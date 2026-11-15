@@ -1,3 +1,4 @@
+a = b = 1
 not a in b
 ^^^^^^^^^^ not-in-test
 not a not in b

@@ -88,6 +88,9 @@ pub fn parse(src: &str, target: PythonVersion) -> ParseResult {
     let mut result = replay(src, kinds, &tokens, &nodes, comments, |t, _| t);
     errors.append(&mut result.errors);
     errors.sort_by_key(|e| e.start);
+    if errors.is_empty() {
+        crate::analysis::keep(src, parsed, target);
+    }
     result.errors = errors;
     result
 }

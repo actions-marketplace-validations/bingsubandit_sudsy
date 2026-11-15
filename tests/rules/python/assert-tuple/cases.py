@@ -1,3 +1,4 @@
+x = 1
 assert (x, "message")
 ^^^^^^^^^^^^^^^^^^^^^ assert-tuple
 assert x, "message"

@@ -39,7 +39,7 @@ One line per upstream rule or option under `entries:`, `<id>: <status>` or `<id>
 | prettier | 59 | 38 | 9 | 2 | 0 | 9 | 1 | 2 |
 | psscriptanalyzer | 75 | 12 | 8 | 0 | 0 | 1 | 54 | 0 |
 | roslynator | 67 | 23 | 7 | 16 | 18 | 1 | 2 | 16 |
-| ruff | 70 | 22 | 0 | 46 | 0 | 2 | 0 | 46 |
+| ruff | 70 | 65 | 0 | 2 | 0 | 3 | 0 | 2 |
 | shellcheck | 520 | 17 | 8 | 0 | 0 | 0 | 495 | 0 |
 | shfmt | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
 | sqlfluff | 38 | 24 | 0 | 0 | 0 | 0 | 14 | 0 |

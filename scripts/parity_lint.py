@@ -156,7 +156,7 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         "html-validate": ("html", ".html", ["node", f"{prefix}/node_modules/html-validate/bin/html-validate.mjs", "-c", "htmlvalidate.json", "-f", "json"],
                           lambda d: (d["ruleId"], d["line"]), lambda out: [m for r in json.loads(out) for m in r["messages"]]),
         # one report for the whole folder: a list of findings with the code, file and row; --select is added below
-        "ruff": ("python", ".py", [sys.executable, str(ROOT / "scripts/parity_ruff.py"), str(prefix), "check", "--isolated", "--no-cache", "--output-format", "json", "--exit-zero", "--ignore-noqa"],
+        "ruff": ("python", ".py", [sys.executable, str(ROOT / "scripts/parity_ruff.py"), str(prefix), "check", "--isolated", "--no-cache", "--output-format", "json", "--exit-zero", "--ignore-noqa", "--target-version", "py314"],
                  lambda d: (d["code"], d["location"]["row"]), json.loads),
         "checkmake": ("makefile", ".mk", [exe, "--format", '{"rule":"{{.Rule}}","line":{{.LineNumber}}}'],
                       lambda d: (d["rule"], d["line"]),

@@ -49,13 +49,3 @@ rule:
   any:
     - { pattern: 'not $A is $B' }
     - { pattern: 'not ($A is $B)' }
----
-id: type-comparison
-message: compare types with `is` and `is not`, or use `isinstance`
-description: A comparison with `==` or `!=` where one side is `type(x)` or a builtin class.
-example: 'type(a) == type(b)'
-severity: warn
-category: suspicious
-rule:
-  kind: ExprCompare
-  regex: "^(?:type\\([ -'*-~]*\\)|(?:int|float|str|bytes|bool|list|dict|tuple|set|frozenset|object|complex|bytearray|memoryview|range|slice|[A-Z][A-Za-z0-9_]*(?:Error|Exception|Warning)|KeyboardInterrupt|SystemExit|StopIteration|GeneratorExit))[ \\t]*[!=]=|[!=]=[ \\t]*(?:type\\([ -'*-~]*\\)|(?:int|float|str|bytes|bool|list|dict|tuple|set|frozenset|object|complex|bytearray|memoryview|range|slice|[A-Z][A-Za-z0-9_]*(?:Error|Exception|Warning)|KeyboardInterrupt|SystemExit|StopIteration|GeneratorExit))$"

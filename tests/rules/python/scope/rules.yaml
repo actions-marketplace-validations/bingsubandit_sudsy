@@ -1,0 +1,13 @@
+unused-import: warn
+redefined-while-unused: warn
+import-shadowed-by-loop-var: warn
+undefined-name: warn
+undefined-local: warn
+undefined-export: warn
+undefined-local-with-import-star: warn
+undefined-local-with-import-star-usage: warn
+undefined-local-with-nested-import-star-usage: warn
+unused-variable: warn
+unused-annotation: warn
+late-future-import: warn
+module-import-not-at-top-of-file: warn

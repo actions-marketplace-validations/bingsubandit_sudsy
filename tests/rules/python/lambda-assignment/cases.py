@@ -1,3 +1,4 @@
+h = 1
 f = lambda x: x
 ^^^^^^^^^^^^^^^ lambda-assignment
 g: int = lambda: 1

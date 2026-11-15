@@ -2,6 +2,7 @@
 //! tokens into the lossless tree, the formatter prints the file in Black's style (`ruff format`).
 
 mod adapter;
+mod analysis;
 mod format;
 mod rules;
 

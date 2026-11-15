@@ -1,26 +1,3 @@
-id: bare-except
-message: name the exceptions to catch; a bare `except` also catches `SystemExit` and `KeyboardInterrupt`
-description: An `except` clause without an exception type, unless it raises again.
-example: "try:\n    pass\nexcept:\n    pass"
-severity: warn
-category: suspicious
-rule:
-  kind: ExceptHandlerExceptHandler
-  regex: '^except\s*:'
-  not: { has: { kind: StmtRaise } }
-report-on: first-token
----
-id: lambda-assignment
-message: define a function with `def` instead of assigning a lambda
-description: A lambda assigned to a name.
-example: 'f = lambda x: x'
-severity: off
-category: style
-rule:
-  any:
-    - { kind: StmtAssign, regex: '^[A-Za-z_]\w*\s*=\s*lambda\b' }
-    - { kind: StmtAnnAssign, regex: '^[A-Za-z_]\w*\s*:[^=]+=\s*lambda\b' }
----
 id: multiple-imports-on-one-line
 message: put each import on a line of its own
 description: An `import` that names several modules.
@@ -30,16 +7,6 @@ category: style
 rule:
   kind: StmtImport
   regex: '^import\s+[^,]+,'
----
-id: f-string-missing-placeholders
-message: this f-string has no placeholders; drop the `f`
-description: An f-string with no replacement field in any of its parts.
-example: 'f"text"'
-severity: warn
-category: suspicious
-rule:
-  kind: ExprFString
-  not: { has: { kind: InterpolatedElement } }
 ---
 id: assert-tuple
 message: 'this assert is always true: its test is a non-empty tuple'
@@ -72,14 +39,3 @@ rule:
   any:
     - { pattern: 'raise NotImplemented' }
     - { pattern: 'raise NotImplemented($$$ARGS)' }
----
-id: return-outside-function
-message: '`return` outside of a function'
-description: A `return` that is not inside a function.
-example: 'return 1'
-severity: warn
-category: correctness
-rule:
-  kind: StmtReturn
-  not: { inside: { kind: StmtFunctionDef } }
-report-on: first-token

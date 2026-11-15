@@ -361,20 +361,63 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `service-pascal-case` | protobuf | style | off | none | A service name that is not PascalCase (buf lint SERVICE_PASCAL_CASE). |
 | `service-suffix` | protobuf | style | off | none | A service whose name does not end in `Service` (buf lint SERVICE_SUFFIX with its default suffix). |
 | `syntax-specified` | protobuf | style | off | none | A file without `syntax = ...;` or `edition = ...;`, which makes it proto2 (buf lint SYNTAX_SPECIFIED). |
+| `ambiguous-class-name` | python | style | off | none | A class named `l`, `O` or `I`. |
+| `ambiguous-function-name` | python | style | off | none | A function named `l`, `O` or `I`. |
+| `ambiguous-variable-name` | python | style | off | none | A variable, parameter or `global` name that is `l`, `O` or `I`. |
 | `assert-tuple` | python | correctness | warn | none | An `assert` whose test is a tuple (a message written inside the parentheses). |
-| `bare-except` | python | suspicious | warn | none | An `except` clause without an exception type, unless it raises again. |
+| `bare-except` | python | suspicious | warn | none | An `except` clause without an exception type, unless its body has a bare `raise` of its own. |
+| `break-outside-loop` | python | correctness | warn | none | A `break` that no loop of its function or class contains. |
+| `continue-outside-loop` | python | correctness | warn | none | A `continue` that no loop of its function or class contains. |
+| `default-except-not-last` | python | correctness | warn | none | A bare `except:` followed by another handler. |
 | `f-string-missing-placeholders` | python | suspicious | warn | none | An f-string with no replacement field in any of its parts. |
+| `forward-annotation-syntax-error` | python | correctness | warn | none | A quoted annotation that is not an expression. |
+| `future-feature-not-defined` | python | correctness | warn | none | A name imported from `__future__` that the module does not have. |
 | `if-tuple` | python | correctness | warn | none | An `if` or `elif` whose test is a tuple. |
-| `is-literal` | python | correctness | warn | none | An identity test (`is`, `is not`) with a string, bytes or number literal. |
-| `lambda-assignment` | python | style | off | none | A lambda assigned to a name. |
+| `import-shadowed-by-loop-var` | python | suspicious | warn | none | A `for` variable with the name of an import. |
+| `invalid-print-syntax` | python | correctness | warn | none | `print >> file, ...` of Python 2. |
+| `invalid-syntax` | python | correctness | error | none | Code that Python rejects when it compiles the file, though the grammar allows it (a duplicate parameter, `nonlocal` at module level, `await` in a sync function, ...). |
+| `is-literal` | python | correctness | warn | none | An identity test (`is`, `is not`) with a string, bytes or number literal, a list, set, dict or comprehension, or a tuple of constants. |
+| `lambda-assignment` | python | style | off | none | A lambda assigned to a single name (an annotated one also in a class body is left alone). |
+| `late-future-import` | python | correctness | warn | none | A `from __future__` import after other statements. |
+| `module-import-not-at-top-of-file` | python | style | off | none | An import at module level after code (docstrings, `__all__`, blocks, and `sys.path` or `os.environ` setup are not code). |
+| `multi-value-repeated-key-literal` | python | suspicious | warn | none | A literal used twice as a key of one dict (`1`, `1.0` and `True` are one key). |
+| `multi-value-repeated-key-variable` | python | suspicious | warn | none | A name used twice as a key of one dict. |
 | `multiple-imports-on-one-line` | python | style | off | none | An `import` that names several modules. |
+| `multiple-starred-expressions` | python | correctness | warn | none | An assignment target with two starred names. |
+| `multiple-statements-on-one-line-colon` | python | style | off | none | A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`). |
+| `multiple-statements-on-one-line-semicolon` | python | style | off | none | Statements joined by `;`. |
 | `none-comparison` | python | suspicious | warn | none | A comparison of a value to `None` with `==` or `!=`. |
 | `not-in-test` | python | style | off | none | A membership test negated in front of the expression (`not a in b`). |
 | `not-is-test` | python | style | off | none | An identity test negated in front of the expression (`not a is b`). |
+| `percent-format-expected-mapping` | python | correctness | warn | none | A `%` format with `%(name)s` placeholders applied to a tuple, list or set. |
+| `percent-format-expected-sequence` | python | correctness | warn | none | A `%` format with several positional placeholders applied to a dict. |
+| `percent-format-extra-named-arguments` | python | correctness | warn | none | A `%` format applied to a dict with keys no placeholder names. |
+| `percent-format-invalid-format` | python | correctness | warn | none | A `"..." % x` whose format string does not parse. |
+| `percent-format-missing-argument` | python | correctness | warn | none | A `%` format with named placeholders the dict does not have. |
+| `percent-format-mixed-positional-and-named` | python | correctness | warn | none | A `%` format with both `%s` and `%(name)s`. |
+| `percent-format-positional-count-mismatch` | python | correctness | warn | none | A `%` format whose placeholders and values differ in number. |
+| `percent-format-star-requires-sequence` | python | correctness | warn | none | A `%` format with a `*` width or precision applied to a dict. |
+| `percent-format-unsupported-format-character` | python | correctness | warn | none | A `%` format with a conversion character Python does not know. |
 | `raise-not-implemented` | python | correctness | warn | none | A `raise` of `NotImplemented`. |
+| `redefined-while-unused` | python | suspicious | warn | none | A function, class or import redefined, or an import covered by a name of a function, before anything read the first. |
 | `return-outside-function` | python | correctness | warn | none | A `return` that is not inside a function. |
+| `string-dot-format-extra-named-arguments` | python | correctness | warn | none | A `.format` call with keywords no field names. |
+| `string-dot-format-extra-positional-arguments` | python | correctness | warn | none | A `.format` call with positional arguments no field uses. |
+| `string-dot-format-invalid-format` | python | correctness | warn | none | A `"...".format(...)` whose string does not parse. |
+| `string-dot-format-missing-arguments` | python | correctness | warn | none | A `.format` call without an argument for a field. |
+| `string-dot-format-mixing-automatic` | python | correctness | warn | none | A `.format` string with both `{}` and `{0}`. |
 | `true-false-comparison` | python | style | off | none | A comparison of a value to `True` or `False` with `==` or `!=`. |
-| `type-comparison` | python | suspicious | warn | none | A comparison with `==` or `!=` where one side is `type(x)` or a builtin class. |
+| `type-comparison` | python | suspicious | warn | none | A comparison with `==` or `!=` where a side is `type(x)` or a builtin class (the builtin, not a name that shadows it). |
+| `undefined-export` | python | correctness | warn | none | A name in `__all__` that the module does not bind. |
+| `undefined-local` | python | correctness | warn | none | A name read in a function before the function assigns it, while an enclosing scope binds it too. |
+| `undefined-local-with-import-star` | python | suspicious | warn | none | A star import. |
+| `undefined-local-with-import-star-usage` | python | suspicious | warn | none | A name that no scope binds in a file that has a star import. |
+| `undefined-local-with-nested-import-star-usage` | python | correctness | warn | none | A star import in a function or class. |
+| `undefined-name` | python | correctness | warn | none | A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`). |
+| `unused-annotation` | python | suspicious | warn | none | A local variable annotated without a value and never read. |
+| `unused-import` | python | suspicious | warn | none | An import that nothing in its scope reads and that `__all__` does not name (a redundant alias `import a as a` is a re-export). |
+| `useless-semicolon` | python | style | off | none | A `;` at the end of a line. |
+| `yield-outside-function` | python | correctness | warn | none | A `yield`, `yield from` or `await` outside a function. |
 | `and-or-is-not-if-else` | shell | suspicious | off | none | A list `a && b \|\| c` of three commands, unless `c` is `echo`, `printf`, `true`, `:`, `return` or `exit`. |
 | `cd-without-exit` | shell | suspicious | warn | none | `cd`, `pushd` or `popd` whose failure is not handled (`cd dir \|\| exit`). Not reported with `set -e`, for `cd ..` or `cd /`, or for `popd -n`. |
 | `declare-and-assign-separately` | shell | suspicious | off | none | `export`, `local`, `declare`, `readonly` or `typeset` with a command substitution as the value reports the status of the declaration, not of the command. |
@@ -478,7 +521,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `unreachable-code` | csharp | suspicious | off | suggestion | A statement that can never run. At `fast` depth this is the statement after a `return`, `throw`, `break`, `continue` or `goto`; with the flow layer it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Only the first statement of a run is reported. Removing it is offered as an editor quick fix only, because unreachable code usually signals a bug. Off by default: the compiler already reports unreachable code (CS0162) and the SDK analyzers add IDE0035. Options: `non_returning_calls` (default `true`): Treat the code after a call that never returns (`[DoesNotReturn]`, `does_not_return` in `semantics:`) as unreachable. The compiler does not, so turn this off to report exactly what it reports (CS0162). Equivalent: Roslynator RCS1148. |
 | `unused-assignment` | csharp | cleanup | off | none | A value is stored in a local variable and no path reads it before it is overwritten or the variable goes out of scope (a dead store). Variables that are captured or whose address is taken are not checked; a variable that is never read at all is reported by `unused-variable` instead. Overlaps the SDK analyzer IDE0059 (unnecessary assignment). Equivalent: Roslynator RCS1179, Roslynator RCS1212. |
 | `unused-private-member` | csharp | cleanup | warn | none | A private field, method, property or event that no file of the project uses (`analysis: deep`). Members with attributes, overrides, interface implementations, `extern` and `partial` methods are left alone, and so are the private methods named in `reflection_methods` of a type derived from one of `reflection_base_types` (a framework calls them by reflection; the `csharp/unity` preset lists Unity's). Overlaps the SDK analyzers IDE0051 (unused private member) and IDE0052 (unread private member). Options: `reflection_base_types` (default `[]`): Names of base classes whose derived types are called by a framework through reflection (with `reflection_methods`). A base is matched by its simple name anywhere up the inheritance chain, also when the project does not load its assembly; `reflection_methods` (default `[]`): Names of private methods that count as used in a type derived from one of `reflection_base_types`. Equivalent: Roslynator RCS1213. |
-| `unused-variable` | csharp | cleanup | off | safe | A local variable or catch variable that is never used (the compiler's CS0168), or is only assigned constants and never read (CS0219). Variables captured by lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219). |
+| `unused-variable` | csharp, python | cleanup | off | safe | A local variable or catch variable that is never used (the compiler's CS0168), or is only assigned constants and never read (CS0219). Variables captured by lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219). |
 | `use-lambda` | csharp | style | off | safe | A lambda instead of an anonymous method. The fix is offered when the anonymous method has a parameter list and no comment before its body; `delegate { }` without one converts to delegate types with any parameters, so it has no fix. Equivalent: StyleCop SA1130. |
 | `use-literal-suffix` | csharp | style | off | safe | A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L`. Not reported for hexadecimal and binary literals cast to a floating-point type, which have no suffix. Equivalent: StyleCop SA1139. |
 | `use-string-empty` | csharp | style | off | safe | `string.Empty` instead of `""` (or `@""`). Not reported where a constant is required: `const`, attribute arguments, default parameter values, `case` labels and patterns. Equivalent: StyleCop SA1122 (partial). |

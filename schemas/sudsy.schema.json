@@ -71,6 +71,18 @@
                 }
               ]
             },
+            "ambiguous-class-name": {
+              "$ref": "#/definitions/rule",
+              "description": "A class named `l`, `O` or `I`."
+            },
+            "ambiguous-function-name": {
+              "$ref": "#/definitions/rule",
+              "description": "A function named `l`, `O` or `I`."
+            },
+            "ambiguous-variable-name": {
+              "$ref": "#/definitions/rule",
+              "description": "A variable, parameter or `global` name that is `l`, `O` or `I`."
+            },
             "and-or-is-not-if-else": {
               "$ref": "#/definitions/rule",
               "description": "A list `a && b || c` of three commands, unless `c` is `echo`, `printf`, `true`, `:`, `return` or `exit`."
@@ -374,11 +386,15 @@
             },
             "bare-except": {
               "$ref": "#/definitions/rule",
-              "description": "An `except` clause without an exception type, unless it raises again."
+              "description": "An `except` clause without an exception type, unless its body has a bare `raise` of its own."
             },
             "block-no-empty": {
               "$ref": "#/definitions/rule",
               "description": "A rule or at-rule block with nothing in it, comments included."
+            },
+            "break-outside-loop": {
+              "$ref": "#/definitions/rule",
+              "description": "A `break` that no loop of its function or class contains."
             },
             "cd-without-exit": {
               "$ref": "#/definitions/rule",
@@ -524,6 +540,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "continue-outside-loop": {
+              "$ref": "#/definitions/rule",
+              "description": "A `continue` that no loop of its function or class contains."
             },
             "copy-from-own-stage": {
               "$ref": "#/definitions/rule",
@@ -696,6 +716,10 @@
             "declare-and-assign-separately": {
               "$ref": "#/definitions/rule",
               "description": "`export`, `local`, `declare`, `readonly` or `typeset` with a command substitution as the value reports the status of the declaration, not of the command."
+            },
+            "default-except-not-last": {
+              "$ref": "#/definitions/rule",
+              "description": "A bare `except:` followed by another handler."
             },
             "deprecated": {
               "$ref": "#/definitions/rule",
@@ -1029,6 +1053,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `font-family` (or `font`) list with no generic family (`serif`, `sans-serif`, ...) to fall back on. `@font-face` is left out."
             },
+            "forward-annotation-syntax-error": {
+              "$ref": "#/definitions/rule",
+              "description": "A quoted annotation that is not an expression."
+            },
             "from-first": {
               "$ref": "#/definitions/rule",
               "description": "An instruction other than ARG before the first FROM."
@@ -1151,6 +1179,10 @@
               "$ref": "#/definitions/rule",
               "description": "An unquoted `url(...)`: quote its argument."
             },
+            "future-feature-not-defined": {
+              "$ref": "#/definitions/rule",
+              "description": "A name imported from `__future__` that the module does not have."
+            },
             "gem-pin-versions": {
               "$ref": "#/definitions/rule",
               "description": "A gem install gem without a version."
@@ -1218,6 +1250,10 @@
               "$ref": "#/definitions/rule",
               "description": "An `@import` of `url(...)`: write the string."
             },
+            "import-shadowed-by-loop-var": {
+              "$ref": "#/definitions/rule",
+              "description": "A `for` variable with the name of an import."
+            },
             "inheritdoc-on-inheriting-member": {
               "$ref": "#/definitions/rule",
               "description": "`<inheritdoc />` without `cref` on a type without a base list, or on a member that neither overrides nor implements anything (a constructor whose signature matches a base constructor is fine). No fix."
@@ -1237,6 +1273,10 @@
             "invalid-job-id": {
               "$ref": "#/definitions/rule",
               "description": "A job id must start with a letter or `_` and contain only letters, digits, `-` and `_`."
+            },
+            "invalid-print-syntax": {
+              "$ref": "#/definitions/rule",
+              "description": "`print >> file, ...` of Python 2."
             },
             "invalid-property-value": {
               "$ref": "#/definitions/rule",
@@ -1294,9 +1334,13 @@
                 }
               ]
             },
+            "invalid-syntax": {
+              "$ref": "#/definitions/rule",
+              "description": "Code that Python rejects when it compiles the file, though the grammar allows it (a duplicate parameter, `nonlocal` at module level, `await` in a sync function, ...)."
+            },
             "is-literal": {
               "$ref": "#/definitions/rule",
-              "description": "An identity test (`is`, `is not`) with a string, bytes or number literal."
+              "description": "An identity test (`is`, `is not`) with a string, bytes or number literal, a list, set, dict or comprehension, or a tuple of constants."
             },
             "iterate-find-output": {
               "$ref": "#/definitions/rule",
@@ -1406,11 +1450,15 @@
             },
             "lambda-assignment": {
               "$ref": "#/definitions/rule",
-              "description": "A lambda assigned to a name."
+              "description": "A lambda assigned to a single name (an annotated one also in a class body is left alone)."
             },
             "last-user-not-root": {
               "$ref": "#/definitions/rule",
               "description": "A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`)."
+            },
+            "late-future-import": {
+              "$ref": "#/definitions/rule",
+              "description": "A `from __future__` import after other statements."
             },
             "layer-name-pattern": {
               "description": "A `@layer` name that does not match the `pattern` option (a regex). An empty pattern allows everything.",
@@ -1829,6 +1877,18 @@
               "$ref": "#/definitions/rule",
               "description": "A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access."
             },
+            "module-import-not-at-top-of-file": {
+              "$ref": "#/definitions/rule",
+              "description": "An import at module level after code (docstrings, `__all__`, blocks, and `sys.path` or `os.environ` setup are not code)."
+            },
+            "multi-value-repeated-key-literal": {
+              "$ref": "#/definitions/rule",
+              "description": "A literal used twice as a key of one dict (`1`, `1.0` and `True` are one key)."
+            },
+            "multi-value-repeated-key-variable": {
+              "$ref": "#/definitions/rule",
+              "description": "A name used twice as a key of one dict."
+            },
             "multiple-imports-on-one-line": {
               "$ref": "#/definitions/rule",
               "description": "An `import` that names several modules."
@@ -1836,6 +1896,18 @@
             "multiple-labeled-controls": {
               "$ref": "#/definitions/rule",
               "description": "A `<label>` without `for` that holds more than one control: it labels only the first."
+            },
+            "multiple-starred-expressions": {
+              "$ref": "#/definitions/rule",
+              "description": "An assignment target with two starred names."
+            },
+            "multiple-statements-on-one-line-colon": {
+              "$ref": "#/definitions/rule",
+              "description": "A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`)."
+            },
+            "multiple-statements-on-one-line-semicolon": {
+              "$ref": "#/definitions/rule",
+              "description": "Statements joined by `;`."
             },
             "name-pattern": {
               "description": "The `name` of a form control that does not match the `pattern` option (a regex; by default camelCase, with a trailing `[]` allowed).",
@@ -2833,6 +2905,42 @@
               "$ref": "#/definitions/rule",
               "description": "A package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1` (`v1beta` too; buf lint PACKAGE_VERSION_SUFFIX)."
             },
+            "percent-format-expected-mapping": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format with `%(name)s` placeholders applied to a tuple, list or set."
+            },
+            "percent-format-expected-sequence": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format with several positional placeholders applied to a dict."
+            },
+            "percent-format-extra-named-arguments": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format applied to a dict with keys no placeholder names."
+            },
+            "percent-format-invalid-format": {
+              "$ref": "#/definitions/rule",
+              "description": "A `\"...\" % x` whose format string does not parse."
+            },
+            "percent-format-missing-argument": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format with named placeholders the dict does not have."
+            },
+            "percent-format-mixed-positional-and-named": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format with both `%s` and `%(name)s`."
+            },
+            "percent-format-positional-count-mismatch": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format whose placeholders and values differ in number."
+            },
+            "percent-format-star-requires-sequence": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format with a `*` width or precision applied to a dict."
+            },
+            "percent-format-unsupported-format-character": {
+              "$ref": "#/definitions/rule",
+              "description": "A `%` format with a conversion character Python does not know."
+            },
             "phony-declared": {
               "$ref": "#/definitions/rule",
               "description": "A target with no recipe that is not declared `.PHONY` (checkmake `phonydeclared`); targets that start with a `.` are special and skipped."
@@ -3147,6 +3255,10 @@
             "read-without-raw": {
               "$ref": "#/definitions/rule",
               "description": "A `read` without the `-r` flag."
+            },
+            "redefined-while-unused": {
+              "$ref": "#/definitions/rule",
+              "description": "A function, class or import redefined, or an import covered by a name of a function, before anything read the first."
             },
             "redundant-pattern": {
               "$ref": "#/definitions/rule",
@@ -4278,6 +4390,26 @@
                 }
               ]
             },
+            "string-dot-format-extra-named-arguments": {
+              "$ref": "#/definitions/rule",
+              "description": "A `.format` call with keywords no field names."
+            },
+            "string-dot-format-extra-positional-arguments": {
+              "$ref": "#/definitions/rule",
+              "description": "A `.format` call with positional arguments no field uses."
+            },
+            "string-dot-format-invalid-format": {
+              "$ref": "#/definitions/rule",
+              "description": "A `\"...\".format(...)` whose string does not parse."
+            },
+            "string-dot-format-missing-arguments": {
+              "$ref": "#/definitions/rule",
+              "description": "A `.format` call without an argument for a field."
+            },
+            "string-dot-format-mixing-automatic": {
+              "$ref": "#/definitions/rule",
+              "description": "A `.format` string with both `{}` and `{0}`."
+            },
             "suppression-justification": {
               "$ref": "#/definitions/rule",
               "description": "`SuppressMessage` needs a `Justification` that says something: not missing, `null`, empty, blank or `\"<Pending>\"`. Matches the attribute by name. No fix."
@@ -4328,11 +4460,35 @@
             },
             "type-comparison": {
               "$ref": "#/definitions/rule",
-              "description": "A comparison with `==` or `!=` where one side is `type(x)` or a builtin class."
+              "description": "A comparison with `==` or `!=` where a side is `type(x)` or a builtin class (the builtin, not a name that shadows it)."
             },
             "typed-variables": {
               "$ref": "#/definitions/rule",
               "description": "A `variable` block with no `type` argument (tflint terraform_typed_variables)."
+            },
+            "undefined-export": {
+              "$ref": "#/definitions/rule",
+              "description": "A name in `__all__` that the module does not bind."
+            },
+            "undefined-local": {
+              "$ref": "#/definitions/rule",
+              "description": "A name read in a function before the function assigns it, while an enclosing scope binds it too."
+            },
+            "undefined-local-with-import-star": {
+              "$ref": "#/definitions/rule",
+              "description": "A star import."
+            },
+            "undefined-local-with-import-star-usage": {
+              "$ref": "#/definitions/rule",
+              "description": "A name that no scope binds in a file that has a star import."
+            },
+            "undefined-local-with-nested-import-star-usage": {
+              "$ref": "#/definitions/rule",
+              "description": "A star import in a function or class."
+            },
+            "undefined-name": {
+              "$ref": "#/definitions/rule",
+              "description": "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`)."
             },
             "unique-fragment-name": {
               "$ref": "#/definitions/rule",
@@ -4560,6 +4716,10 @@
               "$ref": "#/definitions/rule",
               "description": "A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. `scratch`, a variable and an earlier stage's name are fine."
             },
+            "unused-annotation": {
+              "$ref": "#/definitions/rule",
+              "description": "A local variable annotated without a value and never read."
+            },
             "unused-assignment": {
               "$ref": "#/definitions/rule",
               "description": "A value is stored in a local variable and no path reads it before it is overwritten or the variable goes out of scope (a dead store). Variables that are captured or whose address is taken are not checked; a variable that is never read at all is reported by `unused-variable` instead. Overlaps the SDK analyzer IDE0059 (unnecessary assignment)."
@@ -4567,6 +4727,10 @@
             "unused-declarations": {
               "$ref": "#/definitions/rule",
               "description": "A variable, local value or data source that nothing in the same file refers to (tflint terraform_unused_declarations, within one file: a module that uses its variables in other files needs the rule off or those files in one)."
+            },
+            "unused-import": {
+              "$ref": "#/definitions/rule",
+              "description": "An import that nothing in its scope reads and that `__all__` does not name (a redundant alias `import a as a` is a re-export)."
             },
             "unused-private-member": {
               "description": "A private field, method, property or event that no file of the project uses (`analysis: deep`). Members with attributes, overrides, interface implementations, `extern` and `partial` methods are left alone, and so are the private                   methods named in `reflection_methods` of a type derived from one of                   `reflection_base_types` (a framework calls them by reflection; the `csharp/unity`                   preset lists Unity's). Overlaps the SDK analyzers IDE0051 (unused private member) and IDE0052 (unread private member).",
@@ -4645,6 +4809,10 @@
             "useless-echo": {
               "$ref": "#/definitions/rule",
               "description": "An `echo` whose only argument is a command substitution."
+            },
+            "useless-semicolon": {
+              "$ref": "#/definitions/rule",
+              "description": "A `;` at the end of a line."
             },
             "using-order": {
               "description": "`using` directives of a file or namespace are out of order: System first (`system_first`), names in alphabetical order (`compare`), and with the options `static_position` and `alias_position` set to `after`, `using static` directives after the plain ones and aliases after those, each group sorted. `global using` and `using unsafe` stay where they are, and a list restarts at a directive that has a preprocessor directive in front of it (the fix leaves such lists alone). Comments on lines of their own stay where they are; a comment after a directive moves with it. Overlaps the SDK analyzers' `dotnet_sort_system_directives_first` .editorconfig key.",
@@ -4762,6 +4930,10 @@
             "workdir-absolute": {
               "$ref": "#/definitions/rule",
               "description": "A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable)."
+            },
+            "yield-outside-function": {
+              "$ref": "#/definitions/rule",
+              "description": "A `yield`, `yield from` or `await` outside a function."
             },
             "yum-clean": {
               "$ref": "#/definitions/rule",

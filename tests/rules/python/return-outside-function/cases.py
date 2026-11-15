@@ -1,5 +1,5 @@
 return 1
-^^^^^^ return-outside-function
+^^^^^^^^ return-outside-function
 
 
 def f():
@@ -8,5 +8,5 @@ def f():
 
 class A:
     return 2
-#   ^^^^^^ return-outside-function
+#   ^^^^^^^^ return-outside-function
 

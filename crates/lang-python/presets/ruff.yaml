@@ -16,3 +16,47 @@ python:
       if-tuple: warn
       raise-not-implemented: warn
       return-outside-function: warn
+      unused-import: warn
+      redefined-while-unused: warn
+      undefined-name: warn
+      unused-variable: warn
+      unused-annotation: warn
+      undefined-export: warn
+      undefined-local: warn
+      import-shadowed-by-loop-var: warn
+      undefined-local-with-import-star: warn
+      late-future-import: warn
+      undefined-local-with-import-star-usage: warn
+      undefined-local-with-nested-import-star-usage: warn
+      future-feature-not-defined: warn
+      multi-value-repeated-key-literal: warn
+      multi-value-repeated-key-variable: warn
+      multiple-starred-expressions: warn
+      invalid-print-syntax: warn
+      break-outside-loop: warn
+      continue-outside-loop: warn
+      yield-outside-function: warn
+      default-except-not-last: warn
+      forward-annotation-syntax-error: warn
+      invalid-syntax: error
+      module-import-not-at-top-of-file: warn
+      multiple-statements-on-one-line-colon: warn
+      multiple-statements-on-one-line-semicolon: warn
+      useless-semicolon: warn
+      ambiguous-variable-name: warn
+      ambiguous-class-name: warn
+      ambiguous-function-name: warn
+      percent-format-invalid-format: warn
+      percent-format-unsupported-format-character: warn
+      percent-format-mixed-positional-and-named: warn
+      percent-format-expected-mapping: warn
+      percent-format-expected-sequence: warn
+      percent-format-extra-named-arguments: warn
+      percent-format-missing-argument: warn
+      percent-format-positional-count-mismatch: warn
+      percent-format-star-requires-sequence: warn
+      string-dot-format-invalid-format: warn
+      string-dot-format-extra-named-arguments: warn
+      string-dot-format-extra-positional-arguments: warn
+      string-dot-format-missing-arguments: warn
+      string-dot-format-mixing-automatic: warn

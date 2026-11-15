@@ -1,0 +1,449 @@
+id: unused-import
+family: check
+params: { check: unused-import }
+message: "`{name}` imported but unused"
+description: "An import that nothing in its scope reads and that `__all__` does not name (a redundant alias `import a as a` is a re-export)."
+example: "import os"
+severity: warn
+category: suspicious
+---
+id: redefined-while-unused
+family: check
+params: { check: redefined-while-unused }
+message: "redefinition of unused `{name}`"
+description: "A function, class or import redefined, or an import covered by a name of a function, before anything read the first."
+example: "import os\nimport os"
+severity: warn
+category: suspicious
+---
+id: undefined-name
+family: check
+params: { check: undefined-name }
+message: "undefined name `{name}`"
+description: "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`)."
+example: "print(x)"
+severity: warn
+category: correctness
+---
+id: unused-variable
+family: check
+params: { check: unused-variable }
+message: "local variable `{name}` is assigned to but never used"
+description: "A local variable assigned and never read, or an exception named by `except ... as` and never read (not tuple unpacking, not `_` names, not in functions that call `locals()`)."
+example: "def f():\n    x = 1"
+severity: warn
+category: suspicious
+---
+id: unused-annotation
+family: check
+params: { check: unused-annotation }
+message: "local variable `{name}` is annotated but never used"
+description: "A local variable annotated without a value and never read."
+example: "def f():\n    x: int"
+severity: warn
+category: suspicious
+---
+id: undefined-export
+family: check
+params: { check: undefined-export }
+message: "undefined name `{name}` in `__all__`"
+description: "A name in `__all__` that the module does not bind."
+example: "__all__ = [\"x\"]"
+severity: warn
+category: correctness
+---
+id: undefined-local
+family: check
+params: { check: undefined-local }
+message: "local variable `{name}` referenced before assignment"
+description: "A name read in a function before the function assigns it, while an enclosing scope binds it too."
+example: "x = 1\ndef f():\n    print(x)\n    x = 2"
+severity: warn
+category: correctness
+---
+id: import-shadowed-by-loop-var
+family: check
+params: { check: import-shadowed-by-loop-var }
+message: "import `{name}` shadowed by loop variable"
+description: "A `for` variable with the name of an import."
+example: "import os\nfor os in []:\n    pass"
+severity: warn
+category: suspicious
+---
+id: undefined-local-with-import-star
+family: check
+params: { check: undefined-local-with-import-star }
+message: "`from {name} import *` used; unable to detect undefined names"
+description: "A star import."
+example: "from os import *"
+severity: warn
+category: suspicious
+---
+id: late-future-import
+family: check
+params: { check: late-future-import }
+message: "`from __future__` imports must occur at the beginning of the file"
+description: "A `from __future__` import after other statements."
+example: "import os\nfrom __future__ import annotations"
+severity: warn
+category: correctness
+---
+id: undefined-local-with-import-star-usage
+family: check
+params: { check: undefined-local-with-import-star-usage }
+message: "`{name}` may be undefined, or defined from star imports"
+description: "A name that no scope binds in a file that has a star import."
+example: "from os import *\nprint(x)"
+severity: warn
+category: suspicious
+---
+id: undefined-local-with-nested-import-star-usage
+family: check
+params: { check: undefined-local-with-nested-import-star-usage }
+message: "`from {name} import *` only allowed at module level"
+description: "A star import in a function or class."
+example: "def f():\n    from os import *"
+severity: warn
+category: correctness
+---
+id: future-feature-not-defined
+family: check
+params: { check: future-feature-not-defined }
+message: "future feature `{name}` is not defined"
+description: "A name imported from `__future__` that the module does not have."
+example: "from __future__ import nope"
+severity: warn
+category: correctness
+---
+id: multi-value-repeated-key-literal
+family: check
+params: { check: multi-value-repeated-key-literal }
+message: "dictionary key literal `{name}` repeated"
+description: "A literal used twice as a key of one dict (`1`, `1.0` and `True` are one key)."
+example: "d = {\"a\": 1, \"a\": 2}"
+severity: warn
+category: suspicious
+---
+id: multi-value-repeated-key-variable
+family: check
+params: { check: multi-value-repeated-key-variable }
+message: "dictionary key `{name}` repeated"
+description: "A name used twice as a key of one dict."
+example: "d = {x: 1, x: 2}"
+severity: warn
+category: suspicious
+---
+id: multiple-starred-expressions
+family: check
+params: { check: multiple-starred-expressions }
+message: "two starred expressions in assignment"
+description: "An assignment target with two starred names."
+example: "a, *b, *c = x"
+severity: warn
+category: correctness
+---
+id: invalid-print-syntax
+family: check
+params: { check: invalid-print-syntax }
+message: "use of `>>` is invalid with the `print` function"
+description: "`print >> file, ...` of Python 2."
+example: "print >> f, x"
+severity: warn
+category: correctness
+---
+id: break-outside-loop
+family: check
+params: { check: break-outside-loop }
+message: "`break` outside loop"
+description: "A `break` that no loop of its function or class contains."
+example: "break"
+severity: warn
+category: correctness
+---
+id: continue-outside-loop
+family: check
+params: { check: continue-outside-loop }
+message: "`continue` not properly in loop"
+description: "A `continue` that no loop of its function or class contains."
+example: "continue"
+severity: warn
+category: correctness
+---
+id: yield-outside-function
+family: check
+params: { check: yield-outside-function }
+message: "`yield` or `await` outside of a function"
+description: "A `yield`, `yield from` or `await` outside a function."
+example: "yield 1"
+severity: warn
+category: correctness
+---
+id: return-outside-function
+family: check
+params: { check: return-outside-function }
+message: "`return` outside of a function"
+description: "A `return` that is not inside a function."
+example: "return 1"
+severity: warn
+category: correctness
+---
+id: default-except-not-last
+family: check
+params: { check: default-except-not-last }
+message: "an `except:` block must be the last exception handler"
+description: "A bare `except:` followed by another handler."
+example: "try:\n    pass\nexcept:\n    pass\nexcept ValueError:\n    pass"
+severity: warn
+category: correctness
+---
+id: forward-annotation-syntax-error
+family: check
+params: { check: forward-annotation-syntax-error }
+message: "syntax error in forward annotation: {name}"
+description: "A quoted annotation that is not an expression."
+example: "x: \"1 +\" = 1"
+severity: warn
+category: correctness
+---
+id: type-comparison
+family: check
+params: { check: type-comparison }
+message: "compare types with `is` and `is not`, or use `isinstance`"
+description: "A comparison with `==` or `!=` where a side is `type(x)` or a builtin class (the builtin, not a name that shadows it)."
+example: "type(a) == type(b)"
+severity: warn
+category: suspicious
+---
+id: invalid-syntax
+family: check
+params: { check: invalid-syntax }
+message: "{name}"
+description: "Code that Python rejects when it compiles the file, though the grammar allows it (a duplicate parameter, `nonlocal` at module level, `await` in a sync function, ...)."
+example: "def f(a, a):\n    pass"
+severity: error
+category: correctness
+---
+id: module-import-not-at-top-of-file
+family: check
+params: { check: module-import-not-at-top-of-file }
+message: "module level import not at top of file"
+description: "An import at module level after code (docstrings, `__all__`, blocks, and `sys.path` or `os.environ` setup are not code)."
+example: "x = 1\nimport os"
+severity: off
+category: style
+---
+id: multiple-statements-on-one-line-colon
+family: check
+params: { check: multiple-statements-on-one-line-colon }
+message: "put the body of the statement on its own line"
+description: "A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`)."
+example: "if x: pass"
+severity: off
+category: style
+---
+id: multiple-statements-on-one-line-semicolon
+family: check
+params: { check: multiple-statements-on-one-line-semicolon }
+message: "put each statement on a line of its own"
+description: "Statements joined by `;`."
+example: "a = 1; b = 2"
+severity: off
+category: style
+---
+id: useless-semicolon
+family: check
+params: { check: useless-semicolon }
+message: "remove the semicolon that ends the statement"
+description: "A `;` at the end of a line."
+example: "a = 1;"
+severity: off
+category: style
+---
+id: ambiguous-variable-name
+family: check
+params: { check: ambiguous-variable-name }
+message: "ambiguous variable name `{name}`"
+description: "A variable, parameter or `global` name that is `l`, `O` or `I`."
+example: "l = 1"
+severity: off
+category: style
+---
+id: ambiguous-class-name
+family: check
+params: { check: ambiguous-class-name }
+message: "ambiguous class name `{name}`"
+description: "A class named `l`, `O` or `I`."
+example: "class l:\n    pass"
+severity: off
+category: style
+---
+id: ambiguous-function-name
+family: check
+params: { check: ambiguous-function-name }
+message: "ambiguous function name `{name}`"
+description: "A function named `l`, `O` or `I`."
+example: "def l():\n    pass"
+severity: off
+category: style
+---
+id: is-literal
+family: check
+params: { check: is-literal }
+message: "use `==` to compare with a literal, not `is`"
+description: "An identity test (`is`, `is not`) with a string, bytes or number literal, a list, set, dict or comprehension, or a tuple of constants."
+example: 'x is "a"'
+severity: warn
+category: correctness
+---
+id: f-string-missing-placeholders
+family: check
+params: { check: f-string-missing-placeholders }
+message: "this f-string has no placeholders; drop the `f`"
+description: "An f-string with no replacement field in any of its parts."
+example: 'f"text"'
+severity: warn
+category: suspicious
+---
+id: bare-except
+family: check
+params: { check: bare-except }
+message: "name the exceptions to catch; a bare `except` also catches `SystemExit` and `KeyboardInterrupt`"
+description: "An `except` clause without an exception type, unless its body has a bare `raise` of its own."
+example: "try:\n    pass\nexcept:\n    pass"
+severity: warn
+category: suspicious
+---
+id: lambda-assignment
+family: check
+params: { check: lambda-assignment }
+message: "define a function with `def` instead of assigning a lambda"
+description: "A lambda assigned to a single name (an annotated one also in a class body is left alone)."
+example: 'f = lambda x: x'
+severity: off
+category: style
+---
+id: percent-format-invalid-format
+family: check
+params: { check: percent-format-invalid-format }
+message: '`%`-format string is invalid: {name}'
+description: 'A `"..." % x` whose format string does not parse.'
+example: '"%" % x'
+severity: warn
+category: correctness
+---
+id: percent-format-unsupported-format-character
+family: check
+params: { check: percent-format-unsupported-format-character }
+message: '`%`-format string has an unsupported format character `{name}`'
+description: 'A `%` format with a conversion character Python does not know.'
+example: '"%z" % x'
+severity: warn
+category: correctness
+---
+id: percent-format-mixed-positional-and-named
+family: check
+params: { check: percent-format-mixed-positional-and-named }
+message: '`%`-format string mixes positional and named placeholders'
+description: 'A `%` format with both `%s` and `%(name)s`.'
+example: '"%s %(a)s" % x'
+severity: warn
+category: correctness
+---
+id: percent-format-expected-mapping
+family: check
+params: { check: percent-format-expected-mapping }
+message: '`%`-format string has named placeholders but the right side is a sequence'
+description: 'A `%` format with `%(name)s` placeholders applied to a tuple, list or set.'
+example: '"%(a)s" % (1,)'
+severity: warn
+category: correctness
+---
+id: percent-format-expected-sequence
+family: check
+params: { check: percent-format-expected-sequence }
+message: '`%`-format string has several placeholders but the right side is a mapping'
+description: 'A `%` format with several positional placeholders applied to a dict.'
+example: '"%s %s" % {"a": 1}'
+severity: warn
+category: correctness
+---
+id: percent-format-extra-named-arguments
+family: check
+params: { check: percent-format-extra-named-arguments }
+message: '`%`-format string has unused named argument(s): {name}'
+description: 'A `%` format applied to a dict with keys no placeholder names.'
+example: '"%(a)s" % {"a": 1, "b": 2}'
+severity: warn
+category: correctness
+---
+id: percent-format-missing-argument
+family: check
+params: { check: percent-format-missing-argument }
+message: '`%`-format string is missing argument(s) for placeholder(s): {name}'
+description: 'A `%` format with named placeholders the dict does not have.'
+example: '"%(a)s" % {"b": 1}'
+severity: warn
+category: correctness
+---
+id: percent-format-positional-count-mismatch
+family: check
+params: { check: percent-format-positional-count-mismatch }
+message: '`%`-format string has {name}'
+description: 'A `%` format whose placeholders and values differ in number.'
+example: '"%s %s" % (1,)'
+severity: warn
+category: correctness
+---
+id: percent-format-star-requires-sequence
+family: check
+params: { check: percent-format-star-requires-sequence }
+message: '`%`-format string `*` specifier requires a sequence'
+description: 'A `%` format with a `*` width or precision applied to a dict.'
+example: '"%*s" % {"a": 1}'
+severity: warn
+category: correctness
+---
+id: string-dot-format-invalid-format
+family: check
+params: { check: string-dot-format-invalid-format }
+message: '`.format` call has an invalid format string: {name}'
+description: 'A `"...".format(...)` whose string does not parse.'
+example: '"{".format(1)'
+severity: warn
+category: correctness
+---
+id: string-dot-format-extra-named-arguments
+family: check
+params: { check: string-dot-format-extra-named-arguments }
+message: '`.format` call has unused named argument(s): {name}'
+description: 'A `.format` call with keywords no field names.'
+example: '"{}".format(1, a=2)'
+severity: warn
+category: correctness
+---
+id: string-dot-format-extra-positional-arguments
+family: check
+params: { check: string-dot-format-extra-positional-arguments }
+message: '`.format` call has unused arguments at position(s): {name}'
+description: 'A `.format` call with positional arguments no field uses.'
+example: '"{}".format(1, 2)'
+severity: warn
+category: correctness
+---
+id: string-dot-format-missing-arguments
+family: check
+params: { check: string-dot-format-missing-arguments }
+message: '`.format` call is missing argument(s) for placeholder(s): {name}'
+description: 'A `.format` call without an argument for a field.'
+example: '"{} {}".format(1)'
+severity: warn
+category: correctness
+---
+id: string-dot-format-mixing-automatic
+family: check
+params: { check: string-dot-format-mixing-automatic }
+message: '`.format` string mixes automatic and manual numbering'
+description: 'A `.format` string with both `{}` and `{0}`.'
+example: '"{} {0}".format(1)'
+severity: warn
+category: correctness

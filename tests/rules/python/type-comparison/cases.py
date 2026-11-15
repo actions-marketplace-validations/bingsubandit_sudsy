@@ -1,3 +1,4 @@
+a = b = 1
 type(a) == type(b)
 ^^^^^^^^^^^^^^^^^^ type-comparison
 type(a) != int

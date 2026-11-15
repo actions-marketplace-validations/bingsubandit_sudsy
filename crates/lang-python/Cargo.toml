@@ -16,6 +16,7 @@ provider-api.workspace = true
 ruff_python_ast.workspace = true
 ruff_python_parser.workspace = true
 ruff_text_size.workspace = true
+rustc-hash.workspace = true
 
 [dev-dependencies]
 insta.workspace = true

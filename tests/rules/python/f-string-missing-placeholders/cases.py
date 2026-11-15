@@ -1,3 +1,4 @@
+x = b = 1
 f"text"
 ^^^^^^^ f-string-missing-placeholders
 f"{x}"

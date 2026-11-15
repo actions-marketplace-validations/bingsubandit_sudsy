@@ -19,10 +19,10 @@ entries:
   preview: wontfix preview style is not planned
   exclude: formatter
   E401: rule multiple-imports-on-one-line
-  E402: planned
-  E701: planned
-  E702: planned
-  E703: planned
+  E402: rule module-import-not-at-top-of-file
+  E701: rule multiple-statements-on-one-line-colon
+  E702: rule multiple-statements-on-one-line-semicolon
+  E703: rule useless-semicolon
   E711: rule none-comparison
   E712: rule true-false-comparison
   E713: rule not-in-test
@@ -30,51 +30,51 @@ entries:
   E721: rule type-comparison
   E722: rule bare-except
   E731: rule lambda-assignment
-  E741: planned
-  E742: planned
-  E743: planned
+  E741: rule ambiguous-variable-name
+  E742: rule ambiguous-class-name
+  E743: rule ambiguous-function-name
   E902: wontfix an unreadable file is reported by the command line, not by a rule
   E999: rule syntax-error
-  F401: planned
-  F402: planned
-  F403: planned
-  F404: planned
-  F405: planned
-  F406: planned
-  F407: planned
-  F501: planned
-  F502: planned
-  F503: planned
-  F504: planned
-  F505: planned
-  F506: planned
-  F507: planned
-  F508: planned
-  F509: planned
-  F521: planned
-  F522: planned
-  F523: planned
-  F524: planned
-  F525: planned
+  F401: rule unused-import
+  F402: rule import-shadowed-by-loop-var
+  F403: rule undefined-local-with-import-star
+  F404: rule late-future-import
+  F405: rule undefined-local-with-import-star-usage
+  F406: rule undefined-local-with-nested-import-star-usage
+  F407: rule future-feature-not-defined
+  F501: rule percent-format-invalid-format
+  F502: rule percent-format-expected-mapping
+  F503: rule percent-format-expected-sequence
+  F504: rule percent-format-extra-named-arguments
+  F505: rule percent-format-missing-argument
+  F506: rule percent-format-mixed-positional-and-named
+  F507: rule percent-format-positional-count-mismatch
+  F508: rule percent-format-star-requires-sequence
+  F509: rule percent-format-unsupported-format-character
+  F521: rule string-dot-format-invalid-format
+  F522: rule string-dot-format-extra-named-arguments
+  F523: rule string-dot-format-extra-positional-arguments
+  F524: rule string-dot-format-missing-arguments
+  F525: rule string-dot-format-mixing-automatic
   F541: rule f-string-missing-placeholders
-  F601: planned
-  F602: planned
-  F621: planned
-  F622: planned
+  F601: rule multi-value-repeated-key-literal
+  F602: rule multi-value-repeated-key-variable
+  F621: wontfix ruff does not report it
+  F622: rule multiple-starred-expressions
   F631: rule assert-tuple
   F632: rule is-literal
-  F633: planned
+  F633: rule invalid-print-syntax
   F634: rule if-tuple
-  F701: planned
-  F702: planned
-  F704: planned
+  F701: rule break-outside-loop
+  F702: rule continue-outside-loop
+  F704: rule yield-outside-function
   F706: rule return-outside-function
-  F707: planned
-  F722: planned
-  F811: planned
-  F821: planned
-  F822: planned
-  F823: planned
-  F841: planned
-  F842: planned
+  F707: rule default-except-not-last
+  F722: rule forward-annotation-syntax-error
+  F811: rule redefined-while-unused
+  F821: rule undefined-name
+  F822: rule undefined-export
+  F823: rule undefined-local
+  F841: rule unused-variable
+  F842: rule unused-annotation
   F901: rule raise-not-implemented

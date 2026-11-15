@@ -1,3 +1,4 @@
+x = 1
 x == None
 ^^^^^^^^^ none-comparison
 x != None

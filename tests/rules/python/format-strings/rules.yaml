@@ -1,0 +1,14 @@
+percent-format-invalid-format: warn
+percent-format-unsupported-format-character: warn
+percent-format-mixed-positional-and-named: warn
+percent-format-expected-mapping: warn
+percent-format-expected-sequence: warn
+percent-format-extra-named-arguments: warn
+percent-format-missing-argument: warn
+percent-format-positional-count-mismatch: warn
+percent-format-star-requires-sequence: warn
+string-dot-format-invalid-format: warn
+string-dot-format-extra-named-arguments: warn
+string-dot-format-extra-positional-arguments: warn
+string-dot-format-missing-arguments: warn
+string-dot-format-mixing-automatic: warn
