@@ -291,6 +291,8 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `multiple-labeled-controls` | html, svelte, vue | correctness | off | none | A `<label>` without `for` that holds more than one control: it labels only the first. |
 | `name-pattern` | html, svelte, vue | style | off | none | The `name` of a form control that does not match the `pattern` option (a regex; by default camelCase, with a trailing `[]` allowed). Options: `pattern` (default `"^[a-z][a-zA-Z0-9]*(\[\])?$"`): The regex the value must match. |
 | `no-abstract-role` | html, svelte, vue | correctness | warn | none | Abstract roles (`widget`, `landmark`, `command`, ...) are for the ARIA taxonomy, not for authors. |
+| `no-at-debug-tags` | html, svelte, vue | suspicious | off | none | Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change. |
+| `no-at-html-tags` | html, svelte, vue | suspicious | off | none | Svelte's `no-at-html-tags` (eslint-plugin-svelte). Escape the text or sanitize it before it is rendered, or turn the rule off for a value you control. |
 | `no-autoplay` | html, svelte, vue | suspicious | off | none | Autoplaying audio and video annoys users and fails accessibility guidelines; `muted` media is allowed. |
 | `no-conditional-comment` | html, svelte, vue | suspicious | off | none | An Internet Explorer conditional comment (`<!--[if IE]>`). Only IE 9 and older read them; other browsers see a comment. |
 | `no-deprecated-attr` | html, svelte, vue | correctness | warn | none | An attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...). |
@@ -309,11 +311,13 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `no-trailing-whitespace` | html, svelte, vue | style | off | none | Spaces or tabs at the end of a line. |
 | `no-unknown-elements` | html, svelte, vue | suspicious | off | none | An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone. |
 | `no-use-v-if-with-v-for` | html, svelte, vue | suspicious | off | none | Vue's `no-use-v-if-with-v-for` (eslint-plugin-vue). Filter the list in a computed value, or move the `v-if` to a wrapping `<template>`. |
+| `no-v-html` | html, svelte, vue | suspicious | off | none | Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first. |
 | `no-void-end-tag` | html, svelte, vue | correctness | warn | none | A void element (`<br>`, `<img>`, ...) has no content and no end tag; the browser ignores `</br>`. |
 | `prefer-button` | html, svelte, vue | style | off | none | A `<button>` can hold markup and is styled with CSS like any element; `<input type="button">` cannot. |
 | `prefer-native-element` | html, svelte, vue | style | off | none | A `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...) on an element that is not that one needs scripting and styling the native element comes with. |
 | `prefer-tbody` | html, svelte, vue | style | off | none | A `<tr>` directly in `<table>` is moved into an implied `<tbody>` by the browser; write it. |
 | `presentation-role-style` | html, svelte, vue | style | off | none | `none` and `presentation` are synonyms; `none` is the one ARIA 1.2 prefers. |
+| `require-each-key` | html, svelte, vue | correctness | off | none | Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions. |
 | `require-sri` | html, svelte, vue | suspicious | off | none | A `<script src>` or `<link rel="stylesheet" href>` without `integrity` runs or applies a file that changed on its server (a CDN) without the page noticing. |
 | `svg-focusable` | html, svelte, vue | suspicious | off | none | Internet Explorer 11 and old Edge make every `<svg>` focusable unless it says `focusable="false"`. |
 | `text-content` | html, svelte, vue | correctness | off | none | A `<button>` with no text, no image with an `alt`, no `<svg>` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count. |

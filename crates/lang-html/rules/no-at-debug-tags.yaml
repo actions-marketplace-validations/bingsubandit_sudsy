@@ -1,0 +1,7 @@
+id: no-at-debug-tags
+message: "`{@debug}` is a debugging aid; remove it before shipping"
+description: Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change.
+example: '{@debug user}'
+severity: off
+category: suspicious
+rule: { kind: Mustache, regex: '^\{@debug\b' }

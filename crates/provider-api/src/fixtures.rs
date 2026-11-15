@@ -43,11 +43,51 @@ pub fn rule_fixtures_with(
 /// Runs every fixture of the provider's language and panics with the failures, each named by its
 /// file.
 pub fn rule_fixtures(provider: &dyn LanguageProvider) {
-    let root = fixture_root(provider.language());
+    rule_fixtures_dialects(provider, &[]);
+}
+
+/// [`rule_fixtures`] for a language whose dialects (Vue and Svelte for HTML) inherit its rules:
+/// their fixtures run with their own providers and also name rules of `provider`.
+pub fn rule_fixtures_dialects(provider: &dyn LanguageProvider, dialects: &[&dyn LanguageProvider]) {
     let bless = std::env::var_os("SUDSY_BLESS").is_some();
     let (mut count, mut failures) = (0, Vec::new());
-    let marker = testing::marker(provider);
     let (mut named, mut seen) = (HashSet::new(), HashMap::new());
+    for p in std::iter::once(provider).chain(dialects.iter().copied()) {
+        count += run_folders(p, bless, &mut named, &mut seen, &mut failures);
+    }
+    let root = fixture_root(provider.language());
+    assert!(count > 0, "no rule fixtures under {}", root.display());
+    let inherited = provider.base_rules();
+    for rule in provider.rules() {
+        if inherited.iter().any(|r| r.meta().id == rule.meta().id) {
+            continue;
+        }
+        let id = rule.meta().id;
+        if !named.contains(id) {
+            failures.push(format!(
+                "rule `{id}` has no fixture: add a folder named {id}, or annotate it"
+            ));
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "{} of {count} rule fixtures failed:\n\n{}",
+        failures.len(),
+        failures.join("\n\n")
+    );
+}
+
+/// Runs the fixture folders of one provider's language; returns the number of inputs.
+fn run_folders(
+    provider: &dyn LanguageProvider,
+    bless: bool,
+    named: &mut HashSet<String>,
+    seen: &mut HashMap<(String, String), PathBuf>,
+    failures: &mut Vec<String>,
+) -> usize {
+    let root = fixture_root(provider.language());
+    let mut count = 0;
+    let marker = testing::marker(provider);
     for dir in sorted(&root).into_iter().filter(|p| p.is_dir()) {
         let id = dir.file_name().expect("a folder").to_string_lossy();
         let folder_rules =
@@ -84,25 +124,7 @@ pub fn rule_fixtures(provider: &dyn LanguageProvider) {
             named.extend(annotated.expected.into_iter().map(|e| e.3));
         }
     }
-    assert!(count > 0, "no rule fixtures under {}", root.display());
-    let inherited = provider.base_rules();
-    for rule in provider.rules() {
-        if inherited.iter().any(|r| r.meta().id == rule.meta().id) {
-            continue;
-        }
-        let id = rule.meta().id;
-        if !named.contains(id) {
-            failures.push(format!(
-                "rule `{id}` has no fixture: add a folder named {id}, or annotate it"
-            ));
-        }
-    }
-    assert!(
-        failures.is_empty(),
-        "{} of {count} rule fixtures failed:\n\n{}",
-        failures.len(),
-        failures.join("\n\n")
-    );
+    count
 }
 
 /// A fixture input that reports something, for the rule documentation.

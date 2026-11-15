@@ -11729,6 +11729,62 @@
     {
       "category": "suspicious",
       "default_level": "off",
+      "description": "Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<p>{@html comment.body}</p>\n<p>{comment.body}</p>\n{@debug comment}\n",
+        "language": "svelte",
+        "spans": [
+          {
+            "column": 1,
+            "length": 16,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-at-debug-tags",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Svelte's `no-at-html-tags` (eslint-plugin-svelte). Escape the text or sanitize it before it is rendered, or turn the rule off for a value you control.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<p>{@html comment.body}</p>\n<p>{comment.body}</p>\n{@debug comment}\n",
+        "language": "svelte",
+        "spans": [
+          {
+            "column": 4,
+            "length": 20,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-at-html-tags",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
       "description": "Autoplaying audio and video annoys users and fails accessibility guidelines; `muted` media is allowed.",
       "example": {
         "config": null,
@@ -12286,6 +12342,34 @@
       "upstream": []
     },
     {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <div v-html=\"comment\"></div>\n  <div>{{ comment }}</div>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 3,
+            "length": 22,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-v-html",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "A void element (`<br>`, `<img>`, ...) has no content and no end tag; the browser ignores `</br>`.",
@@ -12448,6 +12532,34 @@
       "presets": [
         "html/html-validate-recommended"
       ],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "{#each items as item}\n  <p>{item}</p>\n{/each}\n{#each items as item (item.id)}\n  <p>{item}</p>\n{/each}\n{#each items as { id, name }, i (id)}{name}{/each}\n",
+        "language": "svelte",
+        "spans": [
+          {
+            "column": 1,
+            "length": 21,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "require-each-key",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
       "upstream": []
     },
     {

@@ -1990,6 +1990,14 @@
               "$ref": "#/definitions/rule",
               "description": "`new Promise(async ...)`: an error thrown in the executor is lost."
             },
+            "no-at-debug-tags": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change."
+            },
+            "no-at-html-tags": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-at-html-tags` (eslint-plugin-svelte). Escape the text or sanitize it before it is rendered, or turn the rule off for a value you control."
+            },
             "no-automatic-variable-assignment": {
               "$ref": "#/definitions/rule",
               "description": "An assignment to, a parameter named like, or a `foreach` variable named like an automatic variable (`$Error`, `$Event`, `$input`, `$PSItem`, `$_`, `$PWD`, `$Host`, `$this`, `$true`, ...). `$null = ...` is fine."
@@ -2698,6 +2706,10 @@
               "$ref": "#/definitions/rule",
               "description": "A backslash in a string, template or regex that escapes nothing special (`\"\\d\"`, `/\\-/`)."
             },
+            "no-v-html": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first."
+            },
             "no-void-end-tag": {
               "$ref": "#/definitions/rule",
               "description": "A void element (`<br>`, `<img>`, ...) has no content and no end tag; the browser ignores `</br>`."
@@ -3099,6 +3111,10 @@
             "remove-unused-usings": {
               "$ref": "#/definitions/rule",
               "description": "A `using` directive that nothing in the file needs (the compiler's hidden CS8019, IDE0005 in the SDK analyzers). Not reported in a file that has compiler errors or `#if` regions, because unresolved or inactive code could be the one using it."
+            },
+            "require-each-key": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions."
             },
             "require-sri": {
               "$ref": "#/definitions/rule",

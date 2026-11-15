@@ -218,25 +218,21 @@ fn html_fences_are_formatted_and_linted() {
 
 #[test]
 fn html_front_matter_is_formatted_as_yaml() {
-    let mut providers: Vec<Box<dyn LanguageProvider>> = vec![Box::new(lang_html::provider())];
-    providers.push(Box::new(lang_yaml::YamlProvider::new()));
-    let db = Database::new(providers);
-    let html = "---
-title:   'x'
----
-<p>a</p>
-";
-    let once = formatted(&db, "a.html", html);
-    assert_eq!(
-        once,
-        "---
-title: 'x'
----
-
-<p>a</p>
-"
-    );
-    assert_eq!(formatted(&db, "a.html", &once), once);
+    for (name, provider) in [
+        (
+            "a.html",
+            Box::new(lang_html::provider()) as Box<dyn LanguageProvider>,
+        ),
+        ("a.vue", Box::new(lang_html::vue_provider())),
+        ("a.svelte", Box::new(lang_html::svelte_provider())),
+    ] {
+        let providers: Vec<Box<dyn LanguageProvider>> =
+            vec![provider, Box::new(lang_yaml::YamlProvider::new())];
+        let db = Database::new(providers);
+        let once = formatted(&db, name, "---\ntitle:   'x'\n---\n<p>a</p>\n");
+        assert_eq!(once, "---\ntitle: 'x'\n---\n\n<p>a</p>\n", "{name}");
+        assert_eq!(formatted(&db, name, &once), once, "{name}");
+    }
 }
 
 #[test]
