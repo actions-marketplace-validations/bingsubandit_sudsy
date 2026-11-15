@@ -1,5 +1,5 @@
 tool: "eslint-plugin-vue"
-version: "10.5.0"
+version: "10.12.1"
 languages: ["vue"]
 sources:
   - "https://eslint.vuejs.org/rules/"
@@ -55,3 +55,81 @@ entries:
   no-unused-properties: deferred | needs script analysis (the JS semantic layer)
   no-undef-components: deferred | needs script analysis (the JS semantic layer)
   no-undef-properties: deferred | needs script analysis (the JS semantic layer)
+  first-attribute-linebreak: formatter | the formatter owns layout
+  html-closing-bracket-spacing: formatter | the formatter owns layout
+  html-comment-content-newline: formatter | the formatter owns layout
+  html-comment-content-spacing: formatter | the formatter owns layout
+  html-comment-indent: formatter | the formatter owns layout
+  padding-line-between-blocks: formatter | the formatter owns layout
+  padding-line-between-tags: formatter | the formatter owns layout
+  block-tag-newline: formatter | the formatter owns layout
+  block-lang: planned
+  block-order: planned
+  html-button-has-type: planned
+  html-end-tags: planned
+  max-lines-per-block: planned
+  max-template-depth: planned
+  no-bare-strings-in-template: planned
+  no-child-content: planned
+  no-content-outside-block: planned
+  no-custom-modifiers-on-v-model: planned
+  no-deprecated-filter: planned
+  no-deprecated-functional-template: planned
+  no-deprecated-html-element-is: planned
+  no-deprecated-inline-template: planned
+  no-deprecated-scope-attribute: planned
+  no-deprecated-slot-attribute: planned
+  no-deprecated-slot-scope-attribute: planned
+  no-deprecated-v-bind-sync: planned
+  no-deprecated-v-is: planned
+  no-deprecated-v-on-native-modifier: planned
+  no-deprecated-v-on-number-modifiers: planned
+  no-duplicate-class-names: planned
+  no-empty-component-block: planned
+  no-literals-in-template: planned
+  no-multiple-slot-args: planned
+  no-negated-v-if-condition: planned
+  no-root-v-if: planned
+  no-static-inline-styles: planned
+  no-template-target-blank: planned
+  no-use-v-else-with-v-for: planned
+  no-useless-mustaches: planned
+  no-useless-template-attributes: planned
+  no-useless-v-bind: planned
+  no-v-for-template-key-on-child: planned
+  no-v-text: planned
+  prefer-separate-static-class: planned
+  prefer-true-attribute-shorthand: planned
+  require-toggle-inside-transition: planned
+  slot-name-casing: planned
+  static-class-names-order: planned
+  this-in-template: planned
+  use-v-on-exact: planned
+  v-for-delimiter-style: planned
+  v-if-else-key: planned
+  v-on-event-hyphenation: planned
+  v-on-handler-style: planned
+  valid-attribute-name: planned
+  valid-template-root: planned
+  valid-v-cloak: planned
+  valid-v-html: planned
+  valid-v-is: planned
+  valid-v-memo: planned
+  valid-v-once: planned
+  valid-v-pre: planned
+  valid-v-show: planned
+  valid-v-text: planned
+  enforce-style-attribute: planned
+  no-restricted-html-elements: planned | a configurable restriction list
+  no-restricted-static-attribute: planned | a configurable restriction list
+  no-restricted-v-bind: planned | a configurable restriction list
+  no-restricted-v-on: planned | a configurable restriction list
+  no-restricted-block: planned | a configurable restriction list
+  no-restricted-class: planned | a configurable restriction list
+  no-undef-directives: deferred | needs script analysis or the component graph
+  no-unused-refs: deferred | needs script analysis or the component graph
+  no-restricted-component-names: deferred | needs script analysis or the component graph
+  match-component-file-name: deferred | needs script analysis or the component graph
+  no-v-for-template-key: wontfix deprecated upstream
+  no-v-model-argument: wontfix deprecated upstream
+  valid-v-bind-sync: wontfix deprecated upstream
