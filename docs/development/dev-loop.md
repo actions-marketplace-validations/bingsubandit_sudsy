@@ -16,6 +16,7 @@
 | `finish.sh [-p crate]... [bench args]` | The check of a finished change: `gate.sh --affected` and `bench.sh` (which measures the affected languages) at the same time (about as long as the slower one); `--all`: the full gate and every language; overrides of the selection: `-p <crate>` (repeatable) for the gate's clippy and tests, `--lang <bench/inputs folder or startup>` (repeatable) for the bench; a gate failure stops the bench; ends in `FINISH OK` or `FINISH FAILED: <gate\|bench>` |
 | `agent-stats.py [<subagents dir>] [N]` | Summary of the newest N (10) Claude Code subagent transcripts: model vs tool minutes, gate/bench launches, watchers, errors by kind, the commit whose CLAUDE.md each agent was given |
 | `check-version.sh [vX.Y.Z]` | Cargo workspace, `editors/vscode/package.json` + lock, tag and `CHANGELOG.md` agree |
+| `binsize.sh [REV...]` | Stripped release CLI size of each revision (built in a worktree of the slot) |
 | `package-cli.sh` | CLI archive: executable, `csharp-worker/`, LICENSE, CHANGELOG |
 
 ## Parallel agents
