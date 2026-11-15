@@ -48,7 +48,14 @@ if grep -q ' worker ' <<<"$rows"; then
   fi
 fi
 [ $worker = 1 ] && : >"$out.left" || awk '$2 == "worker" { print $1 }' <<<"$rows" >"$out.left"
-limited warm-up "$bin" fixed json plugins --inputs "$inputs" >/dev/null; sleep 1
+# The plugin phase measures a compile-cache hit: warm a private cache until a compiled plugin is in
+# it (the write is a background thread that a short run can outlive), so .instr does not flip
+# between hit and miss.
+export SUDSY_WASM_CACHE="$out.wasm-cache"; rm -rf "$SUDSY_WASM_CACHE"
+for _ in 1 2 3 4 5; do
+  limited warm-up "$bin" fixed json plugins --inputs "$inputs" >/dev/null; sleep 1
+  [ -n "$(find "$SUDSY_WASM_CACHE" -type f 2>/dev/null | head -1)" ] && break
+done
 
 one() { # one LANG KIND PHASE -> metric lines on stdout
   local lang=$1 kind=$2 phase=$3 res t0=$SECONDS

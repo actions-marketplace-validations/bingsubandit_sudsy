@@ -131,6 +131,7 @@ Markdown (tree-sitter-md block and inline grammars through `core-treesitter` as 
 | First pull (first workspace build) | 3.2-3.7 s |
 | Typing, 40 edits 30 ms apart: last pull answered after last edit | 0.10-0.25 s |
 | Typing: pulls that did the full work | 1-2 of 40 |
+| Rowan node pool freed at thread exit (`lsp-latency bench/inputs/cs`, release, Graviton arm64, release worker) | first pull 1.14-1.16 s, typing 25-47 ms, refresh 80-110 ms: the same as without (1.17-1.8 s, 27-45 ms, 81-112 ms; the host's run-to-run spread); instructions of lint and format phases +0.0 to +0.8% (`scripts/bench.sh`) |
 | Refresh after an edit (`lsp-latency` refresh phase: 5 open C# files, `bench/inputs/cs`, release server, debug worker, Windows; one edit, the server bumps `WorkspaceRevision` after 400 ms, then the 4 other files are pulled) | 68-85 ms for the 4 pulls (one worker round trip each, about 7 ms per file) against 54-55 ms for the same pulls with no edit; format and syntax-only lint do not read the revision (`scripts/bench.sh` unchanged) |
 
 ## Dev loop / tooling (persistent `CARGO_TARGET_DIR` slot, `docs/development/dev-loop.md`)

@@ -8,12 +8,9 @@ Committed work too small for a step of its own: what to do and where, one line e
 - HTML/Vue: 5 files change on a second format (ratchet in `tests/parity/prettier-html/differences.yaml`); bring to 0.
 - Python: 11 files change on a second format (ratchet in `tests/parity/ruff/differences.yaml`); bring to 0.
 - PowerShell: `scripts/parity.sh format invoke-formatter` needs `pwsh`, which the agent host lacks: measure its second-format count and add the ratchet to `tests/parity/invoke-formatter/differences.yaml`; bring it to 0.
-- Rowan node pool: free the thread-local slots at thread exit (`third_party/rowan/src/cursor.rs`); a draft is on branch `wip/worktree-agent-aac9309989c457eed`. Measure lint and LSP numbers.
-- Branch `wip/worktree-agent-ae8f4d33a378fb12a`: a refactor of the `core-rules` hooks and keys, `core-syntax` tree/grammar and the GraphQL/JSON/YAML/EditorConfig hooks, older than the zero-config and false-positive work. Port what still helps or drop it.
-- Delete the origin branches whose content is on main: `rescue/slot1-merged-tests`, `rescue/slot3-svelte-bench-inputs`, `wip/worktree-agent-ad3970d02a02340ee`, `wip/main/detached-63cb014`, `wip/slot3-html-embed-vue-svelte`, `wip/slot2-zero-config-rules`, `wip/slot3-front-matter` and the Python and JS `wip/` branches once their agents have landed them.
+- Delete the origin branches `wip/js-step10b` and `wip/html-defaults-on` once their agents have landed them.
 - HTML dialect rules: the planned entries of `docs/parity/eslint-plugin-vue.yaml` and `eslint-plugin-svelte.yaml`; `valid-v-else` needs a sibling relation in pattern rules. Parity runners (`scripts/parity.sh`) for html-eslint, HTMLHint, eslint-plugin-vue and eslint-plugin-svelte, as for html-validate.
 - Angular templates (4.7M weekly downloads for `@angular-eslint/eslint-plugin-template`, more than Svelte; needs a user decision): a fourth language `angular` on the HTML tree, selected by an `overrides` entry for `*.component.html`, with control flow (`@if`, `@for`), bindings and pipes as embedded expressions.
-- Bench `json.plugins`: the warm-up does not wait for the compile-cache write, so `.instr` flips between about 1.29 G (hit) and 1.54 G (miss); make the warm-up wait so the metric is stable.
 
 ## Languages and analysis
 - JavaScript / TypeScript: Flow is unsupported; type-aware rules wait for the TypeScript worker.
