@@ -16,3 +16,8 @@ quoteProps: consistent
 arrowParens: avoid
 bracketSameLine: true
 jsxSingleQuote: true
+htmlWhitespaceSensitivity: ignore
+singleAttributePerLine: true
+vueIndentScriptAndStyle: true
+svelteIndentScriptAndStyle: false
+embeddedLanguageFormatting: "off"

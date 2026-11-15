@@ -51,7 +51,7 @@ fn every_tool_fixture_migrates_to_a_loadable_config() {
         );
         tools += 1;
     }
-    assert_eq!(tools, 7);
+    assert_eq!(tools, 10);
 }
 
 #[test]

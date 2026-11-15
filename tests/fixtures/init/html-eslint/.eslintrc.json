@@ -1,0 +1,19 @@
+{
+  "root": true,
+  "extends": ["plugin:@html-eslint/recommended"],
+  "overrides": [
+    {
+      "files": ["*.html"],
+      "parser": "@html-eslint/parser",
+      "plugins": ["@html-eslint"],
+      "rules": {
+        "@html-eslint/no-duplicate-id": "error",
+        "@html-eslint/require-closing-tags": ["error", { "selfClosing": "always" }],
+        "@html-eslint/id-naming-convention": ["warn", "kebab-case"],
+        "@html-eslint/no-inline-styles": "off",
+        "@html-eslint/indent": ["error", 2],
+        "@html-eslint/not-a-rule": "error"
+      }
+    }
+  ]
+}

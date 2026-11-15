@@ -13,6 +13,16 @@ css:
     indent_style: tab
     line_width: 100
     single_quote: true
+html:
+  format:
+    bracket_same_line: true
+    embedded_language_formatting: "off"
+    end_of_line: crlf
+    indent_size: 4
+    indent_style: tab
+    line_width: 100
+    single_attribute_per_line: true
+    whitespace_sensitivity: ignore
 js:
   format:
     arrow_parens: avoid
@@ -35,6 +45,12 @@ json:
     indent_size: 4
     indent_style: tab
     line_width: 100
+svelte:
+  format:
+    indent_script_and_style: false
+vue:
+  format:
+    indent_script_and_style: true
 yaml:
   format:
     bracket_spacing: false

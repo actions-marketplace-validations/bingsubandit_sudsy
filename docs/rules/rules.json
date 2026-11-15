@@ -237,6 +237,21 @@
           "tool": "eslint-plugin-jsonc"
         },
         {
+          "id": "no-duplicate-attrs",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-dup-attr",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "attr-no-duplication",
+          "partial": false,
+          "tool": "htmlhint"
+        },
+        {
           "id": "key-duplicates",
           "partial": false,
           "tool": "yamllint"
@@ -4425,33 +4440,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "a {\n  width: calc(1px+2px);\n  width: calc(1px +2px);\n  width: calc(1px+ 2px);\n  width: calc(1px + 2px);\n  width: calc(1px*2);\n  width: calc(-1px + 2px);\n  width: calc((1px+2px) * 3);\n  width: calc(var(--a)+1px);\n  width: CALC(1px + 2px);\n  background: linear-gradient(top, red, blue);\n  background: linear-gradient(to top, red, blue);\n  background: linear-gradient(45deg, red, blue);\n  background: -webkit-linear-gradient(top, red, blue);\n  transform: translateX(1px) ROTATE(1deg);\n}\n",
+        "input": "a {\n  width: calc(-#{$x} + 10px);\n  width: calc(10px + -#{$x});\n  width: calc(10px - -$x);\n  width: calc(10px -#{$x});\n}\n",
         "language": "css",
         "spans": [
           {
-            "column": 18,
+            "column": 20,
             "length": 1,
-            "line": 2
-          },
-          {
-            "column": 19,
-            "length": 4,
-            "line": 3
-          },
-          {
-            "column": 18,
-            "length": 1,
-            "line": 4
-          },
-          {
-            "column": 19,
-            "length": 1,
-            "line": 8
-          },
-          {
-            "column": 23,
-            "length": 4,
-            "line": 9
+            "line": 5
           }
         ]
       },
@@ -10790,7 +10785,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "area-alt",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -10820,7 +10821,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-aria-hidden-body",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "aria-hidden-body",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -10855,7 +10867,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "aria-label-misuse",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -10885,7 +10903,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attr-case",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "attr-lowercase",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -10915,7 +10944,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attr-delimiter",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -10950,7 +10985,13 @@
         }
       ],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attr-pattern",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -10985,7 +11026,23 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "quotes",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "attr-quotes",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "attr-value-double-quotes",
+          "partial": true,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11015,7 +11072,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attr-spacing",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11050,7 +11113,18 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-invalid-attr-value",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "attribute-allowed-values",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11080,7 +11154,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attribute-boolean-style",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11110,7 +11190,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attribute-empty-style",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11150,7 +11236,13 @@
         }
       ],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "class-pattern",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11180,7 +11272,23 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-obsolete-tags",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "deprecated",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "tag-no-obsolete",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11210,7 +11318,18 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "doctype-html",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "doctype-html5",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11240,7 +11359,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "doctype-style",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11275,7 +11400,23 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "lowercase",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "element-case",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "tagname-lowercase",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11305,7 +11446,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "element-name",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11345,7 +11492,33 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-frame-title",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "require-lang",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "element-required-attributes",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "frame-title-require",
+          "partial": true,
+          "tool": "htmlhint"
+        },
+        {
+          "id": "html-lang-require",
+          "partial": true,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11375,7 +11548,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty-headings",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "empty-heading",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11405,7 +11589,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "empty-title",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11443,7 +11633,23 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-multiple-h1",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-skip-heading-levels",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "heading-level",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11483,7 +11689,18 @@
         }
       ],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "id-naming-convention",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "id-pattern",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11511,7 +11728,23 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-input-label",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "input-missing-label",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "input-requires-label",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11541,7 +11774,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "long-title",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11571,7 +11810,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "map-dup-name",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11601,7 +11846,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "meta-refresh",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11629,7 +11880,23 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-doctype",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "missing-doctype",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "doctype-first",
+          "partial": true,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11659,7 +11926,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "multiple-labeled-controls",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11694,7 +11967,13 @@
         }
       ],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "name-pattern",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11724,7 +12003,18 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-abstract-roles",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-abstract-role",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11810,7 +12100,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-autoplay",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11840,7 +12136,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-conditional-comment",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11870,7 +12172,18 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-obsolete-attrs",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-deprecated-attr",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11900,7 +12213,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-duplicate-class",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-dup-class",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -11930,7 +12254,23 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-duplicate-id",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-dup-id",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "id-unique",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11960,7 +12300,23 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-button-type",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-implicit-button-type",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "button-type-require",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11990,7 +12346,23 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-closing-tags",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-implicit-close",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "tag-pair",
+          "partial": true,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12020,7 +12392,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-implicit-input-type",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12050,7 +12428,23 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-inline-styles",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-inline-style",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "inline-style-disabled",
+          "partial": true,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12085,7 +12479,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-missing-references",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12115,7 +12515,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-multiple-main",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12145,7 +12551,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-redundant-for",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12190,7 +12602,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-redundant-role",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-redundant-role",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12220,7 +12643,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-self-closing",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12248,7 +12677,18 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-style-tag",
+          "partial": false,
+          "tool": "html-validate"
+        },
+        {
+          "id": "style-disabled",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12278,7 +12718,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-trailing-spaces",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-trailing-whitespace",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12311,7 +12762,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unknown-elements",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12397,7 +12854,13 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "void-content",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12427,7 +12890,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "prefer-button",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12472,7 +12941,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "prefer-native-element",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12502,7 +12977,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "prefer-tbody",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12532,7 +13013,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "presentation-role-style",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12603,7 +13090,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-sri",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12631,7 +13124,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "svg-focusable",
+          "partial": false,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12661,7 +13160,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "text-content",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12711,7 +13216,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "unique-landmark",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12741,7 +13252,18 @@
       "presets": [
         "html/html-validate-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-invalid-entity",
+          "partial": true,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "unrecognized-char-ref",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12809,7 +13331,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-id",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12839,7 +13367,18 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "void-style",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "empty-tag-not-self-closed",
+          "partial": false,
+          "tool": "htmlhint"
+        }
+      ]
     },
     {
       "category": "suspicious",

@@ -324,7 +324,13 @@ fn check_calc_group(c: &Check, group: &SyntaxNode, ctx: &mut RuleContext<'_>) {
                     usize::from(t.text_range().start()),
                     usize::from(t.text_range().end()),
                 );
-                if (i > 0 && !spaced(start, true)) || (i + 1 < items.len() && !spaced(end, false)) {
+                // A sign in front of an operand (`-#{$x}`, `+ -$x`) is not an operator.
+                let unary = i == 0
+                    || matches!(&items[i - 1], SyntaxElement::Token(p) if p.kind() == k::DELIM);
+                if !unary
+                    && ((i > 0 && !spaced(start, true))
+                        || (i + 1 < items.len() && !spaced(end, false)))
+                {
                     c.hit(ctx, t.text_range(), t.text());
                 }
             }

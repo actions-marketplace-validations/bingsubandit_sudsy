@@ -25,7 +25,7 @@ pub const UNSUPPORTED: [&str; 11] = [
     ".prettierrc.mts",
 ];
 /// Languages with `line_width`, `indent_size` and `end_of_line`.
-const ALL: &[&str] = &["json", "yaml", "js", "css"];
+const ALL: &[&str] = &["json", "yaml", "js", "css", "html"];
 const JS: &[&str] = &["js"];
 const QUOTE_PROPS: [&str; 3] = ["as-needed", "consistent", "preserve"];
 
@@ -40,7 +40,12 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
             ("printWidth", v) if v.is_u64() => out.opt("printWidth", ALL, "line_width", v.clone()),
             ("tabWidth", v) if v.is_u64() => out.opt("tabWidth", ALL, "indent_size", v.clone()),
             ("useTabs", Value::Bool(true)) => {
-                out.opt("useTabs", &["json", "js", "css"], "indent_style", "tab");
+                out.opt(
+                    "useTabs",
+                    &["json", "js", "css", "html"],
+                    "indent_style",
+                    "tab",
+                );
             }
             ("useTabs", Value::Bool(false)) => {}
             ("endOfLine", Value::String(s)) if matches!(s.as_str(), "lf" | "crlf" | "auto") => {
@@ -75,7 +80,7 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
                 out.opt("arrowParens", JS, "arrow_parens", s.clone());
             }
             ("bracketSameLine", Value::Bool(b)) => {
-                out.opt("bracketSameLine", JS, "bracket_same_line", *b);
+                out.opt("bracketSameLine", &["js", "html"], "bracket_same_line", *b);
             }
             ("jsxSingleQuote", Value::Bool(b)) => {
                 out.opt("jsxSingleQuote", JS, "jsx_single_quote", *b);
@@ -94,20 +99,63 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
             ("proseWrap", Value::String(s)) if s == "preserve" => {}
             ("proseWrap", _) => out.skip("proseWrap"),
             ("overrides", _) => out.skip("overrides / .prettierignore / .editorconfig"),
+            ("embeddedLanguageFormatting", Value::String(s))
+                if matches!(s.as_str(), "auto" | "off") =>
+            {
+                out.opt(
+                    "embeddedLanguageFormatting",
+                    &["html"],
+                    "embedded_language_formatting",
+                    s.clone(),
+                );
+            }
             ("embeddedLanguageFormatting", _) => out.skip("embeddedLanguageFormatting"),
+            ("singleAttributePerLine", Value::Bool(b)) => {
+                out.opt(
+                    "singleAttributePerLine",
+                    &["html"],
+                    "single_attribute_per_line",
+                    *b,
+                );
+            }
+            ("htmlWhitespaceSensitivity", Value::String(s))
+                if matches!(s.as_str(), "css" | "strict" | "ignore") =>
+            {
+                out.opt(
+                    "htmlWhitespaceSensitivity",
+                    &["html"],
+                    "whitespace_sensitivity",
+                    s.clone(),
+                );
+            }
+            ("vueIndentScriptAndStyle", Value::Bool(b)) => {
+                out.opt(
+                    "vueIndentScriptAndStyle",
+                    &["vue"],
+                    "indent_script_and_style",
+                    *b,
+                );
+            }
+            ("svelteIndentScriptAndStyle", Value::Bool(b)) => {
+                out.opt(
+                    "svelteIndentScriptAndStyle",
+                    &["svelte"],
+                    "indent_script_and_style",
+                    *b,
+                );
+            }
+            (
+                "singleAttributePerLine"
+                | "htmlWhitespaceSensitivity"
+                | "vueIndentScriptAndStyle"
+                | "svelteIndentScriptAndStyle",
+                _,
+            ) => out.skip_why(key, "not a value Sudsy maps"),
             ("insertPragma" | "requirePragma" | "checkIgnorePragma", _) => {
                 out.skip("insertPragma / requirePragma / checkIgnorePragma");
             }
             ("rangeStart" | "rangeEnd", _) => out.skip("rangeStart / rangeEnd"),
-            (
-                "$schema"
-                | "singleAttributePerLine"
-                | "htmlWhitespaceSensitivity"
-                | "vueIndentScriptAndStyle"
-                | "experimentalTernaries"
-                | "experimentalOperatorPosition",
-                _,
-            ) => {}
+            ("$schema" | "experimentalTernaries" | "experimentalOperatorPosition", _) => {}
             (other, _) => out.skip_why(other, "not a Prettier option Sudsy maps"),
         }
     }

@@ -1,0 +1,10 @@
+{
+  // HTMLHint's defaults
+  "tagname-lowercase": true,
+  "attr-lowercase": true,
+  "id-unique": true,
+  "style-disabled": false,
+  "id-class-value": "dash",
+  "src-not-empty": true,
+  "unknown-rule": true
+}

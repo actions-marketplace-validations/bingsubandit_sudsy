@@ -34,7 +34,7 @@ One line per upstream rule or option under `entries:`, `<id>: <status>` or `<id>
 | html-validate | 90 | 34 | 30 | 19 | 0 | 1 | 6 | 19 |
 | htmlhint | 42 | 10 | 6 | 26 | 0 | 0 | 0 | 26 |
 | markdownlint | 53 | 25 | 16 | 0 | 0 | 0 | 12 | 0 |
-| prettier | 57 | 36 | 7 | 3 | 0 | 10 | 1 | 3 |
+| prettier | 59 | 38 | 9 | 2 | 0 | 9 | 1 | 2 |
 | psscriptanalyzer | 75 | 12 | 8 | 0 | 0 | 1 | 54 | 0 |
 | roslynator | 67 | 23 | 7 | 16 | 18 | 1 | 2 | 16 |
 | shellcheck | 520 | 17 | 8 | 0 | 0 | 0 | 495 | 0 |

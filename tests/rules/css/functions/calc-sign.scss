@@ -1,0 +1,7 @@
+a {
+  width: calc(-#{$x} + 10px);
+  width: calc(10px + -#{$x});
+  width: calc(10px - -$x);
+  width: calc(10px -#{$x});
+//                 ^ function-calc-no-unspaced-operator
+}

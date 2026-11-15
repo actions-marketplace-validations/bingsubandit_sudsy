@@ -1,0 +1,14 @@
+{
+  "extends": ["html-validate:recommended", "my-shared-config"],
+  "rules": {
+    "no-inline-style": "off",
+    "attr-quotes": ["error", { "style": "double" }],
+    "id-pattern": ["error", { "pattern": "^[a-z]+_[a-z]+$" }],
+    "class-pattern": ["warn", { "pattern": "kebabcase" }],
+    "close-order": "off",
+    "no-dup-id": 2,
+    "valid-autocomplete": "error",
+    "not-a-rule": "error"
+  },
+  "elements": ["html5"]
+}

@@ -5,6 +5,7 @@ mod biome;
 mod csharpier;
 mod editorconfig;
 mod eslint;
+mod html;
 mod out;
 mod prettier;
 mod sources;
@@ -28,6 +29,9 @@ enum Tool {
     Stylecop,
     Stylelint,
     Csharpier,
+    HtmlValidate,
+    Htmlhint,
+    HtmlEslint,
 }
 
 #[derive(Args)]
@@ -223,6 +227,47 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
             let source = file
                 .as_deref()
                 .map_or(".editorconfig".into(), |p: &Path| p.display().to_string());
+            Ok((out, source))
+        }
+        Tool::HtmlValidate => {
+            let path = sources::find(&html::HTML_VALIDATE_FILES).with_context(|| {
+                match sources::find(&html::HTML_VALIDATE_JS) {
+                    Some(p) => format!(
+                        "{} is JavaScript and cannot be read without running it; only .htmlvalidate.json is supported. Write the rules by hand: docs/parity/html-validate.yaml maps each rule",
+                        p.display()
+                    ),
+                    None => found("html-validate", &html::HTML_VALIDATE_FILES),
+                }
+            })?;
+            let mut out = Out::new("html-validate");
+            html::html_validate(&sources::parse(&path)?, &mut out)
+                .with_context(|| path.display().to_string())?;
+            Ok((out, path.display().to_string()))
+        }
+        Tool::Htmlhint => {
+            let path = sources::find(&html::HTMLHINT_FILES)
+                .with_context(|| found("HTMLHint", &html::HTMLHINT_FILES))?;
+            let mut out = Out::new("htmlhint");
+            html::htmlhint(&sources::parse(&path)?, &mut out)
+                .with_context(|| path.display().to_string())?;
+            Ok((out, path.display().to_string()))
+        }
+        Tool::HtmlEslint => {
+            let mut out = Out::new("html-eslint");
+            let (config, source) = match sources::find(&eslint::FILES) {
+                Some(path) => (sources::parse(&path)?, path.display().to_string()),
+                None => match sources::package_json_key("eslintConfig")? {
+                    Some(v) => (v, "package.json".to_string()),
+                    None => match sources::find(&eslint::JS_CONFIGS) {
+                        Some(p) => bail!(
+                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the rules by hand: docs/parity/html-eslint.yaml maps each rule",
+                            p.display()
+                        ),
+                        None => bail!("{}", found("ESLint", &eslint::FILES)),
+                    },
+                },
+            };
+            html::html_eslint(&config, &mut out).with_context(|| source.clone())?;
             Ok((out, source))
         }
         Tool::Csharpier => {

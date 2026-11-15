@@ -96,7 +96,7 @@ fn extend(name: &str, out: &mut Out) {
 }
 
 /// `(level, options)` of an ESLint rule setting: `"error"`, `2`, `["warn", {...}]`.
-fn setting(value: &Value) -> Option<(&'static str, &[Value])> {
+pub(super) fn setting(value: &Value) -> Option<(&'static str, &[Value])> {
     let (sev, opts) = match value {
         Value::Array(a) => (a.first()?, a.get(1..).unwrap_or_default()),
         v => (v, [].as_slice()),

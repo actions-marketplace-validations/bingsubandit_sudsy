@@ -1,13 +1,13 @@
 tool: "prettier"
 version: "3.9.10 (npm latest; the options page does not print the version)"
-languages: ["yaml", "json", "markdown", "graphql", "js", "css"]
+languages: ["yaml", "json", "markdown", "graphql", "js", "css", "html", "vue", "svelte"]
 sources:
   - "https://registry.npmjs.org/prettier/latest"
   - "https://prettier.io/docs/options"
   - "https://prettier.io/docs/rationale"
   - "https://raw.githubusercontent.com/prettier/prettier/main/src/language-yaml/options.js (YAML-specific options: bracketSpacing, singleQuote, proseWrap)"
   - "https://prettier.io/blog/2024/01/12/3.2.0"
-scope: "YAML, JSON/JSONC, Markdown, GraphQL, JavaScript/TypeScript (js) and CSS/SCSS/Less (css); formatter has no lint rules"
+scope: "YAML, JSON/JSONC, Markdown, GraphQL, JavaScript/TypeScript (js) and CSS/SCSS/Less (css), HTML, Vue and Svelte (the options of Prettier and of prettier-plugin-svelte); formatter has no lint rules"
 entries:
   printWidth: option json.format.line_width
   tabWidth: option json.format.indent_size
@@ -20,10 +20,12 @@ entries:
   trailingComma: option json.format.trailing_commas | Prettier's `json` parser never adds commas; whether the `jsonc` parser adds them under `all` is unverified (issue 15553 and Zed docs suggest the .jsonc extension can add trailing commas)
   objectWrap: option json.format.collapse
   proseWrap: wontfix deferred, docs/roadmap.md (YAML re-wrapping)
-  embeddedLanguageFormatting: formatter
+  embeddedLanguageFormatting: option html.format.embedded_language_formatting | only the code of HTML, Vue and Svelte files; Markdown fences and code in JS templates are formatted as written
   insertPragma / requirePragma / checkIgnorePragma: wontfix no pragma mode
   rangeStart / rangeEnd: wontfix deferred, docs/roadmap.md (range formatting)
-  htmlWhitespaceSensitivity, vueIndentScriptAndStyle: wontfix not applicable to the supported languages
+  htmlWhitespaceSensitivity: option html.format.whitespace_sensitivity
+  vueIndentScriptAndStyle: option vue.format.indent_script_and_style
+  svelteIndentScriptAndStyle: option svelte.format.indent_script_and_style
   overrides / .prettierignore / .editorconfig: config overrides, exclude, ignore files, .editorconfig
   "json: package.json / package-lock.json / composer.json": "option json.format.collapse"
   "json: number arrays are filled": "planned | docs/formatting/presets.md: 'Number arrays not filled, numbers not normalized'"
@@ -52,7 +54,7 @@ entries:
   trailingComma (js): "option js.format.trailing_commas | es5 and none are not applied to TypeScript lists"
   arrowParens: option js.format.arrow_parens
   bracketSameLine: option js.format.bracket_same_line
-  singleAttributePerLine: "planned | js.format.single_attribute_per_line"
+  singleAttributePerLine: option html.format.single_attribute_per_line | JSX attributes (`js.format.single_attribute_per_line`) are planned
   experimentalTernaries, experimentalOperatorPosition: "wontfix not planned; Prettier marks them experimental"
   "js: formatting": formatter
   "js: // prettier-ignore": formatter
