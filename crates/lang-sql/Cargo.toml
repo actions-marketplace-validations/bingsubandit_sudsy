@@ -13,7 +13,6 @@ core-format.workspace = true
 core-rules.workspace = true
 core-syntax.workspace = true
 provider-api.workspace = true
-sqruff-lib.workspace = true
 sqruff-lib-core.workspace = true
 sqruff-lib-dialects.workspace = true
 strum.workspace = true

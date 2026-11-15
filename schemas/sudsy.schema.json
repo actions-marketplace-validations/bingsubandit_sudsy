@@ -8894,15 +8894,6 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
-                  "comma_position": {
-                    "default": "trailing",
-                    "description": "Where the comma of a list that breaks goes: at the end of a line or at the start of the next.",
-                    "enum": [
-                      "trailing",
-                      "leading"
-                    ],
-                    "type": "string"
-                  },
                   "dialect": {
                     "default": "ansi",
                     "description": "The SQL dialect the file is parsed as.",
@@ -8911,104 +8902,6 @@
                       "postgres",
                       "mysql",
                       "tsql"
-                    ],
-                    "type": "string"
-                  },
-                  "end_of_line": {
-                    "default": "auto",
-                    "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
-                    "enum": [
-                      "auto",
-                      "lf",
-                      "crlf"
-                    ],
-                    "type": "string"
-                  },
-                  "final_newline": {
-                    "default": true,
-                    "description": "End the file with a newline.",
-                    "type": "boolean"
-                  },
-                  "function_case": {
-                    "default": "consistent",
-                    "description": "Capitalisation of function names.",
-                    "enum": [
-                      "consistent",
-                      "upper",
-                      "lower",
-                      "capitalise",
-                      "preserve"
-                    ],
-                    "type": "string"
-                  },
-                  "identifier_case": {
-                    "default": "consistent",
-                    "description": "Capitalisation of unquoted identifiers.",
-                    "enum": [
-                      "consistent",
-                      "upper",
-                      "lower",
-                      "capitalise",
-                      "preserve"
-                    ],
-                    "type": "string"
-                  },
-                  "indent_size": {
-                    "default": 4,
-                    "description": "Columns per indentation level (also the width of a tab).",
-                    "maximum": 16,
-                    "minimum": 1,
-                    "type": "integer"
-                  },
-                  "indent_style": {
-                    "default": "space",
-                    "description": "Indent with spaces or tabs.",
-                    "enum": [
-                      "space",
-                      "tab"
-                    ],
-                    "type": "string"
-                  },
-                  "keyword_case": {
-                    "default": "consistent",
-                    "description": "Capitalisation of keywords: one spelling throughout the file (the first one's), or the named case.",
-                    "enum": [
-                      "consistent",
-                      "upper",
-                      "lower",
-                      "capitalise",
-                      "preserve"
-                    ],
-                    "type": "string"
-                  },
-                  "line_width": {
-                    "default": 80,
-                    "description": "Preferred maximum line width in columns.",
-                    "maximum": 1000,
-                    "minimum": 20,
-                    "type": "integer"
-                  },
-                  "literal_case": {
-                    "default": "consistent",
-                    "description": "Capitalisation of `NULL`, `TRUE` and `FALSE`.",
-                    "enum": [
-                      "consistent",
-                      "upper",
-                      "lower",
-                      "capitalise",
-                      "preserve"
-                    ],
-                    "type": "string"
-                  },
-                  "type_case": {
-                    "default": "consistent",
-                    "description": "Capitalisation of data types.",
-                    "enum": [
-                      "consistent",
-                      "upper",
-                      "lower",
-                      "capitalise",
-                      "preserve"
                     ],
                     "type": "string"
                   }
@@ -10033,15 +9926,6 @@
         "format": {
           "additionalProperties": false,
           "properties": {
-            "comma_position": {
-              "default": "trailing",
-              "description": "Where the comma of a list that breaks goes: at the end of a line or at the start of the next.",
-              "enum": [
-                "trailing",
-                "leading"
-              ],
-              "type": "string"
-            },
             "dialect": {
               "default": "ansi",
               "description": "The SQL dialect the file is parsed as.",
@@ -10050,104 +9934,6 @@
                 "postgres",
                 "mysql",
                 "tsql"
-              ],
-              "type": "string"
-            },
-            "end_of_line": {
-              "default": "auto",
-              "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
-              "enum": [
-                "auto",
-                "lf",
-                "crlf"
-              ],
-              "type": "string"
-            },
-            "final_newline": {
-              "default": true,
-              "description": "End the file with a newline.",
-              "type": "boolean"
-            },
-            "function_case": {
-              "default": "consistent",
-              "description": "Capitalisation of function names.",
-              "enum": [
-                "consistent",
-                "upper",
-                "lower",
-                "capitalise",
-                "preserve"
-              ],
-              "type": "string"
-            },
-            "identifier_case": {
-              "default": "consistent",
-              "description": "Capitalisation of unquoted identifiers.",
-              "enum": [
-                "consistent",
-                "upper",
-                "lower",
-                "capitalise",
-                "preserve"
-              ],
-              "type": "string"
-            },
-            "indent_size": {
-              "default": 4,
-              "description": "Columns per indentation level (also the width of a tab).",
-              "maximum": 16,
-              "minimum": 1,
-              "type": "integer"
-            },
-            "indent_style": {
-              "default": "space",
-              "description": "Indent with spaces or tabs.",
-              "enum": [
-                "space",
-                "tab"
-              ],
-              "type": "string"
-            },
-            "keyword_case": {
-              "default": "consistent",
-              "description": "Capitalisation of keywords: one spelling throughout the file (the first one's), or the named case.",
-              "enum": [
-                "consistent",
-                "upper",
-                "lower",
-                "capitalise",
-                "preserve"
-              ],
-              "type": "string"
-            },
-            "line_width": {
-              "default": 80,
-              "description": "Preferred maximum line width in columns.",
-              "maximum": 1000,
-              "minimum": 20,
-              "type": "integer"
-            },
-            "literal_case": {
-              "default": "consistent",
-              "description": "Capitalisation of `NULL`, `TRUE` and `FALSE`.",
-              "enum": [
-                "consistent",
-                "upper",
-                "lower",
-                "capitalise",
-                "preserve"
-              ],
-              "type": "string"
-            },
-            "type_case": {
-              "default": "consistent",
-              "description": "Capitalisation of data types.",
-              "enum": [
-                "consistent",
-                "upper",
-                "lower",
-                "capitalise",
-                "preserve"
               ],
               "type": "string"
             }

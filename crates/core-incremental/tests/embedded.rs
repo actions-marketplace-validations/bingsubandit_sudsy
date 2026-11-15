@@ -136,18 +136,10 @@ fn sql_fences_are_linted_with_the_sql_config() {
 }
 
 #[test]
-fn sql_fences_are_formatted_with_the_sql_config() {
+fn sql_fences_are_formatted_by_the_sql_formatter() {
+    // The SQL formatter prints as written until its layout lands: a fence is kept, whole.
     let md = "```sql\nselect a,b from t where x=1\n```\n\n```sql\nSELEC FROM ;;\n```\n";
-    let want =
-        "```sql\nselect\n    a,\n    b\nfrom t\nwhere x = 1\n```\n\n```sql\nSELEC FROM ;;\n```\n";
-    let once = formatted(&db(""), "a.md", md);
-    assert_eq!(once, want);
-    assert_eq!(formatted(&db(""), "a.md", &once), once);
-    let upper = "sql:\n  format:\n    keyword_case: upper\n    indent_size: 2\n";
-    assert!(
-        formatted(&db(upper), "a.md", md)
-            .starts_with("```sql\nSELECT\n  a,\n  b\nFROM t\nWHERE x = 1\n```")
-    );
+    assert_eq!(formatted(&db(""), "a.md", md), md);
 }
 
 #[test]

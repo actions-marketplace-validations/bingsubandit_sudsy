@@ -6,34 +6,25 @@ sources:
   - "https://docs.sqlfluff.com/en/stable/reference/rules.html"
   - "https://docs.sqlfluff.com/en/stable/configuration/layout.html"
   - "https://docs.sqlfluff.com/en/stable/configuration/default_configuration.html"
-scope: "Formatter (`sqlfluff fix` with the layout (LT) and capitalisation (CP) rules, done by sqruff's fixer); the other rules are added with the lint step"
+scope: "Formatter (`sqlfluff fix` with the layout (LT) and capitalisation (CP) rules, our own layout code; sqruff is the parser only); the other rules are added with the lint step"
 entries:
   LT01: formatter
   LT02: formatter
   LT03: formatter
-  LT04: option sql.format.comma_position
-  LT05: option sql.format.line_width
   LT06: formatter
   LT07: formatter
   LT08: formatter
   LT09: formatter
   LT10: formatter
   LT11: formatter
-  LT12: option sql.format.final_newline
   LT13: formatter
   LT14: formatter
   LT15: formatter
-  CP01: option sql.format.keyword_case
-  CP02: option sql.format.identifier_case
-  CP03: option sql.format.function_case
-  CP04: option sql.format.literal_case
-  CP05: option sql.format.type_case
   core.dialect: option sql.format.dialect
-  core.max_line_length: option sql.format.line_width
-  indentation.indent_unit: option sql.format.indent_style
-  indentation.tab_space_size: option sql.format.indent_size
 deferred:
-  - gap: "sqruff takes it; Sudsy does not expose it as an option until a preset needs it."
+  - gap: "Formatter step 2 adds the option with its layout."
+    ids: [LT04, LT05, LT12, CP01, CP02, CP03, CP04, CP05, core.max_line_length, indentation.indent_unit, indentation.tab_space_size]
+  - gap: "Not exposed as an option until a preset needs it."
     ids: [indentation.indented_joins, indentation.indented_ctes, indentation.indented_using_on, indentation.indented_on_contents, indentation.indented_then, indentation.indented_then_contents, indentation.implicit_indents, indentation.skip_indentation_in, indentation.ignore_comment_lines, indentation.trailing_comments, layout.type, rules.capitalisation.ignore_words, rules.capitalisation.extended_capitalisation_policy]
   - gap: "Templated SQL (Jinja, dbt) is not rendered: a file with template tags does not parse and is refused."
     ids: [core.templater]
