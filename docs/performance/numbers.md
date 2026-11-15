@@ -7,6 +7,7 @@ Machine unless noted: AMD Ryzen 5 3600 (6 cores / 12 threads), 32 GB, Windows 11
 |---|---|
 | JSON 11.1 MB phases: parse / layout / print / re-parse / compare | 304 / 1136 / 259 / 408 / 122 ms; whole 5.9 MB/s at 4x |
 | JSON one line 1.1 MB | 386 ms (2.9 MB/s) |
+| Python parse (`lang-python`, `ruff_python_parser` 0.0.14 behind the lossless adapter; `perf-bench fixed py PHASE`, `bench.sh`, inputs `bench/inputs/py`, 5 files 121 KB, aarch64 Linux CI runner) | parse 31.6 M instructions (260 per byte), 32.4 k allocations; format (verbatim) 45.3 M; format-query 45.2 M; lint 4.0 M. Round-trip over the pinned corpus (`fetch-python-corpus.sh`, 9 projects): 0 failures in 33 s (`corpus` profile, debug assertions) |
 | CSS / SCSS / Less parse (`lang-css`, hand-written lexer and parser building the tree; corpus of `tests/conformance/fetch-css-corpus.sh`, release, 5 passes over the files in memory) | css 1987 KB 14.8 MB/s, scss 653 KB 17.8 MB/s, less 1254 KB 15.8 MB/s. Instruction counts: `perf-bench fixed css parse` (`bench.sh`, inputs `bench/inputs/css`, 116 KB) |
 | YAML 5.0 MB phases: parse / layout / print / re-parse / compare / data model | 522 / 1655 / 202 / 499 / 194 / 732 ms; whole 1.6 MB/s at 4x |
 | TOML (tree-sitter) 5.5 MB generated (`perf-bench toml`) phases: parse / layout / print / re-parse / compare | 2337 / 558 / 142 / 2348 / 69 ms; whole 1.0 MB/s at 4x (parse 2.3 MB/s; 4.1 MB/s on 512 real `Cargo.toml` files in an earlier spike). Tree-sitter is two thirds of the parse, the adapter one third (spike). |
