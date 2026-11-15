@@ -24,6 +24,10 @@ gate() {
   echo "   ($name: $((SECONDS - t))s)"
 }
 
+# .cargo/config.toml points TEMP/TMP/TMPDIR at .cargo/tmp; without the tracked directory a fresh
+# checkout's C compiler (MSVC D8050) and temp-dir tests fail.
+git ls-files --error-unmatch .cargo/tmp/.gitkeep >/dev/null 2>&1 && [ -e .cargo/tmp/.gitkeep ] ||
+  { echo "GATE FAILED: .cargo/tmp/.gitkeep is gone (restore: git checkout origin/main -- .cargo/tmp/.gitkeep)" >&2; exit 1; }
 . scripts/slot-run.sh; claim_slot; touch_changed; sweep_slot || exit 1
 
 # What runs: crates for clippy and tests (ws) and the other steps.
