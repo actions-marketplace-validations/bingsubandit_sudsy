@@ -33,6 +33,7 @@ Formatter + linter for C#, JSON and YAML. `docs/` describes how everything works
 - Files are LF: edit with the Edit/Write tools; a script that writes files uses `open(p, 'w', newline='\n')` (Python on Windows writes CRLF otherwise, and git then warns "CRLF will be replaced by LF").
 - Commit messages: a subject saying what changed, then 2-5 lines on why and what the diff does not show (behaviour change, trade-off, numbers); end with the Co-Authored-By trailer.
 - Steps are large: a step is a whole piece of work in one area (a feature, or a batch of related fixes), one commit and one finish run. A task can span several steps: push after each step and go on to the next yourself. A large context is no reason to stop or hand back; it is compacted automatically. Stop only for a decision the task does not cover (a regression above its budget, a denied command, a design question).
+- Small work found outside your step (a cleanup, a missing test, a stale branch) goes as one line under "Small tasks" in `docs/roadmap.md`, in the same commit as your step; don't stop to do it. Bugs go to `docs/bugs.md`.
 - Final report: what changed, measured results, `scripts/cost.sh` output, commits, open items.
 
 ## Commands
