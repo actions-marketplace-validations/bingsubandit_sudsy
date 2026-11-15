@@ -19,6 +19,10 @@ pub struct Embedded {
     pub carved: Vec<TextRange>,
     /// Whether the host lets the language's formatter rewrite the code.
     pub format: bool,
+    /// Whether the code is parsed without the carved parts (a language that reads indentation
+    /// needs the fence's container prefix gone) instead of with them blanked; offsets of the
+    /// parse then go through `to_host`.
+    pub strip: bool,
 }
 
 impl Embedded {
@@ -45,6 +49,7 @@ impl Embedded {
             range,
             carved: merged,
             format: false,
+            strip: false,
         }
     }
 
@@ -58,6 +63,34 @@ impl Embedded {
             out.replace_range(at.clone(), &" ".repeat(at.len()));
         }
         out
+    }
+
+    /// The text to parse: stripped or blanked, as the region says.
+    pub fn code(&self, text: &str) -> String {
+        if self.strip {
+            self.stripped(text)
+        } else {
+            self.blanked(text)
+        }
+    }
+
+    /// The host offset of `at`, an offset in `code()`; `end` for the end of a range, which stays
+    /// before a carved part that starts there.
+    pub fn to_host(&self, at: TextSize, end: bool) -> TextSize {
+        let mut host = self.range.start() + at;
+        if self.strip {
+            let mut removed = TextSize::from(0);
+            for c in &self.carved {
+                let here = c.start() - self.range.start() - removed;
+                if at > here || (at == here && !end) {
+                    removed += c.len();
+                } else {
+                    break;
+                }
+            }
+            host += removed;
+        }
+        host
     }
 
     /// The region's text without the carved parts: the code as it reads outside the host.

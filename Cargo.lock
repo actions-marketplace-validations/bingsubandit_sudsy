@@ -514,6 +514,7 @@ dependencies = [
  "lang-js",
  "lang-json",
  "lang-markdown",
+ "lang-python",
  "lang-shell",
  "lang-sql",
  "lang-yaml",

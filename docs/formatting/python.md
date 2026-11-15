@@ -22,6 +22,8 @@ The output is `ruff format` 0.17.4's (Black's style) under its defaults; `script
 - The text is prepared before formatting (comments, `class A():`, see `PythonFormatter::rewrite_source`); the safety check follows it: a pair of parentheses is not compared (`Lpar`, `Rpar` are optional and `Parenthesized` is transparent), a string expression is compared by prefix and body (so joining implicit concatenations and changing quotes pass), a docstring without its indentation.
 - Not done: code in docstrings (`docstring-code-format`), quotes inside f-string replacement fields, comments in unusual places (between `lambda` and its body, after a bracket before a first item on its own line), `# fmt: skip` on compound headers and `# fmt: off` inside brackets, preview style.
 
+Python code in Markdown fences (`python`, `py`) is formatted and linted with the Python options and rules ([markdown.md](markdown.md)).
+
 ## Rules
 Ruff's default set (`F`, `E4`, `E7`, `E9`; [../parity/ruff.yaml](../parity/ruff.yaml) lists every rule and its status) in three kinds of rule files under `crates/lang-python/rules/`:
 - Pattern files ([../rules/patterns.md](../rules/patterns.md)): `none-comparison` (E711), `true-false-comparison` (E712), `not-in-test` (E713), `not-is-test` (E714), `multiple-imports-on-one-line` (E401), `assert-tuple` (F631), `if-tuple` (F634), `raise-not-implemented` (F901).

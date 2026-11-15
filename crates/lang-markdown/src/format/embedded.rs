@@ -40,6 +40,7 @@ pub fn find(root: &SyntaxNode, text: &str) -> Vec<Embedded> {
                 .map(|&(start, prefix, _)| TextRange::new(at(start), at(start + prefix)))
                 .collect(),
             format: true,
+            strip: true,
         });
     }
     out

@@ -1,6 +1,6 @@
 //! The families of Python's rules; rules that fit a pattern or a check are files in `rules/`.
 
-use crate::analysis::{CHECKS, hits};
+use crate::analysis::hits;
 use crate::generated::kind as k;
 use core_rules::{Family, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};
@@ -16,18 +16,14 @@ pub static FAMILIES: &[Family] = &[Family {
 /// `{name}` in the message is the name the finding carries.
 struct Check {
     meta: &'static RuleMeta,
-    check: &'static str,
+    check: String,
     message: String,
 }
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
-    let name = p.text("check")?;
-    let Some(check) = CHECKS.iter().find(|c| **c == name) else {
-        return Err(format!("param `check`: unknown check `{name}`"));
-    };
     let rule = Check {
         meta,
-        check,
+        check: p.text("check")?,
         message: p.text("message")?,
     };
     p.done()?;

@@ -9,7 +9,7 @@ use core_config::{FileInput, OptionValue, ResolvedOptions};
 use core_format::{DirectiveTable, EmbedMode, Embedder};
 use core_rules::engine::ActiveRule;
 use core_rules::{Diagnostic, Edit, FileContext, LineIndex, activate, run_file};
-use core_syntax::SyntaxNode;
+use core_syntax::{SyntaxNode, TextRange};
 use provider_api::embedded::{EmbeddedParse, Resolved, parse_regions, resolve};
 use provider_api::{LanguageProvider, SourceFile, format_file, resolve_dialect};
 
@@ -77,12 +77,17 @@ pub(crate) fn lint_embedded(
             embedded: &[],
             semantics: None,
         };
-        let at = e.region.range.start();
+        let host = |r: TextRange| {
+            TextRange::new(
+                e.region.to_host(r.start(), false),
+                e.region.to_host(r.end(), true),
+            )
+        };
         for mut d in run_file(&context, rules, false).diagnostics {
-            d.range += at;
-            d.related.iter_mut().for_each(|r| r.range += at);
+            d.range = host(d.range);
+            d.related.iter_mut().for_each(|r| r.range = host(r.range));
             for fix in &mut d.fixes {
-                fix.edits.iter_mut().for_each(|x| x.range += at);
+                fix.edits.iter_mut().for_each(|x| x.range = host(x.range));
             }
             d.fixes
                 .retain(|f| f.edits.iter().all(|x| keeps_host(&e.region, x)));
@@ -287,6 +292,7 @@ mod tests {
                 TextSize::from(2),
             )],
             format: true,
+            strip: false,
         };
         let edit = |a: u32, b: u32, t: &str| {
             Edit::replace(core_syntax::TextRange::new(a.into(), b.into()), t)

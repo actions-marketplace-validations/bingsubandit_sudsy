@@ -4,7 +4,6 @@ One line each; none is committed, except the small tasks below.
 
 ## Small tasks
 Committed work too small for a step of its own: what to do and where, one line each. Once the list holds about a step's worth (5 or more related items, or a day of work), the lead hands it to one agent as a single step; the commit that does an item deletes its line. Bugs go to [bugs.md](bugs.md) instead.
-- Python's `check` family lists its 50 check names in `analysis/mod.rs` and again in `rules/checks.yaml`; derive the list from the yaml (codegen) or drop the Rust copy.
 - CSS/SCSS/Less: 5 files change on a second format (ratchet `second-format` in `tests/parity/prettier-css/differences.yaml`); bring to 0.
 - HTML/Vue: 5 files change on a second format (ratchet in `tests/parity/prettier-html/differences.yaml`); bring to 0.
 - Python: 11 files change on a second format (ratchet in `tests/parity/ruff/differences.yaml`); bring to 0.
@@ -18,7 +17,7 @@ Committed work too small for a step of its own: what to do and where, one line e
 
 ## Languages and analysis
 - JavaScript / TypeScript: Flow is unsupported; type-aware rules wait for the TypeScript worker.
-- Python: migration (`sudsy init --from ruff` and `--from black`: `pyproject.toml` `[tool.ruff]` and `[tool.black]`, `ruff.toml`, `per-file-ignores` and `extend-exclude` as `overrides` and `exclude`); `.py` in Markdown fences checked; docstring code formatting and the layout differences of `tests/parity/ruff/differences.yaml`; more ruff families by usage (`B`, `UP`, `SIM`, `I`, `N`, `PL`); notebooks (ruff's `ruff_notebook`); type-aware rules through Pyrefly (below).
+- Python: migration (`sudsy init --from ruff` and `--from black`: `pyproject.toml` `[tool.ruff]` and `[tool.black]`, `ruff.toml`, `per-file-ignores` and `extend-exclude` as `overrides` and `exclude`); docstring code formatting (off in ruff's defaults) and the layout differences of `tests/parity/ruff/differences.yaml`; more ruff families by usage (`B`, `UP`, `SIM`, `I`, `N`, `PL`); notebooks (ruff's `ruff_notebook`); type-aware rules through Pyrefly (below).
 - SQL: dialects beyond ansi, postgres, mysql and tsql (sqruff's others hang or panic); templated (Jinja, dbt) files; the layout and capitalisation of our own (formatter step 2, `tests/parity/sqlfluff/differences.yaml`).
 - INI: `.properties` (`:` and blank separators, `\` continuations, `!` comments); a `.gitconfig` dialect that allows repeated multi-value keys.
 - TOML: TOML 1.1 syntax (the tree-sitter grammar targets 1.0; needs an upstream fix or a fork).

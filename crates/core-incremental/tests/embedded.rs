@@ -18,6 +18,7 @@ fn db(config: &str) -> Database {
         Box::new(lang_dockerfile::provider()),
         Box::new(lang_shell::provider()),
         Box::new(lang_sql::provider()),
+        Box::new(lang_python::provider()),
     ];
     let mut db = Database::new(providers);
     db.set_config(ConfigChain::parse(config));
@@ -267,4 +268,19 @@ fn svelte_blocks_tags_and_scripts_are_formatted() {
     let once = formatted(&db, "a.svelte", svelte);
     assert_eq!(once, want);
     assert_eq!(formatted(&db, "a.svelte", &once), once);
+}
+
+#[test]
+fn python_fences_are_formatted_and_linted_with_the_python_config() {
+    let md = "```python\nimport os\nx  =  {'a':1}\n```\n\n```py\nx = (\n```\n";
+    let want = "```python\nimport os\n\nx = {\"a\": 1}\n```\n\n```py\nx = (\n```\n";
+    let once = formatted(&db(""), "a.md", md);
+    assert_eq!(once, want);
+    assert_eq!(formatted(&db(""), "a.md", &once), once);
+    let on = "python:\n  lint:\n    rules:\n      unused-import: error\n";
+    // Indented by a list item: the code is parsed without the container prefix.
+    let md = "- a\n\n  ```python\n  import os\n  ```\n";
+    let linted = found(&db(on), "a.md", md);
+    assert_eq!(linted.len(), 1, "{linted:?}");
+    assert!(linted[0].1.starts_with("os\n"), "{linted:?}");
 }

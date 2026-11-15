@@ -72,7 +72,7 @@ pub fn parse_regions<'a>(
         let Some((provider, dialect)) = resolve(&region.language) else {
             continue;
         };
-        let code = region.blanked(text);
+        let code = region.code(text);
         let mut file = SourceFile::new(format!("embedded.{}", region.language), 1, code.clone());
         file.language_version = dialect;
         if let Ok(parsed) = provider.parse(&file)
