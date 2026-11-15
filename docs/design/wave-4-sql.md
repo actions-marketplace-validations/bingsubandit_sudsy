@@ -15,7 +15,23 @@ Goal: the formatter and linter sqlfluff and sqruff users switch to: sqlfluff's l
 Measure on sqlfluff's `test/fixtures/dialects` (each `.sql` with its `.yml` parse tree, MIT) and the PostgreSQL regression `sql/` files:
 - sqruff-lib-core: round-trip (concatenated raw segments == input) per dialect; parse failures (`Unparsable`) vs sqlfluff's `.yml`; parse speed MB/s; peak memory; binary added to `sudsy.exe`; crates added and licenses (ICU, fancy-regex).
 - tree-sitter-sequel: the same numbers on the ansi/postgres/mysql/sqlite fixtures.
-Decide: sqruff unless round-trip fails, it is under 5 MB/s, or it adds over 4 MB; record the table here.
+Decide: sqruff unless round-trip fails, it is under 5 MB/s, or it adds over 4 MB.
+
+**Measured** (Linux arm64 Graviton, 8 cores, rustc 1.99.0, release with LTO and `codegen-units = 1`, parse = lex + parse of the whole file from memory, warm; sqruff-lib-core/-dialects 0.44.0 with all 27 dialects, tree-sitter-sequel 0.3.13; sqlfluff `test/fixtures/dialects` at master, 2,558 `.sql` files, and PostgreSQL `src/test/regress/sql`, 245 files, 5.15 MB):
+
+| | sqruff | tree-sitter-sequel |
+|---|---|---|
+| Round-trip (raw segments == input) | 0 failures in all files (lossless) | not applicable (no trivia; our adapter rebuilds it) |
+| Speed, dialect fixtures (0.01-0.25 MB per dialect) | 0.35-0.85 MB/s (ansi 0.43, postgres 0.48, tsql 0.72) | 1.1-2.5 MB/s (ansi, postgres, mysql, sqlite) |
+| Speed, PostgreSQL regress (5.15 MB) | 1.00 MB/s | 2.15 MB/s |
+| Files with `Unparsable` / `ERROR` on fixtures, own dialect | ansi 8/214, postgres 62/210, mysql 36/258, tsql 38/195, snowflake 40/277, bigquery 2/147, sqlite 15/49, databricks 43/93, duckdb 22/60 (all of these parse in sqlfluff) | ansi 79/214, postgres 183/210, mysql 214/258, sqlite 29/49 |
+| Files with errors, PostgreSQL regress (postgres) | 185/245 (plus 11 with lexer errors, 1 panic) | 219/245 |
+| Panics | 1 each in redshift, sqlite, starrocks, trino, postgres regress; `soql` hung over 10 minutes | none |
+| Peak memory (whole run) | 9-22 MB per dialect, 79 MB on the 5 MB regress set | 10-20 MB |
+| Binary added (stripped, panic=abort, vs an empty binary of 0.33 MB) | +9.4 MB (all dialects; per-dialect features not measured) | +13.4 MB |
+| Crates added, licenses | 78 (35 MIT OR Apache-2.0, 18 Unicode-3.0 (ICU), 11 MIT, 7 Apache-2.0 OR MIT, 2 Apache-2.0, 2 Unlicense OR MIT, Zlib, BSL-1.0 OR Apache-2.0) | 2 (MIT, tree-sitter runtime shared) |
+
+**Result:** the rule rejects sqruff (0.4-1.0 MB/s against 5, +9.4 MB against 4). tree-sitter-sequel is no fallback: it is no faster by an order of magnitude, adds 13.4 MB, and fails on 37% (ansi) to 87% (postgres) of the fixtures. Both parsers are rejected and the parser choice is open (candidates: a hand-written lexer and parser for the ansi/postgres core, sqruff with a faster front end, or relaxing the 5 MB/s and 4 MB limits); step 1 is not started.
 
 ## 1. Parser and tree
 - **Pin:** `=0.N.M` of both sqruff crates in the root `Cargo.toml`, Dependabot-ignored like oxc and ruff; a bump touches the kind table and adapter only.
