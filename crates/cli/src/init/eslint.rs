@@ -1,7 +1,9 @@
-//! eslint-plugin-jsonc, from a legacy JSON or YAML ESLint config (`.eslintrc.*`, `package.json`
-//! "eslintConfig"). Flat configs (`eslint.config.*`) are JavaScript and are not read.
+//! ESLint, from a legacy JSON or YAML config (`.eslintrc.*`, `package.json` "eslintConfig"): the
+//! core and typescript-eslint rules for JavaScript and TypeScript, and eslint-plugin-jsonc for
+//! JSON. Flat configs (`eslint.config.*`) are JavaScript and are not read.
 
 use super::out::Out;
+use super::stylelint::strings;
 use anyhow::{Result, bail};
 use serde_json::Value;
 
@@ -11,6 +13,7 @@ pub const FILES: [&str; 4] = [
     ".eslintrc.yml",
     ".eslintrc",
 ];
+pub const IGNORE_FILE: &str = ".eslintignore";
 /// JavaScript configs; they cannot be read without running them.
 pub const JS_CONFIGS: [&str; 10] = [
     "eslint.config.js",
@@ -25,33 +28,71 @@ pub const JS_CONFIGS: [&str; 10] = [
     ".eslintrc.mjs",
 ];
 const J: &[&str] = &["json"];
+const SCRIPT_EXTENSIONS: [&str; 6] = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"];
+
+/// Which languages a block of `rules` applies to.
+#[derive(Clone, Copy)]
+struct Files {
+    json: bool,
+    js: bool,
+}
 
 pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
     let Some(root) = config.as_object() else {
         bail!("the config is not an object");
     };
-    if let Some(rules) = root.get("rules").and_then(Value::as_object) {
-        rules_of(rules, out);
+    for name in strings(root.get("extends")) {
+        extend(name, out);
     }
-    // Overrides for JSON files carry the jsonc rules in most setups.
+    for pattern in strings(root.get("ignorePatterns")) {
+        out.exclude(pattern);
+    }
+    // `globals` are the names `no-undef` accepts (its `globals` option).
+    if let Some(globals) = root.get("globals").and_then(Value::as_object) {
+        let names: Vec<Value> = globals.keys().map(|k| Value::from(k.as_str())).collect();
+        out.rule_opt_free("js", "no-undef", "globals", names.into());
+    }
+    if let Some(rules) = root.get("rules").and_then(Value::as_object) {
+        let all = Files {
+            json: true,
+            js: true,
+        };
+        rules_of(rules, all, out);
+    }
+    // Overrides for JSON files carry the jsonc rules in most setups, those for scripts the rest.
     for entry in root
         .get("overrides")
         .and_then(Value::as_array)
         .into_iter()
         .flatten()
     {
-        let files = match entry.get("files") {
-            Some(Value::String(s)) => vec![s.as_str()],
-            Some(Value::Array(a)) => a.iter().filter_map(Value::as_str).collect(),
-            _ => vec![],
+        let files = strings(entry.get("files"));
+        let applies = Files {
+            json: files.iter().any(|f| f.contains(".json")),
+            js: files
+                .iter()
+                .any(|f| SCRIPT_EXTENSIONS.iter().any(|e| f.contains(e))),
         };
-        if files.iter().any(|f| f.contains(".json"))
+        if (applies.json || applies.js)
             && let Some(rules) = entry.get("rules").and_then(Value::as_object)
         {
-            rules_of(rules, out);
+            rules_of(rules, applies, out);
         }
     }
     Ok(())
+}
+
+/// The recommended configs map to presets; shared configs cannot be followed.
+fn extend(name: &str, out: &mut Out) {
+    match name {
+        "eslint:recommended" => out.extend("js/eslint-recommended"),
+        "plugin:@typescript-eslint/recommended" => out.extend("js/typescript-eslint-recommended"),
+        "prettier" | "plugin:prettier/recommended" => {}
+        _ => out.skip_why(
+            name,
+            "a shared config is not followed; its rules are not migrated",
+        ),
+    }
 }
 
 /// `(level, options)` of an ESLint rule setting: `"error"`, `2`, `["warn", {...}]`.
@@ -78,14 +119,21 @@ fn setting(value: &Value) -> Option<(&'static str, &[Value])> {
     Some((level, opts))
 }
 
-fn rules_of(rules: &serde_json::Map<String, Value>, out: &mut Out) {
+fn rules_of(rules: &serde_json::Map<String, Value>, files: Files, out: &mut Out) {
     for (name, value) in rules {
-        let Some(rule) = name.strip_prefix("jsonc/") else {
-            continue;
-        };
         let Some((level, opts)) = setting(value) else {
             continue;
         };
+        let Some(rule) = name.strip_prefix("jsonc/") else {
+            if files.js {
+                script_rule(name, level, out);
+            }
+            continue;
+        };
+        if !files.json {
+            continue;
+        }
+        out.catalog("eslint-plugin-jsonc");
         let Some(entry) = out.entry(name, "not an eslint-plugin-jsonc rule Sudsy knows") else {
             continue;
         };
@@ -109,6 +157,27 @@ fn rules_of(rules: &serde_json::Map<String, Value>, out: &mut Out) {
                 out.skip(name);
             }
         }
+    }
+}
+
+/// A core rule, or a typescript-eslint rule (`@typescript-eslint/<id>`).
+fn script_rule(name: &str, level: &str, out: &mut Out) {
+    let (tool, id) = match name.strip_prefix("@typescript-eslint/") {
+        Some(id) => ("typescript-eslint", id),
+        None if name.contains('/') => {
+            out.skip_why(name, "a plugin Sudsy has no equivalent for");
+            return;
+        }
+        None => ("eslint", name),
+    };
+    out.catalog(tool);
+    let Some(entry) = out.entry(id, "not a rule of that tool Sudsy knows") else {
+        return;
+    };
+    match entry.sudsy.strip_prefix("rule: ") {
+        Some(sudsy) => out.rule(id, "js", sudsy, level),
+        None if level != "off" && entry.sudsy != "formatter" => out.skip(id),
+        None => {}
     }
 }
 

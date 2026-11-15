@@ -36,7 +36,7 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
         extend(name, out);
     }
     for pattern in strings(root.get("ignoreFiles")) {
-        exclude(pattern, out);
+        out.exclude(pattern);
     }
     if let Some(rules) = root.get("rules").and_then(Value::as_object) {
         for (name, value) in rules {
@@ -53,30 +53,11 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
 }
 
 /// A string or an array of strings.
-fn strings(value: Option<&Value>) -> Vec<&str> {
+pub(super) fn strings(value: Option<&Value>) -> Vec<&str> {
     match value {
         Some(Value::String(s)) => vec![s],
         Some(Value::Array(a)) => a.iter().filter_map(Value::as_str).collect(),
         _ => vec![],
-    }
-}
-
-/// Lines of `.stylelintignore` (gitignore syntax).
-pub fn ignore_file(text: &str, out: &mut Out) {
-    for line in text
-        .lines()
-        .map(str::trim)
-        .filter(|l| !l.is_empty() && !l.starts_with('#'))
-    {
-        exclude(line, out);
-    }
-}
-
-fn exclude(pattern: &str, out: &mut Out) {
-    if pattern.starts_with('!') {
-        out.skip_why(pattern, "negated ignore patterns are not supported");
-    } else {
-        out.exclude(pattern);
     }
 }
 

@@ -3,8 +3,11 @@ class K {} interface K {}
 namespace M {} namespace M {}
 function fo(): void; function fo() {}
 enum En {} namespace En {}
-type T1 = 1; const T1 = 2;
-//                 ^^ no-redeclare
+type T1 = 1; const T1 = 2; function fi() {} interface fi {}
+import type { It } from 'x'; function It() {}
+import { type Ia } from 'y'; let Ia = 1; Ia = 2;
+interface Dup {} const Dup = 1; const Dup = 2;
+//                                    ^^^ no-redeclare
 var v = 1; var v = 2;
 //             ^ no-redeclare
 class Two {} class Two {}

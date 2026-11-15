@@ -77,13 +77,37 @@ impl Out {
         entry
     }
 
-    /// Adds a glob to the top-level `exclude`.
+    /// Switches the catalog the next mappings are checked against (an importer that reads the
+    /// settings of several tools).
+    pub fn catalog(&mut self, tool: &'static str) {
+        self.tool = tool;
+    }
+
+    /// Adds a glob to the top-level `exclude`; a negated one cannot be followed.
     pub fn exclude(&mut self, pattern: &str) {
+        if pattern.starts_with('!') {
+            self.skip_why(pattern, "negated ignore patterns are not supported");
+            return;
+        }
         let list = self
             .cfg
             .entry("exclude")
             .or_insert_with(|| Value::Array(vec![]));
         list.as_array_mut().expect("array").push(pattern.into());
+    }
+
+    /// The patterns of an ignore file in the working directory (gitignore syntax), if there is one.
+    pub fn ignore_file(&mut self, name: &str) -> anyhow::Result<()> {
+        let path = std::path::Path::new(name);
+        if path.is_file() {
+            let text = super::sources::read(path)?;
+            for line in text.lines().map(str::trim) {
+                if !line.is_empty() && !line.starts_with('#') {
+                    self.exclude(line);
+                }
+            }
+        }
+        Ok(())
     }
 
     /// Lists a setting that cannot be migrated, with the catalog's reason.

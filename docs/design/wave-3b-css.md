@@ -1,6 +1,6 @@
 # Design: CSS / SCSS / Less (wave 3b)
 
-Plan for the second language family of wave 3b, built in the steps of section 5 alongside JS/TS ([wave-3b-js.md](wave-3b-js.md)), in other slots. Each step moves what it builds into `docs/formatting/css.md`; this note is deleted when step 8 lands. Numbers marked (measured) come from a parser spike on Windows x64, release, one thread; line counts are estimates.
+Plan for the second language family of wave 3b, built in the steps of section 5 alongside JS/TS, in other slots. Each step moves what it builds into `docs/formatting/css.md`; this note is deleted when step 8 lands. Numbers marked (measured) come from a parser spike on Windows x64, release, one thread; line counts are estimates.
 
 Goal: replace Prettier (format) and stylelint with its scss/less plugins (lint) for `.css`, `.scss` and `.less`, with migration from their configs. Speed only needs to beat them, which any native parser does.
 

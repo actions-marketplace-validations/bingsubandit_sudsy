@@ -1,4 +1,4 @@
-//! Rules that read what names bind to (docs/design/wave-3b-js.md step 15): the model of
+//! Rules that read what names bind to (docs/formatting/js.md): the model of
 //! `crate::semantic`, built on the first of them that runs on a file. Positions follow ESLint's
 //! reports, so the parity runners compare them as they are.
 
@@ -343,6 +343,10 @@ pub(super) fn import_assign(c: &Check, _n: &SyntaxNode, ctx: &mut RuleContext<'_
             {
                 continue;
             }
+            // An imported type next to a local value of its name: the writes are the value's.
+            if cx.ts && cx.decls(sid).iter().any(|(_, n)| !is_import(cx.kind(*n))) {
+                continue;
+            }
             let name = sc.symbol_name(sid);
             let namespace = matches!(
                 first_decl_kind(cx, sid),
@@ -390,22 +394,57 @@ pub(super) fn redeclare(c: &Check, _n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
             if decls.len() < 2 {
                 continue;
             }
+            let mut groups = vec![decls];
             if cx.ts {
                 // An overload signature is not a declaration of its own.
-                decls.retain(
+                groups[0].retain(
                     |(_, n)| !matches!(cx.kind(*n), AstKind::Function(f) if f.body.is_none()),
                 );
-                if decls.len() > 1 {
-                    decls = merged(cx, decls);
+                // Types and values live in separate spaces: a type and a value of one name
+                // (`type T` and `const T`, an imported type and a local function) do not clash.
+                let (types, values): (Vec<_>, Vec<_>) = groups[0]
+                    .iter()
+                    .copied()
+                    .partition(|(_, n)| type_only(cx, *n));
+                if !types.is_empty() && !values.is_empty() {
+                    groups = vec![types, values];
                 }
+                groups = groups
+                    .into_iter()
+                    .filter(|g| g.len() > 1)
+                    .map(|g| merged(cx, g))
+                    .collect();
             }
             let name = sc.symbol_name(sid);
-            for (sp, _) in decls.into_iter().skip(1) {
+            for (sp, _) in groups.into_iter().flat_map(|g| g.into_iter().skip(1)) {
                 hits.push((sp, c.message.replace("{name}", name)));
             }
         }
         hits
     });
+}
+
+fn is_import(k: AstKind<'_>) -> bool {
+    matches!(
+        k,
+        AstKind::ImportSpecifier(_)
+            | AstKind::ImportDefaultSpecifier(_)
+            | AstKind::ImportNamespaceSpecifier(_)
+    )
+}
+
+/// Does the declaration make a type and no value?
+fn type_only(cx: &Cx<'_, '_>, n: NodeId) -> bool {
+    match cx.kind(n) {
+        AstKind::TSInterfaceDeclaration(_) | AstKind::TSTypeAliasDeclaration(_) => true,
+        AstKind::ImportSpecifier(s) if s.import_kind.is_type() => true,
+        AstKind::ImportSpecifier(_)
+        | AstKind::ImportDefaultSpecifier(_)
+        | AstKind::ImportNamespaceSpecifier(_) => {
+            matches!(cx.parent(n), AstKind::ImportDeclaration(d) if d.import_kind.is_type())
+        }
+        _ => false,
+    }
 }
 
 /// The declarations TypeScript's declaration merging leaves reported. Interfaces merge with

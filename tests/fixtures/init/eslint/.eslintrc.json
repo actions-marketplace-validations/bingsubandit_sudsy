@@ -1,6 +1,23 @@
 {
   "root": true,
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier", "airbnb"],
+  "ignorePatterns": ["dist/"],
+  "globals": { "jQuery": "readonly" },
+  "rules": {
+    "no-debugger": "off",
+    "no-unused-vars": ["warn", { "args": "none" }],
+    "no-console": "error",
+    "semi": "error",
+    "import/order": "error"
+  },
   "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-floating-promises": "error"
+      }
+    },
     {
       "files": ["*.json", "*.jsonc"],
       "parser": "jsonc-eslint-parser",
@@ -17,8 +34,7 @@
         "jsonc/no-comments": "off",
         "jsonc/quotes": "error",
         "jsonc/key-spacing": "error",
-        "jsonc/not-a-rule": "error",
-        "no-console": "error"
+        "jsonc/not-a-rule": "error"
       }
     }
   ]

@@ -645,7 +645,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "adjacent-overload-signatures",
+          "partial": false,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -681,7 +687,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "array-type",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -724,7 +736,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ban-ts-comment",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -755,7 +773,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "consistent-type-definitions",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -806,7 +830,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "consistent-type-imports",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -849,7 +879,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "getter-return",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -882,7 +918,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-async-promise-executor",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -925,7 +967,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-case-declarations",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -963,7 +1011,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-class-assign",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -996,7 +1050,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-compare-neg-zero",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1044,7 +1104,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-cond-assign",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1097,7 +1163,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-const-assign",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1125,7 +1197,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-debugger",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1158,7 +1236,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-delete-var",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1196,7 +1280,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-class-members",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1239,7 +1329,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-else-if",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1297,7 +1393,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-keys",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1330,7 +1432,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-duplicate-case",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1378,7 +1486,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1411,7 +1525,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty-character-class",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1449,7 +1569,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty-object-type",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1492,7 +1618,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty-pattern",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1520,7 +1652,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-explicit-any",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1593,7 +1731,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-extra-boolean-cast",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1631,7 +1775,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-extra-non-null-assertion",
+          "partial": false,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1664,7 +1814,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-func-assign",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1722,7 +1878,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-import-assign",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -1748,7 +1910,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-inferrable-types",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1796,7 +1964,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-irregular-whitespace",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1839,7 +2013,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-loss-of-precision",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1877,7 +2057,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-misused-new",
+          "partial": false,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -1910,7 +2096,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-namespace",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -1971,7 +2163,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-non-null-assertion",
+          "partial": false,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2004,7 +2202,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-octal",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2042,12 +2246,18 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-prototype-builtins",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked.",
+      "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed, and a type and a value of one name do not clash. Built-in globals are not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -2085,7 +2295,18 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-redeclare",
+          "partial": true,
+          "tool": "eslint"
+        },
+        {
+          "id": "no-redeclare",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2128,7 +2349,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-regex-spaces",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -2161,7 +2388,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-require-imports",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2244,7 +2477,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-self-assign",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2300,7 +2539,18 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-shadow",
+          "partial": true,
+          "tool": "eslint"
+        },
+        {
+          "id": "no-shadow",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2343,7 +2593,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-shadow-restricted-names",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2381,7 +2637,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-sparse-arrays",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -2414,7 +2676,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-this-alias",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2464,7 +2732,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-undef",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2537,7 +2811,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unreachable",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2580,7 +2860,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unsafe-finally",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2613,7 +2899,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unsafe-negation",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2647,7 +2939,18 @@
         "js/eslint-recommended",
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unused-vars",
+          "partial": true,
+          "tool": "eslint"
+        },
+        {
+          "id": "no-unused-vars",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2698,7 +3001,18 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-use-before-define",
+          "partial": true,
+          "tool": "eslint"
+        },
+        {
+          "id": "no-use-before-define",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2731,7 +3045,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-useless-catch",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2759,7 +3079,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-useless-escape",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2787,7 +3113,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-with",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -2835,7 +3167,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "prefer-as-const",
+          "partial": false,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2878,7 +3216,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-yield",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -2911,7 +3255,13 @@
       "presets": [
         "js/typescript-eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "triple-slash-reference",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2959,7 +3309,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "use-isnan",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -2992,7 +3348,13 @@
       "presets": [
         "js/eslint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-typeof",
+          "partial": true,
+          "tool": "eslint"
+        }
+      ]
     },
     {
       "category": "style",

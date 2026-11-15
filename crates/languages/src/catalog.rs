@@ -112,6 +112,7 @@ pub fn all() -> &'static [Catalog] {
         "biome",
         "csharpier",
         "dotnet-format-editorconfig",
+        "eslint",
         "eslint-plugin-jsonc",
         "prettier",
         "roslynator",
@@ -121,6 +122,7 @@ pub fn all() -> &'static [Catalog] {
         "stylelint-less",
         "stylelint-scss",
         "taplo",
+        "typescript-eslint",
         "yamllint"
     )
 }

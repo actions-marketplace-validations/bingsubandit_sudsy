@@ -1,3 +1,4 @@
+no-import-assign: warn
 no-redeclare: warn
 no-shadow: warn
 no-use-before-define: warn

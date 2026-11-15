@@ -48,7 +48,7 @@ id: no-redeclare
 family: check
 params: { check: redeclare }
 message: "'{name}' is already defined."
-description: A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked.
+description: A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed, and a type and a value of one name do not clash. Built-in globals are not checked.
 example: "var a = 1; var a = 2;   # the second a is reported"
 severity: off
 category: suspicious

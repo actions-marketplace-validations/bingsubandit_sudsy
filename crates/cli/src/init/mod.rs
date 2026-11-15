@@ -23,7 +23,8 @@ enum Tool {
     Yamllint,
     Prettier,
     Biome,
-    EslintJsonc,
+    #[value(alias = "eslint-jsonc")]
+    Eslint,
     Stylecop,
     Stylelint,
     Csharpier,
@@ -153,6 +154,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                 },
             };
             prettier::migrate(&config, &mut out).with_context(|| source.clone())?;
+            out.ignore_file(".prettierignore")?;
             Ok((out, source))
         }
         Tool::Biome => {
@@ -163,15 +165,15 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                 .with_context(|| path.display().to_string())?;
             Ok((out, path.display().to_string()))
         }
-        Tool::EslintJsonc => {
-            let mut out = Out::new("eslint-plugin-jsonc");
+        Tool::Eslint => {
+            let mut out = Out::new("eslint");
             let (config, source) = match sources::find(&eslint::FILES) {
                 Some(path) => (sources::parse(&path)?, path.display().to_string()),
                 None => match sources::package_json_key("eslintConfig")? {
                     Some(v) => (v, "package.json".to_string()),
                     None => match sources::find(&eslint::JS_CONFIGS) {
                         Some(p) => bail!(
-                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the options by hand: docs/parity/eslint-plugin-jsonc.yaml maps each rule and option",
+                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the options by hand: docs/parity/eslint.yaml, typescript-eslint.yaml and eslint-plugin-jsonc.yaml map each rule",
                             p.display()
                         ),
                         None => bail!("{}", found("ESLint", &eslint::FILES)),
@@ -182,6 +184,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                 out.note(format!("{} is JavaScript and was not read", js.display()));
             }
             eslint::migrate(&config, &mut out).with_context(|| source.clone())?;
+            out.ignore_file(eslint::IGNORE_FILE)?;
             Ok((out, source))
         }
         Tool::Stylelint => {
@@ -203,10 +206,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                 out.note(format!("{} is JavaScript and was not read", js.display()));
             }
             stylelint::migrate(&config, &mut out).with_context(|| source.clone())?;
-            if Path::new(stylelint::IGNORE_FILE).is_file() {
-                let text = sources::read(Path::new(stylelint::IGNORE_FILE))?;
-                stylelint::ignore_file(&text, &mut out);
-            }
+            out.ignore_file(stylelint::IGNORE_FILE)?;
             Ok((out, source))
         }
         Tool::Stylecop => {

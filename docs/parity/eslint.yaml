@@ -277,5 +277,5 @@ entries:
   no-unreachable-loop: planned
   no-useless-return: planned
 deferred:
-  - gap: "needs scope analysis (oxc_semantic), not part of docs/design/wave-3b-js.md step 15"
+  - gap: "needs scope analysis (oxc_semantic) beyond the nine scope rules built"
     ids: [block-scoped-var, no-eval, no-extend-native, no-extra-bind, no-global-assign, no-implicit-globals, no-implied-eval, no-invalid-this, no-labels, no-lone-blocks, no-loop-func, no-new-native-nonconstructor, no-new-wrappers, no-obj-calls, no-restricted-globals, no-undef-init, no-unmodified-loop-condition, no-unused-labels, no-unused-private-class-members, no-useless-assignment, prefer-const, require-atomic-updates]
