@@ -3372,6 +3372,478 @@
       ]
     },
     {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "An `assert` whose test is a tuple (a message written inside the parentheses).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "assert (x, \"message\")\nassert x, \"message\"\nassert (x)\nassert ()\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 21,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "assert-tuple",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "An `except` clause without an exception type, unless it raises again.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "try:\n    pass\nexcept:\n    pass\nexcept A:\n    pass\ntry:\n    pass\nexcept (A, B):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 6,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "bare-except",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "An f-string with no replacement field in any of its parts.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "f\"text\"\nf\"{x}\"\nf\"a\" f\"{b}\"\n\"plain\"\nf\"{{}}\"\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 7,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 7,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "f-string-missing-placeholders",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "An `if` or `elif` whose test is a tuple.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "if (x, y):\n    pass\nelif (x, y):\n    pass\nelif (x):\n    pass\nif (x):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 2,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 4,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "if-tuple",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "An identity test (`is`, `is not`) with a string, bytes or number literal.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "x is \"a\"\nx is not 1\nb\"\" is x\nx is None\nx is True\nx is y\nx == \"a\"\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 1,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 2
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "is-literal",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A lambda assigned to a name.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "f = lambda x: x\ng: int = lambda: 1\nh.attr = lambda: 1\nj = (lambda: 1)()\nk = [lambda: 1]\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 15,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 18,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "lambda-assignment",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `import` that names several modules.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import os, sys\nimport os\nimport os.path as p, re\nfrom a import b, c\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 14,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 23,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "multiple-imports-on-one-line",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "A comparison of a value to `None` with `==` or `!=`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "x == None\nx != None\nNone == x\nNone != x\nx is None\nx == 1\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 9,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 9,
+            "line": 2
+          },
+          {
+            "column": 1,
+            "length": 9,
+            "line": 3
+          },
+          {
+            "column": 1,
+            "length": 9,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "none-comparison",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A membership test negated in front of the expression (`not a in b`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "not a in b\nnot a not in b\na not in b\nnot (a in b)\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 10,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 12,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "not-in-test",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An identity test negated in front of the expression (`not a is b`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "not a is b\nnot a is not b\na is not b\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 10,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "not-is-test",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "A `raise` of `NotImplemented`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "raise NotImplemented\nraise NotImplemented(\"a\")\nraise NotImplementedError\nraise\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 20,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 25,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "raise-not-implemented",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "A `return` that is not inside a function.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "return 1\n\n\ndef f():\n    return 1\n\n\nclass A:\n    return 2\n\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 6,
+            "line": 1
+          },
+          {
+            "column": 5,
+            "length": 6,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "return-outside-function",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A comparison of a value to `True` or `False` with `==` or `!=`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "x == True\nx != False\nTrue == x\nx is True\nx == 1\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 9,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 10,
+            "line": 2
+          },
+          {
+            "column": 1,
+            "length": 9,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "true-false-comparison",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "A comparison with `==` or `!=` where one side is `type(x)` or a builtin class.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "type(a) == type(b)\ntype(a) != int\nint == type(a)\ntype(a) is int\nisinstance(a, int)\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 18,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 14,
+            "line": 2
+          },
+          {
+            "column": 1,
+            "length": 14,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "type-comparison",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything.",

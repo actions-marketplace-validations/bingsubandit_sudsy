@@ -155,12 +155,18 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         # one report per file: a list of messages with the rule id and line; the config is written below
         "html-validate": ("html", ".html", ["node", f"{prefix}/node_modules/html-validate/bin/html-validate.mjs", "-c", "htmlvalidate.json", "-f", "json"],
                           lambda d: (d["ruleId"], d["line"]), lambda out: [m for r in json.loads(out) for m in r["messages"]]),
+        # one report for the whole folder: a list of findings with the code, file and row; --select is added below
+        "ruff": ("python", ".py", [sys.executable, str(ROOT / "scripts/parity_ruff.py"), str(prefix), "check", "--isolated", "--no-cache", "--output-format", "json", "--exit-zero", "--ignore-noqa"],
+                 lambda d: (d["code"], d["location"]["row"]), json.loads),
         "checkmake": ("makefile", ".mk", [exe, "--format", '{"rule":"{{.Rule}}","line":{{.LineNumber}}}'],
                       lambda d: (d["rule"], d["line"]),
                       lambda out: [json.loads(l) for l in out.splitlines() if l.startswith("{")]),
     }[tool]
     suffixes = (suffix,) if isinstance(suffix, str) else suffix
     mapping = rule_map(tool)
+    if tool == "ruff":
+        command = command + ["--select", ",".join(c for c in mapping if c != "E999")]  # E999 is gone: ruff reports a syntax error without a code
+    columns = tool in ("eslint", "typescript-eslint")  # the other tools' columns are not compared
     if tool == "typescript-eslint":  # the plugin's rules are `@typescript-eslint/<name>`, the catalog's ids the names
         mapping = {f"@typescript-eslint/{r}": v for r, v in mapping.items()}
     folder = ROOT / "tests/parity" / tool
@@ -195,6 +201,11 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
     if tool in ("eslint", "typescript-eslint"):  # the real-world corpus (tests/conformance/fetch-js-corpus.sh); Prettier's own tests include proposal syntax the parsers reject
         corpus = ROOT / "tests/conformance/corpus/js"
         sources += [(f"corpus/{p.relative_to(corpus).as_posix()}", "-".join(p.relative_to(corpus).parts), p) for suffix in suffixes for p in sorted(corpus.rglob(f"*{suffix}")) if p.is_file() and p.relative_to(corpus).parts[0] != "prettier"]
+    if tool == "ruff":  # the real-world projects of the format parity (tests/conformance/fetch-python-corpus.sh)
+        corpus = ROOT / "tests/conformance/corpus/python"
+        roots = ("django/django/", "requests/src/", "flask/src/", "click/src/", "httpx/httpx/", "pytest/src/", "black/src/")
+        sources += [(f"corpus/{p.relative_to(corpus).as_posix()}", "-".join(p.relative_to(corpus).parts), p) for p in sorted(corpus.rglob("*.py"))
+                    if p.is_file() and p.relative_to(corpus).as_posix().startswith(roots)]
     if not mapping:  # nothing to compare yet
         print(f"{len(sources)} {tool} fixtures, no catalog rule is mapped to a Sudsy rule yet ({tool} {version})")
         return 0
@@ -211,6 +222,14 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         return name, text
 
     batch, unparsed = None, set()
+    if tool == "ruff":  # one run on every file
+        for label, name, source in sources:
+            name, text = read(name, source)
+            (where / name).write_text(text, encoding="utf-8", newline="")
+        run = subprocess.run(command + ["."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
+        batch = {name: [] for _, name, _ in sources}
+        for d in json.loads(run.stdout):
+            batch.setdefault(Path(d["filename"]).name, []).append(d)
     if tool in ("eslint", "typescript-eslint"):  # one ESLint run on every file: its start-up costs more than the files
         for label, name, source in sources:
             name, text = read(name, source)
@@ -236,9 +255,9 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         # checkmake reports a variable (and `.PHONY`, which it reads as one) a line late.
         late = {"timestampexpanded", "minphony"} if tool == "checkmake" else set()
         # ESLint reports a column; the other tools' columns are not compared
-        found = [(parse(d), d) for d in (load(out) if batch is None else [m for m in batch.get(name, []) if m["ruleId"]])]
-        upstream = {(mapping[c], l - (c in late), d["column"] if batch is not None else 0) for (c, l), d in found if c in mapping}
-        ours = {(r, l, c if batch is not None else 0) for r, l, c in sudsy_lint(sudsy, fixture, work, set(mapping.values()))}
+        found = [(parse(d), d) for d in (load(out) if batch is None else [m for m in batch.get(name, []) if m.get("ruleId", m.get("code"))])]
+        upstream = {(mapping[c], l - (c in late), d["column"] if columns else 0) for (c, l), d in found if c in mapping}
+        ours = {(r, l, c if columns else 0) for r, l, c in sudsy_lint(sudsy, fixture, work, set(mapping.values()))}
         if tool == "checkmake":
             upstream, ours = ({row for row in side if row[0] == source.parent.name} for side in (upstream, ours))
         if batch is None:
@@ -424,7 +443,7 @@ def main():
         return stylecop(sudsy, version)
     if tool == "psscriptanalyzer":
         return psscriptanalyzer(sudsy, version, prefix)
-    if tool in ("hadolint", "shellcheck", "checkmake", "actionlint", "buf", "eslint", "typescript-eslint", "stylelint", "stylelint-scss", "stylelint-less", "html-validate"):
+    if tool in ("hadolint", "shellcheck", "checkmake", "actionlint", "buf", "eslint", "typescript-eslint", "stylelint", "stylelint-scss", "stylelint-less", "html-validate", "ruff"):
         exe = parity_format.tools()["format"][config["install"]] if isinstance(config["install"], str) else config
         return rule_fixtures(tool, sudsy, version, prefix, str(parity_format.executable(prefix, exe["install"].get("exe", ""))))
     mapping = rule_map(tool)

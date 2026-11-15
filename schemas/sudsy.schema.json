@@ -115,6 +115,10 @@
               "$ref": "#/definitions/rule",
               "description": "`Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>`; write `T[]` and `readonly T[]`."
             },
+            "assert-tuple": {
+              "$ref": "#/definitions/rule",
+              "description": "An `assert` whose test is a tuple (a message written inside the parentheses)."
+            },
             "async-suffix": {
               "$ref": "#/definitions/rule",
               "description": "An async method returning Task or ValueTask has a name that does not end in `Async`. Overrides, explicit interface implementations and `Main` are left alone (their names are not the method's to choose). Renaming needs the binding layer, so there is no fix."
@@ -367,6 +371,10 @@
             "ban-ts-comment": {
               "$ref": "#/definitions/rule",
               "description": "`@ts-ignore`, `@ts-nocheck` before the first statement, and `@ts-expect-error` without a description of at least three characters in a comment (`@ts-check` is allowed)."
+            },
+            "bare-except": {
+              "$ref": "#/definitions/rule",
+              "description": "An `except` clause without an exception type, unless it raises again."
             },
             "block-no-empty": {
               "$ref": "#/definitions/rule",
@@ -935,6 +943,10 @@
               "$ref": "#/definitions/rule",
               "description": "An EXPOSE with a port above 65535."
             },
+            "f-string-missing-placeholders": {
+              "$ref": "#/definitions/rule",
+              "description": "An f-string with no replacement field in any of its parts."
+            },
             "fenced-code-language": {
               "$ref": "#/definitions/rule",
               "description": "A fenced code block without an info string (markdownlint MD040); name the language, or `text`."
@@ -1194,6 +1206,10 @@
                 }
               ]
             },
+            "if-tuple": {
+              "$ref": "#/definitions/rule",
+              "description": "An `if` or `elif` whose test is a tuple."
+            },
             "import-no-public": {
               "$ref": "#/definitions/rule",
               "description": "`import public` (buf lint IMPORT_NO_PUBLIC)."
@@ -1277,6 +1293,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "is-literal": {
+              "$ref": "#/definitions/rule",
+              "description": "An identity test (`is`, `is not`) with a string, bytes or number literal."
             },
             "iterate-find-output": {
               "$ref": "#/definitions/rule",
@@ -1383,6 +1403,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "lambda-assignment": {
+              "$ref": "#/definitions/rule",
+              "description": "A lambda assigned to a name."
             },
             "last-user-not-root": {
               "$ref": "#/definitions/rule",
@@ -1804,6 +1828,10 @@
             "missing-permissions": {
               "$ref": "#/definitions/rule",
               "description": "A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access."
+            },
+            "multiple-imports-on-one-line": {
+              "$ref": "#/definitions/rule",
+              "description": "An `import` that names several modules."
             },
             "multiple-labeled-controls": {
               "$ref": "#/definitions/rule",
@@ -2730,6 +2758,18 @@
               "$ref": "#/definitions/rule",
               "description": "A call of `Write-Host`."
             },
+            "none-comparison": {
+              "$ref": "#/definitions/rule",
+              "description": "A comparison of a value to `None` with `==` or `!=`."
+            },
+            "not-in-test": {
+              "$ref": "#/definitions/rule",
+              "description": "A membership test negated in front of the expression (`not a in b`)."
+            },
+            "not-is-test": {
+              "$ref": "#/definitions/rule",
+              "description": "An identity test negated in front of the expression (`not a is b`)."
+            },
             "npm-pin-versions": {
               "$ref": "#/definitions/rule",
               "description": "An npm install package without a version."
@@ -3100,6 +3140,10 @@
                 }
               ]
             },
+            "raise-not-implemented": {
+              "$ref": "#/definitions/rule",
+              "description": "A `raise` of `NotImplemented`."
+            },
             "read-without-raw": {
               "$ref": "#/definitions/rule",
               "description": "A `read` without the `-r` flag."
@@ -3131,6 +3175,10 @@
             "required-version": {
               "$ref": "#/definitions/rule",
               "description": "A `terraform` block with no `required_version` argument (tflint terraform_required_version, in the file that has the block: the rule does not know the other files of the module)."
+            },
+            "return-outside-function": {
+              "$ref": "#/definitions/rule",
+              "description": "A `return` that is not inside a function."
             },
             "root-in-section": {
               "$ref": "#/definitions/rule",
@@ -4270,9 +4318,17 @@
               "$ref": "#/definitions/rule",
               "description": "A `/// <reference path=\"x\" />` before the first statement, and a `/// <reference types=\"x\" />` for a module the file imports."
             },
+            "true-false-comparison": {
+              "$ref": "#/definitions/rule",
+              "description": "A comparison of a value to `True` or `False` with `==` or `!=`."
+            },
             "tuple-element-names-in-signatures": {
               "$ref": "#/definitions/rule",
               "description": "A tuple type in the signature of a method, constructor, property, indexer, conversion operator or delegate whose elements have no names. Overrides and implementations of interface members are left alone (their names are not the member's to choose). No fix."
+            },
+            "type-comparison": {
+              "$ref": "#/definitions/rule",
+              "description": "A comparison with `==` or `!=` where one side is `type(x)` or a builtin class."
             },
             "typed-variables": {
               "$ref": "#/definitions/rule",
@@ -5454,6 +5510,7 @@
           "preset:markdown/prettier-compat",
           "preset:powershell/psscriptanalyzer",
           "preset:protobuf/buf-standard",
+          "preset:python/ruff",
           "preset:shell/shellcheck",
           "preset:toml/taplo-compat",
           "preset:xml/csharpier-compat",

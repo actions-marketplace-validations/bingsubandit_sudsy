@@ -19,5 +19,6 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice("target_version", &["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"], "3.14", "The Python version whose syntax the file must follow: newer syntax is a syntax error (`lazy import` needs 3.15)."),
     ])
     .with_presets(vec![
+        core_config::Preset::new("python/ruff", include_str!("../presets/ruff.yaml")),
     ])
 }

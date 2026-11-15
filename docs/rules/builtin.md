@@ -77,6 +77,20 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `triple-slash-reference` | js | style | off | none | A `/// <reference path="x" />` before the first statement, and a `/// <reference types="x" />` for a module the file imports. Equivalent: typescript-eslint triple-slash-reference (partial). |
 | `use-isnan` | js | suspicious | error | none | A comparison with `NaN`, or `NaN` as the discriminant or a case test of a `switch`; use `Number.isNaN`. Equivalent: eslint use-isnan (partial). |
 | `valid-typeof` | js | suspicious | error | none | `typeof x` compared with a string that is not a type name, or with `undefined`. Equivalent: eslint valid-typeof (partial). |
+| `assert-tuple` | python | correctness | warn | none | An `assert` whose test is a tuple (a message written inside the parentheses). |
+| `bare-except` | python | suspicious | warn | none | An `except` clause without an exception type, unless it raises again. |
+| `f-string-missing-placeholders` | python | suspicious | warn | none | An f-string with no replacement field in any of its parts. |
+| `if-tuple` | python | correctness | warn | none | An `if` or `elif` whose test is a tuple. |
+| `is-literal` | python | correctness | warn | none | An identity test (`is`, `is not`) with a string, bytes or number literal. |
+| `lambda-assignment` | python | style | off | none | A lambda assigned to a name. |
+| `multiple-imports-on-one-line` | python | style | off | none | An `import` that names several modules. |
+| `none-comparison` | python | suspicious | warn | none | A comparison of a value to `None` with `==` or `!=`. |
+| `not-in-test` | python | style | off | none | A membership test negated in front of the expression (`not a in b`). |
+| `not-is-test` | python | style | off | none | An identity test negated in front of the expression (`not a is b`). |
+| `raise-not-implemented` | python | correctness | warn | none | A `raise` of `NotImplemented`. |
+| `return-outside-function` | python | correctness | warn | none | A `return` that is not inside a function. |
+| `true-false-comparison` | python | style | off | none | A comparison of a value to `True` or `False` with `==` or `!=`. |
+| `type-comparison` | python | suspicious | warn | none | A comparison with `==` or `!=` where one side is `type(x)` or a builtin class. |
 | `at-rule-allowed-list` | css, less, scss | style | off | none | An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything. Options: `list` (default `[]`): The allowed at-rules, without `@`: names, or `/regex/`. Equivalent: stylelint at-rule-allowed-list. |
 | `at-rule-disallowed-list` | css, less, scss | style | off | none | An at-rule (vendor prefix left out) that is in the `list` option. Options: `list` (default `[]`): The disallowed at-rules, without `@`: names, or `/regex/`. Equivalent: stylelint at-rule-disallowed-list. |
 | `at-rule-no-deprecated` | css, less, scss | suspicious | off | none | A deprecated at-rule (`@document`, `@nest`, `@viewport`). Options: `ignore` (default `[]`): Names left out: names, or `/regex/`. Equivalent: stylelint at-rule-no-deprecated. |

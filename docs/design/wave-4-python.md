@@ -43,10 +43,9 @@ Adapter decisions (the spike's open questions):
 - `docstring_code` (format code examples in docstrings, off as in ruff) with `docstring-code-line-length`: the doctest, Markdown-fence and reStructuredText forms through embedding. Presets: `python/black` only if Black's defaults differ from ours in an option (otherwise none: presets that set nothing are not made).
 - The differences of `tests/parity/ruff/differences.yaml` (`layout-gaps`), worked down with the ratchets.
 
-## 3. Lint
-- Catalog `docs/parity/ruff.yaml` from ruff's rule list; parity runner `scripts/parity.sh ruff` against pinned ruff on the corpus.
-- First: ruff's default set (`F`, `E4`, `E7`, `E9`), syntax- and scope-level. Scope rules (unused imports and variables, undefined names, redefinitions) need a scope pass: ruff's semantic model is not a published crate, so Sudsy builds a small one (bindings, scopes, references) over its tree in `lang-python`, in the shape of `oxc_semantic` use in `lang-js` (decide in step 3 whether `core-semantics` can host it).
-- Zero-config: the bug-catching rules (undefined names, unused imports at warn, duplicate keys, `return` outside function, ...) on by default; style rules off.
+## 3. Lint (what is left of it; the syntax-level rules of the default set are in [../formatting/python.md](../formatting/python.md))
+- The rest of ruff's default set (`F`, `E4`, `E7`, `E9`, catalog `docs/parity/ruff.yaml`, `planned` entries): scope rules (unused imports and variables, undefined names, redefinitions) need a scope pass. ruff's semantic model is not a published crate, so Sudsy builds a small one (bindings, scopes, references) over its tree in `lang-python`, in the shape of `oxc_semantic` use in `lang-js` (decide whether `core-semantics` can host it); `E70x`, `E402`, `E741` and the semantic syntax errors of `ruff_python_parser` (duplicate parameters, `return` outside a function, ...) as rules.
+- Zero-config: the bug-catching rules on by default (unused imports at warn, undefined names, ...); style rules off.
 - Then families by usage, a step each later: `B` (bugbear), `UP` (pyupgrade), `SIM`, `I` (import sorting, as a formatter-adjacent rule with fix), `N`, `PL`.
 
 ## 4. Parity and corpus
@@ -58,7 +57,7 @@ Adapter decisions (the spike's open questions):
 |---|---|---|
 | 1 | `lang-python`: dependency pin, adapter (tokens + AST walk + `Parenthesized`), lang.yaml mapping, provider and registration, verbatim formatter, bench input (cap 150 KB), corpus fetch script and round-trip test over it, `target_version`, parse-speed numbers in `docs/performance/numbers.md`, Markdown `python`/`py` fences (embedding), parity harness for format and lint (catalog `ruff.yaml`) | 1,500 |
 | 2 | Formatter to the targets in section 4: statements, expressions, comments, strings, docstrings, ignore markers, safety-check `value` hooks (landed); docstring code and the remaining differences | 3,000 |
-| 3 | Lint: scope pass, ruff default set, semantic syntax errors as rules, zero-config defaults, presets only where they set something | 2,000 |
+| 3 | Lint: the syntax-level rules of the default set (landed, `python/ruff` preset); scope pass (F401, F811, F821, F841, ...), semantic syntax errors as rules, E70x and E402 | 2,000 |
 | 4 | Migration: `sudsy init --from ruff` and `--from black` (pyproject `[tool.ruff]`, `ruff.toml`, `[tool.black]`), `.py` in Markdown fences checked, `per-file-ignores` and `extend-exclude` as `overrides`/`exclude` | 500 |
 
 Later (not this wave): more rule families; notebooks (`.ipynb`, ruff's `ruff_notebook` crate); Pyrefly type-aware rules after the syntax sweep.

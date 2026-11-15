@@ -1,0 +1,18 @@
+# ruff's default rules (`F`, `E4`, `E7`, `E9`) that Sudsy has: all on, as ruff runs them.
+python:
+  lint:
+    rules:
+      none-comparison: warn
+      true-false-comparison: warn
+      not-in-test: warn
+      not-is-test: warn
+      type-comparison: warn
+      is-literal: warn
+      bare-except: warn
+      lambda-assignment: warn
+      multiple-imports-on-one-line: warn
+      f-string-missing-placeholders: warn
+      assert-tuple: warn
+      if-tuple: warn
+      raise-not-implemented: warn
+      return-outside-function: warn

@@ -6,7 +6,7 @@ sources:
   - "https://docs.astral.sh/ruff/formatter/"
   - "https://docs.astral.sh/ruff/formatter/black/"
   - "https://docs.astral.sh/ruff/settings/#format"
-scope: "Formatter (`ruff format`, Black's style); the lint rules are added with the lint step"
+scope: "Formatter (`ruff format`, Black's style) and ruff's default lint rules (`F`, `E4`, `E7`, `E9`); the other families are added by usage"
 entries:
   line-length: option python.format.line_width
   indent-width: option python.format.indent_size
@@ -18,3 +18,63 @@ entries:
   docstring-code-line-length: planned
   preview: wontfix preview style is not planned
   exclude: formatter
+  E401: rule multiple-imports-on-one-line
+  E402: planned
+  E701: planned
+  E702: planned
+  E703: planned
+  E711: rule none-comparison
+  E712: rule true-false-comparison
+  E713: rule not-in-test
+  E714: rule not-is-test
+  E721: rule type-comparison
+  E722: rule bare-except
+  E731: rule lambda-assignment
+  E741: planned
+  E742: planned
+  E743: planned
+  E902: wontfix an unreadable file is reported by the command line, not by a rule
+  E999: rule syntax-error
+  F401: planned
+  F402: planned
+  F403: planned
+  F404: planned
+  F405: planned
+  F406: planned
+  F407: planned
+  F501: planned
+  F502: planned
+  F503: planned
+  F504: planned
+  F505: planned
+  F506: planned
+  F507: planned
+  F508: planned
+  F509: planned
+  F521: planned
+  F522: planned
+  F523: planned
+  F524: planned
+  F525: planned
+  F541: rule f-string-missing-placeholders
+  F601: planned
+  F602: planned
+  F621: planned
+  F622: planned
+  F631: rule assert-tuple
+  F632: rule is-literal
+  F633: planned
+  F634: rule if-tuple
+  F701: planned
+  F702: planned
+  F704: planned
+  F706: rule return-outside-function
+  F707: planned
+  F722: planned
+  F811: planned
+  F821: planned
+  F822: planned
+  F823: planned
+  F841: planned
+  F842: planned
+  F901: rule raise-not-implemented

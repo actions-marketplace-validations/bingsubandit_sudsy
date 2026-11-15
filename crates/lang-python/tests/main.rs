@@ -2,3 +2,4 @@
 
 mod format;
 mod python;
+mod rule_fixtures;

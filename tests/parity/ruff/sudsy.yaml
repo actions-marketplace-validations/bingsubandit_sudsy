@@ -1,2 +1,3 @@
-# The Sudsy side of the comparison with `ruff format --isolated` (its defaults): Sudsy's own defaults.
-extends: []
+# The Sudsy side of the comparison with ruff (`--isolated`, its defaults): its formatter options are Sudsy's defaults,
+# its lint rules are those of the preset.
+extends: [preset:python/ruff]
