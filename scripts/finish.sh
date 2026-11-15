@@ -10,6 +10,9 @@
 # folders instead of the selection), except -p CRATE (repeatable), which the gate checks instead
 # of the selection. SUDSY_FINISH_REF: the ref whose finish.yml is dispatched (default main; a
 # branch to try a changed workflow). `finish.sh --stop` cancels this slot's run.
+# Agents: `finish.sh --start [args]` dispatches the run and returns; `finish.sh --wait` then waits at
+# most 9 minutes (under the tool's 10-minute foreground limit) and either prints the result as above
+# or ends in `FINISH RUNNING` with exit 3: call --wait again. No background job, Monitor or sleep.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 slot=$(basename "${CARGO_TARGET_DIR:-$PWD}")
@@ -18,9 +21,18 @@ gdir=$(git rev-parse --git-dir)
 # The CI run of this slot: its title is `finish <slot>-<snapshot>-<epoch>`.
 slot_runs() { gh run list --workflow finish.yml --limit 30 --json databaseId,displayTitle,status \
   --jq ".[] | select(.displayTitle | startswith(\"finish $slot-\")) | select(.status != \"completed\") | .databaseId"; }
+state=$gdir/finish-run   # `<run id> <branch>` of a run started with --start
 if [ "${1:-}" = --stop ]; then
-  for r in $(slot_runs); do gh run cancel "$r"; done; echo "finish stopped"; exit 0
+  for r in $(slot_runs); do gh run cancel "$r"; done; rm -f "$state"; echo "finish stopped"; exit 0
 fi
+mode=all deadline=
+case "${1:-}" in
+  --start) mode=start; shift ;;
+  --wait)
+    [ -f "$state" ] || { echo "FINISH FAILED: no started run (scripts/finish.sh --start first)"; exit 1; }
+    read -r id branch <"$state"; mode=wait; deadline=$(( $(date +%s) + 540 )) ;;
+esac
+if [ $mode != wait ]; then
 gate=--affected bench=() pkg= base_rev=
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -50,7 +62,7 @@ snap=$(git read-tree HEAD && git add -A -- . ':!.cargo/tmp' && git write-tree) |
 snap=$(git commit-tree "$snap" -p "$head" -m "finish snapshot of $slot") || { echo "FINISH FAILED: snapshot"; exit 1; }
 rm -f "$idx"; unset GIT_INDEX_FILE
 branch=bench/$slot
-trap 'git push -q origin --delete "$branch" >/dev/null 2>&1' EXIT
+[ $mode = start ] || trap 'git push -q origin --delete "$branch" >/dev/null 2>&1' EXIT
 push() { git push -q --force origin "$snap:refs/heads/$branch"; }
 # GitHub sometimes rejects a push with a transient ref-update error: one retry.
 push || { sleep 5; push; } || { echo "FINISH FAILED: bench (push of $branch)"; exit 1; }
@@ -65,6 +77,12 @@ for _ in $(seq 1 40); do
 done
 [ -n "$id" ] || { echo "FINISH FAILED: bench (no run found for $token)"; exit 1; }
 echo "finish: $(gh run view "$id" --json url --jq .url)"
+if [ $mode = start ]; then
+  echo "$id $branch" >"$state"; echo "FINISH STARTED: now scripts/finish.sh --wait"; exit 0
+fi
+fi
+# The snapshot branch goes once the run has ended (the run checks out its commit).
+[ $mode = wait ] && trap 'git push -q origin --delete "$branch" >/dev/null 2>&1; rm -f "$state"' EXIT
 
 # --- wait: a failed gate job stops the run; otherwise the run's end decides -------------------------
 while :; do
@@ -72,6 +90,9 @@ while :; do
     --jq '[.status, ([.jobs[] | select(.name | startswith("gate")) | select(.conclusion == "failure") | .name] | join(","))] | @tsv')
   [ -z "${failed:-}" ] || break
   [ "$st" = completed ] && break
+  if [ -n "$deadline" ] && [ "$(date +%s)" -ge "$deadline" ]; then
+    trap - EXIT; echo "FINISH RUNNING ($st): call scripts/finish.sh --wait again"; exit 3
+  fi
   sleep 15
 done
 if [ -n "${failed:-}" ]; then
