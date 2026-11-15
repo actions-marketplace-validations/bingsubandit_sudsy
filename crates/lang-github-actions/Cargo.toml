@@ -13,7 +13,6 @@ core-rules.workspace = true
 core-syntax.workspace = true
 lang-yaml.workspace = true
 provider-api.workspace = true
-regex.workspace = true
 
 [dev-dependencies]
 core-incremental.workspace = true

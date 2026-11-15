@@ -1,12 +1,12 @@
 //! What a plain scalar means: the implicit types of the YAML 1.1 schema (PyYAML's resolver, which
 //! yamllint uses) and whether a string can be written plain without changing.
 
-use regex::Regex;
+use core_rules::Re;
 use std::sync::LazyLock;
 
 /// The implicit resolvers other than string: bool, float, int (with `0o17`), merge, null,
 /// timestamp, value and yaml.
-static NON_STRING: LazyLock<Regex> = LazyLock::new(|| {
+static NON_STRING: LazyLock<Re> = LazyLock::new(|| {
     let alternatives = [
         "yes|Yes|YES|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF",
         "[-+]?[0-9][0-9_]*\\.[0-9_]*(?:[eE][-+][0-9]+)?",
@@ -26,7 +26,7 @@ static NON_STRING: LazyLock<Regex> = LazyLock::new(|| {
         "=",
         "!|&|\\*",
     ];
-    Regex::new(&format!("^(?:{})$", alternatives.join("|"))).expect("the pattern is valid")
+    Re::lazy(&format!("^(?:{})$", alternatives.join("|"))).expect("the pattern is valid")
 });
 
 /// Does the plain scalar `value` resolve to a string (rather than a bool, number, null, ...)?

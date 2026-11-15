@@ -17,6 +17,7 @@ fn db(config: &str) -> Database {
         Box::new(lang_markdown::provider()),
         Box::new(lang_dockerfile::provider()),
         Box::new(lang_shell::provider()),
+        Box::new(lang_sql::SqlProvider::new()),
     ];
     let mut db = Database::new(providers);
     db.set_config(ConfigChain::parse(config));
@@ -121,6 +122,17 @@ fn fences_are_linted_with_their_language() {
         [("no-duplicate-keys".into(), "\"a\":".into())],
         "{found:?}"
     );
+}
+
+#[test]
+fn sql_fences_are_linted_with_the_sql_config() {
+    let on = "sql:\n  lint:\n    rules:\n      max-line-length:\n        level: error\n        options:\n          max: 12\n";
+    let md = "```sql\nSELECT 1;\nSELECT a, b, c FROM t;\n```\n";
+    assert_eq!(
+        found(&db(on), "a.md", md),
+        [("max-line-length".into(), " c F".into())]
+    );
+    assert!(found(&db(""), "a.md", md).is_empty());
 }
 
 #[test]

@@ -1,0 +1,5 @@
+disallowed-methods = [
+    { path = "regex::Regex::new", reason = "build regexes with core_rules::Re or core_rules::meta_regex (full DFA off, see core-rules/src/regex.rs)" },
+    { path = "regex::RegexBuilder::new", reason = "build regexes with core_rules::Re or core_rules::meta_regex" },
+    { path = "regex::RegexSet::new", reason = "build regexes with core_rules::Re or core_rules::meta_regex" },
+]

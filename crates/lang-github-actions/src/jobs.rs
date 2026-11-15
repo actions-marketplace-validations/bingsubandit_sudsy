@@ -2,9 +2,8 @@
 
 use crate::view::{Entry, entries, get, items, root_mapping, scalar, scalar_list};
 use core_rules::rule;
-use core_rules::{Check, FileContext, Opt, OptionDecl, Re, RuleContext};
+use core_rules::{Check, FileContext, Meta, Opt, OptionDecl, Re, RuleContext, meta_regex};
 use core_syntax::{SyntaxNode, TextRange};
-use regex::Regex;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
@@ -160,8 +159,14 @@ rule! {
     }
 }
 
-static MATRIX_REF: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\$\{\{\s*matrix\.([\w-]+)\s*\}\}$").expect("a valid pattern"));
+static MATRIX_REF: LazyLock<Meta> =
+    LazyLock::new(|| meta_regex(r"^\$\{\{\s*matrix\.([\w-]+)\s*\}\}$").expect("a valid pattern"));
+
+fn matrix_ref(label: &str) -> Option<&str> {
+    let mut caps = MATRIX_REF.create_captures();
+    MATRIX_REF.captures(label, &mut caps);
+    caps.get_group(1).map(|s| &label[s.range()])
+}
 
 /// The scalars of the job's `strategy.matrix.<name>` and of that key in its `include` entries.
 fn matrix_values(job: &SyntaxNode, text: &str, name: &str) -> Vec<(String, TextRange)> {
@@ -249,8 +254,8 @@ rule! {
             // `${{ matrix.os }}` stands for the values the matrix gives `os`.
             let labels: Vec<_> = labels
                 .into_iter()
-                .flat_map(|(label, range)| match MATRIX_REF.captures(&label) {
-                    Some(name) => matrix_values(&job_node, file.text, &name[1]),
+                .flat_map(|(label, range)| match matrix_ref(&label) {
+                    Some(name) => matrix_values(&job_node, file.text, name),
                     None => vec![(label, range)],
                 })
                 .collect();

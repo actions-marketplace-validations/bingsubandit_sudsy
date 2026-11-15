@@ -142,6 +142,16 @@ impl Re {
     }
 }
 
+/// A regex with the Unicode syntax and captures, for patterns of the code (not of users) that
+/// need `find_iter`/`captures`; built like [`Re`]'s full form.
+pub type Meta = meta::Regex;
+
+/// Builds a [`Meta`]. Every regex of the workspace is built here (`clippy.toml` forbids
+/// `regex::Regex::new`).
+pub fn meta_regex(source: &str) -> Result<Meta, String> {
+    build(source, true)
+}
+
 /// Builds with `regex-automata` directly, the full DFA off: another crate of the build
 /// (`fancy-regex`) turns that engine on for every regex, which costs construction time, and with
 /// it a pattern such as `(?:^|\s)\([^()]*\)\[[^\]]*\]` fails to match without Unicode.
@@ -190,6 +200,7 @@ mod tests {
     /// Both paths give what `regex::Regex` gives, on ASCII and other text, for patterns that
     /// compile without Unicode and ones that need it.
     #[test]
+    #[allow(clippy::disallowed_methods)] // the oracle
     fn agrees_with_the_unicode_regex() {
         let patterns = [
             r"^\s*\w+\s*=",

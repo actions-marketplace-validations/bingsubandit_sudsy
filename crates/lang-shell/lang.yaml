@@ -7,7 +7,6 @@ composite:
   text: Word
   continuation: true
   tolerant: [variable_assignment, test_command, string, concatenation, command_substitution, process_substitution]
-deps: [regex]
 options:
   - indent_size: 4
   - indent_style:

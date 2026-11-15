@@ -23,6 +23,7 @@ lang-js.workspace = true
 lang-json.workspace = true
 lang-markdown = { workspace = true, features = ["static-grammars"] }
 lang-shell = { workspace = true, features = ["static-grammars"] }
+lang-sql.workspace = true
 lang-yaml.workspace = true
 
 [lints]

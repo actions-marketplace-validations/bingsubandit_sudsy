@@ -2,11 +2,11 @@
 
 use crate::generated::{BlockMappingEntry, BlockSequenceEntry, FlowPair, Scalar, kind};
 use crate::rules::has_tag;
+use core_rules::Re;
 use core_rules::rule;
 use core_rules::{Check, Edit, Opt, OptionDecl, RuleContext};
 use core_syntax::ast::AstNode;
 use core_syntax::{SyntaxNode, SyntaxNodeExt, SyntaxToken, TextSize};
-use regex::Regex;
 use std::sync::LazyLock;
 
 const fn flag(name: &'static str, default: bool, description: &'static str) -> OptionDecl {
@@ -76,16 +76,16 @@ fn plain_untagged(node: &SyntaxNode) -> Option<SyntaxToken> {
     (token.kind() == kind::PLAIN && !has_tag(node)).then_some(token)
 }
 
-fn pattern(source: &str) -> Regex {
-    Regex::new(source).expect("the patterns are valid")
+fn pattern(source: &str) -> Re {
+    Re::lazy(source).expect("the patterns are valid")
 }
 
-static NUMERAL_BEFORE_DECIMAL: LazyLock<Regex> =
+static NUMERAL_BEFORE_DECIMAL: LazyLock<Re> =
     LazyLock::new(|| pattern(r"^[-+]?\.[0-9]+([eE][-+]?[0-9]+)?$"));
-static SCIENTIFIC: LazyLock<Regex> =
+static SCIENTIFIC: LazyLock<Re> =
     LazyLock::new(|| pattern(r"^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)[eE][-+]?[0-9]+$"));
-static INF: LazyLock<Regex> = LazyLock::new(|| pattern(r"^[-+]?\.(inf|Inf|INF)$"));
-static NAN: LazyLock<Regex> = LazyLock::new(|| pattern(r"^\.(nan|NaN|NAN)$"));
+static INF: LazyLock<Re> = LazyLock::new(|| pattern(r"^[-+]?\.(inf|Inf|INF)$"));
+static NAN: LazyLock<Re> = LazyLock::new(|| pattern(r"^\.(nan|NaN|NAN)$"));
 
 rule! {
     pub FloatStyle {

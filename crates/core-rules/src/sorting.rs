@@ -1,11 +1,12 @@
 //! Ordering shared by the `sorted-keys` rules (JSON, YAML) and `sorted-array-values`: the options,
 //! the comparison and the plan that says which entries are out of place and where each belongs.
 
+use crate::Re;
 use crate::options::{Check, Opt, OptionDecl, RuleOptions};
-use regex::Regex;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub const ORDER: OptionDecl = OptionDecl {
     name: "order",
@@ -57,7 +58,7 @@ pub struct Sorting<'a> {
     order: Vec<&'a str>,
     descending: bool,
     compare: Compare,
-    ignored: Vec<Regex>,
+    ignored: Vec<Rc<Re>>,
     min: usize,
     blank_line_groups: bool,
 }
@@ -81,15 +82,15 @@ pub fn has_blank_line(gap: &str) -> bool {
 }
 
 thread_local! {
-    static REGEXES: RefCell<HashMap<String, Option<Regex>>> = RefCell::new(HashMap::new());
+    static REGEXES: RefCell<HashMap<String, Option<Rc<Re>>>> = RefCell::new(HashMap::new());
 }
 
 /// A compiled pattern, compiled once per thread; options are validated, so it compiles.
-pub fn cached_regex(pattern: &str) -> Option<Regex> {
+pub fn cached_regex(pattern: &str) -> Option<Rc<Re>> {
     REGEXES.with(|c| {
         c.borrow_mut()
             .entry(pattern.to_string())
-            .or_insert_with(|| Regex::new(pattern).ok())
+            .or_insert_with(|| Re::lazy(pattern).ok().map(Rc::new))
             .clone()
     })
 }

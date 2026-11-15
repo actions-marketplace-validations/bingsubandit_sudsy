@@ -49,5 +49,5 @@ pub use layout::{Attach, LayoutRole, attached, run_layout};
 pub use lines::LineIndex;
 pub use options::{Check, Opt, OptionDecl, RuleOptions};
 pub use project::{Fact, ProjectContext, ProjectFacts};
-pub use regex::Re;
+pub use regex::{Meta, Re, meta_regex};
 pub use rule::{BodyContext, EmbeddedTree, FileContext, Layer, Rule, RuleContext, RuleMeta};

@@ -5,12 +5,13 @@ use crate::generated::{Scalar, kind};
 use crate::resolve::{plain_round_trips, resolves_to_str};
 use crate::rules::is_key;
 use crate::scalar::{double_quoted_value, plain_value, single_quoted_value};
+use core_rules::Re;
 use core_rules::rule;
 use core_rules::sorting::cached_regex;
 use core_rules::{Check, Edit, FileContext, Fix, FixKind, Opt, OptionDecl, RuleContext};
 use core_syntax::ast::AstNode;
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, SyntaxToken};
-use regex::Regex;
+use std::rc::Rc;
 
 /// What is wrong with a scalar.
 enum Problem {
@@ -22,13 +23,13 @@ enum Problem {
 struct Settings {
     quote_type: String,
     required: String,
-    extra_required: Vec<Regex>,
-    extra_allowed: Vec<Regex>,
+    extra_required: Vec<Rc<Re>>,
+    extra_allowed: Vec<Rc<Re>>,
     allow_quoted_quotes: bool,
 }
 
 impl Settings {
-    fn matches(regexes: &[Regex], value: &str) -> bool {
+    fn matches(regexes: &[Rc<Re>], value: &str) -> bool {
         regexes.iter().any(|r| r.is_match(value))
     }
 }
@@ -129,7 +130,7 @@ rule! {
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let o = ctx.options;
-        let compile = |name: &str| -> Vec<Regex> {
+        let compile = |name: &str| -> Vec<Rc<Re>> {
             o.list(name).into_iter().filter_map(cached_regex).collect()
         };
         let settings = Settings {

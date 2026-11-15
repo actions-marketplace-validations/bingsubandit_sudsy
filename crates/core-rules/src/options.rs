@@ -83,7 +83,7 @@ impl Check {
                     .collect::<Vec<_>>()
                     .join(", ")
             )),
-            Check::Regex => regex::Regex::new(v)
+            Check::Regex => crate::Re::lazy(v)
                 .map(drop)
                 .map_err(|e| format!("has an invalid regular expression `{v}`: {e}")),
         }

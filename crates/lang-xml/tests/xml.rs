@@ -73,6 +73,7 @@ fn collect(dir: &Path, out: &mut Vec<PathBuf>) {
 /// `cargo test --profile corpus -p lang-xml --test integration -- --ignored --nocapture conformance`
 #[test]
 #[ignore]
+#[allow(clippy::disallowed_methods)] // a test tool, not a rule
 fn conformance() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../tests/conformance/corpus/xmlconf/xmlconf");

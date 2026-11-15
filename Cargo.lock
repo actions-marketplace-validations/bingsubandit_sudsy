@@ -515,6 +515,7 @@ dependencies = [
  "lang-json",
  "lang-markdown",
  "lang-shell",
+ "lang-sql",
  "lang-yaml",
  "provider-api",
  "salsa",
@@ -1699,7 +1700,6 @@ dependencies = [
  "lang-shell",
  "lang-yaml",
  "provider-api",
- "regex",
 ]
 
 [[package]]
@@ -1904,7 +1904,6 @@ dependencies = [
  "core-syntax",
  "core-treesitter",
  "provider-api",
- "regex",
  "tree-sitter-bash",
 ]
 
@@ -1969,7 +1968,6 @@ dependencies = [
  "memchr",
  "proptest",
  "provider-api",
- "regex",
  "serde_json",
 ]
 

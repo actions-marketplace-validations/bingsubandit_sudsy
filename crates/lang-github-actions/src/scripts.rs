@@ -2,12 +2,11 @@
 //! `embedded`), and the rules that read their text.
 
 use crate::view::{entries, get, items, root_mapping, scalar};
-use core_rules::rule;
 use core_rules::{FileContext, RuleContext};
+use core_rules::{Meta, meta_regex, rule};
 use core_syntax::embedded::size;
 use core_syntax::{Embedded, SyntaxNode, SyntaxNodeExt, TextRange};
 use lang_yaml::generated::kind;
-use regex::Regex;
 use std::sync::LazyLock;
 
 pub struct Script {
@@ -17,8 +16,8 @@ pub struct Script {
     pub language: Option<&'static str>,
 }
 
-static EXPRESSION: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?s)\$\{\{(.*?)\}\}").expect("a valid pattern"));
+static EXPRESSION: LazyLock<Meta> =
+    LazyLock::new(|| meta_regex(r"(?s)\$\{\{(.*?)\}\}").expect("a valid pattern"));
 
 /// `bash`, `sh`, `pwsh` and `powershell` (with options after the name) name a language we check.
 fn language_of(shell: &str) -> Option<&'static str> {
@@ -163,8 +162,8 @@ fn span(start: usize, len: usize) -> TextRange {
     TextRange::new(size(start), size(start + len))
 }
 
-static DEPRECATED: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"::(set-output|save-state|set-env|add-path)\b").expect("a valid pattern")
+static DEPRECATED: LazyLock<Meta> = LazyLock::new(|| {
+    meta_regex(r"::(set-output|save-state|set-env|add-path)\b").expect("a valid pattern")
 });
 
 rule! {
@@ -183,7 +182,7 @@ rule! {
             for m in DEPRECATED.find_iter(body) {
                 ctx.report(
                     span(start + m.start(), m.len()),
-                    format!("the workflow command `{}` is deprecated", m.as_str()),
+                    format!("the workflow command `{}` is deprecated", &body[m.range()]),
                 );
             }
         }
@@ -219,8 +218,8 @@ const UNTRUSTED: &[&str] = &[
     "github.head_ref",
 ];
 
-static PATH: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"[A-Za-z_][\w-]*(?:\.[\w*-]+|\[\s*(?:'[^']*'|\d+|\*)\s*\])*")
+static PATH: LazyLock<Meta> = LazyLock::new(|| {
+    meta_regex(r"[A-Za-z_][\w-]*(?:\.[\w*-]+|\[\s*(?:'[^']*'|\d+|\*)\s*\])*")
         .expect("a valid pattern")
 });
 
@@ -267,11 +266,12 @@ rule! {
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         for (start, body) in script_texts(file) {
             for expression in EXPRESSION.captures_iter(body) {
-                let inner = expression.get(1).expect("the group always takes part");
-                for path in PATH.find_iter(inner.as_str()).filter(|p| untrusted(p.as_str())) {
+                let inner = expression.get_group(1).expect("the group always takes part");
+                let inner_text = &body[inner.range()];
+                for path in PATH.find_iter(inner_text).filter(|p| untrusted(&inner_text[p.range()])) {
                     ctx.report(
-                        span(start + inner.start() + path.start(), path.len()),
-                        format!("`{}` can be set by an attacker and is pasted into the script", path.as_str()),
+                        span(start + inner.start + path.start(), path.len()),
+                        format!("`{}` can be set by an attacker and is pasted into the script", &inner_text[path.range()]),
                     );
                 }
             }

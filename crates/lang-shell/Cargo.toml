@@ -16,7 +16,6 @@ core-rules.workspace = true
 core-syntax.workspace = true
 core-treesitter.workspace = true
 provider-api.workspace = true
-regex.workspace = true
 tree-sitter-bash = { workspace = true, optional = true }
 
 [build-dependencies]
