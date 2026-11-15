@@ -6,6 +6,11 @@ pub const DIALECT: &str = "dialect";
 pub fn option_schema() -> core_config::OptionSchema {
     core_config::OptionSchema::new(vec![
         core_config::OptionDef::choice("dialect", &["ansi", "postgres", "mysql", "tsql"], "ansi", "The SQL dialect the file is parsed as."),
+        core_config::shared::line_width(80),
+        shared::indent_style(),
+        core_config::shared::indent_size(4),
+        core_config::shared::final_newline(true),
+        shared::end_of_line(),
     ])
     .with_presets(vec![
     ])

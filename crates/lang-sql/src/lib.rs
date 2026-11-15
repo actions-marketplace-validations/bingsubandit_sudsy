@@ -1,8 +1,9 @@
 //! The SQL provider (`.sql`): sqruff's parser (ansi, postgres, mysql and tsql dialects) behind
-//! `adapter`, which builds the lossless tree; the formatter prints the file as written until the layout of our own lands.
+//! `adapter`, which builds the lossless tree; the formatter lays the file out itself (`layout`).
 
 mod adapter;
 mod format;
+mod layout;
 mod rules;
 
 pub use adapter::{DIALECTS, MAX_BYTES, parse};

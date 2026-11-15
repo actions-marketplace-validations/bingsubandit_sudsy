@@ -1,5 +1,5 @@
 // SQL (.sql), parsed by sqruff-lib-core with the dialects of `dialect` (crates/lang-sql/src/adapter.rs).
-// Nodes are sqlfluff's segment type names (sqruff's `SyntaxKind`, in Pascal case); a segment type with no node here is transparent, except `*_statement`, which is a `Statement`.
+// Nodes are sqlfluff's segment type names (sqruff's `SyntaxKind`, in Pascal case); a segment type with no node here is transparent, except `*_statement`, which is a `Statement` and every `*_reference`, which is an `ObjectReference`.
 // Format: see crates/core-syntax/src/grammar/mod.rs.
 
 language sql 27 "SQL"
@@ -18,16 +18,41 @@ token BlockComment #trivia #comment #indentable
 
 token LParen "(" #punctuation #glue
 token RParen ")" #punctuation #close
+token LSquare "[" #punctuation
+token RSquare "]" #punctuation #close
 token Comma "," #punctuation #separator #glue
 token Semicolon ";" #punctuation #separator
 token Dot "." #punctuation
-// Every other symbol: `=`, `<>`, `||`, `*`, `::`, `@`, ...
+token CastOp "::" #punctuation
+token Colon ":" #punctuation
+// The `:` of an array slice, the `:` in front of a psql variable.
+token Slice #punctuation
+token Prefix #punctuation
+// A sign in front of a number or an expression.
+token Sign #punctuation
+// Every other symbol: `=`, `<>`, `||`, `*`, `@`, ...
 token Operator #punctuation
+// `+`, `-`, `*`, `/`, `||` between operands.
+token BinaryOperator #punctuation
 token Keyword #restyle
+// `AND`, `OR`.
+token BinaryKeyword #restyle
 token Identifier #restyle
+token FunctionIdentifier #restyle
+token TypeIdentifier #restyle
+// `TRUE`, `FALSE`, `NULL`.
+token WordLiteral #restyle
+// A word the parser left untyped.
+token Word
 token QuotedIdentifier
 token String #literal #string
 token Number #literal
+
+// Where the parser opens (`Indent`, `ImplicitIndent`) or closes (`Dedent`) an indented block: zero-width, they carry the
+// indentation structure of the file.
+token Indent #optional
+token ImplicitIndent #optional
+token Dedent #optional
 
 // Zero-width end-of-file token; it carries the leading trivia of the file's tail.
 token Eof
@@ -59,8 +84,15 @@ node Expression
 node Function
 node FunctionName
 node Bracketed
-node ColumnReference
-node TableReference
+node ObjectReference
+node FunctionContents
+node SetOperator
+node SelectClauseModifier
+node ComparisonOperator
+node ArrayAccessor
+node AliasColumnList
+node BracketedArguments
+node SemiStructuredExpression
 node AliasExpression
 node CaseExpression
 node WhenClause

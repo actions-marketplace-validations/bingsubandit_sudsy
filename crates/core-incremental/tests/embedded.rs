@@ -138,9 +138,10 @@ fn sql_fences_are_linted_with_the_sql_config() {
 
 #[test]
 fn sql_fences_are_formatted_by_the_sql_formatter() {
-    // The SQL formatter prints as written until its layout lands: a fence is kept, whole.
     let md = "```sql\nselect a,b from t where x=1\n```\n\n```sql\nSELEC FROM ;;\n```\n";
-    assert_eq!(formatted(&db(""), "a.md", md), md);
+    let want =
+        "```sql\nselect\n    a,\n    b\nfrom t\nwhere x = 1\n```\n\n```sql\nSELEC FROM ;;\n```\n";
+    assert_eq!(formatted(&db(""), "a.md", md), want);
 }
 
 #[test]

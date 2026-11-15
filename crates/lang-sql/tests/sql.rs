@@ -74,7 +74,7 @@ fn nodes_are_named_after_segment_types() {
         kind::SELECT_CLAUSE,
         kind::FROM_CLAUSE,
         kind::WHERE_CLAUSE,
-        kind::COLUMN_REFERENCE,
+        kind::OBJECT_REFERENCE,
     ] {
         assert!(kinds.contains(&want), "{want:?}");
     }

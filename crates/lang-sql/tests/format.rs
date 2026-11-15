@@ -1,5 +1,4 @@
-//! The formatter prints the file as written until the layout of our own lands: every expectation
-//! passes the shared checks (lossless, meaning, comments, idempotency).
+//! Every expectation passes the shared checks (lossless, meaning, comments, idempotency).
 
 use core_format::DirectiveTable;
 use core_format::testing::assert_formats;
@@ -8,10 +7,11 @@ use provider_api::format_testing::Formatting;
 use provider_api::{LanguageProvider, SourceFile};
 
 #[test]
-fn printed_as_written() {
+fn lays_out_lists_and_keeps_comments() {
     let input = "-- header\nSELECT /* inline */ a,b -- trailing\nFROM t;\n/* block\n   comment */\nselect 1;\n";
     let subject = Formatting::new(lang_sql::provider(), "a.sql");
-    assert_eq!(assert_formats(&subject, input), input);
+    let want = "-- header\nSELECT /* inline */\n    a,\n    b -- trailing\nFROM t;\n/* block\n   comment */\nselect 1;\n";
+    assert_eq!(assert_formats(&subject, input), want);
 }
 
 #[test]

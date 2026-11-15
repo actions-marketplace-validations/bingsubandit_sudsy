@@ -2,10 +2,11 @@
 //!
 //! sqruff lexes and parses a whole file into segments: raw leaves (whitespace, comments, words,
 //! symbols) and nodes named by sqlfluff's segment types. The adapter flattens the leaves in
-//! order, drops the zero-width ones (`Indent`, `Dedent`, `EndOfFile`: layout is Sudsy's), keeps
-//! the nodes the grammar names as spans of non-trivia tokens, and rebuilds the tree with the
-//! shared trivia attachment rule, because sqruff puts whitespace and comments wherever its
-//! grammar matched them.
+//! order, keeps the zero-width `Indent`, `ImplicitIndent` and `Dedent` (where the dialect opens and
+//! closes an indented block; the layout reads the indentation structure from them) and drops
+//! `EndOfFile`, keeps the nodes the grammar names as spans of the other non-trivia tokens, and
+//! rebuilds the tree with the shared trivia attachment rule, because sqruff puts whitespace and
+//! comments wherever its grammar matched them.
 //!
 //! sqruff panics on some inputs (an `unwrap` in a dialect), so the parse runs under
 //! `catch_unwind`: a panic is a parse error and the file is one `Unknown` token, left unchanged.
@@ -116,9 +117,20 @@ fn sqruff_parse(src: &str, kind: DialectKind) -> Result<Flat, String> {
         let dialect = &built[at].1;
         let tables = Tables::default();
         let (segments, lex_errors) = dialect.lexer().lex(&tables, src);
+        // sqlfluff's defaults: joins and CTEs stay flush, the contents of `ON`, `USING` and `THEN`
+        // are indented.
+        let indents = IndentationConfig::from_bool_lookup(|key| {
+            matches!(
+                key,
+                "indented_using_on"
+                    | "indented_on_contents"
+                    | "indented_then"
+                    | "indented_then_contents"
+            )
+        });
         let parser = Parser::new_with_limits(
             dialect,
-            IndentationConfig::default(),
+            indents,
             sqruff_lib_core::parser::DEFAULT_MAX_PARSE_DEPTH,
             0,
         );
@@ -197,7 +209,11 @@ impl Walk<'_> {
         let first = self.flat.leaves.len();
         let ours = match ty {
             Sq::Unparsable => Some(SyntaxKind::ERROR),
-            _ => self.kinds[ty as usize],
+            _ => self.kinds[ty as usize].or_else(|| {
+                seg.class_types()
+                    .contains(Sq::ObjectReference)
+                    .then_some(k::OBJECT_REFERENCE)
+            }),
         };
         let start = self.pos;
         for child in children {
@@ -215,6 +231,21 @@ impl Walk<'_> {
 
     fn leaf(&mut self, seg: &ErasedSegment, ty: Sq) {
         let raw = seg.raw();
+        let meta = match ty {
+            Sq::Indent => Some(k::INDENT),
+            Sq::Implicit => Some(k::IMPLICIT_INDENT),
+            Sq::Dedent => Some(k::DEDENT),
+            _ => None,
+        };
+        if let Some(kind) = meta {
+            let at = self.pos as u32;
+            self.flat.leaves.push(Leaf {
+                kind,
+                start: at,
+                end: at,
+            });
+            return;
+        }
         if raw.is_empty() || seg.is_meta() {
             return;
         }
@@ -242,6 +273,7 @@ impl Walk<'_> {
 
 /// Our token kind for a sqruff leaf; a type this table does not know is classified by its text.
 fn token_kind(ty: Sq, raw: &str) -> SyntaxKind {
+    let word = raw.starts_with(|c: char| c.is_alphabetic() || c == '_');
     match ty {
         Sq::Whitespace => k::WHITESPACE,
         Sq::Newline => k::NEWLINE,
@@ -254,12 +286,26 @@ fn token_kind(ty: Sq, raw: &str) -> SyntaxKind {
         Sq::StatementTerminator if raw == ";" => k::SEMICOLON,
         Sq::StartBracket => k::L_PAREN,
         Sq::EndBracket => k::R_PAREN,
-        Sq::Keyword => k::KEYWORD,
+        Sq::StartSquareBracket => k::L_SQUARE,
+        Sq::EndSquareBracket => k::R_SQUARE,
+        Sq::Keyword | Sq::DatePart => k::KEYWORD,
+        Sq::NakedIdentifier => k::IDENTIFIER,
+        Sq::FunctionNameIdentifier => k::FUNCTION_IDENTIFIER,
+        Sq::DataTypeIdentifier => k::TYPE_IDENTIFIER,
+        Sq::BooleanLiteral | Sq::NullLiteral => k::WORD_LITERAL,
         Sq::QuotedIdentifier => k::QUOTED_IDENTIFIER,
         Sq::QuotedLiteral => k::STRING,
         Sq::NumericLiteral => k::NUMBER,
+        Sq::CastingOperator => k::CAST_OP,
+        Sq::SignIndicator => k::SIGN,
+        Sq::Colon => k::COLON,
+        Sq::Slice => k::SLICE,
+        Sq::PsqlVariableColon => k::PREFIX,
+        Sq::BinaryOperator if word => k::BINARY_KEYWORD,
+        Sq::BinaryOperator => k::BINARY_OPERATOR,
+        Sq::Word => k::WORD,
+        _ if word => k::IDENTIFIER,
         _ => match raw.chars().next() {
-            Some(c) if c.is_alphabetic() || c == '_' => k::IDENTIFIER,
             Some('\'') => k::STRING,
             Some('"' | '`') => k::QUOTED_IDENTIFIER,
             Some(c) if c.is_ascii_digit() => k::NUMBER,
@@ -279,6 +325,7 @@ fn build(src: &str, flat: Flat) -> ParseResult {
     } = flat;
     let grammar = grammars::SQL.get();
     let trivia = |l: &Leaf| grammar.is_trivia(l.kind);
+    let meta = |l: &Leaf| l.end == l.start;
     let tokens: Vec<Tok> = (leaves.iter().filter(|l| !trivia(l)))
         .map(|l| Tok {
             kind: l.kind,
@@ -293,20 +340,19 @@ fn build(src: &str, flat: Flat) -> ParseResult {
         .enumerate()
         .filter_map(|(i, n)| {
             let covered = &leaves[n.first..n.end];
-            let first = covered.iter().find(|l| !trivia(l))?;
-            let last = covered.iter().rfind(|l| !trivia(l))?;
+            let first = covered.iter().find(|l| !trivia(l) && !meta(l))?;
+            let last = covered.iter().rfind(|l| !trivia(l) && !meta(l))?;
             let (start, end, kind) = (first.start, last.end, n.kind);
             Some((i, Node { start, end, kind }))
         })
         .collect();
     spans.sort_by_key(|(i, n)| (n.start, std::cmp::Reverse(n.end), std::cmp::Reverse(*i)));
     let spans: Vec<Node> = spans.into_iter().map(|(_, n)| n).collect();
+    // The zero-width leaves share their start with the leaf after them: they are not looked up.
     let lexed = |_: &str, pos: usize| {
-        let at = leaves
-            .binary_search_by_key(&(pos as u32), |l| l.start)
-            .ok()?;
-        let l = &leaves[at];
-        trivia(l).then_some((l.kind, (l.end - l.start) as usize))
+        let at = leaves.partition_point(|l| (l.start as usize) < pos);
+        let l = leaves[at..].iter().find(|l| !meta(l))?;
+        (l.start as usize == pos && trivia(l)).then_some((l.kind, (l.end - l.start) as usize))
     };
     let kinds = Kinds {
         root: k::FILE,

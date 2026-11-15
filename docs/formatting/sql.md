@@ -19,13 +19,18 @@ Dialects whose parser hangs (`soql`) or panics often (`redshift`, `sqlite`, `sta
 | Option | Values | Default | Description |
 |---|---|---|---|
 | `dialect` | `ansi`, `postgres`, `mysql`, `tsql` | `ansi` | The SQL dialect the file is parsed as. |
+| `line_width` | int 20-1000 | `80` | Preferred maximum line width in columns. |
+| `indent_style` | `space`, `tab` | `space` | Indent with spaces or tabs. |
+| `indent_size` | int 1-16 | `4` | Columns per indentation level (also the width of a tab). |
+| `final_newline` | bool | `true` | End the file with a newline. |
+| `end_of_line` | `auto`, `lf`, `crlf` | `auto` | Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first line break. |
 <!-- /generated -->
 
 ## Formatting
-sqruff is the parser only: layout and capitalisation are Sudsy's own code on its own tree. Until that layout lands the formatter prints the file as written (`format.rs`), and the options that layout will use (`line_width`, `indent_*`, `comma_position`, the `*_case` options) are not offered yet; each is added with its layout. The target is `sqlfluff fix --rules layout,capitalisation` with sqlfluff's defaults ([the catalog](../parity/sqlfluff.yaml)).
+sqruff is the parser only: layout is Sudsy's own code (`src/layout/`) on the parse tree, following sqlfluff's layout rules (LT01 to LT15) with its defaults ([the catalog](../parity/sqlfluff.yaml)). The tree is flattened to blocks (tokens) and the points between them (spacing, line breaks, indentation); `space.rs` sets the spacing (LT01, LT06, LT07, LT10, LT11 and so on), `breaks.rs` the line breaks (LT08, LT09, LT12, LT13, LT14, LT15), `indent.rs` the indentation (LT02, LT03). The rules run in turn until the layout stops changing, as `sqlfluff fix` does, and the result is printed line by line. Not yet written: capitalisation (`*_case` options), `comma_position`, comment placement, long-line wrapping (LT05); those parts stay as written.
 
 ## Parity
-`scripts/parity.sh format sqlfluff` (sqlfluff 4.5.0 `fix --rules layout,capitalisation` against `sudsy format`, one dialect per fixture): sqlfluff's dialect fixtures and PostgreSQL's regression inputs of the conformance corpus. Verbatim output is identical to sqlfluff's on 311 of the 867 files sqlfluff accepts (1,121 files, 254 of them refused by sqlfluff itself: psql commands, template tags). Every difference is a named gap in `tests/parity/sqlfluff/differences.yaml`: files our parser does not accept (`parse-gap`), and the layout and capitalisation not written yet (`layout-gap`, `case-gap`).
+`scripts/parity.sh format sqlfluff` (sqlfluff 4.5.0 `fix --rules layout,capitalisation` against `sudsy format`, one dialect per fixture): sqlfluff's dialect fixtures and PostgreSQL's regression inputs of the conformance corpus. Identical to sqlfluff's on 428 of the 867 files sqlfluff accepts (ansi 159, postgres 84, mysql 138, tsql 41, PostgreSQL regress 6; 1,121 files, 254 of them refused by sqlfluff itself: psql commands, template tags); a second format changes none. Every difference is a named gap in `tests/parity/sqlfluff/differences.yaml`: files our parser does not accept (`parse-gap`), and the layout and capitalisation not written yet (`layout-gap`, `case-gap`).
 
 ## Conformance
 `bash tests/conformance/fetch-sql-corpus.sh`, then `cargo test --profile corpus -p lang-sql --test integration -- --ignored --nocapture conformance::`: sqlfluff's dialect fixtures (ansi, postgres, mysql, tsql) and PostgreSQL's regression inputs; every file prints back byte for byte and satisfies the trivia rule, and the files with parse errors and panics are counted per dialect. `conformance::format_is_stable` formats every file that parses twice (stable output, safety check passed).
