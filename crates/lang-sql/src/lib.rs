@@ -3,6 +3,7 @@
 
 core_syntax::include_generated!();
 mod adapter;
+mod fix;
 mod format;
 mod rules;
 

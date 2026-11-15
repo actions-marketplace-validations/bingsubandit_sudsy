@@ -114,6 +114,23 @@
         {"dir": "tests/conformance/corpus/python", "suffixes": [".py", ".pyi"], "only": "black/src/", "ratchet": "real-world", "recursive": true}
       ]
     },
+    "sqlfluff": {
+      "catalog": "sqlfluff",
+      "install": {"pip": "sqlfluff"},
+      "fetch": ["tests/conformance/fetch-sql-corpus.sh"],
+      "command": ["{python}", "{root}/scripts/parity_sqlfluff.py", "{prefix}", "{file}"],
+      "input": "in-place",
+      "tool_may_reject": true,
+      "parallel": true,
+      "quiet": true,
+      "fixtures": [
+        {"dir": "tests/conformance/corpus/sql/sqlfluff/test/fixtures/dialects/ansi", "suffixes": [".sql"], "prefix": "ansi/", "ratchet": "sqlfluff-ansi"},
+        {"dir": "tests/conformance/corpus/sql/sqlfluff/test/fixtures/dialects/postgres", "suffixes": [".sql"], "prefix": "postgres/", "ratchet": "sqlfluff-postgres"},
+        {"dir": "tests/conformance/corpus/sql/sqlfluff/test/fixtures/dialects/mysql", "suffixes": [".sql"], "prefix": "mysql/", "ratchet": "sqlfluff-mysql"},
+        {"dir": "tests/conformance/corpus/sql/sqlfluff/test/fixtures/dialects/tsql", "suffixes": [".sql"], "prefix": "tsql/", "ratchet": "sqlfluff-tsql"},
+        {"dir": "tests/conformance/corpus/sql/postgres/src/test/regress/sql", "suffixes": [".sql"], "prefix": "postgres/regress-", "ratchet": "postgres-regress"}
+      ]
+    },
     "shfmt": {
       "catalog": "shfmt",
       "install": {

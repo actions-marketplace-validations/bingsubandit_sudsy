@@ -9,10 +9,11 @@ Committed work too small for a step of its own: what to do and where, one line e
 - Delete the origin branches whose content is on main: `rescue/slot1-merged-tests`, `rescue/slot3-svelte-bench-inputs`, `wip/worktree-agent-ad3970d02a02340ee`, `wip/main/detached-63cb014`, `wip/slot3-html-embed-vue-svelte`, `wip/slot2-zero-config-rules`, `wip/slot3-front-matter` and the Python and JS `wip/` branches once their agents have landed them.
 - HTML dialect rules: the planned entries of `docs/parity/eslint-plugin-vue.yaml` and `eslint-plugin-svelte.yaml`; `valid-v-else` needs a sibling relation in pattern rules. Parity runners (`scripts/parity.sh`) for html-eslint, HTMLHint, eslint-plugin-vue and eslint-plugin-svelte, as for html-validate.
 - Angular templates (4.7M weekly downloads for `@angular-eslint/eslint-plugin-template`, more than Svelte; needs a user decision): a fourth language `angular` on the HTML tree, selected by an `overrides` entry for `*.component.html`, with control flow (`@if`, `@for`), bindings and pipes as embedded expressions.
+- Bench `json.plugins`: the warm-up does not wait for the compile-cache write, so `.instr` flips between about 1.29 G (hit) and 1.54 G (miss); make the warm-up wait so the metric is stable.
 
 ## Languages and analysis
 - JavaScript / TypeScript: Flow is unsupported; type-aware rules wait for the TypeScript worker.
-- SQL: dialects beyond ansi, postgres, mysql and tsql (sqruff's others hang or panic); templated (Jinja, dbt) files.
+- SQL: dialects beyond ansi, postgres, mysql and tsql (sqruff's others hang or panic); templated (Jinja, dbt) files; a layout of our own where sqruff's fixer differs from sqlfluff (`tests/parity/sqlfluff/differences.yaml`).
 - INI: `.properties` (`:` and blank separators, `\` continuations, `!` comments); a `.gitconfig` dialect that allows repeated multi-value keys.
 - TOML: TOML 1.1 syntax (the tree-sitter grammar targets 1.0; needs an upstream fix or a fork).
 - XML: the inside of a DOCTYPE (the grammar cannot parse every DTD declaration) and DTD-dependent well-formedness (entities, attribute defaults); reflowing text (the formatter keeps mixed content as written); a `xmlWhitespaceSensitivity: ignore` mode; sorting `PackageReference` items.

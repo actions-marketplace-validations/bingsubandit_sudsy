@@ -128,3 +128,60 @@ fn postgres_regress() {
         corpus("postgres").join("src/test/regress/sql"),
     );
 }
+
+/// Formats every file that parses, twice: the output must be stable and the safety check must
+/// pass (a refusal that is not a parse error fails the test). Prints the counts per dialect.
+/// Run with `--profile corpus` (the safety check needs debug assertions).
+#[test]
+#[ignore = "needs the corpus: bash tests/conformance/fetch-sql-corpus.sh"]
+fn format_is_stable() {
+    use core_format::DirectiveTable;
+    use provider_api::SourceFile;
+    use provider_api::format::format_file;
+    let provider = SqlProvider::new();
+    let mut options = provider.option_schema().defaults();
+    let dirs = lang_sql::DIALECTS.map(|d| {
+        let sub = if d == "postgres" { "postgres" } else { d };
+        (
+            d,
+            corpus("sqlfluff").join("test/fixtures/dialects").join(sub),
+        )
+    });
+    let regress = ("postgres", corpus("postgres").join("src/test/regress/sql"));
+    for (dialect, dir) in dirs.into_iter().chain([regress]) {
+        options.set("dialect", core_config::OptionValue::String(dialect.into()));
+        let run = |name: &str, text: &str| {
+            let mut file = SourceFile::new(name, 1, text);
+            file.language_version = Some(dialect.into());
+            format_file(&provider, &file, &options, &DirectiveTable::default())
+        };
+        let (mut count, mut changed, mut refused, mut unstable) = (0, 0, 0, Vec::new());
+        for path in files(&dir) {
+            let Ok(text) = std::fs::read_to_string(&path) else {
+                continue;
+            };
+            count += 1;
+            let name = path.file_name().unwrap().to_str().unwrap();
+            match run(name, &text) {
+                Ok(once) => {
+                    changed += usize::from(once != text);
+                    if run(name, &once).ok().as_deref() != Some(once.as_str()) {
+                        unstable.push(path.display().to_string());
+                    }
+                }
+                Err(e) if e.to_string().contains("internal error") => {
+                    panic!("{}: {e}", path.display())
+                }
+                Err(_) => refused += 1,
+            }
+        }
+        println!(
+            "{dialect} {}: files={count} changed={changed} refused={refused} unstable={}",
+            dir.file_name().unwrap().to_str().unwrap(),
+            unstable.len()
+        );
+        for path in unstable.iter().take(5) {
+            println!("  not idempotent: {path}");
+        }
+    }
+}

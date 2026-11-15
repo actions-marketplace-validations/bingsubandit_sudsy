@@ -256,6 +256,7 @@ fn token_kind(ty: Sq, raw: &str) -> SyntaxKind {
         Sq::Comma => k::COMMA,
         Sq::Dot => k::DOT,
         Sq::Semicolon => k::SEMICOLON,
+        Sq::StatementTerminator if raw == ";" => k::SEMICOLON,
         Sq::StartBracket => k::L_PAREN,
         Sq::EndBracket => k::R_PAREN,
         Sq::Keyword => k::KEYWORD,

@@ -1,0 +1,17 @@
+differences:
+  parse-gap: gap  "sqruff's dialect does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
+  fix-dropped: gap  "sqruff's fixer changed the code or left the grammar, so the fix is dropped and the file stays as written"
+  layout-gap: gap  "sqruff's layout rules lay a file out differently (its trees differ - compound statement bodies, `REFERENCES t (c)`, user names; long single-line statements are not broken; block-comment continuation lines)"
+  case-gap: gap  "sqruff's capitalisation rules treat some words differently (data types, function names, quoted type names)"
+files:
+  sqlfluff-ansi: parse-gap, fix-dropped, layout-gap
+  sqlfluff-mysql: parse-gap, fix-dropped, layout-gap, case-gap
+  sqlfluff-postgres: parse-gap, layout-gap, case-gap
+  sqlfluff-tsql: parse-gap, fix-dropped, layout-gap, case-gap
+  postgres-regress: parse-gap, fix-dropped, layout-gap, case-gap
+ratchet:
+  sqlfluff-ansi: 198
+  sqlfluff-mysql: 169
+  sqlfluff-postgres: 127
+  sqlfluff-tsql: 108
+  postgres-regress: 33

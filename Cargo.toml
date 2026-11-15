@@ -47,7 +47,8 @@ oxc_span = "=0.158.0"
 ruff_python_ast = "=0.0.14"
 ruff_python_parser = "=0.0.14"
 ruff_text_size = "=0.0.14"
-# sqruff is pre-1.0: pinned exactly, bumped by hand only (dependabot ignores it). Only the dialects lang-sql offers are compiled in.
+# sqruff is pre-1.0: pinned exactly, bumped by hand only (dependabot ignores it). sqruff-lib (the fixer) turns on every dialect of sqruff-lib-dialects; lang-sql offers four.
+sqruff-lib = "=0.44.0"
 sqruff-lib-core = "=0.44.0"
 sqruff-lib-dialects = { version = "=0.44.0", default-features = false, features = ["postgres", "mysql", "tsql"] }
 strum = "0.28"

@@ -3,3 +3,32 @@ options:
       values: ["ansi", "postgres", "mysql", "tsql"]
       default: "ansi"
       doc: "The SQL dialect the file is parsed as."
+  - line_width: 80
+  - indent_style
+  - indent_size: 4
+  - final_newline: true
+  - end_of_line
+  - comma_position:
+      values: ["trailing", "leading"]
+      default: "trailing"
+      doc: "Where the comma of a list that breaks goes: at the end of a line or at the start of the next."
+  - keyword_case:
+      values: ["consistent", "upper", "lower", "capitalise", "preserve"]
+      default: "consistent"
+      doc: "Capitalisation of keywords: one spelling throughout the file (the first one's), or the named case."
+  - identifier_case:
+      values: ["consistent", "upper", "lower", "capitalise", "preserve"]
+      default: "consistent"
+      doc: "Capitalisation of unquoted identifiers."
+  - function_case:
+      values: ["consistent", "upper", "lower", "capitalise", "preserve"]
+      default: "consistent"
+      doc: "Capitalisation of function names."
+  - literal_case:
+      values: ["consistent", "upper", "lower", "capitalise", "preserve"]
+      default: "consistent"
+      doc: "Capitalisation of `NULL`, `TRUE` and `FALSE`."
+  - type_case:
+      values: ["consistent", "upper", "lower", "capitalise", "preserve"]
+      default: "consistent"
+      doc: "Capitalisation of data types."

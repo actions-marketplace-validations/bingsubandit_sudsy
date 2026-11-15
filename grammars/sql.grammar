@@ -23,8 +23,8 @@ token Semicolon ";" #punctuation #separator
 token Dot "." #punctuation
 // Every other symbol: `=`, `<>`, `||`, `*`, `::`, `@`, ...
 token Operator #punctuation
-token Keyword
-token Identifier
+token Keyword #restyle
+token Identifier #restyle
 token QuotedIdentifier
 token String #literal #string
 token Number #literal

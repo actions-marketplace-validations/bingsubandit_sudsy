@@ -42,9 +42,7 @@ Measured limits (release, Graviton, `cargo test --release -p lang-sql --test int
 - **Dialect:** option `dialect` (`ansi`, `postgres`, `mysql`, `tsql`), default `ansi`; the importer reads sqlfluff's `dialect` and reports one outside these four.
 
 ## 2. Formatter
-- Target: `sqlfluff fix` with only the LT and CP rules enabled, pinned sqlfluff version for parity; sqruff as a second check (speed comparison).
-- Options (each named, presets set them): `line_width` (80), `indent_style`/`indent_size` (space, 4), `comma_position` (`trailing` | `leading`), `keyword_case`, `identifier_case`, `function_case`, `literal_case`, `type_case` (`consistent` | `upper` | `lower` | `capitalise` | `preserve`), `line_ending`.
-- Embedding: SQL in Markdown fences (`sql`) and, later, SQL strings in other languages are not in scope.
+Built (step 2): sqruff's own fixer with LT01-LT15 and CP01-CP05, the options `line_width`, `indent_*`, `comma_position` and the five `*_case` options; see [../formatting/sql.md](../formatting/sql.md). Not built: SQL embedded in other languages' strings; the `layout.type` and `indentation` settings beyond the options (deferred in `docs/parity/sqlfluff.yaml`). Own layout code instead of sqruff's would be the way to close the gaps of `tests/parity/sqlfluff/differences.yaml` (section 4's 90% target is out of reach with sqruff: 73% of the files sqlfluff accepts, 95% for ansi).
 
 ## 3. Lint
 - Catalog `docs/parity/sqlfluff.yaml` from sqlfluff's 79 rules (AL 10, AM 9, CP 5, CV 13, JJ 1, LT 15, RF 7, ST 12, TQ 4, Oracle/Postgres dialect rules); parity runner `scripts/parity.sh sqlfluff` against pinned sqlfluff.
@@ -60,7 +58,7 @@ Measured limits (release, Graviton, `cargo test --release -p lang-sql --test int
 |---|---|---|
 | 0 | Spike: parser decision with measured table (section 0) | (not committed) |
 | 1 | `lang-sql`: dependency pin, adapter, lang.yaml (dialect option), provider and registration, verbatim formatter, bench input (ansi: the bench parses with the default dialect), corpus fetch script and round-trip test, parse-speed numbers, Markdown `sql` fences, parity harness and catalog | 1,200 |
-| 2 | Formatter to section 4's targets: layout, indentation, line breaking, capitalisation options, safety-check `value` hooks for re-cased keywords | 2,500 |
+| 2 | Formatter (done): sqruff's fixer behind `rewrite_source`, the options, the safety guard, parity against sqlfluff | 2,500 |
 | 3 | Lint: zero-config set, first rule families, presets only where they set something | 1,500 |
 | 4 | Migration: `sudsy init --from sqlfluff` / `--from sqruff` (`.sqlfluff`, `setup.cfg`, `tox.ini`, `pyproject.toml`, `.sqruff`; `exclude_rules`, `rules`, per-rule sections) | 400 |
 
