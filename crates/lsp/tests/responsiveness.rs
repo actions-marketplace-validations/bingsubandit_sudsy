@@ -91,7 +91,7 @@ impl Rule for Blocker {
 static RULES: &[&dyn Rule] = &[&Blocker];
 
 /// JSON with one more rule.
-struct Gated(lang_json::JsonProvider);
+struct Gated(provider_api::ParserProvider);
 
 impl LanguageProvider for Gated {
     fn id(&self) -> LanguageId {
@@ -124,7 +124,7 @@ impl LanguageProvider for Gated {
 }
 
 fn start(dir: &std::path::Path) -> Client {
-    Client::start(dir, vec![Box::new(Gated(lang_json::JsonProvider::new()))])
+    Client::start(dir, vec![Box::new(Gated(lang_json::provider()))])
 }
 
 fn pull(client: &mut Client, uri: &lsp_types::Uri) -> lsp_server::RequestId {

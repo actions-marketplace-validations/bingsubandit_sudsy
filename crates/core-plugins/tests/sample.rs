@@ -7,7 +7,6 @@ use core_rules::{
     ExtensionRule, Extensions, FileContext, LineIndex, ProjectFacts, RuleOptions, Severity,
     activate,
 };
-use lang_json::JsonProvider;
 use provider_api::LanguageProvider;
 use provider_api::testing::{expect, fix_with, lint_with};
 use std::path::Path;
@@ -48,7 +47,7 @@ fn rules_carry_the_plugin_name_and_declare_themselves() {
 #[test]
 fn a_plugin_rule_reports_fixes_and_obeys_levels_options_and_suppressions() {
     let ext = extensions();
-    let p = JsonProvider::new();
+    let p = lang_json::provider();
     let text = expect(
         &p,
         &ext,
@@ -102,7 +101,7 @@ fn a_body_rule_reads_the_flow_graph_through_the_plugin_boundary() {
     // Without the flow layer a rule that requires it does not run; it does not fail.
     assert!(
         lint_with(
-            &JsonProvider::new(),
+            &lang_json::provider(),
             &ext,
             "a.json",
             "{}",
@@ -115,7 +114,7 @@ fn a_body_rule_reads_the_flow_graph_through_the_plugin_boundary() {
 #[test]
 fn the_project_phase_runs_in_the_plugin() {
     let ext = extensions();
-    let provider = JsonProvider::new();
+    let provider = lang_json::provider();
     let configured = std::collections::BTreeMap::new();
     let rules = ext.for_language("json");
     let active = activate(rules, &configured, |_| true).expect("rules activate");
@@ -162,7 +161,7 @@ fn the_project_phase_runs_in_the_plugin() {
 }
 
 fn disabled_by(ext: &Extensions, mode: &str, expected: &str) {
-    let p = JsonProvider::new();
+    let p = lang_json::provider();
     let rules = format!("sample/misbehave:\n  level: warn\n  options: {{ mode: {mode} }}");
     let first = lint_with(&p, ext, "a.json", "{}", &rules);
     assert_eq!(first.len(), 1, "{first:?}");
@@ -186,7 +185,7 @@ fn a_trapping_plugin_is_disabled_and_reported() {
 fn a_spinning_plugin_runs_out_of_fuel_or_time() {
     // Whichever limit comes first; the message says which.
     let ext = extensions();
-    let p = JsonProvider::new();
+    let p = lang_json::provider();
     let rules = "sample/misbehave:\n  level: warn\n  options: { mode: spin }";
     let found = lint_with(&p, &ext, "a.json", "{}", rules);
     assert_eq!(found.len(), 1, "{found:?}");

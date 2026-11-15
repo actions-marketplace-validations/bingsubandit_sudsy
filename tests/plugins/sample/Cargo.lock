@@ -161,6 +161,7 @@ dependencies = [
  "core-semantics",
  "core-syntax",
  "regex",
+ "regex-automata",
  "regex-syntax",
 ]
 
@@ -376,7 +377,6 @@ dependencies = [
  "core-syntax",
  "memchr",
  "provider-api",
- "regex",
 ]
 
 [[package]]

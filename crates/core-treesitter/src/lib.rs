@@ -30,6 +30,7 @@ pub use provider::{Spec, provider_of, provider_of_composite};
 
 use core_syntax::grammars::LazyGrammar;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TreeBuilder};
+use provider_api::adapter::{Attach, Tok as ATok};
 use provider_api::{ParseError, ParseResult};
 use std::sync::{Mutex, OnceLock};
 use tree_sitter::{Language, Node, Parser, Range};
@@ -132,6 +133,16 @@ struct Tok {
     kind: SyntaxKind,
     start: usize,
     end: usize,
+}
+
+impl Tok {
+    fn shared(self) -> ATok {
+        ATok {
+            kind: self.kind,
+            start: self.start as u32,
+            end: self.end as u32,
+        }
+    }
 }
 
 enum Ev {
@@ -473,7 +484,7 @@ impl Converter {
     }
 
     /// Splits the bytes `a..b` into trivia tokens (comments from tree-sitter, the rest lexed).
-    fn gap(&self, src: &str, (a, b): (usize, usize), s: &mut Scan, out: &mut Vec<Tok>) {
+    fn gap(&self, src: &str, (a, b): (usize, usize), s: &mut Scan, out: &mut Vec<ATok>) {
         let bytes = src.as_bytes();
         let mut pos = a;
         while pos < b {
@@ -485,7 +496,7 @@ impl Converter {
                 s.ci += 1;
             }
             if let Some(c) = s.comments.get(s.ci).filter(|c| c.start == pos) {
-                out.push(*c);
+                out.push(c.shared());
                 pos = c.end.min(b);
                 s.ci += 1;
                 continue;
@@ -522,11 +533,14 @@ impl Converter {
                     (self.unknown, n)
                 }
             };
-            out.push(Tok {
-                kind,
-                start: pos,
-                end: pos + len,
-            });
+            out.push(
+                Tok {
+                    kind,
+                    start: pos,
+                    end: pos + len,
+                }
+                .shared(),
+            );
             pos += len;
         }
     }
@@ -535,30 +549,22 @@ impl Converter {
     fn build(&self, src: &str, s: &mut Scan) -> SyntaxNode {
         let mut b = TreeBuilder::new();
         let real = std::mem::take(&mut s.real);
-        let ends_line = |t: &Tok| matches!(src.as_bytes()[t.end - 1], b'\n' | b'\r');
-        let emit = |b: &mut TreeBuilder, t: &Tok| b.token(t.kind, &src[t.start..t.end]);
+        let mut attach = Attach::new(src);
+        attach.begin(real[0].start as u32, |a, z, out| {
+            self.gap(src, (a as usize, z as usize), s, out)
+        });
         let mut next = 0;
-        let mut carry: Vec<Tok> = Vec::new();
-        let mut gap: Vec<Tok> = Vec::new();
-        // Everything before the first token is its leading trivia.
-        self.gap(src, (0, real[0].start), s, &mut carry);
         for ev in std::mem::take(&mut s.evs) {
             match ev {
                 Ev::Enter(k) => b.start_node(k),
                 Ev::Exit => b.finish_node(),
                 Ev::Real => {
                     let t = real[next];
-                    carry.iter().for_each(|c| emit(&mut b, c));
-                    emit(&mut b, &t);
-                    carry.clear();
                     next += 1;
-                    if let Some(after) = real.get(next) {
-                        gap.clear();
-                        self.gap(src, (t.end, after.start), s, &mut gap);
-                        let cut = gap.iter().position(ends_line).map_or(gap.len(), |i| i + 1);
-                        gap[..cut].iter().for_each(|c| emit(&mut b, c));
-                        carry.extend_from_slice(&gap[cut..]);
-                    }
+                    let after = real.get(next).map(|t| t.start as u32);
+                    attach.token(&mut b, t.shared(), after, |a, z, out| {
+                        self.gap(src, (a as usize, z as usize), s, out)
+                    });
                 }
             }
         }

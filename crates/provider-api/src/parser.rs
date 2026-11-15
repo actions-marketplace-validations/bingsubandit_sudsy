@@ -45,6 +45,8 @@ pub struct ParserProvider {
     hooks: &'static dyn RuleHooks,
     rules: LazyRules,
     embedded: Option<fn(&SyntaxNode, &str) -> Vec<Embedded>>,
+    /// The name and config base of a dialect that has a provider of its own.
+    dialect: Option<(&'static str, &'static str)>,
 }
 
 impl ParserProvider {
@@ -78,7 +80,22 @@ impl ParserProvider {
             formatter: spec.formatter,
             hooks: spec.hooks,
             embedded: None,
+            dialect: None,
         }
+    }
+
+    /// Makes this the provider of a dialect `name` of the language (Vue of HTML, SCSS of CSS):
+    /// it takes `base`'s config section first and shares its rules.
+    pub fn with_dialect(mut self, name: &'static str, base: &'static str) -> Self {
+        self.dialect = Some((name, base));
+        self
+    }
+
+    /// Replaces the file matchers of the spec's extensions and file names (matchers that select
+    /// a dialect, or a directory).
+    pub fn with_matchers(mut self, matchers: Vec<FileMatcher>) -> Self {
+        self.matchers = matchers;
+        self
     }
 
     /// Finds the code of other languages in a tree (a function of the language crate).
@@ -94,7 +111,7 @@ impl LanguageProvider for ParserProvider {
     }
 
     fn language(&self) -> &str {
-        self.grammar.language
+        self.dialect.map_or(self.grammar.language, |d| d.0)
     }
 
     fn crate_name(&self) -> &'static str {
@@ -127,6 +144,18 @@ impl LanguageProvider for ParserProvider {
 
     fn option_schema(&self) -> &OptionSchema {
         &self.schema
+    }
+
+    fn config_base(&self) -> Option<&str> {
+        self.dialect.map(|d| d.1)
+    }
+
+    fn base_rules(&self) -> &'static [&'static dyn Rule] {
+        if self.dialect.is_some() {
+            self.rules.all()
+        } else {
+            &[]
+        }
     }
 
     fn rules(&self) -> &'static [&'static dyn Rule] {

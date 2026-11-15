@@ -5,14 +5,8 @@
 use crate::MAPPING;
 use crate::format::{SVELTE_FORMATTER, VUE_FORMATTER, option_schema};
 use core_config::{OptionDef, OptionSchema};
-use core_format::NodeFormatter;
-use core_rules::{Rule, RuleHooks};
-use core_syntax::{Embedded, Grammar, LanguageId, SyntaxNode};
 use core_treesitter::{Mapping, Spec, provider_of};
 use provider_api::ParserProvider;
-use provider_api::{
-    Capabilities, FileMatcher, LanguageProvider, ParseResult, ProviderError, SourceFile,
-};
 
 /// HTML's node table with the nodes of another grammar added (and the tokens it wraps in nodes).
 fn mapping(
@@ -39,24 +33,6 @@ fn schema(extra: Vec<OptionDef>) -> OptionSchema {
     OptionSchema::new(defs)
 }
 
-pub struct DialectProvider {
-    name: &'static str,
-    inner: ParserProvider,
-    matchers: Vec<FileMatcher>,
-    schema: OptionSchema,
-}
-
-impl DialectProvider {
-    fn new(name: &'static str, inner: ParserProvider, schema: OptionSchema) -> Self {
-        DialectProvider {
-            name,
-            inner,
-            matchers: vec![FileMatcher::extension(name)],
-            schema,
-        }
-    }
-}
-
 macro_rules! spec {
     ($name:literal, $krate:ident, $mapping:expr, $formatter:expr) => {
         Spec {
@@ -78,7 +54,7 @@ macro_rules! spec {
 }
 
 /// `.vue` single-file components.
-pub fn vue_provider() -> DialectProvider {
+pub fn vue_provider() -> ParserProvider {
     let m = mapping(
         &[
             ("template_element", "Element"),
@@ -100,12 +76,13 @@ pub fn vue_provider() -> DialectProvider {
         false,
         "Indent the content of the root `<script>` and `<style>` blocks of a `.vue` file by one level.",
     )];
-    let inner = provider_of(spec!("vue", tree_sitter_vue, m, &VUE_FORMATTER));
-    DialectProvider::new("vue", inner, schema(options))
+    let mut spec = spec!("vue", tree_sitter_vue, m, &VUE_FORMATTER);
+    spec.schema = schema(options);
+    provider_of(spec).with_dialect("vue", "html")
 }
 
 /// `.svelte` components.
-pub fn svelte_provider() -> DialectProvider {
+pub fn svelte_provider() -> ParserProvider {
     let mut kinds = vec![
         ("expression", "MustacheText"),
         ("html_tag", "MustacheText"),
@@ -151,68 +128,7 @@ pub fn svelte_provider() -> DialectProvider {
         true,
         "Indent the content of the root `<script>` and `<style>` blocks of a `.svelte` file by one level.",
     )];
-    let inner = provider_of(spec!("svelte", tree_sitter_svelte, m, &SVELTE_FORMATTER));
-    DialectProvider::new("svelte", inner, schema(options))
-}
-
-impl LanguageProvider for DialectProvider {
-    fn id(&self) -> LanguageId {
-        self.inner.id()
-    }
-
-    fn language(&self) -> &str {
-        self.name
-    }
-
-    fn crate_name(&self) -> &'static str {
-        env!("CARGO_PKG_NAME")
-    }
-
-    fn grammar(&self) -> &Grammar {
-        self.inner.grammar()
-    }
-
-    fn file_matchers(&self) -> &[FileMatcher] {
-        &self.matchers
-    }
-
-    fn capabilities(&self) -> Capabilities {
-        Capabilities::NONE
-    }
-
-    fn parse(&self, file: &SourceFile) -> Result<ParseResult, ProviderError> {
-        self.inner.parse(file)
-    }
-
-    fn embedded(&self, root: &SyntaxNode, text: &str) -> Vec<Embedded> {
-        self.inner.embedded(root, text)
-    }
-
-    fn formatter(&self) -> &dyn NodeFormatter {
-        self.inner.formatter()
-    }
-
-    fn option_schema(&self) -> &OptionSchema {
-        &self.schema
-    }
-
-    fn config_base(&self) -> Option<&str> {
-        Some("html")
-    }
-
-    fn base_rules(&self) -> &'static [&'static dyn Rule] {
-        self.inner.rules()
-    }
-
-    fn rules(&self) -> &'static [&'static dyn Rule] {
-        self.inner.rules()
-    }
-
-    fn rust_rules(&self) -> &'static [&'static dyn Rule] {
-        self.inner.rust_rules()
-    }
-
-    fn rule_hooks(&self) -> &dyn RuleHooks {
-        self.inner.rule_hooks()
-    }
+    let mut spec = spec!("svelte", tree_sitter_svelte, m, &SVELTE_FORMATTER);
+    spec.schema = schema(options);
+    provider_of(spec).with_dialect("svelte", "html")
 }

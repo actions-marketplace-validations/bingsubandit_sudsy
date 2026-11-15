@@ -1,8 +1,10 @@
 use core_config::OptionValue;
-use core_syntax::{SyntaxNode, print, trivia};
-use lang_css::{CssProvider, Dialect};
-use provider_api::format_testing::{Formatting, assert_file_names, assert_formats, check_corpus};
-use provider_api::{LanguageProvider, SourceFile};
+use core_syntax::SyntaxNode;
+use lang_css::Dialect;
+use provider_api::LanguageProvider;
+use provider_api::format_testing::{
+    Formatting, assert_file_names, assert_formats, assert_lossless, check_corpus,
+};
 
 const CSS: &str = "@charset \"utf-8\";\n@import url(foo.css) screen;\n:root { --x: ; --y: {a:b}; --z: 1px }\n\
 a:hover, a > b[href^='x'] { color: red !important; margin: -.5em 0 +1e3px; background: url( a.png ) }\n\
@@ -114,12 +116,9 @@ const LESS_OUT: &str = r#"@color: #4d926f;
 }
 "#;
 
-fn parse(dialect: Dialect, text: &str) -> (SyntaxNode, usize, CssProvider) {
-    let p = CssProvider::new(dialect);
-    let parsed = p.parse(&SourceFile::new("x", 1, text)).unwrap();
-    assert_eq!(print(&parsed.tree), text, "round trip");
-    let g = p.grammar();
-    trivia::check_attachment(&parsed.tree, |k| g.is_trivia(k)).unwrap();
+fn parse(dialect: Dialect, text: &str) -> (SyntaxNode, usize, provider_api::ParserProvider) {
+    let p = lang_css::provider(dialect);
+    let parsed = assert_lossless(&p, "x", text);
     (parsed.tree, parsed.errors.len(), p)
 }
 
@@ -230,7 +229,7 @@ fn formats_like_prettier() {
         (Dialect::Less, "a.less", LESS, LESS_OUT),
     ] {
         assert_eq!(
-            assert_formats(CssProvider::new(dialect), file, text),
+            assert_formats(lang_css::provider(dialect), file, text),
             expected
         );
     }
@@ -240,7 +239,7 @@ fn formats_like_prettier() {
 #[test]
 fn signs_join_and_split() {
     let out = assert_formats(
-        CssProvider::new(Dialect::Css),
+        lang_css::provider(Dialect::Css),
         "a.css",
         "a { b: func(+ 20px, + 20px) round(1.5) +2 1px -2px; c: 1px - 2px }\n",
     );
@@ -255,7 +254,7 @@ fn signs_join_and_split() {
 fn less_inline_javascript_is_kept() {
     let text = ".m() {\n  @f: ~`(function() {\n  // a / b\n  var a = {x: 1};\n})()`;\n}\n";
     assert_eq!(
-        assert_formats(CssProvider::new(Dialect::Less), "a.less", text),
+        assert_formats(lang_css::provider(Dialect::Less), "a.less", text),
         text
     );
 }
@@ -265,7 +264,7 @@ fn less_inline_javascript_is_kept() {
 fn scss_interpolation_nests_in_strings() {
     let text = "a {\n  b: \"x #{call(\"\")} y\";\n}\n";
     assert_eq!(
-        assert_formats(CssProvider::new(Dialect::Scss), "a.scss", text),
+        assert_formats(lang_css::provider(Dialect::Scss), "a.scss", text),
         text
     );
 }
@@ -273,14 +272,14 @@ fn scss_interpolation_nests_in_strings() {
 #[test]
 fn file_names() {
     assert_file_names(
-        &CssProvider::new(Dialect::Css),
+        &lang_css::provider(Dialect::Css),
         &["a.css", "x/B.CSS"],
         &["a.scss", "a.less"],
     );
-    assert_file_names(&CssProvider::new(Dialect::Scss), &["a.scss"], &["a.css"]);
-    assert_file_names(&CssProvider::new(Dialect::Less), &["a.less"], &["a.css"]);
-    assert_eq!(CssProvider::new(Dialect::Less).config_base(), Some("css"));
-    assert_eq!(CssProvider::new(Dialect::Css).config_base(), None);
+    assert_file_names(&lang_css::provider(Dialect::Scss), &["a.scss"], &["a.css"]);
+    assert_file_names(&lang_css::provider(Dialect::Less), &["a.less"], &["a.css"]);
+    assert_eq!(lang_css::provider(Dialect::Less).config_base(), Some("css"));
+    assert_eq!(lang_css::provider(Dialect::Css).config_base(), None);
 }
 
 /// Real-world CSS, SCSS and Less (`bash tests/conformance/fetch-css-corpus.sh` first): every file
@@ -306,7 +305,7 @@ fn conformance() {
             "docusaurus",
         ] {
             let corpus = format!("css/{repo}");
-            let (n, unparsed) = check_corpus(CssProvider::new(dialect), file, &corpus, &[ext]);
+            let (n, unparsed) = check_corpus(lang_css::provider(dialect), file, &corpus, &[ext]);
             assert!(unparsed.is_empty(), "{repo} {ext}: {unparsed:?}");
             count += n;
         }
@@ -320,7 +319,7 @@ fn format_with(file: &'static str, input: &str, options: &[(&'static str, Option
     } else {
         Dialect::Css
     };
-    let mut subject = Formatting::new(CssProvider::new(dialect), file);
+    let mut subject = Formatting::new(lang_css::provider(dialect), file);
     subject.options = options.to_vec();
     core_format::testing::assert_formats(&subject, input)
 }

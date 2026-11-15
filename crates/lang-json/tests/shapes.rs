@@ -9,13 +9,13 @@ use core_format::{
 };
 use core_syntax::{SyntaxKind, SyntaxNode};
 use lang_json::generated::kind as k;
-use lang_json::{JsonFormatter, JsonProvider, option_schema};
+use lang_json::{JsonFormatter, option_schema};
 use provider_api::{LanguageProvider, SourceFile};
 
 fn parse(text: &str) -> SyntaxNode {
     let mut file = SourceFile::new("a.jsonc", 1, text);
     file.language_version = Some("jsonc".into());
-    let r = JsonProvider::new().parse(&file).unwrap();
+    let r = lang_json::provider().parse(&file).unwrap();
     assert!(r.errors.is_empty(), "{:?}", r.errors);
     r.tree
 }

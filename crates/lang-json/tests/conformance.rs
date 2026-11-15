@@ -116,7 +116,7 @@ fn json_test_suite() {
 /// The tree of a text, errors or not.
 fn lang_json_tree(text: &str) -> core_syntax::SyntaxNode {
     use provider_api::{LanguageProvider, SourceFile};
-    lang_json::JsonProvider::new()
+    lang_json::provider()
         .parse(&SourceFile::new("x.json", 1, text))
         .unwrap()
         .tree

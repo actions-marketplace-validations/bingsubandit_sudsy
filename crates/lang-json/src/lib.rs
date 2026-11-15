@@ -13,139 +13,69 @@ mod value_rules;
 pub use format::{COLLAPSE, DIALECT, JsonFormatter, TRAILING_COMMAS, option_schema};
 pub use parser::{Dialect, MAX_DEPTH};
 
-use core_config::OptionSchema;
-use core_format::NodeFormatter;
-use core_rules::{Rule, RuleHooks};
-use core_syntax::{Grammar, LanguageId, grammars};
-use provider_api::{
-    Capabilities, FileMatcher, FilePattern, FnSnippets, LanguageProvider, LazyRules, ParseResult,
-    ProviderError, SourceFile,
-};
+use core_syntax::grammars;
+use provider_api::{FileMatcher, FilePattern, ParseResult, ParserProvider, ParserSpec, SourceFile};
 use std::path::Path;
+use std::sync::LazyLock;
 
-pub struct JsonProvider {
-    matchers: Vec<FileMatcher>,
-    schema: OptionSchema,
-    formatter: JsonFormatter,
-    rules: LazyRules,
+/// The file matchers, each with the dialect it selects.
+static MATCHERS: LazyLock<Vec<FileMatcher>> = LazyLock::new(|| {
+    let matcher = |pattern, dialect: &str| FileMatcher {
+        pattern,
+        dialect: Some(dialect.into()),
+    };
+    let ext = |e: &str| FilePattern::Extension(e.into());
+    vec![
+        matcher(ext("json"), "json"),
+        matcher(ext("jsonc"), "jsonc"),
+        // Unity assembly definitions and input actions are strict JSON.
+        matcher(ext("asmdef"), "json"),
+        matcher(ext("asmref"), "json"),
+        matcher(ext("inputactions"), "json"),
+        matcher(FilePattern::FileName("tsconfig.json".into()), "jsonc"),
+        matcher(
+            FilePattern::InDirectory {
+                dir: ".vscode".into(),
+                extension: "json".into(),
+            },
+            "jsonc",
+        ),
+    ]
+});
+
+pub fn provider() -> ParserProvider {
+    let spec = ParserSpec {
+        crate_name: env!("CARGO_PKG_NAME"),
+        grammar: grammars::JSON,
+        extensions: &[],
+        file_names: &[],
+        schema: option_schema(),
+        formatter: &JsonFormatter,
+        hooks: &hooks::JsonHooks,
+        rules: rules::RULES,
+        pattern_files: provider_api::pattern_files!(),
+        families: &[],
+    };
+    ParserProvider::new(spec, parse_file).with_matchers(MATCHERS.clone())
 }
 
-impl Default for JsonProvider {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl JsonProvider {
-    pub fn new() -> Self {
-        let matcher = |pattern, dialect: &str| FileMatcher {
-            pattern,
-            dialect: Some(dialect.into()),
-        };
-        let name = |n: &str| FilePattern::FileName(n.into());
-        JsonProvider {
-            matchers: vec![
-                matcher(FilePattern::Extension("json".into()), "json"),
-                matcher(FilePattern::Extension("jsonc".into()), "jsonc"),
-                // Unity assembly definitions and input actions are strict JSON.
-                matcher(FilePattern::Extension("asmdef".into()), "json"),
-                matcher(FilePattern::Extension("asmref".into()), "json"),
-                matcher(FilePattern::Extension("inputactions".into()), "json"),
-                matcher(name("tsconfig.json"), "jsonc"),
-                matcher(
-                    FilePattern::InDirectory {
-                        dir: ".vscode".into(),
-                        extension: "json".into(),
-                    },
-                    "jsonc",
-                ),
-            ],
-            schema: option_schema(),
-            formatter: JsonFormatter,
-            rules: LazyRules::new(
-                rules::RULES,
-                grammars::JSON.language,
-                provider_api::pattern_files!(),
-                &[],
-                FnSnippets::new(grammars::JSON, |text| parse_result(text, Dialect::Json)),
-            ),
-        }
-    }
-
-    /// The dialect a file is parsed as: the one chosen in `file.language_version` (set from the
-    /// `dialect` option or the matcher), else decided by the file name.
-    fn dialect_of(&self, file: &SourceFile) -> Dialect {
-        let named = file
-            .language_version
-            .as_deref()
-            .and_then(Dialect::from_name);
-        named.unwrap_or_else(|| {
-            let path = Path::new(&file.id);
-            self.matchers
-                .iter()
-                .filter(|m| m.matches(path))
-                .max_by_key(|m| m.specificity())
-                .and_then(|m| m.dialect.as_deref())
-                .and_then(Dialect::from_name)
-                .unwrap_or(Dialect::Json)
-        })
-    }
-}
-
-fn parse_result(text: &str, dialect: Dialect) -> ParseResult {
-    let parsed = parser::parse(text, dialect);
+/// The dialect a file is parsed as: the one chosen in `file.language_version` (set from the
+/// `dialect` option or the matcher), else decided by the file name.
+fn parse_file(file: &SourceFile) -> ParseResult {
+    let named = (file.language_version.as_deref()).and_then(Dialect::from_name);
+    let dialect = named.unwrap_or_else(|| {
+        let path = Path::new(&file.id);
+        MATCHERS
+            .iter()
+            .filter(|m| m.matches(path))
+            .max_by_key(|m| m.specificity())
+            .and_then(|m| m.dialect.as_deref())
+            .and_then(Dialect::from_name)
+            .unwrap_or(Dialect::Json)
+    });
+    let parsed = parser::parse(&file.text, dialect);
     ParseResult {
         tree: parsed.tree,
         errors: parsed.errors,
-    }
-}
-
-impl LanguageProvider for JsonProvider {
-    fn id(&self) -> LanguageId {
-        LanguageId::JSON
-    }
-
-    fn language(&self) -> &str {
-        grammars::JSON.language
-    }
-
-    fn crate_name(&self) -> &'static str {
-        env!("CARGO_PKG_NAME")
-    }
-
-    fn grammar(&self) -> &Grammar {
-        grammars::JSON.get()
-    }
-
-    fn file_matchers(&self) -> &[FileMatcher] {
-        &self.matchers
-    }
-
-    fn capabilities(&self) -> Capabilities {
-        Capabilities::NONE
-    }
-
-    fn parse(&self, file: &SourceFile) -> Result<ParseResult, ProviderError> {
-        Ok(parse_result(&file.text, self.dialect_of(file)))
-    }
-
-    fn formatter(&self) -> &dyn NodeFormatter {
-        &self.formatter
-    }
-
-    fn option_schema(&self) -> &OptionSchema {
-        &self.schema
-    }
-
-    fn rules(&self) -> &'static [&'static dyn Rule] {
-        self.rules.all()
-    }
-
-    fn rust_rules(&self) -> &'static [&'static dyn Rule] {
-        self.rules.rust()
-    }
-
-    fn rule_hooks(&self) -> &dyn RuleHooks {
-        &hooks::JsonHooks
     }
 }

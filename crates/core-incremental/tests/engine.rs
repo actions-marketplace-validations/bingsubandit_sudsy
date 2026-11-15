@@ -36,7 +36,7 @@ impl Harness {
 
     fn standard() -> Self {
         Self::new(vec![
-            Box::new(lang_json::JsonProvider::new()),
+            Box::new(lang_json::provider()),
             Box::new(lang_yaml::provider()),
         ])
     }

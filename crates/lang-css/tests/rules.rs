@@ -1,10 +1,10 @@
 //! Rules the fixtures cannot express.
 
-use lang_css::{CssProvider, Dialect};
+use lang_css::Dialect;
 use provider_api::testing::{lint, render};
 
 fn report(dialect: Dialect, path: &str, text: &str, rules: &str) -> String {
-    render(text, &lint(&CssProvider::new(dialect), path, text, rules))
+    render(text, &lint(&lang_css::provider(dialect), path, text, rules))
 }
 
 #[test]

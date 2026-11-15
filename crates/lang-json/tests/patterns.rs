@@ -1,7 +1,6 @@
 //! Pattern rules on JSON: matching, constraints, fixes and the annotation fixtures.
 
 use core_rules::Extensions;
-use lang_json::JsonProvider;
 use provider_api::testing::{expect, fix_with, lint_with, pattern_error, pattern_rules};
 
 const DEBUG_RULE: &str = r#"
@@ -16,14 +15,14 @@ fix-kind: safe
 "#;
 
 fn rules(source: &str) -> Extensions {
-    pattern_rules(&JsonProvider::new(), source)
+    pattern_rules(&lang_json::provider(), source)
 }
 
 #[test]
 fn a_json_member_pattern_reports_and_fixes() {
     let ext = rules(DEBUG_RULE);
     let text = expect(
-        &JsonProvider::new(),
+        &lang_json::provider(),
         &ext,
         "a.json",
         r#"{
@@ -36,7 +35,7 @@ fn a_json_member_pattern_reports_and_fixes() {
 "#,
         "",
     );
-    let fixed = fix_with(&JsonProvider::new(), &ext, "a.json", &text, "", false);
+    let fixed = fix_with(&lang_json::provider(), &ext, "a.json", &text, "", false);
     assert_eq!(
         fixed,
         "{\n  \"debug\": false,\n  \"nested\": { \"debug\": false },\n  \"other\": false\n}\n"
@@ -55,7 +54,7 @@ rule:
 "#,
     );
     let found = lint_with(
-        &JsonProvider::new(),
+        &lang_json::provider(),
         &ext,
         "a.json",
         "[[1, 1], [1, 2], [\"x\", \"x\"]]",
@@ -78,13 +77,13 @@ fix: '[$$$REST]'
 "#,
     );
     let text = "[[0], [0, 1, 2], [1, 0], [0, 7]]";
-    let found = lint_with(&JsonProvider::new(), &ext, "a.json", text, "");
+    let found = lint_with(&lang_json::provider(), &ext, "a.json", text, "");
     let messages: Vec<_> = found.iter().map(|d| d.message.as_str()).collect();
     assert_eq!(
         messages,
         ["starts with zero, then 1, 2", "starts with zero, then 7"]
     );
-    let fixed = fix_with(&JsonProvider::new(), &ext, "a.json", text, "", true);
+    let fixed = fix_with(&lang_json::provider(), &ext, "a.json", text, "", true);
     assert_eq!(fixed, "[[0], [1, 2], [1, 0], [7]]");
 }
 
@@ -104,7 +103,7 @@ constraints:
 "#,
     );
     let text = r#"{ "a": { "port": 80 }, "test": { "port": 81 }, "b": { "port": "x" } }"#;
-    let found = lint_with(&JsonProvider::new(), &ext, "a.json", text, "");
+    let found = lint_with(&lang_json::provider(), &ext, "a.json", text, "");
     let messages: Vec<_> = found.iter().map(|d| d.message.as_str()).collect();
     assert_eq!(messages, ["port 80"]);
 }
@@ -112,7 +111,7 @@ constraints:
 #[test]
 fn the_level_comes_from_the_rule_unless_the_config_says_otherwise() {
     let ext = rules(DEBUG_RULE);
-    let p = JsonProvider::new();
+    let p = lang_json::provider();
     let on = |rules: &str| lint_with(&p, &ext, "a.json", "{\"debug\": true}", rules);
     assert_eq!(on("")[0].severity, core_rules::Severity::Error);
     assert_eq!(
@@ -124,7 +123,7 @@ fn the_level_comes_from_the_rule_unless_the_config_says_otherwise() {
 
 #[test]
 fn invalid_files_are_refused_with_a_reason() {
-    let load = |source: &str| pattern_error(&JsonProvider::new(), source);
+    let load = |source: &str| pattern_error(&lang_json::provider(), source);
     let base = "id: r\nlanguage: json\nmessage: m\n";
     assert!(
         load(&format!("{base}rule: {{ kind: Nope }}"))
@@ -162,7 +161,7 @@ rule:
     );
     let text = format!("[{}]", vec!["1"; 150].join(", "));
     // The step budget is what stops it; no wall-clock bound, which made this flaky on a busy machine.
-    let found = lint_with(&JsonProvider::new(), &ext, "a.json", &text, "");
+    let found = lint_with(&lang_json::provider(), &ext, "a.json", &text, "");
     assert_eq!(found.len(), 1, "{found:?}");
     assert!(found[0].message.contains("too many steps"), "{found:?}");
 }

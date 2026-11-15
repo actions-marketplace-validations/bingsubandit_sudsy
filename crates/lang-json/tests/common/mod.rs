@@ -4,20 +4,21 @@ use core_config::{OptionValue, ResolvedOptions};
 use core_format::DirectiveTable;
 use core_format::testing::Subject;
 use core_syntax::{Grammar, SyntaxNode};
-use lang_json::{JsonProvider, option_schema};
+use lang_json::option_schema;
+use provider_api::ParserProvider;
 use provider_api::{LanguageProvider, SourceFile, format_file, resolve_dialect};
 use std::path::Path;
 
 /// A JSON file formatted with some options.
 pub struct JsonSubject {
-    provider: JsonProvider,
+    provider: ParserProvider,
     path: String,
     options: Vec<(String, OptionValue)>,
 }
 
 pub fn subject(path: &str, options: &[(&str, OptionValue)]) -> JsonSubject {
     JsonSubject {
-        provider: JsonProvider::new(),
+        provider: lang_json::provider(),
         path: path.into(),
         options: options
             .iter()
@@ -39,7 +40,7 @@ impl JsonSubject {
             schema.apply(&mut options, k, v).unwrap();
         }
         let matcher = provider_api::select_provider(
-            &[Box::new(JsonProvider::new()) as Box<dyn LanguageProvider>],
+            &[Box::new(lang_json::provider()) as Box<dyn LanguageProvider>],
             Path::new(&self.path),
         )
         .and_then(|(_, d)| d);

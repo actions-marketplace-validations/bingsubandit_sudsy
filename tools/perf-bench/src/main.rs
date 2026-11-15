@@ -30,6 +30,14 @@ use perf_bench::{file, inputs};
 use provider_api::LanguageProvider;
 use std::time::{Duration, Instant};
 
+/// The JSON provider, found through the registry so the harness builds on every revision.
+fn json_provider() -> Box<dyn LanguageProvider> {
+    let all = languages::providers();
+    all.into_iter()
+        .find(|p| p.language() == "json")
+        .expect("json provider")
+}
+
 const JSON_OBJECTS: usize = 40_000;
 const YAML_ITEMS: usize = 60_000;
 const TOML_ITEMS: usize = 30_000;
@@ -285,7 +293,7 @@ fn main() -> Result<()> {
     if matches!(which, "json" | "all") {
         report(
             "JSON",
-            &lang_json::JsonProvider::new(),
+            &*json_provider(),
             "bench.json",
             inputs::json,
             JSON_OBJECTS,
@@ -295,7 +303,7 @@ fn main() -> Result<()> {
     if matches!(which, "json-flat" | "all") {
         report(
             "JSON, one line",
-            &lang_json::JsonProvider::new(),
+            &*json_provider(),
             "flat.json",
             inputs::json_flat,
             50_000,

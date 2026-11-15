@@ -28,7 +28,7 @@ pub struct CssFormatter {
 }
 
 impl CssFormatter {
-    pub fn new(dialect: Dialect) -> Self {
+    pub const fn new(dialect: Dialect) -> Self {
         CssFormatter { dialect }
     }
 }

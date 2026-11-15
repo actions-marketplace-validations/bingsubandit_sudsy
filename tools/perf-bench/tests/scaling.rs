@@ -63,19 +63,14 @@ fn assert_linear(p: &dyn LanguageProvider, name: &str, make: fn(usize) -> String
 
 #[test]
 fn json_work_is_linear_in_the_input() {
-    let p = lang_json::JsonProvider::new();
+    let p = lang_json::provider();
     assert_linear(&p, "a.json", inputs::json, 400);
     assert_linear(&p, "a.json", inputs::json_flat, 2000);
 }
 
 #[test]
 fn json_work_is_linear_in_the_nesting_depth() {
-    assert_linear(
-        &lang_json::JsonProvider::new(),
-        "a.json",
-        inputs::json_nested,
-        30,
-    );
+    assert_linear(&lang_json::provider(), "a.json", inputs::json_nested, 30);
 }
 
 /// Found by name so that the harness builds against any revision.

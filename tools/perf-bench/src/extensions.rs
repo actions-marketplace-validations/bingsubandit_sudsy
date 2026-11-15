@@ -185,7 +185,7 @@ pub fn run(dir: Option<&Path>, limit: Option<usize>) -> Result<()> {
     );
     drop(rules_again);
 
-    let json = lang_json::JsonProvider::new();
+    let json = crate::json_provider();
 
     // 2. The plugin boundary on C#.
     if let Some(dir) = dir {
@@ -209,9 +209,9 @@ pub fn run(dir: Option<&Path>, limit: Option<usize>) -> Result<()> {
 
     // 3. The plugin boundary on generated JSON, with a node-scope rule.
     for objects in [100, 10_000] {
-        let files = parse_all(&json, vec![inputs::json(objects)]);
+        let files = parse_all(&*json, vec![inputs::json(objects)]);
         let label = format!("generated JSON, {objects} objects");
-        boundary(&json, &files, &rules, &label, "no-debug-flag")?;
+        boundary(&*json, &files, &rules, &label, "no-debug-flag")?;
     }
     Ok(())
 }

@@ -3,13 +3,12 @@
 use crate::common::{JsonSubject, subject};
 use core_format::testing::{Subject, check};
 use core_syntax::{SyntaxKind, SyntaxNode, print, trivia};
-use lang_json::JsonProvider;
 use lang_json::generated::kind as k;
 use proptest::prelude::*;
 use provider_api::{LanguageProvider, SourceFile};
 
 fn parse(path: &str, text: &str) -> (SyntaxNode, Vec<String>) {
-    let r = JsonProvider::new()
+    let r = lang_json::provider()
         .parse(&SourceFile::new(path, 1, text))
         .unwrap();
     (r.tree, r.errors.into_iter().map(|e| e.code).collect())
@@ -117,7 +116,7 @@ fn one_diagnostic_per_error_site() {
 
 #[test]
 fn error_positions_point_at_the_problem() {
-    let r = JsonProvider::new()
+    let r = lang_json::provider()
         .parse(&SourceFile::new("a.json", 1, "{\"a\": tru}"))
         .unwrap();
     let e = &r.errors[0];

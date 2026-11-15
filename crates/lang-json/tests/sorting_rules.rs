@@ -1,12 +1,11 @@
 //! Option validation of the shared ordering and key rules (per-option behavior is in the rule
 //! fixtures).
 
-use lang_json::JsonProvider;
 use provider_api::testing::fix;
 
 fn fixed(rule: &str, options: &str) -> String {
     let rules = format!("{rule}:\n  level: warn\n  options:\n    {options}");
-    fix(&JsonProvider::new(), "a.json", "{}", &rules, true)
+    fix(&lang_json::provider(), "a.json", "{}", &rules, true)
 }
 
 #[test]

@@ -1,6 +1,5 @@
 //! JSON rules: expected diagnostics (snapshots) and fix output.
 
-use lang_json::JsonProvider;
 use provider_api::testing::{lint, render};
 
 fn report(text: &str, rules: &str) -> String {
@@ -8,7 +7,7 @@ fn report(text: &str, rules: &str) -> String {
 }
 
 fn report_at(path: &str, text: &str, rules: &str) -> String {
-    render(text, &lint(&JsonProvider::new(), path, text, rules))
+    render(text, &lint(&lang_json::provider(), path, text, rules))
 }
 
 #[test]

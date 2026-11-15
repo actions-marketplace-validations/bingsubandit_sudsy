@@ -1,6 +1,4 @@
-use core_syntax::{print, trivia};
-use provider_api::format_testing::{Formatting, assert_formats};
-use provider_api::{LanguageProvider, SourceFile};
+use provider_api::format_testing::{Formatting, assert_formats, assert_lossless, assert_parses};
 use std::path::{Path, PathBuf};
 
 /// Formats with every check of the shared helper (round trip, meaning, idempotency, comments).
@@ -48,9 +46,10 @@ fn well_formedness_errors() {
         "<a>",
         "<a/><b/>",
     ] {
-        let r = p.parse(&SourceFile::new("a.xml", 1, src)).unwrap();
-        assert!(!r.errors.is_empty(), "{src}");
-        assert_eq!(print(&r.tree), src);
+        assert!(
+            !assert_lossless(&p, "a.xml", src).errors.is_empty(),
+            "{src}"
+        );
     }
 }
 
@@ -118,11 +117,7 @@ fn conformance() {
                 let Ok(doc) = std::fs::read_to_string(&path) else {
                     continue;
                 };
-                let r = s
-                    .provider
-                    .parse(&SourceFile::new("a.xml", 1, &doc))
-                    .unwrap();
-                assert_eq!(print(&r.tree), doc, "not lossless: {}", path.display());
+                let r = assert_lossless(s.provider.as_ref(), &path.display().to_string(), &doc);
                 if get("TYPE") == Some("not-wf") {
                     bad += 1;
                     if r.errors.is_empty() {
@@ -161,10 +156,7 @@ fn fixtures() {
     let p = lang_xml::provider();
     for f in files {
         let text = std::fs::read_to_string(&f).unwrap();
-        let r = p.parse(&SourceFile::new("a.xml", 1, &text)).unwrap();
-        assert!(r.errors.is_empty(), "{}: {:?}", f.display(), r.errors[0]);
-        assert_eq!(print(&r.tree), text, "{}", f.display());
-        trivia::check_attachment(&r.tree, |k| p.grammar().is_trivia(k)).unwrap();
+        assert_parses(&p, &f.display().to_string(), &text);
         fmt(&text);
     }
 }

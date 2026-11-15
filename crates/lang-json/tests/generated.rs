@@ -2,7 +2,6 @@
 
 use core_syntax::ast::AstNode;
 use core_syntax::grammars;
-use lang_json::JsonProvider;
 use lang_json::generated::{self as json, kind};
 use provider_api::{LanguageProvider, SourceFile};
 
@@ -16,7 +15,7 @@ fn generated_code_matches_the_grammar() {
 
 #[test]
 fn typed_wrappers_navigate_the_tree() {
-    let parsed = JsonProvider::new()
+    let parsed = lang_json::provider()
         .parse(&SourceFile::new("a.json", 1, "{ \"a\": 1 }"))
         .unwrap();
     let doc = json::Document::cast(parsed.tree).unwrap();

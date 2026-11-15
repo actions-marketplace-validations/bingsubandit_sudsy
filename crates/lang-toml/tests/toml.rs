@@ -1,6 +1,5 @@
 use core_config::OptionValue;
-use core_syntax::{print, trivia};
-use provider_api::format_testing::Formatting;
+use provider_api::format_testing::{Formatting, assert_lossless, assert_parses};
 use provider_api::{LanguageProvider, SourceFile};
 use std::path::{Path, PathBuf};
 
@@ -85,10 +84,10 @@ fn errors_are_lossless_and_reported() {
         "\u{e9} = 1\n",
         "a = 'é'\r\nb = ;\r\n",
     ] {
-        let r = p.parse(&SourceFile::new("a.toml", 1, src)).unwrap();
-        assert!(!r.errors.is_empty(), "{src:?}");
-        assert_eq!(print(&r.tree), src);
-        trivia::check_attachment(&r.tree, |k| p.grammar().is_trivia(k)).unwrap();
+        assert!(
+            !assert_lossless(&p, "a.toml", src).errors.is_empty(),
+            "{src:?}"
+        );
     }
 }
 
@@ -202,10 +201,7 @@ fn fixtures() {
     let p = lang_toml::provider();
     for f in files {
         let text = std::fs::read_to_string(&f).unwrap();
-        let r = p.parse(&SourceFile::new("a.toml", 1, &text)).unwrap();
-        assert!(r.errors.is_empty(), "{}: {:?}", f.display(), r.errors[0]);
-        assert_eq!(print(&r.tree), text, "{}", f.display());
-        trivia::check_attachment(&r.tree, |k| p.grammar().is_trivia(k)).unwrap();
+        assert_parses(&p, &f.display().to_string(), &text);
         fmt(&text);
     }
 }
@@ -229,10 +225,7 @@ fn conformance() {
         let Ok(text) = String::from_utf8(bytes) else {
             continue;
         };
-        let r = p.parse(&SourceFile::new("a.toml", 1, &text)).unwrap();
-        assert_eq!(print(&r.tree), text, "not lossless: {rel}");
-        trivia::check_attachment(&r.tree, |k| p.grammar().is_trivia(k))
-            .unwrap_or_else(|e| panic!("{rel}: {e:?}"));
+        let r = assert_lossless(&p, rel, &text);
         if rel.starts_with("valid/") {
             valid += 1;
             if r.errors.is_empty() {

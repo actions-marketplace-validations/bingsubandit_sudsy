@@ -17,7 +17,7 @@ pub use provider_api::testing::{expect, fix, fix_with, lint, lint_with, render};
 /// as the CLI finds it (`SUDSY_CSHARP_WORKER`, or `csharp-worker/` beside the executable).
 pub fn provider(language: &str) -> Box<dyn LanguageProvider> {
     match language {
-        "json" => Box::new(lang_json::JsonProvider::new()),
+        "json" => Box::new(lang_json::provider()),
         "yaml" => Box::new(lang_yaml::provider()),
         "csharp" => Box::new(lang_csharp::provider(
             &lang_csharp::locate_worker().unwrap_or_else(|e| panic!("{e}")),

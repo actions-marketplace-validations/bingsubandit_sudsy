@@ -82,6 +82,63 @@ impl KindNames {
     }
 }
 
+/// The trivia attachment loop shared with `core-treesitter`: each real token takes the trivia
+/// before it, itself, and the trivia after it up to the end of its line; the rest of the gap is
+/// carried to the next token. `lex(a, b, out)` splits the text `a..b` between two tokens into
+/// trivia tokens.
+pub struct Attach<'a> {
+    src: &'a str,
+    carry: Vec<Tok>,
+    gap: Vec<Tok>,
+}
+
+impl<'a> Attach<'a> {
+    pub fn new(src: &'a str) -> Self {
+        Attach {
+            src,
+            carry: Vec::new(),
+            gap: Vec::new(),
+        }
+    }
+
+    /// Everything before the first real token is its leading trivia.
+    pub fn begin(&mut self, first: u32, mut lex: impl FnMut(u32, u32, &mut Vec<Tok>)) {
+        lex(0, first, &mut self.carry);
+    }
+
+    /// Emits the carried trivia, `t`, and its trailing trivia before the token that starts at
+    /// `next` (none after the last).
+    pub fn token(
+        &mut self,
+        b: &mut TreeBuilder,
+        t: Tok,
+        next: Option<u32>,
+        mut lex: impl FnMut(u32, u32, &mut Vec<Tok>),
+    ) {
+        let src = self.src;
+        let emit =
+            |b: &mut TreeBuilder, t: &Tok| b.token(t.kind, &src[t.start as usize..t.end as usize]);
+        self.carry.drain(..).for_each(|c| emit(b, &c));
+        emit(b, &t);
+        if let Some(next) = next {
+            self.gap.clear();
+            lex(t.end, next, &mut self.gap);
+            // ASCII last bytes decide without decoding.
+            let ends_line = |c: &Tok| match src.as_bytes()[c.end as usize - 1] {
+                b'\n' | b'\r' => true,
+                0..=0x7f => false,
+                _ => src[..c.end as usize]
+                    .chars()
+                    .next_back()
+                    .is_some_and(is_line_break),
+            };
+            let cut = (self.gap.iter().position(ends_line)).map_or(self.gap.len(), |i| i + 1);
+            self.gap[..cut].iter().for_each(|c| emit(b, c));
+            self.carry.extend_from_slice(&self.gap[cut..]);
+        }
+    }
+}
+
 /// Builds the tree and the errors of the text the tokens do not cover. `scan(rest, pos)` reads
 /// the language's own trivia (comments, line continuations) at the start of `rest`, which is the
 /// text from `pos` to the next token; whitespace and line breaks are recognized here. `retag` may
@@ -94,96 +151,75 @@ pub fn replay(
     scan: impl Fn(&str, usize) -> Option<(SyntaxKind, usize)>,
     retag: impl Fn(Tok, Option<SyntaxKind>) -> Tok,
 ) -> ParseResult {
-    let mut r = Replay {
+    let mut lex = Lexer {
         src,
         kinds,
         scan,
-        builder: TreeBuilder::new(),
         errors: Vec::new(),
     };
-    r.run(tokens, nodes, retag);
+    let mut builder = TreeBuilder::new();
+    run(&mut lex, &mut builder, tokens, nodes, retag);
     ParseResult {
-        tree: SyntaxNode::new_root(r.builder.finish()),
-        errors: r.errors,
+        tree: SyntaxNode::new_root(builder.finish()),
+        errors: lex.errors,
     }
 }
 
-struct Replay<'a, S> {
+/// Replays tokens and nodes: each token takes its leading trivia, itself and its trailing
+/// trivia, inside the innermost node that contains it.
+fn run<S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>>(
+    lex: &mut Lexer<'_, S>,
+    builder: &mut TreeBuilder,
+    tokens: &[Tok],
+    nodes: &[Node],
+    retag: impl Fn(Tok, Option<SyntaxKind>) -> Tok,
+) {
+    let len = lex.src.len() as u32;
+    builder.start_node(lex.kinds.root);
+    let eof = Tok {
+        kind: lex.kinds.eof,
+        start: len,
+        end: len,
+    };
+    let mut nodes = nodes.iter().peekable();
+    // The end and kind of each open node, innermost last.
+    let mut open: Vec<(u32, SyntaxKind)> = Vec::new();
+    let mut attach = Attach::new(lex.src);
+    attach.begin(tokens.first().map_or(len, |t| t.start), |a, b, out| {
+        lex.gap(a, b, out)
+    });
+    let mut real = tokens.iter().copied().chain(Some(eof)).peekable();
+    while let Some(t) = real.next() {
+        while open.last().is_some_and(|&(end, _)| end <= t.start) {
+            open.pop();
+            builder.finish_node();
+        }
+        while let Some(n) = nodes.next_if(|n| n.start <= t.start) {
+            if n.start == n.end {
+                builder.start_node(n.kind);
+                builder.finish_node();
+            } else if n.end > t.start {
+                // A node that overlaps its parent ends with it.
+                let end = open.last().map_or(n.end, |&(p, _)| p.min(n.end));
+                builder.start_node(n.kind);
+                open.push((end, n.kind));
+            }
+        }
+        let t = retag(t, open.last().map(|o| o.1));
+        let next = real.peek().map(|n| n.start);
+        attach.token(builder, t, next, |a, b, out| lex.gap(a, b, out));
+    }
+    builder.finish_node();
+}
+
+struct Lexer<'a, S> {
     src: &'a str,
     kinds: Kinds,
     scan: S,
-    builder: TreeBuilder,
     errors: Vec<ParseError>,
 }
 
-impl<S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Replay<'_, S> {
-    fn emit(&mut self, t: Tok) {
-        self.builder
-            .token(t.kind, &self.src[t.start as usize..t.end as usize]);
-    }
-
-    /// Replays tokens and nodes: each token takes its leading trivia, itself and its trailing
-    /// trivia, inside the innermost node that contains it.
-    fn run(
-        &mut self,
-        tokens: &[Tok],
-        nodes: &[Node],
-        retag: impl Fn(Tok, Option<SyntaxKind>) -> Tok,
-    ) {
-        let len = self.src.len() as u32;
-        self.builder.start_node(self.kinds.root);
-        let eof = Tok {
-            kind: self.kinds.eof,
-            start: len,
-            end: len,
-        };
-        let mut nodes = nodes.iter().peekable();
-        // The end and kind of each open node, innermost last.
-        let mut open: Vec<(u32, SyntaxKind)> = Vec::new();
-        let mut carry: Vec<Tok> = Vec::new();
-        let mut gap: Vec<Tok> = Vec::new();
-        self.gap(0, tokens.first().map_or(len, |t| t.start), &mut carry);
-        let mut real = tokens.iter().copied().chain(Some(eof)).peekable();
-        while let Some(t) = real.next() {
-            while open.last().is_some_and(|&(end, _)| end <= t.start) {
-                open.pop();
-                self.builder.finish_node();
-            }
-            while let Some(n) = nodes.next_if(|n| n.start <= t.start) {
-                if n.start == n.end {
-                    self.builder.start_node(n.kind);
-                    self.builder.finish_node();
-                } else if n.end > t.start {
-                    // A node that overlaps its parent ends with it.
-                    let end = open.last().map_or(n.end, |&(p, _)| p.min(n.end));
-                    self.builder.start_node(n.kind);
-                    open.push((end, n.kind));
-                }
-            }
-            for c in carry.drain(..) {
-                self.emit(c);
-            }
-            let t = retag(t, open.last().map(|o| o.1));
-            self.emit(t);
-            if let Some(next) = real.peek() {
-                gap.clear();
-                self.gap(t.end, next.start, &mut gap);
-                let ends_line = |c: &Tok| {
-                    self.src[..c.end as usize]
-                        .chars()
-                        .next_back()
-                        .is_some_and(is_line_break)
-                };
-                let cut = gap.iter().position(ends_line).map_or(gap.len(), |i| i + 1);
-                for c in gap[..cut].iter().copied() {
-                    self.emit(c);
-                }
-                carry.extend_from_slice(&gap[cut..]);
-            }
-        }
-        self.builder.finish_node();
-    }
-
+impl<S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Lexer<'_, S> {
     /// Splits the text `a..b` between two tokens into trivia tokens.
     fn gap(&mut self, a: u32, b: u32, out: &mut Vec<Tok>) {
         let src = self.src;

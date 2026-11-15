@@ -9,10 +9,10 @@ use std::path::PathBuf;
 fn db(config: &str) -> Database {
     let providers: Vec<Box<dyn LanguageProvider>> = vec![
         Box::new(lang_html::provider()),
-        Box::new(lang_json::JsonProvider::new()),
+        Box::new(lang_json::provider()),
         Box::new(lang_js::provider()),
-        Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
-        Box::new(lang_css::CssProvider::new(lang_css::Dialect::Scss)),
+        Box::new(lang_css::provider(lang_css::Dialect::Css)),
+        Box::new(lang_css::provider(lang_css::Dialect::Scss)),
         Box::new(lang_yaml::provider()),
         Box::new(lang_markdown::provider()),
         Box::new(lang_dockerfile::provider()),
@@ -210,7 +210,7 @@ fn vue_templates_scripts_and_custom_blocks_are_formatted_by_their_language() {
     let mut providers: Vec<Box<dyn LanguageProvider>> = vec![Box::new(lang_html::vue_provider())];
     providers.extend([
         Box::new(lang_js::provider()) as Box<dyn LanguageProvider>,
-        Box::new(lang_json::JsonProvider::new()),
+        Box::new(lang_json::provider()),
     ]);
     let mut db = Database::new(providers);
     db.set_config(ConfigChain::parse(
@@ -259,7 +259,7 @@ fn svelte_blocks_tags_and_scripts_are_formatted() {
     let providers: Vec<Box<dyn LanguageProvider>> = vec![
         Box::new(lang_html::svelte_provider()),
         Box::new(lang_js::provider()),
-        Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
+        Box::new(lang_css::provider(lang_css::Dialect::Css)),
     ];
     let db = Database::new(providers);
     let svelte = "<style>a{b:c}</style>\n{#if a>1}<p on:click={()=>x++} {y}>{y}</p>{:else}\nno\n{/if}\n<script>\nlet a=1\n</script>\n<input value={value} />\n";

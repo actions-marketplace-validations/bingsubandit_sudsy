@@ -4,13 +4,12 @@
 use core_config::{Level, OptionValue, ResolvedRule, Source};
 use core_rules::*;
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};
-use lang_json::JsonProvider;
 use provider_api::{LanguageProvider, SourceFile};
 use std::collections::BTreeMap;
 use std::path::Path;
 
 fn kind(name: &str) -> SyntaxKind {
-    lang_json::JsonProvider::new()
+    lang_json::provider()
         .grammar()
         .kind_by_name(name)
         .expect("a JSON kind")
@@ -81,7 +80,7 @@ impl Rule for Probe {
 }
 
 fn run(text: &str, rule: &Probe, collect: bool, bodies: &[SyntaxKind]) -> FileReport {
-    let provider = JsonProvider::new();
+    let provider = lang_json::provider();
     let parsed = provider.parse(&SourceFile::new("a.json", 1, text)).unwrap();
     let lines = LineIndex::new(text);
     let file = FileContext {

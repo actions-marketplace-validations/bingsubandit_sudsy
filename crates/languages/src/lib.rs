@@ -23,10 +23,10 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
         .unwrap_or_else(|_| PathBuf::from("csharp-worker/Sudsy.Worker.dll"));
     // JSON stays first: the start-up path finds it by grammar name, which parses the grammars before it.
     vec![
-        Box::new(lang_json::JsonProvider::new()),
-        Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
-        Box::new(lang_css::CssProvider::new(lang_css::Dialect::Scss)),
-        Box::new(lang_css::CssProvider::new(lang_css::Dialect::Less)),
+        Box::new(lang_json::provider()),
+        Box::new(lang_css::provider(lang_css::Dialect::Css)),
+        Box::new(lang_css::provider(lang_css::Dialect::Scss)),
+        Box::new(lang_css::provider(lang_css::Dialect::Less)),
         // generated:providers
         Box::new(lang_dockerfile::provider()),
         Box::new(lang_editorconfig::provider()),

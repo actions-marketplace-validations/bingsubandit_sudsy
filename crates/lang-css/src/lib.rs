@@ -11,15 +11,8 @@ mod rules;
 pub use format::{CssFormatter, option_schema};
 pub use parser::MAX_DEPTH;
 
-use core_config::OptionSchema;
-use core_format::NodeFormatter;
-use core_rules::Rule;
-use core_syntax::{Grammar, LanguageId, grammars};
-use provider_api::{
-    Capabilities, FileMatcher, FnSnippets, LanguageProvider, LazyRules, ParseResult, ProviderError,
-    SourceFile,
-};
-use std::sync::LazyLock;
+use core_syntax::grammars;
+use provider_api::{ParseResult, ParserProvider, ParserSpec, SourceFile};
 
 /// The syntax a file is lexed with: `//` comments are SCSS and Less only, `$name` and `#{}` SCSS
 /// only, `@{}` Less only.
@@ -40,106 +33,54 @@ impl Dialect {
     }
 }
 
-pub struct CssProvider {
-    dialect: Dialect,
-    matchers: Vec<FileMatcher>,
-    schema: OptionSchema,
-    formatter: CssFormatter,
-}
-
-/// The rules of the three languages are the same files; built on first use, for all of them. Pattern
-/// files here use no snippets, so one parse function serves.
-static RULES: LazyLock<LazyRules> = LazyLock::new(|| {
-    LazyRules::new(
-        &[],
-        grammars::CSS.language,
-        provider_api::pattern_files!(),
-        rules::FAMILIES,
-        FnSnippets::new(grammars::CSS, |text| parse_result(text, Dialect::Css)),
-    )
-});
-
-impl CssProvider {
-    pub fn new(dialect: Dialect) -> Self {
-        CssProvider {
-            dialect,
-            matchers: [dialect.name()]
-                .into_iter()
-                .chain((dialect == Dialect::Css).then_some("uss")) // Unity UI Toolkit style sheets
-                .map(FileMatcher::extension)
-                .collect(),
-            schema: option_schema(),
-            formatter: CssFormatter::new(dialect),
-        }
+/// The provider of one dialect; `scss` and `less` take `css` as their config base. The three
+/// share the rules; the pattern files use no snippets, so one parse function serves.
+pub fn provider(dialect: Dialect) -> ParserProvider {
+    static CSS: CssFormatter = CssFormatter::new(Dialect::Css);
+    static SCSS: CssFormatter = CssFormatter::new(Dialect::Scss);
+    static LESS: CssFormatter = CssFormatter::new(Dialect::Less);
+    let formatter = match dialect {
+        Dialect::Css => &CSS,
+        Dialect::Scss => &SCSS,
+        Dialect::Less => &LESS,
+    };
+    let spec = ParserSpec {
+        crate_name: env!("CARGO_PKG_NAME"),
+        grammar: grammars::CSS,
+        extensions: match dialect {
+            Dialect::Css => &["css", "uss"], // Unity UI Toolkit style sheets
+            Dialect::Scss => &["scss"],
+            Dialect::Less => &["less"],
+        },
+        file_names: &[],
+        schema: option_schema(),
+        formatter,
+        hooks: &core_rules::DEFAULT_HOOKS,
+        rules: &[],
+        pattern_files: provider_api::pattern_files!(),
+        families: rules::FAMILIES,
+    };
+    let provider = ParserProvider::new(spec, move |file| parse_file(file, dialect));
+    match dialect {
+        Dialect::Css => provider,
+        _ => provider.with_dialect(dialect.name(), "css"),
     }
 }
 
-fn parse_result(text: &str, dialect: Dialect) -> ParseResult {
+fn parse_file(file: &SourceFile, dialect: Dialect) -> ParseResult {
+    // A host's declaration list (`EmbedMode::Declarations`) is the block of a rule.
+    let text = match file.language_version.as_deref() {
+        Some("declarations") => &format!(
+            "a{{
+{}
+}}",
+            file.text
+        ),
+        _ => &file.text,
+    };
     let parsed = parser::parse(text, dialect);
     ParseResult {
         tree: parsed.tree,
         errors: parsed.errors,
-    }
-}
-
-impl LanguageProvider for CssProvider {
-    fn id(&self) -> LanguageId {
-        grammars::CSS.id
-    }
-
-    fn language(&self) -> &str {
-        self.dialect.name()
-    }
-
-    fn crate_name(&self) -> &'static str {
-        env!("CARGO_PKG_NAME")
-    }
-
-    fn grammar(&self) -> &Grammar {
-        grammars::CSS.get()
-    }
-
-    fn file_matchers(&self) -> &[FileMatcher] {
-        &self.matchers
-    }
-
-    fn capabilities(&self) -> Capabilities {
-        Capabilities::NONE
-    }
-
-    fn parse(&self, file: &SourceFile) -> Result<ParseResult, ProviderError> {
-        // A host's declaration list (`EmbedMode::Declarations`) is the block of a rule.
-        Ok(match file.language_version.as_deref() {
-            Some("declarations") => parse_result(
-                &format!(
-                    "a{{
-{}
-}}",
-                    file.text
-                ),
-                self.dialect,
-            ),
-            _ => parse_result(&file.text, self.dialect),
-        })
-    }
-
-    fn formatter(&self) -> &dyn NodeFormatter {
-        &self.formatter
-    }
-
-    fn option_schema(&self) -> &OptionSchema {
-        &self.schema
-    }
-
-    fn config_base(&self) -> Option<&str> {
-        (self.dialect != Dialect::Css).then_some("css")
-    }
-
-    fn rules(&self) -> &'static [&'static dyn Rule] {
-        RULES.all()
-    }
-
-    fn rust_rules(&self) -> &'static [&'static dyn Rule] {
-        RULES.rust()
     }
 }
