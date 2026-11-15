@@ -364,16 +364,24 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `ambiguous-class-name` | python | style | off | none | A class named `l`, `O` or `I`. |
 | `ambiguous-function-name` | python | style | off | none | A function named `l`, `O` or `I`. |
 | `ambiguous-variable-name` | python | style | off | none | A variable, parameter or `global` name that is `l`, `O` or `I`. |
+| `assert-false` | python | suspicious | warn | none | An `assert` whose test is the literal `False`. |
 | `assert-tuple` | python | correctness | warn | none | An `assert` whose test is a tuple (a message written inside the parentheses). |
 | `bare-except` | python | suspicious | warn | none | An `except` clause without an exception type, unless its body has a bare `raise` of its own. |
 | `break-outside-loop` | python | correctness | warn | none | A `break` that no loop of its function or class contains. |
 | `continue-outside-loop` | python | correctness | warn | none | A `continue` that no loop of its function or class contains. |
 | `default-except-not-last` | python | correctness | warn | none | A bare `except:` followed by another handler. |
+| `double-negation` | python | style | off | none | `not` applied to `not`. |
 | `f-string-missing-placeholders` | python | suspicious | warn | none | An f-string with no replacement field in any of its parts. |
 | `forward-annotation-syntax-error` | python | correctness | warn | none | A quoted annotation that is not an expression. |
 | `future-feature-not-defined` | python | correctness | warn | none | A name imported from `__future__` that the module does not have. |
+| `get-attr-with-constant` | python | style | off | none | `getattr(x, "name")` with a literal name that is an identifier (two arguments). |
+| `if-expr-with-false-true` | python | style | off | none | A conditional expression with `False` and `True` arms. |
+| `if-expr-with-true-false` | python | style | off | none | A conditional expression with `True` and `False` arms. |
+| `if-expr-with-twisted-arms` | python | style | off | none | A conditional expression `b if not a else a`. |
 | `if-tuple` | python | correctness | warn | none | An `if` or `elif` whose test is a tuple. |
 | `import-shadowed-by-loop-var` | python | suspicious | warn | none | A `for` variable with the name of an import. |
+| `in-dict-keys` | python | style | off | none | A membership test, `for` or comprehension over `.keys()` with no arguments. |
+| `invalid-escape-sequence` | python | suspicious | warn | none | A backslash in a string that is not raw and does not start an escape sequence (`\d`, `\_`), also in the pieces of an f-string. |
 | `invalid-print-syntax` | python | correctness | warn | none | `print >> file, ...` of Python 2. |
 | `invalid-syntax` | python | correctness | error | none | Code that Python rejects when it compiles the file, though the grammar allows it (a duplicate parameter, `nonlocal` at module level, `await` in a sync function, ...). |
 | `is-literal` | python | correctness | warn | none | An identity test (`is`, `is not`) with a string, bytes or number literal, a list, set, dict or comprehension, or a tuple of constants. |
@@ -384,11 +392,16 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `multi-value-repeated-key-variable` | python | suspicious | warn | none | A name used twice as a key of one dict. |
 | `multiple-imports-on-one-line` | python | style | off | none | An `import` that names several modules. |
 | `multiple-starred-expressions` | python | correctness | warn | none | An assignment target with two starred names. |
+| `multiple-starts-ends-with` | python | style | off | none | `a.startswith(x) or a.startswith(y)` (also `endswith`): the methods take a tuple. |
 | `multiple-statements-on-one-line-colon` | python | style | off | none | A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`). |
 | `multiple-statements-on-one-line-semicolon` | python | style | off | none | Statements joined by `;`. |
+| `mutable-argument-default` | python | suspicious | warn | none | A parameter whose default is a list, dict or set (literal, comprehension or `list()`, `dict()`, `set()`, `collections.deque()`, ...), unless its annotation is an immutable type. |
+| `negate-equal-op` | python | style | off | none | `not` applied to a comparison with `==`. |
+| `negate-not-equal-op` | python | style | off | none | `not` applied to a comparison with `!=`. |
 | `none-comparison` | python | suspicious | warn | none | A comparison of a value to `None` with `==` or `!=`. |
 | `not-in-test` | python | style | off | none | A membership test negated in front of the expression (`not a in b`). |
 | `not-is-test` | python | style | off | none | An identity test negated in front of the expression (`not a is b`). |
+| `os-error-alias` | python | style | off | none | `EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`. |
 | `percent-format-expected-mapping` | python | correctness | warn | none | A `%` format with `%(name)s` placeholders applied to a tuple, list or set. |
 | `percent-format-expected-sequence` | python | correctness | warn | none | A `%` format with several positional placeholders applied to a dict. |
 | `percent-format-extra-named-arguments` | python | correctness | warn | none | A `%` format applied to a dict with keys no placeholder names. |
@@ -398,9 +411,14 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `percent-format-positional-count-mismatch` | python | correctness | warn | none | A `%` format whose placeholders and values differ in number. |
 | `percent-format-star-requires-sequence` | python | correctness | warn | none | A `%` format with a `*` width or precision applied to a dict. |
 | `percent-format-unsupported-format-character` | python | correctness | warn | none | A `%` format with a conversion character Python does not know. |
+| `pprint` | python | style | off | none | A call of `pprint.pprint`. |
+| `print` | python | style | off | none | A call of the builtin `print` without a `file` argument (or with `file=None`). |
 | `raise-not-implemented` | python | correctness | warn | none | A `raise` of `NotImplemented`. |
+| `raise-without-from-inside-except` | python | suspicious | off | none | A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound. |
 | `redefined-while-unused` | python | suspicious | warn | none | A function, class or import redefined, or an import covered by a name of a function, before anything read the first. |
+| `redundant-tuple-in-exception-handler` | python | style | off | none | An `except` clause that names a tuple of one exception. |
 | `return-outside-function` | python | correctness | warn | none | A `return` that is not inside a function. |
+| `set-attr-with-constant` | python | style | off | none | A statement `setattr(x, "name", v)` with a literal name that is an identifier. |
 | `string-dot-format-extra-named-arguments` | python | correctness | warn | none | A `.format` call with keywords no field names. |
 | `string-dot-format-extra-positional-arguments` | python | correctness | warn | none | A `.format` call with positional arguments no field uses. |
 | `string-dot-format-invalid-format` | python | correctness | warn | none | A `"...".format(...)` whose string does not parse. |
@@ -414,10 +432,15 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `undefined-local-with-import-star-usage` | python | suspicious | warn | none | A name that no scope binds in a file that has a star import. |
 | `undefined-local-with-nested-import-star-usage` | python | correctness | warn | none | A star import in a function or class. |
 | `undefined-name` | python | correctness | warn | none | A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`). |
+| `unicode-literal` | python | style | off | none | A string with the `u` prefix. |
+| `unnecessary-collection-call` | python | style | off | none | `dict()`, `list()` or `tuple()` with no arguments (`dict` with keyword arguments only). |
+| `unnecessary-placeholder` | python | style | off | none | A `pass` or `...` statement in a body of two statements or more. |
 | `unused-annotation` | python | suspicious | warn | none | A local variable annotated without a value and never read. |
 | `unused-import` | python | suspicious | warn | none | An import that nothing in its scope reads and that `__all__` does not name (a redundant alias `import a as a` is a re-export). |
+| `useless-object-inheritance` | python | style | off | none | A class with the builtin `object` as a base. |
 | `useless-semicolon` | python | style | off | none | A `;` at the end of a line. |
 | `yield-outside-function` | python | correctness | warn | none | A `yield`, `yield from` or `await` outside a function. |
+| `zip-without-explicit-strict` | python | suspicious | off | none | A call of `zip` with several arguments (or a starred one) and no `strict` keyword, for Python 3.10 and later. |
 | `and-or-is-not-if-else` | shell | suspicious | off | none | A list `a && b \|\| c` of three commands, unless `c` is `echo`, `printf`, `true`, `:`, `return` or `exit`. |
 | `cd-without-exit` | shell | suspicious | warn | none | `cd`, `pushd` or `popd` whose failure is not handled (`cd dir \|\| exit`). Not reported with `set -e`, for `cd ..` or `cd /`, or for `popd -n`. |
 | `declare-and-assign-separately` | shell | suspicious | off | none | `export`, `local`, `declare`, `readonly` or `typeset` with a command substitution as the value reports the status of the declaration, not of the command. |

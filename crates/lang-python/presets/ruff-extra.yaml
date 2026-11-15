@@ -1,0 +1,27 @@
+# Rules of ruff's other families (flake8-bugbear `B`, flake8-comprehensions `C4`, flake8-pie `PIE`, flake8-print `T20`, flake8-simplify `SIM`, pycodestyle `W`, pyupgrade `UP`) that Sudsy has, all on; add it to `python/ruff` for ruff's `--select` of the same codes.
+python:
+  lint:
+    rules:
+      mutable-argument-default: warn
+      get-attr-with-constant: warn
+      set-attr-with-constant: warn
+      assert-false: warn
+      redundant-tuple-in-exception-handler: warn
+      raise-without-from-inside-except: warn
+      zip-without-explicit-strict: warn
+      print: warn
+      pprint: warn
+      useless-object-inheritance: warn
+      os-error-alias: warn
+      unicode-literal: warn
+      in-dict-keys: warn
+      negate-equal-op: warn
+      negate-not-equal-op: warn
+      double-negation: warn
+      if-expr-with-true-false: warn
+      if-expr-with-false-true: warn
+      if-expr-with-twisted-arms: warn
+      unnecessary-placeholder: warn
+      multiple-starts-ends-with: warn
+      unnecessary-collection-call: warn
+      invalid-escape-sequence: warn

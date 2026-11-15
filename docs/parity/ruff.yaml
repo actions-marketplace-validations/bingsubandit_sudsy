@@ -6,7 +6,7 @@ sources:
   - "https://docs.astral.sh/ruff/formatter/"
   - "https://docs.astral.sh/ruff/formatter/black/"
   - "https://docs.astral.sh/ruff/settings/#format"
-scope: "Formatter (`ruff format`, Black's style) and ruff's default lint rules (`F`, `E4`, `E7`, `E9`); the other families are added by usage"
+scope: "Formatter (`ruff format`, Black's style) and ruff's lint rules: the default set (`F`, `E4`, `E7`, `E9`) and the most used rules of `B`, `C4`, `PIE`, `SIM`, `T20`, `UP` and `W`; the other families are added by usage"
 entries:
   line-length: option python.format.line_width
   indent-width: option python.format.indent_size
@@ -78,3 +78,26 @@ entries:
   F841: rule unused-variable
   F842: rule unused-annotation
   F901: rule raise-not-implemented
+  B006: rule mutable-argument-default
+  B009: rule get-attr-with-constant
+  B010: rule set-attr-with-constant
+  B011: rule assert-false
+  B013: rule redundant-tuple-in-exception-handler
+  B904: rule raise-without-from-inside-except
+  B905: rule zip-without-explicit-strict
+  C408: rule unnecessary-collection-call
+  PIE790: rule unnecessary-placeholder
+  PIE810: rule multiple-starts-ends-with
+  SIM118: rule in-dict-keys
+  SIM201: rule negate-equal-op
+  SIM202: rule negate-not-equal-op
+  SIM208: rule double-negation
+  SIM210: rule if-expr-with-true-false
+  SIM211: rule if-expr-with-false-true
+  SIM212: rule if-expr-with-twisted-arms
+  T201: rule print
+  T203: rule pprint
+  UP004: rule useless-object-inheritance
+  UP024: rule os-error-alias
+  UP025: rule unicode-literal
+  W605: rule invalid-escape-sequence

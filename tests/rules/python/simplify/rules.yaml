@@ -1,0 +1,7 @@
+in-dict-keys: warn
+negate-equal-op: warn
+negate-not-equal-op: warn
+double-negation: warn
+if-expr-with-true-false: warn
+if-expr-with-false-true: warn
+if-expr-with-twisted-arms: warn

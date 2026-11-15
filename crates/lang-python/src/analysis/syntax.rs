@@ -64,6 +64,41 @@ pub fn semicolons(m: &mut Model<'_>, tokens: &[Token]) {
     }
 }
 
+/// W605: a backslash in a string that is not raw and starts no escape sequence.
+pub fn invalid_escapes(m: &mut Model<'_>, src: &str, tokens: &[Token]) {
+    for t in tokens {
+        if !matches!(
+            t.kind(),
+            TokenKind::String | TokenKind::FStringMiddle | TokenKind::TStringMiddle
+        ) || t.string_flags().is_none_or(|f| f.is_raw_string())
+        {
+            continue;
+        }
+        let range = t.range();
+        let mut chars = src[range].char_indices();
+        while let Some((i, c)) = chars.next() {
+            if c != '\\' {
+                continue;
+            }
+            // The backslash ends the piece of an f-string: the replacement field's brace follows.
+            let next = chars.next().map_or('{', |(_, n)| n);
+            if !matches!(
+                next,
+                '\n' | '\r' | '\\' | '\'' | '"' | 'a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '0'
+                    ..='7' | 'x' | 'N' | 'u' | 'U'
+            ) {
+                let at = range.start() + TextSize::try_from(i).unwrap_or_default();
+                let len = TextSize::try_from(1 + next.len_utf8()).unwrap_or_default();
+                m.hit(
+                    "invalid-escape-sequence",
+                    TextRange::at(at, len),
+                    format!("\\{next}"),
+                );
+            }
+        }
+    }
+}
+
 /// F601 and F602: a literal or a name used as a key twice in one dict.
 pub fn dict_keys(m: &mut Model<'_>, src: &str, d: &ast::ExprDict) {
     let mut seen: FxHashSet<String> = FxHashSet::default();

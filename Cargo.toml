@@ -24,6 +24,7 @@ regex = "1"
 regex-syntax = "0.8"
 regex-automata = "0.4"
 rustc-hash = "2"
+unicode-ident = "1"
 rowan = { path = "third_party/rowan" }
 mimalloc = "0.1"
 salsa = "0.28"

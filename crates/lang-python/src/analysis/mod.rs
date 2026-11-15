@@ -83,6 +83,7 @@ fn analyze(file: &FileContext<'_>, parsed: &Parsed<Mod>, target: PythonVersion) 
     let mut ck = checker::Checker::new(file.text, file.path, target);
     ck.run(&module.body);
     syntax::semicolons(&mut ck.m, parsed.tokens());
+    syntax::invalid_escapes(&mut ck.m, file.text, parsed.tokens());
     let mut hits = ck.m.hits;
     hits.sort_by_key(|h| (h.start, h.end));
     hits

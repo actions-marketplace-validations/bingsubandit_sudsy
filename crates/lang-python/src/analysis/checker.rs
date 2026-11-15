@@ -4,6 +4,8 @@
 use super::model::{Found, Kind, Model, New, ScopeKind, is_dummy};
 use super::names::is_builtin_class;
 use super::{dot_format, formats, syntax};
+
+mod lints;
 use ruff_python_ast::visitor::{self, Visitor};
 use ruff_python_ast::{
     self as ast, ExceptHandler, Expr, ExprContext, Pattern, PythonVersion, Stmt, name::Name,
@@ -128,6 +130,7 @@ struct Task<'a> {
     stack: Vec<usize>,
     branch: u32,
     cond_depth: u32,
+    protocol: bool,
 }
 
 pub struct Checker<'a> {
@@ -144,6 +147,14 @@ pub struct Checker<'a> {
     lazy: bool,
     store: Store,
     tuple_depth: u32,
+    /// Inside the body of a `Protocol` class (or a method of one).
+    protocol: bool,
+    /// A `...` is not a placeholder to remove here: an abstract method or a protocol.
+    ellipsis_ok: bool,
+    /// The function whose body is read, `""` elsewhere.
+    fn_name: &'a str,
+    /// An expression of the test of an `if` that only raises.
+    exception_check: bool,
     pub(super) loop_depth: u32,
     cond_depth: u32,
     /// Inside the body of a `try` that handles `NameError`.
@@ -172,6 +183,10 @@ impl<'a> Checker<'a> {
                 literal: false,
             },
             tuple_depth: 0,
+            protocol: false,
+            ellipsis_ok: false,
+            fn_name: "",
+            exception_check: false,
             loop_depth: 0,
             cond_depth: 0,
             name_error: 0,
@@ -194,9 +209,14 @@ impl<'a> Checker<'a> {
             self.cond_depth = task.cond_depth;
             (self.loop_depth, self.tuple_depth, self.name_error) = (0, 0, 0);
             self.annotation = false;
+            self.protocol = task.protocol;
+            self.fn_name = "";
+            self.ellipsis_ok = false;
             self.lazy = matches!(task.work, Work::Annotation(_) | Work::Quoted(_));
             match task.work {
                 Work::Function(f) => {
+                    self.fn_name = f.name.as_str();
+                    self.ellipsis_ok = self.protocol || self.is_abstract(f);
                     self.m.push_scope(ScopeKind::Function {
                         is_async: f.is_async,
                     });
@@ -225,6 +245,7 @@ impl<'a> Checker<'a> {
             stack: self.m.stack.clone(),
             branch: self.m.branch,
             cond_depth: self.cond_depth,
+            protocol: self.protocol,
         });
     }
 
@@ -373,6 +394,7 @@ impl<'a> Checker<'a> {
         self.m.add(f.name.as_str(), new);
         let type_scope = f.type_params.as_deref().map(|tp| self.type_params(tp));
         // Defaults are evaluated here, annotations here or after the module.
+        self.lint_defaults(&f.parameters);
         for p in f.parameters.iter_non_variadic_params() {
             if let Some(d) = p.default.as_deref() {
                 self.visit_expr(d);
@@ -423,6 +445,7 @@ impl<'a> Checker<'a> {
     }
 
     fn class_def(&mut self, c: &'a ast::StmtClassDef) {
+        self.lint_class(c);
         for d in &c.decorator_list {
             self.visit_decorator(d);
         }
@@ -433,7 +456,11 @@ impl<'a> Checker<'a> {
         self.compound(&c.body);
         self.m.push_scope(ScopeKind::Class);
         let saved = std::mem::replace(&mut self.loop_depth, 0);
+        let protocol = self.is_protocol(c);
+        let outer = (self.protocol, self.ellipsis_ok);
+        (self.protocol, self.ellipsis_ok) = (protocol, protocol);
         self.visit_body(&c.body);
+        (self.protocol, self.ellipsis_ok) = outer;
         self.loop_depth = saved;
         self.m.pop_scope();
         if type_scope.is_some() {
@@ -680,6 +707,7 @@ impl<'a> Checker<'a> {
             }
             self.m.new_branch();
             self.compound(&eh.body);
+            self.lint_handler(eh, t.is_star);
             self.visit_except_handler(h);
         }
         self.m.branch = body_branch;
@@ -693,7 +721,10 @@ impl<'a> Checker<'a> {
     }
 
     fn if_stmt(&mut self, i: &'a ast::StmtIf) {
+        let raises = matches!(i.body[..], [Stmt::Raise(_)]);
+        self.exception_check = raises;
         self.visit_expr(&i.test);
+        self.exception_check = false;
         let saved = self.m.branch;
         self.cond_depth += 1;
         self.m.new_branch();
@@ -702,7 +733,9 @@ impl<'a> Checker<'a> {
         for clause in &i.elif_else_clauses {
             self.m.new_branch();
             if let Some(t) = &clause.test {
+                self.exception_check = raises;
                 self.visit_expr(t);
+                self.exception_check = false;
             }
             self.compound(&clause.body);
             self.visit_body(&clause.body);
@@ -720,7 +753,13 @@ impl<'a> Checker<'a> {
 }
 
 impl<'a> Visitor<'a> for Checker<'a> {
+    fn visit_body(&mut self, body: &'a [Stmt]) {
+        self.lint_body(body);
+        visitor::walk_body(self, body);
+    }
+
     fn visit_stmt(&mut self, stmt: &'a Stmt) {
+        self.lint_stmt(stmt);
         self.semantic_stmt(stmt);
         match stmt {
             Stmt::Global(g) => self.declare(&g.names, true),
@@ -842,6 +881,7 @@ impl<'a> Visitor<'a> for Checker<'a> {
     }
 
     fn visit_expr(&mut self, expr: &'a Expr) {
+        self.lint_expr(expr);
         self.semantic_expr(expr);
         match expr {
             Expr::Name(n) => match n.ctx {

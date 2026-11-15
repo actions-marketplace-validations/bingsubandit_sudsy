@@ -14309,6 +14309,39 @@
       "upstream": []
     },
     {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "An `assert` whose test is the literal `False`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import collections\nfrom typing import Sequence\n\nx = a = b = 1\n\n\ndef f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):\n    pass\n\n\ndef immutable(a: Sequence[int] = [], b: tuple = (), c=(), d=frozenset(), e=bytearray()):\n    pass\n\n\nassert False\nassert False, \"message\"\nassert 0\ngetattr(x, \"name\")\ngetattr(x, \"__private\")\ngetattr(x, \"class\")\ngetattr(x, \"name\", None)\nsetattr(x, \"name\", 1)\ny = setattr(x, \"name\", 1)\nsetattr(x, \"class\", 1)\nzip(a, b)\nzip(a)\nzip(a, b, strict=True)\ntry:\n    pass\nexcept (ValueError,):\n    pass\nexcept (ValueError, TypeError):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 12,
+            "line": 15
+          },
+          {
+            "column": 1,
+            "length": 23,
+            "line": 16
+          }
+        ]
+      },
+      "fix": null,
+      "id": "assert-false",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "An `assert` whose test is a tuple (a message written inside the parentheses).",
@@ -14449,6 +14482,34 @@
       "upstream": []
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "`not` applied to `not`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 9,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "double-negation",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
       "category": "suspicious",
       "default_level": "warn",
       "description": "An f-string with no replacement field in any of its parts.",
@@ -14538,6 +14599,118 @@
       "upstream": []
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "`getattr(x, \"name\")` with a literal name that is an identifier (two arguments).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import collections\nfrom typing import Sequence\n\nx = a = b = 1\n\n\ndef f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):\n    pass\n\n\ndef immutable(a: Sequence[int] = [], b: tuple = (), c=(), d=frozenset(), e=bytearray()):\n    pass\n\n\nassert False\nassert False, \"message\"\nassert 0\ngetattr(x, \"name\")\ngetattr(x, \"__private\")\ngetattr(x, \"class\")\ngetattr(x, \"name\", None)\nsetattr(x, \"name\", 1)\ny = setattr(x, \"name\", 1)\nsetattr(x, \"class\", 1)\nzip(a, b)\nzip(a)\nzip(a, b, strict=True)\ntry:\n    pass\nexcept (ValueError,):\n    pass\nexcept (ValueError, TypeError):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 18,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "get-attr-with-constant",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A conditional expression with `False` and `True` arms.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 20,
+            "line": 14
+          }
+        ]
+      },
+      "fix": null,
+      "id": "if-expr-with-false-true",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A conditional expression with `True` and `False` arms.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 20,
+            "line": 13
+          }
+        ]
+      },
+      "fix": null,
+      "id": "if-expr-with-true-false",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A conditional expression `b if not a else a`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 17,
+            "line": 16
+          }
+        ]
+      },
+      "fix": null,
+      "id": "if-expr-with-twisted-arms",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "An `if` or `elif` whose test is a tuple.",
@@ -14595,6 +14768,117 @@
       "options": [],
       "presets": [
         "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A membership test, `for` or comprehension over `.keys()` with no arguments.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 13,
+            "line": 2
+          },
+          {
+            "column": 5,
+            "length": 17,
+            "line": 3
+          },
+          {
+            "column": 8,
+            "length": 17,
+            "line": 5
+          },
+          {
+            "column": 10,
+            "length": 8,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "in-dict-keys",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "A backslash in a string that is not raw and does not start an escape sequence (`\\d`, `\\_`), also in the pieces of an f-string.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "x = \"\\d\"\ny = r\"\\d\"\nz = b\"\\d\"\nf = f\"\\d {x} \\w {x:\\d} \\{x}\"\ng = \"\\u1234 \\x41 \\101 \\n \\\\ \\' \\N{EM DASH}\"\nh = \"\\8\" \"\\_\"\ni = \"\"\"\n\\d\n\"\"\"\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 6,
+            "length": 2,
+            "line": 1
+          },
+          {
+            "column": 7,
+            "length": 2,
+            "line": 3
+          },
+          {
+            "column": 7,
+            "length": 2,
+            "line": 4
+          },
+          {
+            "column": 14,
+            "length": 2,
+            "line": 4
+          },
+          {
+            "column": 20,
+            "length": 2,
+            "line": 4
+          },
+          {
+            "column": 24,
+            "length": 2,
+            "line": 4
+          },
+          {
+            "column": 6,
+            "length": 2,
+            "line": 6
+          },
+          {
+            "column": 11,
+            "length": 2,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 2,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "invalid-escape-sequence",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
       ],
       "upstream": []
     },
@@ -14921,6 +15205,39 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "`a.startswith(x) or a.startswith(y)` (also `endswith`): the methods take a tuple.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import pprint\nfrom pprint import pprint as pp\n\na = b = c = f = 1\n\nprint(1)\nprint()\nprint(\"x\", file=f)\nprint(\"x\", file=None)\npprint.pprint(1)\npp(2)\npprint(3)\nx = dict()\nx = dict(a=1)\nx = dict(**a)\nx = dict(a, b=1)\nx = list()\nx = tuple()\nx = list(a)\nx = a.startswith(\"a\") or a.startswith(\"b\")\nx = a.endswith(\"a\") or a.endswith((\"b\", \"c\")) or c\nx = a.startswith(\"a\") or b.startswith(\"b\")\nx = a.startswith(\"a\") and a.startswith(\"b\")\nx = a.startswith(\"a\") or a.endswith(\"b\")\nif a:\n    pass\n    pass\nelse:\n    ...\n    x = 1\n\n\ndef f():\n    \"\"\"doc\"\"\"\n    ...\n\n\nclass C:\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 38,
+            "line": 20
+          },
+          {
+            "column": 5,
+            "length": 46,
+            "line": 21
+          }
+        ]
+      },
+      "fix": null,
+      "id": "multiple-starts-ends-with",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`).",
       "example": {
         "config": null,
@@ -14971,6 +15288,115 @@
       "options": [],
       "presets": [
         "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "A parameter whose default is a list, dict or set (literal, comprehension or `list()`, `dict()`, `set()`, `collections.deque()`, ...), unless its annotation is an immutable type.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import collections\nfrom typing import Sequence\n\nx = a = b = 1\n\n\ndef f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):\n    pass\n\n\ndef immutable(a: Sequence[int] = [], b: tuple = (), c=(), d=frozenset(), e=bytearray()):\n    pass\n\n\nassert False\nassert False, \"message\"\nassert 0\ngetattr(x, \"name\")\ngetattr(x, \"__private\")\ngetattr(x, \"class\")\ngetattr(x, \"name\", None)\nsetattr(x, \"name\", 1)\ny = setattr(x, \"name\", 1)\nsetattr(x, \"class\", 1)\nzip(a, b)\nzip(a)\nzip(a, b, strict=True)\ntry:\n    pass\nexcept (ValueError,):\n    pass\nexcept (ValueError, TypeError):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 9,
+            "length": 2,
+            "line": 7
+          },
+          {
+            "column": 15,
+            "length": 2,
+            "line": 7
+          },
+          {
+            "column": 21,
+            "length": 5,
+            "line": 7
+          },
+          {
+            "column": 30,
+            "length": 6,
+            "line": 7
+          },
+          {
+            "column": 40,
+            "length": 19,
+            "line": 7
+          },
+          {
+            "column": 63,
+            "length": 14,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "mutable-argument-default",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`not` applied to a comparison with `==`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 10,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "negate-equal-op",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`not` applied to a comparison with `!=`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 10,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "negate-not-equal-op",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
       ],
       "upstream": []
     },
@@ -15075,6 +15501,54 @@
       "options": [],
       "presets": [
         "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import select\nimport socket\n\nBase = M = f = 1\n\n\nclass A(object):\n    pass\n\n\nclass B(Base, object, metaclass=M):\n    pass\n\n\nx = u\"a\" \"b\"\ny = f(u\"a\", \"b\")\n\ntry:\n    pass\nexcept IOError:\n    pass\nexcept (EnvironmentError, ValueError, socket.error):\n    pass\nexcept select.error:\n    pass\nraise IOError(\"x\")\nx = IOError\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 8,
+            "length": 7,
+            "line": 20
+          },
+          {
+            "column": 9,
+            "length": 16,
+            "line": 22
+          },
+          {
+            "column": 39,
+            "length": 12,
+            "line": 22
+          },
+          {
+            "column": 8,
+            "length": 12,
+            "line": 24
+          },
+          {
+            "column": 7,
+            "length": 7,
+            "line": 26
+          }
+        ]
+      },
+      "fix": null,
+      "id": "os-error-alias",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
       ],
       "upstream": []
     },
@@ -15346,6 +15820,77 @@
       "upstream": []
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "A call of `pprint.pprint`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import pprint\nfrom pprint import pprint as pp\n\na = b = c = f = 1\n\nprint(1)\nprint()\nprint(\"x\", file=f)\nprint(\"x\", file=None)\npprint.pprint(1)\npp(2)\npprint(3)\nx = dict()\nx = dict(a=1)\nx = dict(**a)\nx = dict(a, b=1)\nx = list()\nx = tuple()\nx = list(a)\nx = a.startswith(\"a\") or a.startswith(\"b\")\nx = a.endswith(\"a\") or a.endswith((\"b\", \"c\")) or c\nx = a.startswith(\"a\") or b.startswith(\"b\")\nx = a.startswith(\"a\") and a.startswith(\"b\")\nx = a.startswith(\"a\") or a.endswith(\"b\")\nif a:\n    pass\n    pass\nelse:\n    ...\n    x = 1\n\n\ndef f():\n    \"\"\"doc\"\"\"\n    ...\n\n\nclass C:\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 16,
+            "line": 10
+          },
+          {
+            "column": 1,
+            "length": 5,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "pprint",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A call of the builtin `print` without a `file` argument (or with `file=None`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import pprint\nfrom pprint import pprint as pp\n\na = b = c = f = 1\n\nprint(1)\nprint()\nprint(\"x\", file=f)\nprint(\"x\", file=None)\npprint.pprint(1)\npp(2)\npprint(3)\nx = dict()\nx = dict(a=1)\nx = dict(**a)\nx = dict(a, b=1)\nx = list()\nx = tuple()\nx = list(a)\nx = a.startswith(\"a\") or a.startswith(\"b\")\nx = a.endswith(\"a\") or a.endswith((\"b\", \"c\")) or c\nx = a.startswith(\"a\") or b.startswith(\"b\")\nx = a.startswith(\"a\") and a.startswith(\"b\")\nx = a.startswith(\"a\") or a.endswith(\"b\")\nif a:\n    pass\n    pass\nelse:\n    ...\n    x = 1\n\n\ndef f():\n    \"\"\"doc\"\"\"\n    ...\n\n\nclass C:\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 8,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 7,
+            "line": 7
+          },
+          {
+            "column": 1,
+            "length": 21,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "print",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "A `raise` of `NotImplemented`.",
@@ -15375,6 +15920,44 @@
       "options": [],
       "presets": [
         "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "x = 1\ntry:\n    pass\nexcept OSError as e:\n    if x:\n        raise ValueError(\"nested\")\n    try:\n        raise ValueError(\"try body\")\n    except KeyError:\n        raise ValueError(\"inner handler\")\n    raise e\n    raise ValueError() from e\n    raise ValueError() from None\n\n    def g():\n        raise ValueError(\"function\")\n\n\ntry:\n    pass\nexcept* OSError:\n    raise ValueError\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 9,
+            "length": 26,
+            "line": 6
+          },
+          {
+            "column": 9,
+            "length": 33,
+            "line": 10
+          },
+          {
+            "column": 5,
+            "length": 16,
+            "line": 22
+          }
+        ]
+      },
+      "fix": null,
+      "id": "raise-without-from-inside-except",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
       ],
       "upstream": []
     },
@@ -15412,6 +15995,34 @@
       "upstream": []
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `except` clause that names a tuple of one exception.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import collections\nfrom typing import Sequence\n\nx = a = b = 1\n\n\ndef f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):\n    pass\n\n\ndef immutable(a: Sequence[int] = [], b: tuple = (), c=(), d=frozenset(), e=bytearray()):\n    pass\n\n\nassert False\nassert False, \"message\"\nassert 0\ngetattr(x, \"name\")\ngetattr(x, \"__private\")\ngetattr(x, \"class\")\ngetattr(x, \"name\", None)\nsetattr(x, \"name\", 1)\ny = setattr(x, \"name\", 1)\nsetattr(x, \"class\", 1)\nzip(a, b)\nzip(a)\nzip(a, b, strict=True)\ntry:\n    pass\nexcept (ValueError,):\n    pass\nexcept (ValueError, TypeError):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 8,
+            "length": 13,
+            "line": 30
+          }
+        ]
+      },
+      "fix": null,
+      "id": "redundant-tuple-in-exception-handler",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "A `return` that is not inside a function.",
@@ -15441,6 +16052,34 @@
       "options": [],
       "presets": [
         "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A statement `setattr(x, \"name\", v)` with a literal name that is an identifier.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import collections\nfrom typing import Sequence\n\nx = a = b = 1\n\n\ndef f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):\n    pass\n\n\ndef immutable(a: Sequence[int] = [], b: tuple = (), c=(), d=frozenset(), e=bytearray()):\n    pass\n\n\nassert False\nassert False, \"message\"\nassert 0\ngetattr(x, \"name\")\ngetattr(x, \"__private\")\ngetattr(x, \"class\")\ngetattr(x, \"name\", None)\nsetattr(x, \"name\", 1)\ny = setattr(x, \"name\", 1)\nsetattr(x, \"class\", 1)\nzip(a, b)\nzip(a)\nzip(a, b, strict=True)\ntry:\n    pass\nexcept (ValueError,):\n    pass\nexcept (ValueError, TypeError):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 21,
+            "line": 22
+          }
+        ]
+      },
+      "fix": null,
+      "id": "set-attr-with-constant",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
       ],
       "upstream": []
     },
@@ -15889,6 +16528,125 @@
       "upstream": []
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "A string with the `u` prefix.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import select\nimport socket\n\nBase = M = f = 1\n\n\nclass A(object):\n    pass\n\n\nclass B(Base, object, metaclass=M):\n    pass\n\n\nx = u\"a\" \"b\"\ny = f(u\"a\", \"b\")\n\ntry:\n    pass\nexcept IOError:\n    pass\nexcept (EnvironmentError, ValueError, socket.error):\n    pass\nexcept select.error:\n    pass\nraise IOError(\"x\")\nx = IOError\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 4,
+            "line": 15
+          },
+          {
+            "column": 7,
+            "length": 4,
+            "line": 16
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unicode-literal",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`dict()`, `list()` or `tuple()` with no arguments (`dict` with keyword arguments only).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import pprint\nfrom pprint import pprint as pp\n\na = b = c = f = 1\n\nprint(1)\nprint()\nprint(\"x\", file=f)\nprint(\"x\", file=None)\npprint.pprint(1)\npp(2)\npprint(3)\nx = dict()\nx = dict(a=1)\nx = dict(**a)\nx = dict(a, b=1)\nx = list()\nx = tuple()\nx = list(a)\nx = a.startswith(\"a\") or a.startswith(\"b\")\nx = a.endswith(\"a\") or a.endswith((\"b\", \"c\")) or c\nx = a.startswith(\"a\") or b.startswith(\"b\")\nx = a.startswith(\"a\") and a.startswith(\"b\")\nx = a.startswith(\"a\") or a.endswith(\"b\")\nif a:\n    pass\n    pass\nelse:\n    ...\n    x = 1\n\n\ndef f():\n    \"\"\"doc\"\"\"\n    ...\n\n\nclass C:\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 6,
+            "line": 13
+          },
+          {
+            "column": 5,
+            "length": 9,
+            "line": 14
+          },
+          {
+            "column": 5,
+            "length": 6,
+            "line": 17
+          },
+          {
+            "column": 5,
+            "length": 7,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unnecessary-collection-call",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `pass` or `...` statement in a body of two statements or more.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import pprint\nfrom pprint import pprint as pp\n\na = b = c = f = 1\n\nprint(1)\nprint()\nprint(\"x\", file=f)\nprint(\"x\", file=None)\npprint.pprint(1)\npp(2)\npprint(3)\nx = dict()\nx = dict(a=1)\nx = dict(**a)\nx = dict(a, b=1)\nx = list()\nx = tuple()\nx = list(a)\nx = a.startswith(\"a\") or a.startswith(\"b\")\nx = a.endswith(\"a\") or a.endswith((\"b\", \"c\")) or c\nx = a.startswith(\"a\") or b.startswith(\"b\")\nx = a.startswith(\"a\") and a.startswith(\"b\")\nx = a.startswith(\"a\") or a.endswith(\"b\")\nif a:\n    pass\n    pass\nelse:\n    ...\n    x = 1\n\n\ndef f():\n    \"\"\"doc\"\"\"\n    ...\n\n\nclass C:\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 5,
+            "length": 4,
+            "line": 26
+          },
+          {
+            "column": 5,
+            "length": 4,
+            "line": 27
+          },
+          {
+            "column": 5,
+            "length": 3,
+            "line": 29
+          },
+          {
+            "column": 5,
+            "length": 3,
+            "line": 35
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unnecessary-placeholder",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
       "category": "suspicious",
       "default_level": "warn",
       "description": "A local variable annotated without a value and never read.",
@@ -15972,6 +16730,39 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A class with the builtin `object` as a base.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import select\nimport socket\n\nBase = M = f = 1\n\n\nclass A(object):\n    pass\n\n\nclass B(Base, object, metaclass=M):\n    pass\n\n\nx = u\"a\" \"b\"\ny = f(u\"a\", \"b\")\n\ntry:\n    pass\nexcept IOError:\n    pass\nexcept (EnvironmentError, ValueError, socket.error):\n    pass\nexcept select.error:\n    pass\nraise IOError(\"x\")\nx = IOError\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 9,
+            "length": 6,
+            "line": 7
+          },
+          {
+            "column": 15,
+            "length": 6,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "useless-object-inheritance",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A `;` at the end of a line.",
       "example": {
         "config": null,
@@ -16032,6 +16823,34 @@
       "options": [],
       "presets": [
         "python/ruff"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A call of `zip` with several arguments (or a starred one) and no `strict` keyword, for Python 3.10 and later.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import collections\nfrom typing import Sequence\n\nx = a = b = 1\n\n\ndef f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):\n    pass\n\n\ndef immutable(a: Sequence[int] = [], b: tuple = (), c=(), d=frozenset(), e=bytearray()):\n    pass\n\n\nassert False\nassert False, \"message\"\nassert 0\ngetattr(x, \"name\")\ngetattr(x, \"__private\")\ngetattr(x, \"class\")\ngetattr(x, \"name\", None)\nsetattr(x, \"name\", 1)\ny = setattr(x, \"name\", 1)\nsetattr(x, \"class\", 1)\nzip(a, b)\nzip(a)\nzip(a, b, strict=True)\ntry:\n    pass\nexcept (ValueError,):\n    pass\nexcept (ValueError, TypeError):\n    pass\n",
+        "language": "python",
+        "spans": [
+          {
+            "column": 1,
+            "length": 9,
+            "line": 25
+          }
+        ]
+      },
+      "fix": null,
+      "id": "zip-without-explicit-strict",
+      "languages": [
+        "python"
+      ],
+      "options": [],
+      "presets": [
+        "python/ruff-extra"
       ],
       "upstream": []
     },

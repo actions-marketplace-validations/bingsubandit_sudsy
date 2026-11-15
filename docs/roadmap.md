@@ -16,8 +16,8 @@ Committed work too small for a step of its own: what to do and where, one line e
 
 ## Languages and analysis
 - JavaScript / TypeScript: Flow is unsupported; type-aware rules wait for the TypeScript worker.
-- Python: migration (`sudsy init --from ruff` and `--from black`: `pyproject.toml` `[tool.ruff]` and `[tool.black]`, `ruff.toml`, `per-file-ignores` and `extend-exclude` as `overrides` and `exclude`); docstring code formatting (off in ruff's defaults) and the layout differences of `tests/parity/ruff/differences.yaml`; more ruff families by usage (`B`, `UP`, `SIM`, `I`, `N`, `PL`); notebooks (ruff's `ruff_notebook`); type-aware rules through Pyrefly (below).
 - SQL: dialects beyond ansi, postgres, mysql and tsql (sqruff's others hang or panic); templated (Jinja, dbt) files; the capitalisation, comment placement and line-length wrapping of our own formatter (`tests/parity/sqlfluff/differences.yaml`).
+- Python: migration (`sudsy init --from ruff` and `--from black`: `pyproject.toml` `[tool.ruff]` and `[tool.black]`, `ruff.toml`, `per-file-ignores` and `extend-exclude` as `overrides` and `exclude`); docstring code formatting (off in ruff's defaults) and the layout differences of `tests/parity/ruff/differences.yaml`; more ruff families by usage (the rest of `B`, `UP`, `SIM`, `C4`, `PIE`; `I`, `N`, `PL`, `RET`, `D`); notebooks (ruff's `ruff_notebook`); type-aware rules through Pyrefly (below).
 - INI: `.properties` (`:` and blank separators, `\` continuations, `!` comments); a `.gitconfig` dialect that allows repeated multi-value keys.
 - TOML: TOML 1.1 syntax (the tree-sitter grammar targets 1.0; needs an upstream fix or a fork).
 - XML: the inside of a DOCTYPE (the grammar cannot parse every DTD declaration) and DTD-dependent well-formedness (entities, attribute defaults); reflowing text (the formatter keeps mixed content as written); a `xmlWhitespaceSensitivity: ignore` mode; sorting `PackageReference` items.

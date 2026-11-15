@@ -447,3 +447,210 @@ description: 'A `.format` string with both `{}` and `{0}`.'
 example: '"{} {0}".format(1)'
 severity: warn
 category: correctness
+---
+id: mutable-argument-default
+family: check
+params: { check: mutable-argument-default }
+message: "do not use a mutable value as an argument default: it is shared by every call"
+description: "A parameter whose default is a list, dict or set (literal, comprehension or `list()`, `dict()`, `set()`, `collections.deque()`, ...), unless its annotation is an immutable type."
+example: "def f(a=[]):\n    pass"
+severity: warn
+category: suspicious
+---
+id: get-attr-with-constant
+family: check
+params: { check: get-attr-with-constant }
+message: "`getattr` with a constant attribute is no safer than `x.attr`"
+description: "`getattr(x, \"name\")` with a literal name that is an identifier (two arguments)."
+example: "getattr(x, \"name\")"
+severity: off
+category: style
+---
+id: set-attr-with-constant
+family: check
+params: { check: set-attr-with-constant }
+message: "`setattr` with a constant attribute is no safer than `x.attr = v`"
+description: "A statement `setattr(x, \"name\", v)` with a literal name that is an identifier."
+example: "setattr(x, \"name\", 1)"
+severity: off
+category: style
+---
+id: assert-false
+family: check
+params: { check: assert-false }
+message: "do not `assert False`: `python -O` removes it, raise `AssertionError()`"
+description: "An `assert` whose test is the literal `False`."
+example: "assert False"
+severity: warn
+category: suspicious
+---
+id: redundant-tuple-in-exception-handler
+family: check
+params: { check: redundant-tuple-in-exception-handler }
+message: "a one-element tuple is redundant in an exception handler"
+description: "An `except` clause that names a tuple of one exception."
+example: "try:\n    pass\nexcept (ValueError,):\n    pass"
+severity: off
+category: style
+---
+id: raise-without-from-inside-except
+family: check
+params: { check: raise-without-from-inside-except }
+message: "inside an `{name}` clause, raise with `from err` or `from None`"
+description: "A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound."
+example: "try:\n    pass\nexcept OSError:\n    raise ValueError"
+severity: off
+category: suspicious
+---
+id: zip-without-explicit-strict
+family: check
+params: { check: zip-without-explicit-strict }
+message: "`zip()` without an explicit `strict=`"
+description: "A call of `zip` with several arguments (or a starred one) and no `strict` keyword, for Python 3.10 and later."
+example: "zip(a, b)"
+severity: off
+category: suspicious
+---
+id: print
+family: check
+params: { check: print }
+message: "`print` found"
+description: "A call of the builtin `print` without a `file` argument (or with `file=None`)."
+example: "print(1)"
+severity: off
+category: style
+---
+id: pprint
+family: check
+params: { check: pprint }
+message: "`pprint` found"
+description: "A call of `pprint.pprint`."
+example: "import pprint\npprint.pprint(1)"
+severity: off
+category: style
+---
+id: useless-object-inheritance
+family: check
+params: { check: useless-object-inheritance }
+message: "class `{name}` inherits from `object`, which every class does"
+description: "A class with the builtin `object` as a base."
+example: "class A(object):\n    pass"
+severity: off
+category: style
+---
+id: os-error-alias
+family: check
+params: { check: os-error-alias }
+message: "`{name}` is an alias of `OSError`"
+description: "`EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`."
+example: "try:\n    pass\nexcept IOError:\n    pass"
+severity: off
+category: style
+---
+id: unicode-literal
+family: check
+params: { check: unicode-literal }
+message: "remove the `u` prefix: strings are unicode"
+description: "A string with the `u` prefix."
+example: "x = u\"a\""
+severity: off
+category: style
+---
+id: in-dict-keys
+family: check
+params: { check: in-dict-keys }
+message: "use `key in dict` instead of `key in dict.keys()`"
+description: "A membership test, `for` or comprehension over `.keys()` with no arguments."
+example: "x = k in d.keys()"
+severity: off
+category: style
+---
+id: negate-equal-op
+family: check
+params: { check: negate-equal-op }
+message: "use `a != b` instead of `not a == b`"
+description: "`not` applied to a comparison with `==`."
+example: "x = not a == b"
+severity: off
+category: style
+---
+id: negate-not-equal-op
+family: check
+params: { check: negate-not-equal-op }
+message: "use `a == b` instead of `not a != b`"
+description: "`not` applied to a comparison with `!=`."
+example: "x = not a != b"
+severity: off
+category: style
+---
+id: double-negation
+family: check
+params: { check: double-negation }
+message: "`not not a` is `a`"
+description: "`not` applied to `not`."
+example: "x = not not a"
+severity: off
+category: style
+---
+id: if-expr-with-true-false
+family: check
+params: { check: if-expr-with-true-false }
+message: "use `bool(...)` instead of `True if ... else False`"
+description: "A conditional expression with `True` and `False` arms."
+example: "x = True if a else False"
+severity: off
+category: style
+---
+id: if-expr-with-false-true
+family: check
+params: { check: if-expr-with-false-true }
+message: "use `not ...` instead of `False if ... else True`"
+description: "A conditional expression with `False` and `True` arms."
+example: "x = False if a else True"
+severity: off
+category: style
+---
+id: if-expr-with-twisted-arms
+family: check
+params: { check: if-expr-with-twisted-arms }
+message: "use `a if a else b` instead of `b if not a else a`"
+description: "A conditional expression `b if not a else a`."
+example: "x = b if not a else a"
+severity: off
+category: style
+---
+id: unnecessary-placeholder
+family: check
+params: { check: unnecessary-placeholder }
+message: "unnecessary `{name}`: the body has other statements"
+description: "A `pass` or `...` statement in a body of two statements or more."
+example: "def f():\n    pass\n    x = 1"
+severity: off
+category: style
+---
+id: multiple-starts-ends-with
+family: check
+params: { check: multiple-starts-ends-with }
+message: "call `{name}` once with a tuple"
+description: "`a.startswith(x) or a.startswith(y)` (also `endswith`): the methods take a tuple."
+example: "x = a.startswith(\"a\") or a.startswith(\"b\")"
+severity: off
+category: style
+---
+id: unnecessary-collection-call
+family: check
+params: { check: unnecessary-collection-call }
+message: "unnecessary `{name}()` call: write a literal"
+description: "`dict()`, `list()` or `tuple()` with no arguments (`dict` with keyword arguments only)."
+example: "x = list()"
+severity: off
+category: style
+---
+id: invalid-escape-sequence
+family: check
+params: { check: invalid-escape-sequence }
+message: "invalid escape sequence `{name}`: use a raw string or double the backslash"
+description: "A backslash in a string that is not raw and does not start an escape sequence (`\\d`, `\\_`), also in the pieces of an f-string."
+example: "x = \"\\d\""
+severity: warn
+category: suspicious

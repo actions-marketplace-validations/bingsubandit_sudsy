@@ -1,0 +1,3 @@
+useless-object-inheritance: warn
+unicode-literal: warn
+os-error-alias: warn

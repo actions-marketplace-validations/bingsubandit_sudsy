@@ -127,6 +127,10 @@
               "$ref": "#/definitions/rule",
               "description": "`Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>`; write `T[]` and `readonly T[]`."
             },
+            "assert-false": {
+              "$ref": "#/definitions/rule",
+              "description": "An `assert` whose test is the literal `False`."
+            },
             "assert-tuple": {
               "$ref": "#/definitions/rule",
               "description": "An `assert` whose test is a tuple (a message written inside the parentheses)."
@@ -872,6 +876,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `variable` block with no `description` argument (tflint terraform_documented_variables)."
             },
+            "double-negation": {
+              "$ref": "#/definitions/rule",
+              "description": "`not` applied to `not`."
+            },
             "duplicate-ids": {
               "$ref": "#/definitions/rule",
               "description": "Job ids that differ only in case (ids are case-insensitive; exact repeats are `no-duplicate-keys`), and step ids repeated within a job."
@@ -1187,6 +1195,10 @@
               "$ref": "#/definitions/rule",
               "description": "A gem install gem without a version."
             },
+            "get-attr-with-constant": {
+              "$ref": "#/definitions/rule",
+              "description": "`getattr(x, \"name\")` with a literal name that is an identifier (two arguments)."
+            },
             "getter-return": {
               "$ref": "#/definitions/rule",
               "description": "A getter that does not return a value on every path, or has a `return;`."
@@ -1238,6 +1250,18 @@
                 }
               ]
             },
+            "if-expr-with-false-true": {
+              "$ref": "#/definitions/rule",
+              "description": "A conditional expression with `False` and `True` arms."
+            },
+            "if-expr-with-true-false": {
+              "$ref": "#/definitions/rule",
+              "description": "A conditional expression with `True` and `False` arms."
+            },
+            "if-expr-with-twisted-arms": {
+              "$ref": "#/definitions/rule",
+              "description": "A conditional expression `b if not a else a`."
+            },
             "if-tuple": {
               "$ref": "#/definitions/rule",
               "description": "An `if` or `elif` whose test is a tuple."
@@ -1254,6 +1278,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `for` variable with the name of an import."
             },
+            "in-dict-keys": {
+              "$ref": "#/definitions/rule",
+              "description": "A membership test, `for` or comprehension over `.keys()` with no arguments."
+            },
             "inheritdoc-on-inheriting-member": {
               "$ref": "#/definitions/rule",
               "description": "`<inheritdoc />` without `cref` on a type without a base list, or on a member that neither overrides nor implements anything (a constructor whose signature matches a base constructor is fine). No fix."
@@ -1265,6 +1293,10 @@
             "input-missing-label": {
               "$ref": "#/definitions/rule",
               "description": "An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`."
+            },
+            "invalid-escape-sequence": {
+              "$ref": "#/definitions/rule",
+              "description": "A backslash in a string that is not raw and does not start an escape sequence (`\\d`, `\\_`), also in the pieces of an f-string."
             },
             "invalid-expression": {
               "$ref": "#/definitions/rule",
@@ -1901,6 +1933,10 @@
               "$ref": "#/definitions/rule",
               "description": "An assignment target with two starred names."
             },
+            "multiple-starts-ends-with": {
+              "$ref": "#/definitions/rule",
+              "description": "`a.startswith(x) or a.startswith(y)` (also `endswith`): the methods take a tuple."
+            },
             "multiple-statements-on-one-line-colon": {
               "$ref": "#/definitions/rule",
               "description": "A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`)."
@@ -1908,6 +1944,10 @@
             "multiple-statements-on-one-line-semicolon": {
               "$ref": "#/definitions/rule",
               "description": "Statements joined by `;`."
+            },
+            "mutable-argument-default": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter whose default is a list, dict or set (literal, comprehension or `list()`, `dict()`, `set()`, `collections.deque()`, ...), unless its annotation is an immutable type."
             },
             "name-pattern": {
               "description": "The `name` of a form control that does not match the `pattern` option (a regex; by default camelCase, with a trailing `[]` allowed).",
@@ -2065,6 +2105,14 @@
                   "type": "object"
                 }
               ]
+            },
+            "negate-equal-op": {
+              "$ref": "#/definitions/rule",
+              "description": "`not` applied to a comparison with `==`."
+            },
+            "negate-not-equal-op": {
+              "$ref": "#/definitions/rule",
+              "description": "`not` applied to a comparison with `!=`."
             },
             "negation-of-excluded-parent": {
               "$ref": "#/definitions/rule",
@@ -2893,6 +2941,10 @@
               "$ref": "#/definitions/rule",
               "description": "A oneof name that is not lower_snake_case (buf lint ONEOF_LOWER_SNAKE_CASE)."
             },
+            "os-error-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "`EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`."
+            },
             "package-defined": {
               "$ref": "#/definitions/rule",
               "description": "A file without a `package` statement (buf lint PACKAGE_DEFINED)."
@@ -2953,6 +3005,10 @@
               "$ref": "#/definitions/rule",
               "description": "A member or element access on an expression the compiler's nullable analysis says may be null. Only code under `#nullable enable` is checked. Off by default: the compiler reports the same thing as CS8602."
             },
+            "pprint": {
+              "$ref": "#/definitions/rule",
+              "description": "A call of `pprint.pprint`."
+            },
             "prefer-as-const": {
               "$ref": "#/definitions/rule",
               "description": "A literal type that repeats the literal it is given to (`let a: 'a' = 'a'`, `'a' as 'a'`, `<'a'>'a'`); write `as const`."
@@ -2972,6 +3028,10 @@
             "presentation-role-style": {
               "$ref": "#/definitions/rule",
               "description": "`none` and `presentation` are synonyms; `none` is the one ARIA 1.2 prefers."
+            },
+            "print": {
+              "$ref": "#/definitions/rule",
+              "description": "A call of the builtin `print` without a `file` argument (or with `file=None`)."
             },
             "printf-variable-format": {
               "$ref": "#/definitions/rule",
@@ -3252,6 +3312,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `raise` of `NotImplemented`."
             },
+            "raise-without-from-inside-except": {
+              "$ref": "#/definitions/rule",
+              "description": "A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound."
+            },
             "read-without-raw": {
               "$ref": "#/definitions/rule",
               "description": "A `read` without the `-r` flag."
@@ -3263,6 +3327,10 @@
             "redundant-pattern": {
               "$ref": "#/definitions/rule",
               "description": "A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)."
+            },
+            "redundant-tuple-in-exception-handler": {
+              "$ref": "#/definitions/rule",
+              "description": "An `except` clause that names a tuple of one exception."
             },
             "remove-unused-usings": {
               "$ref": "#/definitions/rule",
@@ -4203,6 +4271,10 @@
               "$ref": "#/definitions/rule",
               "description": "A service whose name does not end in `Service` (buf lint SERVICE_SUFFIX with its default suffix)."
             },
+            "set-attr-with-constant": {
+              "$ref": "#/definitions/rule",
+              "description": "A statement `setattr(x, \"name\", v)` with a literal name that is an identifier."
+            },
             "shorthand-property-no-redundant-values": {
               "$ref": "#/definitions/rule",
               "description": "A `margin`, `padding`, `border-color`, `border-style`, `border-width` or `border-radius` with two, three or four values that repeat (`1px 1px` is `1px`)."
@@ -4490,6 +4562,10 @@
               "$ref": "#/definitions/rule",
               "description": "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`)."
             },
+            "unicode-literal": {
+              "$ref": "#/definitions/rule",
+              "description": "A string with the `u` prefix."
+            },
             "unique-fragment-name": {
               "$ref": "#/definitions/rule",
               "description": "Two fragments of a document have the same name; a spread cannot tell which one it means. Checked within the file."
@@ -4673,6 +4749,14 @@
                 }
               ]
             },
+            "unnecessary-collection-call": {
+              "$ref": "#/definitions/rule",
+              "description": "`dict()`, `list()` or `tuple()` with no arguments (`dict` with keyword arguments only)."
+            },
+            "unnecessary-placeholder": {
+              "$ref": "#/definitions/rule",
+              "description": "A `pass` or `...` statement in a body of two statements or more."
+            },
             "unreachable-code": {
               "description": "A statement that can never run. At `fast` depth this is the statement after a `return`, `throw`, `break`, `continue` or `goto`; with the flow layer it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Only the first statement of a run is reported. Removing it is offered as an editor quick fix only, because unreachable code usually signals a bug. Off by default: the compiler already reports unreachable code (CS0162) and the SDK analyzers add IDE0035.",
               "oneOf": [
@@ -4810,6 +4894,10 @@
               "$ref": "#/definitions/rule",
               "description": "An `echo` whose only argument is a command substitution."
             },
+            "useless-object-inheritance": {
+              "$ref": "#/definitions/rule",
+              "description": "A class with the builtin `object` as a base."
+            },
             "useless-semicolon": {
               "$ref": "#/definitions/rule",
               "description": "A `;` at the end of a line."
@@ -4942,6 +5030,10 @@
             "yum-yes": {
               "$ref": "#/definitions/rule",
               "description": "yum install without -y."
+            },
+            "zip-without-explicit-strict": {
+              "$ref": "#/definitions/rule",
+              "description": "A call of `zip` with several arguments (or a starred one) and no `strict` keyword, for Python 3.10 and later."
             },
             "zypper-clean": {
               "$ref": "#/definitions/rule",
@@ -5683,6 +5775,7 @@
           "preset:powershell/psscriptanalyzer",
           "preset:protobuf/buf-standard",
           "preset:python/ruff",
+          "preset:python/ruff-extra",
           "preset:shell/shellcheck",
           "preset:toml/taplo-compat",
           "preset:xml/csharpier-compat",

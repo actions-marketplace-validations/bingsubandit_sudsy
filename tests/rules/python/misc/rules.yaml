@@ -1,0 +1,5 @@
+print: warn
+pprint: warn
+unnecessary-collection-call: warn
+multiple-starts-ends-with: warn
+unnecessary-placeholder: warn

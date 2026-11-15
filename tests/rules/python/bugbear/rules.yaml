@@ -1,0 +1,6 @@
+mutable-argument-default: warn
+assert-false: warn
+get-attr-with-constant: warn
+set-attr-with-constant: warn
+zip-without-explicit-strict: warn
+redundant-tuple-in-exception-handler: warn
