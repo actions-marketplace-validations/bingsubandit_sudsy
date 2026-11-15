@@ -21,6 +21,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `bracket_spacing` | bool | json `true`, js `true`, yaml `true`, github-actions `true`, graphql `true`, toml `true` |
 | `collapse` | json: `preserve`, `always`, `never`, `opening_break`; toml: `preserve`, `always`, `never` | json `preserve`, toml `preserve` |
 | `comment_spacing` | int 1-10 | yaml `1`, github-actions `1` |
+| `dialect` | json: `auto`, `json`, `jsonc`; sql: `ansi`, `postgres`, `mysql`, `tsql` | json `auto`, sql `ansi` |
 | `document_end` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `document_start` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `embedded_language_formatting` | `auto`, `off` | html `auto`, markdown `auto`, vue `auto`, svelte `auto` |

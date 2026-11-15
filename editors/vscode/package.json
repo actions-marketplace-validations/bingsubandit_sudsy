@@ -21,6 +21,7 @@
     "onLanguage:jsonc",
     "onLanguage:js",
     "onLanguage:python",
+    "onLanguage:sql",
     "onLanguage:css",
     "onLanguage:yaml",
     "onLanguage:dockerfile",

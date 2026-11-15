@@ -26,6 +26,7 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
         Box::new(lang_json::JsonProvider::new()),
         Box::new(lang_js::JsProvider::new()),
         Box::new(lang_python::PythonProvider::new()),
+        Box::new(lang_sql::SqlProvider::new()),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Scss)),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Less)),

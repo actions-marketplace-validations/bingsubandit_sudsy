@@ -6284,6 +6284,7 @@
           "json",
           "js",
           "python",
+          "sql",
           "css",
           "scss",
           "less",
@@ -8663,6 +8664,53 @@
             },
             "type": "object"
           },
+          "sql": {
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "additionalProperties": false,
+                "properties": {
+                  "dialect": {
+                    "default": "ansi",
+                    "description": "The SQL dialect the file is parsed as.",
+                    "enum": [
+                      "ansi",
+                      "postgres",
+                      "mysql",
+                      "tsql"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "lint": {
+                "$ref": "#/definitions/lint"
+              },
+              "semantics": {
+                "additionalProperties": false,
+                "description": "Facts about methods that the flow analyses use.",
+                "properties": {
+                  "does_not_return": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "pure": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
           "svelte": {
             "additionalProperties": false,
             "properties": {
@@ -9622,6 +9670,53 @@
               "maximum": 10,
               "minimum": 0,
               "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "lint": {
+          "$ref": "#/definitions/lint"
+        },
+        "semantics": {
+          "additionalProperties": false,
+          "description": "Facts about methods that the flow analyses use.",
+          "properties": {
+            "does_not_return": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "pure": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "sql": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "additionalProperties": false,
+          "properties": {
+            "dialect": {
+              "default": "ansi",
+              "description": "The SQL dialect the file is parsed as.",
+              "enum": [
+                "ansi",
+                "postgres",
+                "mysql",
+                "tsql"
+              ],
+              "type": "string"
             }
           },
           "type": "object"

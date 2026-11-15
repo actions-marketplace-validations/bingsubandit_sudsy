@@ -46,6 +46,10 @@ oxc_span = "=0.158.0"
 ruff_python_ast = "=0.0.14"
 ruff_python_parser = "=0.0.14"
 ruff_text_size = "=0.0.14"
+# sqruff is pre-1.0: pinned exactly, bumped by hand only (dependabot ignores it). Only the dialects lang-sql offers are compiled in.
+sqruff-lib-core = "=0.44.0"
+sqruff-lib-dialects = { version = "=0.44.0", default-features = false, features = ["postgres", "mysql", "tsql"] }
+strum = "0.28"
 pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
 # generated:grammars
 tree-sitter-containerfile = "0.9"
@@ -81,6 +85,7 @@ lang-csharp = { path = "crates/lang-csharp" }
 lang-json = { path = "crates/lang-json" }
 lang-js = { path = "crates/lang-js" }
 lang-python = { path = "crates/lang-python" }
+lang-sql = { path = "crates/lang-sql" }
 lang-css = { path = "crates/lang-css" }
 lang-yaml = { path = "crates/lang-yaml" }
 lang-github-actions = { path = "crates/lang-github-actions" }

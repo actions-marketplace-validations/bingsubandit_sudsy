@@ -1,0 +1,5 @@
+options:
+  - dialect:
+      values: ["ansi", "postgres", "mysql", "tsql"]
+      default: "ansi"
+      doc: "The SQL dialect the file is parsed as."

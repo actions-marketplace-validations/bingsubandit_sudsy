@@ -1,0 +1,73 @@
+// SQL (.sql), parsed by sqruff-lib-core with the dialects of `dialect` (crates/lang-sql/src/adapter.rs).
+// Nodes are sqlfluff's segment type names (sqruff's `SyntaxKind`, in Pascal case); a segment type with no node here is transparent, except `*_statement`, which is a `Statement`.
+// Format: see crates/core-syntax/src/grammar/mod.rs.
+
+language sql 27 "SQL"
+comments line "--" block "/*" "*/"
+suppress disable-next-line "sudsy-disable-next-line"
+suppress disable-line "sudsy-disable-line"
+suppress disable "sudsy-disable"
+suppress enable "sudsy-enable"
+suppress disable-file "sudsy-disable-file"
+suppress ignore "sudsy-ignore"
+
+token Whitespace #trivia #whitespace
+token Newline #trivia #newline
+token LineComment #trivia #comment
+token BlockComment #trivia #comment #indentable
+
+token LParen "(" #punctuation #glue
+token RParen ")" #punctuation #close
+token Comma "," #punctuation #separator #glue
+token Semicolon ";" #punctuation #separator
+token Dot "." #punctuation
+// Every other symbol: `=`, `<>`, `||`, `*`, `::`, `@`, ...
+token Operator #punctuation
+token Keyword
+token Identifier
+token QuotedIdentifier
+token String #literal #string
+token Number #literal
+
+// Zero-width end-of-file token; it carries the leading trivia of the file's tail.
+token Eof
+// Text the lexer or the parser could not classify.
+token Unknown #error
+
+node File = Eof
+node Statement
+node SelectStatement
+node SetExpression
+node WithCompoundStatement
+node CommonTableExpression
+node SelectClause
+node SelectClauseElement
+node FromClause
+node FromExpression
+node FromExpressionElement
+node TableExpression
+node JoinClause
+node JoinOnCondition
+node WhereClause
+node GroupbyClause
+node HavingClause
+node OrderbyClause
+node LimitClause
+node WindowSpecification
+node OverClause
+node Expression
+node Function
+node FunctionName
+node Bracketed
+node ColumnReference
+node TableReference
+node AliasExpression
+node CaseExpression
+node WhenClause
+node ElseClause
+node InsertStatement
+node UpdateStatement
+node DeleteStatement
+node CreateTableStatement
+node ColumnDefinition
+node Values

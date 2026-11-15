@@ -16,6 +16,7 @@ lang-csharp.workspace = true
 lang-js.workspace = true
 lang-python.workspace = true
 lang-json.workspace = true
+lang-sql.workspace = true
 lang-css.workspace = true
 lang-yaml.workspace = true
 lang-github-actions.workspace = true

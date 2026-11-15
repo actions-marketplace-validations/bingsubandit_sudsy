@@ -1,11 +1,11 @@
 # Design: SQL
 
-Decided plan with one open measurement (step 0), built in the steps of section 5; each step moves what it builds into `docs/formatting/sql.md`, and this note is deleted when the last step lands.
+Decided plan (step 0 measured), built in the steps of section 5; each step moves what it builds into `docs/formatting/sql.md`, and this note is deleted when the last step lands.
 
 Goal: the formatter and linter sqlfluff and sqruff users switch to: sqlfluff's layout and capitalisation rules (which together are its "formatter"), its bug-catching rules, per-dialect parsing, and migration from `.sqlfluff` / `pyproject.toml [tool.sqlfluff]` / `.sqruff`.
 
 ## Summary
-1. Parser: **sqruff's `sqruff-lib-core` + `sqruff-lib-dialects`** (Apache-2.0, crates.io, 27 of sqlfluff's 28 dialects), pinned exactly, behind a segment-tree-to-lossless-tree adapter. Fallback if step 0 rejects it: tree-sitter-sql (`tree-sitter-sequel`, MIT) as a vendored grammar for an `ansi`-like dialect only.
+1. Parser: **sqruff's `sqruff-lib-core` + `sqruff-lib-dialects`** (Apache-2.0, crates.io), pinned exactly, behind a segment-tree-to-lossless-tree adapter; dialects `ansi`, `postgres`, `mysql`, `tsql` only; panics caught, files over 512 KB not parsed (section 0).
 2. One language `sql` for `.sql`; the dialect is an option (`dialect`), not a language: sqlfluff requires one, Sudsy defaults to `ansi`.
 3. Formatter: sqlfluff's layout rules (LT01-LT15) and capitalisation (CP01-CP05) as the format, with sqlfluff's defaults (`max_line_length` 80, 4 spaces, trailing commas, capitalisation `consistent`).
 4. Lint: sqlfluff's non-layout rules (AL, AM, CV, RF, ST, ...) by usage; zero-config set = the bug-catching ones (ambiguous, references, structure), style rules off.
@@ -31,13 +31,15 @@ Decide: sqruff unless round-trip fails, it is under 5 MB/s, or it adds over 4 MB
 | Binary added (stripped, panic=abort, vs an empty binary of 0.33 MB) | +9.4 MB (all dialects; per-dialect features not measured) | +13.4 MB |
 | Crates added, licenses | 78 (35 MIT OR Apache-2.0, 18 Unicode-3.0 (ICU), 11 MIT, 7 Apache-2.0 OR MIT, 2 Apache-2.0, 2 Unlicense OR MIT, Zlib, BSL-1.0 OR Apache-2.0) | 2 (MIT, tree-sitter runtime shared) |
 
-**Result:** the rule rejects sqruff (0.4-1.0 MB/s against 5, +9.4 MB against 4). tree-sitter-sequel is no fallback: it is no faster by an order of magnitude, adds 13.4 MB, and fails on 37% (ansi) to 87% (postgres) of the fixtures. Both parsers are rejected and the parser choice is open (candidates: a hand-written lexer and parser for the ansi/postgres core, sqruff with a faster front end, or relaxing the 5 MB/s and 4 MB limits); step 1 is not started.
+**Decision (2026-11-15):** the rule rejected both parsers (sqruff 0.3-1.0 MB/s against 5, +9.4 MB against 4; tree-sitter-sequel no faster, +13.4 MB, 37-87% of fixtures failing), and the user chose **sqruff anyway**, restricted so its costs stay bounded: only the dialects `ansi`, `postgres`, `mysql`, `tsql` are compiled in (sqruff-lib-dialects has a cargo feature per dialect: stripped binary 2.76 MB with ansi only, 4.20 MB with the four, 7.54 MB with all, against 0.33 MB empty, so the four cost +3.9 MB); a panic of the parser is caught and leaves the file unchanged; no dialect that hangs is offered (`soql`) and none that panics on the fixtures (`redshift`, `sqlite`, `starrocks`, `trino`); the 5 MB/s and 4 MB limits are replaced by the measured values below. tree-sitter-sequel is dropped.
+
+Measured limits (release, Graviton, `cargo test --release -p lang-sql --test integration -- --ignored --nocapture conformance::scaling`): 0.32-0.38 MB/s on dense statements, 1 MB/s on the PostgreSQL regress files; peak memory about 650 bytes per input byte (331 MB at 512 KB); first file of a dialect builds it in 3 ms (ansi) to 11 ms (tsql). **File limit 512 KB** (`MAX_BYTES`: about 1.6 s and 350 MB at the limit; a larger file is reported and left unchanged). SQL is lazy: the provider builds no dialect until a file is parsed, so other languages stay flat.
 
 ## 1. Parser and tree
 - **Pin:** `=0.N.M` of both sqruff crates in the root `Cargo.toml`, Dependabot-ignored like oxc and ruff; a bump touches the kind table and adapter only.
 - **Adapter:** sqruff segments map 1:1 to nodes (sqlfluff's segment type names, e.g. `select_statement`, `join_clause`, `keyword`), its whitespace, newline and comment segments are trivia; Indent/Dedent meta segments are dropped (zero-width, layout is Sudsy's).
-- **Errors:** an `Unparsable` segment is a syntax error at its span; the file is reported, not formatted or linted (standing decision).
-- **Dialect:** option `dialect` (sqlfluff names: `ansi`, `postgres`, `mysql`, `tsql`, `bigquery`, `snowflake`, ...), default `ansi`; the importer reads sqlfluff's `dialect`.
+- **Errors:** an `Unparsable` segment is a syntax error at its span; the file is reported, not formatted or linted (standing decision). A panic in sqruff (`catch_unwind` at the parse boundary) or a file over 512 KB is one parse error and the file is one `Unknown` token.
+- **Dialect:** option `dialect` (`ansi`, `postgres`, `mysql`, `tsql`), default `ansi`; the importer reads sqlfluff's `dialect` and reports one outside these four.
 
 ## 2. Formatter
 - Target: `sqlfluff fix` with only the LT and CP rules enabled, pinned sqlfluff version for parity; sqruff as a second check (speed comparison).
@@ -57,7 +59,7 @@ Decide: sqruff unless round-trip fails, it is under 5 MB/s, or it adds over 4 MB
 | Step | Builds | Est. lines |
 |---|---|---|
 | 0 | Spike: parser decision with measured table (section 0) | (not committed) |
-| 1 | `lang-sql`: dependency pin, adapter, lang.yaml (dialect option), provider and registration, verbatim formatter, bench input (cap 150 KB, 3 dialects), corpus fetch script and round-trip test, parse-speed numbers, Markdown `sql` fences, parity harness and catalog | 1,200 |
+| 1 | `lang-sql`: dependency pin, adapter, lang.yaml (dialect option), provider and registration, verbatim formatter, bench input (ansi: the bench parses with the default dialect), corpus fetch script and round-trip test, parse-speed numbers, Markdown `sql` fences, parity harness and catalog | 1,200 |
 | 2 | Formatter to section 4's targets: layout, indentation, line breaking, capitalisation options, safety-check `value` hooks for re-cased keywords | 2,500 |
 | 3 | Lint: zero-config set, first rule families, presets only where they set something | 1,500 |
 | 4 | Migration: `sudsy init --from sqlfluff` / `--from sqruff` (`.sqlfluff`, `setup.cfg`, `tox.ini`, `pyproject.toml`, `.sqruff`; `exclude_rules`, `rules`, per-rule sections) | 400 |
