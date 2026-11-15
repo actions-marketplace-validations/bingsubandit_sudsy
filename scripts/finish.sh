@@ -81,8 +81,9 @@ if [ $mode = start ]; then
   echo "$id $branch" >"$state"; echo "FINISH STARTED: now scripts/finish.sh --wait"; exit 0
 fi
 fi
-# The snapshot branch goes once the run has ended (the run checks out its commit).
-[ $mode = wait ] && trap 'git push -q origin --delete "$branch" >/dev/null 2>&1; rm -f "$state"' EXIT
+# The snapshot branch (the run checks out its commit) and the state go once the run has ended; an
+# interrupted --wait keeps both, so --wait can be called again.
+[ $mode = wait ] && trap '[ -z "${ended:-}" ] || { git push -q origin --delete "$branch" >/dev/null 2>&1; rm -f "$state"; }' EXIT
 
 # --- wait: a failed gate job stops the run; otherwise the run's end decides -------------------------
 while :; do
@@ -91,10 +92,11 @@ while :; do
   [ -z "${failed:-}" ] || break
   [ "$st" = completed ] && break
   if [ -n "$deadline" ] && [ "$(date +%s)" -ge "$deadline" ]; then
-    trap - EXIT; echo "FINISH RUNNING ($st): call scripts/finish.sh --wait again"; exit 3
+    echo "FINISH RUNNING ($st): call scripts/finish.sh --wait again"; exit 3
   fi
   sleep 15
 done
+ended=1
 if [ -n "${failed:-}" ]; then
   gh run cancel "$id" >/dev/null 2>&1
   for _ in $(seq 1 20); do [ "$(gh run view "$id" --json status --jq .status)" = completed ] && break; sleep 3; done
