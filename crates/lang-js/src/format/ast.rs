@@ -155,6 +155,36 @@ pub(crate) fn has_leading_comment(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
         .is_some_and(|t| !core_format::comments::leading_comments(cx.grammar, &t).is_empty())
 }
 
+/// Does `n`, or the expression inside its parentheses, have a comment in front of its first token?
+pub(crate) fn has_leading_comment_in_parens(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    has_leading_comment(cx, n) || has_leading_comment(cx, &un(n))
+}
+
+/// Does a comment on a line of its own (or one that spans lines, which ends a line for ASI) stand in
+/// front of `n` or of a node that starts it (Prettier's `returnArgumentHasLeadingComment`: the left side of a call, member, binary, ...)?
+pub(crate) fn has_leading_own_line_comment(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    let mut cur = n.clone();
+    loop {
+        let first = cx.first_token(&cur);
+        if first.as_ref().is_some_and(|t| {
+            core_format::comments::leading_comments(cx.grammar, t)
+                .iter()
+                .any(|c| c.breaks_after > 0 || c.text().contains('\n'))
+        }) {
+            return true;
+        }
+        let next = if cur.kind() == k::PARENTHESIZED_EXPRESSION {
+            cur.children().next()
+        } else {
+            cur.first_child().filter(|c| cx.first_token(c) == first)
+        };
+        match next {
+            Some(c) => cur = c,
+            None => return false,
+        }
+    }
+}
+
 /// Does `n` have a comment after its last token?
 pub(crate) fn has_trailing_comment(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
     cx.last_token(n)

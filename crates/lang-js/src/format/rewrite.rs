@@ -190,6 +190,44 @@ pub(crate) fn rewrite(
                 .filter(|t| matches!(t.kind(), k::L_PAREN | k::R_PAREN))
                 .for_each(&mut cut);
         }
+        // `for ((a) of b)` is `for (a of b)`: the parentheses of the left side go. `let` at the
+        // start of the left side takes its own (`for ((let.a) of b)` is `for ((let).a of b)`).
+        if matches!(node.kind(), k::FOR_IN_STATEMENT | k::FOR_OF_STATEMENT)
+            && let Some(left) = node.first_child()
+            && left.kind() != k::IDENTIFIER_REFERENCE
+        {
+            let tokens: Vec<_> = node
+                .children_with_tokens()
+                .filter_map(|e| e.into_token())
+                .collect();
+            let keyword = tokens
+                .iter()
+                .find(|t| {
+                    t.text_range().start() >= left.text_range().end()
+                        && matches!(t.text(), "of" | "in")
+                })
+                .map(|t| t.text_range().start());
+            let first = first_token(grammar, &left);
+            if let Some(keyword) = keyword {
+                let mut head_open = false;
+                let mut cuts = 0;
+                for t in tokens {
+                    if t.kind() == k::L_PAREN && !std::mem::replace(&mut head_open, true) {
+                        continue;
+                    }
+                    if matches!(t.kind(), k::L_PAREN | k::R_PAREN)
+                        && t.text_range().start() < keyword
+                    {
+                        cuts += 1;
+                        cut(t);
+                    }
+                }
+                if let Some(first) = first.filter(|f| f.text() == "let" && cuts > 0) {
+                    inserts.push((usize::from(first.text_range().start()), Some("(")));
+                    inserts.push((usize::from(first.text_range().end()), Some(")")));
+                }
+            }
+        }
         match node.kind() {
             k::CLASS_BODY => semicolons(&node).into_iter().for_each(&mut cut),
             k::EMPTY_STATEMENT

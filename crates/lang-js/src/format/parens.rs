@@ -104,6 +104,7 @@ pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
             | k::SEQUENCE_EXPRESSION
             | k::ASSIGNMENT_EXPRESSION
             | k::CONDITIONAL_EXPRESSION
+            | k::IDENTIFIER_REFERENCE
             | k::ARROW_FUNCTION_EXPRESSION
             | k::FUNCTION
             | k::CLASS
@@ -115,6 +116,7 @@ pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
             | k::STATIC_MEMBER_EXPRESSION
             | k::COMPUTED_MEMBER_EXPRESSION
             | k::TAGGED_TEMPLATE_EXPRESSION
+            | k::TS_NON_NULL_EXPRESSION
             | k::JSX_ELEMENT
             | k::JSX_FRAGMENT
             | k::TS_AS_EXPRESSION
@@ -124,7 +126,11 @@ pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
     let held = node
         .parent()
         .is_none_or(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
-    if !addable || held || needs_parens(cx, node) != Need::Yes {
+    if !addable
+        || held
+        || (node.kind() == k::IDENTIFIER_REFERENCE && !is_let(cx, node))
+        || needs_parens(cx, node) != Need::Yes
+    {
         return doc;
     }
     concat(vec![lit("("), doc, lit(")")])
@@ -176,6 +182,7 @@ fn declaration_position(pk: SyntaxKind) -> bool {
             | k::SWITCH_CASE
             | k::STATIC_BLOCK
             | k::TS_MODULE_BLOCK
+            | k::EXPORT_DECLARATION
             | k::EXPORT_NAMED_DECLARATION
             | k::EXPORT_DEFAULT_DECLARATION
             | k::LABELED_STATEMENT
@@ -440,6 +447,7 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
             | k::UNARY_EXPRESSION
             | k::LOGICAL_EXPRESSION
             | k::AWAIT_EXPRESSION
+            | k::TS_INSTANTIATION_EXPRESSION
             | k::TS_TYPE_ASSERTION => Need::Yes,
             k::CALL_EXPRESSION | k::NEW_EXPRESSION => yes(is_callee),
             k::CONDITIONAL_EXPRESSION => yes(first),
@@ -476,8 +484,12 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
                 || is_object
                 || (first && pk == k::BINARY_EXPRESSION && operator_text(cx, &p) == "<"))
         }
-        k::IDENTIFIER_REFERENCE
-        | k::THIS_EXPRESSION
+        k::IDENTIFIER_REFERENCE => yes((is_let(cx, node) && let_needs_parens(node, &p, is_object))
+            || (pk == k::TS_AS_EXPRESSION || pk == k::TS_SATISFIES_EXPRESSION)
+                && first
+                && starts_cast_statement(cx, node)),
+        k::IMPORT_EXPRESSION => yes(pk == k::NEW_EXPRESSION && first),
+        k::THIS_EXPRESSION
         | k::ARRAY_EXPRESSION
         | k::TEMPLATE_LITERAL
         | k::REG_EXP_LITERAL
@@ -485,10 +497,70 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
         | k::NULL_LITERAL
         | k::BIG_INT_LITERAL
         | k::SUPER
-        | k::IMPORT_EXPRESSION
         | k::NEW_EXPRESSION => Need::No,
         _ => Need::Keep,
     }
+}
+
+/// `(type) as T;`, `(let) satisfies T;`: a statement that starts with one of these names and `as` or
+/// `satisfies` would read as a declaration or keyword.
+fn starts_cast_statement(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    if !cx.first_token(node).is_some_and(|t| {
+        matches!(
+            t.text(),
+            "await" | "interface" | "module" | "using" | "yield" | "let" | "type"
+        )
+    }) {
+        return false;
+    }
+    let mut cur = outer(node);
+    while let Some(p) = cur.parent() {
+        match p.kind() {
+            k::TS_AS_EXPRESSION | k::TS_SATISFIES_EXPRESSION
+                if p.first_child().as_ref() == Some(&cur) =>
+            {
+                cur = outer(&p);
+            }
+            k::EXPRESSION_STATEMENT => return true,
+            _ => return false,
+        }
+    }
+    false
+}
+
+fn is_let(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    cx.first_token(n).is_some_and(|t| t.text() == "let")
+}
+
+/// `(let)[a] = 1` at the start of a statement or head of a `for`, `for (((let)()).a of x)`: without the
+/// parentheses the code reads as a declaration. (`for ((let) of x)` keeps the parentheses of its source.)
+fn let_needs_parens(node: &SyntaxNode, p: &SyntaxNode, is_object: bool) -> bool {
+    let at = |n: &SyntaxNode| *n == *node;
+    let in_head = |stmt: &SyntaxNode| {
+        stmt.first_child().is_some_and(|head| {
+            head.text_range().contains_range(node.text_range()) && starts_with(&head, &at)
+        })
+    };
+    if p.kind() != k::FOR_OF_STATEMENT
+        && node
+            .ancestors()
+            .find(|a| a.kind() == k::FOR_OF_STATEMENT)
+            .is_some_and(|f| in_head(&f))
+    {
+        return true;
+    }
+    p.kind() == k::COMPUTED_MEMBER_EXPRESSION
+        && is_object
+        && !optional_link(p)
+        && node
+            .ancestors()
+            .find(|a| {
+                matches!(
+                    a.kind(),
+                    k::EXPRESSION_STATEMENT | k::FOR_STATEMENT | k::FOR_IN_STATEMENT
+                )
+            })
+            .is_some_and(|stmt| in_head(&stmt))
 }
 
 /// Is `n` a member or call written with `?.`?
@@ -502,7 +574,7 @@ fn has_call_in_object_chain(node: &SyntaxNode) -> bool {
     let mut n = node.clone();
     loop {
         match n.kind() {
-            k::CALL_EXPRESSION => return true,
+            k::CALL_EXPRESSION | k::IMPORT_EXPRESSION => return true,
             k::STATIC_MEMBER_EXPRESSION
             | k::COMPUTED_MEMBER_EXPRESSION
             | k::PRIVATE_FIELD_EXPRESSION
@@ -516,7 +588,7 @@ fn has_call_in_object_chain(node: &SyntaxNode) -> bool {
     }
 }
 
-/// Is `node` inside the first part of a `for (;;)` head?
+/// Is `node` inside the first part of a `for (;;)` head (or the left side of a `for in`)?
 fn in_for_init(node: &SyntaxNode) -> bool {
     let mut child = outer(node);
     while let Some(p) = child.parent() {
@@ -525,6 +597,10 @@ fn in_for_init(node: &SyntaxNode) -> bool {
                 .find(|e| e.as_token().is_some_and(|t| t.kind() == k::SEMICOLON))
                 .is_some_and(|semi| child.text_range().end() <= semi.text_range().start())
         {
+            return true;
+        }
+        // `for (var a = (b in c) in d)`: the initializer of the declaration on the left.
+        if p.kind() == k::FOR_IN_STATEMENT && p.first_child().as_ref() == Some(&child) {
             return true;
         }
         child = p;

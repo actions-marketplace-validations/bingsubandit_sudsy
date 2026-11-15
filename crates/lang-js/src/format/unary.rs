@@ -1,7 +1,10 @@
 //! The small expressions: unary, update, `await`, `yield`, spread and sequence expressions, and
 //! `return` / `throw` with their argument.
 
-use super::ast::{has_leading_comment, is_binaryish, is_member, outer, parent, starts_with, un};
+use super::ast::{
+    has_leading_comment_in_parens, has_leading_own_line_comment, is_binaryish, is_member, outer,
+    parent, starts_with, un,
+};
 use super::util::{R, elem, keyword, kids, node_of, semi, shape_error, token_of};
 use crate::generated::kind as k;
 use core_format::doc::{Doc, concat, group, hardline, if_break, indent, line, lit, softline};
@@ -41,7 +44,7 @@ fn unary(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
         return Err(shape_error("unary"));
     };
     let word = op.text().ends_with(|c: char| c.is_ascii_alphabetic());
-    let arg_doc = if has_leading_comment(cx, &arg) {
+    let arg_doc = if has_leading_comment_in_parens(cx, &arg) {
         group(concat(vec![
             lit("("),
             indent(concat(vec![softline(), cx.format(&arg)?])),
@@ -147,7 +150,7 @@ fn return_or_throw(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     let arg_u = un(arg);
     let asi = super::util::detach_asi(cx, node);
     let printed = cx.format(arg)?;
-    let body = if has_leading_own_line_comment(cx, &arg_u) {
+    let body = if has_leading_own_line_comment(cx, arg) {
         concat(vec![
             lit(" ("),
             indent(concat(vec![hardline(), printed])),
@@ -177,12 +180,4 @@ fn return_or_throw(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     };
     let end = super::util::reattach_asi(cx, asi);
     Ok(concat(vec![lead, kw, body, semi(cx, node), end]))
-}
-
-fn has_leading_own_line_comment(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-    cx.first_token(n).is_some_and(|t| {
-        core_format::comments::leading_comments(cx.grammar, &t)
-            .iter()
-            .any(|c| c.breaks_after > 0)
-    })
 }

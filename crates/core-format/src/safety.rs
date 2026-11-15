@@ -204,6 +204,9 @@ fn compare(g: &Grammar, a: &SyntaxNode, b: &SyntaxNode) -> Result<usize, String>
         match (a.next(), b.next()) {
             (None, None) => break,
             (Some((_, x)), Some((_, y))) if x == y => restyled += usize::from(x == Event::Restyled),
+            // The printer writes LF only inside a token that spans lines (a template chunk).
+            (Some((_, Event::Token(k, x))), Some((_, Event::Token(l, y))))
+                if k == l && x.replace("\r\n", "\n") == y => {}
             (x, y) => {
                 return Err(format!(
                     "the trees differ: input has {}, output has {}",

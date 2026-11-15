@@ -138,7 +138,8 @@ def upstream(config, prefix, version, copy, work):
 
 def sudsy_format(sudsy, fixture, work, command="format"):
     r = run([sudsy, command, fixture.name], work, check=False)
-    return fixture.read_bytes().decode("utf-8") if r.returncode == 0 else None  # None: Sudsy rejects the file
+    # None: Sudsy rejects the file; `refused`: its safety check did (an internal error, not a syntax error)
+    return (fixture.read_bytes().decode("utf-8") if r.returncode == 0 else None), b"internal error" in r.stderr
 
 
 class Differences:
@@ -153,6 +154,7 @@ class Differences:
         self.files = {k: [n.strip() for n in v.split(",")] for k, v in (data.get("files") or {}).items()}
         self.ratchet = data.get("ratchet") or {}
         self.second_format = data.get("second-format") or {}  # group -> most files that may change on a second format
+        self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
         self.lint = lint
         self.differing = {}  # key -> files that differ, listed or not
 
@@ -224,7 +226,7 @@ def editorconfig_cases(version, sudsy, parity):
             shutil.copy(own if own.exists() else folder / "input.cs", case / "input.cs")
             shutil.copy(folder / "sudsy.yaml", case / "sudsy.yaml")
             if side == "sudsy":
-                outputs.append(sudsy_format(sudsy, case / "input.cs", case))
+                outputs.append(sudsy_format(sudsy, case / "input.cs", case)[0])
             else:
                 run(["dotnet", "format", "whitespace", case, "--folder"], case)
                 outputs.append((case / "input.cs").read_bytes().decode("utf-8"))
@@ -273,24 +275,30 @@ def main():
         name, fixture, _ = item
         copy = work / name.replace("/", "__")
         shutil.copy(fixture, copy)
-        theirs, ours = upstream(config, prefix, version, copy, work), sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))
+        theirs = upstream(config, prefix, version, copy, work)
+        ours, refused = sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))
         # Sudsy's own output must be a fixed point; the files that change on a second format are counted.
-        again = None if ours is None else sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))
+        again = None if ours is None else sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))[0]
         unstable = again is not None and again != ours
         if config.get("ignore_trailing_blanks"):  # the tool keeps the trailing blanks of a line, Sudsy never does
             theirs, ours = (re.sub(r"[ 	]+$", "", t, flags=re.M) if t is not None else None for t in (theirs, ours))
-        return theirs, ours, unstable
+        return theirs, ours, unstable, refused
 
     with ThreadPoolExecutor(os.cpu_count() if config.get("parallel") else 1) as pool:
         results = list(pool.map(compare, found))
     bad, groups = 0, {}  # a ratchet group is counted: [identical, different, rejected by the tool]
     unstable = Counter()  # group (or "fixtures") -> files that change on a second format
-    for (name, path, group), (_, _, again) in zip(found, results):
+    refusals = Counter()  # group (or "fixtures") -> files Sudsy's safety check refuses
+    for (name, path, group), (_, _, again, refused) in zip(found, results):
         if again:
             unstable[group or "fixtures"] += 1
             if only is not None:
                 print(f"{name}: changes on a second format")
-    for (name, _, group), (theirs, ours, _) in zip(found, results):
+        if refused:
+            refusals[group or "fixtures"] += 1
+            if only is not None:
+                print(f"{name}: refused by the safety check")
+    for (name, _, group), (theirs, ours, _, _) in zip(found, results):
         if group and only is None:
             tally = groups.setdefault(group, [0, 0, 0])
             tally[2 if theirs is None else 0 if theirs == ours else 1] += 1
@@ -309,6 +317,12 @@ def main():
             now, top = unstable[group], ceilings.get(group, 0)
             note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"
             print(f"second format {group}: {now} files change ({note}: {top})")
+            bad += now > top
+        # (refused files are not formatted, so the second-format count above leaves them out)
+        for group in sorted(set(refusals) | set(known.refused)):
+            now, top = refusals[group], known.refused.get(group, 0)
+            note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"
+            print(f"refused {group}: {now} files ({note}: {top})")
             bad += now > top
     bad += known.finish(only is not None)
     print(f"{len(found)} fixtures, {bad} mismatch(es) ({tool} {version})")

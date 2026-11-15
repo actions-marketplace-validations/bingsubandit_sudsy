@@ -211,11 +211,13 @@ fn list_of(
             ));
         }
         inner.push(std::mem::replace(&mut items[i].doc, Doc::Nil));
+        // (`x: y,` kept as written in a list of `;` members ends with its separator too)
         let own_sep = !style.separator.is_empty()
             && items[i].verbatim
-            && cx
-                .last_token(&items[i].last)
-                .is_some_and(|t| t.text() == style.separator);
+            && cx.last_token(&items[i].last).is_some_and(|t| {
+                t.text() == style.separator
+                    || (matches!(t.text(), ";" | ",") && matches!(style.separator, ";" | ","))
+            });
         inner.push(match (i == last, style.trailing_comma) {
             _ if own_sep => Doc::Nil,
             (false, _) => sep.clone(),

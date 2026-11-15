@@ -32,3 +32,6 @@ second-format:
   prettier-html: 2
   prettier-vue: 2
   real-world: 1
+refused:
+  prettier-svelte: 1
+  prettier-vue: 3

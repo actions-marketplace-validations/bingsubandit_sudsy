@@ -390,3 +390,21 @@ fn comments_around_dropped_tokens_reach_a_fixed_point() {
         "a = c; /* c */\nif (1) /* b */ {\n  // c\n  x;\n}\nswitch (t) { // s\n}\nfor (;;) x(); // d\n\nlet u: /*1*/ /*2*/ C | D;\nf(a /* e */);\nm = /*p*/ Fn(() => {}).once()().v;\n"
     );
 }
+
+#[test]
+fn inputs_the_safety_check_refused_before() {
+    // Each was refused as an internal error: a line break after `return` (ASI), a comment lost
+    // after `for (;;)`, parentheses that `let`, `type ... as`, `new (import())` and `in` need.
+    assert_eq!(
+        fmt(
+            "function f() {\n  return (\n    // c\n    a\n  )()\n}\nfor (;;) /* b */ ;\nfor ((let) of x);\n(let)[a] = 1;\n(type) as unknown;\nnew (import(\"a\"))();\nfor (var a = (b in c) in {});\n"
+        ),
+        "function f() {\n  return (\n    // c\n    a()\n  );\n}\nfor (;;) /* b */;\nfor ((let) of x);\n(let)[a] = 1;\n(type) as unknown;\nnew (import(\"a\"))();\nfor (var a = (b in c) in {});\n"
+    );
+    assert_eq!(
+        fmt(
+            "measure() // w\n  .then(() => 1);\ninterface I {\n  // prettier-ignore\n  x: y,\n}\nconst s = `a\r\nb`;\n"
+        ),
+        "measure() // w\n  .then(() => 1);\ninterface I {\n  // prettier-ignore\n  x: y,\n}\nconst s = `a\nb`;\n"
+    );
+}

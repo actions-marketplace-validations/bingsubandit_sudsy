@@ -164,8 +164,8 @@ pub(crate) fn member_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode, call: &Ca
         if blank {
             v.push(hardline());
         }
-        // A blank line after a link expands the chain, like a comment does.
-        Ok((concat(v), blank))
+        // A blank line or a comment after a link expands the chain.
+        Ok((concat(v), blank || held.is_some()))
     };
     let (doc, blank) = call_doc(call_node, call)?;
     parts.push(Part {
@@ -250,15 +250,34 @@ pub(crate) fn member_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode, call: &Ca
             _ => break,
         }
     }
+    // Comments on lines of their own in front of the chain go before it: their line breaks must not
+    // break the chain's group.
+    let lead = start.filter(|t| {
+        !cx.is_held_leading(t)
+            && comments::leading_comments(cx.grammar, t)
+                .iter()
+                .any(|c| c.breaks_after > 0)
+    });
+    if let Some(t) = &lead {
+        cx.hold_leading(t);
+    }
     dropped_leads.push(cx.format(&cur_raw)?);
+    // (a comment after the call that starts the chain, `f() // c` then `.g()`, is the call's, as
+    // Prettier's `printedNodes[1]`)
+    let base_commented =
+        un(&cur_raw).kind() == k::CALL_EXPRESSION && super::ast::has_trailing_comment(cx, &cur_raw);
     parts.push(Part {
         doc: concat(dropped_leads),
         node: un(&cur_raw),
         link: Link::Base,
-        commented: false,
+        commented: base_commented,
     });
     parts.reverse();
-    Ok(print_chain(cx, call_node, parts))
+    let chain = print_chain(cx, call_node, parts);
+    Ok(match &lead {
+        Some(t) => concat(vec![cx.held_leading(t), chain]),
+        None => chain,
+    })
 }
 
 /// A comment in front of the chain's first token belongs to the whole chain, not to the parentheses.
@@ -366,7 +385,7 @@ fn print_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode, parts: Vec<Part>) -> 
     let one_line = concat(printed.clone());
     let cutoff = if should_merge { 3 } else { 2 };
     let flat: Vec<usize> = groups.iter().flatten().copied().collect();
-    let node_has_comment = flat[1..flat.len().saturating_sub(1)]
+    let node_has_comment = flat[..flat.len().saturating_sub(1)]
         .iter()
         .any(|&i| parts[i].commented)
         || groups

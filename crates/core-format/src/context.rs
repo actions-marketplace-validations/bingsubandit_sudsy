@@ -424,6 +424,14 @@ impl<'a> FormatCtx<'a> {
             .store(true, std::sync::atomic::Ordering::Relaxed);
     }
 
+    /// Were the leading comments of `tok` held back?
+    pub fn is_held_leading(&self, tok: &SyntaxToken) -> bool {
+        self.held_leading
+            .lock()
+            .expect("held leading lock")
+            .contains(&tok.text_range().start())
+    }
+
     /// The comments [`FormatCtx::hold_leading`] held back, as printed leading comments.
     pub fn held_leading(&self, tok: &SyntaxToken) -> Doc {
         leading_comments_doc(&self.leading_of(tok))

@@ -12,3 +12,6 @@ second-format:
   black-tests: 2
   real-world: 3
   ruff-fixtures: 6
+refused:
+  black-tests: 16
+  ruff-fixtures: 37

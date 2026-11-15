@@ -7,6 +7,8 @@ Committed work too small for a step of its own: what to do and where, one line e
 - CSS/SCSS/Less: 5 files change on a second format (ratchet `second-format` in `tests/parity/prettier-css/differences.yaml`); bring to 0.
 - HTML/Vue: 5 files change on a second format (ratchet in `tests/parity/prettier-html/differences.yaml`); bring to 0.
 - Python: 11 files change on a second format (ratchet in `tests/parity/ruff/differences.yaml`); bring to 0.
+- Safety-check refusals (ratchet `refused`, same yaml files): CSS 1 per dialect, HTML svelte 1 / vue 3, Python black-tests 16 / ruff-fixtures 37; each is a formatter bug; bring to 0.
+- JS/TS: 26 Prettier-test and 4 real-world files change on a second format (comment placement: arrow chains with trailing comments, `as` chains, `<T>` after an own-line comment, `(a = c)` with a comment before `)`, `return /* b */ ;`, `!+(3 /* c */)`); bring to 0.
 - PowerShell: `scripts/parity.sh format invoke-formatter` needs `pwsh`, which the agent host lacks: measure its second-format count and add the ratchet to `tests/parity/invoke-formatter/differences.yaml`; bring it to 0.
 - Delete the origin branches `wip/js-step10b` and `wip/html-defaults-on` once their agents have landed them.
 - HTML dialect rules: the planned entries of `docs/parity/eslint-plugin-vue.yaml` and `eslint-plugin-svelte.yaml`; `valid-v-else` needs a sibling relation in pattern rules. Parity runners (`scripts/parity.sh`) for html-eslint, HTMLHint, eslint-plugin-vue and eslint-plugin-svelte, as for html-validate.

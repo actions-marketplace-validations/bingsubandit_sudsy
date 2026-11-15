@@ -262,6 +262,8 @@ fn for_statement(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
         .iter()
         .position(|e| token_of(e).is_some_and(|t| t.kind() == k::R_PAREN))
         .ok_or_else(|| shape_error("for"))?;
+    // (the `)` is printed first: an empty body takes the comments after it)
+    let close_doc = elem(cx, &kids[close])?;
     let body = node_at(&kids, close + 1)?;
     let body = clause(body, cx.format(body)?, false);
     let (lead, kw) = keyword(cx, &kids[0])?;
@@ -280,7 +282,7 @@ fn for_statement(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     }
     let [init, test, update] = parts;
     let [s1, s2] = <[Doc; 2]>::try_from(semis).map_err(|_| shape_error("for"))?;
-    let close = elem(cx, &kids[close])?;
+    let close = close_doc;
     if init.is_nil() && test.is_nil() && update.is_nil() {
         let head = concat(vec![kw, lit(" "), open, s1, s2, close, body]);
         return Ok(concat(vec![lead, group(head)]));

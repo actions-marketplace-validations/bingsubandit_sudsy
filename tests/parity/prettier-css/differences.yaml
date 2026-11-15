@@ -19,3 +19,7 @@ second-format:
   prettier-css: 1
   prettier-less: 1
   prettier-scss: 3
+refused:
+  prettier-css: 1
+  prettier-less: 1
+  prettier-scss: 1
