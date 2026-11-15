@@ -110,8 +110,13 @@ out=$gdir/finish-result; rm -rf "$out"
 echo "== bench"
 fetch() { rm -rf "$out"; gh run download "$id" -n bench-result -D "$out" >/dev/null 2>&1; }
 if fetch || { sleep 20; fetch; } || { sleep 60; fetch; }; then
-  # The artifact keeps the build output; print the languages and the comparison.
-  awk 'NR == 1 || /^languages/ { print } /^metric/ { p = 1 } p' "$out/bench-output.txt"
+  # The artifact keeps the build output and the full table (bench-output.txt); print the languages
+  # and only the rows that matter: flagged, new, or a non-informational change of 0.5% or more.
+  awk 'NR == 1 || /^languages/ { print; next } /^metric/ { p = 1; print; next } !p { next }
+    $4 !~ /%$/ || /REGRESSION|improved|BUDGET/ { print; next }
+    /informational/ { h++; next }
+    { d = $4 + 0; if (d >= 0.5 || d <= -0.5) print; else h++ }
+    END { if (h) print "(" h " rows within 0.5% or informational not shown)" }' "$out/bench-output.txt"
   cat "$out/bench-line.jsonl" >>bench/history.jsonl 2>/dev/null
 elif [ "$conclusion" = success ]; then
   # A pass without its history line is not a finished bench: the commit would lack the line.
