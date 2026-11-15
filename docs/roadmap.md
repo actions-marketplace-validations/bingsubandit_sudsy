@@ -4,6 +4,7 @@ One line each; none is committed, except the small tasks below.
 
 ## Small tasks
 Committed work too small for a step of its own: what to do and where, one line each. Once the list holds about a step's worth (5 or more related items, or a day of work), the lead hands it to one agent as a single step; the commit that does an item deletes its line. Bugs go to [bugs.md](bugs.md) instead.
+- Python's `check` family lists its 50 check names in `analysis/mod.rs` and again in `rules/checks.yaml`; derive the list from the yaml (codegen) or drop the Rust copy.
 - Rowan node pool: free the thread-local slots at thread exit (`third_party/rowan/src/cursor.rs`); a draft is on branch `wip/worktree-agent-aac9309989c457eed`. Measure lint and LSP numbers.
 - Branch `wip/worktree-agent-ae8f4d33a378fb12a`: a refactor of the `core-rules` hooks and keys, `core-syntax` tree/grammar and the GraphQL/JSON/YAML/EditorConfig hooks, older than the zero-config and false-positive work. Port what still helps or drop it.
 - Delete the origin branches whose content is on main: `rescue/slot1-merged-tests`, `rescue/slot3-svelte-bench-inputs`, `wip/worktree-agent-ad3970d02a02340ee`, `wip/main/detached-63cb014`, `wip/slot3-html-embed-vue-svelte`, `wip/slot2-zero-config-rules`, `wip/slot3-front-matter` and the Python and JS `wip/` branches once their agents have landed them.

@@ -7,7 +7,7 @@ use super::values as v;
 use crate::generated::kind as k;
 use core_rules::tree::significant_range;
 use core_rules::{Family, Params, Rule, RuleContext, RuleMeta};
-use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodeExt, TextRange};
+use core_syntax::{SyntaxElement, SyntaxNode, SyntaxNodeExt, TextRange};
 use std::collections::HashMap;
 
 pub const FAMILY: Family = Family {
@@ -15,18 +15,7 @@ pub const FAMILY: Family = Family {
     build,
 };
 
-pub(super) struct Check {
-    meta: &'static RuleMeta,
-    message: String,
-    kinds: &'static [SyntaxKind],
-    run: fn(&Check, &SyntaxNode, &mut RuleContext<'_>),
-}
-
-type Entry = (
-    &'static str,
-    &'static [SyntaxKind],
-    fn(&Check, &SyntaxNode, &mut RuleContext<'_>),
-);
+pub(super) use core_rules::checks::{Entry, NodeCheck as Check};
 
 const CHECKS: &[Entry] = &[
     ("duplicate-properties", &[k::BLOCK], duplicate_properties),
@@ -91,44 +80,8 @@ const CHECKS: &[Entry] = &[
     ("qualifying-type", &[k::RULE], v::qualifying_type),
 ];
 
-fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
-    let name = p.text("check")?;
-    let Some((_, kinds, run)) = CHECKS.iter().find(|(n, ..)| *n == name) else {
-        return Err(format!("param `check`: unknown check `{name}`"));
-    };
-    let rule = Check {
-        meta,
-        message: p.text("message")?,
-        kinds,
-        run: *run,
-    };
-    p.done()?;
-    Ok(Box::new(rule))
-}
-
-impl Rule for Check {
-    fn meta(&self) -> &'static RuleMeta {
-        self.meta
-    }
-
-    fn kinds(&self) -> &[SyntaxKind] {
-        self.kinds
-    }
-
-    fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        (self.run)(self, node, ctx);
-    }
-}
-
-impl Check {
-    pub(super) fn hit<'a>(
-        &self,
-        ctx: &'a mut RuleContext<'_>,
-        range: TextRange,
-        name: &str,
-    ) -> &'a mut core_rules::Diagnostic {
-        ctx.report(range, self.message.replace("{name}", name))
-    }
+fn build(meta: &'static RuleMeta, p: Params) -> Result<Box<dyn Rule>, String> {
+    core_rules::checks::build(CHECKS, meta, p)
 }
 
 fn declarations(block: &SyntaxNode) -> impl Iterator<Item = SyntaxNode> {

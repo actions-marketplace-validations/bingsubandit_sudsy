@@ -6,14 +6,14 @@
 
 use crate::adapter::{module_first, source_type};
 use core_rules::FileContext;
-use core_syntax::SyntaxNode;
+use core_rules::checks::FileCache;
 use oxc_allocator::Allocator;
 use oxc_ast::{AstKind, ast::Program};
 use oxc_parser::{ParseOptions, Parser};
 use oxc_semantic::{NodeId, Semantic, SemanticBuilder, SymbolId};
 use oxc_span::{GetSpan, Span};
 use self_cell::self_cell;
-use std::cell::{OnceCell, RefCell};
+use std::cell::OnceCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -173,55 +173,50 @@ mod cost {
 }
 
 thread_local! {
-    static CACHE: RefCell<Option<(SyntaxNode, Rc<Model>)>> = const { RefCell::new(None) };
+    static CACHE: FileCache<Model> = const { FileCache::new() };
 }
 
 /// The model of the file, built once and shared by the rules that run on it; `None` when the
 /// text has a syntax error (the parser's diagnostic stands, a half-read tree binds nothing).
 pub fn model(file: &FileContext<'_>) -> Option<Rc<Model>> {
-    CACHE.with(|cache| {
-        let mut cache = cache.borrow_mut();
-        if let Some((root, model)) = &*cache
-            && root == file.root
-        {
-            return model.ok.then(|| model.clone());
-        }
-        let name = file.path.to_string_lossy();
-        let st = source_type(&name);
-        let (ast, ok) = module_first(st, |st| {
-            let mut ok = true;
-            let ast = Ast::new(Allocator::default(), |alloc| {
-                let options = ParseOptions {
-                    allow_return_outside_function: true,
-                    preserve_parens: false,
-                    ..ParseOptions::default()
-                };
-                let parsed = Parser::new(alloc, alloc.alloc_str(file.text), st)
-                    .with_options(options)
-                    .parse();
-                ok = parsed.diagnostics.is_empty();
-                parsed.program
+    let model = CACHE.with(|cache| {
+        cache.get(file, || {
+            let name = file.path.to_string_lossy();
+            let st = source_type(&name);
+            let (ast, ok) = module_first(st, |st| {
+                let mut ok = true;
+                let ast = Ast::new(Allocator::default(), |alloc| {
+                    let options = ParseOptions {
+                        allow_return_outside_function: true,
+                        preserve_parens: false,
+                        ..ParseOptions::default()
+                    };
+                    let parsed = Parser::new(alloc, alloc.alloc_str(file.text), st)
+                        .with_options(options)
+                        .parse();
+                    ok = parsed.diagnostics.is_empty();
+                    parsed.program
+                });
+                ((ast, ok), !ok)
             });
-            ((ast, ok), !ok)
-        });
-        let sem = Sem::new(ast, |ast| {
-            SemanticBuilder::new()
-                .with_build_nodes(true)
-                .build(ast.borrow_dependent())
-                .semantic
-        });
-        let model = Rc::new(Model {
-            sem,
-            ok,
-            commonjs: name.ends_with(".cjs"),
-            typescript: st.is_typescript(),
-            definition: [".d.ts", ".d.cts", ".d.mts"]
-                .iter()
-                .any(|e| name.ends_with(e)),
-            bindings: OnceCell::new(),
-            jsx: OnceCell::new(),
-        });
-        *cache = Some((file.root.clone(), model.clone()));
-        ok.then_some(model)
-    })
+            let sem = Sem::new(ast, |ast| {
+                SemanticBuilder::new()
+                    .with_build_nodes(true)
+                    .build(ast.borrow_dependent())
+                    .semantic
+            });
+            Model {
+                sem,
+                ok,
+                commonjs: name.ends_with(".cjs"),
+                typescript: st.is_typescript(),
+                definition: [".d.ts", ".d.cts", ".d.mts"]
+                    .iter()
+                    .any(|e| name.ends_with(e)),
+                bindings: OnceCell::new(),
+                jsx: OnceCell::new(),
+            }
+        })
+    });
+    model.ok.then_some(model)
 }

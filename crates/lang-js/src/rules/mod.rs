@@ -14,8 +14,8 @@ mod unused;
 
 use crate::generated::kind as k;
 use core_rules::tree::significant_range;
-use core_rules::{Diagnostic, Family, Params, Rule, RuleContext, RuleMeta};
-use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, TextRange};
+use core_rules::{Family, Params, Rule, RuleContext, RuleMeta};
+use core_syntax::{Grammar, SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 
 pub static RULES: &[&dyn Rule] = &[];
 
@@ -26,18 +26,7 @@ const FAMILY: Family = Family {
     build,
 };
 
-pub(super) struct Check {
-    meta: &'static RuleMeta,
-    message: String,
-    kinds: &'static [SyntaxKind],
-    run: fn(&Check, &SyntaxNode, &mut RuleContext<'_>),
-}
-
-type Entry = (
-    &'static str,
-    &'static [SyntaxKind],
-    fn(&Check, &SyntaxNode, &mut RuleContext<'_>),
-);
+pub(super) use core_rules::checks::{Entry, NodeCheck as Check};
 
 const CHECKS: &[Entry] = &[
     ("dupe-keys", &[k::OBJECT_EXPRESSION], dupes::dupe_keys),
@@ -197,45 +186,8 @@ const CHECKS: &[Entry] = &[
     ),
 ];
 
-fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
-    let name = p.text("check")?;
-    let Some((_, kinds, run)) = CHECKS.iter().find(|(n, ..)| *n == name) else {
-        return Err(format!("param `check`: unknown check `{name}`"));
-    };
-    let rule = Check {
-        meta,
-        message: p.text("message")?,
-        kinds,
-        run: *run,
-    };
-    p.done()?;
-    Ok(Box::new(rule))
-}
-
-impl Rule for Check {
-    fn meta(&self) -> &'static RuleMeta {
-        self.meta
-    }
-
-    fn kinds(&self) -> &[SyntaxKind] {
-        self.kinds
-    }
-
-    fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        (self.run)(self, node, ctx);
-    }
-}
-
-impl Check {
-    /// Reports at `range`; the message's `{name}` is `name`.
-    fn hit<'a>(
-        &self,
-        ctx: &'a mut RuleContext<'_>,
-        range: TextRange,
-        name: &str,
-    ) -> &'a mut Diagnostic {
-        ctx.report(range, self.message.replace("{name}", name))
-    }
+fn build(meta: &'static RuleMeta, p: Params) -> Result<Box<dyn Rule>, String> {
+    core_rules::checks::build(CHECKS, meta, p)
 }
 
 /// The span of `n` without its surrounding trivia.

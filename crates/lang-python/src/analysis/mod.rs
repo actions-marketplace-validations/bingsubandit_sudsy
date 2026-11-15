@@ -17,7 +17,7 @@ mod semantic;
 mod syntax;
 
 use core_rules::FileContext;
-use core_syntax::SyntaxNode;
+use core_rules::checks::FileCache;
 use ruff_python_ast::{Mod, PythonVersion};
 use ruff_python_parser::{Mode, ParseOptions, Parsed, parse_unchecked};
 use std::cell::RefCell;
@@ -93,7 +93,7 @@ struct Kept {
 
 thread_local! {
     static PARSED: RefCell<Option<Kept>> = const { RefCell::new(None) };
-    static HITS: RefCell<Option<(SyntaxNode, Rc<Vec<Hit>>)>> = const { RefCell::new(None) };
+    static HITS: FileCache<Vec<Hit>> = const { FileCache::new() };
 }
 
 /// Keeps the parse of a file without errors for the lint that follows on this thread.
@@ -110,26 +110,20 @@ pub fn keep(src: &str, parsed: Parsed<Mod>, target: PythonVersion) {
 /// The findings of every check on the file, computed once and shared by the rules that run on it.
 pub fn hits(file: &FileContext<'_>) -> Rc<Vec<Hit>> {
     HITS.with(|cache| {
-        let mut cache = cache.borrow_mut();
-        if let Some((root, hits)) = &*cache
-            && root == file.root
-        {
-            return hits.clone();
-        }
-        let kept = PARSED
-            .with(|p| p.borrow_mut().take())
-            .filter(|k| k.src == file.text);
-        let (parsed, target) = match kept {
-            Some(k) => (k.parsed, k.target),
-            None => {
-                let target = PythonVersion::latest();
-                let options = ParseOptions::from(Mode::Module).with_target_version(target);
-                (parse_unchecked(file.text, options), target)
-            }
-        };
-        let hits = Rc::new(analyze(file, &parsed, target));
-        *cache = Some((file.root.clone(), hits.clone()));
-        hits
+        cache.get(file, || {
+            let kept = PARSED
+                .with(|p| p.borrow_mut().take())
+                .filter(|k| k.src == file.text);
+            let (parsed, target) = match kept {
+                Some(k) => (k.parsed, k.target),
+                None => {
+                    let target = PythonVersion::latest();
+                    let options = ParseOptions::from(Mode::Module).with_target_version(target);
+                    (parse_unchecked(file.text, options), target)
+                }
+            };
+            analyze(file, &parsed, target)
+        })
     })
 }
 
