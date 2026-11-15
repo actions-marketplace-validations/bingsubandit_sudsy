@@ -578,6 +578,7 @@ dependencies = [
  "lang-json",
  "provider-api",
  "regex",
+ "regex-automata",
  "regex-syntax",
 ]
 

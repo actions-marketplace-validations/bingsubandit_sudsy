@@ -1,6 +1,7 @@
 //! Regexes of rules, compiled when first used and for ASCII text first.
 
-use regex::{Regex, bytes};
+use regex_automata::meta;
+use regex_automata::util::syntax;
 use regex_syntax::ParserBuilder;
 use std::sync::OnceLock;
 
@@ -15,9 +16,9 @@ const ASCII_LIMIT: usize = 1024;
 pub struct Re {
     source: String,
     /// `None` inside: the pattern needs Unicode.
-    ascii: OnceLock<Option<bytes::Regex>>,
+    ascii: OnceLock<Option<meta::Regex>>,
     /// `None` inside: the full form exceeds the regex size limit.
-    full: OnceLock<Option<Regex>>,
+    full: OnceLock<Option<meta::Regex>>,
 }
 
 impl Re {
@@ -29,7 +30,7 @@ impl Re {
     pub fn new(source: &str) -> Result<Re, String> {
         let re = Self::unbuilt(source);
         if re.ascii().is_none() || counts_more_than_a_literal(source) {
-            let full = Regex::new(source).map_err(|e| e.to_string())?;
+            let full = build(source, true)?;
             re.full.get_or_init(|| Some(full));
         }
         Ok(re)
@@ -46,7 +47,7 @@ impl Re {
             .build()
             .parse(source);
         if plain.is_err() {
-            Regex::new(source).map_err(|e| e.to_string())?;
+            build(source, true)?;
         }
         Ok(re)
     }
@@ -59,14 +60,9 @@ impl Re {
         }
     }
 
-    fn ascii(&self) -> Option<&bytes::Regex> {
+    fn ascii(&self) -> Option<&meta::Regex> {
         self.ascii
-            .get_or_init(|| {
-                bytes::RegexBuilder::new(&self.source)
-                    .unicode(false)
-                    .build()
-                    .ok()
-            })
+            .get_or_init(|| build(&self.source, false).ok())
             .as_ref()
     }
 
@@ -81,12 +77,20 @@ impl Re {
             return Vec::new(); // no named group: most regexes have none
         }
         let names: Vec<Option<String>> = match self.ascii() {
-            Some(re) => re.capture_names().map(|n| n.map(String::from)).collect(),
+            Some(re) => re
+                .group_info()
+                .pattern_names(regex_automata::PatternID::ZERO)
+                .map(|n| n.map(String::from))
+                .collect(),
             None => self
                 .full
-                .get_or_init(|| Regex::new(&self.source).ok())
+                .get_or_init(|| build(&self.source, true).ok())
                 .iter()
-                .flat_map(|re| re.capture_names().map(|n| n.map(String::from)))
+                .flat_map(|re| {
+                    re.group_info()
+                        .pattern_names(regex_automata::PatternID::ZERO)
+                        .map(|n| n.map(String::from))
+                })
                 .collect(),
         };
         let names: Vec<String> = names
@@ -112,33 +116,11 @@ impl Re {
         if (in_ascii_file || text.len() <= ASCII_LIMIT && text.is_ascii())
             && let Some(re) = self.ascii()
         {
-            let c = re.captures(text.as_bytes())?;
-            return Some(
-                c.iter()
-                    .skip(1)
-                    .map(|m| m.map(|m| (m.start(), m.end())))
-                    .collect(),
-            );
+            return spans(re, text);
         }
-        match self.full.get_or_init(|| Regex::new(&self.source).ok()) {
-            Some(full) => {
-                let c = full.captures(text)?;
-                Some(
-                    c.iter()
-                        .skip(1)
-                        .map(|m| m.map(|m| (m.start(), m.end())))
-                        .collect(),
-                )
-            }
-            None => {
-                let c = self.ascii()?.captures(text.as_bytes())?;
-                Some(
-                    c.iter()
-                        .skip(1)
-                        .map(|m| m.map(|m| (m.start(), m.end())))
-                        .collect(),
-                )
-            }
+        match self.full.get_or_init(|| build(&self.source, true).ok()) {
+            Some(full) => spans(full, text),
+            None => spans(self.ascii()?, text),
         }
     }
 
@@ -150,14 +132,39 @@ impl Re {
         if (in_ascii_file || text.len() <= ASCII_LIMIT && text.is_ascii())
             && let Some(re) = self.ascii()
         {
-            return re.is_match(text.as_bytes());
+            return re.is_match(text);
         }
         // The syntax was checked; only the size limit can fail here.
-        match self.full.get_or_init(|| Regex::new(&self.source).ok()) {
+        match self.full.get_or_init(|| build(&self.source, true).ok()) {
             Some(full) => full.is_match(text),
-            None => self.ascii().is_some_and(|re| re.is_match(text.as_bytes())),
+            None => self.ascii().is_some_and(|re| re.is_match(text)),
         }
     }
+}
+
+/// Builds with `regex-automata` directly, the full DFA off: another crate of the build
+/// (`fancy-regex`) turns that engine on for every regex, which costs construction time, and with
+/// it a pattern such as `(?:^|\s)\([^()]*\)\[[^\]]*\]` fails to match without Unicode.
+fn build(source: &str, unicode: bool) -> Result<meta::Regex, String> {
+    meta::Regex::builder()
+        .configure(meta::Config::new().dfa(false))
+        .syntax(syntax::Config::new().unicode(unicode).utf8(unicode))
+        .build(source)
+        .map_err(|e| e.to_string())
+}
+
+/// The byte span of each group 1.. of the first match of `re` in `text`.
+fn spans(re: &meta::Regex, text: &str) -> Option<Vec<Option<(usize, usize)>>> {
+    let mut caps = re.create_captures();
+    re.captures(text, &mut caps);
+    if !caps.is_match() {
+        return None;
+    }
+    Some(
+        (1..caps.group_len())
+            .map(|i| caps.get_group(i).map(|s| (s.start, s.end)))
+            .collect(),
+    )
 }
 
 /// Whether the pattern counts a repetition (`{n`) of a class, group or `.` (a literal repeats
@@ -192,6 +199,8 @@ mod tests {
             r"^.{3}$",
             r"\p{L}+",
             r"[é。]",
+            // Wrong without Unicode when the full DFA is on (see `Re::ascii`).
+            r"(?:^|\s)\([^()]*\)\[[^\]]*\]",
         ];
         let texts = [
             "a = 1",
@@ -202,6 +211,7 @@ mod tests {
             "日本語",
             "",
             "ab\n",
+            "(a)[b] x",
         ];
         for pattern in patterns {
             let re = Re::new(pattern).unwrap();

@@ -13,6 +13,7 @@ core-semantics.workspace = true
 core-syntax.workspace = true
 regex.workspace = true
 regex-syntax.workspace = true
+regex-automata.workspace = true
 
 [dev-dependencies]
 lang-json.workspace = true
