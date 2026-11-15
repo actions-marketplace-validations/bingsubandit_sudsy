@@ -21,8 +21,8 @@ token Comment #trivia #comment
 
 token Question "?" #punctuation
 token Exclamation "!" #punctuation
-token Lpar "(" #punctuation #glue
-token Rpar ")" #punctuation #close
+token Lpar "(" #punctuation #glue #optional
+token Rpar ")" #punctuation #close #optional
 token Lsqb "[" #punctuation #glue
 token Rsqb "]" #punctuation #close
 token Colon ":" #punctuation #glue
@@ -116,12 +116,12 @@ token Float #literal #restyle
 token Complex #literal #restyle
 token String #literal #string #restyle
 // An f-string's or t-string's start (prefix and opening quote), end (closing quote) and the literal text between its replacement fields.
-token FStringStart #string
-token FStringMiddle #string
-token FStringEnd #string
-token TStringStart #string
-token TStringMiddle #string
-token TStringEnd #string
+token FStringStart #string #restyle
+token FStringMiddle #string #restyle
+token FStringEnd #string #restyle
+token TStringStart #string #restyle
+token TStringMiddle #string #restyle
+token TStringEnd #string #restyle
 
 // Zero-width end-of-file token; it carries the leading trivia of the file's tail.
 token EndOfFile
@@ -171,10 +171,10 @@ node ExprYield
 node ExprYieldFrom
 node ExprCompare
 node ExprCall
-node ExprFString
-node ExprTString
-node ExprStringLiteral
-node ExprBytesLiteral
+node ExprFString #restyle
+node ExprTString #restyle
+node ExprStringLiteral #restyle
+node ExprBytesLiteral #restyle
 node ExprNumberLiteral
 node ExprBooleanLiteral
 node ExprNoneLiteral

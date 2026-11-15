@@ -39,11 +39,9 @@ Adapter decisions (the spike's open questions):
 - **Trivia:** comments, `NonLogicalNewline` and indent tokens are trivia; a BOM is leading trivia.
 - **Semantic errors:** `ruff_python_parser`'s semantic syntax errors (duplicate parameters, `return` outside a function, ...) become lint rules in step 3.
 
-## 2. Formatter
-- Target: `ruff format` 0.17.4 (pinned for parity), whose output is Black's style with documented deviations; Black 26 as a second check on the black corpus.
-- Options (each a named option, presets set them): `line_width` (88), `indent_style`/`indent_size` (4 spaces), `quote_style` (`double` | `single` | `preserve`), `magic_trailing_comma` (`respect` | `ignore`), `line_ending`, `docstring_code` (format code examples in docstrings: off, as ruff). Preset `python/black` only if Black's defaults differ from ours in an option (otherwise none: presets that set nothing are not made).
-- Docstrings: indentation normalized and quotes as ruff; code in docstrings through embedding when `docstring_code` is on.
-- Comments: Sudsy's token-owned trivia plus relocations, as JS. `# fmt: off` / `# fmt: on` / `# fmt: skip` and `# sudsy-ignore` are ignore markers.
+## 2. Formatter (what is left of it; the rest is in [../formatting/python.md](../formatting/python.md))
+- `docstring_code` (format code examples in docstrings, off as in ruff) with `docstring-code-line-length`: the doctest, Markdown-fence and reStructuredText forms through embedding. Presets: `python/black` only if Black's defaults differ from ours in an option (otherwise none: presets that set nothing are not made).
+- The differences of `tests/parity/ruff/differences.yaml` (`layout-gaps`), worked down with the ratchets.
 
 ## 3. Lint
 - Catalog `docs/parity/ruff.yaml` from ruff's rule list; parity runner `scripts/parity.sh ruff` against pinned ruff on the corpus.
@@ -59,7 +57,7 @@ Adapter decisions (the spike's open questions):
 | Step | Builds | Est. lines |
 |---|---|---|
 | 1 | `lang-python`: dependency pin, adapter (tokens + AST walk + `Parenthesized`), lang.yaml mapping, provider and registration, verbatim formatter, bench input (cap 150 KB), corpus fetch script and round-trip test over it, `target_version`, parse-speed numbers in `docs/performance/numbers.md`, Markdown `python`/`py` fences (embedding), parity harness for format and lint (catalog `ruff.yaml`) | 1,500 |
-| 2 | Formatter to the targets in section 4, options, docstrings, ignore markers, safety-check `value` hooks for restyled tokens (quotes, numeric literals) | 3,000 |
+| 2 | Formatter to the targets in section 4: statements, expressions, comments, strings, docstrings, ignore markers, safety-check `value` hooks (landed); docstring code and the remaining differences | 3,000 |
 | 3 | Lint: scope pass, ruff default set, semantic syntax errors as rules, zero-config defaults, presets only where they set something | 2,000 |
 | 4 | Migration: `sudsy init --from ruff` and `--from black` (pyproject `[tool.ruff]`, `ruff.toml`, `[tool.black]`), `.py` in Markdown fences checked, `per-file-ignores` and `extend-exclude` as `overrides`/`exclude` | 500 |
 

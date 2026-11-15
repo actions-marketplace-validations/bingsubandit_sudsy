@@ -57,6 +57,7 @@ pub fn parse(src: &str, target: PythonVersion) -> ParseResult {
         tokens: &tokens,
         nodes: Vec::with_capacity(tokens.len() / 2),
         open: Vec::new(),
+        claimed: Vec::new(),
         stmts: Vec::new(),
     };
     collector.visit_mod(parsed.syntax());
@@ -181,6 +182,8 @@ struct Collector<'t> {
     /// The enclosing AST nodes: whether each owns the parentheses at the ends of its range
     /// (`Arguments`), and its end.
     open: Vec<(bool, u32)>,
+    /// The range of each enclosing node that took the parentheses around it.
+    claimed: Vec<Option<(u32, u32)>>,
     stmts: Vec<(u32, u32)>,
 }
 
@@ -208,13 +211,25 @@ impl<'a> SourceOrderVisitor<'a> for Collector<'_> {
         let owns = matches!(kind, NodeKind::Arguments | NodeKind::PatternArguments);
         let parent_limit = self.open.last().filter(|p| p.0).map(|p| p.1);
         self.open.push((owns, end));
+        self.claimed.push(None);
         let Some(ours) = self.names.node(kind) else {
             return TraversalSignal::Traverse;
         };
         if name.starts_with("Stmt") {
             self.stmts.push((start, end));
         }
-        if start < end && (name.starts_with("Expr") || name.starts_with("PatternMatch")) {
+        // A pattern and the expression that is all of it share one pair of parentheses.
+        let shared = self
+            .claimed
+            .iter()
+            .rev()
+            .find_map(|c| *c)
+            .is_some_and(|c| c == (start, end));
+        if start < end && !shared && (name.starts_with("Expr") || name.starts_with("PatternMatch"))
+        {
+            if let Some(c) = self.claimed.last_mut() {
+                *c = Some((start, end));
+            }
             for (s, e) in self.parens(start, end, parent_limit).into_iter().rev() {
                 self.nodes.push(Node {
                     start: s,
@@ -233,6 +248,7 @@ impl<'a> SourceOrderVisitor<'a> for Collector<'_> {
 
     fn leave_node(&mut self, _: AnyNodeRef<'a>) {
         self.open.pop();
+        self.claimed.pop();
     }
 }
 

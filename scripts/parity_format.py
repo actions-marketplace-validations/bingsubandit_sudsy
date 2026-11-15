@@ -127,7 +127,7 @@ def upstream(config, prefix, version, copy, work):
         copy = work / "theirs" / copy.name
         copy.parent.mkdir(exist_ok=True)
         shutil.copy(work / copy.name, copy)
-    command = [str(a).format(prefix=prefix, exe=exe, file=copy.name, root=ROOT) for a in config["command"]]
+    command = [str(a).format(prefix=prefix, exe=exe, file=copy.name, root=ROOT, python=sys.executable) for a in config["command"]]
     r = run(command, copy.parent if mode == "in-place" else work, text if mode == "stdin" else None, check=False)
     if r.returncode != 0:
         if config.get("tool_may_reject"):

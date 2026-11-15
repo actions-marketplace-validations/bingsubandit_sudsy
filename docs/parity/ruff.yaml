@@ -14,7 +14,7 @@ entries:
   quote-style: option python.format.quote_style
   skip-magic-trailing-comma: option python.format.magic_trailing_comma
   line-ending: option python.format.end_of_line
-  docstring-code-format: option python.format.docstring_code
-  docstring-code-line-length: formatter
+  docstring-code-format: planned
+  docstring-code-line-length: planned
   preview: wontfix preview style is not planned
   exclude: formatter

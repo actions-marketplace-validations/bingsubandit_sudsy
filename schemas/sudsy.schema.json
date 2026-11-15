@@ -8398,11 +8398,6 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
-                  "docstring_code": {
-                    "default": false,
-                    "description": "Format the code of doctest examples (`>>>`) in docstrings.",
-                    "type": "boolean"
-                  },
                   "end_of_line": {
                     "default": "auto",
                     "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -9435,11 +9430,6 @@
         "format": {
           "additionalProperties": false,
           "properties": {
-            "docstring_code": {
-              "default": false,
-              "description": "Format the code of doctest examples (`>>>`) in docstrings.",
-              "type": "boolean"
-            },
             "end_of_line": {
               "default": "auto",
               "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",

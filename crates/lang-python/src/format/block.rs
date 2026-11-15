@@ -1,0 +1,245 @@
+//! Blocks: the statements of a module or a suite one per line with ruff's blank lines, each with
+//! its comments.
+
+use super::comment::{self, *};
+use super::docstring;
+use super::stmt;
+use super::util::*;
+use crate::generated::kind as k;
+use core_format::FormatCtx;
+use core_format::comments;
+use core_format::doc::{Doc, concat, hardline, indent};
+use core_syntax::{SyntaxKind, SyntaxNode};
+use std::cell::Cell;
+
+thread_local! {
+    static DEPTH: Cell<usize> = const { Cell::new(0) };
+}
+
+/// Indentation levels of the block being built.
+pub(crate) fn depth() -> usize {
+    DEPTH.get()
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Seq {
+    Module,
+    Class,
+    Function,
+    Other,
+}
+
+pub(crate) fn module(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
+    comment::reset();
+    DEPTH.set(0);
+    let stmts: Vec<SyntaxNode> = node.children().filter(|n| is_stmt(n.kind())).collect();
+    let body = sequence(cx, &stmts, true, Seq::Module)?;
+    let mut parts = vec![body];
+    if let Some(eof) = node
+        .children_with_tokens()
+        .filter_map(|e| e.into_token())
+        .find(|t| t.kind() == k::END_OF_FILE)
+    {
+        let cs = remaining_comments(cx, &eof);
+        if !cs.is_empty() {
+            if !stmts.is_empty() {
+                parts.push(hardline());
+                // Source blank lines before the comments, at most two.
+                for _ in 0..comments::blank_lines_before(cx.grammar, &eof).min(2) {
+                    parts.push(hardline());
+                }
+            }
+            parts.push(comments_block(&cs));
+        }
+    }
+    Ok(concat(parts))
+}
+
+pub(crate) fn is_def(kind: SyntaxKind) -> bool {
+    matches!(kind, k::STMT_FUNCTION_DEF | k::STMT_CLASS_DEF)
+}
+
+/// `...` alone, without comments in front of it: a body that stays on the header line.
+pub(crate) fn is_ellipsis(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    n.kind() == k::STMT_EXPR
+        && n.children()
+            .next()
+            .is_some_and(|e| e.kind() == k::EXPR_ELLIPSIS_LITERAL)
+        && cx
+            .first_token(n)
+            .is_some_and(|t| comments::leading_comments(cx.grammar, &t).is_empty())
+}
+
+/// A function whose body is `...` on the header line.
+pub(crate) fn is_stub(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    n.kind() == k::STMT_FUNCTION_DEF && {
+        let body: Vec<SyntaxNode> = n.children().filter(|c| is_stmt(c.kind())).collect();
+        matches!(body.as_slice(), [only] if is_ellipsis(cx, only))
+    }
+}
+
+/// Does the statement end with a function or class (at any depth)?
+fn ends_with_def(n: &SyntaxNode) -> bool {
+    if is_def(n.kind()) {
+        return true;
+    }
+    n.children()
+        .filter(|c| is_stmt(c.kind()) || is_clause(c.kind()))
+        .last()
+        .is_some_and(|c| ends_with_def(&c))
+}
+
+fn is_import(kind: SyntaxKind) -> bool {
+    matches!(kind, k::STMT_IMPORT | k::STMT_IMPORT_FROM)
+}
+
+/// A string-only expression statement.
+fn is_docstring(n: &SyntaxNode) -> bool {
+    n.kind() == k::STMT_EXPR
+        && n.children()
+            .next()
+            .is_some_and(|e| e.kind() == k::EXPR_STRING_LITERAL && e.children().count() == 1)
+}
+
+/// The statements of a block, one per line with the blank lines of ruff.
+pub(crate) fn sequence(cx: &FormatCtx<'_>, stmts: &[SyntaxNode], top: bool, seq: Seq) -> R {
+    let cap = if top { 2 } else { 1 };
+    let mut parts: Vec<Doc> = Vec::new();
+    let (mut off, mut ignoring) = (false, false);
+    for (i, s) in stmts.iter().enumerate() {
+        let Some(first) = cx.first_token(s) else {
+            continue;
+        };
+        let mut src = comments::blank_lines_before(cx.grammar, &first);
+        // Comments a block before has printed: the blank lines after them count.
+        let consumed = consumed_of(&first);
+        if consumed > 0 {
+            let all = comments::leading_comments(cx.grammar, &first);
+            if let Some(c) = all.get(consumed - 1) {
+                src = c.breaks_after.saturating_sub(1);
+            }
+        }
+        // Comments followed by a blank line stay with the statement before.
+        let mut own_doc = Doc::Nil;
+        {
+            let cs = remaining_comments(cx, &first);
+            if let Some(j) = cs.iter().rposition(|c| c.breaks_after >= 2) {
+                if i > 0 {
+                    parts.push(hardline());
+                    let before = if ends_with_def(&stmts[i - 1]) {
+                        cap
+                    } else {
+                        src.min(cap)
+                    };
+                    for _ in 0..before {
+                        parts.push(hardline());
+                    }
+                }
+                own_doc = comments_block(&cs[..=j]);
+                parts.push(own_doc.clone());
+                consume(&first, j + 1);
+                src = cs[j].breaks_after - 1;
+            }
+        }
+        let mut blank = src.min(cap);
+        let docstring = i == 0 && seq != Seq::Other && is_docstring(s);
+        if i > 0 {
+            let prev = &stmts[i - 1];
+            let prev_doc = i == 1 && seq != Seq::Other && is_docstring(prev);
+            let after_def = own_doc == Doc::Nil && ends_with_def(prev);
+            if is_def(s.kind()) && src == 0 && is_stub(cx, prev) && own_doc == Doc::Nil {
+                blank = 0;
+            } else if is_def(s.kind()) || after_def {
+                blank = cap;
+            } else if is_import(prev.kind()) && !is_import(s.kind()) {
+                blank = blank.max(1);
+            } else if prev_doc && matches!(seq, Seq::Module | Seq::Class) {
+                blank = 1;
+            }
+            parts.push(hardline());
+        } else if own_doc != Doc::Nil {
+            blank = if is_def(s.kind()) { cap } else { blank };
+            parts.push(hardline());
+        } else if docstring || matches!(seq, Seq::Class | Seq::Module) {
+            blank = 0;
+        } else if is_def(s.kind()) && seq == Seq::Other {
+            // A function or class in the block of `if`, `for`, ...: a blank line before it.
+            let comments_first = !comments::leading_comments(cx.grammar, &first).is_empty();
+            blank = if comments_first { blank.min(1) } else { 1 };
+        } else if matches!(seq, Seq::Function) || is_def(s.kind()) {
+            blank = blank.min(1);
+        } else {
+            blank = 0;
+        }
+        if i == 0 && src > 0 && comments::starts_file(cx.grammar, &first) && own_doc == Doc::Nil {
+            blank = 0;
+        }
+        for _ in 0..blank {
+            parts.push(hardline());
+        }
+        // `# fmt: off` ... `# fmt: on`, `sudsy-ignore`: statements kept as written.
+        let marks = comments::leading_comments(cx.grammar, &first);
+        let marks = marks.get(consumed_of(&first)..).unwrap_or_default();
+        for c in marks {
+            match mark(cx, c) {
+                Some(Mark::Off) => off = true,
+                Some(Mark::On) => off = false,
+                _ => {}
+            }
+        }
+        let ignore = core_format::ignore::mark_in(cx.grammar, marks);
+        match ignore {
+            Some(core_format::ignore::IgnoreMark::Start) => ignoring = true,
+            Some(core_format::ignore::IgnoreMark::End) => ignoring = false,
+            _ => {}
+        }
+        let skip = (off || ignoring || ignore == Some(core_format::ignore::IgnoreMark::Ignore))
+            || is_fmt_skip(cx, s);
+        parts.push(if skip {
+            verbatim_item(cx, s)?
+        } else {
+            item(cx, s, docstring)?
+        });
+    }
+    Ok(concat(parts))
+}
+
+/// A statement as written (its comments around it as in the source).
+pub(crate) fn verbatim_item(cx: &FormatCtx<'_>, s: &SyntaxNode) -> R {
+    let first = cx.first_token(s).ok_or_else(|| shape_error("statement"))?;
+    let leading = lead(cx, &first);
+    let last = cx.last_token(s).ok_or_else(|| shape_error("statement"))?;
+    Ok(concat(vec![leading, cx.verbatim_range(&first, &last)]))
+}
+
+/// One statement with its leading comments and trailing comment.
+pub(crate) fn item(cx: &FormatCtx<'_>, s: &SyntaxNode, docstring: bool) -> R {
+    let first = cx.first_token(s).ok_or_else(|| shape_error("statement"))?;
+    let leading = lead(cx, &first);
+    let compound = is_compound(s.kind());
+    let last = (!compound).then(|| cx.last_token(s)).flatten();
+    if let Some(l) = &last {
+        cx.hold_trailing(l);
+    }
+    let body = if docstring {
+        docstring::statement(cx, s)?
+    } else {
+        stmt::statement(cx, s)?
+    };
+    let trailing = last.map_or(Doc::Nil, |l| trailing_inline(cx, &l));
+    Ok(concat(vec![leading, body, trailing]))
+}
+
+/// `:` followed by the statements one level deeper.
+pub(crate) fn block(cx: &FormatCtx<'_>, stmts: &[SyntaxNode], seq: Seq) -> R {
+    if stmts.is_empty() {
+        return Ok(Doc::Nil);
+    }
+    DEPTH.set(DEPTH.get() + 1);
+    let body = sequence(cx, stmts, false, seq);
+    DEPTH.set(DEPTH.get() - 1);
+    let body = body?;
+    let col = cx.first_token(&stmts[0]).map(|t| column(&t)).unwrap_or(0);
+    let end = end_comments(cx, &stmts[stmts.len() - 1], col);
+    Ok(indent(concat(vec![hardline(), body, end])))
+}

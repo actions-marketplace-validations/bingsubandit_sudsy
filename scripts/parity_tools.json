@@ -97,7 +97,7 @@
       "catalog": "ruff",
       "install": {"pip": "ruff"},
       "fetch": ["tests/conformance/fetch-python-corpus.sh"],
-      "command": ["python", "{root}/scripts/parity_ruff.py", "{prefix}", "format", "--isolated", "--no-cache", "--quiet", "{file}"],
+      "command": ["{python}", "{root}/scripts/parity_ruff.py", "{prefix}", "format", "--isolated", "--no-cache", "--quiet", "{file}"],
       "input": "in-place",
       "tool_may_reject": true,
       "parallel": true,

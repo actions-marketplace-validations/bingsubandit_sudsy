@@ -1,3 +1,10 @@
-differences: {}
-files: {}
-ratchet: {}
+differences:
+  layout-gaps: gap  ruff layouts not ported yet (comments in unusual places, parenthesized right-hand sides with comments, fmt skip on headers, quotes inside f-string replacement fields, docstring code, preview-only fixtures)
+files:
+  black-tests: layout-gaps
+  ruff-fixtures: layout-gaps
+  real-world: layout-gaps
+ratchet:
+  black-tests: 180
+  ruff-fixtures: 96
+  real-world: 1004
