@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The check of a finished change (CLAUDE.md), run on GitHub Actions (finish.yml): the gate on Linux
-# and on Windows and the bench, as parallel jobs, all on what the change affects (`cargo xtask
+# and the bench, as parallel jobs, all on what the change affects (`cargo xtask
 # affected`; --all: everything). Nothing builds locally. The working tree (untracked files
 # included) is pushed as a snapshot commit to bench/<slot>, checked there against the merge-base
 # with origin/main, and the branch is deleted afterwards. A failing gate job cancels the run at
