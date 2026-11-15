@@ -44,6 +44,7 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
     if !keep {
         return Ok(Some(concat(vec![
             cx.leading_comments_doc(open),
+            cx.trailing_comments_doc(open),
             cx.format(&child)?,
         ])));
     }
@@ -64,7 +65,30 @@ fn commented_pair(cx: &FormatCtx<'_>, open: &SyntaxToken, close: &SyntaxToken) -
             let t = c.text();
             t.starts_with("/**") && (t.contains("@type") || t.contains("@satisfies"))
         });
-    cast || !comments::trailing_comments(cx.grammar, open).is_empty() || token_comments(cx, close)
+    // (a line comment after `(` moves out with the pair)
+    cast || comments::trailing_comments(cx.grammar, open)
+        .iter()
+        .any(|c| c.kind != comments::CommentKind::Line)
+        || token_comments(cx, close)
+}
+
+/// Is `close` the `)` of a pair that is left out of the output (`format` above)?
+pub(crate) fn is_dropped_close(cx: &FormatCtx<'_>, close: &SyntaxToken) -> bool {
+    let Some(paren) = close
+        .parent()
+        .filter(|p| p.kind() == k::PARENTHESIZED_EXPRESSION)
+    else {
+        return false;
+    };
+    let Some(open) = paren.first_token() else {
+        return false;
+    };
+    let nested = paren
+        .parent()
+        .is_some_and(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
+    close.kind() == k::R_PAREN
+        && !commented_pair(cx, &open, close)
+        && (nested || needs_parens(cx, &un(&paren)) == Need::No)
 }
 
 /// `doc` of `node` in the parentheses it needs when the source has none.

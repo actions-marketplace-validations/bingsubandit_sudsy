@@ -70,10 +70,14 @@ fn before_semicolon(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<core_syntax
     };
     let mut t = semi.prev_token();
     while let Some(x) = t {
-        if !cx.grammar.is_trivia(x.kind()) {
+        if cx.grammar.is_trivia(x.kind()) {
+            t = x.prev_token();
+        } else if node.kind() == k::EXPRESSION_STATEMENT && parens::is_dropped_close(cx, &x) {
+            // `(a = c /* c */);` is `a = c;` and the comment after it.
+            t = x.prev_token();
+        } else {
             return comments::has_trailing_comment(cx.grammar, &x).then_some(x);
         }
-        t = x.prev_token();
     }
     None
 }
@@ -122,9 +126,12 @@ impl NodeFormatter for JsFormatter {
             .flatten()
             .filter(|last| {
                 comments::has_trailing_comment(cx.grammar, last)
-                    && !node
-                        .parent()
-                        .is_some_and(|p| before_semicolon(cx, &p).is_some_and(|t| t == *last))
+                    && !node.ancestors().skip(1).any(|p| {
+                        // (the statement of a dropped pair of parentheses places it itself)
+                        (p.kind() == crate::generated::kind::EXPRESSION_STATEMENT
+                            || Some(&p) == node.parent().as_ref())
+                            && before_semicolon(cx, &p).is_some_and(|t| t == *last)
+                    })
                     && node
                         .parent()
                         .is_some_and(|p| cx.last_token(&p).is_some_and(|l| l != *last))

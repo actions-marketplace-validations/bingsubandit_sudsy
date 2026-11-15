@@ -15,3 +15,7 @@ ratchet:
   prettier-scss: 78
   prettier-less: 34
   real-world: 494
+second-format:
+  prettier-css: 1
+  prettier-less: 1
+  prettier-scss: 3

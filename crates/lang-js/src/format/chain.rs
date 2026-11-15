@@ -174,15 +174,28 @@ pub(crate) fn member_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode, call: &Ca
         doc,
         commented: blank,
     });
+    let start = cx.first_token(call_node);
+    // The comments in front of the parentheses that go (the chain's own start).
+    let mut dropped_leads = Vec::new();
     let mut cur_raw = call.callee.clone();
     loop {
         let mut cur = un(&cur_raw);
         // Parentheses that are not needed are not part of the chain's text.
         if cur_raw != cur && !(matches!(cur.kind(), k::CALL_EXPRESSION) || is_member(cur.kind()))
             || (cur_raw != cur
-                && (needs_parens(cx, &cur) != Need::No || paren_commented(cx, &cur_raw)))
+                && (needs_parens(cx, &cur) != Need::No || paren_commented(cx, &cur_raw, &start)))
         {
             cur = cur_raw.clone();
+        }
+        let mut p = cur_raw.clone();
+        while p != cur {
+            if let Some(open) = p.first_token() {
+                dropped_leads.push(cx.leading_comments_doc(&open));
+            }
+            match p.first_child() {
+                Some(c) => p = c,
+                None => break,
+            }
         }
         match cur.kind() {
             k::CALL_EXPRESSION => {
@@ -237,8 +250,9 @@ pub(crate) fn member_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode, call: &Ca
             _ => break,
         }
     }
+    dropped_leads.push(cx.format(&cur_raw)?);
     parts.push(Part {
-        doc: cx.format(&cur_raw)?,
+        doc: concat(dropped_leads),
         node: un(&cur_raw),
         link: Link::Base,
         commented: false,
@@ -247,13 +261,24 @@ pub(crate) fn member_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode, call: &Ca
     Ok(print_chain(cx, call_node, parts))
 }
 
-fn paren_commented(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+/// A comment in front of the chain's first token belongs to the whole chain, not to the parentheses.
+fn paren_commented(
+    cx: &FormatCtx<'_>,
+    n: &SyntaxNode,
+    start: &Option<core_syntax::SyntaxToken>,
+) -> bool {
     let mut cur = n.clone();
     while cur.kind() == k::PARENTHESIZED_EXPRESSION {
         if cur
             .children_with_tokens()
             .filter_map(|e| e.into_token())
-            .any(|t| token_comments(cx, &t))
+            .any(|t| {
+                if Some(&t) == start.as_ref() {
+                    comments::has_trailing_comment(cx.grammar, &t)
+                } else {
+                    token_comments(cx, &t)
+                }
+            })
         {
             return true;
         }

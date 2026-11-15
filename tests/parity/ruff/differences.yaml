@@ -8,3 +8,7 @@ ratchet:
   black-tests: 180
   ruff-fixtures: 96
   real-world: 1004
+second-format:
+  black-tests: 2
+  real-world: 3
+  ruff-fixtures: 6

@@ -378,7 +378,11 @@ impl<'a> FormatCtx<'a> {
                 .iter()
                 .all(|c| c.kind == CommentKind::Block && c.breaks_after == 0)
         {
-            doc::concat(leading.iter().map(comment_doc).collect())
+            let space = if self.follows_comma(tok) { " " } else { "" };
+            doc::concat(vec![
+                doc::text(space),
+                doc::concat(leading.iter().map(comment_doc).collect()),
+            ])
         } else {
             leading_comments_doc(&leading)
         };
@@ -387,6 +391,18 @@ impl<'a> FormatCtx<'a> {
             self.token_text(tok),
             trailing_comments_doc(&self.comment_style, &trailing),
         ])
+    }
+
+    /// Is the last token in front of `tok` (trivia skipped) a comma?
+    fn follows_comma(&self, tok: &SyntaxToken) -> bool {
+        let mut cur = tok.prev_token();
+        while let Some(t) = cur {
+            if !self.grammar.is_trivia(t.kind()) {
+                return t.text() == ",";
+            }
+            cur = t.prev_token();
+        }
+        false
     }
 
     pub fn token_text(&self, tok: &SyntaxToken) -> Doc {

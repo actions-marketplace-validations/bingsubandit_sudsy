@@ -28,3 +28,7 @@ ratchet:
   real-world: 215
   real-world-svelte: 17
   real-world-vue: 8
+second-format:
+  prettier-html: 2
+  prettier-vue: 2
+  real-world: 1

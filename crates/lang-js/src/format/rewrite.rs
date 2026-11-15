@@ -44,9 +44,16 @@ pub(crate) fn rewrite(
     for node in tree.descendants() {
         keys.of(&node, text, grammar, &mut key_edits);
         // `) // c` then `{` on the next line becomes `) { // c`: the comment moves inside the block.
-        if matches!(node.kind(), k::BLOCK_STATEMENT | k::FUNCTION_BODY)
-            && let Some(open) = first_token(grammar, &node)
-            && open.kind() == k::L_BRACE
+        if matches!(
+            node.kind(),
+            k::BLOCK_STATEMENT | k::FUNCTION_BODY | k::SWITCH_STATEMENT
+        ) && let Some(open) = (if node.kind() == k::SWITCH_STATEMENT {
+            node.children_with_tokens()
+                .filter_map(|e| e.into_token())
+                .find(|t| t.kind() == k::L_BRACE)
+        } else {
+            first_token(grammar, &node)
+        }) && open.kind() == k::L_BRACE
             && comments::trailing_comments(grammar, &open).is_empty()
         {
             let mut between = Vec::new();
@@ -55,9 +62,19 @@ pub(crate) fn rewrite(
                 prev = t.prev_token();
                 between.push(t);
             }
+            // Block comments in front of the first line comment stay in front of the `{`.
+            between.reverse();
+            let first_line = between.iter().position(|t| t.kind() == k::LINE_COMMENT);
+            let after = between
+                .iter()
+                .take(first_line.unwrap_or(0))
+                .rfind(|t| t.kind() == k::BLOCK_COMMENT)
+                .map(|t| usize::from(t.text_range().end()));
             if let Some(prev) = prev
-                && between.iter().any(|t| t.kind() == k::LINE_COMMENT)
-                && between.iter().all(|t| t.kind() != k::BLOCK_COMMENT)
+                && first_line.is_some()
+                && between[first_line.unwrap_or(0)..]
+                    .iter()
+                    .all(|t| t.kind() != k::BLOCK_COMMENT)
             {
                 let brace = if node.kind() == k::TS_INTERFACE_BODY {
                     " {
@@ -65,7 +82,10 @@ pub(crate) fn rewrite(
                 } else {
                     " {"
                 };
-                inserts.push((usize::from(prev.text_range().end()), Some(brace)));
+                inserts.push((
+                    after.unwrap_or(usize::from(prev.text_range().end())),
+                    Some(brace),
+                ));
                 // The line break after the old `{` goes too, or a blank line would follow.
                 if let Some(next) = open.next_token().filter(|t| t.kind() == k::NEWLINE) {
                     let at = usize::from(next.text_range().start());
@@ -188,9 +208,16 @@ pub(crate) fn rewrite(
                 semicolons(&node).into_iter().for_each(&mut cut)
             }
             k::TS_PARENTHESIZED_TYPE | k::TS_UNION_TYPE | k::TS_INTERSECTION_TYPE => {
-                super::ts::redundant_type_tokens(&node, grammar)
-                    .into_iter()
-                    .for_each(&mut cut)
+                for t in super::ts::redundant_type_tokens(&node, grammar) {
+                    // The blank after a bar or `&` goes with it (`/*1*/ | /*2*/ C`).
+                    let blank = matches!(t.text(), "|" | "&")
+                        .then(|| t.next_token().filter(|n| n.text() == " "))
+                        .flatten();
+                    cut(t);
+                    if let Some(b) = blank {
+                        cut(b);
+                    }
+                }
             }
             // `(): () => void => x`: a function type returned by an arrow takes parentheses.
             k::TS_FUNCTION_TYPE
@@ -207,21 +234,29 @@ pub(crate) fn rewrite(
                     inserts.push((usize::from(last.text_range().end()), Some(")")));
                 }
             }
-            // `x()\n// c\n;` is `x();` with the comment after it.
-            k::EXPRESSION_STATEMENT => {
+            // `x()\n// c\n;` is `x();` with the comment after it (also for `break`, `continue`, `debugger`).
+            k::EXPRESSION_STATEMENT
+            | k::BREAK_STATEMENT
+            | k::CONTINUE_STATEMENT
+            | k::DEBUGGER_STATEMENT => {
                 let semi = node
                     .children_with_tokens()
                     .filter_map(|e| e.into_token())
                     .find(|t| t.kind() == k::SEMICOLON);
                 if let Some(semi) = semi
-                    && !comments::leading_comments(grammar, &semi).is_empty()
                     && comments::trailing_comments(grammar, &semi).is_empty()
                 {
                     let mut prev = semi.prev_token();
                     while let Some(t) = prev.clone().filter(|t| grammar.is_trivia(t.kind())) {
                         prev = t.prev_token();
                     }
-                    if let Some(prev) = prev {
+                    // (a line comment after the last token is the same case)
+                    if let Some(prev) = prev
+                        && (!comments::leading_comments(grammar, &semi).is_empty()
+                            || comments::trailing_comments(grammar, &prev)
+                                .iter()
+                                .any(|c| c.kind == comments::CommentKind::Line))
+                    {
                         inserts.push((usize::from(prev.text_range().end()), Some(";")));
                         cut(semi);
                     }

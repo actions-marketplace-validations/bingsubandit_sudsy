@@ -1,6 +1,6 @@
 # Testing
 
-Every formatter test checks lossless round trip, idempotency, unchanged meaning (and comments kept). Parsers check the trivia attachment rule.
+Every formatter test checks lossless round trip, idempotency, unchanged meaning (and comments kept). Parsers check the trivia attachment rule. Format parity runs also format every fixture a second time and count the files that change (`second-format` ratchet, [parity.md](parity.md#differences-lists)).
 
 A crate with several integration-test files builds them as one test binary, `integration` (`autotests = false` and a `[[test]]` in its `Cargo.toml`; for generated language crates the template in `xtask/src/lang_crate.rs`): `tests/main.rs` holds a `mod <file>;` line for every file in `tests/` (and `mod common;` for `tests/common/mod.rs`, which files reach as `crate::common`). A new test file needs its `mod` line. One binary per crate links once instead of once per file, which cuts the disk writes of a rebuild ([numbers](../performance/numbers.md)); tests run in one process per binary, so they share statics and the environment. Run one file's tests with `cargo test -p <crate> --test integration <file>::`. insta snapshots are named `integration__<file>__<name>.snap`.
 

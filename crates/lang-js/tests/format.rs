@@ -378,3 +378,15 @@ fn header_comments_move_into_the_body() {
         "class C2 extends Base {\n  // a\n  // b\n  m() {}\n}\ninterface A2 extends B {\n  // c\n  x: number;\n}\n"
     );
 }
+
+#[test]
+fn comments_around_dropped_tokens_reach_a_fixed_point() {
+    // Each input changed on a second format before: parentheses and bars that go, `{` after a
+    // block comment, `switch` heads, a comment before the `;` of a loop body, a comma before `)`.
+    assert_eq!(
+        fmt(
+            "(a = c /* c */);\nif (1) /* b */ // c\n{x}\nswitch (t) // s\n{}\nfor (;;) x() // d\n;\nlet u: /*1*/ | /*2*/ C | D;\nf(a, /* e */);\nm = /*p*/ ( Fn(() => {}).once() )().v;\n"
+        ),
+        "a = c; /* c */\nif (1) /* b */ {\n  // c\n  x;\n}\nswitch (t) { // s\n}\nfor (;;) x(); // d\n\nlet u: /*1*/ /*2*/ C | D;\nf(a /* e */);\nm = /*p*/ Fn(() => {}).once()().v;\n"
+    );
+}

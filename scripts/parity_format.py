@@ -152,6 +152,7 @@ class Differences:
         self.defs = {n: v.split(None, 1) for n, v in (data.get("differences") or {}).items()}
         self.files = {k: [n.strip() for n in v.split(",")] for k, v in (data.get("files") or {}).items()}
         self.ratchet = data.get("ratchet") or {}
+        self.second_format = data.get("second-format") or {}  # group -> most files that may change on a second format
         self.lint = lint
         self.differing = {}  # key -> files that differ, listed or not
 
@@ -273,14 +274,23 @@ def main():
         copy = work / name.replace("/", "__")
         shutil.copy(fixture, copy)
         theirs, ours = upstream(config, prefix, version, copy, work), sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))
+        # Sudsy's own output must be a fixed point; the files that change on a second format are counted.
+        again = None if ours is None else sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))
+        unstable = again is not None and again != ours
         if config.get("ignore_trailing_blanks"):  # the tool keeps the trailing blanks of a line, Sudsy never does
             theirs, ours = (re.sub(r"[ 	]+$", "", t, flags=re.M) if t is not None else None for t in (theirs, ours))
-        return theirs, ours
+        return theirs, ours, unstable
 
     with ThreadPoolExecutor(os.cpu_count() if config.get("parallel") else 1) as pool:
         results = list(pool.map(compare, found))
     bad, groups = 0, {}  # a ratchet group is counted: [identical, different, rejected by the tool]
-    for (name, _, group), (theirs, ours) in zip(found, results):
+    unstable = Counter()  # group (or "fixtures") -> files that change on a second format
+    for (name, path, group), (_, _, again) in zip(found, results):
+        if again:
+            unstable[group or "fixtures"] += 1
+            if only is not None:
+                print(f"{name}: changes on a second format")
+    for (name, _, group), (theirs, ours, _) in zip(found, results):
         if group and only is None:
             tally = groups.setdefault(group, [0, 0, 0])
             tally[2 if theirs is None else 0 if theirs == ours else 1] += 1
@@ -293,6 +303,13 @@ def main():
         note = "BELOW the minimum" if same < floor else f"raise the minimum in differences.yaml to {same}" if same > floor else "at the minimum"
         print(f"ratchet {group}: {same} identical, {different} different, {rejected} rejected by {tool} ({note}: {floor})")
         bad += same < floor
+    if only is None:
+        ceilings = known.second_format
+        for group in sorted(set(unstable) | set(ceilings)):
+            now, top = unstable[group], ceilings.get(group, 0)
+            note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"
+            print(f"second format {group}: {now} files change ({note}: {top})")
+            bad += now > top
     bad += known.finish(only is not None)
     print(f"{len(found)} fixtures, {bad} mismatch(es) ({tool} {version})")
     return 1 if bad else 0

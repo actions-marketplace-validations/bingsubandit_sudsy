@@ -320,10 +320,7 @@ fn union(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
         let d = align(2, cx.format(m)?);
         if i == 0 {
             let flat = match op {
-                Some(t) => concat(vec![
-                    cx.leading_comments_doc(t),
-                    cx.trailing_comments_doc(t),
-                ]),
+                Some(t) => bar_comments(cx, t),
                 None => Doc::Nil,
             };
             code.push(if_break(
@@ -344,6 +341,30 @@ fn union(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     } else {
         group(code)
     })
+}
+
+/// The comments of a leading bar that is not printed: inline block comments, each followed by a
+/// blank, else the comments as the printer places them.
+fn bar_comments(cx: &FormatCtx<'_>, bar: &SyntaxToken) -> Doc {
+    use core_format::comments::{self, CommentKind};
+    let all: Vec<_> = comments::leading_comments(cx.grammar, bar)
+        .into_iter()
+        .chain(comments::trailing_comments(cx.grammar, bar))
+        .collect();
+    if all
+        .iter()
+        .all(|c| c.kind == CommentKind::Block && c.breaks_after == 0)
+    {
+        return concat(
+            all.iter()
+                .flat_map(|c| [core_format::doc::text(c.text().into_owned()), lit(" ")])
+                .collect(),
+        );
+    }
+    concat(vec![
+        cx.leading_comments_doc(bar),
+        cx.trailing_comments_doc(bar),
+    ])
 }
 
 /// `A & B`: object types stay on the line of their neighbour, other members wrap with `&` last.

@@ -11,7 +11,7 @@ Formatter + linter for C#, JSON and YAML. `docs/` describes how everything works
 - Small focused modules; extract helpers instead of growing entrypoints. No duplicated logic across crates: shared behavior lives in a core crate. Code of one language embedded in another (shell in a Dockerfile `RUN`, code in a Markdown fence) is parsed with that language's own grammar and checked by its own rules, never re-read by hand in the host language.
 - Errors: `thiserror` in libraries, `anyhow` only in binaries (`cli`, `lsp`).
 - Snapshot tests use `insta`; fixtures live under `tests/fixtures/<lang>/` or the crate's `tests/`.
-- Every formatter test checks lossless round-trip, idempotency and meaning preservation.
+- Every formatter test checks lossless round-trip, idempotency and meaning preservation. Parity runs ratchet the count of files that change on a second format (`second-format` in `differences.yaml`): it may only go down, target 0.
 - Clean up as you go: once a decision is made, delete the losing alternatives (benchmark candidates, prototypes, bootstrap code); once a temporary placement or shim is superseded (code living somewhere "until X exists"), move or remove it when X exists. Results stay in git history.
 - An upstream library (a parser such as oxc, ruff, sqruff) is used for parsing only; layout and fixes are our own code on our own tree, never the library's formatter or fixer.
 - Presets are pure config data. Formatter and rule code never branches on a preset or tool name (no "csharpier mode", no hidden preset-only values). Each style difference is either default behavior or a named, user-settable option that is documented in the schema, so any preset can be reproduced by writing its options in sudsy.yaml by hand.
