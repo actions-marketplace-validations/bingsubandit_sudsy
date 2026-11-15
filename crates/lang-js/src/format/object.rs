@@ -1,7 +1,7 @@
 //! Objects, arrays and destructuring patterns (Prettier's `printObject`, `printArray`,
 //! `printProperty`): an object stays expanded when the source has a line break after its `{`,
 //! numbers fill lines, a pattern that holds a nested pattern always breaks. The quotes of property
-//! names (`quote_props`) are decided before formatting, in [`key_edits`].
+//! names (`quote_props`) are decided before formatting, in [`KeyEdits`].
 
 use super::ast::{parent, un};
 use super::util::{R, inline, is_tok, kids, node_of, shape_error, style, token_of, trailing_comma};
@@ -185,11 +185,11 @@ fn object(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     };
     // The comments in front of the `{` belong to the whole object, not to its group.
     let lead = cx.leading_comments_doc(&open);
+    let dangling = super::util::dangling(cx, &close);
     let body = concat(vec![
         cx.token_text(&open),
         cx.trailing_comments_doc(&open),
-        indent(concat(vec![edge.clone(), concat(parts)])),
-        comma,
+        indent(concat(vec![edge.clone(), concat(parts), comma, dangling])),
         edge,
         cx.token(&close),
     ]);
@@ -281,11 +281,12 @@ fn array(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     };
     let docs = printed(cx, &items)?;
     let last = docs.len() - 1;
+    let dangling = super::util::dangling(cx, &close);
     let body = if concise {
         let mut parts = Vec::new();
         for (i, (d, blank)) in docs.into_iter().enumerate() {
             if i == last {
-                parts.push(concat(vec![d, comma.clone()]));
+                parts.push(concat(vec![d, comma.clone(), dangling.clone()]));
             } else {
                 parts.push(concat(vec![d, lit(",")]));
                 parts.push(if blank {
@@ -308,6 +309,7 @@ fn array(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
             }
         }
         parts.push(comma);
+        parts.push(dangling);
         concat(parts)
     };
     let must_break = node.kind() == k::ARRAY_EXPRESSION && items.len() > 1 && {
@@ -374,8 +376,13 @@ fn property(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
 
 /// The key of a property that is written with a `:` or as a method, with whether it is
 /// quoted. `None` for computed keys, shorthand properties and anything but a name or a string.
-fn key_of(prop: &SyntaxNode) -> Option<(SyntaxNode, bool)> {
+fn key_of(prop: &SyntaxNode, ts: &dyn Fn() -> bool) -> Option<(SyntaxNode, bool)> {
     let shorthand = match prop.kind() {
+        k::METHOD_DEFINITION
+        | k::PROPERTY_DEFINITION
+        | k::TS_PROPERTY_SIGNATURE
+        | k::TS_METHOD_SIGNATURE
+        | k::TS_ENUM_MEMBER => false,
         k::OBJECT_PROPERTY => prop.children().count() == 1,
         k::BINDING_PROPERTY | k::ASSIGNMENT_TARGET_PROPERTY_PROPERTY => !prop
             .children_with_tokens()
@@ -388,12 +395,33 @@ fn key_of(prop: &SyntaxNode) -> Option<(SyntaxNode, bool)> {
     if shorthand || computed {
         return None;
     }
-    let key = prop.first_child()?;
+    let key = prop
+        .children()
+        .find(|c| !matches!(c.kind(), k::DECORATOR))?;
     match key.kind() {
+        // (Prettier keeps the quotes of class properties in TypeScript)
+        k::STRING_LITERAL if prop.kind() == k::PROPERTY_DEFINITION && ts() => None,
         k::STRING_LITERAL => Some((key, true)),
         k::IDENTIFIER_NAME => Some((key, false)),
         _ => None,
     }
+}
+
+/// `1` and `2.5`, as Prettier prints them (`String(Number(s)) === s`).
+fn is_simple_number(s: &str) -> bool {
+    let (int, frac) = s.split_once('.').map_or((s, None), |(i, f)| (i, Some(f)));
+    !int.is_empty()
+        && int.bytes().all(|b| b.is_ascii_digit())
+        && (int == "0" || !int.starts_with('0'))
+        && frac.is_none_or(|f| {
+            !f.is_empty() && f.bytes().all(|b| b.is_ascii_digit()) && !f.ends_with('0')
+        })
+}
+
+/// Does the tree hold TypeScript syntax (Prettier's TypeScript parser keeps some quotes)?
+fn has_ts(tree: &SyntaxNode, grammar: &Grammar) -> bool {
+    tree.descendants()
+        .any(|n| grammar.name(n.kind()).starts_with("TS"))
 }
 
 fn is_identifier(s: &str) -> bool {
@@ -404,33 +432,61 @@ fn is_identifier(s: &str) -> bool {
         && chars.all(|c| c == '$' || c == '_' || c.is_alphanumeric())
 }
 
-/// The edits of the property names of every object in `tree` for `quote_props`: quotes that are
-/// not needed are removed, and with `consistent` the names are quoted when one needs it. A cut
-/// is `(offset, None)`, an insertion `(offset, Some(text))`.
-pub(crate) fn key_edits(
-    tree: &SyntaxNode,
-    text: &str,
-    grammar: &Grammar,
-    options: &ResolvedOptions,
-) -> Vec<(usize, Option<&'static str>)> {
-    let mode = match options.get("quote_props") {
-        Some(OptionValue::String(s)) => s.as_str(),
-        _ => "preserve",
-    };
-    let mut edits = Vec::new();
-    if mode == "preserve" {
-        return edits;
+/// How `quote_props` is applied to the property names of the objects (and class bodies,
+/// interfaces, type literals and enums) of one tree, node by node (`rewrite` walks the tree once).
+pub(crate) struct KeyEdits<'a> {
+    mode: &'a str,
+    /// Does the tree hold TypeScript syntax? Found when first asked.
+    ts: std::cell::OnceCell<bool>,
+}
+
+impl<'a> KeyEdits<'a> {
+    pub(crate) fn new(options: &'a ResolvedOptions) -> Self {
+        let mode = match options.get("quote_props") {
+            Some(OptionValue::String(s)) => s.as_str(),
+            _ => "preserve",
+        };
+        KeyEdits {
+            mode,
+            ts: std::cell::OnceCell::new(),
+        }
     }
-    let tok = |n: &SyntaxNode| super::rewrite::first_token(grammar, n);
-    for object in tree.descendants().filter(|n| {
-        matches!(
-            n.kind(),
-            k::OBJECT_EXPRESSION | k::OBJECT_PATTERN | k::OBJECT_ASSIGNMENT_TARGET
-        )
-    }) {
-        let keys: Vec<(SyntaxNode, bool)> = object.children().filter_map(|p| key_of(&p)).collect();
+
+    /// The edits of the names of `object`, when it is a list of members: quotes that are not
+    /// needed go, and with `consistent` the names are quoted when one needs it. A cut is
+    /// `(offset, None)`, an insertion `(offset, Some(text))`.
+    pub(crate) fn of(
+        &self,
+        object: &SyntaxNode,
+        text: &str,
+        grammar: &Grammar,
+        edits: &mut Vec<(usize, Option<&'static str>)>,
+    ) {
+        if self.mode == "preserve"
+            || !matches!(
+                object.kind(),
+                k::OBJECT_EXPRESSION
+                    | k::OBJECT_PATTERN
+                    | k::OBJECT_ASSIGNMENT_TARGET
+                    | k::CLASS_BODY
+                    | k::TS_INTERFACE_BODY
+                    | k::TS_TYPE_LITERAL
+                    | k::TS_ENUM_BODY
+            )
+        {
+            return;
+        }
+        let ts = || {
+            *self.ts.get_or_init(|| {
+                let root = object.ancestors().last().unwrap_or_else(|| object.clone());
+                has_ts(&root, grammar)
+            })
+        };
+        let tok = |n: &SyntaxNode| super::rewrite::first_token(grammar, n);
+        let keys: Vec<(SyntaxNode, bool)> =
+            object.children().filter_map(|p| key_of(&p, &ts)).collect();
         // A quoted name that is not a plain identifier (or number) keeps the quotes of all names.
-        let needs_quotes = mode == "consistent"
+        let needs_quotes = self.mode == "consistent"
             && keys.iter().any(|(key, quoted)| {
                 *quoted
                     && tok(key).is_some_and(|t| {
@@ -449,7 +505,7 @@ pub(crate) fn key_edits(
                     .chars()
                     .next_back()
                     .is_some_and(|c| c == '$' || c == '_' || c.is_alphanumeric());
-                if is_identifier(inner) && !glued {
+                if (is_identifier(inner) || (is_simple_number(inner) && !ts())) && !glued {
                     edits.push((start, None));
                     edits.push((end - 1, None));
                 }
@@ -459,7 +515,6 @@ pub(crate) fn key_edits(
             }
         }
     }
-    edits
 }
 
 /// `[]` or `{}`; comments on lines of their own inside go indented between the brackets.

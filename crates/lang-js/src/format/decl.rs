@@ -290,7 +290,15 @@ pub(crate) fn parameters_in(
     for (i, (d, c)) in docs.into_iter().zip(commas).enumerate() {
         list.push(d);
         if i < last {
-            list.extend([lit(","), c, line()]);
+            // A blank line between two parameters stays (and breaks the list).
+            let blank = cx
+                .first_token(items[i + 1])
+                .is_some_and(|t| comments::blank_lines_before(cx.grammar, &t) > 0);
+            if blank {
+                list.extend([lit(","), c, doc::hardline(), doc::hardline()]);
+            } else {
+                list.extend([lit(","), c, line()]);
+            }
         } else {
             if !ends_in_rest {
                 list.push(super::util::trailing_comma(cx, true));
@@ -298,6 +306,7 @@ pub(crate) fn parameters_in(
             list.push(c);
         }
     }
+    let dangling = super::util::dangling(cx, close);
     let body = concat(vec![
         if property {
             doc::break_parent()
@@ -305,7 +314,7 @@ pub(crate) fn parameters_in(
             Doc::Nil
         },
         cx.token(open),
-        indent(concat(vec![softline(), concat(list)])),
+        indent(concat(vec![softline(), concat(list), dangling])),
         softline(),
         cx.token(close),
     ]);

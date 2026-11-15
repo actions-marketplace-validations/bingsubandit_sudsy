@@ -39,7 +39,10 @@ pub(crate) fn rewrite(
     let mut later: Vec<Edit> = Vec::new();
     // Text moved from elsewhere: where it goes and what.
     let mut moved: Vec<(usize, String)> = Vec::new();
+    let keys = super::object::KeyEdits::new(options);
+    let mut key_edits: Vec<Edit> = Vec::new();
     for node in tree.descendants() {
+        keys.of(&node, text, grammar, &mut key_edits);
         // `) // c` then `{` on the next line becomes `) { // c`: the comment moves inside the block.
         if matches!(node.kind(), k::BLOCK_STATEMENT | k::FUNCTION_BODY)
             && let Some(open) = first_token(grammar, &node)
@@ -189,6 +192,21 @@ pub(crate) fn rewrite(
                     .into_iter()
                     .for_each(&mut cut)
             }
+            // `(): () => void => x`: a function type returned by an arrow takes parentheses.
+            k::TS_FUNCTION_TYPE
+                if node
+                    .parent()
+                    .filter(|p| p.kind() == k::TS_TYPE_ANNOTATION)
+                    .and_then(|p| p.parent())
+                    .is_some_and(|a| a.kind() == k::ARROW_FUNCTION_EXPRESSION) =>
+            {
+                if let (Some(first), Some(last)) =
+                    (first_token(grammar, &node), last_token(grammar, &node))
+                {
+                    inserts.push((usize::from(first.text_range().start()), Some("(")));
+                    inserts.push((usize::from(last.text_range().end()), Some(")")));
+                }
+            }
             // `x()\n// c\n;` is `x();` with the comment after it.
             k::EXPRESSION_STATEMENT => {
                 let semi = node
@@ -285,7 +303,7 @@ pub(crate) fn rewrite(
     }
     edits.extend(inserts);
     edits.extend(later);
-    edits.extend(super::object::key_edits(tree, text, grammar, options));
+    edits.extend(key_edits);
     if edits.is_empty() {
         return None;
     }

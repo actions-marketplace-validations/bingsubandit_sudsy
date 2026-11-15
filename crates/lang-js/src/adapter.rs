@@ -14,7 +14,7 @@ use core_syntax::trivia::is_line_break;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TreeBuilder, grammars};
 use oxc_allocator::{Allocator, Vec as ArenaVec};
 use oxc_ast::AstKind;
-use oxc_ast::ast::{JSXChild, JSXExpression, TemplateElement};
+use oxc_ast::ast::{Expression, JSXChild, JSXExpression, TemplateElement};
 use oxc_ast_visit::Visit;
 use oxc_parser::config::TokensParserConfig;
 use oxc_parser::{Kind, ParseOptions, Parser};
@@ -32,7 +32,30 @@ pub fn source_type(path: &str) -> SourceType {
     }
 }
 
+/// Runs `attempt` (it returns its result and whether it had syntax errors) as a module first,
+/// as Babel does, and as the unambiguous type of the extension (a script when the file has no
+/// module syntax) only when that fails and the second try is clean.
+pub fn module_first<R>(st: SourceType, attempt: impl Fn(SourceType) -> (R, bool)) -> R {
+    if !st.is_unambiguous() {
+        return attempt(st).0;
+    }
+    let first = attempt(st.with_module(true));
+    if !first.1 {
+        return first.0;
+    }
+    let second = attempt(st);
+    if second.1 { first.0 } else { second.0 }
+}
+
 pub fn parse(src: &str, source_type: SourceType) -> ParseResult {
+    module_first(source_type, |st| {
+        let r = parse_as(src, st);
+        let failed = !r.errors.is_empty();
+        (r, failed)
+    })
+}
+
+fn parse_as(src: &str, source_type: SourceType) -> ParseResult {
     let allocator = Allocator::default();
     let options = ParseOptions {
         allow_return_outside_function: true,
@@ -165,6 +188,9 @@ struct Collector {
     jsx_space: std::collections::HashSet<u32>,
     /// Where the comments start: a `{" "}` with a comment inside is an expression like any other.
     comment_starts: Vec<u32>,
+    /// Starts of the chains in parentheses that an optional link continues, `(a?.b)?.c`: they are
+    /// no node of their own, as the output (`a?.b?.c`) has none.
+    merged_chains: std::collections::HashSet<u32>,
 }
 
 impl Collector {
@@ -176,6 +202,15 @@ impl Collector {
             made: Vec::new(),
             jsx_space: std::collections::HashSet::new(),
             comment_starts: Vec::new(),
+            merged_chains: std::collections::HashSet::new(),
+        }
+    }
+
+    fn note_merged_chain(&mut self, link: &Expression<'_>) {
+        if let Expression::ParenthesizedExpression(p) = link
+            && let Expression::ChainExpression(c) = &p.expression
+        {
+            self.merged_chains.insert(c.span.start);
         }
     }
 
@@ -222,6 +257,9 @@ impl<'a> Visit<'a> for Collector {
         match kind {
             AstKind::JSXElement(e) => self.note_jsx_space(&e.children),
             AstKind::JSXFragment(f) => self.note_jsx_space(&f.children),
+            AstKind::StaticMemberExpression(m) if m.optional => self.note_merged_chain(&m.object),
+            AstKind::ComputedMemberExpression(m) if m.optional => self.note_merged_chain(&m.object),
+            AstKind::CallExpression(c) if c.optional => self.note_merged_chain(&c.callee),
             _ => {}
         }
         let ours = match kind {
@@ -229,6 +267,7 @@ impl<'a> Visit<'a> for Collector {
                 Some(k::JSX_TEXT)
             }
             AstKind::StringLiteral(_) if self.jsx_space.contains(&span.start) => None,
+            AstKind::ChainExpression(_) if self.merged_chains.contains(&span.start) => None,
             _ => ours,
         };
         let make = ours.filter(|_| span.end > span.start);

@@ -155,12 +155,22 @@ fn return_or_throw(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
             lit(")"),
         ])
     } else if is_binaryish(arg_u.kind()) || arg_u.kind() == k::SEQUENCE_EXPRESSION {
+        // A sequence keeps its parentheses on one line.
+        let seq = arg_u.kind() == k::SEQUENCE_EXPRESSION;
         group(concat(vec![
             lit(" "),
-            if_break(lit("("), Doc::Nil),
+            if seq {
+                lit("(")
+            } else {
+                if_break(lit("("), Doc::Nil)
+            },
             indent(concat(vec![softline(), printed])),
             softline(),
-            if_break(lit(")"), Doc::Nil),
+            if seq {
+                lit(")")
+            } else {
+                if_break(lit(")"), Doc::Nil)
+            },
         ]))
     } else {
         concat(vec![lit(" "), printed])

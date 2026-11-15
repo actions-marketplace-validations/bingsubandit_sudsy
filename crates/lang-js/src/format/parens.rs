@@ -11,7 +11,7 @@ use super::util::{kids, shape_error, token_of};
 use crate::generated::kind as k;
 use core_format::doc::{Doc, concat, lit};
 use core_format::{FormatCtx, FormatError};
-use core_syntax::{SyntaxKind, SyntaxNode};
+use core_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum Need {
@@ -36,19 +36,35 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
         .children()
         .next()
         .ok_or_else(|| shape_error("parentheses"))?;
-    let commented = token_comments(cx, open) || token_comments(cx, close);
+    let commented = commented_pair(cx, open, close);
     let nested = node
         .parent()
         .is_some_and(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
     let keep = commented || (!nested && needs_parens(cx, &un(node)) != Need::No);
     if !keep {
-        return Ok(Some(cx.format(&child)?));
+        return Ok(Some(concat(vec![
+            cx.leading_comments_doc(open),
+            cx.format(&child)?,
+        ])));
     }
     Ok(Some(concat(vec![
         cx.token(open),
         cx.format(&child)?,
         cx.token(close),
     ])))
+}
+
+/// Does a comment tie the source's parentheses to their expression? One inside the pair does, and
+/// so does a type cast (`/** @type {T} */ (x)`); other comments in front belong to the statement.
+fn commented_pair(cx: &FormatCtx<'_>, open: &SyntaxToken, close: &SyntaxToken) -> bool {
+    use core_format::comments;
+    let cast = comments::leading_comments(cx.grammar, open)
+        .last()
+        .is_some_and(|c| {
+            let t = c.text();
+            t.starts_with("/**") && (t.contains("@type") || t.contains("@satisfies"))
+        });
+    cast || !comments::trailing_comments(cx.grammar, open).is_empty() || token_comments(cx, close)
 }
 
 /// `doc` of `node` in the parentheses it needs when the source has none.
@@ -96,10 +112,11 @@ pub(crate) fn first_char(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<char> 
     loop {
         if n.kind() == k::PARENTHESIZED_EXPRESSION {
             let inner = un(&n);
-            let commented = n
-                .children_with_tokens()
-                .filter_map(|e| e.into_token())
-                .any(|t| token_comments(cx, &t));
+            let commented = kids(cx, &n)
+                .first()
+                .and_then(token_of)
+                .zip(kids(cx, &n).last().and_then(token_of))
+                .is_some_and(|(o, c)| commented_pair(cx, o, c));
             let nested = n
                 .parent()
                 .is_some_and(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
@@ -203,8 +220,9 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
             .ancestors()
             .find(|a| a.kind() == k::EXPORT_DEFAULT_DECLARATION)
             .and_then(|a| a.children().last());
-        if kind != k::OBJECT_EXPRESSION && export.is_some_and(|e| starts_with(&e, &at)) {
-            return Need::Yes;
+        // (a function or class that starts a longer expression leaves the parentheses to it)
+        if kind != k::OBJECT_EXPRESSION && export.as_ref().is_some_and(|e| starts_with(e, &at)) {
+            return yes(export.is_some_and(|e| un(&e) == *node));
         }
     }
     if super_class
@@ -228,7 +246,11 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
     {
         return Need::Yes;
     }
-    if pk == k::EXPORT_DEFAULT_DECLARATION && kind == k::SEQUENCE_EXPRESSION {
+    if pk == k::EXPORT_DEFAULT_DECLARATION
+        && (kind == k::SEQUENCE_EXPRESSION
+            || (!matches!(kind, k::FUNCTION | k::CLASS | k::TAGGED_TEMPLATE_EXPRESSION)
+                && starts_with(node, &|n| matches!(n.kind(), k::FUNCTION | k::CLASS))))
+    {
         return Need::Yes;
     }
     let is_cast = |kd: SyntaxKind| matches!(kd, k::TS_AS_EXPRESSION | k::TS_SATISFIES_EXPRESSION);
@@ -273,7 +295,7 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
                     if is_cast(kind) {
                         Need::Keep
                     } else {
-                        Need::No
+                        yes(kind == k::LOGICAL_EXPRESSION && op == "??")
                     }
                 }
                 k::CONDITIONAL_EXPRESSION => {
@@ -319,7 +341,7 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
             }
         }
         k::SEQUENCE_EXPRESSION => match pk {
-            k::RETURN_STATEMENT | k::FOR_STATEMENT | k::EXPRESSION_STATEMENT => Need::No,
+            k::FOR_STATEMENT | k::RETURN_STATEMENT | k::THROW_STATEMENT => Need::No,
             k::ARROW_FUNCTION_EXPRESSION => yes(!last),
             _ => Need::Yes,
         },
@@ -411,8 +433,9 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
         k::CHAIN_EXPRESSION => match pk {
             k::TS_NON_NULL_EXPRESSION => Need::Keep,
             k::TAGGED_TEMPLATE_EXPRESSION => Need::Yes,
-            k::CALL_EXPRESSION | k::NEW_EXPRESSION => yes(is_callee),
-            _ if member_p => yes(is_object),
+            // `(a?.b)?.c` is the one chain `a?.b?.c`
+            k::CALL_EXPRESSION | k::NEW_EXPRESSION => yes(is_callee && !optional_link(&p)),
+            _ if member_p => yes(is_object && !optional_link(&p)),
             _ => Need::No,
         },
         k::CALL_EXPRESSION
@@ -442,6 +465,12 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
         | k::NEW_EXPRESSION => Need::No,
         _ => Need::Keep,
     }
+}
+
+/// Is `n` a member or call written with `?.`?
+fn optional_link(n: &SyntaxNode) -> bool {
+    n.children_with_tokens()
+        .any(|e| e.as_token().is_some_and(|t| t.kind() == k::QUESTION_DOT))
 }
 
 /// `new (foo())`, `new (a.b().c)`: a call in the callee's object chain would take the arguments.

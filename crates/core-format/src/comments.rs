@@ -555,6 +555,70 @@ pub fn comment_at_end(g: &Grammar, node: &SyntaxNode) -> bool {
     matches!(down(g, &node.green()), ControlFlow::Break(true))
 }
 
+/// Is the last token of `node` that is not trivia of kind `kind`, one of its own children?
+/// Reads the green tree, so it can be asked of every node.
+pub fn ends_with_token(g: &Grammar, node: &SyntaxNode, kind: SyntaxKind) -> bool {
+    for child in node.green().children().rev() {
+        match child {
+            rowan::NodeOrToken::Token(t) => {
+                let k = SyntaxKind(t.kind().0);
+                if k == kind {
+                    return true;
+                }
+                if !is_trivia(g, k) {
+                    return false;
+                }
+            }
+            rowan::NodeOrToken::Node(n) => {
+                if !is_trivia(g, SyntaxKind(n.kind().0)) {
+                    return false;
+                }
+            }
+        }
+    }
+    false
+}
+
+/// The spans (start of the trivia in front of a token, start of the token) of the tokens that
+/// have a comment among the trivia in front of them, in order, found in one walk of the green
+/// tree of `root` (no tokens are created), so that asking this of every node costs a search.
+pub fn spans_after_comments(g: &Grammar, root: &SyntaxNode) -> Vec<(u32, u32)> {
+    struct Walk {
+        at: u32,
+        /// Where the trivia in front of the next token start.
+        run: u32,
+        pending: bool,
+        out: Vec<(u32, u32)>,
+    }
+    fn down(g: &Grammar, node: &rowan::GreenNodeData, w: &mut Walk) {
+        for child in node.children() {
+            match child {
+                rowan::NodeOrToken::Node(n) => down(g, n, w),
+                rowan::NodeOrToken::Token(t) => {
+                    let kind = SyntaxKind(t.kind().0);
+                    if !is_trivia(g, kind) {
+                        if std::mem::take(&mut w.pending) {
+                            w.out.push((w.run, w.at));
+                        }
+                        w.run = w.at + u32::from(t.text_len());
+                    } else if is_comment_like(g, kind) {
+                        w.pending = true;
+                    }
+                    w.at += u32::from(t.text_len());
+                }
+            }
+        }
+    }
+    let mut w = Walk {
+        at: 0,
+        run: 0,
+        pending: false,
+        out: Vec::new(),
+    };
+    down(g, &root.green(), &mut w);
+    w.out
+}
+
 /// Calls `visit` with the tokens of `node` in document order until it returns `Break`.
 fn walk_node<B>(
     g: &Grammar,

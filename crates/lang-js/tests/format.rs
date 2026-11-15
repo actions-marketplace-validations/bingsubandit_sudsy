@@ -75,6 +75,26 @@ fn comments_stay_with_their_tokens() {
 }
 
 #[test]
+fn comments_before_a_semicolon_go_after_it_and_parameters_keep_blank_lines() {
+    assert_eq!(
+        fmt(
+            "a = 2 /* c */;\nlet x = 1 /* d */;\nfunction f(\n  a,\n\n  b,\n) {}\n// top\n(a && b) && c;\n"
+        ),
+        "a = 2; /* c */\nlet x = 1; /* d */\nfunction f(\n  a,\n\n  b,\n) {}\n// top\na && b && c;\n"
+    );
+}
+
+#[test]
+fn parentheses_and_quotes_of_the_expressions_and_members() {
+    assert_eq!(
+        fmt(
+            "(a?.b)?.c;\nexport default (function () {}.x());\n(a ?? b) ? c : d;\nclass K { \"m\"() {} }\nimport(\"./a/very/long/module/path/to/a/very/long/module/path/to/a/very/long/module/path\");\n"
+        ),
+        "a?.b?.c;\nexport default (function () {}.x());\n(a ?? b) ? c : d;\nclass K {\n  m() {}\n}\nimport(\"./a/very/long/module/path/to/a/very/long/module/path/to/a/very/long/module/path\");\n"
+    );
+}
+
+#[test]
 fn the_semi_and_quote_options() {
     let semi_off = vec![("semi", OptionValue::Bool(false))];
     assert_eq!(

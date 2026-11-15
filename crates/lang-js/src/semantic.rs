@@ -4,7 +4,7 @@
 //! first scope rule that runs on a file and shared with the others, so a run with syntax rules
 //! only never pays for it.
 
-use crate::adapter::source_type;
+use crate::adapter::{module_first, source_type};
 use core_rules::FileContext;
 use core_syntax::SyntaxNode;
 use oxc_allocator::Allocator;
@@ -188,18 +188,21 @@ pub fn model(file: &FileContext<'_>) -> Option<Rc<Model>> {
         }
         let name = file.path.to_string_lossy();
         let st = source_type(&name);
-        let mut ok = true;
-        let ast = Ast::new(Allocator::default(), |alloc| {
-            let options = ParseOptions {
-                allow_return_outside_function: true,
-                preserve_parens: false,
-                ..ParseOptions::default()
-            };
-            let parsed = Parser::new(alloc, alloc.alloc_str(file.text), st)
-                .with_options(options)
-                .parse();
-            ok = parsed.diagnostics.is_empty();
-            parsed.program
+        let (ast, ok) = module_first(st, |st| {
+            let mut ok = true;
+            let ast = Ast::new(Allocator::default(), |alloc| {
+                let options = ParseOptions {
+                    allow_return_outside_function: true,
+                    preserve_parens: false,
+                    ..ParseOptions::default()
+                };
+                let parsed = Parser::new(alloc, alloc.alloc_str(file.text), st)
+                    .with_options(options)
+                    .parse();
+                ok = parsed.diagnostics.is_empty();
+                parsed.program
+            });
+            ((ast, ok), !ok)
         });
         let sem = Sem::new(ast, |ast| {
             SemanticBuilder::new()

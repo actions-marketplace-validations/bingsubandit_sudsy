@@ -145,6 +145,19 @@ fn import(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
         args,
         close: elems.last().and_then(token_of).cloned(),
     };
+    // A lone string stays on the line however long it is.
+    if let [(arg, None)] = &c.args[..]
+        && un(arg).kind() == k::STRING_LITERAL
+        && !super::ast::has_leading_comment(cx, arg)
+        && let (Some(open), Some(close)) = (&c.open, &c.close)
+    {
+        return Ok(concat(vec![
+            concat(head),
+            cx.token(open),
+            cx.format(arg)?,
+            cx.token(close),
+        ]));
+    }
     Ok(concat(vec![
         concat(head),
         group(arguments_inner(cx, node, &c, true)?),
@@ -157,6 +170,11 @@ pub(crate) fn arguments(cx: &FormatCtx<'_>, node: &SyntaxNode, c: &Call) -> R {
 
 /// The parenthesized argument list (Prettier's `printCallArguments`).
 fn arguments_inner(cx: &FormatCtx<'_>, node: &SyntaxNode, c: &Call, dynamic_import: bool) -> R {
+    let dangling = c
+        .close
+        .as_ref()
+        .filter(|_| !c.args.is_empty())
+        .map_or(Doc::Nil, |t| super::util::dangling(cx, t));
     let (open, close) = parens(cx, c)?;
     let args = &c.args;
     if args.is_empty() {
@@ -210,13 +228,17 @@ fn arguments_inner(cx: &FormatCtx<'_>, node: &SyntaxNode, c: &Call, dynamic_impo
                 line(),
                 concat(printed.to_vec()),
                 trailing.clone(),
+                dangling.clone(),
             ])),
             line(),
             close.clone(),
         ]))
     };
     let decorator = parent(node).is_some_and(|p| p.kind() == k::DECORATOR);
-    if any_empty_line || (!decorator && is_function_composition(cx, &uns)) {
+    if any_empty_line
+        || !matches!(dangling, Doc::Nil)
+        || (!decorator && is_function_composition(cx, &uns))
+    {
         return Ok(all_broken_out(&printed));
     }
     let group_first = could_group_first(cx, &uns);
@@ -273,8 +295,12 @@ fn arguments_inner(cx: &FormatCtx<'_>, node: &SyntaxNode, c: &Call, dynamic_impo
     }
     let contents = concat(vec![
         open,
-        indent(concat(vec![softline(), concat(printed.clone())])),
-        trailing,
+        indent(concat(vec![
+            softline(),
+            concat(printed.clone()),
+            trailing,
+            dangling,
+        ])),
         softline(),
         close,
     ]);
@@ -379,6 +405,14 @@ fn is_hopefully_short(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
             n.children().all(|c| is_hopefully_short(cx, &c))
         }
         k::REG_EXP_LITERAL => true,
+        // `x as T` with a keyword or plain reference type
+        k::TS_AS_EXPRESSION | k::TS_SATISFIES_EXPRESSION => {
+            n.first_child().is_some_and(|e| is_hopefully_short(cx, &e))
+                && n.last_child().is_some_and(|t| {
+                    t.children()
+                        .all(|c| c.kind() != k::TS_TYPE_PARAMETER_INSTANTIATION)
+                })
+        }
         _ => is_simple_call_argument(cx, &n, 0),
     }
 }
@@ -439,13 +473,13 @@ pub(crate) fn could_expand(cx: &FormatCtx<'_>, n: &SyntaxNode, arrow_chain: bool
             (!returns_reference || nonempty_block)
                 && match body_u.kind() {
                     k::FUNCTION_BODY
-                    | k::ARROW_FUNCTION_EXPRESSION
                     | k::OBJECT_EXPRESSION
                     | k::ARRAY_EXPRESSION
                     | k::TS_AS_EXPRESSION
                     | k::TS_SATISFIES_EXPRESSION
                     | k::JSX_ELEMENT
                     | k::JSX_FRAGMENT => true,
+                    k::ARROW_FUNCTION_EXPRESSION => could_expand(cx, &body_u, true),
                     k::CALL_EXPRESSION | k::CONDITIONAL_EXPRESSION => !arrow_chain,
                     _ => false,
                 }
@@ -485,7 +519,10 @@ pub(crate) fn is_simple_call_argument(cx: &FormatCtx<'_>, n: &SyntaxNode, depth:
             let Some(c) = Call::of(cx, &n) else {
                 return false;
             };
-            is_simple_call_argument(cx, &c.callee, depth) && c.args.iter().all(|a| simple(&a.0))
+            // A call inside a call argument is not simple.
+            depth == 0
+                && is_simple_call_argument(cx, &c.callee, depth)
+                && c.args.iter().all(|a| simple(&a.0))
         }
         k::STATIC_MEMBER_EXPRESSION | k::PRIVATE_FIELD_EXPRESSION => n
             .first_child()

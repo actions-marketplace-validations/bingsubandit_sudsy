@@ -16,6 +16,10 @@ pub(crate) struct Style {
     /// `trailing_commas`: 0 none, 1 es5, 2 all.
     pub commas: u8,
     pub bracket_spacing: bool,
+    /// Is the code one expression of a host (no statements, no comments to place)?
+    pub embedded: bool,
+    /// Where the tokens that follow a comment start (found on first use, see `comment_before`).
+    pub after_comment: std::sync::OnceLock<Vec<(u32, u32)>>,
 }
 
 pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
@@ -29,6 +33,9 @@ pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
             _ => 2,
         },
         bracket_spacing: cx.options.bool("bracket_spacing"),
+        embedded: matches!(cx.options.get("embed_mode"),
+            Some(OptionValue::String(m)) if m == super::embed::EXPRESSION),
+        after_comment: std::sync::OnceLock::new(),
     })
 }
 
@@ -233,6 +240,50 @@ pub(crate) fn braces(
         edge,
         close,
     ]))
+}
+
+/// Where the comments of the tree of `anchor` are: (start of the trivia in front of a token, start
+/// of the token) of each token with a comment in front, found on first use.
+pub(crate) fn comment_spans<'a>(cx: &'a FormatCtx<'_>, anchor: &SyntaxNode) -> &'a [(u32, u32)] {
+    style(cx).after_comment.get_or_init(|| {
+        let root = anchor.ancestors().last().unwrap_or_else(|| anchor.clone());
+        core_format::comments::spans_after_comments(cx.grammar, &root)
+    })
+}
+
+/// The comments on lines of their own in front of the closing token of a list: they follow the
+/// last item (and its trailing comma) at the items' indentation, each on a line, and no longer
+/// lead `close`.
+pub(crate) fn dangling(cx: &FormatCtx<'_>, close: &SyntaxToken) -> Doc {
+    // (a token no comment is in front of has no comments to place)
+    let at = u32::from(close.text_range().start());
+    let spans = comment_spans(cx, &close.parent().expect("a token has a parent"));
+    if spans.binary_search_by_key(&at, |s| s.1).is_err() {
+        return Doc::Nil;
+    }
+    use core_format::comments::{self, CommentKind};
+    let cs = comments::leading_comments(cx.grammar, close);
+    if !cs
+        .iter()
+        .any(|c| c.kind == CommentKind::Line || c.breaks_after > 0)
+    {
+        return Doc::Nil;
+    }
+    cx.hold_leading(close);
+    let blank = comments::blank_lines_before(cx.grammar, close) > 0;
+    concat(
+        cs.iter()
+            .enumerate()
+            .flat_map(|(i, c)| {
+                let gap = if i == 0 && blank {
+                    hardline()
+                } else {
+                    Doc::Nil
+                };
+                [gap, hardline(), core_format::context::comment_doc(c)]
+            })
+            .collect(),
+    )
 }
 
 /// `()` that may hold block comments: they sit against the parentheses, `(/* c */)`.

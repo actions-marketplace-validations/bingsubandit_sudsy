@@ -4,9 +4,14 @@ namespace M {} namespace M {}
 function fo(): void; function fo() {}
 enum En {} namespace En {}
 type T1 = 1; const T1 = 2; function fi() {} interface fi {}
+//                 ^^ no-redeclare
+//                                                    ^^ no-redeclare
 import type { It } from 'x'; function It() {}
+//                                    ^^ no-redeclare
 import { type Ia } from 'y'; let Ia = 1; Ia = 2;
+//                               ^^ no-redeclare
 interface Dup {} const Dup = 1; const Dup = 2;
+//                     ^^^ no-redeclare
 //                                    ^^^ no-redeclare
 var v = 1; var v = 2;
 //             ^ no-redeclare

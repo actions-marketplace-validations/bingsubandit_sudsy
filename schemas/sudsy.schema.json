@@ -2550,7 +2550,7 @@
             },
             "no-redeclare": {
               "$ref": "#/definitions/rule",
-              "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed, and a type and a value of one name do not clash. Built-in globals are not checked."
+              "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked."
             },
             "no-redundant-for": {
               "$ref": "#/definitions/rule",

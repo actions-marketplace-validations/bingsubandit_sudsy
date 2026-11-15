@@ -154,9 +154,9 @@ pub struct FormatCtx<'a> {
     detached: Mutex<Vec<(TextSize, Option<Vec<Comment>>)>>,
     /// Like `detached` for the whole run: the comments are read, not taken, so a document that
     /// was cached while they were held back stays right when it is used again.
-    held: Mutex<Vec<(TextSize, Option<Vec<Comment>>)>>,
+    held: Mutex<HashMap<TextSize, Option<Vec<Comment>>>>,
     /// Tokens whose leading comments a shape prints itself (see [`FormatCtx::hold_leading`]).
-    held_leading: Mutex<Vec<TextSize>>,
+    held_leading: Mutex<std::collections::HashSet<TextSize>>,
     /// Is any token in `held_leading`? Asked for every token, so without the lock.
     any_held_leading: std::sync::atomic::AtomicBool,
     /// A provider's per-run data derived from the options (see [`FormatCtx::cached`]).
@@ -181,8 +181,8 @@ impl<'a> FormatCtx<'a> {
             comment_style: formatter.comment_style(options),
             line_breaks: Mutex::new(None),
             detached: Mutex::new(Vec::new()),
-            held: Mutex::new(Vec::new()),
-            held_leading: Mutex::new(Vec::new()),
+            held: Mutex::new(HashMap::new()),
+            held_leading: Mutex::new(std::collections::HashSet::new()),
             any_held_leading: std::sync::atomic::AtomicBool::new(false),
             cache: std::sync::OnceLock::new(),
             layouts: Mutex::new(HashMap::new()),
@@ -403,9 +403,7 @@ impl<'a> FormatCtx<'a> {
     pub fn hold_leading(&self, tok: &SyntaxToken) {
         let at = tok.text_range().start();
         let mut held = self.held_leading.lock().expect("held leading lock");
-        if !held.contains(&at) {
-            held.push(at);
-        }
+        held.insert(at);
         self.any_held_leading
             .store(true, std::sync::atomic::Ordering::Relaxed);
     }
@@ -417,16 +415,18 @@ impl<'a> FormatCtx<'a> {
 
     /// The comments in front of `tok`, as the comment style wants them attached to it.
     fn leading(&self, tok: &SyntaxToken) -> Vec<Comment> {
-        if self
-            .any_held_leading
-            .load(std::sync::atomic::Ordering::Relaxed)
+        let cs = self.leading_of(tok);
+        if !cs.is_empty()
+            && self
+                .any_held_leading
+                .load(std::sync::atomic::Ordering::Relaxed)
         {
             let held = self.held_leading.lock().expect("held leading lock");
             if held.contains(&tok.text_range().start()) {
                 return Vec::new();
             }
         }
-        self.leading_of(tok)
+        cs
     }
 
     fn leading_of(&self, tok: &SyntaxToken) -> Vec<Comment> {
@@ -454,8 +454,8 @@ impl<'a> FormatCtx<'a> {
         if !cs.is_empty() {
             let at = tok.text_range().start();
             let mut held = self.held.lock().expect("held lock");
-            if let Some(h) = held.iter_mut().find(|h| h.0 == at) {
-                h.1 = Some(cs);
+            if let Some(h) = held.get_mut(&at) {
+                *h = Some(cs);
                 return Vec::new();
             }
             drop(held);
@@ -480,9 +480,7 @@ impl<'a> FormatCtx<'a> {
     pub fn hold_trailing(&self, tok: &SyntaxToken) {
         let at = tok.text_range().start();
         let mut held = self.held.lock().expect("held lock");
-        if !held.iter().any(|h| h.0 == at) {
-            held.push((at, None));
-        }
+        held.entry(at).or_insert(None);
     }
 
     /// The comments [`FormatCtx::hold_trailing`] held back, as the printed trailing comments of the
@@ -490,9 +488,8 @@ impl<'a> FormatCtx<'a> {
     pub fn held_trailing(&self, tok: &SyntaxToken) -> Doc {
         let at = tok.text_range().start();
         let held = self.held.lock().expect("held lock");
-        held.iter()
-            .find(|h| h.0 == at)
-            .and_then(|h| h.1.as_ref())
+        held.get(&at)
+            .and_then(|h| h.as_ref())
             .map_or(Doc::Nil, |cs| {
                 trailing_comments_doc(&self.comment_style, cs)
             })

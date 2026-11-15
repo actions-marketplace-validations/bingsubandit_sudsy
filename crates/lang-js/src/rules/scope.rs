@@ -400,15 +400,6 @@ pub(super) fn redeclare(c: &Check, _n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
                 groups[0].retain(
                     |(_, n)| !matches!(cx.kind(*n), AstKind::Function(f) if f.body.is_none()),
                 );
-                // Types and values live in separate spaces: a type and a value of one name
-                // (`type T` and `const T`, an imported type and a local function) do not clash.
-                let (types, values): (Vec<_>, Vec<_>) = groups[0]
-                    .iter()
-                    .copied()
-                    .partition(|(_, n)| type_only(cx, *n));
-                if !types.is_empty() && !values.is_empty() {
-                    groups = vec![types, values];
-                }
                 groups = groups
                     .into_iter()
                     .filter(|g| g.len() > 1)
@@ -431,20 +422,6 @@ fn is_import(k: AstKind<'_>) -> bool {
             | AstKind::ImportDefaultSpecifier(_)
             | AstKind::ImportNamespaceSpecifier(_)
     )
-}
-
-/// Does the declaration make a type and no value?
-fn type_only(cx: &Cx<'_, '_>, n: NodeId) -> bool {
-    match cx.kind(n) {
-        AstKind::TSInterfaceDeclaration(_) | AstKind::TSTypeAliasDeclaration(_) => true,
-        AstKind::ImportSpecifier(s) if s.import_kind.is_type() => true,
-        AstKind::ImportSpecifier(_)
-        | AstKind::ImportDefaultSpecifier(_)
-        | AstKind::ImportNamespaceSpecifier(_) => {
-            matches!(cx.parent(n), AstKind::ImportDeclaration(d) if d.import_kind.is_type())
-        }
-        _ => false,
-    }
 }
 
 /// The declarations TypeScript's declaration merging leaves reported. Interfaces merge with
