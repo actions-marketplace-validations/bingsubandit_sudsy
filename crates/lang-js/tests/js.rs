@@ -2,12 +2,12 @@
 //! syntax: every file parses without errors, prints back byte for byte, satisfies the trivia
 //! attachment rule and has no `Unknown` token.
 
-use core_syntax::{print, trivia};
-use lang_js::JsProvider;
-use lang_js::generated::kind;
-use provider_api::format_testing::{Formatting, assert_file_names};
+use core_syntax::print;
+use lang_js::provider;
+use provider_api::format_testing::{
+    Formatting, assert_file_names, assert_parses, bench_input_files,
+};
 use provider_api::{LanguageProvider, SourceFile};
-use std::path::PathBuf;
 
 const TS: &str = r#"#!/usr/bin/env node
 import type { A } from "./a";
@@ -51,38 +51,9 @@ var r = a / b / c, s = /=/.test(x);
 return a;
 "#;
 
-fn provider() -> JsProvider {
-    JsProvider::new()
-}
-
 /// Every check on one file. `name` picks the dialect; the shared format checks use `subject`.
 fn check(name: &str, text: &str, subject: &'static str) {
-    let parsed = provider().parse(&SourceFile::new(name, 1, text)).unwrap();
-    assert!(
-        parsed.errors.is_empty(),
-        "{name}: {:?}",
-        parsed.errors.first()
-    );
-    assert_eq!(print(&parsed.tree), text, "{name}: round trip");
-    let grammar = provider().grammar().clone();
-    trivia::check_attachment(&parsed.tree, |k| grammar.is_trivia(k))
-        .unwrap_or_else(|e| panic!("{name}: {e}"));
-    let unknown = parsed
-        .tree
-        .descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-        .find(|t| t.kind() == kind::UNKNOWN);
-    assert!(unknown.is_none(), "{name}: unknown token {unknown:?}");
-    // Fixed-text tokens carry their text.
-    for t in parsed
-        .tree
-        .descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-    {
-        if let Some(text) = grammar.def(t.kind()).and_then(|d| d.text.as_deref()) {
-            assert_eq!(t.text(), text, "{name}: {:?}", t.kind());
-        }
-    }
+    assert_parses(&provider(), name, text);
     core_format::testing::assert_formats(&Formatting::new(provider(), subject), text);
 }
 
@@ -95,21 +66,15 @@ fn probes_of_recent_syntax() {
 
 #[test]
 fn bench_inputs() {
-    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../bench/inputs/js");
-    let mut count = 0;
-    for entry in std::fs::read_dir(dir).unwrap() {
-        let path = entry.unwrap().path();
-        let name = path.file_name().unwrap().to_str().unwrap().to_string();
-        let subject = match path.extension().and_then(|e| e.to_str()) {
+    for (name, text) in bench_input_files("js") {
+        let subject = match name.rsplit('.').next() {
             Some("ts") => "a.ts",
             Some("tsx") => "a.tsx",
             Some("jsx") => "a.jsx",
             _ => "a.js",
         };
-        check(&name, &std::fs::read_to_string(&path).unwrap(), subject);
-        count += 1;
+        check(&name, &text, subject);
     }
-    assert!(count >= 4, "bench inputs missing");
 }
 
 #[test]

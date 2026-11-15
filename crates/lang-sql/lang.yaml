@@ -1,3 +1,6 @@
+extensions: [sql]
+formatter: SqlFormatter
+parse: adapter::parse_file
 options:
   - dialect:
       values: ["ansi", "postgres", "mysql", "tsql"]

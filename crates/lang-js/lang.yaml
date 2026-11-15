@@ -1,3 +1,7 @@
+extensions: [js, mjs, cjs, jsx, ts, mts, cts, tsx]
+formatter: JsFormatter
+parse: adapter::parse_file
+families: rules::FAMILIES
 options:
   - line_width: 80
   - indent_size: 2

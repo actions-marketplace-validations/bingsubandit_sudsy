@@ -1,11 +1,10 @@
 //! YAML rules: expected diagnostics (snapshots) and fix output.
 
 use insta::assert_snapshot;
-use lang_yaml::YamlProvider;
 use provider_api::testing::{lint, render};
 
 fn report(text: &str, rules: &str) -> String {
-    render(text, &lint(&YamlProvider::new(), "a.yaml", text, rules))
+    render(text, &lint(&lang_yaml::provider(), "a.yaml", text, rules))
 }
 
 #[test]

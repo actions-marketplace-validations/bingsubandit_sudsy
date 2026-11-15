@@ -1,7 +1,6 @@
 //! Parse, round trip and the shared format checks on SQL probes and the bench inputs.
 
 use core_syntax::{print, trivia};
-use lang_sql::SqlProvider;
 use lang_sql::generated::kind;
 use provider_api::format_testing::{Formatting, assert_file_names};
 use provider_api::{LanguageProvider, SourceFile};
@@ -9,7 +8,7 @@ use provider_api::{LanguageProvider, SourceFile};
 fn parse(text: &str, dialect: &str) -> provider_api::ParseResult {
     let mut file = SourceFile::new("a.sql", 1, text);
     file.language_version = Some(dialect.into());
-    SqlProvider::new().parse(&file).unwrap()
+    lang_sql::provider().parse(&file).unwrap()
 }
 
 /// Every check on one file in one dialect.
@@ -21,7 +20,7 @@ fn check(text: &str, dialect: &str) {
         parsed.errors.first()
     );
     assert_eq!(print(&parsed.tree), text, "{dialect}: round trip");
-    let grammar = SqlProvider::new().grammar().clone();
+    let grammar = lang_sql::provider().grammar().clone();
     trivia::check_attachment(&parsed.tree, |k| grammar.is_trivia(k))
         .unwrap_or_else(|e| panic!("{dialect}: {e}"));
     let unknown = (parsed.tree.descendants_with_tokens())
@@ -30,7 +29,7 @@ fn check(text: &str, dialect: &str) {
     assert!(unknown.is_none(), "{dialect}: unknown token {unknown:?}");
     // The shared subject parses by file name, which is ansi.
     if dialect == "ansi" {
-        core_format::testing::assert_formats(&Formatting::new(SqlProvider::new(), "a.sql"), text);
+        core_format::testing::assert_formats(&Formatting::new(lang_sql::provider(), "a.sql"), text);
     }
 }
 
@@ -103,7 +102,7 @@ fn bench_inputs() {
 #[test]
 fn matches_the_extension() {
     assert_file_names(
-        &SqlProvider::new(),
+        &lang_sql::provider(),
         &["a.sql", "dir/b.SQL"],
         &["a.sqlx", "sql"],
     );

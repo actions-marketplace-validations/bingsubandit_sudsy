@@ -1,12 +1,13 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 use core_syntax::grammars;
-use core_treesitter::{Mapping, Spec, TreeSitterProvider};
+use core_treesitter::{Mapping, Spec, provider_of};
+use provider_api::ParserProvider;
 
 core_syntax::include_generated!();
 
 #[rustfmt::skip]
-pub fn provider() -> TreeSitterProvider {
-    TreeSitterProvider::new(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("html", tree_sitter_html::LANGUAGE), grammar: grammars::HTML, mapping: &MAPPING, extensions: &["html", "htm"], file_names: &[], schema: option_schema(), formatter: &HtmlFormatter, hooks: &hooks::HtmlHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: rules::FAMILIES, validate: None })
+pub fn provider() -> ParserProvider {
+    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("html", tree_sitter_html::LANGUAGE), grammar: grammars::HTML, mapping: &MAPPING, extensions: &["html", "htm"], file_names: &[], schema: option_schema(), formatter: &HtmlFormatter, hooks: &hooks::HtmlHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: rules::FAMILIES, validate: None })
 }
 
 pub const MAPPING: Mapping = Mapping {

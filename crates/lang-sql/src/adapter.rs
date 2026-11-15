@@ -11,9 +11,9 @@
 //! `catch_unwind`: a panic is a parse error and the file is one `Unknown` token, left unchanged.
 
 use crate::generated::kind as k;
-use core_syntax::trivia::attach;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TreeBuilder, grammars};
-use provider_api::{ParseError, ParseResult};
+use provider_api::adapter::{Kinds, Node, Tok, replay};
+use provider_api::{ParseError, ParseResult, SourceFile};
 use sqruff_lib_core::dialects::Dialect;
 use sqruff_lib_core::dialects::init::DialectKind;
 use sqruff_lib_core::dialects::syntax::SyntaxKind as Sq;
@@ -45,6 +45,14 @@ thread_local! {
     static BUILT: RefCell<Vec<(DialectKind, Dialect)>> = const { RefCell::new(Vec::new()) };
 }
 
+/// A file of the provider: the dialect is the `dialect` option.
+pub fn parse_file(file: &SourceFile) -> ParseResult {
+    parse(
+        &file.text,
+        file.language_version.as_deref().unwrap_or("ansi"),
+    )
+}
+
 pub fn parse(src: &str, dialect: &str) -> ParseResult {
     let leaves = if src.len() > MAX_BYTES {
         Err(format!("file over {} KB", MAX_BYTES >> 10))
@@ -71,12 +79,7 @@ fn whole_file(src: &str, message: String) -> ParseResult {
     builder.finish_node();
     ParseResult {
         tree: SyntaxNode::new_root(builder.finish()),
-        errors: vec![ParseError {
-            start: 0,
-            len: src.len() as u32,
-            code: "syntax-error".into(),
-            message,
-        }],
+        errors: vec![ParseError::syntax(0, src.len() as u32, message)],
     }
 }
 
@@ -87,7 +90,7 @@ struct Leaf {
 }
 
 /// A grammar node over the leaves `first..end`.
-struct Node {
+struct Span {
     kind: SyntaxKind,
     first: usize,
     end: usize,
@@ -96,7 +99,7 @@ struct Node {
 /// What the walk over sqruff's tree collects.
 struct Flat {
     leaves: Vec<Leaf>,
-    nodes: Vec<Node>,
+    nodes: Vec<Span>,
     errors: Vec<ParseError>,
 }
 
@@ -202,15 +205,11 @@ impl Walk<'_> {
         }
         let end = self.flat.leaves.len();
         if ty == Sq::Unparsable && self.pos > start {
-            self.flat.errors.push(ParseError {
-                start: start as u32,
-                len: (self.pos - start) as u32,
-                code: "syntax-error".into(),
-                message: "syntax error".into(),
-            });
+            let len = (self.pos - start) as u32;
+            (self.flat.errors).push(ParseError::syntax(start as u32, len, "syntax error"));
         }
         if let Some(kind) = ours.filter(|_| end > first) {
-            self.flat.nodes.push(Node { kind, first, end });
+            self.flat.nodes.push(Span { kind, first, end });
         }
     }
 
@@ -229,12 +228,8 @@ impl Walk<'_> {
         self.pos = end;
         let kind = token_kind(ty, raw);
         if kind == k::UNKNOWN {
-            self.flat.errors.push(ParseError {
-                start: start as u32,
-                len: raw.len() as u32,
-                code: "syntax-error".into(),
-                message: "unexpected text".into(),
-            });
+            let len = raw.len() as u32;
+            (self.flat.errors).push(ParseError::syntax(start as u32, len, "unexpected text"));
         }
         // `pos` order is source order, so a node's leaves are consecutive.
         self.flat.leaves.push(Leaf {
@@ -273,77 +268,54 @@ fn token_kind(ty: Sq, raw: &str) -> SyntaxKind {
     }
 }
 
-/// Replays the leaves and nodes into a tree: each token takes its leading trivia, itself and its
-/// trailing trivia (`core_syntax::trivia::attach`), inside the innermost nodes that contain it.
+/// Replays the leaves and nodes into a tree (`provider_api::adapter::replay`): the tokens are the
+/// leaves that are not trivia, a node spans its first to its last token, and the trivia between
+/// two tokens are the leaves sqruff lexed there.
 fn build(src: &str, flat: Flat) -> ParseResult {
     let Flat {
-        mut leaves,
+        leaves,
         nodes,
         errors,
     } = flat;
-    let len = src.len() as u32;
-    leaves.push(Leaf {
-        kind: k::EOF,
-        start: len,
-        end: len,
-    });
     let grammar = grammars::SQL.get();
-    let text = |i: usize| &src[leaves[i].start as usize..leaves[i].end as usize];
-    let attached = attach(leaves.len(), |i| grammar.is_trivia(leaves[i].kind), text);
-    // The index among the real tokens of a leaf index.
-    let mut real_at = vec![0usize; leaves.len() + 1];
-    for (r, &i) in attached.real.iter().enumerate() {
-        real_at[i] = r;
-    }
-    // A node covers the real tokens `first..=last`; one with no real token is dropped.
-    let spans: Vec<(usize, usize, SyntaxKind)> = nodes
-        .iter()
-        .filter_map(|n| {
-            let first = (n.first..n.end).find(|&i| !grammar.is_trivia(leaves[i].kind))?;
-            let last = (n.first..n.end).rfind(|&i| !grammar.is_trivia(leaves[i].kind))?;
-            Some((real_at[first], real_at[last], n.kind))
+    let trivia = |l: &Leaf| grammar.is_trivia(l.kind);
+    let tokens: Vec<Tok> = (leaves.iter().filter(|l| !trivia(l)))
+        .map(|l| Tok {
+            kind: l.kind,
+            start: l.start,
+            end: l.end,
         })
         .collect();
-    // `nodes` is in post-order; opening order is by first token, outer (later end) first.
-    let mut order: Vec<usize> = (0..spans.len()).collect();
-    order.sort_by_key(|&i| {
-        (
-            spans[i].0,
-            std::cmp::Reverse(spans[i].1),
-            std::cmp::Reverse(i),
-        )
-    });
-    let mut builder = TreeBuilder::new();
-    builder.start_node(k::FILE);
-    let mut open: Vec<usize> = Vec::new();
-    let mut next = order.iter().copied().peekable();
-    for (r, &i) in attached.real.iter().enumerate() {
-        while open.last().is_some_and(|&last| last < r) {
-            open.pop();
-            builder.finish_node();
-        }
-        // The Eof token belongs to the root, not to a node.
-        if leaves[i].kind != k::EOF {
-            while let Some(n) = next.next_if(|&n| spans[n].0 == r) {
-                builder.start_node(spans[n].2);
-                open.push(spans[n].1);
-            }
-        }
-        let emit = |b: &mut TreeBuilder, i: usize| b.token(leaves[i].kind, text(i));
-        for t in attached.leading[r].clone() {
-            emit(&mut builder, t);
-        }
-        emit(&mut builder, i);
-        for t in attached.trailing[r].clone() {
-            emit(&mut builder, t);
-        }
-    }
-    for _ in open {
-        builder.finish_node();
-    }
-    builder.finish_node();
-    ParseResult {
-        tree: SyntaxNode::new_root(builder.finish()),
-        errors,
-    }
+    // `nodes` is in post-order; opening order is by start, outer (later end) first. A node with no
+    // token is dropped.
+    let mut spans: Vec<(usize, Node)> = nodes
+        .iter()
+        .enumerate()
+        .filter_map(|(i, n)| {
+            let covered = &leaves[n.first..n.end];
+            let first = covered.iter().find(|l| !trivia(l))?;
+            let last = covered.iter().rfind(|l| !trivia(l))?;
+            let (start, end, kind) = (first.start, last.end, n.kind);
+            Some((i, Node { start, end, kind }))
+        })
+        .collect();
+    spans.sort_by_key(|(i, n)| (n.start, std::cmp::Reverse(n.end), std::cmp::Reverse(*i)));
+    let spans: Vec<Node> = spans.into_iter().map(|(_, n)| n).collect();
+    let lexed = |_: &str, pos: usize| {
+        let at = leaves
+            .binary_search_by_key(&(pos as u32), |l| l.start)
+            .ok()?;
+        let l = &leaves[at];
+        trivia(l).then_some((l.kind, (l.end - l.start) as usize))
+    };
+    let kinds = Kinds {
+        root: k::FILE,
+        eof: k::EOF,
+        unknown: k::UNKNOWN,
+        whitespace: k::WHITESPACE,
+        newline: k::NEWLINE,
+    };
+    let mut result = replay(src, kinds, &tokens, &spans, lexed, |t, _| t);
+    result.errors = errors;
+    result
 }

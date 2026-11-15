@@ -26,12 +26,11 @@ pub struct Parsed {
 pub fn parse(src: &str, dialect: Dialect) -> Parsed {
     let (tokens, lex_errors) = lex(src, dialect);
     let mut p = Parser::new(src, tokens);
-    p.errors.extend(lex_errors.into_iter().map(|e| ParseError {
-        start: e.start as u32,
-        len: e.len as u32,
-        code: e.code.into(),
-        message: e.message.into(),
-    }));
+    p.errors.extend(
+        lex_errors
+            .into_iter()
+            .map(|e| ParseError::new(e.start as u32, e.len as u32, e.code, e.message)),
+    );
     p.stylesheet();
     p.errors.sort_by_key(|e| e.start);
     Parsed {

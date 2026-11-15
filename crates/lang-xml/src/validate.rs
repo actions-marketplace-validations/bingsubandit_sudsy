@@ -6,12 +6,7 @@ use core_syntax::{SyntaxNode, SyntaxNodeExt, SyntaxToken};
 use provider_api::ParseError;
 
 fn err(range: core_syntax::TextRange, code: &str, message: String) -> ParseError {
-    ParseError {
-        start: range.start().into(),
-        len: u32::from(range.len()),
-        code: code.into(),
-        message,
-    }
+    ParseError::new(range.start().into(), u32::from(range.len()), code, message)
 }
 
 fn legal(c: char) -> bool {
@@ -37,12 +32,12 @@ fn references(t: &SyntaxToken, declared: bool, out: &mut Vec<ParseError>) {
             !declared && !matches!(body, "amp" | "lt" | "gt" | "quot" | "apos")
         };
         if bad {
-            out.push(ParseError {
-                start: u32::from(t.text_range().start()) + i as u32,
-                len: len as u32 + 1,
-                code: "invalid-reference".into(),
-                message: format!("`&{body};` is not a legal reference"),
-            });
+            out.push(ParseError::new(
+                u32::from(t.text_range().start()) + i as u32,
+                len as u32 + 1,
+                "invalid-reference",
+                format!("`&{body};` is not a legal reference"),
+            ));
         }
     }
 }
@@ -57,12 +52,12 @@ pub fn validate(root: &SyntaxNode, text: &str) -> Vec<ParseError> {
             && let Some((at, _)) = t.text().char_indices().find(|(_, c)| !legal(*c))
         {
             let start = u32::from(t.text_range().start()) + at as u32;
-            out.push(ParseError {
+            out.push(ParseError::new(
                 start,
-                len: 1,
-                code: "illegal-character".into(),
-                message: "a character XML does not allow".into(),
-            });
+                1,
+                "illegal-character",
+                "a character XML does not allow",
+            ));
         }
         match e {
             rowan::NodeOrToken::Token(t)

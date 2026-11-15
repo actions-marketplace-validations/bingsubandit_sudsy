@@ -1,12 +1,10 @@
 //! The Rust rules of Python; rules that fit a pattern are files in `rules/`.
 
 use crate::generated::kind as k;
-use core_rules::{Family, Rule, RuleContext, rule};
+use core_rules::{Rule, RuleContext, rule};
 use core_syntax::{SyntaxElement, SyntaxNode};
 
 pub static RULES: &[&dyn Rule] = &[&IsLiteral];
-
-pub static FAMILIES: &[Family] = &[];
 
 /// A string, bytes or number literal (a negative number too).
 fn is_literal(n: &SyntaxNode) -> bool {

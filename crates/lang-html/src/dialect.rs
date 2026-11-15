@@ -8,7 +8,8 @@ use core_config::{OptionDef, OptionSchema};
 use core_format::NodeFormatter;
 use core_rules::{Rule, RuleHooks};
 use core_syntax::{Embedded, Grammar, LanguageId, SyntaxNode};
-use core_treesitter::{Mapping, Spec, TreeSitterProvider};
+use core_treesitter::{Mapping, Spec, provider_of};
+use provider_api::ParserProvider;
 use provider_api::{
     Capabilities, FileMatcher, LanguageProvider, ParseResult, ProviderError, SourceFile,
 };
@@ -40,13 +41,13 @@ fn schema(extra: Vec<OptionDef>) -> OptionSchema {
 
 pub struct DialectProvider {
     name: &'static str,
-    inner: TreeSitterProvider,
+    inner: ParserProvider,
     matchers: Vec<FileMatcher>,
     schema: OptionSchema,
 }
 
 impl DialectProvider {
-    fn new(name: &'static str, inner: TreeSitterProvider, schema: OptionSchema) -> Self {
+    fn new(name: &'static str, inner: ParserProvider, schema: OptionSchema) -> Self {
         DialectProvider {
             name,
             inner,
@@ -99,7 +100,7 @@ pub fn vue_provider() -> DialectProvider {
         false,
         "Indent the content of the root `<script>` and `<style>` blocks of a `.vue` file by one level.",
     )];
-    let inner = TreeSitterProvider::new(spec!("vue", tree_sitter_vue, m, &VUE_FORMATTER));
+    let inner = provider_of(spec!("vue", tree_sitter_vue, m, &VUE_FORMATTER));
     DialectProvider::new("vue", inner, schema(options))
 }
 
@@ -150,7 +151,7 @@ pub fn svelte_provider() -> DialectProvider {
         true,
         "Indent the content of the root `<script>` and `<style>` blocks of a `.svelte` file by one level.",
     )];
-    let inner = TreeSitterProvider::new(spec!("svelte", tree_sitter_svelte, m, &SVELTE_FORMATTER));
+    let inner = provider_of(spec!("svelte", tree_sitter_svelte, m, &SVELTE_FORMATTER));
     DialectProvider::new("svelte", inner, schema(options))
 }
 

@@ -32,6 +32,15 @@ pub fn parse(src: &str) -> Parsed {
     Parsed { tree, errors }
 }
 
+/// A file of the provider.
+pub fn parse_file(file: &provider_api::SourceFile) -> provider_api::ParseResult {
+    let parsed = parse(&file.text);
+    provider_api::ParseResult {
+        tree: parsed.tree,
+        errors: parsed.errors,
+    }
+}
+
 /// Deeper nesting is an error: it bounds the recursion of the parser, the formatter and the
 /// destructor of the tree.
 pub const MAX_DEPTH: usize = 100;
@@ -111,12 +120,12 @@ impl<'a> Parser<'a> {
     }
 
     pub(crate) fn error_at(&mut self, start: usize, len: usize, code: &str, message: &str) {
-        self.errors.push(ParseError {
-            start: start as u32,
-            len: len.max(1) as u32,
-            code: code.into(),
-            message: message.into(),
-        });
+        self.errors.push(ParseError::new(
+            start as u32,
+            len.max(1) as u32,
+            code,
+            message,
+        ));
     }
 
     /// Records an error at the current position and unwinds.

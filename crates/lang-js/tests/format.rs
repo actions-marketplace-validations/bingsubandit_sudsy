@@ -3,15 +3,14 @@
 
 use core_config::OptionValue;
 use core_format::testing::assert_formats;
-use lang_js::JsProvider;
 use provider_api::format_testing::Formatting;
 
 fn fmt(input: &str) -> String {
-    assert_formats(&Formatting::new(JsProvider::new(), "a.ts"), input)
+    assert_formats(&Formatting::new(lang_js::provider(), "a.ts"), input)
 }
 
 fn fmt_with(options: Vec<(&'static str, OptionValue)>, input: &str) -> String {
-    let mut subject = Formatting::new(JsProvider::new(), "a.ts");
+    let mut subject = Formatting::new(lang_js::provider(), "a.ts");
     subject.options = options;
     assert_formats(&subject, input)
 }

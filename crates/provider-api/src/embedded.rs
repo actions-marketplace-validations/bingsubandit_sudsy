@@ -1,6 +1,6 @@
 //! The code of other languages inside a file, parsed with the providers of those languages.
 
-use crate::provider::{LanguageProvider, SourceFile};
+use crate::provider::{FilePattern, LanguageProvider, SourceFile};
 use core_rules::EmbeddedTree;
 use core_syntax::{Embedded, SyntaxNode};
 use std::path::Path;
@@ -23,6 +23,8 @@ pub fn resolve<'a>(
     name: &str,
 ) -> Resolved<'a> {
     let file = format!("x.{name}");
+    // A plain extension (`ts`) is compared as it is, without parsing a path per matcher.
+    let plain = !name.contains(['.', '/', '\\']);
     providers
         .into_iter()
         .filter(|p| p.embeddable())
@@ -30,8 +32,17 @@ pub fn resolve<'a>(
             if p.language() == name {
                 return Some((p, None));
             }
-            let m = (p.file_matchers().iter())
-                .find(|m| m.matches(Path::new(&file)) || m.matches(Path::new(name)))?;
+            let m = (p.file_matchers().iter()).find(|m| match &m.pattern {
+                FilePattern::Extension(e) if plain => e.eq_ignore_ascii_case(name),
+                FilePattern::InDirectory { .. } if plain => false,
+                FilePattern::FileName(n) if plain && !n.contains('/') => {
+                    match n.strip_suffix('*') {
+                        Some(prefix) => name.starts_with(prefix) || file.starts_with(prefix),
+                        None => n == name || *n == file,
+                    }
+                }
+                _ => m.matches(Path::new(&file)) || m.matches(Path::new(name)),
+            })?;
             Some((p, m.dialect.clone()))
         })
 }

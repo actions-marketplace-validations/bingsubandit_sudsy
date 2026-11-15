@@ -10,14 +10,14 @@ fn db(config: &str) -> Database {
     let providers: Vec<Box<dyn LanguageProvider>> = vec![
         Box::new(lang_html::provider()),
         Box::new(lang_json::JsonProvider::new()),
-        Box::new(lang_js::JsProvider::new()),
+        Box::new(lang_js::provider()),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Scss)),
-        Box::new(lang_yaml::YamlProvider::new()),
+        Box::new(lang_yaml::provider()),
         Box::new(lang_markdown::provider()),
         Box::new(lang_dockerfile::provider()),
         Box::new(lang_shell::provider()),
-        Box::new(lang_sql::SqlProvider::new()),
+        Box::new(lang_sql::provider()),
     ];
     let mut db = Database::new(providers);
     db.set_config(ConfigChain::parse(config));
@@ -217,7 +217,7 @@ a{color:red}
 fn vue_templates_scripts_and_custom_blocks_are_formatted_by_their_language() {
     let mut providers: Vec<Box<dyn LanguageProvider>> = vec![Box::new(lang_html::vue_provider())];
     providers.extend([
-        Box::new(lang_js::JsProvider::new()) as Box<dyn LanguageProvider>,
+        Box::new(lang_js::provider()) as Box<dyn LanguageProvider>,
         Box::new(lang_json::JsonProvider::new()),
     ]);
     let mut db = Database::new(providers);
@@ -254,7 +254,7 @@ fn html_front_matter_is_formatted_as_yaml() {
         ("a.svelte", Box::new(lang_html::svelte_provider())),
     ] {
         let providers: Vec<Box<dyn LanguageProvider>> =
-            vec![provider, Box::new(lang_yaml::YamlProvider::new())];
+            vec![provider, Box::new(lang_yaml::provider())];
         let db = Database::new(providers);
         let once = formatted(&db, name, "---\ntitle:   'x'\n---\n<p>a</p>\n");
         assert_eq!(once, "---\ntitle: 'x'\n---\n\n<p>a</p>\n", "{name}");
@@ -266,7 +266,7 @@ fn html_front_matter_is_formatted_as_yaml() {
 fn svelte_blocks_tags_and_scripts_are_formatted() {
     let providers: Vec<Box<dyn LanguageProvider>> = vec![
         Box::new(lang_html::svelte_provider()),
-        Box::new(lang_js::JsProvider::new()),
+        Box::new(lang_js::provider()),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
     ];
     let db = Database::new(providers);

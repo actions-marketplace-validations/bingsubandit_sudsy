@@ -1,3 +1,6 @@
+extensions: [py, pyi, pyw]
+formatter: PythonFormatter
+parse: adapter::parse_file
 options:
   - line_width: 88
   - indent_size: 4

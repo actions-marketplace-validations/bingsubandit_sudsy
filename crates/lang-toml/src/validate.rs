@@ -56,12 +56,12 @@ fn leaves(node: &Green, start: u32) -> impl Iterator<Item = (u32, &GreenTokenDat
 pub fn validate(root: &SyntaxNode, text: &str) -> Vec<ParseError> {
     let mut out = Vec::new();
     let mut err = |range: TextRange, code: &str, message: String| {
-        out.push(ParseError {
-            start: u32::from(range.start()),
-            len: u32::from(range.len()).max(1),
-            code: code.into(),
+        out.push(ParseError::new(
+            u32::from(range.start()),
+            u32::from(range.len()).max(1),
+            code,
             message,
-        });
+        ));
     };
     let green = root.green();
     for (at, t) in leaves(&green, 0) {

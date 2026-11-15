@@ -25,15 +25,30 @@ impl SnippetParser for ProviderSnippets<'_> {
     }
 }
 
-/// Snippets of an in-process language, parsed by a function of the text.
-pub struct FnSnippets(LazyGrammar, Box<dyn Fn(&str) -> ParseResult + Send + Sync>);
+/// An in-process language's parse function; its snippets are parsed by it.
+pub struct FnSnippets(
+    LazyGrammar,
+    Box<dyn Fn(&SourceFile) -> ParseResult + Send + Sync>,
+);
 
 impl FnSnippets {
+    /// A parse function of the text.
     pub fn new(
         grammar: LazyGrammar,
         parse: impl Fn(&str) -> ParseResult + Send + Sync + 'static,
     ) -> Arc<Self> {
+        Self::of_files(grammar, move |file| parse(&file.text))
+    }
+
+    pub fn of_files(
+        grammar: LazyGrammar,
+        parse: impl Fn(&SourceFile) -> ParseResult + Send + Sync + 'static,
+    ) -> Arc<Self> {
         Arc::new(FnSnippets(grammar, Box::new(parse)))
+    }
+
+    pub fn parse_file(&self, file: &SourceFile) -> ParseResult {
+        (self.1)(file)
     }
 }
 
@@ -43,7 +58,7 @@ impl SnippetParser for FnSnippets {
     }
 
     fn parse(&self, text: &str) -> Result<Option<SyntaxNode>, String> {
-        let parsed = (self.1)(text);
+        let parsed = (self.1)(&SourceFile::new("pattern", 1, text));
         Ok(parsed.errors.is_empty().then_some(parsed.tree))
     }
 }

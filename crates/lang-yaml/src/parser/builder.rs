@@ -61,12 +61,12 @@ fn lex_gap(src: &str, start: usize, end: usize, errors: &mut Vec<ParseError>) ->
                 while !src.is_char_boundary(i) {
                     i += 1;
                 }
-                errors.push(ParseError {
-                    start: s as u32,
-                    len: (i - s) as u32,
-                    code: "unexpected-text".into(),
-                    message: "unexpected text".into(),
-                });
+                errors.push(ParseError::new(
+                    s as u32,
+                    (i - s) as u32,
+                    "unexpected-text",
+                    "unexpected text",
+                ));
                 out.push((k::UNKNOWN, s, i));
             }
         }

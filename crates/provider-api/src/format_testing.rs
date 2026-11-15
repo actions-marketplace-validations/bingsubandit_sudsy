@@ -2,11 +2,11 @@
 //! corpus run, and the file-name check.
 
 use crate::format::format_file;
-use crate::provider::{LanguageProvider, SourceFile};
+use crate::provider::{LanguageProvider, ParseResult, SourceFile};
 use core_config::OptionValue;
 use core_format::DirectiveTable;
 use core_format::testing::{Subject, check};
-use core_syntax::{Grammar, SyntaxNode};
+use core_syntax::{Grammar, SyntaxNode, print, trivia};
 use std::path::{Path, PathBuf};
 
 /// A provider formatting files named `file` with its default options plus `options`.
@@ -163,4 +163,51 @@ pub fn assert_file_names(provider: &dyn LanguageProvider, yes: &[&str], no: &[&s
     for p in no {
         assert!(!claims(p), "{p}");
     }
+}
+
+/// Parses `text` as the file `name` and checks the tree: it prints back byte for byte and
+/// satisfies the trivia attachment rule. Returns the parse, errors included.
+#[track_caller]
+pub fn assert_lossless(provider: &dyn LanguageProvider, name: &str, text: &str) -> ParseResult {
+    let parsed =
+        (provider.parse(&SourceFile::new(name, 1, text))).unwrap_or_else(|e| panic!("{e}"));
+    assert_eq!(print(&parsed.tree), text, "{name}: round trip");
+    let grammar = provider.grammar();
+    trivia::check_attachment(&parsed.tree, |k| grammar.is_trivia(k))
+        .unwrap_or_else(|e| panic!("{name}: {e}"));
+    parsed
+}
+
+/// [`assert_lossless`] on a file that must parse: no errors, no `#error` token, and every token
+/// of fixed text has it.
+#[track_caller]
+pub fn assert_parses(provider: &dyn LanguageProvider, name: &str, text: &str) -> ParseResult {
+    let parsed = assert_lossless(provider, name, text);
+    let first = parsed.errors.first();
+    assert!(first.is_none(), "{name}: {first:?}");
+    let grammar = provider.grammar();
+    for t in (parsed.tree.descendants_with_tokens()).filter_map(|e| e.into_token()) {
+        assert!(
+            !grammar.has_tag(t.kind(), "error"),
+            "{name}: unknown token {t:?}"
+        );
+        if let Some(fixed) = grammar.def(t.kind()).and_then(|d| d.text.as_deref()) {
+            assert_eq!(t.text(), fixed, "{name}: {:?}", t.kind());
+        }
+    }
+    parsed
+}
+
+/// The files of `bench/inputs/<folder>` as `(name, text)`; at least four.
+pub fn bench_input_files(folder: &str) -> Vec<(String, String)> {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../bench/inputs");
+    let files: Vec<_> = (std::fs::read_dir(dir.join(folder)).unwrap())
+        .map(|e| e.unwrap().path())
+        .map(|p| {
+            let name = p.file_name().unwrap().to_str().unwrap().to_string();
+            (name, std::fs::read_to_string(p).unwrap())
+        })
+        .collect();
+    assert!(files.len() >= 4, "bench inputs of {folder} missing");
+    files
 }

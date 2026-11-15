@@ -3,12 +3,13 @@
 //! attachment rule and has no `Unknown` token. The ignored test runs the same on the corpus
 //! (`tests/conformance/fetch-python-corpus.sh`).
 
-use core_syntax::{print, trivia};
-use lang_python::PythonProvider;
+use core_syntax::print;
 use lang_python::generated::kind;
-use provider_api::format_testing::{assert_file_names, check_corpus};
+use lang_python::provider;
+use provider_api::format_testing::{
+    assert_file_names, assert_parses, bench_input_files, check_corpus,
+};
 use provider_api::{LanguageProvider, SourceFile};
-use std::path::PathBuf;
 
 const PROBES: &str = r#"#!/usr/bin/env python
 """Module docstring."""
@@ -61,41 +62,9 @@ global_ = lambda: 1
 b = rb'e' b"f"
 "#;
 
-fn provider() -> PythonProvider {
-    PythonProvider::new()
-}
-
-/// Every check on one file except formatting.
-fn check_parse(name: &str, text: &str) {
-    let parsed = provider().parse(&SourceFile::new(name, 1, text)).unwrap();
-    assert!(
-        parsed.errors.is_empty(),
-        "{name}: {:?}",
-        parsed.errors.first()
-    );
-    assert_eq!(print(&parsed.tree), text, "{name}: round trip");
-    let grammar = provider().grammar().clone();
-    trivia::check_attachment(&parsed.tree, |k| grammar.is_trivia(k))
-        .unwrap_or_else(|e| panic!("{name}: {e}"));
-    let unknown = (parsed.tree.descendants_with_tokens())
-        .filter_map(|e| e.into_token())
-        .find(|t| t.kind() == kind::UNKNOWN);
-    assert!(unknown.is_none(), "{name}: unknown token {unknown:?}");
-    // Fixed-text tokens carry their text.
-    for t in parsed
-        .tree
-        .descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-    {
-        if let Some(text) = grammar.def(t.kind()).and_then(|d| d.text.as_deref()) {
-            assert_eq!(t.text().to_lowercase(), text.to_lowercase(), "{name}");
-        }
-    }
-}
-
 #[test]
 fn probes_of_recent_syntax() {
-    check_parse("a.py", PROBES);
+    assert_parses(&provider(), "a.py", PROBES);
 }
 
 #[test]
@@ -124,15 +93,9 @@ fn empty_nodes_stand_for_missing_parts() {
 
 #[test]
 fn bench_inputs() {
-    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../bench/inputs/py");
-    let mut count = 0;
-    for entry in std::fs::read_dir(dir).unwrap() {
-        let path = entry.unwrap().path();
-        let name = path.file_name().unwrap().to_str().unwrap().to_string();
-        check_parse(&name, &std::fs::read_to_string(&path).unwrap());
-        count += 1;
+    for (name, text) in bench_input_files("py") {
+        assert_parses(&provider(), &name, &text);
     }
-    assert!(count >= 4, "bench inputs missing");
 }
 
 #[test]
@@ -172,7 +135,7 @@ fn byte_order_mark_and_line_endings_are_trivia() {
         "if x:\r\n    y = [1,\r\n         2]\r\n",
         "x = 1\\\r\n    + 2\r\n",
     ] {
-        check_parse("a.py", text);
+        assert_parses(&provider(), "a.py", text);
     }
 }
 
@@ -190,7 +153,7 @@ fn matches_the_extensions() {
 #[test]
 #[ignore = "needs the corpus: tests/conformance/fetch-python-corpus.sh"]
 fn conformance() {
-    let (count, unparsed) = check_corpus(PythonProvider::new(), "a.py", "python", &["py", "pyi"]);
+    let (count, unparsed) = check_corpus(lang_python::provider(), "a.py", "python", &["py", "pyi"]);
     assert!(count > 5000, "{count} files");
     println!("{} of {count} files have syntax errors", unparsed.len());
 }

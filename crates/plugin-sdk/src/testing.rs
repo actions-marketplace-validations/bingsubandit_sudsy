@@ -18,7 +18,7 @@ pub use provider_api::testing::{expect, fix, fix_with, lint, lint_with, render};
 pub fn provider(language: &str) -> Box<dyn LanguageProvider> {
     match language {
         "json" => Box::new(lang_json::JsonProvider::new()),
-        "yaml" => Box::new(lang_yaml::YamlProvider::new()),
+        "yaml" => Box::new(lang_yaml::provider()),
         "csharp" => Box::new(lang_csharp::provider(
             &lang_csharp::locate_worker().unwrap_or_else(|e| panic!("{e}")),
         )),

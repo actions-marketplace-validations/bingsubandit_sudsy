@@ -24,14 +24,9 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
     // JSON stays first: the start-up path finds it by grammar name, which parses the grammars before it.
     vec![
         Box::new(lang_json::JsonProvider::new()),
-        Box::new(lang_js::JsProvider::new()),
-        Box::new(lang_python::PythonProvider::new()),
-        Box::new(lang_sql::SqlProvider::new()),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Css)),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Scss)),
         Box::new(lang_css::CssProvider::new(lang_css::Dialect::Less)),
-        Box::new(lang_yaml::YamlProvider::new()),
-        Box::new(lang_github_actions::GithubActionsProvider::new()),
         // generated:providers
         Box::new(lang_dockerfile::provider()),
         Box::new(lang_editorconfig::provider()),
@@ -40,14 +35,20 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
         Box::new(lang_hcl::provider()),
         Box::new(lang_html::provider()),
         Box::new(lang_ini::provider()),
+        Box::new(lang_js::provider()),
         Box::new(lang_makefile::provider()),
         Box::new(lang_markdown::provider()),
         Box::new(lang_powershell::provider()),
         Box::new(lang_protobuf::provider()),
+        Box::new(lang_python::provider()),
         Box::new(lang_shell::provider()),
+        Box::new(lang_sql::provider()),
         Box::new(lang_toml::provider()),
         Box::new(lang_xml::provider()),
+        Box::new(lang_yaml::provider()),
         // /generated
+        // After YAML: a workflow file matches both, and the later of equal matches wins.
+        Box::new(lang_github_actions::GithubActionsProvider::new()),
         Box::new(lang_html::vue_provider()),
         Box::new(lang_html::svelte_provider()),
         Box::new(lang_csharp::provider(&worker)),

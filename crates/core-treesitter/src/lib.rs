@@ -26,7 +26,7 @@
 
 mod provider;
 
-pub use provider::{Spec, TreeSitterProvider};
+pub use provider::{Spec, provider_of, provider_of_composite};
 
 use core_syntax::grammars::LazyGrammar;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TreeBuilder};
@@ -588,12 +588,8 @@ impl Scan {
     }
 
     fn error(&mut self, start: usize, len: usize, message: String) {
-        self.errors.push(ParseError {
-            start: start as u32,
-            len: len as u32,
-            code: "syntax-error".into(),
-            message,
-        });
+        self.errors
+            .push(ParseError::syntax(start as u32, len as u32, message));
     }
 }
 

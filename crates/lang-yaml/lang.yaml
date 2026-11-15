@@ -1,3 +1,7 @@
+extensions: [yaml, yml]
+formatter: YamlFormatter
+hooks: hooks::YamlHooks
+parse: parser::parse_file
 options:
   - line_width: 80
   - indent_size: 2

@@ -78,17 +78,18 @@ fn json_work_is_linear_in_the_nesting_depth() {
     );
 }
 
+/// Found by name so that the harness builds against any revision.
+fn yaml() -> Box<dyn LanguageProvider> {
+    let mut found = languages::providers().into_iter();
+    found.find(|p| p.language() == "yaml").unwrap()
+}
+
 #[test]
 fn yaml_work_is_linear_in_the_input() {
-    assert_linear(&lang_yaml::YamlProvider::new(), "a.yaml", inputs::yaml, 600);
+    assert_linear(&*yaml(), "a.yaml", inputs::yaml, 600);
 }
 
 #[test]
 fn yaml_work_is_linear_in_the_nesting_depth() {
-    assert_linear(
-        &lang_yaml::YamlProvider::new(),
-        "a.yaml",
-        inputs::yaml_nested,
-        10,
-    );
+    assert_linear(&*yaml(), "a.yaml", inputs::yaml_nested, 10);
 }

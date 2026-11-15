@@ -1,12 +1,13 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 use core_syntax::grammars;
-use core_treesitter::{Composite, Mapping, Spec, TreeSitterProvider};
+use core_treesitter::{Composite, Mapping, Spec, provider_of_composite};
+use provider_api::ParserProvider;
 
 core_syntax::include_generated!();
 
 #[rustfmt::skip]
-pub fn provider() -> TreeSitterProvider {
-    TreeSitterProvider::with_composite(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("shell", tree_sitter_bash::LANGUAGE), grammar: grammars::SHELL, mapping: &MAPPING, extensions: &["sh", "bash"], file_names: &[".bashrc", ".bash_profile", ".profile"], schema: option_schema(), formatter: &ShellFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: None }, Some(COMPOSITE))
+pub fn provider() -> ParserProvider {
+    provider_of_composite(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("shell", tree_sitter_bash::LANGUAGE), grammar: grammars::SHELL, mapping: &MAPPING, extensions: &["sh", "bash"], file_names: &[".bashrc", ".bash_profile", ".profile"], schema: option_schema(), formatter: &ShellFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: None }, Some(COMPOSITE))
 }
 
 pub const MAPPING: Mapping = Mapping {

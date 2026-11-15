@@ -3,15 +3,14 @@
 
 use core_config::OptionValue;
 use core_format::testing::assert_formats;
-use lang_python::PythonProvider;
 use provider_api::format_testing::Formatting;
 
 fn fmt(input: &str) -> String {
-    assert_formats(&Formatting::new(PythonProvider::new(), "a.py"), input)
+    assert_formats(&Formatting::new(lang_python::provider(), "a.py"), input)
 }
 
 fn fmt_with(options: Vec<(&'static str, OptionValue)>, input: &str) -> String {
-    let mut subject = Formatting::new(PythonProvider::new(), "a.py");
+    let mut subject = Formatting::new(lang_python::provider(), "a.py");
     subject.options = options;
     assert_formats(&subject, input)
 }

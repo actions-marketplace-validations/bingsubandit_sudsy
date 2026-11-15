@@ -2,5 +2,5 @@
 
 #[test]
 fn rule_fixtures() {
-    provider_api::fixtures::rule_fixtures(&lang_yaml::YamlProvider::new());
+    provider_api::fixtures::rule_fixtures(&lang_yaml::provider());
 }

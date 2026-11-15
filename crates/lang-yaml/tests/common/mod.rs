@@ -4,18 +4,18 @@ use core_config::{OptionValue, ResolvedOptions};
 use core_format::DirectiveTable;
 use core_format::testing::Subject;
 use core_syntax::{Grammar, SyntaxNode};
-use lang_yaml::{YamlProvider, option_schema};
+use lang_yaml::option_schema;
 use provider_api::{LanguageProvider, SourceFile, format_file};
 
 /// A YAML file formatted with some options.
 pub struct YamlSubject {
-    provider: YamlProvider,
+    provider: provider_api::ParserProvider,
     options: Vec<(String, OptionValue)>,
 }
 
 pub fn subject(options: &[(&str, OptionValue)]) -> YamlSubject {
     YamlSubject {
-        provider: YamlProvider::new(),
+        provider: lang_yaml::provider(),
         options: options
             .iter()
             .map(|(k, v)| (k.to_string(), v.clone()))

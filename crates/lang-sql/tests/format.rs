@@ -5,7 +5,6 @@
 use core_config::OptionValue;
 use core_format::DirectiveTable;
 use core_format::testing::assert_formats;
-use lang_sql::SqlProvider;
 use provider_api::format::format_file;
 use provider_api::format_testing::Formatting;
 use provider_api::{LanguageProvider, SourceFile};
@@ -15,18 +14,18 @@ fn s(v: &str) -> OptionValue {
 }
 
 fn fmt(input: &str) -> String {
-    assert_formats(&Formatting::new(SqlProvider::new(), "a.sql"), input)
+    assert_formats(&Formatting::new(lang_sql::provider(), "a.sql"), input)
 }
 
 fn fmt_with(options: Vec<(&'static str, OptionValue)>, input: &str) -> String {
-    let mut subject = Formatting::new(SqlProvider::new(), "a.sql");
+    let mut subject = Formatting::new(lang_sql::provider(), "a.sql");
     subject.options = options;
     assert_formats(&subject, input)
 }
 
 /// `input` formatted as `dialect` twice (the second run must change nothing).
 fn fmt_in(dialect: &str, input: &str) -> String {
-    let provider = SqlProvider::new();
+    let provider = lang_sql::provider();
     let mut options = provider.option_schema().defaults();
     options.set("dialect", s(dialect));
     let run = |text: &str| {
@@ -149,7 +148,7 @@ fn a_fix_that_changes_the_code_is_dropped() {
 
 #[test]
 fn errors_are_refused() {
-    let provider = SqlProvider::new();
+    let provider = lang_sql::provider();
     let file = SourceFile::new("a.sql", 1, "SELEC FROM WHERE ;;");
     let options = provider.option_schema().defaults();
     assert!(format_file(&provider, &file, &options, &DirectiveTable::default()).is_err());

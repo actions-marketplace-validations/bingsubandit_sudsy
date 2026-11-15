@@ -72,11 +72,17 @@ fn no_duplicate_matchers(langs: &[Lang]) -> Result<()> {
     Ok(())
 }
 
-/// The languages with a tree-sitter grammar; a hand-written one (JSON, YAML, C#) has a `lang.yaml`
-/// for its options only.
+/// The languages with a tree-sitter grammar; the others have a `lang.yaml` for their options
+/// (and a `parse` function for a generated provider, see `adapter_provider`).
 pub fn tree_sitter(langs: &[Lang]) -> Vec<&Lang> {
     let ts = |l: &&Lang| l.yaml.get("grammar-crate").is_some();
     langs.iter().filter(ts).collect()
+}
+
+/// The languages whose `provider()` is generated.
+pub fn generated(langs: &[Lang]) -> Vec<&Lang> {
+    let has = |l: &&Lang| l.yaml.get("grammar-crate").is_some() || l.yaml.get("parse").is_some();
+    langs.iter().filter(has).collect()
 }
 
 pub fn generate(langs: &[Lang]) -> Result<Vec<(PathBuf, String)>> {
@@ -91,6 +97,12 @@ pub fn generate(langs: &[Lang]) -> Result<Vec<(PathBuf, String)>> {
             files.push((
                 rel.join("src/provider.generated.rs"),
                 provider(name, yaml) + &consts,
+            ));
+        }
+        if yaml.get("parse").is_some() {
+            files.push((
+                rel.join("src/provider.generated.rs"),
+                adapter_provider(name, yaml),
             ));
         }
         if let Some(schema) = crate::options::generate(name, l)? {
@@ -160,11 +172,20 @@ fn provider(name: &str, v: &Value) -> String {
         Some(Value::Object(_)) => Some("COMPOSITE"),
         c => c.and_then(Value::as_str),
     };
-    let imports = match v.get("composite").is_some_and(Value::is_object) {
-        true => "Composite, Mapping, Spec, TreeSitterProvider",
-        false if data => "Mapping, Spec, TreeSitterProvider",
-        false => "Spec, TreeSitterProvider",
-    };
+    let imports = format!(
+        "{}{}Spec, {}",
+        if v.get("composite").is_some_and(Value::is_object) {
+            "Composite, "
+        } else {
+            ""
+        },
+        if data { "Mapping, " } else { "" },
+        if composite.is_some() {
+            "provider_of_composite"
+        } else {
+            "provider_of"
+        },
+    );
     let hooks = text(v, "hooks", "core_rules::DEFAULT_HOOKS");
     let validate = v
         .get("validate")
@@ -183,15 +204,36 @@ fn provider(name: &str, v: &Value) -> String {
         text(v, "families", "&[]"),
     );
     let body = match composite {
-        Some(c) => format!("TreeSitterProvider::with_composite({spec}, Some({c}))"),
-        None => format!("TreeSitterProvider::new({spec})"),
+        Some(c) => format!("provider_of_composite({spec}, Some({c}))"),
+        None => format!("provider_of({spec})"),
     };
     let body = match v.get("embedded").and_then(Value::as_str) {
         Some(f) => format!("{body}.with_embedded({f})"),
         None => body,
     };
     format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> TreeSitterProvider {{\n    {body}\n}}\n"
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}\n}}\n"
+    )
+}
+
+/// The provider of a language with a `parse` function (`fn(&SourceFile) -> ParseResult`) in
+/// place of a tree-sitter grammar.
+fn adapter_provider(name: &str, v: &Value) -> String {
+    let hooks = text(v, "hooks", "core_rules::DEFAULT_HOOKS");
+    let strings = |key| {
+        format!("{:?}", list(v, key))
+            .replace('[', "")
+            .replace(']', "")
+    };
+    format!(
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {})\n}}\n",
+        name.to_uppercase(),
+        strings("extensions"),
+        strings("file-names"),
+        text(v, "formatter", ""),
+        text(v, "rules", "rules::RULES"),
+        text(v, "families", "&[]"),
+        text(v, "parse", ""),
     )
 }
 

@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 fn rules(config: &str) -> Vec<String> {
     let providers: Vec<Box<dyn LanguageProvider>> = vec![
-        Box::new(lang_yaml::YamlProvider::new()),
+        Box::new(lang_yaml::provider()),
         Box::new(GithubActionsProvider::new()),
     ];
     let mut db = Database::new(providers);

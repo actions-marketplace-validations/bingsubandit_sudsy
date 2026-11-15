@@ -1,18 +1,17 @@
 //! The opt-in YAML rules of yamllint's anchors, empty-values, float-values, octal-values and
 //! quoted-strings (the differential test in tests/parity/yamllint covers the positions).
 
-use lang_yaml::YamlProvider;
 use provider_api::testing::{fix, lint};
 
 fn count(text: &str, rules: &str, rule: &str) -> usize {
-    lint(&YamlProvider::new(), "a.yaml", text, rules)
+    lint(&lang_yaml::provider(), "a.yaml", text, rules)
         .iter()
         .filter(|d| d.rule == rule)
         .count()
 }
 
 fn fixed(text: &str, rules: &str) -> String {
-    fix(&YamlProvider::new(), "a.yaml", text, rules, true)
+    fix(&lang_yaml::provider(), "a.yaml", text, rules, true)
 }
 
 #[test]

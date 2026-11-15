@@ -66,7 +66,8 @@ fn exports(l: &Lang) -> String {
     out
 }
 
-pub fn generate(langs: &[&Lang]) -> Result<Vec<(PathBuf, String)>> {
+/// `langs`: the tree-sitter languages; `providers`: every language whose `provider()` is generated.
+pub fn generate(langs: &[&Lang], providers: &[&Lang]) -> Result<Vec<(PathBuf, String)>> {
     let features = langs
         .iter()
         .map(|l| format!("\"{}/static-grammars\"", l.krate))
@@ -114,7 +115,7 @@ pub fn generate(langs: &[&Lang]) -> Result<Vec<(PathBuf, String)>> {
             &[(
                 "//",
                 "providers",
-                lines(langs, |l| {
+                lines(providers, |l| {
                     format!(
                         "        Box::new({}::provider()),",
                         l.krate.replace('-', "_")

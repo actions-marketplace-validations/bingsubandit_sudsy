@@ -2,5 +2,5 @@
 
 #[test]
 fn rule_fixtures() {
-    provider_api::fixtures::rule_fixtures(&lang_js::JsProvider::new());
+    provider_api::fixtures::rule_fixtures(&lang_js::provider());
 }

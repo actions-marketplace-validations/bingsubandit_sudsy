@@ -1,12 +1,13 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 use core_syntax::grammars;
-use core_treesitter::{Mapping, Spec, TreeSitterProvider};
+use core_treesitter::{Mapping, Spec, provider_of};
+use provider_api::ParserProvider;
 
 core_syntax::include_generated!();
 
 #[rustfmt::skip]
-pub fn provider() -> TreeSitterProvider {
-    TreeSitterProvider::new(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("toml", tree_sitter_toml_ng::LANGUAGE), grammar: grammars::TOML, mapping: &MAPPING, extensions: &["toml"], file_names: &[], schema: option_schema(), formatter: &TomlFormatter, hooks: &hooks::TomlHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: Some(validate::validate) })
+pub fn provider() -> ParserProvider {
+    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("toml", tree_sitter_toml_ng::LANGUAGE), grammar: grammars::TOML, mapping: &MAPPING, extensions: &["toml"], file_names: &[], schema: option_schema(), formatter: &TomlFormatter, hooks: &hooks::TomlHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: Some(validate::validate) })
 }
 
 pub const MAPPING: Mapping = Mapping {

@@ -1,12 +1,9 @@
 //! ruff's AST and tokens as our lossless tree.
 //!
-//! ruff's AST has no punctuation nodes, no parenthesis information and no trivia. The adapter
-//! takes the lexer's tokens (every token of the file, with its span), the AST nodes' spans (one
-//! `SourceOrderVisitor` walk), and the text between two tokens, which holds only whitespace,
-//! comments and line continuations and is split into trivia tokens here, the way
-//! `core-treesitter` does. A node opens before the first token that starts in it and closes after
-//! its last, so a token belongs to the innermost node that contains it; trivia follow the shared
-//! attachment rule (`core_syntax::trivia`).
+//! ruff's AST has no punctuation nodes, no parenthesis information and no trivia. The lexer's
+//! tokens and the AST nodes' spans (one `SourceOrderVisitor` walk) go to
+//! `provider_api::adapter::replay`, which builds the tree; this file knows ruff's kinds and what
+//! lies between tokens: comments and line continuations.
 //!
 //! - Logical and non-logical newlines, indents and dedents are not tokens of the tree: the bytes
 //!   they cover are `Newline` and `Whitespace` trivia, comments are `Comment` trivia.
@@ -18,21 +15,32 @@
 //! - ruff's errors cascade: a file reports the first error of each statement.
 
 use crate::generated::kind as k;
-use core_syntax::trivia::is_line_break;
-use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TreeBuilder, grammars};
-use provider_api::{ParseError, ParseResult};
+use core_syntax::{SyntaxKind, grammars};
+use provider_api::adapter::{KindNames, Kinds, Node, Tok, replay};
+use provider_api::{ParseError, ParseResult, SourceFile};
 use ruff_python_ast::token::TokenKind;
 use ruff_python_ast::visitor::source_order::{SourceOrderVisitor, TraversalSignal};
 use ruff_python_ast::{AnyNodeRef, NodeKind, PythonVersion};
 use ruff_python_parser::{Mode, ParseOptions, parse_unchecked};
 use ruff_text_size::Ranged;
 
+/// The newest stable version unless the file's `target_version` names another.
+pub fn parse_file(file: &SourceFile) -> ParseResult {
+    let target = (file.language_version.as_deref())
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(PythonVersion::latest());
+    parse(&file.text, target)
+}
+
 pub fn parse(src: &str, target: PythonVersion) -> ParseResult {
     let parsed = parse_unchecked(
         src,
         ParseOptions::from(Mode::Module).with_target_version(target),
     );
-    let mut names = Names::new(grammars::PYTHON.get());
+    let grammar = grammars::PYTHON.get();
+    // Our token kinds by `TokenKind`, our node kinds by `NodeKind`.
+    let mut tokens_by_kind = KindNames::new(grammar, 128, |_| false);
+    let nodes_by_kind = KindNames::new(grammar, 128, |n| n.contains("Ipy") || n.starts_with("Mod"));
     let tokens: Vec<Tok> = (parsed.tokens().iter())
         .filter(|t| {
             t.start() != t.end()
@@ -47,13 +55,15 @@ pub fn parse(src: &str, target: PythonVersion) -> ParseResult {
                 )
         })
         .map(|t| Tok {
-            kind: names.token(t.kind()),
+            kind: tokens_by_kind
+                .get(t.kind() as usize, true, || format!("{:?}", t.kind()))
+                .unwrap_or(k::UNKNOWN),
             start: t.start().to_u32(),
             end: t.end().to_u32(),
         })
         .collect();
     let mut collector = Collector {
-        names,
+        names: nodes_by_kind,
         tokens: &tokens,
         nodes: Vec::with_capacity(tokens.len() / 2),
         open: Vec::new(),
@@ -68,17 +78,30 @@ pub fn parse(src: &str, target: PythonVersion) -> ParseResult {
             .chain((parsed.unsupported_syntax_errors().iter()).map(|e| (e.range(), e.to_string()))),
         &stmts,
     );
-    let mut build = Build {
-        src,
-        builder: TreeBuilder::new(),
-        errors: Vec::new(),
+    let kinds = Kinds {
+        root: k::MOD_MODULE,
+        eof: k::END_OF_FILE,
+        unknown: k::UNKNOWN,
+        whitespace: k::WHITESPACE,
+        newline: k::NEWLINE,
     };
-    build.run(&tokens, &nodes);
-    errors.append(&mut build.errors);
+    let mut result = replay(src, kinds, &tokens, &nodes, comments, |t, _| t);
+    errors.append(&mut result.errors);
     errors.sort_by_key(|e| e.start);
-    ParseResult {
-        tree: SyntaxNode::new_root(build.builder.finish()),
-        errors,
+    result.errors = errors;
+    result
+}
+
+/// A comment or a backslash that ends a line, at the start of the text between two tokens.
+fn comments(rest: &str, _: usize) -> Option<(SyntaxKind, usize)> {
+    if rest.starts_with('#') {
+        Some((k::COMMENT, rest.find(['\n', '\r']).unwrap_or(rest.len())))
+    } else {
+        let after = rest.strip_prefix('\\')?;
+        let len = if after.starts_with("\r\n") { 3 } else { 2 };
+        after
+            .starts_with(['\n', '\r'])
+            .then_some((k::CONTINUATION, len))
     }
 }
 
@@ -106,77 +129,14 @@ fn first_per_statement(
             open.pop();
         }
         if open.last().is_none_or(|o| seen.insert(o.0)) {
-            out.push(ParseError {
-                start: at,
-                len: range.len().to_u32(),
-                code: "syntax-error".into(),
-                message,
-            });
+            out.push(ParseError::syntax(at, range.len().to_u32(), message));
         }
     }
     out
 }
 
-#[derive(Clone, Copy)]
-struct Tok {
-    kind: SyntaxKind,
-    start: u32,
-    end: u32,
-}
-
-/// Our kinds for ruff's, found by name on first use.
-struct Names {
-    grammar: &'static Grammar,
-    tokens: [Option<SyntaxKind>; 128],
-    nodes: [Option<Option<SyntaxKind>>; 128],
-}
-
-impl Names {
-    fn new(grammar: &'static Grammar) -> Self {
-        Names {
-            grammar,
-            tokens: [None; 128],
-            nodes: [None; 128],
-        }
-    }
-
-    fn token(&mut self, kind: TokenKind) -> SyntaxKind {
-        let grammar = self.grammar;
-        *self.tokens[kind as usize].get_or_insert_with(|| {
-            let found = grammar.kind_by_name(&format!("{kind:?}"));
-            debug_assert!(
-                found.is_some(),
-                "{kind:?} has no token in grammars/python.grammar"
-            );
-            found.filter(|k| k.is_token()).unwrap_or(k::UNKNOWN)
-        })
-    }
-
-    /// `None` for a kind with no node (IPython escape commands, the root).
-    fn node(&mut self, kind: NodeKind) -> Option<SyntaxKind> {
-        let grammar = self.grammar;
-        *self.nodes[kind as usize].get_or_insert_with(|| {
-            let name = format!("{kind:?}");
-            let found = grammar.kind_by_name(&name).filter(|k| !k.is_token());
-            debug_assert!(
-                found.is_some() || name.contains("Ipy") || name.starts_with("Mod"),
-                "{name} has no node in grammars/python.grammar"
-            );
-            found.filter(|_| name != "ModModule")
-        })
-    }
-}
-
-/// An AST node: its span and our kind.
-struct Node {
-    start: u32,
-    end: u32,
-    kind: SyntaxKind,
-}
-
-/// The nodes of the AST in pre-order, and the spans of its statements.
 struct Collector<'t> {
-    names: Names,
+    names: KindNames,
     tokens: &'t [Tok],
     nodes: Vec<Node>,
     /// The enclosing AST nodes: whether each owns the parentheses at the ends of its range
@@ -212,7 +172,9 @@ impl<'a> SourceOrderVisitor<'a> for Collector<'_> {
         let parent_limit = self.open.last().filter(|p| p.0).map(|p| p.1);
         self.open.push((owns, end));
         self.claimed.push(None);
-        let Some(ours) = self.names.node(kind) else {
+        let ours = (self.names.get(kind as usize, false, || name.clone()))
+            .filter(|_| kind != NodeKind::ModModule);
+        let Some(ours) = ours else {
             return TraversalSignal::Traverse;
         };
         if name.starts_with("Stmt") {
@@ -249,123 +211,5 @@ impl<'a> SourceOrderVisitor<'a> for Collector<'_> {
     fn leave_node(&mut self, _: AnyNodeRef<'a>) {
         self.open.pop();
         self.claimed.pop();
-    }
-}
-
-struct Build<'a> {
-    src: &'a str,
-    builder: TreeBuilder,
-    errors: Vec<ParseError>,
-}
-
-impl Build<'_> {
-    fn emit(&mut self, t: Tok) {
-        self.builder
-            .token(t.kind, &self.src[t.start as usize..t.end as usize]);
-    }
-
-    /// Replays tokens and nodes: each token takes its leading trivia, itself and its trailing
-    /// trivia, inside the innermost node that contains it.
-    fn run(&mut self, tokens: &[Tok], nodes: &[Node]) {
-        let len = self.src.len() as u32;
-        self.builder.start_node(k::MOD_MODULE);
-        // The zero-width end of file token closes every node and owns the trivia of the tail.
-        let eof = Tok {
-            kind: k::END_OF_FILE,
-            start: len,
-            end: len,
-        };
-        let mut nodes = nodes.iter().peekable();
-        // The end of each open node, innermost last.
-        let mut open: Vec<u32> = Vec::new();
-        let mut carry: Vec<Tok> = Vec::new();
-        let mut gap: Vec<Tok> = Vec::new();
-        let first = tokens.first().map_or(len, |t| t.start);
-        self.gap(0, first, &mut carry);
-        let mut real = tokens.iter().copied().chain(Some(eof)).peekable();
-        while let Some(t) = real.next() {
-            while open.last().is_some_and(|&end| end <= t.start) {
-                open.pop();
-                self.builder.finish_node();
-            }
-            while let Some(n) = nodes.next_if(|n| n.start <= t.start) {
-                if n.start == n.end {
-                    self.builder.start_node(n.kind);
-                    self.builder.finish_node();
-                } else if n.end > t.start {
-                    // A node that overlaps its parent ends with it.
-                    let end = open.last().map_or(n.end, |&p| p.min(n.end));
-                    self.builder.start_node(n.kind);
-                    open.push(end);
-                }
-            }
-            for c in carry.drain(..) {
-                self.emit(c);
-            }
-            self.emit(t);
-            if let Some(next) = real.peek() {
-                gap.clear();
-                self.gap(t.end, next.start, &mut gap);
-                let ends_line = |c: &Tok| {
-                    self.src[..c.end as usize]
-                        .chars()
-                        .next_back()
-                        .is_some_and(is_line_break)
-                };
-                let cut = gap.iter().position(ends_line).map_or(gap.len(), |i| i + 1);
-                for c in gap[..cut].iter().copied() {
-                    self.emit(c);
-                }
-                carry.extend_from_slice(&gap[cut..]);
-            }
-        }
-        self.builder.finish_node();
-    }
-
-    /// Splits the text `a..b` between two tokens into trivia tokens.
-    fn gap(&mut self, a: u32, b: u32, out: &mut Vec<Tok>) {
-        let src = self.src;
-        let (mut pos, b) = (a as usize, b as usize);
-        while pos < b {
-            let rest = &src[pos..b];
-            let c = rest.chars().next().unwrap_or(' ');
-            let blank = |c: char| matches!(c, ' ' | '\t' | '\x0c' | '\u{feff}');
-            let (kind, len) = if c == '#' {
-                (k::COMMENT, rest.find(['\n', '\r']).unwrap_or(rest.len()))
-            } else if rest.starts_with("\r\n") {
-                (k::NEWLINE, 2)
-            } else if c == '\n' || c == '\r' {
-                (k::NEWLINE, 1)
-            } else if let Some(after) = rest.strip_prefix('\\')
-                && after.starts_with(['\n', '\r'])
-            {
-                (
-                    k::CONTINUATION,
-                    if after.starts_with("\r\n") { 3 } else { 2 },
-                )
-            } else if blank(c) {
-                (
-                    k::WHITESPACE,
-                    rest.find(|c| !blank(c)).unwrap_or(rest.len()),
-                )
-            } else {
-                let n = rest
-                    .find(|c: char| blank(c) || c == '\n' || c == '\r')
-                    .unwrap_or(rest.len());
-                self.errors.push(ParseError {
-                    start: pos as u32,
-                    len: n as u32,
-                    code: "syntax-error".into(),
-                    message: "unexpected text".into(),
-                });
-                (k::UNKNOWN, n)
-            };
-            out.push(Tok {
-                kind,
-                start: pos as u32,
-                end: (pos + len) as u32,
-            });
-            pos += len;
-        }
     }
 }

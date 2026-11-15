@@ -11,10 +11,9 @@ use core_config::OptionSchema;
 use core_format::NodeFormatter;
 use core_rules::{Rule, RuleHooks};
 use core_syntax::{Embedded, Grammar, LanguageId, SyntaxNode};
-use lang_yaml::YamlProvider;
 use provider_api::{
-    Capabilities, FileMatcher, FilePattern, LanguageProvider, ParseResult, ProviderError,
-    SourceFile,
+    Capabilities, FileMatcher, FilePattern, LanguageProvider, ParseResult, ParserProvider,
+    ProviderError, SourceFile,
 };
 use std::sync::OnceLock;
 
@@ -31,7 +30,7 @@ static RULES: &[&dyn Rule] = &[
 ];
 
 pub struct GithubActionsProvider {
-    yaml: YamlProvider,
+    yaml: ParserProvider,
     matchers: Vec<FileMatcher>,
     schema: OptionSchema,
     all: OnceLock<&'static [&'static dyn Rule]>,
@@ -59,7 +58,7 @@ impl GithubActionsProvider {
             extension: extension.into(),
         };
         GithubActionsProvider {
-            yaml: YamlProvider::new(),
+            yaml: lang_yaml::provider(),
             matchers: vec![
                 matcher(in_workflows("yml")),
                 matcher(in_workflows("yaml")),

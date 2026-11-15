@@ -7,7 +7,6 @@
 //! cargo test --profile corpus -p lang-sql --test integration -- --ignored --nocapture conformance::`
 
 use core_syntax::{print, trivia};
-use lang_sql::SqlProvider;
 use provider_api::LanguageProvider;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -24,7 +23,7 @@ fn files(dir: &Path) -> Vec<PathBuf> {
 
 /// Parses every file as `dialect`; returns what the run printed.
 fn run(label: &str, dialect: &str, dir: PathBuf) {
-    let grammar = SqlProvider::new().grammar().clone();
+    let grammar = lang_sql::provider().grammar().clone();
     let (mut bytes, mut count, mut errors, mut panics, mut big) = (0, 0, 0, 0, 0);
     let mut elapsed = 0.0;
     for path in files(&dir) {
@@ -138,7 +137,7 @@ fn format_is_stable() {
     use core_format::DirectiveTable;
     use provider_api::SourceFile;
     use provider_api::format::format_file;
-    let provider = SqlProvider::new();
+    let provider = lang_sql::provider();
     let mut options = provider.option_schema().defaults();
     let dirs = lang_sql::DIALECTS.map(|d| {
         let sub = if d == "postgres" { "postgres" } else { d };

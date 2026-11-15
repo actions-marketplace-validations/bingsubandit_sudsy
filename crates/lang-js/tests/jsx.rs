@@ -2,11 +2,10 @@
 //! defaults), with every check of the shared helper.
 
 use core_format::testing::assert_formats;
-use lang_js::JsProvider;
 use provider_api::format_testing::Formatting;
 
 fn fmt(input: &str) -> String {
-    assert_formats(&Formatting::new(JsProvider::new(), "a.jsx"), input)
+    assert_formats(&Formatting::new(lang_js::provider(), "a.jsx"), input)
 }
 
 #[test]
@@ -173,7 +172,7 @@ fn prettier_ignore_and_templates() {
 #[test]
 fn jsx_single_quote_and_bracket_same_line() {
     use core_config::OptionValue::Bool;
-    let mut subject = Formatting::new(JsProvider::new(), "a.jsx");
+    let mut subject = Formatting::new(lang_js::provider(), "a.jsx");
     subject.options = vec![
         ("jsx_single_quote", Bool(true)),
         ("bracket_same_line", Bool(true)),

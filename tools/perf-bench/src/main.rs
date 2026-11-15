@@ -305,7 +305,7 @@ fn main() -> Result<()> {
     if matches!(which, "yaml" | "all") {
         report(
             "YAML",
-            &lang_yaml::YamlProvider::new(),
+            &*fixed::named_provider("yaml"),
             "bench.yaml",
             inputs::yaml,
             YAML_ITEMS,

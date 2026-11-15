@@ -251,6 +251,22 @@ pub struct ParseError {
     pub message: String,
 }
 
+impl ParseError {
+    pub fn new(start: u32, len: u32, code: impl Into<String>, message: impl Into<String>) -> Self {
+        ParseError {
+            start,
+            len,
+            code: code.into(),
+            message: message.into(),
+        }
+    }
+
+    /// A syntax error of a parser that has no codes for them.
+    pub fn syntax(start: u32, len: u32, message: impl Into<String>) -> Self {
+        Self::new(start, len, "syntax-error", message)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ParseResult {
     pub tree: SyntaxNode,
