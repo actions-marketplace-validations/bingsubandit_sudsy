@@ -1,0 +1,57 @@
+tool: "eslint-plugin-vue"
+version: "10.5.0"
+languages: ["vue"]
+sources:
+  - "https://eslint.vuejs.org/rules/"
+scope: "eslint-plugin-vue's template rules (the `vue/` rules that read the `<template>` tree); rules about `<script>` come with the JS semantic layer"
+entries:
+  attribute-hyphenation: planned
+  attributes-order: planned
+  component-name-in-template-casing: planned
+  html-closing-bracket-newline: formatter | the formatter owns layout
+  html-indent: formatter | the formatter owns layout
+  html-quotes: rule attr-quotes
+  html-self-closing: planned
+  max-attributes-per-line: formatter | `single_attribute_per_line` and the line width
+  multiline-html-element-content-newline: formatter | the formatter owns layout
+  mustache-interpolation-spacing: planned
+  no-duplicate-attributes: rule no-duplicate-keys | repeated `v-on` handlers and slots are allowed, and `class` next to `:class` is not a repeat
+  no-multi-spaces: formatter | the formatter owns layout
+  no-parsing-error: rule syntax-error
+  no-spaces-around-equal-signs-in-attribute: rule attr-delimiter
+  no-template-shadow: planned
+  no-use-v-if-with-v-for: rule no-use-v-if-with-v-for
+  no-v-html: rule no-v-html
+  no-v-text-v-html-on-component: planned
+  one-component-per-file: deferred | needs script analysis (the JS semantic layer)
+  require-v-for-key: rule v-for-key
+  singleline-html-element-content-newline: formatter | the formatter owns layout
+  v-bind-style: planned
+  v-on-style: planned
+  v-slot-style: planned
+  valid-v-bind: planned
+  valid-v-else: planned
+  valid-v-else-if: planned
+  valid-v-for: planned
+  valid-v-if: planned
+  valid-v-model: planned
+  valid-v-on: planned
+  valid-v-slot: planned
+  no-dupe-v-else-if: deferred | needs a comparison of expressions
+  no-lone-template: planned
+  no-multiple-template-root: planned
+  no-reserved-component-names: planned
+  no-template-key: planned
+  no-textarea-mustache: planned
+  no-unused-vars: deferred | needs script analysis (the JS semantic layer)
+  no-unused-components: deferred | needs script analysis (the JS semantic layer)
+  require-component-is: planned
+  require-prop-types: deferred | needs script analysis (the JS semantic layer)
+  require-valid-default-prop: deferred | needs script analysis (the JS semantic layer)
+  no-mutating-props: deferred | needs script analysis (the JS semantic layer)
+  no-side-effects-in-computed-properties: deferred | needs script analysis (the JS semantic layer)
+  no-async-in-computed-properties: deferred | needs script analysis (the JS semantic layer)
+  no-ref-as-operand: deferred | needs script analysis (the JS semantic layer)
+  no-unused-properties: deferred | needs script analysis (the JS semantic layer)
+  no-undef-components: deferred | needs script analysis (the JS semantic layer)
+  no-undef-properties: deferred | needs script analysis (the JS semantic layer)
