@@ -27,6 +27,13 @@ A language whose tree-sitter grammar exists and is good enough costs a grammar f
 6. **Measure**: committed input files in `bench/inputs/<ext>/` (the folder is named after the files' extension; `perf-bench list` finds the provider by it, and `bench.sh` measures what it lists) (150 KB at most per language) and record parse and format throughput, binary size and build time in [../performance/numbers.md](../performance/numbers.md).
 7. **Docs**: [overview.md](overview.md) (the parser row), the presets list, the roadmap. **Parity** with an upstream formatter: an entry in `scripts/parity_tools.json` ([../development/parity.md](../development/parity.md)).
 
+## After a language lands: the generalization step
+Each new language should cost less code than the last. When a language's step 1 is on main (the crate, the parser or adapter, registration, harness), the lead gives one agent a step to shrink what the next language will have to write:
+- Measure: `scripts/cost.sh <first>^..<last>` over the language's commits, per category, next to its nearest peers (same parser kind: tree-sitter, or an external parser behind an adapter such as oxc, ruff, sqruff).
+- Find code of the same shape across `lang-*` crates (adapters, provider glue, hooks, option schemas, test helpers, parity modes, corpus and bench scripts) and hand-written files that follow a template; move them into a core crate, into codegen from `lang.yaml`, or into a script, and delete the copies.
+- Find the sinks: which kind of code grew most per language (formatter, rule fixtures, docs, generated data) and what would make it cheaper.
+- Record the per-language numbers in the list below and land the extraction as one step (gate, finish, bench flat).
+
 ## Per-language cost and limits
 - Code: grammar file about 40 lines, `lang.yaml` with the mapping about 40, formatter about 130 for TOML. Expect more formatter code for a language with irregular layout; the shapes cover lists, key-values, blocks and statement sequences.
 - Cost in every build: a C compiler (already needed), the tree-sitter runtime once, and the grammar's `parser.c` and scanner per language; sizes are in `numbers.md`.
