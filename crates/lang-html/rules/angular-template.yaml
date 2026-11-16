@@ -1,0 +1,35 @@
+id: banana-in-box
+family: template
+params: { check: banana-in-box, only: component.html }
+message: "write the two-way binding as `[(x)]`: the banana goes in the box"
+description: "Angular's `banana-in-box` (@angular-eslint/template). `([x])` is no binding. Only in `.component.html` files."
+example: "<input ([ngModel])=\"a\">   <input [(ngModel)]=\"a\">"
+severity: error
+category: correctness
+---
+id: eqeqeq
+family: template
+params: { check: loose-equality, only: component.html }
+message: "use `===` / `!==`: `==` and `!=` convert their operands"
+description: "Angular's `eqeqeq` (@angular-eslint/template), on bindings, interpolations and block parameters. Only in `.component.html` files."
+example: "<p *ngIf=\"a == b\">   <p *ngIf=\"a === b\">"
+severity: warn
+category: suspicious
+---
+id: no-negated-async
+family: template
+params: { check: negated-async, only: component.html }
+message: "`!(x | async)` and `(x | async) === false` are also true before the stream emits: compare with the value or use `@if` / `@else`"
+description: "Angular's `no-negated-async` (@angular-eslint/template). Only in `.component.html` files."
+example: "<p *ngIf=\"!(a$ | async)\">   <p *ngIf=\"(a$ | async) === false\">   <p *ngIf=\"a$ | async\">"
+severity: warn
+category: correctness
+---
+id: require-for-track
+family: template
+params: { check: for-track, only: component.html }
+message: "`@for` needs a `track` expression"
+description: "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files."
+example: "@for (x of xs) { <p></p> }   @for (x of xs; track x.id) { <p></p> }"
+severity: error
+category: correctness

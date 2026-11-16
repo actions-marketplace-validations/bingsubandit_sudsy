@@ -1,0 +1,15 @@
+<input ([ngModel])="a" [(ngModel)]="b" />
+//     ^^^^^^^^^^^ banana-in-box
+<p *ngIf="a == b && c !== d">{{ a != b ? "x == y" : 1 }}</p>
+//          ^^ eqeqeq
+//                                ^^ eqeqeq
+<p *ngIf="!(a$ | async)"></p>
+//         ^ no-negated-async
+<p [hidden]="(a$ | async) === false || x"></p>
+//           ^ no-negated-async
+<p *ngIf="!a$ | async"></p>
+@if (a == 1) { <b></b> }
+//     ^^ eqeqeq
+@for (x of xs) { <i></i> }
+^^^^^^^^^^^^^^^^^ require-for-track
+@for (x of xs; track x.id) { <i></i> }

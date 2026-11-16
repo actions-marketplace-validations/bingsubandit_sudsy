@@ -16909,6 +16909,35 @@
       "upstream": []
     },
     {
+      "category": "correctness",
+      "default_level": "error",
+      "description": "Angular's `banana-in-box` (@angular-eslint/template). `([x])` is no binding. Only in `.component.html` files.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<input ([ngModel])=\"a\" [(ngModel)]=\"b\" />\n<p *ngIf=\"a == b && c !== d\">{{ a != b ? \"x == y\" : 1 }}</p>\n<p *ngIf=\"!(a$ | async)\"></p>\n<p [hidden]=\"(a$ | async) === false || x\"></p>\n<p *ngIf=\"!a$ | async\"></p>\n@if (a == 1) { <b></b> }\n@for (x of xs) { <i></i> }\n@for (x of xs; track x.id) { <i></i> }\n",
+        "language": "angular",
+        "spans": [
+          {
+            "column": 8,
+            "length": 11,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "banana-in-box",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "A class name that does not match the `pattern` option (a regex; by default kebab-case).",
@@ -17323,6 +17352,45 @@
           "tool": "html-validate"
         }
       ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "Angular's `eqeqeq` (@angular-eslint/template), on bindings, interpolations and block parameters. Only in `.component.html` files.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<input ([ngModel])=\"a\" [(ngModel)]=\"b\" />\n<p *ngIf=\"a == b && c !== d\">{{ a != b ? \"x == y\" : 1 }}</p>\n<p *ngIf=\"!(a$ | async)\"></p>\n<p [hidden]=\"(a$ | async) === false || x\"></p>\n<p *ngIf=\"!a$ | async\"></p>\n@if (a == 1) { <b></b> }\n@for (x of xs) { <i></i> }\n@for (x of xs; track x.id) { <i></i> }\n",
+        "language": "angular",
+        "spans": [
+          {
+            "column": 13,
+            "length": 2,
+            "line": 2
+          },
+          {
+            "column": 35,
+            "length": 2,
+            "line": 2
+          },
+          {
+            "column": 8,
+            "length": 2,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "eqeqeq",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
     },
     {
       "category": "correctness",
@@ -18754,6 +18822,40 @@
       ]
     },
     {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Angular's `no-negated-async` (@angular-eslint/template). Only in `.component.html` files.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<input ([ngModel])=\"a\" [(ngModel)]=\"b\" />\n<p *ngIf=\"a == b && c !== d\">{{ a != b ? \"x == y\" : 1 }}</p>\n<p *ngIf=\"!(a$ | async)\"></p>\n<p [hidden]=\"(a$ | async) === false || x\"></p>\n<p *ngIf=\"!a$ | async\"></p>\n@if (a == 1) { <b></b> }\n@for (x of xs) { <i></i> }\n@for (x of xs; track x.id) { <i></i> }\n",
+        "language": "angular",
+        "spans": [
+          {
+            "column": 12,
+            "length": 1,
+            "line": 3
+          },
+          {
+            "column": 14,
+            "length": 1,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-negated-async",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "suspicious",
       "default_level": "off",
       "description": "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS.",
@@ -19574,6 +19676,35 @@
       },
       "fix": null,
       "id": "require-each-key",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "error",
+      "description": "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<input ([ngModel])=\"a\" [(ngModel)]=\"b\" />\n<p *ngIf=\"a == b && c !== d\">{{ a != b ? \"x == y\" : 1 }}</p>\n<p *ngIf=\"!(a$ | async)\"></p>\n<p [hidden]=\"(a$ | async) === false || x\"></p>\n<p *ngIf=\"!a$ | async\"></p>\n@if (a == 1) { <b></b> }\n@for (x of xs) { <i></i> }\n@for (x of xs; track x.id) { <i></i> }\n",
+        "language": "angular",
+        "spans": [
+          {
+            "column": 1,
+            "length": 17,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "require-for-track",
       "languages": [
         "angular",
         "html",

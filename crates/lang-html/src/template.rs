@@ -24,6 +24,7 @@
 //! the directives, comma-separated, whose `={name}` is redundant; none: plain attributes).
 
 use crate::generated::kind as k;
+use crate::ng_checks;
 use core_rules::{Edit, Family, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, TextRange, TextSize};
 
@@ -50,6 +51,10 @@ enum Kind {
     SpacedComment,
     TargetBlank,
     NestedStyle,
+    BananaInBox,
+    LooseEquality,
+    NegatedAsync,
+    ForTrack,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -112,6 +117,10 @@ enum Check {
     SpacedComment,
     TargetBlank,
     NestedStyle,
+    BananaInBox,
+    LooseEquality,
+    NegatedAsync,
+    ForTrack,
 }
 
 struct Template {
@@ -215,6 +224,10 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
             ("spaced-comment", Kind::SpacedComment),
             ("target-blank", Kind::TargetBlank),
             ("nested-style", Kind::NestedStyle),
+            ("banana-in-box", Kind::BananaInBox),
+            ("loose-equality", Kind::LooseEquality),
+            ("negated-async", Kind::NegatedAsync),
+            ("for-track", Kind::ForTrack),
         ],
     )?;
     let check = match kind {
@@ -242,6 +255,10 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         Kind::SpacedComment => Check::SpacedComment,
         Kind::TargetBlank => Check::TargetBlank,
         Kind::NestedStyle => Check::NestedStyle,
+        Kind::BananaInBox => Check::BananaInBox,
+        Kind::LooseEquality => Check::LooseEquality,
+        Kind::NegatedAsync => Check::NegatedAsync,
+        Kind::ForTrack => Check::ForTrack,
     };
     let rule = Template {
         meta,
@@ -466,17 +483,20 @@ impl Rule for Template {
             Check::ChildrenSnippet => &[k::BLOCK_TAG],
             Check::UselessMustache => &[k::MUSTACHE],
             Check::SpacedComment => &[k::DOCUMENT],
+            Check::LooseEquality | Check::NegatedAsync => {
+                &[k::ATTRIBUTE, k::INTERPOLATION, k::BLOCK_HEAD]
+            }
+            Check::ForTrack => &[k::BLOCK_HEAD],
             _ => &[k::ATTRIBUTE],
         }
     }
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         if let Some(only) = &self.only
-            && ctx
-                .file
-                .path
-                .extension()
-                .is_none_or(|e| e.to_str() != Some(only))
+            && !ctx.file.path.to_str().is_some_and(|p| {
+                p.strip_suffix(only.as_str())
+                    .is_some_and(|r| r.ends_with('.'))
+            })
         {
             return;
         }
@@ -588,6 +608,53 @@ impl Rule for Template {
                     if !body.contains([q, '\\']) && !(q == '`' && body.contains("${")) {
                         ctx.report(TextRange::at(start, TextSize::of(s)), self.message.clone());
                     }
+                }
+            }
+            Check::BananaInBox => {
+                if let Some(a) = Attr::parse(node, text)
+                    && ng_checks::banana_in_box(a.full)
+                {
+                    ctx.report(a.range(), self.message.clone());
+                }
+            }
+            Check::ForTrack => {
+                let head = text[node.text_range()].trim_start();
+                let head = head.split('{').next().unwrap_or(head);
+                if ng_checks::for_without_track(head) {
+                    ctx.report(node.text_range(), self.message.clone());
+                }
+            }
+            Check::LooseEquality | Check::NegatedAsync => {
+                let (code, start) = if node.kind() == k::ATTRIBUTE {
+                    let Some(a) = Attr::parse(node, text).filter(|a| ng_checks::is_binding(a.full))
+                    else {
+                        return;
+                    };
+                    let Some(v) = a.value() else { return };
+                    // (the value starts after the quote)
+                    let at = text[a.start.into()..]
+                        .find(v)
+                        .map_or(a.start.into(), |i| usize::from(a.start) + i);
+                    (v, at)
+                } else {
+                    let r = node.text_range();
+                    (&text[r], r.start().into())
+                };
+                let hits = if matches!(self.check, Check::LooseEquality) {
+                    ng_checks::loose_equality(code)
+                } else {
+                    ng_checks::negated_async(code)
+                };
+                let len = if matches!(self.check, Check::LooseEquality) {
+                    2
+                } else {
+                    1
+                };
+                for i in hits {
+                    ctx.report(
+                        TextRange::at(TextSize::from((start + i) as u32), TextSize::from(len)),
+                        self.message.clone(),
+                    );
                 }
             }
             Check::SpacedComment => {

@@ -21,6 +21,7 @@ One line per upstream rule or option under `entries:`, `<id>: <status>` or `<id>
 | Tool | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | actionlint | 26 | 5 | 4 | 0 | 0 | 0 | 17 | 0 |
+| angular-eslint | 33 | 3 | 2 | 18 | 0 | 0 | 10 | 18 |
 | biome | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
 | buf | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
 | checkmake | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |

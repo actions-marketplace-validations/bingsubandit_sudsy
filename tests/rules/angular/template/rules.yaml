@@ -1,0 +1,4 @@
+banana-in-box: warn
+eqeqeq: warn
+no-negated-async: warn
+require-for-track: warn

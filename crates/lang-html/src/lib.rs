@@ -9,6 +9,7 @@ mod dom;
 mod format;
 mod hooks;
 mod meta;
+mod ng_checks;
 mod patterns;
 mod rules;
 mod template;

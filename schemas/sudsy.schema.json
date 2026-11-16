@@ -392,6 +392,10 @@
               "$ref": "#/definitions/rule",
               "description": "`@ts-ignore`, `@ts-nocheck` before the first statement, and `@ts-expect-error` without a description of at least three characters in a comment (`@ts-check` is allowed)."
             },
+            "banana-in-box": {
+              "$ref": "#/definitions/rule",
+              "description": "Angular's `banana-in-box` (@angular-eslint/template). `([x])` is no binding. Only in `.component.html` files."
+            },
             "bare-except": {
               "$ref": "#/definitions/rule",
               "description": "An `except` clause without an exception type, unless its body has a bare `raise` of its own."
@@ -990,6 +994,10 @@
             "enum-zero-value-suffix": {
               "$ref": "#/definitions/rule",
               "description": "An enum value numbered 0 whose name does not end in `_UNSPECIFIED` (buf lint ENUM_ZERO_VALUE_SUFFIX with its default suffix)."
+            },
+            "eqeqeq": {
+              "$ref": "#/definitions/rule",
+              "description": "Angular's `eqeqeq` (@angular-eslint/template), on bindings, interpolations and block parameters. Only in `.component.html` files."
             },
             "expose-port-range": {
               "$ref": "#/definitions/rule",
@@ -2692,6 +2700,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `namespace` or `module Name` declaration (not `declare module \"x\"` or `declare global`), except in a `.d.ts` file."
             },
+            "no-negated-async": {
+              "$ref": "#/definitions/rule",
+              "description": "Angular's `no-negated-async` (@angular-eslint/template). Only in `.component.html` files."
+            },
             "no-nested-onbuild": {
               "$ref": "#/definitions/rule",
               "description": "An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER."
@@ -3471,6 +3483,10 @@
             "require-each-key": {
               "$ref": "#/definitions/rule",
               "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions."
+            },
+            "require-for-track": {
+              "$ref": "#/definitions/rule",
+              "description": "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files."
             },
             "require-sri": {
               "$ref": "#/definitions/rule",
