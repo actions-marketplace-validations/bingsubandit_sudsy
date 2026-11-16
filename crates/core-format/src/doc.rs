@@ -122,6 +122,52 @@ impl Doc {
         }
     }
 
+    /// The document without its `BreakParent`s: a line comment inside no longer breaks the groups
+    /// around it (hard lines still do), its text waits for the end of the line.
+    pub fn without_break_parents(self) -> Doc {
+        crate::deep(|| match self {
+            Doc::BreakParent => Doc::Nil,
+            Doc::Outdent(n, d) => Doc::Outdent(n, Box::new(d.without_break_parents())),
+            Doc::Indent(d) => Doc::Indent(Box::new(d.without_break_parents())),
+            Doc::Align(n, d) => Doc::Align(n, Box::new(d.without_break_parents())),
+            Doc::LineSuffix(d) => Doc::LineSuffix(Box::new(d.without_break_parents())),
+            Doc::Label(l, d) => Doc::Label(l, Box::new(d.without_break_parents())),
+            Doc::IndentIfBreak(id, d) => {
+                Doc::IndentIfBreak(id, Box::new(d.without_break_parents()))
+            }
+            Doc::Concat(parts) => {
+                Doc::Concat(parts.into_iter().map(Doc::without_break_parents).collect())
+            }
+            Doc::Fill(parts) => {
+                Doc::Fill(parts.into_iter().map(Doc::without_break_parents).collect())
+            }
+            Doc::IfBreak {
+                broken,
+                flat,
+                group,
+            } => Doc::IfBreak {
+                broken: Box::new(broken.without_break_parents()),
+                flat: Box::new(flat.without_break_parents()),
+                group,
+            },
+            Doc::Group(g) => {
+                let Group {
+                    contents,
+                    states,
+                    broken,
+                    id,
+                } = *g;
+                Doc::Group(Box::new(Group {
+                    contents: contents.without_break_parents(),
+                    states: states.into_iter().map(Doc::without_break_parents).collect(),
+                    broken,
+                    id,
+                }))
+            }
+            other => other,
+        })
+    }
+
     /// Drops the document without recursing: dropping a deep one the usual way uses a stack
     /// frame per level.
     pub fn dispose(self) {

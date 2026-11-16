@@ -171,6 +171,7 @@ pub fn print_counting(doc: &mut Doc, opts: &PrintOptions) -> (String, usize, Pri
         out: String::new(),
         pos: 0,
         suffixes: Vec::new(),
+        line_level: 0,
         remeasure: false,
         group_modes: HashMap::new(),
         keep: 0,
@@ -189,6 +190,8 @@ struct Printer<'a> {
     out: String,
     pos: usize,
     suffixes: Vec<Cmd<'a>>,
+    /// The indentation level of the current line.
+    line_level: usize,
     /// Set after a hard line in flat mode: the next group must be measured again.
     remeasure: bool,
     /// How each group with an id was printed, for `IndentIfBreak`.
@@ -216,13 +219,15 @@ fn ends_in_line_comment(d: &Doc) -> bool {
 
 impl<'a> Printer<'a> {
     /// Queues the pending suffixes in front of the line break that follows; the line break a
-    /// second comment of a line brought along takes the deeper indent of the two places.
+    /// second comment of a line brought along takes the deeper indent of the line it follows and the line break that follows (formatting the
+    /// output again reads it as a comment on one of them).
     fn flush_suffixes(&mut self, cmds: &mut Vec<Cmd<'a>>, indent: usize) {
         for mut c in self.suffixes.drain(..).rev() {
-            if matches!(c.item, Item::Doc(d) if std::ptr::eq(d, &HARD_LINE))
-                && self.indents.levels[c.indent].width < self.indents.levels[indent].width
-            {
-                c.indent = indent;
+            if matches!(c.item, Item::Doc(d) if std::ptr::eq(d, &HARD_LINE)) {
+                c.indent = [indent, self.line_level]
+                    .into_iter()
+                    .max_by_key(|&l| self.indents.levels[l].width)
+                    .unwrap_or(indent);
             }
             cmds.push(c);
         }
@@ -239,7 +244,7 @@ impl<'a> Printer<'a> {
                 if self.suffixes.is_empty() {
                     break;
                 }
-                cmds.extend(self.suffixes.drain(..).rev());
+                self.flush_suffixes(&mut cmds, 0);
                 continue;
             };
             self.step(cmd, &mut cmds);
@@ -259,6 +264,7 @@ impl<'a> Printer<'a> {
         let trimmed = self.out.trim_end_matches([' ', '\t']).len().max(self.keep);
         self.out.truncate(trimmed);
         self.out.push('\n');
+        self.line_level = indent;
         let level = &self.indents.levels[indent];
         self.out.push_str(&level.text);
         self.pos = level.width;

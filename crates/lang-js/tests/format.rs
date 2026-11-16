@@ -425,3 +425,23 @@ fn comments_beside_dropped_parentheses_reach_a_fixed_point() {
         "x = [\n  1, // a\n  2,\n];\nfoo</* c */ T>();\ntype U =\n  | A // a\n  | B;\nconst g = (a) => (b) => c; // c\n"
     );
 }
+
+#[test]
+fn line_comments_in_a_cast_chain_reach_a_fixed_point() {
+    // A line comment inside the operand of a cast does not break the parentheses around it; a
+    // second comment after a line comment goes on its own line at the indentation of the next line.
+    assert_eq!(
+        fmt(
+            "f = (x // a\n  .z as P).y;\ng = ((x // a\n  .l as P) // b\n  .e as P) // c\n  .e; // d\n"
+        ),
+        "f = (x.z as P).y; // a\ng = ((x.l as P).e as P).e; // a\n// b\n// c\n// d\n"
+    );
+}
+
+#[test]
+fn with_optional_calls_and_long_strings_reach_a_fixed_point() {
+    assert_eq!(
+        fmt("with (a /* c */) b;\nx = a /* c */ ?.(b);\ny = f('a\"b');\n"),
+        "with (a /* c */) b;\nx = a /* c */?.(b);\ny = f('a\"b');\n"
+    );
+}

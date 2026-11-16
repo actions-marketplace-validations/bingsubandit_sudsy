@@ -6,8 +6,8 @@ ratchet:
   prettier-tests: 1106
   real-world: 2287
 second-format:
-  prettier-tests: 3
-  real-world: 3
+  prettier-tests: 2
+  real-world: 2
 refused:
   prettier-tests: 0
   real-world: 0

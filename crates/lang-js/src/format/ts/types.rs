@@ -241,7 +241,7 @@ fn cast(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     });
     Ok(if operand {
         group(concat(vec![
-            indent(concat(vec![softline(), doc])),
+            indent(concat(vec![softline(), doc.without_break_parents()])),
             softline(),
         ]))
     } else {
