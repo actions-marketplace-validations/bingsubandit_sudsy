@@ -53,5 +53,11 @@ pub const MAPPING: Mapping = Mapping {
         ("=", "Equals"),
         ("{{", "LBraceBrace"),
         ("}}", "RBraceBrace"),
+        ("{", "LBrace"),
+        ("}", "RBrace"),
+        ("(", "LParen"),
+        (")", "RParen"),
+        (";", "Semi"),
+        (",", "Comma"),
     ],
 };

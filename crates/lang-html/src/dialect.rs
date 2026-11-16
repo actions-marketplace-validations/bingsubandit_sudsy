@@ -3,10 +3,10 @@
 //! matchers and `vue` / `svelte` config sections on top of `html`.
 
 use crate::MAPPING;
-use crate::format::{SVELTE_FORMATTER, VUE_FORMATTER, option_schema};
+use crate::format::{ANGULAR_FORMATTER, SVELTE_FORMATTER, VUE_FORMATTER, option_schema};
 use core_config::{OptionDef, OptionSchema};
 use core_treesitter::{Mapping, Spec, provider_of};
-use provider_api::ParserProvider;
+use provider_api::{ParserProvider, ParserSpec};
 
 /// HTML's node table with the nodes of another grammar added (and the tokens it wraps in nodes).
 fn mapping(
@@ -131,4 +131,22 @@ pub fn svelte_provider() -> ParserProvider {
     let mut spec = spec!("svelte", tree_sitter_svelte, m, &SVELTE_FORMATTER);
     spec.schema = schema(options);
     provider_of(spec).with_dialect("svelte", "html")
+}
+
+/// Angular component templates (`*.component.html`): oxc-htmlish-parser's Angular reading as our
+/// HTML tree (`crate::angular`).
+pub fn angular_provider() -> ParserProvider {
+    let spec = ParserSpec {
+        crate_name: env!("CARGO_PKG_NAME"),
+        grammar: core_syntax::grammars::HTML,
+        extensions: &[],
+        file_names: &["*.component.html"],
+        schema: option_schema(),
+        formatter: &ANGULAR_FORMATTER,
+        hooks: &crate::hooks::HtmlHooks,
+        rules: crate::rules::RULES,
+        pattern_files: provider_api::pattern_files!(),
+        families: crate::rules::FAMILIES,
+    };
+    ParserProvider::new(spec, crate::angular::parse_file).with_dialect("angular", "html")
 }

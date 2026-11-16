@@ -23,7 +23,7 @@ token Lt "<" #punctuation
 token LtSlash "</" #punctuation
 token Gt ">" #punctuation #restyle #tag-end
 token SlashGt "/>" #punctuation #restyle #tag-end
-token Equals "=" #punctuation
+token Equals "=" #punctuation #ng-part
 // Vue's `{{ expression }}`.
 token LBraceBrace "{{" #punctuation
 token RBraceBrace "}}" #punctuation
@@ -41,6 +41,17 @@ token Entity #chunk
 token CData #chunk
 // The content of `script`, `style`, `textarea` and `title`: not parsed as markup.
 token RawText #chunk #restyle
+
+// Angular: control flow blocks (`@if (a) {` ... `}`), `@let` and ICU messages. `AtName` is `@if`, `@else if`,
+// `@let`; `NgCode` a block parameter, a variable name or value, an ICU expression, type or case value.
+token LBrace "{" #punctuation #ng-part
+token RBrace "}" #punctuation
+token LParen "(" #punctuation #ng-part
+token RParen ")" #punctuation #ng-part
+token Semi ";" #punctuation #ng-part
+token Comma "," #punctuation #ng-part
+token AtName #restyle
+token NgCode #restyle #ng-part
 
 token Eof
 token Unknown #error
@@ -65,3 +76,11 @@ node EndTag #transparent = LtSlash TagName Gt
 // An end tag that closes no open element.
 node StrayEndTag #content = LtSlash TagName Gt
 node Attribute #key-value = key:AttrName Equals? value:AttrValue?
+
+// `@if (a) {` up to the `{`, and the block with its content and `}`.
+node BlockHead = AtName parts:#ng-part*
+node NgBlock #content = head:BlockHead items:#content* RBrace?
+node NgLet #content = AtName parts:#ng-part*
+// `{count, plural, =0 {none} other {many}}`.
+node Icu #content = LBrace parts:#ng-part* cases:IcuCase* RBrace
+node IcuCase = NgCode LBrace items:#content* RBrace

@@ -22,6 +22,15 @@ pub enum T {
     Block,
     /// The tag (`value`) of a block's branch and the content up to the next tag.
     Branch,
+    /// Angular's `@name (params) { ... }`: `name`, `params`, the content as kids; `tag_end` is the end
+    /// of the head, `close_start` the `}`.
+    NgBlock,
+    /// Angular's `@let name = value;`: `name`, `value`.
+    Let,
+    /// Angular's ICU message `{value, name, cases}`: `value`, `name`, the cases as kids.
+    Icu,
+    /// A case of an ICU message: `value` and the content as kids.
+    IcuCase,
 }
 
 /// The markup language: Vue and Svelte are HTML plus template syntax.
@@ -30,6 +39,7 @@ pub enum Dialect {
     Html,
     Vue,
     Svelte,
+    Angular,
 }
 
 pub struct Attr<'s> {
@@ -51,6 +61,8 @@ pub struct N<'s> {
     pub tag_end: usize,
     pub close_start: Option<usize>,
     pub attrs: Vec<Attr<'s>>,
+    /// An Angular block's parameters, as written and trimmed.
+    pub params: Vec<&'s str>,
     pub kids: Vec<usize>,
     pub parent: usize,
     pub prev: Option<usize>,
@@ -80,6 +92,7 @@ impl N<'_> {
             tag_end: end,
             close_start: None,
             attrs: Vec::new(),
+            params: Vec::new(),
             kids: Vec::new(),
             parent: 0,
             prev: None,
@@ -395,6 +408,91 @@ impl<'s> Builder<'_, 's> {
         id
     }
 
+    /// The tokens of `node` that are children of it.
+    fn tokens_of(node: &SyntaxNode) -> impl Iterator<Item = SyntaxToken> {
+        node.children_with_tokens().filter_map(|e| e.into_token())
+    }
+
+    /// An Angular block: `@name (parameters) {`, the content, `}`.
+    fn ng_block(&mut self, node: &SyntaxNode, parent: usize) -> usize {
+        let (start, end) = sig(self.g, node);
+        let mut n = N::new(T::NgBlock, start, end);
+        n.display = "block";
+        n.parent = parent;
+        let head = node
+            .children()
+            .find(|c| c.kind() == k::BLOCK_HEAD)
+            .expect("a block has a head");
+        let mut has_body = false;
+        for t in Self::tokens_of(&head) {
+            match t.kind() {
+                k::AT_NAME => n.name = Cow::Borrowed(self.slice(&t)),
+                k::NG_CODE => n.params.push(self.slice(&t).trim_end_matches(';')),
+                k::L_BRACE => has_body = true,
+                _ => {}
+            }
+        }
+        // `@default never;` has no body.
+        n.self_closing = !has_body;
+        n.tag_end = sig(self.g, &head).1;
+        n.close_start = Self::tokens_of(node)
+            .find(|t| t.kind() == k::R_BRACE)
+            .map(|t| usize::from(t.text_range().start()));
+        let region = (n.tag_end, n.close_start.unwrap_or(end).max(n.tag_end));
+        let id = self.push(n);
+        let content = node.children().filter(|c| c.kind() != k::BLOCK_HEAD);
+        self.children(id, content.collect(), region);
+        id
+    }
+
+    /// `@let name = value;`.
+    fn ng_let(&mut self, node: &SyntaxNode, parent: usize) -> usize {
+        let (start, end) = sig(self.g, node);
+        let mut n = N::new(T::Let, start, end);
+        n.display = "block";
+        n.parent = parent;
+        let mut code = Self::tokens_of(node).filter(|t| t.kind() == k::NG_CODE);
+        n.name = Cow::Borrowed(code.next().map_or("", |t| self.slice(&t)));
+        n.value = Cow::Borrowed(code.next().map_or("", |t| self.slice(&t)));
+        self.push(n)
+    }
+
+    /// `{value, name, cases}`.
+    fn icu(&mut self, node: &SyntaxNode, parent: usize) -> usize {
+        let (start, end) = sig(self.g, node);
+        let mut n = N::new(T::Icu, start, end);
+        n.parent = parent;
+        let mut code = Self::tokens_of(node).filter(|t| t.kind() == k::NG_CODE);
+        n.value = Cow::Borrowed(code.next().map_or("", |t| self.slice(&t)));
+        n.name = Cow::Borrowed(code.next().map_or("", |t| self.slice(&t)));
+        let id = self.push(n);
+        let mut kids = Vec::new();
+        for case in node.children().filter(|c| c.kind() == k::ICU_CASE) {
+            let (s, e) = sig(self.g, &case);
+            let mut c = N::new(T::IcuCase, s, e);
+            c.parent = id;
+            c.display = "block";
+            c.value = Cow::Borrowed(
+                Self::tokens_of(&case)
+                    .find(|t| t.kind() == k::NG_CODE)
+                    .map_or("", |t| self.slice(&t)),
+            );
+            let open = Self::tokens_of(&case).find(|t| t.kind() == k::L_BRACE);
+            let close = Self::tokens_of(&case).find(|t| t.kind() == k::R_BRACE);
+            let region = (
+                open.map_or(s, |t| usize::from(t.text_range().end())),
+                close.map_or(e, |t| usize::from(t.text_range().start())),
+            );
+            c.tag_end = region.0;
+            c.close_start = Some(region.1);
+            let cid = self.push(c);
+            self.children(cid, case.children().collect(), region);
+            kids.push(cid);
+        }
+        self.d.n[id].kids = kids;
+        id
+    }
+
     fn display(&mut self, id: usize, prev_comment: Option<&str>) {
         let n = &self.d.n[id];
         let d = if let Some(d) = prev_comment.and_then(comment_display) {
@@ -430,7 +528,10 @@ impl<'s> Builder<'_, 's> {
                 | k::STRAY_END_TAG
                 | k::INTERPOLATION
                 | k::MUSTACHE
-                | k::BLOCK => {
+                | k::BLOCK
+                | k::NG_BLOCK
+                | k::NG_LET
+                | k::ICU => {
                     let (s, e) = sig(self.g, &c);
                     if c.kind() == k::CHUNK && self.d.src[s..e].trim_matches(is_ws).is_empty() {
                         continue;
@@ -508,6 +609,9 @@ impl<'s> Builder<'_, 's> {
                     self.push(n)
                 }
                 k::BLOCK => self.block(it.node.as_ref().expect("block"), parent, it.start, it.end),
+                k::NG_BLOCK => self.ng_block(it.node.as_ref().expect("block"), parent),
+                k::NG_LET => self.ng_let(it.node.as_ref().expect("let"), parent),
+                k::ICU => self.icu(it.node.as_ref().expect("icu"), parent),
                 k::MUSTACHE => {
                     let mut n = N::new(T::Mustache, it.start, it.end);
                     let inner = &self.d.src[it.start..it.end];

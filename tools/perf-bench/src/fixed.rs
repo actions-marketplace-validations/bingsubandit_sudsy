@@ -146,15 +146,14 @@ pub(crate) fn make_provider(lang: &str) -> Result<Box<dyn LanguageProvider>> {
         WORKFLOWS => [".github/workflows/bench.yml".to_string(), String::new()],
         _ => [format!("bench.{lang}"), format!(".{lang}")],
     };
-    languages::providers()
-        .into_iter()
-        .find(|p| {
-            let matchers = p.file_matchers();
-            samples
-                .iter()
-                .any(|s| matchers.iter().any(|m| m.matches(s.as_ref())))
-        })
-        .ok_or_else(|| anyhow!("no language claims .{lang} files"))
+    let mut providers = languages::providers();
+    // As production: the most specific matcher wins (`component.html` is Angular's, not HTML's).
+    let index = samples
+        .iter()
+        .find_map(|s| provider_api::select_provider_index(&providers, Path::new(s)))
+        .map(|(i, _)| i)
+        .ok_or_else(|| anyhow!("no language claims .{lang} files"))?;
+    Ok(providers.swap_remove(index))
 }
 
 /// Process start-up as the CLI pays it, one tiny JSON file: `providers` builds them all,

@@ -217,6 +217,9 @@ impl P<'_> {
 impl P<'_> {
     /// The language of the expressions of a Vue file: TypeScript when its script is.
     fn expression_language(&self) -> &'static str {
+        if self.o.dialect == Dialect::Angular {
+            return "ts";
+        }
         let ts = self.t.n[0].kids.iter().any(|&c| {
             let n = self.n(c);
             n.name == "script" && matches!(attr(n, "lang"), Some("ts" | "tsx"))
@@ -232,15 +235,19 @@ impl P<'_> {
             .o
             .width
             .saturating_sub((self.depth(id) + 1) * self.o.tab);
-        let out = self.o.embed.and_then(|e| {
-            e(
-                self.expression_language(),
-                EmbedMode::Expression,
-                code,
-                width,
-                false,
-            )
-        });
+        let out = if self.o.dialect == Dialect::Angular {
+            self.ng_expression(code, width, false, false)
+        } else {
+            self.o.embed.and_then(|e| {
+                e(
+                    self.expression_language(),
+                    EmbedMode::Expression,
+                    code,
+                    width,
+                    false,
+                )
+            })
+        };
         // An expression that is not formatted keeps its lines, with the indentation they share
         // removed so that formatting again does not indent them further.
         let kept = || match code.split_once('\n') {
@@ -293,7 +300,7 @@ impl P<'_> {
     /// `open` the formatted expression `close`: a string or template literal stays on the line, an
     /// object, array or function hugs the delimiters, anything else goes on lines of its own when
     /// it does not fit. `run` formats for a width and says whether the result is statements.
-    fn attr_expression(
+    pub(super) fn attr_expression(
         &self,
         id: usize,
         open: &str,

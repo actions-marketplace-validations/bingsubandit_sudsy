@@ -28,6 +28,10 @@ pub static SVELTE_FORMATTER: MarkupFormatter = MarkupFormatter {
     dialect: Dialect::Svelte,
 };
 
+pub static ANGULAR_FORMATTER: MarkupFormatter = MarkupFormatter {
+    dialect: Dialect::Angular,
+};
+
 pub static VUE_FORMATTER: MarkupFormatter = MarkupFormatter {
     dialect: Dialect::Vue,
 };
@@ -67,7 +71,10 @@ fn embedded_attribute(value: &core_syntax::SyntaxToken) -> bool {
         let n = n.text().to_ascii_lowercase();
         matches!(n.as_str(), "style" | "srcset" | "allow")
             || (n.len() > 2 && n.starts_with("on"))
-            || n.starts_with([':', '@', '#', '.'])
+            || n.starts_with([':', '@', '#', '.', '[', '(', '*'])
+            || n.starts_with("bind-")
+            || n.starts_with("on-")
+            || n.starts_with("i18n")
             || n.starts_with("v-")
             || n == "slot-scope"
     })
@@ -121,7 +128,11 @@ impl NodeFormatter for MarkupFormatter {
             k::TAG_NAME | k::DOCTYPE_KW => Cow::Owned(text.to_ascii_lowercase()),
             // Code the formatter may rewrite is checked by its own language's formatter.
             k::ATTR_VALUE if embedded_attribute(t) => Cow::Borrowed(""),
-            k::MUSTACHE_TEXT | k::BLOCK_TAG_TEXT => Cow::Borrowed(""),
+            k::ATTR_VALUE if self.dialect == Dialect::Angular && text.contains("{{") => {
+                Cow::Borrowed("")
+            }
+            k::MUSTACHE_TEXT | k::BLOCK_TAG_TEXT | k::NG_CODE => Cow::Borrowed(""),
+            k::AT_NAME => Cow::Owned(norm(text)),
             k::TEXT | k::RAW_TEXT
                 if in_front_matter(t)
                     || in_script_or_style(t)

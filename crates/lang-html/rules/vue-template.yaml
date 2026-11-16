@@ -9,7 +9,7 @@ category: suspicious
 ---
 id: no-textarea-mustache
 family: template
-params: { check: textarea-mustache }
+params: { check: textarea-mustache, only: vue }
 message: "`{{ }}` in a `<textarea>` is not interpolated: bind the text with `v-model`"
 description: "Vue's `no-textarea-mustache` (eslint-plugin-vue)."
 example: "<textarea>{{ text }}</textarea>   <textarea v-model=\"text\"></textarea>"

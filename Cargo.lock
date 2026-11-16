@@ -1759,6 +1759,7 @@ dependencies = [
  "core-rules",
  "core-syntax",
  "core-treesitter",
+ "oxc-htmlish-parser",
  "provider-api",
  "rowan",
  "tree-sitter-html",
@@ -2304,6 +2305,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16a756ddcdeb6c0efc8927bdf0ed112885815a35ba350472a467be5104f01ca1"
 dependencies = [
  "indexmap",
+]
+
+[[package]]
+name = "oxc-htmlish-parser"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baa5deb88dc699ca84aa7e100296adc2246fbc4303350242f0d3c70ffe2badb1"
+dependencies = [
+ "memchr",
+ "oxc_allocator",
 ]
 
 [[package]]

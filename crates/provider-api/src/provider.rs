@@ -133,7 +133,7 @@ pub trait LanguageProvider: Send + Sync {
 pub enum FilePattern {
     /// Extension without the dot, e.g. `cs`.
     Extension(String),
-    /// Exact file name, e.g. `tsconfig.json`; a trailing `*` makes it a prefix (`Dockerfile.*`); with a `/` it is a path suffix (`.git/info/exclude`).
+    /// Exact file name, e.g. `tsconfig.json`; a trailing `*` makes it a prefix (`Dockerfile.*`), a leading one a suffix (`*.component.html`); with a `/` it is a path suffix (`.git/info/exclude`).
     FileName(String),
     /// Files with this extension directly inside a directory of this name, e.g. `.vscode/*.json`.
     InDirectory { dir: String, extension: String },
@@ -162,7 +162,10 @@ impl FileMatcher {
             FilePattern::FileName(n) => {
                 path.file_name().is_some_and(|x| match n.strip_suffix('*') {
                     Some(prefix) => x.to_string_lossy().starts_with(prefix),
-                    None => x == n.as_str(),
+                    None => match n.strip_prefix('*') {
+                        Some(suffix) => x.to_string_lossy().ends_with(suffix),
+                        None => x == n.as_str(),
+                    },
                 })
             }
             FilePattern::InDirectory { dir, extension } => {

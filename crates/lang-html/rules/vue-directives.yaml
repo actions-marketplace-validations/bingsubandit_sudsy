@@ -63,7 +63,7 @@ category: correctness
 ---
 id: valid-v-slot
 family: template
-params: { name: v-slot, modifiers: none, bad-host: html }
+params: { name: v-slot, modifiers: none, bad-host: html, only: vue }
 message: "`v-slot` takes no modifier and goes on a `<template>` or a component"
 description: "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot."
 example: "<div #item>   <template #item>"

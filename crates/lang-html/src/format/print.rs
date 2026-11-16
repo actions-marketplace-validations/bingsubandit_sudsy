@@ -6,6 +6,7 @@ use core_format::EmbedMode;
 use core_format::context::verbatim_text;
 use core_format::doc::{self, Doc, GroupId};
 
+mod angular;
 mod embed;
 
 /// Formats code of another language: language, mode, code, width, single quotes (see
@@ -125,7 +126,11 @@ impl P<'_> {
     /// Does the last descendant of `id` count as text? (An interpolation's content does.)
     fn ends_in_text(&self, id: usize) -> bool {
         let last = self.last_descendant(id);
-        self.text_like(last) || matches!(self.n(last).t, T::Interp | T::Mustache)
+        self.text_like(last)
+            || matches!(
+                self.n(last).t,
+                T::Interp | T::Mustache | T::Icu | T::IcuCase
+            )
     }
 
     fn last_descendant(&self, id: usize) -> usize {
@@ -202,7 +207,7 @@ impl P<'_> {
             }
             .into(),
             T::Interp => "{{".into(),
-            T::Mustache => "{".into(),
+            T::Mustache | T::Icu => "{".into(),
             _ => format!("<{}", n.name),
         }
     }
@@ -221,7 +226,7 @@ impl P<'_> {
     fn close_end_marker(&self, id: usize) -> &'static str {
         if self.n(id).t == T::Interp {
             "}}"
-        } else if self.n(id).t == T::Mustache {
+        } else if matches!(self.n(id).t, T::Mustache | T::Icu) {
             "}"
         } else if self.should_not_print_closing(id) {
             ""
@@ -518,7 +523,10 @@ impl P<'_> {
             T::Front => self.front_matter(id),
             T::Mustache => self.mustache(id),
             T::Block => self.block_doc(id),
-            T::Branch => doc::nil(),
+            T::NgBlock => self.ng_block_doc(id),
+            T::Let => self.ng_let_doc(id),
+            T::Icu => self.icu_doc(id),
+            T::Branch | T::IcuCase => doc::nil(),
             T::Root => doc::nil(),
         }
     }
@@ -652,6 +660,11 @@ impl P<'_> {
             return self
                 .braced_attribute(id, name, v)
                 .unwrap_or_else(|| doc::concat(vec![s(format!("{name}=")), verbatim_text(v)]));
+        }
+        if self.o.dialect == Dialect::Angular
+            && let Some(d) = self.angular_attribute(id, name, v)
+        {
+            return d;
         }
         if let Some(d) = self.embedded_attribute(id, name, v) {
             return d;

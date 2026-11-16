@@ -396,9 +396,9 @@ fn load(root: &Path) -> Result<Workspace> {
             "github-actions" => [workflow, String::new()],
             _ => [format!("bench.{folder}"), format!(".{folder}")],
         };
-        if let Some(p) = providers.iter().find(|p| {
-            (samples.iter()).any(|s| p.file_matchers().iter().any(|m| m.matches(s.as_ref())))
-        }) {
+        let claimed = (samples.iter())
+            .find_map(|s| provider_api::select_provider_index(&providers, Path::new(s)));
+        if let Some(p) = claimed.map(|(i, _)| &providers[i]) {
             let mut crates = vec![p.crate_name()];
             crates.extend(embedded_crates(
                 &providers,

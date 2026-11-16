@@ -1,6 +1,7 @@
 //! HTML: tree-sitter parses (through `core-treesitter`, mapping in `lang.yaml`); the formatter
 //! prints the file as written.
 
+mod angular;
 mod checks;
 mod dialect;
 mod document;
@@ -12,7 +13,7 @@ mod patterns;
 mod rules;
 mod template;
 
-pub use dialect::{svelte_provider, vue_provider};
+pub use dialect::{angular_provider, svelte_provider, vue_provider};
 pub use format::{HtmlFormatter, option_schema};
 
 include!("provider.generated.rs");

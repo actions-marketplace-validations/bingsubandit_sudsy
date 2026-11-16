@@ -30,7 +30,7 @@ fix-kind: safe
 ---
 id: attribute-hyphenation
 family: template
-params: { check: hyphenation }
+params: { check: hyphenation, only: vue }
 message: "write the prop of a component in kebab-case (`my-prop`, not `myProp`)"
 description: "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
 example: "<MyCard :cardTitle=\"t\">   <MyCard :card-title=\"t\">"

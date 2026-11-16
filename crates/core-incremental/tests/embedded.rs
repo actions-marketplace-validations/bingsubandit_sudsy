@@ -226,6 +226,26 @@ fn vue_templates_scripts_and_custom_blocks_are_formatted_by_their_language() {
 }
 
 #[test]
+fn angular_expressions_are_formatted_with_pipes_and_microsyntax() {
+    let providers: Vec<Box<dyn LanguageProvider>> = vec![
+        Box::new(lang_html::angular_provider()),
+        Box::new(lang_js::provider()),
+    ];
+    let db = Database::new(providers);
+    let src = "<div *ngFor=\"let h of hs;trackBy:tb\" [a]=\"x|async\" (c)=\"d( 1 );e=2\">{{n|date:'s'}}</div>\n";
+    let once = formatted(&db, "a.component.html", src);
+    for want in [
+        "*ngFor=\"let h of hs; trackBy: tb\"",
+        "[a]=\"x | async\"",
+        "(c)=\"d(1); e = 2\"",
+        "{{ n | date: \"s\" }}",
+    ] {
+        assert!(once.contains(want), "{want}: {once}");
+    }
+    assert_eq!(formatted(&db, "a.component.html", &once), once);
+}
+
+#[test]
 fn html_fences_are_formatted_and_linted() {
     let md = "```html\n<DIV><p>a</p></DIV>\n```\n";
     assert_eq!(
