@@ -3,6 +3,8 @@
 //! are split off and each part is formatted by the TypeScript formatter; a pipe in parentheses
 //! (`(a | async)?.b`) stands as an identifier while its surroundings are formatted.
 
+use crate::ng_checks::{code_bytes, lone_pipe};
+
 /// Words TypeScript reserves that Angular's expression language takes as names.
 const RESERVED: &[&str] = &[
     "await", "break", "case", "catch", "class", "const", "continue", "debugger", "default",
@@ -12,37 +14,6 @@ const RESERVED: &[&str] = &[
 
 fn is_ident(c: u8) -> bool {
     c.is_ascii_alphanumeric() || c == b'_' || c == b'$'
-}
-
-/// The text outside strings and template literals: `f(code, index)` for each byte that is, with
-/// the index of the byte; strings are skipped.
-fn code_bytes(code: &str) -> impl Iterator<Item = (usize, u8)> + '_ {
-    let b = code.as_bytes();
-    let (mut quote, mut i) = (0u8, 0usize);
-    std::iter::from_fn(move || {
-        while i < b.len() {
-            let (at, c) = (i, b[i]);
-            i += 1;
-            if quote != 0 {
-                if c == b'\\' {
-                    i += 1;
-                } else if c == quote {
-                    quote = 0;
-                }
-                continue;
-            }
-            if matches!(c, b'\'' | b'"' | b'`') {
-                quote = c;
-                continue;
-            }
-            return Some((at, c));
-        }
-        None
-    })
-}
-
-fn lone_pipe(b: &[u8], i: usize) -> bool {
-    b[i] == b'|' && b.get(i + 1) != Some(&b'|') && (i == 0 || b[i - 1] != b'|')
 }
 
 /// The statements of an event handler: split at the `;` outside brackets and strings.

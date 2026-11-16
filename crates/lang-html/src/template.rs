@@ -1,11 +1,11 @@
-//! The `template` family: checks of Vue and Svelte template syntax on attributes, tags and
+//! The `template` family: checks of Vue, Svelte and Angular template syntax on attributes, tags and
 //! mustaches. They are Rust
 //! rather than pattern files because a pattern rule compiles a regex that costs more than all
 //! of these rules together (the lint bench of `.vue` and `.svelte` inputs).
 //!
-//! Param `check` (default `directive`; the others are named in [`Kind`]) and, for every check,
-//! `only` (`vue` or `svelte`: the rule runs on files of that extension only; in HTML, `slot`, `is`
-//! and `<template>` are standard). `directive` reads the attributes called `name` (`v-if`, `v-bind`, ...; `:x`, `@x`
+//! Param `check` (default `directive`; the others are named in `build`) and, for every check,
+//! `only` (`vue`, `svelte` or `component.html`: the rule runs on files with that extension or
+//! file-name suffix only; in HTML, `slot`, `is` and `<template>` are standard). `directive` reads the attributes called `name` (`v-if`, `v-bind`, ...; `:x`, `@x`
 //! and `#x` are `v-bind`, `v-on` and `v-slot`, a plain attribute is `slot`) and reports one
 //! when any of its conditions holds:
 //! - `value`: `required`, `forbidden`, `unless-arg` / `unless-modifier` (required when there is
@@ -32,30 +32,6 @@ pub const FAMILY: Family = Family {
     name: "template",
     build,
 };
-
-#[derive(Clone, Copy)]
-enum Kind {
-    Directive,
-    Shorthand,
-    Hyphenation,
-    KeyOnChild,
-    ChildContent,
-    LoneTemplate,
-    TextareaMustache,
-    ComponentIs,
-    Duplicate,
-    RawSpecial,
-    ChildrenSnippet,
-    UselessMustache,
-    SvelteShorthand,
-    SpacedComment,
-    TargetBlank,
-    NestedStyle,
-    BananaInBox,
-    LooseEquality,
-    NegatedAsync,
-    ForTrack,
-}
 
 #[derive(Clone, Copy, PartialEq)]
 enum Value {
@@ -203,63 +179,53 @@ impl Directive {
     }
 }
 
+/// Reads the params of one `check`.
+type Make = fn(&mut Params) -> Result<Check, String>;
+
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
-    let kind = p.choice(
+    let make = p.choice::<Make>(
         "check",
         false,
         &[
-            ("directive", Kind::Directive),
-            ("shorthand", Kind::Shorthand),
-            ("hyphenation", Kind::Hyphenation),
-            ("key-on-child", Kind::KeyOnChild),
-            ("child-content", Kind::ChildContent),
-            ("lone-template", Kind::LoneTemplate),
-            ("textarea-mustache", Kind::TextareaMustache),
-            ("component-is", Kind::ComponentIs),
-            ("duplicate", Kind::Duplicate),
-            ("raw-special", Kind::RawSpecial),
-            ("children-snippet", Kind::ChildrenSnippet),
-            ("useless-mustache", Kind::UselessMustache),
-            ("svelte-shorthand", Kind::SvelteShorthand),
-            ("spaced-comment", Kind::SpacedComment),
-            ("target-blank", Kind::TargetBlank),
-            ("nested-style", Kind::NestedStyle),
-            ("banana-in-box", Kind::BananaInBox),
-            ("loose-equality", Kind::LooseEquality),
-            ("negated-async", Kind::NegatedAsync),
-            ("for-track", Kind::ForTrack),
+            ("directive", |p| {
+                Ok(Check::Directive(Box::new(Directive::build(p)?)))
+            }),
+            ("shorthand", |p| {
+                Ok(Check::Shorthand {
+                    from: p.text("from")?,
+                    to: p.text("to")?,
+                })
+            }),
+            ("hyphenation", |_| Ok(Check::Hyphenation)),
+            ("key-on-child", |_| Ok(Check::KeyOnChild)),
+            ("child-content", |_| Ok(Check::ChildContent)),
+            ("lone-template", |_| Ok(Check::LoneTemplate)),
+            ("textarea-mustache", |_| Ok(Check::TextareaMustache)),
+            ("component-is", |_| Ok(Check::ComponentIs)),
+            ("duplicate", |p| {
+                Ok(Check::Duplicate {
+                    prefix: p.text("prefix")?,
+                    strip: p.flag("strip-modifiers")?,
+                })
+            }),
+            ("raw-special", |_| Ok(Check::RawSpecial)),
+            ("children-snippet", |_| Ok(Check::ChildrenSnippet)),
+            ("useless-mustache", |_| Ok(Check::UselessMustache)),
+            ("svelte-shorthand", |p| {
+                Ok(Check::SvelteShorthand {
+                    directives: list(p.optional("directives")),
+                })
+            }),
+            ("spaced-comment", |_| Ok(Check::SpacedComment)),
+            ("target-blank", |_| Ok(Check::TargetBlank)),
+            ("nested-style", |_| Ok(Check::NestedStyle)),
+            ("banana-in-box", |_| Ok(Check::BananaInBox)),
+            ("loose-equality", |_| Ok(Check::LooseEquality)),
+            ("negated-async", |_| Ok(Check::NegatedAsync)),
+            ("for-track", |_| Ok(Check::ForTrack)),
         ],
     )?;
-    let check = match kind {
-        Kind::Directive => Check::Directive(Box::new(Directive::build(&mut p)?)),
-        Kind::Shorthand => Check::Shorthand {
-            from: p.text("from")?,
-            to: p.text("to")?,
-        },
-        Kind::Hyphenation => Check::Hyphenation,
-        Kind::KeyOnChild => Check::KeyOnChild,
-        Kind::ChildContent => Check::ChildContent,
-        Kind::LoneTemplate => Check::LoneTemplate,
-        Kind::TextareaMustache => Check::TextareaMustache,
-        Kind::ComponentIs => Check::ComponentIs,
-        Kind::Duplicate => Check::Duplicate {
-            prefix: p.text("prefix")?,
-            strip: p.flag("strip-modifiers")?,
-        },
-        Kind::RawSpecial => Check::RawSpecial,
-        Kind::ChildrenSnippet => Check::ChildrenSnippet,
-        Kind::UselessMustache => Check::UselessMustache,
-        Kind::SvelteShorthand => Check::SvelteShorthand {
-            directives: list(p.optional("directives")),
-        },
-        Kind::SpacedComment => Check::SpacedComment,
-        Kind::TargetBlank => Check::TargetBlank,
-        Kind::NestedStyle => Check::NestedStyle,
-        Kind::BananaInBox => Check::BananaInBox,
-        Kind::LooseEquality => Check::LooseEquality,
-        Kind::NegatedAsync => Check::NegatedAsync,
-        Kind::ForTrack => Check::ForTrack,
-    };
+    let check = make(&mut p)?;
     let rule = Template {
         meta,
         check,

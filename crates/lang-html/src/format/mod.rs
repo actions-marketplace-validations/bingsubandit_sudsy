@@ -24,6 +24,10 @@ pub struct MarkupFormatter {
     pub dialect: Dialect,
 }
 
+const HTML: MarkupFormatter = MarkupFormatter {
+    dialect: Dialect::Html,
+};
+
 pub static SVELTE_FORMATTER: MarkupFormatter = MarkupFormatter {
     dialect: Dialect::Svelte,
 };
@@ -38,10 +42,7 @@ pub static VUE_FORMATTER: MarkupFormatter = MarkupFormatter {
 
 impl NodeFormatter for HtmlFormatter {
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
-        MarkupFormatter {
-            dialect: Dialect::Html,
-        }
-        .value(item)
+        HTML.value(item)
     }
 
     fn format_node(
@@ -49,10 +50,7 @@ impl NodeFormatter for HtmlFormatter {
         node: &SyntaxNode,
         cx: &FormatCtx<'_>,
     ) -> Result<Option<Doc>, FormatError> {
-        MarkupFormatter {
-            dialect: Dialect::Html,
-        }
-        .format_node(node, cx)
+        HTML.format_node(node, cx)
     }
 }
 
@@ -71,10 +69,8 @@ fn embedded_attribute(value: &core_syntax::SyntaxToken) -> bool {
         let n = n.text().to_ascii_lowercase();
         matches!(n.as_str(), "style" | "srcset" | "allow")
             || (n.len() > 2 && n.starts_with("on"))
-            || n.starts_with([':', '@', '#', '.', '[', '(', '*'])
-            || n.starts_with("bind-")
-            || n.starts_with("bindon-")
-            || n.starts_with("on-")
+            || n.starts_with([':', '@', '#', '.'])
+            || crate::ng_checks::is_binding(&n)
             || n.starts_with("i18n")
             || n.starts_with("v-")
             || n == "slot-scope"

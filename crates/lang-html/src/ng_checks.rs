@@ -1,38 +1,46 @@
 //! Text checks of Angular template expressions for the `template` family (`template.rs`): they read
 //! the code of a binding, an interpolation or a block head as text, skipping string literals.
 
-/// The code of `text` outside string literals, as `(byte index, char)`.
-fn code(text: &str) -> impl Iterator<Item = (usize, char)> + '_ {
-    let mut quote = None::<char>;
-    let mut escaped = false;
-    text.char_indices().filter(move |&(_, c)| {
-        if let Some(q) = quote {
-            if escaped {
-                escaped = false;
-            } else if c == '\\' {
-                escaped = true;
-            } else if c == q {
-                quote = None;
+/// The bytes of `code` outside string literals and template literals, with their indexes.
+pub(crate) fn code_bytes(code: &str) -> impl Iterator<Item = (usize, u8)> + '_ {
+    let b = code.as_bytes();
+    let (mut quote, mut i) = (0u8, 0usize);
+    std::iter::from_fn(move || {
+        while i < b.len() {
+            let (at, c) = (i, b[i]);
+            i += 1;
+            if quote != 0 {
+                if c == b'\\' {
+                    i += 1;
+                } else if c == quote {
+                    quote = 0;
+                }
+                continue;
             }
-            false
-        } else if matches!(c, '"' | '\'' | '`') {
-            quote = Some(c);
-            false
-        } else {
-            true
+            if matches!(c, b'\'' | b'"' | b'`') {
+                quote = c;
+                continue;
+            }
+            return Some((at, c));
         }
+        None
     })
+}
+
+/// Is `b[i]` a pipe (`|`), not half of `||`?
+pub(crate) fn lone_pipe(b: &[u8], i: usize) -> bool {
+    b[i] == b'|' && b.get(i + 1) != Some(&b'|') && (i == 0 || b[i - 1] != b'|')
 }
 
 /// The byte offsets of the `==` and `!=` operators (not `===`, `!==`).
 pub(crate) fn loose_equality(text: &str) -> Vec<usize> {
     let b = text.as_bytes();
-    code(text)
+    code_bytes(text)
         .filter(|&(i, c)| {
-            matches!(c, '=' | '!')
+            matches!(c, b'=' | b'!')
                 && b.get(i + 1) == Some(&b'=')
                 && b.get(i + 2) != Some(&b'=')
-                && !(c == '=' && i > 0 && matches!(b[i - 1], b'=' | b'!' | b'<' | b'>'))
+                && !(c == b'=' && i > 0 && matches!(b[i - 1], b'=' | b'!' | b'<' | b'>'))
         })
         .map(|(i, _)| i)
         .collect()
@@ -41,10 +49,9 @@ pub(crate) fn loose_equality(text: &str) -> Vec<usize> {
 /// Is there a pipe to `async` (not `||`) among the code of `text`?
 fn has_async_pipe(text: &str) -> bool {
     let b = text.as_bytes();
-    code(text).any(|(i, c)| {
-        c == '|'
-            && b.get(i + 1) != Some(&b'|')
-            && (i == 0 || b[i - 1] != b'|')
+    code_bytes(text).any(|(i, c)| {
+        c == b'|'
+            && lone_pipe(b, i)
             && text[i + 1..]
                 .trim_start()
                 .strip_prefix("async")
@@ -56,10 +63,10 @@ fn has_async_pipe(text: &str) -> bool {
 pub(crate) fn negated_async(text: &str) -> Vec<usize> {
     let mut out = Vec::new();
     let mut depth = Vec::<usize>::new();
-    for (i, c) in code(text) {
+    for (i, c) in code_bytes(text) {
         match c {
-            '(' => depth.push(i),
-            ')' => {
+            b'(' => depth.push(i),
+            b')' => {
                 let Some(open) = depth.pop() else { continue };
                 if !has_async_pipe(&text[open + 1..i]) {
                     continue;
