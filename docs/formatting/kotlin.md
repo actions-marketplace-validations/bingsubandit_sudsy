@@ -27,7 +27,16 @@ Failure modes of the parser itself: it follows the compiler of Kotlin 2.4.20 and
 <!-- /generated -->
 
 ## Formatting
-Verbatim for now: every file prints as written.
+Layout is our own code over the lossless tree (`crates/lang-kotlin/src/format/`): tokens are never changed, added or removed (so no trailing commas, import sorting or wrapping), and the layout follows ktlint's `ktlint_official` style where it is a matter of whitespace:
+- spacing between tokens (`space.rs`): after commas, around binary operators, `->`, `=`, colons by role, braces, keywords before `(`, none inside brackets or around `.`, `?.`, `::`, `!!`, ranges; tokens without a rule keep a blank as written, collapsed to one;
+- line breaks are kept as written, blank lines collapse to one, and `blank.rs` sets the blank lines ktlint wants: before declarations of a file, class body or block (not between consecutive properties or type aliases), after the package, the imports and the file annotations, none after an annotation or after the `{` of a body or block, none before `}`;
+- indentation (`indent.rs`) is relative to the anchor line of the enclosing construct (class header, call chain, argument or parameter list, `when`, lambda), one unit per level; continuation lines of a header, expression or chain hang one unit; text inside strings is never touched; KDoc and block comments are aligned under their opening `/*`;
+- the output ends with one line break.
+
+Not done (ktlint does them, they change tokens or wrap lines): the wrapping rules (function signatures, argument and parameter lists, class signatures, chains, long expressions), trailing commas, import ordering and wildcard handling, `string-template-indent`, and the rules that rewrite code. They are gaps against `scripts/parity.sh format ktlint`.
+
+## Parity
+`scripts/parity.sh format ktlint` (ktlint 1.8.0, `ktlint_official`, see [../development/parity.md](../development/parity.md)) over the 5,776 corpus files it can parse: the ratchet counts the files that match byte for byte (about a quarter: most of the corpus is not ktlint-formatted, and ktlint wraps and rewrites more than the layout above); a second format changes no file and the safety check refuses none. Against ktlint restricted to its whitespace, blank-line and indentation rules the match is 95%.
 
 ## Conformance
 `bash tests/conformance/fetch-kotlin-corpus.sh`, then `cargo test --profile corpus -p lang-kotlin --test integration -- --ignored --nocapture conformance`: kotlinx.coroutines, ktor, nowinandroid, ktlint and the Kotlin standard library, `.kt` and `.kts` (6,632 files, 20 s in the `corpus` profile): every file parses without errors, prints back byte for byte and satisfies the trivia rule; the 322 compiler PSI parser test inputs (`testData/psi`) that hold deliberate errors are reported, not required to parse. An unclosed block comment is an error.

@@ -1,0 +1,2 @@
+# The Sudsy side of the comparison with `ktlint --format` 1.8.0 (no .editorconfig: the ktlint_official code style): Sudsy's own defaults.
+extends: []

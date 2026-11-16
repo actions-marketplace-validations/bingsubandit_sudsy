@@ -1,0 +1,9 @@
+tool: "ktlint"
+version: "1.8.0 (released 2025-11-14)"
+languages: ["kotlin"]
+sources:
+  - "https://pinterest.github.io/ktlint/1.8.0/rules/standard/"
+  - "https://pinterest.github.io/ktlint/1.8.0/rules/code-styles/"
+scope: "ktlint standard rules. Formatting (`ktlint --format`, the ktlint_official code style, our own layout code) is measured by `scripts/parity.sh format ktlint`."
+entries:
+  indent: formatter

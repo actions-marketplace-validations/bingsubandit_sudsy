@@ -193,6 +193,25 @@
         {"dir": "tests/conformance/corpus/java", "suffixes": [".java"], "prefix": "corpus/", "ratchet": "real-world", "recursive": true}
       ]
     },
+    "ktlint": {
+      "catalog": "ktlint",
+      "install": {
+        "jar": "https://repo1.maven.org/maven2/com/pinterest/ktlint/ktlint-cli/{version}/ktlint-cli-{version}-all.jar",
+        "sha256": "369ad2b789f95a011f807e1fcb690ccef80bd7cd014fd139e73ae82dcc0baeab",
+        "exe": "ktlint"
+      },
+      "fetch": ["tests/conformance/fetch-kotlin-corpus.sh"],
+      "command": ["{exe}", "--format"],
+      "input": "batch",
+      "reject": "^.*/([^/:]+):\\d+:\\d+: Not a valid Kotlin file",
+      "tool_may_reject": true,
+      "parallel": true,
+      "quiet": true,
+      "fixtures": [
+        {"suffixes": [".kt", ".kts"]},
+        {"dir": "tests/conformance/corpus/kotlin", "suffixes": [".kt", ".kts"], "skip": "kotlin/compiler/", "prefix": "corpus/", "ratchet": "real-world", "recursive": true}
+      ]
+    },
     "invoke-formatter": {
       "catalog": "psscriptanalyzer",
       "install": {"psmodule": "PSScriptAnalyzer"},

@@ -1879,6 +1879,7 @@ dependencies = [
  "ktrs-parser",
  "ktrs-syntax",
  "provider-api",
+ "rowan",
 ]
 
 [[package]]

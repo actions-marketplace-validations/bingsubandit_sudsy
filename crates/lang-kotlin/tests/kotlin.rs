@@ -7,7 +7,7 @@ use core_syntax::{print, trivia};
 use lang_kotlin::generated::kind;
 use lang_kotlin::provider;
 use provider_api::format_testing::{
-    assert_file_names, assert_parses, bench_input_files, check_corpus,
+    Formatting, assert_file_names, assert_parses, bench_input_files, check_corpus,
 };
 use provider_api::{LanguageProvider, SourceFile};
 
@@ -149,5 +149,42 @@ fn conformance() {
     assert!(
         unknown.is_empty(),
         "valid files with syntax errors: {unknown:#?}"
+    );
+}
+
+/// Formats with every check of the shared helper (round trip, meaning, idempotency, comments).
+#[track_caller]
+fn fmt(input: &str) -> String {
+    core_format::testing::assert_formats(&Formatting::new(provider(), "A.kt"), input)
+}
+
+#[test]
+fn spacing_follows_ktlint() {
+    assert_eq!(
+        fmt("fun f(a:Int,b : Int):Int{return a+b}\nval x=if(a)1 else 2\n"),
+        "fun f(a: Int, b: Int): Int { return a + b }\n\nval x = if (a) 1 else 2\n"
+    );
+    assert_eq!(fmt("val s = 0 .. 5\n"), "val s = 0..5\n");
+}
+
+#[test]
+fn indentation_follows_the_nesting() {
+    assert_eq!(
+        fmt("class A {\nfun f() {\nif (a) {\nb()\n}\n}\n}\n"),
+        "class A {\n    fun f() {\n        if (a) {\n            b()\n        }\n    }\n}\n"
+    );
+    assert_eq!(
+        fmt("val x = foo(\n1,\n2\n)\nval s = \"\"\"\n  raw\n\"\"\"\n"),
+        "val x = foo(\n    1,\n    2\n)\nval s = \"\"\"\n  raw\n\"\"\"\n"
+    );
+}
+
+#[test]
+fn blank_lines_between_declarations() {
+    assert_eq!(
+        fmt(
+            "package a\nimport b.C\nclass X {\n\n    val a = 1\n    val b = 2\n    fun f() {}\n    fun g() {\n\n        x()\n\n\n    }\n}\n"
+        ),
+        "package a\n\nimport b.C\n\nclass X {\n    val a = 1\n    val b = 2\n\n    fun f() {}\n\n    fun g() {\n        x()\n    }\n}\n"
     );
 }

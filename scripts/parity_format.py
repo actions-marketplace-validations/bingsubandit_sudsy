@@ -11,6 +11,7 @@ known; the file is `differences.yaml` (docs/development/parity.md): named differ
 differ, and the `ratchet` minimums of the groups (a corpus too large for entries per file) that are only counted.
 """
 import difflib
+import hashlib
 import json
 import os
 import platform
@@ -67,6 +68,18 @@ def install(spec, catalog, version, prefix):
         if not (prefix / spec["psmodule"]).is_dir():
             prefix.mkdir(parents=True, exist_ok=True)
             run(["pwsh", "-NoProfile", "-Command", f"Save-Module {spec['psmodule']} -RequiredVersion {version} -Path '{prefix}'"], ROOT)
+    elif "jar" in spec:  # a shaded JVM tool: the pinned jar of Maven Central (checksum verified) and a launcher on the shared JRE
+        exe = executable(prefix, spec["exe"])
+        if not exe.exists():
+            prefix.mkdir(parents=True, exist_ok=True)
+            jar = prefix / f"{spec['exe']}.jar"
+            run(["curl", "-fsSL", "-o", jar, spec["jar"].format(version=version)], ROOT)
+            if hashlib.sha256(jar.read_bytes()).hexdigest() != spec["sha256"]:
+                jar.unlink()
+                sys.exit(f"parity: checksum mismatch for {spec['jar'].format(version=version)}")
+            java = run(["bash", "scripts/lib/jre.sh", prefix.parent], ROOT).stdout.decode().strip()
+            exe.write_text(f'#!/bin/sh\nexec "{java}" -jar "{jar}" "$@"\n')
+            exe.chmod(0o755)
     elif "release" in spec:
         if not executable(prefix, spec["exe"]).exists():
             prefix.mkdir(parents=True, exist_ok=True)
@@ -134,6 +147,24 @@ def upstream(config, prefix, version, copy, work):
             return None
         raise SystemExit(f"{' '.join(command)} failed:\n{r.stderr.decode()}{r.stdout.decode()}")
     return copy.read_bytes().decode("utf-8") if mode == "in-place" else r.stdout.decode("utf-8")
+
+
+def upstream_batch(config, prefix, found, work):
+    """`input: batch`: one run of the tool over copies of all fixtures (a JVM tool starts too slowly for one run
+    per file). Returns name -> the rewritten text, or None for a file the tool names in `reject` (its output)."""
+    exe = executable(prefix, config["install"]["exe"])
+    folder = work / "theirs"
+    folder.mkdir()
+    names = {}
+    for name, fixture, _ in found:
+        copy = name.replace("/", "__")
+        shutil.copy(fixture, folder / copy)
+        names[name] = copy
+    patterns = sorted({"*" + Path(copy).suffix for copy in names.values()})
+    command = [str(a).format(exe=exe, root=ROOT) for a in config["command"]] + patterns
+    r = run(command, folder, check=False)
+    rejected = set(re.findall(config["reject"], (r.stdout + r.stderr).decode("utf-8", "replace"), re.M))
+    return {n: None if c in rejected else (folder / c).read_bytes().decode("utf-8") for n, c in names.items()}
 
 
 def sudsy_format(sudsy, fixture, work, command="format"):
@@ -271,13 +302,15 @@ def main():
     found = [f for f in fixtures(config, folder) if only is None or only in f[0]]
     quiet = bool(config.get("quiet")) and only is None
 
+    batch = upstream_batch(config, prefix, found, work) if config["input"] == "batch" else None
+
     def compare(item):
         name, fixture, _ = item
         copy = work / name.replace("/", "__")
         if "copy_suffix" in config:  # the file name selects the language (Angular: `*.component.html`)
             copy = copy.with_name(copy.name.removesuffix(".html") + config["copy_suffix"])
         shutil.copy(fixture, copy)
-        theirs = upstream(config, prefix, version, copy, work)
+        theirs = batch[name] if batch is not None else upstream(config, prefix, version, copy, work)
         ours, refused = sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))
         # Sudsy's own output must be a fixed point; the files that change on a second format are counted.
         again = None if ours is None else sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))[0]

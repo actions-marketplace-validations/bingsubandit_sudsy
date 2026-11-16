@@ -15,6 +15,7 @@ core-syntax.workspace = true
 ktrs-parser.workspace = true
 ktrs-syntax.workspace = true
 provider-api.workspace = true
+rowan.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
