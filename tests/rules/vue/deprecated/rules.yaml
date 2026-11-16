@@ -1,0 +1,10 @@
+no-deprecated-v-bind-sync: warn
+no-deprecated-v-is: warn
+no-deprecated-v-on-native-modifier: warn
+no-deprecated-v-on-number-modifiers: warn
+no-deprecated-slot-attribute: warn
+no-deprecated-slot-scope-attribute: warn
+no-deprecated-scope-attribute: warn
+no-deprecated-functional-template: warn
+no-deprecated-inline-template: warn
+no-deprecated-html-element-is: warn

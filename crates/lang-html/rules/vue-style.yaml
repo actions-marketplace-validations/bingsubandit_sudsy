@@ -1,0 +1,38 @@
+id: v-bind-style
+family: template
+params: { check: shorthand, from: "v-bind:", to: ":" }
+message: "write `v-bind:` as `:`"
+description: "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form."
+example: "<a v-bind:href=\"u\">   <a :href=\"u\">"
+severity: warn
+category: style
+fix-kind: safe
+---
+id: v-on-style
+family: template
+params: { check: shorthand, from: "v-on:", to: "@" }
+message: "write `v-on:` as `@`"
+description: "Vue's `v-on-style` (eslint-plugin-vue), the shorthand form."
+example: "<b v-on:click=\"go\">   <b @click=\"go\">"
+severity: warn
+category: style
+fix-kind: safe
+---
+id: v-slot-style
+family: template
+params: { check: shorthand, from: "v-slot:", to: "#" }
+message: "write `v-slot:` as `#`"
+description: "Vue's `v-slot-style` (eslint-plugin-vue), the shorthand form."
+example: "<template v-slot:head>   <template #head>"
+severity: warn
+category: style
+fix-kind: safe
+---
+id: attribute-hyphenation
+family: template
+params: { check: hyphenation }
+message: "write the prop of a component in kebab-case (`my-prop`, not `myProp`)"
+description: "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+example: "<MyCard :cardTitle=\"t\">   <MyCard :card-title=\"t\">"
+severity: warn
+category: style

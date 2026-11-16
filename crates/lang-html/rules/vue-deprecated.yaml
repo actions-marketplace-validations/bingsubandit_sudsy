@@ -1,0 +1,89 @@
+id: no-deprecated-v-bind-sync
+family: template
+params: { name: v-bind, banned: sync }
+message: "`.sync` is gone in Vue 3: use `v-model:name`"
+description: "Vue's `no-deprecated-v-bind-sync` (eslint-plugin-vue). `:title.sync=\"t\"` is `v-model:title=\"t\"` in Vue 3."
+example: "<C :title.sync=\"t\">   <C v-model:title=\"t\">"
+severity: warn
+category: correctness
+---
+id: no-deprecated-v-is
+family: template
+params: { name: v-is }
+message: "`v-is` is gone in Vue 3: use `is=\"vue:name\"`"
+description: "Vue's `no-deprecated-v-is` (eslint-plugin-vue)."
+example: "<tr v-is=\"c\">   <tr is=\"vue:c\">"
+severity: warn
+category: correctness
+---
+id: no-deprecated-v-on-native-modifier
+family: template
+params: { name: v-on, banned: native }
+message: "`.native` is gone in Vue 3: declare the event in `emits`, or listen on the component's root element"
+description: "Vue's `no-deprecated-v-on-native-modifier` (eslint-plugin-vue)."
+example: "<C @click.native=\"go\">   <C @click=\"go\">"
+severity: warn
+category: correctness
+---
+id: no-deprecated-v-on-number-modifiers
+family: template
+params: { name: v-on, numeric-modifier: true }
+message: "key codes as modifiers (`@keyup.13`) are gone in Vue 3: use the key name (`@keyup.enter`)"
+description: "Vue's `no-deprecated-v-on-number-modifiers` (eslint-plugin-vue)."
+example: "<input @keyup.13=\"go\">   <input @keyup.enter=\"go\">"
+severity: warn
+category: correctness
+---
+id: no-deprecated-slot-attribute
+family: template
+params: { name: slot, host: not-slot, vue-only: true }
+message: "the `slot` attribute is gone in Vue 3: use `v-slot` (`#name`) on a `<template>`"
+description: "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot."
+example: "<p slot=\"head\">   <template #head><p></p></template>"
+severity: warn
+category: correctness
+---
+id: no-deprecated-slot-scope-attribute
+family: template
+params: { name: slot-scope }
+message: "`slot-scope` is gone in Vue 3: use `v-slot` (`#name=\"props\"`)"
+description: "Vue's `no-deprecated-slot-scope-attribute` (eslint-plugin-vue)."
+example: "<template slot-scope=\"p\">   <template #default=\"p\">"
+severity: warn
+category: correctness
+---
+id: no-deprecated-scope-attribute
+family: template
+params: { name: scope, host: template }
+message: "`scope` on a `<template>` is gone in Vue 3: use `v-slot`"
+description: "Vue's `no-deprecated-scope-attribute` (eslint-plugin-vue)."
+example: "<template scope=\"p\">   <template #default=\"p\">"
+severity: warn
+category: correctness
+---
+id: no-deprecated-functional-template
+family: template
+params: { name: functional, host: template }
+message: "`<template functional>` is gone in Vue 3: write a function component"
+description: "Vue's `no-deprecated-functional-template` (eslint-plugin-vue)."
+example: "<template functional>   <template>"
+severity: warn
+category: correctness
+---
+id: no-deprecated-inline-template
+family: template
+params: { name: inline-template }
+message: "`inline-template` is gone in Vue 3: use a slot"
+description: "Vue's `no-deprecated-inline-template` (eslint-plugin-vue)."
+example: "<C inline-template>   <C v-slot>"
+severity: warn
+category: correctness
+---
+id: no-deprecated-html-element-is
+family: template
+params: { name: is, value: vue-prefixed, host: html, vue-only: true }
+message: "`is` on an HTML element needs the `vue:` prefix in Vue 3 (`is=\"vue:name\"`), or use `<component :is>`"
+description: "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element."
+example: "<tr is=\"row\">   <tr is=\"vue:row\">"
+severity: warn
+category: correctness

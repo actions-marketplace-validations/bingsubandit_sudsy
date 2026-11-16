@@ -8,7 +8,7 @@ Committed work too small for a step of its own: what to do and where, one line e
 - Safety-check refusals (ratchet `refused`, same yaml files): Python black-tests 16 / ruff-fixtures 37; each is a formatter bug; bring to 0.
 - JS/TS: 26 Prettier-test and 4 real-world files change on a second format (comment placement: arrow chains with trailing comments, `as` chains, `<T>` after an own-line comment, `(a = c)` with a comment before `)`, `return /* b */ ;`, `!+(3 /* c */)`); bring to 0.
 - PowerShell: `scripts/parity.sh format invoke-formatter` needs `pwsh`, which the agent host lacks: measure its second-format count and add the ratchet to `tests/parity/invoke-formatter/differences.yaml`; bring it to 0.
-- HTML dialect rules: the planned entries of `docs/parity/eslint-plugin-vue.yaml` and `eslint-plugin-svelte.yaml`; `valid-v-else` needs a sibling relation in pattern rules. Parity runners (`scripts/parity.sh`) for html-eslint, HTMLHint, eslint-plugin-vue and eslint-plugin-svelte, as for html-validate.
+- HTML dialect rules: the planned entries of `docs/parity/eslint-plugin-vue.yaml` and `eslint-plugin-svelte.yaml`; the `valid-v-else` family is done. Parity runners (`scripts/parity.sh`) for html-eslint, HTMLHint, eslint-plugin-vue and eslint-plugin-svelte, as for html-validate.
 - Angular templates (4.7M weekly downloads for `@angular-eslint/eslint-plugin-template`, more than Svelte; needs a user decision): a fourth language `angular` on the HTML tree, selected by an `overrides` entry for `*.component.html`, with control flow (`@if`, `@for`), bindings and pipes as embedded expressions.
 
 ## Languages and analysis

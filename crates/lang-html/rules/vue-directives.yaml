@@ -1,0 +1,143 @@
+id: valid-v-if
+family: template
+params: { name: v-if, value: required, no-arg: true, modifiers: none, with: "v-else,v-else-if" }
+message: "`v-if` needs an expression, takes no argument or modifier, and does not share an element with `v-else` or `v-else-if`"
+description: "Vue's `valid-v-if` (eslint-plugin-vue). An element with `v-else-if` or `v-else` continues an earlier chain."
+example: "<p v-if>   <p v-if=\"ok\">"
+severity: warn
+category: correctness
+---
+id: valid-v-else-if
+family: template
+params: { name: v-else-if, value: required, no-arg: true, modifiers: none, with: "v-if,v-else", after: "v-if,v-else-if" }
+message: "`v-else-if` needs an expression, takes no argument or modifier, and goes on the element right after one with `v-if` or `v-else-if`"
+description: "Vue's `valid-v-else-if` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+example: "<p v-else-if>   <p v-if=\"a\"></p><p v-else-if=\"b\"></p>"
+severity: warn
+category: correctness
+---
+id: valid-v-else
+family: template
+params: { name: v-else, value: forbidden, no-arg: true, modifiers: none, with: "v-if,v-else-if", after: "v-if,v-else-if" }
+message: "`v-else` takes no expression, argument or modifier, and goes on the element right after one with `v-if` or `v-else-if`"
+description: "Vue's `valid-v-else` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+example: "<p v-else=\"x\">   <p v-if=\"a\"></p><p v-else></p>"
+severity: warn
+category: correctness
+---
+id: valid-v-for
+family: template
+params: { name: v-for, value: iteration, no-arg: true, modifiers: none }
+message: "`v-for` needs `item in items` (or `of`) and takes no argument or modifier"
+description: "Vue's `valid-v-for` (eslint-plugin-vue), the syntax of the directive. A missing `:key` is `v-for-key`."
+example: "<li v-for=\"xs\">   <li v-for=\"x in xs\">"
+severity: warn
+category: correctness
+---
+id: valid-v-bind
+family: template
+params: { name: v-bind, value: unless-arg, modifiers: "camel,prop,attr,sync" }
+message: "`v-bind` needs an expression (`:name` alone is the shorthand for `:name=\"name\"`) and takes only the modifiers `camel`, `prop`, `attr` and `sync`"
+description: "Vue's `valid-v-bind` (eslint-plugin-vue)."
+example: "<a :href.x=\"u\"> <a v-bind>   <a :href=\"u\">"
+severity: warn
+category: correctness
+---
+id: valid-v-on
+family: template
+params: { name: v-on, value: unless-modifier }
+message: "`v-on` needs a handler, unless it has a modifier"
+description: "Vue's `valid-v-on` (eslint-plugin-vue). `@click=\"go\"`; `@click.prevent` alone is fine, `@click` is not."
+example: "<b @click>   <b @click=\"go\">"
+severity: warn
+category: correctness
+---
+id: valid-v-model
+family: template
+params: { name: v-model, value: required, bad-host: file-input }
+message: "`v-model` needs an expression, and cannot bind a file input"
+description: "Vue's `valid-v-model` (eslint-plugin-vue). A file input has no value Vue can set; listen to `@change` instead."
+example: "<input v-model>   <input v-model=\"name\">"
+severity: warn
+category: correctness
+---
+id: valid-v-slot
+family: template
+params: { name: v-slot, modifiers: none, bad-host: html }
+message: "`v-slot` takes no modifier and goes on a `<template>` or a component"
+description: "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot."
+example: "<div #item>   <template #item>"
+severity: warn
+category: correctness
+---
+id: valid-v-html
+family: template
+params: { name: v-html, value: required, no-arg: true, modifiers: none }
+message: "`v-html` needs an expression and takes no argument or modifier"
+description: "Vue's `valid-v-html` (eslint-plugin-vue)."
+example: "<div v-html>   <div v-html=\"body\">"
+severity: warn
+category: correctness
+---
+id: valid-v-text
+family: template
+params: { name: v-text, value: required, no-arg: true, modifiers: none }
+message: "`v-text` needs an expression and takes no argument or modifier"
+description: "Vue's `valid-v-text` (eslint-plugin-vue)."
+example: "<p v-text>   <p v-text=\"msg\">"
+severity: warn
+category: correctness
+---
+id: valid-v-show
+family: template
+params: { name: v-show, value: required, no-arg: true, modifiers: none }
+message: "`v-show` needs an expression and takes no argument or modifier"
+description: "Vue's `valid-v-show` (eslint-plugin-vue)."
+example: "<p v-show>   <p v-show=\"open\">"
+severity: warn
+category: correctness
+---
+id: valid-v-is
+family: template
+params: { name: v-is, value: required, no-arg: true, modifiers: none }
+message: "`v-is` needs an expression and takes no argument or modifier"
+description: "Vue's `valid-v-is` (eslint-plugin-vue)."
+example: "<tr v-is>   <tr v-is=\"name\">"
+severity: warn
+category: correctness
+---
+id: valid-v-memo
+family: template
+params: { name: v-memo, value: required, no-arg: true, modifiers: none }
+message: "`v-memo` needs an expression and takes no argument or modifier"
+description: "Vue's `valid-v-memo` (eslint-plugin-vue)."
+example: "<p v-memo>   <p v-memo=\"[a, b]\">"
+severity: warn
+category: correctness
+---
+id: valid-v-once
+family: template
+params: { name: v-once, value: forbidden, no-arg: true, modifiers: none }
+message: "`v-once` takes no expression, argument or modifier"
+description: "Vue's `valid-v-once` (eslint-plugin-vue)."
+example: "<p v-once=\"x\">   <p v-once>"
+severity: warn
+category: correctness
+---
+id: valid-v-pre
+family: template
+params: { name: v-pre, value: forbidden, no-arg: true, modifiers: none }
+message: "`v-pre` takes no expression, argument or modifier"
+description: "Vue's `valid-v-pre` (eslint-plugin-vue)."
+example: "<p v-pre=\"x\">   <p v-pre>"
+severity: warn
+category: correctness
+---
+id: valid-v-cloak
+family: template
+params: { name: v-cloak, value: forbidden, no-arg: true, modifiers: none }
+message: "`v-cloak` takes no expression, argument or modifier"
+description: "Vue's `valid-v-cloak` (eslint-plugin-vue)."
+example: "<p v-cloak=\"x\">   <p v-cloak>"
+severity: warn
+category: correctness

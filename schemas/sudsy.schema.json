@@ -380,6 +380,10 @@
               "$ref": "#/definitions/rule",
               "description": "An attribute whose empty value means the same as no value (`hidden`, `crossorigin`) is written without `=\"\"`."
             },
+            "attribute-hyphenation": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+            },
             "backslash-separator": {
               "$ref": "#/definitions/rule",
               "description": "`build\\out` is the pattern `buildout`: the backslash escapes `o`. Windows-style separators never match what was meant. Reported for a backslash before a letter, digit, `_` or `-` (`\\.` and `\\#` are ordinary escapes). No fix."
@@ -2166,6 +2170,10 @@
               "$ref": "#/definitions/rule",
               "description": "`let`, `const`, a function or a class declared directly in a `case` clause, where it is visible to the other cases."
             },
+            "no-child-content": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-child-content` (eslint-plugin-vue)."
+            },
             "no-class-assign": {
               "$ref": "#/definitions/rule",
               "description": "A class declared by name that is assigned to."
@@ -2221,6 +2229,46 @@
             "no-deprecated-attr": {
               "$ref": "#/definitions/rule",
               "description": "An attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...)."
+            },
+            "no-deprecated-functional-template": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-functional-template` (eslint-plugin-vue)."
+            },
+            "no-deprecated-html-element-is": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element."
+            },
+            "no-deprecated-inline-template": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-inline-template` (eslint-plugin-vue)."
+            },
+            "no-deprecated-scope-attribute": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-scope-attribute` (eslint-plugin-vue)."
+            },
+            "no-deprecated-slot-attribute": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot."
+            },
+            "no-deprecated-slot-scope-attribute": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-slot-scope-attribute` (eslint-plugin-vue)."
+            },
+            "no-deprecated-v-bind-sync": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-v-bind-sync` (eslint-plugin-vue). `:title.sync=\"t\"` is `v-model:title=\"t\"` in Vue 3."
+            },
+            "no-deprecated-v-is": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-v-is` (eslint-plugin-vue)."
+            },
+            "no-deprecated-v-on-native-modifier": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-v-on-native-modifier` (eslint-plugin-vue)."
+            },
+            "no-deprecated-v-on-number-modifiers": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-deprecated-v-on-number-modifiers` (eslint-plugin-vue)."
             },
             "no-descending-specificity": {
               "$ref": "#/definitions/rule",
@@ -2568,6 +2616,10 @@
               "$ref": "#/definitions/rule",
               "description": "A FROM image tagged `latest` (without a digest)."
             },
+            "no-lone-template": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files."
+            },
             "no-loss-of-precision": {
               "$ref": "#/definitions/rule",
               "description": "A number literal that the double it becomes cannot represent exactly."
@@ -2756,6 +2808,10 @@
               "$ref": "#/definitions/rule",
               "description": "A RUN that calls sudo."
             },
+            "no-textarea-mustache": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-textarea-mustache` (eslint-plugin-vue)."
+            },
             "no-this-alias": {
               "$ref": "#/definitions/rule",
               "description": "`const self = this` and `self = this` (destructuring `this` is allowed)."
@@ -2853,6 +2909,10 @@
             "no-useless-escape": {
               "$ref": "#/definitions/rule",
               "description": "A backslash in a string, template or regex that escapes nothing special (`\"\\d\"`, `/\\-/`)."
+            },
+            "no-v-for-template-key-on-child": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-v-for-template-key-on-child` (eslint-plugin-vue)."
             },
             "no-v-html": {
               "$ref": "#/definitions/rule",
@@ -3335,6 +3395,10 @@
             "remove-unused-usings": {
               "$ref": "#/definitions/rule",
               "description": "A `using` directive that nothing in the file needs (the compiler's hidden CS8019, IDE0005 in the SDK analyzers). Not reported in a file that has compiler errors or `#if` regions, because unresolved or inactive code could be the one using it."
+            },
+            "require-component-is": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `require-component-is` (eslint-plugin-vue)."
             },
             "require-each-key": {
               "$ref": "#/definitions/rule",
@@ -4961,9 +5025,21 @@
                 }
               ]
             },
+            "v-bind-style": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form."
+            },
             "v-for-key": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components."
+            },
+            "v-on-style": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `v-on-style` (eslint-plugin-vue), the shorthand form."
+            },
+            "v-slot-style": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `v-slot-style` (eslint-plugin-vue), the shorthand form."
             },
             "valid-id": {
               "$ref": "#/definitions/rule",
@@ -4972,6 +5048,70 @@
             "valid-typeof": {
               "$ref": "#/definitions/rule",
               "description": "`typeof x` compared with a string that is not a type name, or with `undefined`."
+            },
+            "valid-v-bind": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-bind` (eslint-plugin-vue)."
+            },
+            "valid-v-cloak": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-cloak` (eslint-plugin-vue)."
+            },
+            "valid-v-else": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-else` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+            },
+            "valid-v-else-if": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-else-if` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+            },
+            "valid-v-for": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-for` (eslint-plugin-vue), the syntax of the directive. A missing `:key` is `v-for-key`."
+            },
+            "valid-v-html": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-html` (eslint-plugin-vue)."
+            },
+            "valid-v-if": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-if` (eslint-plugin-vue). An element with `v-else-if` or `v-else` continues an earlier chain."
+            },
+            "valid-v-is": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-is` (eslint-plugin-vue)."
+            },
+            "valid-v-memo": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-memo` (eslint-plugin-vue)."
+            },
+            "valid-v-model": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-model` (eslint-plugin-vue). A file input has no value Vue can set; listen to `@change` instead."
+            },
+            "valid-v-on": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-on` (eslint-plugin-vue). `@click=\"go\"`; `@click.prevent` alone is fine, `@click` is not."
+            },
+            "valid-v-once": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-once` (eslint-plugin-vue)."
+            },
+            "valid-v-pre": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-pre` (eslint-plugin-vue)."
+            },
+            "valid-v-show": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-show` (eslint-plugin-vue)."
+            },
+            "valid-v-slot": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot."
+            },
+            "valid-v-text": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `valid-v-text` (eslint-plugin-vue)."
             },
             "value-no-vendor-prefix": {
               "description": "A vendor-prefixed keyword or function that autoprefixer knows the standard value of.",

@@ -1,0 +1,5 @@
+no-lone-template: warn
+no-textarea-mustache: warn
+require-component-is: warn
+no-v-for-template-key-on-child: warn
+no-child-content: warn

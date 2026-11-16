@@ -1,0 +1,3 @@
+no-duplicate-keys: warn
+v-on-style: off
+valid-v-slot: off

@@ -1,0 +1,14 @@
+valid-v-if: warn
+valid-v-for: warn
+valid-v-bind: warn
+valid-v-on: warn
+valid-v-model: warn
+valid-v-slot: warn
+valid-v-html: warn
+valid-v-text: warn
+valid-v-show: warn
+valid-v-is: warn
+valid-v-memo: warn
+valid-v-once: warn
+valid-v-pre: warn
+valid-v-cloak: warn

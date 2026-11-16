@@ -7480,6 +7480,44 @@
     },
     {
       "category": "style",
+      "default_level": "warn",
+      "description": "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "input": "<template>\n  <MyCard v-bind:title=\"t\" v-on:click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template v-slot:head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 44,
+            "length": 10,
+            "line": 2
+          },
+          {
+            "column": 59,
+            "length": 7,
+            "line": 2
+          },
+          {
+            "column": 5,
+            "length": 10,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "attribute-hyphenation",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "style",
       "default_level": "off",
       "description": "A class name that does not match the `pattern` option (a regex; by default kebab-case).",
       "example": {
@@ -8389,6 +8427,34 @@
       ]
     },
     {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-child-content` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <div>\n    <template><p>lone</p></template>\n    <template v-if=\"a\"><p>ok</p></template>\n    <template #head><p>ok</p></template>\n    <textarea>{{ text }}</textarea>\n    <component></component>\n    <component :is=\"view\" />\n    <template v-for=\"x in xs\"><li :key=\"x\" /></template>\n    <template v-for=\"x in xs\" :key=\"x\"><li /></template>\n    <p v-html=\"h\">child</p>\n    <p v-text=\"t\"> </p>\n  </div>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 8,
+            "length": 6,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-child-content",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "suspicious",
       "default_level": "off",
       "description": "An Internet Explorer conditional comment (`<!--[if IE]>`). Only IE 9 and older read them; other browsers see a comment.",
@@ -8464,6 +8530,286 @@
           "tool": "html-validate"
         }
       ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-functional-template` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 38,
+            "length": 10,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-functional-template",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 18,
+            "length": 2,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-html-element-is",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-inline-template` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 55,
+            "length": 15,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-inline-template",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-scope-attribute` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 13,
+            "length": 5,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-scope-attribute",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 4,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-slot-attribute",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-slot-scope-attribute` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 23,
+            "length": 10,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-slot-scope-attribute",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-v-bind-sync` (eslint-plugin-vue). `:title.sync=\"t\"` is `v-model:title=\"t\"` in Vue 3.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 11,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-v-bind-sync",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-v-is` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 71,
+            "length": 4,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-v-is",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-v-on-native-modifier` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 22,
+            "length": 13,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-v-on-native-modifier",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-deprecated-v-on-number-modifiers` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <C :title.sync=\"t\" @click.native=\"go\" @keyup.13=\"k\" inline-template v-is=\"c\" />\n  <p slot=\"head\" is=\"row\"></p><slot name=\"x\" />\n  <template scope=\"p\" slot-scope=\"q\" functional></template>\n  <tr is=\"vue:row\" v-model:title=\"t\" @keyup.enter=\"k\"></tr>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 41,
+            "length": 9,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-deprecated-v-on-number-modifiers",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
     },
     {
       "category": "suspicious",
@@ -8727,6 +9073,34 @@
       ]
     },
     {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <div>\n    <template><p>lone</p></template>\n    <template v-if=\"a\"><p>ok</p></template>\n    <template #head><p>ok</p></template>\n    <textarea>{{ text }}</textarea>\n    <component></component>\n    <component :is=\"view\" />\n    <template v-for=\"x in xs\"><li :key=\"x\" /></template>\n    <template v-for=\"x in xs\" :key=\"x\"><li /></template>\n    <p v-html=\"h\">child</p>\n    <p v-text=\"t\"> </p>\n  </div>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 8,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-lone-template",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "An attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) names an id that no element of the document has.",
@@ -8971,6 +9345,34 @@
       ]
     },
     {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-textarea-mustache` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <div>\n    <template><p>lone</p></template>\n    <template v-if=\"a\"><p>ok</p></template>\n    <template #head><p>ok</p></template>\n    <textarea>{{ text }}</textarea>\n    <component></component>\n    <component :is=\"view\" />\n    <template v-for=\"x in xs\"><li :key=\"x\" /></template>\n    <template v-for=\"x in xs\" :key=\"x\"><li /></template>\n    <p v-html=\"h\">child</p>\n    <p v-text=\"t\"> </p>\n  </div>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 15,
+            "length": 10,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-textarea-mustache",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "Spaces or tabs at the end of a line.",
@@ -9069,6 +9471,34 @@
       },
       "fix": null,
       "id": "no-use-v-if-with-v-for",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `no-v-for-template-key-on-child` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <div>\n    <template><p>lone</p></template>\n    <template v-if=\"a\"><p>ok</p></template>\n    <template #head><p>ok</p></template>\n    <textarea>{{ text }}</textarea>\n    <component></component>\n    <component :is=\"view\" />\n    <template v-for=\"x in xs\"><li :key=\"x\" /></template>\n    <template v-for=\"x in xs\" :key=\"x\"><li /></template>\n    <p v-html=\"h\">child</p>\n    <p v-text=\"t\"> </p>\n  </div>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 35,
+            "length": 4,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-v-for-template-key-on-child",
       "languages": [
         "html",
         "svelte",
@@ -9300,6 +9730,34 @@
           "tool": "html-validate"
         }
       ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `require-component-is` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <div>\n    <template><p>lone</p></template>\n    <template v-if=\"a\"><p>ok</p></template>\n    <template #head><p>ok</p></template>\n    <textarea>{{ text }}</textarea>\n    <component></component>\n    <component :is=\"view\" />\n    <template v-for=\"x in xs\"><li :key=\"x\" /></template>\n    <template v-for=\"x in xs\" :key=\"x\"><li /></template>\n    <p v-html=\"h\">child</p>\n    <p v-text=\"t\"> </p>\n  </div>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 9,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "require-component-is",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
     },
     {
       "category": "correctness",
@@ -9546,6 +10004,34 @@
       ]
     },
     {
+      "category": "style",
+      "default_level": "warn",
+      "description": "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "input": "<template>\n  <MyCard v-bind:title=\"t\" v-on:click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template v-slot:head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 11,
+            "length": 7,
+            "line": 2
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "v-bind-style",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components.",
@@ -9564,6 +10050,62 @@
       },
       "fix": null,
       "id": "v-for-key",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "warn",
+      "description": "Vue's `v-on-style` (eslint-plugin-vue), the shorthand form.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "input": "<template>\n  <MyCard v-bind:title=\"t\" v-on:click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template v-slot:head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 28,
+            "length": 5,
+            "line": 2
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "v-on-style",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "warn",
+      "description": "Vue's `v-slot-style` (eslint-plugin-vue), the shorthand form.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "input": "<template>\n  <MyCard v-bind:title=\"t\" v-on:click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template v-slot:head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 15,
+            "length": 7,
+            "line": 5
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "v-slot-style",
       "languages": [
         "html",
         "svelte",
@@ -9618,6 +10160,489 @@
           "tool": "html-validate"
         }
       ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-bind` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 13,
+            "length": 6,
+            "line": 2
+          },
+          {
+            "column": 26,
+            "length": 2,
+            "line": 3
+          },
+          {
+            "column": 32,
+            "length": 4,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-bind",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-cloak` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 70,
+            "length": 7,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-cloak",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-else` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <p v-else>no if before</p>\n  <p v-if=\"a\">a</p>\n  <!-- a comment may sit between -->\n  <p v-else-if=\"b\">b</p>\n  <p v-else>c</p>\n  <p v-else-if=\"d\">after else</p>\n  <p v-if=\"a\">a</p>\n  text\n  <p v-else-if=\"x\">b</p>\n  <p v-else=\"y\">value</p>\n  <p v-if=\"a\" v-else-if=\"b\">both</p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 6,
+            "line": 2
+          },
+          {
+            "column": 6,
+            "length": 6,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-else",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-else-if` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <p v-else>no if before</p>\n  <p v-if=\"a\">a</p>\n  <!-- a comment may sit between -->\n  <p v-else-if=\"b\">b</p>\n  <p v-else>c</p>\n  <p v-else-if=\"d\">after else</p>\n  <p v-if=\"a\">a</p>\n  text\n  <p v-else-if=\"x\">b</p>\n  <p v-else=\"y\">value</p>\n  <p v-if=\"a\" v-else-if=\"b\">both</p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 9,
+            "line": 7
+          },
+          {
+            "column": 6,
+            "length": 9,
+            "line": 10
+          },
+          {
+            "column": 15,
+            "length": 9,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-else-if",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-for` (eslint-plugin-vue), the syntax of the directive. A missing `:key` is `v-for-key`.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 5,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-for",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-html` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 28,
+            "length": 6,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-html",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-if` (eslint-plugin-vue). An element with `v-else-if` or `v-else` continues an earlier chain.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<template>\n  <p v-else>no if before</p>\n  <p v-if=\"a\">a</p>\n  <!-- a comment may sit between -->\n  <p v-else-if=\"b\">b</p>\n  <p v-else>c</p>\n  <p v-else-if=\"d\">after else</p>\n  <p v-if=\"a\">a</p>\n  text\n  <p v-else-if=\"x\">b</p>\n  <p v-else=\"y\">value</p>\n  <p v-if=\"a\" v-else-if=\"b\">both</p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 6,
+            "length": 4,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-if",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-is` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 89,
+            "length": 4,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-is",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-memo` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 82,
+            "length": 6,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-memo",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-model` (eslint-plugin-vue). A file input has no value Vue can set; listen to `@change` instead.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 20,
+            "length": 7,
+            "line": 2
+          },
+          {
+            "column": 22,
+            "length": 7,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-model",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-on` (eslint-plugin-vue). `@click=\"go\"`; `@click.prevent` alone is fine, `@click` is not.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 57,
+            "length": 6,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-on",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-once` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 49,
+            "length": 6,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-once",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-pre` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 60,
+            "length": 5,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-pre",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-show` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 42,
+            "length": 6,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-show",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot.",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 41,
+            "length": 4,
+            "line": 3
+          },
+          {
+            "column": 50,
+            "length": 5,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-slot",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Vue's `valid-v-text` (eslint-plugin-vue).",
+      "example": {
+        "config": null,
+        "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "input": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" v-on:click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 35,
+            "length": 6,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "valid-v-text",
+      "languages": [
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
     },
     {
       "category": "style",

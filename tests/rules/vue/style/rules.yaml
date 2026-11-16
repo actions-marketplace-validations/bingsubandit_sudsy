@@ -1,0 +1,4 @@
+v-bind-style: warn
+v-on-style: warn
+v-slot-style: warn
+attribute-hyphenation: warn
