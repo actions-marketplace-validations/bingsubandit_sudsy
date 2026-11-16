@@ -264,6 +264,16 @@ fn semicolon_comments() {
     );
 }
 
+/// A comment after the `;` that ends a block, even one kept by `# fmt: off`.
+#[test]
+fn semicolon_comment_at_block_end() {
+    assert_eq!(
+        fmt("def f():\n    if True:\n        x = 1 ;  # comment\n"),
+        "def f():\n    if True:\n        x = 1  # comment\n"
+    );
+    fmt("def f():\n    # fmt: off\n    if True:\n        x = 1 \\\n            ;  # comment\n");
+}
+
 /// A comment after an operator stays with the operand before it.
 #[test]
 fn operator_comment() {

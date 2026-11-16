@@ -133,15 +133,15 @@ pub(crate) fn mark(cx: &FormatCtx<'_>, c: &Comment) -> Option<Mark> {
     }
 }
 
-/// The `;` that ends a simple statement, if it has one: the sibling after the statement.
+/// The `;` right after the statement's last token, if there is one (for a compound statement,
+/// the `;` of its last inner statement). It is the next token, not a sibling: at the end of a
+/// block it lies outside the enclosing nodes, which end where their last statement ends.
 pub(crate) fn semicolon(cx: &FormatCtx<'_>, s: &SyntaxNode) -> Option<SyntaxToken> {
-    let mut next = s.next_sibling_or_token();
-    while let Some(e) = next {
-        match e {
-            SyntaxElement::Token(t) if t.kind() == k::SEMI => return Some(t),
-            SyntaxElement::Token(t) if cx.grammar.is_trivia(t.kind()) => {
-                next = t.next_sibling_or_token();
-            }
+    let mut next = cx.last_token(s)?.next_token();
+    while let Some(t) = next {
+        match t.kind() {
+            k::SEMI => return Some(t),
+            _ if cx.grammar.is_trivia(t.kind()) => next = t.next_token(),
             _ => return None,
         }
     }
