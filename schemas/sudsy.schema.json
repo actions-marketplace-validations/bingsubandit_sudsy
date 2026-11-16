@@ -569,6 +569,10 @@
               "$ref": "#/definitions/rule",
               "description": "A COPY with more than one source whose last argument does not end with `/`."
             },
+            "count-star": {
+              "$ref": "#/definitions/rule",
+              "description": "A `COUNT` of the constant 1 or 0 (sqlfluff CV04)."
+            },
             "custom-media-pattern": {
               "description": "A `@custom-media` name, without its `--`, that does not match the `pattern` option (a regex). An empty pattern allows everything.",
               "oneOf": [
@@ -757,6 +761,10 @@
               "$ref": "#/definitions/rule",
               "description": "No space between `#` and the directive keyword (`#if`, not `# if`)."
             },
+            "distinct-group-by": {
+              "$ref": "#/definitions/rule",
+              "description": "`SELECT DISTINCT` in a query that has `GROUP BY`: the grouping already makes the rows distinct (sqlfluff AM01)."
+            },
             "dnf-clean": {
               "$ref": "#/definitions/rule",
               "description": "dnf install with no dnf clean all after it."
@@ -892,6 +900,10 @@
               "$ref": "#/definitions/rule",
               "description": "Two FROM instructions name their stage alike."
             },
+            "duplicate-table-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04)."
+            },
             "element-case": {
               "$ref": "#/definitions/rule",
               "description": "Element names are case-insensitive in HTML; lowercase is the convention. Everything inside `<svg>` and `<math>` keeps its case. Reported on the name of a start or end tag."
@@ -903,6 +915,10 @@
             "element-required-attributes": {
               "$ref": "#/definitions/rule",
               "description": "An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...)."
+            },
+            "else-null": {
+              "$ref": "#/definitions/rule",
+              "description": "A `CASE` branch `ELSE NULL` (sqlfluff ST01)."
             },
             "empty-catch-block": {
               "$ref": "#/definitions/rule",
@@ -1269,6 +1285,10 @@
             "if-tuple": {
               "$ref": "#/definitions/rule",
               "description": "An `if` or `elif` whose test is a tuple."
+            },
+            "implicit-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "A table or column alias without the `AS` keyword (sqlfluff AL01, AL02)."
             },
             "import-no-public": {
               "$ref": "#/definitions/rule",
@@ -2994,6 +3014,10 @@
               "$ref": "#/definitions/rule",
               "description": "An npm install package without a version."
             },
+            "null-comparison": {
+              "$ref": "#/definitions/rule",
+              "description": "`= NULL`, `<> NULL` or `!= NULL`, which is never true: use `IS NULL` or `IS NOT NULL` (sqlfluff CV05)."
+            },
             "null-comparison-side": {
               "$ref": "#/definitions/rule",
               "description": "A `-eq`, `-ne` (or case variant) comparison with `$null` on the right."
@@ -3116,6 +3140,10 @@
             "prefer-button": {
               "$ref": "#/definitions/rule",
               "description": "A `<button>` can hold markup and is styled with CSS like any element; `<input type=\"button\">` cannot."
+            },
+            "prefer-coalesce": {
+              "$ref": "#/definitions/rule",
+              "description": "A call of `IFNULL` or `NVL` (sqlfluff CV02)."
             },
             "prefer-native-element": {
               "$ref": "#/definitions/rule",
@@ -3463,6 +3491,10 @@
             "return-outside-function": {
               "$ref": "#/definitions/rule",
               "description": "A `return` that is not inside a function."
+            },
+            "right-join": {
+              "$ref": "#/definitions/rule",
+              "description": "A `RIGHT` join (sqlfluff CV08)."
             },
             "root-in-section": {
               "$ref": "#/definitions/rule",
@@ -4359,6 +4391,10 @@
                 }
               ]
             },
+            "self-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "An alias that repeats the name it is given to, `a AS a` (sqlfluff AL09)."
+            },
             "separate-attributes": {
               "$ref": "#/definitions/rule",
               "description": "One attribute per attribute list: `[A, B]` becomes `[A]` and `[B]`. Lists on parameters and type parameters are left alone. The fix is not offered when the list has a comment in it."
@@ -4682,6 +4718,10 @@
               "$ref": "#/definitions/rule",
               "description": "A string with the `u` prefix."
             },
+            "union-distinct": {
+              "$ref": "#/definitions/rule",
+              "description": "A `UNION` that names neither `DISTINCT` nor `ALL` (sqlfluff AM02)."
+            },
             "unique-fragment-name": {
               "$ref": "#/definitions/rule",
               "description": "Two fragments of a document have the same name; a spread cannot tell which one it means. Checked within the file."
@@ -4923,6 +4963,10 @@
             "unused-assignment": {
               "$ref": "#/definitions/rule",
               "description": "A value is stored in a local variable and no path reads it before it is overwritten or the variable goes out of scope (a dead store). Variables that are captured or whose address is taken are not checked; a variable that is never read at all is reported by `unused-variable` instead. Overlaps the SDK analyzer IDE0059 (unnecessary assignment)."
+            },
+            "unused-cte": {
+              "$ref": "#/definitions/rule",
+              "description": "A common table expression that nothing in the `WITH` statement refers to (sqlfluff ST03)."
             },
             "unused-declarations": {
               "$ref": "#/definitions/rule",

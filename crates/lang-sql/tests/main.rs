@@ -2,4 +2,5 @@
 
 mod conformance;
 mod format;
+mod rule_fixtures;
 mod sql;

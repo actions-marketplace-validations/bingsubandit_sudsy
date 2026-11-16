@@ -99,3 +99,18 @@ fn errors_are_refused() {
     let options = provider.option_schema().defaults();
     assert!(format_file(&provider, &file, &options, &DirectiveTable::default()).is_err());
 }
+
+#[test]
+fn tsql_indents_if_else_and_while_bodies() {
+    let mut subject = Formatting::new(lang_sql::provider(), "a.sql");
+    subject
+        .options
+        .push(("dialect", core_config::OptionValue::String("tsql".into())));
+    assert_eq!(
+        assert_formats(
+            &subject,
+            "IF @a = 1\nSELECT 1\nELSE\nSELECT 2;\nWHILE @a < 3\nSET @a = @a + 1;\n"
+        ),
+        "IF @a = 1\n    SELECT 1\nELSE\n    SELECT 2;\nWHILE @a < 3\n    SET @a = @a + 1;\n"
+    );
+}

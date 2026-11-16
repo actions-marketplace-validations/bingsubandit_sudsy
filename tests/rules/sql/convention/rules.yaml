@@ -1,0 +1,6 @@
+union-distinct: warn
+prefer-coalesce: warn
+count-star: warn
+right-join: warn
+else-null: warn
+implicit-alias: warn

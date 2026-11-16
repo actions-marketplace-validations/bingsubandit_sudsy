@@ -513,6 +513,17 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `trap-expands-now` | shell | suspicious | warn | none | A `trap` whose double-quoted command contains an expansion. |
 | `useless-cat` | shell | style | off | none | A pipeline that starts with `cat file`. |
 | `useless-echo` | shell | style | off | none | An `echo` whose only argument is a command substitution. |
+| `count-star` | sql | style | off | none | A `COUNT` of the constant 1 or 0 (sqlfluff CV04). |
+| `distinct-group-by` | sql | suspicious | warn | none | `SELECT DISTINCT` in a query that has `GROUP BY`: the grouping already makes the rows distinct (sqlfluff AM01). |
+| `duplicate-table-alias` | sql | correctness | warn | none | Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04). |
+| `else-null` | sql | cleanup | warn | none | A `CASE` branch `ELSE NULL` (sqlfluff ST01). |
+| `implicit-alias` | sql | style | off | none | A table or column alias without the `AS` keyword (sqlfluff AL01, AL02). |
+| `null-comparison` | sql | correctness | warn | none | `= NULL`, `<> NULL` or `!= NULL`, which is never true: use `IS NULL` or `IS NOT NULL` (sqlfluff CV05). |
+| `prefer-coalesce` | sql | style | off | none | A call of `IFNULL` or `NVL` (sqlfluff CV02). |
+| `right-join` | sql | style | off | none | A `RIGHT` join (sqlfluff CV08). |
+| `self-alias` | sql | cleanup | warn | none | An alias that repeats the name it is given to, `a AS a` (sqlfluff AL09). |
+| `union-distinct` | sql | suspicious | warn | none | A `UNION` that names neither `DISTINCT` nor `ALL` (sqlfluff AM02). |
+| `unused-cte` | sql | suspicious | warn | none | A common table expression that nothing in the `WITH` statement refers to (sqlfluff ST03). |
 | `no-duplicate-include` | xml | correctness | warn | none | An element of a project file (`PackageReference`, `ProjectReference`, `Compile`, ...) has the same `Include` as an earlier element of the same name in the same parent. The duplicate is a restore warning or a build error. |
 | `no-floating-package-version` | xml | suspicious | off | none | A `PackageReference` (or `PackageVersion`) whose `Version` contains `*` restores a different package as new versions appear. Reported on the attribute; no fix, because the version to pin is a decision. |
 | `ambiguous-booleans` | github-actions, yaml | suspicious | off | unsafe | A plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the usual casings): a boolean to YAML 1.1 parsers and a string to YAML 1.2 parsers. Lowercase `true` and `false` are fine. Options: `check_keys` (default `true`): Also check mapping keys. Turn it off to keep GitHub workflow `on:`; `allowed` (default `[]`): Spellings that are not reported, for example `["on"]`; `report_true_false` (default `false`): Also report `true` and `false` (unless listed in `allowed`), for code that wants every boolean quoted or spelled out. Equivalent: yamllint truthy, yamllint truthy.allowed-values, yamllint truthy.check-keys. |

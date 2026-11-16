@@ -1,0 +1,5 @@
+null-comparison: warn
+distinct-group-by: warn
+self-alias: warn
+duplicate-table-alias: warn
+unused-cte: warn

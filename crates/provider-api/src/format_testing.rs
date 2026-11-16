@@ -34,7 +34,7 @@ impl Subject for Formatting {
     fn parse(&self, text: &str) -> Result<SyntaxNode, String> {
         let r = self
             .provider
-            .parse(&SourceFile::new(self.file, 1, text))
+            .parse(&self.source(text))
             .map_err(|e| e.to_string())?;
         match r.errors.first() {
             Some(e) => Err(format!("{} (byte {})", e.message, e.start)),
@@ -45,7 +45,7 @@ impl Subject for Formatting {
     fn format(&self, text: &str) -> Result<String, String> {
         format_file(
             &*self.provider,
-            &SourceFile::new(self.file, 1, text),
+            &self.source(text),
             &self.resolved(),
             &DirectiveTable::default(),
         )
@@ -73,6 +73,13 @@ impl Subject for Formatting {
 }
 
 impl Formatting {
+    /// The file for `text`, parsed in the dialect (or target version) the options choose.
+    fn source(&self, text: &str) -> SourceFile {
+        let mut file = SourceFile::new(self.file, 1, text);
+        file.language_version = crate::format::resolve_dialect(&mut self.resolved(), None);
+        file
+    }
+
     fn resolved(&self) -> core_config::ResolvedOptions {
         let schema = self.provider.option_schema();
         let mut options = schema.defaults();

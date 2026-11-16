@@ -42,7 +42,7 @@ One line per upstream rule or option under `entries:`, `<id>: <status>` or `<id>
 | ruff | 93 | 88 | 0 | 2 | 0 | 3 | 0 | 2 |
 | shellcheck | 520 | 17 | 8 | 0 | 0 | 0 | 495 | 0 |
 | shfmt | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 38 | 23 | 0 | 0 | 0 | 0 | 15 | 0 |
+| sqlfluff | 88 | 35 | 0 | 34 | 0 | 4 | 15 | 34 |
 | stylecop | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
 | stylelint | 150 | 83 | 9 | 54 | 0 | 0 | 4 | 54 |
 | stylelint-less | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |

@@ -1,0 +1,60 @@
+id: union-distinct
+message: write UNION DISTINCT or UNION ALL, not a bare UNION
+description: A `UNION` that names neither `DISTINCT` nor `ALL` (sqlfluff AM02).
+example: 'select 1 union select 2'
+severity: warn
+category: suspicious
+rule:
+  kind: SetOperator
+  regex: '(?i)^union\s*$'
+---
+id: prefer-coalesce
+message: use COALESCE, which every dialect has, instead of IFNULL or NVL
+description: A call of `IFNULL` or `NVL` (sqlfluff CV02).
+example: 'select ifnull(a, 0) from t'
+severity: off
+category: style
+rule:
+  kind: FunctionName
+  regex: '(?i)^(ifnull|nvl)$'
+---
+id: count-star
+message: use COUNT(*), not COUNT(1) or COUNT(0)
+description: A `COUNT` of the constant 1 or 0 (sqlfluff CV04).
+example: 'select count(1) from t'
+severity: off
+category: style
+rule:
+  kind: Function
+  regex: '(?i)^count\(\s*[01]\s*\)$'
+---
+id: right-join
+message: use a LEFT JOIN and swap the tables instead of a RIGHT JOIN
+description: A `RIGHT` join (sqlfluff CV08).
+example: 'select a from t right join u on t.a = u.a'
+severity: off
+category: style
+rule:
+  kind: JoinClause
+  regex: '(?i)^\s*right\b'
+report-on: first-token
+---
+id: else-null
+message: the ELSE NULL is the default of CASE; leave it out
+description: A `CASE` branch `ELSE NULL` (sqlfluff ST01).
+example: 'select case when a then 1 else null end from t'
+severity: warn
+category: cleanup
+rule:
+  kind: ElseClause
+  regex: '(?i)^else\s+null\s*$'
+---
+id: implicit-alias
+message: write AS before the alias
+description: A table or column alias without the `AS` keyword (sqlfluff AL01, AL02).
+example: 'select a b from t u'
+severity: off
+category: style
+rule:
+  kind: AliasExpression
+  not: { regex: '(?i)^as\b' }

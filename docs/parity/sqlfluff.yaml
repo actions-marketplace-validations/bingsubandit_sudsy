@@ -6,7 +6,7 @@ sources:
   - "https://docs.sqlfluff.com/en/stable/reference/rules.html"
   - "https://docs.sqlfluff.com/en/stable/configuration/layout.html"
   - "https://docs.sqlfluff.com/en/stable/configuration/default_configuration.html"
-scope: "Formatter (`sqlfluff fix` with the layout (LT) and capitalisation (CP) rules, our own layout code; sqruff is the parser only); the other rules are added with the lint step"
+scope: "Formatter (`sqlfluff fix` with the layout (LT) and capitalisation (CP) rules, our own layout code; sqruff is the parser only); the linter covers the rules that catch bugs (aliasing, ambiguous, convention, structure) and plans the rest; templated rules (JJ) and T-SQL ones (TQ) are out"
 entries:
   LT01: formatter
   LT02: formatter
@@ -28,6 +28,56 @@ entries:
   CP04: option sql.format.literal_case
   CP05: option sql.format.type_case
   LT12: option sql.format.final_newline
+  AL01: rule implicit-alias
+  AL02: rule implicit-alias
+  AL04: rule duplicate-table-alias
+  AL09: rule self-alias
+  AM01: rule distinct-group-by
+  AM02: rule union-distinct
+  CV02: rule prefer-coalesce
+  CV04: rule count-star
+  CV05: rule null-comparison
+  CV08: rule right-join
+  ST01: rule else-null
+  ST03: rule unused-cte
+  AL03: planned
+  AL05: planned
+  AL06: planned
+  AL07: planned
+  AL08: planned
+  AM03: planned
+  AM04: planned
+  AM05: planned
+  AM06: planned
+  AM07: planned
+  CV01: planned
+  CV03: planned
+  CV06: planned
+  CV07: planned
+  CV09: planned
+  CV10: planned
+  CV11: planned
+  CV12: planned
+  RF01: planned
+  RF02: planned
+  RF03: planned
+  RF04: planned
+  RF05: planned
+  RF06: planned
+  ST02: planned
+  ST04: planned
+  ST05: planned
+  ST06: planned
+  ST07: planned
+  ST08: planned
+  ST09: planned
+  ST10: planned
+  ST11: planned
+  ST12: planned
+  JJ01: wontfix templated SQL is not rendered
+  TQ01: wontfix T-SQL naming and batch checks are not scheduled
+  TQ02: wontfix T-SQL naming and batch checks are not scheduled
+  TQ03: wontfix T-SQL naming and batch checks are not scheduled
   indentation.indent_unit: option sql.format.indent_style
   indentation.tab_space_size: option sql.format.indent_size
   core.dialect: option sql.format.dialect
