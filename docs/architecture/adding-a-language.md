@@ -15,6 +15,25 @@ Test helpers: `format_testing::assert_parses` (round trip, attachment, no errors
 - `Mapping::wrap`: tree-sitter hides one-part keys and literals as bare tokens, while shapes (`#delimited-list`, `#key-value`) want nodes as items. A token listed there is wrapped in a node of its own, unless its tree-sitter parent already maps to that node.
 - A zero-width `Eof` token ends the root; it owns the comments at the end of the file.
 
+## Parser comparison (before step 1)
+The first step of a language measures the candidate parsers and stops with a recommendation (CLAUDE.md); the user decides. The comparison is one table, one column per candidate, on one machine (named: CPU, cores, rustc, release with LTO), parse of whole files from memory, warm, best of 5, no adapter, on a pinned corpus of real files (commit SHAs) plus hand-written probes of the newest syntax. Rows, all measured unless marked:
+
+| Row | What it says |
+|---|---|
+| Kind | Rust or C; hand-written or generated; typed AST or untyped tree; where trivia lives |
+| Corpus files with a parse error | count over the whole corpus (the error-free files are the valid set when no reference compiler is installed) |
+| Probes failing | newest-version syntax and known awkward constructs (keywords as names, heredocs, alternative syntax) |
+| Parse speed | MB/s per corpus |
+| Stripped binary added | MB over an empty `main` |
+| Tokens with trivia tile the source | yes or no, on every corpus file: whitespace and comments come as tokens and the spans leave no gap or overlap (an adapter needs this; if no, it must rebuild trivia) |
+| Mutants: damage by one deleted bracket | share of the file lost to the error (median / p75 / p90) on files with one `)`, `}` or `{` removed |
+| Deep nesting | graceful error or stack overflow, and from what depth |
+| Dependencies | crate count and build time, and what they pull in |
+| Upstream | licence, releases per year, contributors, toolchain (`rust-version` against ours) |
+| Maintainers and funding | who maintains it (one person, a team, a company), whether the work is paid or sponsored, how releases and fixes went in the past year |
+
+What was not measured stays named ("adapter itself", "memory"). The note ends with the recommendation, its exact pin and the costs accepted; it is deleted when the language's step 1 lands, the decision going into the language's formatting doc. Example: the PHP comparison, `git show e93070f:docs/design/php.md`.
+
 ## Steps
 1. **Grammar file** `grammars/<lang>.grammar` (format: [syntax-tree.md](syntax-tree.md)). Take a free language id (`language <name> <id> "<Display name>"`, 1 to 31; codegen refuses a duplicate). Declare the trivia tokens (`Whitespace`, `Newline`, the comment kinds), `Eof` and `Unknown #error`, one token per tree-sitter token you keep, and the nodes with the tags the shared code reads: `#delimited-list`, `#block`, `#key-value`, `#separator`, `#mapping`, `#sequence`. Read the grammar's `node-types.json` first: hidden rules (`_name`) are not nodes in the tree, so their children are tokens in the parent.
 2. **Crate** `crates/lang-<name>` (a workspace member by the `crates/*` glob). Cargo needs a manifest before `cargo xtask codegen` can write the real one: create `src/lib.rs` (empty) and a `Cargo.toml` of `[package]` and `name = "lang-<name>"`. Then write `lang.yaml` and run `cargo xtask codegen`; it generates `Cargo.toml` (the shared dependencies, `build = "../../build/lang-crate.rs"` which embeds `rules/*.yaml` and writes `generated`, the `static-grammars` feature) and `src/provider.generated.rs` (`pub fn provider() -> ParserProvider` filling a `core_treesitter::Spec`). Keys of `lang.yaml`:
