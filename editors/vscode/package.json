@@ -28,6 +28,7 @@
     "onLanguage:html",
     "onLanguage:ini",
     "onLanguage:js",
+    "onLanguage:kotlin",
     "onLanguage:makefile",
     "onLanguage:markdown",
     "onLanguage:powershell",

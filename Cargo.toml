@@ -54,6 +54,9 @@ ruff_text_size = "=0.0.14"
 # sqruff is pre-1.0: pinned exactly, bumped by hand only (dependabot ignores it). lang-sql offers four dialects.
 sqruff-lib-core = "=0.44.0"
 sqruff-lib-dialects = { version = "=0.44.0", default-features = false, features = ["postgres", "mysql", "tsql"] }
+# ktrs (Kotlin): 0.x, pinned exactly, bumped by hand only (dependabot ignores it). Only the parser crates are used.
+ktrs-parser = "=0.5.1"
+ktrs-syntax = "=0.5.1"
 strum = "0.28"
 pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
 # generated:grammars
@@ -91,6 +94,7 @@ lang-json = { path = "crates/lang-json" }
 lang-js = { path = "crates/lang-js" }
 lang-python = { path = "crates/lang-python" }
 lang-sql = { path = "crates/lang-sql" }
+lang-kotlin = { path = "crates/lang-kotlin" }
 lang-css = { path = "crates/lang-css" }
 lang-yaml = { path = "crates/lang-yaml" }
 lang-github-actions = { path = "crates/lang-github-actions" }

@@ -1,0 +1,208 @@
+// Kotlin (.kt, .kts), parsed by ktrs-parser (crates/lang-kotlin/src/adapter.rs), a port of the Kotlin compiler's PSI parser.
+// Node kinds are the compiler's PSI element types (`KtNodeTypes`, Pascal case) and punctuation tokens its `KtTokens`; every keyword, hard or soft, is `Keyword`. KDoc comments are `Comment` trivia like the others.
+// Format: see crates/core-syntax/src/grammar/mod.rs.
+
+language kotlin 22 "Kotlin"
+comments line "//" block "/*" "*/"
+suppress disable-next-line "sudsy-disable-next-line"
+suppress disable-line "sudsy-disable-line"
+suppress disable "sudsy-disable"
+suppress enable "sudsy-enable"
+suppress disable-file "sudsy-disable-file"
+suppress ignore "sudsy-ignore"
+suppress ignore-start "sudsy-ignore-start"
+suppress ignore-end "sudsy-ignore-end"
+
+token Whitespace #trivia #whitespace
+token Newline #trivia #newline
+// `//`, `/* */` (nested), `/** */` and a `#!` first line.
+token Comment #trivia #comment
+token Lbracket "[" #punctuation
+token Rbracket "]" #punctuation
+token Lbrace "{" #punctuation
+token Rbrace "}" #punctuation
+token Lpar "(" #punctuation
+token Rpar ")" #punctuation
+token Dot "." #punctuation
+token PlusPlus "++" #punctuation
+token MinusMinus "--" #punctuation
+token Mul "*" #punctuation
+token Plus "+" #punctuation
+token Minus "-" #punctuation
+token Excl "!" #punctuation
+token Div "/" #punctuation
+token Perc "%" #punctuation
+token Lt "<" #punctuation
+token Gt ">" #punctuation
+token LtEq "<=" #punctuation
+token GtEq ">=" #punctuation
+token EqEqEq "===" #punctuation
+token Arrow "->" #punctuation
+token DoubleArrow "=>" #punctuation
+token ExclEqEqEq "!==" #punctuation
+token EqEq "==" #punctuation
+token ExclEq "!=" #punctuation
+token ExclExcl "!!" #punctuation
+token AndAnd "&&" #punctuation
+token And "&" #punctuation
+token OrOr "||" #punctuation
+token SafeAccess "?." #punctuation
+token Elvis "?:" #punctuation
+token Quest "?" #punctuation
+token ColonColon "::" #punctuation
+token Colon ":" #punctuation
+token Semicolon ";" #punctuation #separator
+token DoubleSemicolon ";;" #punctuation
+token Range ".." #punctuation
+token RangeUntil "..<" #punctuation
+token Eq "=" #punctuation
+token MulEq "*=" #punctuation
+token DivEq "/=" #punctuation
+token PercEq "%=" #punctuation
+token PlusEq "+=" #punctuation
+token MinusEq "-=" #punctuation
+token Hash "#" #punctuation
+token At "@" #punctuation
+token Comma "," #punctuation #separator
+
+// Hard and soft keywords and modifiers (`fun`, `val`, `in`, `!is`, `as?`, `data`, ...).
+token Keyword #keyword
+token Identifier
+token Integer #literal #restyle
+token Float #literal #restyle
+token Character #literal
+// A string is `StringTemplate`: its quotes, text parts, escapes and `$` / `${` entries.
+token OpenQuote #string
+token ClosingQuote #string
+token StringPart #string
+token EscapeSequence #string
+// The `$` run of a multi-dollar string.
+token InterpolationPrefix #string
+token ShortTemplateEntryStart #string
+token LongTemplateEntryStart #string
+token LongTemplateEntryEnd "}" #string
+// Zero-width end-of-file token; it carries the leading trivia of the file's tail.
+token EndOfFile
+// Text the parser could not classify.
+token Unknown #error
+
+node KtFile
+node Class
+node Fun
+node Property
+node DestructuringDeclaration
+node DestructuringDeclarationEntry
+node ObjectDeclaration
+node Typealias
+node CompanionBlock
+node EnumEntry
+node ClassInitializer
+node ScriptInitializer
+node SecondaryConstructor
+node PrimaryConstructor
+node ContextReceiver
+node ContextParameterList
+node TypeParameterList
+node TypeParameter
+node SuperTypeList
+node DelegatedSuperTypeEntry
+node SuperTypeCallEntry
+node SuperTypeEntry
+node PropertyDelegate
+node ConstructorCallee
+node ValueParameterList
+node ValueParameter
+node ClassBody
+node ImportList
+node FileAnnotationList
+node ImportDirective
+node ImportAlias
+node ModifierList
+node Annotation
+node AnnotationEntry
+node AnnotationTarget
+node TypeArgumentList
+node ValueArgumentList
+node ValueArgument
+node ContractEffectList
+node ContractEffect
+node LambdaArgument
+node ValueArgumentName
+node TypeReference
+node UserType
+node DynamicType
+node FunctionType
+node FunctionTypeReceiver
+node NullableType
+node IntersectionType
+node TypeProjection
+node PropertyAccessor
+node BackingField
+node InitializerList
+node TypeConstraintList
+node TypeConstraint
+node ConstructorDelegationCall
+node ConstructorDelegationReference
+node Null
+node BooleanConstant
+node FloatConstant
+node CharacterConstant
+node IntegerConstant
+node StringTemplate
+node LongStringTemplateEntry
+node ShortStringTemplateEntry
+node LiteralStringTemplateEntry
+node EscapeStringTemplateEntry
+node StringInterpolationPrefix
+node Parenthesized
+node Return
+node Throw
+node Continue
+node Break
+node If
+node Condition
+node Then
+node Else
+node Try
+node Catch
+node Finally
+node For
+node While
+node DoWhile
+node LoopRange
+node Body
+node Block
+node LambdaExpression
+node FunctionLiteral
+node AnnotatedExpression
+node ReferenceExpression
+node EnumEntrySuperclassReferenceExpression
+node OperationReference
+node Label
+node LabelQualifier
+node ThisExpression
+node SuperExpression
+node BinaryExpression
+node BinaryWithType
+node IsExpression
+node PrefixExpression
+node PostfixExpression
+node LabeledExpression
+node CallExpression
+node ArrayAccessExpression
+node Indices
+node DotQualifiedExpression
+node CallableReferenceExpression
+node ClassLiteralExpression
+node SafeAccessExpression
+node ObjectLiteral
+node When
+node WhenEntry
+node WhenEntryGuard
+node WhenConditionInRange
+node WhenConditionIsPattern
+node WhenConditionExpression
+node CollectionLiteralExpression
+node PackageDirective
+node Script
+node ErrorElement

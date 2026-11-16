@@ -1,0 +1,9 @@
+extensions: [kt, kts]
+formatter: KotlinFormatter
+parse: adapter::parse_file
+options:
+  - indent_size: 4
+  - line_width: 140
+  - indent_style
+  - final_newline: true
+  - end_of_line

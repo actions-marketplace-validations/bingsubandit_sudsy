@@ -36,6 +36,7 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
         Box::new(lang_html::provider()),
         Box::new(lang_ini::provider()),
         Box::new(lang_js::provider()),
+        Box::new(lang_kotlin::provider()),
         Box::new(lang_makefile::provider()),
         Box::new(lang_markdown::provider()),
         Box::new(lang_powershell::provider()),

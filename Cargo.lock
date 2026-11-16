@@ -1632,6 +1632,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "ktrs-lexer"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e085425e4b01ec2d56f4159051bf9152f149b5501ce13f7d05eb3a895c721f58"
+dependencies = [
+ "ktrs-syntax",
+]
+
+[[package]]
+name = "ktrs-parser"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec8d43d9549490689477385c7678bbd22ecbc445973ab364e8ecb69dd4882bcc"
+dependencies = [
+ "ktrs-lexer",
+ "ktrs-syntax",
+]
+
+[[package]]
+name = "ktrs-syntax"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b29166c66ba5e9edb079497726eae48b28a5dc405b5e189d54ff96ddbd38e4f"
+dependencies = [
+ "text-size",
+]
+
+[[package]]
 name = "lang-csharp"
 version = "0.1.0-rc.1"
 dependencies = [
@@ -1811,6 +1839,20 @@ dependencies = [
  "core-syntax",
  "insta",
  "proptest",
+ "provider-api",
+]
+
+[[package]]
+name = "lang-kotlin"
+version = "0.1.0-rc.1"
+dependencies = [
+ "core-config",
+ "core-format",
+ "core-rules",
+ "core-syntax",
+ "insta",
+ "ktrs-parser",
+ "ktrs-syntax",
  "provider-api",
 ]
 
@@ -1997,6 +2039,7 @@ dependencies = [
  "lang-ini",
  "lang-js",
  "lang-json",
+ "lang-kotlin",
  "lang-makefile",
  "lang-markdown",
  "lang-powershell",
