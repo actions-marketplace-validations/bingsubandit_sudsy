@@ -1,10 +1,11 @@
-//! The `template` family: checks of Vue template syntax on attributes and tags. They are Rust
+//! The `template` family: checks of Vue and Svelte template syntax on attributes, tags and
+//! mustaches. They are Rust
 //! rather than pattern files because a pattern rule compiles a regex that costs more than all
 //! of these rules together (the lint bench of `.vue` and `.svelte` inputs).
 //!
 //! Param `check` (default `directive`; the others are named in [`Kind`]) and, for every check,
-//! `vue-only` (the rule runs on `.vue` files only: in HTML, `slot`, `is` and `<template>` are
-//! standard). `directive` reads the attributes called `name` (`v-if`, `v-bind`, ...; `:x`, `@x`
+//! `only` (`vue` or `svelte`: the rule runs on files of that extension only; in HTML, `slot`, `is`
+//! and `<template>` are standard). `directive` reads the attributes called `name` (`v-if`, `v-bind`, ...; `:x`, `@x`
 //! and `#x` are `v-bind`, `v-on` and `v-slot`, a plain attribute is `slot`) and reports one
 //! when any of its conditions holds:
 //! - `value`: `required`, `forbidden`, `unless-arg` / `unless-modifier` (required when there is
@@ -15,7 +16,12 @@
 //!   not have one of them (`v-else` after `v-if`);
 //! - `bad-host`: `html` (a plain lowercase element: not `<template>`, `<component>` or a
 //!   component), `file-input` (an `<input type="file">`);
-//! - `host`: the rule only looks at this element, `template`, `html` or `not-slot`.
+//! - `host`: the rule only looks at this element, `template`, `html`, `not-slot` or `checkable`
+//!   (an `<input>` that is a checkbox or a radio button).
+//!
+//! The other checks take `prefix` (`duplicate`: the attributes starting with it must not repeat;
+//! `strip-modifiers` compares the names without `|modifiers`) and `directives` (`svelte-shorthand`:
+//! the directives, comma-separated, whose `={name}` is redundant; none: plain attributes).
 
 use crate::generated::kind as k;
 use core_rules::{Edit, Family, Params, Rule, RuleContext, RuleMeta};
@@ -36,6 +42,14 @@ enum Kind {
     LoneTemplate,
     TextareaMustache,
     ComponentIs,
+    Duplicate,
+    RawSpecial,
+    ChildrenSnippet,
+    UselessMustache,
+    SvelteShorthand,
+    SpacedComment,
+    TargetBlank,
+    NestedStyle,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -55,6 +69,7 @@ enum Host {
     Html,
     NotSlot,
     FileInput,
+    Checkable,
 }
 
 enum Modifiers {
@@ -89,13 +104,21 @@ enum Check {
     LoneTemplate,
     TextareaMustache,
     ComponentIs,
+    Duplicate { prefix: String, strip: bool },
+    RawSpecial,
+    ChildrenSnippet,
+    UselessMustache,
+    SvelteShorthand { directives: Vec<String> },
+    SpacedComment,
+    TargetBlank,
+    NestedStyle,
 }
 
 struct Template {
     meta: &'static RuleMeta,
     check: Check,
     message: String,
-    vue_only: bool,
+    only: Option<String>,
 }
 
 fn list(text: Option<String>) -> Vec<String> {
@@ -113,6 +136,7 @@ fn host(p: &mut Params, key: &str) -> Result<Option<Host>, String> {
         "html" => Ok(Some(Host::Html)),
         "not-slot" => Ok(Some(Host::NotSlot)),
         "file-input" => Ok(Some(Host::FileInput)),
+        "checkable" => Ok(Some(Host::Checkable)),
         _ => Err(format!("param `{key}`: `{text}` is not a host")),
     }
 }
@@ -183,6 +207,14 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
             ("lone-template", Kind::LoneTemplate),
             ("textarea-mustache", Kind::TextareaMustache),
             ("component-is", Kind::ComponentIs),
+            ("duplicate", Kind::Duplicate),
+            ("raw-special", Kind::RawSpecial),
+            ("children-snippet", Kind::ChildrenSnippet),
+            ("useless-mustache", Kind::UselessMustache),
+            ("svelte-shorthand", Kind::SvelteShorthand),
+            ("spaced-comment", Kind::SpacedComment),
+            ("target-blank", Kind::TargetBlank),
+            ("nested-style", Kind::NestedStyle),
         ],
     )?;
     let check = match kind {
@@ -197,12 +229,25 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         Kind::LoneTemplate => Check::LoneTemplate,
         Kind::TextareaMustache => Check::TextareaMustache,
         Kind::ComponentIs => Check::ComponentIs,
+        Kind::Duplicate => Check::Duplicate {
+            prefix: p.text("prefix")?,
+            strip: p.flag("strip-modifiers")?,
+        },
+        Kind::RawSpecial => Check::RawSpecial,
+        Kind::ChildrenSnippet => Check::ChildrenSnippet,
+        Kind::UselessMustache => Check::UselessMustache,
+        Kind::SvelteShorthand => Check::SvelteShorthand {
+            directives: list(p.optional("directives")),
+        },
+        Kind::SpacedComment => Check::SpacedComment,
+        Kind::TargetBlank => Check::TargetBlank,
+        Kind::NestedStyle => Check::NestedStyle,
     };
     let rule = Template {
         meta,
         check,
         message: p.text("message")?,
-        vue_only: p.flag("vue-only")?,
+        only: p.optional("only"),
     };
     p.done()?;
     Ok(Box::new(rule))
@@ -329,6 +374,15 @@ fn is_host(h: Host, tag: &SyntaxNode, text: &str) -> bool {
         Host::Template => name == "template",
         Host::NotSlot => name != "slot",
         Host::Html => !is_component(name) && !matches!(name, "template" | "component"),
+        Host::Checkable => {
+            name.eq_ignore_ascii_case("input")
+                && attrs(tag, text).iter().any(|a| {
+                    a.full == "type"
+                        && a.value().is_some_and(|v| {
+                            v.eq_ignore_ascii_case("checkbox") || v.eq_ignore_ascii_case("radio")
+                        })
+                })
+        }
         Host::FileInput => {
             name.eq_ignore_ascii_case("input")
                 && attrs(tag, text).iter().any(|a| {
@@ -403,18 +457,26 @@ impl Rule for Template {
 
     fn kinds(&self) -> &[SyntaxKind] {
         match self.check {
-            Check::LoneTemplate | Check::TextareaMustache | Check::ComponentIs => &[k::START_TAG],
+            Check::LoneTemplate
+            | Check::TextareaMustache
+            | Check::ComponentIs
+            | Check::RawSpecial
+            | Check::TargetBlank
+            | Check::NestedStyle => &[k::START_TAG],
+            Check::ChildrenSnippet => &[k::BLOCK_TAG],
+            Check::UselessMustache => &[k::MUSTACHE],
+            Check::SpacedComment => &[k::DOCUMENT],
             _ => &[k::ATTRIBUTE],
         }
     }
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        if self.vue_only
+        if let Some(only) = &self.only
             && ctx
                 .file
                 .path
                 .extension()
-                .is_none_or(|e| e.to_str() != Some("vue"))
+                .is_none_or(|e| e.to_str() != Some(only))
         {
             return;
         }
@@ -470,11 +532,117 @@ impl Rule for Template {
                     ctx.report(range, self.message.clone());
                 }
             }
+            Check::RawSpecial => {
+                if let Some((name, range)) = tag_name(node, text)
+                    && matches!(
+                        name,
+                        "head" | "body" | "window" | "document" | "element" | "options"
+                    )
+                {
+                    ctx.report(range, self.message.clone());
+                }
+            }
+            Check::NestedStyle => {
+                if let Some((name, range)) = tag_name(node, text)
+                    && name == "style"
+                    && node
+                        .parent()
+                        .and_then(|e| e.parent())
+                        .is_some_and(|p| p.kind() != k::DOCUMENT)
+                {
+                    ctx.report(range, self.message.clone());
+                }
+            }
+            Check::ChildrenSnippet => {
+                let (s, start) = code(node, text);
+                let empty = s
+                    .strip_prefix("{#snippet")
+                    .map(str::trim_start)
+                    .and_then(|r| r.strip_prefix("children"))
+                    .map(str::trim_start)
+                    .and_then(|r| r.strip_prefix('('))
+                    .is_some_and(|r| r.trim_start().starts_with(')'));
+                if empty {
+                    ctx.report(
+                        TextRange::at(start, TextSize::of(s.trim_end())),
+                        self.message.clone(),
+                    );
+                }
+            }
+            Check::UselessMustache => {
+                let (s, start) = code(node, text);
+                let s = s.trim_end();
+                let inner = s
+                    .strip_prefix('{')
+                    .and_then(|r| r.strip_suffix('}'))
+                    .map(str::trim);
+                if let Some(inner) = inner
+                    && let Some(q) = inner
+                        .chars()
+                        .next()
+                        .filter(|c| matches!(c, '"' | '\'' | '`'))
+                    && inner.len() >= 2
+                    && inner.ends_with(q)
+                {
+                    let body = &inner[1..inner.len() - 1];
+                    if !body.contains([q, '\\']) && !(q == '`' && body.contains("${")) {
+                        ctx.report(TextRange::at(start, TextSize::of(s)), self.message.clone());
+                    }
+                }
+            }
+            Check::SpacedComment => {
+                for t in node
+                    .descendants_with_tokens()
+                    .filter_map(|e| e.into_token())
+                    .filter(|t| t.kind() == k::COMMENT)
+                {
+                    let c = &text[t.text_range()];
+                    let inner = c.strip_prefix("<!--").and_then(|c| c.strip_suffix("-->"));
+                    if inner.is_some_and(|i| {
+                        !i.is_empty()
+                            && !(i.starts_with(char::is_whitespace)
+                                && i.ends_with(char::is_whitespace))
+                    }) {
+                        ctx.report(t.text_range(), self.message.clone());
+                    }
+                }
+            }
+            Check::TargetBlank => {
+                let attrs = attrs(node, text);
+                let is_a = tag_name(node, text).is_some_and(|(n, _)| n.eq_ignore_ascii_case("a"));
+                let external = attrs.iter().any(|a| {
+                    (a.full == "href"
+                        && a.after.trim_start().strip_prefix('=').is_some_and(|v| {
+                            let v = v.trim_start().trim_start_matches(['"', '\'']);
+                            v.starts_with("http://")
+                                || v.starts_with("https://")
+                                || v.starts_with("//")
+                                || v.starts_with('{')
+                        }))
+                        || a.name == "v-bind" && a.parts().0 == Some("href")
+                });
+                let safe = attrs.iter().any(|a| {
+                    a.full == "rel"
+                        && a.value()
+                            .is_some_and(|v| v.split_whitespace().any(|w| w == "noreferrer"))
+                });
+                if let Some(target) = attrs
+                    .iter()
+                    .find(|a| a.full == "target" && a.value() == Some("_blank"))
+                    && is_a
+                    && external
+                    && !safe
+                {
+                    ctx.report(target.range(), self.message.clone());
+                }
+            }
             check => {
                 let s = code(node, text).0;
                 let candidate = match check {
                     Check::Directive(d) => d.prefixes.iter().any(|p| s.starts_with(p.as_str())),
                     Check::Shorthand { from, .. } => s.starts_with(from.as_str()),
+                    Check::Duplicate { prefix, .. } => s.starts_with(prefix.as_str()),
+                    Check::SvelteShorthand { .. } => s.contains("={") || s.contains("= {"),
                     Check::KeyOnChild => s.starts_with(":key") || s.starts_with("v-bind:key"),
                     Check::ChildContent => s.starts_with("v-html") || s.starts_with("v-text"),
                     _ => s
@@ -523,6 +691,48 @@ impl Rule for Template {
                                         && attrs(&t, text).iter().any(|x| x.name == "v-for")
                                 })
                     }
+                    Check::Duplicate { strip, .. } => {
+                        let key = |a: &Attr<'_>| {
+                            a.full
+                                .split('|')
+                                .next()
+                                .filter(|_| *strip)
+                                .unwrap_or(a.full)
+                                .to_string()
+                        };
+                        let mine = key(&a);
+                        std::iter::successors(node.prev_sibling(), SyntaxNode::prev_sibling)
+                            .filter(|n| n.kind() == k::ATTRIBUTE)
+                            .filter_map(|n| Attr::parse(&n, text))
+                            .any(|o| key(&o) == mine)
+                    }
+                    Check::SvelteShorthand { directives } => {
+                        let inner = a
+                            .after
+                            .trim()
+                            .strip_prefix('=')
+                            .map(str::trim)
+                            .and_then(|r| r.strip_prefix('{'))
+                            .and_then(|r| r.strip_suffix('}'))
+                            .map(str::trim);
+                        let target = if directives.is_empty() {
+                            Some(a.full)
+                        } else {
+                            a.full
+                                .split_once(':')
+                                .filter(|(d, _)| directives.iter().any(|x| x == d))
+                                .map(|(_, n)| n)
+                        };
+                        match (inner, target) {
+                            (Some(i), Some(t)) => {
+                                i == t
+                                    && !t.is_empty()
+                                    && t.chars()
+                                        .all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+                            }
+                            _ => false,
+                        }
+                    }
                     Check::ChildContent => {
                         matches!(a.name, "v-html" | "v-text")
                             && tag.parent().is_some_and(|e| {
@@ -538,7 +748,20 @@ impl Rule for Template {
                 if !hit {
                     return;
                 }
-                if let Check::Shorthand { from, to } = check {
+                if let Check::SvelteShorthand { directives } = check {
+                    let end = a.start + TextSize::of(code(node, text).0.trim_end());
+                    let whole = TextRange::new(a.start, end);
+                    let edit = if directives.is_empty() {
+                        Edit::replace(whole, format!("{{{}}}", a.full))
+                    } else {
+                        Edit::delete(TextRange::new(a.start + TextSize::of(a.full), end))
+                    };
+                    ctx.report_fix(
+                        a.range(),
+                        self.message.clone(),
+                        ("Use the shorthand", vec![edit]),
+                    );
+                } else if let Check::Shorthand { from, to } = check {
                     let range = TextRange::at(a.start, TextSize::of(from.as_str()));
                     ctx.report_fix(
                         range,

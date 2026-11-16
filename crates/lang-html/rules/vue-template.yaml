@@ -1,6 +1,6 @@
 id: no-lone-template
 family: template
-params: { check: lone-template, vue-only: true }
+params: { check: lone-template, only: vue }
 message: "a `<template>` without `v-if`, `v-for`, `v-slot` or the like renders nothing of its own: remove the tag"
 description: "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files."
 example: "<div><template><p></p></template></div>   <div><template v-if=\"a\"><p></p></template></div>"

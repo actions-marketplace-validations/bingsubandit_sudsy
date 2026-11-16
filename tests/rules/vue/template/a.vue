@@ -16,5 +16,8 @@
     <p v-html="h">child</p>
 //     ^^^^^^ no-child-content
     <p v-text="t"> </p>
+//     ^^^^^^ no-v-text
+    <a :href="u" target="_blank">x</a>
+//               ^^^^^^ no-target-blank
   </div>
 </template>

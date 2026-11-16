@@ -2166,6 +2166,10 @@
               "$ref": "#/definitions/rule",
               "description": "A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a space or starts the paragraph. Reported on the paragraph."
             },
+            "no-bind-value-on-checkable-inputs": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-bind-value-on-checkable-inputs` (eslint-plugin-svelte)."
+            },
             "no-case-declarations": {
               "$ref": "#/definitions/rule",
               "description": "`let`, `const`, a function or a class declared directly in a `case` clause, where it is visible to the other cases."
@@ -2293,6 +2297,18 @@
             "no-dupe-keys": {
               "$ref": "#/definitions/rule",
               "description": "A key that appears twice in one object literal (a getter and a setter may share one)."
+            },
+            "no-dupe-on-directives": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). Same event and modifiers twice; put both handlers in one function."
+            },
+            "no-dupe-style-properties": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-dupe-style-properties` (eslint-plugin-svelte). `|important` is not part of the property."
+            },
+            "no-dupe-use-directives": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte)."
             },
             "no-duplicate-anchors": {
               "$ref": "#/definitions/rule",
@@ -2660,6 +2676,10 @@
               "$ref": "#/definitions/rule",
               "description": "An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER."
             },
+            "no-nested-style-tag": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS."
+            },
             "no-non-null-assertion": {
               "$ref": "#/definitions/rule",
               "description": "A non-null assertion `a!`."
@@ -2719,6 +2739,10 @@
             "no-ps-grep": {
               "$ref": "#/definitions/rule",
               "description": "A pipeline from `ps` into `grep`."
+            },
+            "no-raw-special-elements": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on."
             },
             "no-redeclare": {
               "$ref": "#/definitions/rule",
@@ -2807,6 +2831,10 @@
             "no-sudo": {
               "$ref": "#/definitions/rule",
               "description": "A RUN that calls sudo."
+            },
+            "no-target-blank": {
+              "$ref": "#/definitions/rule",
+              "description": "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer. Also eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`."
             },
             "no-textarea-mustache": {
               "$ref": "#/definitions/rule",
@@ -2906,9 +2934,17 @@
               "$ref": "#/definitions/rule",
               "description": "A `catch` that only rethrows its error."
             },
+            "no-useless-children-snippet": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-useless-children-snippet` (eslint-plugin-svelte)."
+            },
             "no-useless-escape": {
               "$ref": "#/definitions/rule",
               "description": "A backslash in a string, template or regex that escapes nothing special (`\"\\d\"`, `/\\-/`)."
+            },
+            "no-useless-mustaches": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-useless-mustaches` (eslint-plugin-svelte)."
             },
             "no-v-for-template-key-on-child": {
               "$ref": "#/definitions/rule",
@@ -2917,6 +2953,10 @@
             "no-v-html": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first."
+            },
+            "no-v-text": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-v-text` (eslint-plugin-vue)."
             },
             "no-void-end-tag": {
               "$ref": "#/definitions/rule",
@@ -4339,6 +4379,14 @@
               "$ref": "#/definitions/rule",
               "description": "A statement `setattr(x, \"name\", v)` with a literal name that is an identifier."
             },
+            "shorthand-attribute": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `shorthand-attribute` (eslint-plugin-svelte)."
+            },
+            "shorthand-directive": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `shorthand-directive` (eslint-plugin-svelte), for `bind:`, `class:` and `style:`."
+            },
             "shorthand-property-no-redundant-values": {
               "$ref": "#/definitions/rule",
               "description": "A `margin`, `padding`, `border-color`, `border-style`, `border-width` or `border-radius` with two, three or four values that repeat (`1px 1px` is `1px`)."
@@ -4525,6 +4573,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "spaced-html-comment": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `spaced-html-comment` (eslint-plugin-svelte)."
             },
             "string-dot-format-extra-named-arguments": {
               "$ref": "#/definitions/rule",

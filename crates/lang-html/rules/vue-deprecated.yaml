@@ -36,7 +36,7 @@ category: correctness
 ---
 id: no-deprecated-slot-attribute
 family: template
-params: { name: slot, host: not-slot, vue-only: true }
+params: { name: slot, host: not-slot, only: vue }
 message: "the `slot` attribute is gone in Vue 3: use `v-slot` (`#name`) on a `<template>`"
 description: "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot."
 example: "<p slot=\"head\">   <template #head><p></p></template>"
@@ -81,7 +81,7 @@ category: correctness
 ---
 id: no-deprecated-html-element-is
 family: template
-params: { name: is, value: vue-prefixed, host: html, vue-only: true }
+params: { name: is, value: vue-prefixed, host: html, only: vue }
 message: "`is` on an HTML element needs the `vue:` prefix in Vue 3 (`is=\"vue:name\"`), or use `<component :is>`"
 description: "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element."
 example: "<tr is=\"row\">   <tr is=\"vue:row\">"

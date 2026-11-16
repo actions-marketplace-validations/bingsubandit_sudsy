@@ -28,11 +28,11 @@ One line per upstream rule or option under `entries:`, `<id>: <status>` or `<id>
 | dotnet-format-editorconfig | 56 | 50 | 3 | 0 | 1 | 2 | 0 | 0 |
 | eslint | 292 | 86 | 16 | 136 | 0 | 32 | 22 | 136 |
 | eslint-plugin-jsonc | 44 | 36 | 6 | 0 | 0 | 2 | 0 | 0 |
-| eslint-plugin-svelte | 84 | 5 | 7 | 32 | 0 | 3 | 37 | 32 |
-| eslint-plugin-vue | 128 | 41 | 15 | 52 | 0 | 3 | 17 | 52 |
+| eslint-plugin-svelte | 84 | 18 | 8 | 17 | 0 | 3 | 38 | 17 |
+| eslint-plugin-vue | 128 | 43 | 16 | 49 | 0 | 3 | 17 | 49 |
 | graphql-eslint | 35 | 4 | 6 | 0 | 0 | 0 | 25 | 0 |
 | hadolint | 71 | 38 | 10 | 0 | 0 | 1 | 22 | 0 |
-| html-eslint | 66 | 13 | 11 | 42 | 0 | 0 | 0 | 42 |
+| html-eslint | 66 | 14 | 11 | 41 | 0 | 0 | 0 | 41 |
 | html-validate | 90 | 34 | 30 | 19 | 0 | 1 | 6 | 19 |
 | htmlhint | 42 | 10 | 6 | 26 | 0 | 0 | 0 | 26 |
 | markdownlint | 53 | 25 | 16 | 0 | 0 | 0 | 12 | 0 |

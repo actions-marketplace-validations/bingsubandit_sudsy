@@ -3,3 +3,5 @@ no-textarea-mustache: warn
 require-component-is: warn
 no-v-for-template-key-on-child: warn
 no-child-content: warn
+no-v-text: warn
+no-target-blank: warn

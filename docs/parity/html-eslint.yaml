@@ -46,7 +46,7 @@ entries:
   no-restricted-tags: planned
   no-script-style-type: planned
   no-skip-heading-levels: rule heading-level | also reports a first heading that is not an h1 and a second h1
-  no-target-blank: planned
+  no-target-blank: rule no-target-blank
   no-trailing-spaces: rule no-trailing-whitespace
   no-whitespace-only-children: planned
   prefer-https: planned

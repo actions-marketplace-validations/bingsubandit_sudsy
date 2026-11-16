@@ -1,0 +1,118 @@
+id: no-dupe-on-directives
+family: template
+params: { check: duplicate, prefix: "on:", only: svelte }
+message: "this `on:` directive repeats an earlier one of the element"
+description: "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). Same event and modifiers twice; put both handlers in one function."
+example: "<b on:click={a} on:click={b}>   <b on:click={both}>"
+severity: warn
+category: correctness
+---
+id: no-dupe-use-directives
+family: template
+params: { check: duplicate, prefix: "use:", only: svelte }
+message: "this `use:` directive repeats an earlier one of the element"
+description: "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte)."
+example: "<b use:tip use:tip>   <b use:tip>"
+severity: warn
+category: correctness
+---
+id: no-dupe-style-properties
+family: template
+params: { check: duplicate, prefix: "style:", strip-modifiers: true, only: svelte }
+message: "this `style:` property repeats an earlier one of the element"
+description: "Svelte's `no-dupe-style-properties` (eslint-plugin-svelte). `|important` is not part of the property."
+example: "<b style:color=\"a\" style:color={b}>   <b style:color={b}>"
+severity: warn
+category: correctness
+---
+id: no-raw-special-elements
+family: template
+params: { check: raw-special, only: svelte }
+message: "a special element is written `<svelte:name>`"
+description: "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on."
+example: "<head></head>   <svelte:head></svelte:head>"
+severity: warn
+category: suspicious
+---
+id: no-useless-children-snippet
+family: template
+params: { check: children-snippet, only: svelte }
+message: "a `{#snippet children()}` without parameters is the content of the component: write the content"
+description: "Svelte's `no-useless-children-snippet` (eslint-plugin-svelte)."
+example: "<C>{#snippet children()}hi{/snippet}</C>   <C>hi</C>"
+severity: warn
+category: suspicious
+---
+id: no-useless-mustaches
+family: template
+params: { check: useless-mustache, only: svelte }
+message: "a string literal in `{ }` is just text: write it without the braces"
+description: "Svelte's `no-useless-mustaches` (eslint-plugin-svelte)."
+example: "<p>{\"text\"}</p>   <p>text</p>"
+severity: warn
+category: suspicious
+---
+id: shorthand-attribute
+family: template
+params: { check: svelte-shorthand, only: svelte }
+message: "write `name={name}` as `{name}`"
+description: "Svelte's `shorthand-attribute` (eslint-plugin-svelte)."
+example: "<b id={id}>   <b {id}>"
+severity: off
+category: style
+fix-kind: safe
+---
+id: shorthand-directive
+family: template
+params: { check: svelte-shorthand, directives: "bind,class,style", only: svelte }
+message: "write `bind:name={name}` as `bind:name`"
+description: "Svelte's `shorthand-directive` (eslint-plugin-svelte), for `bind:`, `class:` and `style:`."
+example: "<input bind:value={value}>   <input bind:value>"
+severity: off
+category: style
+fix-kind: safe
+---
+id: spaced-html-comment
+family: template
+params: { check: spaced-comment, only: svelte }
+message: "put a space inside the comment: `<!-- text -->`"
+description: "Svelte's `spaced-html-comment` (eslint-plugin-svelte)."
+example: "<!--text-->   <!-- text -->"
+severity: off
+category: style
+---
+id: no-nested-style-tag
+family: template
+params: { check: nested-style, only: svelte }
+message: "a `<style>` inside an element is not the component's stylesheet"
+description: "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS."
+example: "<div><style>a{}</style></div>"
+severity: off
+category: suspicious
+---
+id: no-bind-value-on-checkable-inputs
+family: template
+params: { check: directive, name: bind:value, host: checkable }
+message: "a checkbox or radio button binds `bind:checked` (or `bind:group`), not `bind:value`"
+description: "Svelte's `no-bind-value-on-checkable-inputs` (eslint-plugin-svelte)."
+example: "<input type=\"checkbox\" bind:value={v}>   <input type=\"checkbox\" bind:checked={v}>"
+severity: off
+category: correctness
+---
+id: no-target-blank
+family: template
+params: { check: target-blank }
+message: "a link to another site with `target=\"_blank\"` needs `rel=\"noreferrer\"`"
+description: "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer. Also eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`."
+example: "<a href=\"https://x.org\" target=\"_blank\">   <a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">"
+severity: off
+category: suspicious
+---
+id: no-v-text
+family: template
+params: { name: v-text }
+message: "`v-text` replaces the content of the element: write `{{ }}`"
+description: "Vue's `no-v-text` (eslint-plugin-vue)."
+example: "<p v-text=\"msg\"></p>   <p>{{ msg }}</p>"
+severity: off
+category: style

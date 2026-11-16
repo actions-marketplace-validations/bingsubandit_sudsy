@@ -65,7 +65,7 @@ entries:
   block-tag-newline: formatter | the formatter owns layout
   block-lang: planned
   block-order: planned
-  html-button-has-type: planned
+  html-button-has-type: rule no-implicit-button-type | a missing `type` only, not an invalid value
   html-end-tags: planned
   max-lines-per-block: planned
   max-template-depth: planned
@@ -91,13 +91,13 @@ entries:
   no-negated-v-if-condition: planned
   no-root-v-if: planned
   no-static-inline-styles: planned
-  no-template-target-blank: planned
+  no-template-target-blank: rule no-target-blank
   no-use-v-else-with-v-for: planned
   no-useless-mustaches: planned
   no-useless-template-attributes: planned
   no-useless-v-bind: planned
   no-v-for-template-key-on-child: rule no-v-for-template-key-on-child
-  no-v-text: planned
+  no-v-text: rule no-v-text
   prefer-separate-static-class: planned
   prefer-true-attribute-shorthand: planned
   require-toggle-inside-transition: planned
