@@ -75,13 +75,13 @@ fn next_side(seq: &Seq, e: usize) -> Side {
     }
 }
 
-pub fn spans(seq: &Seq) -> Vec<Span> {
+pub fn spans(seq: &Seq, comma: Pos) -> Vec<Span> {
     let mut out = Vec::new();
     for i in 1..seq.blocks.len() - 1 {
         let b = &seq.blocks[i];
         let node = &seq.nodes[b.node as usize];
         let (pos, strict, s, e) = match (b.kind, node.kind) {
-            (k::COMMA, _) => (Pos::Trailing, false, i, i),
+            (k::COMMA, _) => (comma, false, i, i),
             (k::BINARY_OPERATOR | k::BINARY_KEYWORD, _) => (Pos::Leading, false, i, i),
             (_, k::COMPARISON_OPERATOR) if node.first == i as u32 => {
                 (Pos::Leading, false, i, node.last as usize)
@@ -97,8 +97,8 @@ pub fn spans(seq: &Seq) -> Vec<Span> {
 }
 
 /// Keeps operators, commas and set operators where they belong around line breaks.
-pub fn rebreak(seq: &mut Seq) {
-    for sp in spans(seq) {
+pub fn rebreak(seq: &mut Seq, comma: Pos) {
+    for sp in spans(seq, comma) {
         let (prev, next) = (prev_side(seq, sp.s), next_side(seq, sp.e));
         let before = seq.points[prev.newline].newlines;
         let after = seq.points[next.newline].newlines;
@@ -334,14 +334,36 @@ pub fn ctes(seq: &mut Seq) {
     }
 }
 
+/// The most line breaks (one more than blank lines) the gap before block `i` may have, by what
+/// sqlfluff's LT15 calls its scope: inside a statement 1 blank line, between statements 2 and
+/// between batches (after a T-SQL `GO`) 1. Leading and trailing comments of a statement lie
+/// between statements.
+fn max_breaks(seq: &Seq, i: usize) -> u32 {
+    let common = seq.common_node(i - 1, i);
+    let alone = seq.points[i - 1].newlines > 0 || i == 1;
+    if alone && seq.blocks[i - 1].text.eq_ignore_ascii_case("go") {
+        return 2;
+    }
+    let mut n = common;
+    while n != NONE {
+        let node = &seq.nodes[n as usize];
+        if node.kind == k::STATEMENT {
+            let inside = node.first != NONE && node.first < i as u32 && i as u32 <= node.last;
+            let ctes = common != n && seq.nodes[common as usize].kind == k::WITH_COMPOUND_STATEMENT;
+            return if inside && !ctes { 2 } else { 3 };
+        }
+        n = node.parent;
+    }
+    3
+}
+
 /// No blank lines at the start of the file; at most one inside a statement and two between
 /// statements (LT13, LT15).
 pub fn blank_lines(seq: &mut Seq) {
     seq.points[0].newlines = 0;
     seq.points[0].ws = Cow::Borrowed("");
     for i in 1..seq.blocks.len() {
-        let between = seq.common_node(i - 1, i) == 0;
-        let max = if between { 3 } else { 2 };
+        let max = max_breaks(seq, i);
         let p = &mut seq.points[i];
         p.newlines = p.newlines.min(max);
     }

@@ -37,8 +37,10 @@ fn signature(seq: &Seq) -> Vec<(u32, String)> {
 
 pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -> Doc {
     let mut seq = Seq::build(root, grammar);
-    if matches!(options.get("dialect"), Some(OptionValue::String(d)) if d == "mysql") {
-        blocks::add_indents(&mut seq);
+    match options.get("dialect") {
+        Some(OptionValue::String(d)) if d == "mysql" => blocks::add_indents(&mut seq),
+        Some(OptionValue::String(d)) if d == "tsql" => blocks::add_tsql_indents(&mut seq),
+        _ => {}
     }
     case::recase(&mut seq, options);
     let unit = unit(options);
@@ -47,12 +49,16 @@ pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -
         Some(OptionValue::Int(n)) => *n as usize,
         _ => 80,
     };
+    let comma = match options.get("comma_position") {
+        Some(OptionValue::String(s)) if s == "leading" => breaks::Pos::Leading,
+        _ => breaks::Pos::Trailing,
+    };
     for _ in 0..40 {
         let before = signature(&seq);
         space::respace(&mut seq);
         indent::reindent(&mut seq, &unit);
-        breaks::rebreak(&mut seq);
-        let wrapped = wrap::long_lines(&mut seq, width, tab, &unit);
+        breaks::rebreak(&mut seq, comma);
+        let wrapped = wrap::long_lines(&mut seq, width, tab, &unit, comma);
         breaks::ctes(&mut seq);
         breaks::select_targets(&mut seq, width);
         breaks::keywords(&mut seq);

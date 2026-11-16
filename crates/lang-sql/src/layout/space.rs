@@ -52,7 +52,17 @@ fn wishes(seq: &Seq, i: usize) -> (Wish, Wish) {
     }
     match seq.blocks[i].kind {
         k::COMMA | k::SEMICOLON | k::R_PAREN | k::R_SQUARE | k::EOF => before = TOUCH,
-        k::COLON => (before, after) = (TOUCH, ANY),
+        // A `:` that starts a line is a sqlcmd command (`:r file`), whose word it touches.
+        k::COLON => {
+            (before, after) = (
+                TOUCH,
+                if i == 0 || seq.points[i].newlines > 0 {
+                    ANY
+                } else {
+                    SINGLE
+                },
+            )
+        }
         k::DOT | k::SLICE => (before, after) = (TOUCH, TOUCH),
         k::PREFIX => after = TOUCH,
         k::L_PAREN | k::L_SQUARE => after = TOUCH,

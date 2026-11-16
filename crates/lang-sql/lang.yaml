@@ -11,6 +11,10 @@ options:
   - indent_size: 4
   - final_newline: true
   - end_of_line
+  - comma_position:
+      values: ["trailing", "leading"]
+      default: "trailing"
+      doc: "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one."
   - keyword_case:
       values: ["consistent", "upper", "lower", "capitalise"]
       default: "consistent"

@@ -61,6 +61,22 @@ fn capitalisation_follows_the_first_word_or_the_option() {
 }
 
 #[test]
+fn leading_commas() {
+    let mut subject = Formatting::new(lang_sql::provider(), "a.sql");
+    subject.options.push((
+        "comma_position",
+        core_config::OptionValue::String("leading".into()),
+    ));
+    assert_eq!(
+        assert_formats(
+            &subject,
+            "select a,\n b\n, c from t where x in (1,\n 2\n,3)\n"
+        ),
+        "select\n    a\n    , b\n    , c\nfrom t\nwhere x in (\n    1\n    , 2\n    , 3\n)\n"
+    );
+}
+
+#[test]
 fn spacing_of_names_brackets_and_prefix_operators() {
     assert_eq!(
         formats("select max (a) from t;\n"),

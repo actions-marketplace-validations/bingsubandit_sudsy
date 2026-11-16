@@ -57,8 +57,8 @@ fn priority(seq: &Seq, sp: &Span) -> i32 {
 
 /// Operators, commas and set operators, and the clauses that sqlfluff's layout config wants alone
 /// on their lines (`ORDER BY` leading), in the order of their first block.
-fn rebreaks(seq: &Seq) -> Vec<Rebreak> {
-    let mut out: Vec<Rebreak> = breaks::spans(seq)
+fn rebreaks(seq: &Seq, comma: Pos) -> Vec<Rebreak> {
+    let mut out: Vec<Rebreak> = breaks::spans(seq, comma)
         .iter()
         .map(|sp| Rebreak {
             start: sp.s,
@@ -239,12 +239,12 @@ fn lift_comment(seq: &mut Seq, s: usize, c: usize) {
 
 /// Fixes every line that is too long and can be (from the end, so indexes stay valid); returns
 /// whether it fixed any.
-pub fn long_lines(seq: &mut Seq, max: usize, tab: usize, unit: &str) -> bool {
+pub fn long_lines(seq: &mut Seq, max: usize, tab: usize, unit: &str, comma: Pos) -> bool {
     if max == 0 {
         return false;
     }
     let starts = line_starts(seq);
-    let mut spans = rebreaks(seq);
+    let mut spans = rebreaks(seq, comma);
     let mut changed = false;
     for w in starts.windows(2).rev() {
         let (s, e) = (w[0], w[1]);
@@ -264,7 +264,7 @@ pub fn long_lines(seq: &mut Seq, max: usize, tab: usize, unit: &str) -> bool {
             let text = &seq.blocks[last].text;
             if !text.contains("noqa") && text.chars().count() + indent.chars().count() <= max {
                 lift_comment(seq, s, last);
-                spans = rebreaks(seq);
+                spans = rebreaks(seq, comma);
                 changed = true;
             }
             continue;

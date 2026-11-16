@@ -9,7 +9,7 @@ files:
   postgres-regress: parse-gap, layout-gap
 ratchet:
   sqlfluff-ansi: 202
-  sqlfluff-mysql: 202
+  sqlfluff-mysql: 206
   sqlfluff-postgres: 121
-  sqlfluff-tsql: 100
-  postgres-regress: 34
+  sqlfluff-tsql: 108
+  postgres-regress: 37

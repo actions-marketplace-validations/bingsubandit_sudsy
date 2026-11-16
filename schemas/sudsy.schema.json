@@ -9127,6 +9127,15 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "comma_position": {
+                    "default": "trailing",
+                    "description": "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one.",
+                    "enum": [
+                      "trailing",
+                      "leading"
+                    ],
+                    "type": "string"
+                  },
                   "dialect": {
                     "default": "ansi",
                     "description": "The SQL dialect the file is parsed as.",
@@ -10252,6 +10261,15 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "comma_position": {
+              "default": "trailing",
+              "description": "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one.",
+              "enum": [
+                "trailing",
+                "leading"
+              ],
+              "type": "string"
+            },
             "dialect": {
               "default": "ansi",
               "description": "The SQL dialect the file is parsed as.",
