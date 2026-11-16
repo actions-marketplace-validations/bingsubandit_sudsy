@@ -27,6 +27,8 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
         Box::new(lang_css::provider(lang_css::Dialect::Css)),
         Box::new(lang_css::provider(lang_css::Dialect::Scss)),
         Box::new(lang_css::provider(lang_css::Dialect::Less)),
+        Box::new(lang_cpp::provider(lang_cpp::Dialect::Cpp)),
+        Box::new(lang_cpp::provider(lang_cpp::Dialect::C)),
         // generated:providers
         Box::new(lang_dockerfile::provider()),
         Box::new(lang_editorconfig::provider()),

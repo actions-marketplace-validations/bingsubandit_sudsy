@@ -1,0 +1,101 @@
+// C and C++ (.c .h, .cc .cpp .cxx .hpp .hh .hxx .ipp), read without preprocessing by crates/lang-cpp (docs/formatting/cpp.md).
+// The lexer gives the tokens, the structural layer the nodes: unwrapped lines, bracket groups, preprocessor directives and, where the branches nest, conditional groups.
+// Format: see crates/core-syntax/src/grammar/mod.rs.
+
+language cpp 21 "C/C++"
+comments line "//" block "/*" "*/"
+suppress disable-next-line "sudsy-disable-next-line"
+suppress disable-line "sudsy-disable-line"
+suppress disable "sudsy-disable"
+suppress enable "sudsy-enable"
+suppress disable-file "sudsy-disable-file"
+suppress ignore "sudsy-ignore"
+suppress ignore-start "sudsy-ignore-start"
+suppress ignore-end "sudsy-ignore-end"
+
+token Whitespace #trivia #whitespace
+token Newline #trivia #newline
+// A backslash that ends a line.
+token Continuation #trivia #whitespace
+token Comment #trivia #comment
+
+token Lbrace "{" #punctuation
+token Rbrace "}" #punctuation #close
+token Lpar "(" #punctuation
+token Rpar ")" #punctuation #close
+token Lsqb "[" #punctuation
+token Rsqb "]" #punctuation #close
+token Semi ";" #punctuation #separator
+token Comma "," #punctuation #separator
+token Colon ":" #punctuation
+token ColonColon "::" #punctuation
+token Dot "." #punctuation
+token Ellipsis "..." #punctuation
+token Arrow "->" #punctuation
+token ArrowStar "->*" #punctuation
+token DotStar ".*" #punctuation
+token Question "?" #punctuation
+token Plus "+" #punctuation
+token Minus "-" #punctuation
+token Star "*" #punctuation
+token Slash "/" #punctuation
+token Percent "%" #punctuation
+token Caret "^" #punctuation
+token Amp "&" #punctuation
+token Pipe "|" #punctuation
+token Tilde "~" #punctuation
+token Bang "!" #punctuation
+token Equal "=" #punctuation
+token Less "<" #punctuation
+token Greater ">" #punctuation
+token PlusEq "+=" #punctuation
+token MinusEq "-=" #punctuation
+token StarEq "*=" #punctuation
+token SlashEq "/=" #punctuation
+token PercentEq "%=" #punctuation
+token CaretEq "^=" #punctuation
+token AmpEq "&=" #punctuation
+token PipeEq "|=" #punctuation
+token LessLess "<<" #punctuation
+token GreaterGreater ">>" #punctuation
+token LessLessEq "<<=" #punctuation
+token GreaterGreaterEq ">>=" #punctuation
+token EqEq "==" #punctuation
+token BangEq "!=" #punctuation
+token LessEq "<=" #punctuation
+token GreaterEq ">=" #punctuation
+token Spaceship "<=>" #punctuation
+token AmpAmp "&&" #punctuation
+token PipePipe "||" #punctuation
+token PlusPlus "++" #punctuation
+token MinusMinus "--" #punctuation
+token Hash "#" #punctuation
+token HashHash "##" #punctuation
+
+token Ident
+token Keyword #keyword
+token Number #literal
+token String #literal #string
+token Char #literal #string
+// The `<...>` of #include.
+token HeaderName #literal
+// A byte that starts no other token (`@`, a backquote, a stray backslash).
+token Other
+
+// Zero-width end-of-file token; it carries the leading trivia of the file's tail.
+token EndOfFile
+// Text the lexer could not classify.
+token Unknown #error
+
+node TranslationUnit = EndOfFile
+// An unwrapped line: the tokens and groups of one declaration or statement (a control statement's header is a line of its own, its body the next one).
+node Line
+// A `{ }`, `( )` or `[ ]` pair and what lies between; the closing token is missing when the text ends the group early.
+node BraceGroup
+node ParenGroup
+node BracketGroup
+// A preprocessor line: `#`, the directive's name and its tokens, with the lines it continues over.
+node Directive
+// `#if` ... `#endif` where the branches nest with the groups around them, and each of its branches (from its directive to the next).
+node PpGroup
+node PpBranch

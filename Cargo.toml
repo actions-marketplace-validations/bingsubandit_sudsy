@@ -96,6 +96,7 @@ lang-python = { path = "crates/lang-python" }
 lang-sql = { path = "crates/lang-sql" }
 lang-kotlin = { path = "crates/lang-kotlin" }
 lang-css = { path = "crates/lang-css" }
+lang-cpp = { path = "crates/lang-cpp" }
 lang-yaml = { path = "crates/lang-yaml" }
 lang-github-actions = { path = "crates/lang-github-actions" }
 # generated:languages

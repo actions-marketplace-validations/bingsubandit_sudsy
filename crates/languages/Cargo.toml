@@ -19,6 +19,7 @@ lang-json.workspace = true
 lang-sql.workspace = true
 lang-kotlin.workspace = true
 lang-css.workspace = true
+lang-cpp.workspace = true
 lang-yaml.workspace = true
 lang-github-actions.workspace = true
 # generated:dependencies
