@@ -4,6 +4,8 @@ One line each; none is committed, except the small tasks below.
 
 ## Small tasks
 Committed work too small for a step of its own: what to do and where, one line each. Once the list holds about a step's worth (5 or more related items, or a day of work), the lead hands it to one agent as a single step; the commit that does an item deletes its line. Bugs go to [bugs.md](bugs.md) instead.
+- Pattern rules (`core-patterns`): each rule compiles its regexes at load, about 430 allocations per rule; 35 Vue rules as pattern rules cost vue lint +110% instructions, so they became the Rust `template` family. Share or lazily build the regexes so pattern rules stay the cheap default (measure with the html/vue lint bench).
+- Vue/Svelte: several `template` rules and their default severities were written from memory of eslint-plugin-vue/svelte; a parity runner (`scripts/parity.sh`, as for html-validate) should confirm `no-raw-special-elements`, `no-dupe-on-directives` and `no-target-blank`.
 - Python: 11 files change on a second format (ratchet in `tests/parity/ruff/differences.yaml`); bring to 0.
 - Safety-check refusals (ratchet `refused`, same yaml files): Python black-tests 16 / ruff-fixtures 37; each is a formatter bug; bring to 0.
 - JS/TS: 3 Prettier-test and 3 real-world files change on a second format (`as` chains with comments after each `as`; member chains that Prettier itself lays out differently when its own output is formatted again: one-line form with a broken last argument vs the expanded chain); bring to 0.
