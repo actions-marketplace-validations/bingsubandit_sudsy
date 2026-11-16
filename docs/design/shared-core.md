@@ -66,7 +66,7 @@ L1 is a test of the design. If the three languages cannot hold their ratchets on
 ### Scopes and flow
 | # | Step | Where | Done when | After |
 |---|---|---|---|---|
-| S1 | The scope model and binder in `core-semantics`, with JS's binding table and resolution data; the shared rule family with ESLint's ids as rows; a parity mode that compares findings by rule and reported name | `core-semantics`, `core-rules`, `lang-js`, `scripts/parity_lint.py` | on the `eslint` and `typescript-eslint` parity corpora no problem the reference tool reports is missed (decision 2: compared by rule and reported name per file, not by position); `oxc_semantic` and the second parse are gone; `js.lint` within budget | R2 |
+| S1 | The scope model and binder in `core-semantics`, with JS's binding table and resolution data; the shared rule family with ESLint's ids as rows; a parity mode that compares findings by rule and reported name | `core-semantics`, `core-rules`, `lang-js` | on the `eslint` and `typescript-eslint` parity corpora no problem the reference tool reports is missed (decision 2: compared by rule and reported name per file, not by position); `oxc_semantic` and the second parse are gone; `js.lint` within budget | R2, M4 |
 | S2 | Python on the same model (ruff ids as rows); the kept AST and `analysis/model.rs` go | `lang-python` | the same measure on the `ruff` parity corpus | S1, R3 |
 | S3 | A flow-graph builder from statement roles; JS `no-unreachable` on `core-flow` | `core-flow`, `lang-js` | `rules/flow.rs` deleted, same findings | R2 |
 | S4 | Java, Kotlin and PHP get the scope rules from tables alone | `lang-*` | lines per language recorded | S1, R3 |
@@ -86,7 +86,8 @@ Kept as they are: oxc, ruff, Roslyn, mago; tree-sitter for Bash, Markdown and Po
 |---|---|---|---|---|
 | M1 | `scripts/cost.sh` reports, per language, hand-written lines by kind (formatter, rules, other) per grammar node, and the shared share of the workspace; the table in `adding-a-language.md` shows them for every language | `scripts`, docs | a CI check fails when the shared share falls or a language passes its budget (decision 3) without a line in the commit message | |
 | M2 | Speed against ruff, Biome and oxlint as a script beside `speed-json-yaml.sh`, numbers in `numbers.md` | `tests/conformance`, docs | the table of section 1 can be re-run | |
-| M3 | Parity catalogs list every upstream rule (ruff's lists 93 of its rules), so the coverage counts mean the same for every tool | `docs/parity` | counts regenerated | |
+| M3 | Parity catalogs list every upstream rule (ruff's lists 93 of its rules) as an inventory; their headline number is M4's coverage, not rules covered of N | `docs/parity` | counts regenerated | |
+| M4 | Lint parity by function (decision 6): one mode of `scripts/parity_lint.py` for every tool runs the reference tool's default or recommended set on its real-world corpus and reports the share of its findings that the mapped Sudsy rule also reports in the same file, by rule and file (and reported name where the tool gives one), not by position; a ratchet on that share in `differences.yaml`. Fixture comparisons by `(rule, line)` stay only where the position is the check | `scripts/parity_lint.py`, `docs/development/parity.md` | every lint tool with a corpus reports its coverage share; S1 uses this mode | |
 
 `adding-a-language.md` changes with L3 and S4: a language starts as a grammar with roles and a policy file, its formatter is the kit, and Rust is written per named gap.
 
@@ -96,6 +97,7 @@ Kept as they are: oxc, ruff, Roslyn, mago; tree-sitter for Bash, Markdown and Po
 3. **A new brace language has a budget of 3,000 hand-written lines to "usable"**; passing it needs a review.
 4. **Release builds do not run the safety check.** It stays in debug builds, tests and the `corpus` profile.
 5. **New languages go on while L1 runs**: parser comparison and step 1, with roles from the start. Formatter steps wait for L1's result.
+6. **A language's lint is complete by function, not by mirroring output.** It is usable when, on real-world code, at least 95% of the findings of the reference tool's default or recommended rule set are reported by the mapped Sudsy rule in the same file (M4). Rules outside that set do not count toward usable; they stay `planned` entries.
 
 ## 5. What this gives up
 - The last points of parity. A quirk of a reference tool that cannot be named as a style option stays a difference, or becomes per-language code, which is the cost this plan removes.
