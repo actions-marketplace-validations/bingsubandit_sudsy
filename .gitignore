@@ -7,9 +7,7 @@ node_modules/
 tests/conformance/corpus/
 .claude/worktrees/
 
-# dotnet build logs written to the tests' temp dir (.cargo/config.toml); the dir itself must stay unignored
-.cargo/tmp/*.log
-.cargo/tmp/VBCSCompiler/
-# rust-analyzer's proc-macro server inherits the [env] TEMP above
-.cargo/tmp/proc-macro-srv*/
+# The tests' temp dir (.cargo/config.toml): everything in it is scratch; the dir itself is kept by .gitkeep
+.cargo/tmp/*
+!.cargo/tmp/.gitkeep
 __pycache__/
