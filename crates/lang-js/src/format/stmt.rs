@@ -21,7 +21,7 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
         k::FOR_STATEMENT => for_statement(node, cx)?,
         k::FOR_IN_STATEMENT | k::FOR_OF_STATEMENT => for_in_of(node, cx)?,
         k::WHILE_STATEMENT => condition_clause(node, cx, true)?,
-        k::WITH_STATEMENT => condition_clause(node, cx, false)?,
+        k::WITH_STATEMENT => condition_clause(node, cx, true)?,
         k::DO_WHILE_STATEMENT => do_while(node, cx)?,
         k::SWITCH_STATEMENT => switch(node, cx)?,
         k::SWITCH_CASE => switch_case(node, cx)?,

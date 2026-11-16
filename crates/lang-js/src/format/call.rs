@@ -2,7 +2,7 @@
 //! test-call and `require` forms. Member chains are `chain.rs`.
 
 use super::arrow::{self, Flags};
-use super::ast::{Call, has_comment, is_function, is_literal, nodes, parent, un};
+use super::ast::{Call, has_comment, is_function, is_literal, nodes, parent, token_comments, un};
 use super::chain;
 use super::util::{R, kids, shape_error, token_of, will_break};
 use crate::generated::kind as k;
@@ -12,7 +12,7 @@ use core_format::doc::{
     line, lit, shared, softline,
 };
 use core_format::{FormatCtx, FormatError, comments};
-use core_syntax::{SyntaxElement, SyntaxNode};
+use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
 pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, FormatError> {
     match node.kind() {
@@ -51,6 +51,19 @@ fn call(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     }
     parts.push(cx.format(&c.callee)?);
     if let Some(o) = &c.optional {
+        // Block comments in front of `?.` stay with the callee.
+        let before = comments::leading_comments(cx.grammar, o);
+        if !before.is_empty()
+            && before
+                .iter()
+                .all(|c| c.kind == comments::CommentKind::Block)
+        {
+            cx.hold_leading(o);
+            for c in &before {
+                parts.push(lit(" "));
+                parts.push(core_format::context::comment_doc(c));
+            }
+        }
         parts.push(cx.token(o));
     }
     if let Some(t) = &c.type_args {
@@ -429,21 +442,35 @@ fn should_group_last(cx: &FormatCtx<'_>, a: &[SyntaxNode]) -> bool {
             || penultimate.is_none_or(|p| {
                 p.kind() != k::ARROW_FUNCTION_EXPRESSION || last.kind() != k::ARRAY_EXPRESSION
             }))
-        && !(a.len() > 1 && is_concise_array(last))
+        && !(a.len() > 1 && is_concise_array(cx, last))
 }
 
 /// An array of two or more numbers, which prints as a fill.
-pub(crate) fn is_concise_array(n: &SyntaxNode) -> bool {
+pub(crate) fn is_concise_array(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
     if n.kind() != k::ARRAY_EXPRESSION {
         return false;
     }
     let items = nodes(n);
-    items.len() > 1
-        && items.iter().all(|i| {
-            i.kind() == k::NUMERIC_LITERAL
-                || (i.kind() == k::UNARY_EXPRESSION
-                    && i.last_child()
-                        .is_some_and(|c| c.kind() == k::NUMERIC_LITERAL))
+    items.len() > 1 && items.iter().all(|i| is_concise_item(cx, i))
+}
+
+/// A number (signed, without comments inside) with no line comment after it or its comma.
+fn is_concise_item(cx: &FormatCtx<'_>, i: &SyntaxNode) -> bool {
+    let line_comment = |t: &SyntaxToken| {
+        comments::trailing_comments(cx.grammar, t)
+            .iter()
+            .any(|c| c.kind == comments::CommentKind::Line)
+    };
+    let number = i.kind() == k::NUMERIC_LITERAL
+        || (i.kind() == k::UNARY_EXPRESSION
+            && i.last_child()
+                .is_some_and(|c| c.kind() == k::NUMERIC_LITERAL && !has_comment(cx, &c))
+            && !cx.first_token(i).is_some_and(|t| token_comments(cx, &t)));
+    number
+        && !cx.last_token(i).is_some_and(|t| {
+            line_comment(&t)
+                || t.next_token()
+                    .is_some_and(|c| c.kind() == k::COMMA && line_comment(&c))
         })
 }
 

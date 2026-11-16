@@ -3,11 +3,11 @@ differences:
 files:
   real-world: project-options
 ratchet:
-  prettier-tests: 1090
-  real-world: 2286
+  prettier-tests: 1106
+  real-world: 2287
 second-format:
-  prettier-tests: 26
-  real-world: 4
+  prettier-tests: 3
+  real-world: 3
 refused:
   prettier-tests: 0
   real-world: 0

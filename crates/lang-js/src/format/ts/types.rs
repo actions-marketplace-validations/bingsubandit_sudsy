@@ -126,6 +126,27 @@ pub(super) fn should_hug(n: &SyntaxNode) -> bool {
 
 /// `<A, B>`: on one line, or one per line with a trailing comma (declarations only); a lone
 /// simple or object type never breaks.
+/// The `<` with the block comments after it in front of the first item, as `(` has them.
+fn open_token(cx: &FormatCtx<'_>, open: &SyntaxToken) -> Doc {
+    use core_format::comments::{self, CommentKind};
+    let after = comments::trailing_comments(cx.grammar, open);
+    if after.is_empty() || !after.iter().all(|c| c.kind == CommentKind::Block) {
+        return cx.token(open);
+    }
+    cx.detach_trailing(open);
+    let token = cx.token(open);
+    let _ = cx.reattach_trailing(open);
+    concat(
+        std::iter::once(token)
+            .chain(
+                after
+                    .iter()
+                    .flat_map(|c| [core_format::context::comment_doc(c), lit(" ")]),
+            )
+            .collect(),
+    )
+}
+
 pub(super) fn type_params(node: &SyntaxNode, cx: &FormatCtx<'_>, id: Option<GroupId>) -> R {
     let ks = kids(cx, node);
     let (Some(SyntaxElement::Token(open)), Some(SyntaxElement::Token(close))) =
@@ -133,6 +154,7 @@ pub(super) fn type_params(node: &SyntaxNode, cx: &FormatCtx<'_>, id: Option<Grou
     else {
         return Err(shape_error("type parameters"));
     };
+    let open_doc = open_token(cx, open);
     let items: Vec<SyntaxNode> = node.children().collect();
     let docs = items
         .iter()
@@ -170,11 +192,11 @@ pub(super) fn type_params(node: &SyntaxNode, cx: &FormatCtx<'_>, id: Option<Grou
             .children()
             .any(|c| c.kind() != k::BINDING_IDENTIFIER)
     {
-        return Ok(concat(vec![cx.token(open), docs[0].clone(), lit(",>")]));
+        return Ok(concat(vec![open_doc.clone(), docs[0].clone(), lit(",>")]));
     }
     if docs.is_empty() || (items.len() == 1 && should_hug(&items[0])) {
         return Ok(concat(vec![
-            cx.token(open),
+            open_doc.clone(),
             joined(lit(" "), docs),
             cx.token(close),
         ]));
@@ -185,7 +207,7 @@ pub(super) fn type_params(node: &SyntaxNode, cx: &FormatCtx<'_>, id: Option<Grou
         Doc::Nil
     };
     let body = concat(vec![
-        cx.token(open),
+        open_doc.clone(),
         indent(concat(vec![softline(), joined(line(), docs)])),
         comma,
         softline(),
@@ -328,7 +350,20 @@ fn union(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
                 flat,
             ));
         } else {
-            code.extend([line(), operator(cx, op, "|"), lit(" ")]);
+            // A line comment after a `|` belongs to the member before it.
+            let bar = op.as_ref().filter(|t| {
+                core_format::comments::trailing_comments(cx.grammar, t)
+                    .iter()
+                    .any(|c| c.kind == core_format::comments::CommentKind::Line)
+            });
+            if let Some(t) = bar {
+                cx.detach_trailing(t);
+            }
+            let printed = operator(cx, op, "|");
+            if let Some(t) = bar {
+                code.push(cx.reattach_trailing(t));
+            }
+            code.extend([line(), printed, lit(" ")]);
         }
         code.push(d);
     }

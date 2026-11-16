@@ -264,19 +264,20 @@ impl<'a> FormatCtx<'a> {
     /// Formats a child node. Honors `sudsy-ignore` comments before the node and the `Preserve`
     /// directive; use [`FormatCtx::format_unguarded`] for the node a caller was invoked for.
     pub fn format(&self, node: &SyntaxNode) -> Result<Doc, FormatError> {
-        // Only a comment can ask for the node to be kept as written.
-        if comments::node_leading(self.grammar, node).has_comment
-            && let Some(first) = self.first_token(node)
-        {
-            let leading = comments::leading_comments(self.grammar, &first);
-            if ignore::mark_in(self.grammar, &leading) == Some(IgnoreMark::Ignore) {
-                return Ok(self.verbatim_node(node));
-            }
-        }
-        if self.directives_of(node).has(&Directive::Preserve) {
+        if self.is_ignored(node) || self.directives_of(node).has(&Directive::Preserve) {
             return Ok(self.verbatim_node(node));
         }
         self.format_unguarded(node)
+    }
+
+    /// Does a `sudsy-ignore` comment in front of `node` keep it as written?
+    pub fn is_ignored(&self, node: &SyntaxNode) -> bool {
+        // Only a comment can ask for the node to be kept as written.
+        comments::node_leading(self.grammar, node).has_comment
+            && self.first_token(node).is_some_and(|first| {
+                let leading = comments::leading_comments(self.grammar, &first);
+                ignore::mark_in(self.grammar, &leading) == Some(IgnoreMark::Ignore)
+            })
     }
 
     /// Formatting code for `node` itself, ignoring ignore comments and `Preserve`.
@@ -374,13 +375,19 @@ impl<'a> FormatCtx<'a> {
         }
         // Inline comments in front of a closing token (tag `#close`) sit tight against it.
         let lead = if self.grammar.has_tag(tok.kind(), "close")
+            && !leading.is_empty()
             && leading
                 .iter()
                 .all(|c| c.kind == CommentKind::Block && c.breaks_after == 0)
         {
-            let space = if self.follows_comma(tok) { " " } else { "" };
+            // (no space when the closing token starts a line of its own)
+            let space = if self.follows_comma(tok) {
+                doc::if_break(Doc::Nil, doc::text(" "))
+            } else {
+                Doc::Nil
+            };
             doc::concat(vec![
-                doc::text(space),
+                space,
                 doc::concat(leading.iter().map(comment_doc).collect()),
             ])
         } else {
@@ -608,10 +615,11 @@ pub fn leading_comments_doc(cs: &[Comment]) -> Doc {
         return Doc::Nil;
     }
     let mut parts = Vec::new();
-    for c in cs {
+    for (i, c) in cs.iter().enumerate() {
         // A comment that was on its own line starts one, wherever the formatter put the code
-        // before it.
-        if c.kind != CommentKind::Block || c.breaks_after > 0 {
+        // before it (a later one is on the line of the comment before it, or that comment ended
+        // the line already).
+        if i == 0 && (c.kind != CommentKind::Block || c.breaks_after > 0) {
             parts.push(doc::newline_if_needed());
         }
         parts.push(comment_doc(c));

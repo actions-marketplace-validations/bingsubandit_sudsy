@@ -56,30 +56,61 @@ fn before_semicolon(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<core_syntax
     if matches!(node.kind(), k::FOR_STATEMENT | k::TS_TYPE_ALIAS_DECLARATION) {
         return None;
     }
-    if !comments::ends_with_token(cx.grammar, node, k::SEMICOLON) {
+    let written = comments::ends_with_token(cx.grammar, node, k::SEMICOLON);
+    let mut t = if written {
+        let mut last = node.last_child_or_token();
+        let semi = loop {
+            let e = last?;
+            match e {
+                core_syntax::SyntaxElement::Token(t) if t.kind() == k::SEMICOLON => break t,
+                _ if cx.grammar.is_trivia(e.kind()) => last = e.prev_sibling_or_token(),
+                _ => return None,
+            }
+        };
+        semi.prev_token()
+    } else if node.kind() == k::EXPRESSION_STATEMENT {
+        // (the `;` is written by the formatter)
+        node.last_token()
+    } else {
         return None;
-    }
-    let mut last = node.last_child_or_token();
-    let semi = loop {
-        let e = last?;
-        match e {
-            core_syntax::SyntaxElement::Token(t) if t.kind() == k::SEMICOLON => break t,
-            _ if cx.grammar.is_trivia(e.kind()) => last = e.prev_sibling_or_token(),
-            _ => return None,
-        }
     };
-    let mut t = semi.prev_token();
+    let mut skipped = false;
     while let Some(x) = t {
         if cx.grammar.is_trivia(x.kind()) {
             t = x.prev_token();
-        } else if node.kind() == k::EXPRESSION_STATEMENT && parens::is_dropped_close(cx, &x) {
+        } else if node.kind() == k::EXPRESSION_STATEMENT
+            && parens::is_dropped_close(cx, &x)
+            && !comments::has_trailing_comment(cx.grammar, &x)
+            && vanishes(&x)
+        {
             // `(a = c /* c */);` is `a = c;` and the comment after it.
+            skipped = true;
             t = x.prev_token();
         } else {
-            return comments::has_trailing_comment(cx.grammar, &x).then_some(x);
+            // (without a written `;`, the comments of the last token are placed by `detach_asi`)
+            return (written || skipped)
+                .then(|| comments::has_trailing_comment(cx.grammar, &x).then_some(x))
+                .flatten();
         }
     }
     None
+}
+
+/// Is the pair of parentheses that `close` ends left out for good, not printed again around its
+/// content by the node it is the operand of (`void (a && b)`)?
+fn vanishes(close: &core_syntax::SyntaxToken) -> bool {
+    use crate::generated::kind as k;
+    let mut n = close.parent();
+    while let Some(p) = n.as_ref().and_then(|n| n.parent()) {
+        match p.kind() {
+            // (the end of an assignment chain ends the statement)
+            k::PARENTHESIZED_EXPRESSION => {}
+            k::ASSIGNMENT_EXPRESSION if p.last_child() == n => {}
+            kind => return matches!(kind, k::EXPRESSION_STATEMENT | k::ARROW_FUNCTION_EXPRESSION),
+        }
+        n = Some(p);
+    }
+    false
 }
 
 /// Does a comment come before the first token of `node` (inside the node or right before it)?

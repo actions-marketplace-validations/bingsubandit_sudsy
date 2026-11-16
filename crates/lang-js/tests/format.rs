@@ -408,3 +408,20 @@ fn inputs_the_safety_check_refused_before() {
         "measure() // w\n  .then(() => 1);\ninterface I {\n  // prettier-ignore\n  x: y,\n}\nconst s = `a\nb`;\n"
     );
 }
+
+#[test]
+fn comments_beside_dropped_parentheses_reach_a_fixed_point() {
+    // Each of these changed on a second format.
+    assert_eq!(
+        fmt(
+            "(a = c /* c */);\nfunction f() { return /* b */ ; }\nvoid (a && b // c\n);\n!+(3 /* foo */);\n"
+        ),
+        "a = c; /* c */\nfunction f() {\n  return; /* b */\n}\nvoid (\n  a &&\n  b // c\n);\n!+(3 /* foo */);\n"
+    );
+    assert_eq!(
+        fmt(
+            "x = [1, // a\n  2];\nfoo</* c */ T>();\ntype U =\n  | A // a\n  | B;\nconst g = // c\n  (a) => (b) => c;\n"
+        ),
+        "x = [\n  1, // a\n  2,\n];\nfoo</* c */ T>();\ntype U =\n  | A // a\n  | B;\nconst g = (a) => (b) => c; // c\n"
+    );
+}

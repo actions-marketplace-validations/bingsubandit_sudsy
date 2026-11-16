@@ -13,7 +13,7 @@ use core_format::doc::{
     line_suffix_boundary, lit, shared, softline, text,
 };
 use core_format::{FormatCtx, FormatError};
-use core_syntax::SyntaxNode;
+use core_syntax::{SyntaxNode, SyntaxToken};
 
 pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, FormatError> {
     Ok(Some(match node.kind() {
@@ -73,6 +73,9 @@ fn container(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
         // `{}` or `{/* comment */}`, as written.
         return Ok(cx.verbatim_node(node));
     };
+    if let Some(doc) = commented_container(cx, open, close, expr)? {
+        return Ok(doc);
+    }
     let held = un(expr);
     let in_element = node.parent().is_some_and(|p| is_jsx(p.kind()));
     let inline = !super::ast::has_comment(cx, expr)
@@ -96,6 +99,37 @@ fn container(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
             cx.token(close),
         ])
     }))
+}
+
+/// `{ /* c */ expr /* d */ }`: the comments after `{` and the ones in front of `}`, each on a
+/// line of its own.
+fn commented_container(
+    cx: &FormatCtx<'_>,
+    open: &SyntaxToken,
+    close: &SyntaxToken,
+    expr: &SyntaxNode,
+) -> Result<Option<Doc>, FormatError> {
+    use core_format::comments::{leading_comments, trailing_comments};
+    use core_format::context::comment_doc;
+    let before = trailing_comments(cx.grammar, open);
+    let after = leading_comments(cx.grammar, close);
+    if before.is_empty() && after.is_empty() {
+        return Ok(None);
+    }
+    let mut inner = Vec::new();
+    for c in &before {
+        inner.extend([comment_doc(c), hardline()]);
+    }
+    inner.push(cx.format(expr)?);
+    for c in &after {
+        inner.extend([hardline(), comment_doc(c)]);
+    }
+    Ok(Some(group(concat(vec![
+        lit("{"),
+        indent(concat(vec![hardline(), concat(inner)])),
+        hardline(),
+        lit("}"),
+    ]))))
 }
 
 /// Expressions that break inside their own delimiters, so `{` stays next to them.

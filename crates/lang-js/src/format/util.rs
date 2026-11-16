@@ -192,9 +192,13 @@ pub(crate) fn semi(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Doc {
         .find(|t| t.kind() == k::SEMICOLON);
     let text = if style(cx).semi { lit(";") } else { Doc::Nil };
     match tok {
+        // (a comment in front of the `;` goes after it)
         Some(t) => concat(vec![
-            cx.leading_comments_doc(&t),
             text,
+            core_format::context::trailing_comments_doc(
+                &cx.comment_style,
+                &core_format::comments::leading_comments(cx.grammar, &t),
+            ),
             cx.trailing_comments_doc(&t),
         ]),
         None => text,

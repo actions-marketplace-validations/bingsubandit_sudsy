@@ -69,6 +69,49 @@ pub(crate) fn should_inline_logical(node: &SyntaxNode) -> bool {
 }
 
 pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, FormatError> {
+    // Comments on lines of their own in front of the chain go in front of its group, not inside
+    // the group of its first operand.
+    let lead = (matches!(
+        node.kind(),
+        k::BINARY_EXPRESSION | k::LOGICAL_EXPRESSION | k::PRIVATE_IN_EXPRESSION
+    ))
+    .then(|| leading_token(node, cx))
+    .flatten();
+    if let Some(t) = &lead {
+        cx.hold_leading(t);
+    }
+    let doc = format_chain(node, cx)?;
+    Ok(match (doc, &lead) {
+        (Some(d), Some(t)) => Some(concat(vec![cx.held_leading(t), d])),
+        (d, _) => d,
+    })
+}
+
+/// The first token of `node` past the parentheses (there are some) that are left out, when comments on lines of
+/// their own are in front of it and nothing holds them yet.
+fn leading_token(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Option<core_syntax::SyntaxToken> {
+    let mut t = cx.first_token(node)?;
+    if t.kind() != k::L_PAREN {
+        return None;
+    }
+    while t.kind() == k::L_PAREN {
+        let close = t.parent()?.last_token()?;
+        if !super::parens::is_dropped_close(cx, &close) {
+            return None;
+        }
+        t = t.next_token()?;
+        while cx.grammar.is_trivia(t.kind()) {
+            t = t.next_token()?;
+        }
+    }
+    (!cx.is_held_leading(&t)
+        && core_format::comments::leading_comments(cx.grammar, &t)
+            .iter()
+            .any(|c| c.kind != core_format::comments::CommentKind::Block || c.breaks_after > 0))
+    .then_some(t)
+}
+
+fn format_chain(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, FormatError> {
     if !matches!(
         node.kind(),
         k::BINARY_EXPRESSION | k::LOGICAL_EXPRESSION | k::PRIVATE_IN_EXPRESSION
@@ -85,8 +128,13 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
         .as_ref()
         .is_some_and(|p| p.last_child().as_ref() == Some(&c));
     let inside_parens = match pk {
-        Some(k::IF_STATEMENT | k::WHILE_STATEMENT | k::SWITCH_STATEMENT) => first_of_parent,
+        Some(k::IF_STATEMENT | k::WHILE_STATEMENT | k::SWITCH_STATEMENT | k::WITH_STATEMENT) => {
+            first_of_parent
+        }
         Some(k::DO_WHILE_STATEMENT) => last_of_parent,
+        Some(k::UNARY_EXPRESSION) => p
+            .as_ref()
+            .is_some_and(|p| super::unary::has_commented_parentheses(cx, p)),
         Some(k::ARRAY_EXPRESSION) => super::embed::is_root(cx, node),
         _ => false,
     };
@@ -174,7 +222,8 @@ fn parts(
     let op_tok = operator(cx, node).ok_or_else(|| shape_error("binary expression"))?;
     let op = op_tok.text().to_string();
     let left_u = un(&left);
-    // Prettier's tree has no parentheses; only commented ones are in the way of flattening.
+    // Prettier's tree has no parentheses; only ones with a comment in the way (a comment after
+    // the `)` or inside, not in front of the content) are in the way of flattening.
     let clean = |n: &SyntaxNode| {
         std::iter::successors(Some(n.clone()), |x| {
             (x.kind() == k::PARENTHESIZED_EXPRESSION)
@@ -186,7 +235,7 @@ fn parts(
                 || !x
                     .children_with_tokens()
                     .filter_map(|e| e.into_token())
-                    .any(|t| token_comments(cx, &t))
+                    .any(|t| t.kind() == k::R_PAREN && token_comments(cx, &t))
         })
     };
     let mut parts = if is_binaryish(left_u.kind())

@@ -114,13 +114,26 @@ pub(crate) fn assign_like(
     };
     let right_u = un(right);
     let right_doc = if right_u.kind() == k::ARROW_FUNCTION_EXPRESSION && *right == right_u {
-        let flags = Flags::RHS
-            | if layout == Layout::ChainTailArrowChain {
-                Flags::CHAIN_TAIL
-            } else {
-                0
-            };
-        arrow::print_fn(cx, right, flags)?.ok_or_else(|| shape_error("arrow"))?
+        // Comments on lines of their own in front of the arrow go in front of its layout (a chain
+        // then lays out as it does anywhere but at the end of an assignment).
+        let lead = cx.first_token(right).filter(|t| {
+            core_format::comments::leading_comments(cx.grammar, t)
+                .iter()
+                .any(|c| c.kind != core_format::comments::CommentKind::Block || c.breaks_after > 0)
+        });
+        let flags = match (&lead, layout) {
+            (Some(_), _) => 0,
+            (None, Layout::ChainTailArrowChain) => Flags::RHS | Flags::CHAIN_TAIL,
+            (None, _) => Flags::RHS,
+        };
+        if let Some(t) = &lead {
+            cx.hold_leading(t);
+        }
+        let arrow = arrow::print_fn(cx, right, flags)?.ok_or_else(|| shape_error("arrow"))?;
+        match &lead {
+            Some(t) => concat(vec![cx.held_leading(t), arrow]),
+            None => arrow,
+        }
     } else {
         cx.format(right)?
     };
@@ -180,7 +193,7 @@ fn choose_layout(
         } else if right_u.kind() == k::ARROW_FUNCTION_EXPRESSION
             && right_u
                 .last_child()
-                .is_some_and(|b| b.kind() == k::ARROW_FUNCTION_EXPRESSION)
+                .is_some_and(|b| super::arrow::arrow_body(cx, &b).is_some())
         {
             Layout::ChainTailArrowChain
         } else {
@@ -285,7 +298,7 @@ fn should_never_break_after_operator(
         k::ARROW_FUNCTION_EXPRESSION
             if right
                 .last_child()
-                .is_some_and(|b| b.kind() == k::ARROW_FUNCTION_EXPRESSION) =>
+                .is_some_and(|b| super::arrow::arrow_body(cx, &b).is_some()) =>
         {
             return true;
         }
@@ -389,7 +402,13 @@ fn is_lone_short_argument(cx: &FormatCtx<'_>, arg: &SyntaxNode) -> bool {
             let t = text_of(cx, arg);
             t.rfind('/').is_some_and(|end| end.saturating_sub(1) <= 5)
         }
-        k::STRING_LITERAL => len(arg) <= threshold,
+        // (the length of the string as printed: its quotes may change, so a second format agrees)
+        k::STRING_LITERAL => {
+            super::literal::string(&text_of(cx, arg), super::util::style(cx).single_quote)
+                .chars()
+                .count()
+                <= threshold
+        }
         k::TEMPLATE_LITERAL => {
             let t = text_of(cx, arg);
             !t.contains("${")
