@@ -6,7 +6,7 @@ use super::paren;
 use super::util::*;
 use crate::generated::kind as k;
 use core_format::FormatCtx;
-use core_format::doc::{self, Doc, concat, group, indent, lit, softline};
+use core_format::doc::{Doc, concat};
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 pub(crate) fn statement(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
@@ -147,39 +147,19 @@ fn assert(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     Ok(concat(parts))
 }
 
-/// `del a, b`; several targets parenthesize when they do not fit.
+/// `del a, b`: the targets are one tuple (the adapter makes it), parenthesized when it does not fit.
 fn delete(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let ks = kids(cx, node);
-    let targets: Vec<&SyntaxElement> = ks.iter().filter(|e| e.as_node().is_some()).collect();
     let mut parts = Vec::new();
-    for e in &ks {
-        if let SyntaxElement::Token(t) = e
-            && t.kind() == k::DEL
-        {
-            parts.push(cx.token(t));
+    for e in kids(cx, node) {
+        match e {
+            SyntaxElement::Token(t) if t.kind() == k::DEL => parts.push(cx.token(&t)),
+            SyntaxElement::Node(n) => {
+                parts.push(sp());
+                parts.push(paren::maybe_parenthesize(cx, &n)?);
+            }
+            SyntaxElement::Token(_) => {}
         }
     }
-    parts.push(sp());
-    // One tuple in parentheses, or targets separated by commas.
-    if let [SyntaxElement::Node(n)] = targets.as_slice() {
-        parts.push(paren::maybe_parenthesize(cx, n)?);
-        return Ok(concat(parts));
-    }
-    let mut items = Vec::new();
-    for (i, t) in targets.iter().enumerate() {
-        if i > 0 {
-            items.push(lit(","));
-            items.push(ln());
-        }
-        items.push(expr::elem(cx, t)?);
-    }
-    items.push(trailing_comma());
-    parts.push(group(concat(vec![
-        doc::if_break(lit("("), Doc::Nil),
-        indent(concat(vec![softline(), concat(items)])),
-        softline(),
-        doc::if_break(lit(")"), Doc::Nil),
-    ])));
     Ok(concat(parts))
 }
 

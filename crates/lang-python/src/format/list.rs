@@ -137,7 +137,13 @@ fn bracketed_inner(
     };
     if p.runs.is_empty() {
         if end.is_empty() {
-            return Ok(concat(vec![cx.token(open), cx.token(close)]));
+            // A comment after the `(` of empty brackets ends the line.
+            let gap = if has_comments(cx, open) {
+                hardline()
+            } else {
+                Doc::Nil
+            };
+            return Ok(concat(vec![cx.token(open), gap, cx.token(close)]));
         }
         return Ok(concat(vec![
             cx.token(open),
@@ -174,12 +180,17 @@ pub(crate) fn is_bare(cx: &FormatCtx<'_>, tuple: &SyntaxNode) -> bool {
 
 /// The items of a tuple without parentheses, a comma after the last one when broken.
 pub(crate) fn bare_tuple(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    bare_tuple_with(cx, node, true)
+    bare_tuple_with(cx, node, true, true)
+}
+
+/// [`bare_tuple`] for the caller's own group (the parentheses ruff adds): its items break with it.
+pub(crate) fn bare_tuple_ungrouped(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
+    bare_tuple_with(cx, node, true, false)
 }
 
 /// `breakable`: the items go on lines of their own when they do not fit; otherwise only the
 /// brackets inside them split.
-fn bare_tuple_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool) -> R {
+fn bare_tuple_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool, grouped: bool) -> R {
     let ks = kids(cx, node);
     let inner: Vec<SyntaxElement> = if is_bare(cx, node) {
         ks
@@ -202,7 +213,7 @@ fn bare_tuple_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool) -> R 
             _ => {}
         }
     }
-    Ok(if breakable {
+    Ok(if breakable && grouped {
         group(concat(parts))
     } else {
         concat(parts)
@@ -211,7 +222,7 @@ fn bare_tuple_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool) -> R 
 
 /// A tuple that stays on one line (its last or first item is a bracket that splits).
 pub(crate) fn bare_tuple_flat(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    bare_tuple_with(cx, node, false)
+    bare_tuple_with(cx, node, false, false)
 }
 
 pub(crate) fn collection(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
@@ -277,8 +288,21 @@ pub(crate) fn import_names(cx: &FormatCtx<'_>, p: &Parts) -> R {
 
 fn import_names_inner(cx: &FormatCtx<'_>, p: &Parts) -> R {
     let open_comment = p.open.as_ref().is_some_and(|o| has_comments(cx, o));
-    let magic = (has_magic(cx, p) && p.open.is_some()) || open_comment;
-    let inner = items(cx, p, false, false, true)?;
+    let end = p.close.as_ref().map_or_else(Vec::new, |c| {
+        core_format::comments::leading_comments(cx.grammar, c)
+    });
+    if let Some(c) = p.close.as_ref().filter(|_| !end.is_empty()) {
+        cx.hold_leading(c);
+    }
+    let magic = (has_magic(cx, p) && p.open.is_some()) || open_comment || !end.is_empty();
+    let mut inner = items(cx, p, false, false, true)?;
+    if !end.is_empty() {
+        inner = concat(vec![
+            inner,
+            hardline(),
+            super::comment::comments_block(&end),
+        ]);
+    }
     let open = match &p.open {
         Some(o) if open_comment => cx.token(o),
         _ => if_break(lit("("), Doc::Nil),
@@ -346,7 +370,7 @@ fn comprehension_inner(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     }
     let inner = group(concat(parts));
     Ok(match (open, close) {
-        (Some(o), Some(c)) => parenthesized(cx.token(&o), inner, cx.token(&c)),
+        (Some(o), Some(c)) => bracketed_by(cx, &o, inner, &c),
         _ => inner,
     })
 }

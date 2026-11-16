@@ -81,15 +81,23 @@ fn requote(
         }
         body.to_string()
     } else {
-        escape_quote(&unescape_quote(body, orig), new, triple)
+        // (ruff keeps the escapes of a triple-quoted string: `\'''` stays)
+        let body = if triple {
+            Cow::Borrowed(body)
+        } else {
+            Cow::Owned(unescape_quote(body, orig))
+        };
+        escape_quote(&body, new, triple)
     };
     if fstring && has_backslash_in_field(&new_body) {
         return None;
     }
     let mut new_body = new_body;
-    if triple && new_body.ends_with(new) && new == '"' {
+    if triple && new == '"' && new_body.ends_with(new) {
         new_body.pop();
-        new_body.push_str("\\\"");
+        // (an odd run of backslashes already escapes it)
+        let run = new_body.len() - new_body.trim_end_matches('\\').len();
+        new_body.push_str(if run % 2 == 1 { "\"" } else { "\\\"" });
     }
     let orig_esc = body.matches('\\').count();
     let new_esc = new_body.matches('\\').count();

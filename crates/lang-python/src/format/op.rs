@@ -65,6 +65,16 @@ fn binary_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool) -> R {
     chain(cx, &elems, breakable)
 }
 
+/// An operator token and its trailing comment, which stays with the operand before it (ruff).
+pub(crate) fn operator(cx: &FormatCtx<'_>, t: &core_syntax::SyntaxToken) -> (Doc, Doc) {
+    if !core_format::comments::has_trailing_comment(cx.grammar, t) {
+        return (Doc::Nil, cx.token(t));
+    }
+    cx.hold_trailing(t);
+    let op = cx.token(t);
+    (cx.held_trailing(t), op)
+}
+
 /// `a`, then per operator a break opportunity before it.
 fn chain(cx: &FormatCtx<'_>, elems: &[SyntaxElement], breakable: bool) -> R {
     let mut parts = Vec::new();
@@ -81,16 +91,11 @@ fn chain(cx: &FormatCtx<'_>, elems: &[SyntaxElement], breakable: bool) -> R {
                 if !pair.is_empty() {
                     parts.push(group(concat(std::mem::take(&mut pair))));
                 }
+                let (comment, op) = operator(cx, t);
+                pair.push(comment);
                 pair.push(if breakable { brk() } else { sp() });
-                pair.push(cx.token(t));
-                // A comment after the operator keeps the operand on the next line.
-                pair.push(
-                    if core_format::comments::has_trailing_comment(cx.grammar, t) {
-                        core_format::doc::hardline()
-                    } else {
-                        sp()
-                    },
-                );
+                pair.push(op);
+                pair.push(sp());
             }
             SyntaxElement::Node(n) => {
                 let d = if matches!(n.kind(), k::EXPR_STRING_LITERAL | k::EXPR_BYTES_LITERAL) {
@@ -204,12 +209,14 @@ fn compare_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool) -> R {
                 in_op = false;
             }
             SyntaxElement::Token(t) => {
+                let (comment, op) = operator(cx, t);
+                parts.push(comment);
                 if in_op {
                     parts.push(sp());
                 } else if i > 0 {
                     parts.push(if breakable { brk() } else { sp() });
                 }
-                parts.push(cx.token(t));
+                parts.push(op);
                 in_op = true;
             }
         }

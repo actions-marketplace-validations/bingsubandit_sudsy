@@ -9,19 +9,34 @@ use core_syntax::SyntaxNode;
 
 /// A docstring statement: the string with ruff's layout.
 pub(crate) fn statement(cx: &FormatCtx<'_>, stmt: &SyntaxNode) -> R {
-    let token = stmt
+    let tokens: Vec<_> = stmt
         .descendants_with_tokens()
         .filter_map(|e| e.into_token())
-        .find(|t| t.kind() == k::STRING)
-        .ok_or_else(|| shape_error("docstring"))?;
-    let text = literal::string(token.text(), style(cx).quote);
+        .filter(|t| t.kind() == k::STRING)
+        .collect();
+    let (Some(token), Some(last_token)) = (tokens.first(), tokens.last()) else {
+        return Err(shape_error("docstring"));
+    };
+    let text = if tokens.len() == 1 {
+        literal::string(token.text(), style(cx).quote).into_owned()
+    } else {
+        // An implicit concatenation is the docstring when its parts join; else a plain string.
+        let strings = stmt
+            .children()
+            .next()
+            .ok_or_else(|| shape_error("docstring"))?;
+        match super::expr::joined(cx, &strings) {
+            Some(flat) => flat,
+            None => return super::stmt::statement(cx, stmt),
+        }
+    };
     let Some((prefix, quote, body)) = literal::split(&text) else {
         return Ok(cx.verbatim_node(stmt));
     };
     let body = clean(body);
     let lines: Vec<&str> = body.split('\n').collect();
     let mut parts: Vec<Doc> = vec![
-        cx.leading_comments_doc(&token),
+        cx.leading_comments_doc(token),
         doc::text(format!("{prefix}{quote}")),
     ];
     let last = lines.len() - 1;
@@ -66,7 +81,7 @@ pub(crate) fn statement(cx: &FormatCtx<'_>, stmt: &SyntaxNode) -> R {
         parts.push(doc::text(" "));
     }
     parts.push(doc::text(quote.to_string()));
-    parts.push(cx.trailing_comments_doc(&token));
+    parts.push(cx.trailing_comments_doc(last_token));
     Ok(concat(parts))
 }
 

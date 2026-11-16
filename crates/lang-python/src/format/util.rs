@@ -103,6 +103,23 @@ pub(crate) fn parenthesized(open: Doc, inner: Doc, close: Doc) -> Doc {
     group(concat(vec![open, soft_block(inner), close]))
 }
 
+/// [`parenthesized`] around bracket tokens; own-line comments in front of the closing one stay
+/// inside the indent.
+pub(crate) fn bracketed_by(
+    cx: &FormatCtx<'_>,
+    open: &SyntaxToken,
+    inner: Doc,
+    close: &SyntaxToken,
+) -> Doc {
+    let end = core_format::comments::leading_comments(cx.grammar, close);
+    if end.is_empty() {
+        return parenthesized(cx.token(open), inner, cx.token(close));
+    }
+    cx.hold_leading(close);
+    let end = concat(vec![doc::hardline(), super::comment::comments_block(&end)]);
+    parenthesized(cx.token(open), concat(vec![inner, end]), cx.token(close))
+}
+
 /// Operands of the binary-like chains and other places that name a bracket kind.
 pub(crate) fn is_open(kind: SyntaxKind) -> bool {
     matches!(kind, k::LPAR | k::LSQB | k::LBRACE)

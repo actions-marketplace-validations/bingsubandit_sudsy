@@ -201,10 +201,10 @@ struct Printer<'a> {
 
 static HARD_LINE: Doc = Doc::HardLine;
 
-/// Does the pending suffix end in text that starts with `//`?
+/// Does the pending suffix end in text that starts with `//` or `#`?
 fn ends_in_line_comment(d: &Doc) -> bool {
     match d {
-        Doc::Text(t) => t.starts_with("//"),
+        Doc::Text(t) => t.starts_with("//") || t.starts_with('#'),
         Doc::Concat(ps) => ps
             .iter()
             .rev()
@@ -215,6 +215,19 @@ fn ends_in_line_comment(d: &Doc) -> bool {
 }
 
 impl<'a> Printer<'a> {
+    /// Queues the pending suffixes in front of the line break that follows; the line break a
+    /// second comment of a line brought along takes the deeper indent of the two places.
+    fn flush_suffixes(&mut self, cmds: &mut Vec<Cmd<'a>>, indent: usize) {
+        for mut c in self.suffixes.drain(..).rev() {
+            if matches!(c.item, Item::Doc(d) if std::ptr::eq(d, &HARD_LINE))
+                && self.indents.levels[c.indent].width < self.indents.levels[indent].width
+            {
+                c.indent = indent;
+            }
+            cmds.push(c);
+        }
+    }
+
     fn run(&mut self, root: &'a Doc) {
         let mut cmds = vec![Cmd {
             indent: 0,
@@ -348,7 +361,7 @@ impl<'a> Printer<'a> {
                 }
                 if !self.suffixes.is_empty() {
                     cmds.push(cmd);
-                    cmds.extend(self.suffixes.drain(..).rev());
+                    self.flush_suffixes(cmds, indent);
                     return;
                 }
                 self.newline(indent);
@@ -390,7 +403,7 @@ impl<'a> Printer<'a> {
                 item: Item::Fill(parts),
             }),
             Doc::LineSuffix(d) => {
-                // A second comment on a line that ends in a `//` comment goes on a line of its
+                // A second comment on a line that ends in a line comment goes on a line of its
                 // own, or it would become part of the first.
                 let after_line_comment = self
                     .suffixes
@@ -404,7 +417,7 @@ impl<'a> Printer<'a> {
                         item: Item::Doc(&HARD_LINE),
                     });
                     if let Doc::Concat(ps) = &**d
-                        && matches!(ps.first(), Some(Doc::Text(t)) if t.as_ref() == " ")
+                        && matches!(ps.first(), Some(Doc::Text(t)) if t.trim().is_empty())
                     {
                         parts = &ps[1..];
                     }
@@ -430,7 +443,7 @@ impl<'a> Printer<'a> {
                 if !self.suffixes.is_empty() {
                     // Trailing comments go out before the newline.
                     cmds.push(cmd);
-                    cmds.extend(self.suffixes.drain(..).rev());
+                    self.flush_suffixes(cmds, indent);
                     return;
                 }
                 self.newline(indent);

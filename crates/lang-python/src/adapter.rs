@@ -208,6 +208,24 @@ impl<'a> SourceOrderVisitor<'a> for Collector<'_> {
             end,
             kind: ours,
         });
+        // `del a, b` has the targets of `del (a, b)` in a tuple, so that the formatter may add
+        // the parentheses.
+        if let AnyNodeRef::StmtDelete(d) = node
+            && let [first, .., last] = d.targets.as_slice()
+        {
+            let outer = |s: u32, e: u32, left: bool| {
+                let all = self.parens(s, e, None);
+                all.last()
+                    .map_or(if left { s } else { e }, |p| if left { p.0 } else { p.1 })
+            };
+            let (fs, fe) = (first.range().start().to_u32(), first.range().end().to_u32());
+            let (ls, le) = (last.range().start().to_u32(), last.range().end().to_u32());
+            self.nodes.push(Node {
+                start: outer(fs, fe, true),
+                end: outer(ls, le, false),
+                kind: k::EXPR_TUPLE,
+            });
+        }
         TraversalSignal::Traverse
     }
 

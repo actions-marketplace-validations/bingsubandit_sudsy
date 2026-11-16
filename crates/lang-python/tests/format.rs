@@ -134,3 +134,152 @@ fn options() {
         "if x:\n\ty\n"
     );
 }
+
+/// Comments between the parts of a lambda keep it parenthesized (ruff moves them; `fmt` holds the
+/// comments, the meaning and idempotency).
+#[test]
+fn lambda_comments() {
+    fmt("(\n    lambda\n    # comment\n    *x: x\n)\n(\n    lambda:\n    # comment\n    x\n)\n");
+}
+
+/// A decimal integer or float is parenthesized before `.attr`.
+#[test]
+fn number_attribute() {
+    assert_eq!(
+        fmt("x = 123456789 .bit_count()\ny = 0XB1 .real\nz = 1.5J.imag\nw = 1.e1 .real\n"),
+        "x = (123456789).bit_count()\ny = 0xB1.real\nz = 1.5j.imag\nw = (1.0e1).real\n"
+    );
+}
+
+/// `del a, b` parenthesizes its targets as a tuple when they do not fit.
+#[test]
+fn delete_targets() {
+    assert_eq!(
+        fmt(
+            "del a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a\ndel (a), b\ndel (a, b)\n"
+        ),
+        "del a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a\ndel (a), b\ndel (a, b)\n"
+    );
+}
+
+/// Escapes in triple-quoted strings stay.
+#[test]
+fn triple_quote_escapes() {
+    assert_eq!(
+        fmt("x = '''\\'''\\\"'''\ny = '''a\\\"'''\nw = '''\\\\\"'''\n"),
+        "x = \"\"\"\\'''\\\"\"\"\"\ny = \"\"\"a\\\"\"\"\"\nw = '''\\\\\"'''\n"
+    );
+}
+
+/// A pattern in parentheses is formatted like one without.
+#[test]
+fn parenthesized_pattern() {
+    assert_eq!(
+        fmt(
+            "match x:\n    case (\n        \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\" | \"abcd\"\n    ):\n        pass\n    case (\"a\" | \"b\"):\n        pass\n"
+        ),
+        "match x:\n    case (\n        \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n        | \"abcd\"\n    ):\n        pass\n    case \"a\" | \"b\":\n        pass\n"
+    );
+}
+
+/// A comment between `not` and its operand keeps the parentheses.
+#[test]
+fn comment_after_unary_operator() {
+    assert_eq!(
+        fmt("if (\n  not\n  # comment\n  (a)):\n    pass\n"),
+        "if (\n    not\n    # comment\n    (a)\n):\n    pass\n"
+    );
+}
+
+/// A tuple target breaks one item per line inside parentheses; a trailing comma keeps it expanded.
+#[test]
+fn for_target_tuple() {
+    assert_eq!(
+        fmt(
+            "for index, columns, unique, primary, orders, type_, definition, options in cursor.fetchall():\n    pass\nfor (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccccccccc) in x:\n    pass\nfor (\n    a,\n    b,\n) in c:\n    pass\n"
+        ),
+        "for (\n    index,\n    columns,\n    unique,\n    primary,\n    orders,\n    type_,\n    definition,\n    options,\n) in cursor.fetchall():\n    pass\nfor (\n    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,\n    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,\n    cccccccccccccccccccccccccc,\n) in x:\n    pass\nfor (\n    a,\n    b,\n) in c:\n    pass\n"
+    );
+}
+
+/// A comment in a parenthesized target keeps its parentheses.
+#[test]
+fn for_target_comment() {
+    assert_eq!(
+        fmt(
+            "for (\n    # leading comment\n    column_name, [\n    referenced_column_name,\n]) in relations.items():\n    pass\n"
+        ),
+        "for (\n    # leading comment\n    column_name,\n    [\n        referenced_column_name,\n    ],\n) in relations.items():\n    pass\n"
+    );
+}
+
+/// Own-line comments before the `)` of an import.
+#[test]
+fn import_end_comments() {
+    assert_eq!(
+        fmt("from foo import (\n    bar,\n    # qux\n)\nfrom x import (\n    a,\n    # end\n)\n"),
+        "from foo import (\n    bar,\n    # qux\n)\nfrom x import (\n    a,\n    # end\n)\n"
+    );
+}
+
+/// A `...` body stays on its own line after a comment on the header.
+#[test]
+fn ellipsis_body_with_header_comment() {
+    assert_eq!(
+        fmt(
+            "class A:\n    def f(self):  # c1\n        ...  # c2\n    def g(self):\n        ...\n    def h(self): ...  # c3\n"
+        ),
+        "class A:\n    def f(self):  # c1\n        ...  # c2\n    def g(self): ...\n    def h(self): ...  # c3\n"
+    );
+}
+
+/// Comments of a parenthesized `with` list.
+#[test]
+fn with_items_comments() {
+    assert_eq!(
+        fmt(
+            "with (\n    # First\n    a() as b,\n    # Second\n    c(),\n    # Last\n):\n    pass\n"
+        ),
+        "with (\n    # First\n    a() as b,\n    # Second\n    c(),\n    # Last\n):\n    pass\n"
+    );
+}
+
+/// Comments inside an attribute chain parenthesize it.
+#[test]
+fn attribute_chain_comments() {
+    assert_eq!(
+        fmt(
+            "x31 = (\n    a\n    # own line\n    .b\n)\nx331 = (\n    a.\n    # own line 3\n    b\n)\n"
+        ),
+        "x31 = (\n    a\n    # own line\n    .b\n)\nx331 = (\n    a.\n    # own line 3\n    b\n)\n"
+    );
+}
+
+/// A comment after a trailing `;`, `# fmt: skip` after one.
+#[test]
+fn semicolon_comments() {
+    assert_eq!(
+        fmt("x = 1;  # fmt: skip\ny = 1   ; # fmt: skip\n_;  # semicolon comment\n"),
+        "x = 1;  # fmt: skip\ny = 1   ;  # fmt: skip\n_  # semicolon comment\n"
+    );
+}
+
+/// A comment after an operator stays with the operand before it.
+#[test]
+fn operator_comment() {
+    assert_eq!(
+        fmt("c = (a\n     > # test trailing comment\n     b\n     )\n(a == # comment\n b\n )\n"),
+        "c = (\n    a  # test trailing comment\n    > b\n)\n(\n    a  # comment\n    == b\n)\n"
+    );
+}
+
+/// An implicit concatenation of plain strings is a docstring.
+#[test]
+fn implicit_concatenated_docstring() {
+    assert_eq!(
+        fmt(
+            "def a():\n    \"    This is a \" \"implicit\" \"concatenated\" \"docstring\"\n\ndef b():\n    \"This is a \" \"implicit\" \"concatenated\" \"docstring    \"\n"
+        ),
+        "def a():\n    \"This is a implicitconcatenateddocstring\"\n\n\ndef b():\n    \"This is a implicitconcatenateddocstring\"\n"
+    );
+}

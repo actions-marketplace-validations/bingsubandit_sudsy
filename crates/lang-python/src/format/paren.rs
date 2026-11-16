@@ -51,6 +51,8 @@ fn strip_all(cx: &FormatCtx<'_>, e: &SyntaxNode, named: bool, yields: bool) -> S
                 if plain
                     && !edge_comments
                     && !(n.kind() == k::EXPR_NAMED && !named)
+                    && !(n.kind() == k::EXPR_LAMBDA
+                        && n.descendants_with_tokens().any(|e| e.kind() == k::COMMENT))
                     && !(n.kind() == k::EXPR_STARRED
                         || !yields && matches!(n.kind(), k::EXPR_YIELD | k::EXPR_YIELD_FROM)) =>
             {
@@ -119,11 +121,23 @@ fn maybe_parenthesize_inner(
         }
         k::EXPR_AWAIT if can_omit(cx, &inner) => expr::expr(cx, &inner),
         k::EXPR_IF | k::EXPR_AWAIT => expanded(|| expr::expr(cx, &inner)),
-        k::EXPR_ATTRIBUTE | k::EXPR_CALL | k::EXPR_SUBSCRIPT if expr::is_fluent(cx, &inner) => {
+        k::EXPR_ATTRIBUTE | k::EXPR_CALL | k::EXPR_SUBSCRIPT
+            if expr::is_fluent(cx, &inner) || expr::chain_has_comments(cx, &inner) =>
+        {
             expanded(|| expr::expr(cx, &inner))
         }
-        k::EXPR_ATTRIBUTE | k::EXPR_CALL | k::EXPR_SUBSCRIPT if head_is_implicit_concat(&inner) => {
-            expanded(|| expr::expr(cx, &inner))
+        k::EXPR_ATTRIBUTE | k::EXPR_CALL | k::EXPR_SUBSCRIPT
+            if implicit_concat_head(&inner).is_some() =>
+        {
+            let d = with_open(true, || expr::expr(cx, &inner))?;
+            // The parts join when the line up to the first bracket holds them.
+            let joins =
+                implicit_concat_head(&inner).is_some_and(|h| expr::joined(cx, &h).is_some());
+            if joins && depth() * style(cx).indent + prefix + head_width(&d) <= style(cx).width {
+                Ok(d)
+            } else {
+                Ok(parenthesize_if_expands(d))
+            }
         }
         k::EXPR_ATTRIBUTE | k::EXPR_CALL | k::EXPR_SUBSCRIPT => {
             if assignment && starts_with_atom(&inner) {
@@ -157,22 +171,20 @@ fn maybe_parenthesize_inner(
     }
 }
 
-/// Is the head of a chain of attributes, calls and subscripts several strings in a row?
-fn head_is_implicit_concat(n: &SyntaxNode) -> bool {
+/// The head of a chain of attributes, calls and subscripts when it is several strings in a row.
+fn implicit_concat_head(n: &SyntaxNode) -> Option<SyntaxNode> {
     let mut cur = n.clone();
     while matches!(
         cur.kind(),
         k::EXPR_CALL | k::EXPR_ATTRIBUTE | k::EXPR_SUBSCRIPT
     ) {
-        match cur.children().next() {
-            Some(c) => cur = c,
-            None => return false,
-        }
+        cur = cur.children().next()?;
     }
-    matches!(
+    (matches!(
         cur.kind(),
         k::EXPR_STRING_LITERAL | k::EXPR_BYTES_LITERAL | k::EXPR_F_STRING | k::EXPR_T_STRING
-    ) && cur.children().count() > 1
+    ) && cur.children().count() > 1)
+        .then_some(cur)
 }
 
 /// Is the head of a chain of attributes, calls and subscripts a name or a literal?
@@ -302,23 +314,37 @@ pub(crate) fn pattern(cx: &FormatCtx<'_>, n: &SyntaxNode) -> R {
 /// A `for` target: a tuple loses its parentheses.
 pub(crate) fn for_target(cx: &FormatCtx<'_>, n: &SyntaxNode) -> R {
     let inner = strip(cx, n);
-    if inner.kind() == k::EXPR_TUPLE && !has_own_comments(cx, &inner) {
+    let ks = kids(cx, &inner);
+    let magic = style(cx).magic_comma
+        && ks.len() > 2
+        && tok_kind(&ks[ks.len() - 1]) == Some(k::RPAR)
+        && tok_kind(&ks[ks.len() - 2]) == Some(k::COMMA);
+    if inner.kind() == k::EXPR_TUPLE && !magic && !has_own_comments(cx, &inner) {
         return with_open(false, || {
-            if can_omit(cx, &inner) {
+            if list::is_bare(cx, &inner) && can_omit(cx, &inner) {
                 list::bare_tuple_flat(cx, &inner)
             } else {
-                expanded(|| list::bare_tuple(cx, &inner))
+                expanded(|| list::bare_tuple_ungrouped(cx, &inner))
             }
         });
     }
     expr::expr(cx, n)
 }
 
+/// Comments on the tokens of `n` itself or at the edges of its first and last element.
 fn has_own_comments(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-    kids(cx, n).iter().any(|e| match e {
-        core_syntax::SyntaxElement::Token(t) => has_comments(cx, t),
-        _ => false,
-    })
+    let edges = n.children().next().is_some_and(|f| {
+        cx.first_token(&f)
+            .is_some_and(|t| !core_format::comments::leading_comments(cx.grammar, &t).is_empty())
+    }) || n.children().last().is_some_and(|l| {
+        cx.last_token(&l)
+            .is_some_and(|t| !core_format::comments::trailing_comments(cx.grammar, &t).is_empty())
+    });
+    edges
+        || kids(cx, n).iter().any(|e| match e {
+            core_syntax::SyntaxElement::Token(t) => has_comments(cx, t),
+            _ => false,
+        })
 }
 
 struct Visit {
@@ -405,7 +431,17 @@ impl Visit {
                 }
             }
             k::EXPR_UNARY_OP => {
-                let o = kids(cx, n).first().and_then(tok_kind);
+                let ks = kids(cx, n);
+                if ks.iter().any(|e| match e {
+                    core_syntax::SyntaxElement::Token(t) => has_comments(cx, t),
+                    core_syntax::SyntaxElement::Node(c) => cx.first_token(c).is_some_and(|t| {
+                        !core_format::comments::leading_comments(cx.grammar, &t).is_empty()
+                    }),
+                }) {
+                    self.comments = true;
+                    return;
+                }
+                let o = ks.first().and_then(tok_kind);
                 self.update(if o == Some(k::NOT) { 3 } else { 11 }, 1);
                 for c in n.children() {
                     self.visit(cx, &c);

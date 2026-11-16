@@ -1,6 +1,6 @@
 //! Compound statements and clauses: header, `:` and the block, decorators, `with` items.
 
-use super::block::{Seq, block as block_doc, is_ellipsis};
+use super::block::{Seq, block as block_doc, joins_header};
 use super::comment::*;
 use super::expr;
 use super::list;
@@ -66,7 +66,7 @@ pub(crate) fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
                 }
                 if matches!(node.kind(), k::STMT_FUNCTION_DEF | k::STMT_CLASS_DEF)
                     && let [only] = body.as_slice()
-                    && is_ellipsis(cx, only)
+                    && joins_header(cx, only)
                 {
                     let last = cx.last_token(only).ok_or_else(|| shape_error("stub"))?;
                     cx.hold_trailing(&last);
@@ -124,7 +124,7 @@ pub(crate) fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
                                 .iter()
                                 .position(|e| tok_kind(e) == Some(k::RPAR))
                                 .is_some_and(|p| p > 0 && tok_kind(&ks[p - 1]) == Some(k::COMMA));
-                        parts.push(with_items_doc(cx, &items, magic)?);
+                        parts.push(with_items_doc(cx, &items, &ks, magic)?);
                     }
                 } else {
                     let no_space = matches!(
@@ -208,6 +208,9 @@ fn header_node(cx: &FormatCtx<'_>, parent: &SyntaxNode, n: &SyntaxNode) -> R {
         | k::PATTERN_MATCH_OR
         | k::PATTERN_MATCH_SINGLETON
         | k::PATTERN_MATCH_STAR => paren::pattern(cx, n),
+        k::PARENTHESIZED if parent.kind() == k::MATCH_CASE && is_pattern_in_parens(n) => {
+            paren::pattern(cx, n)
+        }
         _ if n.prev_sibling_or_token().is_some_and(|p| {
             p.kind() == k::RARROW
                 || p.kind() == k::WHITESPACE
@@ -215,13 +218,19 @@ fn header_node(cx: &FormatCtx<'_>, parent: &SyntaxNode, n: &SyntaxNode) -> R {
                         .is_some_and(|q| q.kind() == k::RARROW)
         }) =>
         {
-            // The parameters split before the annotation does.
-            let d = expr::expr(cx, n)?;
+            // The parameters split before the annotation does; without parameters the
+            // annotation is parenthesized when it does not fit.
             let params = parent
                 .children()
                 .find(|c| c.kind() == k::PARAMETERS)
                 .is_some_and(|p| kids(cx, &p).len() > 2);
-            Ok(if params { flatten(d) } else { d })
+            if params && !n.descendants_with_tokens().any(|e| e.kind() == k::COMMENT) {
+                Ok(flatten(expr::expr(cx, n)?))
+            } else if params {
+                expr::expr(cx, n)
+            } else {
+                paren::maybe_parenthesize(cx, n)
+            }
         }
         _ => {
             let target = parent.kind() == k::STMT_FOR
@@ -241,6 +250,28 @@ fn header_node(cx: &FormatCtx<'_>, parent: &SyntaxNode, n: &SyntaxNode) -> R {
     }
 }
 
+/// A parenthesized pattern (not the guard).
+fn is_pattern_in_parens(n: &SyntaxNode) -> bool {
+    let mut cur = n.clone();
+    while cur.kind() == k::PARENTHESIZED {
+        let Some(inner) = cur.children().next() else {
+            return false;
+        };
+        cur = inner;
+    }
+    matches!(
+        cur.kind(),
+        k::PATTERN_MATCH_VALUE
+            | k::PATTERN_MATCH_SEQUENCE
+            | k::PATTERN_MATCH_MAPPING
+            | k::PATTERN_MATCH_CLASS
+            | k::PATTERN_MATCH_AS
+            | k::PATTERN_MATCH_OR
+            | k::PATTERN_MATCH_SINGLETON
+            | k::PATTERN_MATCH_STAR
+    )
+}
+
 /// Is `n` the loop variable of a `for` (the node before `in`)?
 fn header_is_target(cx: &FormatCtx<'_>, parent: &SyntaxNode, n: &SyntaxNode) -> bool {
     let ks = kids(cx, parent);
@@ -251,28 +282,67 @@ fn header_is_target(cx: &FormatCtx<'_>, parent: &SyntaxNode, n: &SyntaxNode) -> 
 }
 
 /// The items of a `with`, in parentheses (one per line) when they do not fit.
-fn with_items_doc(cx: &FormatCtx<'_>, items: &[SyntaxNode], magic: bool) -> R {
-    if items.len() == 1 {
+fn with_items_doc(
+    cx: &FormatCtx<'_>,
+    items: &[SyntaxNode],
+    ks: &[SyntaxElement],
+    magic: bool,
+) -> R {
+    let token = |kind| {
+        ks.iter()
+            .find_map(|e| e.as_token().filter(|t| t.kind() == kind))
+            .cloned()
+    };
+    let (open, close) = (token(k::LPAR), token(k::RPAR));
+    let commas: Vec<SyntaxToken> = ks
+        .iter()
+        .filter_map(|e| e.as_token().filter(|t| t.kind() == k::COMMA))
+        .cloned()
+        .collect();
+    let open_comment = open.as_ref().is_some_and(|o| has_comments(cx, o));
+    let end = close
+        .as_ref()
+        .map_or_else(Vec::new, |c| comments::leading_comments(cx.grammar, c));
+    let comma_comment = commas.iter().any(|c| has_comments(cx, c));
+    if items.len() == 1 && !open_comment && end.is_empty() && !comma_comment {
         return expr::expr(cx, &items[0]);
+    }
+    if let Some(c) = close.as_ref().filter(|_| !end.is_empty()) {
+        cx.hold_leading(c);
     }
     let mut parts = Vec::new();
     for (i, it) in items.iter().enumerate() {
         if i > 0 {
-            parts.push(lit(","));
             parts.push(ln());
         }
         parts.push(expr::expr(cx, it)?);
+        match commas.get(i) {
+            Some(c) => {
+                parts.push(lit(","));
+                parts.push(cx.trailing_comments_doc(c));
+            }
+            None => parts.push(trailing_comma()),
+        }
     }
-    parts.push(trailing_comma());
+    if !end.is_empty() {
+        parts.push(hardline());
+        parts.push(comments_block(&end));
+    }
+    let open_doc = match &open {
+        Some(o) if open_comment => cx.token(o),
+        _ => doc::if_break(lit("("), Doc::Nil),
+    };
     let body = concat(vec![
-        doc::if_break(lit("("), Doc::Nil),
+        open_doc,
         indent(concat(vec![softline(), concat(parts)])),
         softline(),
         doc::if_break(lit(")"), Doc::Nil),
     ]);
-    Ok(if magic {
-        doc::group_broken(body)
-    } else {
-        group(body)
-    })
+    Ok(
+        if magic || open_comment || !end.is_empty() || comma_comment {
+            doc::group_broken(body)
+        } else {
+            group(body)
+        },
+    )
 }

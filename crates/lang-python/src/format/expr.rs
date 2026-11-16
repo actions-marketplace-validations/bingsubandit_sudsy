@@ -168,7 +168,7 @@ pub(crate) fn strings(cx: &FormatCtx<'_>, node: &SyntaxNode, own_group: bool) ->
 
 /// The parts of an implicit concatenation as one string, when they are plain strings of one
 /// kind that need no escapes to share a quote (ruff joins them when they fit on a line).
-fn joined(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<String> {
+pub(crate) fn joined(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<String> {
     let mut prefix = None;
     let mut quote = None;
     let mut body = String::new();
@@ -239,11 +239,7 @@ fn parenthesized_node(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             ks[1..ks.len() - 1].iter().map(|e| elem(cx, e)).collect()
         })
     });
-    Ok(parenthesized(
-        cx.token(open),
-        concat(inner?),
-        cx.token(close),
-    ))
+    Ok(bracketed_by(cx, open, concat(inner?), close))
 }
 
 /// One link of an attribute, call and subscript chain.
@@ -274,6 +270,44 @@ fn links(node: &SyntaxNode) -> (SyntaxNode, Vec<Link>) {
     (cur, out)
 }
 
+/// Does a comment stand between the dot and the names of an attribute chain, or between a
+/// callee and its `(` or `[`?
+pub(crate) fn chain_has_comments(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    let mut cur = node.clone();
+    loop {
+        match cur.kind() {
+            k::EXPR_ATTRIBUTE => {
+                for e in cur.children_with_tokens().skip(1) {
+                    let hit = match &e {
+                        SyntaxElement::Token(t) => {
+                            !cx.grammar.is_trivia(t.kind()) && has_comments(cx, t)
+                        }
+                        SyntaxElement::Node(c) => {
+                            cx.first_token(c).is_some_and(|t| has_comments(cx, &t))
+                        }
+                    };
+                    if hit {
+                        return true;
+                    }
+                }
+            }
+            k::EXPR_CALL | k::EXPR_SUBSCRIPT => {
+                let after = cur.children().nth(1).and_then(|a| cx.first_token(&a));
+                if after.is_some_and(|t| {
+                    !core_format::comments::leading_comments(cx.grammar, &t).is_empty()
+                }) {
+                    return true;
+                }
+            }
+            _ => return false,
+        }
+        match cur.children().next() {
+            Some(c) => cur = c,
+            None => return false,
+        }
+    }
+}
+
 /// ruff's fluent layout: two or more attributes that follow a call or subscript.
 pub(crate) fn is_fluent(_cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
     if !fluent_allowed() {
@@ -301,7 +335,12 @@ pub(crate) fn is_fluent(_cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
 fn trailers(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let (head, ls) = links(node);
     let fluent = is_fluent(cx, node);
-    let mut first = vec![expr(cx, &head)?];
+    let head_doc = expr(cx, &head)?;
+    let mut first = vec![if needs_dot_parens(&head, &ls) {
+        concat(vec![doc::lit("("), head_doc, doc::lit(")")])
+    } else {
+        head_doc
+    }];
     let mut rest: Vec<Doc> = Vec::new();
     let mut after_bracket = false;
     for l in &ls {
@@ -341,6 +380,20 @@ fn trailers(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     Ok(group(concat(vec![concat(first), concat(rest)])))
 }
 
+/// A decimal integer or a float is parenthesized before `.attr` (`(1).real`); `0x1.real` and `1j.real`
+/// stay as they are.
+fn needs_dot_parens(head: &SyntaxNode, ls: &[Link]) -> bool {
+    head.kind() == k::EXPR_NUMBER_LITERAL
+        && matches!(ls.first(), Some(Link::Attr(_)))
+        && head.first_token().is_some_and(|t| {
+            t.kind() == k::FLOAT
+                || t.kind() == k::INT
+                    && !t.text().get(..2).is_some_and(|p| {
+                        ["0x", "0b", "0o"].contains(&p.to_ascii_lowercase().as_str())
+                    })
+        })
+}
+
 /// `[index]` of a subscript.
 fn subscript_tail(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     with_fluent(true, || with_open(true, || subscript_tail_inner(cx, node)))
@@ -365,7 +418,7 @@ fn subscript_tail_inner(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
                 .collect::<Result<_, _>>()?,
         ),
     };
-    Ok(parenthesized(cx.token(open), inner_doc, cx.token(close)))
+    Ok(bracketed_by(cx, open, inner_doc, close))
 }
 
 /// `lower:upper:step`; with an operand that is not simple the colons get spaces next to operands.
@@ -526,8 +579,10 @@ pub(crate) fn pattern(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             for e in kids(cx, node) {
                 match &e {
                     SyntaxElement::Token(t) => {
+                        let (comment, op) = op::operator(cx, t);
+                        parts.push(comment);
                         parts.push(ln());
-                        parts.push(cx.token(t));
+                        parts.push(op);
                         parts.push(sp());
                     }
                     _ => parts.push(elem(cx, &e)?),

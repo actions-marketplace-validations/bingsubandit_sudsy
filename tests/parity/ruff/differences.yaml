@@ -5,13 +5,13 @@ files:
   ruff-fixtures: layout-gaps
   real-world: layout-gaps
 ratchet:
-  black-tests: 180
-  ruff-fixtures: 96
-  real-world: 1004
+  black-tests: 189
+  ruff-fixtures: 104
+  real-world: 1006
 second-format:
-  black-tests: 2
-  real-world: 3
+  black-tests: 1
+  real-world: 0
   ruff-fixtures: 6
 refused:
-  black-tests: 16
-  ruff-fixtures: 37
+  black-tests: 0
+  ruff-fixtures: 0

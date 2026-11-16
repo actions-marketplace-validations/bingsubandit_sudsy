@@ -133,17 +133,34 @@ pub(crate) fn mark(cx: &FormatCtx<'_>, c: &Comment) -> Option<Mark> {
     }
 }
 
-/// A simple statement with a trailing `# fmt: skip`.
+/// The `;` that ends a simple statement, if it has one: the sibling after the statement.
+pub(crate) fn semicolon(cx: &FormatCtx<'_>, s: &SyntaxNode) -> Option<SyntaxToken> {
+    let mut next = s.next_sibling_or_token();
+    while let Some(e) = next {
+        match e {
+            SyntaxElement::Token(t) if t.kind() == k::SEMI => return Some(t),
+            SyntaxElement::Token(t) if cx.grammar.is_trivia(t.kind()) => {
+                next = t.next_sibling_or_token();
+            }
+            _ => return None,
+        }
+    }
+    None
+}
+
+/// A simple statement with a trailing `# fmt: skip` (after its `;` when it has one).
 pub(crate) fn is_fmt_skip(cx: &FormatCtx<'_>, s: &SyntaxNode) -> bool {
     !is_compound(s.kind())
-        && cx.last_token(s).is_some_and(|l| {
-            comments::trailing_comments(cx.grammar, &l).iter().any(|c| {
-                matches!(
-                    cx.grammar.comment_body(&c.text()).trim(),
-                    "fmt: skip" | "fmt:skip"
-                )
+        && semicolon(cx, s)
+            .or_else(|| cx.last_token(s))
+            .is_some_and(|l| {
+                comments::trailing_comments(cx.grammar, &l).iter().any(|c| {
+                    matches!(
+                        cx.grammar.comment_body(&c.text()).trim(),
+                        "fmt: skip" | "fmt:skip"
+                    )
+                })
             })
-        })
 }
 
 /// What formatting changes in the text that no layout decision can undo, done before the tree is

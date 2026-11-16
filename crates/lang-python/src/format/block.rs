@@ -70,6 +70,18 @@ pub(crate) fn is_ellipsis(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
             .is_some_and(|t| comments::leading_comments(cx.grammar, &t).is_empty())
 }
 
+/// [`is_ellipsis`] with no comment after the header's colon: the body joins the header line.
+pub(crate) fn joins_header(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    is_ellipsis(cx, n)
+        && !cx.first_token(n).is_some_and(|t| {
+            std::iter::successors(t.prev_token(), |p| p.prev_token())
+                .find(|p| !cx.grammar.is_trivia(p.kind()))
+                .is_some_and(|p| {
+                    p.kind() == k::COLON && !comments::trailing_comments(cx.grammar, &p).is_empty()
+                })
+        })
+}
+
 /// A function whose body is `...` on the header line.
 pub(crate) fn is_stub(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
     n.kind() == k::STMT_FUNCTION_DEF && {
@@ -93,12 +105,13 @@ fn is_import(kind: SyntaxKind) -> bool {
     matches!(kind, k::STMT_IMPORT | k::STMT_IMPORT_FROM)
 }
 
-/// A string-only expression statement.
+/// A string-only expression statement (an implicit concatenation of plain strings too).
 fn is_docstring(n: &SyntaxNode) -> bool {
     n.kind() == k::STMT_EXPR
-        && n.children()
-            .next()
-            .is_some_and(|e| e.kind() == k::EXPR_STRING_LITERAL && e.children().count() == 1)
+        && n.children().next().is_some_and(|e| {
+            e.kind() == k::EXPR_STRING_LITERAL
+                && e.children().all(|c| c.kind() == k::STRING_LITERAL)
+        })
 }
 
 /// The statements of a block, one per line with the blank lines of ruff.
@@ -208,7 +221,9 @@ pub(crate) fn sequence(cx: &FormatCtx<'_>, stmts: &[SyntaxNode], top: bool, seq:
 pub(crate) fn verbatim_item(cx: &FormatCtx<'_>, s: &SyntaxNode) -> R {
     let first = cx.first_token(s).ok_or_else(|| shape_error("statement"))?;
     let leading = lead(cx, &first);
-    let last = cx.last_token(s).ok_or_else(|| shape_error("statement"))?;
+    let last = semicolon(cx, s)
+        .or_else(|| cx.last_token(s))
+        .ok_or_else(|| shape_error("statement"))?;
     Ok(concat(vec![leading, cx.verbatim_range(&first, &last)]))
 }
 
@@ -227,7 +242,10 @@ pub(crate) fn item(cx: &FormatCtx<'_>, s: &SyntaxNode, docstring: bool) -> R {
         stmt::statement(cx, s)?
     };
     let trailing = last.map_or(Doc::Nil, |l| trailing_inline(cx, &l));
-    Ok(concat(vec![leading, body, trailing]))
+    let after_semicolon = semicolon(cx, s)
+        .filter(|_| !compound)
+        .map_or(Doc::Nil, |m| trailing_inline(cx, &m));
+    Ok(concat(vec![leading, body, trailing, after_semicolon]))
 }
 
 /// `:` followed by the statements one level deeper.
