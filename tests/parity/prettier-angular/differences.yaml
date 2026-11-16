@@ -1,0 +1,27 @@
+differences:
+  embedded-language-off: gap  the tests that run with the option `embeddedLanguageFormatting` set to off are formatted with the option on (Prettier's own option is not run)
+  angularjs: gap  AngularJS attributes (`ng-click`, `ng-repeat`, ...) are formatted as plain attributes, not as Angular expressions
+  start-tag-comments: gap  comments inside a start tag are a syntax error of the parser
+  non-bindable: gap  the subtree of `ngNonBindable` is formatted, not kept as written
+  let-and-text: gap  `@let` followed by text on the same line breaks differently
+  microsyntax: gap  `*directive` values with `as`, `then`/`else` colon edge cases and `a; b c` pieces print as the colon rules of the microsyntax decide, not as Prettier does
+  expression-layout: gap  parentheses kept around logical expressions, unparenthesized arrow functions, regular-expression literals and quoted attribute values inside `[error]` bindings differ
+  i18n-values: gap  long `i18n` attribute values are not broken
+  whitespace-edges: gap  whitespace of `[target]=" "`, between a custom inline element and a block child, and before `{{` after a comment differs
+  blank-lines: gap  a blank line between a `@defer` or autocomplete child and its siblings is dropped
+  non-idempotent: gap  files Prettier itself does not keep stable (component-styling, focus-trap-demo, plural ICU, paren-statement indentation); Sudsy follows Prettier's output, so a second format changes them
+files:
+  prettier-angular: embedded-language-off, angularjs, start-tag-comments, non-bindable, let-and-text, microsyntax, expression-layout, i18n-values, whitespace-edges, blank-lines, non-idempotent
+  components: expression-layout, blank-lines, non-idempotent
+  angular: expression-layout, blank-lines, whitespace-edges, i18n-values
+ratchet:
+  prettier-angular: 56
+  components: 681
+  angular: 444
+  realworld-app: 11
+second-format:
+  components: 2
+  prettier-angular: 1
+refused:
+  components: 0
+  prettier-angular: 0

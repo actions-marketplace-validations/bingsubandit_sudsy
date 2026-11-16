@@ -22,9 +22,9 @@ files:
   real-world-svelte: svelte-attributes, svelte-inline
 ratchet:
   prettier-html: 127
-  prettier-vue: 53
+  prettier-vue: 55
   prettier-svelte: 51
   prettier-vue-html: 10
-  real-world: 215
+  real-world: 216
   real-world-svelte: 17
   real-world-vue: 8

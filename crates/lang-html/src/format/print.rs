@@ -447,11 +447,13 @@ impl P<'_> {
         let deep_borrow = self.borrow_prev_close_end(next)
             && p.kids.last().is_some_and(|&l| {
                 self.borrow_parent_close_start(l)
-                    && self
-                        .n(l)
-                        .kids
-                        .last()
-                        .is_some_and(|&ll| self.borrow_parent_close_start(ll))
+                    // (an interpolation holds one text, which borrows the same marker)
+                    && (self.n(l).t == T::Interp
+                        || self
+                            .n(l)
+                            .kids
+                            .last()
+                            .is_some_and(|&ll| self.borrow_parent_close_start(ll)))
             });
         if !n.lead_ss || self.prefer_hard_leading(next) || deep_borrow {
             Bl::Hard
@@ -761,7 +763,7 @@ impl P<'_> {
     /// The content of a root `<script>` or `<style>` of a Vue file starts at the margin.
     fn unindented(&self, id: usize) -> bool {
         let n = self.n(id);
-        self.o.dialect != Dialect::Html
+        matches!(self.o.dialect, Dialect::Vue | Dialect::Svelte)
             && !self.o.indent_blocks
             && n.parent == 0
             && matches!(n.name.as_ref(), "script" | "style")
@@ -796,11 +798,25 @@ impl P<'_> {
             } else if self.borrow_last_child_close_end(id) {
                 end -= self.close_end_marker(*n.kids.last().expect("last")).len();
             }
-            return doc::concat(vec![
-                doc::group(self.opening_tag(id)),
-                verbatim_text(&self.t.src[start..end.max(start)]),
-                self.closing_tag(id),
-            ]);
+            let end = end.max(start);
+            // The text is kept as written, an interpolation in it is formatted.
+            let mut parts = vec![doc::group(self.opening_tag(id))];
+            let mut at = start;
+            for &k in &n.kids {
+                let c = self.n(k);
+                if c.t == T::Interp
+                    && c.start >= at
+                    && c.end <= end
+                    && let Some(flat) = self.interpolation_text(k)
+                {
+                    parts.push(verbatim_text(&self.t.src[at..c.start]));
+                    parts.push(s(flat));
+                    at = c.end;
+                }
+            }
+            parts.push(verbatim_text(&self.t.src[at..end]));
+            parts.push(self.closing_tag(id));
+            return doc::concat(parts);
         }
         let attrs = doc::new_group_id();
         let elem = |inner: Doc| {
@@ -820,7 +836,7 @@ impl P<'_> {
         let (f, l) = (self.n(first), self.n(last));
         // `<span>{{ expression }}</span>`: the interpolation hugs the tags unless the attributes break.
         let hug = n.kids.len() == 1
-            && f.t == T::Interp
+            && matches!(f.t, T::Interp | T::Icu)
             && f.lead_ss
             && !f.lead_sp
             && l.trail_ss

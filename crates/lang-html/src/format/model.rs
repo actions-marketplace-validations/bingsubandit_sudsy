@@ -698,7 +698,11 @@ impl<'s> Builder<'_, 's> {
             return;
         }
         if kids.is_empty() {
-            self.d.n[parent].dangling_sp = region.0 < region.1;
+            // (the first line break of `pre` and `textarea` is not content)
+            let skip = usize::from(
+                self.d.n[parent].indent_sens && self.d.src[region.0..region.1].starts_with('\n'),
+            );
+            self.d.n[parent].dangling_sp = region.0 + skip < region.1;
             return;
         }
         for (i, &c) in kids.iter().enumerate() {
@@ -725,7 +729,7 @@ impl<'s> Builder<'_, 's> {
         if kids.is_empty() {
             let n = &self.d.n[id];
             self.d.n[id].dangling_ss = !block_like(n.display)
-                && n.display != "inline-block"
+                && (n.display != "inline-block" || n.name == "textarea")
                 && !(n.t == T::Element && is_script_like(&n.name));
             return;
         }

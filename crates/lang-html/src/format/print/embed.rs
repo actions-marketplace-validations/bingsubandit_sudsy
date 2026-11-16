@@ -55,7 +55,7 @@ fn style_language(n: &N) -> Option<&'static str> {
 
 /// The lines of `code` one per line, except the lines that start inside a template literal: their
 /// indentation is part of the string and stays.
-fn lines(code: &str) -> Doc {
+pub(super) fn lines(code: &str) -> Doc {
     let mut chunks = Vec::<String>::new();
     for (line, inside) in code.split('\n').zip(starts_in_template(code)) {
         match chunks.last_mut() {
@@ -88,6 +88,66 @@ fn handler(embed: Embed, language: &str, value: &str, width: usize) -> Option<(S
 /// its own.
 fn expand(name: &str, body: Doc) -> Doc {
     expand_with(&format!("{name}=\""), "\"", body)
+}
+
+/// Does the code hold a `// comment` (outside strings)? It ends the line, so the expression breaks.
+fn has_line_comment(code: &str) -> bool {
+    let (mut quote, mut escaped, mut prev) = (None::<char>, false, ' ');
+    for c in code.chars() {
+        if let Some(q) = quote {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == q {
+                quote = None;
+            }
+        } else if matches!(c, '\'' | '"' | '`') {
+            quote = Some(c);
+        } else if c == '/' && prev == '/' {
+            return true;
+        }
+        prev = c;
+    }
+    false
+}
+
+/// `{ a: 1, b: 2 }` as an object that is broken: a property per line, each with its comma.
+fn explode_object(flat: &str, tab: usize) -> Option<String> {
+    let inner = flat.strip_prefix("{ ")?.strip_suffix(" }")?;
+    let (mut depth, mut start, mut quote, mut escaped) = (0i32, 0, None::<char>, false);
+    let mut props = Vec::new();
+    for (i, c) in inner.char_indices() {
+        if let Some(q) = quote {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == q {
+                quote = None;
+            }
+            continue;
+        }
+        match c {
+            '\'' | '"' | '`' => quote = Some(c),
+            '(' | '[' | '{' => depth += 1,
+            ')' | ']' | '}' => depth -= 1,
+            ',' if depth == 0 => {
+                props.push(&inner[start..i]);
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    props.push(&inner[start..]);
+    let pad = " ".repeat(tab);
+    let lines: Vec<String> = props
+        .iter()
+        .map(|p| p.trim())
+        .filter(|p| !p.is_empty())
+        .map(|p| format!("{pad}{p},"))
+        .collect();
+    (depth == 0 && !lines.is_empty()).then(|| format!("{{\n{}\n}}", lines.join("\n")))
 }
 
 fn expand_with(open: &str, close: &str, body: Doc) -> Doc {
@@ -227,16 +287,21 @@ impl P<'_> {
         if ts { "ts" } else { "js" }
     }
 
-    /// `{{ expression }}`: the expression on the line when it fits, else on lines of its own.
-    pub(super) fn interpolation(&self, id: usize) -> Doc {
+    /// `{{ expression }}` on one line, when the expression formats to one line.
+    pub(super) fn interpolation_text(&self, id: usize) -> Option<String> {
+        let out = self.formatted_interpolation(id)?;
+        (!out.contains('\n')).then(|| format!("{{{{ {out} }}}}"))
+    }
+
+    fn formatted_interpolation(&self, id: usize) -> Option<String> {
         let n = self.n(id);
         let code = n.value.trim();
         let width = self
             .o
             .width
             .saturating_sub((self.depth(id) + 1) * self.o.tab);
-        let out = if self.o.dialect == Dialect::Angular {
-            self.ng_expression(code, width, false, false)
+        if self.o.dialect == Dialect::Angular {
+            self.ng_expression(code, width, false, super::angular::Ng::Nested)
         } else {
             self.o.embed.and_then(|e| {
                 e(
@@ -247,7 +312,17 @@ impl P<'_> {
                     false,
                 )
             })
-        };
+        }
+    }
+
+    /// `{{ expression }}`: the expression on the line when it fits, else on lines of its own.
+    pub(super) fn interpolation(&self, id: usize) -> Doc {
+        let n = self.n(id);
+        let code = n.value.trim();
+        if code.is_empty() {
+            return doc::concat(vec![s(self.open_start(id)), s(self.close_end(id))]);
+        }
+        let out = self.formatted_interpolation(id);
         // An expression that is not formatted keeps its lines, with the indentation they share
         // removed so that formatting again does not indent them further.
         let kept = || match code.split_once('\n') {
@@ -255,7 +330,13 @@ impl P<'_> {
             None => code.to_string(),
         };
         let borrowed = n.next.is_some_and(|x| self.borrow_prev_close_end(x));
+        let broken = out.as_deref().is_some_and(has_line_comment);
         doc::concat(vec![
+            if broken {
+                doc::break_parent()
+            } else {
+                doc::nil()
+            },
             s(self.open_start(id)),
             doc::indent(doc::concat(vec![
                 doc::line(),
@@ -325,6 +406,14 @@ impl P<'_> {
             return Some(hugged(flat));
         }
         if !flat.contains('\n') {
+            if has_line_comment(&flat) {
+                return Some(doc::concat(vec![
+                    s(open),
+                    doc::indent(doc::concat(vec![doc::hardline(), s(fix(flat))])),
+                    doc::hardline(),
+                    s(close),
+                ]));
+            }
             return Some(expand_with(open, close, s(fix(flat))));
         }
         let first = flat.lines().next().unwrap_or("");
@@ -333,6 +422,22 @@ impl P<'_> {
                 || flat.starts_with("function")
                 || (first.contains("=>") && first.ends_with('{')));
         if hug {
+            // Only the first and last line sit beside the quotes: the lines between have the
+            // attribute's indentation to themselves.
+            // (Angular only: the rerun costs another format of the expression)
+            let wide = (self.o.dialect == Dialect::Angular)
+                .then(|| run(self.o.width.saturating_sub(indent)))
+                .flatten();
+            if let Some((wide, _)) = wide {
+                if wide.contains('\n') {
+                    return Some(hugged(wide));
+                }
+                // The object is too wide for the line it starts on, so it breaks: a property per
+                // line, each as it fits the wide width.
+                if let Some(exploded) = explode_object(&wide, self.o.tab) {
+                    return Some(hugged(exploded));
+                }
+            }
             return Some(hugged(flat));
         }
         let (broken, _) = run(self.o.width.saturating_sub(indent + self.o.tab))?;

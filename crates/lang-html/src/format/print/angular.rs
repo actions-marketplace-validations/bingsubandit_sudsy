@@ -2,6 +2,7 @@
 //! microsyntax and pipes. Expressions are formatted by the engine as TypeScript (`Opts::embed`);
 //! pipes, which are no TypeScript, are split off first (`pipes`).
 
+use super::embed::lines;
 use super::{P, s};
 use crate::format::model::{N, T};
 use core_format::EmbedMode;
@@ -19,8 +20,19 @@ fn continues(name: &str, next: &str) -> bool {
         "if" | "else if" => matches!(next, "else" | "else if"),
         "for" => next == "empty",
         "defer" => chain.contains(&next),
+        "boundary" => next == "error",
         _ => chain.contains(&name) && chain.contains(&next),
     }
+}
+
+/// `item of list` split at the word `of`.
+fn split_of(p: &str) -> Option<(&str, &str)> {
+    let blank = |c: Option<char>| c.is_some_and(char::is_whitespace);
+    p.match_indices("of").find_map(|(i, _)| {
+        let (before, after) = (&p[..i], &p[i + 2..]);
+        (blank(before.chars().next_back()) && blank(after.chars().next()))
+            .then_some((before, after))
+    })
 }
 
 /// `a   b` as `a b`.
@@ -28,20 +40,43 @@ fn collapse(t: &str) -> String {
     t.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
+/// Where an expression stands in the template: the whole value of a binding (the operands of a
+/// binary are not indented), part of a value, or the statements of an event handler.
+#[derive(Clone, Copy, PartialEq)]
+pub(super) enum Ng {
+    Binding,
+    Nested,
+    Statements,
+}
+
 impl P<'_> {
-    /// An expression formatted for `width`; `statements` reads `a; b` (an event handler).
+    /// An expression formatted for `width`; `Ng::Statements` reads `a; b` (an event handler).
     pub(super) fn ng_expression(
         &self,
         code: &str,
         width: usize,
         single_quotes: bool,
-        statements: bool,
+        kind: Ng,
     ) -> Option<String> {
         let embed = self.o.embed?;
-        let fmt = |c: &str| embed("ts", EmbedMode::Expression, c, width, single_quotes);
-        if statements {
+        let mode = match kind {
+            Ng::Binding => EmbedMode::NgExpression,
+            Ng::Nested | Ng::Statements => EmbedMode::NgNested,
+        };
+        let fmt = |c: &str| embed("ts", mode, c, width, single_quotes);
+        if kind == Ng::Statements {
             let parts = pipes::split_statements(code);
-            let out: Option<Vec<String>> = parts.iter().map(|p| pipes::format(p, &fmt)).collect();
+            let out: Option<Vec<String>> = parts
+                .iter()
+                .map(|p| {
+                    let out = pipes::format(p, &fmt)?;
+                    Some(if pipes::has_side_effect(p) {
+                        out
+                    } else {
+                        format!("({out})")
+                    })
+                })
+                .collect();
             let out = out?;
             let flat = out.join("; ");
             return Some(if flat.len() <= width && !flat.contains('\n') {
@@ -58,16 +93,15 @@ impl P<'_> {
         let v = super::unescape_quotes(value);
         let (open, close) = (format!("{name}=\""), "\"");
         if name.starts_with('(') || name.starts_with("on-") {
-            let f = |w: usize| self.ng_expression(&v, w, true, true);
+            let f = |w: usize| self.ng_expression(&v, w, true, Ng::Statements);
             return self.ng_attr(id, &open, close, &f);
         }
-        if name.starts_with(['[']) || name.starts_with("bind-") {
-            let f = |w: usize| self.ng_expression(&v, w, true, false);
+        if name.starts_with(['[']) || name.starts_with("bind-") || name.starts_with("bindon-") {
+            let f = |w: usize| self.ng_expression(&v, w, true, Ng::Binding);
             return self.ng_attr(id, &open, close, &f);
         }
         if name.starts_with('*') {
-            let f = |w: usize| self.microsyntax(&v, w);
-            return self.ng_attr(id, &open, close, &f);
+            return self.microsyntax_attribute(id, &open, &v);
         }
         if name == "i18n" || name.starts_with("i18n-") {
             let words = collapse(&v);
@@ -111,7 +145,7 @@ impl P<'_> {
             let body = if code.is_empty() {
                 doc::line()
             } else {
-                let out = self.ng_expression(code, width, true, false)?;
+                let out = self.ng_expression(code, width, true, Ng::Nested)?;
                 doc::concat(vec![doc::line(), quoted(&out)])
             };
             parts.push(doc::group(doc::concat(vec![
@@ -149,7 +183,13 @@ impl P<'_> {
             return None;
         };
         let text = |sp: oxc_htmlish_parser::Span| &src[sp.start as usize..sp.end as usize];
-        let expr = |sp| self.ng_expression(text(sp), width, true, false);
+        // (the operands of a binary are indented unless the value is one expression)
+        let kind = if bindings.len() > 2 {
+            Ng::Nested
+        } else {
+            Ng::Binding
+        };
+        let expr = |sp| self.ng_expression(text(sp), width, true, kind);
         let mut out = String::new();
         let (mut first_is_expression, mut previous_key): (bool, Option<&str>) = (false, None);
         // The directive's own empty first binding is not printed; an `as` that names the expression
@@ -216,19 +256,42 @@ impl P<'_> {
                 out.push(' ');
             } else if i > 0 {
                 let of = matches!(b, TemplateBinding::Expression { key: Some(k), .. } if i == 1 && text(*k) == "of");
-                out.push_str(if of { " " } else { "; " });
+                out.push(if of { ' ' } else { '\u{1}' });
             }
             out.push_str(&piece);
         }
         Some(out)
     }
 
+    /// `name="` the microsyntax `value` `"`: on one line when it fits, else a binding per line.
+    fn microsyntax_attribute(&self, id: usize, open: &str, value: &str) -> Option<Doc> {
+        let indent = (self.depth(id) + 1) * self.o.tab;
+        let flat_width = self.o.width.saturating_sub(indent + open.len() + 1);
+        let flat = self.microsyntax(value, flat_width)?.replace('\u{1}', "; ");
+        if flat.len() <= flat_width && !flat.contains('\n') {
+            return Some(s(format!("{open}{flat}\"")));
+        }
+        let broken = self.microsyntax(value, self.o.width.saturating_sub(indent + self.o.tab))?;
+        let pieces = broken
+            .split('\u{1}')
+            .map(|p| lines(&p.replace('"', "&quot;")));
+        Some(doc::concat(vec![
+            s(open),
+            doc::indent(doc::concat(vec![
+                doc::hardline(),
+                doc::join(&doc::concat(vec![s(";"), doc::hardline()]), pieces),
+            ])),
+            doc::hardline(),
+            s("\""),
+        ]))
+    }
+
     /// The parameters of a block: expressions of `if`, `else if`, `for`, `switch` and `case`
     /// formatted, the rest of each parameter with its blanks collapsed.
-    fn block_parameters(&self, n: &N<'_>, width: usize) -> String {
+    fn block_parameters(&self, n: &N<'_>, width: usize) -> Vec<String> {
         let name = collapse(n.name.trim_start_matches('@'));
         let expr = |code: &str| {
-            self.ng_expression(code.trim(), width, false, false)
+            self.ng_expression(code.trim(), width, false, Ng::Binding)
                 .unwrap_or_else(|| collapse(code))
         };
         let mut out = Vec::new();
@@ -242,16 +305,16 @@ impl P<'_> {
                         .filter(|r| r.starts_with(char::is_whitespace))
                     {
                         format!("track {}", expr(rest))
-                    } else if let Some((item, list)) = p.split_once(" of ") {
+                    } else if let Some((item, list)) = split_of(p) {
                         format!("{} of {}", collapse(item), expr(list))
                     } else {
-                        p.to_string()
+                        collapse(p)
                     }
                 }
                 _ => collapse(p),
             });
         }
-        out.join("; ")
+        out
     }
 
     fn block_name(n: &N<'_>) -> String {
@@ -261,10 +324,13 @@ impl P<'_> {
     /// Does the block print its `}`? Not when a block that continues it follows.
     fn closes(&self, id: usize) -> bool {
         let n = self.n(id);
-        !n.next.is_some_and(|x| {
-            self.n(x).t == T::NgBlock
-                && continues(&Self::block_name(n), &Self::block_name(self.n(x)))
-        })
+        // (a block kept as written has its own `}`, and one kept as written takes no `} `)
+        self.has_ignore(id)
+            || !n.next.is_some_and(|x| {
+                self.n(x).t == T::NgBlock
+                    && !self.has_ignore(x)
+                    && continues(&Self::block_name(n), &Self::block_name(self.n(x)))
+            })
     }
 
     /// `@name (parameters) {`, the content indented, `}`; the `}` of a block another follows
@@ -280,19 +346,39 @@ impl P<'_> {
         }
         head.push('@');
         head.push_str(&Self::block_name(n));
+        let mut parts = vec![s(head)];
         if !n.params.is_empty() {
             let width = self
                 .o
                 .width
                 .saturating_sub((self.depth(id) + 1) * self.o.tab);
-            head.push_str(&format!(" ({})", self.block_parameters(n, width)));
+            let pieces = self
+                .block_parameters(n, width)
+                .into_iter()
+                .map(|p| lines(&p));
+            // (`@default never(x);` is one word to Prettier)
+            parts.push(s(if Self::block_name(n) == "default never" {
+                "("
+            } else {
+                " ("
+            }));
+            parts.push(doc::group(doc::concat(vec![
+                doc::indent(doc::concat(vec![
+                    doc::softline(),
+                    doc::join(&doc::concat(vec![s(";"), doc::line()]), pieces),
+                ])),
+                doc::softline(),
+            ])));
+            parts.push(s(")"));
         }
         if n.self_closing {
-            head.push(';');
-            return s(head);
+            // A `@case` that falls through to the next one, or `@default never;`.
+            if Self::block_name(n) == "default never" {
+                parts.push(s(";"));
+            }
+            return doc::concat(parts);
         }
-        head.push_str(" {");
-        let mut parts = vec![s(head)];
+        parts.push(s(" {"));
         let close = self.closes(id);
         if n.kids.is_empty() {
             if close {
@@ -313,25 +399,41 @@ impl P<'_> {
     /// `@let name = value;`
     pub(super) fn ng_let_doc(&self, id: usize) -> Doc {
         let n = self.n(id);
-        let width = self
-            .o
-            .width
-            .saturating_sub((self.depth(id) + 1) * self.o.tab);
-        let value = self
-            .ng_expression(n.value.trim(), width, false, false)
-            .unwrap_or_else(|| n.value.trim().to_string());
-        s(format!("@let {} = {};", n.name.trim(), value))
+        let head = format!("@let {} =", n.name.trim());
+        let indent = self.depth(id) * self.o.tab;
+        let code = n.value.trim();
+        let flat = self.ng_expression(
+            code,
+            self.o.width.saturating_sub(indent + head.len() + 2),
+            false,
+            Ng::Binding,
+        );
+        match flat {
+            Some(v) if !v.contains('\n') => s(format!("{head} {v};")),
+            Some(_) => {
+                let broken = self
+                    .ng_expression(
+                        code,
+                        self.o.width.saturating_sub(indent + self.o.tab + 1),
+                        false,
+                        Ng::Binding,
+                    )
+                    .unwrap_or_default();
+                let lines = lines(&broken);
+                doc::concat(vec![
+                    s(head),
+                    doc::indent(doc::concat(vec![doc::hardline(), lines])),
+                    s(";"),
+                ])
+            }
+            None => s(format!("{head} {code};")),
+        }
     }
 
     /// `{value, type, =0 {one} other {many}}`
     pub(super) fn icu_doc(&self, id: usize) -> Doc {
         let n = self.n(id);
-        let mut head = vec![s(format!(
-            "{}{}, {}",
-            self.open_start(id),
-            n.value.trim(),
-            n.name.trim()
-        ))];
+        let mut head = vec![s(format!("{}, {}", n.value.trim(), n.name.trim()))];
         if !n.kids.is_empty() {
             let cases: Vec<Doc> = n.kids.iter().map(|&c| self.icu_case(c)).collect();
             head.push(s(","));
@@ -341,8 +443,11 @@ impl P<'_> {
             ])));
         }
         head.push(doc::softline());
-        head.push(s(self.close_end(id)));
-        doc::group(doc::concat(head))
+        doc::concat(vec![
+            s(self.open_start(id)),
+            doc::group(doc::concat(head)),
+            s(self.close_end(id)),
+        ])
     }
 
     fn icu_case(&self, id: usize) -> Doc {

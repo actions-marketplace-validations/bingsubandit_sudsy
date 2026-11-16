@@ -274,6 +274,8 @@ def main():
     def compare(item):
         name, fixture, _ = item
         copy = work / name.replace("/", "__")
+        if "copy_suffix" in config:  # the file name selects the language (Angular: `*.component.html`)
+            copy = copy.with_name(copy.name.removesuffix(".html") + config["copy_suffix"])
         shutil.copy(fixture, copy)
         theirs = upstream(config, prefix, version, copy, work)
         ours, refused = sudsy_format(sudsy, copy, work, config.get("sudsy_command", "format"))

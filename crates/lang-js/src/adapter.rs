@@ -33,7 +33,7 @@ pub fn source_type(path: &str) -> SourceType {
 /// of an array.
 pub fn parse_file(file: &SourceFile) -> ParseResult {
     let text = match file.language_version.as_deref() {
-        Some("expression") => &format!("[\n{}\n]", file.text),
+        Some("expression" | "ng-expression" | "ng-nested") => &format!("[\n{}\n]", file.text),
         _ => &file.text,
     };
     parse(text, source_type(&file.id))

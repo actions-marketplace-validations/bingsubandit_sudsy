@@ -20,6 +20,12 @@ pub enum EmbedMode {
     Program,
     /// One expression (a Vue directive, `{{ }}`, a Svelte `{...}`).
     Expression,
+    /// One expression of an Angular template: as `Expression`, and call arguments take no trailing
+    /// comma (Angular's expression syntax has none).
+    NgExpression,
+    /// One expression of an Angular template that is not the whole value (an interpolation, a
+    /// statement, a block's parameter): as `NgExpression`, and a binary's operands are indented.
+    NgNested,
     /// A list of declarations (`style=""`).
     Declarations,
 }
@@ -30,6 +36,8 @@ impl EmbedMode {
         match self {
             EmbedMode::Program => "program",
             EmbedMode::Expression => "expression",
+            EmbedMode::NgExpression => "ng-expression",
+            EmbedMode::NgNested => "ng-nested",
             EmbedMode::Declarations => "declarations",
         }
     }

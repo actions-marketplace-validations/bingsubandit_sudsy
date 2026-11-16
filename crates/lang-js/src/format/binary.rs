@@ -135,7 +135,7 @@ fn format_chain(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, Fo
         Some(k::UNARY_EXPRESSION) => p
             .as_ref()
             .is_some_and(|p| super::unary::has_commented_parentheses(cx, p)),
-        Some(k::ARRAY_EXPRESSION) => super::embed::is_root(cx, node),
+        Some(k::ARRAY_EXPRESSION) => super::embed::is_unindented_root(cx, node),
         _ => false,
     };
     let mut parts = parts(node, cx, inside_parens)?;

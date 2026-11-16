@@ -237,6 +237,15 @@ impl NodeFormatter for JsFormatter {
         grammar: &core_syntax::Grammar,
         options: &core_config::ResolvedOptions,
     ) -> Option<String> {
+        // The tree of an embedded expression is the one of `[\n text \n]` (`adapter::parse_file`).
+        if embed::is_expression(options) {
+            let wrapped = format!("[\n{text}\n]");
+            let out = rewrite::rewrite(tree, &wrapped, grammar, options)?;
+            return out
+                .strip_prefix("[\n")
+                .and_then(|o| o.strip_suffix("\n]"))
+                .map(str::to_string);
+        }
         rewrite::rewrite(tree, text, grammar, options)
     }
 

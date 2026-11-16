@@ -143,10 +143,8 @@ impl Walk<'_, '_> {
                 }
                 self.token(k::R_BRACE_BRACE, Span::new(e.end, e.end + 2));
             }
-            NodeKind::Cdata => {
-                self.node(k::CHUNK, n.span);
-                self.token(k::C_DATA, n.span);
-            }
+            // Text to Prettier (and the Angular compiler): `{{ }}` inside is an interpolation.
+            NodeKind::Cdata => self.cdata(n.span),
             NodeKind::DocType(d) => {
                 let s = n.span;
                 self.node(k::DOCTYPE, s);
@@ -214,6 +212,31 @@ impl Walk<'_, '_> {
             }
             // Comments are the replay's (`scan`); the content of a conditional comment is part of it.
             _ => {}
+        }
+    }
+
+    fn cdata(&mut self, s: Span) {
+        let text = &self.src[s.start as usize..s.end as usize];
+        let mut at = 0;
+        while let Some(open) = text[at..].find("{{").map(|i| i + at) {
+            let Some(close) = text[open..].find("}}").map(|i| i + open) else {
+                break;
+            };
+            self.text_part(Span::new(s.start + at as u32, s.start + open as u32));
+            let e = Span::new(s.start + open as u32 + 2, s.start + close as u32);
+            self.node(k::INTERPOLATION, Span::new(e.start - 2, e.end + 2));
+            self.token(k::L_BRACE_BRACE, Span::new(e.start - 2, e.start));
+            self.text_part(e);
+            self.token(k::R_BRACE_BRACE, Span::new(e.end, e.end + 2));
+            at = close + 2;
+        }
+        self.text_part(Span::new(s.start + at as u32, s.end));
+    }
+
+    fn text_part(&mut self, s: Span) {
+        if !s.is_empty() {
+            self.node(k::CHUNK, s);
+            self.token(k::TEXT, s);
         }
     }
 

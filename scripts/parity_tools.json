@@ -63,6 +63,23 @@
         {"dir": "tests/conformance/corpus/html", "suffixes": [".html", ".htm"], "skip": "prettier/", "prefix": "corpus/", "ratchet": "real-world", "recursive": true}
       ]
     },
+    "prettier-angular": {
+      "catalog": "prettier",
+      "install": {"npm": "prettier"},
+      "fetch": ["tests/conformance/fetch-angular-corpus.sh"],
+      "command": ["node", "{prefix}/node_modules/prettier/bin/prettier.cjs", "--no-config", "--no-editorconfig", "{file}"],
+      "input": "arg",
+      "copy_suffix": ".component.html",
+      "tool_may_reject": true,
+      "parallel": true,
+      "quiet": true,
+      "fixtures": [
+        {"dir": "tests/conformance/corpus/angular", "suffixes": [".html"], "only": "prettier/", "ratchet": "prettier-angular", "recursive": true},
+        {"dir": "tests/conformance/corpus/angular", "suffixes": [".html"], "only": "components/", "prefix": "corpus/", "ratchet": "components", "recursive": true},
+        {"dir": "tests/conformance/corpus/angular", "suffixes": [".html"], "only": "angular/", "prefix": "corpus/", "ratchet": "angular", "recursive": true},
+        {"dir": "tests/conformance/corpus/angular", "suffixes": [".html"], "only": "angular-realworld-example-app/", "prefix": "corpus/", "ratchet": "realworld-app", "recursive": true}
+      ]
+    },
     "biome": {
       "catalog": "biome",
       "install": {"npm": "@biomejs/biome"},

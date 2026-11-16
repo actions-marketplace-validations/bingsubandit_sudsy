@@ -64,6 +64,46 @@ pub fn split_statements(code: &str) -> Vec<String> {
     out
 }
 
+/// Does the statement call something or assign (Prettier's `hasNgSideEffect`)? A statement that
+/// does not is printed in parentheses.
+pub fn has_side_effect(code: &str) -> bool {
+    let b = code.as_bytes();
+    code_bytes(code).any(|(i, c)| match c {
+        b'(' => {
+            let before = code[..i].trim_end();
+            let word = before
+                .rsplit(|c: char| !(c.is_ascii_alphanumeric() || c == '_' || c == '$'))
+                .next()
+                .unwrap_or("");
+            before.ends_with([')', ']'])
+                || before.ends_with("?.")
+                || (!word.is_empty()
+                    && !matches!(
+                        word,
+                        "typeof" | "void" | "in" | "of" | "instanceof" | "new" | "await"
+                    )
+                    && before
+                        .ends_with(|c: char| c.is_ascii_alphanumeric() || c == '_' || c == '$'))
+        }
+        b'=' => {
+            let next = b.get(i + 1).copied();
+            let prev = i.checked_sub(1).map(|j| b[j]);
+            let before2 = i.checked_sub(2).map(|j| b[j]);
+            if next == Some(b'=') || next == Some(b'>') || prev == Some(b'=') {
+                false
+            } else {
+                match prev {
+                    Some(b'!') => false,
+                    Some(b'<') => before2 == Some(b'<'),
+                    Some(b'>') => before2 == Some(b'>'),
+                    _ => true,
+                }
+            }
+        }
+        _ => false,
+    })
+}
+
 /// `code` formatted by `fmt`, with its pipes; `None` when a part does not format.
 pub fn format(code: &str, fmt: &dyn Fn(&str) -> Option<String>) -> Option<String> {
     let (renamed, names) = rename_reserved(code.trim());
@@ -230,7 +270,11 @@ fn mask_groups(code: &str) -> Option<(String, Vec<(String, String)>)> {
         if s < at {
             continue;
         }
-        let ph = format!("ngpipe_{}_", groups.len());
+        // As wide as the group, so that the line breaks where the real text would.
+        let mut ph = format!("ngpipe_{}_", groups.len());
+        while ph.len() < e - s {
+            ph.push('_');
+        }
         out.push_str(&code[at..s]);
         out.push_str(&ph);
         groups.push((ph, code[s + 1..e - 1].to_string()));

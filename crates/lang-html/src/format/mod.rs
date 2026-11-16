@@ -73,6 +73,7 @@ fn embedded_attribute(value: &core_syntax::SyntaxToken) -> bool {
             || (n.len() > 2 && n.starts_with("on"))
             || n.starts_with([':', '@', '#', '.', '[', '(', '*'])
             || n.starts_with("bind-")
+            || n.starts_with("bindon-")
             || n.starts_with("on-")
             || n.starts_with("i18n")
             || n.starts_with("v-")

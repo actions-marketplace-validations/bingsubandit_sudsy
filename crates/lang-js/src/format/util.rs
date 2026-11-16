@@ -28,13 +28,18 @@ pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
         single_quote: matches!(cx.options.get("quote_style"),
             Some(OptionValue::String(s)) if s == "single"),
         commas: match cx.options.get("trailing_commas") {
+            _ if matches!(cx.options.get("embed_mode"),
+                Some(OptionValue::String(m))
+                    if m == super::embed::NG_EXPRESSION || m == super::embed::NG_NESTED) =>
+            {
+                1
+            }
             Some(OptionValue::String(s)) if s == "none" => 0,
             Some(OptionValue::String(s)) if s == "es5" => 1,
             _ => 2,
         },
         bracket_spacing: cx.options.bool("bracket_spacing"),
-        embedded: matches!(cx.options.get("embed_mode"),
-            Some(OptionValue::String(m)) if m == super::embed::EXPRESSION),
+        embedded: super::embed::is_expression(cx.options),
         after_comment: std::sync::OnceLock::new(),
     })
 }
