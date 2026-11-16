@@ -1,16 +1,15 @@
 differences:
   parse-gap: gap  "sqruff's dialect does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-  layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments, line-length wrapping), those parts stay as written"
-  case-gap: gap  "the capitalisation of our own (keywords, identifiers, functions, types, literals) is not written yet, words stay as written"
+  layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 files:
-  sqlfluff-ansi: parse-gap, layout-gap, case-gap
-  sqlfluff-mysql: parse-gap, layout-gap, case-gap
-  sqlfluff-postgres: parse-gap, layout-gap, case-gap
-  sqlfluff-tsql: parse-gap, layout-gap, case-gap
-  postgres-regress: parse-gap, layout-gap, case-gap
+  sqlfluff-ansi: parse-gap, layout-gap
+  sqlfluff-mysql: parse-gap, layout-gap
+  sqlfluff-postgres: parse-gap, layout-gap
+  sqlfluff-tsql: parse-gap, layout-gap
+  postgres-regress: parse-gap, layout-gap
 ratchet:
-  sqlfluff-ansi: 166
-  sqlfluff-mysql: 167
-  sqlfluff-postgres: 88
-  sqlfluff-tsql: 44
-  postgres-regress: 7
+  sqlfluff-ansi: 202
+  sqlfluff-mysql: 202
+  sqlfluff-postgres: 121
+  sqlfluff-tsql: 100
+  postgres-regress: 34

@@ -9013,6 +9013,28 @@
                     "description": "End the file with a newline.",
                     "type": "boolean"
                   },
+                  "function_case": {
+                    "default": "consistent",
+                    "description": "Case of function names: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+                    "enum": [
+                      "consistent",
+                      "upper",
+                      "lower",
+                      "capitalise"
+                    ],
+                    "type": "string"
+                  },
+                  "identifier_case": {
+                    "default": "consistent",
+                    "description": "Case of unquoted identifiers: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+                    "enum": [
+                      "consistent",
+                      "upper",
+                      "lower",
+                      "capitalise"
+                    ],
+                    "type": "string"
+                  },
                   "indent_size": {
                     "default": 4,
                     "description": "Columns per indentation level (also the width of a tab).",
@@ -9029,12 +9051,45 @@
                     ],
                     "type": "string"
                   },
+                  "keyword_case": {
+                    "default": "consistent",
+                    "description": "Case of keywords: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+                    "enum": [
+                      "consistent",
+                      "upper",
+                      "lower",
+                      "capitalise"
+                    ],
+                    "type": "string"
+                  },
                   "line_width": {
                     "default": 80,
                     "description": "Preferred maximum line width in columns.",
                     "maximum": 1000,
                     "minimum": 20,
                     "type": "integer"
+                  },
+                  "literal_case": {
+                    "default": "consistent",
+                    "description": "Case of `NULL`, `TRUE` and `FALSE`: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+                    "enum": [
+                      "consistent",
+                      "upper",
+                      "lower",
+                      "capitalise"
+                    ],
+                    "type": "string"
+                  },
+                  "type_case": {
+                    "default": "consistent",
+                    "description": "Case of data types: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+                    "enum": [
+                      "consistent",
+                      "upper",
+                      "lower",
+                      "capitalise"
+                    ],
+                    "type": "string"
                   }
                 },
                 "type": "object"
@@ -10083,6 +10138,28 @@
               "description": "End the file with a newline.",
               "type": "boolean"
             },
+            "function_case": {
+              "default": "consistent",
+              "description": "Case of function names: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+              "enum": [
+                "consistent",
+                "upper",
+                "lower",
+                "capitalise"
+              ],
+              "type": "string"
+            },
+            "identifier_case": {
+              "default": "consistent",
+              "description": "Case of unquoted identifiers: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+              "enum": [
+                "consistent",
+                "upper",
+                "lower",
+                "capitalise"
+              ],
+              "type": "string"
+            },
             "indent_size": {
               "default": 4,
               "description": "Columns per indentation level (also the width of a tab).",
@@ -10099,12 +10176,45 @@
               ],
               "type": "string"
             },
+            "keyword_case": {
+              "default": "consistent",
+              "description": "Case of keywords: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+              "enum": [
+                "consistent",
+                "upper",
+                "lower",
+                "capitalise"
+              ],
+              "type": "string"
+            },
             "line_width": {
               "default": 80,
               "description": "Preferred maximum line width in columns.",
               "maximum": 1000,
               "minimum": 20,
               "type": "integer"
+            },
+            "literal_case": {
+              "default": "consistent",
+              "description": "Case of `NULL`, `TRUE` and `FALSE`: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+              "enum": [
+                "consistent",
+                "upper",
+                "lower",
+                "capitalise"
+              ],
+              "type": "string"
+            },
+            "type_case": {
+              "default": "consistent",
+              "description": "Case of data types: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it.",
+              "enum": [
+                "consistent",
+                "upper",
+                "lower",
+                "capitalise"
+              ],
+              "type": "string"
             }
           },
           "type": "object"

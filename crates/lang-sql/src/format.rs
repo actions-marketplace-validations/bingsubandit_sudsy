@@ -3,7 +3,8 @@
 
 use core_config::shared;
 use core_format::{Doc, FormatCtx, FormatError, NodeFormatter};
-use core_syntax::SyntaxNode;
+use core_syntax::{SyntaxElement, SyntaxNode};
+use std::borrow::Cow;
 
 include!("schema.generated.rs");
 
@@ -16,5 +17,13 @@ impl NodeFormatter for SqlFormatter {
         cx: &FormatCtx<'_>,
     ) -> Result<Option<Doc>, FormatError> {
         Ok((node.parent().is_none()).then(|| crate::layout::format(node, cx.grammar, cx.options)))
+    }
+
+    /// The words whose case is set compare lowercase.
+    fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
+        match item {
+            SyntaxElement::Token(t) => Cow::Owned(t.text().to_lowercase()),
+            SyntaxElement::Node(n) => Cow::Owned(n.text().to_string()),
+        }
     }
 }

@@ -155,6 +155,7 @@ fn sqruff_parse(src: &str, kind: DialectKind) -> Result<Flat, String> {
             errors: Vec::new(),
         },
         pos: 0,
+        parent: (Sq::File, 0),
     };
     walk.visit(&root);
     if walk.pos != src.len() {
@@ -196,6 +197,8 @@ struct Walk<'a> {
     kinds: &'static [Option<SyntaxKind>],
     flat: Flat,
     pos: usize,
+    /// The type of the segment whose children are visited, and how many it has.
+    parent: (Sq, usize),
 }
 
 impl Walk<'_> {
@@ -216,9 +219,11 @@ impl Walk<'_> {
             }),
         };
         let start = self.pos;
+        let outer = std::mem::replace(&mut self.parent, (ty, children.len()));
         for child in children {
             self.visit(child);
         }
+        self.parent = outer;
         let end = self.flat.leaves.len();
         if ty == Sq::Unparsable && self.pos > start {
             let len = (self.pos - start) as u32;
@@ -258,6 +263,17 @@ impl Walk<'_> {
         }
         self.pos = end;
         let kind = token_kind(ty, raw);
+        let kind = match (kind, self.parent) {
+            // Keywords of a data type are types for the capitalisation, and the last part of a
+            // qualified function name (a user's function, whose case matters) is not a function; bare
+            // functions (`CURRENT_DATE`) are functions.
+            (k::KEYWORD, (Sq::DataType | Sq::PrimitiveType | Sq::DatetimeTypeIdentifier, _)) => {
+                k::TYPE_IDENTIFIER
+            }
+            (k::KEYWORD, (Sq::BareFunction, _)) => k::FUNCTION_IDENTIFIER,
+            (k::FUNCTION_IDENTIFIER, (Sq::FunctionName, n)) if n > 1 => k::WORD,
+            _ => kind,
+        };
         if kind == k::UNKNOWN {
             let len = raw.len() as u32;
             (self.flat.errors).push(ParseError::syntax(start as u32, len, "unexpected text"));
@@ -289,6 +305,7 @@ fn token_kind(ty: Sq, raw: &str) -> SyntaxKind {
         Sq::StartSquareBracket => k::L_SQUARE,
         Sq::EndSquareBracket => k::R_SQUARE,
         Sq::Keyword | Sq::DatePart => k::KEYWORD,
+        Sq::BareFunction => k::FUNCTION_IDENTIFIER,
         Sq::NakedIdentifier => k::IDENTIFIER,
         Sq::FunctionNameIdentifier => k::FUNCTION_IDENTIFIER,
         Sq::DataTypeIdentifier => k::TYPE_IDENTIFIER,
@@ -304,7 +321,8 @@ fn token_kind(ty: Sq, raw: &str) -> SyntaxKind {
         Sq::BinaryOperator if word => k::BINARY_KEYWORD,
         Sq::BinaryOperator => k::BINARY_OPERATOR,
         Sq::Word => k::WORD,
-        _ if word => k::IDENTIFIER,
+        Sq::PropertiesNakedIdentifier => k::IDENTIFIER,
+        _ if word => k::WORD,
         _ => match raw.chars().next() {
             Some('\'') => k::STRING,
             Some('"' | '`') => k::QUOTED_IDENTIFIER,

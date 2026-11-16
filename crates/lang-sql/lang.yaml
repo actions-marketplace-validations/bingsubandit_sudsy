@@ -11,3 +11,23 @@ options:
   - indent_size: 4
   - final_newline: true
   - end_of_line
+  - keyword_case:
+      values: ["consistent", "upper", "lower", "capitalise"]
+      default: "consistent"
+      doc: "Case of keywords: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."
+  - identifier_case:
+      values: ["consistent", "upper", "lower", "capitalise"]
+      default: "consistent"
+      doc: "Case of unquoted identifiers: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."
+  - function_case:
+      values: ["consistent", "upper", "lower", "capitalise"]
+      default: "consistent"
+      doc: "Case of function names: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."
+  - literal_case:
+      values: ["consistent", "upper", "lower", "capitalise"]
+      default: "consistent"
+      doc: "Case of `NULL`, `TRUE` and `FALSE`: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."
+  - type_case:
+      values: ["consistent", "upper", "lower", "capitalise"]
+      default: "consistent"
+      doc: "Case of data types: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."

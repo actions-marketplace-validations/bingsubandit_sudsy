@@ -8,9 +8,9 @@ use provider_api::{LanguageProvider, SourceFile};
 
 #[test]
 fn lays_out_lists_and_keeps_comments() {
-    let input = "-- header\nSELECT /* inline */ a,b -- trailing\nFROM t;\n/* block\n   comment */\nselect 1;\n";
+    let input = "-- header\nSELECT /* inline */ a,b -- trailing\nFROM t;\n/* block\n   comment */\nSELECT 1;\n";
     let subject = Formatting::new(lang_sql::provider(), "a.sql");
-    let want = "-- header\nSELECT /* inline */\n    a,\n    b -- trailing\nFROM t;\n/* block\n   comment */\nselect 1;\n";
+    let want = "-- header\nSELECT /* inline */\n    a,\n    b -- trailing\nFROM t;\n/* block\n   comment */\nSELECT 1;\n";
     assert_eq!(assert_formats(&subject, input), want);
 }
 
@@ -19,28 +19,45 @@ fn formats(input: &str) -> String {
 }
 
 #[test]
-fn long_lines_break_at_the_last_bracket_and_the_commas() {
+fn long_lines_break_like_sqlfluff() {
     let call = "select a from t where x = sch.fname(arg_number_one, arg_number_two, arg_number_three, arg_number_four);\n";
     assert_eq!(
         formats(call),
-        "select a from t\nwhere x = sch.fname(\n    arg_number_one,\n    arg_number_two,\n    arg_number_three,\n    arg_number_four\n);\n"
+        "select a\nfrom t\nwhere\n    x\n    = sch.fname(\n        arg_number_one, arg_number_two, arg_number_three, arg_number_four\n    );\n"
     );
     let list = "select * from table_one, table_two, table_three, table_four, table_five, table_six, table_seven, table_eight, table_nine;\n";
     assert_eq!(
         formats(list),
-        "select *\nfrom table_one,\n    table_two,\n    table_three,\n    table_four,\n    table_five,\n    table_six,\n    table_seven,\n    table_eight,\n    table_nine;\n"
+        "select *\nfrom table_one, table_two, table_three, table_four, table_five, table_six,\n    table_seven, table_eight, table_nine;\n"
     );
 }
 
 #[test]
 fn a_trailing_comment_over_the_width_moves_above() {
     let input = "select a from t where b = 1 and c = 2 and d = 3 and e = 4 -- a long comment that does not fit on the line\n;\n";
-    let out = formats(input);
-    assert!(
-        out.starts_with("select a from t\n-- a long comment"),
-        "{out}"
+    assert_eq!(
+        formats(input),
+        "-- a long comment that does not fit on the line\nselect a from t\nwhere b = 1 and c = 2 and d = 3 and e = 4\n;\n"
     );
-    assert!(!out.contains("4 --"), "{out}");
+}
+
+#[test]
+fn capitalisation_follows_the_first_word_or_the_option() {
+    let input = "select A, b from T where X = Null and y is NULL and z = CAST(1 AS Int);\n";
+    assert_eq!(
+        formats(input),
+        "select\n    A,\n    B\nfrom T\nwhere X = Null and Y is Null and Z = CAST(1 as Int);\n"
+    );
+    let mut subject = Formatting::new(lang_sql::provider(), "a.sql");
+    for (name, value) in [("keyword_case", "upper"), ("literal_case", "lower")] {
+        subject
+            .options
+            .push((name, core_config::OptionValue::String(value.into())));
+    }
+    assert_eq!(
+        assert_formats(&subject, input),
+        "SELECT\n    A,\n    B\nFROM T\nWHERE X = null AND Y IS null AND Z = CAST(1 AS Int);\n"
+    );
 }
 
 #[test]

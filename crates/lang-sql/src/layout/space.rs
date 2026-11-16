@@ -51,7 +51,8 @@ fn wishes(seq: &Seq, i: usize) -> (Wish, Wish) {
         n = node.parent;
     }
     match seq.blocks[i].kind {
-        k::COMMA | k::SEMICOLON | k::R_PAREN | k::R_SQUARE | k::EOF | k::COLON => before = TOUCH,
+        k::COMMA | k::SEMICOLON | k::R_PAREN | k::R_SQUARE | k::EOF => before = TOUCH,
+        k::COLON => (before, after) = (TOUCH, ANY),
         k::DOT | k::SLICE => (before, after) = (TOUCH, TOUCH),
         k::PREFIX => after = TOUCH,
         k::L_PAREN | k::L_SQUARE => after = TOUCH,

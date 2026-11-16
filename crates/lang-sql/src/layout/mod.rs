@@ -4,6 +4,7 @@
 
 mod blocks;
 mod breaks;
+mod case;
 mod indent;
 mod seq;
 mod space;
@@ -39,6 +40,7 @@ pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -
     if matches!(options.get("dialect"), Some(OptionValue::String(d)) if d == "mysql") {
         blocks::add_indents(&mut seq);
     }
+    case::recase(&mut seq, options);
     let unit = unit(options);
     let tab = unit.chars().count().max(1);
     let width = match options.get(shared::LINE_WIDTH) {
@@ -50,11 +52,11 @@ pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -
         space::respace(&mut seq);
         indent::reindent(&mut seq, &unit);
         breaks::rebreak(&mut seq);
+        let wrapped = wrap::long_lines(&mut seq, width, tab, &unit);
         breaks::ctes(&mut seq);
         breaks::select_targets(&mut seq, width);
         breaks::keywords(&mut seq);
         breaks::blank_lines(&mut seq);
-        let wrapped = wrap::long_lines(&mut seq, width, tab);
         if !wrapped && signature(&seq) == before {
             break;
         }

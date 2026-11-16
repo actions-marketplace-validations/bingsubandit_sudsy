@@ -21,16 +21,16 @@ fn break_before(seq: &mut Seq, i: usize, indent: &str) {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-enum Pos {
+pub enum Pos {
     Leading,
     Trailing,
     Alone,
 }
 
-struct Span {
-    s: usize,
-    e: usize,
-    pos: Pos,
+pub struct Span {
+    pub s: usize,
+    pub e: usize,
+    pub pos: Pos,
     strict: bool,
 }
 
@@ -75,7 +75,7 @@ fn next_side(seq: &Seq, e: usize) -> Side {
     }
 }
 
-fn spans(seq: &Seq) -> Vec<Span> {
+pub fn spans(seq: &Seq) -> Vec<Span> {
     let mut out = Vec::new();
     for i in 1..seq.blocks.len() - 1 {
         let b = &seq.blocks[i];
