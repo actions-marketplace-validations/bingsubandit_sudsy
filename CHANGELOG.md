@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.0.2] - 2026-11-17
+
+### Fixed
+* VS Code and the release archives: JavaScript/TypeScript, CSS, Python, SQL, Java, HTML, Vue,
+  Svelte, Angular, Kotlin, PHP and Ruby were reported as not installed and were not formatted or
+  linted, and installing them failed with "this build has no `js` language pack". Only
+  tree-sitter languages are packs; the others are in the binary.
+* Python: the formatter is stable on its own output (comments in lambdas, implicit string
+  concatenations, after the head of an attribute chain, in `class C(  # c`).
+
+### Install
+* Packages for npm (`npm i -D sudsy`), PyPI (`pip install sudsy`, `uvx sudsy`), Homebrew
+  (`brew install bingsubandit/sudsy/sudsy`), Scoop, winget and `cargo binstall`, built from the
+  release archives.
+* VS Code: the install prompt for a missing language shows on every open of such a file, with
+  "Don't ask again"; the command "Sudsy: Install Missing Languages" installs the languages of the
+  open files. `sudsy.importStrategy`: `fromEnvironment` (default) uses `sudsy.serverPath`, then a
+  `sudsy` on PATH, then the bundled binary; `useBundled` always uses the bundled one.
+
+### Lint
+* On every language with statement roles (C#, Java, JavaScript/TypeScript, Kotlin, PHP, Python,
+  Ruby, SQL): `no-self-compare`, `no-constant-condition`, `no-constant-comparison`,
+  `no-assignment-in-condition`, `no-empty-block` and `no-duplicate-case`.
+* Java, Kotlin and PHP: unused imports, unused local variables, undefined variables (PHP) and
+  parameter assignment.
+* JavaScript: `no-fallthrough`, `no-unexpected-multiline`, `no-control-regex` and
+  `no-misleading-character-class`.
+* Vue and Svelte: rules checked against eslint-plugin-vue and eslint-plugin-svelte
+  (`no-target-blank` and `no-dupe-on-directives` corrected, fewer false positives), new
+  `v-on-event-hyphenation`, `no-v-text-v-html-on-component`, `no-use-v-else-with-v-for`,
+  `no-dupe-v-else-if` and `no-unknown-style-directive-property`; on Vue `<script>` and
+  `<script setup>`, `require-default-prop`, `require-prop-types` and `no-dupe-keys`, and Svelte
+  `no-object-in-text-mustaches`.
+
+### Faster
+* SQL: a hand-written parser replaces sqruff (about 40x faster, a twentieth of the memory, no
+  512 KB file limit; the binary is 4 MB smaller).
+* Startup about 30 percent fewer instructions; HTML, Vue and Svelte formatting cheaper.
+
 ## [0.0.1] - 2026-11-17
 
 First release: one formatter and linter, as a CLI and a VS Code extension, configured by
