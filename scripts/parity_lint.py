@@ -1,6 +1,6 @@
 """Compares an upstream tool with `sudsy lint` on tests/parity/<tool>/ (run by scripts/parity.sh).
 
-Usage: parity_lint.py <tool> <sudsy-binary> <target-dir>
+Usage: parity_lint.py <tool> <sudsy-binary> <target-dir> [--coverage]
 
 The tool's version, install and corpora come from its entry in parity_tools.json (parity_format.prepare).
 """
@@ -126,6 +126,21 @@ def markdownlint(install, folder):
     return found
 
 
+def corpus_sources(tool, suffixes=()):
+    """`[(label, work file name, path)]` of the real-world corpus of ruff, eslint and typescript-eslint (fetched by
+    tests/conformance/fetch-js-corpus.sh and fetch-python-corpus.sh); nothing for the other tools."""
+    def listing(corpus, files):
+        return [(f"corpus/{p.relative_to(corpus).as_posix()}", "-".join(p.relative_to(corpus).parts), p) for p in files]
+    if tool in ("eslint", "typescript-eslint"):  # Prettier's own tests include proposal syntax the parsers reject
+        corpus = ROOT / "tests/conformance/corpus/js"
+        return listing(corpus, [p for suffix in suffixes for p in sorted(corpus.rglob(f"*{suffix}")) if p.is_file() and p.relative_to(corpus).parts[0] != "prettier"])
+    if tool == "ruff":  # the real-world projects of the format parity (tests/conformance/fetch-python-corpus.sh)
+        corpus = ROOT / "tests/conformance/corpus/python"
+        roots = ("django/django/", "requests/src/", "flask/src/", "click/src/", "httpx/httpx/", "pytest/src/", "black/src/")
+        return listing(corpus, [p for p in sorted(corpus.rglob("*.py")) if p.is_file() and p.relative_to(corpus).as_posix().startswith(roots)])
+    return []
+
+
 def rule_fixtures(tool, sudsy, version, prefix, exe):
     """Runs the tool (hadolint, shellcheck, checkmake, stylelint, html-validate) and `sudsy lint` on the rule fixtures of its language
     (tests/rules/<lang>/<folder>/*<suffix>, annotations removed) and compares `(rule, line)` of the
@@ -198,14 +213,7 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
     if tool == "actionlint":  # the corpus too (tests/conformance/fetch-github-actions-corpus.sh), a file per name
         corpus = ROOT / "tests/conformance/corpus/github-actions"
         sources += [(f"corpus/{p.relative_to(corpus).as_posix()}", "-".join(p.relative_to(corpus).parts), p) for p in sorted(corpus.rglob("*.y*ml")) if p.is_file()]
-    if tool in ("eslint", "typescript-eslint"):  # the real-world corpus (tests/conformance/fetch-js-corpus.sh); Prettier's own tests include proposal syntax the parsers reject
-        corpus = ROOT / "tests/conformance/corpus/js"
-        sources += [(f"corpus/{p.relative_to(corpus).as_posix()}", "-".join(p.relative_to(corpus).parts), p) for suffix in suffixes for p in sorted(corpus.rglob(f"*{suffix}")) if p.is_file() and p.relative_to(corpus).parts[0] != "prettier"]
-    if tool == "ruff":  # the real-world projects of the format parity (tests/conformance/fetch-python-corpus.sh)
-        corpus = ROOT / "tests/conformance/corpus/python"
-        roots = ("django/django/", "requests/src/", "flask/src/", "click/src/", "httpx/httpx/", "pytest/src/", "black/src/")
-        sources += [(f"corpus/{p.relative_to(corpus).as_posix()}", "-".join(p.relative_to(corpus).parts), p) for p in sorted(corpus.rglob("*.py"))
-                    if p.is_file() and p.relative_to(corpus).as_posix().startswith(roots)]
+    sources += corpus_sources(tool, suffixes)
     if not mapping:  # nothing to compare yet
         print(f"{len(sources)} {tool} fixtures, no catalog rule is mapped to a Sudsy rule yet ({tool} {version})")
         return 0
@@ -435,10 +443,95 @@ def stylecop(sudsy, version):
     return 1 if mismatches else 0
 
 
+COVERAGE = {  # tool -> (language, file suffixes, flat config or command line for its default/recommended set)
+    "ruff": ("python", (".py",)),
+    "eslint": ("js", (".js",)),
+    "typescript-eslint": ("js", (".ts", ".tsx")),
+}
+
+
+def message_name(message):
+    """The first name a message quotes (`os`, 'x'), or None."""
+    m = re.search(r"`([^`]+)`|'([^']+)'|\"([^\"]+)\"", message)
+    return next((g for g in m.groups() if g), None) if m else None
+
+
+def coverage(tool, sudsy, version, prefix, exe):
+    """The share of the findings of `tool`'s default (ruff) or recommended (ESLint, typescript-eslint) set on its
+    real-world corpus that the mapped Sudsy rule also reports in the same file: by rule and file, and by the
+    reported name where the tool's message quotes one and Sudsy's does too, not by position. Fails when the
+    share is below `coverage:` of tests/parity/<tool>/differences.yaml (a ratchet: it may only go up)."""
+    if tool not in COVERAGE:
+        print(f"{tool}: no real-world corpus yet, fixtures only (scripts/parity.sh {tool})")
+        return 0
+    lang, suffixes = COVERAGE[tool]
+    mapping = rule_map(tool)
+    if tool == "typescript-eslint":  # its recommended set also sets ESLint core rules (`no-var`), mapped by the eslint catalog
+        mapping = {**rule_map("eslint"), **{f"@typescript-eslint/{r}": v for r, v in mapping.items()}}
+    folder = ROOT / "tests/parity" / tool
+    work = prefix / "coverage"
+    shutil.rmtree(work, ignore_errors=True)
+    work.mkdir(parents=True)
+    shutil.copy(folder / "sudsy.yaml", work / "sudsy.yaml")
+    names = {}
+    for _, name, source in corpus_sources(tool, suffixes):
+        if tool == "eslint":  # both tools read a `.js` as a module by default: a file with `import`/`export` is one, the others are scripts
+            text = source.read_text(encoding="utf-8")
+            name = str(Path(name).with_suffix(".mjs" if re.search(r"^(?:import|export)\b", text, re.M) else ".cjs"))
+        shutil.copy(source, work / name)
+        names[name] = source
+    # the default / recommended set of the tool, on every file in one run
+    if tool == "ruff":
+        run = subprocess.run([sys.executable, str(ROOT / "scripts/parity_ruff.py"), str(prefix), "check", "--isolated", "--no-cache", "--output-format", "json", "--exit-zero", "--ignore-noqa", "--target-version", "py314", "."],
+                             cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
+        found = [(Path(d["filename"]).name, d["code"], d["message"]) for d in json.loads(run.stdout) if d["code"]]
+        fatal = set()
+    else:
+        config = ('import js from "@eslint/js";\nexport default [{ linterOptions: { noInlineConfig: true } }, js.configs.recommended];\n' if tool == "eslint" else
+                  'import tseslint from "typescript-eslint";\nexport default [{ linterOptions: { noInlineConfig: true } }, ...tseslint.configs.recommended];\n')
+        (work / "eslint.config.mjs").write_text(config, encoding="utf-8")
+        run = subprocess.run(["node", f"{prefix}/node_modules/eslint/bin/eslint.js", "-c", "eslint.config.mjs", "-f", "json", "--no-warn-ignored", "."],
+                             cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
+        try:
+            results = json.loads(run.stdout)
+        except json.JSONDecodeError:
+            sys.exit(f"eslint produced no report:\n{run.stdout}\n{run.stderr}")
+        fatal = {Path(r["filePath"]).name for r in results if any(m.get("fatal") for m in r["messages"])}
+        found = [(Path(r["filePath"]).name, m["ruleId"], m["message"]) for r in results for m in r["messages"] if m["ruleId"] and not m.get("fatal")]
+    found = [f for f in found if f[0] not in fatal]
+    out = subprocess.run([sudsy, "lint", "--format", "json", "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False).stdout
+    ours = {}  # (file, sudsy rule) -> messages
+    for d in json.loads(out)["diagnostics"]:
+        ours.setdefault((Path(d["path"]).name, d["rule"]), []).append(d["message"])
+    named = {r for (_, r), ms in ours.items() if any(message_name(m) for m in ms)}  # rules whose messages quote a name
+    per = {}  # upstream rule -> [findings, covered]
+    for file, rule, message in found:
+        row = per.setdefault(rule, [0, 0])
+        row[0] += 1
+        target = mapping.get(rule)
+        messages = ours.get((file, target)) if target else None
+        if messages and (target not in named or (n := message_name(message)) is None or any(n in m for m in messages)):
+            row[1] += 1
+    total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
+    share = round(1000 * hit / total) / 10 if total else 100.0
+    for rule, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:15]:
+        print(f"  {rule}: {c} of {n} covered" + ("" if rule in mapping else " (no Sudsy rule)"))
+    print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}%")
+    floor = (yaml.safe_load((folder / "differences.yaml").read_text(encoding="utf-8")) or {}).get("coverage")
+    if floor is None or share < floor:
+        print(f"COVERAGE below the ratchet: {share}% < {floor}%" if floor is not None else f"no `coverage:` ratchet in tests/parity/{tool}/differences.yaml: set it to {share}")
+        return 1
+    if share > floor:
+        print(f"coverage improved: raise `coverage:` in tests/parity/{tool}/differences.yaml to {share}")
+    return 0
+
+
 def main():
     tool, sudsy, target = sys.argv[1:4]
     config = parity_format.tools()["lint"][tool]
     version, prefix = parity_format.prepare(config, Path(target).resolve() / "parity")
+    if "--coverage" in sys.argv:
+        return coverage(tool, sudsy, version, prefix, None)
     if tool == "stylecop":
         return stylecop(sudsy, version)
     if tool == "psscriptanalyzer":

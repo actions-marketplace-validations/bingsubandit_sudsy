@@ -74,10 +74,6 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         &[("crates", crates)],
     )?);
     out.push(splice(
-        "docs/architecture/syntax-tree.md",
-        &[("roles", roles_table())],
-    )?);
-    out.push(splice(
         "docs/parity/README.md",
         &[("counts", catalog_counts()?)],
     )?);
@@ -91,20 +87,6 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         out.push((path, text));
     }
     Ok(out)
-}
-
-/// The role vocabulary of `core_syntax::roles`: required fields plain, optional ones with `?`.
-fn roles_table() -> String {
-    let mut out = String::from("| Role | Fields | Meaning |\n|---|---|---|\n");
-    for r in core_syntax::roles::ROLES {
-        let fields = if r.fields.is_empty() {
-            "-".into()
-        } else {
-            format!("`{}`", r.fields.replace(' ', "` `"))
-        };
-        out += &format!("| `#{}` | {fields} | {} |\n", r.name, r.doc);
-    }
-    out
 }
 
 /// One row per catalog (`docs/parity/*.yaml`): the entries by coverage.
@@ -121,18 +103,22 @@ fn catalog_counts() -> Result<String> {
         }
     }
     catalogs.sort_by(|a, b| a.tool.cmp(&b.tool));
+    let shares = coverage_shares()?;
     let mut out = String::from(
-        "| Tool | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
+        "| Tool | Coverage share | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 ",
     );
     for c in catalogs {
         let n = |coverage: &str| c.entries.iter().filter(|e| e.coverage == coverage).count();
         let planned = c.entries.iter().filter(|e| e.sudsy == "planned").count();
         out += &format!(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {planned} |
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {planned} |
 ",
             c.tool,
+            shares
+                .get(&c.tool)
+                .map_or("-".to_string(), |s| format!("{s:.1}%")),
             c.entries.len(),
             n("covered"),
             n("partial"),
@@ -143,6 +129,34 @@ fn catalog_counts() -> Result<String> {
         );
     }
     Ok(out)
+}
+
+/// The `coverage` ratchet (share of the tool's default-set findings on its corpus that Sudsy also
+/// reports, `scripts/parity.sh coverage <tool>`) of each lint tool, by catalog name.
+fn coverage_shares() -> Result<BTreeMap<String, f64>> {
+    #[derive(serde::Deserialize)]
+    struct Ratchets {
+        coverage: Option<f64>,
+    }
+    let root = xtask::repo_root();
+    let text = std::fs::read_to_string(root.join("scripts/parity_tools.json"))?;
+    let modes: BTreeMap<String, BTreeMap<String, serde_json::Value>> = serde_json::from_str(&text)?;
+    let mut shares = BTreeMap::new();
+    for (tool, entry) in &modes["lint"] {
+        let path = root
+            .join("tests/parity")
+            .join(tool)
+            .join("differences.yaml");
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let r: Ratchets = serde_saphyr::from_str(&text)
+            .map_err(|e| anyhow::anyhow!("{}: {e}", path.display()))?;
+        if let (Some(share), Some(catalog)) = (r.coverage, entry["catalog"].as_str()) {
+            shares.insert(catalog.to_string(), share);
+        }
+    }
+    Ok(shares)
 }
 
 /// The tools of `scripts/parity_tools.json`, per mode.

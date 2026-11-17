@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
-# Differential test against an upstream tool. Usage: scripts/parity.sh [format] <tool>
+# Differential test against an upstream tool. Usage: scripts/parity.sh [format|coverage] <tool>
 # Lint mode runs the tool and `sudsy lint` on tests/parity/<tool>/ (or the rule fixtures) and compares
 # rule (mapped through docs/parity/<tool>.yaml), line and column; format mode compares `sudsy format`
-# with the tool's output. Prints every mismatch; exit 1 on any. The tools, their versions' catalogs
+# with the tool's output; coverage mode reports the share of the tool's default-set findings on its corpus that
+# Sudsy also reports (docs/development/parity.md). Prints every mismatch; exit 1 on any. The tools, their versions' catalogs
 # and how they are installed are the entries of scripts/parity_tools.json (docs/development/parity.md).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 tdir=${CARGO_TARGET_DIR:-$PWD/target}
 mode=lint
+extra=()
 if [ "${1:-}" = format ]; then mode=format; shift; fi
+if [ "${1:-}" = coverage ]; then extra=(--coverage); shift; fi
 tool=${1:-}
 py=
 for candidate in python3 python; do
@@ -27,4 +30,4 @@ if [ ! -d "$venv" ]; then
   "$vpy" -m pip install --quiet pyyaml
 fi
 py="$venv/bin/python"; [ -x "$py" ] || py="$venv/Scripts/python.exe"
-exec "$py" "scripts/parity_$mode.py" "$tool" "$sudsy" "$tdir"
+exec "$py" "scripts/parity_$mode.py" "$tool" "$sudsy" "$tdir" "${extra[@]}"

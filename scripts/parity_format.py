@@ -12,6 +12,7 @@ differ, and the `ratchet` minimums of the groups (a corpus too large for entries
 """
 import difflib
 import hashlib
+import io
 import json
 import os
 import platform
@@ -19,6 +20,8 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.request
+import zipfile
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -60,7 +63,17 @@ def install(spec, catalog, version, prefix):
             run(["npm", "install", "--silent", "--no-audit", "--no-fund", "--prefix", prefix, *spec.get("with", []), f"{spec['npm']}@{version}"], ROOT)
     elif "pip" in spec:  # a Python tool, run with PYTHONPATH=prefix
         if not (prefix / spec["pip"]).is_dir():
-            run([sys.executable, "-m", "pip", "install", "--quiet", "--target", prefix, f"{spec['pip']}=={version}"], ROOT)
+            if subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True).returncode == 0:
+                run([sys.executable, "-m", "pip", "install", "--quiet", "--target", prefix, f"{spec['pip']}=={version}"], ROOT)
+            else:  # no pip on the host: the tool's wheel from PyPI, unpacked (a tool without dependencies, as ruff)
+                files = json.load(urllib.request.urlopen(f"https://pypi.org/pypi/{spec['pip']}/{version}/json"))["urls"]
+                machine = platform.machine().lower()
+                url = next(f["url"] for f in files if f["filename"].endswith(".whl") and ("none-any" in f["filename"] or ("manylinux" in f["filename"] and machine in f["filename"])))
+                zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(url).read())).extractall(prefix)
+                (prefix / "bin").mkdir(exist_ok=True)  # where `pip --target` puts the scripts
+                for script in prefix.glob("*.data/scripts/*"):
+                    shutil.move(script, prefix / "bin" / script.name)
+                    (prefix / "bin" / script.name).chmod(0o755)
     elif "dotnet-tool" in spec:
         if not executable(prefix, spec["exe"]).exists():
             run(["dotnet", "tool", "install", spec["dotnet-tool"], "--version", version, "--tool-path", prefix], ROOT)
