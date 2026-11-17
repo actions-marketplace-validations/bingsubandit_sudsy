@@ -261,6 +261,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut comments = CommentSyntax::default();
     let mut suppressions = Vec::new();
     let mut requires_roles = false;
+    let mut operators = HashMap::new();
     let mut raw: Vec<RawKind> = Vec::new();
 
     for d in &decls {
@@ -304,6 +305,18 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
                 }
             }
             "roles" => requires_roles = true,
+            "operators" => {
+                let kind = c.ident("an operator kind")?;
+                if !crate::roles::OPERATOR_KINDS.iter().any(|k| k.0 == kind) {
+                    return err(d.line, format!("unknown operator kind `{kind}`"));
+                }
+                while c.peek().is_some() {
+                    let text = c.string("operator text")?;
+                    if operators.insert(text.clone(), kind.clone()).is_some() {
+                        return err(d.line, format!("operator `{text}` has two kinds"));
+                    }
+                }
+            }
             "suppress" => {
                 let role = c.ident("suppression role")?;
                 let marker = c.string("suppression marker")?;
@@ -352,6 +365,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         comments,
         suppressions,
         requires_roles,
+        operators,
         raw,
         hash,
     )
@@ -365,6 +379,7 @@ fn resolve(
     comments: CommentSyntax,
     suppressions: Vec<Suppression>,
     requires_roles: bool,
+    operators: HashMap<String, String>,
     raw: Vec<RawKind>,
     hash: String,
 ) -> Result<Grammar, GrammarError> {
@@ -454,6 +469,7 @@ fn resolve(
         comments,
         suppressions,
         requires_roles,
+        operators,
         token_flags: super::hot_flags(&tokens),
         node_flags: super::hot_flags(&nodes),
         nodes,
@@ -553,6 +569,23 @@ node Long =
                 .unwrap()
                 .check_roles()
                 .is_empty()
+        );
+    }
+
+    #[test]
+    fn operators_map_text_to_a_kind() {
+        let g = Grammar::parse(
+            "language x 1\noperators equality \"==\" \"!=\"\noperators logical \"&&\"",
+        )
+        .unwrap();
+        assert_eq!(g.operator_kind("!="), Some("equality"));
+        assert_eq!(g.operator_kind("&&"), Some("logical"));
+        assert_eq!(g.operator_kind("+"), Some("arithmetic"));
+        assert_eq!(g.operator_kind("as"), None);
+        assert!(Grammar::parse("language x 1\noperators nope \"+\"").is_err());
+        assert!(
+            Grammar::parse("language x 1\noperators logical \"+\"\noperators equality \"+\"")
+                .is_err()
         );
     }
 

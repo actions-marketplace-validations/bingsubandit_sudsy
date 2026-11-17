@@ -4,6 +4,8 @@
 
 language python 20 "Python"
 roles
+operators equality "is"
+operators arithmetic "//" "@"
 comments line "#"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
@@ -130,12 +132,12 @@ token EndOfFile
 token Unknown #error
 
 node ModModule #scope = body:#statement* EndOfFile
-node Parenthesized #expression #part #opaque #transparent
+node Parenthesized #expression #pattern #part #opaque #transparent
 node StmtFunctionDef #statement #declaration #function #scope =
     Decorator* Async? Def name:Identifier TypeParams? parameters:Parameters Rarrow? returns:#expression? Colon body:#statement*
 node StmtClassDef #statement #declaration #type-declaration #scope =
     Decorator* Class name:Identifier TypeParams? Arguments? Colon members:#statement*
-node StmtReturn #statement #opaque
+node StmtReturn #statement #return = Return value:#expression?
 node StmtDelete #statement #opaque
 node StmtTypeAlias #statement #declaration =
     Type name:ExprName TypeParams? Equal value:#expression
@@ -145,13 +147,18 @@ node StmtAugAssign #statement #assignment =
     left:#expression operator:#operator right:#expression
 node StmtAnnAssign #statement #assignment =
     left:#expression Colon annotation:#expression operator:Equal? right:#expression?
-node StmtFor #statement #opaque
-node StmtWhile #statement #opaque
-node StmtIf #statement #opaque
+node StmtFor #statement #loop =
+    Async? For target:#expression In iter:#expression Colon body:#statement* Else? Colon? orelse:#statement*
+node StmtWhile #statement #loop =
+    While condition=test:#expression Colon body:#statement* Else? Colon? orelse:#statement*
+node StmtIf #statement #conditional =
+    If condition=test:#expression Colon then=body:#statement* else=clauses:ElifElseClause*
 node StmtWith #statement #opaque
-node StmtMatch #statement #opaque
-node StmtRaise #statement #opaque
-node StmtTry #statement #opaque
+node StmtMatch #statement #switch =
+    Match subject:#expression Colon cases:MatchCase*
+node StmtRaise #statement #throw = Raise value=exc:#expression? From? cause:#expression?
+node StmtTry #statement #try =
+    Try Colon body:#statement* catches=handlers:ExceptHandlerExceptHandler* Else? Colon? orelse:#statement* Finally? Colon? finally=finalbody:#statement*
 node StmtAssert #statement #opaque
 node StmtImport #statement #import =
     Import path=names:Alias*
@@ -215,7 +222,8 @@ node ExprName #expression #part #reference =
 node ExprList #expression #part #opaque
 node ExprTuple #expression #part #opaque
 node ExprSlice #expression #part #opaque
-node ExceptHandlerExceptHandler #opaque
+node ExceptHandlerExceptHandler #catch =
+    Except Star? parameter=type:#expression? As? name:Identifier? Colon body:#statement*
 node InterpolatedElement #opaque
 node InterpolatedStringLiteralElement #opaque
 node PatternMatchValue #pattern #opaque
@@ -245,9 +253,11 @@ node ParameterWithDefault #parameter #opaque
 node Keyword #opaque
 node Alias #opaque
 node WithItem #opaque
-node MatchCase #opaque
+node MatchCase #case =
+    Case test=pattern:#pattern If? guard:#expression? Colon body:#statement*
 node Decorator #opaque
-node ElifElseClause #opaque
+node ElifElseClause #conditional =
+    Elif? Else? condition=test:#expression? Colon then=body:#statement*
 node TypeParams #opaque
 node FString #string-part #opaque
 node TString #opaque

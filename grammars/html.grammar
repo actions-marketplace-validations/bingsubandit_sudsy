@@ -77,7 +77,7 @@ node StartTag #start-tag #mapping #opaque = Lt TagName entries:Attribute* #tag-e
 node EndTag #transparent #opaque = LtSlash TagName Gt
 // An end tag that closes no open element.
 node StrayEndTag #content #opaque = LtSlash TagName Gt
-node Attribute #key-value #opaque = key:AttrName Equals? value:AttrValue?
+node Attribute #key-value = key:AttrName Equals? value:AttrValue?
 
 // `@if (a) {` up to the `{`, and the block with its content and `}`.
 node BlockHead #opaque = AtName parts:#ng-part*

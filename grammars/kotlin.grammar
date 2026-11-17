@@ -4,6 +4,7 @@
 
 language kotlin 22 "Kotlin"
 roles
+operators coalesce "?:"
 comments line "//" block "/*" "*/"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
@@ -174,8 +175,8 @@ node LiteralStringTemplateEntry #template-entry #opaque
 node EscapeStringTemplateEntry #template-entry #opaque
 node StringInterpolationPrefix #opaque
 node Parenthesized #expression #item #opaque
-node Return #expression #item #opaque
-node Throw #expression #item #opaque
+node Return #expression #item #return = Keyword LabelQualifier? value:#item?
+node Throw #expression #item #throw = Keyword value:#item
 node Continue #expression #item #opaque
 node Break #expression #item #opaque
 node If #expression #item #conditional =
@@ -183,15 +184,15 @@ node If #expression #item #conditional =
 node Condition #opaque
 node Then #opaque
 node Else #opaque
-node Try #expression #item #opaque
-node Catch #opaque
+node Try #expression #item #try = Keyword body:Block catches:Catch* finally:Finally?
+node Catch #catch = Keyword parameter:ValueParameterList? body:Block
 node Finally #opaque
-node For #expression #item #opaque
-node While #expression #item #opaque
-node DoWhile #expression #item #opaque
+node For #expression #item #loop = Keyword Lpar Annotation* ValueParameter? DestructuringDeclaration? Keyword LoopRange? Rpar body:Body?
+node While #expression #item #loop = Keyword Lpar condition:Condition Rpar body:Body?
+node DoWhile #expression #item #loop = Keyword body:Body? Keyword Lpar condition:Condition Rpar
 node LoopRange #opaque
 node Body #item #opaque
-node Block #block =
+node Block #block #item =
     Lbrace? items:#item* Rbrace?
 node LambdaExpression #expression #item #opaque
 node FunctionLiteral #function #scope =
@@ -228,12 +229,12 @@ node ClassLiteralExpression #expression #item #opaque
 node SafeAccessExpression #expression #item #member-access =
     object:#expression SafeAccess member:#expression
 node ObjectLiteral #expression #item #opaque
-node When #expression #item #opaque
-node WhenEntry #opaque
+node When #expression #item #switch = Keyword Lpar? subject:#item? Rpar? Lbrace cases:WhenEntry* Rbrace
+node WhenEntry #case = test:#when-condition* Keyword? WhenEntryGuard? Arrow body:#item?
 node WhenEntryGuard #opaque
-node WhenConditionInRange #opaque
-node WhenConditionIsPattern #opaque
-node WhenConditionExpression #opaque
+node WhenConditionInRange #when-condition #opaque
+node WhenConditionIsPattern #when-condition #opaque
+node WhenConditionExpression #when-condition #opaque
 node CollectionLiteralExpression #expression #item #opaque
 node PackageDirective #opaque
 node Script #scope

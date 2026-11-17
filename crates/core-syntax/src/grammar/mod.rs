@@ -99,6 +99,8 @@ pub struct Grammar {
     pub suppressions: Vec<Suppression>,
     /// The grammar declared `roles`: [`Grammar::check_roles`] applies.
     pub requires_roles: bool,
+    /// Operator text to operator kind (`operators` lines).
+    operators: HashMap<String, String>,
     nodes: Vec<KindDef>,
     tokens: Vec<KindDef>,
     by_name: HashMap<String, SyntaxKind>,
@@ -170,13 +172,21 @@ impl Grammar {
     /// Fills the tables derived from the kinds: resolved bodies, the skipped kinds and the nodes
     /// per tag.
     fn resolve(&mut self) {
-        let kinds_of = |target: &Target| -> Vec<SyntaxKind> {
-            let mut kinds: Vec<SyntaxKind> = match target {
+        // The sorted kinds of each tag used by a body, found once: a body item copies them.
+        let mut by_tag: HashMap<String, Vec<SyntaxKind>> = HashMap::new();
+        let mut kinds_of = |target: &Target| -> Vec<SyntaxKind> {
+            match target {
                 Target::Kind(k) => vec![*k],
-                Target::Tag(t) => self.kinds_with_tag(t).map(|d| d.kind).collect(),
-            };
-            kinds.sort();
-            kinds
+                Target::Tag(t) => {
+                    if let Some(kinds) = by_tag.get(t) {
+                        return kinds.clone();
+                    }
+                    let mut kinds: Vec<SyntaxKind> =
+                        self.kinds_with_tag(t).map(|d| d.kind).collect();
+                    kinds.sort();
+                    by_tag.entry(t.clone()).or_insert(kinds).clone()
+                }
+            }
         };
         let bodies = self
             .nodes
@@ -187,14 +197,19 @@ impl Grammar {
             .chain(self.kinds_with_tag("trivia").map(|d| d.kind))
             .collect();
         skip.sort();
-        let mut tag_nodes: HashMap<String, Vec<SyntaxKind>> = HashMap::new();
+        // Counted first, so that each list is allocated once at its size.
+        let mut counts: HashMap<&str, usize> = HashMap::new();
+        for tag in self.nodes.iter().flat_map(|d| &d.tags) {
+            *counts.entry(tag.as_str()).or_default() += 1;
+        }
+        let mut tag_nodes: HashMap<String, Vec<SyntaxKind>> = counts
+            .into_iter()
+            .map(|(tag, n)| (tag.to_string(), Vec::with_capacity(n)))
+            .collect();
         for d in &self.nodes {
             for tag in &d.tags {
-                match tag_nodes.get_mut(tag) {
-                    Some(v) => v.push(d.kind),
-                    None => {
-                        tag_nodes.insert(tag.clone(), vec![d.kind]);
-                    }
+                if let Some(v) = tag_nodes.get_mut(tag) {
+                    v.push(d.kind);
                 }
             }
         }
@@ -236,6 +251,15 @@ impl Grammar {
                 item.label.as_deref() == Some(label) || item.field.as_deref() == Some(label)
             })
             .map(|(_, e)| e)
+    }
+
+    /// The operator kind (`equality`, `logical`, ...; [`crate::roles::OPERATOR_KINDS`]) of operator
+    /// text: the grammar's `operators` lines, then the common table.
+    pub fn operator_kind(&self, text: &str) -> Option<&str> {
+        match self.operators.get(text) {
+            Some(kind) => Some(kind),
+            None => crate::roles::common_operator_kind(text),
+        }
     }
 
     /// What is wrong with the roles of a grammar that declared `roles`: a node kind with no role

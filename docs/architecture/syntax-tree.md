@@ -17,18 +17,21 @@ Trailing trivia: after a token up to and including the end of its line. Leading:
 - Bodies match children in order (`core_syntax::ast::assign`); `ShapeChecker` verifies every child lands in a slot (`#opaque` nodes declare no shape and are skipped; `violations` lists every failing node, `provider_api::format_testing::check_corpus_shapes` runs it over a corpus). Generated accessors use the same routine, and so does `Grammar::slot(node, label)`, the generic accessor for a labelled item (shared rules read an entry's `key` and `value` with it; bodies are resolved to kind lists once when the grammar loads).
 - Tags for shared rules: `#mapping` marks a container of key/value entries (the entries are `#key-value` nodes whose key is the item labelled `key`: JSON `Object`; YAML `BlockMapping`, `FlowMapping`), `#sequence` a list of values (JSON `Array`; YAML `BlockSequence`, `FlowSequence`), `#sections` a file container of sections whose first child, a `#section` header node, has the name token in its `name` slot (INI, EditorConfig `Document`, `Section`). A rule subscribes by tag (`Rule::tags`) and runs for every kind carrying it, in every language that tags its grammar. `Grammar::nodes_with_tag` answers from a table built at load.
 - Roles: a node kind says what it is for cross-language code (layout kits, scope binder, shared rules) with a role tag from the vocabulary below, or `#opaque` when none fits. A kind may carry several roles (a method is a `#declaration` and a `#function`). A role names the fields shared code reads with `Grammar::slot(node, field)`; `field?` is optional, and a required field must be declared in the body, as the item's label or as an alias `label=field:Type` (C# `when_true=then:#expression`; the generated accessor keeps `label`). A grammar opts in with a `roles` line; then `cargo xtask codegen` refuses a node kind with neither a role nor `#opaque` (or with both), and a role whose required fields the body lacks. Tokens are exempt. The table is `core_syntax::roles::ROLES`; adapter-backed grammars (oxc, ruff, ...) opt in the same way and their adapter fills the nodes as the body says.
-- Bodies of a grammar that opted in are checked by `ShapeChecker` in every parse test and conformance run (`provider_api::format_testing`): each child of a node lands in an item, separators and `#optional` tokens aside. A kind with no body is not checked, so an `#opaque` kind needs none; a body is written for the kinds that have a role. A tag may hold nodes and tokens (a union such as `#expression` in PHP, where `null` is a bare token): such an item is read with `Grammar::slot`, no typed accessor is generated. A role tag is a node tag, so a token tag of the same name is renamed (`#literal` on Python and Kotlin number tokens became `#number`). Flat operator chains (Python `and`/comparison/chained assignment) put the first operator and operands in the role fields and the rest in an unlabeled `#part*` item. `#conditional` is the ternary or if-expression form; if statements are `#opaque` (C#, Python, PHP), as is `new` (C#, PHP).
+- Bodies of a grammar that opted in are checked by `ShapeChecker` in every parse test and conformance run (`provider_api::format_testing`): each child of a node lands in an item, separators and `#optional` tokens aside. A kind with no body is not checked, so an `#opaque` kind needs none; a body is written for the kinds that have a role. A tag may hold nodes and tokens (a union such as `#expression` in PHP, where `null` is a bare token): such an item is read with `Grammar::slot`, no typed accessor is generated. A role tag is a node tag, so a token tag of the same name is renamed (`#literal` on Python and Kotlin number tokens became `#number`). Flat operator chains (Python `and`/comparison/chained assignment) put the first operator and operands in the role fields and the rest in an unlabeled `#part*` item. `#conditional` covers the ternary, the `if` expression and the `if` statement (a rule asking for one form checks the kind's `#statement` or `#expression` tag): `condition` and `then` always, `else` when the grammar has an else part; an `elif` or `else-if` clause is a `#conditional` of its own (Python `ElifElseClause`, PHP `IfStatementBodyElseIfClause`), and an `else` clause has no `condition`. Where a language wraps a part in a node of its own (Kotlin `Condition`, `Then`, `Body`; PHP `IfStatementBody`, the body that holds a switch's cases), the field is that wrapper, and shared code looks inside it. `new` stays `#opaque` (C#, PHP).
+- Statement roles: `#loop` (`body`, `condition?`: `while`, `do`, `for`, `foreach`), `#switch` (`cases`, `subject?`) with `#case` arms (`test`, `body`; a C# section has one `test` per label, a Python `case` or PHP `case` one), `#try` (`body`, `catches`, `finally`) with `#catch` (`body`, `parameter?`), `#return` and `#throw` (`value`, optional), and `#key-value` (`key`, `value?`) for an entry of an object, dictionary or array, or a named argument. Python's `ExprDict` stays `#opaque`: ruff has no node for an entry and the adapter would have to make one (and the formatter read it).
+- Operator kinds: the `operator` field of `#binary`, `#unary` and `#assignment` is the operator's token (or, in Kotlin, its `OperationReference` node); `Grammar::operator_kind(text)` says what the text does, from the table below, so a rule asks "is this an equality" in any grammar. A grammar adds or overrides texts with `operators <kind> "text"...` lines (Python `is` is an equality, `//` and `@` arithmetic; PHP `<>`; Kotlin `?:`). The kind is looked up by text and not tagged on token kinds because mago's `Operator` is one token kind for every operator. Where a node holds several operator tokens (Python `not in`, `is not`) the field is the first.
+
 
 | Grammar | Node kinds | With a role | `#opaque` |
 |---|---|---|---|
-| C# | 321 | 107 | 214 |
-| Python | 92 | 38 | 54 |
-| Kotlin | 120 | 33 | 87 |
-| PHP | 169 | 32 | 137 |
-| SQL | 44 | 6 | 38 |
-| Ruby | 150 | 67 | 83 |
-| JS | 191 | 44 | 147 |
-| Java | 149 | 37 | 112 |
+| C# | 321 | 126 | 195 |
+| Python | 92 | 48 | 44 |
+| Kotlin | 120 | 42 | 78 |
+| PHP | 169 | 50 | 119 |
+| SQL | 44 | 8 | 36 |
+| Ruby | 150 | 75 | 75 |
+| JS | 191 | 52 | 139 |
+| Java | 149 | 43 | 106 |
 - Decisions every grammar follows:
   - A kind has a role when its body can declare every required field as items of its own; otherwise it is `#opaque`. So `#conditional` is the ternary only and an `if` statement (optional `else`) is `#opaque`; `new` is `#call` (`callee` is the constructed type or expression: JS `NewExpression`, Java `ObjectCreationExpression`; C#'s `ObjectCreationExpression` stays opaque); a statement or expression with no field to read (`return`, `throw`, JSX, TypeScript types) is `#opaque`. A kind with a role needs its whole body, as the shape check reads it; an `#opaque` kind needs none.
   - One field can be several items (`label=field`; labels are unique, fields are not). `Grammar::slot` returns the first child assigned to any of them, in the order of the body. This is the union: a postfix `operator` after the operand and a prefix one before it (`prefix=operator:... operand suffix=operator:...`), and a Java operand that is a node (`left:#expression?`) or a bare token (`left_token=left:#operand?`; tags are uniform, so one item cannot take both). When a required token of the same kind follows, the token item goes first: Java `#type-token? #type? name:Identifier` (a node return type must not leave `name` to a token item).
@@ -47,7 +50,15 @@ Trailing trivia: after a token up to and including the end of its line. Leading:
 | `#binary` | `left` `operator` `right` | two operands and an operator, any precedence |
 | `#unary` | `operand` `operator?` | prefix, postfix or keyword operator on one operand |
 | `#assignment` | `left` `operator` `right` | stores a value, plain or compound |
-| `#conditional` | `condition` `then` `else` | ternary expression |
+| `#conditional` | `condition` `then` `else?` | ternary expression, or an `if` statement or branch (`else` is the else branch, absent without one; in Python the first `elif`/`else` clause, whose siblings are the rest); a clause with no condition (`else`) has no `condition` |
+| `#loop` | `body` `condition?` | `while`, `do`, `for`, `foreach`; no condition in a `foreach` or `for (;;)` |
+| `#switch` | `cases` `subject?` | selects among cases by a value (`switch`, `match`, SQL `CASE`); `cases` are the `#case` nodes or the items that hold them |
+| `#case` | `test` `body` | one arm of a switch; `test` is the value, pattern or condition (repeated when one arm has several labels, absent for the default arm) |
+| `#try` | `body` `catches` `finally` | `try` with its `#catch` clauses (any number) and `finally` block (optional) |
+| `#catch` | `body` `parameter?` | an exception handler; `parameter` is the caught type or variable, absent in a catch-all |
+| `#return` | `value` | leaves a function; `value` is optional |
+| `#throw` | `value` | raises an exception; `value` is optional (a rethrow) |
+| `#key-value` | `key` `value?` | an entry of an object or dictionary, or a named argument (`value` absent when it is the next sibling) |
 | `#function` | `parameters` `body?` `expression_body?` | method, lambda or local function |
 | `#parameter-list` | `parameters` | the parameters of a function with their brackets |
 | `#block` | `items` | braced sequence of statements or members |
@@ -57,6 +68,20 @@ Trailing trivia: after a token up to and including the end of its line. Leading:
 | `#literal` | `value` | a constant written in the source |
 | `#scope` | - | names declared inside are not visible outside |
 | `#reference` | `name` | uses a name |
+<!-- /generated -->
+
+<!-- generated:operators -->
+| Kind | Common texts |
+|---|---|
+| `equality` | `==` `!=` `===` `!==` |
+| `comparison` | `<` `>` `<=` `>=` `<=>` |
+| `logical` | `&&` `\|\|` `!` `and` `or` `xor` `not` |
+| `arithmetic` | `+` `-` `*` `/` `%` `**` `++` `--` |
+| `bitwise` | `&` `\|` `^` `~` `<<` `>>` `>>>` |
+| `coalesce` | `??` |
+| `membership` | `in` |
+| `assign` | `=` `:=` |
+| `compound` | `+=` and every other `op=` |
 <!-- /generated -->
 
 - `grammars/csharp.grammar` follows Roslyn's field lists (321 node kinds, 252 token kinds); hand-maintained. Types are also expressions (every `#type` kind carries `#expression`).

@@ -98,8 +98,8 @@ node BracketedArguments #opaque
 node SemiStructuredExpression #opaque
 node AliasExpression #declaration =
     Keyword? name:#name-part* Bracketed? AliasColumnList?
-node CaseExpression #opaque
-node WhenClause #opaque
+node CaseExpression #switch = Keyword subject:Expression? cases:WhenClause* ElseClause? Keyword
+node WhenClause #case = Keyword test:Expression Keyword body:Expression
 node ElseClause #opaque
 node InsertStatement #opaque
 node UpdateStatement #opaque

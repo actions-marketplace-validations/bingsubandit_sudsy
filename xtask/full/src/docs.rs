@@ -39,6 +39,10 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         "docs/formatting/engine.md",
         &[("shared-options", shared_options_table(&schemas))],
     )?);
+    out.push(splice(
+        "docs/architecture/syntax-tree.md",
+        &[("roles", roles_table()), ("operators", operators_table())],
+    )?);
     let mut titles: Vec<(&str, &str)> = providers
         .iter()
         .map(|p| (p.grammar().title.as_str(), p.language()))
@@ -208,6 +212,33 @@ pub(crate) fn splice_text(
         text.replace_range(from..from + len, &format!("{newline}{body}"));
     }
     Ok((rel.into(), text))
+}
+
+/// The role vocabulary of `core_syntax::roles`.
+fn roles_table() -> String {
+    let mut out = String::from("| Role | Fields | Meaning |\n|---|---|---|\n");
+    for r in core_syntax::roles::ROLES {
+        let fields = if r.fields.is_empty() {
+            "-".to_string()
+        } else {
+            r.fields
+                .split(' ')
+                .map(|f| format!("`{f}`"))
+                .collect::<Vec<_>>()
+                .join(" ")
+        };
+        out += &format!("| `#{}` | {fields} | {} |\n", r.name, cell(r.doc));
+    }
+    out
+}
+
+/// The operator kinds of `core_syntax::roles`.
+fn operators_table() -> String {
+    let mut out = String::from("| Kind | Common texts |\n|---|---|\n");
+    for (kind, texts) in core_syntax::roles::OPERATOR_KINDS {
+        out += &format!("| `{kind}` | {} |\n", cell(texts));
+    }
+    out
 }
 
 /// A table cell: one line, no pipes.

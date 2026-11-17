@@ -3,6 +3,8 @@
 
 language php 24 "PHP"
 roles
+operators equality "<>"
+operators logical "AND" "OR" "XOR"
 comments line "//" block "/*" "*/"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
@@ -91,7 +93,7 @@ node Array #expression #opaque
 node ArrayAccess #expression #index =
     object:#expression LBracket arguments:#expression RBracket
 node ArrayAppend #expression #opaque
-node KeyValueArrayElement #opaque
+node KeyValueArrayElement #key-value = key:#expression DoubleArrow value:#expression
 node LegacyArray #expression #opaque
 node List #expression #opaque
 node MissingArrayElement #opaque
@@ -161,21 +163,21 @@ node IssetConstruct #expression #opaque
 node PrintConstruct #expression #opaque
 node RequireConstruct #expression #opaque
 node RequireOnceConstruct #expression #opaque
-node If #stmt #opaque
-node IfColonDelimitedBody #opaque
+node If #stmt #conditional = Keyword LParen condition:#expression RParen then=body:#if-body
+node IfColonDelimitedBody #if-body #opaque
 node IfColonDelimitedBodyElseClause #opaque
-node IfColonDelimitedBodyElseIfClause #opaque
-node IfStatementBody #opaque
+node IfColonDelimitedBodyElseIfClause #conditional = Keyword LParen condition:#expression RParen Colon then:#stmt*
+node IfStatementBody #if-body #opaque
 node IfStatementBodyElseClause #opaque
-node IfStatementBodyElseIfClause #opaque
-node Match #expression #opaque
-node MatchDefaultArm #opaque
-node MatchExpressionArm #opaque
-node Switch #stmt #opaque
-node SwitchBraceDelimitedBody #opaque
-node SwitchColonDelimitedBody #opaque
-node SwitchDefaultCase #opaque
-node SwitchExpressionCase #opaque
+node IfStatementBodyElseIfClause #conditional = Keyword LParen condition:#expression RParen then:#stmt
+node Match #expression #switch = Keyword LParen subject:#expression RParen LBrace cases:#match-arm* RBrace
+node MatchDefaultArm #case #match-arm = Keyword test:#expression* DoubleArrow body:#expression
+node MatchExpressionArm #case #match-arm = test:#expression* DoubleArrow body:#expression
+node Switch #stmt #switch = Keyword LParen subject:#expression RParen cases=body:#switch-body
+node SwitchBraceDelimitedBody #switch-body #opaque
+node SwitchColonDelimitedBody #switch-body #opaque
+node SwitchDefaultCase #case = Keyword test:#expression? Colon? body:#stmt*
+node SwitchExpressionCase #case = Keyword test:#expression Colon? body:#stmt*
 node Declare #stmt #opaque
 node DeclareColonDelimitedBody #opaque
 node DeclareItem #opaque
@@ -221,23 +223,23 @@ node Assignment #expression #assignment =
     left:#expression operator:#operator right:#expression
 node Conditional #expression #conditional =
     condition:#expression Question body=then:#expression? Colon orelse=else:#expression
-node DoWhile #stmt #opaque
-node Foreach #stmt #opaque
-node ForeachColonDelimitedBody #opaque
+node DoWhile #stmt #loop = Keyword body:#stmt Keyword LParen condition:#expression RParen Semi?
+node Foreach #stmt #loop = Keyword LParen #expression Keyword ForeachKeyValueTarget? ForeachValueTarget? RParen body:#stmt
+node ForeachColonDelimitedBody #stmt #opaque
 node ForeachKeyValueTarget #opaque
 node ForeachValueTarget #opaque
-node For #stmt #opaque
-node ForColonDelimitedBody #opaque
-node While #stmt #opaque
-node WhileColonDelimitedBody #opaque
+node For #stmt #loop = Keyword LParen #expression* Semi condition:#expression* Semi #expression* RParen body:#stmt
+node ForColonDelimitedBody #stmt #opaque
+node While #stmt #loop = Keyword LParen condition:#expression RParen body:#stmt
+node WhileColonDelimitedBody #stmt #opaque
 node Break #stmt #opaque
 node Continue #stmt #opaque
-node Return #stmt #opaque
+node Return #stmt #return = Keyword value:#expression? Semi?
 node Static #stmt #opaque
 node StaticAbstractItem #opaque
 node StaticConcreteItem #opaque
-node Try #stmt #opaque
-node TryCatchClause #opaque
+node Try #stmt #try = Keyword body:Block catches:TryCatchClause* finally:TryFinallyClause?
+node TryCatchClause #catch = Keyword LParen parameter:#operand-hint? DirectVariable? RParen body:Block
 node TryFinallyClause #opaque
 node MaybeTypedUseItem #opaque
 node MixedUseItemList #opaque
@@ -259,7 +261,7 @@ node ShellExecuteString #expression #opaque
 node ClosingTag #stmt #opaque
 node FullOpeningTag #stmt #opaque
 node ShortOpeningTag #stmt #opaque
-node Throw #stmt #expression #opaque
+node Throw #stmt #expression #throw = Keyword value:#expression
 node IntersectionHint #operand-hint #opaque
 node NullableHint #operand-hint #opaque
 node ParenthesizedHint #operand-hint #opaque

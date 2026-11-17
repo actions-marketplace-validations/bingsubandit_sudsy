@@ -49,8 +49,48 @@ pub const ROLES: &[Role] = &[
     },
     Role {
         name: "conditional",
-        fields: "condition then else",
-        doc: "ternary expression",
+        fields: "condition then else?",
+        doc: "ternary expression, or an `if` statement or branch (`else` is the else branch, absent without one; in Python the first `elif`/`else` clause, whose siblings are the rest); a clause with no condition (`else`) has no `condition`",
+    },
+    Role {
+        name: "loop",
+        fields: "body condition?",
+        doc: "`while`, `do`, `for`, `foreach`; no condition in a `foreach` or `for (;;)`",
+    },
+    Role {
+        name: "switch",
+        fields: "cases subject?",
+        doc: "selects among cases by a value (`switch`, `match`, SQL `CASE`); `cases` are the `#case` nodes or the items that hold them",
+    },
+    Role {
+        name: "case",
+        fields: "test body",
+        doc: "one arm of a switch; `test` is the value, pattern or condition (repeated when one arm has several labels, absent for the default arm)",
+    },
+    Role {
+        name: "try",
+        fields: "body catches finally",
+        doc: "`try` with its `#catch` clauses (any number) and `finally` block (optional)",
+    },
+    Role {
+        name: "catch",
+        fields: "body parameter?",
+        doc: "an exception handler; `parameter` is the caught type or variable, absent in a catch-all",
+    },
+    Role {
+        name: "return",
+        fields: "value",
+        doc: "leaves a function; `value` is optional",
+    },
+    Role {
+        name: "throw",
+        fields: "value",
+        doc: "raises an exception; `value` is optional (a rethrow)",
+    },
+    Role {
+        name: "key-value",
+        fields: "key value?",
+        doc: "an entry of an object or dictionary, or a named argument (`value` absent when it is the next sibling)",
     },
     Role {
         name: "function",
@@ -98,6 +138,38 @@ pub const ROLES: &[Role] = &[
         doc: "uses a name",
     },
 ];
+
+/// Operator kinds, the `operator_kind` of operator text: what an operator does, so a shared rule
+/// asks of the token in an `operator` field whether it is an equality, in any language. A grammar
+/// adds texts or overrides the common ones with `operators <kind> "text"...` lines.
+pub const OPERATOR_KINDS: &[(&str, &str)] = &[
+    ("equality", "`==` `!=` `===` `!==`"),
+    ("comparison", "`<` `>` `<=` `>=` `<=>`"),
+    ("logical", "`&&` `||` `!` `and` `or` `xor` `not`"),
+    ("arithmetic", "`+` `-` `*` `/` `%` `**` `++` `--`"),
+    ("bitwise", "`&` `|` `^` `~` `<<` `>>` `>>>`"),
+    ("coalesce", "`??`"),
+    ("membership", "`in`"),
+    ("assign", "`=` `:=`"),
+    ("compound", "`+=` and every other `op=`"),
+];
+
+/// The kind of operator text common to the languages (the table above); `None` for the rest.
+pub fn common_operator_kind(text: &str) -> Option<&'static str> {
+    Some(match text {
+        "==" | "!=" | "===" | "!==" => "equality",
+        "<" | ">" | "<=" | ">=" | "<=>" => "comparison",
+        "&&" | "||" | "!" | "and" | "or" | "xor" | "not" => "logical",
+        "+" | "-" | "*" | "/" | "%" | "**" | "++" | "--" => "arithmetic",
+        "&" | "|" | "^" | "~" | "<<" | ">>" | ">>>" => "bitwise",
+        "??" => "coalesce",
+        "in" => "membership",
+        "=" | ":=" => "assign",
+        "+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "//=" | "@=" | "&=" | "|=" | "^=" | "<<="
+        | ">>=" | ">>>=" | "??=" | "&&=" | "||=" | ".=" => "compound",
+        _ => return None,
+    })
+}
 
 pub fn role(name: &str) -> Option<&'static Role> {
     ROLES.iter().find(|r| r.name == name)

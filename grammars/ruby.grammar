@@ -62,13 +62,13 @@ token Unknown #error
 node Program #scope
 node AliasGlobalVariable #expression #opaque
 node AliasMethod #expression #opaque
-node AlternationPattern #opaque
+node AlternationPattern #expression #opaque
 node And #expression #binary =
     left:#expression operator:#operator right:#expression
 node Arguments #opaque
 node Array #expression #opaque
-node ArrayPattern #opaque
-node Assoc #opaque
+node ArrayPattern #expression #opaque
+node Assoc #key-value = key:#expression Operator? value:#expression?
 node AssocSplat #opaque
 node BackReferenceRead #expression #reference =
     name:Variable
@@ -87,9 +87,9 @@ node Call #expression #call #member-access =
 node CallOperatorWrite #expression #opaque
 node CallOrWrite #expression #opaque
 node CallTarget #expression #opaque
-node CapturePattern #opaque
+node CapturePattern #expression #opaque
 node CaseMatch #expression #opaque
-node Case #expression #opaque
+node Case #expression #switch = Keyword subject:#expression? cases:When* Else? Keyword?
 node Class #expression #declaration #type-declaration #scope =
     Keyword name:#expression Operator? superclass:#expression? members:#body? Keyword?
 node ClassVariableAndWrite #expression #assignment =
@@ -129,14 +129,14 @@ node ConstantWrite #expression #assignment =
 node Def #expression #declaration #function #scope =
     Keyword object:#expression? #dot? name:#member-name #open? parameters:Parameters? #close? Assign? body:#body? Keyword?
 node Defined #expression #opaque
-node Else #opaque
+node Else #else-branch #opaque
 node EmbeddedStatements #opaque
 node EmbeddedVariable #opaque
 node Ensure #opaque
 node ErrorRecovery #opaque
 node False #expression #literal =
     value:Keyword
-node FindPattern #opaque
+node FindPattern #expression #opaque
 node FlipFlop #expression #opaque
 node Float #expression #literal =
     Operator? value:Number
@@ -156,8 +156,8 @@ node GlobalVariableTarget #expression #opaque
 node GlobalVariableWrite #expression #assignment =
     left:#target operator:#operator right:#expression
 node Hash #expression #opaque
-node HashPattern #opaque
-node If #expression #opaque
+node HashPattern #expression #opaque
+node If #expression #conditional #else-branch = Statements? Keyword? condition:#expression Keyword? Operator? then:Statements? else:#else-branch? Keyword?
 node Imaginary #expression #literal =
     Operator? value:#expression
 node Implicit #expression #opaque
@@ -238,7 +238,7 @@ node RescueModifier #expression #opaque
 node Rescue #opaque
 node RestParameter #declaration
 node Retry #expression #opaque
-node Return #expression #opaque
+node Return #expression #return = Keyword value:Arguments?
 node This #expression #literal =
     value:Keyword
 node ShareableConstant #expression #opaque
@@ -250,7 +250,7 @@ node SourceFile #expression #literal =
     value:Keyword
 node SourceLine #expression #literal =
     value:Keyword
-node Splat #opaque
+node Splat #expression #opaque
 node Statements #body #opaque
 node String #expression #literal =
     #delim? value:StringPart* #delim?
@@ -261,10 +261,10 @@ node Symbol #expression #literal =
 node True #expression #literal =
     value:Keyword
 node Undef #expression #opaque
-node Unless #expression #opaque
-node Until #expression #opaque
-node When #opaque
-node While #expression #opaque
+node Unless #expression #conditional = Statements? Keyword? condition:#expression Keyword? Operator? then:Statements? else:#else-branch? Keyword?
+node Until #expression #loop = Statements? Keyword condition:#expression Keyword? Semi? body:Statements? Keyword?
+node When #case = Keyword test:#expression* Keyword? body:Statements?
+node While #expression #loop = Statements? Keyword condition:#expression Keyword? Semi? body:Statements? Keyword?
 node XString #expression #opaque
 node Yield #expression #call =
     callee:Keyword #open? arguments:Arguments? #close?
