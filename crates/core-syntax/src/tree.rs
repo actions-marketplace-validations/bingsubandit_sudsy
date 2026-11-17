@@ -114,6 +114,20 @@ impl TreeBuilder {
         self.inner.finish_node();
     }
 
+    /// The position before the next element, for [`Self::start_node_at`]: a parser that finds
+    /// out after the fact that a node began earlier (a left operand) wraps what it built.
+    pub fn checkpoint(&self) -> rowan::Checkpoint {
+        self.inner.checkpoint()
+    }
+
+    /// Opens a node around everything built since `checkpoint`; the current node must be the one
+    /// that was open when the checkpoint was taken.
+    pub fn start_node_at(&mut self, checkpoint: rowan::Checkpoint, kind: SyntaxKind) {
+        debug_assert!(!kind.is_token());
+        self.inner
+            .start_node_at(checkpoint, rowan::SyntaxKind(kind.0));
+    }
+
     pub fn finish(self) -> rowan::GreenNode {
         self.inner.finish()
     }

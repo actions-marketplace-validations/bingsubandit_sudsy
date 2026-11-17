@@ -166,12 +166,7 @@ pub fn replay(
     scan: impl Fn(&str, usize) -> Option<(SyntaxKind, usize)>,
     retag: impl Fn(Tok, Option<SyntaxKind>) -> Tok,
 ) -> ParseResult {
-    let mut lex = Lexer {
-        src,
-        kinds,
-        scan,
-        errors: Vec::new(),
-    };
+    let mut lex = Lexer::new(src, kinds, scan);
     let mut builder = TreeBuilder::new();
     run(&mut lex, &mut builder, tokens, nodes, retag);
     ParseResult {
@@ -227,16 +222,27 @@ fn run<S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>>(
     builder.finish_node();
 }
 
-struct Lexer<'a, S> {
+/// Splits the text between two tokens into trivia; [`replay`] and the parsers that build the tree
+/// directly (with [`Attach`]) share it.
+pub struct Lexer<'a, S> {
     src: &'a str,
     kinds: Kinds,
     scan: S,
-    errors: Vec<ParseError>,
+    pub errors: Vec<ParseError>,
 }
 
-impl<S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Lexer<'_, S> {
+impl<'a, S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Lexer<'a, S> {
+    pub fn new(src: &'a str, kinds: Kinds, scan: S) -> Self {
+        Lexer {
+            src,
+            kinds,
+            scan,
+            errors: Vec::new(),
+        }
+    }
+
     /// Splits the text `a..b` between two tokens into trivia tokens.
-    fn gap(&mut self, a: u32, b: u32, out: &mut Vec<Tok>) {
+    pub fn gap(&mut self, a: u32, b: u32, out: &mut Vec<Tok>) {
         let src = self.src;
         let (mut pos, b) = (a as usize, b as usize);
         let blank = |c: char| c.is_whitespace() || c == '\u{feff}';

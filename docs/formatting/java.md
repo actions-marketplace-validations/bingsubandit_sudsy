@@ -3,6 +3,8 @@
 ## Parser
 rezel-lang-java (Java up to 26: records, sealed types, switch patterns and guards, unnamed variables, text blocks, `import module`, flexible constructor bodies; an LR parser from a Lezer grammar, pinned `=0.0.0`) behind `crates/lang-java/src/adapter.rs`, which walks rezel's tree once and builds ours with `provider_api::adapter::replay` ([../architecture/adding-a-language.md](../architecture/adding-a-language.md)); the tree shape is `grammars/java.grammar` (one row per rezel node name, loose bodies; leaves are tokens). Lezer leaves out the tokens its grammar never names (`<`, `>`, `|`, `&`, `@interface`): the adapter reads them from the text between leaves. A string or text block is one `String` token, a comment one `Comment` token (`//`, `/* */`, `/** */`). Rezel's recovery points (`⚠`) are syntax errors.
 
+A hand-written parser (`lexer.rs`, `parser/`) builds the same tree directly, without rezel and the adapter; `tests/differential.rs` compares the two trees on the corpus (identical on all but four files: two rezel bugs and two annotated array dimensions) until rezel is removed.
+
 Files: `*.java`.
 
 ## Formatting
