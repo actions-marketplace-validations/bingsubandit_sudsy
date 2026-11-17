@@ -52,6 +52,15 @@ example: "<p>{\"text\"}</p>   <p>text</p>"
 severity: warn
 category: suspicious
 ---
+id: no-object-in-text-mustaches
+family: template
+params: { check: object-mustache, only: svelte }
+message: "an {phrase} in a text mustache renders as `[object Object]` or its source: use it in an attribute or in code"
+description: "Svelte's `no-object-in-text-mustaches` (eslint-plugin-svelte). An object, array, function or class written in `{ }` among text. Read from the first token of the expression, so an arrow function is not found."
+example: "<p>{{ a: 1 }}</p>   <p>{a}</p>"
+severity: warn
+category: correctness
+---
 id: shorthand-attribute
 family: template
 params: { check: svelte-shorthand, only: svelte }

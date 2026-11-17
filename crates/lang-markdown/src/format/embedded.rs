@@ -41,6 +41,7 @@ pub fn find(root: &SyntaxNode, text: &str) -> Vec<Embedded> {
                 .collect(),
             format: true,
             strip: true,
+            lint: true,
         });
     }
     out

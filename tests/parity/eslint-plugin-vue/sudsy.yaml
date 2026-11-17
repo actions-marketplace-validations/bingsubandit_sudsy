@@ -18,6 +18,7 @@ vue:
       no-deprecated-v-is: warn
       no-deprecated-v-on-native-modifier: warn
       no-deprecated-v-on-number-modifiers: warn
+      no-dupe-keys: warn
       no-dupe-v-else-if: warn
       no-duplicate-keys: warn
       no-implicit-button-type: warn
@@ -31,6 +32,8 @@ vue:
       no-v-text: warn
       no-v-text-v-html-on-component: warn
       require-component-is: warn
+      require-default-prop: warn
+      require-prop-types: warn
       v-bind-style: warn
       v-for-key: warn
       v-on-event-hyphenation: warn

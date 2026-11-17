@@ -1789,8 +1789,10 @@ dependencies = [
  "core-config",
  "core-format",
  "core-rules",
+ "core-semantics",
  "core-syntax",
  "lang-css",
+ "lang-js",
  "provider-api",
  "rowan",
 ]

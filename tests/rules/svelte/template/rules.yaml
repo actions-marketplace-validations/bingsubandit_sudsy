@@ -4,6 +4,7 @@ no-dupe-style-properties: warn
 no-raw-special-elements: warn
 no-useless-children-snippet: warn
 no-useless-mustaches: warn
+no-object-in-text-mustaches: warn
 shorthand-attribute: warn
 shorthand-directive: warn
 spaced-html-comment: warn

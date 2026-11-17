@@ -7,6 +7,7 @@
 <C>{#snippet children(x)}{x}{/snippet}</C>
 <p style:marginLeft="1px" style:margin-left="1px" style:--x="1"></p>
 <p>{"text"} {'it'} {`tpl`} {`a${b}`} {"a'b"} {text}</p>
+<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>
 <!--bad--> <!-- ok --> <!---->
 <div><style>a { color: red }</style></div>
 <a href="https://x.org" target="_blank">x</a>

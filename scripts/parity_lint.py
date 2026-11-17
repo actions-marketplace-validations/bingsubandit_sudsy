@@ -549,11 +549,6 @@ def coverage(tool, sudsy, version, prefix, exe):
             row[1] += 1
     total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
     share = round(1000 * hit / total) / 10 if total else 100.0
-    if tool in PLUGINS:  # the share of the rules that read the template: the ones that need the script are deferred in the catalog
-        script = {f"{PLUGINS[tool]}/{e['id']}" for e in catalog_entries(tool) if e["coverage"] == "deferred"}
-        scope = [(n, c) for r, (n, c) in per.items() if r not in script]
-        print(f"{sum(c for _, c in scope)} of {sum(n for n, _ in scope)} findings of the template rules ({sum(n for n, _ in per.values()) - sum(n for n, _ in scope)} of the deferred rules left out)")
-        share = round(1000 * sum(c for _, c in scope) / sum(n for n, _ in scope)) / 10 if scope else 100.0
     extra = {}  # Sudsy rule -> its findings in files where the tool reports its rule nowhere (a false positive, or a suppression comment)
     wanted = {(f, mapping[r]) for f, r, _ in found if r in mapping}
     on = set()  # the Sudsy rules of the rules that the tool's set turns on
@@ -567,7 +562,7 @@ def coverage(tool, sudsy, version, prefix, exe):
     print("only Sudsy (files the tool reports the rule in nowhere): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
     for rule, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:15]:
         print(f"  {rule}: {c} of {n} covered" + ("" if rule in mapping else " (no Sudsy rule)"))
-    print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {round(1000 * hit / total) / 10 if total else 100.0}%" + (f"; the template rules: {share}%" if tool in PLUGINS else ""))
+    print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}%")
     floor = (yaml.safe_load((folder / "differences.yaml").read_text(encoding="utf-8")) or {}).get("coverage")
     if floor is None or share < floor:
         print(f"COVERAGE below the ratchet: {share}% < {floor}%" if floor is not None else f"no `coverage:` ratchet in tests/parity/{tool}/differences.yaml: set it to {share}")

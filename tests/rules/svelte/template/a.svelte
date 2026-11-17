@@ -3,8 +3,8 @@
 <svelte:head><title>t</title></svelte:head>
 <input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color="a" style:color|important={b}>
 //     ^^^^^^^^ no-dupe-on-directives
-//                                                 ^^^^^^^ no-dupe-use-directives
 //                  ^^^^^^^^ no-dupe-on-directives
+//                                                 ^^^^^^^ no-dupe-use-directives
 //                                                         ^^^^^^^ no-dupe-use-directives
 //                                                                                           ^^^^^^^^^^^^^^^^^^^^^ no-dupe-style-properties
 <input type="checkbox" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>
@@ -24,6 +24,10 @@
 //          ^^^^^^ no-useless-mustaches
 //                 ^^^^^^^ no-useless-mustaches
 //                                   ^^^^^^^ no-useless-mustaches
+<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>
+// ^^^^^^^^^^ no-object-in-text-mustaches
+//            ^^^^^ no-object-in-text-mustaches
+//                  ^^^^^^^^^^^^^^^^ no-object-in-text-mustaches
 <!--bad--> <!-- ok --> <!---->
 ^^^^^^^^^^ spaced-html-comment
 <div><style>a { color: red }</style></div>

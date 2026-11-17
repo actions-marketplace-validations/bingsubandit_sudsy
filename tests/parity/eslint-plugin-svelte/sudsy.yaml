@@ -13,6 +13,7 @@ svelte:
       no-implicit-button-type: warn
       no-inline-style: warn
       no-nested-style-tag: warn
+      no-object-in-text-mustaches: warn
       no-raw-special-elements: warn
       no-target-blank: warn
       no-unknown-style-directive-property: warn

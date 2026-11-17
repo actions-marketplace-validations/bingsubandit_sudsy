@@ -10,5 +10,6 @@ mod safety;
 mod semantic;
 
 pub use format::{JsFormatter, option_schema};
+pub use semantic::bind_embedded;
 
 include!("provider.generated.rs");

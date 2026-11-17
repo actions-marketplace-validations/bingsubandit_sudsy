@@ -12,6 +12,7 @@ mod ng_checks;
 mod parser;
 mod patterns;
 mod rules;
+mod script;
 mod template;
 
 pub use dialect::{angular_provider, provider, svelte_provider, vue_provider};

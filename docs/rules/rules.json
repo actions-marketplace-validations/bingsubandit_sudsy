@@ -18852,8 +18852,8 @@
       "description": "Svelte's `no-bind-value-on-checkable-inputs` (eslint-plugin-svelte).",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -19277,12 +19277,46 @@
     },
     {
       "category": "correctness",
+      "default_level": "error",
+      "description": "Vue's `no-dupe-keys` (eslint-plugin-vue). A name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object; or a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<script>\nexport default {\n  props: {\n    a: String,\n    b: { type: String, default: '' },\n    c: { required: true, type: Number },\n    d: Boolean,\n    e: [String, Number],\n    f: {},\n    g: Object,\n  },\n  data() {\n    return { a: 1, h: 2 }\n  },\n  computed: {\n    h() { return 1 },\n    get k() { return 1 },\n    set k(v) {},\n  },\n  methods: { go() {} },\n}\n</script>\n\n<script setup>\ndefineProps(['x', 'y'])\nconst ok = 1\nconst model = defineModel()\n</script>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 14,
+            "length": 1,
+            "line": 13
+          },
+          {
+            "column": 5,
+            "length": 1,
+            "line": 16
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-dupe-keys",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "correctness",
       "default_level": "warn",
       "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported.",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -19315,8 +19349,8 @@
       "description": "Svelte's `no-dupe-style-properties` (eslint-plugin-svelte). `|important` is not part of the property.",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -19344,8 +19378,8 @@
       "description": "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte).",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -19824,14 +19858,14 @@
       "description": "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS.",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
             "column": 7,
             "length": 5,
-            "line": 11
+            "line": 12
           }
         ]
       },
@@ -19848,13 +19882,52 @@
       "upstream": []
     },
     {
+      "category": "correctness",
+      "default_level": "warn",
+      "description": "Svelte's `no-object-in-text-mustaches` (eslint-plugin-svelte). An object, array, function or class written in `{ }` among text. Read from the first token of the expression, so an arrow function is not found.",
+      "example": {
+        "config": null,
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "language": "svelte",
+        "spans": [
+          {
+            "column": 4,
+            "length": 10,
+            "line": 10
+          },
+          {
+            "column": 15,
+            "length": 5,
+            "line": 10
+          },
+          {
+            "column": 21,
+            "length": 16,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-object-in-text-mustaches",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "suspicious",
       "default_level": "warn",
       "description": "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on.",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -20203,8 +20276,8 @@
       "description": "Svelte's `no-unknown-style-directive-property` (eslint-plugin-svelte). Custom properties (`style:--x`) and vendor-prefixed ones pass. The property table is the CSS language's.",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -20290,8 +20363,8 @@
       "description": "Svelte's `no-useless-children-snippet` (eslint-plugin-svelte).",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -20319,8 +20392,8 @@
       "description": "Svelte's `no-useless-mustaches` (eslint-plugin-svelte).",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -20708,6 +20781,50 @@
       "upstream": []
     },
     {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "Vue's `require-default-prop` (eslint-plugin-vue). A prop that is not required, has no `default` and is not a `Boolean` is `undefined` when the parent leaves it out. With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked, as the plugin does without type information.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<script>\nexport default {\n  props: {\n    a: String,\n    b: { type: String, default: '' },\n    c: { required: true, type: Number },\n    d: Boolean,\n    e: [String, Number],\n    f: {},\n    g: Object,\n  },\n  data() {\n    return { a: 1, h: 2 }\n  },\n  computed: {\n    h() { return 1 },\n    get k() { return 1 },\n    set k(v) {},\n  },\n  methods: { go() {} },\n}\n</script>\n\n<script setup>\ndefineProps(['x', 'y'])\nconst ok = 1\nconst model = defineModel()\n</script>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 5,
+            "length": 9,
+            "line": 4
+          },
+          {
+            "column": 5,
+            "length": 19,
+            "line": 8
+          },
+          {
+            "column": 5,
+            "length": 5,
+            "line": 9
+          },
+          {
+            "column": 5,
+            "length": 9,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "require-default-prop",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions.",
@@ -20755,6 +20872,50 @@
       },
       "fix": null,
       "id": "require-for-track",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "Vue's `require-prop-types` (eslint-plugin-vue). A prop in the array form, or an object with no `type` or `validator`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<script>\nexport default {\n  props: {\n    a: String,\n    b: { type: String, default: '' },\n    c: { required: true, type: Number },\n    d: Boolean,\n    e: [String, Number],\n    f: {},\n    g: Object,\n  },\n  data() {\n    return { a: 1, h: 2 }\n  },\n  computed: {\n    h() { return 1 },\n    get k() { return 1 },\n    set k(v) {},\n  },\n  methods: { go() {} },\n}\n</script>\n\n<script setup>\ndefineProps(['x', 'y'])\nconst ok = 1\nconst model = defineModel()\n</script>\n",
+        "language": "vue",
+        "spans": [
+          {
+            "column": 5,
+            "length": 5,
+            "line": 9
+          },
+          {
+            "column": 14,
+            "length": 3,
+            "line": 25
+          },
+          {
+            "column": 19,
+            "length": 3,
+            "line": 25
+          },
+          {
+            "column": 15,
+            "length": 13,
+            "line": 27
+          }
+        ]
+      },
+      "fix": null,
+      "id": "require-prop-types",
       "languages": [
         "angular",
         "html",
@@ -20821,8 +20982,8 @@
       "description": "Svelte's `shorthand-attribute` (eslint-plugin-svelte).",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -20850,8 +21011,8 @@
       "description": "Svelte's `shorthand-directive` (eslint-plugin-svelte), for `bind:`, `class:` and `style:`.",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
@@ -20889,14 +21050,14 @@
       "description": "Svelte's `spaced-html-comment` (eslint-plugin-svelte).",
       "example": {
         "config": null,
-        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
-        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
+        "input": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} id={id} {id} bind:group={group} class:on={on}>\n<input bind:value={value} class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
         "language": "svelte",
         "spans": [
           {
             "column": 1,
             "length": 10,
-            "line": 10
+            "line": 11
           }
         ]
       },

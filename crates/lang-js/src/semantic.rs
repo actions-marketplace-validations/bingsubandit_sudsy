@@ -224,6 +224,11 @@ fn table() -> &'static Table {
     TABLE.get_or_init(|| Table::new(grammars::JS.get(), ROWS, HOSTS, &["Identifier"]))
 }
 
+/// The model of a script that another file embeds (a Vue `<script>`), for the host's rules.
+pub fn bind_embedded(root: &SyntaxNode) -> Model {
+    bind(root, grammars::JS.get(), table())
+}
+
 /// What a scope rule reads: the model and the file's kind.
 pub struct Cx {
     pub s: Model,

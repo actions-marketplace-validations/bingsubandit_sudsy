@@ -2374,6 +2374,10 @@
               "$ref": "#/definitions/rule",
               "description": "An `else if` condition that an earlier condition of the chain already covers."
             },
+            "no-dupe-keys": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-dupe-keys` (eslint-plugin-vue). A name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object; or a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`)."
+            },
             "no-dupe-on-directives": {
               "$ref": "#/definitions/rule",
               "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported."
@@ -2787,6 +2791,10 @@
             "no-non-null-assertion": {
               "$ref": "#/definitions/rule",
               "description": "A non-null assertion `a!`."
+            },
+            "no-object-in-text-mustaches": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-object-in-text-mustaches` (eslint-plugin-svelte). An object, array, function or class written in `{ }` among text. Read from the first token of the expression, so an arrow function is not found."
             },
             "no-octal": {
               "$ref": "#/definitions/rule",
@@ -3620,6 +3628,10 @@
               "$ref": "#/definitions/rule",
               "description": "Vue's `require-component-is` (eslint-plugin-vue)."
             },
+            "require-default-prop": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `require-default-prop` (eslint-plugin-vue). A prop that is not required, has no `default` and is not a `Boolean` is `undefined` when the parent leaves it out. With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked, as the plugin does without type information."
+            },
             "require-each-key": {
               "$ref": "#/definitions/rule",
               "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions."
@@ -3627,6 +3639,10 @@
             "require-for-track": {
               "$ref": "#/definitions/rule",
               "description": "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files."
+            },
+            "require-prop-types": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `require-prop-types` (eslint-plugin-vue). A prop in the array form, or an object with no `type` or `validator`."
             },
             "require-sri": {
               "$ref": "#/definitions/rule",

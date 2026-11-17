@@ -56,7 +56,9 @@ pub fn vue_provider() -> ParserProvider {
         "Indent the content of the root `<script>` and `<style>` blocks of a `.vue` file by one level.",
     )];
     let spec = spec(&["vue"], &[], schema(options), &VUE_FORMATTER);
-    ParserProvider::new(spec, |f| parser::parse(&f.text, Mode::Vue)).with_dialect("vue", "html")
+    ParserProvider::new(spec, |f| parser::parse(&f.text, Mode::Vue))
+        .with_dialect("vue", "html")
+        .with_embedded(crate::script::find)
 }
 
 /// `.svelte` components.

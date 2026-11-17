@@ -36,8 +36,17 @@ pub fn rule_fixtures_with(
     provider: &dyn LanguageProvider,
     companions: &[&'static dyn LanguageProvider],
 ) {
+    rule_fixtures_dialects_with(provider, &[], companions);
+}
+
+/// [`rule_fixtures_dialects`] for a language that embeds others (the script of a Vue file).
+pub fn rule_fixtures_dialects_with(
+    provider: &dyn LanguageProvider,
+    dialects: &[&dyn LanguageProvider],
+    companions: &[&'static dyn LanguageProvider],
+) {
     testing::COMPANIONS.set(companions.to_vec());
-    rule_fixtures(provider);
+    rule_fixtures_dialects(provider, dialects);
 }
 
 /// Runs every fixture of the provider's language and panics with the failures, each named by its

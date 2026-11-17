@@ -8,5 +8,6 @@ pub static RULES: &[&dyn Rule] = crate::document::RULES;
 pub static FAMILIES: &[Family] = &[
     crate::checks::FAMILY,
     crate::patterns::FAMILY,
+    crate::script::FAMILY,
     crate::template::FAMILY,
 ];

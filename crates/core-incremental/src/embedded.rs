@@ -40,7 +40,7 @@ pub(crate) fn lint_embedded(
 ) -> Result<Vec<Diagnostic>, Failure> {
     let mut active: Vec<(&str, Vec<ActiveRule<'static>>)> = Vec::new();
     let mut out = Vec::new();
-    for e in parses {
+    for e in parses.iter().filter(|e| e.region.lint) {
         let language = e.provider.language();
         if !active.iter().any(|(l, _)| *l == language) {
             // Read only now: a file with no embedded code does not depend on the config here.
@@ -293,6 +293,7 @@ mod tests {
             )],
             format: true,
             strip: false,
+            lint: true,
         };
         let edit = |a: u32, b: u32, t: &str| {
             Edit::replace(core_syntax::TextRange::new(a.into(), b.into()), t)

@@ -1,0 +1,26 @@
+id: require-default-prop
+family: script
+params: { check: default-prop }
+message: "prop `{name}` is not required and has no default value"
+description: "Vue's `require-default-prop` (eslint-plugin-vue). A prop that is not required, has no `default` and is not a `Boolean` is `undefined` when the parent leaves it out. With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked, as the plugin does without type information."
+example: "defineProps({ a: String })   defineProps({ a: { type: String, default: '' } })"
+severity: warn
+category: suspicious
+---
+id: require-prop-types
+family: script
+params: { check: prop-types }
+message: "prop `{name}` should define at least its type"
+description: "Vue's `require-prop-types` (eslint-plugin-vue). A prop in the array form, or an object with no `type` or `validator`."
+example: "defineProps(['a'])   defineProps({ a: String })"
+severity: warn
+category: suspicious
+---
+id: no-dupe-keys
+family: script
+params: { check: dupe-keys }
+message: "duplicate key `{name}`: it collides in the script and the template"
+description: "Vue's `no-dupe-keys` (eslint-plugin-vue). A name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object; or a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`)."
+example: "export default { props: ['a'], data() { return { a: 1 } } }"
+severity: error
+category: correctness

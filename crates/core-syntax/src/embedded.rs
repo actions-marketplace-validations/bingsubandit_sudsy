@@ -23,6 +23,9 @@ pub struct Embedded {
     /// needs the fence's container prefix gone) instead of with them blanked; offsets of the
     /// parse then go through `to_host`.
     pub strip: bool,
+    /// Whether the language's own rules run on the code. A host that reads the parse itself (a Vue
+    /// `<script>`, whose names the template uses) leaves it off.
+    pub lint: bool,
 }
 
 impl Embedded {
@@ -50,6 +53,7 @@ impl Embedded {
             carved: merged,
             format: false,
             strip: false,
+            lint: true,
         }
     }
 

@@ -3,7 +3,7 @@ version: "10.12.1"
 languages: ["vue"]
 sources:
   - "https://eslint.vuejs.org/rules/"
-scope: "eslint-plugin-vue's template rules (the `vue/` rules that read the `<template>` tree); rules about `<script>` come with the JS semantic layer"
+scope: "eslint-plugin-vue's template rules (the `vue/` rules that read the `<template>` tree); with the script rules on the shared JS scope layer (`require-default-prop`, `require-prop-types`, `no-dupe-keys`); the other `<script>` rules are `planned`"
 entries:
   attribute-hyphenation: rule attribute-hyphenation
   attributes-order: rule attributes-order | the default order, no `alphabetical`, `order` or `sortLineLength` option, no fix
@@ -19,11 +19,11 @@ entries:
   no-multi-spaces: formatter | the formatter owns layout
   no-parsing-error: rule syntax-error
   no-spaces-around-equal-signs-in-attribute: rule attr-delimiter
-  no-template-shadow: deferred | needs script analysis (the JS semantic layer), the variables of the script are shadowed too
+  no-template-shadow: planned | needs script analysis (the JS semantic layer), the variables of the script are shadowed too
   no-use-v-if-with-v-for: rule no-use-v-if-with-v-for
   no-v-html: rule no-v-html
   no-v-text-v-html-on-component: rule no-v-text-v-html-on-component
-  one-component-per-file: deferred | needs script analysis (the JS semantic layer)
+  one-component-per-file: planned | needs script analysis (the JS semantic layer)
   require-v-for-key: rule v-for-key
   singleline-html-element-content-newline: formatter | the formatter owns layout
   v-bind-style: rule v-bind-style
@@ -43,18 +43,18 @@ entries:
   no-reserved-component-names: planned
   no-template-key: planned
   no-textarea-mustache: rule no-textarea-mustache
-  no-unused-vars: deferred | needs script analysis (the JS semantic layer)
-  no-unused-components: deferred | needs script analysis (the JS semantic layer)
+  no-unused-vars: planned | needs script analysis (the JS semantic layer)
+  no-unused-components: planned | needs script analysis (the JS semantic layer)
   require-component-is: rule require-component-is
-  require-prop-types: deferred | needs script analysis (the JS semantic layer)
-  require-valid-default-prop: deferred | needs script analysis (the JS semantic layer)
-  no-mutating-props: deferred | needs script analysis (the JS semantic layer)
-  no-side-effects-in-computed-properties: deferred | needs script analysis (the JS semantic layer)
-  no-async-in-computed-properties: deferred | needs script analysis (the JS semantic layer)
-  no-ref-as-operand: deferred | needs script analysis (the JS semantic layer)
-  no-unused-properties: deferred | needs script analysis (the JS semantic layer)
-  no-undef-components: deferred | needs script analysis (the JS semantic layer)
-  no-undef-properties: deferred | needs script analysis (the JS semantic layer)
+  require-prop-types: rule require-prop-types | a type it cannot resolve in the file is skipped, a component object only at the top level as for `no-dupe-keys`
+  require-valid-default-prop: planned | needs script analysis (the JS semantic layer)
+  no-mutating-props: planned | needs script analysis (the JS semantic layer)
+  no-side-effects-in-computed-properties: planned | needs script analysis (the JS semantic layer)
+  no-async-in-computed-properties: planned | needs script analysis (the JS semantic layer)
+  no-ref-as-operand: planned | needs script analysis (the JS semantic layer)
+  no-unused-properties: planned | needs script analysis (the JS semantic layer)
+  no-undef-components: planned | needs script analysis (the JS semantic layer)
+  no-undef-properties: planned | needs script analysis (the JS semantic layer)
   first-attribute-linebreak: formatter | the formatter owns layout
   html-closing-bracket-spacing: formatter | the formatter owns layout
   html-comment-content-newline: formatter | the formatter owns layout
@@ -69,7 +69,7 @@ entries:
   html-end-tags: planned | the parser's `syntax-error` and `no-implicit-close` cover most of it; check the cases
   max-lines-per-block: formatter | the formatter owns layout
   max-template-depth: planned
-  no-bare-strings-in-template: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  no-bare-strings-in-template: planned | needs the JS rules on template expressions (the JS semantic layer)
   no-child-content: rule no-child-content
   no-content-outside-block: planned
   no-custom-modifiers-on-v-model: planned
@@ -86,14 +86,14 @@ entries:
   no-deprecated-v-on-number-modifiers: rule no-deprecated-v-on-number-modifiers
   no-duplicate-class-names: planned
   no-empty-component-block: planned
-  no-literals-in-template: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  no-literals-in-template: planned | needs the JS rules on template expressions (the JS semantic layer)
   no-multiple-slot-args: planned
   no-negated-v-if-condition: planned
   no-root-v-if: planned
   no-static-inline-styles: planned
   no-template-target-blank: rule no-target-blank
   no-use-v-else-with-v-for: rule no-use-v-else-with-v-for
-  no-useless-mustaches: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  no-useless-mustaches: planned | needs the JS rules on template expressions (the JS semantic layer)
   no-useless-template-attributes: planned
   no-useless-v-bind: planned
   no-v-for-template-key-on-child: rule no-v-for-template-key-on-child
@@ -103,7 +103,7 @@ entries:
   require-toggle-inside-transition: planned
   slot-name-casing: planned
   static-class-names-order: formatter | the formatter owns layout
-  this-in-template: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  this-in-template: planned | needs the JS rules on template expressions (the JS semantic layer)
   use-v-on-exact: planned
   v-for-delimiter-style: planned
   v-if-else-key: planned
@@ -126,10 +126,10 @@ entries:
   no-restricted-v-on: planned | a configurable restriction list
   no-restricted-block: planned | a configurable restriction list
   no-restricted-class: planned | a configurable restriction list
-  no-undef-directives: deferred | needs script analysis or the component graph
-  no-unused-refs: deferred | needs script analysis or the component graph
-  no-restricted-component-names: deferred | needs script analysis or the component graph
-  match-component-file-name: deferred | needs script analysis or the component graph
+  no-undef-directives: planned | needs script analysis or the component graph
+  no-unused-refs: planned | needs script analysis or the component graph
+  no-restricted-component-names: planned | needs script analysis or the component graph
+  match-component-file-name: planned | needs script analysis or the component graph
   no-v-for-template-key: wontfix deprecated upstream
   no-v-model-argument: wontfix deprecated upstream
   valid-v-bind-sync: wontfix deprecated upstream
@@ -139,125 +139,125 @@ entries:
   arrow-spacing: formatter | the formatter owns layout
   block-spacing: formatter | the formatter owns layout
   brace-style: formatter | the formatter owns layout
-  camelcase: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  camelcase: planned | needs the JS rules on template expressions (the JS semantic layer)
   comma-dangle: formatter | the formatter owns layout
   comma-spacing: formatter | the formatter owns layout
   comma-style: formatter | the formatter owns layout
   comment-directive: planned
-  component-api-style: deferred | needs script analysis (the JS semantic layer)
-  component-definition-name-casing: deferred | needs script analysis (the JS semantic layer)
-  component-options-name-casing: deferred | needs script analysis (the JS semantic layer)
-  custom-event-name-casing: deferred | needs script analysis (the JS semantic layer)
-  define-emits-declaration: deferred | needs script analysis (the JS semantic layer)
-  define-macros-order: deferred | needs script analysis (the JS semantic layer)
-  define-props-declaration: deferred | needs script analysis (the JS semantic layer)
-  define-props-destructuring: deferred | needs script analysis (the JS semantic layer)
+  component-api-style: planned | needs script analysis (the JS semantic layer)
+  component-definition-name-casing: planned | needs script analysis (the JS semantic layer)
+  component-options-name-casing: planned | needs script analysis (the JS semantic layer)
+  custom-event-name-casing: planned | needs script analysis (the JS semantic layer)
+  define-emits-declaration: planned | needs script analysis (the JS semantic layer)
+  define-macros-order: planned | needs script analysis (the JS semantic layer)
+  define-props-declaration: planned | needs script analysis (the JS semantic layer)
+  define-props-destructuring: planned | needs script analysis (the JS semantic layer)
   dot-location: formatter | the formatter owns layout
-  dot-notation: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  eqeqeq: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  dot-notation: planned | needs the JS rules on template expressions (the JS semantic layer)
+  eqeqeq: planned | needs the JS rules on template expressions (the JS semantic layer)
   func-call-spacing: formatter | the formatter owns layout
-  jsx-uses-vars: deferred | needs script analysis (the JS semantic layer)
+  jsx-uses-vars: planned | needs script analysis (the JS semantic layer)
   key-spacing: formatter | the formatter owns layout
   keyword-spacing: formatter | the formatter owns layout
-  match-component-import-name: deferred | needs script analysis (the JS semantic layer)
+  match-component-import-name: planned | needs script analysis (the JS semantic layer)
   max-len: formatter | the formatter owns layout
-  max-props: deferred | needs script analysis (the JS semantic layer)
-  multi-word-component-names: deferred | needs script analysis (the JS semantic layer), a `name` option replaces the file name
+  max-props: planned | needs script analysis (the JS semantic layer)
+  multi-word-component-names: planned | needs script analysis (the JS semantic layer), a `name` option replaces the file name
   multiline-ternary: formatter | the formatter owns layout
   new-line-between-multi-line-property: formatter | the formatter owns layout
-  next-tick-style: deferred | needs script analysis (the JS semantic layer)
-  no-arrow-functions-in-watch: deferred | needs script analysis (the JS semantic layer)
-  no-boolean-default: deferred | needs script analysis (the JS semantic layer)
-  no-computed-properties-in-data: deferred | needs script analysis (the JS semantic layer)
-  no-console: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-constant-condition: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-define-model-default: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-data-object-declaration: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-delete-set: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-destroyed-lifecycle: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-dollar-listeners-api: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-dollar-scopedslots-api: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-events-api: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-model-definition: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-props-default-this: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-router-link-tag-prop: deferred | needs script analysis (the JS semantic layer)
-  no-deprecated-vue-config-keycodes: deferred | needs script analysis (the JS semantic layer)
-  no-dupe-keys: deferred | needs script analysis (the JS semantic layer)
-  no-duplicate-attr-inheritance: deferred | needs script analysis (the JS semantic layer)
-  no-empty-pattern: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-export-in-script-setup: deferred | needs script analysis (the JS semantic layer)
-  no-expose-after-await: deferred | needs script analysis (the JS semantic layer)
+  next-tick-style: planned | needs script analysis (the JS semantic layer)
+  no-arrow-functions-in-watch: planned | needs script analysis (the JS semantic layer)
+  no-boolean-default: planned | needs script analysis (the JS semantic layer)
+  no-computed-properties-in-data: planned | needs script analysis (the JS semantic layer)
+  no-console: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-constant-condition: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-define-model-default: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-data-object-declaration: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-delete-set: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-destroyed-lifecycle: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-dollar-listeners-api: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-dollar-scopedslots-api: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-events-api: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-model-definition: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-props-default-this: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-router-link-tag-prop: planned | needs script analysis (the JS semantic layer)
+  no-deprecated-vue-config-keycodes: planned | needs script analysis (the JS semantic layer)
+  no-dupe-keys: rule no-dupe-keys | the `groups` option is not read; a component object only as `export default`, `defineComponent`, `defineNuxtComponent` or `Vue.extend` at the top level
+  no-duplicate-attr-inheritance: planned | needs script analysis (the JS semantic layer)
+  no-empty-pattern: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-export-in-script-setup: planned | needs script analysis (the JS semantic layer)
+  no-expose-after-await: planned | needs script analysis (the JS semantic layer)
   no-extra-parens: formatter | the formatter owns layout
-  no-implicit-coercion: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-import-compiler-macros: deferred | needs script analysis (the JS semantic layer)
-  no-irregular-whitespace: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-lifecycle-after-await: deferred | needs script analysis (the JS semantic layer)
-  no-loss-of-precision: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-multiple-objects-in-class: deferred | needs script analysis (the JS semantic layer)
-  no-negated-condition: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-potential-component-option-typo: deferred | needs script analysis (the JS semantic layer)
-  no-props-shadow: deferred | needs script analysis (the JS semantic layer)
-  no-ref-object-reactivity-loss: deferred | needs script analysis (the JS semantic layer)
-  no-required-prop-with-default: deferred | needs script analysis (the JS semantic layer)
-  no-reserved-keys: deferred | needs script analysis (the JS semantic layer)
-  no-reserved-props: deferred | needs script analysis (the JS semantic layer)
-  no-restricted-call-after-await: deferred | needs script analysis (the JS semantic layer)
-  no-restricted-component-options: deferred | needs script analysis (the JS semantic layer)
-  no-restricted-custom-event: deferred | needs script analysis (the JS semantic layer)
-  no-restricted-props: deferred | needs script analysis (the JS semantic layer)
-  no-restricted-syntax: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-setup-props-reactivity-loss: deferred | needs script analysis (the JS semantic layer)
-  no-shadow-native-events: deferred | needs script analysis (the JS semantic layer)
-  no-shared-component-data: deferred | needs script analysis (the JS semantic layer)
-  no-sparse-arrays: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-this-in-before-route-enter: deferred | needs script analysis (the JS semantic layer)
-  no-unsupported-features: deferred | needs script analysis (the JS semantic layer)
-  no-unused-emit-declarations: deferred | needs script analysis (the JS semantic layer)
-  no-use-computed-property-like-method: deferred | needs script analysis (the JS semantic layer)
-  no-useless-concat: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  no-watch-after-await: deferred | needs script analysis (the JS semantic layer)
+  no-implicit-coercion: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-import-compiler-macros: planned | needs script analysis (the JS semantic layer)
+  no-irregular-whitespace: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-lifecycle-after-await: planned | needs script analysis (the JS semantic layer)
+  no-loss-of-precision: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-multiple-objects-in-class: planned | needs script analysis (the JS semantic layer)
+  no-negated-condition: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-potential-component-option-typo: planned | needs script analysis (the JS semantic layer)
+  no-props-shadow: planned | needs script analysis (the JS semantic layer)
+  no-ref-object-reactivity-loss: planned | needs script analysis (the JS semantic layer)
+  no-required-prop-with-default: planned | needs script analysis (the JS semantic layer)
+  no-reserved-keys: planned | needs script analysis (the JS semantic layer)
+  no-reserved-props: planned | needs script analysis (the JS semantic layer)
+  no-restricted-call-after-await: planned | needs script analysis (the JS semantic layer)
+  no-restricted-component-options: planned | needs script analysis (the JS semantic layer)
+  no-restricted-custom-event: planned | needs script analysis (the JS semantic layer)
+  no-restricted-props: planned | needs script analysis (the JS semantic layer)
+  no-restricted-syntax: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-setup-props-reactivity-loss: planned | needs script analysis (the JS semantic layer)
+  no-shadow-native-events: planned | needs script analysis (the JS semantic layer)
+  no-shared-component-data: planned | needs script analysis (the JS semantic layer)
+  no-sparse-arrays: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-this-in-before-route-enter: planned | needs script analysis (the JS semantic layer)
+  no-unsupported-features: planned | needs script analysis (the JS semantic layer)
+  no-unused-emit-declarations: planned | needs script analysis (the JS semantic layer)
+  no-use-computed-property-like-method: planned | needs script analysis (the JS semantic layer)
+  no-useless-concat: planned | needs the JS rules on template expressions (the JS semantic layer)
+  no-watch-after-await: planned | needs script analysis (the JS semantic layer)
   object-curly-newline: formatter | the formatter owns layout
   object-curly-spacing: formatter | the formatter owns layout
   object-property-newline: formatter | the formatter owns layout
-  object-shorthand: deferred | needs the JS rules on template expressions (the JS semantic layer)
+  object-shorthand: planned | needs the JS rules on template expressions (the JS semantic layer)
   operator-linebreak: formatter | the formatter owns layout
   order-in-components: formatter | the formatter owns layout
   padding-lines-in-component-definition: formatter | the formatter owns layout
-  prefer-define-options: deferred | needs script analysis (the JS semantic layer)
-  prefer-import-from-vue: deferred | needs script analysis (the JS semantic layer)
-  prefer-prop-type-boolean-first: deferred | needs script analysis (the JS semantic layer)
-  prefer-single-event-payload: deferred | needs script analysis (the JS semantic layer)
-  prefer-template: deferred | needs the JS rules on template expressions (the JS semantic layer)
-  prefer-use-template-ref: deferred | needs script analysis (the JS semantic layer)
-  prefer-v-model: deferred | needs script analysis (the JS semantic layer)
-  prop-name-casing: deferred | needs script analysis (the JS semantic layer)
+  prefer-define-options: planned | needs script analysis (the JS semantic layer)
+  prefer-import-from-vue: planned | needs script analysis (the JS semantic layer)
+  prefer-prop-type-boolean-first: planned | needs script analysis (the JS semantic layer)
+  prefer-single-event-payload: planned | needs script analysis (the JS semantic layer)
+  prefer-template: planned | needs the JS rules on template expressions (the JS semantic layer)
+  prefer-use-template-ref: planned | needs script analysis (the JS semantic layer)
+  prefer-v-model: planned | needs script analysis (the JS semantic layer)
+  prop-name-casing: planned | needs script analysis (the JS semantic layer)
   quote-props: formatter | the formatter owns layout
-  require-default-export: deferred | needs script analysis (the JS semantic layer)
-  require-default-prop: deferred | needs script analysis (the JS semantic layer)
-  require-direct-export: deferred | needs script analysis (the JS semantic layer)
-  require-emit-validator: deferred | needs script analysis (the JS semantic layer)
-  require-explicit-emits: deferred | needs script analysis (the JS semantic layer)
-  require-explicit-slots: deferred | needs script analysis (the JS semantic layer)
-  require-expose: deferred | needs script analysis (the JS semantic layer)
-  require-macro-variable-name: deferred | needs script analysis (the JS semantic layer)
-  require-name-property: deferred | needs script analysis (the JS semantic layer)
-  require-prop-comment: deferred | needs script analysis (the JS semantic layer)
-  require-prop-type-constructor: deferred | needs script analysis (the JS semantic layer)
-  require-render-return: deferred | needs script analysis (the JS semantic layer)
-  require-slots-as-functions: deferred | needs script analysis (the JS semantic layer)
-  require-typed-object-prop: deferred | needs script analysis (the JS semantic layer)
-  require-typed-ref: deferred | needs script analysis (the JS semantic layer)
-  restricted-component-names: deferred | needs script analysis (the JS semantic layer)
-  return-in-computed-property: deferred | needs script analysis (the JS semantic layer)
-  return-in-emits-validator: deferred | needs script analysis (the JS semantic layer)
+  require-default-export: planned | needs script analysis (the JS semantic layer)
+  require-default-prop: rule require-default-prop | a type that comes from another file is skipped (the plugin has no type information there either), a component object only at the top level as for `no-dupe-keys`
+  require-direct-export: planned | needs script analysis (the JS semantic layer)
+  require-emit-validator: planned | needs script analysis (the JS semantic layer)
+  require-explicit-emits: planned | needs script analysis (the JS semantic layer)
+  require-explicit-slots: planned | needs script analysis (the JS semantic layer)
+  require-expose: planned | needs script analysis (the JS semantic layer)
+  require-macro-variable-name: planned | needs script analysis (the JS semantic layer)
+  require-name-property: planned | needs script analysis (the JS semantic layer)
+  require-prop-comment: planned | needs script analysis (the JS semantic layer)
+  require-prop-type-constructor: planned | needs script analysis (the JS semantic layer)
+  require-render-return: planned | needs script analysis (the JS semantic layer)
+  require-slots-as-functions: planned | needs script analysis (the JS semantic layer)
+  require-typed-object-prop: planned | needs script analysis (the JS semantic layer)
+  require-typed-ref: planned | needs script analysis (the JS semantic layer)
+  restricted-component-names: planned | needs script analysis (the JS semantic layer)
+  return-in-computed-property: planned | needs script analysis (the JS semantic layer)
+  return-in-emits-validator: planned | needs script analysis (the JS semantic layer)
   script-indent: formatter | the formatter owns layout
   sort-keys: formatter | the formatter owns layout
   space-in-parens: formatter | the formatter owns layout
   space-infix-ops: formatter | the formatter owns layout
   space-unary-ops: formatter | the formatter owns layout
   template-curly-spacing: formatter | the formatter owns layout
-  valid-define-emits: deferred | needs script analysis (the JS semantic layer)
-  valid-define-options: deferred | needs script analysis (the JS semantic layer)
-  valid-define-props: deferred | needs script analysis (the JS semantic layer)
+  valid-define-emits: planned | needs script analysis (the JS semantic layer)
+  valid-define-options: planned | needs script analysis (the JS semantic layer)
+  valid-define-props: planned | needs script analysis (the JS semantic layer)
   valid-model-definition: wontfix deprecated upstream
-  valid-next-tick: deferred | needs script analysis (the JS semantic layer)
+  valid-next-tick: planned | needs script analysis (the JS semantic layer)

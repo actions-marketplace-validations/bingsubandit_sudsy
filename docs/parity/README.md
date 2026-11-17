@@ -30,8 +30,8 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | dotnet-format-editorconfig | - | 56 | 50 | 3 | 0 | 1 | 2 | 0 | 0 |
 | eslint | 100.0% | 292 | 93 | 21 | 125 | 0 | 32 | 21 | 125 |
 | eslint-plugin-jsonc | - | 44 | 36 | 6 | 0 | 0 | 2 | 0 | 0 |
-| eslint-plugin-svelte | 100.0% | 85 | 19 | 8 | 16 | 0 | 3 | 39 | 16 |
-| eslint-plugin-vue | 100.0% | 256 | 45 | 55 | 35 | 0 | 4 | 117 | 35 |
+| eslint-plugin-svelte | 100.0% | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
+| eslint-plugin-vue | 99.6% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
 | google-java-format | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | - | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | - | 71 | 38 | 10 | 0 | 0 | 1 | 22 | 0 |

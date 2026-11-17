@@ -100,6 +100,7 @@ enum Check {
     RawSpecial,
     ChildrenSnippet,
     UselessMustache,
+    ObjectMustache,
     SvelteShorthand {
         directives: Vec<String>,
     },
@@ -233,6 +234,7 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
             ("raw-special", |_| Ok(Check::RawSpecial)),
             ("children-snippet", |_| Ok(Check::ChildrenSnippet)),
             ("useless-mustache", |_| Ok(Check::UselessMustache)),
+            ("object-mustache", |_| Ok(Check::ObjectMustache)),
             ("svelte-shorthand", |p| {
                 Ok(Check::SvelteShorthand {
                     directives: list(p.optional("directives")),
@@ -478,7 +480,7 @@ impl Rule for Template {
             | Check::AttributesOrder
             | Check::NestedStyle => &[k::START_TAG],
             Check::ChildrenSnippet => &[k::BLOCK_TAG],
-            Check::UselessMustache => &[k::MUSTACHE],
+            Check::UselessMustache | Check::ObjectMustache => &[k::MUSTACHE],
             Check::SpacedComment => &[k::DOCUMENT],
             Check::LooseEquality | Check::NegatedAsync => {
                 &[k::ATTRIBUTE, k::INTERPOLATION, k::BLOCK_HEAD]
@@ -616,6 +618,26 @@ impl Rule for Template {
                         ctx.report(TextRange::at(start, TextSize::of(s)), self.message.clone());
                     }
                 }
+            }
+            Check::ObjectMustache => {
+                let (s, start) = code(node, text);
+                let s = s.trim_end();
+                let inner = s.strip_prefix('{').and_then(|r| r.strip_suffix('}'));
+                let inner = inner.map_or("", str::trim_start);
+                let word = |w: &str| {
+                    inner.strip_prefix(w).is_some_and(|r| {
+                        !r.starts_with(|c: char| c.is_alphanumeric() || c == '_' || c == '$')
+                    })
+                };
+                let phrase = match inner.chars().next() {
+                    Some('{') => "object",
+                    Some('[') => "array",
+                    _ if word("function") || word("async") => "function",
+                    _ if word("class") => "class",
+                    _ => return,
+                };
+                let at = TextRange::at(start, TextSize::of(s));
+                ctx.report(at, self.message.replace("{phrase}", phrase));
             }
             Check::BananaInBox => {
                 if let Some(a) = Attr::parse(node, text)
