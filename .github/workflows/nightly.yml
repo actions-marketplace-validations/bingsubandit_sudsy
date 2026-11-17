@@ -1,0 +1,64 @@
+name: nightly
+
+# Every parity ratchet (tests/parity/*/differences.yaml) and every ignored conformance test, run
+# nightly and on demand; a broken ratchet fails the job that names the tool or crate. The matrix is
+# computed by scripts/ci-nightly-matrix.py from scripts/parity_tools.json and the `#[ignore]`d tests.
+# Tools (target/parity) and corpora (tests/conformance/corpus) are cached on their pins.
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: never
+  CARGO_TARGET_DIR: ${{ github.workspace }}/target
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - id: matrix
+        run: echo "matrix=$(python3 scripts/ci-nightly-matrix.py)" >> "$GITHUB_OUTPUT"
+
+  run:
+    name: ${{ matrix.name }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          key: ${{ matrix.name }}
+          save-if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+      # The reference tools: the folders scripts/parity.sh installs into, keyed on every pin.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: target/parity
+          key: tools-${{ matrix.name }}-${{ hashFiles('scripts/parity_tools.json', 'docs/parity/*.yaml', 'scripts/lib/jre.sh', 'dotnet-tools.json') }}
+      # The corpora: the fetch scripts are idempotent per pinned commit, so a stale cache is updated.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tests/conformance/corpus
+          key: corpus-${{ matrix.name }}-${{ hashFiles('tests/conformance/fetch-*.sh', 'tests/conformance/tarball-corpus.sh') }}
+          restore-keys: corpus-${{ matrix.name }}-
+      - name: ${{ matrix.cmd }}
+        env:
+          CMD: ${{ matrix.cmd }}
+        run: bash $CMD

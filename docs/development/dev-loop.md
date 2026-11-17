@@ -12,6 +12,7 @@
 | `dogfood.sh` | Build debug CLI + worker into `target/dogfood/` for the editor |
 | `bench.sh`, `bench-time.sh`, `bench-measure.sh`, `bench-setup-wsl.sh` | [performance/tooling.md](../performance/tooling.md) |
 | `parity.sh <tool>`, `parity.sh format <tool>` | Differential test against an upstream tool on `tests/parity/<tool>/` fixtures: [parity.md](parity.md) |
+| `conformance.sh lang-<x>` | Fetch a language's corpus and run its ignored conformance tests; the nightly job runs it and every parity tool: [parity.md](parity.md#nightly) |
 | `pack.sh <out> [language...]`, `pack-bench.sh` | Build language packs and their manifest for this machine; static vs pack timing and sizes ([../architecture/language-packs.md](../architecture/language-packs.md)) |
 | `finish.sh [-p crate]... [bench args]` | The check of a finished change: `gate.sh --affected` and `bench.sh` (which measures the affected languages) at the same time (about as long as the slower one); `--all`: the full gate and every language; overrides of the selection: `-p <crate>` (repeatable) for the gate's clippy and tests, `--lang <bench/inputs folder or startup>` (repeatable) for the bench; a gate failure stops the bench; ends in `FINISH OK` or `FINISH FAILED: <gate\|bench>` |
 | `agent-stats.py [<subagents dir>] [N]` | Summary of the newest N (10) Claude Code subagent transcripts: model vs tool minutes, gate/bench launches, watchers, errors by kind, the commit whose CLAUDE.md each agent was given |
