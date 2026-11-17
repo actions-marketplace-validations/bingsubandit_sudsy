@@ -83,6 +83,7 @@ pub fn list(providers: &[Box<dyn LanguageProvider>]) -> Vec<Row> {
 /// for a pack that loads.
 pub fn add(language: &str, dir: Option<&Path>) -> Result<(), String> {
     core_packs::set_removed(language, false).map_err(|e| e.to_string())?;
+    core_packs::set_no_prompt(language, false).map_err(|e| e.to_string())?;
     if !from_pack(language) || check(language).is_ok() {
         return Ok(());
     }

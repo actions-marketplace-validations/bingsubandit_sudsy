@@ -22,7 +22,8 @@ C# needs the .NET 10 runtime; JSON and YAML work without it.
 
 ## Settings
 
-* `sudsy.serverPath`: the `sudsy` executable (default: the bundled one, else `sudsy` on PATH).
+* `sudsy.importStrategy`: `fromEnvironment` (default: `sudsy.serverPath` if set, else the first `sudsy` on PATH, else the bundled one) or `useBundled`.
+* `sudsy.serverPath`: the `sudsy` executable. A CLI for terminals is a separate install: the release archives `sudsy-<version>-<platform>`.
 * `sudsy.csharpWorkerPath`: `Sudsy.Worker.dll` (default: the one beside the executable).
 * Both path settings are machine-scoped: set them in user settings, not in a workspace's `.vscode/settings.json`. The extension does not run in untrusted (Restricted Mode) workspaces.
 * `sudsy.trace.server`: `off`, `messages` or `verbose`.

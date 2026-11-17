@@ -10,6 +10,7 @@ publish.workspace = true
 anyhow.workspace = true
 core-config.workspace = true
 core-incremental.workspace = true
+core-packs.workspace = true
 core-rules.workspace = true
 core-workspace.workspace = true
 crossbeam-channel = "0.5"

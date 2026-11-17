@@ -28,7 +28,7 @@ Dependabot (`.github/dependabot.yml`: cargo, npm, nuget monthly, actions weekly,
 3. One build job per platform on a native runner (linux, win32, darwin; x64 and arm64): packs (`scripts/pack.sh`), the pack-mode CLI embedding their hashes, the CLI archive and the offline `sudsy-full` archive with `packs/` (`scripts/package-cli.sh`), the pack files themselves as assets, and the platform `.vsix`, after the same smoke test ([language packs](../architecture/language-packs.md)).
 4. A job drafts a GitHub release with archives and `SHA256SUMS`, notes from the changelog section. `-rc.N` suffixes make a pre-release.
 
-Publishing is manual: the workflow publishes nothing by itself. The `marketplace` job runs only from a hand-started run on a tag with its input ticked, using the `VSCE_PAT` secret. Nothing goes to crates.io (every crate is `publish = false`; the SDK is used by path until the plugin API is stable) or NuGet (the worker ships inside the packages).
+Publishing is manual: the workflow publishes nothing by itself. The drafted release must be published before language packs can download: a draft's assets return 404. The `marketplace` job runs only from a hand-started run on a tag with its input ticked, using the `VSCE_PAT` secret. Nothing goes to crates.io (every crate is `publish = false`; the SDK is used by path until the plugin API is stable) or NuGet (the worker ships inside the packages).
 
 Supply chain: third-party actions are pinned by commit SHA (version in a comment; Dependabot bumps them weekly), workflows default to `contents: read` (only `release` writes), the tag name reaches scripts through `env`, and the `marketplace` job runs `vsce` from the `package-lock.json` install, not an unpinned download.
 

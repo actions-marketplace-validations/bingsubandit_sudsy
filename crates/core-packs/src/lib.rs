@@ -11,7 +11,7 @@ mod state;
 
 pub use install::{download, install_from, remove};
 pub use load::load;
-pub use state::{cache_dir, is_removed, set_removed};
+pub use state::{cache_dir, is_no_prompt, is_removed, set_no_prompt, set_removed};
 pub use tree_sitter::Language;
 
 /// The Sudsy version packs are locked to.
@@ -19,7 +19,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 const MANIFEST: &str = include_str!(concat!(env!("OUT_DIR"), "/manifest.txt"));
 /// Where the release assets of the running version live; the one place that names the host.
-const RELEASE_URL: &str = "https://github.com/a-coox/sudsy/releases/download/v";
+const RELEASE_URL: &str = "https://github.com/bingsubandit/sudsy/releases/download/v";
 
 #[derive(Debug, thiserror::Error)]
 pub enum PackError {

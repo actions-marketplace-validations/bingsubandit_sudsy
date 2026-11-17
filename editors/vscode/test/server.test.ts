@@ -3,7 +3,7 @@ import { test } from "node:test";
 import * as path from "node:path";
 import { WORKER_ENV, bundledServer, resolveServer } from "../src/server";
 
-const none = { serverPath: "", csharpWorkerPath: "" };
+const none = { importStrategy: "fromEnvironment" as const, serverPath: "", csharpWorkerPath: "" };
 const ext = path.join("ext", "sudsy");
 
 test("the bundled executable is named for the platform", () => {
@@ -16,10 +16,19 @@ test("a configured executable wins over the bundled one", () => {
   assert.deepEqual(s, { command: "/opt/sudsy", args: ["lsp"], env: {} });
 });
 
-test("the bundled executable is used when it exists, else PATH", () => {
+test("without a setting the first sudsy on PATH wins, then the bundled one, then plain sudsy", () => {
   const bundled = bundledServer(ext, "linux");
-  assert.equal(resolveServer(none, ext, "linux", (f) => f === bundled).command, bundled);
-  assert.equal(resolveServer(none, ext, "linux", () => false).command, "sudsy");
+  const dirs = ["/a", "/b"];
+  const onB = (f: string) => f === "/b/sudsy" || f === bundled;
+  assert.equal(resolveServer(none, ext, "linux", onB, undefined, dirs).command, "/b/sudsy");
+  assert.equal(resolveServer(none, ext, "linux", (f) => f === bundled, undefined, dirs).command, bundled);
+  assert.equal(resolveServer(none, ext, "linux", () => false, undefined, dirs).command, "sudsy");
+});
+
+test("useBundled ignores the setting and PATH", () => {
+  const bundled = bundledServer(ext, "linux");
+  const s = { ...none, importStrategy: "useBundled" as const, serverPath: "/opt/sudsy" };
+  assert.equal(resolveServer(s, ext, "linux", () => true, undefined, ["/a"]).command, bundled);
 });
 
 test("the worker setting becomes the environment variable the executable reads", () => {
@@ -29,7 +38,7 @@ test("the worker setting becomes the environment variable the executable reads",
 
 test("${workspaceFolder} in the settings is the first workspace folder", () => {
   const s = resolveServer(
-    { serverPath: "${workspaceFolder}/target/sudsy", csharpWorkerPath: "${workspaceFolder}/w.dll" },
+    { ...none, serverPath: "${workspaceFolder}/target/sudsy", csharpWorkerPath: "${workspaceFolder}/w.dll" },
     ext,
     "linux",
     () => false,

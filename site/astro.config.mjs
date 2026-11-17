@@ -15,7 +15,7 @@ export default defineConfig({
       logo: { src: '../assets/logo/soap_color.svg', alt: 'Sudsy' },
       favicon: '/favicon.svg',
       customCss: ['./src/styles/site.css'],
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/a-coox/sudsy' }],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/bingsubandit/sudsy' }],
       sidebar: [
         { label: 'Getting started', link: '/getting-started/' },
         { label: 'Rules', link: '/rules/' },

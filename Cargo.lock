@@ -2187,6 +2187,7 @@ dependencies = [
  "core-config",
  "core-format",
  "core-incremental",
+ "core-packs",
  "core-rules",
  "core-syntax",
  "core-workspace",

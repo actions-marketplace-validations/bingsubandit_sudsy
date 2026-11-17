@@ -71,6 +71,10 @@
       {
         "command": "sudsy.showOutput",
         "title": "Sudsy: Show Output"
+      },
+      {
+        "command": "sudsy.installMissingLanguages",
+        "title": "Sudsy: Install Missing Languages"
       }
     ],
     "configuration": {
@@ -79,12 +83,25 @@
         "sudsy.serverPath": {
           "type": "string",
           "scope": "machine",
-          "description": "Path of the `sudsy` executable (`${workspaceFolder}` is the first workspace folder). Empty: the one bundled with the extension, else `sudsy` from PATH."
+          "description": "Path of the `sudsy` executable (`${workspaceFolder}` is the first workspace folder). Empty: see `sudsy.importStrategy`. Ignored with `useBundled`."
         },
         "sudsy.csharpWorkerPath": {
           "type": "string",
           "scope": "machine",
           "description": "Path of `Sudsy.Worker.dll`, the C# worker. Empty: the one next to the executable."
+        },
+        "sudsy.importStrategy": {
+          "type": "string",
+          "enum": [
+            "fromEnvironment",
+            "useBundled"
+          ],
+          "enumDescriptions": [
+            "Use `sudsy.serverPath` if set, else the first `sudsy` on PATH, else the bundled executable.",
+            "Always use the executable bundled with the extension."
+          ],
+          "default": "fromEnvironment",
+          "description": "Which `sudsy` executable the extension runs."
         },
         "sudsy.trace.server": {
           "type": "string",

@@ -38,9 +38,9 @@ fn a_missing_language_is_offered_once_and_served_after_the_install() {
     assert_eq!(apply("a=1\n", &client.format(&a)), "a = 1\n");
 
     // One prompt for the language, though two files of it were opened.
-    let prompts = prompts(&client);
-    assert_eq!(prompts.len(), 1, "{prompts:?}");
-    let messages: Vec<&str> = prompts
+    let shown = prompts(&client);
+    assert_eq!(shown.len(), 1, "{shown:?}");
+    let messages: Vec<&str> = shown
         .iter()
         .map(|p| p["message"].as_str().unwrap())
         .collect();
@@ -48,7 +48,7 @@ fn a_missing_language_is_offered_once_and_served_after_the_install() {
         messages.iter().any(|m| m.contains("toml is not installed")),
         "{messages:?}"
     );
-    assert_eq!(prompts[0]["actions"][0]["title"], "Install");
+    assert_eq!(shown[0]["actions"][0]["title"], "Install");
     assert!(
         client
             .server_requests
@@ -56,4 +56,46 @@ fn a_missing_language_is_offered_once_and_served_after_the_install() {
             .any(|m| m == "workspace/diagnostic/refresh")
     );
     assert!(languages::installed::check("toml").is_ok());
+
+    // Dismissed prompts come back at the next open; "Don't ask again" stops them, also in a
+    // new server, until the language is installed again.
+    languages::installed::remove("toml").unwrap();
+    client.choice = Some("dismiss");
+    let before = prompts(&client).len();
+    for name in ["d.toml", "e.toml"] {
+        let uri = client.open(name, "toml", "d=1\n");
+        client.format(&uri);
+    }
+    assert_eq!(prompts(&client).len(), before + 2);
+    client.choice = Some("Don't ask again");
+    for name in ["f.toml", "g.toml"] {
+        let uri = client.open(name, "toml", "d=1\n");
+        client.format(&uri);
+    }
+    assert_eq!(prompts(&client).len(), before + 3);
+    client.choice = None;
+    let mut again = Client::start(t.path(), languages::providers());
+    let uri = again.open("h.toml", "toml", "d=1\n");
+    again.format(&uri);
+    assert!(prompts(&again).is_empty());
+    assert!(core_packs::is_no_prompt("toml"));
+    again.shutdown();
+
+    // The command installs the missing languages of the open documents, or the one it is given.
+    languages::installed::remove("toml").unwrap();
+    let c = client.open("c.toml", "toml", "c=1\n");
+    let result = client.install_command(None);
+    assert_eq!(result["installed"][0], "toml", "{result}");
+    assert_eq!(apply("c=1\n", &client.format(&c)), "c = 1\n");
+    languages::installed::remove("toml").unwrap();
+    client.close(&c);
+    let result = client.install_command(Some("toml"));
+    assert_eq!(result["installed"][0], "toml", "{result}");
+    assert!(languages::installed::check("toml").is_ok());
+    assert!(
+        client.install_command(None)["installed"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
 }

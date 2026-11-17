@@ -100,7 +100,7 @@ pub fn run(args: InitArgs) -> Result<()> {
 }
 
 fn starter(presets: Vec<String>, known: &[(&str, &str)]) -> Result<String> {
-    let mut text = String::from("# https://github.com/a-coox/sudsy\n");
+    let mut text = String::from("# https://github.com/bingsubandit/sudsy\n");
     text.push_str(if presets.is_empty() {
         "extends: []   # e.g. preset:csharp/google\n"
     } else {

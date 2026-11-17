@@ -5,7 +5,8 @@ use crate::actions::{FIX_ALL_KIND, code_action};
 use crate::analysis::{Analysis, Cancel};
 use crate::diagnostics::diagnostic;
 use crate::notifier::{
-    DOWNLOAD_ACTION, INSTALL_ACTION, INSTALL_PROMPT_PREFIX, Notifier, RUNTIME_PROMPT_ID,
+    DOWNLOAD_ACTION, INSTALL_ACTION, INSTALL_COMMAND, INSTALL_PROMPT_PREFIX, NO_PROMPT_ACTION,
+    Notifier, RUNTIME_PROMPT_ID,
 };
 use crate::workspace::Workspace;
 use anyhow::{Result, anyhow};
@@ -16,7 +17,7 @@ use lsp_types::notification::{
     DidOpenTextDocument, Notification as LspNotification,
 };
 use lsp_types::request::{
-    CodeActionRequest, DocumentDiagnosticRequest, Formatting, RegisterCapability,
+    CodeActionRequest, DocumentDiagnosticRequest, ExecuteCommand, Formatting, RegisterCapability,
     Request as LspRequest, ShowDocument, WorkspaceDiagnosticRefresh,
 };
 use lsp_types::{
@@ -25,9 +26,10 @@ use lsp_types::{
     DidChangeTextDocumentParams, DidChangeWatchedFilesParams,
     DidChangeWatchedFilesRegistrationOptions, DidCloseTextDocumentParams,
     DidOpenTextDocumentParams, DocumentDiagnosticParams, DocumentFormattingParams,
-    FileSystemWatcher, GlobPattern, InitializeParams, NumberOrString, OneOf, Registration,
-    RegistrationParams, ServerCapabilities, ServerInfo, ShowDocumentParams, TextDocumentIdentifier,
-    TextDocumentSyncCapability, TextDocumentSyncKind, Uri, WatchKind,
+    ExecuteCommandOptions, ExecuteCommandParams, FileSystemWatcher, GlobPattern, InitializeParams,
+    NumberOrString, OneOf, Registration, RegistrationParams, ServerCapabilities, ServerInfo,
+    ShowDocumentParams, TextDocumentIdentifier, TextDocumentSyncCapability, TextDocumentSyncKind,
+    Uri, WatchKind,
 };
 use provider_api::LanguageProvider;
 use serde::Serialize;
@@ -61,6 +63,10 @@ fn capabilities() -> ServerCapabilities {
             ..Default::default()
         })),
         document_formatting_provider: Some(OneOf::Left(true)),
+        execute_command_provider: Some(ExecuteCommandOptions {
+            commands: vec![INSTALL_COMMAND.into()],
+            ..Default::default()
+        }),
         ..Default::default()
     }
 }
@@ -199,10 +205,15 @@ impl Server {
         let id = serde_json::to_value(&response.id)?;
         let id = id.as_str().unwrap_or("");
         if let Some(language) = id.strip_prefix(INSTALL_PROMPT_PREFIX) {
-            return if title == Some(INSTALL_ACTION) {
-                self.install(language)
-            } else {
-                Ok(())
+            self.notifier.prompt_answered(language);
+            return match title {
+                Some(INSTALL_ACTION) => self.install(&[language.to_string()]).map(drop),
+                Some(NO_PROMPT_ACTION) => {
+                    // A write failure only means the language is offered again.
+                    let _ = core_packs::set_no_prompt(language, true);
+                    Ok(())
+                }
+                _ => Ok(()),
             };
         }
         if id != RUNTIME_PROMPT_ID || title != Some(DOWNLOAD_ACTION) {
@@ -217,19 +228,41 @@ impl Server {
     }
 
     /// Same code as `sudsy languages add`, then the documents that waited start being served.
+    /// Returns what was installed and what failed (failures are also shown to the user).
     // shortcut: a download blocks the message loop for its duration, move it to a thread if
     // packs grow beyond a few hundred KB.
-    fn install(&mut self, language: &str) -> Result<()> {
-        match languages::installed::add(language, None) {
-            Ok(()) => {
-                self.workspace.activate_installed();
-                if self.support.diagnostic_refresh {
-                    self.call::<WorkspaceDiagnosticRefresh>(())?;
+    fn install(&mut self, languages: &[String]) -> Result<serde_json::Value> {
+        let (mut installed, mut failed) = (Vec::new(), Vec::new());
+        for language in languages {
+            match languages::installed::add(language, None) {
+                Ok(()) => installed.push(language.clone()),
+                Err(why) => {
+                    self.notifier.install_failed(language, &why);
+                    failed.push(serde_json::json!({ "language": language, "why": why }));
                 }
             }
-            Err(why) => self.notifier.install_failed(language, &why),
         }
-        Ok(())
+        if !installed.is_empty() {
+            self.notifier.installed(&installed);
+            self.workspace.activate_installed();
+            if self.support.diagnostic_refresh {
+                self.call::<WorkspaceDiagnosticRefresh>(())?;
+            }
+        }
+        Ok(serde_json::json!({ "installed": installed, "failed": failed }))
+    }
+
+    /// `sudsy.installMissingLanguages`: the language in the argument, else every missing language
+    /// of the open documents.
+    fn install_missing(&mut self, params: ExecuteCommandParams) -> Result<serde_json::Value> {
+        let languages = match params.arguments.first().and_then(|a| a.as_str()) {
+            Some(language) => vec![language.to_string()],
+            None => self.workspace.missing_open_languages(),
+        };
+        if languages.is_empty() {
+            self.notifier.nothing_missing();
+        }
+        self.install(&languages)
     }
 
     fn send(&self, message: impl Into<Message>) -> Result<()> {
@@ -261,6 +294,21 @@ impl Server {
                 return self.queue(req, |p: &CodeActionParams| &p.text_document, code_action);
             }
             Formatting::METHOD => self.answer(req, Self::formatting),
+            ExecuteCommand::METHOD => {
+                match serde_json::from_value::<ExecuteCommandParams>(req.params) {
+                    Ok(p) if p.command == INSTALL_COMMAND => {
+                        Response::new_ok(req.id, self.install_missing(p)?)
+                    }
+                    Ok(p) => Response::new_err(
+                        req.id,
+                        ErrorCode::InvalidParams as i32,
+                        format!("unknown command {}", p.command),
+                    ),
+                    Err(e) => {
+                        Response::new_err(req.id, ErrorCode::InvalidParams as i32, e.to_string())
+                    }
+                }
+            }
             _ => Response::new_err(
                 req.id,
                 ErrorCode::MethodNotFound as i32,

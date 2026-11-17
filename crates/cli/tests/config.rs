@@ -300,7 +300,7 @@ fn init_writes_a_starter_config_and_will_not_overwrite() {
     assert_eq!(out.status.code(), Some(0), "{}", stderr(&out));
     assert_eq!(
         read(t.path(), "sudsy.yaml"),
-        "# https://github.com/a-coox/sudsy\nextends:\n  - preset:csharp/google\n  - preset:json/prettier-compat\n"
+        "# https://github.com/bingsubandit/sudsy\nextends:\n  - preset:csharp/google\n  - preset:json/prettier-compat\n"
     );
     let t = tempfile::tempdir().unwrap();
     let out = sudsy(t.path(), &["init", "--preset", "csharp/nope"]);

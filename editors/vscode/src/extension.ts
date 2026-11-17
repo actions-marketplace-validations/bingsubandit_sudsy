@@ -1,5 +1,6 @@
+import { execFile } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import * as vscode from "vscode";
 import { LanguageClient, type LanguageClientOptions } from "vscode-languageclient/node";
 import { type RuleDoc, ruleMarkdown } from "./ruleDocs";
@@ -8,7 +9,7 @@ import { resolveServer } from "./server";
 
 let client: LanguageClient | undefined;
 
-const SETTINGS_THAT_RESTART = ["sudsy.serverPath", "sudsy.csharpWorkerPath"];
+const SETTINGS_THAT_RESTART = ["sudsy.serverPath", "sudsy.csharpWorkerPath", "sudsy.importStrategy"];
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   context.subscriptions.push(
@@ -32,6 +33,7 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
   const settings = vscode.workspace.getConfiguration("sudsy");
   const server = resolveServer(
     {
+      importStrategy: settings.get<"fromEnvironment" | "useBundled">("importStrategy", "fromEnvironment"),
       serverPath: settings.get<string>("serverPath", ""),
       csharpWorkerPath: settings.get<string>("csharpWorkerPath", ""),
     },
@@ -39,6 +41,7 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
     process.platform,
     existsSync,
     vscode.workspace.workspaceFolders?.[0]?.uri.fsPath,
+    (process.env.PATH ?? "").split(delimiter).filter((d) => d !== ""),
   );
   const options: LanguageClientOptions = {
     documentSelector,
@@ -56,6 +59,7 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
     },
     options,
   );
+  logBinary(client, server.command);
   try {
     await client.start();
   } catch (e) {
@@ -65,6 +69,15 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
         "Set `sudsy.serverPath` or put `sudsy` on PATH.",
     );
   }
+}
+
+/** Which executable runs, and its version, in the Sudsy output channel. */
+function logBinary(c: LanguageClient, command: string): void {
+  execFile(command, ["--version"], { timeout: 10_000 }, (error, stdout) =>
+    c.outputChannel.appendLine(
+      error ? `Using ${command} (version unknown: ${error.message})` : `Using ${command}: ${stdout.trim()}`,
+    ),
+  );
 }
 
 const DOCS_SCHEME = "sudsy-rule";

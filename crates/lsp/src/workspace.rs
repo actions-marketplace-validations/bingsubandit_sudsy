@@ -114,6 +114,16 @@ impl Workspace {
         Some((language.to_string(), why))
     }
 
+    /// The languages of the open documents that are not installed and not ignored, sorted.
+    pub fn missing_open_languages(&self) -> Vec<String> {
+        let missing: std::collections::BTreeSet<String> = (self.docs.keys())
+            .filter_map(|p| self.missing_language(p))
+            .map(|(language, _)| language)
+            .filter(|l| !self.ignores_language(l))
+            .collect();
+        missing.into_iter().collect()
+    }
+
     /// Whether the project's config says files of `language` are skipped without a word.
     pub fn ignores_language(&self, language: &str) -> bool {
         self.project

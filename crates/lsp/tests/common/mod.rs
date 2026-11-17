@@ -42,6 +42,9 @@ pub struct Client {
     /// The same requests with their parameters.
     pub server_request_params: Vec<(String, serde_json::Value)>,
     pub root: PathBuf,
+    /// The title of the prompt action to choose (none such: the prompt is dismissed); the
+    /// default is the first action.
+    pub choice: Option<&'static str>,
 }
 
 pub fn uri(path: &Path) -> Uri {
@@ -62,6 +65,7 @@ impl Client {
             server_requests: Vec::new(),
             server_request_params: Vec::new(),
             root: root.to_path_buf(),
+            choice: None,
         };
         let params = InitializeParams {
             workspace_folders: Some(vec![WorkspaceFolder {
@@ -91,7 +95,13 @@ impl Client {
     /// Records a request of the server and answers it: a prompt gets its first action chosen,
     /// everything else null.
     fn answer(&mut self, r: Request) {
-        let result = r.params["actions"][0].clone();
+        let actions = r.params["actions"].as_array();
+        let result = match (self.choice, actions) {
+            (Some(title), Some(a)) => a.iter().find(|x| x["title"] == title).cloned(),
+            (None, Some(a)) => a.first().cloned(),
+            _ => None,
+        };
+        let result = result.unwrap_or_default();
         self.server_requests.push(r.method.clone());
         self.server_request_params.push((r.method, r.params));
         self.send(Response::new_ok(r.id, result));
@@ -309,6 +319,17 @@ impl Client {
             work_done_progress_params: Default::default(),
         };
         self.request::<Formatting>(params).unwrap_or_default()
+    }
+
+    /// `sudsy.installMissingLanguages`, with a language or without.
+    pub fn install_command(&mut self, language: Option<&str>) -> serde_json::Value {
+        let params = lsp_types::ExecuteCommandParams {
+            command: "sudsy.installMissingLanguages".into(),
+            arguments: language.map(|l| vec![l.into()]).unwrap_or_default(),
+            work_done_progress_params: Default::default(),
+        };
+        self.request::<lsp_types::request::ExecuteCommand>(params)
+            .unwrap()
     }
 
     pub fn shutdown(mut self) {
