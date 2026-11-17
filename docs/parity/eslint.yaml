@@ -97,7 +97,7 @@ entries:
   no-constant-condition: planned
   no-constructor-return: planned
   no-continue: planned
-  no-control-regex: planned
+  no-control-regex: rule no-control-regex
   no-debugger: rule no-debugger
   no-delete-var: rule no-delete-var
   no-div-regex: planned
@@ -132,7 +132,7 @@ entries:
   no-lonely-if: planned
   no-loss-of-precision: rule no-loss-of-precision
   no-magic-numbers: planned
-  no-misleading-character-class: planned
+  no-misleading-character-class: rule no-misleading-character-class | the surrogate pair, emoji modifier, flag and joined-sequence checks are not made
   no-mixed-operators: wontfix deprecated formatting rule with no formatter equivalent
   no-mixed-requires: wontfix deprecated upstream
   no-mixed-spaces-and-tabs: formatter
@@ -189,12 +189,12 @@ entries:
   no-undef: rule no-undef | the `typeof` option keeps its default; `languageOptions.globals` is the rule's `globals` option, and `/*global*/` comments are not read; JSX tags are not references
   no-undefined: planned
   no-underscore-dangle: planned
-  no-unexpected-multiline: planned
+  no-unexpected-multiline: rule no-unexpected-multiline
   no-unneeded-ternary: planned
   no-unsafe-finally: rule no-unsafe-finally
   no-unsafe-negation: rule no-unsafe-negation | the `enforceForOrderingRelations` option is not supported
   no-unsafe-optional-chaining: planned
-  no-unused-expressions: planned
+  no-unused-expressions: rule no-unused-expressions | the options keep their defaults
   no-unused-vars: rule no-unused-vars | the options keep their defaults; `/*exported*/` and `/*global*/` comments are not read; a JSX tag counts as a use
   no-use-before-define: rule no-use-before-define | the options keep their defaults; JSX tags are not references
   no-useless-backreference: planned
@@ -205,7 +205,7 @@ entries:
   no-useless-constructor: planned
   no-useless-escape: rule no-useless-escape | regex `v` flag classes are read like `u` classes
   no-useless-rename: planned
-  no-var: planned
+  no-var: rule no-var
   no-void: planned
   no-warning-comments: planned
   no-whitespace-before-property: formatter
@@ -222,6 +222,7 @@ entries:
   padded-blocks: formatter
   padding-line-between-statements: wontfix deprecated formatting rule with no formatter equivalent
   prefer-arrow-callback: planned
+  prefer-const: "rule prefer-const | the options keep their defaults (`destructuring: any`, `ignoreReadBeforeAssign: false`)"
   prefer-destructuring: planned
   prefer-exponentiation-operator: planned
   prefer-named-capture-group: planned
@@ -231,8 +232,8 @@ entries:
   prefer-promise-reject-errors: planned
   prefer-reflect: wontfix deprecated upstream
   prefer-regex-literals: planned
-  prefer-rest-params: planned
-  prefer-spread: planned
+  prefer-rest-params: rule prefer-rest-params
+  prefer-spread: rule prefer-spread
   prefer-template: planned
   preserve-caught-error: planned
   quote-props: formatter
@@ -271,11 +272,11 @@ entries:
   consistent-return: planned
   constructor-super: planned
   getter-return: rule getter-return | the getters of Object.defineProperty and Reflect.defineProperty descriptors are not checked; paths are judged from jumps, if/else, try, switch and endless loops, not a flow graph
-  no-fallthrough: planned
+  no-fallthrough: rule no-fallthrough
   no-this-before-super: planned
   no-unreachable: rule no-unreachable | paths are judged from jumps, if/else, try, switch and endless loops, not a flow graph
   no-unreachable-loop: planned
   no-useless-return: planned
 deferred:
-  - gap: "needs scope analysis (oxc_semantic) beyond the nine scope rules built"
-    ids: [block-scoped-var, no-eval, no-extend-native, no-extra-bind, no-global-assign, no-implicit-globals, no-implied-eval, no-invalid-this, no-labels, no-lone-blocks, no-loop-func, no-new-native-nonconstructor, no-new-wrappers, no-obj-calls, no-restricted-globals, no-undef-init, no-unmodified-loop-condition, no-unused-labels, no-unused-private-class-members, no-useless-assignment, prefer-const, require-atomic-updates]
+  - gap: "needs scope analysis beyond the scope rules built"
+    ids: [block-scoped-var, no-eval, no-extend-native, no-extra-bind, no-global-assign, no-implicit-globals, no-implied-eval, no-invalid-this, no-labels, no-lone-blocks, no-loop-func, no-new-native-nonconstructor, no-new-wrappers, no-obj-calls, no-restricted-globals, no-undef-init, no-unmodified-loop-condition, no-unused-labels, no-unused-private-class-members, no-useless-assignment, require-atomic-updates]
