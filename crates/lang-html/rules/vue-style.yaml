@@ -31,8 +31,35 @@ fix-kind: safe
 id: attribute-hyphenation
 family: template
 params: { check: hyphenation, only: vue }
-message: "write the prop of a component in kebab-case (`my-prop`, not `myProp`)"
+message: "write the prop of a component in kebab-case (my-prop, not myProp)"
 description: "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
 example: "<MyCard :cardTitle=\"t\">   <MyCard :card-title=\"t\">"
 severity: warn
+category: style
+---
+id: v-on-event-hyphenation
+family: template
+params: { check: hyphenation, on: true, only: vue }
+message: "write the event of a component in kebab-case (my-event, not myEvent)"
+description: "Vue's `v-on-event-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+example: "<MyCard @cardOpen=\"go\">   <MyCard @card-open=\"go\">"
+severity: warn
+category: style
+---
+id: html-self-closing
+family: template
+params: { check: self-closing, only: vue }
+message: "write an empty element as `<div />` and a void element as `<img>`"
+description: "Vue's `html-self-closing` (eslint-plugin-vue) with its defaults: HTML elements, components, SVG and MathML elements without content are self-closing, void HTML elements are not. The elements of the file's root (`<template>`, `<script>`) are left alone."
+example: "<template><div></div><img /></template>   <template><div /><img></template>"
+severity: off
+category: style
+---
+id: attributes-order
+family: template
+params: { check: attributes-order, only: vue }
+message: "put this attribute earlier: the order is: is, v-for, conditions, v-pre and v-once, id, ref, key and slots, v-model, other directives, attributes, events, v-html and v-text"
+description: "Vue's `attributes-order` (eslint-plugin-vue) with its default order. A bare `v-bind=\"object\"` takes the place of the attribute it precedes. Not sorted alphabetically."
+example: "<a @click=\"go\" :href=\"u\" v-if=\"ok\">   <a v-if=\"ok\" :href=\"u\" @click=\"go\">"
+severity: off
 category: style

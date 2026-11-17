@@ -366,7 +366,7 @@
             },
             "attr-quotes": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute value is quoted with `\"`; it is quoted with `'` only when it holds a `\"`. Unquoted values are reported too."
+              "description": "An attribute value is quoted with `\"`; it is quoted with `'` only when it holds a `\"`. Unquoted values are reported too, except `name={expression}` in Svelte, where the braces are the syntax."
             },
             "attr-spacing": {
               "$ref": "#/definitions/rule",
@@ -387,6 +387,10 @@
             "attribute-hyphenation": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+            },
+            "attributes-order": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `attributes-order` (eslint-plugin-vue) with its default order. A bare `v-bind=\"object\"` takes the place of the attribute it precedes. Not sorted alphabetically."
             },
             "avoid-star-import": {
               "$ref": "#/definitions/rule",
@@ -1274,6 +1278,10 @@
             "heading-level": {
               "$ref": "#/definitions/rule",
               "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`."
+            },
+            "html-self-closing": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `html-self-closing` (eslint-plugin-vue) with its defaults: HTML elements, components, SVG and MathML elements without content are self-closing, void HTML elements are not. The elements of the file's root (`<template>`, `<script>`) are left alone."
             },
             "id-pattern": {
               "description": "An `id` that does not match the `pattern` option (a regex; by default kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter).",
@@ -2372,7 +2380,7 @@
             },
             "no-dupe-on-directives": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). Same event and modifiers twice; put both handlers in one function."
+              "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported."
             },
             "no-dupe-style-properties": {
               "$ref": "#/definitions/rule",
@@ -2381,6 +2389,10 @@
             "no-dupe-use-directives": {
               "$ref": "#/definitions/rule",
               "description": "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte)."
+            },
+            "no-dupe-v-else-if": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-dupe-v-else-if` (eslint-plugin-vue). Conditions are compared as text without blanks, `||` alternatives one by one; a condition that only some earlier `&&` terms cover is not found."
             },
             "no-duplicate-anchors": {
               "$ref": "#/definitions/rule",
@@ -2666,7 +2678,7 @@
             },
             "no-implicit-button-type": {
               "$ref": "#/definitions/rule",
-              "description": "A `<button>` without a `type` is a submit button, which is rarely meant outside a form."
+              "description": "A `<button>` without a `type` is a submit button, which is rarely meant outside a form. A Svelte spread (`{...props}`) may carry the `type`."
             },
             "no-implicit-close": {
               "$ref": "#/definitions/rule",
@@ -2690,7 +2702,7 @@
             },
             "no-inline-style": {
               "$ref": "#/definitions/rule",
-              "description": "A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it."
+              "description": "A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it. A Svelte `style:property` directive is one too."
             },
             "no-interactive-commands": {
               "$ref": "#/definitions/rule",
@@ -2934,7 +2946,7 @@
             },
             "no-target-blank": {
               "$ref": "#/definitions/rule",
-              "description": "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer. Also eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`."
+              "description": "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer; both `noopener` and `noreferrer` are required, as in eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`. Links to a scheme or host and computed links (`{href}`, `bind:href`, `:href`) count."
             },
             "no-textarea-mustache": {
               "$ref": "#/definitions/rule",
@@ -3006,6 +3018,10 @@
               "$ref": "#/definitions/rule",
               "description": "An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone."
             },
+            "no-unknown-style-directive-property": {
+              "$ref": "#/definitions/rule",
+              "description": "Svelte's `no-unknown-style-directive-property` (eslint-plugin-svelte). Custom properties (`style:--x`) and vendor-prefixed ones pass. The property table is the CSS language's."
+            },
             "no-unnecessary-type-constraint": {
               "$ref": "#/definitions/rule",
               "description": "A type parameter constrained to `any` or `unknown`."
@@ -3046,6 +3062,10 @@
               "$ref": "#/definitions/rule",
               "description": "A reference that comes before the declaration of what it names in the source (function declarations included), or runs while the variable is being initialized. References in types are left alone."
             },
+            "no-use-v-else-with-v-for": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-use-v-else-with-v-for` (eslint-plugin-vue). Put the `v-for` on a child or a wrapping `<template>`."
+            },
             "no-use-v-if-with-v-for": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `no-use-v-if-with-v-for` (eslint-plugin-vue). Filter the list in a computed value, or move the `v-if` to a wrapping `<template>`."
@@ -3077,6 +3097,10 @@
             "no-v-text": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `no-v-text` (eslint-plugin-vue)."
+            },
+            "no-v-text-v-html-on-component": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `no-v-text-v-html-on-component` (eslint-plugin-vue)."
             },
             "no-var": {
               "$ref": "#/definitions/rule",
@@ -5279,7 +5303,11 @@
             },
             "v-for-key": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components."
+              "description": "Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components. On a `<template>` or `<slot>` the key goes on the child elements; components are left to `valid-v-for`."
+            },
+            "v-on-event-hyphenation": {
+              "$ref": "#/definitions/rule",
+              "description": "Vue's `v-on-event-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
             },
             "v-on-style": {
               "$ref": "#/definitions/rule",

@@ -5,3 +5,7 @@ no-v-for-template-key-on-child: warn
 no-child-content: warn
 no-v-text: warn
 no-target-blank: warn
+v-for-key: warn
+no-v-text-v-html-on-component: warn
+no-dupe-v-else-if: warn
+no-use-v-else-with-v-for: warn

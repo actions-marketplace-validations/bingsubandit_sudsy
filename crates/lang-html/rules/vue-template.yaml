@@ -42,3 +42,30 @@ description: "Vue's `no-child-content` (eslint-plugin-vue)."
 example: "<p v-text=\"t\">x</p>   <p v-text=\"t\"></p>"
 severity: warn
 category: correctness
+---
+id: no-use-v-else-with-v-for
+family: template
+params: { check: directive, name: v-else, with: v-for, only: vue }
+message: "`v-else` and `v-for` on one element: `v-else` is evaluated first and cannot read the loop variable"
+description: "Vue's `no-use-v-else-with-v-for` (eslint-plugin-vue). Put the `v-for` on a child or a wrapping `<template>`."
+example: "<li v-else v-for=\"x in xs\">   <template v-else><li v-for=\"x in xs\">"
+severity: warn
+category: suspicious
+---
+id: no-v-text-v-html-on-component
+family: template
+params: { check: component-html, only: vue }
+message: "`v-html` and `v-text` on a component replace its content, which it does not render as HTML or text: use a prop or a slot"
+description: "Vue's `no-v-text-v-html-on-component` (eslint-plugin-vue)."
+example: "<MyCard v-html=\"h\">   <div v-html=\"h\">"
+severity: warn
+category: correctness
+---
+id: no-dupe-v-else-if
+family: template
+params: { check: dupe-else-if, only: vue }
+message: "this `v-else-if` branch can never run: an earlier `v-if` or `v-else-if` of the chain has the same condition"
+description: "Vue's `no-dupe-v-else-if` (eslint-plugin-vue). Conditions are compared as text without blanks, `||` alternatives one by one; a condition that only some earlier `&&` terms cover is not found."
+example: "<a v-if=\"x\"/><b v-else-if=\"x\"/>   <a v-if=\"x\"/><b v-else-if=\"y\"/>"
+severity: warn
+category: correctness

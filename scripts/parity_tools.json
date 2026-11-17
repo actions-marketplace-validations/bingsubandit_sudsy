@@ -303,6 +303,8 @@
     "yamllint": {"catalog": "yamllint", "install": {"pip": "yamllint"}},
     "eslint": {"catalog": "eslint", "install": {"npm": "eslint"}, "fetch": ["tests/conformance/fetch-js-corpus.sh"]},
     "typescript-eslint": {"catalog": "typescript-eslint", "install": {"npm": "typescript-eslint", "with": ["eslint@9.39.5"]}, "fetch": ["tests/conformance/fetch-js-corpus.sh"]},
+    "eslint-plugin-vue": {"catalog": "eslint-plugin-vue", "install": {"npm": "eslint-plugin-vue", "with": ["eslint@9.39.5", "typescript-eslint@8.72.2"]}, "fetch": ["tests/conformance/fetch-html-corpus.sh"]},
+    "eslint-plugin-svelte": {"catalog": "eslint-plugin-svelte", "install": {"npm": "eslint-plugin-svelte", "with": ["eslint@9.39.5", "svelte@5.57.3", "typescript-eslint@8.72.2"]}, "fetch": ["tests/conformance/fetch-html-corpus.sh"]},
     "eslint-jsonc":{"catalog": "eslint-plugin-jsonc", "install": {"npm": "eslint-plugin-jsonc", "with": ["eslint@9"]}},
     "stylelint": {"catalog": "stylelint", "install": {"npm": "stylelint"}},
     "stylelint-scss": {"catalog": "stylelint-scss", "install": {"npm": "stylelint-scss", "with": ["stylelint@17.16.0", "postcss-scss@4.0.9"]}},

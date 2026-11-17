@@ -63,7 +63,10 @@ impl P<'_> {
                 self.stack.push((Open::Block, block));
                 self.block_tag(start, end);
             }
-            b':' | b'/' => {
+            // `{/** @type {T} */ (x)}` is an expression: only `{/if}` and the like close a block
+            b':' | b'/'
+                if sigil == b':' || matches!(word, "if" | "each" | "await" | "key" | "snippet") =>
+            {
                 let block = self.stack.iter().rposition(|&(o, _)| o == Open::Block);
                 let Some(at) = block else {
                     self.error(start, end, "no block is open");

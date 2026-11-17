@@ -10,3 +10,4 @@ spaced-html-comment: warn
 no-nested-style-tag: warn
 no-bind-value-on-checkable-inputs: warn
 no-target-blank: warn
+no-unknown-style-directive-property: warn

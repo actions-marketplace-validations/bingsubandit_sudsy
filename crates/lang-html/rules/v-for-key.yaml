@@ -1,10 +1,8 @@
 id: v-for-key
+family: template
+params: { check: for-key }
 message: a `v-for` needs a `:key`, so that Vue can reuse the elements when the list changes
-description: Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components.
+description: Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components. On a `<template>` or `<slot>` the key goes on the child elements; components are left to `valid-v-for`.
 example: '<li v-for="x in xs">   <li v-for="x in xs" :key="x.id">'
 severity: warn
 category: correctness
-rule:
-  kind: StartTag
-  has: { kind: Attribute, regex: '^v-for[\s=]' }
-  not: { has: { kind: Attribute, regex: '^(:|v-bind:)key[\s=]' } }

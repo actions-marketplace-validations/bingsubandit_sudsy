@@ -30,12 +30,12 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | dotnet-format-editorconfig | - | 56 | 50 | 3 | 0 | 1 | 2 | 0 | 0 |
 | eslint | 100.0% | 292 | 92 | 19 | 128 | 0 | 32 | 21 | 128 |
 | eslint-plugin-jsonc | - | 44 | 36 | 6 | 0 | 0 | 2 | 0 | 0 |
-| eslint-plugin-svelte | - | 85 | 18 | 8 | 18 | 0 | 3 | 38 | 18 |
-| eslint-plugin-vue | - | 256 | 43 | 16 | 176 | 0 | 4 | 17 | 176 |
+| eslint-plugin-svelte | 100.0% | 85 | 19 | 8 | 16 | 0 | 3 | 39 | 16 |
+| eslint-plugin-vue | 100.0% | 256 | 45 | 55 | 35 | 0 | 4 | 117 | 35 |
 | google-java-format | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | - | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | - | 71 | 38 | 10 | 0 | 0 | 1 | 22 | 0 |
-| html-eslint | - | 66 | 14 | 11 | 41 | 0 | 0 | 0 | 41 |
+| html-eslint | - | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
 | html-validate | - | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
 | htmlhint | - | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
 | ktlint | - | 97 | 34 | 7 | 56 | 0 | 0 | 0 | 56 |

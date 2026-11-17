@@ -25,6 +25,7 @@
 
 use crate::generated::kind as k;
 use crate::ng_checks;
+mod vue;
 use core_rules::{Edit, Family, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, TextRange, TextSize};
 
@@ -78,25 +79,43 @@ struct Directive {
 
 enum Check {
     Directive(Box<Directive>),
-    Shorthand { from: String, to: String },
-    Hyphenation,
+    Shorthand {
+        from: String,
+        to: String,
+    },
+    /// `on`: the arguments of `v-on` (the events), else attributes and `v-bind` arguments.
+    Hyphenation {
+        on: bool,
+    },
     KeyOnChild,
     ChildContent,
     LoneTemplate,
     TextareaMustache,
     ComponentIs,
-    Duplicate { prefix: String, strip: bool },
+    Duplicate {
+        prefix: String,
+        strip: bool,
+        same_value: bool,
+    },
     RawSpecial,
     ChildrenSnippet,
     UselessMustache,
-    SvelteShorthand { directives: Vec<String> },
+    SvelteShorthand {
+        directives: Vec<String>,
+    },
     SpacedComment,
+    StyleProperty,
     TargetBlank,
     NestedStyle,
     BananaInBox,
     LooseEquality,
     NegatedAsync,
     ForTrack,
+    ForKey,
+    SelfClosing,
+    AttributesOrder,
+    DupeElseIf,
+    ComponentHtml,
 }
 
 struct Template {
@@ -196,7 +215,9 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
                     to: p.text("to")?,
                 })
             }),
-            ("hyphenation", |_| Ok(Check::Hyphenation)),
+            ("hyphenation", |p| {
+                Ok(Check::Hyphenation { on: p.flag("on")? })
+            }),
             ("key-on-child", |_| Ok(Check::KeyOnChild)),
             ("child-content", |_| Ok(Check::ChildContent)),
             ("lone-template", |_| Ok(Check::LoneTemplate)),
@@ -206,6 +227,7 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
                 Ok(Check::Duplicate {
                     prefix: p.text("prefix")?,
                     strip: p.flag("strip-modifiers")?,
+                    same_value: p.flag("same-value")?,
                 })
             }),
             ("raw-special", |_| Ok(Check::RawSpecial)),
@@ -217,12 +239,18 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
                 })
             }),
             ("spaced-comment", |_| Ok(Check::SpacedComment)),
+            ("style-property", |_| Ok(Check::StyleProperty)),
             ("target-blank", |_| Ok(Check::TargetBlank)),
             ("nested-style", |_| Ok(Check::NestedStyle)),
             ("banana-in-box", |_| Ok(Check::BananaInBox)),
             ("loose-equality", |_| Ok(Check::LooseEquality)),
             ("negated-async", |_| Ok(Check::NegatedAsync)),
             ("for-track", |_| Ok(Check::ForTrack)),
+            ("for-key", |_| Ok(Check::ForKey)),
+            ("self-closing", |_| Ok(Check::SelfClosing)),
+            ("attributes-order", |_| Ok(Check::AttributesOrder)),
+            ("dupe-else-if", |_| Ok(Check::DupeElseIf)),
+            ("component-html", |_| Ok(Check::ComponentHtml)),
         ],
     )?;
     let check = make(&mut p)?;
@@ -406,7 +434,7 @@ impl Directive {
             Value::Required => empty,
             Value::Forbidden => value.is_some(),
             Value::UnlessArg => blank || value.is_none() && arg.is_none(),
-            Value::UnlessModifier => blank || value.is_none() && mods.is_empty(),
+            Value::UnlessModifier => mods.is_empty() && (blank || value.is_none()),
             Value::Iteration => !value.is_some_and(|v| {
                 let words: Vec<&str> = v.split_whitespace().collect();
                 words.len() >= 3
@@ -445,6 +473,9 @@ impl Rule for Template {
             | Check::ComponentIs
             | Check::RawSpecial
             | Check::TargetBlank
+            | Check::ForKey
+            | Check::SelfClosing
+            | Check::AttributesOrder
             | Check::NestedStyle => &[k::START_TAG],
             Check::ChildrenSnippet => &[k::BLOCK_TAG],
             Check::UselessMustache => &[k::MUSTACHE],
@@ -515,6 +546,16 @@ impl Rule for Template {
                         || a.name == "v-bind" && a.parts().0 == Some("is")
                 };
                 if name == "component" && !attrs(node, text).iter().any(is) {
+                    ctx.report(range, self.message.clone());
+                }
+            }
+            Check::ForKey | Check::SelfClosing | Check::AttributesOrder => {
+                let ranges = match self.check {
+                    Check::ForKey => vue::for_key(node, text),
+                    Check::SelfClosing => vue::self_closing(node, text),
+                    _ => vue::attributes_order(node, text),
+                };
+                for range in ranges {
                     ctx.report(range, self.message.clone());
                 }
             }
@@ -642,27 +683,34 @@ impl Rule for Template {
             }
             Check::TargetBlank => {
                 let attrs = attrs(node, text);
-                let is_a = tag_name(node, text).is_some_and(|(n, _)| n.eq_ignore_ascii_case("a"));
+                // a link to a scheme or host, or one that is computed (`{x}`, `{href}`, `bind:href`, `:href`)
                 let external = attrs.iter().any(|a| {
                     (a.full == "href"
                         && a.after.trim_start().strip_prefix('=').is_some_and(|v| {
                             let v = v.trim_start().trim_start_matches(['"', '\'']);
-                            v.starts_with("http://")
-                                || v.starts_with("https://")
+                            let scheme = v
+                                .bytes()
+                                .take_while(|b| b.is_ascii_alphanumeric() || *b == b'_')
+                                .count();
+                            v.starts_with('{')
                                 || v.starts_with("//")
-                                || v.starts_with('{')
+                                || scheme > 0 && v[scheme..].starts_with(':')
                         }))
+                        || matches!(a.full, "{href}" | "bind:href")
                         || a.name == "v-bind" && a.parts().0 == Some("href")
                 });
                 let safe = attrs.iter().any(|a| {
                     a.full == "rel"
-                        && a.value()
-                            .is_some_and(|v| v.split_whitespace().any(|w| w == "noreferrer"))
+                        && a.value().is_some_and(|v| {
+                            let v = v.to_ascii_lowercase();
+                            ["noopener", "noreferrer"]
+                                .iter()
+                                .all(|t| v.split_whitespace().any(|w| w == *t))
+                        })
                 });
                 if let Some(target) = attrs
                     .iter()
                     .find(|a| a.full == "target" && a.value() == Some("_blank"))
-                    && is_a
                     && external
                     && !safe
                 {
@@ -677,6 +725,10 @@ impl Rule for Template {
                     Check::Duplicate { prefix, .. } => s.starts_with(prefix.as_str()),
                     Check::SvelteShorthand { .. } => s.contains("={") || s.contains("= {"),
                     Check::KeyOnChild => s.starts_with(":key") || s.starts_with("v-bind:key"),
+                    Check::DupeElseIf => s.starts_with("v-else-if"),
+                    Check::StyleProperty => s.starts_with("style:"),
+                    Check::ComponentHtml => s.starts_with("v-html") || s.starts_with("v-text"),
+                    Check::Hyphenation { on: true } => s.starts_with('@') || s.starts_with("v-on"),
                     Check::ChildContent => s.starts_with("v-html") || s.starts_with("v-text"),
                     _ => s
                         .bytes()
@@ -699,10 +751,11 @@ impl Rule for Template {
                             && d.violated(&a, &tag, text)
                     }
                     Check::Shorthand { from, .. } => a.full.starts_with(from.as_str()),
-                    Check::Hyphenation => {
+                    Check::Hyphenation { on } => {
                         let target = match (a.directive, a.name) {
-                            (false, _) => Some(a.full),
-                            (true, "v-bind") => a.parts().0,
+                            (false, _) if !on => Some(a.full),
+                            (true, "v-bind") if !on => a.parts().0,
+                            (true, "v-on") if *on => a.parts().0,
                             _ => None,
                         };
                         target.is_some_and(|t| {
@@ -712,29 +765,64 @@ impl Rule for Template {
                                     .any(|w| w[0].is_ascii_lowercase() && w[1].is_ascii_uppercase())
                         }) && tag_name(&tag, text).is_some_and(|(n, _)| is_component(n))
                     }
+                    Check::DupeElseIf => a.name == "v-else-if" && vue::dupe_else_if(&a, &tag, text),
+                    Check::StyleProperty => {
+                        let name = a.full["style:".len()..].split('|').next().unwrap_or("");
+                        !name.starts_with('-') && !lang_css::data::has("property", name)
+                    }
+                    Check::ComponentHtml => {
+                        matches!(a.name, "v-html" | "v-text")
+                            && tag_name(&tag, text).is_some_and(|(n, _)| is_component(n))
+                    }
                     Check::KeyOnChild => {
                         a.name == "v-bind"
                             && a.parts().0 == Some("key")
+                            && !attrs(&tag, text).iter().any(|x| {
+                                matches!(x.name, "v-if" | "v-else-if" | "v-else" | "v-for")
+                            })
                             && tag
                                 .parent()
                                 .and_then(|e| e.parent())
                                 .and_then(|g| g.child(k::START_TAG))
                                 .is_some_and(|t| {
+                                    let all = attrs(&t, text);
                                     is_host(Host::Template, &t, text)
-                                        && attrs(&t, text).iter().any(|x| x.name == "v-for")
+                                        && all.iter().find(|x| x.name == "v-for").is_some_and(|f| {
+                                            vue::uses_loop_variable(f, &a)
+                                                && !all.iter().any(|x| {
+                                                    x.name == "v-bind"
+                                                        && x.parts().0 == Some("key")
+                                                        && vue::uses_loop_variable(f, x)
+                                                })
+                                        })
                                 })
                     }
-                    Check::Duplicate { strip, .. } => {
+                    Check::Duplicate {
+                        strip, same_value, ..
+                    } => {
                         let key = |a: &Attr<'_>| {
-                            a.full
+                            let name = a
+                                .full
                                 .split('|')
                                 .next()
                                 .filter(|_| *strip)
-                                .unwrap_or(a.full)
-                                .to_string()
+                                .unwrap_or(a.full);
+                            if *same_value {
+                                let value: String = a.after.split_whitespace().collect();
+                                format!("{name}{value}")
+                            } else {
+                                name.to_string()
+                            }
                         };
                         let mine = key(&a);
-                        std::iter::successors(node.prev_sibling(), SyntaxNode::prev_sibling)
+                        // with `same-value` every one of the equal directives is reported, else the later ones
+                        let before =
+                            std::iter::successors(node.prev_sibling(), SyntaxNode::prev_sibling);
+                        let after =
+                            std::iter::successors(node.next_sibling(), SyntaxNode::next_sibling)
+                                .take(if *same_value { usize::MAX } else { 0 });
+                        before
+                            .chain(after)
                             .filter(|n| n.kind() == k::ATTRIBUTE)
                             .filter_map(|n| Attr::parse(&n, text))
                             .any(|o| key(&o) == mine)

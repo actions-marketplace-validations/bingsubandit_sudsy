@@ -24,7 +24,7 @@ entries:
   no-shorthand-style-property-overrides: planned
   no-spaces-around-equal-signs-in-attribute: rule attr-delimiter
   no-target-blank: rule no-target-blank
-  no-unknown-style-directive-property: planned
+  no-unknown-style-directive-property: rule no-unknown-style-directive-property
   no-unused-class-name: deferred | needs script analysis (the JS semantic layer)
   no-useless-mustaches: rule no-useless-mustaches
   require-each-key: rule require-each-key
@@ -50,7 +50,7 @@ entries:
   prefer-style-directive: planned
   prefer-attribute-interpolation: planned
   no-extra-reactive-curlies: planned
-  no-add-event-listener: planned
+  no-add-event-listener: deferred | needs script analysis (the JS semantic layer)
   no-bind-value-on-checkable-inputs: rule no-bind-value-on-checkable-inputs
   max-lines-per-block: planned
   consistent-selector-style: planned

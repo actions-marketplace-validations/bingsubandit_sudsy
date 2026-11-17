@@ -1,16 +1,16 @@
 id: no-dupe-on-directives
 family: template
-params: { check: duplicate, prefix: "on:", only: svelte }
-message: "this `on:` directive repeats an earlier one of the element"
-description: "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). Same event and modifiers twice; put both handlers in one function."
-example: "<b on:click={a} on:click={b}>   <b on:click={both}>"
+params: { check: duplicate, prefix: "on:", strip-modifiers: true, same-value: true, only: svelte }
+message: "this `on:` directive and another one of the element have the same event and handler"
+description: "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported."
+example: "<b on:click={go} on:click={go}>   <b on:click={go} on:keydown={go}>"
 severity: warn
 category: correctness
 ---
 id: no-dupe-use-directives
 family: template
-params: { check: duplicate, prefix: "use:", only: svelte }
-message: "this `use:` directive repeats an earlier one of the element"
+params: { check: duplicate, prefix: "use:", same-value: true, only: svelte }
+message: "this `use:` directive and another one of the element have the same action and parameter"
 description: "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte)."
 example: "<b use:tip use:tip>   <b use:tip>"
 severity: warn
@@ -102,9 +102,9 @@ category: correctness
 id: no-target-blank
 family: template
 params: { check: target-blank }
-message: "a link to another site with `target=\"_blank\"` needs `rel=\"noreferrer\"`"
-description: "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer. Also eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`."
-example: "<a href=\"https://x.org\" target=\"_blank\">   <a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">"
+message: "a link with `target=\"_blank\"` needs `rel=\"noopener noreferrer\"`"
+description: "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer; both `noopener` and `noreferrer` are required, as in eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`. Links to a scheme or host and computed links (`{href}`, `bind:href`, `:href`) count."
+example: "<a href=\"https://x.org\" target=\"_blank\">   <a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">"
 severity: off
 category: suspicious
 ---
@@ -116,3 +116,12 @@ description: "Vue's `no-v-text` (eslint-plugin-vue)."
 example: "<p v-text=\"msg\"></p>   <p>{{ msg }}</p>"
 severity: off
 category: style
+---
+id: no-unknown-style-directive-property
+family: template
+params: { check: style-property, only: svelte }
+message: "this style directive names a property that CSS does not know (CSS properties are lowercase and hyphenated)"
+description: "Svelte's `no-unknown-style-directive-property` (eslint-plugin-svelte). Custom properties (`style:--x`) and vendor-prefixed ones pass. The property table is the CSS language's."
+example: "<p style:marginLeft=\"1px\">   <p style:margin-left=\"1px\">"
+severity: warn
+category: correctness

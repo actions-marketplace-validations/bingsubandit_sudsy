@@ -1,7 +1,9 @@
 <head></head>
  ^^^^ no-raw-special-elements
 <svelte:head><title>t</title></svelte:head>
-<input on:click={a} on:click={b} on:click|once={c} use:tip use:tip use:other style:color="a" style:color|important={b}>
+<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color="a" style:color|important={b}>
+//     ^^^^^^^^ no-dupe-on-directives
+//                                                 ^^^^^^^ no-dupe-use-directives
 //                  ^^^^^^^^ no-dupe-on-directives
 //                                                         ^^^^^^^ no-dupe-use-directives
 //                                                                                           ^^^^^^^^^^^^^^^^^^^^^ no-dupe-style-properties
@@ -15,6 +17,8 @@
 <C>{#snippet children()}hi{/snippet}</C>
 // ^^^^^^^^^^^^^^^^^^^^^ no-useless-children-snippet
 <C>{#snippet children(x)}{x}{/snippet}</C>
+<p style:marginLeft="1px" style:margin-left="1px" style:--x="1"></p>
+// ^^^^^^^^^^^^^^^^ no-unknown-style-directive-property
 <p>{"text"} {'it'} {`tpl`} {`a${b}`} {"a'b"} {text}</p>
 // ^^^^^^^^ no-useless-mustaches
 //          ^^^^^^ no-useless-mustaches
@@ -27,4 +31,6 @@
 <a href="https://x.org" target="_blank">x</a>
 //                      ^^^^^^ no-target-blank
 <a href="https://x.org" target="_blank" rel="noopener noreferrer">x</a>
+<a href="https://x.org" target="_blank" rel="noreferrer">x</a>
+//                      ^^^^^^ no-target-blank
 <a href="/local" target="_blank">x</a>

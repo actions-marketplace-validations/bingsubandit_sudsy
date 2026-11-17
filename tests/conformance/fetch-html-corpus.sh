@@ -2,7 +2,8 @@
 # Fetches the pinned HTML corpus into tests/conformance/corpus/html/<repo> (gitignored): Prettier's own
 # html and vue format-test inputs (tag 3.9.10; the .html and .vue files, no snapshots or runners) and real
 # pages: Bootstrap 5.3.3 (its JS test pages and docs site, whose Hugo templates are not HTML) and
-# mdn/learning-area (a 128 MB tarball).
+# mdn/learning-area (a 128 MB tarball); Vue (Vue core, VitePress, Pinia, Nuxt UI) and Svelte (the realworld app,
+# SvelteKit, the Prettier plugin's samples) sources.
 source "$(dirname "$0")/tarball-corpus.sh"
 fetch_tarballs html <<'EOF'
 prettier/prettier 1172b82c295c4f889fd787dc6c78c3e194ebf353 */tests/format/html/* */tests/format/vue/*
@@ -11,6 +12,10 @@ mdn/learning-area 21973263ba859ff3477919087b488157f9d618a6 *.html
 vuejs/core 7ef6817112bb420ef47a7252821b37caae016ac9 *.vue
 sveltejs/prettier-plugin-svelte 44dda204c660fafbf0e5c6c71b6f6c3c4423adce */test/formatting/samples/*/input.html
 sveltejs/realworld df796708040f5200ec572b28ab7f88ecee5794dd *.svelte
+vuejs/vitepress 40b2e090772ac11eac358d25ec92ee435fc2adbd *.vue
+vuejs/pinia 91f918e59dddae4cc2609ab3d8e5607e29fd442f *.vue
+nuxt/ui 550471d1a2c1178c9cc9593d8ff684cae7d64674 *.vue
+sveltejs/kit a58e0a92c35dbeee161e96c733464dc7397e073a *.svelte
 EOF
 prettier="$(dirname "$0")/corpus/html/prettier"
 find "$prettier" -name __snapshots__ -prune -exec rm -rf {} +
