@@ -13,8 +13,6 @@ core-format.workspace = true
 core-rules.workspace = true
 core-syntax.workspace = true
 provider-api.workspace = true
-rezel-common.workspace = true
-rezel-lang-java.workspace = true
 
 [dev-dependencies]
 insta.workspace = true

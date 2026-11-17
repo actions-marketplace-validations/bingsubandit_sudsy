@@ -1881,8 +1881,6 @@ dependencies = [
  "core-syntax",
  "insta",
  "provider-api",
- "rezel-common",
- "rezel-lang-java",
 ]
 
 [[package]]
@@ -3376,37 +3374,6 @@ name = "regex-syntax"
 version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
-
-[[package]]
-name = "rezel-common"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50c1d714e12e369e4931db0e912831c4d30232b2a33c9df097bfec415681e5bc"
-dependencies = [
- "text-size",
-]
-
-[[package]]
-name = "rezel-lang-java"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90b2765c429b0859de610ad1dc11cce3a7aab9d05ab491321b330f2e8da9f413"
-dependencies = [
- "rezel-common",
- "rezel-lr",
- "unicode-ident",
- "zerocopy",
-]
-
-[[package]]
-name = "rezel-lr"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "efa6b391da95d283ba078216663b124b45143761cf78d687edb9604fee36934d"
-dependencies = [
- "rezel-common",
- "zerocopy",
-]
 
 [[package]]
 name = "rmp"

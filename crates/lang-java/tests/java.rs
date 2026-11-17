@@ -17,18 +17,10 @@ fn fmt(input: &str) -> String {
 #[ignore]
 fn conformance() {
     let (_, unparsed) = check_corpus(lang_java::provider(), "A.java", "java", &["java"]);
-    // rezel 0.0.0 fails to lex a text block with an escaped `\"""` and to parse a chain of
-    // about 300 method calls (docs/bugs.md).
-    let known = ["FormatterTest.java", "WellKnownMutability.java"];
-    let unknown: Vec<_> = unparsed
-        .iter()
-        .filter(|u| !known.iter().any(|k| u.contains(k)))
-        .collect();
     assert!(
-        unknown.is_empty(),
-        "valid files with syntax errors: {unknown:#?}"
+        unparsed.is_empty(),
+        "valid files with syntax errors: {unparsed:#?}"
     );
-    assert_eq!(unparsed.len(), known.len(), "a known failure parses now");
 }
 
 #[test]

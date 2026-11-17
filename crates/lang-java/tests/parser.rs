@@ -1,6 +1,6 @@
 //! The hand-written parser: deep input, hard literals, and input that is not Java.
 
-use lang_java::parse_handwritten as parse;
+use lang_java::parse;
 
 fn assert_lossless(src: &str) -> provider_api::ParseResult {
     let parsed = parse(src);
@@ -117,27 +117,19 @@ fn parse_speed() {
         }
     }
     let bytes: usize = texts.iter().map(String::len).sum();
-    for (name, f) in [
-        (
-            "rezel + adapter",
-            lang_java::parse_rezel as fn(&str) -> provider_api::ParseResult,
-        ),
-        ("hand-written", parse),
-    ] {
-        let best = (0..3)
-            .map(|_| {
-                let t = std::time::Instant::now();
-                for text in &texts {
-                    std::hint::black_box(f(text));
-                }
-                t.elapsed().as_secs_f64()
-            })
-            .fold(f64::MAX, f64::min);
-        println!(
-            "{name}: {:.1} MB/s ({} files, {:.1} MB)",
-            bytes as f64 / best / 1e6,
-            texts.len(),
-            bytes as f64 / 1e6
-        );
-    }
+    let best = (0..3)
+        .map(|_| {
+            let t = std::time::Instant::now();
+            for text in &texts {
+                std::hint::black_box(parse(text));
+            }
+            t.elapsed().as_secs_f64()
+        })
+        .fold(f64::MAX, f64::min);
+    println!(
+        "parse: {:.1} MB/s ({} files, {:.1} MB)",
+        bytes as f64 / best / 1e6,
+        texts.len(),
+        bytes as f64 / 1e6
+    );
 }

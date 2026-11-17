@@ -18,7 +18,7 @@ use crate::generated::kind as k;
 use crate::lexer::{T, Token, lex};
 use core_syntax::{Checkpoint, SyntaxKind, SyntaxNode, TreeBuilder};
 use provider_api::adapter::{Attach, Kinds, Lexer, Tok};
-use provider_api::{ParseError, ParseResult};
+use provider_api::{ParseError, ParseResult, SourceFile};
 
 const KINDS: Kinds = Kinds {
     root: k::PROGRAM,
@@ -27,6 +27,10 @@ const KINDS: Kinds = Kinds {
     whitespace: k::WHITESPACE,
     newline: k::NEWLINE,
 };
+
+pub fn parse_file(file: &SourceFile) -> ParseResult {
+    parse(&file.text)
+}
 
 pub fn parse(src: &str) -> ParseResult {
     let lexed = lex(src);

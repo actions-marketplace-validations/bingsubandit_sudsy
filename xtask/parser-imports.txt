@@ -3,7 +3,6 @@
 prefix oxc
 prefix ruff
 prefix sqruff
-prefix rezel
 prefix ktrs
 prefix mago
 prefix ruby

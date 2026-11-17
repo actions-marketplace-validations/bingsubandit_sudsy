@@ -1,6 +1,6 @@
 extensions: [java]
 formatter: JavaFormatter
-parse: adapter::parse_file
+parse: parser::parse_file
 options:
   - indent_size: 2
   - line_width: 100

@@ -100,7 +100,7 @@ pub(super) fn kids(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Vec<SyntaxElement> 
         .collect()
 }
 
-/// The children, with the wrapper nodes of rezel's grammar (`...Core`, the entry points) replaced
+/// The children, with the wrapper nodes of the grammar (`...Core`, the entry points) replaced
 /// by their own children.
 pub(super) fn flat(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Vec<SyntaxElement> {
     let mut out = Vec::new();
