@@ -1,8 +1,8 @@
 # Changelog
 
-## [0.1.0-rc.1] - unreleased
+## [0.0.1] - 2026-11-17
 
-First release candidate: one formatter and linter, as a CLI and a VS Code extension, configured by
+First release: one formatter and linter, as a CLI and a VS Code extension, configured by
 one `sudsy.yaml`. Every layout decision is an option; presets are plain config.
 
 ### C# (needs the .NET 10 runtime)
@@ -25,7 +25,14 @@ one `sudsy.yaml`. Every layout decision is an option; presets are plain config.
 ### Web, scripts and docs
 * CSS, SCSS and Less, JavaScript and TypeScript (JSX/TSX), HTML with embedded script and style,
   GraphQL, Markdown (embedded code blocks are formatted by their languages).
+* Python (ruff's layout and rule families), SQL (sqlfluff's layout and rules; dialects ansi,
+  postgres, mysql, tsql), Vue and Svelte single-file components, Angular templates.
 * Shell and PowerShell lint.
+
+### Early (formatter or rules incomplete; keep format on save off for these)
+* Java: google-java-format layout (84% of a large corpus identical) and Checkstyle-style rules.
+* Kotlin: ktlint's whitespace layout without wrapping, and the first ktlint rules.
+* C and C++, PHP, Ruby: parsed and linted; files are kept as written by the formatter.
 
 ### Tools
 * CLI: `format`, `lint`, `fix`, `check`, `rules`, `config print`, `init` (including migration from

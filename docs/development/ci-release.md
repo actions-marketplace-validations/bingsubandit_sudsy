@@ -40,4 +40,4 @@ Supply chain: third-party actions are pinned by commit SHA (version in a comment
 
 ## Still open
 - Pack builds and `languages add --from` are proven locally on Windows x64 and Linux x64; macOS and arm64 builds are untested on real hardware until the first release run.
-- Release is prepared, not performed (`CHANGELOG.md` `0.1.0` is "unreleased").
+- The first release is 0.0.1; `v0.1.0-rc.1` is an older tag that was never published.
