@@ -103,8 +103,7 @@ pub fn provider(worker_dll: &Path) -> OutOfProcessProvider {
 
 /// A C# provider whose worker is started with `command` (tests use a host that cannot run).
 pub fn provider_with_command(command: Vec<OsString>) -> OutOfProcessProvider {
-    let mut config = WorkerConfig::new(command, "");
-    config.grammar = Some(grammars::CSHARP);
+    let mut config = WorkerConfig::new(command, generated::GRAMMAR_HASH);
     config.pool_size = pool_size();
     // The worker is a batch process: start counting calls at once, so that its hot methods
     // reach optimized code in the first second instead of after the default 100 ms of quiet.
