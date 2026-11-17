@@ -92,8 +92,8 @@ Kit additions, each justified by 3 or more consumers, none by speculation:
 | `core_format::literals` | string quote switching (fewest escapes, `quote_style`), number spelling (case, trailing zeros, exponent), comment text (`#x` to `# x`) | JS `literal.rs` 266, Python `literal.rs` 374 + comment, CSS `text.rs` 189, YAML `scalars.rs` quotes | text in, text out: no layout risk |
 | list layouts | `PreserveFirstBreak` (an object stays expanded when the source breaks after `{`), `MagicTrailingComma`, `Fill` (number arrays) on `shapes::delimited_list` | JS `object.rs` 550, Python `list.rs` 401, C# `lists.rs` 402, Java array and annotation lists, CSS value lists | Kotlin's `PreserveItemBreak` is the first of these |
 | `shapes::signature` | parameter list + return type + type parameters, hugging a sole object or destructured parameter, break order | JS `decl.rs`/`arrow.rs` params (~800), TS signatures, Java `decl.rs` parameters, Kotlin (ktlint `function-signature`, 30,800 missing findings), C#, Python `def` | |
-| `shapes::compound` | keyword, head, body, continuation clauses (`else if`, `else`, `catch`, `finally`, `while` of `do`), brace body or offside body (`BlockStyle::Offside`) | JS `stmt.rs` 407, C# `braces.rs` 512, Java `stmt.rs` 223, Kotlin, PHP, Python `compound.rs` 348 + `block.rs` 263 | the largest repeated construct left after chains |
-| `shapes::maybe_parenthesize` | `group(if_break("("), indent(softline, x), softline, if_break(")"))` with invisible parentheses | Python `paren.rs` 589 (ruff's `maybe_parenthesize`), JS `return`/`throw`/arrow body, C# `paren_group` | an extension of `shapes::parens` |
+| `shapes::compound` | keyword, head, body, continuation clauses (`else if`, `else`, `catch`, `finally`, `while` of `do`), brace body or offside body (`BlockStyle::Offside`) | JS `stmt.rs` 407, C# `braces.rs` 512, Java `stmt.rs` 223, Kotlin, PHP, Python `compound.rs` 348 + `block.rs` 263, YAML block mappings and sequences (offside bodies) | the largest repeated construct left after chains; offside bodies have two consumers now (Python, YAML), so they are kit code, not Python code |
+| `shapes::maybe_parenthesize` | `group(if_break("("), indent(softline, x), softline, if_break(")"))` with invisible parentheses | Python `paren.rs` 589 (ruff's `maybe_parenthesize`), JS `return`/`throw`/arrow body, C# `paren_group` | an extension of `shapes::parens`; three consumers, so it lands in F3, not with Python |
 | call arguments | the hug candidates builder (flat, hugged, all broken out) with a `can_hug` hook | JS `call.rs` 713, C# `lists.rs` hook, Java, Kotlin, PHP | L1 found three languages share only the last step; attempt only after the rows above, and stop if fewer than 4 languages use it |
 
 | Language | Formatter now | Moves to the kit | Stays language code | lang / shared | Ratchets that must hold | Bench risk |
@@ -110,6 +110,8 @@ Kit additions, each justified by 3 or more consumers, none by speculation:
 | Shell | 1,271 | dangling comments (done) | all (statement layout per shfmt) | 0-100 | shfmt | none |
 
 ## 6. Steps
+Rule for every step: a mechanism needed by a second language (a layout construct, a check, an analysis) is built in the shared core in that step, never copied; that a language is older than the kit is never a reason it stays off it.
+
 One step is one commit and one finish run, in one area. Each step records `scripts/cost.sh --languages` before and after, updates the docs of its area, and keeps every ratchet. Order: what unblocks the others first, then lines per effort. Lint (L) and format (F) tracks are independent and can run in parallel.
 
 | # | Step | Removes (lang) / adds (shared) | Risk | After |
@@ -119,10 +121,10 @@ One step is one commit and one finish run, in one area. Each step records `scrip
 | L2 | Scope family complete (undefined, use-before-define, redeclared, shadowed, unused parameter, positions) with JS on it; ESLint ids are renamed; coverage by (rule, file, name) for eslint and typescript-eslint stays 100% with the mapping preset | -900 / +450 | medium-high | L1 |
 | L3 | Python on the scope family (F4, F8, E74 rows); `binding.rs` goes | -650 / +150 | medium: ruff coverage 95.6% and 0 mismatches | L2 |
 | F2 | List layouts and `shapes::signature`; JS objects, arrays and parameters, C# lists, Java parameters, Kotlin signature (opens the ktlint `function-signature` gap) | -900 / +500 | medium-high | F1 |
-| F3 | `shapes::compound` and offside bodies; JS, C#, Java, Kotlin, PHP statements | -500 / +300 | medium | F2 |
+| F3 | `shapes::compound` with brace and offside bodies, and `shapes::maybe_parenthesize`; JS, C#, Java, Kotlin, PHP statements, YAML block collections, JS `return`/`throw`/arrow bodies and C# `paren_group` on them | -500 / +300 | medium | F2 |
 | L4 | Roles `#expression-statement`, `#empty-statement`, `#try` for Ruby, the catch type field; shared rules `no-empty-catch`, `no-broad-catch`, `no-throw-generic`, `no-useless-expression`, `no-self-assign`, `boolean-literal-comparison`, `no-wildcard-imports`, banned-call rows (`no-print`, `no-eval`, `no-debugger`); CSS shared-id copies; Python jump placement as role rows | -400 / +120 | low-medium | L1, R4 |
 | L5 | Flow family: `unreachable-code`, `no-fallthrough` on `core_flow::build` for every language with statement roles | -170 / +0 | low | L1 |
-| F4 | Python formatter on the kit (`maybe_parenthesize`, lists, `compound`, `binary_chain`, `conditional`, `call_chain`) | -1,300 / +400 | high | F2, F3 |
+| F4 | Python formatter on the kit (`maybe_parenthesize` and offside `compound` from F3, lists, `binary_chain`, `conditional`, `call_chain`); a construct Python still needs that a second language has goes to the kit in this step | -1,300 / +400 | high | F2, F3 |
 | L6 | `names`, `naming-convention`, `unique-names` rows, `max`: CSS families to `core-rules`, Kotlin and Protobuf rows, GraphQL naming, JS/Docker/Makefile/SQL/Markdown uniqueness | -650 / +450 | medium | L1 |
 | F5 | JS second pass: call arguments hug builder, arrow chains, `needs_parens` as data, TS types lists | -600 / +250 | high | F2, F3 |
 | F6 | CSS onto blocks, key-value and list layouts | -350 / +100 | medium | F2 |
