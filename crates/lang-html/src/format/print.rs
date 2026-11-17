@@ -8,6 +8,7 @@ use core_format::doc::{self, Doc, GroupId};
 
 mod angular;
 mod embed;
+mod microsyntax;
 
 /// Formats code of another language: language, mode, code, width, single quotes (see
 /// `core_format::Embedder`); `None` when embedded formatting is off.

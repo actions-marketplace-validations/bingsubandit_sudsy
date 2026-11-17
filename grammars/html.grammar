@@ -1,10 +1,12 @@
-// HTML, parsed by tree-sitter (tree-sitter-html, forked in grammars/tree-sitter-html) and mapped by the mapping of crates/lang-html/lang.yaml.
+// HTML, Vue, Svelte and Angular, parsed by the hand-written parser of crates/lang-html/src/parser.
+// Markup has no node of the cross-language role vocabulary, so every node is `#opaque`.
 // An element is its start tag (`StartTag`), its content and its end tag; void
 // elements and elements closed by an implied end tag have no `EndTag`. Text, entities, CDATA sections and
 // the text of `<script>`, `<style>`, `<textarea>` and `<title>` are one `Chunk` each (a token inside).
 // Format: see crates/core-syntax/src/grammar/mod.rs.
 
 language html 19 "HTML"
+roles
 comments block "<!--" "-->"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
@@ -56,31 +58,31 @@ token NgCode #restyle #ng-part
 token Eof
 token Unknown #error
 
-node Document = items:#content* Eof
-node Doctype #content = LtBang DoctypeKw DoctypeBody Gt
+node Document #opaque = items:#content* Eof
+node Doctype #content #opaque = LtBang DoctypeKw DoctypeBody Gt
 // Svelte: `{expression}` and `{@html x}`, and the tags of its blocks (`{#if x}`, `{:else}`, `{/if}`).
 token MustacheText #restyle
 token BlockTagText #restyle
-node Mustache #content = value:MustacheText
-node BlockTag #content = value:BlockTagText
+node Mustache #content #opaque = value:MustacheText
+node BlockTag #content #opaque = value:BlockTagText
 // The tags and the content between them, in order.
-node Block #content = items:#content*
-node Interpolation #content = LBraceBrace Chunk? RBraceBrace
-node Chunk #content = value:#chunk
-node Element #content = start:#start-tag content:#content* end:EndTag?
+node Block #content #opaque = items:#content*
+node Interpolation #content #opaque = LBraceBrace Chunk? RBraceBrace
+node Chunk #content #opaque = value:#chunk
+node Element #content #opaque = start:#start-tag content:#content* end:EndTag?
 // `>` or `/>`: `<br>` and `<br />` are the same node.
-node StartTag #start-tag #mapping = Lt TagName entries:Attribute* #tag-end
+node StartTag #start-tag #mapping #opaque = Lt TagName entries:Attribute* #tag-end
 // `#transparent`: the formatter writes the end tag of an element that has none, and an element that is
 // closed implicitly stays so in the safety check.
-node EndTag #transparent = LtSlash TagName Gt
+node EndTag #transparent #opaque = LtSlash TagName Gt
 // An end tag that closes no open element.
-node StrayEndTag #content = LtSlash TagName Gt
-node Attribute #key-value = key:AttrName Equals? value:AttrValue?
+node StrayEndTag #content #opaque = LtSlash TagName Gt
+node Attribute #key-value #opaque = key:AttrName Equals? value:AttrValue?
 
 // `@if (a) {` up to the `{`, and the block with its content and `}`.
-node BlockHead = AtName parts:#ng-part*
-node NgBlock #content = head:BlockHead items:#content* RBrace?
-node NgLet #content = AtName parts:#ng-part*
+node BlockHead #opaque = AtName parts:#ng-part*
+node NgBlock #content #opaque = head:BlockHead items:#content* RBrace?
+node NgLet #content #opaque = AtName parts:#ng-part*
 // `{count, plural, =0 {none} other {many}}`.
-node Icu #content = LBrace parts:#ng-part* cases:IcuCase* RBrace
-node IcuCase = NgCode LBrace items:#content* RBrace
+node Icu #content #opaque = LBrace parts:#ng-part* cases:IcuCase* RBrace
+node IcuCase #opaque = NgCode LBrace items:#content* RBrace

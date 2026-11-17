@@ -3,12 +3,11 @@
 //! pipes, which are no TypeScript, are split off first (`pipes`).
 
 use super::embed::lines;
+use super::microsyntax::{Span, TemplateBinding, template_bindings};
 use super::{P, s};
 use crate::format::model::{N, T};
 use core_format::EmbedMode;
 use core_format::doc::{self, Doc};
-use oxc_htmlish_parser::ast::{AngularAttribute, AttributeKind, NodeKind, TemplateBinding};
-use oxc_htmlish_parser::{Allocator, Dialect, Parser};
 
 mod pipes;
 
@@ -167,22 +166,9 @@ impl P<'_> {
     /// The value of a structural directive (`let item of items; trackBy: f`), as Prettier prints
     /// its microsyntax; read with the parser's own reading of a start tag.
     fn microsyntax(&self, value: &str, width: usize) -> Option<String> {
-        let quote = ['"', '\''].into_iter().find(|q| !value.contains(*q))?;
-        let src = format!("<a *d={quote}{value}{quote}>");
-        let allocator = Allocator::default();
-        let root = Parser::new(&allocator, &src, Dialect::Angular)
-            .parse()
-            .ok()?;
-        let element = root.nodes.iter().find_map(|n| match &n.kind {
-            NodeKind::Element(e) => Some(e),
-            _ => None,
-        })?;
-        let attribute = element.attributes.first()?;
-        let AttributeKind::Angular(AngularAttribute::Template(Some(bindings))) = &attribute.kind
-        else {
-            return None;
-        };
-        let text = |sp: oxc_htmlish_parser::Span| &src[sp.start as usize..sp.end as usize];
+        let src = value;
+        let bindings = template_bindings(src)?;
+        let text = |sp: Span| &src[sp.start..sp.end];
         // (the operands of a binary are indented unless the value is one expression)
         let kind = if bindings.len() > 2 {
             Ng::Nested
