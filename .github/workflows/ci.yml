@@ -47,6 +47,21 @@ jobs:
           fetch-depth: 0
       - run: scripts/check-dco.sh ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}
 
+  # Hand-written lines per language and the shared share (scripts/cost_languages.py): fails when the
+  # share falls or a language crosses its budget without a `Cost-exception:` line in a commit message.
+  cost:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - env:
+          BASE: ${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.ref_type == 'branch' && github.event.before) || '' }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          case "$BASE" in ""|0000000*) echo "no base: table only"; scripts/cost.sh --languages "$HEAD" ;; *) scripts/cost.sh --languages --check "$BASE" "$HEAD" ;; esac
+
   # Linux: the full gate. Includes the worker contract tests, which build and run the C# worker;
   # the big dotnet/runtime corpus test is #[ignore]d and not fetched here.
   rust:
@@ -193,7 +208,7 @@ jobs:
   ci:
     name: CI ok
     if: always()
-    needs: [changes, dco, rust, windows, bench, dotnet, vscode, package]
+    needs: [changes, dco, cost, rust, windows, bench, dotnet, vscode, package]
     runs-on: ubuntu-latest
     steps:
       - run: test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = false

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Added/removed lines per category. Usage: scripts/cost.sh [<rev-range>]
 # Default: the merge-base with origin/main up to the working tree (untracked files count as added).
+#   scripts/cost.sh --languages [REV]               hand-written Rust per language by kind, shared share
+#   scripts/cost.sh --languages --check BASE [HEAD]  the CI check (scripts/cost_languages.py)
 cd "$(dirname "$0")/.." || exit 1
+if [ "${1:-}" = --languages ]; then shift; exec python3 scripts/cost_languages.py "$@"; fi
 range=${1:-$(git merge-base origin/main HEAD)}
 {
   git diff --numstat -M "$range" -- .

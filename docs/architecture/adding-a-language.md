@@ -58,6 +58,49 @@ Each new language should cost less code than the last. When a language's step 1 
 - Find the sinks: which kind of code grew most per language (formatter, rule fixtures, docs, generated data) and what would make it cheaper.
 - Record the per-language numbers in the list below and land the extraction as one step (gate, finish, bench flat).
 
+## Hand-written lines per language
+Hand-written Rust in `crates/lang-*/src` by kind, per grammar node (`node` lines of `grammars/<lang>.grammar`), generated files left out (`scripts/cost.sh --languages [REV]`, classes by path in `scripts/cost-kinds.txt`; unmatched files are "other": parser, adapter, lexer, glue). `github-actions` has no grammar; the C# worker (.NET) is not counted. Refresh the table when a language lands.
+
+| Language | Grammar nodes | Formatter | Rules | Other | Total | Per node |
+|---|---|---|---|---|---|---|
+| js | 191 | 8567 | 3599 | 304 | 12470 | 65 |
+| csharp | 321 | 3671 | 4310 | 157 | 8138 | 25 |
+| python | 92 | 3747 | 3390 | 247 | 7384 | 80 |
+| html | 17 | 3506 | 325 | 1935 | 5766 | 339 |
+| css | 12 | 2259 | 2255 | 954 | 5468 | 456 |
+| yaml | 13 | 1451 | 582 | 2681 | 4714 | 363 |
+| sql | 44 | 1825 | 190 | 383 | 2398 | 54 |
+| java | 149 | 1694 | 359 | 204 | 2257 | 15 |
+| markdown | 17 | 1253 | 92 | 124 | 1469 | 86 |
+| shell | 26 | 1271 | 126 | 9 | 1406 | 54 |
+| kotlin | 120 | 1058 | 6 | 302 | 1366 | 11 |
+| cpp | 8 | 20 | 0 | 1060 | 1080 | 135 |
+| github-actions | - | 0 | 0 | 995 | 995 | - |
+| json | 5 | 57 | 89 | 847 | 993 | 199 |
+| toml | 8 | 241 | 686 | 12 | 939 | 117 |
+| dockerfile | 2 | 202 | 616 | 85 | 903 | 452 |
+| graphql | 37 | 572 | 229 | 10 | 811 | 22 |
+| powershell | 13 | 528 | 146 | 11 | 685 | 53 |
+| hcl | 20 | 403 | 262 | 9 | 674 | 34 |
+| makefile | 13 | 376 | 218 | 47 | 641 | 49 |
+| protobuf | 37 | 536 | 5 | 10 | 551 | 15 |
+| xml | 7 | 268 | 220 | 10 | 498 | 71 |
+| editorconfig | 4 | 74 | 253 | 10 | 337 | 84 |
+| php | 169 | 39 | 6 | 257 | 302 | 2 |
+| gitignore | 2 | 50 | 157 | 9 | 216 | 108 |
+| ini | 4 | 118 | 5 | 9 | 132 | 33 |
+
+Shared crates (`core-*`, `provider-api`, `languages`): 24631, lang-* crates 62593, shared share 28.2% (budget 3000 lines per language)
+
+A new brace language has a budget of 3,000 hand-written lines to "usable" (decision 3 of the shared-core design). The CI job `cost` runs `scripts/cost.sh --languages --check BASE HEAD` on every push and pull request. It fails when the shared share falls by more than 0.1 points or a language crosses the budget (from at most the budget to above it), unless a commit message of the range has a line
+
+```
+Cost-exception: shared-share: <reason>
+Cost-exception: lang-kotlin: <reason>
+```
+
+naming the case (the crate name for a budget, `shared-share` for the share) with a reason. A new language that lowers the share names it.
+
 ## Per-language cost and limits
 Cost of step 1 (`scripts/cost.sh <first>^..<last>`), added lines; test data is the bench inputs (150 KB per language at most):
 
