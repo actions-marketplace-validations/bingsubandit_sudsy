@@ -253,6 +253,29 @@ impl Grammar {
             .map(|(_, e)| e)
     }
 
+    /// Every child of `node` in the items of the field `label`, in order (the `cases` of a switch).
+    pub fn slots<'a>(
+        &'a self,
+        node: &'a SyntaxNode,
+        label: &'a str,
+    ) -> impl Iterator<Item = SyntaxElement> + 'a {
+        let def = self.def(node.kind());
+        let body = def.and_then(|def| {
+            Some(GrammarBody {
+                grammar: self,
+                kinds: self.bodies.get(node.kind().index() as usize)?,
+                body: &def.body,
+            })
+        });
+        body.into_iter().flat_map(move |body| {
+            crate::ast::assign(node, body).filter_map(move |(i, e)| {
+                let item = &body.body[i];
+                (item.label.as_deref() == Some(label) || item.field.as_deref() == Some(label))
+                    .then_some(e)
+            })
+        })
+    }
+
     /// The operator kind (`equality`, `logical`, ...; [`crate::roles::OPERATOR_KINDS`]) of operator
     /// text: the grammar's `operators` lines, then the common table.
     pub fn operator_kind(&self, text: &str) -> Option<&str> {
