@@ -9,6 +9,9 @@ Classes and the budget are data: scripts/cost-kinds.txt. Called by `scripts/cost
 Exception line, in the message of any commit of BASE..HEAD:
   Cost-exception: shared-share: <reason>      (the share fell by more than TOLERANCE points)
   Cost-exception: lang-kotlin: <reason>       (a language crossed the budget)
+  Language-only: lang-kotlin: <the fact>      (a language crate grew: each added line is a fact of that
+                                               language that cannot be generic; anything a second
+                                               language does or could do belongs in a shared crate)
 """
 import os
 import re
@@ -103,6 +106,7 @@ def check(base, head):
     h_langs, h_shared, _, _ = measure(head)
     msgs = git("log", "--format=%B", f"{base}..{head}").decode()
     excused = set(m.group(1) for m in re.finditer(r"^Cost-exception:\s*([\w-]+):\s*\S", msgs, re.M))
+    language_only = set(m.group(1) for m in re.finditer(r"^Language-only:\s*([\w-]+):\s*\S", msgs, re.M))
     problems = []
     b_share, h_share = share(b_langs, b_shared), share(h_langs, h_shared)
     if h_share < b_share - TOLERANCE and "shared-share" not in excused:
@@ -111,6 +115,9 @@ def check(base, head):
         was = total(b_langs[crate]) if crate in b_langs else 0
         if was <= budget < total(d) and crate not in excused:
             problems.append(f"{crate} passed its budget of {budget} lines ({was} -> {total(d)}; add `Cost-exception: {crate}: <reason>`)")
+        if total(d) > was and crate not in language_only:
+            problems.append(f"{crate} grew ({was} -> {total(d)} lines): code that can be generic goes to the shared crates; "
+                            f"if every added line is a fact of this language only, add `Language-only: {crate}: <the fact>`")
     for p in problems:
         print("cost check:", p)
     if problems:
