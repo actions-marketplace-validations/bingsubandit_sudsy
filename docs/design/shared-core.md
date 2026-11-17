@@ -49,6 +49,7 @@ A step is one commit and one finish run. `After` names what must be on main firs
 | R1 | The role vocabulary and the fields each role requires, as a table in `core-syntax` and in `docs/architecture/syntax-tree.md`; codegen refuses a node with neither a role nor `#opaque` once a grammar opts in | `core-syntax`, `xtask` | C# passes unchanged with its existing tags mapped to the roles | |
 | R2 | Roles and field bodies for `js.grammar` and `java.grammar`; no formatter or rule change | `grammars/`, adapters only if a field needs a wrapped token | `ShapeChecker` passes on the whole corpus; parity counts unchanged | R1 |
 | R3 | The same for Python, Kotlin, PHP, SQL | `grammars/` | as R2 | R1 |
+| R4 | The vocabulary grows by the roles shared bug rules read: loop, switch and case, try and catch, return and throw, object or dict entry (key, value), and an operator kind on `#binary`/`#unary`/`#assignment` (comparison, equality, logical, arithmetic) as data of the grammar's operator tokens; the kinds R1-R3 marked `#opaque` for want of these roles get them | `core-syntax`, `grammars/` | every role-opted grammar maps them; `ShapeChecker` and parity unchanged | R2, R3 |
 
 R1 is in: the vocabulary is `core_syntax::roles::ROLES` (table in [../architecture/syntax-tree.md](../architecture/syntax-tree.md)); C# opts in with `roles`. Open for R2/R3 and L1:
 - Roles are tags, so a role name is also a tag name in grammars that already used it (`#block`, `#declaration`, `#assignment`, `#literal` on C# tokens); role checks look at nodes only. A language whose old tag means something else under the same name has to rename the old tag.
@@ -67,6 +68,11 @@ R1 is in: the vocabulary is `core_syntax::roles::ROLES` (table in [../architectu
 Role-driven layouts read parts through `Grammar::slot`, which costs more than a kind match and a positional child. If a kit step's bench is over its format budget, the first lever is the `Grammar::slot` item under Performance levers in [../roadmap.md](../roadmap.md) (field index at grammar load, fixed child position); the step that does it deletes that line. If no step needs it, it stays on the roadmap.
 
 L1 is a test of the design. If the three languages cannot hold their ratchets on policy data alone, stop after L1, record why in this note, and treat the per-language formatter cost as fixed: the response is then a limit on the number of languages, not more abstraction.
+
+### Shared rules
+| # | Step | Where | Done when | After |
+|---|---|---|---|---|
+| K1 | Pattern rules match on roles and role fields (`#binary` with `operator: equality`, `left`, `right`), so one rule file runs on every grammar with roles; a shared family of the common bug rules on it (self-compare, constant condition, duplicate keys and cases, empty block and catch, assignment in a condition, comparison with a literal that is always the same), each tool's ids as rows (ESLint, ruff, Checkstyle, ktlint, PHPCS) | `core-patterns`, `core-rules`, the rule files of `lang-*` | the per-language copies of those rules are deleted; M4 coverage holds or rises for every tool with a corpus; lint bench within budget | R4, M4 |
 
 ### Scopes and flow
 | # | Step | Where | Done when | After |
