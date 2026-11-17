@@ -13,7 +13,7 @@ class A {
     for (String s : xs) {
       used += s.length();
     }
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) { // keep
     }
     Runnable r = () -> {
              ^ unused-local-variable

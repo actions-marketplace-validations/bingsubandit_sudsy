@@ -3,6 +3,7 @@
 One line each; none is committed, except the small tasks below.
 
 ## Small tasks
+- K1 cost on languages without K1 rules: graphql/json/toml lint +1.1-2.1% instructions, no allocation change; profile the shared rule engine per node with callgrind (base b10bfc6e vs K1) and remove it.
 - Python lint cost: `py.lint` is about +60 percent over the typed-AST pass it replaced (accepted by the lead; single-walk binder replaces the typed-AST pass). Profile of a 5-file pass (4.0 ms, release): binder 1.3 ms (0.4 of it the bare rowan preorder, name references with resolve 0.55, subscript and argument rows 0.2), scope findings 0.8, engine walk 0.3, the other ~50 rules 1.4 (about 0.03 each). Next: drive the binder from the engine's own preorder, and per-node memo of the `check` rules that share an analysis.
 - Java member chains: 101 files fewer than before the kit (4402 of 5337); closing them needs `this`-head, head-call counting and chain-in-cast policy values. Call arguments (hug rules) wait for the object, array and template roles of R4; the `member_chain_*` option declarations repeat in three `lang.yaml` files and want one shared declaration.
 - Java: generalization step ([architecture/adding-a-language.md](architecture/adding-a-language.md#after-a-language-lands-the-generalization-step)).
