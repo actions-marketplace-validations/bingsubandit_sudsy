@@ -26,6 +26,7 @@ Trailing trivia: after a token up to and including the end of its line. Leading:
 | Kotlin | 120 | 33 | 87 |
 | PHP | 169 | 32 | 137 |
 | SQL | 44 | 6 | 38 |
+| Ruby | 150 | 67 | 83 |
 
 <!-- generated:roles -->
 | Role | Fields | Meaning |
