@@ -62,7 +62,7 @@ R4 is in for C#, Python, Kotlin, PHP, SQL, Ruby (no `#try`) and HTML (roles and 
 ### Layout
 | # | Step | Where | Done when | After |
 |---|---|---|---|---|
-| L1 | Pilot: member chains and call arguments move from `lang-js` into `core-format` as role-driven layouts with a policy struct; `lang-csharp` and `lang-java` are ported onto them | `core-format`, `lang-js`, `lang-csharp`, `lang-java` | all three parity ratchets within 2 points of their counts before the port (decision 1); more lines deleted from the three crates than added to `core-format`; bench within budget | R2 |
+| L1 | Pilot: member chains and call arguments move from `lang-js` into `core-format` as role-driven layouts with a policy struct; `lang-csharp` and `lang-java` are ported onto them | `core-format`, `lang-js`, `lang-csharp`, `lang-java` | all three parity ratchets within 2 points of their counts before the port (decision 1); bench within budget (the lines test is waived: the user accepts more shared lines than deleted ones, since the kit pays off with each further language) | R2 |
 | L2 | The rest of the kit: operator chains, assignment, conditional, parentheses from a precedence table in the grammar, blocks and statement sequences | the same | as L1; each language's remaining formatter code is listed by construct in its doc | L1 passes |
 | L3 | Kotlin and PHP formatters start on the kit: policy file first, Rust only for a named gap that cannot be a policy value | `lang-kotlin`, `lang-php` | formatter lines per grammar node recorded next to JS and C# | L2 |
 
