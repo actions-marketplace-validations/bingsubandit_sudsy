@@ -6,6 +6,7 @@ use super::util::*;
 use super::{list, op};
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc, concat, group};
+use core_format::literals::prefixed;
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -126,7 +127,7 @@ fn number(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 
 /// The restyled text of a string-like token.
 pub(crate) fn string_token(cx: &FormatCtx<'_>, t: &SyntaxToken) -> Doc {
-    restyled(cx, t, &literal::string(t.text(), style(cx).quote))
+    restyled(cx, t, &prefixed::string(t.text(), style(cx).quote))
 }
 
 /// Strings of an implicit concatenation, one per line when they do not fit.
@@ -225,8 +226,8 @@ pub(crate) fn joined_with(
         {
             return None;
         }
-        let text = literal::string(t.text(), style(cx).quote);
-        let (p, q, b) = literal::split(&text)?;
+        let text = prefixed::string(t.text(), style(cx).quote);
+        let (p, q, b) = prefixed::split(&text)?;
         if q.len() != 1 || p.contains(['r', 'R']) || *prefix.get_or_insert(p.to_string()) != p {
             return None;
         }
@@ -258,7 +259,7 @@ fn fstring(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Doc {
         .collect();
     concat(vec![
         cx.leading_comments_doc(first),
-        doc::text(literal::fstring(&text, style(cx).quote).into_owned()),
+        doc::text(prefixed::fstring(&text, style(cx).quote).into_owned()),
         cx.trailing_comments_doc(last),
     ])
 }

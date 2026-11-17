@@ -1,10 +1,10 @@
 //! Docstrings: quotes, indentation and trailing whitespace as ruff writes them.
 
-use super::literal;
 use super::util::*;
 use crate::generated::kind as k;
 use core_format::FormatCtx;
 use core_format::doc::{self, Doc, concat, hardline};
+use core_format::literals::prefixed;
 use core_syntax::SyntaxNode;
 
 /// A docstring statement: the string with ruff's layout.
@@ -18,7 +18,7 @@ pub(crate) fn statement(cx: &FormatCtx<'_>, stmt: &SyntaxNode) -> R {
         return Err(shape_error("docstring"));
     };
     let text = if tokens.len() == 1 {
-        literal::string(token.text(), style(cx).quote).into_owned()
+        prefixed::string(token.text(), style(cx).quote).into_owned()
     } else {
         // An implicit concatenation is the docstring when its parts join; else a plain string.
         let strings = stmt
@@ -30,7 +30,7 @@ pub(crate) fn statement(cx: &FormatCtx<'_>, stmt: &SyntaxNode) -> R {
             None => return super::stmt::statement(cx, stmt),
         }
     };
-    let Some((prefix, quote, body)) = literal::split(&text) else {
+    let Some((prefix, quote, body)) = prefixed::split(&text) else {
         return Ok(cx.verbatim_node(stmt));
     };
     let body = clean(body);

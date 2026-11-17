@@ -5,6 +5,7 @@ use super::util::{semi, style};
 use crate::generated::kind as k;
 use core_format::context::verbatim_text;
 use core_format::doc::{self, Doc};
+use core_format::literals::{self, FracZeros, NumberStyle, StringStyle};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -82,88 +83,30 @@ fn directive(raw: &str, single: bool) -> String {
     format!("{q}{content}{q}")
 }
 
-/// A string with the preferred quote, unless its text has more of those than of the other
-/// quote. Escapes stay as written except the quotes: an escaped quote that needs no escape
-/// loses its backslash, an unescaped enclosing quote gains one.
+const STRING: StringStyle = StringStyle {
+    single: false,
+    keep_quoted: false,
+    interpolation: false,
+};
+
+/// A string with the preferred quote (see [`literals::string`]).
 pub(crate) fn string(raw: &str, single: bool) -> String {
-    let content = &raw[1..raw.len() - 1];
-    let count = |q: char| content.matches(q).count();
-    let (doubles, singles) = (count('"'), count('\''));
-    let use_single = if single {
-        singles <= doubles
-    } else {
-        doubles > singles
-    };
-    let (enclosing, other) = if use_single { ('\'', '"') } else { ('"', '\'') };
-    let mut out = String::with_capacity(raw.len() + 2);
-    out.push(enclosing);
-    let mut chars = content.chars();
-    while let Some(c) = chars.next() {
-        match c {
-            '\\' => match chars.next() {
-                Some(e) if e == other => out.push(e),
-                Some(e) => {
-                    out.push('\\');
-                    out.push(e);
-                }
-                None => out.push('\\'),
-            },
-            c if c == enclosing => {
-                out.push('\\');
-                out.push(c);
-            }
-            c => out.push(c),
-        }
-    }
-    out.push(enclosing);
-    out
+    literals::string(raw, StringStyle { single, ..STRING })
 }
 
 /// Lowercase, no `+` and no leading zeros in an exponent (none at all when it is zero), a zero
 /// before a leading dot, no trailing zeros of a fraction (one digit stays) and no trailing dot.
 pub(crate) fn number(raw: &str) -> String {
-    let lower = raw.to_ascii_lowercase();
-    if lower.starts_with("0x") || lower.starts_with("0b") || lower.starts_with("0o") {
-        return lower;
-    }
-    let (mantissa, exponent) = match lower.split_once('e') {
-        Some((m, e)) => (m, Some(e)),
-        None => (lower.as_str(), None),
-    };
-    let mut out = String::new();
-    if mantissa.starts_with('.') {
-        out.push('0');
-    }
-    match mantissa.split_once('.') {
-        Some((int, frac)) => {
-            out.push_str(int);
-            let digits = frac.bytes().all(|b| b.is_ascii_digit());
-            let trimmed = frac.trim_end_matches('0');
-            let frac = if digits && frac.len() > 1 && trimmed.len() < frac.len() {
-                &frac[..trimmed.len().max(1)]
-            } else {
-                frac
-            };
-            if !frac.is_empty() {
-                out.push('.');
-                out.push_str(frac);
-            }
-        }
-        None => out.push_str(mantissa),
-    }
-    if let Some(e) = exponent {
-        let (sign, digits) = match e.strip_prefix('-') {
-            Some(d) => ("-", d),
-            None => ("", e.strip_prefix('+').unwrap_or(e)),
-        };
-        let digits = digits.trim_start_matches('0');
-        if !digits.is_empty() {
-            out.push('e');
-            out.push_str(sign);
-            out.push_str(digits);
-        }
-    }
-    out
+    literals::number(
+        raw,
+        NumberStyle {
+            frac: FracZeros::KeepOne,
+            dot_zero: false,
+            trim_exponent: true,
+            hex_upper: false,
+            imaginary: false,
+        },
+    )
 }
 
 /// The flags of a regular expression in alphabetical order.
@@ -186,26 +129,8 @@ pub(crate) fn value(kind: SyntaxKind, raw: &str) -> String {
     }
 }
 
-/// The content of a string with quote escapes resolved, the one thing a quote change may alter.
 fn unquoted(raw: &str) -> String {
-    let content = raw.get(1..raw.len().saturating_sub(1)).unwrap_or("");
-    let mut out = String::with_capacity(content.len());
-    let mut chars = content.chars();
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            match chars.next() {
-                Some(e @ ('"' | '\'')) => out.push(e),
-                Some(e) => {
-                    out.push('\\');
-                    out.push(e);
-                }
-                None => out.push('\\'),
-            }
-        } else {
-            out.push(c);
-        }
-    }
-    out
+    literals::unescape_quotes(raw.get(1..raw.len().saturating_sub(1)).unwrap_or(""))
 }
 
 fn canonical_number(raw: &str) -> String {

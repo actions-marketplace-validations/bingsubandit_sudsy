@@ -48,7 +48,7 @@ pub(crate) fn soft_brk() -> Doc {
 }
 
 pub(crate) struct Style {
-    pub quote: super::literal::Quote,
+    pub quote: core_format::literals::prefixed::Quote,
     pub magic_comma: bool,
     pub width: usize,
     pub indent: usize,
@@ -57,9 +57,13 @@ pub(crate) struct Style {
 pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
     cx.cached(|| Style {
         quote: match cx.options.get("quote_style") {
-            Some(OptionValue::String(s)) if s == "single" => super::literal::Quote::Single,
-            Some(OptionValue::String(s)) if s == "preserve" => super::literal::Quote::Preserve,
-            _ => super::literal::Quote::Double,
+            Some(OptionValue::String(s)) if s == "single" => {
+                core_format::literals::prefixed::Quote::Single
+            }
+            Some(OptionValue::String(s)) if s == "preserve" => {
+                core_format::literals::prefixed::Quote::Preserve
+            }
+            _ => core_format::literals::prefixed::Quote::Double,
         },
         magic_comma: !matches!(cx.options.get("magic_trailing_comma"),
             Some(OptionValue::String(s)) if s == "ignore"),

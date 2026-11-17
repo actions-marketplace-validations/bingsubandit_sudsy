@@ -1,5 +1,7 @@
 //! Spelling of single tokens: numbers, units, strings, hex colors and `url(`.
 
+use core_format::literals::{self, FracZeros, NumberStyle, StringStyle};
+
 /// Units written in their canonical case (`PX` becomes `px`, `hz` becomes `Hz`).
 const UNITS: &[&str] = &[
     "em", "rem", "ex", "rex", "cap", "rcap", "ch", "rch", "ic", "ric", "lh", "rlh", "vw", "svw",
@@ -9,47 +11,31 @@ const UNITS: &[&str] = &[
     "s", "ms", "Hz", "kHz", "dpi", "dpcm", "dppx", "x", "fr",
 ];
 
-/// A number token (or the numeric start of a dimension): lowercase `e`, no `+` or leading zeros in
-/// the exponent, no trailing zeros or dot, a digit before the dot. Returns the text after the
-/// number as the second element.
+/// A number token (or the numeric start of a dimension) spelled by [`literals::number`]; the text
+/// after the number is the second element.
 pub fn split_number(s: &str) -> (String, &str) {
     let b = s.as_bytes();
-    let mut i = 0;
-    let sign = if matches!(b.first(), Some(b'+' | b'-')) {
-        i = 1;
-        &s[..1]
-    } else {
-        ""
-    };
     let digits = |from: usize| from + b[from..].iter().take_while(|c| c.is_ascii_digit()).count();
-    let int_end = digits(i);
-    let int = &s[i..int_end];
-    i = int_end;
-    let mut frac = "";
+    let mut i = digits(usize::from(matches!(b.first(), Some(b'+' | b'-'))));
     if b.get(i) == Some(&b'.') && b.get(i + 1).is_some_and(u8::is_ascii_digit) {
-        let end = digits(i + 1);
-        frac = &s[i + 1..end];
-        i = end;
+        i = digits(i + 1);
     }
-    let mut exp = String::new();
     // `1.e1` is `1e1`.
     let j = i + usize::from(b.get(i) == Some(&b'.'));
     if matches!(b.get(j), Some(b'e' | b'E')) {
         let sign_len = usize::from(matches!(b.get(j + 1), Some(b'+' | b'-')));
         if b.get(j + 1 + sign_len).is_some_and(u8::is_ascii_digit) {
-            let end = digits(j + 1 + sign_len);
-            let neg = b[j + 1] == b'-';
-            let n = s[j + 1 + sign_len..end].trim_start_matches('0');
-            if !n.is_empty() {
-                exp = format!("e{}{n}", if neg { "-" } else { "" });
-            }
-            i = end;
+            i = digits(j + 1 + sign_len);
         }
     }
-    let frac = frac.trim_end_matches('0');
-    let int = if int.is_empty() { "0" } else { int };
-    let dot = if frac.is_empty() { "" } else { "." };
-    (format!("{sign}{int}{dot}{frac}{exp}"), &s[i..])
+    let style = NumberStyle {
+        frac: FracZeros::Trim,
+        dot_zero: false,
+        trim_exponent: true,
+        hex_upper: false,
+        imaginary: false,
+    };
+    (literals::number(&s[..i], style), &s[i..])
 }
 
 pub fn number(s: &str) -> String {
@@ -66,67 +52,14 @@ pub fn percentage(s: &str) -> String {
     format!("{}%", number(s.trim_end_matches('%')))
 }
 
-/// A string token with the preferred quote unless it holds more of that quote than of the other;
-/// one that has its quote already is kept as written.
-pub fn string(raw: &str, single_quote: bool) -> String {
-    let body = &raw[1..raw.len() - 1];
-    // A string whose SCSS interpolation holds quotes keeps the quote it has.
-    if body
-        .split("#{")
-        .skip(1)
-        .any(|s| s.split('}').next().is_some_and(|i| i.contains(['"', '\''])))
-    {
-        return raw.to_string();
-    }
-    let (pref, alt) = if single_quote {
-        ('\'', '"')
-    } else {
-        ('"', '\'')
+/// A string token with the preferred quote unless it holds more of that quote than of the other.
+pub fn string(raw: &str, single: bool) -> String {
+    let style = StringStyle {
+        single,
+        keep_quoted: true,
+        interpolation: true,
     };
-    let count = |q: char| body.matches(q).count();
-    let (quote, other) = if count(pref) > count(alt) {
-        (alt, pref)
-    } else {
-        (pref, alt)
-    };
-    if raw.starts_with(quote) {
-        return raw.to_string();
-    }
-    let mut out = String::with_capacity(raw.len());
-    out.push(quote);
-    let mut chars = body.chars();
-    let (mut depth, mut prev) = (0, ' ');
-    while let Some(c) = chars.next() {
-        // An SCSS `#{ }` is copied as written.
-        let inside = depth > 0 || (c == '{' && prev == '#');
-        prev = c;
-        if inside {
-            match c {
-                '{' => depth += 1,
-                '}' => depth -= 1,
-                _ => {}
-            }
-            out.push(c);
-            continue;
-        }
-        match c {
-            '\\' => match chars.next() {
-                Some(e) if e == other => out.push(e),
-                Some(e) => {
-                    out.push('\\');
-                    out.push(e);
-                }
-                None => out.push('\\'),
-            },
-            c if c == quote => {
-                out.push('\\');
-                out.push(c);
-            }
-            c => out.push(c),
-        }
-    }
-    out.push(quote);
-    out
+    literals::string(raw, style)
 }
 
 /// `#FFF` is `#fff`; other hashes (ids, odd lengths) keep their case.

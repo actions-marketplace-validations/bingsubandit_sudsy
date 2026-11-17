@@ -15,6 +15,7 @@ pub mod doc;
 mod error;
 pub mod ignore;
 mod lines;
+pub mod literals;
 pub mod printer;
 pub mod safety;
 pub mod shapes;
