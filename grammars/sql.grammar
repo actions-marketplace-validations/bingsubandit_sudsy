@@ -1,5 +1,5 @@
-// SQL (.sql), parsed by sqruff-lib-core with the dialects of `dialect` (crates/lang-sql/src/adapter.rs).
-// Nodes are sqlfluff's segment type names (sqruff's `SyntaxKind`, in Pascal case); a segment type with no node here is transparent, except `*_statement`, which is a `Statement` and every `*_reference`, which is an `ObjectReference`.
+// SQL (.sql), parsed by the hand-written parser of `crates/lang-sql/src/parse/` in the mode of `dialect`.
+// Nodes are sqlfluff's segment type names (in Pascal case); a segment type with no node here is transparent, except `*_statement`, which is a `Statement` and every `*_reference`, which is an `ObjectReference`.
 // Format: see crates/core-syntax/src/grammar/mod.rs.
 
 language sql 27 "SQL"

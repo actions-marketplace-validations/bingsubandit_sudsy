@@ -71,6 +71,8 @@ fn wishes(seq: &Seq, i: usize) -> (Wish, Wish) {
         k::OPERATOR if seq.blocks[i].text == "@" => (before, after) = (TOUCH, TOUCH),
         k::OPERATOR if seq.blocks[i].node == 0 => before = TOUCH,
         k::LINE_COMMENT | k::BLOCK_COMMENT => (before, after) = (ANY, ANY),
+        // A raw multi-line word (`COPY .. FROM STDIN` with its data rows) is taken as written.
+        k::WORD if seq.blocks[i].text.contains('\n') => (before, after) = (ANY, ANY),
         _ => {}
     }
     (before, after)

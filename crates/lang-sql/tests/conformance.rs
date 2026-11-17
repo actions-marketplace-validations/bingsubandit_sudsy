@@ -25,7 +25,7 @@ fn files(dir: &Path) -> Vec<PathBuf> {
 /// Parses every file as `dialect`; returns what the run printed.
 fn run(label: &str, dialect: &str, dir: PathBuf) {
     let grammar = lang_sql::provider().grammar().clone();
-    let (mut bytes, mut count, mut errors, mut panics, mut big) = (0, 0, 0, 0, 0);
+    let (mut bytes, mut count, mut errors) = (0, 0, 0);
     let mut elapsed = 0.0;
     for path in files(&dir) {
         let Ok(text) = std::fs::read_to_string(&path) else {
@@ -44,14 +44,10 @@ fn run(label: &str, dialect: &str, dir: PathBuf) {
                 .check(&parsed.tree)
                 .unwrap_or_else(|e| panic!("{}: {e}", path.display()));
         }
-        if let Some(e) = parsed.errors.first() {
-            errors += 1;
-            panics += usize::from(e.message.contains("failed on this file"));
-            big += usize::from(e.message.starts_with("file over"));
-        }
+        errors += usize::from(!parsed.errors.is_empty());
     }
     println!(
-        "{label} {dialect}: files={count} with_errors={errors} panics={panics} over_limit={big} MB/s={:.2}",
+        "{label} {dialect}: files={count} with_errors={errors} MB/s={:.2}",
         bytes as f64 / 1e6 / elapsed
     );
 }
@@ -90,8 +86,7 @@ fn peak_mb() -> f64 {
     kb.unwrap_or(0.0) / 1024.0
 }
 
-/// The cost of a dialect's first file and the time per MB at growing sizes: the numbers behind
-/// `MAX_BYTES` (docs/performance/numbers.md). Run with `--release` (debug assertions slow sqruff).
+/// The time per MB and the peak memory at growing sizes (docs/performance/numbers.md). Run with `--release`.
 #[test]
 #[ignore = "measurement: cargo test --release -p lang-sql --test integration -- --ignored --nocapture conformance::scaling"]
 fn scaling() {
@@ -99,15 +94,7 @@ fn scaling() {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../bench/inputs/sql/ansi-fixtures.sql"),
     )
     .unwrap();
-    for dialect in lang_sql::DIALECTS {
-        let start = Instant::now();
-        lang_sql::parse("SELECT 1;", dialect);
-        println!(
-            "{dialect}: first file (builds the dialect) {:.1} ms",
-            start.elapsed().as_secs_f64() * 1e3
-        );
-    }
-    for kb in [64, 256, 480] {
+    for kb in [64, 256, 480, 4096] {
         let text = input.repeat(kb * 1024 / input.len() + 1);
         let text = &text[..text.rfind(";\n").unwrap() + 2];
         let start = Instant::now();

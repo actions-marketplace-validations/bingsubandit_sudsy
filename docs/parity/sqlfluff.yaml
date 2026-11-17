@@ -6,7 +6,7 @@ sources:
   - "https://docs.sqlfluff.com/en/stable/reference/rules.html"
   - "https://docs.sqlfluff.com/en/stable/configuration/layout.html"
   - "https://docs.sqlfluff.com/en/stable/configuration/default_configuration.html"
-scope: "Formatter (`sqlfluff fix` with the layout (LT) and capitalisation (CP) rules, our own layout code; sqruff is the parser only); the linter covers the rules that catch bugs (aliasing, ambiguous, convention, structure) and plans the rest; templated rules (JJ) and T-SQL ones (TQ) are out"
+scope: "Formatter (`sqlfluff fix` with the layout (LT) and capitalisation (CP) rules, our own layout code and parser); the linter covers the rules that catch bugs (aliasing, ambiguous, convention, structure) and plans the rest; templated rules (JJ) and T-SQL ones (TQ) are out"
 entries:
   LT01: formatter
   LT02: formatter

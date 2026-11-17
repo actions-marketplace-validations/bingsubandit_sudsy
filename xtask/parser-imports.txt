@@ -2,7 +2,6 @@
 # adapter.rs, adapter/ or a generated file; the files below still do. The list may only shrink.
 prefix oxc
 prefix ruff
-prefix sqruff
 prefix ktrs
 prefix mago
 prefix ruby

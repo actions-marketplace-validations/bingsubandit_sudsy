@@ -1,5 +1,5 @@
 differences:
-  parse-gap: gap  "sqruff's dialect does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
+  parse-gap: gap  "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
   layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 files:
   sqlfluff-ansi: parse-gap, layout-gap
@@ -8,8 +8,8 @@ files:
   sqlfluff-tsql: parse-gap, layout-gap
   postgres-regress: parse-gap, layout-gap
 ratchet:
-  sqlfluff-ansi: 202
-  sqlfluff-mysql: 206
-  sqlfluff-postgres: 121
+  sqlfluff-ansi: 203
+  sqlfluff-mysql: 208
+  sqlfluff-postgres: 122
   sqlfluff-tsql: 108
   postgres-regress: 37

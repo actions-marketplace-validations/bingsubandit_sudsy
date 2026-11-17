@@ -1,4 +1,4 @@
-//! The indentation of procedural blocks. sqruff's MySQL dialect parses `BEGIN ... END`, `LOOP`,
+//! The indentation of procedural blocks. The MySQL parse leaves `BEGIN ... END`, `LOOP`,
 //! `WHILE` and `REPEAT` as flat statements with no indent, and its T-SQL dialect puts no indent
 //! around the condition and the body of `IF`, `ELSE` and `WHILE`, so the indents sqlfluff's dialects have are put
 //! on the points here, from the keywords and statements.

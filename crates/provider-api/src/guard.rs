@@ -2,7 +2,7 @@
 //! run goes on with the other files.
 //!
 //! - [`check_nesting`] runs before every parse. Parsers written by others (oxc, ruff, mago,
-//!   sqruff, tree-sitter walks) recurse on the stack of the calling thread, and a stack overflow
+//!   tree-sitter walks) recurse on the stack of the calling thread, and a stack overflow
 //!   cannot be caught, so the limit has to come before the parser. It is language-neutral: the
 //!   deepest nesting of `(`, `[` and `{` in the text, strings and comments included (a closer
 //!   with nothing open is ignored). Code deeper than [`MAX_NESTING`] does not exist outside

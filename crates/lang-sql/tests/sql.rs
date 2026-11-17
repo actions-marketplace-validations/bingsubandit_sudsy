@@ -65,6 +65,41 @@ fn syntax_errors_are_reported_and_lossless() {
     }
 }
 
+/// Deep nesting is an error or flat tokens, never a stack overflow (a 1 MB stack here).
+#[test]
+fn deep_nesting_does_not_overflow() {
+    let n = 20_000;
+    let inputs = [
+        format!("SELECT {}1{};", "(".repeat(n), ")".repeat(n)),
+        format!(
+            "{}SELECT 1{};",
+            "SELECT * FROM (".repeat(n),
+            ") t".repeat(n)
+        ),
+        format!(
+            "SELECT {}1{};",
+            "CASE WHEN a THEN ".repeat(n),
+            " END".repeat(n)
+        ),
+        format!("SELECT {}a;", "NOT ".repeat(n)),
+        format!("SELECT {}a;", "- ".repeat(n)),
+        format!("SELECT {}1{};", "ARRAY[".repeat(n), "]".repeat(n)),
+        format!("SELECT {}a;", "f(".repeat(n)),
+    ];
+    std::thread::Builder::new()
+        .stack_size(1 << 20)
+        .spawn(move || {
+            for text in &inputs {
+                for dialect in lang_sql::DIALECTS {
+                    assert_eq!(print(&lang_sql::parse(text, dialect).tree), *text);
+                }
+            }
+        })
+        .unwrap()
+        .join()
+        .unwrap();
+}
+
 #[test]
 fn nodes_are_named_after_segment_types() {
     let parsed = parse("SELECT a FROM t WHERE a = 1;", "ansi");
@@ -78,14 +113,6 @@ fn nodes_are_named_after_segment_types() {
     ] {
         assert!(kinds.contains(&want), "{want:?}");
     }
-}
-
-#[test]
-fn a_file_over_the_limit_is_one_unknown_token() {
-    let big = "SELECT 1;\n".repeat(lang_sql::MAX_BYTES / 10 + 1);
-    let parsed = parse(&big, "ansi");
-    assert_eq!(parsed.errors.len(), 1);
-    assert_eq!(print(&parsed.tree), big);
 }
 
 #[test]

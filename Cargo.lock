@@ -174,27 +174,12 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "bit-set"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08807e080ed7f9d5433fa9b275196cfc35414f66a0c79d864dc51a0d825231a3"
-dependencies = [
- "bit-vec 0.8.0",
-]
-
-[[package]]
-name = "bit-set"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56d87354e4229f54a44f7bf2435906a4656dba36026ab6eaca629a2c436a691c"
 dependencies = [
- "bit-vec 0.10.1",
+ "bit-vec",
 ]
-
-[[package]]
-name = "bit-vec"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7"
 
 [[package]]
 name = "bit-vec"
@@ -903,12 +888,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "diff"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
-
-[[package]]
 name = "digest"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1036,18 +1015,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "enum_dispatch"
-version = "0.3.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa18ce2bc66555b3218614519ac839ddb759a7d6720732f979ef8d13be147ecd"
-dependencies = [
- "once_cell",
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
 name = "equivalent"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1061,17 +1028,6 @@ checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
  "windows-sys",
-]
-
-[[package]]
-name = "fancy-regex"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d301f5bf187b3c295fce6468d3875037a0bccc5f6b151c63cac2f85babf21912"
-dependencies = [
- "bit-set 0.8.0",
- "regex-automata",
- "regex-syntax",
 ]
 
 [[package]]
@@ -1338,28 +1294,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "icu_casemap"
-version = "2.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a6f143e9349267b80ae071a6ec25d4797c45756d8b2671a8b24b7b25b81ab94"
-dependencies = [
- "icu_casemap_data",
- "icu_collections",
- "icu_locale_core",
- "icu_properties",
- "icu_provider",
- "potential_utf",
- "writeable",
- "zerovec",
-]
-
-[[package]]
-name = "icu_casemap_data"
-version = "2.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71a5c321208537711696af55bc2ab5dad939e4f6e0aef92dd6a2555deceedf3a"
-
-[[package]]
 name = "icu_collections"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1367,7 +1301,6 @@ checksum = "fe090a42a0d3140fed8c63263ed1fecc02422cb2f4bfe55cd8de2de1b8e105dd"
 dependencies = [
  "displaydoc",
  "potential_utf",
- "serde",
  "utf8_iter",
  "yoke",
  "zerofrom",
@@ -2069,9 +2002,6 @@ dependencies = [
  "core-syntax",
  "insta",
  "provider-api",
- "sqruff-lib-core",
- "sqruff-lib-dialects",
- "strum",
 ]
 
 [[package]]
@@ -3025,16 +2955,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pretty_assertions"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ae130e2f271fbc2ac3a40fb1d07180839cdbbe443c7a27e1e3c13c5cac0116d"
-dependencies = [
- "diff",
- "yansi",
-]
-
-[[package]]
 name = "prettyplease"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3079,8 +2999,8 @@ version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8530004ccb15eae51c7e40009fbe317f341f804db54dc033eec1c50be28cfa0"
 dependencies = [
- "bit-set 0.11.1",
- "bit-vec 0.10.1",
+ "bit-set",
+ "bit-vec",
  "bitflags 2.13.2",
  "chacha20",
  "core_detect",
@@ -3710,19 +3630,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_yaml"
-version = "0.9.34+deprecated"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
-dependencies = [
- "indexmap",
- "itoa",
- "ryu",
- "serde",
- "unsafe-libyaml",
-]
-
-[[package]]
 name = "sha2"
 version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3799,16 +3706,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8e2fb0f499abb4d162f2bedad68f5ef91a1682b5a03596ddb67efd37768d100"
 
 [[package]]
-name = "smol_str"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eeb7109d23f319619d4cc0de5464613c8b7b1a09db2774a58101459cf6be2f10"
-dependencies = [
- "borsh",
- "serde_core",
-]
-
-[[package]]
 name = "socket2"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3816,43 +3713,6 @@ checksum = "c3d1e2c7f27f8d4cb10542a02c49005dbd6e93095799d6f3be745fae9f8fedd4"
 dependencies = [
  "libc",
  "windows-sys",
-]
-
-[[package]]
-name = "sqruff-lib-core"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "794da13e9757404d68d45367b10838417ea179949d3cee31d5a784140bf5e6c7"
-dependencies = [
- "enum_dispatch",
- "fancy-regex",
- "hashbrown 0.17.1",
- "icu_casemap",
- "icu_locale_core",
- "indexmap",
- "itertools 0.15.0",
- "log",
- "nohash-hasher",
- "pretty_assertions",
- "regex-automata",
- "smallvec",
- "smol_str",
- "strum",
- "strum_macros",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "sqruff-lib-dialects"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7512ae76f95acfce25f5661186f1d62258299c0c87cf445ab75805a888c8fb66"
-dependencies = [
- "hashbrown 0.17.1",
- "itertools 0.15.0",
- "serde_yaml",
- "sqruff-lib-core",
- "strum",
 ]
 
 [[package]]
@@ -4339,12 +4199,6 @@ dependencies = [
  "phf_codegen",
  "rand 0.8.8",
 ]
-
-[[package]]
-name = "unsafe-libyaml"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
 
 [[package]]
 name = "url"
@@ -4982,12 +4836,6 @@ dependencies = [
  "serde_json",
  "xtask",
 ]
-
-[[package]]
-name = "yansi"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfe53a6657fd280eaa890a3bc59152892ffa3e30101319d168b781ed6529b049"
 
 [[package]]
 name = "yoke"
