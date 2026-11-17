@@ -145,6 +145,13 @@ fn hot_flags(defs: &[KindDef]) -> Vec<u16> {
         .collect()
 }
 
+/// Where a labelled body item is (see [`Grammar::slot`]).
+struct FieldAt {
+    item: usize,
+    /// The child position when each item before it and it are `One`.
+    fixed: Option<usize>,
+}
+
 /// One node kind's body as [`crate::ast::assign`] sees it.
 #[derive(Clone, Copy)]
 struct GrammarBody<'g> {
@@ -253,6 +260,66 @@ impl Grammar {
             .map(|(_, e)| e)
     }
 
+    /// [`Grammar::slot`] on the non-trivia children of `node` already collected (`children`):
+    /// no second walk of the tree; an item that follows only single required items is read at its
+    /// fixed child position.
+    pub fn slot_in(
+        &self,
+        kind: SyntaxKind,
+        children: &[SyntaxElement],
+        label: &str,
+    ) -> Option<SyntaxElement> {
+        let at = self.field_at(kind, label)?;
+        if let Some(p) = at.fixed {
+            let e = children.get(p)?;
+            if e.kind() != SyntaxKind::ERROR && self.accepts(kind, at.item, e.kind()) {
+                return Some(e.clone());
+            }
+        }
+        self.slot_slow(kind, children.iter().cloned(), label)
+    }
+
+    fn field_at(&self, kind: SyntaxKind, label: &str) -> Option<FieldAt> {
+        let def = self.def(kind)?;
+        let mut all_one = true;
+        for (i, item) in def.body.iter().enumerate() {
+            all_one &= item.cardinality == Cardinality::One;
+            if item.label.as_deref() == Some(label) || item.field.as_deref() == Some(label) {
+                return Some(FieldAt {
+                    item: i,
+                    fixed: all_one.then_some(i),
+                });
+            }
+        }
+        None
+    }
+
+    fn accepts(&self, kind: SyntaxKind, item: usize, child: SyntaxKind) -> bool {
+        self.bodies[kind.index() as usize][item]
+            .binary_search(&child)
+            .is_ok()
+    }
+
+    fn slot_slow(
+        &self,
+        kind: SyntaxKind,
+        children: impl Iterator<Item = SyntaxElement>,
+        label: &str,
+    ) -> Option<SyntaxElement> {
+        let def = self.def(kind)?;
+        let body = GrammarBody {
+            grammar: self,
+            kinds: self.bodies.get(kind.index() as usize)?,
+            body: &def.body,
+        };
+        crate::ast::assign_of(children, body)
+            .find(|(i, _)| {
+                let item = &def.body[*i];
+                item.label.as_deref() == Some(label) || item.field.as_deref() == Some(label)
+            })
+            .map(|(_, e)| e)
+    }
+
     /// Every child of `node` in the items of the field `label`, in order (the `cases` of a switch).
     pub fn slots<'a>(
         &'a self,
@@ -283,6 +350,29 @@ impl Grammar {
             Some(kind) => Some(kind),
             None => crate::roles::common_operator_kind(text),
         }
+    }
+
+    /// Every child of `node` in the items labelled `label` (or filling the role field `label`), in
+    /// source order: the arguments of a call whose parentheses are children of the call.
+    pub fn slots(&self, node: &SyntaxNode, label: &str) -> Vec<SyntaxElement> {
+        let Some(def) = self.def(node.kind()) else {
+            return Vec::new();
+        };
+        let Some(kinds) = self.bodies.get(node.kind().index() as usize) else {
+            return Vec::new();
+        };
+        let body = GrammarBody {
+            grammar: self,
+            kinds,
+            body: &def.body,
+        };
+        crate::ast::assign(node, body)
+            .filter(|(i, _)| {
+                let item = &def.body[*i];
+                item.label.as_deref() == Some(label) || item.field.as_deref() == Some(label)
+            })
+            .map(|(_, e)| e)
+            .collect()
     }
 
     /// What is wrong with the roles of a grammar that declared `roles`: a node kind with no role
