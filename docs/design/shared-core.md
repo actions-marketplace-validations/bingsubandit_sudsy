@@ -89,8 +89,10 @@ L1 is a test of the design. If the three languages cannot hold their ratchets on
 | P2 | One hand-written parser for the HTML family (HTML, Vue, Svelte, Angular as modes), replacing two forked grammars, one vendored grammar and `oxc-htmlish-parser` | `lang-html` | conformance and Prettier parity ratchets hold; parse instructions per byte recorded | G2 |
 | P3 | SQL: sqruff measured against the alternatives as in P1; Java: a replacement plan for `rezel-lang-java` | design notes | recommendation, the user decides | |
 | P4 | Small formats (INI, gitignore, EditorConfig, TOML, GraphQL, Protobuf) get hand-written parsers when a fork would otherwise be edited or the language is being worked on anyway | `lang-*` | no step of its own | |
+| P5 | SQL: one hand-written parser for the ansi, postgres, mysql and tsql dialects (user's decision on the P3 note `sql-parser.md`), replacing sqruff; the tree keeps `sql.grammar`'s node kinds and roles so the layout and rules keep working | `lang-sql` | fixture parse failures per dialect no worse than sqruff's (ansi 8, postgres 62, mysql 36, tsql 38), sqlfluff format parity and lint ratchets hold, sqruff removed from Cargo.lock, speed, memory per byte and binary size recorded | |
+| P6 | Java: a hand-written parser (user's decision on the P3 note `java-parser.md`), replacing `rezel-lang-java`; the tree keeps `java.grammar`'s node kinds and roles (R2), tokens tile the source | `lang-java` | 0 corpus parse errors (rezel: 2), no panic on text blocks, 10,000-link call chains parse, google-java-format parity and Checkstyle ratchets hold, rezel removed, speed and binary size recorded | R2 |
 
-Kept as they are: oxc, ruff, Roslyn, mago; tree-sitter for Bash, Markdown and PowerShell.
+Kept as they are: oxc, ruff, Roslyn, mago, ruby-prism; tree-sitter for Bash, Markdown and PowerShell.
 
 ### Measures
 | # | Step | Where | Done when | After |
