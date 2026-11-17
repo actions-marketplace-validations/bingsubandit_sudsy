@@ -15,7 +15,7 @@
 
 use crate::db::Db;
 use crate::embedded::format_embedded;
-use crate::failure::{Failure, Stage};
+use crate::failure::{Failure, Stage, guarded};
 use crate::inputs::{ConfigFile, File};
 use core_config::{ConfigChain, FileInput, ResolvedOptions};
 use core_syntax::{GreenNode, SyntaxNode};
@@ -163,7 +163,7 @@ pub(crate) fn provider_of(db: &dyn Db, file: File) -> Result<&dyn LanguageProvid
 pub fn parse(db: &dyn Db, file: File) -> Result<Parsed, Failure> {
     let provider = provider_of(db, file)?;
     let source = source_file(db, file, parse_settings(db, file));
-    match provider.parse(&source) {
+    match provider_api::guard::parse(provider, &source) {
         Ok(result) => Ok(Parsed {
             green: result.tree.green().into_owned(),
             errors: result.errors,
@@ -178,6 +178,10 @@ pub fn parse(db: &dyn Db, file: File) -> Result<Parsed, Failure> {
 /// provider: the output is not a file, so there is nothing to key a query on.
 #[salsa::tracked(returns(ref))]
 pub fn format(db: &dyn Db, file: File) -> Result<String, Failure> {
+    guarded(Stage::Format, || format_body(db, file))
+}
+
+fn format_body(db: &dyn Db, file: File) -> Result<String, Failure> {
     let provider = provider_of(db, file)?;
     let parsed = parse(db, file).as_ref().map_err(Clone::clone)?;
     let options = options(db, file).as_ref().map_err(Clone::clone)?;

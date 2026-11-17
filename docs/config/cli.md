@@ -15,7 +15,7 @@
 | `debug parse <file>` | Developer: parse a `.cs` file with the worker, check round trip, print the tree | |
 
 - Exit 3 from `format`, `lint`, `fix` and `check` when everything else succeeded but files of an installed-nowhere language were skipped (one stderr line per language with its install command); not for a language the config marks `ignored`.
-- Exit 2 on any command: a file could not be processed (syntax error, unreadable, bad option, worker unavailable) or the config is invalid. Failed files are left alone and the rest are processed. Results are reported in path order.
+- Exit 2 on any command: a file could not be processed (syntax error, unreadable, bad option, worker unavailable, nested deeper than 1,000 brackets, a panic in a parser, formatter or rule) or the config is invalid. Failed files are left alone and the rest are processed. Results are reported in path order.
 - `lint`, `fix`, `check`: `--format human|json|sarif|github` and `--analysis fast|standard|deep`.
   - JSON: `{version, summary, diagnostics}` with byte offsets, line/column ranges and fix edits. SARIF 2.1.0: results and rule table, no `fixes`. GitHub: `::error|warning file=,line=,col=,endLine=,endColumn=,title=::message`.
 - Discovery (`core-workspace`): `.gitignore` honored also outside a git checkout, hidden directories included, `.git` excluded; explicit file arguments are always kept.

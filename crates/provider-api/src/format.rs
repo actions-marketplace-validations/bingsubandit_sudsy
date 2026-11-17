@@ -55,7 +55,7 @@ pub fn format_file(
     options: &ResolvedOptions,
     directives: &DirectiveTable,
 ) -> Result<String, FileFormatError> {
-    let parsed = provider.parse(file)?;
+    let parsed = crate::guard::parse(provider, file)?;
     format_parsed(provider, file, &parsed, options, directives)
 }
 

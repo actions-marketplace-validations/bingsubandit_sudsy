@@ -8,6 +8,7 @@ mod languages;
 mod layout;
 mod lint;
 mod lsp;
+mod nesting;
 mod patterns;
 mod presets;
 mod semantic;

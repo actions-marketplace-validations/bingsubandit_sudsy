@@ -293,6 +293,9 @@ pub enum ProviderError {
     RuntimeMissing(String),
     #[error("worker error {code}: {message}")]
     Worker { code: String, message: String },
+    /// The file is refused before or while parsing: nested too deeply, or the parser panicked.
+    #[error("{0}")]
+    Unparsable(String),
     #[error("invalid tree from worker: {0}")]
     InvalidTree(#[from] core_syntax::wire::WireError),
 }

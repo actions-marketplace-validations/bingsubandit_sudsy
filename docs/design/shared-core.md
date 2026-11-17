@@ -40,10 +40,8 @@ A step is one commit and one finish run. `After` names what must be on main firs
 ### Guards
 | # | Step | Where | Done when | After |
 |---|---|---|---|---|
-| G1 | A nesting limit and a panic catch around each file's parse, format and lint, in the shared engine and `provider_api::adapter::replay`: a file that fails is one diagnostic and the run goes on | `provider-api`, `core-incremental`, `cli`, `lsp` | 20,000 nested brackets in every language's syntax give exit 2 and the other files' results; a test per provider through the shared test helper | |
 | G2 | Parity and corpus runs as a scheduled CI job that fails on a ratchet | `.github/workflows`, `scripts/parity.sh` | every `differences.yaml` ratchet and every ignored conformance test runs nightly without a person | |
 | G3 | Parser crates may be imported only by `adapter.rs`: a check with the files of section 1 as its starting list, which may only shrink | `xtask`, `clippy.toml` | the gate fails on a new import outside an adapter | |
-| G4 | The README says where the safety check runs: debug builds, tests and the corpus profile; release builds do not run it (decision 4) | `README.md` | the README agrees with `docs/formatting/engine.md` | |
 
 ### Roles
 | # | Step | Where | Done when | After |

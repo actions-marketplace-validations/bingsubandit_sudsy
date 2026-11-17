@@ -145,7 +145,7 @@ impl Notifier {
                 );
                 self.prompt_runtime_missing();
             }
-            Stage::Format => self.log(
+            Stage::Format | Stage::Lint => self.log(
                 MessageType::WARNING,
                 format!("{}: {}", uri.as_str(), failure.message),
             ),

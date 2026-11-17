@@ -26,6 +26,8 @@ pub enum Stage {
     Runtime,
     /// The file has syntax errors, formatting failed, or the output failed the safety check.
     Format,
+    /// A rule failed (it panicked); the file's diagnostics are not available.
+    Lint,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -68,3 +70,31 @@ impl fmt::Display for Failure {
 }
 
 impl Error for Failure {}
+
+/// Runs one query's work so that a panic in a parser, formatter or rule is that file's failure
+/// and not the run's end. The engine's own cancellation unwind passes through.
+pub(crate) fn guarded<T>(
+    stage: Stage,
+    work: impl FnOnce() -> Result<T, Failure>,
+) -> Result<T, Failure> {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(work)) {
+        Ok(result) => result,
+        Err(payload) if payload.is::<salsa::Cancelled>() => std::panic::resume_unwind(payload),
+        Err(payload) => Err(Failure::message(
+            stage,
+            provider_api::guard::panic_message(&*payload),
+        )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_panic_in_a_query_is_the_files_failure() {
+        let failed = guarded::<()>(Stage::Lint, || panic!("boom")).unwrap_err();
+        assert_eq!(failed.stage, Stage::Lint);
+        assert!(failed.message.contains("boom"), "{failed}");
+    }
+}

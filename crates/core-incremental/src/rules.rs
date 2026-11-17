@@ -3,7 +3,7 @@
 
 use crate::db::Db;
 use crate::embedded::{lint_embedded, parse_embedded};
-use crate::failure::{Failure, Stage};
+use crate::failure::{Failure, Stage, guarded};
 use crate::inputs::{ExtensionSet, File, WorkspaceRevision};
 use crate::queries::{config, parse, parse_settings, provider_of, selection, source_file};
 use core_config::{Depth, FileInput, ResolvedRule};
@@ -180,6 +180,10 @@ pub fn semantics(db: &dyn Db, file: File) -> Result<Option<FileSemantics>, Failu
 /// Runs the rules on a file. A file with syntax errors reports those instead.
 #[salsa::tracked(returns(ref))]
 pub fn lint(db: &dyn Db, file: File) -> Result<Linted, Failure> {
+    guarded(Stage::Lint, || lint_body(db, file))
+}
+
+fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
     let provider = provider_of(db, file)?;
     let parsed = parse(db, file).as_ref().map_err(Clone::clone)?;
     if !parsed.errors.is_empty() {

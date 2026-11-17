@@ -132,7 +132,7 @@ pub(crate) fn format_embedded(
         text: formatted.clone(),
         ..source_file(db, file, None)
     };
-    let Ok(parsed) = host.parse(&source) else {
+    let Ok(parsed) = provider_api::guard::parse(host, &source) else {
         return formatted;
     };
     let regions = regions(&parsed.tree, &formatted);
@@ -163,7 +163,7 @@ pub(crate) fn format_embedded(
         text: out.clone(),
         ..source
     };
-    match host.parse(&again) {
+    match provider_api::guard::parse(host, &again) {
         Ok(p) if p.errors.is_empty() && regions_agree(host, &p.tree, &out, &regions) => out,
         _ => formatted,
     }

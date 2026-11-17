@@ -6,6 +6,7 @@ pub mod embedded;
 pub mod fixtures;
 pub mod format;
 pub mod format_testing;
+pub mod guard;
 pub mod out_of_process;
 pub mod parser;
 pub mod protocol;

@@ -6,6 +6,7 @@
 - Fix loop: `fix_text` / `transient` (same file, other text) are shared by `sudsy fix` and the editor's fix-all.
 
 ## Behaviour
+- A file that cannot be handled is one failure and the run goes on with the others. `provider_api::guard` refuses a file whose `(`, `[` and `{` nest deeper than 1,000 before any parser sees it (external parsers recurse on the caller's stack, which cannot be caught when it overflows; the scan is language-neutral, so strings and comments count too, and a closer with nothing open is ignored), and the `parse`, `format` and `lint` queries catch a panic of the parser, formatter or a rule (`Stage::Parse`, `Format`, `Lint`); the engine's own cancellation unwind passes through. Every parse of a file goes through `guard::parse`. `cli/tests/nesting.rs` nests every provider's syntax 20,000 deep (one row of data per provider) and expects exit 2 with the other files processed.
 - Failures are values (`Failure { stage, message }`, `Clone + Eq`): memoized and backdated; a missing worker is `Err`, never a panic. Editors retry by setting the file again (always bumps the revision).
 - `parse` stores the `GreenNode` (`Send + Sync`, structural `==`); the red root is rebuilt in O(1). Backdating pays off at `config`, `options` and `format` (a whitespace edit with equal output stops there).
 - Parallelism: database handles are `Clone` and share memos; setting an input needs `&mut` and waits for other handles. Rule: set inputs on one handle, then fan out (`std::thread::scope`, atomic path counter; output ordered by path). Memos live until exit.

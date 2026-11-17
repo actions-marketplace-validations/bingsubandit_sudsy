@@ -75,7 +75,7 @@ pub fn parse_regions<'a>(
         let code = region.code(text);
         let mut file = SourceFile::new(format!("embedded.{}", region.language), 1, code.clone());
         file.language_version = dialect;
-        if let Ok(parsed) = provider.parse(&file)
+        if let Ok(parsed) = crate::guard::parse(provider, &file)
             && parsed.errors.is_empty()
         {
             out.push(EmbeddedParse {

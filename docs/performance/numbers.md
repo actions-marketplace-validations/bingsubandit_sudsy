@@ -2,6 +2,11 @@
 
 Machine unless noted: AMD Ryzen 5 3600 (6 cores / 12 threads), 32 GB, Windows 11, release builds, mimalloc in the CLI, one run, noise 10-15%. Compare ratios across days, not absolutes. Method: [tooling.md](tooling.md). Latest value per metric only; `bench/history.jsonl` keeps the recorded series.
 
+## Nesting check (`provider_api::guard::check_nesting`, run before every parse)
+| Path | Number |
+|---|---|
+| 13.2 MB of JS-like text, one thread, release, x86-64 Linux agent host, best of 10 (`cargo test --release -p provider-api --lib -- --ignored nesting_cost --nocapture`) | 12.8 GB/s, 1.0 ms; 0.2 percent of the JS parse (20-22 MB/s) |
+
 ## Formatting (`perf-bench`, `format_file` = parse, layout, print, re-parse, tree compare, YAML model compare)
 | Path | Number |
 |---|---|
