@@ -6,6 +6,7 @@
 //! * [`grammar`]: the `.grammar` description format, its loader and content hash.
 //! * [`ast`]: support code used by the generated typed wrappers.
 //! * [`codegen`]: generates those wrappers (driven by `cargo xtask codegen`).
+//! * [`roles`]: the role vocabulary grammars tag their node kinds with.
 //! * [`shape`]: checks trees against the bodies of a grammar.
 //! * [`wire`]: the versioned tree encoding used across process boundaries.
 
@@ -15,6 +16,7 @@ pub mod embedded;
 pub mod grammar;
 pub mod grammars;
 pub mod kind;
+pub mod roles;
 pub mod shape;
 pub mod tree;
 pub mod trivia;

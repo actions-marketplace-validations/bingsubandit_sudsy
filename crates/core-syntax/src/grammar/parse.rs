@@ -186,6 +186,7 @@ impl<'a> Cursor<'a> {
 /// An item before names are resolved to kinds.
 struct RawItem {
     label: Option<String>,
+    field: Option<String>,
     target: RawTarget,
     cardinality: Cardinality,
 }
@@ -206,9 +207,17 @@ struct RawKind {
 fn parse_body(c: &mut Cursor) -> Result<Vec<RawItem>, GrammarError> {
     let mut items = Vec::new();
     while let Some(l) = c.next() {
+        let mut field = None;
         let (label, target) = match l {
             Lexeme::Tag(t) => (None, RawTarget::Tag(t.clone())),
             Lexeme::Ident(first) => {
+                if c.peek() == Some(&Lexeme::Sym('=')) {
+                    c.next();
+                    field = Some(c.ident("a role field after `=`")?);
+                    if c.peek() != Some(&Lexeme::Sym(':')) {
+                        return err(c.line, "expected `:` after the role field");
+                    }
+                }
                 if c.peek() == Some(&Lexeme::Sym(':')) {
                     c.next();
                     let target = match c.next() {
@@ -236,6 +245,7 @@ fn parse_body(c: &mut Cursor) -> Result<Vec<RawItem>, GrammarError> {
         };
         items.push(RawItem {
             label,
+            field,
             target,
             cardinality,
         });
@@ -250,6 +260,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut language: Option<(String, LanguageId, String)> = None;
     let mut comments = CommentSyntax::default();
     let mut suppressions = Vec::new();
+    let mut requires_roles = false;
     let mut raw: Vec<RawKind> = Vec::new();
 
     for d in &decls {
@@ -292,6 +303,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
                     }
                 }
             }
+            "roles" => requires_roles = true,
             "suppress" => {
                 let role = c.ident("suppression role")?;
                 let marker = c.string("suppression marker")?;
@@ -339,17 +351,20 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         title,
         comments,
         suppressions,
+        requires_roles,
         raw,
         hash,
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn resolve(
     language: String,
     language_id: LanguageId,
     title: String,
     comments: CommentSyntax,
     suppressions: Vec<Suppression>,
+    requires_roles: bool,
     raw: Vec<RawKind>,
     hash: String,
 ) -> Result<Grammar, GrammarError> {
@@ -406,13 +421,14 @@ fn resolve(
                     None => return err(r.line, format!("no kind carries tag #{t}")),
                 },
             };
-            if let Some(l) = &it.label
-                && !labels.insert(l.clone())
-            {
-                return err(r.line, format!("duplicate label `{l}`"));
+            for l in it.label.iter().chain(&it.field) {
+                if !labels.insert(l.clone()) {
+                    return err(r.line, format!("duplicate label `{l}`"));
+                }
             }
             body.push(Item {
                 label: it.label.clone(),
+                field: it.field.clone(),
                 target,
                 cardinality: it.cardinality.clone(),
             });
@@ -437,6 +453,7 @@ fn resolve(
         title,
         comments,
         suppressions,
+        requires_roles,
         token_flags: super::hot_flags(&tokens),
         node_flags: super::hot_flags(&nodes),
         nodes,
@@ -510,6 +527,33 @@ node Long =
             "token Comma \",\" #separator\ntoken Space #trivia",
         );
         assert_ne!(a.hash(), Grammar::parse(&swapped).unwrap().hash());
+    }
+
+    #[test]
+    fn checks_roles_and_resolves_field_aliases() {
+        let head = "language x 1\nroles\ntoken T\nnode Id #reference = name:T\n";
+        let ok = format!(
+            "{head}node Bin #binary = left:Id operator:T r=right:Id\nnode Skip #opaque = a:T"
+        );
+        let g = Grammar::parse(&ok).unwrap();
+        assert!(g.check_roles().is_empty());
+        let bad = format!(
+            "{head}node Bin #binary = left:Id operator:T\nnode None = a:T\nnode Both #opaque #reference = name:T"
+        );
+        let errors = Grammar::parse(&bad).unwrap().check_roles().join("; ");
+        for m in [
+            "Bin: role #binary needs field `right`",
+            "None: no role",
+            "Both: #opaque with a role",
+        ] {
+            assert!(errors.contains(m), "{errors}");
+        }
+        assert!(
+            Grammar::parse(&bad.replace("roles\n", ""))
+                .unwrap()
+                .check_roles()
+                .is_empty()
+        );
     }
 
     #[test]

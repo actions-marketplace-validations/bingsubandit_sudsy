@@ -74,6 +74,10 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         &[("crates", crates)],
     )?);
     out.push(splice(
+        "docs/architecture/syntax-tree.md",
+        &[("roles", roles_table())],
+    )?);
+    out.push(splice(
         "docs/parity/README.md",
         &[("counts", catalog_counts()?)],
     )?);
@@ -87,6 +91,20 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         out.push((path, text));
     }
     Ok(out)
+}
+
+/// The role vocabulary of `core_syntax::roles`: required fields plain, optional ones with `?`.
+fn roles_table() -> String {
+    let mut out = String::from("| Role | Fields | Meaning |\n|---|---|---|\n");
+    for r in core_syntax::roles::ROLES {
+        let fields = if r.fields.is_empty() {
+            "-".into()
+        } else {
+            format!("`{}`", r.fields.replace(' ', "` `"))
+        };
+        out += &format!("| `#{}` | {fields} | {} |\n", r.name, r.doc);
+    }
+    out
 }
 
 /// One row per catalog (`docs/parity/*.yaml`): the entries by coverage.

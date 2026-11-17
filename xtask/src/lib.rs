@@ -39,6 +39,13 @@ pub fn generate() -> Result<Vec<(PathBuf, String)>> {
             .with_context(|| format!("reading {}", path.display()))?;
         let grammar =
             Grammar::parse(&src).with_context(|| format!("parsing {}", path.display()))?;
+        let problems = grammar.check_roles();
+        ensure!(
+            problems.is_empty(),
+            "{}: roles:\n  {}",
+            path.display(),
+            problems.join("\n  ")
+        );
         if path.file_stem().is_some_and(|n| n == "csharp") {
             files.push((
                 "workers/csharp/Sudsy.Worker/Generated/CsharpGrammar.g.cs".into(),

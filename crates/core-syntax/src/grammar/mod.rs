@@ -10,6 +10,8 @@
 //! token LBrace "{" #punctuation        // fixed-text token
 //! node Member #key-value = key:String Colon value:#value
 //! node Array #value #delimited-list = LBracket elements:#value* RBracket
+//! roles                                // opt in: every node kind has a role tag or #opaque
+//! node Call #call = callee:#value args=arguments:ArgList   // `args` fills the role field `arguments`
 //! ```
 //!
 //! A node body is a list of items `[label:]Ref[?|*]`. `Ref` is a node or token
@@ -47,6 +49,8 @@ pub enum Target {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Item {
     pub label: Option<String>,
+    /// The role field the item fills when its label differs (`label=field:Type`).
+    pub field: Option<String>,
     pub target: Target,
     pub cardinality: Cardinality,
 }
@@ -93,6 +97,8 @@ pub struct Grammar {
     pub title: String,
     pub comments: CommentSyntax,
     pub suppressions: Vec<Suppression>,
+    /// The grammar declared `roles`: [`Grammar::check_roles`] applies.
+    pub requires_roles: bool,
     nodes: Vec<KindDef>,
     tokens: Vec<KindDef>,
     by_name: HashMap<String, SyntaxKind>,
@@ -208,14 +214,15 @@ impl Grammar {
         self.tag_nodes.get(tag).map_or(&[], Vec::as_slice)
     }
 
-    /// The child of `node` in the body item labelled `label` (the first, for a repeated item).
+    /// The child of `node` in the body item labelled `label` or filling the role field `label`
+    /// (the first, for a repeated item).
     /// Found with the routine the generated accessors use, so it agrees with them.
     pub fn slot(&self, node: &SyntaxNode, label: &str) -> Option<SyntaxElement> {
         let def = self.def(node.kind())?;
         let index = def
             .body
             .iter()
-            .position(|i| i.label.as_deref() == Some(label))?;
+            .position(|i| i.label.as_deref() == Some(label) || i.field.as_deref() == Some(label))?;
         let body = GrammarBody {
             grammar: self,
             kinds: self.bodies.get(node.kind().index() as usize)?,
@@ -224,6 +231,43 @@ impl Grammar {
         crate::ast::assign(node, body)
             .find(|(i, _)| *i == index)
             .map(|(_, e)| e)
+    }
+
+    /// What is wrong with the roles of a grammar that declared `roles`: a node kind with no role
+    /// tag and no `#opaque`, an opaque one with a role, a role whose required fields its body
+    /// lacks. Empty for a grammar that did not opt in.
+    pub fn check_roles(&self) -> Vec<String> {
+        let mut errors = Vec::new();
+        if !self.requires_roles {
+            return errors;
+        }
+        for n in &self.nodes {
+            let roles: Vec<_> = n
+                .tags
+                .iter()
+                .filter_map(|t| crate::roles::role(t))
+                .collect();
+            let opaque = n.has_tag(crate::roles::OPAQUE);
+            match (roles.is_empty(), opaque) {
+                (true, false) => errors.push(format!("{}: no role and not #opaque", n.name)),
+                (false, true) => errors.push(format!("{}: #opaque with a role", n.name)),
+                _ => {}
+            }
+            for r in roles {
+                for (field, required) in r.fields() {
+                    let has = n.body.iter().any(|i| {
+                        i.label.as_deref() == Some(field) || i.field.as_deref() == Some(field)
+                    });
+                    if required && !has {
+                        errors.push(format!(
+                            "{}: role #{} needs field `{field}`",
+                            n.name, r.name
+                        ));
+                    }
+                }
+            }
+        }
+        errors
     }
 
     pub fn parse(source: &str) -> Result<Grammar, GrammarError> {
