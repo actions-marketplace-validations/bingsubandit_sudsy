@@ -42,20 +42,34 @@ pub fn required(element: &str) -> impl Iterator<Item = &'static str> {
 }
 
 /// The values `attr` of `element` is limited to, when the metadata lists them (`[enum]` items are
-/// `[element,element:]attribute=value|value`; an item for the element wins over a global one).
-pub fn allowed(element: &str, attr: &str) -> Option<Vec<&'static str>> {
-    let items = || TABLES.get("enum").into_iter().flatten();
-    let found = |specific: bool| {
-        items().find_map(|i| {
-            let (key, values) = i.split_once('=')?;
-            let hit = match key.rsplit_once(':') {
-                Some((elements, a)) => {
-                    specific && a == attr && elements.split(',').any(|e| e == element)
-                }
-                None => !specific && key == attr,
-            };
-            hit.then(|| values.split('|').collect())
-        })
-    };
-    found(true).or_else(|| found(false))
+/// `[element,element:]attribute=value|value`; an item for the element wins over a global one),
+/// as `a|b|c`.
+pub fn allowed(element: &str, attr: &str) -> Option<&'static str> {
+    /// The `[enum]` items sorted by attribute: attribute, elements of the item (none: global), values.
+    static ENUMS: LazyLock<Vec<(&'static str, Option<&'static str>, &'static str)>> =
+        LazyLock::new(|| {
+            let mut items: Vec<_> = TABLES
+                .get("enum")
+                .into_iter()
+                .flatten()
+                .filter_map(|item| {
+                    let (key, values) = item.split_once('=')?;
+                    Some(match key.rsplit_once(':') {
+                        Some((elements, attr)) => (attr, Some(elements), values),
+                        None => (key, None, values),
+                    })
+                })
+                .collect();
+            items.sort_unstable();
+            items
+        });
+    let start = ENUMS.partition_point(|i| i.0 < attr);
+    let items = &ENUMS[start..];
+    let items = &items[..items.partition_point(|i| i.0 == attr)];
+    let specific = items
+        .iter()
+        .find(|i| i.1.is_some_and(|e| e.split(',').any(|x| x == element)));
+    specific
+        .or_else(|| items.iter().find(|i| i.1.is_none()))
+        .map(|i| i.2)
 }

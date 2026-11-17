@@ -125,7 +125,7 @@ impl Rule for Meta {
                         _ => meta::allowed(&name, &a.name).is_some_and(|allowed| {
                             a.value.is_some()
                                 && !value.is_empty()
-                                && !allowed.iter().any(|v| v.eq_ignore_ascii_case(value))
+                                && !allowed.split('|').any(|v| v.eq_ignore_ascii_case(value))
                         }),
                     };
                     if wrong {

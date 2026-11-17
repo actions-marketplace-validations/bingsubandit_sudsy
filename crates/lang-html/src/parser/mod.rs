@@ -16,6 +16,7 @@ use crate::generated::kind as k;
 use core_syntax::SyntaxKind;
 use provider_api::adapter::{Kinds, Node, Tok, replay};
 use provider_api::{ParseError, ParseResult};
+use std::borrow::Cow;
 
 /// Deeper nesting of elements is an error: the elements below are not nested any more, which
 /// bounds the recursion of the formatter and of tree destruction.
@@ -114,9 +115,18 @@ struct P<'a> {
     /// A Vue file that is an HTML page (a doctype or an `html` root): no blocks.
     page: bool,
     /// The last void element: its node, the token count after it and its lowercase name.
-    last_void: Option<(usize, usize, String)>,
+    last_void: Option<(usize, usize, Cow<'a, str>)>,
     /// Angular: the end of the CDATA section being read; 0 outside one.
     cdata: usize,
+}
+
+/// The ASCII-lowercase name; borrowed unless it has upper-case letters.
+fn lowercase(s: &str) -> Cow<'_, str> {
+    if s.bytes().any(|b| b.is_ascii_uppercase()) {
+        Cow::Owned(s.to_ascii_lowercase())
+    } else {
+        Cow::Borrowed(s)
+    }
 }
 
 fn is_ws(b: u8) -> bool {
@@ -408,10 +418,11 @@ impl<'a> P<'a> {
     fn start_tag(&mut self) {
         let start = self.pos;
         let name_end = self.name_end(start + 1);
-        let lower = self.src[start + 1..name_end].to_ascii_lowercase();
+        let src = self.src;
+        let lower = lowercase(&src[start + 1..name_end]);
         // The start tag closes what it cannot be inside.
         while let Some(&(Open::Element(s, e), node)) = self.stack.last() {
-            let parent = self.src[s as usize..e as usize].to_ascii_lowercase();
+            let parent = lowercase(&src[s as usize..e as usize]);
             if !tags::closes(&parent, &lower) {
                 break;
             }
@@ -433,8 +444,8 @@ impl<'a> P<'a> {
             self.error(start, name_end, "elements are nested too deeply");
         }
         let raw = match self.mode {
-            Mode::Html => matches!(lower.as_str(), "script" | "style" | "textarea" | "title"),
-            _ => matches!(lower.as_str(), "script" | "style"),
+            Mode::Html => matches!(&*lower, "script" | "style" | "textarea" | "title"),
+            _ => matches!(&*lower, "script" | "style"),
         } || (self.mode == Mode::Vue && root && lower != "template");
         if self_closing
             || nested_too_deep
@@ -443,7 +454,7 @@ impl<'a> P<'a> {
                 && (self.mode != Mode::Svelte && self.mode != Mode::Vue
                     || self.src[start + 1..name_end] == lower))
         {
-            if self_closing && raw && matches!(lower.as_str(), "script" | "style") {
+            if self_closing && raw && matches!(&*lower, "script" | "style") {
                 self.error(
                     start,
                     self.pos,
@@ -457,8 +468,7 @@ impl<'a> P<'a> {
         self.stack
             .push((Open::Element(start as u32 + 1, name_end as u32), element));
         if raw {
-            let custom =
-                self.mode == Mode::Vue && root && !matches!(lower.as_str(), "script" | "style");
+            let custom = self.mode == Mode::Vue && root && !matches!(&*lower, "script" | "style");
             self.raw_text(&lower, custom);
         }
     }
@@ -561,8 +571,7 @@ impl<'a> P<'a> {
         }
         // (a self-closed Angular element is complete: its end tag stands beside it)
         if let Some(el) = void_own.filter(|_| {
-            self.mode != Mode::Angular
-                || tags::is_void(&self.src[name..name_end].to_ascii_lowercase())
+            self.mode != Mode::Angular || tags::is_void(&lowercase(&self.src[name..name_end]))
         }) {
             self.close(el);
         }
