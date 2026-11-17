@@ -41,3 +41,35 @@ workspace = true
 [[test]]
 name = "integration"
 path = "tests/main.rs"
+
+# `cargo binstall --git https://github.com/bingsubandit/sudsy sudsy` downloads the release archive of the
+# platform (names: scripts/package-cli.sh) and installs the executable only; C# also needs the
+# `csharp-worker/` directory of the archive (docs/development/ci-release.md).
+[package.metadata.binstall]
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
+pkg-url = "https://github.com/bingsubandit/sudsy/releases/download/v{ version }/sudsy-{ version }-linux-x64.tar.gz"
+bin-dir = "sudsy-{ version }-linux-x64/{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.aarch64-unknown-linux-gnu]
+pkg-url = "https://github.com/bingsubandit/sudsy/releases/download/v{ version }/sudsy-{ version }-linux-arm64.tar.gz"
+bin-dir = "sudsy-{ version }-linux-arm64/{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-url = "https://github.com/bingsubandit/sudsy/releases/download/v{ version }/sudsy-{ version }-darwin-x64.tar.gz"
+bin-dir = "sudsy-{ version }-darwin-x64/{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.aarch64-apple-darwin]
+pkg-url = "https://github.com/bingsubandit/sudsy/releases/download/v{ version }/sudsy-{ version }-darwin-arm64.tar.gz"
+bin-dir = "sudsy-{ version }-darwin-arm64/{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "https://github.com/bingsubandit/sudsy/releases/download/v{ version }/sudsy-{ version }-win32-x64.zip"
+bin-dir = "sudsy-{ version }-win32-x64/{ bin }{ binary-ext }"
+pkg-fmt = "zip"
+
+[package.metadata.binstall.overrides.aarch64-pc-windows-msvc]
+pkg-url = "https://github.com/bingsubandit/sudsy/releases/download/v{ version }/sudsy-{ version }-win32-arm64.zip"
+bin-dir = "sudsy-{ version }-win32-arm64/{ bin }{ binary-ext }"
+pkg-fmt = "zip"

@@ -204,11 +204,26 @@ jobs:
           path: editors/vscode/*.vsix
           retention-days: 3
 
+  # Dry run of the package-manager packages (npm, PyPI, Homebrew, Scoop, winget) from the latest
+  # published release's assets; publishes nothing (publish.yml does, by hand).
+  packages:
+    needs: changes
+    if: needs.changes.outputs.package == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+      - run: scripts/package-dry-run.sh
+
   # The one required check: green when every job that ran passed (skipped jobs are fine).
   ci:
     name: CI ok
     if: always()
-    needs: [changes, dco, cost, rust, windows, bench, dotnet, vscode, package]
+    needs: [changes, dco, cost, rust, windows, bench, dotnet, vscode, package, packages]
     runs-on: ubuntu-latest
     steps:
       - run: test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = false

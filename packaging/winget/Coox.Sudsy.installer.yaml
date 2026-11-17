@@ -1,0 +1,21 @@
+PackageIdentifier: Coox.Sudsy
+PackageVersion: @VERSION@
+InstallerType: zip
+NestedInstallerType: portable
+Commands:
+- sudsy
+Installers:
+- Architecture: x64
+  InstallerUrl: @URL win32-x64@
+  InstallerSha256: @SHA win32-x64@
+  NestedInstallerFiles:
+  - RelativeFilePath: sudsy-@VERSION@-win32-x64\sudsy.exe
+    PortableCommandAlias: sudsy
+- Architecture: arm64
+  InstallerUrl: @URL win32-arm64@
+  InstallerSha256: @SHA win32-arm64@
+  NestedInstallerFiles:
+  - RelativeFilePath: sudsy-@VERSION@-win32-arm64\sudsy.exe
+    PortableCommandAlias: sudsy
+ManifestType: installer
+ManifestVersion: 1.6.0

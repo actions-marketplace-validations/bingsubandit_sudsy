@@ -1,0 +1,41 @@
+{
+    "version": "@VERSION@",
+    "description": "Formatter and linter for C#, JSON, YAML and more",
+    "homepage": "https://github.com/bingsubandit/sudsy",
+    "license": "MIT",
+    "notes": "Formatting C# needs the .NET 10 runtime.",
+    "architecture": {
+        "64bit": {
+            "url": "@URL win32-x64@",
+            "hash": "@SHA win32-x64@",
+            "extract_dir": "sudsy-@VERSION@-win32-x64"
+        },
+        "arm64": {
+            "url": "@URL win32-arm64@",
+            "hash": "@SHA win32-arm64@",
+            "extract_dir": "sudsy-@VERSION@-win32-arm64"
+        }
+    },
+    "bin": "sudsy.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/bingsubandit/sudsy/releases/download/v$version/sudsy-$version-win32-x64.zip",
+                "hash": {
+                    "url": "https://github.com/bingsubandit/sudsy/releases/download/v$version/SHA256SUMS",
+                    "regex": "$sha256\\s+sudsy-$version-win32-x64\\.zip"
+                },
+                "extract_dir": "sudsy-$version-win32-x64"
+            },
+            "arm64": {
+                "url": "https://github.com/bingsubandit/sudsy/releases/download/v$version/sudsy-$version-win32-arm64.zip",
+                "hash": {
+                    "url": "https://github.com/bingsubandit/sudsy/releases/download/v$version/SHA256SUMS",
+                    "regex": "$sha256\\s+sudsy-$version-win32-arm64\\.zip"
+                },
+                "extract_dir": "sudsy-$version-win32-arm64"
+            }
+        }
+    }
+}

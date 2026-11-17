@@ -1,0 +1,172 @@
+name: Publish packages
+
+# Started by hand on a release tag (Run workflow, pick the tag), with one input ticked per channel.
+# It renders the packages from the assets of the published GitHub release of that tag
+# (scripts/package-channels.py), so publish the draft release first. Nothing runs on a tag push.
+# A channel whose secret is missing is skipped with a warning. Setup per channel:
+# docs/development/ci-release.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm:
+        description: "npm: sudsy and @sudsy/cli-* (secret NPM_TOKEN)"
+        type: boolean
+        default: false
+      pypi:
+        description: "PyPI: sudsy wheels (trusted publisher, no secret)"
+        type: boolean
+        default: false
+      homebrew:
+        description: "Homebrew tap bingsubandit/homebrew-sudsy (secret HOMEBREW_TAP_TOKEN)"
+        type: boolean
+        default: false
+      scoop:
+        description: "Scoop bucket bingsubandit/scoop-sudsy (secret SCOOP_BUCKET_TOKEN)"
+        type: boolean
+        default: false
+      winget:
+        description: "winget: pull request to microsoft/winget-pkgs (secret WINGET_TOKEN)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  TAG: ${{ github.ref_name }}
+
+jobs:
+  npm:
+    if: inputs.npm && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Needs NPM_TOKEN
+        id: s
+        run: if [ -n "$NODE_AUTH_TOKEN" ]; then echo ok=true >> "$GITHUB_OUTPUT"; else echo "::warning::NPM_TOKEN is not set; npm skipped"; fi
+      - if: steps.s.outputs.ok
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: steps.s.outputs.ok
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - if: steps.s.outputs.ok
+        run: python3 scripts/package-channels.py npm "${TAG#v}" assets out "$TAG"
+      # Platform packages first, so `sudsy` never points at a version that is not there yet.
+      - if: steps.s.outputs.ok
+        run: |
+          next=""
+          case "$TAG" in *-*) next="--tag next" ;; esac
+          for dir in out/npm/cli-* out/npm/sudsy; do
+            npm publish "$dir" --provenance --access public $next
+          done
+
+  pypi:
+    if: inputs.pypi && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # trusted publishing
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - run: python3 scripts/package-channels.py pypi "${TAG#v}" assets out "$TAG"
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: out/pypi
+
+  homebrew:
+    if: inputs.homebrew && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    env:
+      TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - name: Needs HOMEBREW_TAP_TOKEN
+        id: s
+        run: if [ -n "$TAP_TOKEN" ]; then echo ok=true >> "$GITHUB_OUTPUT"; else echo "::warning::HOMEBREW_TAP_TOKEN is not set; Homebrew skipped"; fi
+      - if: steps.s.outputs.ok
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: steps.s.outputs.ok
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: bingsubandit/homebrew-sudsy
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+      - if: steps.s.outputs.ok
+        run: |
+          python3 scripts/package-channels.py homebrew "${TAG#v}" assets out "$TAG"
+          cp -r out/homebrew/Formula tap/
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/sudsy.rb
+          git commit -m "sudsy ${TAG#v}"
+          git push
+
+  scoop:
+    if: inputs.scoop && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    env:
+      BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+    steps:
+      - name: Needs SCOOP_BUCKET_TOKEN
+        id: s
+        run: if [ -n "$BUCKET_TOKEN" ]; then echo ok=true >> "$GITHUB_OUTPUT"; else echo "::warning::SCOOP_BUCKET_TOKEN is not set; Scoop skipped"; fi
+      - if: steps.s.outputs.ok
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: steps.s.outputs.ok
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: bingsubandit/scoop-sudsy
+          token: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          path: bucket
+      - if: steps.s.outputs.ok
+        run: |
+          python3 scripts/package-channels.py scoop "${TAG#v}" assets out "$TAG"
+          cp -r out/scoop/bucket/. bucket/bucket/
+          cd bucket
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bucket/sudsy.json
+          git commit -m "sudsy ${TAG#v}"
+          git push
+
+  # Pushes the manifests to a fork of microsoft/winget-pkgs and opens the pull request. The fork
+  # is made on the first run, by the owner of WINGET_TOKEN.
+  winget:
+    if: inputs.winget && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - name: Needs WINGET_TOKEN
+        id: s
+        run: if [ -n "$WINGET_TOKEN" ]; then echo ok=true >> "$GITHUB_OUTPUT"; else echo "::warning::WINGET_TOKEN is not set; winget skipped"; fi
+      - if: steps.s.outputs.ok
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: steps.s.outputs.ok
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          version="${TAG#v}"
+          python3 scripts/package-channels.py winget "$version" assets out "$TAG"
+          owner=$(gh api user -q .login)
+          gh repo fork microsoft/winget-pkgs --clone=false || true
+          git clone --depth 1 "https://x-access-token:$WINGET_TOKEN@github.com/$owner/winget-pkgs.git" fork
+          cd fork
+          git checkout -b "sudsy-$version"
+          cp -r ../out/winget/manifests .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifests
+          git commit -m "New version: Coox.Sudsy version $version"
+          git push origin "sudsy-$version"
+          gh pr create --repo microsoft/winget-pkgs --head "$owner:sudsy-$version" \
+            --title "New version: Coox.Sudsy version $version" \
+            --body "Sudsy $version, rendered from the release assets by scripts/package-channels.py."
