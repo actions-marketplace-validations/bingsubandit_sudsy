@@ -1,0 +1,27 @@
+# Parser crates (dependencies of lang-* crates whose name starts with a prefix) may be named only in
+# adapter.rs, adapter/ or a generated file; the files below still do. The list may only shrink.
+prefix oxc
+prefix ruff
+prefix sqruff
+prefix rezel
+prefix ktrs
+prefix mago
+prefix tree-sitter
+allow crates/lang-html/src/angular.rs
+allow crates/lang-html/src/dialect.rs
+allow crates/lang-html/src/format/print/angular.rs
+allow crates/lang-js/src/rules/imports.rs
+allow crates/lang-js/src/rules/scope.rs
+allow crates/lang-js/src/rules/shadow.rs
+allow crates/lang-js/src/rules/unused.rs
+allow crates/lang-js/src/semantic.rs
+allow crates/lang-markdown/src/mapping.rs
+allow crates/lang-python/src/analysis/checker.rs
+allow crates/lang-python/src/analysis/checker/lints.rs
+allow crates/lang-python/src/analysis/dot_format.rs
+allow crates/lang-python/src/analysis/finish.rs
+allow crates/lang-python/src/analysis/formats.rs
+allow crates/lang-python/src/analysis/mod.rs
+allow crates/lang-python/src/analysis/model.rs
+allow crates/lang-python/src/analysis/semantic.rs
+allow crates/lang-python/src/analysis/syntax.rs

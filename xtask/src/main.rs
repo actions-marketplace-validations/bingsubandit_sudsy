@@ -14,6 +14,7 @@ fn main() -> Result<()> {
             full(&["codegen"])
         }
         ["codegen", "--check"] => {
+            xtask::parser_imports(&xtask::repo_root())?;
             // Stage 2 builds the languages, which stale glue would break: report that first.
             let stale = xtask::stale(xtask::generate()?);
             if !stale.is_empty() {

@@ -9,10 +9,12 @@ mod lang_crate;
 mod mapping;
 mod new_rule;
 mod options;
+mod parser_imports;
 mod registry;
 
 pub use css_data::generate as css_data;
 pub use new_rule::new_rule;
+pub use parser_imports::check as parser_imports;
 
 use anyhow::{Context, Result, ensure};
 use core_syntax::{Grammar, codegen};
