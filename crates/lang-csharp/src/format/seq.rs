@@ -12,6 +12,7 @@ use super::spacing;
 use super::tags::{self, Tag};
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc};
+use core_format::shapes::paren_group;
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -371,26 +372,6 @@ fn has_paren_condition(kind: SyntaxKind) -> bool {
     )
 }
 
-/// `( expr )` where the expression may move to its own, indented line.
-pub fn paren_group(
-    cx: &FormatCtx<'_>,
-    open: &SyntaxToken,
-    expr: &SyntaxNode,
-    close: &SyntaxToken,
-) -> R {
-    // A comment after the closing parenthesis must not make the group break.
-    Ok(doc::concat(vec![
-        doc::group(doc::concat(vec![
-            cx.token(open),
-            doc::indent(doc::concat(vec![doc::softline(), cx.format(expr)?])),
-            doc::softline(),
-            cx.leading_comments_doc(close),
-            cx.token_text(close),
-        ])),
-        cx.trailing_comments_doc(close),
-    ]))
-}
-
 /// `label:` moved out by `label_indent`, then the labeled statement on the next line.
 pub fn labeled_statement(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let els = sig(cx, node);
@@ -450,25 +431,13 @@ pub fn seq_of(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R
             _ => None,
         };
         let body = match (condition, foreach_close) {
-            (Some((open, expr, close)), _) => paren_group(cx, open, expr, close)?,
+            (Some((open, expr, close)), _) => paren_group(cx, open, || cx.format(expr), close)?,
             (None, Some(n)) => {
                 let (SyntaxElement::Token(open), SyntaxElement::Token(close)) = (e, &els[i + n])
                 else {
                     unreachable!("a parenthesis token")
                 };
-                doc::concat(vec![
-                    doc::group(doc::concat(vec![
-                        cx.token(open),
-                        doc::indent(doc::concat(vec![
-                            doc::softline(),
-                            seq_of(cx, node, &els[i + 1..i + n])?,
-                        ])),
-                        doc::softline(),
-                        cx.leading_comments_doc(close),
-                        cx.token_text(close),
-                    ])),
-                    cx.trailing_comments_doc(close),
-                ])
+                paren_group(cx, open, || seq_of(cx, node, &els[i + 1..i + n]), close)?
             }
             (None, None) => element_doc(cx, e)?,
         };

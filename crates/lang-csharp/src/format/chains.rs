@@ -2,7 +2,7 @@
 //! and the conditional operator.
 
 use super::options::fluid_assignments;
-use super::seq::{R, paren_group, seq_of, sig};
+use super::seq::{R, seq_of, sig};
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc};
 use core_format::shapes::{self, ChainPolicy, ends_in_line_comment};
@@ -175,16 +175,11 @@ pub fn conditional(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 }
 
 pub fn parenthesized(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = sig(cx, node);
-    let [
-        SyntaxElement::Token(open),
-        SyntaxElement::Node(expr),
-        SyntaxElement::Token(close),
-    ] = els.as_slice()
-    else {
-        return Err(shape("parenthesized expression: unexpected children"));
+    const POLICY: shapes::ParenPolicy = shapes::ParenPolicy {
+        layout: shapes::ParenLayout::Group,
+        unneeded: shapes::Unneeded::Keep,
     };
-    paren_group(cx, open, expr, close)
+    shapes::parenthesized(cx, node, &POLICY, &shapes::NoParenHooks)
 }
 
 // ------------------------------------------------------------------- binary

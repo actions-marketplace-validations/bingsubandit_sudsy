@@ -143,6 +143,11 @@ pub const ROLES: &[Role] = &[
         doc: "a constant written in the source",
     },
     Role {
+        name: "parenthesized",
+        fields: "",
+        doc: "`(` one expression `)`",
+    },
+    Role {
         name: "scope",
         fields: "",
         doc: "names declared inside are not visible outside",

@@ -10,6 +10,7 @@ mod chain;
 mod conditional;
 mod key_value;
 mod list;
+mod parens;
 
 pub use assignment::{
     Assign, AssignHooks, AssignLayout, AssignPolicy, AssignStyle, NoAssignHooks, assignment,
@@ -18,8 +19,8 @@ pub use binary_chain::{
     BinaryHooks, BinaryPolicy, Hug, NoBinaryHooks, OperatorLine, Place, binary_chain, flattens,
 };
 pub use block::{
-    BlockStyle, block, block_between, block_open_inside, document, statement_sequence,
-    statement_sequence_with,
+    BlockStyle, blank_before, block, block_between, block_open_inside, braces, document,
+    statement_sequence, statement_sequence_with,
 };
 pub use call_chain::{CHAIN_LABEL, ChainHooks, ChainPolicy, NoHooks, member_chain as call_chain};
 pub use chain::{MemberChain, ends_in_line_comment, gap_after_operator, member_chain};
@@ -28,6 +29,10 @@ pub use conditional::{
 };
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{ListLayout, ListStyle, TrailingComma, delimited_list, delimited_list_between};
+pub use parens::{
+    Need, NoParenHooks, ParenHooks, ParenLayout, ParenPolicy, Unneeded, binary_needs, first_char,
+    is_dropped_close, paren_group, parenthesized, unwrap, wrap,
+};
 
 use crate::FormatCtx;
 use crate::comments::{self, Comment, CommentKind};
@@ -77,45 +82,60 @@ pub(crate) fn container_between(
     let g = cx.grammar;
     let name = g.name(node.kind());
     let shape = |m: &str| FormatError::Shape(format!("{name}: {m}"));
-    let all: Vec<SyntaxElement> = node
-        .children_with_tokens()
-        .by_kind(|k| !g.is_trivia(k))
-        .collect();
-    let position = |t: &SyntaxToken| {
-        all.iter()
-            .position(|e| matches!(e, SyntaxElement::Token(x) if x == t))
-    };
-    let (first, last) = match bounds {
-        Some((o, c)) => (position(o), position(c)),
-        None => (Some(0), all.len().checked_sub(1)),
-    };
-    let (Some(first), Some(last)) = (first, last) else {
-        return Err(shape("expected an opening and a closing token"));
-    };
-    let (Some(SyntaxElement::Token(open)), Some(SyntaxElement::Token(close))) =
-        (all.get(first), all.get(last))
-    else {
-        return Err(shape("expected an opening and a closing token"));
-    };
-    if first >= last {
-        return Err(shape("expected an opening and a closing token"));
-    }
     let mut slots: Vec<Slot> = Vec::new();
     let mut prefix = None;
-    for e in &all[first + 1..last] {
+    let mut add = |e: SyntaxElement| -> Result<(), FormatError> {
         if slots.is_empty()
             && prefix.is_none()
-            && let SyntaxElement::Node(n) = e
+            && let SyntaxElement::Node(n) = &e
             && g.has_tag(n.kind(), "list-prefix")
         {
             prefix = Some(n.clone());
-            continue;
+            return Ok(());
         }
-        place(g, &mut slots, e.clone()).map_err(|m| shape(&m))?;
-    }
+        place(g, &mut slots, e).map_err(|m| shape(&m))
+    };
+    let mut children = node.children_with_tokens().by_kind(|k| !g.is_trivia(k));
+    let (open, close) = match bounds {
+        // The first and the last element are the delimiters: one pass, no list of the children.
+        None => {
+            let missing = || shape("expected an opening and a closing token");
+            let Some(SyntaxElement::Token(open)) = children.next() else {
+                return Err(missing());
+            };
+            let mut held = children.next().ok_or_else(missing)?;
+            for next in children {
+                add(std::mem::replace(&mut held, next))?;
+            }
+            let SyntaxElement::Token(close) = held else {
+                return Err(missing());
+            };
+            (open, close)
+        }
+        Some((open, close)) => {
+            let missing = || shape("expected an opening and a closing token");
+            let mut inside = false;
+            let mut found = false;
+            for e in children {
+                match &e {
+                    SyntaxElement::Token(t) if t == close && inside => {
+                        found = true;
+                        break;
+                    }
+                    SyntaxElement::Token(t) if t == open => inside = true,
+                    _ if inside => add(e)?,
+                    _ => {}
+                }
+            }
+            if !found {
+                return Err(missing());
+            }
+            (open.clone(), close.clone())
+        }
+    };
     Ok(Container {
-        open: open.clone(),
-        close: close.clone(),
+        open,
+        close,
         prefix,
         slots,
     })
@@ -131,6 +151,8 @@ fn place(g: &Grammar, slots: &mut Vec<Slot>, e: SyntaxElement) -> Result<(), Str
                 None => return Err("separator without a preceding item".into()),
             }
         }
+        // `;` after a statement: not an item, and not kept.
+        SyntaxElement::Token(t) if g.has_tag(t.kind(), "stray") => {}
         SyntaxElement::Token(t) => return Err(format!("unexpected token `{}`", t.text())),
     }
     Ok(())
@@ -160,19 +182,20 @@ fn no_tokens() -> FormatError {
 fn leading_info(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
-) -> Result<(usize, Option<IgnoreMark>), FormatError> {
+) -> Result<(usize, Option<IgnoreMark>, bool), FormatError> {
     let g = cx.grammar;
     let lead = comments::node_leading(g, node);
     if !lead.has_tokens {
         return Err(no_tokens());
     }
     if !lead.has_comment {
-        return Ok((lead.blank_lines, None));
+        return Ok((lead.blank_lines, None, false));
     }
     let tok = cx.first_token(node).ok_or_else(no_tokens)?;
     Ok((
         comments::blank_lines_before(g, &tok),
         ignore::mark_in(g, &comments::leading_comments(g, &tok)),
+        true,
     ))
 }
 
@@ -185,7 +208,7 @@ pub(crate) fn render_slots(
     let mut out = Vec::with_capacity(slots.len());
     let mut i = 0;
     while i < slots.len() {
-        let (blank_before, mark) = leading_info(cx, &slots[i].node)?;
+        let (blank_before, mark, commented) = leading_info(cx, &slots[i].node)?;
         if mark == Some(IgnoreMark::Start) {
             let mut j = i;
             while j + 1 < slots.len()
@@ -209,7 +232,7 @@ pub(crate) fn render_slots(
                 first: slots[i].node.clone(),
                 last: slots[i].node.clone(),
                 blank_before,
-                doc: cx.format(&slots[i].node)?,
+                doc: cx.format_known(&slots[i].node, commented)?,
                 verbatim: mark == Some(IgnoreMark::Ignore),
                 sep: slots[i].sep.clone(),
             });
@@ -230,14 +253,18 @@ pub(crate) fn gap(
     max_blank: usize,
     force_blank: Option<BlankRule>,
 ) -> Doc {
-    let (prev_d, next_d) = (cx.directives_of(&prev.first), cx.directives_of(&next.first));
-    let required = next_d.blank_lines_before().or_else(|| {
+    let has_directives = !cx.directives.is_empty();
+    let (prev_d, next_d) = (
+        has_directives.then(|| cx.directives_of(&prev.first)),
+        has_directives.then(|| cx.directives_of(&next.first)),
+    );
+    let required = next_d.and_then(|d| d.blank_lines_before()).or_else(|| {
         force_blank
             .is_some_and(|rule| rule(cx, &prev.last, &next.first))
             .then_some(1)
     });
-    let forced = next_d.has(&Directive::BreakBefore)
-        || prev_d.has(&Directive::BreakAfter)
+    let forced = next_d.is_some_and(|d| d.has(&Directive::BreakBefore))
+        || prev_d.is_some_and(|d| d.has(&Directive::BreakAfter))
         || required.is_some_and(|n| n > 0);
     let hard_base = matches!(base, Doc::HardLine);
     let blank = required.unwrap_or_else(|| next.blank_before.min(max_blank));

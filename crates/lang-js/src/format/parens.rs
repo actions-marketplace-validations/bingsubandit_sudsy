@@ -1,99 +1,53 @@
-//! Parentheses: which a node needs (Prettier's `needsParens`), and the printing of the ones the
-//! source has. The tree keeps `ParenthesizedExpression` (`#transparent` for the safety check): a
-//! kept pair is printed as written, an unneeded pair is left out, and a node that needs a pair the
-//! source lacks gets one around its printed document.
+//! Parentheses: which a node needs (Prettier's `needsParens`), on top of the shared parentheses
+//! shape (`core_format::shapes::parens`). The tree keeps `ParenthesizedExpression` (`#transparent`
+//! for the safety check): a kept pair is printed as written, an unneeded pair is left out, and a
+//! node that needs a pair the source lacks gets one around its printed document.
 
 use super::ast::{is_binaryish, is_member, operator_text, outer, parent, starts_with, un};
-use super::util::{kids, shape_error, token_of};
 use crate::generated::kind as k;
-use core_format::doc::{Doc, concat, lit};
-use core_format::shapes::flattens;
+use core_format::doc::Doc;
+use core_format::shapes::{
+    self, ParenHooks, ParenLayout, ParenPolicy, Unneeded, binary_needs, is_dropped_close as dropped,
+};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub(crate) enum Need {
-    Yes,
-    No,
-    /// A kind this step does not decide on (TypeScript): the source's parentheses stay.
-    Keep,
-}
+pub(crate) use shapes::Need;
 
-pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, FormatError> {
-    if node.kind() != k::PARENTHESIZED_EXPRESSION {
-        return Ok(None);
+const POLICY: ParenPolicy = ParenPolicy {
+    layout: ParenLayout::Flat,
+    unneeded: Unneeded::Drop,
+};
+
+struct Hooks;
+
+impl ParenHooks for Hooks {
+    fn needs(&self, cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
+        needs_parens(cx, node)
     }
-    let elems = kids(cx, node);
-    let (Some(open), Some(close)) = (
-        elems.first().and_then(token_of),
-        elems.last().and_then(token_of),
-    ) else {
-        return Err(shape_error("parentheses"));
-    };
-    let child = node
-        .children()
-        .next()
-        .ok_or_else(|| shape_error("parentheses"))?;
-    let commented = commented_pair(cx, open, close);
-    let nested = node
-        .parent()
-        .is_some_and(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
-    let keep = commented || (!nested && needs_parens(cx, &un(node)) != Need::No);
-    if !keep {
-        return Ok(Some(concat(vec![
-            cx.leading_comments_doc(open),
-            cx.trailing_comments_doc(open),
-            cx.format(&child)?,
-            cx.trailing_comments_doc(close),
-        ])));
+
+    /// A type cast (`/** @type {T} */ (x)`) ties the pair to its expression.
+    fn tied(&self, cx: &FormatCtx<'_>, open: &SyntaxToken) -> bool {
+        core_format::comments::leading_comments(cx.grammar, open)
+            .last()
+            .is_some_and(|c| {
+                let t = c.text();
+                t.starts_with("/**") && (t.contains("@type") || t.contains("@satisfies"))
+            })
     }
-    Ok(Some(concat(vec![
-        cx.token(open),
-        cx.format(&child)?,
-        cx.token(close),
-    ])))
+
+    fn addable(&self, cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+        match node.kind() {
+            k::IDENTIFIER_REFERENCE => is_let(cx, node),
+            kind => addable(kind),
+        }
+    }
 }
 
-/// Does a comment tie the source's parentheses to their expression? One inside the pair does, and
-/// so does a type cast (`/** @type {T} */ (x)`); other comments in front belong to the statement.
-fn commented_pair(cx: &FormatCtx<'_>, open: &SyntaxToken, close: &SyntaxToken) -> bool {
-    use core_format::comments;
-    let cast = comments::leading_comments(cx.grammar, open)
-        .last()
-        .is_some_and(|c| {
-            let t = c.text();
-            t.starts_with("/**") && (t.contains("@type") || t.contains("@satisfies"))
-        });
-    // (a line comment after `(` moves out with the pair)
-    cast || comments::trailing_comments(cx.grammar, open)
-        .iter()
-        .any(|c| c.kind != comments::CommentKind::Line)
-        || !comments::leading_comments(cx.grammar, close).is_empty()
-}
-
-/// Is `close` the `)` of a pair that is left out of the output (`format` above)?
-pub(crate) fn is_dropped_close(cx: &FormatCtx<'_>, close: &SyntaxToken) -> bool {
-    let Some(paren) = close
-        .parent()
-        .filter(|p| p.kind() == k::PARENTHESIZED_EXPRESSION)
-    else {
-        return false;
-    };
-    let Some(open) = paren.first_token() else {
-        return false;
-    };
-    let nested = paren
-        .parent()
-        .is_some_and(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
-    close.kind() == k::R_PAREN
-        && !commented_pair(cx, &open, close)
-        && (nested || needs_parens(cx, &un(&paren)) == Need::No)
-}
-
-/// `doc` of `node` in the parentheses it needs when the source has none.
-pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
-    let addable = matches!(
-        node.kind(),
+/// The kinds that get parentheses when they need them and the source has none.
+fn addable(kind: SyntaxKind) -> bool {
+    matches!(
+        kind,
         k::BINARY_EXPRESSION
             | k::LOGICAL_EXPRESSION
             | k::UNARY_EXPRESSION
@@ -103,7 +57,6 @@ pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
             | k::SEQUENCE_EXPRESSION
             | k::ASSIGNMENT_EXPRESSION
             | k::CONDITIONAL_EXPRESSION
-            | k::IDENTIFIER_REFERENCE
             | k::ARROW_FUNCTION_EXPRESSION
             | k::FUNCTION
             | k::CLASS
@@ -121,54 +74,29 @@ pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
             | k::TS_AS_EXPRESSION
             | k::TS_SATISFIES_EXPRESSION
             | k::TS_TYPE_ASSERTION
-    );
-    let held = node
-        .parent()
-        .is_none_or(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
-    if !addable
-        || held
-        || (node.kind() == k::IDENTIFIER_REFERENCE && !is_let(cx, node))
-        || needs_parens(cx, node) != Need::Yes
-    {
-        return doc;
+    )
+}
+
+pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc>, FormatError> {
+    if node.kind() != k::PARENTHESIZED_EXPRESSION {
+        return Ok(None);
     }
-    concat(vec![lit("("), doc, lit(")")])
+    shapes::parenthesized(cx, node, &POLICY, &Hooks).map(Some)
+}
+
+/// Is `close` the `)` of a pair that is left out of the output?
+pub(crate) fn is_dropped_close(cx: &FormatCtx<'_>, close: &SyntaxToken) -> bool {
+    dropped(cx, close, &POLICY, &Hooks)
+}
+
+/// `doc` of `node` in the parentheses it needs when the source has none.
+pub(crate) fn wrap(node: &SyntaxNode, cx: &FormatCtx<'_>, doc: Doc) -> Doc {
+    shapes::wrap(cx, node, doc, &POLICY, &Hooks)
 }
 
 /// The first character the printed `node` starts with (a kept or added parenthesis counts).
 pub(crate) fn first_char(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<char> {
-    let mut n = node.clone();
-    loop {
-        if n.kind() == k::PARENTHESIZED_EXPRESSION {
-            let inner = un(&n);
-            let commented = kids(cx, &n)
-                .first()
-                .and_then(token_of)
-                .zip(kids(cx, &n).last().and_then(token_of))
-                .is_some_and(|(o, c)| commented_pair(cx, o, c));
-            let nested = n
-                .parent()
-                .is_some_and(|p| p.kind() == k::PARENTHESIZED_EXPRESSION);
-            if commented || (!nested && needs_parens(cx, &inner) != Need::No) {
-                return Some('(');
-            }
-            n = n.first_child()?;
-            continue;
-        }
-        if n.parent()
-            .is_some_and(|p| p.kind() != k::PARENTHESIZED_EXPRESSION)
-            && needs_parens(cx, &n) == Need::Yes
-        {
-            return Some('(');
-        }
-        match n
-            .children_with_tokens()
-            .find(|e| !cx.grammar.is_trivia(e.kind()))?
-        {
-            core_syntax::SyntaxElement::Node(c) => n = c,
-            core_syntax::SyntaxElement::Token(t) => return t.text().chars().next(),
-        }
-    }
+    shapes::first_char(cx, node, &POLICY, &Hooks)
 }
 
 /// The kinds that are declarations when they stand where a statement does.
@@ -356,17 +284,7 @@ pub(crate) fn needs_parens(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Need {
                     if pk == k::LOGICAL_EXPRESSION && kind == k::LOGICAL_EXPRESSION {
                         return yes(pop != op);
                     }
-                    let level = |o: &str| cx.grammar.precedence(o).map_or(0, |p| p.level);
-                    let (np, pp) = (level(&op), level(&pop));
-                    // The left side of a chain of one precedence prints without its own parentheses.
-                    if first && pp == np && flattens(cx.grammar, &pop, &op) {
-                        return Need::No;
-                    }
-                    yes(pp > np
-                        || (pp == np && !first)
-                        || (pp == np && !flattens(cx.grammar, &pop, &op))
-                        || (pp < np && op == "%" && (pop == "+" || pop == "-"))
-                        || cx.grammar.operator_kind(&pop) == Some("bitwise"))
+                    binary_needs(cx.grammar, &pop, &op, first, true)
                 }
                 _ => Need::No,
             }

@@ -49,7 +49,7 @@ token LBracket "[" #punctuation #glue
 token RBracket "]" #punctuation
 token Lt "<" #punctuation #operator
 token Gt ">" #punctuation #operator
-token Semi ";" #punctuation
+token Semi ";" #punctuation #stray
 token Comma "," #punctuation #separator #glue
 token Dot "." #punctuation
 token Colon ":" #punctuation

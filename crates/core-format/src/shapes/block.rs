@@ -19,6 +19,8 @@ pub struct BlockStyle {
     pub expand_empty: bool,
     /// Items that share a source line (no comment between) stay on one line, separated by a space.
     pub keep_same_line: bool,
+    /// A blank line after the opening delimiter stays.
+    pub keep_leading_blank: bool,
 }
 
 impl Default for BlockStyle {
@@ -29,6 +31,7 @@ impl Default for BlockStyle {
             force_blank: None,
             expand_empty: false,
             keep_same_line: false,
+            keep_leading_blank: false,
         }
     }
 }
@@ -75,67 +78,118 @@ fn block_of(
     open_inside: bool,
 ) -> Result<Doc, FormatError> {
     let g = cx.grammar;
-    let dangling = comments::leading_comments(g, &c.close);
     let moved: Vec<Comment> = if open_inside {
         comments::trailing_comments(g, &c.open)
     } else {
         Vec::new()
     };
-    let opening = if moved.is_empty() {
-        cx.token(&c.open)
-    } else {
-        doc::concat(vec![
-            cx.leading_comments_doc(&c.open),
-            cx.token_text(&c.open),
-        ])
+    let Some(first) = c.slots.first() else {
+        let ends = ends_of(cx, &c.open, &c.close, &moved);
+        return Ok(braces_of(cx, ends, &c.close, None, false, &moved, style));
     };
-    let closing = doc::concat(vec![
-        cx.token_text(&c.close),
-        cx.trailing_comments_doc(&c.close),
-    ]);
-    if c.slots.is_empty() && dangling.is_empty() && moved.is_empty() {
-        return Ok(doc::concat(vec![
+    let lead_blank = if moved.is_empty() {
+        style.keep_leading_blank && blank_before(cx, &first.node)
+    } else {
+        // A blank line after the comment that moved inside stays.
+        cx.first_token(&first.node)
+            .is_some_and(|t| comments::blank_lines_before(g, &t) > 0)
+    };
+    let ends = ends_of(cx, &c.open, &c.close, &moved);
+    let items = sequence_items(
+        cx,
+        render_slots(cx, &c.slots)?,
+        style.max_blank_lines,
+        style.force_blank,
+        style.keep_same_line,
+    );
+    Ok(braces_of(
+        cx,
+        ends,
+        &c.close,
+        Some(items),
+        lead_blank,
+        &moved,
+        style,
+    ))
+}
+
+/// Blank lines the source has in front of the node (comments in front of it excluded).
+pub fn blank_before(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    super::leading_info(cx, node).is_ok_and(|(blank, ..)| blank > 0)
+}
+
+/// `open`, a body already laid out (`None`: nothing in it), `close`, with the comments in front
+/// of `close` inside, after the body. `lead_blank`: a blank line stays after `open`.
+pub fn braces(
+    cx: &FormatCtx<'_>,
+    open: &SyntaxToken,
+    close: &SyntaxToken,
+    body: Option<Doc>,
+    lead_blank: bool,
+    style: &BlockStyle,
+) -> Doc {
+    let ends = ends_of(cx, open, close, &[]);
+    braces_of(cx, ends, close, body, lead_blank, &[], style)
+}
+
+/// The delimiters as printed. Made before the items are, so that the comments they own are
+/// taken in source order.
+struct Ends {
+    opening: Doc,
+    closing: Doc,
+}
+
+fn ends_of(cx: &FormatCtx<'_>, open: &SyntaxToken, close: &SyntaxToken, moved: &[Comment]) -> Ends {
+    let opening = if moved.is_empty() {
+        cx.token(open)
+    } else {
+        doc::concat(vec![cx.leading_comments_doc(open), cx.token_text(open)])
+    };
+    let closing = doc::concat(vec![cx.token_text(close), cx.trailing_comments_doc(close)]);
+    Ends { opening, closing }
+}
+
+fn braces_of(
+    cx: &FormatCtx<'_>,
+    ends: Ends,
+    close: &SyntaxToken,
+    body: Option<Doc>,
+    lead_blank: bool,
+    moved: &[Comment],
+    style: &BlockStyle,
+) -> Doc {
+    let g = cx.grammar;
+    let dangling = comments::leading_comments(g, close);
+    let Ends { opening, closing } = ends;
+    if body.is_none() && dangling.is_empty() && moved.is_empty() {
+        return doc::concat(vec![
             opening,
             if style.expand_empty {
                 doc::hardline()
             } else {
                 doc::lit(style.empty)
             },
-            cx.token_text(&c.close),
-            cx.trailing_comments_doc(&c.close),
-        ]));
+            closing,
+        ]);
     }
-    let mut inner = vec![sequence_items(
-        cx,
-        render_slots(cx, &c.slots)?,
-        style.max_blank_lines,
-        style.force_blank,
-        style.keep_same_line,
-    )];
-    let blank_before = !c.slots.is_empty() && comments::blank_lines_before(g, &c.close) > 0;
-    inner.push(dangling_comments(&dangling, blank_before));
-    let first_hardline = if c.slots.is_empty() {
-        Doc::Nil
-    } else if !moved.is_empty()
-        && cx
-            .first_token(&c.slots[0].node)
-            .is_some_and(|t| comments::blank_lines_before(g, &t) > 0)
-    {
-        // A blank line after the comment that moved inside stays.
-        doc::concat(vec![doc::hardline(), doc::hardline()])
-    } else {
-        doc::hardline()
+    let blank_before_close =
+        !dangling.is_empty() && body.is_some() && comments::blank_lines_before(g, close) > 0;
+    let first_hardline = match (&body, lead_blank) {
+        (None, _) => Doc::Nil,
+        (Some(_), true) => doc::concat(vec![doc::hardline(), doc::hardline()]),
+        (Some(_), false) => doc::hardline(),
     };
-    Ok(doc::concat(vec![
+    doc::concat(vec![
         opening,
         doc::indent(doc::concat(vec![
-            dangling_comments(&moved, false),
+            dangling_comments(moved, false),
             first_hardline,
-            doc::concat(inner),
+            body.unwrap_or(Doc::Nil),
+            dangling_comments(&dangling, blank_before_close),
         ])),
         doc::hardline(),
         closing,
-    ]))
+    ])
 }
 
 /// Items one per line with the source's blank lines (at most `max_blank_lines`) between them.

@@ -114,7 +114,7 @@ node SequenceExpression #expression #opaque
 node Super #expression #opaque
 node AwaitExpression #expression #unary = operator:Keyword operand:#expression
 node ChainExpression #expression #opaque
-node ParenthesizedExpression #expression #opaque #transparent
+node ParenthesizedExpression #expression #parenthesized #transparent
 node Directive #statement #opaque
 node BlockStatement #statement #block #scope = LBrace items:#statement* RBrace
 node VariableDeclaration #statement #declaration = Identifier* Keyword? Identifier* declarators:VariableDeclarator*

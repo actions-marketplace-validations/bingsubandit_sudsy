@@ -285,6 +285,17 @@ impl<'a> FormatCtx<'a> {
         self.format_unguarded(node)
     }
 
+    /// [`FormatCtx::format`] for a caller that already knows whether a comment stands in front of
+    /// `node` (without one nothing can ask for it to be kept as written).
+    pub fn format_known(&self, node: &SyntaxNode, commented: bool) -> Result<Doc, FormatError> {
+        if (commented && self.is_ignored(node))
+            || (!self.directives.is_empty() && self.directives_of(node).has(&Directive::Preserve))
+        {
+            return Ok(self.verbatim_node(node));
+        }
+        self.format_unguarded(node)
+    }
+
     /// Does a `sudsy-ignore` comment in front of `node` keep it as written?
     pub fn is_ignored(&self, node: &SyntaxNode) -> bool {
         // Only a comment can ask for the node to be kept as written.

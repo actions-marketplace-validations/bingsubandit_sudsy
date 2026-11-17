@@ -253,85 +253,12 @@ pub(super) fn generic(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     seq(cx, &flat(cx, node))
 }
 
-/// Blank lines the source has in front of the element (comments in front of it excluded).
+/// A blank line stands in front of the element in the source (comments in front of it excluded).
 pub(super) fn blank_before(cx: &FormatCtx<'_>, e: &SyntaxElement) -> bool {
-    let Some(t) = first(cx, e) else {
-        return false;
-    };
-    let mut breaks = 0;
-    let mut prev = t.prev_token();
-    while let Some(p) = prev.filter(|p| cx.grammar.is_trivia(p.kind())) {
-        if cx.grammar.has_tag(p.kind(), "comment") {
-            return comments::blank_lines_before(cx.grammar, &t) > 0;
-        }
-        breaks += p.text().matches('\n').count();
-        prev = p.prev_token();
+    match e {
+        SyntaxElement::Node(n) => core_format::shapes::blank_before(cx, n),
+        SyntaxElement::Token(t) => comments::blank_lines_before(cx.grammar, t) > 0,
     }
-    breaks > 1
-}
-
-/// Elements on lines of their own, with the blank lines of the source (at most one) between them
-/// and `force_blank(prev, next)` where the layout wants one.
-pub(super) fn lines(
-    cx: &FormatCtx<'_>,
-    items: &[SyntaxElement],
-    force_blank: impl Fn(&SyntaxElement, &SyntaxElement) -> bool,
-) -> R {
-    let mut parts = Vec::with_capacity(items.len() * 2);
-    for (i, e) in items.iter().enumerate() {
-        if i > 0 {
-            parts.push(doc::hardline());
-            if blank_before(cx, e) || force_blank(&items[i - 1], e) {
-                parts.push(doc::hardline());
-            }
-        }
-        parts.push(el(cx, e)?);
-    }
-    Ok(doc::concat(parts))
-}
-
-/// `{`, the items indented one per line, `}`; `{}` when there are none. Comments in front of the
-/// `}` stay inside, after the items.
-pub(super) fn braces(
-    cx: &FormatCtx<'_>,
-    open: &SyntaxToken,
-    close: &SyntaxToken,
-    body: Option<Doc>,
-) -> R {
-    let lead = comments::leading_comments(cx.grammar, close);
-    let mut inner = Vec::new();
-    if !lead.is_empty() {
-        cx.hold_leading(close);
-        if body.is_some() && comments::blank_lines_before(cx.grammar, close) > 0 {
-            inner.push(doc::hardline());
-        }
-    }
-    let open_doc = cx.token(open);
-    let close_doc = cx.token(close);
-    if body.is_none() && lead.is_empty() {
-        return Ok(doc::concat(vec![open_doc, close_doc]));
-    }
-    if let Some(b) = body {
-        inner.insert(0, b);
-        if !lead.is_empty() {
-            inner.insert(1.min(inner.len()), doc::hardline());
-        }
-    }
-    for (i, c) in lead.iter().enumerate() {
-        if i > 0 {
-            inner.push(doc::hardline());
-            if lead[i - 1].breaks_after >= 2 {
-                inner.push(doc::hardline());
-            }
-        }
-        inner.push(core_format::context::comment_doc(c));
-    }
-    Ok(doc::concat(vec![
-        open_doc,
-        doc::indent(doc::concat(vec![doc::hardline(), doc::concat(inner)])),
-        doc::hardline(),
-        close_doc,
-    ]))
 }
 
 /// Continuation indent: two levels.

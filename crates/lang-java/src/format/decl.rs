@@ -142,58 +142,41 @@ fn type_decl(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 /// The members of a body, one per line: a blank line before everything but a field without
 /// javadoc, and where the source has one.
 fn members(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let (Some(SyntaxElement::Token(open)), Some(SyntaxElement::Token(close))) =
-        (els.first().cloned(), els.last().cloned())
-    else {
-        return generic(cx, node);
-    };
-    let items: Vec<_> = els[1..els.len() - 1]
-        .iter()
-        .filter(|e| !is_tok(e, ";"))
-        .cloned()
-        .collect();
-    if items.is_empty() {
-        return braces(cx, &open, &close, None);
-    }
-    let body = member_lines(cx, &items)?;
-    braces(cx, &open, &close, Some(lead_blank(cx, &items[0], body)))
+    shapes::block(cx, node, &member_style())
 }
 
-fn has_javadoc(cx: &FormatCtx<'_>, e: &SyntaxElement) -> bool {
-    first(cx, e).is_some_and(|t| {
+fn member_style() -> shapes::BlockStyle {
+    shapes::BlockStyle {
+        force_blank: Some(member_blank),
+        keep_leading_blank: true,
+        ..shapes::BlockStyle::default()
+    }
+}
+
+/// A blank line goes between two members unless both are plain fields.
+fn member_blank(cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
+    let spaced = |n: &SyntaxNode| {
+        !matches!(n.kind(), k::FIELD_DECLARATION | k::CONSTANT_DECLARATION)
+            || has_javadoc(cx, n)
+            || has_annotation_args(cx, n)
+    };
+    spaced(prev) || spaced(next)
+}
+
+fn has_javadoc(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    cx.first_token(n).is_some_and(|t| {
         comments::leading_trivia(cx.grammar, &t)
             .iter()
             .any(|x| x.kind() == k::COMMENT && x.to_string().starts_with("/**"))
     })
 }
 
-fn has_annotation_args(cx: &FormatCtx<'_>, e: &SyntaxElement) -> bool {
-    e.as_node().is_some_and(|n| {
-        kids(cx, n).iter().any(|m| {
-            m.as_node().is_some_and(|m| {
-                m.kind() == k::MODIFIERS && kids(cx, m).iter().any(|a| has_args(cx, a))
-            })
+fn has_annotation_args(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+    kids(cx, n).iter().any(|m| {
+        m.as_node().is_some_and(|m| {
+            m.kind() == k::MODIFIERS && kids(cx, m).iter().any(|a| has_args(cx, a))
         })
     })
-}
-
-fn member_lines(cx: &FormatCtx<'_>, items: &[SyntaxElement]) -> R {
-    let mut parts = Vec::new();
-    let mut last_blank = false;
-    for (i, e) in items.iter().enumerate() {
-        let field = matches!(e.kind(), k::FIELD_DECLARATION | k::CONSTANT_DECLARATION);
-        let blank_here = !field || has_javadoc(cx, e) || has_annotation_args(cx, e);
-        if i > 0 {
-            parts.push(doc::hardline());
-            if blank_here || last_blank || blank_before(cx, e) {
-                parts.push(doc::hardline());
-            }
-        }
-        last_blank = blank_here;
-        parts.push(el(cx, e)?);
-    }
-    Ok(doc::concat(parts))
 }
 
 fn enum_body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
@@ -246,10 +229,7 @@ fn enum_body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         parts.push(semi_doc(cx)?);
     }
     if let Some(d) = decls.and_then(|d| d.as_node()) {
-        let members: Vec<_> = kids(cx, d)
-            .into_iter()
-            .filter(|e| !is_tok(e, ";"))
-            .collect();
+        let members: Vec<SyntaxNode> = d.children().collect();
         if !members.is_empty() {
             if comma_last {
                 parts.push(doc::hardline());
@@ -259,19 +239,31 @@ fn enum_body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         if !members.is_empty() {
             parts.push(doc::hardline());
             parts.push(doc::hardline());
-            parts.push(member_lines(cx, &members)?);
+            parts.push(shapes::statement_sequence_with(
+                cx,
+                &members,
+                1,
+                Some(member_blank),
+                false,
+            )?);
         }
     }
+    let style = shapes::BlockStyle::default();
     if parts.is_empty() {
-        return braces(cx, &open, &close, None);
+        return Ok(shapes::braces(cx, &open, &close, None, false, &style));
     }
-    let body = doc::concat(parts);
-    let body = match consts.first() {
-        Some(c) if has_javadoc(cx, c) => lead_blank(cx, c, body),
-        Some(_) => body,
-        None => body,
-    };
-    braces(cx, &open, &close, Some(body))
+    let lead_blank = consts
+        .first()
+        .and_then(|c| c.as_node())
+        .is_some_and(|c| has_javadoc(cx, c) && shapes::blank_before(cx, c));
+    Ok(shapes::braces(
+        cx,
+        &open,
+        &close,
+        Some(doc::concat(parts)),
+        lead_blank,
+        &style,
+    ))
 }
 
 fn enum_constant(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
@@ -549,15 +541,6 @@ fn paren_list_id(
 
 #[allow(unused_imports)]
 use shapes as _shapes;
-
-/// A blank line the source has after the opening brace stays.
-pub(super) fn lead_blank(cx: &FormatCtx<'_>, first: &SyntaxElement, body: Doc) -> Doc {
-    if blank_before(cx, first) {
-        doc::concat(vec![doc::hardline(), body])
-    } else {
-        body
-    }
-}
 
 /// Annotations of a package go on lines of their own.
 fn package(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {

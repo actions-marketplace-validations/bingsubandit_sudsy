@@ -1,6 +1,7 @@
 //! Statements: blocks, the control statements and `switch`.
 
 use super::*;
+use core_format::shapes::{self, BlockStyle};
 
 pub(super) fn rule(
     cx: &FormatCtx<'_>,
@@ -52,34 +53,12 @@ fn is_statement(kind: core_syntax::SyntaxKind) -> bool {
 }
 
 fn block(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let (Some(SyntaxElement::Token(open)), Some(SyntaxElement::Token(close))) =
-        (els.first().cloned(), els.last().cloned())
-    else {
-        return generic(cx, node);
+    let style = BlockStyle {
+        expand_empty: node.children().next().is_none() && keeps_lines(node),
+        keep_leading_blank: true,
+        ..BlockStyle::default()
     };
-    let items: Vec<_> = els[1..els.len() - 1]
-        .iter()
-        .filter(|e| !is_tok(e, ";"))
-        .cloned()
-        .collect();
-    if items.is_empty() {
-        if keeps_lines(node) && comments::leading_comments(cx.grammar, &close).is_empty() {
-            return Ok(doc::concat(vec![
-                cx.token(&open),
-                doc::hardline(),
-                cx.token(&close),
-            ]));
-        }
-        return braces(cx, &open, &close, None);
-    }
-    let body = lines(cx, &items, |_, _| false)?;
-    braces(
-        cx,
-        &open,
-        &close,
-        Some(decl::lead_blank(cx, &items[0], body)),
-    )
+    shapes::block(cx, node, &style)
 }
 
 /// An empty block that is part of a longer statement (`catch`, `finally`, `if` with an `else`,
@@ -179,9 +158,13 @@ fn switch_group(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         i += 1;
     }
     if split < els.len() {
+        let body: Vec<SyntaxNode> = els[split..]
+            .iter()
+            .filter_map(|e| e.as_node().cloned())
+            .collect();
         parts.push(doc::indent(doc::concat(vec![
             doc::hardline(),
-            lines(cx, &els[split..], |_, _| false)?,
+            shapes::statement_sequence(cx, &body, 1)?,
         ])));
     }
     let d = doc::concat(parts);

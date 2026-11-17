@@ -19,6 +19,7 @@ const BLOCK: BlockStyle = BlockStyle {
     force_blank: None,
     expand_empty: false,
     keep_same_line: false,
+    keep_leading_blank: false,
 };
 
 /// The value of a block string (`"""`): its lines without the common indentation and the blank

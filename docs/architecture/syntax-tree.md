@@ -70,6 +70,7 @@ Trailing trivia: after a token up to and including the end of its line. Leading:
 | `#type-declaration` | `members` `name?` | class, struct, interface, enum |
 | `#import` | `path` | brings the names of another file or namespace into scope |
 | `#literal` | `value` | a constant written in the source |
+| `#parenthesized` | - | `(` one expression `)` |
 | `#scope` | - | names declared inside are not visible outside |
 | `#reference` | `name` | uses a name |
 <!-- /generated -->

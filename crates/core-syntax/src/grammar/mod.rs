@@ -154,7 +154,7 @@ pub struct Grammar {
 
 /// Tags that formatting code asks about for every token or node: answered from a bit set
 /// instead of scanning the tag strings.
-const HOT_TAGS: [&str; 12] = [
+const HOT_TAGS: [&str; 15] = [
     "trivia",
     "separator",
     "optional",
@@ -167,6 +167,9 @@ const HOT_TAGS: [&str; 12] = [
     "glue",
     "close",
     "indentable",
+    "parenthesized",
+    "stray",
+    "list-prefix",
 ];
 
 fn hot_flags(defs: &[KindDef]) -> Vec<u16> {
