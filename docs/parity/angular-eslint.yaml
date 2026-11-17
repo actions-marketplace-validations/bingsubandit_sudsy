@@ -38,3 +38,7 @@ entries:
   table-scope: planned
   use-track-by-function: deferred
   valid-aria: planned
+  no-positive-tabindex: planned
+  prefer-at-else: planned
+  prefer-at-empty: planned
+  prefer-built-in-pipes: planned

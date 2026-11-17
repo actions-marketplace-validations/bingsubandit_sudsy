@@ -48,3 +48,5 @@ entries:
   tagname-lowercase: rule element-case
   tags-check: planned
   title-require: planned
+  spec-char-escape: planned
+  tagname-specialchars: planned

@@ -96,3 +96,10 @@ entries:
   void: planned | deprecated in html-validate; void-style and no-void-end-tag replace it
   void-content: rule no-void-end-tag
   void-style: rule void-style | the omit style only, without the style option
+  wcag/h30: planned
+  wcag/h32: planned
+  wcag/h36: planned
+  wcag/h37: planned
+  wcag/h63: planned
+  wcag/h67: planned
+  wcag/h71: planned

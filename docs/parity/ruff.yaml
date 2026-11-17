@@ -101,3 +101,890 @@ entries:
   UP024: rule os-error-alias
   UP025: rule unicode-literal
   W605: rule invalid-escape-sequence
+  A001: planned
+  A002: planned
+  A003: planned
+  A004: planned
+  A005: planned
+  A006: planned
+  AIR001: planned
+  AIR002: planned
+  AIR003: deferred | preview rule
+  AIR004: deferred | preview rule
+  AIR201: deferred | preview rule
+  AIR202: deferred | preview rule
+  AIR301: planned
+  AIR302: planned
+  AIR303: planned
+  AIR304: deferred | preview rule
+  AIR311: planned
+  AIR312: planned
+  AIR321: deferred | preview rule
+  ANN001: planned
+  ANN002: planned
+  ANN003: planned
+  ANN101: wontfix removed upstream
+  ANN102: wontfix removed upstream
+  ANN201: planned
+  ANN202: planned
+  ANN204: planned
+  ANN205: planned
+  ANN206: planned
+  ANN401: planned
+  ARG001: planned
+  ARG002: planned
+  ARG003: planned
+  ARG004: planned
+  ARG005: planned
+  ASYNC100: planned
+  ASYNC105: planned
+  ASYNC109: planned
+  ASYNC110: planned
+  ASYNC115: planned
+  ASYNC116: planned
+  ASYNC119: deferred | preview rule
+  ASYNC210: planned
+  ASYNC212: planned
+  ASYNC220: planned
+  ASYNC221: planned
+  ASYNC222: planned
+  ASYNC230: planned
+  ASYNC240: planned
+  ASYNC250: planned
+  ASYNC251: planned
+  B002: planned
+  B003: planned
+  B004: planned
+  B005: planned
+  B007: planned
+  B008: planned
+  B012: planned
+  B014: planned
+  B015: planned
+  B016: planned
+  B017: planned
+  B018: planned
+  B019: planned
+  B020: planned
+  B021: planned
+  B022: planned
+  B023: planned
+  B024: planned
+  B025: planned
+  B026: planned
+  B027: planned
+  B028: planned
+  B029: planned
+  B030: planned
+  B031: planned
+  B032: planned
+  B033: planned
+  B034: planned
+  B035: planned
+  B039: planned
+  B043: deferred | preview rule
+  B901: deferred | preview rule
+  B903: deferred | preview rule
+  B909: deferred | preview rule
+  B911: planned
+  B912: planned
+  BLE001: planned
+  C400: planned
+  C401: planned
+  C402: planned
+  C403: planned
+  C404: planned
+  C405: planned
+  C406: planned
+  C409: planned
+  C410: planned
+  C411: planned
+  C413: planned
+  C414: planned
+  C415: planned
+  C416: planned
+  C417: planned
+  C418: planned
+  C419: planned
+  C420: planned
+  C901: planned
+  COM812: planned
+  COM818: planned
+  COM819: planned
+  CPY001: planned
+  D100: planned
+  D101: planned
+  D102: planned
+  D103: planned
+  D104: planned
+  D105: planned
+  D106: planned
+  D107: planned
+  D200: planned
+  D201: planned
+  D202: planned
+  D203: planned
+  D204: planned
+  D205: planned
+  D206: planned
+  D207: planned
+  D208: planned
+  D209: planned
+  D210: planned
+  D211: planned
+  D212: planned
+  D213: planned
+  D214: planned
+  D215: planned
+  D300: planned
+  D301: planned
+  D400: planned
+  D401: planned
+  D402: planned
+  D403: planned
+  D404: planned
+  D405: planned
+  D406: planned
+  D407: planned
+  D408: planned
+  D409: planned
+  D410: planned
+  D411: planned
+  D412: planned
+  D413: planned
+  D414: planned
+  D415: planned
+  D416: planned
+  D417: planned
+  D418: planned
+  D419: planned
+  D420: deferred | preview rule
+  D421: deferred | preview rule
+  DJ001: planned
+  DJ003: planned
+  DJ006: planned
+  DJ007: planned
+  DJ008: planned
+  DJ012: planned
+  DJ013: planned
+  DOC102: deferred | preview rule
+  DOC201: deferred | preview rule
+  DOC202: deferred | preview rule
+  DOC402: deferred | preview rule
+  DOC403: deferred | preview rule
+  DOC501: deferred | preview rule
+  DOC502: deferred | preview rule
+  DTZ001: planned
+  DTZ002: planned
+  DTZ003: planned
+  DTZ004: planned
+  DTZ005: planned
+  DTZ006: planned
+  DTZ007: planned
+  DTZ011: planned
+  DTZ012: planned
+  DTZ901: planned
+  E101: planned
+  E111: deferred | preview rule
+  E112: deferred | preview rule
+  E113: deferred | preview rule
+  E114: deferred | preview rule
+  E115: deferred | preview rule
+  E116: deferred | preview rule
+  E117: deferred | preview rule
+  E201: deferred | preview rule
+  E202: deferred | preview rule
+  E203: deferred | preview rule
+  E204: deferred | preview rule
+  E211: deferred | preview rule
+  E221: deferred | preview rule
+  E222: deferred | preview rule
+  E223: deferred | preview rule
+  E224: deferred | preview rule
+  E225: deferred | preview rule
+  E226: deferred | preview rule
+  E227: deferred | preview rule
+  E228: deferred | preview rule
+  E231: deferred | preview rule
+  E241: deferred | preview rule
+  E242: deferred | preview rule
+  E251: deferred | preview rule
+  E252: deferred | preview rule
+  E261: deferred | preview rule
+  E262: deferred | preview rule
+  E265: deferred | preview rule
+  E266: deferred | preview rule
+  E271: deferred | preview rule
+  E272: deferred | preview rule
+  E273: deferred | preview rule
+  E274: deferred | preview rule
+  E275: deferred | preview rule
+  E301: deferred | preview rule
+  E302: deferred | preview rule
+  E303: deferred | preview rule
+  E304: deferred | preview rule
+  E305: deferred | preview rule
+  E306: deferred | preview rule
+  E501: planned
+  E502: deferred | preview rule
+  EM101: planned
+  EM102: planned
+  EM103: planned
+  ERA001: planned
+  EXE001: planned
+  EXE002: planned
+  EXE003: planned
+  EXE004: planned
+  EXE005: planned
+  FA100: planned
+  FA102: planned
+  FAST001: planned
+  FAST002: planned
+  FAST003: planned
+  FBT001: planned
+  FBT002: planned
+  FBT003: planned
+  FIX001: planned
+  FIX002: planned
+  FIX003: planned
+  FIX004: planned
+  FLY002: planned
+  FURB101: deferred | preview rule
+  FURB103: deferred | preview rule
+  FURB105: planned
+  FURB110: planned
+  FURB113: deferred | preview rule
+  FURB116: planned
+  FURB118: deferred | preview rule
+  FURB122: planned
+  FURB129: planned
+  FURB131: deferred | preview rule
+  FURB132: planned
+  FURB136: planned
+  FURB140: deferred | preview rule
+  FURB142: deferred | preview rule
+  FURB145: deferred | preview rule
+  FURB148: deferred | preview rule
+  FURB152: deferred | preview rule
+  FURB154: deferred | preview rule
+  FURB156: deferred | preview rule
+  FURB157: planned
+  FURB161: planned
+  FURB162: planned
+  FURB163: planned
+  FURB164: planned
+  FURB166: planned
+  FURB167: planned
+  FURB168: planned
+  FURB169: planned
+  FURB171: planned
+  FURB177: planned
+  FURB180: deferred | preview rule
+  FURB181: planned
+  FURB187: planned
+  FURB188: planned
+  FURB189: deferred | preview rule
+  FURB192: planned
+  G001: planned
+  G002: planned
+  G003: planned
+  G004: planned
+  G010: planned
+  G101: planned
+  G201: planned
+  G202: planned
+  I001: planned
+  I002: planned
+  ICN001: planned
+  ICN002: planned
+  ICN003: planned
+  INP001: planned
+  INT001: planned
+  INT002: planned
+  INT003: planned
+  ISC001: planned
+  ISC002: planned
+  ISC003: planned
+  ISC004: planned
+  LOG001: planned
+  LOG002: planned
+  LOG004: planned
+  LOG007: planned
+  LOG009: planned
+  LOG014: planned
+  LOG015: planned
+  N801: planned
+  N802: planned
+  N803: planned
+  N804: planned
+  N805: planned
+  N806: planned
+  N807: planned
+  N811: planned
+  N812: planned
+  N813: planned
+  N814: planned
+  N815: planned
+  N816: planned
+  N817: planned
+  N818: planned
+  N999: planned
+  NPY001: planned
+  NPY002: planned
+  NPY003: planned
+  NPY201: planned
+  PD002: planned
+  PD003: planned
+  PD004: planned
+  PD007: planned
+  PD008: planned
+  PD009: planned
+  PD010: planned
+  PD011: planned
+  PD012: planned
+  PD013: planned
+  PD015: planned
+  PD101: planned
+  PD901: wontfix removed upstream
+  PERF101: planned
+  PERF102: planned
+  PERF203: planned
+  PERF401: planned
+  PERF402: planned
+  PERF403: planned
+  PGH001: wontfix removed upstream
+  PGH002: wontfix removed upstream
+  PGH003: planned
+  PGH004: planned
+  PGH005: planned
+  PIE794: planned
+  PIE796: planned
+  PIE800: planned
+  PIE804: planned
+  PIE807: planned
+  PIE808: planned
+  PLC0105: planned
+  PLC0131: planned
+  PLC0132: planned
+  PLC0205: planned
+  PLC0206: planned
+  PLC0207: planned
+  PLC0208: planned
+  PLC0414: planned
+  PLC0415: planned
+  PLC1802: planned
+  PLC1901: deferred | preview rule
+  PLC2401: planned
+  PLC2403: planned
+  PLC2701: deferred | preview rule
+  PLC2801: deferred | preview rule
+  PLC3002: planned
+  PLE0100: planned
+  PLE0101: planned
+  PLE0115: planned
+  PLE0116: planned
+  PLE0117: planned
+  PLE0118: planned
+  PLE0237: planned
+  PLE0241: planned
+  PLE0302: planned
+  PLE0303: planned
+  PLE0304: planned
+  PLE0305: planned
+  PLE0307: planned
+  PLE0308: planned
+  PLE0309: planned
+  PLE0604: planned
+  PLE0605: planned
+  PLE0643: planned
+  PLE0704: planned
+  PLE1132: planned
+  PLE1141: deferred | preview rule
+  PLE1142: planned
+  PLE1205: planned
+  PLE1206: planned
+  PLE1300: planned
+  PLE1307: planned
+  PLE1310: planned
+  PLE1507: planned
+  PLE1519: planned
+  PLE1520: planned
+  PLE1700: planned
+  PLE2502: planned
+  PLE2510: planned
+  PLE2512: planned
+  PLE2513: planned
+  PLE2514: planned
+  PLE2515: planned
+  PLE4703: deferred | preview rule
+  PLR0124: planned
+  PLR0133: planned
+  PLR0202: deferred | preview rule
+  PLR0203: deferred | preview rule
+  PLR0206: planned
+  PLR0402: planned
+  PLR0904: deferred | preview rule
+  PLR0911: planned
+  PLR0912: planned
+  PLR0913: planned
+  PLR0914: deferred | preview rule
+  PLR0915: planned
+  PLR0916: deferred | preview rule
+  PLR0917: planned
+  PLR1701: wontfix removed upstream
+  PLR1702: deferred | preview rule
+  PLR1704: planned
+  PLR1706: wontfix removed upstream
+  PLR1708: planned
+  PLR1711: planned
+  PLR1712: deferred | preview rule
+  PLR1714: planned
+  PLR1716: planned
+  PLR1722: planned
+  PLR1730: planned
+  PLR1733: planned
+  PLR1736: planned
+  PLR2004: planned
+  PLR2044: planned
+  PLR5501: planned
+  PLR6104: deferred | preview rule
+  PLR6201: deferred | preview rule
+  PLR6301: deferred | preview rule
+  PLW0108: planned
+  PLW0120: planned
+  PLW0127: planned
+  PLW0128: planned
+  PLW0129: planned
+  PLW0131: planned
+  PLW0133: planned
+  PLW0177: planned
+  PLW0211: planned
+  PLW0244: deferred | preview rule
+  PLW0245: planned
+  PLW0406: planned
+  PLW0602: planned
+  PLW0603: planned
+  PLW0604: planned
+  PLW0642: planned
+  PLW0711: planned
+  PLW0717: deferred | preview rule
+  PLW1501: planned
+  PLW1507: planned
+  PLW1508: planned
+  PLW1509: planned
+  PLW1510: planned
+  PLW1514: deferred | preview rule
+  PLW1641: planned
+  PLW2101: planned
+  PLW2901: planned
+  PLW3201: deferred | preview rule
+  PLW3301: planned
+  PT001: planned
+  PT002: planned
+  PT003: planned
+  PT004: wontfix removed upstream
+  PT005: wontfix removed upstream
+  PT006: planned
+  PT007: planned
+  PT008: planned
+  PT009: planned
+  PT010: planned
+  PT011: planned
+  PT012: planned
+  PT013: planned
+  PT014: planned
+  PT015: planned
+  PT016: planned
+  PT017: planned
+  PT018: planned
+  PT019: planned
+  PT020: planned
+  PT021: planned
+  PT022: planned
+  PT023: planned
+  PT024: planned
+  PT025: planned
+  PT026: planned
+  PT027: planned
+  PT028: planned
+  PT029: deferred | preview rule
+  PT030: planned
+  PT031: planned
+  PTH100: planned
+  PTH101: planned
+  PTH102: planned
+  PTH103: planned
+  PTH104: planned
+  PTH105: planned
+  PTH106: planned
+  PTH107: planned
+  PTH108: planned
+  PTH109: planned
+  PTH110: planned
+  PTH111: planned
+  PTH112: planned
+  PTH113: planned
+  PTH114: planned
+  PTH115: planned
+  PTH116: planned
+  PTH117: planned
+  PTH118: planned
+  PTH119: planned
+  PTH120: planned
+  PTH121: planned
+  PTH122: planned
+  PTH123: planned
+  PTH124: planned
+  PTH201: planned
+  PTH202: planned
+  PTH203: planned
+  PTH204: planned
+  PTH205: planned
+  PTH206: planned
+  PTH207: planned
+  PTH208: planned
+  PTH210: planned
+  PTH211: planned
+  PYI001: planned
+  PYI002: planned
+  PYI003: planned
+  PYI004: planned
+  PYI005: planned
+  PYI006: planned
+  PYI007: planned
+  PYI008: planned
+  PYI009: planned
+  PYI010: planned
+  PYI011: planned
+  PYI012: planned
+  PYI013: planned
+  PYI014: planned
+  PYI015: planned
+  PYI016: planned
+  PYI017: planned
+  PYI018: planned
+  PYI019: planned
+  PYI020: planned
+  PYI021: planned
+  PYI024: planned
+  PYI025: planned
+  PYI026: planned
+  PYI029: planned
+  PYI030: planned
+  PYI032: planned
+  PYI033: planned
+  PYI034: planned
+  PYI035: planned
+  PYI036: planned
+  PYI041: planned
+  PYI042: planned
+  PYI043: planned
+  PYI044: planned
+  PYI045: planned
+  PYI046: planned
+  PYI047: planned
+  PYI048: planned
+  PYI049: planned
+  PYI050: planned
+  PYI051: planned
+  PYI052: planned
+  PYI053: planned
+  PYI054: planned
+  PYI055: planned
+  PYI056: planned
+  PYI057: planned
+  PYI058: planned
+  PYI059: planned
+  PYI061: planned
+  PYI062: planned
+  PYI063: planned
+  PYI064: planned
+  PYI066: planned
+  Q000: planned
+  Q001: planned
+  Q002: planned
+  Q003: planned
+  Q004: planned
+  RET501: planned
+  RET502: planned
+  RET503: planned
+  RET504: planned
+  RET505: planned
+  RET506: planned
+  RET507: planned
+  RET508: planned
+  RSE102: planned
+  RUF001: planned
+  RUF002: planned
+  RUF003: planned
+  RUF005: planned
+  RUF006: planned
+  RUF007: planned
+  RUF008: planned
+  RUF009: planned
+  RUF010: planned
+  RUF011: wontfix removed upstream
+  RUF012: planned
+  RUF013: planned
+  RUF015: planned
+  RUF016: planned
+  RUF017: planned
+  RUF018: planned
+  RUF019: planned
+  RUF020: planned
+  RUF021: planned
+  RUF022: planned
+  RUF023: planned
+  RUF024: planned
+  RUF026: planned
+  RUF027: deferred | preview rule
+  RUF028: planned
+  RUF029: deferred | preview rule
+  RUF030: planned
+  RUF031: deferred | preview rule
+  RUF032: planned
+  RUF033: planned
+  RUF034: planned
+  RUF035: wontfix removed upstream
+  RUF036: planned
+  RUF037: planned
+  RUF038: deferred | preview rule
+  RUF039: deferred | preview rule
+  RUF040: planned
+  RUF041: planned
+  RUF043: planned
+  RUF045: deferred | preview rule
+  RUF046: planned
+  RUF047: deferred | preview rule
+  RUF048: planned
+  RUF049: planned
+  RUF050: deferred | preview rule
+  RUF051: planned
+  RUF052: deferred | preview rule
+  RUF053: planned
+  RUF054: deferred | preview rule
+  RUF055: deferred | preview rule
+  RUF056: deferred | preview rule
+  RUF057: planned
+  RUF058: planned
+  RUF059: planned
+  RUF060: planned
+  RUF061: planned
+  RUF063: planned
+  RUF064: planned
+  RUF065: deferred | preview rule
+  RUF066: deferred | preview rule
+  RUF067: deferred | preview rule
+  RUF068: planned
+  RUF069: deferred | preview rule
+  RUF070: deferred | preview rule
+  RUF071: planned
+  RUF072: deferred | preview rule
+  RUF073: deferred | preview rule
+  RUF074: deferred | preview rule
+  RUF075: deferred | preview rule
+  RUF077: deferred | preview rule
+  RUF100: planned
+  RUF101: planned
+  RUF102: planned
+  RUF103: planned
+  RUF104: planned
+  RUF105: deferred | preview rule
+  RUF106: deferred | preview rule
+  RUF200: planned
+  RUF201: deferred | preview rule
+  S101: planned
+  S102: planned
+  S103: planned
+  S104: planned
+  S105: planned
+  S106: planned
+  S107: planned
+  S108: planned
+  S110: planned
+  S112: planned
+  S113: planned
+  S201: planned
+  S202: planned
+  S301: planned
+  S302: planned
+  S303: planned
+  S304: planned
+  S305: planned
+  S306: planned
+  S307: planned
+  S308: planned
+  S310: planned
+  S311: planned
+  S312: planned
+  S313: planned
+  S314: planned
+  S315: planned
+  S316: planned
+  S317: planned
+  S318: planned
+  S319: planned
+  S320: wontfix removed upstream
+  S321: planned
+  S323: planned
+  S324: planned
+  S401: deferred | preview rule
+  S402: deferred | preview rule
+  S403: deferred | preview rule
+  S404: deferred | preview rule
+  S405: deferred | preview rule
+  S406: deferred | preview rule
+  S407: deferred | preview rule
+  S408: deferred | preview rule
+  S409: deferred | preview rule
+  S410: wontfix removed upstream
+  S411: deferred | preview rule
+  S412: deferred | preview rule
+  S413: deferred | preview rule
+  S415: deferred | preview rule
+  S501: planned
+  S502: planned
+  S503: planned
+  S504: planned
+  S505: planned
+  S506: planned
+  S507: planned
+  S508: planned
+  S509: planned
+  S601: planned
+  S602: planned
+  S603: planned
+  S604: planned
+  S605: planned
+  S606: planned
+  S607: planned
+  S608: planned
+  S609: planned
+  S610: planned
+  S611: planned
+  S612: planned
+  S701: planned
+  S702: planned
+  S704: planned
+  SIM101: planned
+  SIM102: planned
+  SIM103: planned
+  SIM105: planned
+  SIM107: planned
+  SIM108: planned
+  SIM109: planned
+  SIM110: planned
+  SIM112: planned
+  SIM113: planned
+  SIM114: planned
+  SIM115: planned
+  SIM116: planned
+  SIM117: planned
+  SIM220: planned
+  SIM221: planned
+  SIM222: planned
+  SIM223: planned
+  SIM300: planned
+  SIM401: planned
+  SIM905: planned
+  SIM910: planned
+  SIM911: planned
+  SLF001: planned
+  SLOT000: planned
+  SLOT001: planned
+  SLOT002: planned
+  T100: planned
+  TC001: planned
+  TC002: planned
+  TC003: planned
+  TC004: planned
+  TC005: planned
+  TC006: planned
+  TC007: planned
+  TC008: deferred | preview rule
+  TC010: planned
+  TD001: planned
+  TD002: planned
+  TD003: planned
+  TD004: planned
+  TD005: planned
+  TD006: planned
+  TD007: planned
+  TID251: planned
+  TID252: planned
+  TID253: planned
+  TID254: planned
+  TID255: planned
+  TRY002: planned
+  TRY003: planned
+  TRY004: planned
+  TRY200: wontfix removed upstream
+  TRY201: planned
+  TRY203: planned
+  TRY300: planned
+  TRY301: planned
+  TRY400: planned
+  TRY401: planned
+  UP001: planned
+  UP003: planned
+  UP005: planned
+  UP006: planned
+  UP007: planned
+  UP008: planned
+  UP009: planned
+  UP010: planned
+  UP011: planned
+  UP012: planned
+  UP013: planned
+  UP014: planned
+  UP015: planned
+  UP017: planned
+  UP018: planned
+  UP019: planned
+  UP020: planned
+  UP021: planned
+  UP022: planned
+  UP023: planned
+  UP026: planned
+  UP027: wontfix removed upstream
+  UP028: planned
+  UP029: planned
+  UP030: planned
+  UP031: planned
+  UP032: planned
+  UP033: planned
+  UP034: planned
+  UP035: planned
+  UP036: planned
+  UP037: planned
+  UP038: wontfix removed upstream
+  UP039: planned
+  UP040: planned
+  UP041: planned
+  UP042: planned
+  UP043: planned
+  UP044: planned
+  UP045: planned
+  UP046: planned
+  UP047: planned
+  UP048: deferred | preview rule
+  UP049: planned
+  UP050: planned
+  UP051: deferred | preview rule
+  UP052: deferred | preview rule
+  W191: planned
+  W291: planned
+  W292: planned
+  W293: planned
+  W391: deferred | preview rule
+  W505: planned
+  YTT101: planned
+  YTT102: planned
+  YTT103: planned
+  YTT201: planned
+  YTT202: planned
+  YTT203: planned
+  YTT204: planned
+  YTT301: planned
+  YTT302: planned
+  YTT303: planned

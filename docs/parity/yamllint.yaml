@@ -71,3 +71,4 @@ entries:
   truthy.check-keys: rule ambiguous-booleans
   syntax-error: rule syntax-error
   disable-directives: config suppression comments (sudsy-disable, sudsy-enable, sudsy-disable-line, sudsy-disable-next-line, sudsy-disable-file)
+  common: planned

@@ -89,3 +89,4 @@ entries:
   no-dynamic-slot-name: wontfix deprecated upstream
   no-goto-without-base: wontfix deprecated upstream
   no-navigation-without-base: wontfix deprecated upstream
+  system: planned

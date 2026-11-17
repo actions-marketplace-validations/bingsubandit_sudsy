@@ -16,6 +16,36 @@ entries:
   selection-set-depth: rule selection-set-depth | Fragment spreads are not followed (upstream adds the depth of the spread fragments); no ignore option.
   alphabetize: rule sorted-keys | Upstream picks the kinds to sort (fields, values, selections, variables, arguments, definitions) and a `groups` order; sorted-keys has no per-kind switch and does not sort definitions.
   graphql-js-validation: rule syntax-error | known-argument-names, known-directives, known-fragment-names, known-type-names, fields-on-correct-type, fragments-on-composite-types, no-fragment-cycles, no-undefined-variables, no-unused-fragments, no-unused-variables, overlapping-fields-can-be-merged, possible-fragment-spread, possible-type-extension, provided-required-arguments, scalar-leafs, variables-are-input-types, variables-in-allowed-position, values-of-correct-type and the other rules that need a schema or the other files of the project are not built.
+  executable-definitions: planned
+  fields-on-correct-type: planned
+  fragments-on-composite-type: planned
+  known-argument-names: planned
+  known-directives: planned
+  known-fragment-names: planned
+  known-type-names: planned
+  lone-anonymous-operation: planned
+  lone-schema-definition: planned
+  no-fragment-cycles: planned
+  no-undefined-variables: planned
+  no-unused-fragments: planned
+  no-unused-variables: planned
+  one-field-subscriptions: planned
+  overlapping-fields-can-be-merged: planned
+  possible-fragment-spread: planned
+  possible-type-extension: planned
+  provided-required-arguments: planned
+  scalar-leafs: planned
+  unique-argument-names: planned
+  unique-directive-names: planned
+  unique-directive-names-per-location: planned
+  unique-field-definition-names: planned
+  unique-input-field-names: planned
+  unique-operation-types: planned
+  unique-type-names: planned
+  unique-variable-names: planned
+  value-literals-of-correct-type: planned
+  variables-are-input-types: planned
+  variables-in-allowed-position: planned
 deferred:
   - gap: "Possible without a schema; not built yet."
     ids: [description-style, input-name, lone-executable-definition, match-document-filename, no-hashtag-description, no-root-type, require-deprecation-date, require-deprecation-reason, require-description, require-nullable-fields-with-oneof, require-type-pattern-with-oneof]

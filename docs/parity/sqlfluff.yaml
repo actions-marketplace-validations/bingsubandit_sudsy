@@ -81,6 +81,15 @@ entries:
   indentation.indent_unit: option sql.format.indent_style
   indentation.tab_space_size: option sql.format.indent_size
   core.dialect: option sql.format.dialect
+  AL10: planned
+  AM08: planned
+  AM09: planned
+  CV13: planned
+  OR01: planned
+  PG01: planned
+  PG02: planned
+  RF07: planned
+  TQ04: planned
 deferred:
   - gap: "Not exposed as an option."
     ids: [core.max_line_length]
