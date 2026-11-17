@@ -56,6 +56,22 @@ Prettier 3.9.10, Biome 2.6.4, dprint 0.64.3 (json 0.25.2, pretty_yaml 0.6.0), No
 | YAML, 308 small files | 0.11 | 1.13 | - | 0.35 |
 | YAML, one 5.0 MB file | 2.39 | 20.19 | - | 3.06 |
 
+## Python and JavaScript against ruff, Biome, oxlint and Prettier (`speed-lint-format.sh`, check mode, new process per run, best of 5)
+8 cores Neoverse-V2 (aarch64 Linux, 15 GB), release CLI, ruff 0.17.4, Biome 2.6.4, oxlint 1.94.0, Prettier 3.9.10. Python: Django 5.2.8 (883 files, 8 MB), ruff with `--isolated --no-cache`. JavaScript: three.js `src` and express `lib` + `test`, 8 copies (848 files, 7 MB). Lint is each tool's default rules, so the rule counts differ (Sudsy has far fewer rules than ruff's 407); peak memory is the best run's maximum resident set.
+
+| Task | Tool | Wall | Peak memory |
+|---|---|---|---|
+| Django format | Sudsy | 0.18 s | 180 MB |
+| Django format | ruff | 0.04 s | 47 MB |
+| Django lint | Sudsy | 0.11 s | 171 MB |
+| Django lint | ruff | 0.11 s | 47 MB |
+| JS format | Sudsy | 0.22 s | 197 MB |
+| JS format | Biome | 0.15 s | 102 MB |
+| JS format | Prettier | 4.21 s | 298 MB |
+| JS lint | Sudsy | 0.11 s | 206 MB |
+| JS lint | oxlint | 0.05 s | 164 MB |
+| JS lint | Biome | 0.32 s | 146 MB |
+
 ## C# (12 cores, `speed.sh` and `perf-bench csharp`)
 | | CSharpier 1.3.0 | Sudsy CLI cold | Sudsy warm worker |
 |---|---|---|---|
