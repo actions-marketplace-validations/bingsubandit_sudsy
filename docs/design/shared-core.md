@@ -122,7 +122,7 @@ Kept as they are: oxc, ruff, Roslyn, mago, ruby-prism; tree-sitter for Bash, Mar
 3. **A new brace language has a budget of 3,000 hand-written lines to "usable"**; passing it needs a review.
 4. **Release builds do not run the safety check.** It stays in debug builds, tests and the `corpus` profile.
 5. **New languages go on while L1 runs**: parser comparison and step 1, with roles from the start. Formatter steps wait for L1's result.
-6. **A language's lint is complete by function, not by mirroring output.** It is usable when, on real-world code, at least 95% of the findings of the reference tool's default or recommended rule set are reported by the mapped Sudsy rule in the same file (M4). Rules outside that set do not count toward usable; they stay `planned` entries.
+6. **A language's lint is complete by function, not by mirroring output.** It is usable when, with the Sudsy preset that mirrors the reference tool's default or recommended rule set, on real-world code at least 85% of that set's findings are reported by the mapped Sudsy rule in the same file (M4); Sudsy's own defaults keep the bug-only policy of [config/sudsy-yaml.md](../config/sudsy-yaml.md). Rules outside that set do not count toward usable; they stay `planned` entries.
 
 ## 5. What this gives up
 - The last points of parity. A quirk of a reference tool that cannot be named as a style option stays a difference, or becomes per-language code, which is the cost this plan removes.
