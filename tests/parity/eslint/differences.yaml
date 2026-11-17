@@ -8,4 +8,4 @@ files:
   comparisons/constant eslint:no-constant-condition 2: constant-comparison-scope
   comparisons/constant sudsy:no-constant-comparison 2: constant-comparison-scope
   empty/blocks eslint:no-empty-block 6: switch-block
-coverage: 100.0  # share of the recommended-set findings of eslint on the real-world corpus that Sudsy also reports (scripts/parity.sh coverage eslint)
+coverage: 0.9  # share of the default-set findings of eslint on its corpus that Sudsy also reports with its default config (scripts/parity.sh coverage eslint)
