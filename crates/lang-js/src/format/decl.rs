@@ -257,7 +257,10 @@ pub(crate) fn parameters_in(
             SyntaxElement::Token(_) => {}
         }
     }
-    let hugs = matches!(&items[..], [only] if hugs_parentheses(only));
+    // A comment on the parameter (before the `)` or at its comma) keeps the parentheses apart.
+    let commented = commas.iter().any(|c| !matches!(c, Doc::Nil))
+        || !comments::leading_comments(cx.grammar, close).is_empty();
+    let hugs = !commented && matches!(&items[..], [only] if hugs_parentheses(only));
     let ends_in_rest = items
         .last()
         .is_some_and(|n| n.kind() == k::FORMAL_PARAMETER_REST);

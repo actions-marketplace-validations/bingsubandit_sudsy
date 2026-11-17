@@ -143,29 +143,34 @@ impl Doc {
     /// The document without its `BreakParent`s: a line comment inside no longer breaks the groups
     /// around it (hard lines still do), its text waits for the end of the line.
     pub fn without_break_parents(self) -> Doc {
+        self.strip(false)
+    }
+
+    /// [`Doc::without_break_parents`], and groups that were broken on purpose are not (hard lines
+    /// still break): the layout the document has when its source line breaks are not kept.
+    pub fn unforced(self) -> Doc {
+        self.strip(true)
+    }
+
+    fn strip(self, groups: bool) -> Doc {
         crate::deep(|| match self {
+            Doc::Shared(s) if groups => shared(s.doc.clone().strip(true)),
             Doc::BreakParent => Doc::Nil,
-            Doc::Outdent(n, d) => Doc::Outdent(n, Box::new(d.without_break_parents())),
-            Doc::Indent(d) => Doc::Indent(Box::new(d.without_break_parents())),
-            Doc::Align(n, d) => Doc::Align(n, Box::new(d.without_break_parents())),
-            Doc::LineSuffix(d) => Doc::LineSuffix(Box::new(d.without_break_parents())),
-            Doc::Label(l, d) => Doc::Label(l, Box::new(d.without_break_parents())),
-            Doc::IndentIfBreak(id, d) => {
-                Doc::IndentIfBreak(id, Box::new(d.without_break_parents()))
-            }
-            Doc::Concat(parts) => {
-                Doc::Concat(parts.into_iter().map(Doc::without_break_parents).collect())
-            }
-            Doc::Fill(parts) => {
-                Doc::Fill(parts.into_iter().map(Doc::without_break_parents).collect())
-            }
+            Doc::Outdent(n, d) => Doc::Outdent(n, Box::new(d.strip(groups))),
+            Doc::Indent(d) => Doc::Indent(Box::new(d.strip(groups))),
+            Doc::Align(n, d) => Doc::Align(n, Box::new(d.strip(groups))),
+            Doc::LineSuffix(d) => Doc::LineSuffix(Box::new(d.strip(groups))),
+            Doc::Label(l, d) => Doc::Label(l, Box::new(d.strip(groups))),
+            Doc::IndentIfBreak(id, d) => Doc::IndentIfBreak(id, Box::new(d.strip(groups))),
+            Doc::Concat(parts) => Doc::Concat(parts.into_iter().map(|d| d.strip(groups)).collect()),
+            Doc::Fill(parts) => Doc::Fill(parts.into_iter().map(|d| d.strip(groups)).collect()),
             Doc::IfBreak {
                 broken,
                 flat,
                 group,
             } => Doc::IfBreak {
-                broken: Box::new(broken.without_break_parents()),
-                flat: Box::new(flat.without_break_parents()),
+                broken: Box::new(broken.strip(groups)),
+                flat: Box::new(flat.strip(groups)),
                 group,
             },
             Doc::Group(g) => {
@@ -176,9 +181,9 @@ impl Doc {
                     id,
                 } = *g;
                 Doc::Group(Box::new(Group {
-                    contents: contents.without_break_parents(),
-                    states: states.into_iter().map(Doc::without_break_parents).collect(),
-                    broken,
+                    contents: contents.strip(groups),
+                    states: states.into_iter().map(|d| d.strip(groups)).collect(),
+                    broken: broken && !groups,
                     id,
                 }))
             }

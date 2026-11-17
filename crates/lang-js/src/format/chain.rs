@@ -124,7 +124,8 @@ impl ChainHooks for Hooks<'_> {
     /// Parentheses that are not needed are not part of the chain's text.
     fn through(&self, paren: &SyntaxNode) -> bool {
         let inner = un(paren);
-        (inner.kind() == k::CALL_EXPRESSION || is_member(inner.kind()))
+        (matches!(inner.kind(), k::CALL_EXPRESSION | k::TS_NON_NULL_EXPRESSION)
+            || is_member(inner.kind()))
             && needs_parens(self.cx, &inner) == Need::No
             && !paren_commented(self.cx, paren, &self.start)
     }

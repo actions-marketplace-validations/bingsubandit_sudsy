@@ -9,7 +9,7 @@ use crate::comments::{self, CommentKind};
 use crate::doc::{self, Doc};
 use crate::{Directive, FormatCtx, FormatError};
 use core_config::{OptionValue, ResolvedOptions};
-use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
+use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 use std::cell::RefCell;
 
 pub const MIN_CALLS: &str = "member_chain_min_calls";
@@ -516,6 +516,31 @@ pub fn member_chain(
 // ---------------------------------------------------------------------------- prettier
 
 /// A name that reads as a factory or a namespace: capitalized, or only `$` and `_`.
+/// Does a link after the first group start on a line of its own in the source?
+fn source_expanded(cx: &FormatCtx<'_>, links: &[Link]) -> bool {
+    links.iter().any(|l| {
+        l.dotted
+            && l.elems
+                .first()
+                .and_then(|e| e.as_token())
+                .is_some_and(|dot| {
+                    let mut before = dot.prev_token();
+                    while let Some(t) = &before {
+                        if !cx.grammar.is_trivia(t.kind()) {
+                            break;
+                        }
+                        before = t.prev_token();
+                    }
+                    before.is_some_and(|prev| {
+                        cx.has_line_break(
+                            &l.node,
+                            TextRange::new(prev.text_range().end(), dot.text_range().start()),
+                        )
+                    })
+                })
+    })
+}
+
 fn is_factory(name: &str) -> bool {
     name.starts_with(|c: char| c.is_ascii_uppercase())
         || (!name.is_empty() && name.chars().all(|c| c == '$' || c == '_'))
@@ -694,6 +719,15 @@ fn prettier(
                     .iter()
                     .any(|a| w.tag(&w.unwrap(a, false), "function"))
             })
+    };
+    // A chain of at most two calls that is expanded in the source stays so when its one-line form
+    // fits only because an argument keeps a line break of the source: Prettier's own output of
+    // such a chain hugs the argument at the next format and expands again at the one after that.
+    // Longer chains keep Prettier's layout.
+    let one_line = if calls.len() <= 2 && source_expanded(cx, &links[groups[0].len()..]) {
+        one_line.unforced()
+    } else {
+        one_line
     };
     let result = if complex_args
         || printed[..printed.len() - 1].iter().any(Doc::will_break)

@@ -445,3 +445,25 @@ fn with_optional_calls_and_long_strings_reach_a_fixed_point() {
         "with (a /* c */) b;\nx = a /* c */?.(b);\ny = f('a\"b');\n"
     );
 }
+
+#[test]
+fn chains_and_parameters_that_hugged_at_a_second_format_reach_a_fixed_point() {
+    // An expanded chain of two calls keeps its layout when only the object's source line break
+    // would make the one-line form fit.
+    let chain = "const f = (cb) =>\n  textureNode\n    .isolate()\n    .context({\n      getUV: (t) => callback(t.uvNode || uv()),\n      forceUVContext: true,\n    });\n";
+    assert_eq!(fmt(chain), chain);
+    // A comment after a lone object parameter keeps the parameter from hugging the parentheses.
+    assert_eq!(
+        fmt(
+            "class A {\n  m({ lightDirection, lightColor, reflectedLight, lightDirection2, lightColor2, reflectedLight2 }, /* b */ ) {}\n}\n"
+        ),
+        "class A {\n  m(\n    {\n      lightDirection,\n      lightColor,\n      reflectedLight,\n      lightDirection2,\n      lightColor2,\n      reflectedLight2,\n    },\n  /* b */) {}\n}\n"
+    );
+    // Parentheses around a non-null expression are not a chain head of their own.
+    assert_eq!(
+        fmt(
+            "x = (\n    glimseGlyphsHazardNoopsTieTie\n    ?. averredBathersBoxroomBuggyNurl\n    ?.anodyneCondosMalateOverateRetinol!\n  )\n  ?.annularCooeedSplicesWalksWayWay\n  .annularCooeedSplicesWalksWayWay(annularCooeedSplicesWalksWayWay)\n  .annularCooeedSplicesWalksWayWay();\n"
+        ),
+        "x = glimseGlyphsHazardNoopsTieTie?.averredBathersBoxroomBuggyNurl\n  ?.anodyneCondosMalateOverateRetinol!?.annularCooeedSplicesWalksWayWay.annularCooeedSplicesWalksWayWay(\n    annularCooeedSplicesWalksWayWay,\n  )\n  .annularCooeedSplicesWalksWayWay();\n"
+    );
+}
