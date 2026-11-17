@@ -1,15 +1,15 @@
-//! Which languages are installed. JSON, YAML and C# are in the binary and only a toggle in the
-//! state file removes them; every other language is a tree-sitter grammar that is linked in
-//! (`static-grammars`, where the toggle is all there is) or loaded from its language pack.
+//! Which languages are installed. A language with a pack in the build's manifest is a tree-sitter
+//! grammar that is linked in (`static-grammars`, where the toggle is all there is) or loaded from
+//! its language pack; every other language is in the binary and only a toggle in the state file
+//! removes it.
 
 use provider_api::LanguageProvider;
 use std::collections::HashMap;
 use std::path::Path;
 
-const BUILT_IN: &[&str] = &["json", "yaml", "csharp"];
-
+/// Whether `language` loads from a pack: only the languages of the build's pack manifest do.
 fn from_pack(language: &str) -> bool {
-    !cfg!(feature = "static-grammars") && !BUILT_IN.contains(&language)
+    !cfg!(feature = "static-grammars") && core_packs::entry(language).is_ok()
 }
 
 /// Why `language` cannot be used, or `Ok` when its files can be processed. Loads (and so
@@ -69,10 +69,9 @@ pub fn list(providers: &[Box<dyn LanguageProvider>]) -> Vec<Row> {
         .map(|p| Row {
             language: p.language().to_string(),
             installed: check(p.language()).is_ok(),
-            size: match (from_pack(p.language()), core_packs::entry(p.language())) {
-                (false, _) => "built in".into(),
-                (true, Ok(e)) => format!("{} KB", e.size.div_ceil(1000)),
-                (true, Err(_)) => "no pack in this build".into(),
+            size: match core_packs::entry(p.language()) {
+                Ok(e) if from_pack(p.language()) => format!("{} KB", e.size.div_ceil(1000)),
+                _ => "built in".into(),
             },
         })
         .collect();
