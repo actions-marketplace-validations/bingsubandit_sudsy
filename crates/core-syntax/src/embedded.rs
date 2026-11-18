@@ -1,5 +1,10 @@
 //! Code of another language inside a file (a Dockerfile's `RUN`, a Markdown fence), as the host's
 //! provider reports it. The engine parses the region with the other language's provider.
+//!
+//! concept: embedded-code
+//! what: Code of another language inside a file, reported by the host provider and parsed by that language.
+//! tools: Prettier embedded languages, shellcheck in Dockerfile RUN
+//! reads: grammar:embed
 
 use crate::{TextRange, TextSize};
 

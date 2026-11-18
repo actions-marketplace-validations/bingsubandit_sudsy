@@ -17,6 +17,8 @@
 //!   declaration order (so reordering a grammar changes ids and its hash).
 //!
 //! Each language therefore has up to 8,388,608 node kinds and as many token kinds, and there are 255 languages.
+//!
+//! concept: none (infrastructure: SyntaxKind namespace)
 
 /// Identifies a language namespace (8 bits).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]

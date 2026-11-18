@@ -1,5 +1,7 @@
 //! What Ruby says to the shared scope rules (`core_rules::scope_rules`): `../../scope.rows`, and
 //! which parameters are left alone.
+//!
+//! concept: scope-tables
 
 use super::tree::child;
 use crate::generated::kind as k;

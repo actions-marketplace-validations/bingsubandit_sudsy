@@ -11,6 +11,8 @@
 //! * [`scan`]: the `trivia` and `limits` rows adapters of external parsers read.
 //! * [`strings`]: the string-literal model every language's `string` rows describe.
 //! * [`wire`]: the versioned tree encoding used across process boundaries.
+//!
+//! concept: none (glue: crate root)
 
 pub mod ast;
 pub mod codegen;

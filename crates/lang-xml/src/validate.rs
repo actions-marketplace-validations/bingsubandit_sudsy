@@ -1,5 +1,7 @@
 //! Well-formedness the grammar accepts: an end tag that does not match its start tag, a repeated
 //! attribute, `--` inside a comment, `]]>` in character data. Reported as parse errors.
+//!
+//! concept: parse-validation
 
 use crate::generated::kind as k;
 use core_syntax::{SyntaxNode, SyntaxNodeExt, SyntaxToken};

@@ -1,4 +1,6 @@
 //! The lossless lexer: every byte of the input ends up in exactly one token.
+//!
+//! concept: source-lexer
 
 use crate::generated::kind as k;
 use core_syntax::SyntaxKind;

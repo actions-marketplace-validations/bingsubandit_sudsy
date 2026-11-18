@@ -2,6 +2,10 @@
 //! `props` option, `defineModel`, and what each prop's declaration says about a default and a
 //! type (the reading of eslint-plugin-vue, without type information: a type it cannot resolve in
 //! the file is unknown and its props are not checked).
+//!
+//! concept: new component-props-model
+//! what: The props a component declares through defineProps, the props option or defineModel.
+//! tools: eslint-plugin-vue require-default-prop
 
 use super::Cx;
 use super::js::{self, args, calls, ident, key_name, members, static_name, string};

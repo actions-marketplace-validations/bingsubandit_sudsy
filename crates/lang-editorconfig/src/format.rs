@@ -1,5 +1,7 @@
 //! EditorConfig formatting: `[glob]` headers, `key = value` pairs one per line, a blank line before
 //! each section. Keys, globs, values and comments are kept as written.
+//!
+//! concept: key-value-layout
 
 use crate::generated::kind as k;
 use core_config::shared;

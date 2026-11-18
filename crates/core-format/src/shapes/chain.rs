@@ -1,3 +1,8 @@
+//! concept: member-chain
+//! what: Member chains broken by call count, head shape and receiver kind.
+//! tools: Prettier member-chain, google-java-format dot chains
+//! reads: option:member_chain_min_calls
+
 use crate::FormatCtx;
 use crate::comments::{self, CommentKind};
 use crate::doc::{self, Doc};

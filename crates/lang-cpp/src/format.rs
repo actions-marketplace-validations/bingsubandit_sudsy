@@ -1,4 +1,7 @@
 //! C and C++ formatting: the file is printed as written.
+//!
+//! concept: new verbatim-formatter
+//! what: A file or node printed as written.
 
 use core_config::shared;
 use core_format::context::verbatim_text;

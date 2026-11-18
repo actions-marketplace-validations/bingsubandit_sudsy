@@ -1,5 +1,7 @@
 //! SQL formatting: the layout of our own on the parser's tree (`layout`), following sqlfluff's
 //! layout rules.
+//!
+//! concept: none (glue: formatter dispatch)
 
 use core_config::shared;
 use core_format::{Doc, FormatCtx, FormatError, NodeFormatter};

@@ -1,5 +1,10 @@
 //! The regex flavors a grammar's `regex` and `regex-call` rows name: what each dialect writes
 //! the way the checks need to know.
+//!
+//! concept: regex-source-checks
+//! what: Rules about the source of regular expressions in literals and call arguments, by flavor.
+//! tools: eslint no-control-regex no-regex-spaces no-empty-character-class no-misleading-character-class, ruff regex checks
+//! reads: grammar:regex*
 
 /// The facts of one regex dialect.
 pub struct Flavor {

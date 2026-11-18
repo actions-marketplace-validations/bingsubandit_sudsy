@@ -1,5 +1,9 @@
 //! The `run:` scripts of a file: where they are, which shell runs them (the embedded code, see
 //! `embedded`), and the rules that read their text.
+//!
+//! concept: new deprecated-commands, new script-injection, embedded-code, embedded-command-checks
+//! what: deprecated-commands: A script uses a workflow command that GitHub has disabled (`::set-output`, `::save-state`, `::set-env`, `::add-path`); write to `$GITHUB_OUTPUT`, `$GITHUB_STATE`, `$GITHU
+//! what: script-injection: An expression in a `run` script reads text that an attacker can choose (an issue or pull request title, a branch name, a commit message): it is pasted into the script bef
 
 use crate::view::{entries, get, items, root_mapping, scalar};
 use core_rules::{FileContext, RuleContext};

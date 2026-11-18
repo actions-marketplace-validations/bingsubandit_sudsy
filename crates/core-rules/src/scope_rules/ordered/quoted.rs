@@ -1,6 +1,11 @@
 //! Quoted annotations (`x: "Foo"`, `List["Foo"]`): a string in a type position is code read
 //! later, and the names in it are references from the scope the string is written in. The names
 //! are the identifiers outside nested quotes and not behind a `.`; keywords are none.
+//!
+//! concept: ordered-scope-rules
+//! what: Scope rules where code order decides what a name means: replaced definitions, covered imports, unread locals.
+//! tools: pyflakes, ruff F811 F402 F841
+//! reads: family:scope
 
 use crate::scope_rules::ScopeLang;
 use core_semantics::scopes::{Access, Model};

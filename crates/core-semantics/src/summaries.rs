@@ -1,5 +1,9 @@
 //! Behavior summaries: per-method facts for rules and fix preconditions, from
 //! attributes, a provider's built-in list for its standard library, and the user's `semantics:`.
+//!
+//! concept: behavior-summaries
+//! what: Per-method behavior facts for rules and fix preconditions.
+//! tools: Roslyn attributes, nullable analysis
 
 use crate::facts::{FileSemantics, qualified_name};
 use core_flow::{BodyGraph, Op, OpFlags, Reachability, reachability};

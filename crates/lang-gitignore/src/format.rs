@@ -1,5 +1,7 @@
 //! Gitignore-syntax formatting: one pattern or comment per line, blank-line runs capped, trailing
 //! spaces removed (the parser keeps an escaped one, `\ `, as part of the pattern).
+//!
+//! concept: node-sequence
 
 use crate::generated::kind as k;
 use core_config::shared;

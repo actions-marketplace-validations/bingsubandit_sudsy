@@ -1,5 +1,10 @@
 //! Reads of names: those no scope binds, those that run before the name is bound, the names a
 //! module exports.
+//!
+//! concept: ordered-scope-rules
+//! what: Scope rules where code order decides what a name means: replaced definitions, covered imports, unread locals.
+//! tools: pyflakes, ruff F811 F402 F841
+//! reads: family:scope
 
 use super::live::{Bindings, Kind, deferred, own};
 use super::{Hit, imports::Form};

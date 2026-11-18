@@ -1,5 +1,7 @@
 //! Type nodes: annotations, references, type parameters and arguments, unions, intersections,
 //! function, conditional, mapped and tuple types, and the type operators.
+//!
+//! concept: type-expression-layout
 
 use super::{glued, words};
 use crate::format::decl;

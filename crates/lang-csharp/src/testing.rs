@@ -1,4 +1,6 @@
 //! Test support: the built C# worker, shared by every test binary that needs it.
+//!
+//! concept: none (test harness)
 
 use std::path::PathBuf;
 use std::sync::OnceLock;

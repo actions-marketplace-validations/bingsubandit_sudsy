@@ -1,6 +1,10 @@
 //! Angular's template syntax in the printer: control flow blocks, `@let`, ICU messages, bindings,
 //! microsyntax and pipes. Expressions are formatted by the engine as TypeScript (`Opts::embed`);
 //! pipes, which are no TypeScript, are split off first (`pipes`).
+//!
+//! concept: new angular-template-layout
+//! what: Angular template syntax: control flow blocks, @let, ICU, bindings.
+//! tools: Prettier angular
 
 use super::embed::lines;
 use super::microsyntax::{Span, TemplateBinding, template_bindings};

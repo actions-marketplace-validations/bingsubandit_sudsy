@@ -1,5 +1,11 @@
 //! The rules of checkmake (minphony, phonydeclared, timestampexpanded, maxbodylength,
 //! uniquetargets) and the rules of the Shell language on the commands of a recipe.
+//!
+//! concept: new min-phony, new phony-declared, new timestamp-expanded, new unique-targets, unique-names, max-family, embedded-command-checks
+//! what: min-phony: A target that must exist and be declared `.PHONY` (checkmake `minphony`)
+//! what: phony-declared: A target with no recipe that is not declared `.PHONY` (checkmake `phonydeclared`); targets that start with a `.` are special and skipped
+//! what: timestamp-expanded: A variable whose value runs `date` and that is not simply expanded (`:=`, `::=`): every use runs `date` again and the values differ within one build (checkmake `timestamp
+//! what: unique-targets: A target defined by more than one rule, which merges prerequisites and overrides recipes (checkmake `uniquetargets`)
 
 use crate::generated::kind as k;
 use core_rules::{Check, Opt, OptionDecl, Rule, RuleContext, rule};

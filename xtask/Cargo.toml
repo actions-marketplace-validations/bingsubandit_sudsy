@@ -9,6 +9,7 @@ publish.workspace = true
 # compile when that glue is stale. What needs the compiled languages lives in `xtask-full`.
 [dependencies]
 anyhow.workspace = true
+core-format.workspace = true
 core-syntax.workspace = true
 serde-saphyr.workspace = true
 serde_json.workspace = true

@@ -8,6 +8,8 @@
 //! the rest of its opening line and Prism ends the nodes of that line before it: the body (text,
 //! interpolations, label) is one `HeredocBody` token, without nodes of its own, and the nodes that
 //! hold the whole line are extended over it, so it is a child of the innermost of them.
+//!
+//! concept: adapter-replay
 
 mod ffi;
 

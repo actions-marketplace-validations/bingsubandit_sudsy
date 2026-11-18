@@ -1,4 +1,7 @@
 //! Names and conditions that repeat: object keys, class members, `case` tests, `else if` chains.
+//!
+//! concept: no-duplicate-keys, no-duplicate-case, unique-names, new no-dupe-else-if
+//! what: An else-if chain that repeats an earlier condition.
 
 use super::{Check, code_text, has_own, operator, span, test_of, un};
 use crate::generated::kind as k;

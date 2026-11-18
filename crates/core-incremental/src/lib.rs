@@ -9,6 +9,8 @@
 //! Backdating: when a query re-executes to an equal value, its dependents are not re-run.
 //! Equality of every value in the graph is structural: `GreenNode` compares its tree, config and
 //! options compare their contents, and failures compare their messages.
+//!
+//! concept: none (glue: crate root)
 
 mod db;
 mod embedded;

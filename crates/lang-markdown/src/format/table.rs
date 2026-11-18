@@ -1,4 +1,8 @@
 //! GFM tables, columns aligned.
+//!
+//! concept: new table-alignment
+//! what: Tables with aligned columns.
+//! tools: Prettier markdown tables
 
 use super::*;
 

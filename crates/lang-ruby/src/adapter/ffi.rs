@@ -1,6 +1,8 @@
 //! The calls into Prism's C library: one parse that records the lexer's tokens (the library's lex
 //! callback, which the Rust crate does not wrap) and the node tree (the library's visitor), with
 //! nothing of the library's types leaving this file.
+//!
+//! concept: none (adapter: Prism FFI calls)
 
 #![allow(unsafe_code)]
 

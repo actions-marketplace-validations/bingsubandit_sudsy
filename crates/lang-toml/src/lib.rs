@@ -1,5 +1,7 @@
 //! TOML: tree-sitter parses (through `core-treesitter`, mapping in `lang.yaml`), formatting is
 //! the shared shapes plus the table layout in `format.rs`.
+//!
+//! concept: none (glue: provider entry)
 
 mod align;
 mod format;

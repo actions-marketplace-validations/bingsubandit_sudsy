@@ -2,6 +2,8 @@
 //! [`check`], which enforces the four automatic checks of docs/ai/development/testing.md that
 //! concern formatting: lossless round-trip, unchanged meaning, idempotency, and (here) that no
 //! comment was lost or reordered.
+//!
+//! concept: none (test harness)
 
 use crate::safety::equal_ignoring_trivia;
 use core_syntax::{Grammar, SyntaxElement, SyntaxNode, print};

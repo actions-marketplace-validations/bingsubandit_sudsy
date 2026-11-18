@@ -1,4 +1,6 @@
 //! `MERGE INTO target USING source ON cond WHEN [NOT] MATCHED [BY ..] [AND cond] THEN action ..`.
+//!
+//! concept: recursive-descent-parser
 
 use super::lexer::T;
 use super::{Dialect, P};

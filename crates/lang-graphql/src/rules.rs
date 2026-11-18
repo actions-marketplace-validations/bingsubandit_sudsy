@@ -1,4 +1,6 @@
 //! The Rust rules of GraphQL; syntax rules that fit a pattern are files in `rules/`.
+//!
+//! concept: none (glue: rule registration)
 
 mod no_typename_prefix;
 

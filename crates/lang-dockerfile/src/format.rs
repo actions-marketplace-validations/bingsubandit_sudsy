@@ -2,6 +2,10 @@
 //! arguments where the source has blanks, line continuations ending the line and indenting what
 //! follows. Shell text, options, paths and pairs are kept as written; only the line breaks of
 //! multi-line text are re-indented (never inside a quote, where the blanks are content).
+//!
+//! concept: token-case, new line-continuation-layout
+//! what: Line continuations kept at the end of lines.
+//! tools: shfmt, hadolint, checkmake
 
 use crate::generated::kind as k;
 use core_config::shared;

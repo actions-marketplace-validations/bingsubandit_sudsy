@@ -2,6 +2,11 @@
 //! the node's body ([`crate::ast::assign`], the routine the generated accessors use; separators and
 //! `#optional` tokens excepted), and every required item must be present. Conformance suites run
 //! it over real files, which is what keeps a grammar's bodies honest.
+//!
+//! concept: tree-shape-check
+//! what: Checks a tree against the node bodies of its grammar.
+//! tools: none (conformance)
+//! reads: grammar:language
 
 use crate::ast::{Pattern, Slot, assign};
 use crate::grammar::{Cardinality, Grammar};

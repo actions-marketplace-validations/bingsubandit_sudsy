@@ -1,3 +1,5 @@
+//! concept: none (glue: provider entry)
+
 mod format;
 mod rules;
 

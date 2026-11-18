@@ -3,6 +3,11 @@
 //! The primitives are those of docs/ai/formatting/engine.md (after Wadler and Prettier):
 //! `text`, `line`, `softline`, `hardline`, `group`, `indent`, `align`, `if_break`, `fill`,
 //! `conditional_group`, `line_suffix` and `break_parent`.
+//!
+//! concept: layout-document
+//! what: The Wadler-style layout document that formatting code builds and the printer consumes.
+//! tools: Prettier doc builders
+//! reads: grammar:language
 
 use std::borrow::Cow;
 use std::sync::Arc;

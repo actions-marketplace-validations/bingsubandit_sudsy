@@ -8,6 +8,8 @@
 //! * [`fixes`]: fix selection and application, and the loop around them.
 //! * [`layout`]: layout directives that rules attach for the formatter.
 //! * `suppress`: `sudsy-disable-next-line`, `-disable-line`, `-disable`/`-enable`, `-disable-file`.
+//!
+//! concept: none (glue: crate root)
 
 pub mod cases;
 pub mod checks;

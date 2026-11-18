@@ -1,5 +1,7 @@
 //! What the rules read from the tree: names of properties and at-rules, the parts of selectors,
 //! and the tokens and functions of a value.
+//!
+//! concept: role-accessors
 
 use crate::generated::kind as k;
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodeExt, SyntaxToken, TextRange};

@@ -1,4 +1,6 @@
 //! `rule!`: declares a Rust rule, its struct and its metadata, around a normal `impl Rule` body.
+//!
+//! concept: none (glue: rule! macro)
 
 /// Declares a rule: the struct, its [`RuleMeta`](crate::RuleMeta) (with empty `requires`, `uses`
 /// and `options` unless given) and the `meta`, `kinds` and `tags` methods of [`Rule`](crate::Rule).

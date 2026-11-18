@@ -1,5 +1,9 @@
 //! Prefixed strings (`r".."`, `f".."`, `"""..""""`): quote choice by escapes, prefix spelling and
 //! f-string fields (the rule of Black and ruff).
+//!
+//! concept: prefixed-string-quotes
+//! what: Quote choice, prefix spelling and f-string fields of prefixed strings.
+//! tools: Black string prefix normalization, ruff format
 
 use core_syntax::strings::StringSyntax;
 use std::borrow::Cow;

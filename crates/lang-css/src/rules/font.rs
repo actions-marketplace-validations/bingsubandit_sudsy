@@ -1,4 +1,8 @@
 //! The families of a `font-family` declaration.
+//!
+//! concept: new font-family-checks
+//! what: Font family names and generic families of a font-family declaration.
+//! tools: stylelint font-family-*
 
 use super::model;
 use crate::generated::kind as k;

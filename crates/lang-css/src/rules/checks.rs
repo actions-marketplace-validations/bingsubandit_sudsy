@@ -1,5 +1,9 @@
 //! The `check` family: rules that each read the tree their own way. Param `check` names the
 //! function; the message has `{name}`.
+//!
+//! concept: new style-declaration-checks
+//! what: Checks on properties, values and selectors of style rules.
+//! tools: stylelint
 
 use super::font;
 use super::model::{self, group_items, is_trivia, plain};

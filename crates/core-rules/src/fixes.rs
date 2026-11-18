@@ -1,5 +1,7 @@
 //! The fix loop: collect fixes, drop overlapping ones by rule
 //! priority, apply, re-parse, re-run the rules; repeat until nothing changes or 10 iterations.
+//!
+//! concept: none (infrastructure: fix loop)
 
 use crate::diagnostic::{Diagnostic, Fix};
 use core_syntax::TextRange;

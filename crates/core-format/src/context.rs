@@ -1,4 +1,6 @@
 //! The context formatting code runs in, and the trait providers implement.
+//!
+//! concept: none (infrastructure: formatting context and the NodeFormatter trait)
 
 use crate::comments::{self, Comment, CommentKind, CommentStyle};
 use crate::directives::{Directive, DirectiveTable, NodeDirectives};

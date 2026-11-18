@@ -1,4 +1,6 @@
 //! Checks on the shape of a call: what its arguments and its block are.
+//!
+//! concept: call-shape-checks
 
 use super::tree::{child, has_token, last_node, method_name, span, tokens};
 use crate::generated::kind as k;

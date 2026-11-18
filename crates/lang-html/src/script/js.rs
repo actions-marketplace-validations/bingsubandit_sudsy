@@ -1,5 +1,7 @@
 //! Reading the JavaScript tree of a script: names of keys, calls and object members. Plain
 //! accessors over `lang_js`'s node kinds; no rule logic.
+//!
+//! concept: role-accessors
 
 use core_syntax::{SyntaxNode, SyntaxNodeExt, TextRange, code_span, grammars};
 use lang_js::generated::kind as j;

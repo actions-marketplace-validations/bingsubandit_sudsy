@@ -4,6 +4,11 @@
 //! other. The language says which nodes are branches, loops, collections and the like by tags
 //! (`#branch`, `#branching`, `#collection`, `#comprehension`, `#with-item`, `#named-expr`,
 //! docs/ai/rules/semantics.md#ordered-rules) and the rest in [`Ordered`](super::Ordered).
+//!
+//! concept: ordered-scope-rules
+//! what: Scope rules where code order decides what a name means: replaced definitions, covered imports, unread locals.
+//! tools: pyflakes, ruff F811 F402 F841
+//! reads: family:scope
 
 mod defs;
 mod imports;

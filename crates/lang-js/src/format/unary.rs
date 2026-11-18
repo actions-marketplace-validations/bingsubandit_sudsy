@@ -1,5 +1,9 @@
 //! The small expressions: unary, update, `await`, `yield`, spread and sequence expressions, and
 //! `return` / `throw` with their argument.
+//!
+//! concept: new unary-expression-layout
+//! what: Unary, update, await, yield, spread, return and throw expressions.
+//! tools: Prettier unary and keyword expressions
 
 use super::ast::{
     has_leading_comment_in_parens, has_leading_own_line_comment, is_member, outer, parent,

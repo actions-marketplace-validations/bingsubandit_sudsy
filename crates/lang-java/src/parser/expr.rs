@@ -1,6 +1,9 @@
 //! Expressions: precedence climbing for the binary operators; the left-recursive forms (binary
 //! operators, member chains, array access, method references) wrap what was built with a
 //! checkpoint, so they are loops.
+//!
+//! concept: new precedence-expression-parser
+//! what: Expression parsing by operator precedence and associativity.
 
 use super::P;
 use super::look::Paren;

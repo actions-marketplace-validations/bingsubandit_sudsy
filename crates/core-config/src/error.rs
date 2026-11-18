@@ -1,3 +1,5 @@
+//! concept: none (infrastructure: config errors)
+
 use std::fmt;
 use std::path::PathBuf;
 

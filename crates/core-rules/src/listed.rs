@@ -7,6 +7,11 @@
 //!   (a name repeats within the node).
 //!
 //! The message has `{name}`.
+//!
+//! concept: names-family
+//! what: Allowed, disallowed, pattern and case checks on the names of one kind of thing.
+//! tools: stylelint name rules, html-validate attr-pattern, element-case
+//! reads: family:names
 
 use crate::unique::Repeats;
 use crate::{Family, Params, Re, Rule, RuleContext, RuleMeta};

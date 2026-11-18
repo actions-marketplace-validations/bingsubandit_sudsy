@@ -1,6 +1,11 @@
 //! `use-before-define` (a reference that comes before the declaration, or runs while the
 //! variable is being initialized) and `redeclared-variable` (a name declared again in one scope),
 //! after ESLint's `no-use-before-define` and `no-redeclare`.
+//!
+//! concept: use-before-define, redeclared-variable
+//! what: A reference before its declaration, and a name declared again in one scope.
+//! rules: use-before-define, redeclared-variable
+//! reads: rule:use-before-define
 
 use super::cx::Cx;
 use core_semantics::scopes::{Decl, Flags, Reference, Symbol};

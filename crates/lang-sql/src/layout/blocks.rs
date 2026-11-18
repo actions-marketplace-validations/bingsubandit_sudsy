@@ -2,6 +2,10 @@
 //! `WHILE` and `REPEAT` as flat statements with no indent, and its T-SQL dialect puts no indent
 //! around the condition and the body of `IF`, `ELSE` and `WHILE`, so the indents sqlfluff's dialects have are put
 //! on the points here, from the keywords and statements.
+//!
+//! concept: new indent-balance-layout
+//! what: Indentation from the indent and dedent balance of each line.
+//! tools: sqlfluff LT02
 
 use super::seq::{NONE, Seq};
 use crate::generated::kind as k;

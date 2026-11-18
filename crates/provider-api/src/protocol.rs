@@ -5,6 +5,8 @@
 //! payload. Payload structs are MessagePack arrays in field order, mirrored by
 //! `workers/csharp/Sudsy.Worker/Protocol/Messages.cs`; change both together and bump
 //! [`PROTOCOL_VERSION`].
+//!
+//! concept: none (infrastructure: worker protocol)
 
 use core_flow::BodyGraph;
 use core_semantics::Answers;

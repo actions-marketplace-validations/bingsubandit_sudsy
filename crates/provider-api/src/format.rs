@@ -1,4 +1,6 @@
 //! Formatting a file through a provider: parse, format (and, in debug builds, the safety check).
+//!
+//! concept: none (infrastructure: formatting a file through a provider)
 
 use crate::provider::{LanguageProvider, ParseError, ParseResult, ProviderError, SourceFile};
 use core_config::ResolvedOptions;

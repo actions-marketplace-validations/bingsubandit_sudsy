@@ -1,5 +1,7 @@
 //! MySQL stored-program statements that have a structure of their own (`IF`); `BEGIN`, `LOOP`,
 //! `WHILE` and `REPEAT` stay flat and get their indents in the layout.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use super::lexer::T;

@@ -1,6 +1,10 @@
 //! Rules that need a symbol or a type from the worker (`symbol_findings`): each reports the
 //! places one check of the worker found. `debug-assert-message` and `debug-fail-message` also
 //! work without the worker, by name.
+//!
+//! concept: new debug-assert-message, new debug-fail-message
+//! what: debug-assert-message: `Debug.Assert` without a message, or with a constant blank one
+//! what: debug-fail-message: `Debug.Fail` with a constant blank message
 
 use super::finding::report;
 use super::{kind, text_of};

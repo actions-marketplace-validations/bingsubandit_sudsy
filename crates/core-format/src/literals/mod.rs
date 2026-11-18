@@ -1,5 +1,9 @@
 //! Spelling of literal tokens: string quotes and escapes, number notation. Text in, text out;
 //! each language passes its policy as a style value.
+//!
+//! concept: literal-spelling
+//! what: Quotes, escapes and number notation of literal tokens by a style value.
+//! tools: Prettier strings and numbers, Black string normalization, ruff format
 
 pub mod prefixed;
 

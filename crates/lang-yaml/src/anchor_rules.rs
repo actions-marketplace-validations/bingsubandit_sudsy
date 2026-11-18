@@ -1,5 +1,10 @@
 //! Rules on anchors and aliases: `no-undefined-alias` (correctness) and the opt-in
 //! `no-duplicate-anchors` and `no-unused-anchors`. Anchors do not cross document markers.
+//!
+//! concept: new no-undefined-alias, new no-duplicate-anchors, new no-unused-anchors
+//! what: no-undefined-alias: An alias names an anchor that is not defined earlier in the same document
+//! what: no-duplicate-anchors: An anchor name is defined again in the same document; an alias refers to the latest definition above it, which is easy to misread
+//! what: no-unused-anchors: An anchor that no alias refers to
 
 use crate::generated::kind;
 use core_rules::rule;

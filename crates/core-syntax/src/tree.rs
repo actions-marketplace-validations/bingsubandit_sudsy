@@ -1,4 +1,6 @@
 //! The lossless tree: `rowan` green/red trees keyed by our [`SyntaxKind`].
+//!
+//! concept: none (infrastructure: lossless tree)
 
 use crate::kind::SyntaxKind;
 

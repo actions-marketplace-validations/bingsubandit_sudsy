@@ -1,6 +1,10 @@
 //! `member-order` and `accessor-order`: the order of the members of a type, namespace or file,
 //! and of the accessors of a property or event. Both report only; the report places match
 //! StyleCop SA1201 to SA1204, SA1212, SA1213 and SA1214.
+//!
+//! concept: new member-order, new accessor-order
+//! what: member-order: Members are out of order
+//! what: accessor-order: `get` goes before `set` or `init`, and `add` before `remove`
 
 use super::kind;
 use core_rules::rule;

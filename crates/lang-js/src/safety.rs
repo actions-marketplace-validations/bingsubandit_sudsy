@@ -4,6 +4,8 @@
 //! spelling of numbers, the order of regular expression flags may differ, nothing else. JSX text
 //! (`JSXText` is transparent to the generic check) is compared by its meaning per element: lines
 //! trimmed as JSX does, runs of whitespace one space, `{" "}` a space.
+//!
+//! concept: format-safety-check
 
 use crate::format::literal_value;
 use crate::generated::kind as k;

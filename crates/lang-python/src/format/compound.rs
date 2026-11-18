@@ -1,4 +1,6 @@
 //! Compound statements and clauses: header, `:` and the block, decorators, `with` items.
+//!
+//! concept: compound-statement, declaration-kit
 
 use super::block::{Seq, block as block_doc, joins_header};
 use super::expr;

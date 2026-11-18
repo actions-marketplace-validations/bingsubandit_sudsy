@@ -1,6 +1,8 @@
 //! [`WasmRule`]: a plugin's rule as a [`Rule`]. The host copies the file to the plugin, the plugin
 //! runs the rule with the core's own engine and sends diagnostics back; the host reports them
 //! through the rule context, so everything after that (levels, suppressions, fixes) is shared.
+//!
+//! concept: none (infrastructure: Wasm plugin host)
 
 use crate::host::{Plugin, PluginError, w};
 use core_config::Level;

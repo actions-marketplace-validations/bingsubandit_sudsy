@@ -1,4 +1,6 @@
 //! Regexes of rules, compiled when first used and for ASCII text first.
+//!
+//! concept: none (helper: rule regex cache)
 
 use regex_automata::meta;
 use regex_automata::util::syntax;

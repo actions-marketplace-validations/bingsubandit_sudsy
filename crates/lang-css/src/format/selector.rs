@@ -1,5 +1,9 @@
 //! Selector lists. A selector with a construct this printer does not know (SCSS and Less
 //! interpolation, mixin definitions and guards) is `None`: the caller keeps it as written.
+//!
+//! concept: new selector-list-layout
+//! what: Selector lists printed one selector per line with combinators.
+//! tools: Prettier postcss selectors
 
 use super::value::{self, Grp, Item, split_commas};
 use super::{Pr, text};

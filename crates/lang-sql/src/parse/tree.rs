@@ -1,4 +1,6 @@
 //! The flat output of a parse (leaves and node spans) and its replay into the lossless tree.
+//!
+//! concept: adapter-replay
 
 use crate::generated::kind as k;
 use core_syntax::{SyntaxKind, grammars};

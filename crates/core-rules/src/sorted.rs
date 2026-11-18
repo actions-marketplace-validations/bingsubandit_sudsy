@@ -1,5 +1,10 @@
 //! Ordering rules on the shared tags: `sorted-keys` (every `#mapping`) and `sorted-array-values`
 //! (every `#sequence` of only strings or only numbers).
+//!
+//! concept: sorted-keys, sorted-array-values
+//! what: Mapping keys and string or number array values in order.
+//! rules: sorted-keys, sorted-array-values
+//! reads: rule:sorted-keys
 
 use crate::hooks::Scalar;
 use crate::keys::{key_range, keyed};

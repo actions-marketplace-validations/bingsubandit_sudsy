@@ -1,4 +1,6 @@
 //! Statement shapes of postgres that the generic walker does not read from position alone.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use super::lexer::T;

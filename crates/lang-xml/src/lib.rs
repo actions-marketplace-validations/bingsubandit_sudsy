@@ -1,5 +1,7 @@
 //! XML: tree-sitter parses (through `core-treesitter`, mapping in `lang.yaml`), `validate.rs`
 //! checks well-formedness beyond the grammar, formatting is in `format.rs`.
+//!
+//! concept: none (glue: provider entry)
 
 mod format;
 mod rules;

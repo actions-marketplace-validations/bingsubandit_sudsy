@@ -1,4 +1,8 @@
 //! `unknown-property` and `invalid-property-value`, both read from `data/properties.txt`.
+//!
+//! concept: new unknown-property, new invalid-property-value
+//! what: unknown-property: A property name that is not an EditorConfig or .NET (`dotnet_*`, `csharp_*`, `visual_basic_*`, `dotnet_diagnostic.<ID>.severity`, naming rule) property but is one typo aw
+//! what: invalid-property-value: A known EditorConfig or .NET property has a value it does not accept (`indent_style = tabs`, `dotnet_diagnostic.CA1000.severity = high`)
 
 use crate::generated::kind;
 use core_config::suggest;

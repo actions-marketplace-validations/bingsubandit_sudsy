@@ -13,6 +13,10 @@
 //! `#if`, the `#if` ... `#endif` is a `PpGroup` of `PpBranch` nodes; when a branch closed a group
 //! that was opened before the `#if` (`#if A` / `} else {` / `#endif`), only the `Directive`
 //! nodes are there.
+//!
+//! concept: new unwrapped-line-structure
+//! what: Nodes found from tokens alone by grouping unwrapped lines, without preprocessing.
+//! tools: clang-format
 
 use crate::generated::kind as k;
 use crate::lexer::LTok;

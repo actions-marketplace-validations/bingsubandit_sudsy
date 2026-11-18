@@ -7,6 +7,8 @@
 //! * [`safety`]: the re-parse and tree comparison check; [`testing`]: the shared test helper.
 //!
 //! A provider's formatter turns a node into a [`Doc`]; [`format_tree`] prints it.
+//!
+//! concept: none (glue: crate root and format entry)
 
 mod blank;
 pub mod calls;

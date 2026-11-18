@@ -17,6 +17,11 @@
 //! stands before a brace: a line break, or a blank when the option is `same_line`),
 //! `trailing=option:NAME=VALUE` (a trailing comma when the option has the value),
 //! `no_trailing_after=K` (none after a last item that starts with that token).
+//!
+//! concept: node-layout-rows
+//! what: Layout rows name a shape and its details for a kind of node, so a language holds only a table.
+//! tools: none (each tool layout as options)
+//! reads: rules:layout
 
 use crate::FormatCtx;
 use crate::comments;

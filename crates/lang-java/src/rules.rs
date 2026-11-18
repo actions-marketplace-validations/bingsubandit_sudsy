@@ -1,5 +1,8 @@
 //! The Rust rules of Java (Checkstyle): the checks that read several nodes. The checks on one
 //! node's own text are pattern files in `rules/`.
+//!
+//! concept: naming-convention, new modifier-order
+//! what: The modifiers of a declaration are not in the order of the Java Language Specification: `public protected private abstract default static sealed non-sealed final transien
 
 use crate::generated::kind as k;
 use core_rules::options::{Check, Opt, OptionDecl};

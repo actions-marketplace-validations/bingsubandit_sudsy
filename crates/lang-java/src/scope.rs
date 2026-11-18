@@ -1,4 +1,6 @@
 //! What Java says to the shared scope rules (`core_rules::scope_rules`): `../scope.rows`.
+//!
+//! concept: scope-tables
 
 use core_rules::{ScopeLang, ScopeRule};
 

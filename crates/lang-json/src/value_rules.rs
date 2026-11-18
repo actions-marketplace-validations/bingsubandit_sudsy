@@ -1,4 +1,7 @@
 //! JSON rules on values: the opt-in `unsafe-numbers`.
+//!
+//! concept: new unsafe-numbers
+//! what: A number that a double-precision parser (JavaScript, most JSON libraries) cannot hold: an integer beyond 2^53 - 1, a value that overflows to infinity, underflows to zero
 
 use crate::generated::{Literal, kind};
 use core_rules::RuleContext;

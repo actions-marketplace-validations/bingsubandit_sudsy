@@ -1,4 +1,6 @@
 //! Strings and numbers: quote and prefix normalization, number spelling, docstrings.
+//!
+//! concept: literal-spelling, prefixed-string-quotes
 
 use super::util::syntax;
 use core_format::literals::{self, FracZeros, NumberStyle, prefixed};

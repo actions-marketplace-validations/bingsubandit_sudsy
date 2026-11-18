@@ -3,6 +3,10 @@
 //! finding's text), `empty` (what `{text}` is when the finding has none, default empty) and
 //! `fix-title` (the finding's text replaces its fix range; without a title, or without text,
 //! there is no fix).
+//!
+//! concept: new worker-findings-family
+//! what: A rule family reporting the places one check of the C# worker found.
+//! tools: Roslyn analyzers
 
 use super::range_of;
 use core_rules::{Edit, Family, FileContext, Params, Rule, RuleContext, RuleMeta};

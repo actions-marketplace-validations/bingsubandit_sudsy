@@ -7,6 +7,8 @@
 //! The message has `{name}`; the option `ignore` lists names or `/regex/` that are left out.
 //! Names are compared in lowercase. SCSS and Less constructs are not unknown: their at-rules are
 //! in the tables `at-rule-scss` and `at-rule-less`, and their functions are not checked.
+//!
+//! concept: known-names-table
 
 use super::model::{self, Complex, Part, Piece, split_dimension};
 use crate::data;

@@ -1,4 +1,6 @@
 //! Offsets to line and column.
+//!
+//! concept: none (helper: line index)
 
 use core_syntax::TextSize;
 

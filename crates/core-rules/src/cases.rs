@@ -1,5 +1,10 @@
 //! `no-duplicate-case`, on the `#switch` and `#case` roles: two arms of one switch with the same
 //! test (the `test` field of a case; an arm with several labels has one per label).
+//!
+//! concept: no-duplicate-case
+//! what: Two arms of one switch with the same test.
+//! rules: no-duplicate-case
+//! reads: rule:no-duplicate-case
 
 use crate::rule;
 use crate::rule::RuleContext;

@@ -1,4 +1,6 @@
 //! Inline content: paragraphs, emphasis, escapes.
+//!
+//! concept: text-fill
 
 use super::*;
 use core_syntax::SyntaxNodeExt;

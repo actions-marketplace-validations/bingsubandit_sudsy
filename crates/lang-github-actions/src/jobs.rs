@@ -1,4 +1,12 @@
 //! Rules on the `jobs` of a workflow: ids, `needs`, `runs-on` and `permissions`.
+//!
+//! concept: new invalid-job-id, new duplicate-ids, new unknown-needs, new cyclic-needs, new invalid-runs-on, new missing-permissions
+//! what: invalid-job-id: A job id must start with a letter or `_` and contain only letters, digits, `-` and `_`
+//! what: duplicate-ids: Job ids that differ only in case (ids are case-insensitive; exact repeats are `no-duplicate-keys`), and step ids repeated within a job
+//! what: unknown-needs: `needs` names a job that the workflow does not define
+//! what: cyclic-needs: The `needs` of the jobs form a cycle, so no job of it can start
+//! what: invalid-runs-on: A `runs-on` label that is not one of the known runner labels
+//! what: missing-permissions: A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access
 
 use crate::view::{Entry, entries, get, items, root_mapping, scalar, scalar_list};
 use core_rules::rule;

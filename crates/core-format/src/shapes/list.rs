@@ -1,3 +1,8 @@
+//! concept: delimited-list
+//! what: Delimited lists flat or one item per line with trailing comma and magic-comma policy.
+//! tools: Prettier arrays objects and parameters, ruff magic trailing comma, google-java-format lists
+//! reads: tag:delimited-list
+
 use super::{
     BlankRule, container, container_between, dangling_comments, gap, render_slots,
     separator_comments,

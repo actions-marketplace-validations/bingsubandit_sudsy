@@ -1,5 +1,7 @@
 //! Option schemas: every provider declares its format options once (name, type, default,
 //! allowed values, description). Validation, resolution, docs and tests derive from it.
+//!
+//! concept: none (infrastructure: option schemas)
 
 use crate::error::unknown_name;
 use crate::model::OptionValue;

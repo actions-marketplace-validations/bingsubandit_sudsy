@@ -2,6 +2,10 @@
 //! them is not TOML, like a syntax error): string escapes and control characters, date and time
 //! ranges, a missing line break between entries, and the table model (duplicate keys, redefined
 //! tables, tables and arrays of tables that conflict, extending an inline table or a value).
+//!
+//! concept: new parse-validation
+//! what: Rules the grammar does not express, reported as parse errors.
+//! tools: TOML 1.0 spec, XML well-formedness
 
 use crate::generated::kind;
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};

@@ -2,6 +2,10 @@
 //! payload too (MessagePack arrays in field order, mirrored by
 //! `workers/csharp/Sudsy.Worker/Protocol/SemanticMessages.cs`). Spans are UTF-8 byte offsets
 //! into the file text.
+//!
+//! concept: semantic-facts
+//! what: What a provider semantic model says about one file: declarations, references, diagnostics.
+//! tools: Roslyn semantic model
 
 use core_flow::BodyGraph;
 use serde::{Deserialize, Serialize};

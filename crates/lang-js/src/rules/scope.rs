@@ -1,6 +1,8 @@
 //! Rules that read what names bind to (docs/ai/formatting/js.md): the model of
 //! `crate::semantic`, built on the first of them that runs on a file. Positions follow ESLint's
 //! reports, so the parity runners compare them as they are.
+//!
+//! concept: scope-rules
 
 use super::{Check, code_text};
 use crate::generated::kind as k;

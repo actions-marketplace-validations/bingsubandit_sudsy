@@ -1,6 +1,8 @@
 //! `[Diagnostics.CodeAnalysis.SuppressMessage('PSRuleName', ...)]` silences the rule for the
 //! function or class the attribute is on or in (on a method: its class), else for the file. The PSScriptAnalyzer name maps to the
 //! Sudsy rule through the parity catalog. Optional target and scope arguments are not read.
+//!
+//! concept: suppression-comments
 
 use crate::generated::kind;
 use core_rules::{FileContext, RuleHooks};

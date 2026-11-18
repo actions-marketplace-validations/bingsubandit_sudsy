@@ -3,6 +3,11 @@
 //! [`Row`]s of the binder and the facts the scope rules ask for; kind names are resolved against
 //! the grammar when the [`super::Table`] is built. `//` starts a comment.
 //!
+//! concept: scope-tables
+//! what: Which node kinds open scopes, declare, refer to or assign names, as rows resolved against the grammar.
+//! tools: none (language facts as rows)
+//! reads: file:scope.rows
+//!
 //! Row attributes (a bare word is a flag, `key=value` has a value; several `child`, `token`,
 //! `keyword`, `name`, `parent-place`, `parent-flags` and `unchecked` attributes are a list):
 //! - flags of the row: `var-scope`, `closed`, `hidden`, `inert`, `dynamic`, `binding`,

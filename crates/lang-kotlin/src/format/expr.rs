@@ -1,4 +1,6 @@
 //! Expressions and statements: control flow, lambdas, operators.
+//!
+//! concept: block-and-statements, binary-chain-layout
 
 use super::*;
 

@@ -1,5 +1,10 @@
 //! The placeholder syntaxes of format strings, read as the language's own library reads them:
 //! what a string asks of its arguments, or why it is invalid.
+//!
+//! concept: format-string-checks
+//! what: Format strings that do not fit their arguments, by flavor (percent, brace).
+//! tools: ruff F501-F509 F521-F525, pyupgrade UP031 UP032
+//! reads: grammar:format
 
 use std::collections::BTreeSet;
 

@@ -1,5 +1,9 @@
 //! The `<summary>` rules (SA1601, SA1604-SA1608). A partial type or method is checked part by
 //! part: StyleCop accepts one documented part, which needs the whole project.
+//!
+//! concept: new doc-partial-required, new no-default-summary
+//! what: doc-partial-required: A partial type or method without a documentation comment (or with an empty one)
+//! what: no-default-summary: A `<summary>` that starts with the text Visual Studio generates, "Summary description for ..."
 
 use super::doc_comments::{DOC_KINDS, Decl, Declaration, doc_of, documented, normalized_text};
 use super::kind;

@@ -1,4 +1,8 @@
 //! Checks on one statement or expression of its own.
+//!
+//! concept: new statement-shape-checks
+//! what: Checks on the shape of statements and expressions: layout, comparisons, try clauses, jumps.
+//! tools: ruff pycodestyle E7 and bugbear, ESLint core
 
 use super::{Check, code_text, has_own, operator, span, un};
 use crate::generated::kind as k;

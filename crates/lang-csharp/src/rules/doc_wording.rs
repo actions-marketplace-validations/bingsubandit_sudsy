@@ -1,6 +1,12 @@
 //! Rules about the wording of `<summary>`: property summaries (SA1623, SA1624) and the
 //! standard text of constructors and finalizers (SA1642, SA1643). Fixes change documentation
 //! text, so they are unsafe.
+//!
+//! concept: new property-summary-matches-accessors, new property-summary-omits-restricted-accessor, new constructor-summary-standard-text, new destructor-summary-standard-text
+//! what: property-summary-matches-accessors: A property summary starts with "Gets", "Sets" or "Gets or sets" ("Gets a value indicating whether" and so on for `bool`), as the property's accessors reachable from outsi
+//! what: property-summary-omits-restricted-accessor: A property summary says "Gets or sets" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property)
+//! what: constructor-summary-standard-text: The summary of a constructor starts with "Initializes a new instance of the <see cref="T"/> class" (struct), "Initializes static members of the ..." for a static construc
+//! what: destructor-summary-standard-text: The summary of a finalizer starts with "Finalizes an instance of the <see cref="T"/> class."
 
 use super::doc_comments::{
     Access, DOC_KINDS, Decl, Documented, Element, documented, first_text, has_modifier,

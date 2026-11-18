@@ -1,3 +1,7 @@
+//! concept: new sorted-imports
+//! what: Import statements ordered by group, name and case, with blank lines between groups.
+//! tools: isort, google-java-format, ktlint import-ordering, StyleCop SA1210, PHP-CS-Fixer ordered_imports, buf format
+
 use super::kind;
 use crate::using_sort::{self, Compare, Order};
 use core_rules::rule;

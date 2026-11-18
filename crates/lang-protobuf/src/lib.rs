@@ -1,5 +1,7 @@
 //! Protobuf (proto2, proto3, editions): tree-sitter parses (through `core-treesitter`, mapping in
 //! `lang.yaml`), `format.rs` lays the statements out like `buf format`.
+//!
+//! concept: none (glue: provider entry)
 
 mod format;
 mod rules;

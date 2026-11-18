@@ -1,4 +1,8 @@
 //! Helpers over the shared tree that several languages' rules need.
+//!
+//! concept: role-accessors
+//! what: Accessors over the shared tree that several languages rules need: ranges, separators, reordering.
+//! tools: none (internal)
 
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken, TextRange};
 use std::cell::{Cell, RefCell};

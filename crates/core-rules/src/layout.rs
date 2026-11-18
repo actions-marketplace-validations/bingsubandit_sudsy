@@ -2,6 +2,10 @@
 //! out a certain way, and the formatter reads the resulting [`DirectiveTable`]. Rules request,
 //! the core performs. The rules run in a pass of their own, so formatting depends on the layout
 //! rules only, not on the rest of the lint results.
+//!
+//! concept: layout-directives
+//! what: Versioned layout requests that rules attach to nodes and shapes read.
+//! tools: none (internal)
 
 use crate::engine::{ActiveRule, traverse};
 use crate::rule::{FileContext, RuleContext};

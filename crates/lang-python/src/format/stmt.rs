@@ -1,4 +1,6 @@
 //! Simple statements: `return`, assignments, `raise`, `assert`, `del`, `global`, imports.
+//!
+//! concept: assignment-layout
 
 use super::expr::{self, expr as expr_doc};
 use super::list;

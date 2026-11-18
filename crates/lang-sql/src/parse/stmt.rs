@@ -1,4 +1,6 @@
 //! The file and its statements.
+//!
+//! concept: recursive-descent-parser
 
 use super::lexer::T;
 use super::{Dialect, P};

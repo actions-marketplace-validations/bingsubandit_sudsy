@@ -1,4 +1,6 @@
 //! Flow nodes: properties, aliases, scalars and flow collections.
+//!
+//! concept: recursive-descent-parser
 
 use super::scan::is_flow_indicator;
 use super::{Parser, R};

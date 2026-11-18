@@ -25,6 +25,11 @@
 //! `short_binary`, `cast` (`Kind:TypeArgumentsKind`: short when the first child is and the last
 //! has no type arguments), `not_last` (`First:Last`: a pair of arguments the last of which does
 //! not hug), `numeric` and `signed_numeric` (the items of a concise array), `concise`.
+//!
+//! concept: call-arguments-hug
+//! what: Call arguments flat, hugged (first or last) or broken out, decided by grammar tags and call, hug and simple rows.
+//! tools: Prettier call-arguments (last-arg hug, test calls, composition, React hooks), google-java-format argument lists
+//! reads: rules:call, rules:hug, rules:simple, tag:huggable
 
 use crate::FormatCtx;
 use crate::comments;

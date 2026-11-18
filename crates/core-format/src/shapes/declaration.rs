@@ -3,6 +3,11 @@
 //! `#block`), the members of a body (`#compact` members need no blank line between them) and an
 //! enum body (`#enum-constant`, `#separator`, the `;` a `#stray`, the members after it an
 //! `#enum-tail`). The language prints the elements (a [`Printer`]).
+//!
+//! concept: declaration-kit
+//! what: Annotations, type headers with heritage clauses, member sequences and enum bodies of declarations.
+//! tools: google-java-format declarations and annotations, ktlint annotation and class-signature, Prettier class bodies
+//! reads: tag:annotation, tag:heritage, option:type_use_annotations
 
 use super::{BlockStyle, braces, statement_sequence_with};
 use crate::FormatCtx;

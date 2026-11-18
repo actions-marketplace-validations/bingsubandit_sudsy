@@ -1,5 +1,7 @@
 //! Where parentheses appear around a statement's expression: ruff's `maybe_parenthesize`
 //! (redundant ones go, missing ones come back when the expression does not fit).
+//!
+//! concept: maybe-parenthesize, parenthesized-expression
 
 use super::block::depth;
 use super::util::*;

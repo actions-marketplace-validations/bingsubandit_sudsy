@@ -1,4 +1,11 @@
 //! Rules about the text and structure of documentation comments: SA1625-SA1627, SA1629, SA1651.
+//!
+//! concept: new no-duplicate-doc-text, new no-doc-slashes-in-plain-comment, new doc-text-not-empty, new no-doc-placeholder, new doc-text-ends-with-period
+//! what: no-duplicate-doc-text: Two elements of one documentation comment with the same text (a copied and pasted `<param>`, for example)
+//! what: no-doc-slashes-in-plain-comment: A `///` comment that holds only text, no XML element: a plain comment written with documentation slashes
+//! what: doc-text-not-empty: A `<remarks>`, `<example>`, `<exception>` or `<permission>` element without text, written `<remarks></remarks>` or `<remarks />`
+//! what: no-doc-placeholder: A `<placeholder>` element in a documentation comment
+//! what: doc-text-ends-with-period: The last text of an element of a documentation comment does not end with a period (`.` or `.)`)
 
 use super::doc_comments::{
     DOC_KINDS, Decl, Element, content, documented, element_name, first_text, is_blank, text_tokens,

@@ -8,6 +8,11 @@
 //! - `report`: the tag of a descendant whose first token gets the report (default: the node).
 //!
 //! The message has `{count}` and `{max}`.
+//!
+//! concept: max-family
+//! what: A count over grammar tags that must not pass an option max.
+//! tools: stylelint max-nesting-depth, graphql-eslint selection-set-depth, checkmake maxbodylength
+//! reads: family:max
 
 use crate::tree::significant_range;
 use crate::{Family, Params, Rule, RuleContext, RuleMeta};

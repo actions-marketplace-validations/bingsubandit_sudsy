@@ -1,5 +1,7 @@
 //! Delimited lists: argument and parameter lists, initializers, collection expressions,
 //! attribute lists.
+//!
+//! concept: delimited-list, call-arguments-hug
 
 use super::ROWS;
 use super::options::{

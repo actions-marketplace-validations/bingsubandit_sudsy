@@ -1,6 +1,11 @@
 //! The `regex` and `regex-call` rows of a grammar: which tokens hold regex source and which calls
 //! take it as their first argument, with the name of the regex flavor (the dialect; its facts are
 //! in `core_rules::regex_source`).
+//!
+//! concept: regex-rows
+//! what: Which tokens hold regex source and which calls take it as first argument, with the flavor name.
+//! tools: none (regex locations as rows)
+//! reads: grammar:regex*
 
 use crate::kind::SyntaxKind;
 

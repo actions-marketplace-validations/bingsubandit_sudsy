@@ -2,6 +2,8 @@
 //! crash or hang restarts it once before reporting it unavailable. A worker that answers again
 //! has its restart allowance back, so a worker that lives as long as an editor session survives
 //! any number of unrelated crashes.
+//!
+//! concept: none (infrastructure: worker proxy)
 
 use crate::protocol::{
     self, Empty, FLOW_GRAPH_FORMAT_VERSION, FlowGraphs, Graphs, Hello, OpenWorkspace,

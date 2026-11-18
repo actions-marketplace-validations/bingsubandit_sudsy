@@ -1,4 +1,6 @@
 //! Statements, `switch` and patterns.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use crate::generated::kind as k;

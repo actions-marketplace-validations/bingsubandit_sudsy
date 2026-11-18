@@ -5,6 +5,8 @@
 //! parser, merged and checked like an `extends` file ([`crate::ConfigChain`] expands it). Formatting code never
 //! looks at which preset is in use, so a `sudsy.yaml` that copies the file formats exactly the
 //! same. Presets are unversioned.
+//!
+//! concept: none (infrastructure: preset loading)
 
 /// `extends` entries that name a preset start with this.
 pub const PRESET_PREFIX: &str = "preset:";

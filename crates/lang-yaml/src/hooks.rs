@@ -1,6 +1,8 @@
 //! What the shared rules ask of YAML: a key is its scalar's value (so `a`, `'a'` and `"a"` are the
 //! same key), `<<` merges mappings, and plain scalars resolve to strings or numbers by the core
 //! schema.
+//!
+//! concept: key-identity
 
 use crate::generated::{Scalar as ScalarNode, kind};
 use crate::model::{Value, resolve_plain};

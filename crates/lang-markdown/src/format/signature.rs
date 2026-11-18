@@ -1,4 +1,6 @@
 //! The signature `extra_check` compares: structure and text, without layout.
+//!
+//! concept: format-safety-check
 
 use super::*;
 

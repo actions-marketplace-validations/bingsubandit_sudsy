@@ -1,3 +1,8 @@
+//! concept: signature-layout
+//! what: Parameter lists and signature heads wrapped as a unit.
+//! tools: google-java-format method signatures, ktlint function-signature, Prettier function parameters
+//! reads: tag:parameter
+
 use super::list::{ListLayout, ListStyle, TrailingComma, delimited_list};
 use crate::FormatCtx;
 use crate::doc::{self, Doc, GroupId};

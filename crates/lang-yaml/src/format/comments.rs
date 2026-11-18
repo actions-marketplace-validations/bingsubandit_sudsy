@@ -6,6 +6,8 @@
 //! usually sits at a shallower indentation. The hook gives them back: a block collection that
 //! ends right before the token takes the leading comments that are indented at least as far as
 //! the collection itself (inner collections first), and prints them after its last entry.
+//!
+//! concept: comment-placement, comment-consumption
 
 use super::Style;
 use crate::generated::kind as k;

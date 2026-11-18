@@ -1,5 +1,7 @@
 //! Checks of pyupgrade's rules about type annotations and the typing module: the spelling that the
 //! target version replaces (`Optional[X]`, `List[X]`, `TypeAlias`, `Generic[T]`, quoted names).
+//!
+//! concept: legacy-api-upgrade
 
 use super::Check;
 use super::lints::has_token;

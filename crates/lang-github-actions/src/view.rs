@@ -1,4 +1,6 @@
 //! A small reading API over the YAML tree: mappings, sequences and scalars of a workflow.
+//!
+//! concept: role-accessors
 
 use core_syntax::{SyntaxNode, SyntaxNodeExt, TextRange};
 use lang_yaml::generated::kind;

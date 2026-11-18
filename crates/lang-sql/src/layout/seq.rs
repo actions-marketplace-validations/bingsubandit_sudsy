@@ -5,6 +5,8 @@
 //! parser put there (`Indent` and `Dedent`). `points[i]` precedes `blocks[i]`; the last block is
 //! the end of the file. Nodes keep their first and last code block, so a rule can ask whether a
 //! block starts or ends one.
+//!
+//! concept: line-layout-engine
 
 use crate::generated::kind as k;
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};

@@ -2,6 +2,11 @@
 //! [`ScopeLang`] (which node kinds declare, refer to or assign names; `core_semantics::scopes`)
 //! and the rules it wants, and the checks below read the model the binder builds, once per file.
 //! A construct the table cannot decide turns a rule off for its scope, never guesses.
+//!
+//! concept: scope-rules
+//! what: Unused, undefined, shadowed, redeclared and use-before-define checks from a language scope table.
+//! rules: unused-variable, unused-parameter, unused-import, undefined-variable, shadowed-variable, redeclared-variable, use-before-define
+//! reads: family:scope
 
 mod cx;
 mod ordered;

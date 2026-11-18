@@ -2,6 +2,8 @@
 //! language neutral; a provider exports it (C#: converted from Roslyn's operation-based control-flow
 //! graph in the worker) or the core builds it from statement roles ([`build`]), and the analyses run
 //! here, in the core.
+//!
+//! concept: none (glue: crate root)
 
 mod analyses;
 mod bitset;

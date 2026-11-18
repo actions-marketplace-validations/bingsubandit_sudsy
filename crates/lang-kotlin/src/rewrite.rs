@@ -1,6 +1,8 @@
 //! What ktlint rewrites rather than lays out, done on the source before it is formatted (the
 //! formatter's `rewrite_source`): the import order. Each rewrite is a list of edits of the text,
 //! so what stays is untouched; the result is parsed again.
+//!
+//! concept: source-rewrite, sorted-imports
 
 use crate::generated::kind as k;
 use core_syntax::SyntaxNode;

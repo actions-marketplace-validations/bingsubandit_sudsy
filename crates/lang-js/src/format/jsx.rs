@@ -3,6 +3,10 @@
 //! attribute per line when broken, expression containers, spreads, and the parentheses around
 //! a multi-line element. The `{" "}` children are `JSXText` nodes (see the adapter), so text and
 //! jsx whitespace are one kind here.
+//!
+//! concept: new jsx-layout, text-fill
+//! what: JSX elements, attributes and children.
+//! tools: Prettier printJsxElement
 
 use super::ast::{has_trailing_comment, is_binaryish, is_jsx, parent, un};
 use super::parens::{Need, needs_parens};

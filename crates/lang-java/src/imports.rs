@@ -1,6 +1,8 @@
 //! The import order of google-java-format: static imports first, then the others, each group in
 //! ASCII order of the imported name, no duplicates, one blank line between the groups. Imports
 //! with a comment between them are left as written.
+//!
+//! concept: sorted-imports
 
 use crate::generated::kind as k;
 use core_syntax::SyntaxNode;

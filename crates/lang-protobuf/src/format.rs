@@ -1,6 +1,8 @@
 //! Protobuf formatting, laid out like `buf format`: two-space indented blocks, one statement per
 //! line, a single space between the parts of a statement, compact options (`[a = 1, b = 2]`)
 //! broken one per line as soon as there are two, message literals expanded one field per line.
+//!
+//! concept: block-and-statements, key-value-layout
 
 use crate::generated::kind as k;
 use crate::sort;

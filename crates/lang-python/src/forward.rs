@@ -1,6 +1,8 @@
 //! Quoted annotations (`x: "Foo"`, `List["Foo"]`, `cast("Foo", x)`) that are not one Python
 //! expression: the string is code, parsed with the Python grammar (the shared scope model reads
 //! its names, `core_rules::scope_rules`).
+//!
+//! concept: embedded-code
 
 use crate::adapter::parse_snippet;
 use crate::generated::kind as k;

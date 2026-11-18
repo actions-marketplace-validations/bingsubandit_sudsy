@@ -2,6 +2,8 @@
 //! Those on keys and sequences ([`crate::keys`], [`crate::sorted`]) act on the grammar tags
 //! `#mapping` and `#sequence` (`no-duplicate-sections`: `#sections`), so they do nothing in a
 //! language that does not tag them.
+//!
+//! concept: none (glue: registration of the shared rules)
 
 use crate::comments::{CommentSpace, NoEmptyComment};
 use crate::keys::{KeyNameCasing, NoDuplicateKeys, NoEmptyKeys};

@@ -1,6 +1,8 @@
 //! Conditional expressions on the shared layout (`core_format::shapes::conditional`, the
 //! `chained` layout: Prettier's `printTernary`); what stays here is the JSX mode that wraps
 //! branches in parentheses and the places that indent the whole conditional.
+//!
+//! concept: conditional-expression-layout
 
 use super::ast::{is_jsx, is_member, outer, parent, un};
 use crate::generated::kind as k;

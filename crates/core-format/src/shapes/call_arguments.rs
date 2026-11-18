@@ -13,6 +13,11 @@
 //! part of an arrow chain; not when its return type is a `#named-type` and the body is an empty
 //! block), `#hug-wrapper` (a cast: hugs when its `#expression` child does), `#argument` (a node that
 //! holds one argument expression: the last child node).
+//!
+//! concept: call-arguments-hug
+//! what: Call arguments flat, hugged (first or last) or broken out, decided by grammar tags and call, hug and simple rows.
+//! tools: Prettier call-arguments (last-arg hug, test calls, composition, React hooks), google-java-format argument lists
+//! reads: rules:call, rules:hug, rules:simple, tag:huggable
 
 use super::{ListStyle, container, delimited_list};
 use crate::FormatCtx;

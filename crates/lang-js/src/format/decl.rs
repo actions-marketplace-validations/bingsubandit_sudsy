@@ -1,4 +1,6 @@
 //! Variable declarations, functions and parameters, imports and exports.
+//!
+//! concept: signature-layout, delimited-list
 
 use super::arrow::Flags;
 use super::util::{

@@ -1,5 +1,7 @@
 //! Expressions: one flat chain of operands and operators, the way the tree keeps them (no
 //! precedence nodes); brackets, calls, `CASE` and subqueries nest.
+//!
+//! concept: precedence-expression-parser
 
 use super::lexer::T;
 use super::{MAX_DEPTH, P};

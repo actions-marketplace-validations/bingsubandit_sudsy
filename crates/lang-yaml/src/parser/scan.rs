@@ -1,5 +1,7 @@
 //! Character-level helpers: positions and columns, trivia, node properties, and the scanners
 //! for plain, single-quoted and double-quoted scalars.
+//!
+//! concept: source-lexer
 
 use super::{Parser, R};
 use crate::generated::kind as k;

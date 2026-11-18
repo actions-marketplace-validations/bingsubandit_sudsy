@@ -1,5 +1,7 @@
 //! The HTML targets of the shared `names` family (`core_rules::listed`): the value of `id`, each
 //! word of `class`, the value of `name` on form controls, or the name of every attribute.
+//!
+//! concept: names-family
 
 use crate::dom;
 use crate::generated::kind as k;

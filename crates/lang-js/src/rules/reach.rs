@@ -1,5 +1,8 @@
 //! `getter-return`: asks the flow graph (`core_flow::build`, from the statement roles) whether a
 //! getter's end can be reached.
+//!
+//! concept: new getter-return
+//! what: A getter whose end can be reached without a return.
 
 use super::dupes::key_name;
 use super::{Check, has_own, span};

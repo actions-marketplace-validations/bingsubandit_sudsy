@@ -1,5 +1,8 @@
 //! Preprocessor directives: `directive-keyword-space` (`no-regions` and `no-region-in-body` are
 //! pattern files in `rules/`).
+//!
+//! concept: new directive-keyword-space
+//! what: No space between `#` and the directive keyword (`#if`, not `# if`)
 
 use super::kind;
 use core_rules::rule;

@@ -1,6 +1,8 @@
 //! The scope model of a file, for the rules that need to know what a name binds to: the shared
 //! binder of `core_semantics::scopes` run over the tree with JavaScript's table (`scope.rows`). Built on the first scope rule that runs on a file and shared
 //! with the others, so a run with syntax rules only never pays for it.
+//!
+//! concept: scope-tables
 
 use crate::adapter::source_type;
 use crate::generated::kind as k;

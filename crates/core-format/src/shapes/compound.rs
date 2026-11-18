@@ -3,6 +3,11 @@
 //! (`#empty-statement`) stays on the head's line; any other statement goes on the next line,
 //! indented, when it does not fit. A continuation keyword joins the `}` of a block body and
 //! stands on a line of its own after any other body.
+//!
+//! concept: compound-statement
+//! what: A head, a body and the continuation clauses (else, while of do) of a compound statement.
+//! tools: Prettier if, while and do statements, google-java-format control statements
+//! reads: tag:empty-statement
 
 use crate::FormatCtx;
 use crate::comments::{self, CommentKind};

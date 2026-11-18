@@ -3,6 +3,11 @@
 //! `callee` when that has no `object`, or the `operand`), and what else it holds is the link's
 //! text. The layout comes from a [`ChainPolicy`], whose values are options of the language
 //! (`member_chain_*`); what only the language can print or judge comes through [`ChainHooks`].
+//!
+//! concept: member-chain
+//! what: Member chains broken by call count, head shape and receiver kind.
+//! tools: Prettier member-chain, google-java-format dot chains
+//! reads: option:member_chain_min_calls
 
 use super::chain::{MemberChain, member_chain as print_chain};
 use crate::comments::{self, CommentKind};

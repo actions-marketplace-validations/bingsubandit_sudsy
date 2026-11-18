@@ -1,3 +1,5 @@
+//! concept: none (infrastructure: config loading)
+
 use crate::error::{ConfigError, suggest};
 use crate::glob::Matcher;
 use crate::model::{Config, Depth, LintSection};

@@ -1,4 +1,8 @@
 //! Checks on `rescue` clauses.
+//!
+//! concept: new clause-checks
+//! what: Checks on case and rescue clauses and loop conditions.
+//! tools: RuboCop Lint
 
 use super::tree::{child, span, tokens};
 use crate::generated::kind as k;

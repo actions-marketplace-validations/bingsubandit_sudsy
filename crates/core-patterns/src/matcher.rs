@@ -3,6 +3,11 @@
 //! A pattern is parsed by its language's own parser, so it is a tree of the same kinds as the
 //! code it matches. Trivia is ignored on both sides. A metavariable node matches one element,
 //! or for `$$$NAME` a (possibly empty) run of sibling elements.
+//!
+//! concept: pattern-rules
+//! what: ast-grep style pattern rules: atoms, relations and combinators on the shared tree.
+//! tools: ast-grep rules
+//! reads: rulefiles:pattern
 
 use crate::metavar::{self, Meta, Style};
 use core_rules::tree::significant_range;

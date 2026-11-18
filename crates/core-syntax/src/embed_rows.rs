@@ -23,6 +23,11 @@
 //!   `carve-kind <Kind>...` (every node or token of the kind), `carve-first <Kind>...` (the first
 //!   character of each);
 //! - `format`, `strip`, `no-lint`: the [`Embedded`] flags.
+//!
+//! concept: embed-rows
+//! what: Which node holds code of another language and how it is carved out of the host text.
+//! tools: none (embedded code as rows)
+//! reads: grammar:embed
 
 use crate::containers::Containers;
 use crate::embedded::size;

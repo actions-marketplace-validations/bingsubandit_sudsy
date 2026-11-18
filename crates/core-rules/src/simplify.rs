@@ -13,6 +13,12 @@
 //!   anyway), `jump-outside` (param `jump`: `break`, `continue` or `return`; `inside` lists the
 //!   tags a `break` may be in besides `loop`).
 //! - the message has `{name}` where the check passes a name.
+//!
+//! concept: simplify
+//! what: Statements and expressions that say in several words what fewer say, and jumps with nothing to jump out of.
+//! tools: ruff SIM and PLR rules, ESLint no-lonely-if no-extra-boolean-cast, RuboCop Style simplifications
+//! rules: collapsible-if, needless-bool, if-with-same-arms, boolean-conditional, twisted-conditional, negated-comparison, double-negation, redundant-cast, jump-outside
+//! reads: family:simplify
 
 use crate::tree::significant_range;
 use crate::{Edit, Family, Params, Rule, RuleContext, RuleMeta};

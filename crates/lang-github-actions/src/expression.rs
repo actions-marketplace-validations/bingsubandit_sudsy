@@ -1,5 +1,8 @@
 //! `invalid-expression`: the syntax of `${{ }}` expressions, and names that are no context or
 //! function. Types, and which contexts exist where, are not checked.
+//!
+//! concept: new invalid-expression
+//! what: A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quot
 
 use core_rules::rule;
 use core_rules::{FileContext, RuleContext};

@@ -1,6 +1,10 @@
 //! `preserve_single_line_blocks` and `preserve_single_line_statements`: a block, type, namespace,
 //! `switch` or compound statement written on one line is printed on one line, everything below it
 //! with it.
+//!
+//! concept: new flat-block-preservation
+//! what: A block or statement written on one line stays on one line.
+//! tools: dotnet-format csharp_preserve_single_line_blocks
 
 use super::options::{preserve_single_line_blocks, preserve_single_line_statements};
 use super::seq::R;

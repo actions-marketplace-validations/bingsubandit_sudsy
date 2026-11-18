@@ -3,6 +3,8 @@
 //! first word of a column definition is a name and the word after it a type, expressions after
 //! `DEFAULT` and in `CHECK (...)` parse as expressions, the rest are keywords when the dialect's
 //! tables say so.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use super::lexer::T;

@@ -1,5 +1,7 @@
 //! Blocks: the statements of a module or a suite one per line with ruff's blank lines, each with
 //! its comments.
+//!
+//! concept: block-and-statements, blank-lines-between-members
 
 use super::comment::*;
 use super::docstring;

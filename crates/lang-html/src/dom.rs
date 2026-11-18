@@ -1,4 +1,6 @@
 //! What the Rust rules read of a start tag: its lowercase name and its attributes.
+//!
+//! concept: role-accessors
 
 use crate::generated::kind as k;
 use core_syntax::{SyntaxNode, SyntaxNodeExt, TextRange, TextSize};

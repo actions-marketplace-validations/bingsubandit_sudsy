@@ -4,6 +4,8 @@
 //! `provider_api::adapter::replay`, which builds the tree; this file knows oxc's kinds. Nodes with no token (`JSXEmptyExpression`) and kinds without a
 //! grammar node (`Program`, which is the root node of the tree, and `Hashbang`, a comment) are
 //! left out.
+//!
+//! concept: adapter-replay
 
 use crate::generated::kind as k;
 use core_syntax::{Grammar, SyntaxKind, grammars};

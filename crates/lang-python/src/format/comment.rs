@@ -1,5 +1,7 @@
 //! Python comments: the `;` that ends a statement, `# fmt: skip`, and the comment text normalized
 //! before formatting.
+//!
+//! concept: format-ignore-markers, source-rewrite
 
 use super::util::*;
 use crate::generated::kind as k;

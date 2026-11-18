@@ -2,6 +2,8 @@
 //! shape (`core_format::shapes::parens`). The tree keeps `ParenthesizedExpression` (`#transparent`
 //! for the safety check): a kept pair is printed as written, an unneeded pair is left out, and a
 //! node that needs a pair the source lacks gets one around its printed document.
+//!
+//! concept: parenthesized-expression
 
 use super::ast::{is_binaryish, is_member, operator_text, outer, parent, starts_with, un};
 use crate::generated::kind as k;

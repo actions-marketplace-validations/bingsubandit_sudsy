@@ -5,6 +5,8 @@
 //! lists). `cargo xtask codegen --check` (and the `codegen_is_fresh` test) fails when either is stale.
 
 mod css_data;
+mod dupes;
+pub mod kit;
 mod lang_crate;
 mod mapping;
 mod new_rule;
@@ -12,11 +14,14 @@ mod options;
 mod parser_imports;
 mod registry;
 mod rename_rule;
+mod rows;
 
 pub use css_data::generate as css_data;
+pub use dupes::{Mode as DupesMode, run as dupes};
 pub use new_rule::new_rule;
 pub use parser_imports::check as parser_imports;
 pub use rename_rule::rename_rule;
+pub use rows::check as rows;
 
 use anyhow::{Context, Result, ensure};
 use core_syntax::{Grammar, codegen};
@@ -68,6 +73,21 @@ pub fn generate() -> Result<Vec<(PathBuf, String)>> {
         &lang_crate::tree_sitter(&langs),
         &lang_crate::generated(&langs),
     )?);
+    files.extend(kit_files(&root)?);
+    Ok(files)
+}
+
+/// The kit index and the single-use list (written only once every module has a header).
+pub fn kit_files(root: &Path) -> Result<Vec<(PathBuf, String)>> {
+    let kit = kit::build(root)?;
+    let mut files = vec![(kit::INDEX.into(), kit::index(&kit))];
+    if kit
+        .errors
+        .iter()
+        .all(|e| !e.contains("no `//! concept:` header"))
+    {
+        files.push((kit::RATCHET.into(), kit::ratchet_file(root, &kit)));
+    }
     Ok(files)
 }
 

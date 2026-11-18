@@ -8,6 +8,8 @@
 //!
 //! * [`scan`]: characters, columns, trivia, properties and the scalar scanners.
 //! * [`flow`]: flow nodes and collections. [`block`]: documents, block collections and block scalars.
+//!
+//! concept: recursive-descent-parser
 
 mod block;
 mod builder;

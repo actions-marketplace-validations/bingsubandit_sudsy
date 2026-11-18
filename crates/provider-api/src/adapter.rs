@@ -8,6 +8,11 @@
 //! whitespace, comments and what the language's `scan` recognizes, and is split into trivia
 //! tokens that follow the shared attachment rule (`core_syntax::trivia`), the way
 //! `core-treesitter` does.
+//!
+//! concept: adapter-replay
+//! what: The lossless tree from the tokens and AST spans of an external parser, with the text between tokens.
+//! tools: none (adapters to oxc, ruff, mago, prism)
+//! reads: grammar:trivia
 
 use crate::provider::{ParseError, ParseResult};
 use core_syntax::trivia::is_line_break;

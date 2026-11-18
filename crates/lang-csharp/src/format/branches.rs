@@ -6,6 +6,10 @@
 //! two directive lines of the base output is replaced by the same stretch of the output of a
 //! parse where it was active. The directive lines of all outputs must match one to one, or
 //! nothing is merged. The caller checks the result against every parse it took text from.
+//!
+//! concept: new preprocessor-branches
+//! what: Formatting the #if branches that the symbols of the file leave inactive.
+//! tools: dotnet-format preprocessor
 
 use super::options::{DERIVE_SYMBOL_SETS, PREPROCESSOR_SYMBOL_SETS};
 use crate::generated::kind as k;

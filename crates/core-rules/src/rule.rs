@@ -1,4 +1,6 @@
 //! The rule trait and the contexts rules run in.
+//!
+//! concept: none (infrastructure: rule trait)
 
 use crate::diagnostic::{Category, Diagnostic, Edit, Fix, FixKind, Severity};
 use crate::hooks::RuleHooks;

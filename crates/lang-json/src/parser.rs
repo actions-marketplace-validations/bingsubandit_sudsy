@@ -3,6 +3,8 @@
 //! Every token ends up in the tree. Trivia are placed by the shared attachment rule (see
 //! `core_syntax::trivia`): trailing trivia right after their token, leading trivia right before
 //! theirs, inside the node that token belongs to. Unexpected tokens are wrapped in `ERROR` nodes.
+//!
+//! concept: recursive-descent-parser
 
 use crate::generated::kind as k;
 use crate::lexer::{LexError, Token, lex};

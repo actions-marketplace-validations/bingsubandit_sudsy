@@ -1,5 +1,7 @@
 //! The root `<script>` elements of a component (the embedded region is the `embed` row of
 //! `grammars/html.grammar`).
+//!
+//! concept: embedded-code
 
 use crate::dom;
 use crate::generated::kind as k;

@@ -1,5 +1,7 @@
 //! Checks of ruff's rules about single calls, decorators and signatures (flake8-bugbear,
 //! tryceratops, pylint, flynt, flake8-pyi).
+//!
+//! concept: call-shape-checks
 
 use super::Check;
 use super::lints::{call_args, collect_raises};

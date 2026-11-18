@@ -1,4 +1,8 @@
 //! TypeScript: types, interfaces, type aliases, enums, namespaces, `as`, `satisfies`, `!`.
+//!
+//! concept: new type-expression-layout
+//! what: Type annotations: unions, intersections, generics, function, mapped and tuple types.
+//! tools: Prettier typescript types
 
 mod decls;
 mod heritage;

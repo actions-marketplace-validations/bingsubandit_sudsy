@@ -1,4 +1,6 @@
 //! Checks that the rules a config names exist.
+//!
+//! concept: none (infrastructure: rule id checks)
 
 use crate::chain::ConfigChain;
 use crate::error::{ConfigError, unknown_name};

@@ -1,4 +1,9 @@
 //! The code of other languages inside a file, parsed with the providers of those languages.
+//!
+//! concept: embedded-code
+//! what: Code of another language inside a file, reported by the host provider and parsed by that language.
+//! tools: Prettier embedded languages, shellcheck in Dockerfile RUN
+//! reads: grammar:embed
 
 use crate::provider::{FilePattern, LanguageProvider, SourceFile};
 use core_rules::EmbeddedTree;

@@ -1,5 +1,7 @@
 //! Project scope: rules gather facts from each file, then report across
 //! files once all files have been seen.
+//!
+//! concept: none (infrastructure: project scope)
 
 use crate::diagnostic::{Diagnostic, Severity};
 use crate::options::RuleOptions;

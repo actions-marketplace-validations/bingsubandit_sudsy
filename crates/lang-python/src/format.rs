@@ -1,6 +1,8 @@
 //! Python formatting: `ruff format`'s layout (Black's style). `stmt` prints the statements and
 //! the comments between them, `paren` decides where parentheses stand, the other modules print
 //! the expressions.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod block;
 mod comment;

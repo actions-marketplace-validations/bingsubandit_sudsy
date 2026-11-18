@@ -2,6 +2,8 @@
 //! (also outside a git checkout), leaves out what the config excludes, and visits hidden
 //! directories such as `.vscode`, but never `.git`. Paths are absolute; [`display_path`] gives the
 //! form printed to users. Scheduling and depth modes grow here with the rule engine.
+//!
+//! concept: none (infrastructure: file discovery)
 
 use ignore::WalkBuilder;
 use std::path::{Component, Path, PathBuf};

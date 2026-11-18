@@ -10,6 +10,10 @@
 //! - `allowed-values`: a value that is not one of those the attribute is limited to.
 //!
 //! The message has `{name}` (the element), `{attr}` and `{value}`.
+//!
+//! concept: new element-metadata-checks
+//! what: Element names and attributes checked against element metadata.
+//! tools: html-validate element-name, htmlhint
 
 use crate::dom;
 use crate::generated::kind as k;

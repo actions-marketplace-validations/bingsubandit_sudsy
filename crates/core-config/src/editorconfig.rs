@@ -31,6 +31,11 @@
 //! A value that is not valid for the option (a width of 5, `max_line_length = off`) is ignored:
 //! the file is shared with other tools, so it is not Sudsy's to reject. Options a language does not
 //! declare are ignored for its files.
+//!
+//! concept: editorconfig-options
+//! what: Format options read from .editorconfig as a fallback source.
+//! tools: EditorConfig, dotnet-format editorconfig
+//! reads: grammar:language
 
 use crate::model::OptionValue;
 use globset::GlobBuilder;

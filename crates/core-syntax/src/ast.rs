@@ -1,4 +1,6 @@
 //! Support code for the generated typed wrappers (`json::Member::key()` etc.).
+//!
+//! concept: none (glue: typed wrapper support)
 
 use crate::kind::SyntaxKind;
 use crate::tree::{SyntaxElement, SyntaxNode, SyntaxToken};

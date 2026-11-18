@@ -7,6 +7,11 @@
 //! `consistent` follows sqlfluff (CP01 to CP05): the first word of a row fixes what the file may
 //! be (`upper`, `lower` or `capitalise`), each word that differs rules cases out, and once none is
 //! left the words after it, and so the whole file, take the case the last non-empty set preferred.
+//!
+//! concept: token-case
+//! what: Case of words per token kind (upper, lower, capitalise, consistent) as rows.
+//! tools: sqlfluff CP01-CP05, hadolint instruction case, Prettier lowercase hex and units
+//! reads: rules:case
 
 use core_config::ResolvedOptions;
 use core_syntax::{Grammar, SyntaxKind};

@@ -1,6 +1,8 @@
 //! Calls and `new`: the callee and the argument list. The layouts of the arguments (hugging a last
 //! or first function or object argument, test calls, `require`, hooks) are core-format's
 //! `shapes::call_arguments` over the rows of `format.rules`. Member chains are `chain.rs`.
+//!
+//! concept: call-arguments-hug
 
 use super::arrow::{self, Flags};
 use super::ast::{Call, un};

@@ -2,6 +2,11 @@
 //! names or assign. Rows are data, written with the grammar's kind names; [`Table::new`] resolves
 //! them against the grammar once. Which kinds open scopes is the grammar's `#scope` role; the
 //! table only says which of those scopes hold `var` declarations.
+//!
+//! concept: scope-tables
+//! what: Which node kinds open scopes, declare, refer to or assign names, as rows resolved against the grammar.
+//! tools: none (language facts as rows)
+//! reads: family:scope, file:scope.rows
 
 use super::Flags;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode};

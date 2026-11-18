@@ -6,6 +6,11 @@
 //! closing delimiter of an otherwise empty (or fully consumed) container.
 //!
 //! Everything here reads the tree locally (token neighbours), so it works for any subtree.
+//!
+//! concept: comment-placement
+//! what: Leading, trailing and dangling comment placement from the trivia attachment rule.
+//! tools: Prettier comments, Black comments, ktlint comment-spacing
+//! reads: grammar:language
 
 use core_syntax::trivia::is_line_break;
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};

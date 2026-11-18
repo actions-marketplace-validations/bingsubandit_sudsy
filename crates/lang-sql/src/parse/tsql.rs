@@ -1,4 +1,6 @@
 //! T-SQL statements: variables, flow control, blocks, procedures.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use super::lexer::T;

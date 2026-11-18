@@ -9,6 +9,11 @@
 //!   generated or hostile input.
 //! - [`catch`] turns a panic of a parser, formatter or rule into a message; the engine's queries
 //!   catch around their whole body (the engine's own cancellation unwind passes through).
+//!
+//! concept: parse-guards
+//! what: Nesting, size and panic guards around the parse of one file.
+//! tools: none (robustness)
+//! reads: grammar:language
 
 use crate::provider::{LanguageProvider, ParseResult, ProviderError, SourceFile};
 use std::any::Any;

@@ -7,6 +7,8 @@
 //! a module finds an `x` assigned below it. What depends on the order (a redefinition before a
 //! read, a read before an assignment in a function) the rules read off the positions of the
 //! declarations and references of a symbol.
+//!
+//! concept: scope-tables
 
 use crate::generated::kind as k;
 use core_rules::FileContext;

@@ -23,6 +23,11 @@
 //!
 //! Parsing is not incremental and has no depth limit of its own (the walk is iterative; the
 //! formatter recurses). See `docs/ai/architecture/adding-a-language.md`.
+//!
+//! concept: tree-sitter-adapter
+//! what: A language-neutral adapter from tree-sitter to the lossless tree through a node-name mapping.
+//! tools: tree-sitter
+//! reads: path:core_treesitter
 
 mod provider;
 

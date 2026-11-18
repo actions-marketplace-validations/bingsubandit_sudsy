@@ -1,4 +1,6 @@
 //! Statement sequences, blocks and control flow.
+//!
+//! concept: block-and-statements, compound-statement
 
 use super::util::{
     R, elem, inline, inline_split, is_tok, keyword, kids, node_at, node_of, semi, shape_error,

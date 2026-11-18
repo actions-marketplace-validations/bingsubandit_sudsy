@@ -13,6 +13,11 @@
 //!   none).
 //!
 //! The message has `{name}`.
+//!
+//! concept: regex-source-checks
+//! what: Rules about the source of regular expressions in literals and call arguments, by flavor.
+//! tools: eslint no-control-regex no-regex-spaces no-empty-character-class no-misleading-character-class, ruff regex checks
+//! reads: grammar:regex*
 
 mod flavor;
 mod parse;

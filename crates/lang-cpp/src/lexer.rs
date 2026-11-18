@@ -6,6 +6,9 @@
 //! A token carries the number of the preprocessor directive it belongs to (0 for none): a
 //! directive is a `#` that starts a line and everything to the end of the line, over line
 //! continuations and block comments.
+//!
+//! concept: new source-lexer
+//! what: Lexer: the source as tokens with byte spans for a hand-written parser.
 
 use crate::Dialect;
 use crate::generated::kind as k;

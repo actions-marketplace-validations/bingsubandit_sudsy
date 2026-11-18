@@ -1,5 +1,7 @@
 //! Checks that read the shape of statements and expressions only: layout (`E7`, `E402`),
 //! comparisons, `try` clauses, jumps and `__future__` imports.
+//!
+//! concept: statement-shape-checks, simplify
 
 use super::Check;
 use super::scope::run;

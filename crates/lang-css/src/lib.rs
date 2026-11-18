@@ -1,5 +1,7 @@
 //! CSS, SCSS and Less: one hand-written lossless parser for the three dialects, and three
 //! providers over it. `scss` and `less` take `css` as their config base.
+//!
+//! concept: none (glue: provider entry)
 
 core_syntax::include_generated!();
 pub mod data;

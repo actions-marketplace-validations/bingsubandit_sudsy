@@ -1,5 +1,7 @@
 //! Kotlin (`.kt`, `.kts`): ktrs-parser (a port of the Kotlin compiler's PSI parser) parses behind
 //! `adapter`, which builds the lossless tree; `format.rs` lays the code out like ktlint.
+//!
+//! concept: none (glue: provider entry)
 
 mod adapter;
 mod format;

@@ -3,6 +3,8 @@
 //! a tight list item); only what the safety check can verify is restyled: heading and list
 //! markers, emphasis delimiters, code fences, table alignment, `*` and `_` escapes, runs of blanks.
 //! Code, HTML, code spans, destinations and everything else are kept verbatim.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod blocks;
 mod containers;

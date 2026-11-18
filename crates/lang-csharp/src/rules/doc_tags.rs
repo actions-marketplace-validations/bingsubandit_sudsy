@@ -1,5 +1,9 @@
 //! Rules about the `<value>`, `<param>`, `<returns>` and `<typeparam>` elements (SA1610,
 //! SA1613-SA1617, SA1619, SA1621, SA1622).
+//!
+//! concept: new no-returns-on-void, new doc-partial-typeparams
+//! what: no-returns-on-void: A `<returns>` on a method or delegate that returns `void`
+//! what: doc-partial-typeparams: A documented partial generic type (with a `<summary>`) that has no `<typeparam>` for one of its type parameters
 
 use super::doc_comments::{DOC_KINDS, Decl, documented};
 use core_rules::rule;

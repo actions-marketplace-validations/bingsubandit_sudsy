@@ -1,6 +1,8 @@
 //! What the shared key rules ask of HTML: attribute names are case-insensitive, and a Vue
 //! directive (`:a`) is one name whose first token is the key. Event handlers and slots (`@a`, `v-on`,
 //! `#a`, Svelte's `on:` and `use:`) may repeat and are not names.
+//!
+//! concept: key-identity
 
 use core_rules::RuleHooks;
 use core_syntax::{Grammar, SyntaxElement};

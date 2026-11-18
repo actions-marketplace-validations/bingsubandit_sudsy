@@ -1,5 +1,7 @@
 //! Assignments, variable declarators and class properties: where the line breaks between the
 //! left side, the operator and the right side (Prettier's assignment layouts).
+//!
+//! concept: assignment-layout
 
 use super::arrow::{self, Flags};
 use super::ast::{Call, has_comment, is_literal, name_of, operator, text_of, un};

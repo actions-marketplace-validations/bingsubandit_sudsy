@@ -2,6 +2,8 @@
 //! They are ordinary [`Rule`]s that the project's
 //! config adds to a language's own, so they run through the same engine, configuration,
 //! suppressions and fix loop.
+//!
+//! concept: none (infrastructure: pattern and plugin rules added by config)
 
 use crate::rule::Rule;
 

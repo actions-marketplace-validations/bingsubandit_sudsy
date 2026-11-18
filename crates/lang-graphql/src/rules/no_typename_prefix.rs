@@ -1,3 +1,6 @@
+//! concept: new no-typename-prefix
+//! what: A field of an object or interface type starts with the name of the type (`type User { userId: ID }`); the type already says it (case ignored)
+
 use crate::generated::kind;
 use core_rules::{RuleContext, rule};
 use core_syntax::SyntaxNode;

@@ -1,4 +1,6 @@
 //! The diagnostics model every rule source reports into.
+//!
+//! concept: none (infrastructure: diagnostics model)
 
 use core_config::Level;
 use core_syntax::{TextRange, TextSize};

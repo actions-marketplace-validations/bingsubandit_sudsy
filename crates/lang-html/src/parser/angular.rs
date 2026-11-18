@@ -1,5 +1,7 @@
 //! Angular: control flow blocks (`@if (a) {` ... `}`), `@let`, ICU expressions
 //! (`{n, plural, =0 {none}}`) and `{{ }}` closed outside string literals, as its compiler reads them.
+//!
+//! concept: recursive-descent-parser
 
 use super::{Open, P, is_ws};
 use crate::generated::kind as k;

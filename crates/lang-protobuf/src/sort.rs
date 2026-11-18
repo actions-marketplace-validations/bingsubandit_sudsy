@@ -2,6 +2,10 @@
 //! `option` last, by path), file options (built-in before custom, by name), then everything else
 //! as written. Each statement moves with its comments (the trivia in front of it and a comment on
 //! its last line); inside the import and option groups the blank lines of the source go.
+//!
+//! concept: new file-header-order, sorted-imports
+//! what: The order of the header statements of a file: syntax, package, imports, options.
+//! tools: buf format
 
 use crate::generated::kind as k;
 use core_syntax::SyntaxNode;

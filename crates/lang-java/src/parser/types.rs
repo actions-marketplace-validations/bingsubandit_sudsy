@@ -1,4 +1,6 @@
 //! Names, annotations, modifiers and types.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use crate::generated::kind as k;

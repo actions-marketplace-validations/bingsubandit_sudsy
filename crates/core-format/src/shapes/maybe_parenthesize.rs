@@ -1,6 +1,10 @@
 //! Content between delimiters on lines of their own when it does not fit: "parenthesize if the
 //! content breaks" (ruff's `maybe_parenthesize`, Prettier's `return (...)`), and the same layout
 //! with delimiters that are always there.
+//!
+//! concept: maybe-parenthesize
+//! what: Content between delimiters on lines of its own when it does not fit.
+//! tools: ruff maybe_parenthesize, Prettier return (...)
 
 use crate::FormatCtx;
 use crate::doc::{self, Doc};

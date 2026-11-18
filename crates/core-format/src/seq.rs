@@ -2,6 +2,11 @@
 //! `flat`, `first`, `last`, `el`) and [`plain`], the children one after the other with the blanks
 //! of the `[space]` rows and nothing else (no line breaks, no hanging; see
 //! `shapes::flow::Flow` for those).
+//!
+//! concept: node-sequence
+//! what: The children of a node as a sequence: kids, flat, first, last helpers and the plain layout.
+//! tools: none (internal)
+//! reads: tag:wrapper
 
 use crate::FormatCtx;
 use crate::comments;

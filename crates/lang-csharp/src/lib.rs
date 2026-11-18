@@ -1,5 +1,7 @@
 //! The C# provider: the grammar's typed wrappers, the proxy to the Roslyn worker and the
 //! formatter.
+//!
+//! concept: none (glue: provider entry)
 
 mod format;
 mod rules;

@@ -1,3 +1,8 @@
+//! concept: key-value-layout
+//! what: A key, a separator and a value, aligned or broken.
+//! tools: taplo align, terraform fmt alignment, Prettier object properties
+//! reads: tag:key-value
+
 use crate::FormatCtx;
 use crate::directives::Directive;
 use crate::doc::{self, Doc};

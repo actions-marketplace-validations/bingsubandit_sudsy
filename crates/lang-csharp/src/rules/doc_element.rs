@@ -12,6 +12,8 @@
 //!   has no text), `attribute` (its `name` attribute) or `identifier` (inside an empty `name=""`).
 //!
 //! `required` skips members that need no comment, and `returning` ones that return void.
+//!
+//! concept: doc-comment-model
 
 use super::doc_comments::{DOC_KINDS, Decl, Documented, Element, documented};
 use super::kind;

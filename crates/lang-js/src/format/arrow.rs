@@ -1,5 +1,9 @@
 //! Arrow functions: parameters, the body on the arrow's line or the next, chains
 //! (`a => b => c`), and the forms used when the function is hugged as a call argument.
+//!
+//! concept: new arrow-function-layout
+//! what: Arrow functions: parameters, body placement and chains.
+//! tools: Prettier arrow chains
 
 use super::ast::{has_comment, is_binaryish, outer, parent, starts_with, un};
 use super::util::{R, kids, node_of, remove_lines, shape_error, token_of, will_break};

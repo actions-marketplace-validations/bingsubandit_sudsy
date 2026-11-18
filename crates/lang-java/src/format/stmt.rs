@@ -1,4 +1,6 @@
 //! Statements: blocks, the control statements and `switch`.
+//!
+//! concept: compound-statement, block-and-statements
 
 use super::*;
 use core_format::shapes::{self, BlockStyle};

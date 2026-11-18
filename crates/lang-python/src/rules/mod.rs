@@ -1,6 +1,8 @@
 //! The rules of Python: pattern files in `rules/*.yaml`, and the `check` family they name for
 //! ruff's rules that read the syntax tree and the scope model. `cargo xtask new-rule python <id>
 //! --rust` adds a module under `rules/` and lists it here.
+//!
+//! concept: none (glue: rule registration)
 
 mod branch;
 mod decl;

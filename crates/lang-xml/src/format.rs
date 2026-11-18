@@ -2,6 +2,8 @@
 //! reference, a CDATA section or a processing instruction (or has `xml:space="preserve"`, or only
 //! blanks without a line break) keeps its content exactly as written. The other elements put each
 //! child element on its own line, indented. A tag that does not fit breaks its attributes.
+//!
+//! concept: markup-whitespace-model
 
 use crate::generated::kind as k;
 use core_config::shared;

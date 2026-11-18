@@ -2,6 +2,10 @@
 //! (Prettier prints it with unlimited width). An interpolation with a line break, or
 //! one whose layout forces a break (a function body), keeps that expression as written. A tagged
 //! template is its tag, type arguments and template.
+//!
+//! concept: new template-literal-layout
+//! what: Template literals with interpolations printed on one line.
+//! tools: Prettier template-literal
 
 use crate::generated::kind as k;
 use core_format::context::verbatim_text;

@@ -1,4 +1,6 @@
 //! Documents, block collections and block scalars.
+//!
+//! concept: recursive-descent-parser
 
 use super::scan::{Marker, is_blank, is_break};
 use super::{Parser, R};

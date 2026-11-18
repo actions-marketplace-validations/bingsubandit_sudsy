@@ -1,5 +1,11 @@
 //! Rules about how an expression is written, each with a safe fix: `nullable-shorthand`,
 //! `use-lambda`, `constant-on-right` and `use-literal-suffix`.
+//!
+//! concept: new nullable-shorthand, new use-lambda, new constant-on-right, new use-literal-suffix
+//! what: nullable-shorthand: `int?` instead of `Nullable<int>` or `System.Nullable<int>`
+//! what: use-lambda: A lambda instead of an anonymous method
+//! what: constant-on-right: A comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`
+//! what: use-literal-suffix: A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L`
 
 use super::{has_comment_in, kind, text_of};
 use core_rules::rule;

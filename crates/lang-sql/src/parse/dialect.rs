@@ -1,4 +1,8 @@
 //! Dialect modes of the one parser: keyword tables and the few syntax switches.
+//!
+//! concept: new dialect-keyword-tables
+//! what: Keyword tables and syntax switches of the dialects of one parser.
+//! tools: sqlfluff dialects
 
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;

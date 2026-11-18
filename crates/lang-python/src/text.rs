@@ -1,4 +1,6 @@
 //! What the rules read off the text of the tree: dotted names, string literals and their values.
+//!
+//! concept: role-accessors, string-literal-model
 
 use crate::format::syntax;
 use crate::generated::kind as k;

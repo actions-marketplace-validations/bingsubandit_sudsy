@@ -1,5 +1,7 @@
 //! Code that is not a whole file: a host (HTML, Vue, Svelte) hands one expression, which the
 //! provider parses as the only element of `[ ]` (`parse`) and prints here without the brackets.
+//!
+//! concept: embedded-code
 
 use super::util::{R, shape_error};
 use crate::generated::kind as k;

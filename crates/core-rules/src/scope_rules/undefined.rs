@@ -1,5 +1,10 @@
 //! `undefined-variable`: a read or write that no scope binds, the language's globals do not list
 //! and the rule's `globals` option does not name.
+//!
+//! concept: undefined-variable
+//! what: A read or write that no scope binds and the globals do not list.
+//! rules: undefined-variable
+//! reads: rule:undefined-variable
 
 use super::cx::Cx;
 use core_syntax::TextRange;

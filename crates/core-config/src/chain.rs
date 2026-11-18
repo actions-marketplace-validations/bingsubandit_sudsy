@@ -1,4 +1,6 @@
 //! The config files that apply: the one found by [`crate::discover`] and everything it extends.
+//!
+//! concept: none (infrastructure: config chain)
 
 use crate::PRESET_PREFIX;
 use crate::error::ConfigError;

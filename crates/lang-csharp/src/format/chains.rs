@@ -1,5 +1,7 @@
 //! Expressions that lay out as a chain: binary operators, member accesses and calls, assignments
 //! and the conditional operator.
+//!
+//! concept: binary-chain-layout, member-chain, assignment-layout, conditional-expression-layout
 
 use super::options::fluid_assignments;
 use super::seq::{R, seq_of};

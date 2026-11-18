@@ -1,4 +1,8 @@
 //! `quoted-strings`: which strings must, may or must not be quoted, and with which quotes.
+//!
+//! concept: new quoted-strings, literal-spelling
+//! what: Which strings must, may or must not be quoted, and with which quotes.
+//! tools: yamllint quoted-strings, Prettier yaml quotes
 
 use crate::format::{QuoteStyle, restyle};
 use crate::generated::{Scalar, kind};

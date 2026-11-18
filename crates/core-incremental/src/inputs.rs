@@ -1,5 +1,7 @@
 //! The inputs of the database: the only values that are set from outside. Everything else is a
 //! query over them.
+//!
+//! concept: none (infrastructure: database inputs)
 
 use core_config::{ConfigChain, ConfigError, EditorConfig};
 use std::path::PathBuf;

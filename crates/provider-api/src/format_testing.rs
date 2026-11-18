@@ -1,5 +1,7 @@
 //! The format tests every language repeats: a provider as a `core_format::testing::Subject`, the
 //! corpus run, and the file-name check.
+//!
+//! concept: none (test harness: format tests)
 
 use crate::format::format_file;
 use crate::provider::{LanguageProvider, ParseResult, SourceFile};

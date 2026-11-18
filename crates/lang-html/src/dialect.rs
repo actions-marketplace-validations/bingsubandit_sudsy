@@ -1,6 +1,8 @@
 //! The providers of the HTML family: HTML, Vue, Svelte and Angular share one tree
 //! (`grammars/html.grammar`), their rules and the printer; each has its own file matchers, parse
 //! mode and formatter, and `vue`, `svelte` and `angular` config sections on top of `html`.
+//!
+//! concept: none (glue: dialect providers)
 
 use crate::format::{
     ANGULAR_FORMATTER, INDENT_SCRIPT_AND_STYLE, SVELTE_FORMATTER, VUE_FORMATTER, option_schema,

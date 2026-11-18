@@ -20,8 +20,31 @@ fn main() -> Result<()> {
             if !stale.is_empty() {
                 bail!("stale generated files (run `cargo xtask codegen`): {stale:?}");
             }
+            xtask::kit::check(&xtask::repo_root())?;
+            xtask::rows(&xtask::repo_root())?;
             full(&["codegen", "--check"])
         }
+        ["rows"] => xtask::rows(&xtask::repo_root()),
+        ["kit", "--write"] => {
+            xtask::write(xtask::kit_files(&xtask::repo_root())?)?;
+            Ok(())
+        }
+        ["kit"] => {
+            let kit = xtask::kit::build(&xtask::repo_root())?;
+            for e in &kit.errors {
+                println!("{e}");
+            }
+            println!(
+                "{} modules, {} concepts, {} problems",
+                kit.modules.len(),
+                kit.concepts.len(),
+                kit.errors.len()
+            );
+            Ok(())
+        }
+        ["dupes"] => xtask::dupes(&xtask::repo_root(), xtask::DupesMode::Report),
+        ["dupes", "--check"] => xtask::dupes(&xtask::repo_root(), xtask::DupesMode::Check),
+        ["dupes", "--baseline"] => xtask::dupes(&xtask::repo_root(), xtask::DupesMode::Baseline),
         ["affected", rest @ ..] => {
             let mut a = vec!["affected"];
             a.extend(rest);
@@ -37,7 +60,7 @@ fn main() -> Result<()> {
         ["rename-rule", old, new] => rename(old, new, false),
         ["rename-rule", old, new, "--dry-run"] => rename(old, new, true),
         _ => bail!(
-            "usage: cargo xtask codegen [--check] | affected [--base REV] [--all] | new-rule <language> <id> [--rust] | rename-rule <old> <new> [--dry-run] | css-data <npm dir>"
+            "usage: cargo xtask codegen [--check] | affected [--base REV] [--all] | dupes [--check|--baseline] | new-rule <language> <id> [--rust] | rename-rule <old> <new> [--dry-run] | css-data <npm dir>"
         ),
     }
 }

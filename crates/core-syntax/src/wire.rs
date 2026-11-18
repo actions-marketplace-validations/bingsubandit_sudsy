@@ -13,6 +13,8 @@
 //!
 //! [`FlatTree`] is that pair of arrays; [`WireTree`] is its serialized form
 //! (see docs/ai/architecture/syntax-tree.md).
+//!
+//! concept: none (infrastructure: wire encoding of trees)
 
 use crate::kind::SyntaxKind;
 use crate::tree::{SyntaxNode, TreeBuilder};

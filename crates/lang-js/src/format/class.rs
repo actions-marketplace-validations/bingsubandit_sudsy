@@ -1,4 +1,6 @@
 //! Classes and their members.
+//!
+//! concept: declaration-kit
 
 use super::util::{R, elem, inline, kids, node_of, semi, shape_error, style, token_of};
 use crate::generated::kind as k;

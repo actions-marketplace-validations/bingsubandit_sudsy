@@ -6,6 +6,8 @@
 //!   where a value goes after its indicator. [`scalars`]: scalar text, quote style and block
 //!   scalar contents. [`comments`]: token printing and the comment placement hook for the end of
 //!   block collections.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod block;
 mod comments;

@@ -1,5 +1,9 @@
 //! typescript-eslint rules that read the syntax tree alone and that a pattern cannot say: a
 //! comparison of two nodes, a count, a name taken from the parent, the comments of the file.
+//!
+//! concept: new typescript-type-checks
+//! what: typescript-eslint rules that read the syntax tree: comparisons, counts, names from the parent.
+//! tools: typescript-eslint
 
 use super::dupes::key_name;
 use super::{Check, code_text, code_token, has_own, operator, span, un};

@@ -1,4 +1,8 @@
 //! Rules over the binding, type and value layers, and the project-scope rule.
+//!
+//! concept: unused-import, new possible-null-dereference, new unused-private-member
+//! what: possible-null-dereference: A member or element access on an expression the compiler's nullable analysis says may be null
+//! what: unused-private-member: A private field, method, property or event that no file of the project uses (`analysis: deep`)
 
 use super::range_of;
 use core_rules::rule;

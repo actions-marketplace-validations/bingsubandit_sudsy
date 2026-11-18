@@ -1,6 +1,8 @@
 //! HTML formatting, Prettier's layout (printer-html): `model` builds the nodes with the whitespace
 //! flags, `print` lays them out. The safety check compares what the formatter rewrites (tag names,
 //! attribute values, the blanks of a text) through `value`.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod model;
 mod print;

@@ -33,6 +33,8 @@
 //! Kind ids are assigned in declaration order, see [`crate::kind`]. The
 //! grammar's version is a SHA-256 over its lexemes (comments and layout do not
 //! change it; declaration order does).
+//!
+//! concept: none (infrastructure: grammar model)
 
 mod parse;
 

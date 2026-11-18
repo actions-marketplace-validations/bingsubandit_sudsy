@@ -7,6 +7,8 @@
 //! closed by an implied end tag have no `EndTag`. Errors are reported and parsing goes on, so every
 //! file has a tree. The dialects differ in what they add to the same shapes: Vue's `{{ }}` and
 //! directive names, Svelte's `{ }` tags and blocks, Angular's control flow (`angular.rs`).
+//!
+//! concept: recursive-descent-parser
 
 mod angular;
 mod svelte;

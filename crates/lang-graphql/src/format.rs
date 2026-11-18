@@ -1,6 +1,8 @@
 //! GraphQL formatting, laid out like Prettier: two-space indented blocks, one definition, field
 //! or value per line, argument and variable lists on one line when they fit and one item per line
 //! (no commas) when they do not, block strings re-indented, commas dropped.
+//!
+//! concept: delimited-list, block-and-statements
 
 use crate::generated::kind as k;
 use core_config::shared;

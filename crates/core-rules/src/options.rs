@@ -1,4 +1,6 @@
 //! Rule options: declared per rule, stored as data in the config, checked here.
+//!
+//! concept: none (infrastructure: rule options)
 
 use core_config::OptionValue;
 use std::collections::BTreeMap;

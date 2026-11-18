@@ -1,5 +1,9 @@
 //! The tag table: void elements and which start tag closes an open element (HTML's optional end
 //! tags, as `angular-html-parser` reads them). Names are lowercase.
+//!
+//! concept: new html-tag-table
+//! what: Void elements and which start tag closes an open element.
+//! tools: angular-html-parser
 
 pub fn is_void(name: &str) -> bool {
     matches!(

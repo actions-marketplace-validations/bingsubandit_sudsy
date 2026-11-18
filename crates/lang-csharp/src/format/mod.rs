@@ -4,6 +4,8 @@
 //! else is a sequence of its children with the spacing of the `[space]` rows. The hooks of the plan
 //! (member chains, lambda as last argument, LINQ queries, binary expression trees, attribute
 //! lists) are in [`chains`], [`lists`] and [`query`].
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod braces;
 mod branches;

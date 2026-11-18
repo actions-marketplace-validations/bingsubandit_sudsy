@@ -19,6 +19,11 @@
 //! (line breaks as LF, the lines of a multi-line comment trimmed, the end of a one-line comment
 //! trimmed): a formatter may move a comment, not lose, duplicate or edit one.
 //! The provider's [`NodeFormatter::extra_check`] verifies what is not per item.
+//!
+//! concept: format-safety-check
+//! what: Output must parse and keep the tree once trivia are ignored.
+//! tools: none (meaning preservation)
+//! reads: grammar:language
 
 use crate::FormatError;
 use crate::context::NodeFormatter;

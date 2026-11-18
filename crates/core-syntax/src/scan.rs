@@ -1,6 +1,11 @@
 //! What adapters of external parsers read from a grammar about the text between tokens and the
 //! size of what the parser may be given: the `trivia` rows (comments and line continuations) and
 //! the `limits` row.
+//!
+//! concept: trivia-rows
+//! what: Comments, line continuations and size limits that adapters of external parsers read from the grammar.
+//! tools: none (adapter data as rows)
+//! reads: grammar:trivia, grammar:limits
 
 use crate::kind::SyntaxKind;
 

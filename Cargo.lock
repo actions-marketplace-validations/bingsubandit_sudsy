@@ -4831,6 +4831,7 @@ name = "xtask"
 version = "0.0.2"
 dependencies = [
  "anyhow",
+ "core-format",
  "core-syntax",
  "serde-saphyr",
  "serde_json",

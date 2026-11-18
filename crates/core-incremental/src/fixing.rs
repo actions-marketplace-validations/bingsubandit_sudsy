@@ -1,5 +1,7 @@
 //! Fixing a text through the database: the fix loop of `core-rules` with the `lint` query as its
 //! analysis. Shared by `sudsy fix` and the editor's "fix all" actions.
+//!
+//! concept: none (infrastructure: fixing through the database)
 
 use crate::db::Db;
 use crate::failure::Failure;

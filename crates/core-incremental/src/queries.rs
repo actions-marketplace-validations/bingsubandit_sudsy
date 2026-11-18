@@ -12,6 +12,8 @@
 //! reads the config and the selection, and `lint(file)` reads `parse`, `lint_settings` and
 //! `semantics(file)`, the provider's answers for the layers the file's rules ask for (empty at
 //! `fast`, so syntax-only runs never touch the semantic model).
+//!
+//! concept: none (infrastructure: derived queries)
 
 use crate::db::Db;
 use crate::embedded::format_embedded;

@@ -1,6 +1,8 @@
 //! Capability layers, symbol ids, the facts a provider's semantic model answers about a file, and
 //! behavior summaries. Language neutral: a provider fills these in,
 //! rules read them.
+//!
+//! concept: none (glue: crate root)
 
 mod facts;
 mod layer;

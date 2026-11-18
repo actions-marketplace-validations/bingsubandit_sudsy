@@ -3,6 +3,8 @@
 //! the indentation follows the brackets, the spaces between tokens follow fixed rules, and the `=`
 //! of consecutive attributes and their trailing comments line up. The tree only classifies the
 //! tokens; the layout works on the token stream, as hclwrite does.
+//!
+//! concept: key-value-layout, block-and-statements
 
 use crate::generated::kind as k;
 use core_config::shared;

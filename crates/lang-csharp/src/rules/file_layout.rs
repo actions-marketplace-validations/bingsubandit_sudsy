@@ -1,5 +1,10 @@
 //! Rules about what a file holds: `single-class-per-file`, `single-namespace-per-file` and
 //! `file-name-matches-type`. They look at the file's top level only.
+//!
+//! concept: new single-class-per-file, new single-namespace-per-file, new file-name-matches-type
+//! what: single-class-per-file: A file holds one class or record: every later one is reported, more parts of the first class (when it is partial) excepted
+//! what: single-namespace-per-file: A file declares one namespace: every later one, nested ones included, is reported
+//! what: file-name-matches-type: The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}`
 
 use super::{kind, text_of};
 use core_rules::RuleContext;

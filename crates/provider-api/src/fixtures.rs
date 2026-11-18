@@ -17,6 +17,8 @@
 //!
 //! `SUDSY_BLESS=1` rewrites the annotations and the `.fixed`/`.unsafe` files from what the rules
 //! report now; review the diff before committing.
+//!
+//! concept: none (test harness: rule fixtures)
 
 use crate::provider::LanguageProvider;
 use crate::testing;

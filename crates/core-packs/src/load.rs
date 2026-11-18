@@ -1,4 +1,6 @@
 //! Loading an installed pack: hash check, `dlopen`, ABI check.
+//!
+//! concept: none (infrastructure: language packs)
 
 use crate::{Entry, PackError, entry};
 use sha2::{Digest, Sha256};

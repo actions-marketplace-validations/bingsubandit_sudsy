@@ -2,6 +2,11 @@
 //! grammar maps onto them (`prettier-ignore`, `fmt: off`, `fmt: skip`). The marker text comes
 //! from each grammar's `suppress` rows (roles `ignore`, `ignore-start`, `ignore-end`,
 //! `ignore-line`) and the comment delimiters from its `comments` line.
+//!
+//! concept: format-ignore-markers
+//! what: Ignore comments and foreign markers that keep a node or region as written.
+//! tools: Prettier prettier-ignore, Black fmt: off and fmt: skip, yapf disable
+//! reads: grammar:suppress ignore*
 
 use crate::comments::{Comment, CommentKind};
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken};

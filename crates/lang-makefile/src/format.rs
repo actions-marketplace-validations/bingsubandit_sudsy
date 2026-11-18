@@ -2,6 +2,8 @@
 //! assignment operators and after rule colons, one tab before each recipe command, conditional
 //! bodies indented. Values, recipe commands and `define` bodies are kept as written (trailing
 //! blanks aside); recipe commands are Shell code, which the Shell language formats on its own.
+//!
+//! concept: block-and-statements, key-value-layout, line-continuation-layout
 
 use crate::generated::kind as k;
 use core_config::shared;

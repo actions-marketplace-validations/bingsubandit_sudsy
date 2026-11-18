@@ -2,6 +2,8 @@
 //! level, `then`/`do` on the line of their head, case patterns at the `case` column and their
 //! bodies indented. A compound command written on one line stays on one line. Words, strings,
 //! expansions, substitutions and tests are kept as written; only the layout between them changes.
+//!
+//! concept: block-and-statements, line-continuation-layout
 
 use crate::generated::kind as k;
 use core_config::shared;

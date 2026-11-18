@@ -60,6 +60,7 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha || (github.event_name == 'push' && github.ref_type == 'branch' && github.event.before) || '' }}
           HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
+          cargo xtask dupes --check
           case "$BASE" in ""|0000000*) echo "no base: table only"; scripts/cost.sh --languages "$HEAD" ;; *) scripts/cost.sh --languages --check "$BASE" "$HEAD" ;; esac
 
   # Linux: the full gate. Includes the worker contract tests, which build and run the C# worker;

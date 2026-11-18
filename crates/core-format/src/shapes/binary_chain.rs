@@ -3,6 +3,11 @@
 //! operators of the same level flatten into one chain. The layout comes from a [`BinaryPolicy`]
 //! (options of the language: `binary_*`, `indent_nested_binary`); what only the language can
 //! judge (where the chain stands, what is inline, parentheses) comes through [`BinaryHooks`].
+//!
+//! concept: binary-chain-layout
+//! what: Operator chains flattened by precedence and broken at operators.
+//! tools: Prettier binaryish, ruff binary expressions, ktlint binary-expression-wrapping
+//! reads: tag:binary-chain, option:binary_operator_line
 
 use super::chain::ends_in_line_comment;
 use crate::FormatCtx;

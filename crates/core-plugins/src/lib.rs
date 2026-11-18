@@ -6,6 +6,8 @@
 //! * [`rule`]: [`WasmRule`], the `Rule` that forwards a file to its plugin.
 //!
 //! API v0 is unstable; see `wit/rules.wit`.
+//!
+//! concept: none (infrastructure: Wasm plugin host)
 
 mod host;
 mod rule;

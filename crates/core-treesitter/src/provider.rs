@@ -1,5 +1,10 @@
 //! A [`LanguageProvider`](provider_api::LanguageProvider) for a language parsed by tree-sitter,
 //! configured by data.
+//!
+//! concept: tree-sitter-adapter
+//! what: A language-neutral adapter from tree-sitter to the lossless tree through a node-name mapping.
+//! tools: tree-sitter
+//! reads: path:core_treesitter
 
 use crate::{Composite, Engine, Mapping};
 use core_config::OptionSchema;

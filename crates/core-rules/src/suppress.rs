@@ -2,6 +2,11 @@
 //! every rule): `sudsy-disable-next-line`, `sudsy-disable-line`, `sudsy-disable` ... `sudsy-enable`
 //! (a block) and `sudsy-disable-file`. The marker words come from the grammar's `suppress` lines;
 //! a grammar without them (and plain JSON, which has no comments) has config-only suppression.
+//!
+//! concept: suppression-comments
+//! what: Suppression comments in each grammar comment syntax, with optional rule lists, and foreign directives.
+//! tools: eslint-disable, rubocop:disable, noqa, pragma warning disable
+//! reads: grammar:suppress
 
 use crate::diagnostic::Diagnostic;
 use crate::rule::FileContext;

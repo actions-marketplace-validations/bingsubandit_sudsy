@@ -1,5 +1,7 @@
 //! Rule results as queries: `lint(file)` reads `parse` and the
 //! resolved rule configuration, so an edit of a file or of the config re-runs only what depends on it.
+//!
+//! concept: none (infrastructure: rule queries)
 
 use crate::db::Db;
 use crate::embedded::{lint_embedded, parse_embedded};

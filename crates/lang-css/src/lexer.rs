@@ -1,5 +1,7 @@
 //! The lossless lexer: every byte of the input ends up in exactly one token. CSS Syntax Level 3
 //! tokens, plus the extras of the dialects (see [`Dialect`]).
+//!
+//! concept: source-lexer
 
 use crate::Dialect;
 use crate::generated::kind as k;

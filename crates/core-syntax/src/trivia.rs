@@ -16,6 +16,11 @@
 //! comment or directive). Such a structured trivia is one element of the run;
 //! its own tokens follow the same rule inside it, as if it were a tree of its
 //! own.
+//!
+//! concept: trivia-attachment
+//! what: The single rule that attaches comments and whitespace to tokens as leading or trailing trivia.
+//! tools: none (internal)
+//! reads: grammar:language
 
 use crate::kind::SyntaxKind;
 use crate::tree::{SyntaxElement, SyntaxNode};

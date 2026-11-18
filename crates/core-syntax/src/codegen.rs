@@ -1,5 +1,7 @@
 //! Code generation from grammars: the typed wrappers of a language crate (its build script writes
 //! them to `OUT_DIR`) and the C# constants that `cargo xtask codegen` checks in.
+//!
+//! concept: none (generated: code generation from grammars)
 
 use crate::grammar::{Cardinality, Grammar, Item, KindDef, Target};
 use crate::kind::SyntaxKind;

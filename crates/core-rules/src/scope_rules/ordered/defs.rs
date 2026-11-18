@@ -1,6 +1,11 @@
 //! What the declarations of a name say once the order of the code is known: imports nothing
 //! read, definitions replaced before a read, imports covered by a loop variable, local variables
 //! never read, arguments rebound by a local.
+//!
+//! concept: ordered-scope-rules
+//! what: Scope rules where code order decides what a name means: replaced definitions, covered imports, unread locals.
+//! tools: pyflakes, ruff F811 F402 F841
+//! reads: family:scope
 
 use super::Hit;
 use super::imports::Form;

@@ -1,4 +1,6 @@
 //! Queries: `WITH`, `SELECT` and its clauses, set operations, joins.
+//!
+//! concept: recursive-descent-parser
 
 use super::lexer::T;
 use super::{Dialect, P};

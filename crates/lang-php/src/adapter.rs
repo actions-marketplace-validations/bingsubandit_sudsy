@@ -7,6 +7,8 @@
 //! wrappers (`Statement`, `Expression`, ...) and its one-token nodes have no row (`UNMAPPED`).
 //! A panic in the parser, which is pinned but young, is a parse error and the file stays as
 //! written.
+//!
+//! concept: adapter-replay
 
 use crate::generated::kind as k;
 use core_syntax::{Grammar, SyntaxKind, grammars};

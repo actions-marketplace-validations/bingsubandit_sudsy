@@ -1,3 +1,5 @@
+//! concept: none (infrastructure: provider interface)
+
 use core_config::OptionSchema;
 use core_format::NodeFormatter;
 use core_rules::{DEFAULT_HOOKS, Rule, RuleHooks};

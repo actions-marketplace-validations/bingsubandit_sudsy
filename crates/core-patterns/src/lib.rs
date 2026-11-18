@@ -10,6 +10,11 @@
 //!
 //! The matcher does not parse anything itself: whoever compiles a pattern supplies the parse
 //! function of the pattern's language ([`SnippetParser`]).
+//!
+//! concept: pattern-rules
+//! what: ast-grep style pattern rules: atoms, relations and combinators on the shared tree.
+//! tools: ast-grep rules
+//! reads: rulefiles:pattern
 
 pub mod expr;
 pub mod file;

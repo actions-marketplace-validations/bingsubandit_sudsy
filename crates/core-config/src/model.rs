@@ -1,5 +1,7 @@
 //! The structure of `sudsy.yaml`, read with source
 //! locations so later checks can point at the offending value.
+//!
+//! concept: none (infrastructure: config model)
 
 use serde::de::{self, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};

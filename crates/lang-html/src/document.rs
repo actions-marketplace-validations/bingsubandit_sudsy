@@ -1,4 +1,19 @@
 //! Rules that read the whole document: ids and references, classes, headings, `<main>`, comments.
+//!
+//! concept: new no-duplicate-id, new no-duplicate-class, new no-multiple-main, new heading-level, new no-missing-references, new no-redundant-for, new no-conditional-comment, new input-missing-label, new multiple-labeled-controls, new unique-landmark, new map-dup-name, new no-trailing-whitespace, new unrecognized-char-ref, unique-names
+//! what: no-duplicate-id: An `id` that an earlier element of the document already has
+//! what: no-duplicate-class: A class name written twice in one `class` attribute
+//! what: no-multiple-main: A second `<main>` element that is not `hidden`: a page has one main landmark
+//! what: heading-level: Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second
+//! what: no-missing-references: An attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) names an id that no element of the document has
+//! what: no-redundant-for: A `<label>` has a `for` that names a control inside it, which the label already labels
+//! what: no-conditional-comment: An Internet Explorer conditional comment (`<!--[if IE]>`)
+//! what: input-missing-label: An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria-
+//! what: multiple-labeled-controls: A `<label>` without `for` that holds more than one control: it labels only the first
+//! what: unique-landmark: Landmarks of one kind (`<nav>`, `<aside>`, or an element with the same landmark `role`) that a screen reader user cannot tell apart: with several of them, each needs an `
+//! what: map-dup-name: A `<map>` whose `name` an earlier `<map>` already has: `usemap` finds the first
+//! what: no-trailing-whitespace: Spaces or tabs at the end of a line
+//! what: unrecognized-char-ref: A named character reference in text (`&name;`) that HTML does not define
 
 use crate::dom;
 use crate::generated::kind as k;

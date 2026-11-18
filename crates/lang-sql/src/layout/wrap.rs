@@ -1,6 +1,10 @@
 //! Long lines (sqlfluff's LT05): the places a line may break are its indent points (by indent
 //! balance) and the operators and commas around it (between the balances, by precedence); the
 //! outermost are broken. A trailing line comment moves to the line before.
+//!
+//! concept: new line-wrapping
+//! what: Long lines broken at indent points and operators.
+//! tools: sqlfluff LT05
 
 use super::breaks::{self, Pos, Span};
 use super::seq::{NONE, Seq};

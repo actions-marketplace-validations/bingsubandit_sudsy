@@ -21,6 +21,11 @@
 //! options:                        # typed options, validated like a Rust rule's
 //!   - { name: allowed, type: list, default: [], description: Names that are fine }
 //! ```
+//!
+//! concept: pattern-rules
+//! what: ast-grep style pattern rules: atoms, relations and combinators on the shared tree.
+//! tools: ast-grep rules
+//! reads: rulefiles:pattern
 
 use crate::expr::{Ctx, Expr, RegexCache, STEP_BUDGET, Spec};
 use crate::matcher::{Capture, Captures, SnippetParser};

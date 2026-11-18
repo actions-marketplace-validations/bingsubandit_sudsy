@@ -6,6 +6,9 @@
 //! `Group`s (`()`, `[]`, `#{}`), as in the CSS Syntax spec, so dialect constructs need no rules of
 //! their own. Every token is in the tree; trivia are placed by the shared attachment rule (see
 //! `core_syntax::trivia`).
+//!
+//! concept: new recursive-descent-parser
+//! what: Hand-written recursive-descent parser that builds the lossless tree with error recovery.
 
 use crate::Dialect;
 use crate::generated::kind as k;

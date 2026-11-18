@@ -1,5 +1,7 @@
 //! What the formatting modules share: the options, a node's significant children, the
 //! one-line "words" printer, statement endings and clauses, and brace lists.
+//!
+//! concept: node-sequence
 
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc, concat, hardline, if_break, lit};

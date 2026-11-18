@@ -2,6 +2,11 @@
 //! (`#mapping`, `#sequence`, `#key-part`) and gives it a `keys` line gets the shared key and
 //! sequence rules with no code of its own; a language whose keys or scalars the rows cannot
 //! describe implements the hooks it needs.
+//!
+//! concept: key-identity
+//! what: What a key or scalar is called, read from tags and the keys row, for the key rules.
+//! tools: eslint-plugin-jsonc, yamllint key rules
+//! reads: grammar:keys
 
 use crate::names;
 use crate::rule::FileContext;

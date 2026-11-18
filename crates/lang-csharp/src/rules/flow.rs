@@ -1,4 +1,7 @@
 //! Rules over the flow layer: unused variables, dead stores.
+//!
+//! concept: unused-variable, new unused-assignment
+//! what: A value is stored in a local variable and no path reads it before it is overwritten or the variable goes out of scope (a dead store)
 
 use super::{kind, range_of};
 use core_flow::{LocalKind, OpFlags, OpKind, dead_stores};

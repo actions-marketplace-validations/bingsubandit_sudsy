@@ -1,6 +1,8 @@
 //! Rule families: Rust code that built-in rule files instantiate by name. A file with
 //! `family: <name>` and `params:` instead of `rule:` becomes one rule of that family; the
 //! language provider lists its families, the pattern loader (`core-patterns`) builds the rules.
+//!
+//! concept: none (glue: family registry)
 
 use crate::{Rule, RuleMeta};
 use std::collections::BTreeMap;

@@ -1,4 +1,6 @@
 //! Declarations: the file, types and their bodies, members, modifiers, annotations, parameters.
+//!
+//! concept: declaration-kit, signature-layout
 
 use super::*;
 use core_format::shapes::{self, Annotations, ListStyle, Printer};

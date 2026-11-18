@@ -1,3 +1,5 @@
+//! concept: none (infrastructure: error type)
+
 use crate::directives::DirectiveConflict;
 
 #[derive(Debug, thiserror::Error)]

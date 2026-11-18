@@ -1,6 +1,8 @@
 //! TOML formatting: the shared shapes with TOML's layout. A table is its header and then its pairs
 //! one per line, without indentation (there are no braces); an inline table never breaks (TOML 1.0
 //! forbids line breaks in it); arrays follow the list shape.
+//!
+//! concept: key-value-layout
 
 use crate::align::{self, AlignTable};
 use crate::generated::kind as k;

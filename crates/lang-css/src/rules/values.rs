@@ -1,4 +1,6 @@
 //! Checks of the `check` family that read values and selectors in more detail.
+//!
+//! concept: style-declaration-checks
 
 use super::checks::Check;
 use super::font;

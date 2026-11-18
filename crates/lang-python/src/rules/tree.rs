@@ -1,5 +1,7 @@
 //! Reading the parts of the nodes the rules look at: the tree has one node for each node of the
 //! parser's AST, so these are the accessors of a typed AST.
+//!
+//! concept: role-accessors
 
 use crate::generated::kind as k;
 use crate::text::code_text;

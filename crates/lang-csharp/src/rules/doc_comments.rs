@@ -2,6 +2,10 @@
 //! list of top-level XML elements, and the few facts about the declaration they need (kind,
 //! accessibility, where to report). Syntax only: the rules agree with StyleCop for everything
 //! that does not need name lookup (`<include>` files, `<inheritdoc>` targets, type aliases).
+//!
+//! concept: new doc-comment-model
+//! what: The documentation comment of a declaration as a list of XML elements, and the facts the doc rules read.
+//! tools: StyleCop SA16xx
 
 use super::kind;
 use core_rules::RuleContext;

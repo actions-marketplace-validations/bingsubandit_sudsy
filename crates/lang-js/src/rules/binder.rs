@@ -1,5 +1,9 @@
 //! Rules over the binder's references: `prefer-const`, `prefer-rest-params` and the global types
 //! `Function` and the wrapper objects.
+//!
+//! concept: new prefer-const, new prefer-rest-params
+//! what: prefer-const: A binding that is never reassigned should be const.
+//! what: prefer-rest-params: Rest parameters instead of arguments.
 
 use super::Check;
 use super::scope::{Hit, run};

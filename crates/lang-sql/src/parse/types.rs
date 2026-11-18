@@ -1,4 +1,6 @@
 //! Data types: `int`, `varchar(10)`, `double precision`, `timestamp with time zone`, `int[]`.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use super::lexer::T;

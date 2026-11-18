@@ -2,6 +2,11 @@
 //! the nodes of given kinds (`params: { check: <name> }`; `{name}` in the message is what the
 //! function passes to [`NodeCheck::hit`]), and the cache of a per-file analysis that several
 //! checks read (a scope model, the findings of one walk).
+//!
+//! concept: check-family
+//! what: A rule family that runs one function of a language table on nodes of given kinds.
+//! tools: none (plumbing of Rust checks)
+//! reads: family:check
 
 use crate::{Diagnostic, FileContext, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};

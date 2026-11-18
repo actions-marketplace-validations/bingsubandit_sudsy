@@ -1,3 +1,6 @@
+//! concept: new doc-comment-space
+//! what: A documentation line (`///`) starts with a single space
+
 use super::kind;
 use core_rules::FileContext;
 use core_rules::rule;

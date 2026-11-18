@@ -1,3 +1,8 @@
+//! concept: heritage-clause-layout
+//! what: extends, implements and base lists on or below the type head.
+//! tools: google-java-format class headers, ktlint class-signature, Prettier class heritage
+//! reads: tag:heritage
+
 use crate::doc::{self, Doc};
 
 /// How the supertypes of a type declaration are laid out.

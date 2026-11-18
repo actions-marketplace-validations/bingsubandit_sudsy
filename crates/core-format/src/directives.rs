@@ -1,6 +1,10 @@
 //! Layout directives: the fixed, versioned set of layout requests that rules can attach to
 //! nodes. Rules never print layout themselves; a rule fills a
 //! [`DirectiveTable`], and shapes read it.
+//!
+//! concept: layout-directives
+//! what: Versioned layout requests that rules attach to nodes and shapes read.
+//! tools: none (internal)
 
 use core_syntax::{SyntaxKind, SyntaxNode};
 use std::collections::HashMap;

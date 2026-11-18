@@ -4,6 +4,11 @@
 //! is never reported as unreachable: empty, hoisted, a guard the compiler leaves alone) and
 //! `#fallthrough` (a `switch` whose arms run into the next one). A provider whose semantic model
 //! has flow graphs (C#) gets constant conditions and calls that never return on top.
+//!
+//! concept: unreachable-code, no-fallthrough
+//! what: Flow family: code no path reaches and switch cases that fall through, on the flow graph.
+//! rules: unreachable-code, no-fallthrough
+//! reads: rule:unreachable-code
 
 use crate::diagnostic::Edit;
 use crate::rule::{BodyContext, FileContext, RuleContext};

@@ -1,5 +1,7 @@
 //! Strings, numbers, regular expressions and directives, and the printing of a node as written
 //! with those restyled (what every node without layout code of its own gets).
+//!
+//! concept: literal-spelling
 
 use super::util::{semi, style};
 use crate::generated::kind as k;

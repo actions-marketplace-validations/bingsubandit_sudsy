@@ -2,6 +2,8 @@
 //! `Touch` (none) or `Any` (as written) before and after; an `inline` variant also removes a line
 //! break. Blocks claim the wishes of the nodes they start or end, and the innermost node that
 //! holds both neighbours may ask for them to touch.
+//!
+//! concept: token-spacing-rows
 
 use super::seq::{NONE, Seq, is_comment};
 use crate::generated::kind as k;

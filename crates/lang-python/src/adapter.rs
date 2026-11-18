@@ -13,6 +13,8 @@
 //! - A node with no token (`lambda:` has an empty `Parameters`, error recovery adds names of no
 //!   length) is an empty node, so a kind is present wherever ruff's AST has it.
 //! - ruff's errors cascade: a file reports the first error of each statement.
+//!
+//! concept: adapter-replay
 
 use crate::generated::kind as k;
 use core_syntax::grammars;

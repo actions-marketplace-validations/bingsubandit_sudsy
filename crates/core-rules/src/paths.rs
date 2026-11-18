@@ -1,5 +1,10 @@
 //! Key paths (`a.b[0]["odd key"].c`, the form eslint-plugin-jsonc's `pathPattern` matches) of
 //! mappings and sequences, for the rules that can be limited to part of a document.
+//!
+//! concept: key-path-scope
+//! what: Rules limited to part of a document by key path patterns.
+//! tools: eslint-plugin-jsonc pathPattern
+//! reads: grammar:keys
 
 use crate::names;
 use crate::options::{Check, Opt, OptionDecl};

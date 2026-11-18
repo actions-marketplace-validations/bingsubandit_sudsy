@@ -1,5 +1,7 @@
 //! The JSON and JSONC provider: a hand-written lossless parser, and formatting that is almost
 //! entirely the shared shapes' tag defaults.
+//!
+//! concept: none (glue: provider entry)
 
 core_syntax::include_generated!();
 mod format;

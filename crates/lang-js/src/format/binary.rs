@@ -2,6 +2,8 @@
 //! (`core_format::shapes::binary_chain`); what stays here is where a chain stands in JS (inside
 //! the parentheses of `if`, in a JSX attribute, ...), which right sides stay on the operator's
 //! line, and the comments in front of a chain.
+//!
+//! concept: binary-chain-layout
 
 use super::ast::{outer, parent, token_comments, un};
 use crate::generated::kind as k;

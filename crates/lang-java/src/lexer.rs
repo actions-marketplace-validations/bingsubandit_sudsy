@@ -4,6 +4,8 @@
 //!
 //! `>` is always a token of its own (`>>` and `>>>` are joined by the parser in an expression, so
 //! `List<List<X>>` needs no splitting); `>=`, `>>=` and `>>>=` are lexed whole.
+//!
+//! concept: source-lexer
 
 use crate::generated::kind as k;
 

@@ -1,6 +1,10 @@
 //! The layout of a SQL file, on the blocks and points of [`Seq`]. It follows sqlfluff's layout
 //! rules (LT01 to LT15) with its defaults: the rules run in turn until the file stops changing,
 //! as `sqlfluff fix` does, and the result is printed line by line.
+//!
+//! concept: new line-layout-engine
+//! what: A line-breaking, indentation and wrapping engine on its own block and point model.
+//! tools: sqlfluff layout rules
 
 mod blocks;
 mod breaks;

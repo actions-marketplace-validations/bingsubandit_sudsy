@@ -1,4 +1,6 @@
 //! From the resolved rule configuration of a file to the rules that run on it.
+//!
+//! concept: none (infrastructure: rule configuration)
 
 use crate::diagnostic::Severity;
 use crate::engine::ActiveRule;

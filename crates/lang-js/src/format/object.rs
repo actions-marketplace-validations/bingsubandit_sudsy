@@ -2,6 +2,8 @@
 //! `printProperty`): an object stays expanded when the source has a line break after its `{`,
 //! numbers fill lines, a pattern that holds a nested pattern always breaks. The quotes of property
 //! names (`quote_props`) are decided before formatting, in [`KeyEdits`].
+//!
+//! concept: delimited-list
 
 use super::ast::{parent, un};
 use super::util::{R, inline, is_tok, kids, node_of, shape_error, style, token_of};

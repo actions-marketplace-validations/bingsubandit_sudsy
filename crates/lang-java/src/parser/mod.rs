@@ -7,6 +7,8 @@
 //! that wrap what was built with a checkpoint, so a chain of 10,000 calls needs no recursion
 //! while parsing; recursion that follows the nesting of the source (statements, unary operands,
 //! types) goes through `core_format::deep`.
+//!
+//! concept: recursive-descent-parser
 
 mod decl;
 mod expr;

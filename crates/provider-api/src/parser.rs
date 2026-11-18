@@ -1,6 +1,8 @@
 //! A [`LanguageProvider`] for an in-process language, configured by data: the parse function and
 //! what `lang.yaml` says. Every language whose provider is generated (tree-sitter, adapters to
 //! external parsers, hand-written parsers with no dialects) is one of these.
+//!
+//! concept: none (glue: provider configured by data)
 
 use crate::provider::{
     Capabilities, FileMatcher, FilePattern, LanguageProvider, ParseResult, ProviderError,

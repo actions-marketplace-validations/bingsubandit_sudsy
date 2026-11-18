@@ -1,6 +1,11 @@
 //! Rules on the keys of mappings, written against the `#mapping` and `#key-value` grammar tags and
 //! the language's [`RuleHooks`](crate::hooks::RuleHooks): `no-duplicate-keys`, `no-empty-keys` and
 //! `key-name-casing`.
+//!
+//! concept: no-duplicate-keys, no-empty-keys, key-name-casing
+//! what: Rules on the keys of mappings.
+//! rules: no-duplicate-keys, no-empty-keys, key-name-casing
+//! reads: rule:no-duplicate-keys
 
 use crate::hooks::Accessor;
 use crate::names;

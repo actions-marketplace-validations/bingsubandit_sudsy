@@ -1,5 +1,10 @@
 //! The v0.1 analyses on the solver: reachability, liveness, reaching definitions and definite
 //! assignment.
+//!
+//! concept: dataflow-analyses
+//! what: Reachability, liveness, reaching definitions and definite assignment on the solver.
+//! tools: Roslyn flow analysis, ESLint no-unreachable
+//! reads: rule:unreachable-code
 
 use crate::bitset::BitSet;
 use crate::graph::{Block, BodyGraph, Edge, EdgeKind, Op, OpKind};

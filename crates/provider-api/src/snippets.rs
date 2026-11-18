@@ -1,4 +1,6 @@
 //! Provider-backed parsing of pattern snippets (the parse function core-patterns asks for).
+//!
+//! concept: none (glue: pattern snippet parsing)
 
 use crate::provider::{LanguageProvider, ParseResult, SourceFile};
 use core_patterns::SnippetParser;

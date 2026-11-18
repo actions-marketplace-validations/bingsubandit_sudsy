@@ -1,5 +1,7 @@
 //! Expressions: dispatch on the node kind, names, literals, attribute and call chains, subscripts,
 //! parameters and patterns.
+//!
+//! concept: member-chain, literal-spelling
 
 use super::literal;
 use super::util::*;

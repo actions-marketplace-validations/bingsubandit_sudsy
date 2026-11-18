@@ -12,6 +12,10 @@
 //! - `cleaned-by`: alternatives `a b c | d e`, each a command name with arguments it must have;
 //!   the instruction needs one of them after the selected command.
 //! - `cache-dir`: a `--mount` of type cache or tmpfs on that directory exempts the instruction.
+//!
+//! concept: new embedded-command-checks
+//! what: Checks on the commands of shell text embedded in a host: RUN, recipe lines, run steps.
+//! tools: hadolint DL3xxx, shellcheck, actionlint
 
 use crate::generated::kind as k;
 use core_rules::tree::significant_range;

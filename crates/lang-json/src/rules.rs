@@ -1,5 +1,7 @@
 //! The rules of JSON; `cargo xtask new-rule json <id> --rust` adds a module under `rules/` and
 //! lists it here.
+//!
+//! concept: none (glue: rule registration)
 
 use crate::value_rules;
 use core_rules::Rule;

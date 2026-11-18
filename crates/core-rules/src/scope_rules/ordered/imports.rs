@@ -1,5 +1,10 @@
 //! What an import declaration binds: the form it is written in, what a message says about it
 //! and what the bound name stands for.
+//!
+//! concept: ordered-scope-rules
+//! what: Scope rules where code order decides what a name means: replaced definitions, covered imports, unread locals.
+//! tools: pyflakes, ruff F811 F402 F841
+//! reads: family:scope
 
 use core_semantics::scopes::{Decl, Flags};
 use core_syntax::roles::code_text;

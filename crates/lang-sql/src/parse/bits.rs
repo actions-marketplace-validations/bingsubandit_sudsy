@@ -1,4 +1,6 @@
 //! Small shared pieces: references, aliases, brackets, comma lists.
+//!
+//! concept: recursive-descent-parser
 
 use super::lexer::T;
 use super::{Dialect, MAX_DEPTH, P};

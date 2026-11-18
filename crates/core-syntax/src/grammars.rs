@@ -1,5 +1,7 @@
 //! The built-in grammars, parsed once from the checked-in `.grammar` files. The loaders and
 //! `by_name` are generated from `grammars/*.grammar` by the build script.
+//!
+//! concept: none (generated: built-in grammar loaders)
 
 use crate::{Grammar, LanguageId};
 use std::sync::OnceLock;

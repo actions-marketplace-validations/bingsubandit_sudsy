@@ -1,5 +1,7 @@
 //! The code of other languages inside a file (see `provider_api::embedded`): linted with the
 //! rules and config of its own language, and formatted by its own formatter when the host asks.
+//!
+//! concept: none (infrastructure: embedded regions as queries)
 
 use crate::db::Db;
 use crate::failure::{Failure, Stage};

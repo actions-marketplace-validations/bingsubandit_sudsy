@@ -1,5 +1,7 @@
 //! The JSON Schema of `sudsy.yaml`, generated from the providers' option declarations
 //! Editors register it for completion and validation of the config.
+//!
+//! concept: none (generated: JSON schema of sudsy.yaml)
 
 use crate::model::{Depth, OptionValue};
 use crate::schema::{OptionDef, OptionKind, OptionSchema, shared};

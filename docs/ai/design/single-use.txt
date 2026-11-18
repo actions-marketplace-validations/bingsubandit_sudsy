@@ -1,0 +1,436 @@
+# Single-use list: a ratchet that may only shrink (`cargo xtask codegen --check`).
+# Every data item (grammar line type, format.rules section, row key, grammar tag read by shared code) and every concept
+# with fewer than two users, and every LOCAL entry (a language module that carries a concept without using its shared
+# mechanism). An entry that is no longer true is removed by `cargo xtask codegen`; adding one fails the check:
+# a second language adopts the shared form (docs/ai/architecture/adding-a-language.md).
+concept accessor-order # users: csharp
+concept ambiguous-booleans # users: yaml
+concept angular-expression-pipes # users: html
+concept angular-microsyntax # users: html
+concept angular-template-layout # users: html
+concept arrow-function-layout # users: js
+concept async-suffix # users: csharp
+concept behavior-summaries # users: csharp
+concept block-collection-layout # users: yaml
+concept build-stage-checks # users: dockerfile
+concept capability-layers # users: 
+concept cd-without-exit # users: shell
+concept class-body-checks # users: ruby
+concept clause-checks # users: ruby
+concept clause-line-breaks # users: sql
+concept comment-syntax # users: hcl
+concept component-option-checks # users: html
+concept component-props-model # users: html
+concept component-value-layout # users: css
+concept constant-on-right # users: csharp
+concept constructor-summary-standard-text # users: csharp
+concept container-rows # users: markdown
+concept copy-from-own-stage # users: dockerfile
+concept copy-from-unknown-stage # users: dockerfile
+concept cyclic-needs # users: github-actions
+concept debug-assert-message # users: csharp
+concept debug-fail-message # users: csharp
+concept declaration-checks # users: python
+concept deprecated-commands # users: github-actions
+concept deprecated-index # users: hcl
+concept deprecated-interpolation # users: hcl
+concept destructor-summary-standard-text # users: csharp
+concept dialect-keyword-tables # users: sql
+concept directive-keyword-space # users: csharp
+concept distinct-group-by # users: sql
+concept doc-comment-model # users: csharp
+concept doc-comment-space # users: csharp
+concept doc-partial-required # users: csharp
+concept doc-partial-typeparams # users: csharp
+concept doc-text-ends-with-period # users: csharp
+concept doc-text-not-empty # users: csharp
+concept docstring-reindent # users: python
+concept document-end # users: yaml
+concept document-start # users: yaml
+concept document-stream-layout # users: yaml
+concept duplicate-ids # users: github-actions
+concept duplicate-stage-name # users: dockerfile
+concept duplicate-table-alias # users: sql
+concept element-metadata-checks # users: html
+concept file-header-order # users: protobuf
+concept file-name-matches-type # users: csharp
+concept flat-block-preservation # users: csharp
+concept float-style # users: yaml
+concept font-family-checks # users: css
+concept format-string-checks # users: python
+concept from-first # users: dockerfile
+concept getter-return # users: js
+concept heading-increment # users: markdown
+concept heading-level # users: html
+concept heritage-clause-layout # users: java
+concept html-tag-table # users: html
+concept implicit-string-concat # users: python
+concept import-usage-checks # users: js
+concept indent-balance-layout # users: sql
+concept input-missing-label # users: html
+concept invalid-escape-sequence # users: python
+concept invalid-expression # users: github-actions
+concept invalid-job-id # users: github-actions
+concept invalid-property-value # users: editorconfig
+concept invalid-runs-on # users: github-actions
+concept jsx-layout # users: js
+concept known-names-table # users: css
+concept last-user-not-root # users: dockerfile
+concept layout-directives # users: 
+concept legacy-api-upgrade # users: python
+concept line-layout-engine # users: sql
+concept line-wrapping # users: sql
+concept linq-query-layout # users: csharp
+concept literal-checks # users: ruby
+concept map-dup-name # users: html
+concept markdown-block-layout # users: markdown
+concept markup-layout # users: html
+concept member-order # users: csharp
+concept min-phony # users: makefile
+concept missing-permissions # users: github-actions
+concept modifier-order # users: java
+concept multiple-labeled-controls # users: html
+concept naming-convention # users: graphql
+concept negation-of-excluded-parent # users: gitignore
+concept no-comment-before-block # users: csharp
+concept no-conditional-comment # users: html
+concept no-default-summary # users: csharp
+concept no-doc-placeholder # users: csharp
+concept no-doc-slashes-in-plain-comment # users: csharp
+concept no-dupe-else-if # users: js
+concept no-duplicate-anchors # users: yaml
+concept no-duplicate-class # users: html
+concept no-duplicate-doc-text # users: csharp
+concept no-duplicate-heading # users: markdown
+concept no-duplicate-id # users: html
+concept no-duplicate-include # users: xml
+concept no-duplicate-pattern # users: gitignore
+concept no-empty-statement # users: csharp
+concept no-empty-values # users: yaml
+concept no-irregular-whitespace # users: js
+concept no-loss-of-precision # users: js
+concept no-missing-references # users: html
+concept no-multiple-main # users: html
+concept no-redundant-for # users: html
+concept no-returns-on-void # users: csharp
+concept no-throw-generic # users: python
+concept no-trailing-whitespace # users: html
+concept no-typename-prefix # users: graphql
+concept no-undefined-alias # users: yaml
+concept no-unexpected-multiline # users: js
+concept no-unsafe-finally # users: js
+concept no-unused-anchors # users: yaml
+concept null-comparison # users: sql
+concept nullable-shorthand # users: csharp
+concept parser-lookahead # users: java
+concept phony-declared # users: makefile
+concept possible-null-dereference # users: csharp
+concept prefer-const # users: js
+concept prefer-rest-params # users: js
+concept prefixed-string-quotes # users: python
+concept preprocessor-branches # users: csharp
+concept property-summary-matches-accessors # users: csharp
+concept property-summary-omits-restricted-accessor # users: csharp
+concept quoted-strings # users: yaml
+concept redundant-pattern # users: gitignore
+concept require-yield # users: js
+concept scalar-layout # users: yaml
+concept scalar-type-resolution # users: yaml
+concept script-injection # users: github-actions
+concept selector-list-layout # users: css
+concept self-alias # users: sql
+concept semantic-facts # users: csharp
+concept separate-attributes # users: csharp
+concept separate-field-declarations # users: csharp
+concept single-class-per-file # users: csharp
+concept single-namespace-per-file # users: csharp
+concept single-title # users: markdown
+concept style-declaration-checks # users: css
+concept suppression-justification # users: csharp
+concept table-alignment # users: markdown
+concept template-expression-checks # users: html
+concept template-literal-layout # users: js
+concept template-syntax-checks # users: html
+concept timestamp-expanded # users: makefile
+concept token-rewrite-rows # users: php
+concept trailing-comment-alignment # users: toml
+concept type-expression-layout # users: js
+concept typescript-type-checks # users: js
+concept unary-expression-layout # users: js
+concept unique-landmark # users: html
+concept unique-targets # users: makefile
+concept unknown-needs # users: github-actions
+concept unknown-property # users: editorconfig
+concept unrecognized-char-ref # users: html
+concept unsafe-numbers # users: json
+concept untagged-base-image # users: dockerfile
+concept unused-assignment # users: csharp
+concept unused-cte # users: sql
+concept unused-declarations # users: hcl
+concept unused-private-member # users: csharp
+concept unwrapped-line-structure # users: cpp
+concept use-lambda # users: csharp
+concept use-literal-suffix # users: csharp
+concept useless-echo # users: shell
+concept worker-findings-family # users: csharp
+data grammar-line:case-insensitive # users: powershell
+data grammar-line:container # users: markdown
+data grammar-line:format # users: python
+data grammar-line:hoisted # users: js
+data grammar-line:limits # users: kotlin
+data grammar-line:regex # users: js
+data row-key:at_least_one.kind # users: php
+data row-key:at_least_one.parent # users: php
+data row-key:blank.annotation_args # users: java
+data row-key:blank.comment_blank # users: kotlin
+data row-key:blank.commented # users: kotlin
+data row-key:blank.doc # users: java
+data row-key:blank.group # users: php
+data row-key:blank.has # users: kotlin
+data row-key:blank.parent # users: kotlin
+data row-key:blank.prev.annotation_args # users: java
+data row-key:blank.prev.doc # users: java
+data row-key:blank.prev.has # users: kotlin
+data row-key:call.arg # users: js
+data row-key:call.callee # users: js
+data row-key:call.comments # users: js
+data row-key:call.line # users: js
+data row-key:call.node # users: js
+data row-key:call.params # users: js
+data row-key:call.parent # users: js
+data row-key:comments.max_blank_after # users: php
+data row-key:file.exact_end # users: php
+data row-key:file.one_line_verbatim # users: php
+data row-key:file.verbatim_if # users: php
+data row-key:flow.exact # users: php
+data row-key:flow.keep_blank_lines # users: php
+data row-key:flow.source_hang # users: php
+data row-key:flow.unhang # users: php
+data row-key:hug.cast # users: js
+data row-key:hug.composition # users: js
+data row-key:hug.concise # users: js
+data row-key:hug.no_composition # users: js
+data row-key:hug.not_last # users: js
+data row-key:hug.numeric # users: js
+data row-key:hug.short # users: js
+data row-key:hug.short_binary # users: js
+data row-key:hug.signed_numeric # users: js
+data row-key:joined.grand # users: php
+data row-key:joined.kind # users: php
+data row-key:joined.parent # users: php
+data row-key:joined.text # users: php
+data row-key:layout.body # users: php
+data row-key:layout.clauses # users: php
+data row-key:layout.ctor # users: kotlin
+data row-key:layout.empty # users: php
+data row-key:layout.gap # users: php
+data row-key:layout.hug_min # users: kotlin
+data row-key:layout.list # users: kotlin
+data row-key:layout.min # users: kotlin
+data row-key:layout.no_trailing_after # users: php
+data row-key:layout.spaced # users: kotlin
+data row-key:layout.trailing # users: php
+data row-key:layout.trailing_commas # users: php
+data row-key:op_first.kind # users: php
+data row-key:op_first.parent # users: php
+data row-key:rewrite.before # users: php
+data row-key:rewrite.end_of # users: php
+data row-key:rewrite.grand # users: php
+data row-key:rewrite.kind # users: php
+data row-key:rewrite.parent # users: php
+data row-key:rewrite.sibling # users: php
+data row-key:rewrite.text # users: php
+data row-key:simple.array # users: js
+data row-key:simple.call # users: js
+data row-key:simple.items # users: js
+data row-key:simple.leaf # users: js
+data row-key:simple.members # users: js
+data row-key:simple.object # users: js
+data row-key:simple.operand # users: js
+data row-key:simple.regex # users: js
+data row-key:simple.single_line # users: js
+data row-key:simple.unary # users: js
+data row-key:space.ends # users: csharp
+data row-key:space.exact # users: csharp
+data rules-section:at_least_one # users: php
+data rules-section:call # users: js
+data rules-section:comments # users: php
+data rules-section:file # users: php
+data rules-section:hug # users: js
+data rules-section:joined # users: php
+data rules-section:op_first # users: php
+data rules-section:rewrite # users: php
+data rules-section:simple # users: js
+data tag:annotation-arguments # users: java
+data tag:arg # users: dockerfile
+data tag:argument # users: csharp
+data tag:body # users: ruby
+data tag:branch # users: python
+data tag:branching # users: python
+data tag:checked # users: xml
+data tag:collection # users: python
+data tag:comprehension # users: python
+data tag:debugger # users: js
+data tag:default-value # users: js
+data tag:delim # users: ruby
+data tag:dict # users: python
+data tag:display # users: python
+data tag:document # users: graphql
+data tag:dots # users: python
+data tag:enum-constant # users: java
+data tag:enum-tail # users: java
+data tag:escapes # users: js
+data tag:export # users: js
+data tag:export-list # users: js
+data tag:final # users: js
+data tag:finally # users: python
+data tag:global-scope # users: js
+data tag:head # users: makefile
+data tag:heritage # users: java
+data tag:hole # users: js
+data tag:hug-wrapper # users: js
+data tag:huggable-always # users: js
+data tag:huggable-body # users: js
+data tag:huggable-tail # users: js
+data tag:indentable-doc # users: kotlin
+data tag:indented # users: csharp
+data tag:inert-bare # users: js
+data tag:initializer-expression # users: csharp
+data tag:key-part # users: toml
+data tag:key-separator # users: python
+data tag:label # users: hcl
+data tag:list-prefix # users: csharp
+data tag:markup # users: js
+data tag:member-chain # users: csharp
+data tag:modifier # users: csharp
+data tag:module # users: js
+data tag:module-body # users: js
+data tag:name # users: csharp
+data tag:named-expr # users: python
+data tag:named-type # users: js
+data tag:namespace # users: csharp
+data tag:negated # users: ruby
+data tag:nest # users: css
+data tag:open # users: ruby
+data tag:parenthesized # users: js
+data tag:quoted # users: js
+data tag:raw-strings # users: js
+data tag:regex # users: js
+data tag:rule # users: makefile
+data tag:signature # users: js
+data tag:stray # users: java
+data tag:string-escapes # users: python
+data tag:string-literal # users: python
+data tag:switch-label # users: csharp
+data tag:target # users: ruby
+data tag:tuple # users: python
+data tag:verbatim-trivia # users: csharp
+data tag:with-item # users: python
+data tag:wrapper # users: java
+local lang-cpp/format.rs verbatim-formatter # lang: cpp
+local lang-cpp/lexer.rs source-lexer # lang: cpp
+local lang-csharp/format/braces.rs declaration-kit # lang: csharp
+local lang-csharp/rules/async_suffix.rs naming-convention # lang: csharp
+local lang-csharp/rules/binding.rs unused-import # lang: csharp
+local lang-csharp/rules/flow.rs unused-variable # lang: csharp
+local lang-csharp/rules/usings.rs sorted-imports # lang: csharp
+local lang-csharp/using_sort.rs sorted-imports # lang: csharp
+local lang-css/format/mod.rs key-value-layout # lang: css
+local lang-css/format/mod.rs token-case # lang: css
+local lang-css/format/text.rs token-case # lang: css
+local lang-css/format/value.rs delimited-list # lang: css
+local lang-css/lexer.rs source-lexer # lang: css
+local lang-css/parser.rs recursive-descent-parser # lang: css
+local lang-dockerfile/format.rs line-continuation-layout # lang: dockerfile
+local lang-dockerfile/rules/run_command.rs embedded-command-checks # lang: dockerfile
+local lang-dockerfile/rules/stages.rs unique-names # lang: dockerfile
+local lang-github-actions/scripts.rs embedded-command-checks # lang: github-actions
+local lang-github-actions/view.rs role-accessors # lang: github-actions
+local lang-gitignore/format.rs node-sequence # lang: gitignore
+local lang-gitignore/rules.rs unique-names # lang: gitignore
+local lang-graphql/format.rs delimited-list # lang: graphql
+local lang-hcl/format.rs block-and-statements # lang: hcl
+local lang-hcl/rules.rs naming-convention # lang: hcl
+local lang-html/dom.rs role-accessors # lang: html
+local lang-html/format/model.rs markup-whitespace-model # lang: html
+local lang-html/format/print.rs text-fill # lang: html
+local lang-html/parser/angular.rs recursive-descent-parser # lang: html
+local lang-html/parser/mod.rs recursive-descent-parser # lang: html
+local lang-html/parser/svelte.rs recursive-descent-parser # lang: html
+local lang-html/script/js.rs role-accessors # lang: html
+local lang-java/format/stmt.rs compound-statement # lang: java
+local lang-java/imports.rs sorted-imports # lang: java
+local lang-java/lexer.rs source-lexer # lang: java
+local lang-java/parser/decl.rs recursive-descent-parser # lang: java
+local lang-java/parser/expr.rs precedence-expression-parser # lang: java
+local lang-java/parser/mod.rs recursive-descent-parser # lang: java
+local lang-java/parser/stmt.rs recursive-descent-parser # lang: java
+local lang-java/parser/types.rs recursive-descent-parser # lang: java
+local lang-java/rules.rs naming-convention # lang: java
+local lang-js/format/embed.rs embedded-code # lang: js
+local lang-js/format/jsx.rs text-fill # lang: js
+local lang-js/format/rewrite.rs source-rewrite # lang: js
+local lang-js/format/ts/heritage.rs heritage-clause-layout # lang: js
+local lang-js/format/ts/parens.rs source-rewrite # lang: js
+local lang-js/format/util.rs node-sequence # lang: js
+local lang-js/rules/dupes.rs unique-names # lang: js
+local lang-js/rules/misc.rs statement-shape-checks # lang: js
+local lang-js/rules/stmts.rs unique-names # lang: js
+local lang-json/lexer.rs source-lexer # lang: json
+local lang-json/parser.rs recursive-descent-parser # lang: json
+local lang-kotlin/format/decl.rs signature-layout # lang: kotlin
+local lang-kotlin/format/expr.rs binary-chain-layout # lang: kotlin
+local lang-kotlin/rewrite.rs sorted-imports # lang: kotlin
+local lang-kotlin/rewrite.rs source-rewrite # lang: kotlin
+local lang-makefile/format.rs key-value-layout # lang: makefile
+local lang-makefile/format.rs line-continuation-layout # lang: makefile
+local lang-makefile/rules.rs embedded-command-checks # lang: makefile
+local lang-makefile/rules.rs unique-names # lang: makefile
+local lang-markdown/format/inline.rs text-fill # lang: markdown
+local lang-markdown/format/keep.rs verbatim-formatter # lang: markdown
+local lang-powershell/format.rs block-and-statements # lang: powershell
+local lang-powershell/format.rs token-case # lang: powershell
+local lang-protobuf/format.rs key-value-layout # lang: protobuf
+local lang-protobuf/sort.rs sorted-imports # lang: protobuf
+local lang-python/format/block.rs blank-lines-between-members # lang: python
+local lang-python/format/comment.rs source-rewrite # lang: python
+local lang-python/format/expr.rs member-chain # lang: python
+local lang-python/format/list.rs delimited-list # lang: python
+local lang-python/format/op.rs binary-chain-layout # lang: python
+local lang-python/format/paren.rs parenthesized-expression # lang: python
+local lang-python/format/util.rs node-sequence # lang: python
+local lang-python/forward.rs embedded-code # lang: python
+local lang-python/rules/isort.rs sorted-imports # lang: python
+local lang-python/rules/lints.rs call-shape-checks # lang: python
+local lang-python/rules/misc.rs call-shape-checks # lang: python
+local lang-python/rules/stmts.rs statement-shape-checks # lang: python
+local lang-ruby/format.rs verbatim-formatter # lang: ruby
+local lang-ruby/rules/calls.rs call-shape-checks # lang: ruby
+local lang-shell/format.rs block-and-statements # lang: shell
+local lang-shell/format.rs line-continuation-layout # lang: shell
+local lang-shell/format/arith.rs token-spacing-rows # lang: shell
+local lang-shell/format/words.rs block-and-statements # lang: shell
+local lang-sql/layout/space.rs token-spacing-rows # lang: sql
+local lang-sql/parse/bits.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/clauses.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/expr.rs precedence-expression-parser # lang: sql
+local lang-sql/parse/generic.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/lexer.rs source-lexer # lang: sql
+local lang-sql/parse/merge.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/mod.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/mysql.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/postgres.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/stmt.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/tsql.rs recursive-descent-parser # lang: sql
+local lang-sql/parse/types.rs recursive-descent-parser # lang: sql
+local lang-sql/rules.rs unique-names # lang: sql
+local lang-toml/validate.rs parse-validation # lang: toml
+local lang-xml/format.rs markup-whitespace-model # lang: xml
+local lang-xml/validate.rs parse-validation # lang: xml
+local lang-yaml/format/scalars.rs literal-spelling # lang: yaml
+local lang-yaml/parser/block.rs recursive-descent-parser # lang: yaml
+local lang-yaml/parser/builder.rs adapter-replay # lang: yaml
+local lang-yaml/parser/flow.rs recursive-descent-parser # lang: yaml
+local lang-yaml/parser/mod.rs recursive-descent-parser # lang: yaml
+local lang-yaml/parser/scan.rs source-lexer # lang: yaml
+local lang-yaml/quoted_strings.rs literal-spelling # lang: yaml

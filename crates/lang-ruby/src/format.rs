@@ -1,4 +1,6 @@
 //! Ruby formatting (see docs/ai/formatting/ruby.md).
+//!
+//! concept: verbatim-formatter
 
 use crate::generated::kind as k;
 use core_config::shared;

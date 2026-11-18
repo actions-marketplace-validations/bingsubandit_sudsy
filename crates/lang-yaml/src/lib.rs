@@ -1,5 +1,7 @@
 //! The YAML provider: a hand-written lossless YAML 1.2 parser, the data model used by the
 //! safety check, and the formatter.
+//!
+//! concept: none (glue: provider entry)
 
 mod anchor_rules;
 mod format;

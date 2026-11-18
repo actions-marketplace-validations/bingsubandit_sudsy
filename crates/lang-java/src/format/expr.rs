@@ -1,4 +1,6 @@
 //! Expressions: operator chains, method chains, lambdas, assignments and initializers.
+//!
+//! concept: binary-chain-layout, member-chain, assignment-layout
 
 use super::*;
 use core_format::FormatError;

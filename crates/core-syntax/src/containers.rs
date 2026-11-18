@@ -4,6 +4,11 @@
 //! `container <Node> marker <Token> [prefix "s"]`: the content of the node starts after its first
 //! `marker` token; each following line carries `s` (and one space), or, without `prefix`, as much
 //! indentation as the content is indented.
+//!
+//! concept: container-rows
+//! what: Nodes whose content lines all carry a prefix (quote marker, list indent), and fenced blocks inside them.
+//! tools: CommonMark container blocks
+//! reads: grammar:container
 
 use crate::SyntaxKind;
 use crate::grammar::Grammar;

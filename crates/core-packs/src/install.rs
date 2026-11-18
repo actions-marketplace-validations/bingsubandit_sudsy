@@ -1,4 +1,6 @@
 //! Putting a pack into the cache directory, and taking it out.
+//!
+//! concept: none (infrastructure: language packs)
 
 use crate::{Entry, PackError, cache_dir, entry, load::verify};
 use std::path::Path;

@@ -1,5 +1,9 @@
 //! Text checks of Angular template expressions for the `template` family (`template.rs`): they read
 //! the code of a binding, an interpolation or a block head as text, skipping string literals.
+//!
+//! concept: new template-expression-checks
+//! what: Text checks of template expressions: loose equality, lone pipes, negated async.
+//! tools: angular-eslint template rules
 
 /// The bytes of `code` outside string literals and template literals, with their indexes.
 pub(crate) fn code_bytes(code: &str) -> impl Iterator<Item = (usize, u8)> + '_ {

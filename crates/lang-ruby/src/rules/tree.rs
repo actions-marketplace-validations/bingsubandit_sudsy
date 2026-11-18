@@ -1,6 +1,8 @@
 //! Reading the parts of Prism's nodes the rules look at. A call is `object? dot? name open?
 //! arguments? block-pass? close? block?`: the arguments are one `Arguments` node, a `do` or
 //! brace block one `Block` node, parentheses are own tokens.
+//!
+//! concept: role-accessors
 
 use crate::generated::kind as k;
 use core_rules::RuleContext;

@@ -4,6 +4,8 @@
 //! and parameter lists, assignments); the rest is `seq`: the children one after the other with
 //! the spacing of the `[space]` rows, a line break of the source kept as a line break, and the lines
 //! after the first one hung one level below.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod decl;
 mod expr;

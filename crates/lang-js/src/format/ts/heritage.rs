@@ -1,6 +1,8 @@
 //! A class header with several heritage clauses (`class A<T> extends B implements C, D {`), which
 //! goes on lines of its own, indented, when it is too long, and then puts `{` on a line of its
 //! own. A lone `extends` or `implements` with a plain name stays on the line.
+//!
+//! concept: heritage-clause-layout
 
 use super::types::type_params;
 use crate::format::util::{elem, inline, is_tok, node_of, shape_error};

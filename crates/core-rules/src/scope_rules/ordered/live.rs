@@ -1,6 +1,11 @@
 //! What a declaration is where the order of the code matters: the kind of binding, where it takes
 //! effect, which branch it is in, and whether anything read it. The model resolves by name; the
 //! order (a read between two assignments) is read off the positions here.
+//!
+//! concept: ordered-scope-rules
+//! what: Scope rules where code order decides what a name means: replaced definitions, covered imports, unread locals.
+//! tools: pyflakes, ruff F811 F402 F841
+//! reads: family:scope
 
 use super::imports::{self, Form, Import};
 use crate::scope_rules::cx::Cx;

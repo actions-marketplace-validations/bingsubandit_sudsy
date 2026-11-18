@@ -2,6 +2,11 @@
 //! accesses in front of the first call stay with the head, every later dot starts a line when the
 //! chain breaks, and a call after a block or argument list that ends on a line of its own stays
 //! on that line (`}.toList()`).
+//!
+//! concept: member-chain-wrapped
+//! what: Wrapped style of a member chain: every dot after the head starts a line when the chain breaks.
+//! tools: ktlint chain-method-continuation
+//! reads: option:member_chain_style
 
 use super::{ChainHooks, ChainPolicy, Link, Walk, has_line_comment};
 use crate::FormatError;

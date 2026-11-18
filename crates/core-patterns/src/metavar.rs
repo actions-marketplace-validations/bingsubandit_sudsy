@@ -2,6 +2,11 @@
 //! upper case; a name starting with `_` captures nothing). To parse a pattern with the
 //! language's own parser each metavariable is first written as an identifier, or as a string
 //! when the language has no bare identifiers in value position (JSON).
+//!
+//! concept: pattern-rules
+//! what: ast-grep style pattern rules: atoms, relations and combinators on the shared tree.
+//! tools: ast-grep rules
+//! reads: rulefiles:pattern
 
 const SINGLE: &str = "__SUDSY_S_";
 const MULTI: &str = "__SUDSY_M_";

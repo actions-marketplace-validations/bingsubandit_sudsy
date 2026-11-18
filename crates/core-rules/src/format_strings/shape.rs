@@ -1,6 +1,11 @@
 //! What the arguments of a format string are, read from the grammar's tags and fields: a tuple
 //! (`#tuple`), a dict (`#dict`), a list, set or comprehension (`#display`), a value that is
 //! never a tuple (`#literal`, an operation on such values), or something unknown.
+//!
+//! concept: format-string-checks
+//! what: Format strings that do not fit their arguments, by flavor (percent, brace).
+//! tools: ruff F501-F509 F521-F525, pyupgrade UP031 UP032
+//! reads: grammar:format
 
 use core_syntax::roles::{code_text, un};
 use core_syntax::{FormatVia, Grammar, SyntaxElement, SyntaxNode};

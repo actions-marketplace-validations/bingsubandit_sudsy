@@ -4,6 +4,8 @@
 //! The binary embeds a manifest (`language file sha256 size` per line) and refuses a pack whose
 //! hash differs. A build with the `static-grammars` feature of the language crates links the
 //! grammars in and never loads a pack; the installed set then only records removed languages.
+//!
+//! concept: none (infrastructure: language packs)
 
 mod install;
 mod load;

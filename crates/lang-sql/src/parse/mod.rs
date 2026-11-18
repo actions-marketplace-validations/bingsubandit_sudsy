@@ -6,6 +6,8 @@
 //! `ImplicitIndent` and `Dedent` the layout reads; `tree` replays that into the lossless tree. A
 //! statement that is not understood to its end becomes an `Error` node up to the next `;`; the
 //! rest of the file still parses. Nothing panics: every loop consumes a token or ends.
+//!
+//! concept: recursive-descent-parser
 
 mod bits;
 mod clauses;

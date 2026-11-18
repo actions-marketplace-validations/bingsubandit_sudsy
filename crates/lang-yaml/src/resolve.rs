@@ -1,5 +1,9 @@
 //! What a plain scalar means: the implicit types of the YAML 1.1 schema (PyYAML's resolver, which
 //! yamllint uses) and whether a string can be written plain without changing.
+//!
+//! concept: new scalar-type-resolution
+//! what: What a plain scalar means: the implicit types of a YAML schema.
+//! tools: yamllint truthy, PyYAML resolver
 
 use core_rules::Re;
 use std::sync::LazyLock;

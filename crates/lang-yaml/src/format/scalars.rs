@@ -1,4 +1,8 @@
 //! Scalars: line layout of flow scalars, quote style, and block scalar contents.
+//!
+//! concept: new scalar-layout, literal-spelling
+//! what: Scalars: flow line layout, quote style and block scalar contents.
+//! tools: Prettier yaml scalars
 
 use super::comments;
 use super::{QuoteStyle, Style};

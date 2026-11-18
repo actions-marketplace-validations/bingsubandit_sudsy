@@ -1,5 +1,7 @@
 //! The oxc tree read the way Prettier's printers read ESTree: parentheses are transparent
 //! (`un`, `parent`), operators and call parts are found by position.
+//!
+//! concept: role-accessors
 
 use super::util::{kids, node_of};
 use crate::generated::kind as k;

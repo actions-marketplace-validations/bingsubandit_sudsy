@@ -1,5 +1,7 @@
 //! What the shared rules ask of Python: the keys of a dict, which has no entry nodes, and the name
 //! of a literal or variable key.
+//!
+//! concept: key-identity
 
 use crate::format::syntax;
 use crate::generated::kind as k;

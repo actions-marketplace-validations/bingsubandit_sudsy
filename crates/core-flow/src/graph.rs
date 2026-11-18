@@ -1,6 +1,11 @@
 //! The flow graph model. These types are also the worker's wire payload: MessagePack arrays in
 //! field order, mirrored by `workers/csharp/Sudsy.Worker/Protocol/FlowMessages.cs`. Enumerations
 //! travel as their `u8` codes so both sides agree without naming variants.
+//!
+//! concept: flow-graph-model
+//! what: The language-neutral flow graph model and its wire form.
+//! tools: Roslyn ControlFlowGraph
+//! reads: rule:unreachable-code
 
 use serde::{Deserialize, Serialize};
 

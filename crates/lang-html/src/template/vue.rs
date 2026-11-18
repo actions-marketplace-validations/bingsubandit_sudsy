@@ -1,6 +1,8 @@
 //! Checks of the `template` family that read a whole start tag or a chain of elements: the
 //! `v-for` key, the self-closing style, the order of attributes and repeated `v-else-if`
 //! conditions. Each returns the ranges to report.
+//!
+//! concept: template-syntax-checks
 
 use super::{
     Attr, SyntaxNode, TextRange, TextSize, attrs, code, is_component, previous_tag, tag_name,

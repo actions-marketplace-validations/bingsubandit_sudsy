@@ -1,4 +1,6 @@
 //! Files, bodies, declarations and the lists of parameters and arguments.
+//!
+//! concept: declaration-kit, delimited-list, signature-layout
 
 use super::*;
 use core_format::shapes::{self, ListLayout, TrailingComma};

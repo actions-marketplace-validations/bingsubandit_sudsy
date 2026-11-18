@@ -1,5 +1,11 @@
 //! Prettier's printer-html: elements, tags with borrowed markers, children with the whitespace
 //! model, text as a fill of words, attributes.
+//!
+//! concept: new markup-layout, new text-fill
+//! what: markup-layout: Elements, tags, attributes and children laid out by the whitespace model.
+//! tools: markup-layout: Prettier printer-html
+//! what: text-fill: Words and separators laid out in a fill: JSX children, inline markup text, prose.
+//! tools: text-fill: Prettier fill, markdown proseWrap
 
 use super::model::{Dialect, N, T, Tree, is_ws, pre_like};
 use core_format::EmbedMode;

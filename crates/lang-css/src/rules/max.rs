@@ -1,6 +1,8 @@
 //! The `selector-max` family: a count per complex selector that must not pass option `max`. Param
 //! `count`: `class`, `id`, `attribute`, `pseudo-class`, `type`, `universal`, `compounds` or
 //! `combinators`. The message has `{count}` and `{max}`.
+//!
+//! concept: max-family
 
 use super::model::{self, Part};
 use crate::generated::kind as k;

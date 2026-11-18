@@ -1,6 +1,8 @@
 //! The data model of a YAML stream, loaded from our own tree: the node graph of YAML 1.2 with
 //! core-schema scalar resolution, tags, and aliases expanded. The formatter's safety check
 //! compares the model before and after formatting.
+//!
+//! concept: format-safety-check
 
 use crate::generated::kind as k;
 use crate::scalar::{self, block_header, block_value};

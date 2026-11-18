@@ -1,6 +1,11 @@
 //! Shared shapes: the handful of layouts most syntax is made of. Each shape reads the node's
 //! structure generically (delimiter tokens at both ends, child nodes in between, tokens tagged
 //! `#separator`), merges its style with the node's layout directives, and returns a [`Doc`].
+//!
+//! concept: delimited-container
+//! what: Containers of delimiters, children and slots, and verbatim text.
+//! tools: none (internal)
+//! reads: grammar:language
 
 mod assignment;
 mod binary_chain;

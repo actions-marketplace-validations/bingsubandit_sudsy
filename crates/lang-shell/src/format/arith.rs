@@ -1,5 +1,7 @@
 //! Spacing of an arithmetic expression like shfmt: binary operators, `,`, `?` and `:` get one
 //! blank on each side, unary and `++`/`--` operators and subscripts none.
+//!
+//! concept: token-spacing-rows
 
 const OPS: [&str; 34] = [
     "<<=", ">>=", "&&", "||", "<<", ">>", "<=", ">=", "==", "!=", "+=", "-=", "*=", "/=", "%=",

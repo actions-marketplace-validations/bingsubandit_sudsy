@@ -1,3 +1,5 @@
+//! concept: none (infrastructure: out-of-process provider)
+
 use crate::protocol::{OpenWorkspace, ParseRequest, Query, UpdateText};
 use crate::provider::{
     Capabilities, FileMatcher, LanguageProvider, ParseError, ParseResult, ProviderError, SourceFile,

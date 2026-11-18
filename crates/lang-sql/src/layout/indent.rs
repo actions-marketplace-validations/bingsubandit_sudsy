@@ -1,6 +1,8 @@
 //! Indentation (sqlfluff's LT02): the parser's `Indent` and `Dedent` give each line a balance;
 //! an indent that no line break follows is untaken and does not count for the lines after it,
 //! and an indent that is taken but whose dedent has no line break forces one.
+//!
+//! concept: indent-balance-layout
 
 use super::seq::{Point, Seq};
 use std::borrow::Cow;

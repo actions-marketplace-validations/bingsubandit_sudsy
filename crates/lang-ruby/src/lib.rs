@@ -1,5 +1,7 @@
 //! Ruby: Prism parses behind `adapter`, which builds the lossless tree; `format.rs` lays the code
 //! out.
+//!
+//! concept: none (glue: provider entry)
 
 mod adapter;
 mod format;

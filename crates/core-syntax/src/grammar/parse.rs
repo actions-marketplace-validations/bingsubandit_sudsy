@@ -1,3 +1,5 @@
+//! concept: none (infrastructure: grammar file parser)
+
 use super::*;
 use sha2::{Digest, Sha256};
 use std::borrow::Cow;

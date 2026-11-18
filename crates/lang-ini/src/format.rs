@@ -1,5 +1,7 @@
 //! INI formatting: `[section]` headers, `key = value` settings one per line, a blank line before
 //! each section. Names, keys, values and comments are kept as written.
+//!
+//! concept: key-value-layout
 
 use crate::generated::kind as k;
 use core_config::shared;

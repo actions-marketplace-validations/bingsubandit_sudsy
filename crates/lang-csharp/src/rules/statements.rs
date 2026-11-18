@@ -1,4 +1,8 @@
 //! Statement-level lexical rules: `no-empty-statement` and `no-comment-before-block`.
+//!
+//! concept: new no-empty-statement, new no-comment-before-block
+//! what: no-empty-statement: A lone `;` is a statement that does nothing
+//! what: no-comment-before-block: A comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its `{`
 
 use super::kind;
 use core_rules::rule;

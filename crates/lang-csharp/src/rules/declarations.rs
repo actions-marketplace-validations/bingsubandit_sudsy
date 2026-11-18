@@ -1,4 +1,8 @@
 //! Rules about declarations: `separate-field-declarations` and `suppression-justification`.
+//!
+//! concept: new separate-field-declarations, new suppression-justification
+//! what: separate-field-declarations: One field or event per declaration: `int a, b;` becomes `int a;` and `int b;`, each with the attributes, modifiers and type of the original
+//! what: suppression-justification: `SuppressMessage` needs a `Justification` that says something: not missing, `null`, empty, blank or `"<Pending>"`
 
 use super::{has_comment_in, kind, line_separator, text_of};
 use core_rules::rule;

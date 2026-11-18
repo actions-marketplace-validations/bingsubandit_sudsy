@@ -1,5 +1,10 @@
 //! Names that must not repeat: [`Repeats`], the first-seen bookkeeping of the rules that report a
 //! repeat against its first occurrence, and the `unique-names` family built on it.
+//!
+//! concept: unique-names
+//! what: Names that must not repeat, reported against the first occurrence.
+//! tools: eslint no-dupe-class-members, hadolint DL3024, checkmake unique-targets
+//! reads: family:unique-names
 
 use crate::rule::{Rule, RuleContext, RuleMeta};
 use crate::{Family, Params};

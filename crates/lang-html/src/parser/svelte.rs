@@ -1,4 +1,6 @@
 //! Svelte: `{expression}`, `{@html x}` and the tags of blocks (`{#if x}`, `{:else}`, `{/if}`).
+//!
+//! concept: recursive-descent-parser
 
 use super::{Open, P, is_ws};
 use crate::generated::kind as k;

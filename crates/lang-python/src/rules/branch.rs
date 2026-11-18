@@ -1,5 +1,7 @@
 //! Checks of ruff's rules about what a statement does with its branches and its values
 //! (flake8-simplify, tryceratops, flake8-return, flake8-bugbear).
+//!
+//! concept: simplify
 
 use super::Check;
 use super::tree::{callee, inner, span, statements, tokens};

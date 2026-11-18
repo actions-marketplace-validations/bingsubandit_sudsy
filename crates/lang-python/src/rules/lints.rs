@@ -1,6 +1,12 @@
 //! Checks of ruff's other families (flake8-bugbear, flake8-simplify, pyupgrade, flake8-pie,
 //! flake8-comprehensions, flake8-print) that read the shape of a call, a class or a clause and the
 //! names they refer to.
+//!
+//! concept: new call-shape-checks, new legacy-api-upgrade
+//! what: call-shape-checks: Checks on the shape of a call: its arguments, its block, its callee.
+//! tools: call-shape-checks: ruff bugbear and pylint, RuboCop Lint
+//! what: legacy-api-upgrade: Replacing spellings of deprecated or legacy APIs by those of the target version.
+//! tools: legacy-api-upgrade: ruff pyupgrade
 
 use super::Check;
 use super::tree::{

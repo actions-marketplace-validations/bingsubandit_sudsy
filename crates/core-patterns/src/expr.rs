@@ -1,6 +1,11 @@
 //! The `rule:` of a pattern rule file: atoms that all must hold for a node (`pattern`, `kind`,
 //! `regex`, and the relations `inside`, `not-inside`, `has`, `not-has`) and the combinators
 //! `all`, `any` and `not`.
+//!
+//! concept: pattern-rules
+//! what: ast-grep style pattern rules: atoms, relations and combinators on the shared tree.
+//! tools: ast-grep rules
+//! reads: rulefiles:pattern
 
 use crate::matcher::{Capture, Captures, Pattern, SnippetParser};
 use crate::metavar::Meta;

@@ -1,5 +1,7 @@
 //! HTML, Vue, Svelte and Angular: one hand-written parser (`parser`), one tree, the formatter
 //! prints the file as written.
+//!
+//! concept: none (glue: provider entry)
 
 mod checks;
 mod dialect;

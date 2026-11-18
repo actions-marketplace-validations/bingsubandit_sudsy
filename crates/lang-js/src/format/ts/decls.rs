@@ -1,5 +1,7 @@
 //! Interfaces, type aliases, enums, namespaces and modules, signatures, and the TypeScript-only
 //! statements.
+//!
+//! concept: declaration-kit
 
 use super::words;
 use crate::format::util::{R, elem, is_tok, kids, node_of, semi, shape_error};

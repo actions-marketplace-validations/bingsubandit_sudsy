@@ -1,4 +1,6 @@
 //! One compiled plugin, the wasmtime engine it runs in and the limits every call gets.
+//!
+//! concept: none (infrastructure: Wasm plugin host)
 
 use crate::rule::make_rules;
 use core_rules::Rule;

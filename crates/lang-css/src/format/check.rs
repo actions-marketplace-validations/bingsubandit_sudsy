@@ -3,6 +3,8 @@
 //! The formatter joins `+ 20px` after a comma and splits `round(1) +2` into `+ 2`, which changes
 //! the token count; a sign is unary or binary by its left neighbour, not by blanks, so `1px -2px`
 //! (a list) and `1px - 2px` (a subtraction) stay different.
+//!
+//! concept: format-safety-check
 
 use super::{normalized, value::is_trivia};
 use crate::generated::kind as k;

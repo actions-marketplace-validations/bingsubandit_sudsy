@@ -1,6 +1,8 @@
 //! tree-sitter-md node name -> `grammars/markdown.grammar` kind, for the block grammar and the
 //! inline grammar parsed inside its `inline` and `pipe_table_cell` nodes. Unmapped leaves
 //! (escapes, entities, link punctuation) are part of the surrounding `Text`.
+//!
+//! concept: tree-sitter-adapter
 
 use core_treesitter::{Composite, Injected, Mapping};
 

@@ -1,3 +1,5 @@
+//! concept: none (helper: bit set)
+
 /// A fixed-size set of small integers (locals, definitions).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct BitSet(Vec<u64>);

@@ -1,4 +1,6 @@
 //! Comma-separated lists: collections, call arguments, parameters, imports, comprehensions.
+//!
+//! concept: delimited-list
 
 use super::expr::elem;
 use super::util::*;

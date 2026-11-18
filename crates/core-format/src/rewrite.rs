@@ -5,6 +5,11 @@
 //! `replace "x"` (the token becomes `x`), `replace through next "x"` (the token and the next one,
 //! with the blanks between them, become `x`), `insert before "x"` and `insert after "x"`. The
 //! first row that matches a token is the one applied. Lines starting with `#` are comments.
+//!
+//! concept: token-rewrite-rows
+//! what: Token rewrites (replace, insert) as rows applied to the source before layout.
+//! tools: PHP-CS-Fixer short array syntax and visibility_required
+//! reads: rules:rewrite
 
 use crate::spacing::Pattern;
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken};

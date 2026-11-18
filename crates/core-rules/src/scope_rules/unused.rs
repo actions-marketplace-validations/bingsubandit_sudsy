@@ -1,6 +1,11 @@
 //! `unused-variable` and `unused-parameter` after ESLint's `no-unused-vars` (`vars: all`,
 //! `args: after-used`, `caughtErrors: all`) and, in typed files, typescript-eslint's reading of
 //! types, `typeof` queries and declaration merging.
+//!
+//! concept: unused-variable, unused-parameter, unused-import
+//! what: Declarations that nothing reads: variables, parameters, imports.
+//! rules: unused-variable, unused-parameter, unused-import
+//! reads: rule:unused-variable
 
 use super::cx::Cx;
 use crate::Re;

@@ -4,6 +4,8 @@
 //! below (`ConfigError`, `ProviderError`, `FileFormatError`) are neither `Clone` nor `Eq`. A
 //! query that can fail therefore returns `Result<T, Failure>`: the failure is a value that is
 //! memoized, compared and backdated like any other, never a panic.
+//!
+//! concept: none (infrastructure: errors as query results)
 
 use provider_api::{ProviderError, RUNTIME_MISSING, RUNTIME_URL};
 use std::error::Error;

@@ -1,4 +1,9 @@
 //! A generic worklist dataflow solver, forward or backward, over any lattice.
+//!
+//! concept: dataflow-solver
+//! what: A generic worklist dataflow solver over any lattice.
+//! tools: none (internal)
+//! reads: rule:unreachable-code
 
 use crate::graph::{Block, BodyGraph, Edge};
 

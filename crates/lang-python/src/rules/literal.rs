@@ -1,5 +1,9 @@
 //! Checks of ruff's rules about collections of string literals (flake8-implicit-str-concat, `__all__`
 //! and `__slots__` that are not sorted).
+//!
+//! concept: sorted-array-values, new implicit-string-concat
+//! what: Implicit concatenation of adjacent string literals.
+//! tools: ruff ISC
 
 use super::Check;
 use super::tree::span;

@@ -12,6 +12,8 @@
 //!   prop or model of `<script setup>` that a top-level name of the script repeats.
 //!
 //! The message has `{name}`.
+//!
+//! concept: embedded-code
 
 mod js;
 mod keys;

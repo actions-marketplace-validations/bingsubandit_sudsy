@@ -1,5 +1,7 @@
 //! The rule engine: one traversal per file, dispatching nodes to the rules subscribed to their
 //! kind, then the file-scope and body-scope calls, then suppressions.
+//!
+//! concept: none (infrastructure: rule engine)
 
 use crate::diagnostic::{Diagnostic, Severity};
 use crate::layout::LayoutSink;

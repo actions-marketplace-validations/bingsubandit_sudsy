@@ -1,4 +1,6 @@
 //! Helpers shared by the formatting modules: children, tokens, options, document shapes.
+//!
+//! concept: node-sequence
 
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc, concat, if_break, line, lit, softline};

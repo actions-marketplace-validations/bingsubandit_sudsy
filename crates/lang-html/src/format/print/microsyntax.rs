@@ -1,6 +1,10 @@
 //! Angular's microsyntax (`*ngFor="let item of items; trackBy: f"`), split as its compiler reads it (`parseTemplateBindings`):
 //! its lexer's tokens, and an expression ending where its parser stops (`parsePipe`), which takes no JS parse:
 //! after a value, only an operator, `(`, `[`, `.`, a template literal, or the `:` of a conditional or a pipe's argument continues it.
+//!
+//! concept: new angular-microsyntax
+//! what: Angular microsyntax (*ngFor) split as the compiler reads it.
+//! tools: Prettier angular microsyntax
 
 /// A byte range of the value.
 #[derive(Clone, Copy)]

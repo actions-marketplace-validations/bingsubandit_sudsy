@@ -1,4 +1,6 @@
 //! The database: salsa storage plus the (immutable) provider list.
+//!
+//! concept: none (infrastructure: salsa database)
 
 use crate::inputs::{ConfigFile, ExtensionSet, File, WorkspaceRevision};
 use core_config::{ConfigChain, ConfigError, EditorConfig};

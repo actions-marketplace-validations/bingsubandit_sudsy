@@ -6,6 +6,10 @@
 //! - Parentheses around a type that its place does not need, and a leading `&` or lone `|` of a
 //!   type (`format/ts/parens.rs`).
 //! - `new Foo` becomes `new Foo()` and an arrow's lone parameter gets its parentheses.
+//!
+//! concept: new source-rewrite
+//! what: Edits to the source text made before layout that the safety check cannot follow.
+//! tools: Prettier, ktlint rewrites, Black
 
 use crate::generated::kind as k;
 use core_config::ResolvedOptions;

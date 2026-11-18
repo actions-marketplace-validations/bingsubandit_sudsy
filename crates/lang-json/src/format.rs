@@ -1,5 +1,7 @@
 //! JSON formatting. Almost everything is the shared tag defaults; this file only maps the JSON
 //! options onto the list shape for objects and arrays and handles the document's end.
+//!
+//! concept: delimited-list
 
 use crate::generated::kind as k;
 use core_config::{ResolvedOptions, shared};

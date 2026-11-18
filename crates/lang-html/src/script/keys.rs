@@ -1,6 +1,10 @@
 //! Names a component defines twice: the groups of the options API (`props`, `computed`, `data`,
 //! `methods`, `setup`), and the props of `defineProps` and models of `defineModel` against the
 //! top-level names of `<script setup>`, where the template sees one name for both.
+//!
+//! concept: new component-option-checks
+//! what: Names a component defines twice in its option groups, props and models.
+//! tools: eslint-plugin-vue no-dupe-keys
 
 use super::Cx;
 use super::js::{self, args, calls, members, span, static_name, string};

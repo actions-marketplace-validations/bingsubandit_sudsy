@@ -13,6 +13,11 @@
 //! ends like a word or a literal: a letter, digit, `_`, quote or `@`). The result is the text after
 //! the last `:` when that is `yes`, `no` or `keep`; the sides are split at the first ` / `. Lines
 //! starting with `#` are comments. [`Pattern`] is also the matcher of `rewrite::RewriteRules`.
+//!
+//! concept: token-spacing-rows
+//! what: Blanks between neighbouring tokens as ordered rows.
+//! tools: google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01
+//! reads: rules:space, rules:joined, rules:at_least_one, rules:op_first
 
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxToken};
 
@@ -24,7 +29,7 @@ struct Cond {
     texts: Vec<String>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum Key {
     Kind,
     Parent,
@@ -91,6 +96,38 @@ impl Pattern {
 
     pub fn matches(&self, t: &SyntaxToken) -> bool {
         self.matches_in(&Ctx::new(t))
+    }
+
+    /// Every token this pattern matches is also matched by `broad` (provable from the conditions).
+    fn implies(&self, broad: &Pattern) -> bool {
+        broad.0.iter().all(|b| {
+            self.0.iter().any(|n| {
+                if n.key != b.key {
+                    return false;
+                }
+                let (nv, bv): (Vec<&str>, Vec<&str>) = if matches!(b.key, Key::Ends) {
+                    return n.not == b.not;
+                } else if b.kinds.is_empty() && n.kinds.is_empty() {
+                    (
+                        n.texts.iter().map(String::as_str).collect(),
+                        b.texts.iter().map(String::as_str).collect(),
+                    )
+                } else {
+                    return match (n.not, b.not) {
+                        (false, false) => n.kinds.iter().all(|k| b.kinds.contains(k)),
+                        (false, true) => n.kinds.iter().all(|k| !b.kinds.contains(k)),
+                        (true, true) => b.kinds.iter().all(|k| n.kinds.contains(k)),
+                        (true, false) => false,
+                    };
+                };
+                match (n.not, b.not) {
+                    (false, false) => nv.iter().all(|t| bv.contains(t)),
+                    (false, true) => nv.iter().all(|t| !bv.contains(t)),
+                    (true, true) => bv.iter().all(|t| nv.contains(t)),
+                    (true, false) => false,
+                }
+            })
+        })
     }
 
     /// The kinds a matching token's `kind=` condition allows, when it has one.
@@ -432,6 +469,37 @@ fn row(grammar: &Grammar, line: &str) -> Row {
             _ => None,
         },
     }
+}
+
+/// The rows of the spacing sections that an earlier row of the same section always matches first.
+pub fn shadowed_rows(grammar: &Grammar, text: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for name in ["space", "joined", "at_least_one"] {
+        let rows: Vec<(&str, Row)> = crate::rules::section(text, name)
+            .map(|l| (l, row(grammar, l)))
+            .collect();
+        for (j, (line, r)) in rows.iter().enumerate() {
+            if let Some((first, _)) = rows[..j]
+                .iter()
+                .find(|(_, e)| r.prev.implies(&e.prev) && r.next.implies(&e.next))
+            {
+                out.push(format!(
+                    "[{name}] `{line}` is never reached: `{first}` matches first"
+                ));
+            }
+        }
+    }
+    let pats: Vec<(&str, Pattern)> = crate::rules::section(text, "op_first")
+        .map(|l| (l, Pattern::parse(grammar, l)))
+        .collect();
+    for (j, (line, p)) in pats.iter().enumerate() {
+        if let Some((first, _)) = pats[..j].iter().find(|(_, e)| p.implies(e)) {
+            out.push(format!(
+                "[op_first] `{line}` is never reached: `{first}` matches first"
+            ));
+        }
+    }
+    out
 }
 
 impl SpaceRules {

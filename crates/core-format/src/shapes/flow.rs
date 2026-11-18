@@ -1,6 +1,11 @@
 //! The children of a node one after the other, for the syntax no other shape lays out: the
 //! spacing between two tokens is the language's rule (`Flow::want`), a line break the source has
 //! stays one, and everything after the first one hangs below what stands before it.
+//!
+//! concept: token-flow-layout
+//! what: Children one after another with the spacing rows and the line breaks the source has.
+//! tools: none (internal)
+//! reads: rules:flow, rules:space
 
 use crate::FormatCtx;
 use crate::comments;

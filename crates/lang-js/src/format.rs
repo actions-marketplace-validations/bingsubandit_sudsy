@@ -2,6 +2,8 @@
 //! [`MODULES`] for the node (a module matches the kinds it owns); a node no module owns is
 //! printed as written, with its strings and numbers restyled (`literal::verbatim`). A later step
 //! adds its own module and one line in `MODULES`.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod arrow;
 mod assign;

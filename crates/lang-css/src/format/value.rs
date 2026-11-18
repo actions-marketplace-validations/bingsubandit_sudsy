@@ -1,5 +1,9 @@
 //! Component-value trees (preludes, properties, values) as flat item lists, and the printer for
 //! values and at-rule parameters.
+//!
+//! concept: new component-value-layout, delimited-list
+//! what: Component-value trees of values and at-rule parameters printed by value kind.
+//! tools: Prettier postcss values
 
 use super::{Pr, text};
 use crate::Dialect;

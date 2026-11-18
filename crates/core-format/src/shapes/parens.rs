@@ -2,6 +2,11 @@
 //! says whether a pair that is not needed stays and how its content may break; which pairs are
 //! needed is the language's judgement ([`ParenHooks::needs`]), for operators decided by the
 //! grammar's `precedence` lines ([`binary_needs`]).
+//!
+//! concept: parenthesized-expression
+//! what: Needed and unneeded parentheses and the layout of their content.
+//! tools: Prettier needs-parens, ruff parenthesized, ktlint no-unnecessary-parentheses
+//! reads: tag:parenthesized
 
 use super::binary_chain::flattens;
 use crate::FormatCtx;

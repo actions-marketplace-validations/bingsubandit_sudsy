@@ -1,5 +1,10 @@
 //! Rules about single statements and expressions: `no-unexpected-multiline`,
 //! `no-duplicate-enum-values`, `no-unsafe-finally` and `require-yield`.
+//!
+//! concept: new no-unexpected-multiline, unique-names, new no-unsafe-finally, new require-yield
+//! what: no-unexpected-multiline: A line break that changes the meaning of an expression.
+//! what: no-unsafe-finally: Control flow statements inside a finally block.
+//! what: require-yield: A generator function without a yield.
 
 use super::{Check, code_text, has_own, span};
 use crate::generated::kind as k;

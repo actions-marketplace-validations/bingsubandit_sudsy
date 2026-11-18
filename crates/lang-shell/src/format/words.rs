@@ -1,5 +1,7 @@
 //! Word-like nodes (string, concatenation, test, substitution): written as they are, except that
 //! the commands inside a `$(...)` are laid out like statements.
+//!
+//! concept: block-and-statements
 
 use super::{
     E, block_list, breaks, dangling, elems, inline_list, kw_lead, max_blank, opening_blank,

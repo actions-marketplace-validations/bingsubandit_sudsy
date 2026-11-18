@@ -4,6 +4,11 @@
 //! node's `name` slot, or its `key` slot. The option's value is a convention (`PascalCase`,
 //! `camelCase`, `snake_case`, `UPPER_CASE`) or `off`; leading `$` and `_` are ignored. The message
 //! has `{name}` and `{convention}`.
+//!
+//! concept: naming-convention
+//! what: The name of a kind of declaration follows the convention an option sets.
+//! rules: naming-convention
+//! reads: family:naming-convention
 
 use crate::{Family, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxElement, SyntaxNode};

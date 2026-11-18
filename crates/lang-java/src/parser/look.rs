@@ -1,6 +1,9 @@
 //! Lookahead over the tokens, with no tree built: where a type, an annotation or a run of
 //! modifiers ends, and what a `(` opens. Java needs it where a declaration, a cast, a lambda and
 //! an expression start alike.
+//!
+//! concept: new parser-lookahead
+//! what: Token lookahead without building a tree, to decide what a construct is.
 
 use super::P;
 use crate::lexer::T;

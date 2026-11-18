@@ -1,4 +1,6 @@
 //! The lexer: the whole file as tokens that tile it (trivia included), one pass, dialect modes.
+//!
+//! concept: source-lexer
 
 use super::dialect::Dialect;
 

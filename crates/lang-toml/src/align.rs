@@ -5,6 +5,10 @@
 //!
 //! The widths come from formatting the entries once in a context of their own (only for runs
 //! that have a comment); the formatter then pads the comment of each entry.
+//!
+//! concept: new trailing-comment-alignment
+//! what: Trailing comments of consecutive entries start in one column.
+//! tools: taplo align_comments
 
 use crate::format::TomlFormatter;
 use crate::generated::kind as k;

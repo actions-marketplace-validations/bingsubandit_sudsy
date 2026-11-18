@@ -1,5 +1,7 @@
 //! Markdown: tree-sitter-md's block grammar parses, its inline grammar is injected into the
 //! `inline` and `pipe_table_cell` nodes (`core-treesitter` composite, mapping in `mapping.rs`).
+//!
+//! concept: none (glue: provider entry)
 
 mod format;
 mod mapping;

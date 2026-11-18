@@ -1,6 +1,10 @@
 //! Where line breaks go: operators and commas next to them (sqlfluff's LT03, LT04), set
 //! operators (LT11), clause keywords (LT14), select targets (LT09), CTE brackets and blank lines
 //! (LT07, LT08), blank lines and the start of the file (LT13, LT15).
+//!
+//! concept: new clause-line-breaks
+//! what: Where line breaks go: operators, commas, set operators, clause keywords, select targets.
+//! tools: sqlfluff LT03 LT04 LT09 LT11 LT14
 
 use super::seq::{NONE, Seq};
 use super::space::respace_point;

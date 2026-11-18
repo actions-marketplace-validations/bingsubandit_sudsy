@@ -1,5 +1,9 @@
 //! Block collections and their entries, flow collections, node properties, and where a value
 //! goes after the indicator in front of it (`key:`, `-`, `?`, `---`).
+//!
+//! concept: new block-collection-layout, key-value-layout
+//! what: Block collections and entries with their indicators.
+//! tools: Prettier yaml, yamllint
 
 use super::comments::{
     blank_lines_before, breaks, dangling, gap, has_leading_comments, has_trailing_comments, tok,

@@ -1,5 +1,7 @@
 //! Compilation units and everything with a braced body: types, namespaces, blocks, switch
 //! statements and expressions, enums, accessor lists.
+//!
+//! concept: block-and-statements, declaration-kit
 
 use super::flat;
 use super::options::{

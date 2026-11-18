@@ -1,5 +1,10 @@
 //! Ordering shared by the `sorted-keys` rules (JSON, YAML) and `sorted-array-values`: the options,
 //! the comparison and the plan that says which entries are out of place and where each belongs.
+//!
+//! concept: sort-plan
+//! what: The comparison and the plan that says which entries are out of place and where each belongs.
+//! tools: eslint-plugin-jsonc sort-keys
+//! reads: rule:sorted-keys
 
 use crate::Re;
 use crate::options::{Check, Opt, OptionDecl, RuleOptions};

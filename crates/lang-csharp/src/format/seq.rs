@@ -1,5 +1,7 @@
 //! The generic layout: a node's significant children one after the other, separated by the
 //! space, line break or nothing that [`Sep`] decides.
+//!
+//! concept: node-sequence, token-flow-layout
 
 use super::flat;
 use super::options::{

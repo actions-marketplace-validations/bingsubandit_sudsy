@@ -1,6 +1,11 @@
 //! What the scope rules read besides the model: the file's flavors, grammar tags, fields and
 //! own tokens of nodes. Kinds are never named here: a language says what a kind is by its tags
 //! (`#function`, `#loop`, `#export`, `#signature`, ...; docs/ai/rules/semantics.md#scope-rules).
+//!
+//! concept: scope-rules
+//! what: Unused, undefined, shadowed, redeclared and use-before-define checks from a language scope table.
+//! rules: unused-variable, unused-parameter, unused-import, undefined-variable, shadowed-variable, redeclared-variable, use-before-define
+//! reads: family:scope
 
 use super::ScopeLang;
 use crate::FileContext;

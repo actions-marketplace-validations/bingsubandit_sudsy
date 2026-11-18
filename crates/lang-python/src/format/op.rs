@@ -1,5 +1,7 @@
 //! Operators: binary, boolean and comparison chains, unary, conditional, lambda, `:=`, `await`
 //! and `yield`.
+//!
+//! concept: binary-chain-layout, conditional-expression-layout
 
 use super::expr::{elem, expr};
 use super::util::*;

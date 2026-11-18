@@ -4,6 +4,8 @@
 //! Microsoft's layout. Presets are config files (`presets/`): they only set these options, and
 //! nothing in the formatter knows which preset is in use. The typed getter of each option
 //! (an enum per choice) comes from `lang.yaml`; what follows combines them.
+//!
+//! concept: none (glue: option readers)
 
 use crate::generated::kind as k;
 use core_config::{ResolvedOptions, shared};

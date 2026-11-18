@@ -1,5 +1,10 @@
 //! The Rust rules of gitignore-syntax files (they read the patterns of a file in order); rules
 //! that fit a pattern are files in `rules/`.
+//!
+//! concept: new no-duplicate-pattern, new redundant-pattern, new negation-of-excluded-parent, unique-names
+//! what: no-duplicate-pattern: The same pattern appears twice with no opposite pattern (`!x` for `x`) in between, so the second one changes nothing
+//! what: redundant-pattern: A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)
+//! what: negation-of-excluded-parent: Git cannot re-include a file when a parent directory is excluded: `!a/b` after `a/` has no effect
 
 use crate::generated::kind;
 use core_rules::{Rule, RuleContext, rule};

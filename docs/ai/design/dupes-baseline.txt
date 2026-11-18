@@ -1,0 +1,35 @@
+# Duplicate clusters of hand-written Rust across crates (`cargo xtask dupes`): a pair of files and the tokens they share.
+# A ratchet that may only shrink: `cargo xtask dupes --check` fails on a new pair or a larger count;
+# `cargo xtask dupes --baseline` rewrites the counts that fell and drops the pairs that are gone.
+crates/core-config/src/schema.rs ~ crates/core-rules/src/options.rs 136
+crates/core-flow/src/graph.rs ~ crates/core-semantics/src/facts.rs 103
+crates/core-format/src/shapes/block.rs ~ crates/lang-makefile/src/format.rs 98
+crates/core-format/src/shapes/block.rs ~ crates/lang-shell/src/format.rs 98
+crates/lang-csharp/src/rules/file_layout.rs ~ crates/lang-dockerfile/src/rules/stages.rs 208
+crates/lang-csharp/src/rules/file_layout.rs ~ crates/lang-gitignore/src/rules.rs 182
+crates/lang-csharp/src/rules/file_layout.rs ~ crates/lang-makefile/src/rules.rs 123
+crates/lang-csharp/src/rules/file_layout.rs ~ crates/lang-sql/src/rules.rs 195
+crates/lang-css/src/parser.rs ~ crates/lang-json/src/parser.rs 151
+crates/lang-css/src/rules/max.rs ~ crates/lang-html/src/checks.rs 193
+crates/lang-css/src/rules/max.rs ~ crates/lang-html/src/script/mod.rs 138
+crates/lang-dockerfile/src/format.rs ~ crates/lang-gitignore/src/format.rs 125
+crates/lang-dockerfile/src/format.rs ~ crates/lang-ini/src/format.rs 95
+crates/lang-dockerfile/src/format.rs ~ crates/lang-makefile/src/format.rs 95
+crates/lang-dockerfile/src/format.rs ~ crates/lang-xml/src/format.rs 95
+crates/lang-dockerfile/src/rules/stages.rs ~ crates/lang-gitignore/src/rules.rs 124
+crates/lang-dockerfile/src/rules/stages.rs ~ crates/lang-makefile/src/rules.rs 132
+crates/lang-dockerfile/src/rules/stages.rs ~ crates/lang-shell/src/rules.rs 124
+crates/lang-dockerfile/src/rules/stages.rs ~ crates/lang-sql/src/rules.rs 259
+crates/lang-editorconfig/src/format.rs ~ crates/lang-ini/src/format.rs 381
+crates/lang-editorconfig/src/format.rs ~ crates/lang-xml/src/format.rs 108
+crates/lang-gitignore/src/rules.rs ~ crates/lang-makefile/src/rules.rs 133
+crates/lang-gitignore/src/rules.rs ~ crates/lang-sql/src/rules.rs 193
+crates/lang-ini/src/format.rs ~ crates/lang-makefile/src/format.rs 172
+crates/lang-ini/src/format.rs ~ crates/lang-shell/src/format.rs 125
+crates/lang-ini/src/format.rs ~ crates/lang-xml/src/format.rs 139
+crates/lang-java/src/format/decl.rs ~ crates/lang-python/src/format/op.rs 128
+crates/lang-java/src/format/expr.rs ~ crates/lang-kotlin/src/format/decl.rs 137
+crates/lang-js/src/format/ast.rs ~ crates/lang-python/src/format/util.rs 195
+crates/lang-makefile/src/format.rs ~ crates/lang-shell/src/format.rs 259
+crates/lang-makefile/src/format.rs ~ crates/lang-xml/src/format.rs 113
+crates/lang-makefile/src/rules.rs ~ crates/lang-sql/src/rules.rs 123

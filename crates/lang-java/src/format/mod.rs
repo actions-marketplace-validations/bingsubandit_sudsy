@@ -4,6 +4,8 @@
 //! after the other with the spacing of the `[space]` rows. A rule wraps the parts that may break in
 //! groups: `list` (the parenthesised lists), `body` (braces with one member per line), `binary`
 //! and the rest of `expr.rs`.
+//!
+//! concept: none (glue: formatter dispatch)
 
 mod decl;
 mod expr;

@@ -1,4 +1,8 @@
 //! Checks on class and module bodies: access modifiers, constants, constructors.
+//!
+//! concept: new class-body-checks
+//! what: Checks on class and module bodies: access modifiers, constants, constructors.
+//! tools: RuboCop Lint
 
 use super::tree::{child, has_token, method_name, span, tokens};
 use crate::generated::kind as k;

@@ -1,5 +1,10 @@
 //! YAML rules: `ambiguous-booleans` and `document-start`. Anchor rules are in `anchor_rules`,
 //! rules on values in `value_rules` and `quoted_strings`.
+//!
+//! concept: new ambiguous-booleans, new document-start, new document-end
+//! what: ambiguous-booleans: A plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the usual casings): a boolean to YAML 1.1 parsers and a string to YAML 1.2 parsers
+//! what: document-start: The first document does not start with `---`
+//! what: document-end: A document without the `...` end marker (or, with `present: false`, one that has it)
 
 use crate::generated::{BlockMappingEntry, FlowPair, Scalar, kind};
 use crate::{anchor_rules, quoted_strings, value_rules};

@@ -1,3 +1,6 @@
+//! concept: new async-suffix, naming-convention
+//! what: An async method returning Task or ValueTask has a name that does not end in `Async`
+
 use super::{kind, text_of};
 use crate::generated::MethodDeclaration;
 use core_rules::RuleContext;

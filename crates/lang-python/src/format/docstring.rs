@@ -1,4 +1,8 @@
 //! Docstrings: quotes, indentation and trailing whitespace as ruff writes them.
+//!
+//! concept: new docstring-reindent
+//! what: Docstring quotes, indentation and trailing whitespace.
+//! tools: ruff format docstrings, Black
 
 use super::util::*;
 use crate::generated::kind as k;

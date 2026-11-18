@@ -3,6 +3,11 @@
 //! it (`#assignment`, `#binary-chain`, `#conditional`) under an [`AssignPolicy`] (options of the
 //! language: `assignment_*`), and what only the language can judge (which right sides never
 //! break after the operator, strings, calls, templates) comes through [`AssignHooks`].
+//!
+//! concept: assignment-layout
+//! what: Where the line breaks between the operator and the right side of an assignment or entry.
+//! tools: Prettier assignment layouts, google-java-format assignment wrapping
+//! reads: option:assignment_layout, tag:assignment
 
 use super::chain::ends_in_line_comment;
 use crate::FormatCtx;

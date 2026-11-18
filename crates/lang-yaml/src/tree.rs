@@ -1,4 +1,6 @@
 //! Small questions about positions in a YAML tree, shared by the loader and the formatter.
+//!
+//! concept: role-accessors
 
 use crate::generated::kind as k;
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};

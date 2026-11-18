@@ -1,5 +1,7 @@
 //! The order of `using` directives, shared by the `using-order` rule and the formatter's
 //! `sort_usings`: one place decides which group a directive belongs to and how names compare.
+//!
+//! concept: sorted-imports
 
 use crate::generated::{
     CompilationUnit, FileScopedNamespaceDeclaration, NamespaceDeclaration, UsingDirective, kind,

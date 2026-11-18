@@ -1,5 +1,10 @@
 //! `no-duplicate-sections`, written against the `#sections` (a file's container of sections) and
 //! `#section` (a section's header node, whose `name` slot holds the name token) grammar tags.
+//!
+//! concept: no-duplicate-sections
+//! what: Two sections of one file with the same name.
+//! rules: no-duplicate-sections
+//! reads: rule:no-duplicate-sections
 
 use crate::rule;
 use crate::rule::RuleContext;

@@ -4,6 +4,11 @@
 //! means; resolution is by name up the scope chain, over the namespaces (value, type) a symbol's
 //! flags name. What a language adds to the rules that read the model is data of its table or a
 //! hook of its own.
+//!
+//! concept: scope-model
+//! what: Scopes, symbols and references of one file.
+//! tools: ESLint scope analysis, pyflakes
+//! reads: family:scope
 
 mod build;
 mod rows;

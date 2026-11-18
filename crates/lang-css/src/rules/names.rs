@@ -1,5 +1,7 @@
 //! The CSS targets of the shared `names` family (`core_rules::listed`): what the names of a kind
 //! of thing are, read off the CSS tree.
+//!
+//! concept: names-family
 
 use super::model::{self, Part, plain, split_dimension};
 use crate::generated::kind as k;

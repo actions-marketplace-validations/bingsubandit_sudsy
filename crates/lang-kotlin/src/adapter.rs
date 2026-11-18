@@ -10,6 +10,8 @@
 //! the largest file, the nesting it cannot recurse through and the nested annotation arguments it
 //! is exponential in) and done by `provider_api::adapter::guarded`; it requires `\n` line breaks
 //! (`Lf` maps the offsets back).
+//!
+//! concept: adapter-replay
 
 use crate::generated::kind as k;
 use core_syntax::codegen::from_screaming;

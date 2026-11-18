@@ -1,5 +1,7 @@
 //! What PHP says to the shared scope rules (`core_rules::scope_rules`): `../scope.rows` and
 //! `../globals/php.txt`.
+//!
+//! concept: scope-tables
 
 use core_rules::{ScopeLang, ScopeRule};
 

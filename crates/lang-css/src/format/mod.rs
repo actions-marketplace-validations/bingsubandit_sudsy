@@ -3,6 +3,8 @@
 //! selectors from the same items (`selector.rs`); a construct the printer does not know is kept as
 //! written. SCSS and Less constructs (control flow, mixins, maps, guards) are kept as written, and
 //! their rules and declarations go through the common printer.
+//!
+//! concept: block-and-statements, key-value-layout, token-case
 
 mod check;
 mod selector;

@@ -2,6 +2,8 @@
 //! clang-format reads them. `lexer` gives every token, `structure` the unwrapped lines, bracket
 //! groups, directives and conditional groups; the two providers (`cpp`, and `c` as its dialect)
 //! share both. The formatter prints the file as written.
+//!
+//! concept: none (glue: provider entry)
 
 core_syntax::include_generated!();
 mod format;

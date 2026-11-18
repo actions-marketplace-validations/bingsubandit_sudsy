@@ -1,4 +1,8 @@
 //! Block rendering: the blocks of a container, lists, fences.
+//!
+//! concept: new markdown-block-layout
+//! what: Blocks of a container rendered to lines: lists, fences, headings.
+//! tools: Prettier markdown
 
 use super::*;
 use core_syntax::SyntaxNodeExt;

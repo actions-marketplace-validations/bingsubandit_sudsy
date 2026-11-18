@@ -1,3 +1,8 @@
+//! concept: block-and-statements
+//! what: Braced blocks and statement sequences with blank-line rules.
+//! tools: Prettier statements, google-java-format blocks, ktlint curly-spacing
+//! reads: tag:block
+
 use super::{
     BlankRule, Rendered, Slot, container, container_between, dangling_comments, gap, render_slots,
 };

@@ -1,6 +1,8 @@
 //! A test harness for rules: run a provider's rules on a text with a given `lint:` config, render
 //! the diagnostics for snapshots, and run the fix loop with the checks every fix must pass
 //! (the file stays parseable, and a second run changes nothing).
+//!
+//! concept: none (test harness: rules)
 
 use crate::provider::{LanguageProvider, SourceFile};
 use core_config::{ConfigChain, FileInput};

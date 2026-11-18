@@ -1,5 +1,10 @@
 //! The binder: one pre-order walk that opens scopes, declares names and records references as the
 //! language's [`Table`] says, then resolves every reference by name up the scope chain.
+//!
+//! concept: scope-binder
+//! what: One walk that opens scopes, declares names and resolves references by name up the scope chain.
+//! tools: ESLint scope analysis, pyflakes
+//! reads: family:scope
 
 use super::table::{Declares, Flow, Place, Pred, Redirect, Row, Sel, Table};
 use super::{

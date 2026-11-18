@@ -5,6 +5,11 @@
 //! operation of a reachable block names is unreachable. A loop with no test or a literal `true`
 //! test never ends by itself, a `finally` block is built once per way of entering it, and the
 //! calls, accesses and `throw`s of a `try` body lead to its handlers.
+//!
+//! concept: flow-graph-from-roles
+//! what: The flow graph of a body built from statement role tags.
+//! tools: ESLint code path analysis
+//! reads: rule:unreachable-code
 
 use crate::graph::{Block, BodyGraph, Edge, Op};
 use core_syntax::{Grammar, SyntaxElement, SyntaxNode, code_span};

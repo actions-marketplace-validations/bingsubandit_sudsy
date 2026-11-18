@@ -2,6 +2,11 @@
 //! and how a value is written again. A grammar describes each kind in `string` rows (see
 //! [`crate::grammar`]); decoding, unknown-escape checks and quote changes of every language go
 //! through this one implementation.
+//!
+//! concept: string-literal-model
+//! what: How a string token is delimited, what its escapes mean and how a value is written again.
+//! tools: none (string rows)
+//! reads: grammar:string
 
 use std::borrow::Cow;
 

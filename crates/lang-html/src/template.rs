@@ -22,6 +22,10 @@
 //! The other checks take `prefix` (`duplicate`: the attributes starting with it must not repeat;
 //! `strip-modifiers` compares the names without `|modifiers`) and `directives` (`svelte-shorthand`:
 //! the directives, comma-separated, whose `={name}` is redundant; none: plain attributes).
+//!
+//! concept: new template-syntax-checks
+//! what: Checks of Vue, Svelte and Angular template syntax on attributes, tags and mustaches.
+//! tools: eslint-plugin-vue, eslint-plugin-svelte, angular-eslint
 
 use crate::generated::kind as k;
 use crate::ng_checks;

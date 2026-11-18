@@ -1,4 +1,8 @@
 //! Checks of ruff's rules about declarations: class attributes, import aliases.
+//!
+//! concept: new declaration-checks
+//! what: Checks of declarations: class attributes and import aliases.
+//! tools: ruff PIE, pylint
 
 use super::Check;
 use super::lints::{immutable_annotation, is_mutable};

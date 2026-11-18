@@ -1,4 +1,8 @@
 //! The stream, its documents, and the `---` and `...` markers.
+//!
+//! concept: new document-stream-layout
+//! what: A stream of documents with start and end markers.
+//! tools: Prettier yaml, yamllint document-start
 
 use super::block::{Ctx, node_after, property_root};
 use super::comments::{gap, has_remaining_comments, leading, tok};

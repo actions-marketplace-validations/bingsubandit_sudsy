@@ -1,4 +1,11 @@
 //! The Rust rules of SQL; rules that fit a pattern are files in `rules/`.
+//!
+//! concept: new null-comparison, new distinct-group-by, new unused-cte, new duplicate-table-alias, new self-alias, unique-names
+//! what: null-comparison: `= NULL`, `<> NULL` or `!= NULL`, which is never true: use `IS NULL` or `IS NOT NULL` (sqlfluff CV05)
+//! what: distinct-group-by: `SELECT DISTINCT` in a query that has `GROUP BY`: the grouping already makes the rows distinct (sqlfluff AM01)
+//! what: unused-cte: A common table expression that nothing in the `WITH` statement refers to (sqlfluff ST03)
+//! what: duplicate-table-alias: Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04)
+//! what: self-alias: An alias that repeats the name it is given to, `a AS a` (sqlfluff AL09)
 
 use crate::generated::kind as k;
 use core_rules::{Rule, RuleContext, rule};

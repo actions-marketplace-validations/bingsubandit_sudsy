@@ -3,6 +3,8 @@
 //! operators, separators, pipes, `=` of a hashtable). Blanks the source has are kept, and so are
 //! the words, strings and line breaks the formatter has no rule for. The tree is flat, so the
 //! formatter walks the tokens.
+//!
+//! concept: token-case, block-and-statements
 
 use crate::generated::kind as k;
 use core_config::shared;

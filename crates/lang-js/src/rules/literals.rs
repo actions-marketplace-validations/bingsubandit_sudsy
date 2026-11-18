@@ -1,4 +1,8 @@
 //! Rules about the text of literals: irregular whitespace and number precision.
+//!
+//! concept: new no-irregular-whitespace, new no-loss-of-precision
+//! what: no-irregular-whitespace: Irregular whitespace characters in source.
+//! what: no-loss-of-precision: Number literals that lose precision.
 
 use super::{Check, code_text, span};
 use crate::generated::kind as k;

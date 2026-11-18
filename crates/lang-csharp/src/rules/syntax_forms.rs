@@ -1,4 +1,7 @@
 //! Rules about how a construct is written: `separate-attributes` (`no-empty-delegate-parens` is a pattern file in `rules/`).
+//!
+//! concept: new separate-attributes
+//! what: One attribute per attribute list: `[A, B]` becomes `[A]` and `[B]`
 
 use super::{kind, line_separator, text_of};
 use core_rules::rule;

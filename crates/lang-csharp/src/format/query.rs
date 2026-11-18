@@ -1,5 +1,9 @@
 //! LINQ query expressions: `from x in xs where ... select ...` on one line if it fits, else one
 //! clause per line below the `from`.
+//!
+//! concept: new linq-query-layout
+//! what: LINQ query expressions: one clause per line below the from when they do not fit.
+//! tools: dotnet-format
 
 use super::options::preserve_query_breaks;
 use super::seq::{R, seq};

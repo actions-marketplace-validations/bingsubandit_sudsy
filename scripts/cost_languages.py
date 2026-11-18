@@ -19,6 +19,7 @@ import subprocess
 import sys
 
 TOLERANCE = 0.1  # percentage points the shared share may fall without a line
+HEADER = re.compile(rb"//! (concept|what|tools|reads|kind|rules):")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -67,7 +68,15 @@ def measure(rev):
             nodes[os.path.basename(path)[:-8]] = sum(1 for l in data.splitlines() if l.startswith(b"node "))
             continue
         rel = path[len("crates/"):]
-        lines = data.count(b"\n")
+        # Kit header lines (`//! concept:` ...) are comments, not hand-written code.
+        raw = data.split(b"\n")[:-1]
+        lines = sum(
+            1
+            for i, l in enumerate(raw)
+            if not HEADER.match(l)
+            and not (l == b"//!" and i + 1 < len(raw) and HEADER.match(raw[i + 1]))
+            and not (l == b"" and i > 0 and HEADER.match(raw[i - 1]))
+        )
         cls = next((k for k, rx in kinds if rx.search(rel)), "other")
         if cls == "ignore":
             continue

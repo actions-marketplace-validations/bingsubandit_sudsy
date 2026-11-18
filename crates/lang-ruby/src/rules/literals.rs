@@ -1,5 +1,9 @@
 //! Checks on literals: floats compared for equality, symbols that are booleans, single-quoted
 //! strings that contain `#{`.
+//!
+//! concept: new literal-checks
+//! what: Checks on literals: float comparison, boolean symbols, interpolation in strings.
+//! tools: RuboCop Lint
 
 use super::tree::{child, method_name, span, tokens};
 use crate::generated::kind as k;

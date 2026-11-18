@@ -1,5 +1,11 @@
 //! The Rust rules of HCL (tflint's terraform ruleset): the checks that read several nodes or build
 //! a fix. The checks on one node's own text are pattern files in `rules/`.
+//!
+//! concept: new deprecated-interpolation, new deprecated-index, new comment-syntax, naming-convention, new unused-declarations
+//! what: deprecated-interpolation: A string that is one interpolation, `"${var.a}"`, where the expression alone does (tflint terraform_deprecated_interpolation)
+//! what: deprecated-index: A list item read with the legacy dot syntax, `a.0` (tflint terraform_deprecated_index)
+//! what: comment-syntax: A `//` comment where `#` is the convention (tflint terraform_comment_syntax)
+//! what: unused-declarations: A variable, local value or data source that nothing in the same file refers to (tflint terraform_unused_declarations, within one file: a module that uses its variables in
 
 use crate::generated::kind as k;
 use core_rules::diagnostic::Edit;

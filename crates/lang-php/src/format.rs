@@ -1,4 +1,6 @@
 //! PHP formatting is data: `format.rules` (docs/ai/formatting/php.md).
+//!
+//! concept: rules-file-formatter
 
 use core_config::shared;
 use core_format::rules::LazyRules;

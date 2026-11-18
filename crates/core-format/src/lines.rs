@@ -1,6 +1,11 @@
 //! Where the line breaks of a tree are, to answer "does this part of the source span lines"
 //! without scanning it: a scan of every list's text makes the cost of a file with nested
 //! lists on one line proportional to its size times its nesting depth.
+//!
+//! concept: line-break-index
+//! what: Where the line breaks of a tree are, to ask whether a part of the source spans lines.
+//! tools: none (internal)
+//! reads: grammar:language
 
 use core_syntax::{SyntaxNode, TextRange};
 

@@ -2,6 +2,10 @@
 //! pipe and never a bit-or) and identifiers that TypeScript reserves (`delete`, `switch`). The pipes
 //! are split off and each part is formatted by the TypeScript formatter; a pipe in parentheses
 //! (`(a | async)?.b`) stands as an identifier while its surroundings are formatted.
+//!
+//! concept: new angular-expression-pipes
+//! what: Angular expressions as TypeScript plus pipes.
+//! tools: Prettier angular pipes
 
 use crate::ng_checks::{code_bytes, lone_pipe};
 

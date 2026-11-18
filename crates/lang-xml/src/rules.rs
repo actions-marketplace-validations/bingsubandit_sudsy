@@ -1,4 +1,7 @@
 //! The Rust rules of XML; syntax rules that fit a pattern are files in `rules/`.
+//!
+//! concept: new no-duplicate-include, unique-names
+//! what: An element of a project file (`PackageReference`, `ProjectReference`, `Compile`, ...) has the same `Include` as an earlier element of the same name in the same parent
 
 use crate::generated::kind;
 use core_rules::{Rule, RuleContext, rule};

@@ -5,6 +5,8 @@
 //! The config is read with `serde-saphyr` with YAML 1.2 semantics (`yes`, `no`, `on` and `off` are
 //! plain strings), which gives every value its line and column for error messages; see
 //! docs/ai/formatting/yaml.md for why Sudsy's own YAML parser is not used here.
+//!
+//! concept: none (glue: crate root)
 
 mod chain;
 mod editorconfig;

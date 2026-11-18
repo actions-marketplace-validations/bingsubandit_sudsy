@@ -1,5 +1,7 @@
 //! The Rust rules of Dockerfile and the families its pattern files name; rules that fit a pattern
 //! are files in `rules/`.
+//!
+//! concept: none (glue: rule registration)
 
 mod run_command;
 mod stages;

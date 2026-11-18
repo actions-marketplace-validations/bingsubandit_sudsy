@@ -1,3 +1,7 @@
+//! concept: capability-layers
+//! what: Capability layers a provider offers: syntax, semantic, flow.
+//! tools: none (internal)
+
 /// The capability layers (docs/ai/rules/semantics.md). A rule that needs a layer the provider
 /// does not answer, or the analysis depth does not allow, is skipped.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

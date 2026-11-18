@@ -1,5 +1,10 @@
 //! Shared comment rules, written against the grammar's comment syntax: `comment-space` and
 //! `no-empty-comment`. They read comment tokens, so they cost nothing when off.
+//!
+//! concept: comment-space, no-empty-comment
+//! what: Rules on comment tokens: text after the marker, no empty comments.
+//! rules: comment-space, no-empty-comment
+//! reads: rule:comment-space
 
 use crate::diagnostic::Edit;
 use crate::options::{Check, Opt, OptionDecl};

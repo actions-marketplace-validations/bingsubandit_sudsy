@@ -1,5 +1,10 @@
 //! The Rust rules of Markdown (the heading checks that need the whole document); the rules that
 //! fit a pattern are files in `rules/`.
+//!
+//! concept: new heading-increment, new no-duplicate-heading, new single-title, unique-names
+//! what: heading-increment: A heading is more than one level deeper than the heading before it (an `h4` right after an `h2`)
+//! what: no-duplicate-heading: Two headings have the same text (markdownlint MD024), which makes their anchors ambiguous
+//! what: single-title: A document has more than one top-level heading (markdownlint MD025)
 
 use crate::format::{heading_level, heading_range};
 use crate::generated::kind;

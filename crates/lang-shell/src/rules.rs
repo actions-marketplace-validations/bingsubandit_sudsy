@@ -1,4 +1,8 @@
 //! The Rust rules of Shell; rules that fit a pattern are files in `rules/`.
+//!
+//! concept: new cd-without-exit, new useless-echo
+//! what: cd-without-exit: `cd`, `pushd` or `popd` whose failure is not handled (`cd dir || exit`)
+//! what: useless-echo: An `echo` whose only argument is a command substitution
 
 use crate::generated::kind as k;
 use core_rules::{Rule, RuleContext, rule};

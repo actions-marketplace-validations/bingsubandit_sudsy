@@ -1,4 +1,6 @@
 //! Blocks and files kept as written.
+//!
+//! concept: verbatim-formatter
 
 use super::*;
 

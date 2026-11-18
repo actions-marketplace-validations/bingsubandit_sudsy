@@ -2,6 +2,11 @@
 //! ([`core_syntax::KeySyntax`]): the identity that `no-duplicate-keys`, `sorted-keys`, the key
 //! naming rule and the key paths compare. A language whose keys need more than the row says
 //! overrides the methods of [`RuleHooks`](crate::hooks::RuleHooks).
+//!
+//! concept: key-identity
+//! what: What a key or scalar is called, read from tags and the keys row, for the key rules.
+//! tools: eslint-plugin-jsonc, yamllint key rules
+//! reads: grammar:keys
 
 use crate::hooks::{Accessor, Scalar};
 use core_syntax::strings::integer;

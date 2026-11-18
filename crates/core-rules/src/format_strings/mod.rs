@@ -4,6 +4,11 @@
 //! the arguments of the call); the tags of [`shape`] say what an argument is. A format string is
 //! read as the language's library reads it; which right-hand sides are one value, a sequence or a
 //! mapping follows ruff. One analysis of a node serves every rule: each reports its own findings.
+//!
+//! concept: format-string-checks
+//! what: Format strings that do not fit their arguments, by flavor (percent, brace).
+//! tools: ruff F501-F509 F521-F525, pyupgrade UP031 UP032
+//! reads: grammar:format
 
 mod flavor;
 mod shape;

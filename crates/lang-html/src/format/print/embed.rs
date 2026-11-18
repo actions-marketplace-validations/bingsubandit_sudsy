@@ -1,6 +1,8 @@
 //! Code of other languages inside the markup: the content of `<script>` and `<style>` and the
 //! values of `style`, `srcset` and event-handler attributes. The engine formats the code
 //! (`Opts::embed`); this module lays the lines out. Code that does not parse stays as written.
+//!
+//! concept: embedded-code
 
 use super::{Embed, P, dedent, s, starts_in_template, trim_preserve_indentation, unescape_quotes};
 use crate::format::model::{Dialect, N};

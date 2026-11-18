@@ -1,6 +1,11 @@
 //! Which leading comments a layout has already printed. A token owns the comments in front of
 //! it, but a block that ends right before it may print the deeper ones inside itself
 //! ([`FormatCtx::end_comments`]); the token then prints the rest ([`FormatCtx::lead`]).
+//!
+//! concept: comment-consumption
+//! what: Tracks which leading comments a layout already printed.
+//! tools: none (internal)
+//! reads: grammar:language
 
 use crate::comments::{self, Comment};
 use crate::context::{FormatCtx, comment_doc, leading_comments_doc};

@@ -5,6 +5,8 @@
 //! hash), crash-on-parse, crash-once (crashes on the first Parse across restarts, using the marker
 //! file), hang-on-parse, missing-framework (the message and exit code of the .NET host without its
 //! runtime, before any handshake).
+//!
+//! concept: none (test double of the worker protocol)
 
 use core_syntax::LanguageId;
 use core_syntax::SyntaxKind;

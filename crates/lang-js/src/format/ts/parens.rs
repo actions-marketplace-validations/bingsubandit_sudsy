@@ -1,6 +1,8 @@
 //! Tokens of a type that its place does not need: parentheses, and the leading `&` of an
 //! intersection or the bar of a union with one member. They come out of the source before
 //! formatting (`NodeFormatter::rewrite_source`), as the safety check compares the nodes.
+//!
+//! concept: source-rewrite
 
 use crate::generated::kind as k;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, SyntaxToken};

@@ -6,6 +6,8 @@
 //! members of a `from` import sorted by constants, classes, variables; `from` imports of one
 //! module are one statement (`as` aliases and `*` apart), and a line over the width is wrapped in
 //! parentheses. The rule writes the block that way and compares it with the text.
+//!
+//! concept: sorted-imports
 
 use super::Check;
 use super::lints::bodies;

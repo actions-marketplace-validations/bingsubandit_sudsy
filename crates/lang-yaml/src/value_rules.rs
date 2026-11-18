@@ -1,4 +1,8 @@
 //! Rules on plain values: `no-empty-values`, `float-style` (opt-in) and `no-octal-values`.
+//!
+//! concept: new no-empty-values, new float-style
+//! what: no-empty-values: A mapping key or sequence entry without a value (an implicit null)
+//! what: float-style: Restricts how plain floats are written
 
 use crate::generated::{BlockMappingEntry, BlockSequenceEntry, FlowPair, Scalar, kind};
 use crate::rules::has_tag;

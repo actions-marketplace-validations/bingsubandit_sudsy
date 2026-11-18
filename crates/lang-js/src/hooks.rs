@@ -1,4 +1,6 @@
 //! What the shared rules ask of JavaScript: the static name of an object key.
+//!
+//! concept: key-identity
 
 use crate::rules::key_name;
 use core_rules::RuleHooks;

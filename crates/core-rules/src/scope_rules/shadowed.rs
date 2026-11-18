@@ -2,6 +2,11 @@
 //! declarations are not, and `var a = function a() {}` is no shadow. In typed files a type and a
 //! value of one name, the parameters of signatures and the type parameters of static members are
 //! left alone, as typescript-eslint does.
+//!
+//! concept: shadowed-variable
+//! what: A declaration that shadows one of an enclosing scope.
+//! rules: shadowed-variable
+//! reads: rule:shadowed-variable
 
 use super::cx::Cx;
 use core_semantics::scopes::{Flags, ScopeId, Symbol, SymbolId};

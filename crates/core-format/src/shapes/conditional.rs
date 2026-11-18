@@ -5,6 +5,11 @@
 //! breaks as one, the branches line up after `? ` and `: `). What only the language can judge
 //! (branches wrapped in parentheses, the places that need the whole indented) comes through
 //! [`ConditionalHooks`].
+//!
+//! concept: conditional-expression-layout
+//! what: Conditional expressions (test ? a : b) laid out flat, indented or chained.
+//! tools: Prettier ternaries, ruff conditional expressions
+//! reads: option:conditional_layout, tag:conditional
 
 use super::chain::ends_in_line_comment;
 use crate::FormatCtx;

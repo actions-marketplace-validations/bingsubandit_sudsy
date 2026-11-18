@@ -1,6 +1,8 @@
 //! GitHub Actions workflows (`.github/workflows/*.yml`) and action metadata (`action.yml`): YAML
 //! with its own rules. Parsing, formatting and options are `lang-yaml`'s; the `run:` scripts are
 //! embedded Shell or PowerShell.
+//!
+//! concept: none (glue: provider entry)
 
 mod expression;
 mod jobs;

@@ -1,4 +1,6 @@
 //! The file, type declarations and their members.
+//!
+//! concept: recursive-descent-parser
 
 use super::P;
 use crate::generated::kind as k;

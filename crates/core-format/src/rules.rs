@@ -9,6 +9,10 @@
 //! kinds), `exact_end = A|B` (a file whose last token is of those kinds keeps its end).
 //! `[comments]`: `max_blank_after = unlimited|N`. `[blank]` rows `PREV / NEXT [: group=KIND]` say
 //! between which statements or members a blank line is required ([`crate::blank`]).
+//!
+//! concept: rules-file-formatter
+//! what: A formatter that is only data: one rules file per language parsed against the grammar.
+//! tools: none (internal)
 
 use crate::FormatCtx;
 use crate::blank::Blank;

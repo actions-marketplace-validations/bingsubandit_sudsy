@@ -7,6 +7,11 @@
 //! front), `comment_blank=yes|no` (a blank line between the comments in front or after them),
 //! `annotation_args=yes|no` (an annotation with arguments among its modifiers) and `group=K`
 //! (only when the second token of the two is of kind `K` for one of them).
+//!
+//! concept: blank-lines-between-members
+//! what: Rows say between which neighbouring statements or members a blank line is required.
+//! tools: ktlint blank-line-before-declaration, google-java-format member blank lines, Prettier blank-line preservation
+//! reads: rules:blank
 
 use crate::FormatCtx;
 use crate::comments;

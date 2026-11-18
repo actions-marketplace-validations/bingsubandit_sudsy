@@ -1,4 +1,6 @@
 //! The per-user directory holding packs and `state.json` (the removed languages, the languages not to ask about).
+//!
+//! concept: none (infrastructure: language packs)
 
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;

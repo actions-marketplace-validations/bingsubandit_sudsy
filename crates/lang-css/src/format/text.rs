@@ -1,4 +1,6 @@
 //! Spelling of single tokens: numbers, units, strings, hex colors and `url(`.
+//!
+//! concept: literal-spelling, token-case
 
 use core_format::literals::{self, FracZeros, NumberStyle, StringStyle};
 

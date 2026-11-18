@@ -7,6 +7,11 @@
 //! `fields` lists the named parts shared code reads through `Grammar::slot`; a name ending in `?`
 //! is optional. A required field must be declared in the node's body, as the item's label or as
 //! an alias (`when_true=then:#expression`); the item itself may be optional or repeated.
+//!
+//! concept: role-vocabulary
+//! what: What a node kind is for cross-language code, by role tags.
+//! tools: none (internal)
+//! reads: grammar:language
 
 use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 

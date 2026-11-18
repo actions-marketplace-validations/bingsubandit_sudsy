@@ -1,4 +1,6 @@
 //! Scalar values: flow scalars (the grammar's `string` rows) and block scalar semantics.
+//!
+//! concept: string-literal-model
 
 use core_syntax::{SyntaxKind, grammars};
 use std::borrow::Cow;

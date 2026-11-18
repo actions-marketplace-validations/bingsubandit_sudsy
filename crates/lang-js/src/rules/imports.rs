@@ -1,4 +1,8 @@
 //! Rules about how modules are imported that need to know what an imported name is used for.
+//!
+//! concept: new import-usage-checks
+//! what: Checks on imports that need to know what an imported name is used for.
+//! tools: ESLint import rules
 
 use super::scope::{ref_at, run};
 use super::{Check, code_text, span};

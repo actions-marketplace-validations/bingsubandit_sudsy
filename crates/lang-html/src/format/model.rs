@@ -1,5 +1,9 @@
 //! The document as Prettier's printer sees it: elements, text runs, comments and doctypes with
 //! the whitespace flags of `print-preprocess.js`, built from the syntax tree and the source.
+//!
+//! concept: new markup-whitespace-model
+//! what: Elements and text with the whitespace sensitivity of inline and block content.
+//! tools: Prettier print-preprocess, xml:space
 
 use crate::generated::kind as k;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, SyntaxToken};

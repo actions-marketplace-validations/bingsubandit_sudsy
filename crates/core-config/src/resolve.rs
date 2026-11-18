@@ -5,6 +5,8 @@
 //! Within one tier the chain's files apply base first, so the file closest to the user wins.
 //! Across tiers the order above holds regardless of which file wrote the value: a base file's
 //! language section still beats the extending file's shared section.
+//!
+//! concept: none (infrastructure: option resolution)
 
 use crate::chain::{ConfigChain, Loaded};
 use crate::editorconfig::EditorConfig;

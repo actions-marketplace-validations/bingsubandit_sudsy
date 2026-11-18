@@ -1,5 +1,10 @@
 //! The regex parser: a pattern as the items the checks read (characters, sets, classes with their
 //! members, syntax characters) and the escapes it contains, read by the rules of a [`Flavor`].
+//!
+//! concept: regex-source-checks
+//! what: Rules about the source of regular expressions in literals and call arguments, by flavor.
+//! tools: eslint no-control-regex no-regex-spaces no-empty-character-class no-misleading-character-class, ruff regex checks
+//! reads: grammar:regex*
 
 use super::flavor::Flavor;
 

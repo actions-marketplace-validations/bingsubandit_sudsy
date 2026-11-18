@@ -3,6 +3,8 @@
 //! Paths are relative to the directory of the config file and use `/`. `*` does not cross a `/`,
 //! `**` does. A pattern without a `/` matches at any depth (`*.g.cs`), a leading `/` anchors it at
 //! the config file's directory, and a pattern that names a directory matches everything below it.
+//!
+//! concept: none (infrastructure: glob patterns)
 
 use crate::error::ConfigError;
 use globset::{Glob, GlobBuilder, GlobSet, GlobSetBuilder};

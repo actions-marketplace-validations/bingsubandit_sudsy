@@ -1,4 +1,14 @@
 //! Rules about the build stages of a file: what each FROM starts and what refers to it.
+//!
+//! concept: new untagged-base-image, new last-user-not-root, new duplicate-stage-name, new copy-from-unknown-stage, new copy-from-own-stage, new from-first, new build-stage-checks, unique-names
+//! what: untagged-base-image: A FROM image with neither a tag nor a digest, which builds on whatever `latest` is
+//! what: last-user-not-root: A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`)
+//! what: duplicate-stage-name: Two FROM instructions name their stage alike
+//! what: copy-from-unknown-stage: A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`)
+//! what: copy-from-own-stage: A `COPY --from` that names the stage it is in
+//! what: from-first: An instruction other than ARG before the first FROM
+//! what: build-stage-checks: What each FROM starts and what refers to it.
+//! tools: build-stage-checks: hadolint DL3006 DL3059
 
 use crate::generated::kind as k;
 use core_rules::tree::significant_range;

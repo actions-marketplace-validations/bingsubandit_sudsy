@@ -2,6 +2,11 @@
 //! prefix: a literal, an f-string): a backslash in a string that is not raw and starts no escape
 //! its `string` row defines. The pieces of an interpolated string have no delimiters of their own;
 //! a backslash that ends one escapes the brace that opens the next field.
+//!
+//! concept: invalid-escape-sequence
+//! what: A backslash in a non-raw string that starts no escape its string row defines.
+//! rules: invalid-escape-sequence
+//! reads: rule:invalid-escape-sequence
 
 use crate::rule;
 use crate::rule::RuleContext;

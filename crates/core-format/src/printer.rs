@@ -1,5 +1,10 @@
 //! The greedy, language-unaware printer. It follows Prettier's algorithm: a group is printed flat
 //! if the rest of its line (up to the next possible break) fits in the line width, else broken.
+//!
+//! concept: doc-printer
+//! what: The greedy, language-unaware printer that fits groups to the line width.
+//! tools: Prettier printDocToString
+//! reads: grammar:language
 
 use crate::doc::{Doc, GroupId};
 use std::collections::HashMap;
