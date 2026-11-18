@@ -284,7 +284,7 @@ node TSTypeAssertion #expression #opaque #hug-wrapper
 node TSImportEqualsDeclaration #statement #opaque
 node TSExternalModuleReference #opaque
 node TSNonNullExpression #expression #unary = operand:#expression operator:#operator
-node Decorator #statement #opaque #decorator
+node Decorator #statement #opaque #decorator #annotation
 node TSExportAssignment #statement #opaque #export-list
 node TSNamespaceExportDeclaration #statement #opaque
 node TSInstantiationExpression #expression #opaque

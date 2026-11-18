@@ -17,57 +17,6 @@ pub(super) fn rule(cx: &FormatCtx<'_>, node: &SyntaxNode, kind: SyntaxKind) -> O
     })
 }
 
-fn is_decl(kind: SyntaxKind) -> bool {
-    [
-        k::CLASS,
-        k::FUN,
-        k::PROPERTY,
-        k::OBJECT_DECLARATION,
-        k::SECONDARY_CONSTRUCTOR,
-        k::TYPEALIAS,
-        k::CLASS_INITIALIZER,
-    ]
-    .contains(&kind)
-}
-
-fn bodiless(n: &SyntaxNode) -> bool {
-    n.kind() == k::SECONDARY_CONSTRUCTOR
-        && !n
-            .children()
-            .any(|c| matches!(c.kind(), k::BLOCK | k::CONSTRUCTOR_DELEGATION_CALL))
-}
-
-/// Must a blank line stand between `prev` and `node` (siblings in a file, class body or block)?
-fn needs_blank(cx: &FormatCtx<'_>, prev: &SyntaxNode, node: &SyntaxNode) -> bool {
-    let parent = parent_kind(node);
-    if parent == k::KT_FILE
-        && [
-            k::PACKAGE_DIRECTIVE,
-            k::IMPORT_LIST,
-            k::FILE_ANNOTATION_LIST,
-        ]
-        .contains(&prev.kind())
-    {
-        return !(prev.kind() == k::PACKAGE_DIRECTIVE && node.kind() == k::IMPORT_LIST
-            || prev.kind() == k::FILE_ANNOTATION_LIST && node.kind() == k::PACKAGE_DIRECTIVE);
-    }
-    let same = |kinds: &[SyntaxKind]| kinds.contains(&node.kind()) && prev.kind() == node.kind();
-    let commented = cx
-        .first_token(node)
-        .is_some_and(|t| !comments::leading_comments(cx.grammar, &t).is_empty());
-    match parent {
-        k::KT_FILE | k::CLASS_BODY => {
-            (node.kind() == k::ENUM_ENTRY && prev.kind() == k::ENUM_ENTRY && commented)
-                || is_decl(node.kind())
-                    && (!same(&[k::PROPERTY, k::TYPEALIAS]) || commented)
-                    && !(bodiless(node) && bodiless(prev))
-                    && !(commented && blank_in_comments(cx, node))
-        }
-        k::BLOCK => is_decl(node.kind()) && node.kind() != k::PROPERTY,
-        _ => false,
-    }
-}
-
 /// Items one per line: the nodes of a file or of a body without braces.
 fn statements(
     cx: &FormatCtx<'_>,
@@ -86,7 +35,12 @@ fn statements(
 }
 
 fn file(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let mut parts = vec![statements(cx, node, Some(needs_blank), 1)?];
+    let mut parts = vec![statements(
+        cx,
+        node,
+        Some(|cx, p, n| cx.blank_between(p, n)),
+        1,
+    )?];
     let eof = node.last_token().filter(|t| t.kind() == k::END_OF_FILE);
     if let Some(eof) = eof {
         let trailing = comments::leading_comments(cx.grammar, &eof);
@@ -105,7 +59,7 @@ fn file(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 
 fn body_style() -> shapes::BlockStyle {
     shapes::BlockStyle {
-        force_blank: Some(needs_blank),
+        force_blank: Some(|cx, p, n| cx.blank_between(p, n)),
         ..shapes::BlockStyle::default()
     }
 }
@@ -156,7 +110,7 @@ fn body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 fn block(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     match cx.first_token(node).map(|t| t.kind()) {
         Some(k::LBRACE) => body(cx, node),
-        _ => statements(cx, node, Some(needs_blank), 1),
+        _ => statements(cx, node, Some(|cx, p, n| cx.blank_between(p, n)), 1),
     }
 }
 
@@ -238,15 +192,6 @@ fn blank_before_comments(cx: &FormatCtx<'_>, tok: &SyntaxToken) -> bool {
             e.as_token()
                 .is_some_and(|t| comments::count_breaks(t.text()) > 0)
         })
-}
-
-/// Does the source have a blank line between the comments in front of the node, or after them?
-fn blank_in_comments(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
-    cx.first_token(node).is_some_and(|t| {
-        comments::leading_comments(cx.grammar, &t)
-            .iter()
-            .any(|c| c.breaks_after >= 2)
-    })
 }
 
 /// A string that spans lines stays on the line of the `=`.

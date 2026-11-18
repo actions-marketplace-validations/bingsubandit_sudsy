@@ -8,11 +8,10 @@
 //! file of one line stays as written), `verbatim_if = A|B` (so does a file with a token of those
 //! kinds), `exact_end = A|B` (a file whose last token is of those kinds keeps its end).
 //! `[comments]`: `max_blank_after = unlimited|N`. `[blank]` rows `PREV / NEXT [: group=KIND]` say
-//! between which statements a blank line is required, `PREV` and `NEXT` being `*` or `kind=A|B`
-//! or `kind!=A|B`; with `group=K` only when the second token of the two statements differs in
-//! being of kind `K`.
+//! between which statements or members a blank line is required ([`crate::blank`]).
 
 use crate::FormatCtx;
+use crate::blank::Blank;
 use crate::calls::CallRules;
 use crate::case::Cases;
 use crate::comments::CommentStyle;
@@ -21,7 +20,7 @@ use crate::doc::Doc;
 use crate::error::FormatError;
 use crate::layout::{File, Layout};
 use crate::rewrite::RewriteRules;
-use crate::seq::{first, kids};
+use crate::seq::kids;
 use crate::shapes::flow::Flow;
 use crate::spacing::SpaceRules;
 use core_config::ResolvedOptions;
@@ -48,41 +47,6 @@ pub fn settings<'a>(text: &'a str, name: &str) -> Vec<(&'a str, &'a str)> {
         .collect()
 }
 
-/// One side of a `[blank]` row.
-struct KindPat {
-    kinds: Vec<SyntaxKind>,
-    not: bool,
-}
-
-impl KindPat {
-    fn parse(g: &Grammar, text: &str) -> KindPat {
-        let text = text.trim();
-        let (not, names) = match text.strip_prefix("kind!=") {
-            Some(n) => (true, n),
-            None => (false, text.strip_prefix("kind=").unwrap_or("")),
-        };
-        let kinds = names
-            .split('|')
-            .filter(|n| !n.is_empty())
-            .map(|n| {
-                g.kind_by_name(n)
-                    .unwrap_or_else(|| panic!("blank: kind `{n}`"))
-            })
-            .collect();
-        KindPat { kinds, not }
-    }
-
-    fn matches(&self, kind: SyntaxKind) -> bool {
-        self.kinds.is_empty() || self.kinds.contains(&kind) != self.not
-    }
-}
-
-struct BlankRow {
-    prev: KindPat,
-    next: KindPat,
-    group: Option<SyntaxKind>,
-}
-
 pub struct RuleFormatter {
     space: SpaceRules,
     cases: Cases,
@@ -91,7 +55,7 @@ pub struct RuleFormatter {
     calls: OnceLock<CallRules>,
     rewrite: RewriteRules,
     layout: Layout,
-    blank: Vec<BlankRow>,
+    blank: Blank,
     file: File,
     exact_end: Vec<SyntaxKind>,
     exact: bool,
@@ -133,19 +97,7 @@ impl RuleFormatter {
             calls: OnceLock::new(),
             rewrite: RewriteRules::parse(g, text),
             layout: Layout::parse(g, &layout),
-            blank: section(text, "blank")
-                .map(|l| {
-                    let (pair, opts) = l.split_once(':').unwrap_or((l, ""));
-                    let (prev, next) = pair
-                        .split_once('/')
-                        .unwrap_or_else(|| panic!("blank: `{l}`"));
-                    BlankRow {
-                        prev: KindPat::parse(g, prev),
-                        next: KindPat::parse(g, next),
-                        group: opts.trim().strip_prefix("group=").map(|k| kinds(k)[0]),
-                    }
-                })
-                .collect(),
+            blank: Blank::parse(g, section(text, "blank")),
             file: File {
                 one_line: yes(&file, "one_line_verbatim"),
                 any: get(&file, "verbatim_if"),
@@ -194,15 +146,6 @@ impl RuleFormatter {
         }
     }
 
-    /// The kind of the second token of a statement is `kind` (a way to tell `use` from
-    /// `use function`).
-    fn second_is(cx: &FormatCtx<'_>, node: &SyntaxNode, kind: SyntaxKind) -> bool {
-        kids(cx, node)
-            .get(1)
-            .and_then(|e| first(cx, e))
-            .is_some_and(|t| t.kind() == kind)
-    }
-
     pub fn format_node(
         &self,
         node: &SyntaxNode,
@@ -227,12 +170,7 @@ impl RuleFormatter {
     }
 
     pub fn blank_between(&self, cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
-        self.blank.iter().any(|r| {
-            r.prev.matches(prev.kind())
-                && r.next.matches(next.kind())
-                && r.group
-                    .is_none_or(|g| Self::second_is(cx, prev, g) != Self::second_is(cx, next, g))
-        })
+        self.blank.between(cx, prev, next)
     }
 
     pub fn exact_end(&self, g: &Grammar, root: &SyntaxNode) -> bool {

@@ -7971,6 +7971,19 @@
               "maximum": 100,
               "minimum": 0,
               "type": "integer"
+            },
+            "type_use_annotations": {
+              "default": [
+                "org.jspecify.annotations.Nullable",
+                "org.jspecify.annotations.NonNull",
+                "org.checkerframework.*.Nullable",
+                "org.checkerframework.*.NonNull"
+              ],
+              "description": "Annotations that belong to the type after them, not to the declaration (`@Nullable String name`): the fully qualified names the file imports them under, `*` standing for any text. They stay on the line of the declaration.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           "type": "object"
@@ -10545,6 +10558,19 @@
                     "maximum": 100,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "type_use_annotations": {
+                    "default": [
+                      "org.jspecify.annotations.Nullable",
+                      "org.jspecify.annotations.NonNull",
+                      "org.checkerframework.*.Nullable",
+                      "org.checkerframework.*.NonNull"
+                    ],
+                    "description": "Annotations that belong to the type after them, not to the declaration (`@Nullable String name`): the fully qualified names the file imports them under, `*` standing for any text. They stay on the line of the declaration.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   }
                 },
                 "type": "object"

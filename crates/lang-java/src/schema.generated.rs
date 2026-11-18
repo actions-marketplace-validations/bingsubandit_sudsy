@@ -8,6 +8,8 @@ pub const MEMBER_CHAIN_BREAK_ON_BLOCK: &str = "member_chain_break_on_block";
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_HEAD_CALLS: &str = "member_chain_head_calls";
 #[allow(dead_code)]
+pub const TYPE_USE_ANNOTATIONS: &str = "type_use_annotations";
+#[allow(dead_code)]
 pub const MEMBER_CHAIN_SHORT_HEAD: &str = "member_chain_short_head";
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_INDENT: &str = "member_chain_indent";
@@ -46,6 +48,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::member_chain_keep_accesses("head"),
         core_config::shared::member_chain_break_on_block("any"),
         core_config::shared::member_chain_head_calls(&["stream"]),
+        core_config::shared::type_use_annotations(&["org.jspecify.annotations.Nullable", "org.jspecify.annotations.NonNull", "org.checkerframework.*.Nullable", "org.checkerframework.*.NonNull"]),
         core_config::shared::member_chain_short_head(4),
         core_config::shared::member_chain_indent(2),
         core_config::shared::binary_operator_line("start"),

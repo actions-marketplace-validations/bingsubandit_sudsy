@@ -476,6 +476,14 @@ pub mod shared {
         )
     }
 
+    pub fn type_use_annotations(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "type_use_annotations",
+            default,
+            "Annotations that belong to the type after them, not to the declaration (`@Nullable String name`): the fully qualified names the file imports them under, `*` standing for any text. They stay on the line of the declaration.",
+        )
+    }
+
     pub fn member_chain_head_calls(default: &[&str]) -> OptionDef {
         OptionDef::words(
             "member_chain_head_calls",

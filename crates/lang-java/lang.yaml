@@ -12,6 +12,7 @@ options:
   - member_chain_keep_accesses: ["head"]
   - member_chain_break_on_block: ["any"]
   - member_chain_head_calls: [["stream"]]
+  - type_use_annotations: [["org.jspecify.annotations.Nullable", "org.jspecify.annotations.NonNull", "org.checkerframework.*.Nullable", "org.checkerframework.*.NonNull"]]
   - member_chain_short_head: [4]
   - member_chain_indent: [2]
   - binary_operator_line: ["start"]

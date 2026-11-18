@@ -10,6 +10,7 @@ mod call_chain;
 mod chain;
 mod compound;
 mod conditional;
+mod declaration;
 pub mod flow;
 mod heritage;
 mod key_value;
@@ -40,6 +41,10 @@ pub use chain::{MemberChain, ends_in_line_comment, gap_after_operator, member_ch
 pub use compound::{body as compound_body, continuation as compound_continuation};
 pub use conditional::{
     Around, ConditionalHooks, ConditionalPolicy, NoConditionalHooks, conditional,
+};
+pub use declaration::{
+    Annotations, Clause, HeaderStyle, Printer, annotation_args, annotations_above, enum_body,
+    has_arguments, has_doc_comment, header, lead_annotations, members, modifiers, type_declaration,
 };
 pub use heritage::{HeritageLayout, heritage};
 pub use key_value::{KeyValueStyle, key_value};

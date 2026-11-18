@@ -43,6 +43,10 @@ impl NodeFormatter for JavaFormatter {
         crate::imports::sort_imports(tree, text)
     }
 
+    fn blank_between(&self, cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
+        ROWS.get().blank_between(cx, prev, next)
+    }
+
     fn format_node(
         &self,
         node: &SyntaxNode,

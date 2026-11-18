@@ -6,8 +6,9 @@ use super::types::type_params;
 use crate::format::util::{elem, inline, is_tok, node_of, shape_error};
 use crate::generated::kind as k;
 use core_format::doc::{
-    Doc, concat, group, group_with_id, hardline, if_break_in, indent, line, lit, new_group_id,
+    Doc, concat, group, hardline, if_break_in, indent, line, lit, new_group_id,
 };
+use core_format::shapes::{HeaderStyle, header};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode};
 
@@ -77,7 +78,7 @@ pub(crate) fn class_header(
     let multiple = usize::from(ext.is_some()) + implements.len() > 1;
     let mut clauses = Vec::new();
     if let Some(at) = ext {
-        clauses.extend([line(), inline(cx, &elems[at..imp.unwrap_or(last)])?]);
+        clauses.push((line(), inline(cx, &elems[at..imp.unwrap_or(last)])?));
     }
     if let Some(at) = imp {
         // The comments of a comma stay after it.
@@ -108,31 +109,31 @@ pub(crate) fn class_header(
                 list.push(c);
             }
         }
-        let sep = match params {
+        clauses.push((
             // With type parameters only, `implements` stays after a broken parameter list.
-            Some(_) if !multiple => if_break_in(id, lit(" "), line()),
-            _ => line(),
-        };
-        clauses.extend([
-            sep,
-            elem(cx, &elems[at])?,
-            group(indent(concat(vec![line(), concat(list)]))),
-        ]);
+            match params {
+                Some(_) if !multiple => if_break_in(id, lit(" "), line()),
+                _ => line(),
+            },
+            concat(vec![
+                elem(cx, &elems[at])?,
+                group(indent(concat(vec![line(), concat(list)]))),
+            ]),
+        ));
     }
-    let heritage = concat(clauses);
-    let header = if params.is_some() {
-        concat(vec![head, indent(heritage)])
-    } else {
-        indent(concat(vec![head, heritage]))
-    };
     let group_id = new_group_id();
     let brace = if body_empty {
         lit(" ")
     } else {
         if_break_in(group_id, hardline(), lit(" "))
     };
+    let style = HeaderStyle {
+        continuation: 1,
+        id: Some(group_id),
+        ..HeaderStyle::default()
+    };
     Ok(Some(concat(vec![
-        group_with_id(group_id, header),
+        header(head, clauses, &style),
         brace,
         body.clone(),
     ])))

@@ -1,7 +1,27 @@
 //! Declarations: the file, types and their bodies, members, modifiers, annotations, parameters.
 
 use super::*;
-use core_format::shapes::{self, ListStyle};
+use core_format::shapes::{self, Annotations, ListStyle, Printer};
+
+/// Java's printing of the elements of a declaration.
+struct Java<'a>(&'a FormatCtx<'a>);
+
+impl Printer for Java<'_> {
+    fn el(&self, e: &SyntaxElement) -> R {
+        el(self.0, e)
+    }
+    fn seq_with(&self, els: &[SyntaxElement], doc: &dyn Fn(&SyntaxElement) -> R) -> R {
+        seq_with(self.0, els, doc)
+    }
+}
+
+/// The type parameters of a type, the group of which tells where its clauses go.
+fn head(cx: &FormatCtx<'_>, e: &SyntaxElement, id: doc::GroupId) -> R {
+    match e.as_node() {
+        Some(n) if e.kind() == k::TYPE_PARAMETERS => angle_list(cx, n, Some(id)),
+        _ => el(cx, e),
+    }
+}
 
 pub(super) fn rule(
     cx: &FormatCtx<'_>,
@@ -13,11 +33,13 @@ pub(super) fn rule(
         | k::INTERFACE_DECLARATION
         | k::ENUM_DECLARATION
         | k::RECORD_DECLARATION
-        | k::ANNOTATION_TYPE_DECLARATION => type_decl(cx, node),
-        k::CLASS_BODY | k::INTERFACE_BODY | k::RECORD_BODY | k::ANNOTATION_TYPE_BODY => {
-            members(cx, node)
+        | k::ANNOTATION_TYPE_DECLARATION => {
+            shapes::type_declaration(cx, node, &Java(cx), &|e, id| head(cx, e, id), 2)
         }
-        k::ENUM_BODY => enum_body(cx, node),
+        k::CLASS_BODY | k::INTERFACE_BODY | k::RECORD_BODY | k::ANNOTATION_TYPE_BODY => {
+            shapes::members(cx, node)
+        }
+        k::ENUM_BODY => shapes::enum_body(cx, node, &Java(cx)),
         k::METHOD_DECLARATION | k::CONSTRUCTOR_DECLARATION | k::COMPACT_CONSTRUCTOR_DECLARATION => {
             method(cx, node)
         }
@@ -29,10 +51,9 @@ pub(super) fn rule(
         k::RESOURCE_SPECIFICATION => resources(cx, node),
         k::FORMAL_PARAMETERS | k::RECORD_HEADER => hanging_list(cx, node, None),
         k::ARGUMENT_LIST | k::ANNOTATION_ARGUMENT_LIST => paren_list(cx, node),
-        k::PACKAGE_DECLARATION => package(cx, node),
+        k::PACKAGE_DECLARATION => shapes::annotations_above(cx, node, &Java(cx)),
         k::TYPE_PARAMETERS | k::TYPE_ARGUMENTS => angle_list(cx, node, None),
         k::VARIABLE_DECLARATOR => declarator(cx, node),
-        k::ENUM_CONSTANT => enum_constant(cx, node),
         _ => return None,
     })
 }
@@ -83,229 +104,6 @@ pub(super) fn program(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     Ok(doc::concat(parts))
 }
 
-fn is_body(kind: core_syntax::SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::CLASS_BODY | k::INTERFACE_BODY | k::ENUM_BODY | k::RECORD_BODY | k::ANNOTATION_TYPE_BODY
-    )
-}
-
-fn type_decl(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = flat(cx, node);
-    let at = els.iter().position(|e| is_body(e.kind()));
-    let (head, body) = els.split_at(at.unwrap_or(els.len()));
-    let mut parts = Vec::new();
-    let mut rest = head;
-    if let Some(m) = head.first().filter(|e| e.kind() == k::MODIFIERS) {
-        parts.push(modifiers_then(cx, m, true, false)?);
-        rest = &head[1..];
-    }
-    // Everything up to the name and type parameters stays on a line; supertypes break before
-    // their keyword when the header does not fit.
-    let split = rest
-        .iter()
-        .position(|e| {
-            matches!(
-                e.kind(),
-                k::SUPERCLASS | k::SUPER_INTERFACES | k::EXTENDS_INTERFACES | k::PERMITS
-            )
-        })
-        .unwrap_or(rest.len());
-    let id = doc::new_group_id();
-    let mut header = vec![seq_with(cx, &rest[..split], |e| match e.as_node() {
-        Some(n) if e.kind() == k::TYPE_PARAMETERS => angle_list(cx, n, Some(id)),
-        _ => el(cx, e),
-    })?];
-    let mut tail = Vec::new();
-    for (i, e) in rest[split..].iter().enumerate() {
-        let clause = doc::shared(el(cx, e)?);
-        let flat = doc::group(doc::concat(vec![doc::line(), clause.clone()]));
-        tail.push(if i == 0 {
-            doc::if_break_in(id, doc::concat(vec![doc::hardline(), clause]), flat)
-        } else {
-            flat
-        });
-    }
-    if !tail.is_empty() {
-        header.push(cont(doc::concat(tail)));
-    }
-    parts.push(doc::group(doc::concat(header)));
-    if let Some(b) = body.first() {
-        parts.push(doc::lit(" "));
-        parts.push(el(cx, b)?);
-    }
-    Ok(doc::concat(parts))
-}
-
-/// The members of a body, one per line: a blank line before everything but a field without
-/// javadoc, and where the source has one.
-fn members(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::block(cx, node, &member_style())
-}
-
-fn member_style() -> shapes::BlockStyle {
-    shapes::BlockStyle {
-        force_blank: Some(member_blank),
-        keep_leading_blank: true,
-        ..shapes::BlockStyle::default()
-    }
-}
-
-/// A blank line goes between two members unless both are plain fields.
-fn member_blank(cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
-    let spaced = |n: &SyntaxNode| {
-        !matches!(n.kind(), k::FIELD_DECLARATION | k::CONSTANT_DECLARATION)
-            || has_javadoc(cx, n)
-            || has_annotation_args(cx, n)
-    };
-    spaced(prev) || spaced(next)
-}
-
-fn has_javadoc(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-    cx.first_token(n).is_some_and(|t| {
-        comments::leading_trivia(cx.grammar, &t)
-            .iter()
-            .any(|x| x.kind() == k::COMMENT && x.to_string().starts_with("/**"))
-    })
-}
-
-fn has_annotation_args(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-    kids(cx, n).iter().any(|m| {
-        m.as_node().is_some_and(|m| {
-            m.kind() == k::MODIFIERS && kids(cx, m).iter().any(|a| has_args(cx, a))
-        })
-    })
-}
-
-fn enum_body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let (Some(SyntaxElement::Token(open)), Some(SyntaxElement::Token(close))) =
-        (els.first().cloned(), els.last().cloned())
-    else {
-        return generic(cx, node);
-    };
-    let inner = &els[1..els.len() - 1];
-    let consts: Vec<_> = inner
-        .iter()
-        .filter(|e| e.kind() == k::ENUM_CONSTANT)
-        .collect();
-    let decls = inner.iter().find(|e| e.kind() == k::ENUM_BODY_DECLARATIONS);
-    let commas: Vec<_> = inner.iter().filter(|e| is_tok(e, ",")).collect();
-    let mut parts = Vec::new();
-    for (i, c) in consts.iter().enumerate() {
-        if i > 0 {
-            parts.push(el(cx, commas[i - 1])?);
-            parts.push(doc::hardline());
-            if blank_before(cx, c) {
-                parts.push(doc::hardline());
-            }
-        }
-        parts.push(el(cx, c)?);
-    }
-    let comma_last = inner
-        .iter()
-        .rev()
-        .find(|e| !matches!(e.kind(), k::ENUM_BODY_DECLARATIONS | k::SEMI) && !is_tok(e, ";"))
-        .is_some_and(|e| is_tok(e, ","));
-    if comma_last {
-        parts.push(el(cx, commas[consts.len() - 1])?);
-    }
-    let semi_el = inner.iter().find(|e| is_tok(e, ";")).cloned().or_else(|| {
-        decls
-            .and_then(|d| d.as_node())
-            .and_then(|d| kids(cx, d).into_iter().find(|e| is_tok(e, ";")))
-    });
-    let semi = decls.is_some() || semi_el.is_some();
-    let semi_doc = |cx: &FormatCtx<'_>| match &semi_el {
-        Some(e) => el(cx, e),
-        None => Ok(doc::text(";")),
-    };
-    if semi && !decls.is_some_and(|d| d.as_node().is_some_and(|n| kids(cx, n).len() > 1)) {
-        if comma_last {
-            parts.push(doc::hardline());
-        }
-        parts.push(semi_doc(cx)?);
-    }
-    if let Some(d) = decls.and_then(|d| d.as_node()) {
-        let members: Vec<SyntaxNode> = d.children().collect();
-        if !members.is_empty() {
-            if comma_last {
-                parts.push(doc::hardline());
-            }
-            parts.push(semi_doc(cx)?);
-        }
-        if !members.is_empty() {
-            parts.push(doc::hardline());
-            parts.push(doc::hardline());
-            parts.push(shapes::statement_sequence_with(
-                cx,
-                &members,
-                1,
-                Some(member_blank),
-                false,
-            )?);
-        }
-    }
-    let style = shapes::BlockStyle::default();
-    if parts.is_empty() {
-        return Ok(shapes::braces(cx, &open, &close, None, false, &style));
-    }
-    let lead_blank = consts
-        .first()
-        .and_then(|c| c.as_node())
-        .is_some_and(|c| has_javadoc(cx, c) && shapes::blank_before(cx, c));
-    Ok(shapes::braces(
-        cx,
-        &open,
-        &close,
-        Some(doc::concat(parts)),
-        lead_blank,
-        &style,
-    ))
-}
-
-fn enum_constant(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    generic(cx, node)
-}
-
-/// The modifiers and what separates them from the rest: annotations in front of a declaration
-/// go on lines of their own when `vertical`, the keywords and other annotations stay on the line.
-fn modifiers_then(cx: &FormatCtx<'_>, m: &SyntaxElement, vertical: bool, soft: bool) -> R {
-    let Some(node) = m.as_node() else {
-        return el(cx, m);
-    };
-    let els = kids(cx, node);
-    let mut lead = els
-        .iter()
-        .take_while(|e| matches!(e.kind(), k::ANNOTATION | k::MARKER_ANNOTATION))
-        .count();
-    while lead > 0 && is_type_use(&els[lead - 1], node) {
-        lead -= 1;
-    }
-    let mut parts = Vec::new();
-    if vertical {
-        for e in &els[..lead] {
-            parts.push(el(cx, e)?);
-            parts.push(doc::hardline());
-        }
-        if lead < els.len() {
-            parts.push(seq(cx, &els[lead..])?);
-            parts.push(doc::lit(" "));
-        }
-    } else if soft && lead > 0 {
-        parts.push(seq(cx, &els[..lead])?);
-        parts.push(doc::line());
-        if lead < els.len() {
-            parts.push(seq(cx, &els[lead..])?);
-            parts.push(doc::lit(" "));
-        }
-    } else {
-        parts.push(seq(cx, &els)?);
-        parts.push(doc::lit(" "));
-    }
-    Ok(doc::concat(parts))
-}
-
 fn modifiers(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     seq(cx, &kids(cx, node))
 }
@@ -315,7 +113,7 @@ fn method(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let mut parts = Vec::new();
     let mut rest = &els[..];
     if let Some(m) = els.first().filter(|e| e.kind() == k::MODIFIERS) {
-        parts.push(modifiers_then(cx, m, true, false)?);
+        parts.push(shapes::modifiers(cx, m, Annotations::Lines, &Java(cx))?);
         rest = &els[1..];
     }
     let block = rest
@@ -424,15 +222,11 @@ fn variables(cx: &FormatCtx<'_>, node: &SyntaxNode, _field: bool) -> R {
     let mut rest = &els[..];
     let mut annotated = false;
     if let Some(m) = els.first().filter(|e| e.kind() == k::MODIFIERS) {
-        let node = m.as_node().unwrap();
-        let has = |kind| kids(cx, node).iter().any(|a| a.kind() == kind);
-        let vertical = kids(cx, node).iter().any(|a| has_args(cx, a));
-        let _ = has;
-        annotated = !vertical
-            && kids(cx, node)
-                .first()
-                .is_some_and(|a| matches!(a.kind(), k::MARKER_ANNOTATION | k::ANNOTATION));
-        parts.push(modifiers_then(cx, m, vertical, annotated)?);
+        let layout = m
+            .as_node()
+            .map_or(Annotations::Inline, |n| Annotations::of(cx, n));
+        annotated = layout == Annotations::Hanging;
+        parts.push(shapes::modifiers(cx, m, layout, &Java(cx))?);
         rest = &els[1..];
     }
     parts.push(seq(cx, rest)?);
@@ -525,22 +319,6 @@ fn paren_list_in(cx: &FormatCtx<'_>, node: &SyntaxNode, extra: bool) -> R {
 #[allow(unused_imports)]
 use shapes as _shapes;
 
-/// Annotations of a package go on lines of their own.
-fn package(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let lead = els
-        .iter()
-        .take_while(|e| matches!(e.kind(), k::ANNOTATION | k::MARKER_ANNOTATION))
-        .count();
-    let mut parts = Vec::new();
-    for e in &els[..lead] {
-        parts.push(el(cx, e)?);
-        parts.push(doc::hardline());
-    }
-    parts.push(seq(cx, &els[lead..])?);
-    Ok(doc::concat(parts))
-}
-
 /// `<A, B>`: on one line, else after the `<` two continuation levels in. `id`: the group of the
 /// whole list.
 fn angle_list(cx: &FormatCtx<'_>, node: &SyntaxNode, id: Option<doc::GroupId>) -> R {
@@ -580,53 +358,4 @@ fn hanging_list(cx: &FormatCtx<'_>, node: &SyntaxNode, id: Option<doc::GroupId>)
         ..ListStyle::default()
     };
     shapes::delimited_list(cx, node, &style).or_else(|_| generic(cx, node))
-}
-
-/// Is the annotation one the file imports from a package of type-use annotations? Those belong
-/// to the type, not to the declaration.
-fn is_type_use(annotation: &SyntaxElement, at: &SyntaxNode) -> bool {
-    let Some(a) = annotation
-        .as_node()
-        .filter(|a| a.kind() == k::MARKER_ANNOTATION)
-    else {
-        return false;
-    };
-    let text = a
-        .descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-        .filter(|t| {
-            t.text().chars().all(|c| c.is_alphanumeric() || c == '_') && !t.text().is_empty()
-        })
-        .last()
-        .map(|t| t.text().to_string())
-        .unwrap_or_default();
-    let name = text.as_str();
-    if !matches!(name, "Nullable" | "NonNull") {
-        return false;
-    }
-    let Some(root) = at.ancestors().last() else {
-        return false;
-    };
-    root.descendants().any(|n| {
-        n.kind() == k::IMPORT_DECLARATION && {
-            let t = n.text().to_string();
-            let t = t
-                .trim_start_matches("import")
-                .trim()
-                .trim_end_matches(';')
-                .trim();
-            (t.starts_with("org.jspecify.annotations.") || t.starts_with("org.checkerframework."))
-                && t.rsplit('.').next() == Some(name)
-        }
-    })
-}
-
-/// An annotation with arguments (`@A()` has none).
-fn has_args(cx: &FormatCtx<'_>, e: &SyntaxElement) -> bool {
-    e.as_node().is_some_and(|n| {
-        n.kind() == k::ANNOTATION
-            && kids(cx, n)
-                .iter()
-                .any(|a| a.as_node().is_some_and(|l| kids(cx, l).len() > 2))
-    })
 }

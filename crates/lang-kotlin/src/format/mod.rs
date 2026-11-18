@@ -44,6 +44,10 @@ impl NodeFormatter for KotlinFormatter {
         crate::rewrite::rewrite(tree, text, options.int("line_width") as usize)
     }
 
+    fn blank_between(&self, cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
+        ROWS.get().blank_between(cx, prev, next)
+    }
+
     fn format_node(
         &self,
         node: &SyntaxNode,

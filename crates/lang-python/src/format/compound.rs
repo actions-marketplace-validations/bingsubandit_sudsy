@@ -26,7 +26,11 @@ pub(crate) fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let top = at_top(node);
     let seq = seq_of(node.kind());
     let mut parts: Vec<Doc> = Vec::new();
-    let mut i = 0;
+    let (lead, mut i) = shapes::lead_annotations(cx, &ks, &|e| match e {
+        SyntaxElement::Node(n) => decorator(cx, n),
+        SyntaxElement::Token(t) => Ok(cx.token(t)),
+    })?;
+    parts.push(lead);
     let mut prev: Option<&SyntaxElement> = None;
     let with_items = node.kind() == k::STMT_WITH;
     while i < ks.len() {
@@ -96,13 +100,6 @@ pub(crate) fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
                     parts.pop();
                 }
                 parts.push(cx.token(t));
-            }
-            SyntaxElement::Node(n) if n.kind() == k::DECORATOR => {
-                parts.push(decorator(cx, n)?);
-                parts.push(hardline());
-                prev = None;
-                i += 1;
-                continue;
             }
             SyntaxElement::Node(n) if is_clause(n.kind()) => {
                 let first = cx.first_token(n).ok_or_else(|| shape_error("clause"))?;

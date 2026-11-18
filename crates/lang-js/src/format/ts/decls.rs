@@ -8,7 +8,9 @@ use core_format::doc::{
     self, Doc, concat, group, group_with_id, indent, indent_if_break, line, line_suffix_boundary,
     lit, new_group_id,
 };
-use core_format::shapes::{self, BlockStyle, ListLayout, ListStyle, TrailingComma};
+use core_format::shapes::{
+    self, BlockStyle, HeaderStyle, ListLayout, ListStyle, TrailingComma, header,
+};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode};
 
@@ -156,50 +158,51 @@ fn interface(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
         }
         head.push(elem(cx, e)?);
     }
-    let mut parts = Vec::new();
-    match ext {
-        None => parts.extend(head),
-        Some(at) => {
-            let nodes: Vec<&SyntaxNode> = ks[at + 1..]
-                .iter()
-                .filter_map(node_of)
-                .filter(|n| n.kind() == k::TS_INTERFACE_HERITAGE)
-                .collect();
-            let heritage = nodes
-                .iter()
-                .map(|n| cx.format(n))
-                .collect::<Result<Vec<_>, _>>()?;
-            // A lone name, or one with type arguments (which break instead), stays on the line.
-            let hugs = nodes.len() == 1
-                && nodes[0].children().any(|c| {
-                    matches!(
-                        c.kind(),
-                        k::TS_TYPE_PARAMETER_INSTANTIATION | k::IDENTIFIER_REFERENCE
-                    )
-                });
-            let list = doc::join(&concat(vec![lit(","), line()]), heritage);
-            let extends = elem(cx, &ks[at])?;
-            let tail = if hugs {
-                concat(vec![lit(" "), extends, lit(" "), list])
-            } else if nodes.len() == 1 {
-                concat(vec![line(), extends, lit(" "), list])
-            } else {
-                concat(vec![
-                    line(),
-                    group(concat(vec![extends, indent(concat(vec![line(), list]))])),
-                ])
-            };
-            let has_params = ks[..at].iter().any(|e| matches!(e, SyntaxElement::Node(n) if n.kind() == k::TS_TYPE_PARAMETER_DECLARATION));
-            // With type parameters only the heritage is indented, not their list.
-            parts.push(if hugs {
-                group(concat(vec![concat(head), tail]))
-            } else if has_params {
-                group(concat(vec![concat(head), indent(tail)]))
-            } else {
-                group(indent(concat(vec![concat(head), tail])))
+    let mut clauses = Vec::new();
+    let mut continuation = 0;
+    if let Some(at) = ext {
+        let nodes: Vec<&SyntaxNode> = ks[at + 1..]
+            .iter()
+            .filter_map(node_of)
+            .filter(|n| n.kind() == k::TS_INTERFACE_HERITAGE)
+            .collect();
+        let heritage = nodes
+            .iter()
+            .map(|n| cx.format(n))
+            .collect::<Result<Vec<_>, _>>()?;
+        // A lone name, or one with type arguments (which break instead), stays on the line.
+        let hugs = nodes.len() == 1
+            && nodes[0].children().any(|c| {
+                matches!(
+                    c.kind(),
+                    k::TS_TYPE_PARAMETER_INSTANTIATION | k::IDENTIFIER_REFERENCE
+                )
             });
-        }
+        let list = doc::join(&concat(vec![lit(","), line()]), heritage);
+        let extends = elem(cx, &ks[at])?;
+        let (sep, clause) = if nodes.len() == 1 {
+            (
+                if hugs { lit(" ") } else { line() },
+                concat(vec![extends, lit(" "), list]),
+            )
+        } else {
+            (
+                line(),
+                group(concat(vec![extends, indent(concat(vec![line(), list]))])),
+            )
+        };
+        continuation = usize::from(!hugs);
+        clauses.push((sep, clause));
     }
+    let style = HeaderStyle {
+        continuation,
+        ..HeaderStyle::default()
+    };
+    let mut parts = vec![if clauses.is_empty() {
+        concat(head)
+    } else {
+        header(concat(head), clauses, &style)
+    }];
     parts.extend([lit(" "), elem(cx, body)?]);
     Ok(group(concat(parts)))
 }

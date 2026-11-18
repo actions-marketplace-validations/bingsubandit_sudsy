@@ -1,4 +1,20 @@
 # Kotlin layouts chosen by rows (syntax: crates/core-format/src/layout.rs); the rest is Rust.
+# A blank line between neighbours of a file, a class body or a block (syntax: crates/core-format/src/blank.rs).
+[blank]
+kind=PackageDirective / kind!=ImportList : parent=KtFile
+kind=ImportList / * : parent=KtFile
+kind=FileAnnotationList / kind!=PackageDirective : parent=KtFile
+kind=EnumEntry / kind=EnumEntry : parent=KtFile|ClassBody commented=yes
+* / kind=Class|Fun|ObjectDeclaration|ClassInitializer : parent=KtFile|ClassBody comment_blank=no
+kind!=Property / kind=Property : parent=KtFile|ClassBody comment_blank=no
+kind=Property / kind=Property : parent=KtFile|ClassBody commented=yes comment_blank=no
+kind!=Typealias / kind=Typealias : parent=KtFile|ClassBody comment_blank=no
+kind=Typealias / kind=Typealias : parent=KtFile|ClassBody commented=yes comment_blank=no
+kind!=SecondaryConstructor / kind=SecondaryConstructor : parent=KtFile|ClassBody comment_blank=no
+kind=SecondaryConstructor / kind=SecondaryConstructor : parent=KtFile|ClassBody comment_blank=no has=Block|ConstructorDelegationCall
+kind=SecondaryConstructor / kind=SecondaryConstructor : parent=KtFile|ClassBody comment_blank=no prev.has=Block|ConstructorDelegationCall
+* / kind=Class|Fun|ObjectDeclaration|SecondaryConstructor|Typealias|ClassInitializer : parent=Block
+
 [layout]
 Class|ObjectDeclaration : heritage colon=Colon list=SuperTypeList ctor=PrimaryConstructor params=ValueParameterList min=option:class_signature_wrap_min_supertypes hug_min=option:class_signature_wrap_min_parameters
 DotQualifiedExpression|SafeAccessExpression&parent!=ImportDirective|PackageDirective : chain spaced=LambdaArgument

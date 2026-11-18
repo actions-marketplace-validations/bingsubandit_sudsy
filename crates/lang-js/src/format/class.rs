@@ -2,7 +2,7 @@
 
 use super::util::{R, elem, inline, kids, node_of, semi, shape_error, style, token_of};
 use crate::generated::kind as k;
-use core_format::doc::{Doc, concat, hardline, lit};
+use core_format::doc::{Doc, concat, lit};
 use core_format::shapes::{self, BlockStyle};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::SyntaxNode;
@@ -22,14 +22,8 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
 /// `class A<T> extends B implements C { members }`, each decorator on its own line.
 fn class(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     let kids = kids(cx, node);
-    let decorators = kids
-        .iter()
-        .take_while(|e| node_of(e).is_some_and(|n| n.kind() == k::DECORATOR))
-        .count();
-    let mut parts = Vec::new();
-    for e in &kids[..decorators] {
-        parts.extend([elem(cx, e)?, hardline()]);
-    }
+    let (lead, decorators) = shapes::lead_annotations(cx, &kids, &|e| elem(cx, e))?;
+    let mut parts = vec![lead];
     let rest = &kids[decorators..];
     let body = rest
         .last()
