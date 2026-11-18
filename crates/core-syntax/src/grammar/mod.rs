@@ -31,6 +31,7 @@
 mod parse;
 
 use crate::kind::{LanguageId, SyntaxKind};
+use crate::regex::{RegexCall, RegexRow};
 use crate::scan::{Limits, TriviaRow, TriviaSyntax};
 use crate::strings::{StringSyntax, Unknown};
 use crate::tree::{SyntaxElement, SyntaxNode};
@@ -169,6 +170,9 @@ pub struct Grammar {
     keys: KeySyntax,
     /// The `string` rows, grouped by token kind.
     strings: Vec<(SyntaxKind, StringSyntax)>,
+    /// The `regex` and `regex-call` rows.
+    regex_rows: Vec<RegexRow>,
+    regex_calls: Vec<RegexCall>,
     /// Per token index, where its rows start in `strings` (`u32::MAX`: none).
     string_first: Vec<u32>,
     /// The `trivia` rows.
@@ -576,6 +580,16 @@ impl Grammar {
         (self.strings[self.first_string(kind)..].iter())
             .take_while(move |(k, _)| *k == kind)
             .map(|(_, s)| s)
+    }
+
+    /// The `regex` row of the token kind `kind`.
+    pub fn regex_row(&self, kind: SyntaxKind) -> Option<&RegexRow> {
+        self.regex_rows.iter().find(|r| r.kind == Some(kind))
+    }
+
+    /// The `regex-call` rows: calls whose first argument is a regex source.
+    pub fn regex_calls(&self) -> &[RegexCall] {
+        &self.regex_calls
     }
 
     /// The value of a string token of kind `kind`: [`StringSyntax::value_of`] of the first of its

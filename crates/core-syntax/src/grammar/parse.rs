@@ -313,6 +313,8 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut precedence_rows: Vec<PrecedenceRow> = Vec::new();
     let mut keys = KeySyntax::default();
     let mut strings: Vec<StringSyntax> = Vec::new();
+    let mut regex_rows: Vec<RegexRow> = Vec::new();
+    let mut regex_calls: Vec<RegexCall> = Vec::new();
     let mut trivia: Vec<TriviaRow> = Vec::new();
     let mut limits = Limits::default();
     let mut raw: Vec<RawKind> = Vec::with_capacity(lexed.decls.len());
@@ -427,6 +429,8 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
                 });
             }
             "string" => strings.extend(string_row(&mut c)?),
+            "regex" => regex_rows.push(regex_row(&mut c)?),
+            "regex-call" => regex_calls.push(regex_call_row(&mut c)?),
             "trivia" => trivia.push(trivia_row(&mut c)?),
             "limits" => limits = limits_row(&mut c)?,
             "suppress" => {
@@ -500,6 +504,14 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         grammar.string_first[kind.index() as usize] = i as u32;
     }
     grammar.strings = rows;
+    for row in &mut regex_rows {
+        match grammar.by_name.get(&row.token) {
+            Some(kind) if kind.is_token() => row.kind = Some(*kind),
+            _ => return err(1, format!("regex row of unknown token `{}`", row.token)),
+        }
+    }
+    grammar.regex_rows = regex_rows;
+    grammar.regex_calls = regex_calls;
     for row in &mut trivia {
         row.kind = grammar.by_name.get(&row.token).copied();
         if row.kind.is_none() {
@@ -539,6 +551,51 @@ fn trivia_row(c: &mut Cursor<'_>) -> Result<TriviaRow, GrammarError> {
             "unicode" => row.unicode = true,
             other => return err(c.line, format!("unknown trivia attribute `{other}`")),
         }
+    }
+    Ok(row)
+}
+
+/// A `regex <Token> flavor <name> [quote "c"]` row: the token holds a regex literal
+/// (`/body/flags` with the quote `/`).
+fn regex_row(c: &mut Cursor<'_>) -> Result<RegexRow, GrammarError> {
+    let token = c.ident("a token kind")?.to_string();
+    let mut row = RegexRow {
+        token,
+        kind: None,
+        flavor: String::new(),
+        quote: '/',
+    };
+    while c.peek().is_some() {
+        match c.ident("a regex attribute")? {
+            "flavor" => row.flavor = c.ident("a flavor")?.to_string(),
+            "quote" => row.quote = c.string("a delimiter")?.chars().next().unwrap_or('/'),
+            other => return err(c.line, format!("unknown regex attribute `{other}`")),
+        }
+    }
+    if row.flavor.is_empty() {
+        return err(c.line, "a regex row needs a flavor");
+    }
+    Ok(row)
+}
+
+/// A `regex-call flavor <name> [concat "+"] "callee"...` row: a call whose first argument is a
+/// regex source (the text of its `callee`, spaces dropped, is one of the strings).
+fn regex_call_row(c: &mut Cursor<'_>) -> Result<RegexCall, GrammarError> {
+    let mut row = RegexCall::default();
+    while let Some(l) = c.peek() {
+        if let Lexeme::Str(s) = l {
+            row.callees.push(s.to_string());
+            c.next();
+            continue;
+        }
+        match c.ident("a regex-call attribute")? {
+            "flavor" => row.flavor = c.ident("a flavor")?.to_string(),
+            "concat" => row.concat = Some(c.string("an operator")?.to_string()),
+            other => return err(c.line, format!("unknown regex-call attribute `{other}`")),
+        }
+    }
+    if row.flavor.is_empty() || row.callees.is_empty() {
+        return err(c.line, "a regex-call row needs a flavor and callees");
     }
     Ok(row)
 }
@@ -610,6 +667,8 @@ fn string_row(c: &mut Cursor<'_>) -> Result<Vec<StringSyntax>, GrammarError> {
             "raw" => s.raw = c.string("raw prefix letters")?.to_string(),
             "triple" => s.triple = true,
             "double" => s.doubled = true,
+            "opener" => s.opener = c.string("a substitution opener")?.to_string(),
+            "resume" => s.resume = Some(ch(c.next()).ok_or_else(bad)?),
             "surrogates" => s.surrogates = true,
             "continuation" => s.continuation = true,
             "fold" => s.fold = true,
@@ -762,6 +821,8 @@ fn resolve(
         precedence_rows,
         keys,
         strings: Vec::new(),
+        regex_rows: Vec::new(),
+        regex_calls: Vec::new(),
         string_first: Vec::new(),
         trivia: TriviaSyntax::default(),
         limits: Limits::default(),

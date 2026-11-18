@@ -131,6 +131,7 @@ token String #string #restyle
 string String quote "\"" "'" triple prefix "rRbBuUfFtT" raw "rR" escape "\\" continuation named "N" octal 3
   replace 63 map "a" 7 "b" 8 "f" 12 "n" 10 "r" 13 "t" 9 "v" 11 "\\" 92 "'" 39 "\"" 34 hex "x" 2 "u" 4 "U" 8
 // An f-string's or t-string's start (prefix and opening quote), end (closing quote) and the literal text between its replacement fields.
+regex-call flavor python concat "+" "re.compile" "re.match" "re.search" "re.fullmatch" "re.split" "re.findall" "re.finditer" "re.sub" "re.subn"
 token FStringStart #string #restyle
 token FStringMiddle #string #restyle
 token FStringEnd #string #restyle
@@ -257,7 +258,7 @@ node PatternArguments #opaque
 node PatternKeyword #opaque
 node Comprehension #opaque #comprehension =
     Async? For target:#expression In iter:#expression
-node Arguments #opaque
+node Arguments #opaque #arguments
 node Parameters #parameter-list =
     parameters:#parameter* Slash? #parameter* Star? #parameter*
 node Parameter #declaration #parameter =

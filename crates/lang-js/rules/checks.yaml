@@ -86,7 +86,7 @@ severity: error
 category: suspicious
 ---
 id: no-useless-escape
-family: check
+family: regex
 params: { check: useless-escape }
 message: 'Unnecessary escape character: \{name}.'
 description: A backslash in a string, template or regex that escapes nothing special (`"\d"`, `/\-/`).
@@ -95,16 +95,16 @@ severity: off
 category: suspicious
 ---
 id: no-regex-spaces
-family: check
-params: { check: regex-spaces }
+family: regex
+params: { check: spaces }
 message: "Spaces are hard to count. Use {{name}}."
 description: Two or more spaces in a regex literal or in the string of `new RegExp(...)`, outside a character class.
 example: "var r = /a  b/;   # reported"
 category: suspicious
 ---
 id: no-empty-character-class
-family: check
-params: { check: empty-character-class }
+family: regex
+params: { check: empty-class }
 message: "Empty class."
 description: "`[]` in a regex literal, which matches nothing."
 example: "var r = /a[]/;   # reported"
@@ -216,16 +216,16 @@ example: "var a = b\n(c || d).e()   # reported"
 category: suspicious
 ---
 id: no-control-regex
-family: check
-params: { check: control-regex }
+family: regex
+params: { check: control }
 message: "Unexpected control character(s) in regular expression: {name}."
 description: A control character (below U+0020) in a regex literal or in the constant string given to `RegExp`, written raw or as `\x00`, `\u0000` or `\u{0}`.
 example: "var r = /\\x1f/;   # reported"
 category: suspicious
 ---
 id: no-misleading-character-class
-family: check
-params: { check: misleading-character-class }
+family: regex
+params: { check: misleading-class }
 message: "Unexpected combined character in character class."
 description: A character class of a regex (a literal or the constant string given to `RegExp`; names of variables written once are followed) in which a combining mark follows another character. The surrogate pair, emoji modifier, flag and joined-sequence checks are not made.
 example: "var r = /[A\\u0301]/;   # reported"

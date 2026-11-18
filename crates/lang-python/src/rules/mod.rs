@@ -29,6 +29,7 @@ pub static FAMILIES: &[Family] = &[
         name: "scope",
         build: |meta, p| core_rules::scope_rules::build(&crate::semantic::LANG, meta, p),
     },
+    core_rules::regex_source::FAMILY,
 ];
 
 pub(super) use core_rules::checks::{Entry, NodeCheck as Check};

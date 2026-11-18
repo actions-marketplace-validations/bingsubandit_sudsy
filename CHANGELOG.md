@@ -21,6 +21,12 @@
   `import-shadowed-by-loop-var` and `redefined-argument-from-local` are merged into
   `shadowed-variable` (so a plain `warn` now reports both; it was `off` for the second).
   Names inside quoted annotations are read as identifiers, not parsed.
+* The regex rules are one shared family (`core_rules::regex_source`): JavaScript/TypeScript keeps
+  `no-control-regex`, `no-regex-spaces`, `no-empty-character-class`,
+  `no-misleading-character-class` and `no-useless-escape` (regex part), and Python has the new
+  `no-control-regex`, `no-regex-spaces` and `no-misleading-character-class` (off by default) for
+  the constant string given to `re.compile`, `re.match`, `re.search` and the other `re` functions.
+  `no-regex-spaces` now also reads the pattern of a string argument with its escapes decoded.
 
 ### Changed
 * GraphQL `selection-set-depth`: the option `max_depth` is now `max`, as in every `max` rule.

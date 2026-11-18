@@ -4,11 +4,10 @@
 
 mod binder;
 mod dupes;
-mod escapes;
 mod imports;
+mod literals;
 mod misc;
 mod reach;
-mod regexp;
 mod scope;
 mod stmts;
 mod ts;
@@ -21,12 +20,19 @@ use core_syntax::{Grammar, SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 
 pub static RULES: &[&dyn Rule] = &[];
 
-pub static FAMILIES: &[Family] = &[FAMILY, SCOPE];
+pub static FAMILIES: &[Family] = &[FAMILY, SCOPE, REGEX];
 
 /// The scope rules, shared with the other languages (`core_rules::scope_rules`).
 const SCOPE: Family = Family {
     name: "scope",
     build: |meta, p| core_rules::scope_rules::build(&crate::semantic::LANG, meta, p),
+};
+
+/// The regex rules, shared with the other languages (`core_rules::regex_source`); the scope
+/// model follows the names of variables into `new RegExp(name)`.
+const REGEX: Family = Family {
+    name: "regex",
+    build: |meta, p| core_rules::regex_source::build(Some(&crate::semantic::LANG), meta, p),
 };
 
 const FAMILY: Family = Family {
@@ -78,29 +84,14 @@ const CHECKS: &[Entry] = &[
     ),
     ("require-yield", &[k::FUNCTION], stmts::require_yield),
     (
-        "useless-escape",
-        &[k::STRING_LITERAL, k::TEMPLATE_LITERAL, k::REG_EXP_LITERAL],
-        escapes::useless_escape,
-    ),
-    (
-        "regex-spaces",
-        &[k::REG_EXP_LITERAL, k::NEW_EXPRESSION, k::CALL_EXPRESSION],
-        escapes::regex_spaces,
-    ),
-    (
-        "empty-character-class",
-        &[k::REG_EXP_LITERAL],
-        escapes::empty_character_class,
-    ),
-    (
         "irregular-whitespace",
         &[k::PROGRAM],
-        escapes::irregular_whitespace,
+        literals::irregular_whitespace,
     ),
     (
         "loss-of-precision",
         &[k::NUMERIC_LITERAL],
-        escapes::loss_of_precision,
+        literals::loss_of_precision,
     ),
     (
         "unused-expressions",
@@ -120,16 +111,6 @@ const CHECKS: &[Entry] = &[
         "duplicate-enum-values",
         &[k::TS_ENUM_DECLARATION],
         stmts::duplicate_enum_values,
-    ),
-    (
-        "control-regex",
-        &[k::REG_EXP_LITERAL, k::NEW_EXPRESSION, k::CALL_EXPRESSION],
-        regexp::control_regex,
-    ),
-    (
-        "misleading-character-class",
-        &[k::REG_EXP_LITERAL, k::NEW_EXPRESSION, k::CALL_EXPRESSION],
-        regexp::misleading_class,
     ),
     ("const-assign", &[k::PROGRAM], scope::const_assign),
     ("class-assign", &[k::PROGRAM], scope::class_assign),

@@ -18,6 +18,7 @@ pub mod embedded;
 pub mod grammar;
 pub mod grammars;
 pub mod kind;
+pub mod regex;
 pub mod roles;
 pub mod scan;
 pub mod shape;

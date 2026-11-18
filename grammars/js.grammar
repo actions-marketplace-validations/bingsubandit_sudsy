@@ -71,8 +71,12 @@ string String quote "\"" "'" escape "\\" continuation octal 3 unknown drop repla
 token Number #literal #restyle
 token BigInt #literal #restyle
 token RegExp #literal #restyle
+regex RegExp flavor ecmascript quote "/"
+regex-call flavor ecmascript concat "+" "RegExp"
 // A piece of a template literal: the text with its backtick or `${` and `}` delimiters.
 token TemplateChunk #string
+string TemplateChunk quote "`" resume "}" opener "${" escape "\\" continuation octal 3 unknown drop
+  map "n" 10 "r" 13 "v" 11 "t" 9 "b" 8 "f" 12 "8" 56 "9" 57 hex "x" 2 "u" 4
 token JsxTextRun
 
 // Zero-width end-of-file token; it carries the leading trivia of the file's tail.
@@ -90,8 +94,8 @@ node ArrayExpression #expression #opaque
 node Elision #opaque #hole
 node ObjectExpression #expression #opaque #mapping
 node ObjectProperty #key-value = Keyword? Identifier? Operator? LBracket? key:#expression RBracket? Colon? value:#expression?
-node TemplateLiteral #expression #opaque
-node TaggedTemplateExpression #expression #opaque #escapes
+node TemplateLiteral #expression #opaque #quoted
+node TaggedTemplateExpression #expression #opaque #escapes #raw-strings
 node TemplateElement #opaque
 node ComputedMemberExpression #expression #index = object:#expression QuestionDot? LBracket arguments:#expression RBracket
 node StaticMemberExpression #expression #member-access = object:#expression Dot? QuestionDot? member:IdentifierName
@@ -191,9 +195,9 @@ node V8IntrinsicExpression #expression #opaque
 node BooleanLiteral #expression #literal = value:Keyword
 node NullLiteral #expression #literal = value:Keyword
 node NumericLiteral #expression #literal = value:Number
-node StringLiteral #expression #literal = value:String? StringLiteral?
+node StringLiteral #expression #literal #quoted = value:String? StringLiteral?
 node BigIntLiteral #expression #literal = value:BigInt
-node RegExpLiteral #expression #literal = value:RegExp
+node RegExpLiteral #expression #literal #regex = value:RegExp
 node JSXElement #expression #opaque
 node JSXOpeningElement #opaque #markup
 node JSXClosingElement #opaque
@@ -204,7 +208,7 @@ node JSXNamespacedName #opaque
 node JSXMemberExpression #opaque
 node JSXExpressionContainer #opaque
 node JSXEmptyExpression #opaque
-node JSXAttribute #opaque
+node JSXAttribute #opaque #raw-strings
 node JSXSpreadAttribute #opaque
 node JSXIdentifier #opaque
 node JSXSpreadChild #opaque

@@ -31,6 +31,10 @@ pub struct StringSyntax {
     pub raw: String,
     /// Two delimiters in a row stand for one.
     pub doubled: bool,
+    /// Text that ends a piece of the string without a closing delimiter (`${`: the template
+    /// literal goes on with code), and the delimiter that starts the next piece (`}`).
+    pub opener: String,
+    pub resume: Option<char>,
     pub escape: Option<char>,
     /// Escape letter to the character it stands for.
     pub map: Vec<(char, char)>,
@@ -66,7 +70,9 @@ pub struct Literal<'a> {
 impl StringSyntax {
     /// Does this row describe `text`: its opening delimiter after the prefix, or any unquoted text.
     pub fn matches(&self, text: &str) -> bool {
-        self.quotes.is_empty() || text[self.prefix_len(text)..].starts_with(self.quotes.as_slice())
+        self.quotes.is_empty()
+            || text[self.prefix_len(text)..].starts_with(self.quotes.as_slice())
+            || self.resume.is_some_and(|r| text.starts_with(r))
     }
 
     fn prefix_len(&self, text: &str) -> usize {
@@ -87,16 +93,28 @@ impl StringSyntax {
             });
         }
         let (prefix, rest) = text.split_at(self.prefix_len(text));
-        let q = rest.chars().next().filter(|c| self.quotes.contains(c))?;
+        let q = rest
+            .chars()
+            .next()
+            .filter(|c| self.quotes.contains(c) || Some(*c) == self.resume)?;
         let width = q.len_utf8();
         let triple =
             self.triple && rest.len() >= 6 * width && rest.starts_with(&q.to_string().repeat(3));
         let open = &rest[..if triple { 3 * width } else { width }];
         let body = &rest[open.len()..];
+        let mut buf = [0u8; 4];
+        // A piece that resumes after code closes with the first quote, not with its opener.
+        let close = match (self.resume, self.quotes.first()) {
+            (Some(_), Some(q)) => q.encode_utf8(&mut buf),
+            _ => open,
+        };
+        let tail = body
+            .strip_suffix(self.opener.as_str())
+            .filter(|_| !self.opener.is_empty());
         Some(Literal {
             prefix,
             open,
-            inner: body.strip_suffix(open).unwrap_or(body),
+            inner: tail.or_else(|| body.strip_suffix(&*close)).unwrap_or(body),
         })
     }
 
@@ -141,7 +159,14 @@ impl StringSyntax {
                 continue;
             }
             let Some((_, e)) = chars.next() else { continue };
-            let known = e == quote
+            let kept = !self.opener.is_empty() && {
+                let (head, last) = self.opener.split_at(self.opener.len() - 1);
+                let after = &inner[i + esc.len_utf8() + e.len_utf8()..];
+                (self.opener.starts_with(e) && after.starts_with(&self.opener[e.len_utf8()..]))
+                    || (last.starts_with(e) && inner[..i].ends_with(head))
+            };
+            let known = kept
+                || e == quote
                 || e == esc
                 || self.map.iter().any(|m| m.0 == e)
                 || self.hex.iter().any(|h| h.0 == e)
@@ -361,6 +386,18 @@ mod tests {
         let g = Grammar::parse(&format!("language t 1\ntoken S\ntoken Q\n{rows}")).unwrap();
         let kind = g.kind_by_name("S").unwrap();
         g.string_value(kind, text).map(|v| v.into_owned())
+    }
+
+    #[test]
+    fn pieces_of_a_template_end_with_the_opener() {
+        let row = r#"string S quote "`" resume "}" opener "${" escape "\\" unknown drop"#;
+        assert_eq!(value(row, "`a\\${b${").unwrap(), "a${b");
+        assert_eq!(value(row, "}c`").unwrap(), "c");
+        let g = Grammar::parse(&format!("language t 1\ntoken S\n{row}")).unwrap();
+        let s = g.string_rows(g.kind_by_name("S").unwrap()).next().unwrap();
+        let mut found = Vec::new();
+        s.unknown_escapes("\\${$\\{\\q", '`', |_, c| found.push(c));
+        assert_eq!(found, ['q']);
     }
 
     #[test]

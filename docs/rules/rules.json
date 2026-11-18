@@ -8090,7 +8090,8 @@
       "fix": null,
       "id": "no-control-regex",
       "languages": [
-        "js"
+        "js",
+        "python"
       ],
       "options": [],
       "presets": [
@@ -8851,7 +8852,8 @@
       "fix": null,
       "id": "no-misleading-character-class",
       "languages": [
-        "js"
+        "js",
+        "python"
       ],
       "options": [],
       "presets": [
@@ -9177,7 +9179,8 @@
       "fix": null,
       "id": "no-regex-spaces",
       "languages": [
-        "js"
+        "js",
+        "python"
       ],
       "options": [],
       "presets": [
