@@ -7,6 +7,7 @@ use crate::generated::kind as k;
 use crate::text::code_text;
 use core_rules::RuleContext;
 use core_rules::tree::significant_range;
+use core_syntax::roles::has;
 use core_syntax::{SyntaxNode, TextRange};
 
 pub use core_syntax::roles::un as inner;
@@ -65,13 +66,10 @@ pub fn dotted(n: &SyntaxNode) -> Option<String> {
 
 /// The statements among the children of a node, in order.
 pub fn statements<'a>(n: &'a SyntaxNode) -> impl Iterator<Item = SyntaxNode> + 'a {
-    n.children().filter(|c| is_statement(c.kind()))
+    n.children().filter(|c| has(c.kind(), "statement"))
 }
 
-pub fn is_statement(kind: core_syntax::SyntaxKind) -> bool {
-    STATEMENTS.contains(&kind)
-}
-
+/// The kinds of the `statement` tag, for the dispatch tables (rows name kinds).
 pub const STATEMENTS: &[core_syntax::SyntaxKind] = &[
     k::STMT_FUNCTION_DEF,
     k::STMT_CLASS_DEF,

@@ -5,13 +5,14 @@
 
 use super::Check;
 use super::scope::run;
-use super::tree::{callee, compare_ops, dotted, inner, is_statement, span, statements};
+use super::tree::{callee, compare_ops, dotted, inner, span, statements};
 use crate::generated::kind as k;
 use crate::names::is_builtin_class;
 use crate::semantic::{Cx, model};
 use crate::text::code_text;
 use core_rules::RuleContext;
 use core_semantics::scopes::Flags;
+use core_syntax::roles::has;
 use core_syntax::{SyntaxElement, SyntaxNode, TextRange};
 
 /// E402: an import of the module after code (a docstring, `__all__`-style assignments, blocks and
@@ -120,7 +121,7 @@ pub(super) fn colon_statement(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'
         }
         let Some(first) = next
             .and_then(|e| e.into_node())
-            .filter(|s| is_statement(s.kind()))
+            .filter(|s| has(s.kind(), "statement"))
         else {
             continue;
         };
@@ -130,7 +131,9 @@ pub(super) fn colon_statement(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'
                 .children()
                 .next()
                 .is_some_and(|e| e.kind() == k::EXPR_ELLIPSIS_LITERAL)
-            && first.next_sibling().is_none_or(|s| !is_statement(s.kind()));
+            && first
+                .next_sibling()
+                .is_none_or(|s| !has(s.kind(), "statement"));
         if lone_ellipsis {
             continue;
         }

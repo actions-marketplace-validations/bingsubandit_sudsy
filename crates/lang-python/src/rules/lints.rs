@@ -9,13 +9,12 @@
 //! tools: legacy-api-upgrade: ruff pyupgrade
 
 use super::Check;
-use super::tree::{
-    call_arguments, callee, compare_ops, inner, is_statement, keyword, span, statements, tokens,
-};
+use super::tree::{call_arguments, callee, compare_ops, inner, keyword, span, statements, tokens};
 use crate::generated::kind as k;
 use crate::semantic::{Cx, model};
 use crate::text::{code_text, string_value};
 use core_rules::RuleContext;
+use core_syntax::roles::has;
 use core_syntax::{SyntaxKind, SyntaxNode};
 use std::collections::BTreeMap;
 
@@ -303,7 +302,7 @@ pub(super) fn bodies(n: &SyntaxNode) -> Vec<Vec<SyntaxNode>> {
             core_syntax::SyntaxElement::Token(t) if matches!(t.kind(), k::ELSE | k::FINALLY) => {
                 out.push(Vec::new())
             }
-            core_syntax::SyntaxElement::Node(s) if is_statement(s.kind()) => {
+            core_syntax::SyntaxElement::Node(s) if has(s.kind(), "statement") => {
                 if let Some(last) = out.last_mut() {
                     last.push(s);
                 }
