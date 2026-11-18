@@ -50,6 +50,7 @@ raise Exception("x")
 ^^^^^^^^^^^^^^^^^^^^ raise-vanilla-class
 
 if not isinstance(x, int):
+^ unreachable-code
     raise ValueError("x")
 #   ^^^^^^^^^^^^^^^^^^^^^ type-check-without-type-error
 

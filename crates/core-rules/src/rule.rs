@@ -132,6 +132,12 @@ impl<'a> RuleContext<'a> {
         self.ranges
     }
 
+    /// Is this the first time in this file that this rule asks about `range`? Always true outside
+    /// the engine's traversal.
+    pub fn first_visit(&self, range: TextRange) -> bool {
+        self.ranges.is_none_or(|c| c.first(self.meta.id, range))
+    }
+
     /// Has this rule already reported exactly `message` in this context?
     pub fn has_reported(&self, message: &str) -> bool {
         self.out

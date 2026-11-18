@@ -19,6 +19,7 @@ pub mod engine;
 pub mod extension;
 pub mod family;
 pub mod fixes;
+pub mod flow_rules;
 pub mod hooks;
 pub mod keys;
 pub mod layout;

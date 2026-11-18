@@ -4,6 +4,7 @@
 //! // comment
 //! language json 1 "JSON"              // name, LanguageId (1..=31), display name (optional)
 //! comments line "//" block "/*" "*/"   // either part optional
+//! hoisted "var"                        // declaration keywords whose bare declarations hoist (optional)
 //! suppress disable-next-line "sudsy-disable-next-line"   // role, marker; roles: disable-next-line,
 //!                                                        // disable-line, disable, enable, disable-file, ignore*
 //! token Whitespace #trivia #whitespace // variable-text token with tags
@@ -156,6 +157,8 @@ pub struct Grammar {
     pub requires_roles: bool,
     /// Operator text to operator kind (`operators` lines).
     operators: HashMap<String, String>,
+    /// Declaration keywords whose declarations hoist (`hoisted` line: JS `var`).
+    hoisted: Vec<String>,
     /// The `precedence` lines (a handful of rows: scanned, no table).
     precedence_rows: Vec<PrecedenceRow>,
     keys: KeySyntax,
@@ -376,6 +379,20 @@ impl Grammar {
     /// The node kinds carrying `tag`, in id order (precomputed; empty for an unknown tag).
     pub fn nodes_with_tag(&self, tag: &str) -> &[SyntaxKind] {
         self.tag_nodes.get(tag).map_or(&[], Vec::as_slice)
+    }
+
+    /// Is `keyword` one of the `hoisted` declaration keywords?
+    pub fn is_hoisted(&self, keyword: &str) -> bool {
+        self.hoisted.iter().any(|h| h == keyword)
+    }
+
+    /// Does the body of `kind` have an item labelled `label` or filling the field `label`?
+    pub fn has_field(&self, kind: SyntaxKind, label: &str) -> bool {
+        self.def(kind).is_some_and(|d| {
+            d.body
+                .iter()
+                .any(|i| i.label.as_deref() == Some(label) || i.field.as_deref() == Some(label))
+        })
     }
 
     /// The child of `node` in a body item labelled `label` or filling the role field `label` (the

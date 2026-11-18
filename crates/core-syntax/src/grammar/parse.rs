@@ -309,6 +309,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut suppressions = Vec::new();
     let mut requires_roles = false;
     let mut operators: HashMap<String, String> = HashMap::new();
+    let mut hoisted: Vec<String> = Vec::new();
     let mut precedence_rows: Vec<PrecedenceRow> = Vec::new();
     let mut keys = KeySyntax::default();
     let mut raw: Vec<RawKind> = Vec::with_capacity(lexed.decls.len());
@@ -370,6 +371,11 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
                         }
                         other => return err(d.line, format!("unknown keys option `{other}`")),
                     }
+                }
+            }
+            "hoisted" => {
+                while c.peek().is_some() {
+                    hoisted.push(c.string("a declaration keyword")?.to_string());
                 }
             }
             "operators" => {
@@ -469,6 +475,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         suppressions,
         requires_roles,
         operators,
+        hoisted,
         precedence_rows,
         keys,
         raw,
@@ -485,6 +492,7 @@ fn resolve(
     suppressions: Vec<Suppression>,
     requires_roles: bool,
     operators: HashMap<String, String>,
+    hoisted: Vec<String>,
     precedence_rows: Vec<PrecedenceRow>,
     keys: KeySyntax,
     raw: Vec<RawKind>,
@@ -580,6 +588,7 @@ fn resolve(
         suppressions,
         requires_roles,
         operators,
+        hoisted,
         precedence_rows,
         keys,
         token_flags: super::hot_flags(&tokens),

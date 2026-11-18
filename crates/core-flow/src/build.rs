@@ -1,4 +1,4 @@
-//! The flow graph of a body built from statement roles (`#block`, `#conditional`, `#loop`,
+//! The flow graph of a body built from statement roles (`#block`, `#statements`, `#conditional`, `#loop`,
 //! `#switch`, `#case`, `#try`, `#catch`, `#return`, `#throw`, `#break`, `#continue`, `#labeled`),
 //! so a language gets reachability from its grammar's roles alone. Every statement the walk
 //! passes becomes one operation (its source span) in the block it runs in; a statement that no
@@ -28,6 +28,11 @@ pub struct Reached {
 }
 
 impl Reached {
+    /// The starts of the statements that can never run, sorted.
+    pub fn dead_starts(&self) -> &[u32] {
+        &self.dead
+    }
+
     /// Is the statement starting at `start` (its first code byte) built, and can it never run?
     pub fn is_dead(&self, start: u32) -> bool {
         self.dead.binary_search(&start).is_ok()
@@ -65,6 +70,23 @@ impl Flow {
     }
 }
 
+/// The `#case` nodes of a `switch`: its children, or the children of the wrapper that holds them
+/// (PHP's `SwitchBraceDelimitedBody`), never those of a nested switch or arm.
+pub fn cases(g: &Grammar, switch: &SyntaxNode) -> Vec<SyntaxNode> {
+    fn go(g: &Grammar, n: &SyntaxNode, out: &mut Vec<SyntaxNode>, depth: u8) {
+        for child in n.children() {
+            if g.has_tag(child.kind(), "case") {
+                out.push(child);
+            } else if depth > 0 && !g.has_tag(child.kind(), "switch") {
+                go(g, &child, out, depth - 1);
+            }
+        }
+    }
+    let mut out = Vec::new();
+    go(g, switch, &mut out, 2);
+    out
+}
+
 /// Builds the graph of `root`: a function (its body), or any statement (a block, a `switch`, the
 /// file). `None` for a function without a body. Control that leaves `root` (`return`, a `break` to
 /// an outer loop, a throw nothing catches) ends the path.
@@ -79,7 +101,11 @@ pub fn build(grammar: &Grammar, text: &str, root: &SyntaxNode) -> Option<Flow> {
         case_ends: Vec::new(),
     };
     if role(grammar, root) == Role::Function {
-        b.stmt(&grammar.slot(root, "body")?.into_node()?);
+        let body = b.nodes(root, "body");
+        if body.is_empty() {
+            return None;
+        }
+        b.stmts(&body);
     } else {
         b.stmt(root);
     }
@@ -119,7 +145,7 @@ fn role(g: &Grammar, n: &SyntaxNode) -> Role {
         .iter()
         .find_map(|t| {
             Some(match &**t {
-                "block" => Role::Block,
+                "block" | "statements" => Role::Block,
                 "conditional" => Role::Conditional,
                 "loop" => Role::Loop,
                 "switch" => Role::Switch,
@@ -174,9 +200,32 @@ struct Builder<'a> {
     case_ends: Vec<(u32, usize)>,
 }
 
-fn constant_true(text: &str) -> bool {
+/// Is the loop test constant in the way that keeps the loop going (`true`; for a `#negated` loop,
+/// which runs while its condition is false, `false` or `nil`)?
+fn endless_test(text: &str, negated: bool) -> bool {
     let t = text.trim_matches(|c: char| c == '(' || c == ')' || c.is_whitespace());
-    matches!(t, "true" | "True" | "1")
+    if negated {
+        matches!(t, "false" | "nil")
+    } else {
+        matches!(t, "true" | "True" | "1")
+    }
+}
+
+/// Does the loop look endless: its test is a constant that keeps it going, or it has none where
+/// the grammar has a place for one? (A `break` inside can still end it.)
+pub fn endless_loop(g: &Grammar, text: &str, n: &SyntaxNode) -> bool {
+    match g.slot(n, "condition").and_then(SyntaxElement::into_node) {
+        Some(c) => {
+            let t = code_span(&c, g).map_or("", |r| &text[r]);
+            endless_test(t, g.has_tag(n.kind(), "negated"))
+        }
+        None => {
+            g.slot(n, "iterable")
+                .and_then(SyntaxElement::into_node)
+                .is_none()
+                && g.has_field(n.kind(), "condition")
+        }
+    }
 }
 
 impl<'a> Builder<'a> {
@@ -219,8 +268,13 @@ impl<'a> Builder<'a> {
             .collect()
     }
 
-    fn text_of(&self, n: &SyntaxNode) -> &'a str {
-        code_span(n, self.g).map_or("", |r| &self.text[r])
+    /// The name a `break`, `continue` or labeled statement carries (a node or a token).
+    fn label(&self, n: &SyntaxNode) -> Option<&'a str> {
+        let at = match self.g.slot(n, "label")? {
+            SyntaxElement::Node(l) => code_span(&l, self.g)?,
+            SyntaxElement::Token(t) => t.text_range(),
+        };
+        Some(&self.text[at])
     }
 
     /// One operation for the statement `n`.
@@ -248,6 +302,21 @@ impl<'a> Builder<'a> {
                 match role(self.g, &c) {
                     Role::Function => walk.skip_subtree(),
                     Role::Fallible | Role::Throw => return true,
+                    _ => {}
+                }
+            }
+        }
+        false
+    }
+
+    /// Is there a `break` in `n` (outside nested functions)?
+    fn breaks(&self, n: &SyntaxNode) -> bool {
+        let mut walk = n.preorder();
+        while let Some(event) = walk.next() {
+            if let WalkEvent::Enter(c) = event {
+                match role(self.g, &c) {
+                    Role::Function => walk.skip_subtree(),
+                    Role::Break => return true,
                     _ => {}
                 }
             }
@@ -329,14 +398,19 @@ impl<'a> Builder<'a> {
         self.walk(n);
     }
 
+    fn stmts(&mut self, list: &[SyntaxNode]) {
+        for s in list {
+            self.stmt(s);
+        }
+    }
+
     fn walk(&mut self, n: &SyntaxNode) {
         match role(self.g, n) {
             Role::Block => {
-                for s in self.nodes(n, "items") {
-                    self.stmt(&s);
-                }
+                let items = self.nodes(n, "items");
+                self.stmts(&items);
             }
-            Role::Conditional => self.conditional(n),
+            Role::Conditional => self.conditional(n, &[]),
             Role::Loop => self.looping(n),
             Role::Switch => self.switch(n),
             Role::Try => self.try_stmt(n),
@@ -352,17 +426,15 @@ impl<'a> Builder<'a> {
                 self.jump(None);
             }
             r @ (Role::Break | Role::Continue) => {
-                let label = self.node(n, "label").map(|l| self.text_of(&l));
-                let t = self.find(label, r == Role::Break);
+                let t = self.find(self.label(n), r == Role::Break);
                 self.jump(t);
             }
             Role::Labeled => {
-                let name = self.node(n, "label").map_or("", |l| self.text_of(&l));
+                let name = self.label(n).unwrap_or("");
                 let after = self.new_block();
                 self.frames.push(Frame::Label { name, brk: after });
-                if let Some(body) = self.node(n, "body") {
-                    self.stmt(&body);
-                }
+                let body = self.nodes(n, "body");
+                self.stmts(&body);
                 self.frames.pop();
                 self.always(self.cur, after);
                 self.cur = after;
@@ -371,13 +443,13 @@ impl<'a> Builder<'a> {
         }
     }
 
-    fn conditional(&mut self, n: &SyntaxNode) {
-        let then = self.node(n, "then");
+    /// `n` with the clauses after it (Python's `elif` and `else` are siblings in the `else` field of
+    /// the `if`): they are its else branch.
+    fn conditional(&mut self, n: &SyntaxNode, rest: &[SyntaxNode]) {
+        let then = self.nodes(n, "then");
         // an `else` clause has no condition: its body runs
         let Some(cond) = self.node(n, "condition") else {
-            if let Some(t) = then {
-                self.stmt(&t);
-            }
+            self.stmts(&then);
             return;
         };
         self.parts(&[Some(cond)]);
@@ -385,30 +457,33 @@ impl<'a> Builder<'a> {
         self.edge(head, then_b, 1);
         self.edge(head, else_b, 2);
         self.cur = then_b;
-        if let Some(t) = then {
-            self.stmt(&t);
-        }
+        self.stmts(&then);
         let then_end = self.cur;
         self.cur = else_b;
-        if let Some(e) = self.node(n, "else") {
-            self.stmt(&e);
+        let mut other = self.nodes(n, "else");
+        other.extend_from_slice(rest);
+        match other.split_first() {
+            Some((first, rest)) if role(self.g, first) == Role::Conditional => {
+                self.emit(first);
+                self.conditional(first, rest);
+            }
+            _ => self.stmts(&other),
         }
         self.cur = self.join(&[then_end, self.cur]);
     }
 
     fn looping(&mut self, n: &SyntaxNode) {
-        let (cond, iter) = (self.node(n, "condition"), self.node(n, "iterable"));
+        let cond = self.node(n, "condition");
         let (init, update) = (self.node(n, "init"), self.node(n, "update"));
-        let Some(body) = self.node(n, "body") else {
+        let body = self.nodes(n, "body");
+        let Some(last) = body.last() else {
             return;
         };
         let test_last = cond
             .as_ref()
-            .is_some_and(|c| c.text_range().start() >= body.text_range().end());
-        let endless = match &cond {
-            Some(c) => constant_true(self.text_of(c)),
-            None => iter.is_none(),
-        };
+            .is_some_and(|c| c.text_range().start() >= last.text_range().end());
+        // a `break` the walk may not reach (inside a statement the grammar gives no role) keeps a loop from being endless
+        let endless = !body.iter().any(|b| self.breaks(b)) && endless_loop(self.g, self.text, n);
         let after = self.new_block();
         self.parts(&[init]);
         let top = self.new_block();
@@ -421,7 +496,7 @@ impl<'a> Builder<'a> {
                 brk: after,
                 cont: test,
             });
-            self.stmt(&body);
+            self.stmts(&body);
             self.frames.pop();
             self.always(self.cur, test);
             self.cur = test;
@@ -430,6 +505,7 @@ impl<'a> Builder<'a> {
             self.edge(test, after, 2);
             self.blocks[test].branch_const = endless.then_some(true);
         } else {
+            let iter = self.node(n, "iterable");
             self.parts(&[cond, iter]);
             let body_b = self.new_block();
             self.edge(top, body_b, 1);
@@ -441,7 +517,7 @@ impl<'a> Builder<'a> {
                 brk: after,
                 cont: step.unwrap_or(top),
             });
-            self.stmt(&body);
+            self.stmts(&body);
             self.frames.pop();
             if let Some(step) = step {
                 self.always(self.cur, step);
@@ -458,8 +534,9 @@ impl<'a> Builder<'a> {
         self.parts(&[subject]);
         let (dispatch, after) = (self.cur, self.new_block());
         self.frames.push(Frame::Switch { brk: after });
+        let falls = self.g.has_tag(n.kind(), "fallthrough");
         let (mut default, mut prev) = (false, None);
-        for case in self.nodes(n, "cases") {
+        for case in cases(self.g, n) {
             let entry = self.new_block();
             self.always(dispatch, entry);
             if let Some(p) = prev {
@@ -467,13 +544,17 @@ impl<'a> Builder<'a> {
             }
             self.cur = entry;
             default |= self.g.slot(&case, "test").is_none();
-            for s in self.nodes(&case, "body") {
-                self.stmt(&s);
-            }
+            let body = self.nodes(&case, "body");
+            self.stmts(&body);
             if let Some(r) = code_span(&case, self.g) {
                 self.case_ends.push((u32::from(r.start()), self.cur));
             }
-            prev = Some(self.cur);
+            // an arm that does not fall through leaves the switch
+            if falls {
+                prev = Some(self.cur);
+            } else {
+                self.always(self.cur, after);
+            }
         }
         self.frames.pop();
         if !default {
@@ -487,9 +568,9 @@ impl<'a> Builder<'a> {
 
     fn try_stmt(&mut self, n: &SyntaxNode) {
         let catches = self.nodes(n, "catches");
-        let finalizer = self.node(n, "finally");
+        let finalizer = self.nodes(n, "finally");
         let entries: Vec<usize> = catches.iter().map(|_| self.new_block()).collect();
-        let (has_finally, has_catch) = (finalizer.is_some(), !entries.is_empty());
+        let (has_finally, has_catch) = (!finalizer.is_empty(), !entries.is_empty());
         if has_finally {
             self.frames.push(Frame::Finally(Vec::new()));
         }
@@ -498,9 +579,8 @@ impl<'a> Builder<'a> {
         }
         self.guards += usize::from(has_finally) + usize::from(has_catch);
         let start = self.cur;
-        if let Some(body) = self.node(n, "body") {
-            self.stmt(&body);
-        }
+        let body = self.nodes(n, "body");
+        self.stmts(&body);
         if has_catch {
             self.frames.pop();
             self.guards -= 1;
@@ -514,21 +594,17 @@ impl<'a> Builder<'a> {
             // the handler's own statements run whether or not a throw reaches it (what follows the
             // `try` stays reachable); only its block, built in the entry, can be unreachable
             self.cur = entry;
-            let body = self.node(c, "body");
-            if let Some(body) = &body {
-                self.emit(body);
-            }
+            self.emit(c);
             self.cur = self.new_block();
             self.always(start, self.cur);
-            if let Some(body) = &body {
-                self.walk(body);
-            }
+            let body = self.nodes(c, "body");
+            self.stmts(&body);
             normal.push(self.cur);
         }
-        let Some(finalizer) = finalizer else {
+        if finalizer.is_empty() {
             self.cur = self.join(&normal);
             return;
-        };
+        }
         self.guards -= 1;
         let Some(Frame::Finally(pending)) = self.frames.pop() else {
             return;
@@ -548,7 +624,7 @@ impl<'a> Builder<'a> {
             for from in froms {
                 self.always(from, self.cur);
             }
-            self.stmt(&finalizer);
+            self.stmts(&finalizer);
             match target {
                 Some(t) => self.go(self.cur, t),
                 None => after = self.cur,

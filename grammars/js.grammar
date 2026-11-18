@@ -5,6 +5,7 @@
 language js 17 "JavaScript/TypeScript"
 roles
 // Binary operators, loosest first: `precedence <level> <assoc> "op"...` (core_syntax::Assoc).
+hoisted "var"
 precedence 1 left "??"
 precedence 2 left "||"
 precedence 3 left "&&"
@@ -118,9 +119,9 @@ node ChainExpression #expression #opaque
 node ParenthesizedExpression #expression #parenthesized #transparent
 node Directive #statement #opaque
 node BlockStatement #statement #block #scope = LBrace items:#statement* RBrace
-node VariableDeclaration #statement #declaration = Identifier* Keyword? Identifier* declarators:VariableDeclarator*
+node VariableDeclaration #statement #declaration #inert-bare = Identifier* Keyword? Identifier* declarators:VariableDeclarator*
 node VariableDeclarator #declaration = name:#pattern Operator? type:TSTypeAnnotation? Operator? init:#expression?
-node EmptyStatement #statement #opaque
+node EmptyStatement #statement #opaque #inert
 node ExpressionStatement #statement #opaque
 node IfStatement #statement #conditional = Keyword LParen condition:#expression RParen then:#statement Keyword? else:#statement?
 node DoWhileStatement #statement #loop = Keyword body:#statement Keyword LParen condition:#expression RParen Semicolon?
@@ -135,7 +136,7 @@ node ContinueStatement #statement #continue = Keyword label:LabelIdentifier? Sem
 node BreakStatement #statement #break = Keyword label:LabelIdentifier? Semicolon?
 node ReturnStatement #statement #return = Keyword value:#expression? Semicolon?
 node WithStatement #statement #opaque
-node SwitchStatement #statement #scope #switch = Keyword LParen discriminant=subject:#expression RParen LBrace cases:SwitchCase* RBrace
+node SwitchStatement #statement #scope #switch #fallthrough = Keyword LParen discriminant=subject:#expression RParen LBrace cases:SwitchCase* RBrace
 node SwitchCase #case = Keyword test:#expression? Colon body:#statement*
 node LabeledStatement #statement #labeled = label:LabelIdentifier Colon body:#statement
 node ThrowStatement #statement #throw = Keyword value:#expression Semicolon?
@@ -148,7 +149,7 @@ node ObjectPattern #pattern #opaque
 node BindingProperty #opaque
 node ArrayPattern #pattern #opaque
 node BindingRestElement #pattern #opaque
-node Function #expression #statement #function #declaration #scope =
+node Function #expression #statement #function #declaration #scope #inert =
     Identifier* Keyword? Operator? name:BindingIdentifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? body:FunctionBody?
 node FormalParameters #parameter-list = LParen? parameters:#parameter* RParen?
 node FormalParameter #parameter #opaque

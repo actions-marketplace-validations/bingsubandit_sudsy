@@ -1,25 +1,27 @@
 function a() { return 1; b(); var v; c(); function h() {} }
-//                       ^^^^ no-unreachable
-//                                   ^^^^ no-unreachable
+//                       ^^^^ unreachable-code
+//                                   ^^^^ unreachable-code
 function b() { throw e; ; d(); }
-//                        ^^^^ no-unreachable
+//                        ^^^^ unreachable-code
 function c(x) { if (x) { return; } else { return; } e(); }
-//                                                  ^^^^ no-unreachable
+//                                                  ^^^^ unreachable-code
 function d() { while (true) {} f(); }
 //                          ^^ no-empty-block
-//                             ^^^^ no-unreachable
+//                             ^^^^ unreachable-code
 function e(x) { for (;;) { if (x) break; } g(); }
 function f(x) { switch (x) { case 1: return; default: return; } h(); }
-//                                                              ^^^^ no-unreachable
+//                                                              ^^^^ unreachable-code
 function g(x) { switch (x) { case 1: return; } h(); }
 function h(x) { try { return 1; } finally { i(); } j(); }
-//                                                 ^^^^ no-unreachable
+//                                                 ^^^^ unreachable-code
 function i(x) { l: { break l; } k(); }
 function j() { for (;;) { continue; k(); } }
-//                                  ^^^^ no-unreachable
+//                                  ^^^^ unreachable-code
 function k(x) { try { return 1; } catch (e) { } m(); }
 //                                          ^^^ no-empty-block
-//                                          ^^^ no-unreachable
+//                                          ^^^ unreachable-code
 function l(x) { do { break; } while (x); n(); }
 function m() { return; let z = 1; const y = 2; class Z {} }
-//                     ^^^^^^^^^^ no-unreachable
+//                     ^^^^^^^^^^ unreachable-code
+function n() { return; var w; let q; }
+//                            ^^^^^^ unreachable-code

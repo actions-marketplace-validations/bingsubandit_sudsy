@@ -105,6 +105,11 @@ pub const ROLES: &[Role] = &[
         doc: "a statement with a name that `break` and `continue` can address",
     },
     Role {
+        name: "statements",
+        fields: "items",
+        doc: "a wrapper that holds statements without braces of its own: an `else` or `finally` clause, the body of `lock` or `using`",
+    },
+    Role {
         name: "key-value",
         fields: "key value?",
         doc: "an entry of an object or dictionary, or a named argument (`value` absent when it is the next sibling)",

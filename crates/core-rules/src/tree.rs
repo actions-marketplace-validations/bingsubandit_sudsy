@@ -1,7 +1,7 @@
 //! Helpers over the shared tree that several languages' rules need.
 
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken, TextRange};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 
 /// The span of a node from its first token that is not trivia to the end of its last one:
 /// comments and blank space around the node are not part of it. Found from the two ends, so it
@@ -17,6 +17,7 @@ pub fn significant_range(node: &SyntaxNode, grammar: &Grammar) -> TextRange {
 pub struct TraversalCache {
     range: Cell<Option<(TextRange, TextRange)>>,
     ascii: Cell<Option<bool>>,
+    seen: RefCell<Vec<(&'static str, TextRange)>>,
 }
 
 impl TraversalCache {
@@ -30,6 +31,16 @@ impl TraversalCache {
                 range
             }
         }
+    }
+
+    /// Is this the first ask of rule `id` about `range` in the file?
+    pub fn first(&self, id: &'static str, range: TextRange) -> bool {
+        let mut seen = self.seen.borrow_mut();
+        let new = !seen.contains(&(id, range));
+        if new {
+            seen.push((id, range));
+        }
+        new
     }
 
     /// Is the file's `text` ASCII? Scanned on the first ask.

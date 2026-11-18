@@ -3182,10 +3182,6 @@
               "$ref": "#/definitions/rule",
               "description": "`base.M()` or `base[i]` where the type does not override the member, so `this` binds to the same one. The fix writes `this`."
             },
-            "no-unreachable": {
-              "$ref": "#/definitions/rule",
-              "description": "A statement after `return`, `throw`, `break`, `continue`, an `if`/`else` or `try` that always jumps, or a loop that never ends. Function declarations and `var` without a value are not reported."
-            },
             "no-unsafe-finally": {
               "$ref": "#/definitions/rule",
               "description": "`return`, `throw`, and a `break` or `continue` that leaves the block, in a `finally` block: they override the `try`'s own outcome."
@@ -5346,7 +5342,7 @@
               "description": "A `pass` or `...` statement in a body of two statements or more."
             },
             "unreachable-code": {
-              "description": "A statement that can never run. At `fast` depth this is the statement after a `return`, `throw`, `break`, `continue` or `goto`; with the flow layer it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Only the first statement of a run is reported. Removing it is offered as an editor quick fix only, because unreachable code usually signals a bug. Off by default: the compiler already reports unreachable code (CS0162) and the SDK analyzers add IDE0035.",
+              "description": "A statement that can never run: after `return`, `throw`, `break` or `continue`, after an `if`/`else` or `try` that always jumps, or after a loop that never ends. Only the first statement of a run is reported. Where the language has a flow layer (C#) it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Hoisted declarations and empty statements are left out. Removing the statement is offered as an editor quick fix only, because unreachable code usually signals a bug.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5362,7 +5358,7 @@
                       "properties": {
                         "non_returning_calls": {
                           "default": true,
-                          "description": "Treat the code after a call that never returns (`[DoesNotReturn]`,                       `does_not_return` in `semantics:`) as unreachable. The compiler does not,                       so turn this off to report exactly what it reports (CS0162).",
+                          "description": "With a flow layer, treat the code after a call that never returns (`[DoesNotReturn]`, `does_not_return` in `semantics:`) as unreachable. A compiler does not, so turn this off to report exactly what it reports.",
                           "type": "boolean"
                         }
                       },

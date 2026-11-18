@@ -80,7 +80,7 @@ node Block #block #scope #block-arg =
 node BlockParameter #declaration
 node BlockParameters #block-params #parameter-list =
     #popen? parameters:Parameters? BlockLocalVariable* #pclose?
-node Break #expression #opaque
+node Break #expression #break = Keyword Arguments?
 node CallAndWrite #expression #opaque
 node Call #expression #call #member-access =
     object:#expression? #dot? callee=member:#member-name? #open? operand:#expression? Assign? arguments:Arguments? pass:#block-pass? #close? block:#block-arg?
@@ -129,7 +129,7 @@ node ConstantWrite #expression #assignment =
 node Def #expression #declaration #function #scope =
     Keyword object:#expression? #dot? name:#member-name #open? parameters:Parameters? #close? Assign? body:#body? Keyword?
 node Defined #expression #opaque
-node Else #else-branch #opaque
+node Else #else-branch #statements = Keyword? Colon? stmts=items:Statements? value=items:#expression? Ensure? Keyword?
 node EmbeddedStatements #opaque
 node EmbeddedVariable #opaque
 node Ensure #opaque
@@ -209,7 +209,7 @@ node Module #expression #declaration #type-declaration #scope =
     Keyword name:#expression members:#body? Keyword?
 node MultiTarget #expression #opaque
 node MultiWrite #expression #opaque
-node Next #expression #opaque
+node Next #expression #continue = Keyword Arguments?
 node Nil #expression #literal =
     value:Keyword
 node NoBlockParameter #opaque
@@ -251,7 +251,7 @@ node SourceFile #expression #literal =
 node SourceLine #expression #literal =
     value:Keyword
 node Splat #expression #opaque
-node Statements #body #opaque
+node Statements #body #statements = items:#expression*
 node String #expression #literal =
     #delim? value:StringPart* #delim?
 node Super #expression #call =
@@ -262,7 +262,7 @@ node True #expression #literal =
     value:Keyword
 node Undef #expression #opaque
 node Unless #expression #conditional = Statements? Keyword? condition:#expression Keyword? Operator? then:Statements? else:#else-branch? Keyword?
-node Until #expression #loop = Statements? Keyword condition:#expression Keyword? Semi? body:Statements? Keyword?
+node Until #expression #loop #negated = Statements? Keyword condition:#expression Keyword? Semi? body:Statements? Keyword?
 node When #case = Keyword test:#expression* Keyword? body:Statements?
 node While #expression #loop = Statements? Keyword condition:#expression Keyword? Semi? body:Statements? Keyword?
 node XString #expression #opaque

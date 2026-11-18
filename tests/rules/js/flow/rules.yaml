@@ -1,4 +1,4 @@
-no-unreachable: warn
+unreachable-code: warn
 no-unsafe-finally: warn
 getter-return: warn
 require-yield: warn

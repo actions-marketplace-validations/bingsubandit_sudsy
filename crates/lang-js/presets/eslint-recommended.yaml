@@ -37,7 +37,7 @@ js:
       no-sparse-arrays: error
       no-undef: error
       no-unexpected-multiline: error
-      no-unreachable: error
+      unreachable-code: error
       no-unsafe-finally: error
       no-unsafe-negation: error
       no-unused-expressions: error

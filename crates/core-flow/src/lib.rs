@@ -14,7 +14,7 @@ pub use analyses::{
     reaching_definitions, unassigned_reads,
 };
 pub use bitset::BitSet;
-pub use build::{Flow, Reached, build};
+pub use build::{Flow, Reached, build, cases, endless_loop};
 pub use graph::{
     Block, BodyGraph, Edge, EdgeKind, Local, LocalKind, Op, OpFlags, OpKind, body_kind,
 };

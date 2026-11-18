@@ -1,9 +1,9 @@
 class A {
   int f(int n, int m) {
     n = 1;
-    ^ parameter-assignment
+//  ^ parameter-assignment
     n++;
-    ^ parameter-assignment
+//  ^ parameter-assignment
     int k = m;
     k = 2;
     return k + n;

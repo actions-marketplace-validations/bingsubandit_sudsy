@@ -34,3 +34,4 @@ except select.error:
 raise IOError("x")
 #     ^^^^^^^ os-error-alias
 x = IOError
+^^^^^^^^^^^ unreachable-code

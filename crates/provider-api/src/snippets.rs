@@ -126,6 +126,12 @@ impl LazyRules {
             if !g.nodes_with_tag("switch").is_empty() && !g.nodes_with_tag("case").is_empty() {
                 rules.push(&core_rules::cases::NoDuplicateCase);
             }
+            if core_rules::flow_rules::has_jumps(g) {
+                rules.push(&core_rules::flow_rules::UnreachableCode);
+            }
+            if core_rules::flow_rules::has_fallthrough(g) {
+                rules.push(&core_rules::flow_rules::NoFallthrough);
+            }
             for source in files.sources {
                 let loaded = core_patterns::load_lazy(
                     source,

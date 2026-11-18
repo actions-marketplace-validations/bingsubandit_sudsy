@@ -4,7 +4,7 @@ function f(int $a, $b = 1) {
     $x = $a + $b;
     [$p, $q] = g();
     foreach ($arr as $k => $v) {
-             ^^^^ undefined-variable
+//           ^^^^ undefined-variable
         echo $k . $v . $p . $q . $x;
     }
     try {
@@ -14,7 +14,7 @@ function f(int $a, $b = 1) {
     }
     $r = function () use ($x) {
         return $x + $undefined;
-                    ^^^^^^^^^^ undefined-variable
+//                  ^^^^^^^^^^ undefined-variable
     };
     $s = fn($z) => $z + $x;
     global $gg;
@@ -24,13 +24,13 @@ function f(int $a, $b = 1) {
     $list[] = 1;
     echo $gg . $st . $m2 . $list . Foo::$bar . $this->z . $_GET['a'];
     echo isset($maybe) ? "$x {$y}" : '';
-                              ^^ undefined-variable
+//                            ^^ undefined-variable
     return $s;
 }
 
 function g() {
     return $top;
-           ^^^^ undefined-variable
+//         ^^^^ undefined-variable
 }
 
 function h() {

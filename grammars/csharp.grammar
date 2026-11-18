@@ -625,7 +625,7 @@ node GlobalStatement #member #declaration =
     attribute_lists:AttributeList* modifiers:#modifier* statement:#statement
 node Block #statement #block #scope =
     attribute_lists:AttributeList* open_brace:OpenBraceToken statements=items:#statement* close_brace:CloseBraceToken
-node LocalFunctionStatement #statement #function #scope =
+node LocalFunctionStatement #statement #function #scope #inert =
     attribute_lists:AttributeList* modifiers:#modifier* return_type:#type identifier:IdentifierToken type_parameter_list:TypeParameterList? parameter_list=parameters:ParameterList constraint_clauses:TypeParameterConstraintClause* body:Block? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
 node LocalDeclarationStatement #statement #opaque =
     attribute_lists:AttributeList* await_keyword:AwaitKeyword? using_keyword:UsingKeyword? modifiers:#modifier* declaration:VariableDeclaration semicolon:SemicolonToken
@@ -643,23 +643,23 @@ node ParenthesizedVariableDesignation #variable-designation #opaque =
     open_paren:OpenParenToken variables:#variable-designation* close_paren:CloseParenToken
 node ExpressionStatement #statement #opaque =
     attribute_lists:AttributeList* expression:#expression semicolon:SemicolonToken
-node EmptyStatement #statement #opaque =
+node EmptyStatement #statement #opaque #inert =
     attribute_lists:AttributeList* semicolon:SemicolonToken
-node LabeledStatement #statement #opaque =
-    attribute_lists:AttributeList* identifier:IdentifierToken colon:ColonToken statement:#statement
+node LabeledStatement #statement #statements #inert =
+    attribute_lists:AttributeList* identifier:IdentifierToken colon:ColonToken statement=items:#statement
 node GotoStatement #statement #opaque =
     attribute_lists:AttributeList* goto_keyword:GotoKeyword case_or_default_keyword:#goto-statement-case-or-default-keyword? expression:#expression? semicolon:SemicolonToken
 node GotoCaseStatement #statement #opaque =
     attribute_lists:AttributeList* goto_keyword:GotoKeyword case_or_default_keyword:#goto-statement-case-or-default-keyword? expression:#expression? semicolon:SemicolonToken
 node GotoDefaultStatement #statement #opaque =
     attribute_lists:AttributeList* goto_keyword:GotoKeyword case_or_default_keyword:#goto-statement-case-or-default-keyword? expression:#expression? semicolon:SemicolonToken
-node BreakStatement #statement #opaque =
+node BreakStatement #statement #break =
     attribute_lists:AttributeList* break_keyword:BreakKeyword name:IdentifierName? semicolon:SemicolonToken
-node ContinueStatement #statement #opaque =
+node ContinueStatement #statement #continue =
     attribute_lists:AttributeList* continue_keyword:ContinueKeyword name:IdentifierName? semicolon:SemicolonToken
 node ReturnStatement #statement #return =
     attribute_lists:AttributeList* return_keyword:ReturnKeyword expression=value:#expression? semicolon:SemicolonToken
-node ThrowStatement #statement #throw =
+node ThrowStatement #statement #throw #inert =
     attribute_lists:AttributeList* throw_keyword:ThrowKeyword expression=value:#expression? semicolon:SemicolonToken
 node YieldReturnStatement #statement #opaque =
     attribute_lists:AttributeList* yield_keyword:YieldKeyword return_or_break_keyword:#yield-statement-return-or-break-keyword expression:#expression? semicolon:SemicolonToken
@@ -672,25 +672,25 @@ node DoStatement #statement #loop =
 node ForStatement #statement #loop =
     attribute_lists:AttributeList* for_keyword:ForKeyword open_paren:OpenParenToken declaration:VariableDeclaration? initializers:#expression* first_semicolon:SemicolonToken condition:#expression? second_semicolon:SemicolonToken incrementors:#expression* close_paren:CloseParenToken statement=body:#statement
 node ForEachStatement #statement #loop =
-    attribute_lists:AttributeList* await_keyword:AwaitKeyword? for_each_keyword:ForEachKeyword open_paren:OpenParenToken type:#type identifier:IdentifierToken in_keyword:InKeyword expression:#expression close_paren:CloseParenToken statement=body:#statement
+    attribute_lists:AttributeList* await_keyword:AwaitKeyword? for_each_keyword:ForEachKeyword open_paren:OpenParenToken type:#type identifier:IdentifierToken in_keyword:InKeyword expression=iterable:#expression close_paren:CloseParenToken statement=body:#statement
 node ForEachVariableStatement #statement #loop =
-    attribute_lists:AttributeList* await_keyword:AwaitKeyword? for_each_keyword:ForEachKeyword open_paren:OpenParenToken variable:#expression in_keyword:InKeyword expression:#expression close_paren:CloseParenToken statement=body:#statement
-node UsingStatement #statement #opaque =
-    attribute_lists:AttributeList* await_keyword:AwaitKeyword? using_keyword:UsingKeyword open_paren:OpenParenToken declaration:VariableDeclaration? expression:#expression? close_paren:CloseParenToken statement:#statement
-node FixedStatement #statement #opaque =
-    attribute_lists:AttributeList* fixed_keyword:FixedKeyword open_paren:OpenParenToken declaration:VariableDeclaration close_paren:CloseParenToken statement:#statement
-node CheckedStatement #statement #opaque =
-    attribute_lists:AttributeList* keyword:#checked-statement-keyword block:Block
-node UncheckedStatement #statement #opaque =
-    attribute_lists:AttributeList* keyword:#checked-statement-keyword block:Block
-node UnsafeStatement #statement #opaque =
-    attribute_lists:AttributeList* unsafe_keyword:UnsafeKeyword block:Block
-node LockStatement #statement #opaque =
-    attribute_lists:AttributeList* lock_keyword:LockKeyword open_paren:OpenParenToken expression:#expression close_paren:CloseParenToken statement:#statement
+    attribute_lists:AttributeList* await_keyword:AwaitKeyword? for_each_keyword:ForEachKeyword open_paren:OpenParenToken variable:#expression in_keyword:InKeyword expression=iterable:#expression close_paren:CloseParenToken statement=body:#statement
+node UsingStatement #statement #statements =
+    attribute_lists:AttributeList* await_keyword:AwaitKeyword? using_keyword:UsingKeyword open_paren:OpenParenToken declaration:VariableDeclaration? expression:#expression? close_paren:CloseParenToken statement=items:#statement
+node FixedStatement #statement #statements =
+    attribute_lists:AttributeList* fixed_keyword:FixedKeyword open_paren:OpenParenToken declaration:VariableDeclaration close_paren:CloseParenToken statement=items:#statement
+node CheckedStatement #statement #statements =
+    attribute_lists:AttributeList* keyword:#checked-statement-keyword block=items:Block
+node UncheckedStatement #statement #statements =
+    attribute_lists:AttributeList* keyword:#checked-statement-keyword block=items:Block
+node UnsafeStatement #statement #statements =
+    attribute_lists:AttributeList* unsafe_keyword:UnsafeKeyword block=items:Block
+node LockStatement #statement #statements =
+    attribute_lists:AttributeList* lock_keyword:LockKeyword open_paren:OpenParenToken expression:#expression close_paren:CloseParenToken statement=items:#statement
 node IfStatement #statement #conditional =
     attribute_lists:AttributeList* if_keyword:IfKeyword open_paren:OpenParenToken condition:#expression close_paren:CloseParenToken statement=then:#statement else:ElseClause?
-node ElseClause #opaque =
-    else_keyword:ElseKeyword statement:#statement
+node ElseClause #statements =
+    else_keyword:ElseKeyword statement=items:#statement
 node SwitchStatement #statement #switch =
     attribute_lists:AttributeList* switch_keyword:SwitchKeyword open_paren:OpenParenToken? expression=subject:#expression close_paren:CloseParenToken? open_brace:OpenBraceToken sections=cases:SwitchSection* close_brace:CloseBraceToken
 node SwitchSection #case =
@@ -713,8 +713,8 @@ node CatchDeclaration #opaque =
     open_paren:OpenParenToken type:#type identifier:IdentifierToken? close_paren:CloseParenToken
 node CatchFilterClause #opaque =
     when_keyword:WhenKeyword open_paren:OpenParenToken filter_expression:#expression close_paren:CloseParenToken
-node FinallyClause #opaque =
-    finally_keyword:FinallyKeyword block:Block
+node FinallyClause #statements =
+    finally_keyword:FinallyKeyword block=items:Block
 node CompilationUnit #scope =
     externs:ExternAliasDirective* usings:UsingDirective* attribute_lists:AttributeList* members:#member* end_of_file:EndOfFileToken
 node ExternAliasDirective #opaque =

@@ -8,6 +8,7 @@ if True: pass
 #  ^^^^ no-constant-condition
 while 1: pass
 if (b := f()): pass
+^^^^^^^^^^^^^^^^^^^ unreachable-code
 #        ^ undefined-name
 d = {"k": 1, "k": 2, **d, **d}
 #            ^^^ no-duplicate-keys

@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Lint
+* `no-unreachable` is renamed `unreachable-code` (JavaScript/TypeScript config keys and the
+  `eslint-recommended` preset follow). It now runs in C#, Java, JavaScript/TypeScript, Kotlin, PHP,
+  Python and Ruby, and is on by default (`warn`) in all of them; in C# it was off.
+* `no-fallthrough` also runs in Java and PHP.
+
 ## [0.0.2] - 2026-11-17
 
 ### Fixed

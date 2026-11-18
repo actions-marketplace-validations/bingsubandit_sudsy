@@ -67,14 +67,6 @@ description: "`return`, `throw`, and a `break` or `continue` that leaves the blo
 example: "try { a() } finally { return 1 }   # reported"
 category: suspicious
 ---
-id: no-unreachable
-family: check
-params: { check: unreachable }
-message: "Unreachable code."
-description: A statement after `return`, `throw`, `break`, `continue`, an `if`/`else` or `try` that always jumps, or a loop that never ends. Function declarations and `var` without a value are not reported.
-example: "function f() { return; a(); }   # a() is reported"
-category: suspicious
----
 id: getter-return
 family: check
 params: { check: getter-return }
@@ -205,14 +197,6 @@ description: "Overloads of one function or method (or call and construct signatu
 example: "interface I { a(): void; b(): void; a(x: number): void }   # the last a is reported"
 severity: off
 category: style
----
-id: no-fallthrough
-family: check
-params: { check: fallthrough }
-message: "Expected a 'break' statement before '{name}'."
-description: A `case` with statements that can reach the next `case` or `default`, or an empty one followed by a blank line, without a comment that says `falls through` before the next one (or at the end of its block).
-example: "switch (a) { case 1: b(); case 2: c(); }   # the second case is reported"
-category: suspicious
 ---
 id: no-unused-expressions
 family: check

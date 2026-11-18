@@ -7,6 +7,7 @@ def f():
 
 
 class A:
+^ unreachable-code
     return 2
 #   ^^^^^^^^ return-outside-function
 

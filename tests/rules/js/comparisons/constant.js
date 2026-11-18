@@ -16,6 +16,6 @@ if (true) {} while (0) {} while (true) {} for (;;) {} var c = "x" ? 1 : 2, d = a
 //                  ^ no-constant-condition
 //                     ^^ no-empty-block
 //                                     ^^ no-empty-block
-//                                        ^^^^^^^^^^^ no-unreachable
+//                                        ^^^^^^^^^^^ unreachable-code
 //                                                 ^^ no-empty-block
 //                                                            ^^^ no-constant-condition

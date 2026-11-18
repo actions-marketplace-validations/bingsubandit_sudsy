@@ -131,7 +131,7 @@ token EndOfFile
 // Text the lexer could not classify.
 token Unknown #error
 
-node ModModule #scope = body:#statement* EndOfFile
+node ModModule #scope #block = items=body:#statement* EndOfFile
 node Parenthesized #expression #pattern #part #opaque #transparent
 node StmtFunctionDef #statement #declaration #function #scope =
     Decorator* Async? Def name:Identifier TypeParams? parameters:Parameters Rarrow? returns:#expression? Colon body:#statement*
@@ -148,7 +148,7 @@ node StmtAugAssign #statement #assignment =
 node StmtAnnAssign #statement #assignment =
     left:#expression Colon annotation:#expression operator:Equal? right:#expression?
 node StmtFor #statement #loop =
-    Async? For target:#expression In iter:#expression Colon body:#statement* Else? Colon? orelse:#statement*
+    Async? For target:#expression In iterable=iter:#expression Colon body:#statement* Else? Colon? orelse:#statement*
 node StmtWhile #statement #loop =
     While condition=test:#expression Colon body:#statement* Else? Colon? orelse:#statement*
 node StmtIf #statement #conditional =
@@ -168,8 +168,8 @@ node StmtGlobal #statement #opaque
 node StmtNonlocal #statement #opaque
 node StmtExpr #statement #opaque
 node StmtPass #statement #opaque
-node StmtBreak #statement #opaque
-node StmtContinue #statement #opaque
+node StmtBreak #statement #break = Break
+node StmtContinue #statement #continue = Continue
 node ExprBoolOp #expression #part #binary =
     left:#expression operator:#operator right:#expression #part*
 node ExprNamed #expression #part #assignment =

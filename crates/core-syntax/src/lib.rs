@@ -26,7 +26,7 @@ pub mod wire;
 pub use embedded::Embedded;
 pub use grammar::{Assoc, Grammar, KeySyntax, Precedence};
 pub use kind::{LanguageId, SyntaxKind};
-pub use rowan::{Checkpoint, GreenNode, TextRange, TextSize};
+pub use rowan::{Checkpoint, GreenNode, TextRange, TextSize, WalkEvent};
 pub use tree::{
     SudsyLang, SyntaxElement, SyntaxNode, SyntaxNodeExt, SyntaxToken, TreeBuilder, code_span,
     dump_tree, print,

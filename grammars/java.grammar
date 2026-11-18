@@ -83,7 +83,7 @@ node AssertStatement #child #statement #opaque = #child*
 node AssignmentExpression #child #expression #assignment = left:#expression? left_token=left:#operand? operator:#operator right:#expression? right_token=right:#operand?
 node BinaryExpression #child #expression #binary-chain #binary = left:#expression? left_token=left:#operand? operator:#operator right:#expression? right_token=right:#operand?
 node Block #child #statement #member #block #scope = LBrace items:#statement* RBrace
-node BreakStatement #child #statement #opaque = #child*
+node BreakStatement #child #statement #break = Keyword label:Label? Semi?
 node CastExpression #child #expression #opaque = #child*
 node CatchAlternativeType #child #opaque = #child*
 node CatchClause #child #scope #catch = Keyword parameter:CatchFormalParameter body:Block
@@ -98,7 +98,7 @@ node CompilationUnit #child #scope #block = items:#child*
 node ConstantDeclaration #child #member #opaque = #child*
 node ConstructorBody #child #block = LBrace items:#statement* RBrace
 node ConstructorDeclaration #child #member #declaration #function #scope = Modifiers? TypeParameters? name:Identifier parameters:FormalParameters Throws? body:ConstructorBody
-node ContinueStatement #child #statement #opaque = #child*
+node ContinueStatement #child #statement #continue = Keyword label:Label? Semi?
 node CreatedClassType #child #opaque = #child*
 node DefaultValue #child #opaque = #child*
 node DimExpr #child #opaque = #child*
@@ -118,7 +118,7 @@ node ExpressionStatement #child #statement #opaque = #child*
 node ExtendsInterfaces #child #opaque = #child*
 node FieldAccess #child #expression #member-access = object:#expression? object_token=object:#operand? Dot member:Identifier? this_member=member:ThisExpression?
 node FieldDeclaration #child #member #declaration = Modifiers? #annotation* #type-token? #type? declarators:VariableDeclarator* Semi
-node FinallyClause #child #opaque = #child*
+node FinallyClause #child #statements = Keyword items:Block
 node ForCondition #child #opaque = #child*
 node ForInitializer #child #opaque = #child*
 node ForSpec #child #opaque = #child*
@@ -139,7 +139,7 @@ node InterfaceDeclaration #child #member #opaque = #child*
 node InterfaceDeclarationCore #child #type-declaration #declaration #scope = Keyword name:Identifier TypeParameters? ExtendsInterfaces? Permits? members:InterfaceBody
 node InterfaceTypeList #child #opaque = #child*
 node Label #child #opaque = #child*
-node LabeledStatement #child #statement #opaque = #child*
+node LabeledStatement #child #statement #labeled = label:Label Colon body:#statement
 node LambdaExpression #child #expression #function #scope = parameters:#parameter-list? single=parameters:Identifier? Arrow body:Block? expression_body:#expression? expression_token=expression_body:#operand?
 node LambdaFormalParameters #child #parameter-list = LParen? parameters:#parameter* RParen?
 node LocalTypeDeclaration #child #statement #opaque = #child*
@@ -180,19 +180,19 @@ node StaticInitializer #child #member #opaque = #child*
 node SuperExpression #child #expression #opaque = #child*
 node SuperInterfaces #child #opaque = #child*
 node Superclass #child #opaque = #child*
-node SwitchBlockStatementGroup #child #opaque = #child*
-node SwitchBlockStatementGroupBody #child #opaque = #child*
+node SwitchBlockStatementGroup #child #case = test:SwitchLabel Colon body:SwitchBlockStatementGroupBody?
+node SwitchBlockStatementGroupBody #child #statements = items:SwitchGroupStatements
 node SwitchCaseElement #child #opaque = #child*
 node SwitchCaseLabelRest #child #opaque = #child*
 node SwitchExpression #child #expression #opaque = #child*
 node SwitchExpressionBlock #child #opaque = #child*
 node SwitchExpressionRule #child #opaque = #child*
-node SwitchGroupStatements #child #opaque = #child*
+node SwitchGroupStatements #child #statements = items:#statement*
 node SwitchLabel #child #opaque = #child*
-node SwitchStatement #child #statement #scope #switch = Keyword subject:ParenthesizedExpression cases=block:SwitchStatementBlock
+node SwitchStatement #child #statement #scope #switch #fallthrough = Keyword subject:ParenthesizedExpression cases=block:SwitchStatementBlock
 node SwitchStatementBlock #child #opaque = #child*
 node SwitchStatementRule #child #opaque = #child*
-node SynchronizedStatement #child #statement #opaque = #child*
+node SynchronizedStatement #child #statement #statements = Keyword ParenthesizedExpression items:Block
 node TernaryExpression #child #expression #conditional = condition:#expression? condition_token=condition:#operand? Operator then:#expression? then_token=then:#operand? Colon else:#expression? else_token=else:#operand?
 node ThisExpression #child #expression #opaque = #child*
 node ThrowStatement #child #statement #throw = Keyword value:#expression? value_token=value:#operand? Semi?

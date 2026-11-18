@@ -271,10 +271,10 @@ entries:
   array-callback-return: planned
   consistent-return: planned
   constructor-super: planned
-  getter-return: rule getter-return | the getters of Object.defineProperty and Reflect.defineProperty descriptors are not checked; paths are judged from jumps, if/else, try, switch and endless loops, not a flow graph
+  getter-return: rule getter-return | the getters of Object.defineProperty and Reflect.defineProperty descriptors are not checked
   no-fallthrough: rule no-fallthrough
   no-this-before-super: planned
-  no-unreachable: rule no-unreachable | paths are judged from jumps, if/else, try, switch and endless loops, not a flow graph
+  no-unreachable: rule unreachable-code
   no-unreachable-loop: planned
   no-useless-return: planned
 deferred:

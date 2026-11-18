@@ -173,7 +173,7 @@ node IfStatementBodyElseIfClause #conditional = Keyword LParen condition:#expres
 node Match #expression #switch = Keyword LParen subject:#expression RParen LBrace cases:#match-arm* RBrace
 node MatchDefaultArm #case #match-arm = Keyword test:#expression* DoubleArrow body:#expression
 node MatchExpressionArm #case #match-arm = test:#expression* DoubleArrow body:#expression
-node Switch #stmt #switch = Keyword LParen subject:#expression RParen cases=body:#switch-body
+node Switch #stmt #switch #fallthrough = Keyword LParen subject:#expression RParen cases=body:#switch-body
 node SwitchBraceDelimitedBody #switch-body #opaque
 node SwitchColonDelimitedBody #switch-body #opaque
 node SwitchDefaultCase #case = Keyword test:#expression? Colon? body:#stmt*
@@ -206,7 +206,7 @@ node FunctionLikeParameterList #parameter-list =
 node FunctionLikeReturnTypeHint #opaque
 node Global #stmt #opaque
 node Goto #stmt #opaque
-node Label #stmt #opaque
+node Label #stmt #opaque #inert
 node HaltCompiler #stmt #opaque
 node Inline #stmt #opaque
 node Instantiation #expression #opaque
@@ -224,7 +224,7 @@ node Assignment #expression #assignment =
 node Conditional #expression #conditional =
     condition:#expression Question body=then:#expression? Colon orelse=else:#expression
 node DoWhile #stmt #loop = Keyword body:#stmt Keyword LParen condition:#expression RParen Semi?
-node Foreach #stmt #loop = Keyword LParen #expression Keyword ForeachKeyValueTarget? ForeachValueTarget? RParen body:#stmt
+node Foreach #stmt #loop = Keyword LParen iterable:#expression Keyword ForeachKeyValueTarget? ForeachValueTarget? RParen body:#stmt
 node ForeachColonDelimitedBody #stmt #opaque
 node ForeachKeyValueTarget #opaque
 node ForeachValueTarget #opaque
@@ -232,8 +232,8 @@ node For #stmt #loop = Keyword LParen #expression* Semi condition:#expression* S
 node ForColonDelimitedBody #stmt #opaque
 node While #stmt #loop = Keyword LParen condition:#expression RParen body:#stmt
 node WhileColonDelimitedBody #stmt #opaque
-node Break #stmt #opaque
-node Continue #stmt #opaque
+node Break #stmt #break = Keyword #expression? Semi?
+node Continue #stmt #continue = Keyword #expression? Semi?
 node Return #stmt #return = Keyword value:#expression? Semi?
 node Static #stmt #opaque
 node StaticAbstractItem #opaque

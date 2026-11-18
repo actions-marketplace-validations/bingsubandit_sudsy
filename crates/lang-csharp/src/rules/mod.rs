@@ -35,7 +35,6 @@ pub static RULES: &[&dyn Rule] = &[
     &usings::UsingOrder,
     &member_order::MemberOrder,
     &member_order::AccessorOrder,
-    &flow::UnreachableCode,
     &flow::UnusedVariable,
     &flow::UnusedAssignment,
     &binding::RemoveUnusedUsings,

@@ -177,21 +177,21 @@ node StringInterpolationPrefix #opaque
 node Parenthesized #expression #item #opaque
 node Return #expression #item #return = Keyword LabelQualifier? value:#item?
 node Throw #expression #item #throw = Keyword value:#item
-node Continue #expression #item #opaque
-node Break #expression #item #opaque
+node Continue #expression #item #continue = Keyword label:LabelQualifier?
+node Break #expression #item #break = Keyword label:LabelQualifier?
 node If #expression #item #conditional =
     Keyword Lpar condition:Condition Rpar then:Then Keyword? orelse=else:Else?
 node Condition #opaque
-node Then #opaque
-node Else #opaque
+node Then #statements = items:#item*
+node Else #statements = items:#item*
 node Try #expression #item #try = Keyword body:Block catches:Catch* finally:Finally?
 node Catch #catch = Keyword parameter:ValueParameterList? body:Block
-node Finally #opaque
-node For #expression #item #loop = Keyword Lpar Annotation* ValueParameter? DestructuringDeclaration? Keyword LoopRange? Rpar body:Body?
+node Finally #statements = Keyword items:Block
+node For #expression #item #loop = Keyword Lpar Annotation* ValueParameter? DestructuringDeclaration? Keyword iterable:LoopRange? Rpar body:Body?
 node While #expression #item #loop = Keyword Lpar condition:Condition Rpar body:Body?
 node DoWhile #expression #item #loop = Keyword body:Body? Keyword Lpar condition:Condition Rpar
 node LoopRange #opaque
-node Body #item #opaque
+node Body #item #statements = items:#item*
 node Block #block #item =
     Lbrace? items:#item* Rbrace?
 node LambdaExpression #expression #item #opaque

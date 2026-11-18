@@ -571,6 +571,7 @@ name = "core-rules"
 version = "0.0.2"
 dependencies = [
  "core-config",
+ "core-flow",
  "core-format",
  "core-semantics",
  "core-syntax",

@@ -7356,6 +7356,42 @@
       "upstream": []
     },
     {
+      "category": "suspicious",
+      "default_level": "warn",
+      "description": "A `case` with statements that can reach the next `case` or `default`, or an empty one followed by a blank line, without a comment that says `falls through` before the next one (or at the end of its block).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A {\n    int a(int x) {\n        return 1;\n        b();\n        c();\n    }\n    void d(int[] xs, boolean y) {\n        for (int i : xs) { continue; e(); }\n        for (;;) { if (y) { break; } }\n        f();\n        outer: while (true) { while (y) { break outer; } }\n        g();\n        while (true) { }\n        h();\n    }\n    void i(int x) {\n        try { return; } finally { j(); }\n        k();\n    }\n    void l(int x) {\n        switch (x) {\n            case 1:\n                m();\n            case 2:\n                n();\n                break;\n            case 3:\n            case 4:\n                o();\n                // falls through\n            default:\n                p();\n        }\n    }\n}\n",
+        "language": "java",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 24
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-fallthrough",
+      "languages": [
+        "java",
+        "js",
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "js/eslint-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "no-fallthrough",
+          "partial": false,
+          "tool": "eslint"
+        }
+      ]
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "A parameter is assigned a new value (Checkstyle ParameterAssignment). No fix.",
@@ -8560,40 +8596,6 @@
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A `case` with statements that can reach the next `case` or `default`, or an empty one followed by a blank line, without a comment that says `falls through` before the next one (or at the end of its block).",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "switch (a) {\n  case 1:\n    b();\n  case 2:\n    c();\n    // falls through\n  case 3:\n  case 4:\n    break;\n  default:\n    d();\n}\n",
-        "language": "js",
-        "spans": [
-          {
-            "column": 3,
-            "length": 1,
-            "line": 4
-          }
-        ]
-      },
-      "fix": null,
-      "id": "no-fallthrough",
-      "languages": [
-        "js"
-      ],
-      "options": [],
-      "presets": [
-        "js/eslint-recommended"
-      ],
-      "upstream": [
-        {
-          "id": "no-fallthrough",
-          "partial": false,
-          "tool": "eslint"
-        }
-      ]
-    },
-    {
-      "category": "suspicious",
-      "default_level": "warn",
       "description": "A function declared by name that is assigned to.",
       "example": {
         "config": null,
@@ -9691,40 +9693,6 @@
           "id": "no-unnecessary-type-constraint",
           "partial": false,
           "tool": "typescript-eslint"
-        }
-      ]
-    },
-    {
-      "category": "suspicious",
-      "default_level": "warn",
-      "description": "A statement after `return`, `throw`, `break`, `continue`, an `if`/`else` or `try` that always jumps, or a loop that never ends. Function declarations and `var` without a value are not reported.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "if (a === a) {} if (a.b < a.b) {} if (f() === f()) {} if (a === b) {}\nif (1 === 2) {} if (a === 1) {}\nif (true) {} while (0) {} while (true) {} for (;;) {} var c = \"x\" ? 1 : 2, d = a ? 1 : 2;\n",
-        "language": "js",
-        "spans": [
-          {
-            "column": 43,
-            "length": 11,
-            "line": 3
-          }
-        ]
-      },
-      "fix": null,
-      "id": "no-unreachable",
-      "languages": [
-        "js"
-      ],
-      "options": [],
-      "presets": [
-        "js/eslint-recommended"
-      ],
-      "upstream": [
-        {
-          "id": "no-unreachable",
-          "partial": true,
-          "tool": "eslint"
         }
       ]
     },
@@ -26209,6 +26177,7 @@
       "id": "no-duplicate-case",
       "languages": [
         "csharp",
+        "java",
         "js",
         "kotlin",
         "php",
@@ -26376,6 +26345,7 @@
         "js",
         "kotlin",
         "php",
+        "python",
         "ruby"
       ],
       "options": [],
@@ -27091,8 +27061,8 @@
     },
     {
       "category": "suspicious",
-      "default_level": "off",
-      "description": "A statement that can never run. At `fast` depth this is the statement after a `return`, `throw`, `break`, `continue` or `goto`; with the flow layer it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Only the first statement of a run is reported. Removing it is offered as an editor quick fix only, because unreachable code usually signals a bug. Off by default: the compiler already reports unreachable code (CS0162) and the SDK analyzers add IDE0035.",
+      "default_level": "warn",
+      "description": "A statement that can never run: after `return`, `throw`, `break` or `continue`, after an `if`/`else` or `try` that always jumps, or after a loop that never ends. Only the first statement of a run is reported. Where the language has a flow layer (C#) it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Hoisted declarations and empty statements are left out. Removing the statement is offered as an editor quick fix only, because unreachable code usually signals a bug.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27119,18 +27089,31 @@
       "fix": "suggestion",
       "id": "unreachable-code",
       "languages": [
-        "csharp"
+        "csharp",
+        "java",
+        "js",
+        "kotlin",
+        "php",
+        "python",
+        "ruby"
       ],
       "options": [
         {
           "default": true,
-          "description": "Treat the code after a call that never returns (`[DoesNotReturn]`,                       `does_not_return` in `semantics:`) as unreachable. The compiler does not,                       so turn this off to report exactly what it reports (CS0162).",
+          "description": "With a flow layer, treat the code after a call that never returns (`[DoesNotReturn]`, `does_not_return` in `semantics:`) as unreachable. A compiler does not, so turn this off to report exactly what it reports.",
           "name": "non_returning_calls",
           "type": "bool"
         }
       ],
-      "presets": [],
+      "presets": [
+        "js/eslint-recommended"
+      ],
       "upstream": [
+        {
+          "id": "no-unreachable",
+          "partial": false,
+          "tool": "eslint"
+        },
         {
           "id": "RCS1148",
           "partial": false,

@@ -67,7 +67,6 @@ const CHECKS: &[Entry] = &[
         ],
         stmts::unsafe_finally,
     ),
-    ("unreachable", reach::UNITS, reach::unreachable),
     (
         "getter-return",
         &[k::METHOD_DEFINITION, k::OBJECT_PROPERTY],
@@ -99,7 +98,6 @@ const CHECKS: &[Entry] = &[
         &[k::NUMERIC_LITERAL],
         escapes::loss_of_precision,
     ),
-    ("fallthrough", &[k::SWITCH_STATEMENT], reach::fallthrough),
     (
         "unused-expressions",
         &[k::EXPRESSION_STATEMENT],

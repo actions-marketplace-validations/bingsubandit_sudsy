@@ -9,6 +9,7 @@ break
 ^^^^^ break-outside-loop
 continue
 ^^^^^^^^ continue-outside-loop
+^^^^^^^^ unreachable-code
 yield 1
 ^^^^^^^ yield-outside-function
 await x
