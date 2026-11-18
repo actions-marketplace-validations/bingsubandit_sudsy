@@ -15,7 +15,7 @@ on:
         type: string
         default: ""
       npm:
-        description: "npm: @sudsylint/sudsy and @sudsylint/cli-* (secret NPM_TOKEN)"
+        description: "npm: @sudsylint/sudsy and @sudsylint/cli-* (trusted publisher, no secret)"
         type: boolean
         default: false
       pypi:
@@ -48,32 +48,25 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      id-token: write # npm trusted publishing (OIDC); provenance is added by npm
     steps:
-      - name: Needs NPM_TOKEN
-        id: s
-        run: if [ -n "$NODE_AUTH_TOKEN" ]; then echo ok=true >> "$GITHUB_OUTPUT"; else echo "::warning::NPM_TOKEN is not set; npm skipped"; fi
-      - if: steps.s.outputs.ok
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - if: steps.s.outputs.ok
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - if: steps.s.outputs.ok
-        run: python3 scripts/package-channels.py npm "${TAG#v}" assets out "$TAG"
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@11.6.2
+      - run: python3 scripts/package-channels.py npm "${TAG#v}" assets out "$TAG"
       # Platform packages first, so `sudsy` never points at a version that is not there yet.
-      - if: steps.s.outputs.ok
-        run: |
+      - run: |
           next=""
           case "$TAG" in *-*) next="--tag next" ;; esac
           for dir in out/npm/cli-* out/npm/sudsy; do
             # A re-run skips the packages an earlier run already published.
             spec=$(node -p "const p=require('./$dir/package.json'); p.name+'@'+p.version")
             if npm view "$spec" version >/dev/null 2>&1; then echo "skip $spec (published)"; continue; fi
-            npm publish "$dir" --provenance --access public $next
+            npm publish "$dir" --access public $next
           done
 
   pypi:
