@@ -14,6 +14,8 @@ use unicode_width::UnicodeWidthStr;
 pub struct KeyValueStyle {
     pub space_before_separator: bool,
     pub space_after_separator: bool,
+    /// Start the trailing comments of consecutive entries in one column.
+    pub align_comments: bool,
 }
 
 impl Default for KeyValueStyle {
@@ -21,6 +23,7 @@ impl Default for KeyValueStyle {
         KeyValueStyle {
             space_before_separator: false,
             space_after_separator: true,
+            align_comments: false,
         }
     }
 }
@@ -77,9 +80,7 @@ pub fn key_value(
         )));
     };
     let mut value = parts.peekable();
-    if value.peek().is_none() {
-        return Err(FormatError::Shape(format!("{name}: missing value")));
-    }
+    let valued = value.peek().is_some();
     let mut out = vec![element_doc(cx, &key)?];
     if let Some(parent) = node.parent()
         && cx.directives_of(&parent).has(&Directive::Align)
@@ -104,11 +105,18 @@ pub fn key_value(
         out.push(doc::lit(" "));
     }
     out.push(cx.token(&sep));
-    if style.space_after_separator {
+    if style.space_after_separator && valued {
         out.push(doc::lit(" "));
     }
     for v in value {
         out.push(element_doc(cx, &v)?);
     }
-    Ok(doc::concat(out))
+    let mut d = doc::concat(out);
+    if style.align_comments {
+        let extra = cx.comment_pad(node);
+        if extra > 0 {
+            crate::align::pad_comment(&mut d, extra);
+        }
+    }
+    Ok(d)
 }

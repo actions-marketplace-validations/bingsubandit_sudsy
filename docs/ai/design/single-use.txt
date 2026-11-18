@@ -341,14 +341,12 @@ local lang-css/format/text.rs token-case # lang: css
 local lang-css/format/value.rs delimited-list # lang: css
 local lang-css/lexer.rs source-lexer # lang: css
 local lang-css/parser.rs recursive-descent-parser # lang: css
-local lang-dockerfile/format.rs line-continuation-layout # lang: dockerfile
 local lang-dockerfile/rules/run_command.rs embedded-command-checks # lang: dockerfile
 local lang-dockerfile/rules/stages.rs unique-names # lang: dockerfile
 local lang-github-actions/scripts.rs embedded-command-checks # lang: github-actions
 local lang-github-actions/view.rs role-accessors # lang: github-actions
 local lang-gitignore/format.rs node-sequence # lang: gitignore
 local lang-gitignore/rules.rs unique-names # lang: gitignore
-local lang-graphql/format.rs delimited-list # lang: graphql
 local lang-hcl/format.rs block-and-statements # lang: hcl
 local lang-hcl/rules.rs naming-convention # lang: hcl
 local lang-html/dom.rs role-accessors # lang: html
@@ -383,7 +381,6 @@ local lang-kotlin/format/expr.rs binary-chain-layout # lang: kotlin
 local lang-kotlin/rewrite.rs sorted-imports # lang: kotlin
 local lang-kotlin/rewrite.rs source-rewrite # lang: kotlin
 local lang-makefile/format.rs key-value-layout # lang: makefile
-local lang-makefile/format.rs line-continuation-layout # lang: makefile
 local lang-makefile/rules.rs embedded-command-checks # lang: makefile
 local lang-makefile/rules.rs unique-names # lang: makefile
 local lang-markdown/format/inline.rs text-fill # lang: markdown
@@ -407,7 +404,6 @@ local lang-python/rules/stmts.rs statement-shape-checks # lang: python
 local lang-ruby/format.rs verbatim-formatter # lang: ruby
 local lang-ruby/rules/calls.rs call-shape-checks # lang: ruby
 local lang-shell/format.rs block-and-statements # lang: shell
-local lang-shell/format.rs line-continuation-layout # lang: shell
 local lang-shell/format/arith.rs token-spacing-rows # lang: shell
 local lang-shell/format/words.rs block-and-statements # lang: shell
 local lang-sql/layout/space.rs token-spacing-rows # lang: sql
