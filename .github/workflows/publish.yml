@@ -70,6 +70,9 @@ jobs:
           next=""
           case "$TAG" in *-*) next="--tag next" ;; esac
           for dir in out/npm/cli-* out/npm/sudsy; do
+            # A re-run skips the packages an earlier run already published.
+            spec=$(node -p "const p=require('./$dir/package.json'); p.name+'@'+p.version")
+            if npm view "$spec" version >/dev/null 2>&1; then echo "skip $spec (published)"; continue; fi
             npm publish "$dir" --provenance --access public $next
           done
 

@@ -69,7 +69,7 @@ def npm(version, assets, out, tmp, **_):
         (d / "CHANGELOG.md").unlink()
         write_json(d / "package.json", {
             "name": f"{NPM_SCOPE}/cli-{p}", "version": version, "description": f"{DESC} (binary for {p})",
-            "license": "MIT", "repository": f"github:{REPO}", "os": [os_], "cpu": [cpu],
+            "license": "MIT", "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "os": [os_], "cpu": [cpu],
             "files": [exe(p), "csharp-worker", "LICENSE"],
             "publishConfig": {"access": "public"},
         })
@@ -81,7 +81,7 @@ def npm(version, assets, out, tmp, **_):
     shutil.copy(ROOT / "README.md", d / "README.md")
     write_json(d / "package.json", {
         "name": "sudsy", "version": version, "description": DESC, "license": "MIT",
-        "repository": f"github:{REPO}", "homepage": f"https://github.com/{REPO}",
+        "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "homepage": f"https://github.com/{REPO}",
         "bin": {"sudsy": "bin/sudsy.js"}, "files": ["bin", "LICENSE", "README.md"],
         "optionalDependencies": {f"{NPM_SCOPE}/cli-{p}": version for p in PLATFORMS},
     })
@@ -113,7 +113,7 @@ def pypi(version, assets, out, tmp, **_):
         files[f"{dist}/METADATA"] = (
             f"Metadata-Version: 2.4\nName: sudsy\nVersion: {version}\nSummary: {DESC}\n"
             f"License-Expression: MIT\nLicense-File: LICENSE\nProject-URL: Homepage, https://github.com/{REPO}\n"
-            f"Requires-Python: >=3.8\n\n{(ROOT / 'README.md').read_text()}".encode(), 0o644)
+            f"Requires-Python: >=3.8\nDescription-Content-Type: text/markdown\n\n{(ROOT / 'README.md').read_text()}".encode(), 0o644)
         files[f"{dist}/WHEEL"] = (f"Wheel-Version: 1.0\nGenerator: scripts/package-channels.py\nRoot-Is-Purelib: false\nTag: {tag}\n".encode(), 0o644)
         files[f"{dist}/entry_points.txt"] = (b"[console_scripts]\nsudsy = sudsy:main\n", 0o644)
         record = "".join(f"{n},{record_hash(b)},{len(b)}\n" for n, (b, _) in files.items()) + f"{dist}/RECORD,,\n"

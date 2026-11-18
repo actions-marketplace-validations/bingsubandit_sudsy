@@ -38,7 +38,7 @@ Publishing is by hand: publish the draft release, then start `publish.yml` on it
 
 | Channel | Package | Needs (one time) | Install |
 |---|---|---|---|
-| npm | `sudsy` (bin shim) with `@sudsylint/cli-<os>-<arch>` as optionalDependencies, six platforms, `npm publish --provenance` | create the npm organisation `sudsylint` (the scope), secret `NPM_TOKEN` (automation token that may publish to it) | `npm i -D sudsy` or `npx sudsy` |
+| npm | `sudsy` (bin shim) with `@sudsylint/cli-<os>-<arch>` as optionalDependencies, six platforms, `npm publish --provenance` | create the npm organisation `sudsylint` (the scope), secret `NPM_TOKEN` (a granular token with read and write on all packages, so it can create the unscoped `sudsy` on the first publish, and on the `sudsylint` organisation) | `npm i -D sudsy` or `npx sudsy` |
 | PyPI | `sudsy`: one `py3-none-<platform>` wheel per platform, the binary and worker inside the package, a console script starts it | trusted publisher on pypi.org for project `sudsy`: owner `bingsubandit`, repo `sudsy`, workflow `publish.yml`, no environment (a pending publisher creates the project on first upload); no secret | `pip install sudsy`, `uvx sudsy` |
 | Homebrew | `Formula/sudsy.rb` pushed to the tap | create repo `bingsubandit/homebrew-sudsy` (with a first commit), secret `HOMEBREW_TAP_TOKEN` (contents: write on it) | `brew install bingsubandit/sudsy/sudsy` |
 | Scoop | `bucket/sudsy.json` (with `autoupdate`) pushed to the bucket | create repo `bingsubandit/scoop-sudsy`, secret `SCOOP_BUCKET_TOKEN` (contents: write on it) | `scoop bucket add sudsy https://github.com/bingsubandit/scoop-sudsy` then `scoop install sudsy` |

@@ -28,7 +28,7 @@ EOF
 host=$(node -p 'process.platform + "-" + process.arch')
 if [ -d "$out/packages/npm/cli-$host" ]; then
   mkdir -p "$out/packages/npm/sudsy/node_modules/@sudsylint"
-  ln -s "$out/packages/npm/cli-$host" "$out/packages/npm/sudsy/node_modules/@sudsylintlint/cli-$host"
+  ln -s "$out/packages/npm/cli-$host" "$out/packages/npm/sudsy/node_modules/@sudsylint/cli-$host"
   node "$out/packages/npm/sudsy/bin/sudsy.js" --version
   rm -r "$out/packages/npm/sudsy/node_modules"
 fi
