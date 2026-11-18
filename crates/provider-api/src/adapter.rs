@@ -164,6 +164,110 @@ impl<'a> Attach<'a> {
     }
 }
 
+/// The trivia of a parser that builds the tree itself and reports its real tokens in order: each
+/// token takes the trivia before it and its trailing trivia ([`Attach`]), and the text between two
+/// tokens is split by [`Lexer`]. The parser keeps its own [`TreeBuilder`] for the nodes.
+pub struct Stream<'a, S> {
+    attach: Attach<'a>,
+    /// Splits the gaps; holds the errors of text no token or trivia covers.
+    pub gap: Lexer<'a, S>,
+    eof: Tok,
+    first: u32,
+}
+
+/// What recognizes the trivia at the start of the text between two tokens: `scan(rest, pos)` is
+/// the kind and length of the comment (or other non-blank trivia) there. Closures are scans.
+pub trait Scan {
+    fn scan(&self, rest: &str, pos: usize) -> Option<(SyntaxKind, usize)>;
+}
+
+impl<F: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Scan for F {
+    fn scan(&self, rest: &str, pos: usize) -> Option<(SyntaxKind, usize)> {
+        self(rest, pos)
+    }
+}
+
+/// The scan of the trivia rows of a grammar.
+pub struct GrammarScan<'a> {
+    src: &'a str,
+    grammar: &'a Grammar,
+}
+
+impl Scan for GrammarScan<'_> {
+    #[inline]
+    fn scan(&self, rest: &str, pos: usize) -> Option<(SyntaxKind, usize)> {
+        self.grammar.trivia.scan(self.src, rest, pos)
+    }
+}
+
+/// Comments that start with `prefix` and run to the end of the line: for a parser that has the
+/// kinds as constants and no need of the grammar at parse time.
+pub struct LineComments {
+    pub prefix: &'static str,
+    pub kind: SyntaxKind,
+}
+
+impl Scan for LineComments {
+    #[inline]
+    fn scan(&self, rest: &str, _: usize) -> Option<(SyntaxKind, usize)> {
+        rest.starts_with(self.prefix)
+            .then(|| (self.kind, rest.find(['\n', '\r']).unwrap_or(rest.len())))
+    }
+}
+
+impl<'a> Stream<'a, GrammarScan<'a>> {
+    /// A stream with the kinds and the `trivia` rows of `grammar`.
+    pub fn of(src: &'a str, grammar: &'a Grammar, first: u32) -> Self {
+        Stream::new(src, Kinds::of(grammar), GrammarScan { src, grammar }, first)
+    }
+}
+
+impl<'a, S: Scan> Stream<'a, S> {
+    /// `first` is the start of the first real token (the end of the text when there is none).
+    pub fn new(src: &'a str, kinds: Kinds, scan: S, first: u32) -> Self {
+        let len = src.len() as u32;
+        let mut stream = Stream {
+            attach: Attach::new(src),
+            gap: Lexer::new(src, kinds, scan),
+            eof: Tok {
+                kind: kinds.eof,
+                start: len,
+                end: len,
+            },
+            first,
+        };
+        let gap = &mut stream.gap;
+        stream.attach.begin(first, |a, b, out| gap.gap(a, b, out));
+        stream
+    }
+
+    /// A tab continues a run of spaces in one `Whitespace` token (YAML); the default is two.
+    pub fn joining_tabs(mut self) -> Self {
+        self.gap.tabs = true;
+        // The text before the first token was split already: split it again.
+        self.gap.errors.clear();
+        self.attach = Attach::new(self.gap.src);
+        let (gap, first) = (&mut self.gap, self.first);
+        self.attach.begin(first, |a, b, out| gap.gap(a, b, out));
+        self
+    }
+
+    /// Emits `t` with its trivia; `next` is the start of the token after it.
+    pub fn token(&mut self, b: &mut TreeBuilder, t: Tok, next: u32) {
+        let gap = &mut self.gap;
+        let next = Some(next);
+        self.attach
+            .token(b, t, next, |a, b, out| gap.gap(a, b, out));
+    }
+
+    /// Emits the `Eof` token with the trivia of the tail.
+    pub fn finish(&mut self, b: &mut TreeBuilder) {
+        let gap = &mut self.gap;
+        self.attach
+            .token(b, self.eof, None, |a, b, out| gap.gap(a, b, out));
+    }
+}
+
 /// A file the parser gave up on: one `Unknown` token under the root, with the reason as the error.
 pub fn whole_file(src: &str, kinds: Kinds, message: impl Into<String>) -> ParseResult {
     let mut builder = TreeBuilder::new();
@@ -208,7 +312,19 @@ pub fn replay_grammar(
     nodes: &[Node],
     retag: impl Fn(Tok, Option<SyntaxKind>) -> Tok,
 ) -> ParseResult {
-    let scan = |rest: &str, pos: usize| grammar.trivia.scan(src, rest, pos);
+    replay_with(src, grammar, false, tokens, nodes, retag)
+}
+
+/// [`replay_grammar`]; `continued`: a line comment goes on over a `\` that ends a line (C/C++).
+pub fn replay_with(
+    src: &str,
+    grammar: &Grammar,
+    continued: bool,
+    tokens: &[Tok],
+    nodes: &[Node],
+    retag: impl Fn(Tok, Option<SyntaxKind>) -> Tok,
+) -> ParseResult {
+    let scan = |rest: &str, pos: usize| grammar.trivia.scan_with(src, rest, pos, continued);
     replay(src, Kinds::of(grammar), tokens, nodes, scan, retag)
 }
 
@@ -307,7 +423,7 @@ impl<'a> Lf<'a> {
 
 /// Replays tokens and nodes: each token takes its leading trivia, itself and its trailing
 /// trivia, inside the innermost node that contains it.
-fn run<S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>>(
+fn run<S: Scan>(
     lex: &mut Lexer<'_, S>,
     builder: &mut TreeBuilder,
     tokens: &[Tok],
@@ -358,15 +474,18 @@ pub struct Lexer<'a, S> {
     src: &'a str,
     kinds: Kinds,
     scan: S,
+    /// A tab continues a run of spaces (set by [`Stream::joining_tabs`]).
+    pub tabs: bool,
     pub errors: Vec<ParseError>,
 }
 
-impl<'a, S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Lexer<'a, S> {
+impl<'a, S: Scan> Lexer<'a, S> {
     pub fn new(src: &'a str, kinds: Kinds, scan: S) -> Self {
         Lexer {
             src,
             kinds,
             scan,
+            tabs: false,
             errors: Vec::new(),
         }
     }
@@ -387,11 +506,14 @@ impl<'a, S: Fn(&str, usize) -> Option<(SyntaxKind, usize)>> Lexer<'a, S> {
                 ..
             } = self.kinds;
             // The common gap, spaces up to an ASCII character, needs no scan.
-            let spaces = rest.bytes().take_while(|&c| c == b' ').count();
+            let tabs = self.tabs;
+            let spaces = (rest.bytes())
+                .take_while(|&c| c == b' ' || (tabs && c == b'\t'))
+                .count();
             let (kind, len) = if spaces > 0 && rest.as_bytes().get(spaces).is_none_or(u8::is_ascii)
             {
                 (whitespace, spaces)
-            } else if let Some(found) = (self.scan)(rest, pos) {
+            } else if let Some(found) = self.scan.scan(rest, pos) {
                 found
             } else if rest.starts_with("\r\n") {
                 (newline, 2)

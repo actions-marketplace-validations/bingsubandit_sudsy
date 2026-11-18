@@ -429,7 +429,6 @@ local lang-xml/format.rs markup-whitespace-model # lang: xml
 local lang-xml/validate.rs parse-validation # lang: xml
 local lang-yaml/format/scalars.rs literal-spelling # lang: yaml
 local lang-yaml/parser/block.rs recursive-descent-parser # lang: yaml
-local lang-yaml/parser/builder.rs adapter-replay # lang: yaml
 local lang-yaml/parser/flow.rs recursive-descent-parser # lang: yaml
 local lang-yaml/parser/mod.rs recursive-descent-parser # lang: yaml
 local lang-yaml/parser/scan.rs source-lexer # lang: yaml
