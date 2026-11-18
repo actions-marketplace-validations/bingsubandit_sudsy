@@ -36,7 +36,7 @@
   concatenations, after the head of an attribute chain, in `class C(  # c`).
 
 ### Install
-* Packages for npm (`npm i -D sudsy`), PyPI (`pip install sudsy`, `uvx sudsy`), Homebrew
+* Packages for npm (`npm i -D @sudsylint/sudsy`), PyPI (`pip install sudsy`, `uvx sudsy`), Homebrew
   (`brew install bingsubandit/sudsy/sudsy`), Scoop, winget and `cargo binstall`, built from the
   release archives.
 * VS Code: the install prompt for a missing language shows on every open of such a file, with

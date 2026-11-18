@@ -15,7 +15,7 @@ on:
         type: string
         default: ""
       npm:
-        description: "npm: sudsy and @sudsylint/cli-* (secret NPM_TOKEN)"
+        description: "npm: @sudsylint/sudsy and @sudsylint/cli-* (secret NPM_TOKEN)"
         type: boolean
         default: false
       pypi:

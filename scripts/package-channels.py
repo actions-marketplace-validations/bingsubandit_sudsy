@@ -80,7 +80,7 @@ def npm(version, assets, out, tmp, **_):
     shutil.copy(ROOT / "LICENSE", d / "LICENSE")
     shutil.copy(ROOT / "README.md", d / "README.md")
     write_json(d / "package.json", {
-        "name": "sudsy", "version": version, "description": DESC, "license": "MIT",
+        "name": f"{NPM_SCOPE}/sudsy", "version": version, "description": DESC, "license": "MIT",
         "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "homepage": f"https://github.com/{REPO}",
         "bin": {"sudsy": "bin/sudsy.js"}, "files": ["bin", "LICENSE", "README.md"],
         "optionalDependencies": {f"{NPM_SCOPE}/cli-{p}": version for p in PLATFORMS},

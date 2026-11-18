@@ -13,7 +13,7 @@ Measured speed against CSharpier, Prettier, Biome and dprint, with the method an
 ## Install
 
 - **CLI**: download the archive for your platform (Linux, Windows or macOS; x64 or arm64) from the GitHub releases page and put the `sudsy` executable on your `PATH`. Keep the `csharp-worker/` directory beside it.
-- **Package managers** (same binary, `csharp-worker/` included except with cargo-binstall): `npm i -D sudsy`, `pip install sudsy` / `uvx sudsy`, `brew install bingsubandit/sudsy/sudsy`, `scoop bucket add sudsy https://github.com/bingsubandit/scoop-sudsy && scoop install sudsy`, `winget install Coox.Sudsy`, `cargo binstall --git https://github.com/bingsubandit/sudsy sudsy`. Setup and publishing: [docs/development/ci-release.md](docs/development/ci-release.md).
+- **Package managers** (same binary, `csharp-worker/` included except with cargo-binstall): `npm i -D @sudsylint/sudsy`, `pip install sudsy` / `uvx sudsy`, `brew install bingsubandit/sudsy/sudsy`, `scoop bucket add sudsy https://github.com/bingsubandit/scoop-sudsy && scoop install sudsy`, `winget install Coox.Sudsy`, `cargo binstall --git https://github.com/bingsubandit/sudsy sudsy`. Setup and publishing: [docs/development/ci-release.md](docs/development/ci-release.md).
 - **VS Code**: install the extension `Coox.sudsy`. It bundles the CLI and the worker.
 - **C#** needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Every other language works without it.
 
