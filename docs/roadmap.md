@@ -3,6 +3,7 @@
 One line each; none is committed, except the small tasks below.
 
 ## Small tasks
+- Profile the `core_format::spacing` row lookup (kt.format +6.4%, java.format +4% at F2) once a profiler runs on the agent host.
 - Scope family: JS `unused-import` is still part of `unused-variable` (split it as Java, Kotlin and PHP have it); Python's `F401`/`F841` rows move on the family in L3.
 - Flow family modeling gaps (`unreachable-code`, `no-fallthrough`; [rules/semantics.md](rules/semantics.md#flow-family-core_rulesflow_rules)): JS static blocks and TS module blocks are not units of their own; PHP file level and `if`/`else` bodies (opaque wrappers); Java arrow `switch` arms and `for` heads; Ruby `begin`/`rescue`; Python `with` and `try`/`else`.
 - Layout rules that are `planned` in the catalogs while a formatter could own them (their findings are most of the gap in [parity/README.md](parity/README.md#lint-coverage-by-function)): html-eslint `indent`, `element-newline`, `attrs-newline`; ktlint `function-signature`, `argument-list-wrapping`, `multiline-expression-wrapping`, `class-signature`, the trailing-comma and wrapping rules; sqlfluff `CP01`-`CP05` (capitalisation), `LT05`. Mark them `formatter` (the coverage run then leaves them out) or write the rule.
