@@ -140,6 +140,6 @@ impl LanguageProvider for GithubActionsProvider {
     }
 
     fn embedded(&self, root: &SyntaxNode, text: &str) -> Vec<Embedded> {
-        scripts::embedded(root, text)
+        scripts::embedded(root, text, self.yaml.grammar(), self.yaml.rule_hooks())
     }
 }

@@ -341,7 +341,6 @@ local lang-css/lexer.rs source-lexer # lang: css
 local lang-css/parser.rs recursive-descent-parser # lang: css
 local lang-dockerfile/rules/run_command.rs embedded-command-checks # lang: dockerfile
 local lang-dockerfile/rules/stages.rs unique-names # lang: dockerfile
-local lang-github-actions/scripts.rs embedded-command-checks # lang: github-actions
 local lang-github-actions/view.rs role-accessors # lang: github-actions
 local lang-gitignore/format.rs node-sequence # lang: gitignore
 local lang-gitignore/rules.rs unique-names # lang: gitignore
@@ -361,7 +360,6 @@ local lang-java/parser/mod.rs recursive-descent-parser # lang: java
 local lang-java/parser/stmt.rs recursive-descent-parser # lang: java
 local lang-java/parser/types.rs recursive-descent-parser # lang: java
 local lang-java/rules.rs naming-convention # lang: java
-local lang-js/format/embed.rs embedded-code # lang: js
 local lang-js/format/rewrite.rs source-rewrite # lang: js
 local lang-js/format/ts/heritage.rs heritage-clause-layout # lang: js
 local lang-js/format/ts/parens.rs source-rewrite # lang: js
@@ -388,7 +386,6 @@ local lang-python/format/list.rs delimited-list # lang: python
 local lang-python/format/op.rs binary-chain-layout # lang: python
 local lang-python/format/paren.rs parenthesized-expression # lang: python
 local lang-python/format/util.rs node-sequence # lang: python
-local lang-python/forward.rs embedded-code # lang: python
 local lang-python/rules/lints.rs call-shape-checks # lang: python
 local lang-python/rules/misc.rs call-shape-checks # lang: python
 local lang-python/rules/stmts.rs statement-shape-checks # lang: python

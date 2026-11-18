@@ -17,6 +17,7 @@ pub mod comments;
 pub mod configure;
 mod declare;
 pub mod diagnostic;
+pub mod embed_keys;
 pub mod engine;
 pub mod escapes;
 pub mod extension;

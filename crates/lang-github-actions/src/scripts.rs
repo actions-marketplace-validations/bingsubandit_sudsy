@@ -1,165 +1,87 @@
 //! The `run:` scripts of a file: where they are, which shell runs them (the embedded code, see
 //! `embedded`), and the rules that read their text.
 //!
-//! concept: new deprecated-commands, new script-injection, embedded-code, embedded-command-checks
+//! concept: new deprecated-commands, new script-injection, embedded-code
 //! what: deprecated-commands: A script uses a workflow command that GitHub has disabled (`::set-output`, `::save-state`, `::set-env`, `::add-path`); write to `$GITHUB_OUTPUT`, `$GITHUB_STATE`, `$GITHU
 //! what: script-injection: An expression in a `run` script reads text that an attacker can choose (an issue or pull request title, a branch name, a commit message): it is pasted into the script bef
 
-use crate::view::{entries, get, items, root_mapping, scalar};
+use core_rules::embed_keys::{KeyEmbed, KeyEmbeds, find};
 use core_rules::{FileContext, RuleContext};
 use core_rules::{Meta, meta_regex, rule};
 use core_syntax::embedded::size;
-use core_syntax::{Embedded, SyntaxNode, SyntaxNodeExt, TextRange};
-use lang_yaml::generated::kind;
+use core_syntax::{Embedded, Grammar, SyntaxNode, TextRange};
 use std::sync::LazyLock;
 
-pub struct Script {
-    pub range: TextRange,
-    /// Literal text that a shell can read as written: a single-line plain scalar or a `|` block.
-    pub code: bool,
-    pub language: Option<&'static str>,
-}
+const EXPRESSION_SOURCE: &str = r"(?s)\$\{\{(.*?)\}\}";
 
 static EXPRESSION: LazyLock<Meta> =
-    LazyLock::new(|| meta_regex(r"(?s)\$\{\{(.*?)\}\}").expect("a valid pattern"));
+    LazyLock::new(|| meta_regex(EXPRESSION_SOURCE).expect("a valid pattern"));
 
-/// `bash`, `sh`, `pwsh` and `powershell` (with options after the name) name a language we check.
-fn language_of(shell: &str) -> Option<&'static str> {
-    match shell.split_whitespace().next()? {
-        "bash" | "sh" => Some("shell"),
-        "pwsh" | "powershell" => Some("powershell"),
-        _ => None,
-    }
-}
+/// A step's `shell` and the defaults of its job and of the file name the language; no shell
+/// means PowerShell on a Windows runner, else Shell. The JavaScript of `actions/github-script`
+/// is text pasted from the same expressions: no parser reads it.
+static SCRIPTS: KeyEmbeds = KeyEmbeds {
+    rows: &[
+        KeyEmbed {
+            path: "jobs.*.steps.*.run",
+            words: &[
+                "jobs.$1.steps.$2.shell",
+                "jobs.$1.defaults.run.shell",
+                "defaults.run.shell",
+            ],
+            guess: Some(("jobs.$1.runs-on", "windows", "powershell")),
+            language: "shell",
+            when: None,
+        },
+        KeyEmbed {
+            path: "runs.steps.*.run",
+            words: &["runs.steps.$1.shell", "defaults.run.shell"],
+            guess: None,
+            language: "shell",
+            when: None,
+        },
+        KeyEmbed {
+            path: "jobs.*.steps.*.with.script",
+            words: &[],
+            guess: None,
+            language: "",
+            when: Some(("jobs.$1.steps.$2.uses", "actions/github-script")),
+        },
+        KeyEmbed {
+            path: "runs.steps.*.with.script",
+            words: &[],
+            guess: None,
+            language: "",
+            when: Some(("runs.steps.$1.uses", "actions/github-script")),
+        },
+    ],
+    languages: &[
+        (&["bash", "sh"], "shell"),
+        (&["pwsh", "powershell"], "powershell"),
+    ],
+    carve: EXPRESSION_SOURCE,
+    plain: "Plain",
+    block_header: "BlockHeader",
+    literal: "|",
+};
 
-fn default_shell(map: &SyntaxNode, text: &str) -> Option<String> {
-    let run = get(map, text, "defaults")?.value?;
-    let shell = get(&get(&run, text, "run")?.value?, text, "shell")?.value?;
-    scalar(&shell, text).map(|s| s.0)
-}
-
-/// Every `run` of the steps of the workflow's jobs and of a composite action.
-pub fn scripts(root: &SyntaxNode, text: &str) -> Vec<Script> {
-    let Some(file) = root_mapping(root) else {
-        return Vec::new();
-    };
-    let file_shell = default_shell(&file, text);
-    let mut out = Vec::new();
-    let mut steps_of = |container: &SyntaxNode, shell: &Option<String>, windows: bool| {
-        let Some(steps) = get(container, text, "steps").and_then(|e| e.value) else {
-            return;
-        };
-        for step in items(&steps) {
-            // The JavaScript of `actions/github-script` is text pasted from the same expressions.
-            let uses = get(&step, text, "uses")
-                .and_then(|e| e.value)
-                .and_then(|v| scalar(&v, text));
-            if uses.is_some_and(|u| u.0.starts_with("actions/github-script"))
-                && let Some(js) = get(&step, text, "with")
-                    .and_then(|e| e.value)
-                    .and_then(|w| get(&w, text, "script"))
-                    .and_then(|e| e.value)
-            {
-                out.extend(script(&js, text, None));
-            }
-            let Some(run) = get(&step, text, "run").and_then(|e| e.value) else {
-                continue;
-            };
-            let own = get(&step, text, "shell")
-                .and_then(|e| e.value)
-                .and_then(|v| scalar(&v, text))
-                .map(|s| s.0);
-            let language = match own.or_else(|| shell.clone()) {
-                Some(shell) => language_of(&shell),
-                None if windows => Some("powershell"),
-                None => Some("shell"),
-            };
-            out.extend(script(&run, text, language));
-        }
-    };
-    if let Some(runs) = get(&file, text, "runs").and_then(|e| e.value) {
-        steps_of(&runs, &file_shell, false);
-    }
-    let jobs = get(&file, text, "jobs").and_then(|e| e.value);
-    for job in jobs.iter().flat_map(|j| entries(j, text)) {
-        let Some(value) = job.value else { continue };
-        let windows = get(&value, text, "runs-on")
-            .and_then(|e| e.value)
-            .is_some_and(|v| text[v.text_range()].to_lowercase().contains("windows"));
-        let shell = default_shell(&value, text).or_else(|| file_shell.clone());
-        steps_of(&value, &shell, windows);
-    }
-    out
-}
-
-fn script(value: &SyntaxNode, text: &str, language: Option<&'static str>) -> Option<Script> {
-    let node = crate::view::inner(value)?;
-    match node.kind() {
-        kind::SCALAR => {
-            let (_, range) = scalar(&node, text)?;
-            let plain = node.children_with_tokens().any(|c| c.kind() == kind::PLAIN);
-            Some(Script {
-                range,
-                code: plain && !text[range].contains('\n'),
-                language,
-            })
-        }
-        kind::BLOCK_SCALAR => {
-            let token = |k| node.token(k);
-            let (header, content) = (token(kind::BLOCK_HEADER)?, token(kind::BLOCK_CONTENT)?);
-            Some(Script {
-                range: content.text_range(),
-                code: text[header.text_range()].starts_with('|'),
-                language,
-            })
-        }
-        _ => None,
-    }
-}
-
-/// The regions of `run` code in a shell the checks know. The host parts inside them are the
-/// block's indentation and the `${{ }}` expressions, which the shell never sees.
-pub fn embedded(root: &SyntaxNode, text: &str) -> Vec<Embedded> {
-    let mut out = Vec::new();
-    for script in scripts(root, text).into_iter().filter(|s| s.code) {
-        let Some(language) = script.language else {
-            continue;
-        };
-        let body = &text[script.range];
-        let start = usize::from(script.range.start());
-        let at = |i: usize| size(start + i);
-        let mut carved = Vec::new();
-        // A block scalar's lines start with the indentation of its first line.
-        let indent = body
-            .lines()
-            .find(|l| !l.trim().is_empty())
-            .map_or(0, |l| l.len() - l.trim_start().len());
-        if body.contains('\n') {
-            let mut from = 0;
-            for line in body.split_inclusive('\n') {
-                let spaces = (line.len() - line.trim_start_matches(' ').len()).min(indent);
-                if spaces > 0 {
-                    carved.push(TextRange::new(at(from), at(from + spaces)));
-                }
-                from += line.len();
-            }
-        }
-        carved.extend(
-            EXPRESSION
-                .find_iter(body)
-                .map(|m| TextRange::new(at(m.start()), at(m.end()))),
-        );
-        out.push(Embedded::new(language, script.range, carved));
-    }
-    out
+/// Every `run` script of the steps of the workflow's jobs and of a composite action, as regions;
+/// the host parts inside them are the block's indentation and the `${{ }}` expressions, which
+/// the shell never sees.
+pub fn embedded(
+    root: &SyntaxNode,
+    text: &str,
+    grammar: &Grammar,
+    hooks: &dyn core_rules::RuleHooks,
+) -> Vec<Embedded> {
+    find(&SCRIPTS, grammar, hooks, root, text).to_vec()
 }
 
 /// The text of every script, with the offset of its range in the file.
 fn script_texts<'a>(file: &FileContext<'a>) -> impl Iterator<Item = (usize, &'a str)> {
     let text = file.text;
-    scripts(file.root, text)
-        .into_iter()
-        .map(move |s| (usize::from(s.range.start()), &text[s.range]))
+    let found = find(&SCRIPTS, file.grammar, file.hooks, file.root, text);
+    (0..found.len()).map(move |i| (usize::from(found[i].range.start()), &text[found[i].range]))
 }
 
 fn span(start: usize, len: usize) -> TextRange {

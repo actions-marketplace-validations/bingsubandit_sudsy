@@ -2,7 +2,7 @@
 //! expression: the string is code, parsed with the Python grammar (the shared scope model reads
 //! its names, `core_rules::scope_rules`).
 //!
-//! concept: embedded-code
+//! concept: scope-rules
 
 use crate::adapter::parse_snippet;
 use crate::generated::kind as k;

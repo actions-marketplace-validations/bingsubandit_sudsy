@@ -74,7 +74,11 @@ pub fn parse_regions<'a>(
 ) -> Vec<EmbeddedParse<'a>> {
     let mut out = Vec::new();
     for region in host.embedded(root, text) {
-        let Some((provider, dialect)) = resolve(&region.language) else {
+        // No language: the host reports the text for its own rules.
+        let Some((provider, dialect)) = Some(&region.language)
+            .filter(|l| !l.is_empty())
+            .and_then(|l| resolve(l))
+        else {
             continue;
         };
         let code = region.code(text);
