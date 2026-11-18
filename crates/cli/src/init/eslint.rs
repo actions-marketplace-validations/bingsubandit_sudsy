@@ -174,10 +174,13 @@ fn script_rule(name: &str, level: &str, out: &mut Out) {
     let Some(entry) = out.entry(id, "not a rule of that tool Sudsy knows") else {
         return;
     };
-    match entry.sudsy.strip_prefix("rule: ") {
-        Some(sudsy) => out.rule(id, "js", sudsy, level),
-        None if level != "off" && entry.sudsy != "formatter" => out.skip(id),
-        None => {}
+    if entry.rules().next().is_some() {
+        // One upstream rule split over several ids: the level applies to each.
+        for sudsy in entry.rules() {
+            out.rule(id, "js", sudsy, level);
+        }
+    } else if level != "off" && entry.sudsy != "formatter" {
+        out.skip(id);
     }
 }
 

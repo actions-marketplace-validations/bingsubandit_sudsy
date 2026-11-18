@@ -7,7 +7,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 
 | Status | Meaning | Coverage |
 |---|---|---|
-| `rule <id>` | A Sudsy rule does it (`syntax-error` is the parser's diagnostic); the rule's `sudsy rules` page and the table in [rules/builtin.md](../rules/builtin.md) list the entry as its equivalent. | covered, partial with a gap |
+| `rule <id>[, <id>...]` | A Sudsy rule does it, or all of the listed ones when one upstream rule is split over ids (`syntax-error` is the parser's diagnostic); the rule's `sudsy rules` page and the table in [rules/builtin.md](../rules/builtin.md) list the entry as its equivalent. | covered, partial with a gap |
 | `option <language>.format.<name>` | A formatter option does it. | covered, partial with a gap |
 | `formatter` | Fixed formatter behavior, no option. | covered, partial with a gap |
 | `config <text>` | Configuration outside rules and options (overrides, ignore files, presets, suppression comments). | covered, partial with a gap |

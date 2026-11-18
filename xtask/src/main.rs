@@ -34,8 +34,10 @@ fn main() -> Result<()> {
         }
         ["new-rule", language, id] => print_new_rule(language, id, false),
         ["new-rule", language, id, "--rust"] => print_new_rule(language, id, true),
+        ["rename-rule", old, new] => rename(old, new, false),
+        ["rename-rule", old, new, "--dry-run"] => rename(old, new, true),
         _ => bail!(
-            "usage: cargo xtask codegen [--check] | affected [--base REV] [--all] | new-rule <language> <id> [--rust] | css-data <npm dir>"
+            "usage: cargo xtask codegen [--check] | affected [--base REV] [--all] | new-rule <language> <id> [--rust] | rename-rule <old> <new> [--dry-run] | css-data <npm dir>"
         ),
     }
 }
@@ -44,6 +46,22 @@ fn print_new_rule(language: &str, id: &str, rust: bool) -> Result<()> {
     println!(
         "{}",
         xtask::new_rule(&xtask::repo_root(), language, id, rust)?
+    );
+    Ok(())
+}
+
+/// Renames a rule id everywhere, then regenerates the tables and the schema (not on a dry run).
+fn rename(old: &str, new: &str, dry_run: bool) -> Result<()> {
+    for line in xtask::rename_rule(&xtask::repo_root(), old, new, dry_run)? {
+        println!("{line}");
+    }
+    if dry_run {
+        return Ok(());
+    }
+    xtask::write(xtask::generate()?)?;
+    full(&["codegen"])?;
+    println!(
+        "next: CHANGELOG.md (list the rename), presets and crates/cli/src/init mappings the list above left, then scripts/gate.sh"
     );
     Ok(())
 }

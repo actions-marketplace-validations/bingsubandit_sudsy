@@ -38,21 +38,21 @@ fn check_status(
     match kind {
         "planned" | "deferred" | "formatter" if value.is_empty() => Ok(()),
         "sdk" | "config" | "wontfix" if !value.is_empty() => Ok(()),
-        "rule" => {
-            if value.contains(' ') {
-                return Err("a rule status names exactly one id".into());
+        "rule" => entry.rules().try_for_each(|id| {
+            if id.contains(' ') {
+                return Err("a rule status names ids separated by `, `".into());
             }
-            let known = value == SYNTAX_ERROR
-                || rules.iter().any(|(language, id)| {
-                    *id == value && (language == "all" || catalog.languages.contains(language))
+            let known = id == SYNTAX_ERROR
+                || rules.iter().any(|(language, known)| {
+                    *known == id && (language == "all" || catalog.languages.contains(language))
                 });
             known.then_some(()).ok_or_else(|| {
                 format!(
-                    "no rule `{value}` for {}; add the details to `notes`",
+                    "no rule `{id}` for {}; add the details to `notes`",
                     catalog.languages.join("/")
                 )
             })
-        }
+        }),
         "option" => {
             let parts: Vec<&str> = value.split('.').collect();
             let [language, "format", name] = parts[..] else {
@@ -99,4 +99,15 @@ fn every_rule_and_option_a_status_names_exists() {
         }
     }
     assert!(problems.is_empty(), "{}", problems.join("\n"));
+}
+
+#[test]
+fn an_entry_may_name_several_rules() {
+    let text = "tool: t\nlanguages: [js]\nentries:\n  a: rule x, y\n  b: rule z\n  c: planned\n";
+    let c = catalog::parse(text).unwrap();
+    let ids = |i: usize| c.entries[i].rules().collect::<Vec<_>>();
+    assert_eq!(
+        (ids(0), ids(1), ids(2)),
+        (vec!["x", "y"], vec!["z"], vec![])
+    );
 }

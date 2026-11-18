@@ -38,7 +38,7 @@ def rule_map(tool):
     """Upstream rule name (`anchors.forbid-unused-anchors` for an option that is a rule of its own) -> Sudsy
     rule id, from the catalog."""
     return {
-        e["id"]: e["sudsy"][len("rule: "):]
+        e["id"]: e["sudsy"][len("rule: "):].split(", ")[0]  # an entry naming several ids is compared on the first
         for e in catalog_entries(tool, sub=True)
         if e["sudsy"].startswith("rule: ")
     }

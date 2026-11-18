@@ -11,10 +11,12 @@ mod new_rule;
 mod options;
 mod parser_imports;
 mod registry;
+mod rename_rule;
 
 pub use css_data::generate as css_data;
 pub use new_rule::new_rule;
 pub use parser_imports::check as parser_imports;
+pub use rename_rule::rename_rule;
 
 use anyhow::{Context, Result, ensure};
 use core_syntax::{Grammar, codegen};

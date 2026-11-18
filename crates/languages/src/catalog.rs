@@ -15,6 +15,17 @@ pub struct Entry {
     pub gap: String,
 }
 
+impl Entry {
+    /// The Sudsy rule ids of a `rule: <id>[, <id>...]` status (several when one upstream rule is
+    /// split over ids), empty for any other status.
+    pub fn rules(&self) -> impl Iterator<Item = &str> {
+        self.sudsy
+            .strip_prefix("rule: ")
+            .into_iter()
+            .flat_map(|ids| ids.split(", "))
+    }
+}
+
 #[derive(Deserialize)]
 pub struct Catalog {
     pub tool: String,
@@ -196,7 +207,6 @@ impl std::fmt::Display for Upstream {
 /// The upstream settings that map to the rule `rule` in one of `languages` (`all`: every
 /// language), in catalog order.
 pub fn upstream(rule: &str, languages: &[&str]) -> Vec<Upstream> {
-    let status = format!("rule: {rule}");
     let mut out = Vec::new();
     for c in all() {
         let applies = languages.contains(&"all")
@@ -205,7 +215,8 @@ pub fn upstream(rule: &str, languages: &[&str]) -> Vec<Upstream> {
             continue;
         }
         for e in &c.entries {
-            if e.sudsy == status && matches!(e.coverage.as_str(), "covered" | "partial") {
+            if e.rules().any(|r| r == rule) && matches!(e.coverage.as_str(), "covered" | "partial")
+            {
                 out.push(Upstream {
                     tool: tool_name(&c.tool),
                     id: e.id.clone(),
@@ -230,7 +241,7 @@ pub fn rules_for(id: &str) -> Vec<&'static str> {
                     .split([',', '/'])
                     .any(|p| p.trim().eq_ignore_ascii_case(id))
         })
-        .filter_map(|e| e.sudsy.strip_prefix("rule: "))
+        .flat_map(Entry::rules)
         .collect();
     out.sort();
     out.dedup();

@@ -50,7 +50,7 @@ impl Out {
 
     /// Sets the level of a rule; `id` is the catalog entry that maps it.
     pub fn rule(&mut self, id: &str, lang: &str, rule: &str, level: &str) {
-        self.check(id, |sudsy| sudsy == format!("rule: {rule}"));
+        self.check(id, |sudsy| names_rule(sudsy, rule));
         self.rule_free(lang, rule, level);
     }
 
@@ -59,7 +59,7 @@ impl Out {
     }
 
     pub fn rule_opt(&mut self, id: &str, lang: &str, rule: &str, name: &str, value: Value) {
-        self.check(id, |sudsy| sudsy == format!("rule: {rule}"));
+        self.check(id, |sudsy| names_rule(sudsy, rule));
         self.put(&[lang, "lint", "rules", rule, "options", name], value);
     }
 
@@ -241,6 +241,13 @@ fn prune(
             cfg.remove(&key);
         }
     }
+}
+
+/// `status` is `rule: <id>[, <id>...]` and names `rule`.
+fn names_rule(status: &str, rule: &str) -> bool {
+    status
+        .strip_prefix("rule: ")
+        .is_some_and(|ids| ids.split(", ").any(|id| id == rule))
 }
 
 /// `rule: { level: warn }` becomes `rule: warn`.
