@@ -33,7 +33,6 @@ python:
       if-tuple: warn
       if-with-same-arms: warn
       implicit-concat-in-collection: warn
-      import-shadowed-by-loop-var: warn
       in-dict-keys: warn
       invalid-escape-sequence: warn
       invalid-print-syntax: warn
@@ -66,12 +65,12 @@ python:
       quoted-annotation: warn
       raise-not-implemented: warn
       raise-vanilla-class: warn
-      redefined-argument-from-local: warn
-      redefined-while-unused: warn
+      redeclared-variable: warn
       redundant-tuple-in-exception-handler: warn
       regex-flag-alias: warn
       return-outside-function: warn
       set-attr-with-constant: warn
+      shadowed-variable: warn
       static-join: warn
       string-dot-format-extra-named-arguments: warn
       string-dot-format-extra-positional-arguments: warn
@@ -84,9 +83,9 @@ python:
       type-check-without-type-error: warn
       type-var-name-variance: warn
       undefined-export: warn
-      undefined-local: warn
+      use-before-define: warn
       undefined-local-with-nested-import-star-usage: warn
-      undefined-name: warn
+      undefined-variable: warn
       unicode-literal: warn
       union-annotation: warn
       unnecessary-collection-call: warn

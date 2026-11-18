@@ -33,6 +33,7 @@ class A(Generic[T]):
 from typing import TypeVar
 T = TypeVar("T")
 def f(x: T) -> T:
+#   ^ redeclared-variable
 #   ^ generic-function
     return x
 
@@ -51,12 +52,14 @@ if sys.version_info >= (3, 8):
 from typing import TypeVar
 T = TypeVar("T")
 class A:
+#     ^ redeclared-variable
     def f(self: T) -> T:
 #               ^ custom-type-var-return
         return self
 
 from typing import Any
 class A:
+#     ^ redeclared-variable
     def __eq__(self, other: Any) -> bool:
 #                           ^^^ any-eq-parameter
         return True

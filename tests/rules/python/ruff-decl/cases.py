@@ -1,7 +1,7 @@
 def f():
     a, b = g()
 #      ^ unused-unpacked-variable
-#          ^ undefined-name
+#          ^ undefined-variable
     return a
 
 class A:
@@ -13,9 +13,10 @@ import os as os
 #      ^^^^^^^^ useless-import-alias
 
 def f(a):
+#   ^ redeclared-variable
     with g() as a:
-#        ^ undefined-name
-#               ^ redefined-argument-from-local
+#        ^ undefined-variable
+#               ^ shadowed-variable
         pass
 
 x = ["a" "b", "c"]
@@ -25,22 +26,25 @@ __all__ = ["b", "a"]
 #         ^^^^^^^^^^ unsorted-dunder-all
 
 class A:
+#     ^ redeclared-variable
     __slots__ = ("b", "a")
 #               ^^^^^^^^^^ unsorted-dunder-slots
 
 import sys
 ^ unsorted-imports
 import os
-#      ^^ redefined-while-unused
+#      ^^ redeclared-variable
 
 import functools
 class A:
+#     ^ redeclared-variable
     @functools.cache
 #   ^^^^^^^^^^^^^^^^ cached-method
     def f(self):
         pass
 
 def f(x=list()):
+#   ^ redeclared-variable
 #       ^^^^^^ function-call-in-default
 #       ^^^^^^ mutable-argument-default
     pass
@@ -56,11 +60,11 @@ x = ", ".join([a, b])
 
 x = "%s" % y
 #   ^^^^^^^^ printf-string-formatting
-#          ^ undefined-name
+#          ^ undefined-variable
 
 x = "{}".format(y)
 #   ^^^^^^^^^^^^^^ f-string
-#               ^ undefined-name
+#               ^ undefined-variable
 
 import re
 ^^^^^^^^^ unsorted-imports

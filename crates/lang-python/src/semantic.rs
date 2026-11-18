@@ -10,15 +10,14 @@
 
 use crate::generated::kind as k;
 use core_rules::FileContext;
+use core_rules::ScopeLang;
 use core_rules::checks::FileCache;
-use core_semantics::scopes::{
-    Access, Declares, Flags, Flow, Model, Place, Redirect, Row, ScopeId, Sel, Table, bind,
-};
+use core_rules::scope_rules::Ordered;
+use core_semantics::scopes::{Declares, Flags, Flow, Model, Place, Redirect, Row, Sel};
 use core_syntax::{Grammar, SyntaxNode, TextRange, TextSize, grammars};
 use rustc_hash::FxHashMap as HashMap;
 use std::cell::{OnceCell, RefCell};
 use std::rc::Rc;
-use std::sync::OnceLock;
 
 const V: Flags = Flags::VALUE;
 
@@ -286,26 +285,43 @@ fn is_cast(n: &SyntaxNode) -> bool {
         .is_some_and(|name| name.text() == "cast")
 }
 
-fn table() -> &'static Table {
-    static TABLE: OnceLock<Table> = OnceLock::new();
-    TABLE.get_or_init(|| Table::new(grammars::PYTHON.get(), ROWS, &[], &["Name", "Star"]))
-}
+/// The scope rules' view of Python: the table above and the facts the shared rules ask for
+/// (the order of the code decides what a name means: `core_rules::scope_rules`).
+pub static LANG: ScopeLang = ScopeLang::new(ROWS, &["Name", "Star"])
+    .dynamic(&["locals"])
+    .globals(include_str!("../globals/python.txt"))
+    .globals_if(&[("init", "__path__")])
+    .flavors(&[("init", &["__init__.py"])])
+    .scope_names(&[
+        ("StmtClassDef", "__module__"),
+        ("StmtClassDef", "__qualname__"),
+        ("StmtClassDef", "__class__"),
+    ])
+    .ordered(Ordered {
+        exports: "__all__",
+        pragma: "__future__",
+        guard: "NameError",
+        overloads: &["typing.overload", "typing_extensions.overload"],
+        ignored: &[
+            "__tracebackhide__",
+            "__traceback_info__",
+            "__traceback_supplement__",
+        ],
+        value_forms: &["Literal"],
+        note_forms: &["Annotated"],
+        quoted: true,
+    });
 
 /// The start and kind of a node.
 type NodeKey = (u32, u32);
 
 /// What a scope rule reads: the model and the facts of the file.
 pub struct Cx {
-    pub s: Model,
+    pub s: Rc<Model>,
     pub root: SyntaxNode,
     pub g: &'static Grammar,
-    /// `.pyi`: annotations are never evaluated.
-    /// `__init__.py`: its `__all__` may name submodules.
-    pub init: bool,
     /// The minor version of the target (`3.14`: 14).
     pub minor: u32,
-    /// Syntax errors of quoted annotations: where and why.
-    pub forward_errors: Vec<(TextRange, String)>,
     by_ref: OnceCell<HashMap<u32, usize>>,
     /// What [`Cx::qualified`] found, by the start and kind of the node asked about.
     qualified: RefCell<HashMap<NodeKey, Option<Rc<str>>>>,
@@ -368,19 +384,14 @@ pub fn model(file: &FileContext<'_>) -> Option<Rc<Cx>> {
                 if errors || fatal {
                     return None;
                 }
-                let name = file.path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                let mut cx = Cx {
-                    s: bind(file.root, file.grammar, table()),
+                Some(Rc::new(Cx {
+                    s: core_rules::scope_rules::model(&LANG, file),
                     root: file.root.clone(),
                     g: grammars::PYTHON.get(),
-                    init: name == "__init__.py",
                     minor,
-                    forward_errors: Vec::new(),
                     by_ref: OnceCell::new(),
                     qualified: RefCell::default(),
-                };
-                cx.forward_references();
-                Some(Rc::new(cx))
+                }))
             })
             .as_ref()
             .clone()
@@ -408,33 +419,6 @@ impl Cx {
         map.get(&u32::from(start)).map(|i| &self.s.refs[*i])
     }
 
-    /// Is the scope the body of a function or a lambda (code that runs when called)?
-    pub fn is_function(&self, scope: ScopeId) -> bool {
-        matches!(
-            self.s.scope(scope).node.kind(),
-            k::STMT_FUNCTION_DEF | k::EXPR_LAMBDA
-        )
-    }
-
-    /// Does a function or lambda lie between the reference's scope and `scope` (the reference
-    /// runs after the code of `scope` has run)?
-    pub fn deferred(&self, from: ScopeId, scope: ScopeId) -> bool {
-        self.s
-            .ancestors(from)
-            .take_while(|s| *s != scope)
-            .any(|s| self.is_function(s))
-    }
-
-    /// Quoted annotations (and the strings in typing generics and `cast`) name things: the
-    /// names in them are references from the scope the string is written in.
-    fn forward_references(&mut self) {
-        let texts = std::mem::take(&mut self.s.texts);
-        for t in texts {
-            let node = t.node(&self.root);
-            crate::forward::references(self, &node, t.scope);
-        }
-    }
-
     /// The name a reference to a dotted name stands for through imports: `typing.Literal` for
     /// `Literal` imported from typing, `print` for the builtin; `None` for anything else.
     pub fn qualified(&self, node: &SyntaxNode) -> Option<String> {
@@ -456,9 +440,11 @@ impl Cx {
                 match r.symbol {
                     Some(sym) => {
                         let d = self.s.symbol(sym).decls.last()?;
-                        crate::imports::target(self, d)
+                        LANG.import_target(self.g, &self.root, d)
                     }
-                    None => crate::names::is_builtin(&r.name).then(|| r.name.to_string()),
+                    None => LANG
+                        .is_global(&r.name, std::path::Path::new(""))
+                        .then(|| r.name.to_string()),
                 }
             }
             k::EXPR_ATTRIBUTE => {
@@ -473,23 +459,5 @@ impl Cx {
             k::PARENTHESIZED => self.qualified(&node.first_child()?),
             _ => None,
         }
-    }
-}
-
-impl Cx {
-    pub(crate) fn add_reference(
-        &mut self,
-        name: &str,
-        range: TextRange,
-        at: &SyntaxNode,
-        scope: ScopeId,
-    ) {
-        self.s.add_reference(
-            name,
-            range,
-            (at.text_range(), at.kind()),
-            Access::READ.union(Access::TYPE),
-            scope,
-        );
     }
 }

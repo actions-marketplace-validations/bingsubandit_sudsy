@@ -10057,11 +10057,13 @@
       "fix": null,
       "id": "redeclared-variable",
       "languages": [
-        "js"
+        "js",
+        "python"
       ],
       "options": [],
       "presets": [
-        "js/eslint-recommended"
+        "js/eslint-recommended",
+        "python/ruff"
       ],
       "upstream": [
         {
@@ -10175,7 +10177,8 @@
       "fix": null,
       "id": "shadowed-variable",
       "languages": [
-        "js"
+        "js",
+        "python"
       ],
       "options": [
         {
@@ -10199,7 +10202,9 @@
           "type": "list"
         }
       ],
-      "presets": [],
+      "presets": [
+        "python/ruff"
+      ],
       "upstream": [
         {
           "id": "no-shadow",
@@ -10288,7 +10293,8 @@
       "id": "undefined-variable",
       "languages": [
         "js",
-        "php"
+        "php",
+        "python"
       ],
       "options": [
         {
@@ -10300,7 +10306,8 @@
       ],
       "presets": [
         "js/eslint-recommended",
-        "php/phpstan"
+        "php/phpstan",
+        "python/ruff"
       ],
       "upstream": [
         {
@@ -10413,7 +10420,8 @@
       "fix": null,
       "id": "use-before-define",
       "languages": [
-        "js"
+        "js",
+        "python"
       ],
       "options": [
         {
@@ -10435,7 +10443,9 @@
           "type": "bool"
         }
       ],
-      "presets": [],
+      "presets": [
+        "python/ruff"
+      ],
       "upstream": [
         {
           "id": "no-use-before-define",
@@ -13663,34 +13673,6 @@
       "upstream": []
     },
     {
-      "category": "suspicious",
-      "default_level": "warn",
-      "description": "A `for` variable with the name of an import.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "import os\nimport sys\nimport json as json\nimport a.b\nimport a.c\nfrom m import n, o as p\nfrom . import q\nfrom __future__ import annotations\nfrom k import *\n\nimport re\nimport re\n\n\ndef f():\n    import sys\n    return sys\n\n\nfor os in []:\n    pass\n\n\nclass C:\n    import unused_in_class\n\n\ntry:\n    import t\nexcept ImportError:\n    t = None\n",
-        "language": "python",
-        "spans": [
-          {
-            "column": 5,
-            "length": 2,
-            "line": 20
-          }
-        ]
-      },
-      "fix": null,
-      "id": "import-shadowed-by-loop-var",
-      "languages": [
-        "python"
-      ],
-      "options": [],
-      "presets": [
-        "python/ruff"
-      ],
-      "upstream": []
-    },
-    {
       "category": "style",
       "default_level": "off",
       "description": "A membership test, `for` or comprehension over `.keys()` with no arguments.",
@@ -15081,62 +15063,6 @@
       "upstream": []
     },
     {
-      "category": "suspicious",
-      "default_level": "off",
-      "description": "A `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "def f():\n    a, b = g()\n    return a\n\nclass A:\n    x = []\n\nimport os as os\n\ndef f(a):\n    with g() as a:\n        pass\n\nx = [\"a\" \"b\", \"c\"]\n\n__all__ = [\"b\", \"a\"]\n\nclass A:\n    __slots__ = (\"b\", \"a\")\n\nimport sys\nimport os\n\nimport functools\nclass A:\n    @functools.cache\n    def f(self):\n        pass\n\ndef f(x=list()):\n    pass\n\nimport subprocess\nsubprocess.run([\"ls\"])\n\na = b = \"x\"\nx = \", \".join([a, b])\n\nx = \"%s\" % y\n\nx = \"{}\".format(y)\n\nimport re\nx = re.compile(\"a\", re.I)\n",
-        "language": "python",
-        "spans": [
-          {
-            "column": 17,
-            "length": 1,
-            "line": 11
-          }
-        ]
-      },
-      "fix": null,
-      "id": "redefined-argument-from-local",
-      "languages": [
-        "python"
-      ],
-      "options": [],
-      "presets": [
-        "python/ruff"
-      ],
-      "upstream": []
-    },
-    {
-      "category": "suspicious",
-      "default_level": "warn",
-      "description": "A function, class or import redefined, or an import covered by a name of a function, before anything read the first.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "def f():\n    a, b = g()\n    return a\n\nclass A:\n    x = []\n\nimport os as os\n\ndef f(a):\n    with g() as a:\n        pass\n\nx = [\"a\" \"b\", \"c\"]\n\n__all__ = [\"b\", \"a\"]\n\nclass A:\n    __slots__ = (\"b\", \"a\")\n\nimport sys\nimport os\n\nimport functools\nclass A:\n    @functools.cache\n    def f(self):\n        pass\n\ndef f(x=list()):\n    pass\n\nimport subprocess\nsubprocess.run([\"ls\"])\n\na = b = \"x\"\nx = \", \".join([a, b])\n\nx = \"%s\" % y\n\nx = \"{}\".format(y)\n\nimport re\nx = re.compile(\"a\", re.I)\n",
-        "language": "python",
-        "spans": [
-          {
-            "column": 8,
-            "length": 2,
-            "line": 22
-          }
-        ]
-      },
-      "fix": null,
-      "id": "redefined-while-unused",
-      "languages": [
-        "python"
-      ],
-      "options": [],
-      "presets": [
-        "python/ruff"
-      ],
-      "upstream": []
-    },
-    {
       "category": "style",
       "default_level": "warn",
       "description": "An `except` clause that names a tuple of one exception.",
@@ -15692,34 +15618,6 @@
       "upstream": []
     },
     {
-      "category": "correctness",
-      "default_level": "warn",
-      "description": "A name read in a function before the function assigns it, while an enclosing scope binds it too.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "__all__ = [\"present\", \"missing\"]\npresent = 1\nprint(undefined, present, len)\n\n\ndef reads_before_assignment():\n    print(present)\n    present = 2\n\n\ndef handled():\n    try:\n        name_error_is_handled\n    except NameError:\n        pass\n    del present\n    del not_bound\n\n\ndef annotations(a: \"Missing\", b: \"bad syntax here\"):\n    x: int\n    print(x)\n\n\nclass K:\n    attr = 1\n    print(attr, __qualname__)\n\n    def method(self):\n        return attr\n",
-        "language": "python",
-        "spans": [
-          {
-            "column": 11,
-            "length": 7,
-            "line": 7
-          }
-        ]
-      },
-      "fix": null,
-      "id": "undefined-local",
-      "languages": [
-        "python"
-      ],
-      "options": [],
-      "presets": [
-        "python/ruff"
-      ],
-      "upstream": []
-    },
-    {
       "category": "suspicious",
       "default_level": "off",
       "description": "A star import.",
@@ -15800,59 +15698,6 @@
       },
       "fix": null,
       "id": "undefined-local-with-nested-import-star-usage",
-      "languages": [
-        "python"
-      ],
-      "options": [],
-      "presets": [
-        "python/ruff"
-      ],
-      "upstream": []
-    },
-    {
-      "category": "correctness",
-      "default_level": "warn",
-      "description": "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`).",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "try:\n    pass\nexcept Exception:\n    pass\n\nif a:\n    if b:\n        pass\n\ntry:\n    pass\nexcept Exception:\n    pass\n\nimport pdb\n\ndef f(x):\n    if x:\n        return True\n    return False\n\nif a:\n    x = 1\nelif b:\n    x = 1\n\nf = open(\"a\")\n\nwith a:\n    with b:\n        pass\n\nraise Exception(\"x\")\n\nif not isinstance(x, int):\n    raise ValueError(\"x\")\n\ndef f(x):\n    if x:\n        return None\n    print(x)\n\nx = 1\nx\n\ntry:\n    pass\nexcept ValueError as e:\n    raise e\n\ndef f():\n    raise\n\nexec(\"x = 1\")\n\nhasattr(x, \"__call__\")\n",
-        "language": "python",
-        "spans": [
-          {
-            "column": 4,
-            "length": 1,
-            "line": 6
-          },
-          {
-            "column": 8,
-            "length": 1,
-            "line": 7
-          },
-          {
-            "column": 4,
-            "length": 1,
-            "line": 22
-          },
-          {
-            "column": 6,
-            "length": 1,
-            "line": 24
-          },
-          {
-            "column": 6,
-            "length": 1,
-            "line": 29
-          },
-          {
-            "column": 10,
-            "length": 1,
-            "line": 30
-          }
-        ]
-      },
-      "fix": null,
-      "id": "undefined-name",
       "languages": [
         "python"
       ],

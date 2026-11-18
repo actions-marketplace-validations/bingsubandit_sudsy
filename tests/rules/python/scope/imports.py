@@ -17,18 +17,18 @@ from k import *
 
 import re
 import re
-#      ^^ redefined-while-unused
+#      ^^ redeclared-variable
 #      ^^ unused-import
 
 
 def f():
     import sys
-#          ^^^ redefined-while-unused
+#          ^^^ redeclared-variable
     return sys
 
 
 for os in []:
-#   ^^ import-shadowed-by-loop-var
+#   ^^ shadowed-variable
     pass
 
 

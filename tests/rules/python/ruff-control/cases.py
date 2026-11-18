@@ -7,9 +7,9 @@ except Exception:
 
 if a:
 ^ collapsible-if
-#  ^ undefined-name
+#  ^ undefined-variable
     if b:
-#      ^ undefined-name
+#      ^ undefined-variable
         pass
 
 try:
@@ -29,21 +29,22 @@ def f(x):
     return False
 
 if a:
-#  ^ undefined-name
+#  ^ undefined-variable
     x = 1
 elif b:
 ^ if-with-same-arms
-#    ^ undefined-name
+#    ^ undefined-variable
     x = 1
 
 f = open("a")
+^ redeclared-variable
 #   ^^^^^^^^^ open-file-without-with
 
 with a:
 ^ nested-with
-#    ^ undefined-name
+#    ^ undefined-variable
     with b:
-#        ^ undefined-name
+#        ^ undefined-variable
         pass
 
 raise Exception("x")
@@ -55,6 +56,7 @@ if not isinstance(x, int):
 #   ^^^^^^^^^^^^^^^^^^^^^ type-check-without-type-error
 
 def f(x):
+#   ^ redeclared-variable
     if x:
         return None
 #       ^^^^^^^^^^^ explicit-return-none
@@ -71,6 +73,7 @@ except ValueError as e:
 #   ^^^^^^^ verbose-raise
 
 def f():
+#   ^ redeclared-variable
     raise
 #   ^^^^^ bare-raise-outside-handler
 

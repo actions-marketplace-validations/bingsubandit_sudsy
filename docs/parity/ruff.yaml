@@ -36,7 +36,7 @@ entries:
   E902: wontfix an unreadable file is reported by the command line, not by a rule
   E999: rule syntax-error
   F401: rule unused-import
-  F402: rule import-shadowed-by-loop-var
+  F402: rule shadowed-variable
   F403: rule undefined-local-with-import-star
   F404: rule late-future-import
   F405: rule undefined-local-with-import-star-usage
@@ -71,10 +71,10 @@ entries:
   F706: rule return-outside-function
   F707: rule default-except-not-last
   F722: rule forward-annotation-syntax-error
-  F811: rule redefined-while-unused
-  F821: rule undefined-name
+  F811: rule redeclared-variable
+  F821: rule undefined-variable
   F822: rule undefined-export
-  F823: rule undefined-local
+  F823: rule use-before-define
   F841: rule unused-variable
   F842: rule unused-annotation
   F901: rule raise-not-implemented
@@ -533,7 +533,7 @@ entries:
   PLR0917: planned
   PLR1701: wontfix removed upstream
   PLR1702: deferred | preview rule
-  PLR1704: rule redefined-argument-from-local
+  PLR1704: rule shadowed-variable
   PLR1706: wontfix removed upstream
   PLR1708: planned
   PLR1711: planned

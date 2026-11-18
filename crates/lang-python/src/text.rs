@@ -2,15 +2,13 @@
 
 use crate::format::syntax;
 use crate::generated::kind as k;
-use core_syntax::{SyntaxNode, TextSize};
+use core_syntax::SyntaxNode;
 use std::borrow::Cow;
 
 pub use core_syntax::roles::code_text;
 
 /// One quoted piece of a string literal.
 pub struct Part {
-    /// Where the text between the quotes starts and what it is.
-    pub inner_start: TextSize,
     pub inner: String,
     pub raw: bool,
     pub bytes: bool,
@@ -26,9 +24,7 @@ pub fn parts(n: &SyntaxNode) -> Vec<Part> {
                 .filter_map(|e| e.into_token())
                 .find(|t| t.kind() == k::STRING)?;
             let lit = syntax().split(t.text())?;
-            let start = lit.prefix.len() + lit.open.len();
             Some(Part {
-                inner_start: t.text_range().start() + TextSize::try_from(start).ok()?,
                 inner: lit.inner.to_owned(),
                 raw: lit.prefix.contains(['r', 'R']),
                 bytes: lit.prefix.contains(['b', 'B']),

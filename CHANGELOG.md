@@ -15,6 +15,12 @@
   options become rule options: `unused-variable` has `caught_errors`, `ignore_pattern` and
   `ignore_rest_siblings`, `unused-parameter` has `args` and `ignore_pattern`, `use-before-define`
   has `functions`, `classes` and `variables`, `shadowed-variable` has `allow` and `kinds`.
+* Python scope rules are the shared ones and are renamed (config keys and the `python/ruff` preset
+  follow, no aliases): `undefined-name` is `undefined-variable`, `redefined-while-unused` is
+  `redeclared-variable`, `undefined-local` (F823) is `use-before-define`, and
+  `import-shadowed-by-loop-var` and `redefined-argument-from-local` are merged into
+  `shadowed-variable` (so a plain `warn` now reports both; it was `off` for the second).
+  Names inside quoted annotations are read as identifiers, not parsed.
 
 ### Changed
 * GraphQL `selection-set-depth`: the option `max_depth` is now `max`, as in every `max` rule.

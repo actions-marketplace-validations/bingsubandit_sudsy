@@ -1,2 +1,2 @@
 unreachable-code: warn
-undefined-name: off
+undefined-variable: off

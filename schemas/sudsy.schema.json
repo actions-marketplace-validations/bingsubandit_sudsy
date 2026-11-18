@@ -1446,10 +1446,6 @@
               "$ref": "#/definitions/rule",
               "description": "An `@import` of `url(...)`: write the string."
             },
-            "import-shadowed-by-loop-var": {
-              "$ref": "#/definitions/rule",
-              "description": "A `for` variable with the name of an import."
-            },
             "in-dict-keys": {
               "$ref": "#/definitions/rule",
               "description": "A membership test, `for` or comprehension over `.keys()` with no arguments."
@@ -3742,14 +3738,6 @@
               "$ref": "#/definitions/rule",
               "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked."
             },
-            "redefined-argument-from-local": {
-              "$ref": "#/definitions/rule",
-              "description": "A `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function."
-            },
-            "redefined-while-unused": {
-              "$ref": "#/definitions/rule",
-              "description": "A function, class or import redefined, or an import covered by a name of a function, before anything read the first."
-            },
             "redundant-pattern": {
               "$ref": "#/definitions/rule",
               "description": "A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)."
@@ -5110,10 +5098,6 @@
               "$ref": "#/definitions/rule",
               "description": "A name in `__all__` that the module does not bind."
             },
-            "undefined-local": {
-              "$ref": "#/definitions/rule",
-              "description": "A name read in a function before the function assigns it, while an enclosing scope binds it too."
-            },
             "undefined-local-with-import-star": {
               "$ref": "#/definitions/rule",
               "description": "A star import."
@@ -5125,10 +5109,6 @@
             "undefined-local-with-nested-import-star-usage": {
               "$ref": "#/definitions/rule",
               "description": "A star import in a function or class."
-            },
-            "undefined-name": {
-              "$ref": "#/definitions/rule",
-              "description": "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`)."
             },
             "undefined-variable": {
               "description": "A name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file, `require`, `module`, `exports` and `global`) and that is not in the `globals` option. `typeof x` and JSX tags are left alone.",

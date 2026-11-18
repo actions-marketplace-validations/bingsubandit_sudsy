@@ -2,7 +2,6 @@
 //! ruff's rules that read the syntax tree and the scope model. `cargo xtask new-rule python <id>
 //! --rust` adds a module under `rules/` and lists it here.
 
-mod binding;
 mod branch;
 mod control;
 mod decl;
@@ -21,10 +20,16 @@ use core_rules::{Family, Params, Rule, RuleMeta};
 
 pub static RULES: &[&dyn Rule] = &[];
 
-pub static FAMILIES: &[Family] = &[Family {
-    name: "check",
-    build,
-}];
+pub static FAMILIES: &[Family] = &[
+    Family {
+        name: "check",
+        build,
+    },
+    Family {
+        name: "scope",
+        build: |meta, p| core_rules::scope_rules::build(&crate::semantic::LANG, meta, p),
+    },
+];
 
 pub(super) use core_rules::checks::{Entry, NodeCheck as Check};
 
@@ -36,41 +41,10 @@ const BIN_OP: &[core_syntax::SyntaxKind] = &[k::EXPR_BIN_OP];
 const MODULE: &[core_syntax::SyntaxKind] = &[k::MOD_MODULE];
 
 const CHECKS: &[Entry] = &[
-    ("unused-import", MODULE, scope::unused_import),
-    (
-        "redefined-while-unused",
-        MODULE,
-        scope::redefined_while_unused,
-    ),
-    (
-        "import-shadowed-by-loop-var",
-        MODULE,
-        scope::import_shadowed_by_loop_var,
-    ),
-    ("undefined-name", MODULE, scope::undefined_name),
-    (
-        "undefined-local-with-import-star-usage",
-        MODULE,
-        scope::star_usage,
-    ),
     (
         "forward-annotation-syntax-error",
         MODULE,
         scope::forward_annotation_syntax_error,
-    ),
-    ("undefined-export", MODULE, scope::undefined_export),
-    ("undefined-local", MODULE, scope::undefined_local),
-    ("unused-variable", MODULE, scope::unused_variable),
-    ("unused-annotation", MODULE, scope::unused_annotation),
-    (
-        "unused-unpacked-variable",
-        MODULE,
-        scope::unused_unpacked_variable,
-    ),
-    (
-        "redefined-argument-from-local",
-        MODULE,
-        scope::redefined_argument_from_local,
     ),
     (
         "needless-bool",

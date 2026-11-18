@@ -30,6 +30,11 @@ impl<'a> Cx<'a> {
         }
     }
 
+    /// The facts of an ordered language (the rules that read it run on those only).
+    pub fn ordered(&self) -> &super::Ordered {
+        self.lang.ordered.as_ref().expect("an ordered language")
+    }
+
     pub fn tag(&self, n: &SyntaxNode, tag: &str) -> bool {
         self.file.grammar.has_tag(n.kind(), tag)
     }

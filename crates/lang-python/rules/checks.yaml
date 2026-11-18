@@ -1,5 +1,5 @@
 id: unused-import
-family: check
+family: scope
 params: { check: unused-import }
 message: "`{name}` imported but unused"
 description: "An import that nothing in its scope reads and that `__all__` does not name (a redundant alias `import a as a` is a re-export)."
@@ -7,18 +7,18 @@ example: "import os"
 severity: off
 category: suspicious
 ---
-id: redefined-while-unused
-family: check
-params: { check: redefined-while-unused }
+id: redeclared-variable
+family: scope
+params: { check: redeclared-variable }
 message: "redefinition of unused `{name}`"
 description: "A function, class or import redefined, or an import covered by a name of a function, before anything read the first."
 example: "import os\nimport os"
 severity: warn
 category: suspicious
 ---
-id: undefined-name
-family: check
-params: { check: undefined-name }
+id: undefined-variable
+family: scope
+params: { check: undefined-variable }
 message: "undefined name `{name}`"
 description: "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`)."
 example: "print(x)"
@@ -26,7 +26,7 @@ severity: warn
 category: correctness
 ---
 id: unused-variable
-family: check
+family: scope
 params: { check: unused-variable }
 message: "local variable `{name}` is assigned to but never used"
 description: "A local variable assigned and never read, or an exception named by `except ... as` and never read (not tuple unpacking, not `_` names, not in functions that call `locals()`)."
@@ -35,8 +35,8 @@ severity: off
 category: suspicious
 ---
 id: unused-annotation
-family: check
-params: { check: unused-annotation }
+family: scope
+params: { check: unused-variable, mode: annotation }
 message: "local variable `{name}` is annotated but never used"
 description: "A local variable annotated without a value and never read."
 example: "def f():\n    x: int"
@@ -44,7 +44,7 @@ severity: off
 category: suspicious
 ---
 id: undefined-export
-family: check
+family: scope
 params: { check: undefined-export }
 message: "undefined name `{name}` in `__all__`"
 description: "A name in `__all__` that the module does not bind."
@@ -52,20 +52,20 @@ example: "__all__ = [\"x\"]"
 severity: warn
 category: correctness
 ---
-id: undefined-local
-family: check
-params: { check: undefined-local }
+id: use-before-define
+family: scope
+params: { check: use-before-define }
 message: "local variable `{name}` referenced before assignment"
 description: "A name read in a function before the function assigns it, while an enclosing scope binds it too."
 example: "x = 1\ndef f():\n    print(x)\n    x = 2"
 severity: warn
 category: correctness
 ---
-id: import-shadowed-by-loop-var
-family: check
-params: { check: import-shadowed-by-loop-var }
-message: "import `{name}` shadowed by loop variable"
-description: "A `for` variable with the name of an import."
+id: shadowed-variable
+family: scope
+params: { check: shadowed-variable }
+message: "`{name}` shadows an import or an argument"
+description: "A `for` variable with the name of an import, and a `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function (and has not been bound since)."
 example: "import os\nfor os in []:\n    pass"
 severity: warn
 category: suspicious
@@ -89,8 +89,8 @@ severity: warn
 category: correctness
 ---
 id: undefined-local-with-import-star-usage
-family: check
-params: { check: undefined-local-with-import-star-usage }
+family: scope
+params: { check: undefined-variable, mode: star-usage }
 message: "`{name}` may be undefined, or defined from star imports"
 description: "A name that no scope binds in a file that has a star import."
 example: "from os import *\nprint(x)"
@@ -638,8 +638,8 @@ severity: warn
 category: suspicious
 ---
 id: unused-unpacked-variable
-family: check
-params: { check: unused-unpacked-variable }
+family: scope
+params: { check: unused-variable, mode: unpacked }
 message: "unpacked variable `{name}` is never used"
 description: "A name of a tuple target in a function that the function never reads (not `_` names, not in functions that call `locals()`)."
 example: "def f():\n    a, b = g()\n    return a"
@@ -717,15 +717,6 @@ description: "A `\"...\".format(...)` on a string literal whose fields all name 
 example: "x = \"{}\".format(y)"
 severity: off
 category: style
----
-id: redefined-argument-from-local
-family: check
-params: { check: redefined-argument-from-local }
-message: "redefining argument with the local name `{name}`"
-description: "A `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function."
-example: "def f(a):\n    with g() as a:\n        pass"
-severity: off
-category: suspicious
 ---
 id: needless-bool
 family: check

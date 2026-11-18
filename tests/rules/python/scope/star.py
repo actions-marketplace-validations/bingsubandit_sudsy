@@ -18,4 +18,4 @@ def f(a: "Missing"):
 #         ^^^^^^^ undefined-local-with-import-star-usage
     x: int
     print(x)
-#         ^ undefined-name
+#         ^ undefined-variable

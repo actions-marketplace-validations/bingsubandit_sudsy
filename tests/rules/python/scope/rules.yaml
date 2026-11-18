@@ -1,8 +1,8 @@
 unused-import: warn
-redefined-while-unused: warn
-import-shadowed-by-loop-var: warn
-undefined-name: warn
-undefined-local: warn
+redeclared-variable: warn
+shadowed-variable: warn
+undefined-variable: warn
+use-before-define: warn
 undefined-export: warn
 undefined-local-with-import-star: warn
 undefined-local-with-import-star-usage: warn

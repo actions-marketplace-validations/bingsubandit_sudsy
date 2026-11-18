@@ -4,6 +4,7 @@
 //! A construct the table cannot decide turns a rule off for its scope, never guesses.
 
 mod cx;
+mod ordered;
 mod ordering;
 mod shadowed;
 mod undefined;
@@ -22,8 +23,43 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
 
+/// What a language says when the order of its code decides what a name means (see
+/// `ordered`): the facts its tags do not carry.
+pub struct Ordered {
+    /// The module-level list of the names a module exports (`__all__`); empty: none.
+    pub exports: &'static str,
+    /// The import module whose names are directives, never unused or redefined (`__future__`).
+    pub pragma: &'static str,
+    /// The exception whose handler makes a read of a missing name no finding (`NameError`).
+    pub guard: &'static str,
+    /// Decorators (names through imports) that make a redefined function no finding.
+    pub overloads: &'static [&'static str],
+    /// Names meant to be unused besides those that start with `_`.
+    pub ignored: &'static [&'static str],
+    /// Subscripted forms whose items are values, not types (`Literal`).
+    pub value_forms: &'static [&'static str],
+    /// Subscripted forms whose items after the first are values (`Annotated`).
+    pub note_forms: &'static [&'static str],
+    /// A string in a type position is code: its names are reads.
+    pub quoted: bool,
+}
+
+impl Ordered {
+    pub const NONE: Ordered = Ordered {
+        exports: "",
+        pragma: "",
+        guard: "",
+        overloads: &[],
+        ignored: &[],
+        value_forms: &[],
+        note_forms: &[],
+        quoted: false,
+    };
+}
+
 /// What a language says to the shared scope rules.
 pub struct ScopeLang {
+    ordered: Option<Ordered>,
     rows: &'static [Row],
     name_tokens: &'static [&'static str],
     hosts: &'static [&'static str],
@@ -53,6 +89,7 @@ impl ScopeLang {
     /// Rows by node kind, and the token kinds a name is written with.
     pub const fn new(rows: &'static [Row], name_tokens: &'static [&'static str]) -> ScopeLang {
         ScopeLang {
+            ordered: None,
             rows,
             name_tokens,
             hosts: &[],
@@ -77,6 +114,14 @@ impl ScopeLang {
             unused_prefix: "",
             table: OnceLock::new(),
         }
+    }
+
+    /// The order of the code decides what a name means (Python): the rules `unused-import`,
+    /// `unused-variable`, `undefined-variable`, `use-before-define`, `redeclared-variable`,
+    /// `shadowed-variable` and `undefined-export` read the bindings in order.
+    pub const fn ordered(mut self, ordered: Ordered) -> Self {
+        self.ordered = Some(ordered);
+        self
     }
 
     /// Names are bare tokens: every one that is not a declaration is a use (Java).
@@ -222,10 +267,21 @@ impl ScopeLang {
         let path = path.to_string_lossy();
         self.flavors
             .iter()
-            .any(|(n, suffixes)| *n == name && suffixes.iter().any(|s| path.ends_with(s)))
+            .any(|(n, suffixes)| *n == name && suffixes.iter().any(|s| matches(&path, s)))
     }
 
-    fn is_global(&self, name: &str, path: &Path) -> bool {
+    /// What the name an import declaration binds stands for (`a` for `import a.b`).
+    pub fn import_target(
+        &self,
+        g: &Grammar,
+        root: &SyntaxNode,
+        d: &core_semantics::scopes::Decl,
+    ) -> Option<String> {
+        ordered::import_target(g, root, self.ordered.as_ref()?.pragma, d)
+    }
+
+    /// Is `name` one the language (or the file's flavor) declares everywhere?
+    pub fn is_global(&self, name: &str, path: &Path) -> bool {
         let sets = self.sets.get_or_init(|| GlobalSets {
             base: self.globals.split_whitespace().collect(),
             conditional: self
@@ -277,6 +333,9 @@ pub fn model(lang: &ScopeLang, file: &FileContext<'_>) -> Rc<Model> {
     CACHE.with(|c| {
         c.get(file, || {
             let mut model = bind(file.root, file.grammar, lang.table(file.grammar));
+            if lang.ordered.as_ref().is_some_and(|o| o.quoted) {
+                ordered::quoted::add_reads(&mut model, file.root, file.grammar, lang);
+            }
             if !lang.interpolated.is_empty() {
                 interpolation_reads(&mut model, file, lang.interpolated);
             }
@@ -299,6 +358,33 @@ enum Check {
     UseBeforeDefine,
     RedeclaredVariable,
     ShadowedVariable,
+    // The reports of `unused-variable` for an annotation with no value and for a name of a tuple
+    // target, of `undefined-variable` for a name a wildcard import may bring, and the names a
+    // module exports that nothing binds: ordered languages only.
+    UnusedAnnotation,
+    UnusedUnpacked,
+    StarUsage,
+    UndefinedExport,
+}
+
+impl Check {
+    /// What of the findings of an ordered language the check reports.
+    fn which(self) -> Option<ordered::Which> {
+        use ordered::Which as W;
+        Some(match self {
+            Check::UnusedImport => W::UnusedImport,
+            Check::UnusedVariable => W::UnusedVariable,
+            Check::UndefinedVariable => W::Undefined,
+            Check::UseBeforeDefine => W::UseBeforeDefine,
+            Check::RedeclaredVariable => W::Redeclared,
+            Check::ShadowedVariable => W::Shadowed,
+            Check::UnusedAnnotation => W::UnusedAnnotation,
+            Check::UnusedUnpacked => W::UnusedUnpacked,
+            Check::StarUsage => W::StarUsage,
+            Check::UndefinedExport => W::UndefinedExport,
+            _ => return None,
+        })
+    }
 }
 
 /// One scope rule of a language.
@@ -316,15 +402,35 @@ pub fn build(
     meta: &'static RuleMeta,
     mut p: Params,
 ) -> Result<Box<dyn Rule>, String> {
-    let check = match p.text("check")?.as_str() {
-        "undefined-variable" => Check::UndefinedVariable,
-        "unused-variable" => Check::UnusedVariable,
-        "unused-parameter" => Check::UnusedParameter,
-        "use-before-define" => Check::UseBeforeDefine,
-        "redeclared-variable" => Check::RedeclaredVariable,
-        "shadowed-variable" => Check::ShadowedVariable,
-        other => return Err(format!("param `check`: unknown check `{other}`")),
+    let name = p.text("check")?;
+    let mode = p.optional("mode");
+    let check = match (name.as_str(), mode.as_deref()) {
+        ("undefined-variable", Some("star-usage")) => Check::StarUsage,
+        ("unused-variable", Some("annotation")) => Check::UnusedAnnotation,
+        ("unused-variable", Some("unpacked")) => Check::UnusedUnpacked,
+        (_, Some(mode)) => return Err(format!("param `mode`: unknown mode `{mode}`")),
+        (name, None) => match name {
+            "unused-import" if lang.ordered.is_some() => Check::UnusedImport,
+            "undefined-export" if lang.ordered.is_some() => Check::UndefinedExport,
+            "undefined-variable" => Check::UndefinedVariable,
+            "unused-variable" => Check::UnusedVariable,
+            "unused-parameter" => Check::UnusedParameter,
+            "use-before-define" => Check::UseBeforeDefine,
+            "redeclared-variable" => Check::RedeclaredVariable,
+            "shadowed-variable" => Check::ShadowedVariable,
+            other => return Err(format!("param `check`: unknown check `{other}`")),
+        },
     };
+    if lang.ordered.is_none()
+        && check.which().is_some_and(|_| {
+            matches!(
+                check,
+                Check::UnusedAnnotation | Check::UnusedUnpacked | Check::StarUsage
+            )
+        })
+    {
+        return Err("param `mode`: the language is not ordered".into());
+    }
     let message = p.text("message")?;
     p.done()?;
     Ok(Box::new(ScopeRule {
@@ -417,6 +523,14 @@ impl ScopeRule {
 }
 
 /// Whether `text` contains `name` as a whole word.
+/// Does the path end with the flavor's suffix? One that does not start with a dot (`__init__.py`)
+/// is a whole file name.
+fn matches(path: &str, suffix: &str) -> bool {
+    path.strip_suffix(suffix).is_some_and(|head| {
+        suffix.starts_with('.') || head.is_empty() || head.ends_with(['/', '\\'])
+    })
+}
+
 fn mentions(text: &str, name: &str) -> bool {
     text.match_indices(name).any(|(i, _)| {
         let word = |c: Option<char>| c.is_some_and(|c| c.is_alphanumeric() || c == '_');
@@ -443,7 +557,11 @@ impl Rule for ScopeRule {
             | Check::UnusedParameter
             | Check::UseBeforeDefine
             | Check::RedeclaredVariable
-            | Check::ShadowedVariable => unreachable!("a row of the rule files gives its metadata"),
+            | Check::ShadowedVariable
+            | Check::UnusedAnnotation
+            | Check::UnusedUnpacked
+            | Check::StarUsage
+            | Check::UndefinedExport => unreachable!("a row of the rule files gives its metadata"),
             Check::UnusedImport => meta!(
                 "unused-import",
                 Cleanup,
@@ -511,6 +629,16 @@ impl Rule for ScopeRule {
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let lang = self.lang;
         let m = model(lang, file);
+        if lang.ordered.is_some()
+            && let Some(which) = self.check.which()
+        {
+            let cx = Cx::new(&m, file, lang);
+            let template = self.template("'{name}' is not defined");
+            for (range, name) in ordered::findings(&cx, file).get(which) {
+                ctx.report(*range, template.replace("{name}", name));
+            }
+            return;
+        }
         let dynamic = |scope| {
             let mut open = true;
             m.ancestors(scope)
@@ -617,6 +745,10 @@ impl Rule for ScopeRule {
                     }
                 }
             }
+            Check::UnusedAnnotation
+            | Check::UnusedUnpacked
+            | Check::StarUsage
+            | Check::UndefinedExport => {}
             Check::UndefinedVariable => {
                 let extra = ctx.options.list("globals");
                 let template = self.template("the variable `{name}` is not defined");

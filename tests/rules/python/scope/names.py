@@ -2,12 +2,12 @@ __all__ = ["present", "missing"]
 #                     ^^^^^^^^^ undefined-export
 present = 1
 print(undefined, present, len)
-#     ^^^^^^^^^ undefined-name
+#     ^^^^^^^^^ undefined-variable
 
 
 def reads_before_assignment():
     print(present)
-#         ^^^^^^^ undefined-local
+#         ^^^^^^^ use-before-define
     present = 2
 #   ^^^^^^^ unused-variable
 
@@ -19,17 +19,17 @@ def handled():
     except NameError:
         pass
     del present
-#       ^^^^^^^ undefined-name
+#       ^^^^^^^ undefined-variable
     del not_bound
-#       ^^^^^^^^^ undefined-name
+#       ^^^^^^^^^ undefined-variable
 
 
 def annotations(a: "Missing", b: "bad syntax here"):
-#                   ^^^^^^^ undefined-name
+#                   ^^^^^^^ undefined-variable
 #                                ^^^^^^^^^^^^^^^^^ forward-annotation-syntax-error
     x: int
     print(x)
-#         ^ undefined-name
+#         ^ undefined-variable
 
 
 class K:
@@ -38,4 +38,4 @@ class K:
 
     def method(self):
         return attr
-#              ^^^^ undefined-name
+#              ^^^^ undefined-variable

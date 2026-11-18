@@ -1,24 +1,23 @@
-//! What an import declaration binds: the form it is written in, what it says in a message and
-//! what the bound name stands for.
+//! What an import declaration binds: the form it is written in, what a message says about it
+//! and what the bound name stands for.
 
-use crate::generated::kind as k;
-use crate::semantic::Cx;
-use crate::text::code_text;
 use core_semantics::scopes::{Decl, Flags};
+use core_syntax::roles::code_text;
+use core_syntax::{Grammar, SyntaxNode};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Form {
+pub(in crate::scope_rules) enum Form {
     /// `import a`, `import a as b`.
     Import,
     /// `import a.b`: binds `a`.
     Submodule,
     /// `from m import a`.
     From,
-    /// `from __future__ import a`.
-    Future,
+    /// An import of the language's pragma module (`from __future__ import a`).
+    Pragma,
 }
 
-pub struct Import {
+pub(in crate::scope_rules) struct Import {
     pub form: Form,
     /// What a message says (`a.b`, `.m.a`).
     pub label: String,
@@ -28,16 +27,32 @@ pub struct Import {
     pub explicit: bool,
 }
 
-/// The import an `Alias` declaration makes; `None` for a declaration of another kind.
-pub fn describe(cx: &Cx, d: &Decl) -> Option<Import> {
+/// The number of dots a relative import starts with.
+fn level(g: &Grammar, stmt: &SyntaxNode) -> usize {
+    stmt.children_with_tokens()
+        .filter_map(|e| e.into_token())
+        .filter(|t| g.has_tag(t.kind(), "dots"))
+        .map(|t| t.text().len())
+        .sum()
+}
+
+/// The import an alias declaration makes (`pragma`: the language's pragma module); `None` for a
+/// declaration of another kind.
+pub(in crate::scope_rules) fn describe(
+    g: &Grammar,
+    root: &SyntaxNode,
+    pragma: &str,
+    d: &Decl,
+) -> Option<Import> {
     if !d.flags.contains(Flags::IMPORT) {
         return None;
     }
-    let alias = d.node(&cx.root);
-    let name = code_text(&cx.slot(&alias, "name")?);
-    let asname = cx.slot(&alias, "asname").map(|a| code_text(&a));
+    let alias = d.node(root);
+    let slot = |n: &SyntaxNode, label: &str| g.slot(n, label)?.into_node();
+    let name = code_text(&slot(&alias, "name")?);
+    let asname = slot(&alias, "asname").map(|a| code_text(&a));
     let stmt = alias.parent()?;
-    if stmt.kind() == k::STMT_IMPORT {
+    if !g.has_field(stmt.kind(), "module") {
         return Some(match asname {
             Some(a) => Import {
                 form: Form::Import,
@@ -61,19 +76,10 @@ pub fn describe(cx: &Cx, d: &Decl) -> Option<Import> {
             }
         });
     }
-    let module = cx
-        .slot(&stmt, "module")
+    let module = slot(&stmt, "module")
         .map(|m| code_text(&m))
         .unwrap_or_default();
-    let level: usize = stmt
-        .children_with_tokens()
-        .filter_map(|e| e.into_token())
-        .map(|t| match t.kind() {
-            k::DOT => 1,
-            k::ELLIPSIS => 3,
-            _ => 0,
-        })
-        .sum();
+    let level = level(g, &stmt);
     let dots = ".".repeat(level);
     let full = if module.is_empty() {
         format!("{dots}{name}")
@@ -81,8 +87,8 @@ pub fn describe(cx: &Cx, d: &Decl) -> Option<Import> {
         format!("{dots}{module}.{name}")
     };
     Some(Import {
-        form: if level == 0 && module == "__future__" {
-            Form::Future
+        form: if level == 0 && !pragma.is_empty() && module == pragma {
+            Form::Pragma
         } else {
             Form::From
         },
@@ -90,9 +96,4 @@ pub fn describe(cx: &Cx, d: &Decl) -> Option<Import> {
         label: full.clone(),
         target: full,
     })
-}
-
-/// What the name a declaration binds stands for, when it is an import.
-pub fn target(cx: &Cx, d: &Decl) -> Option<String> {
-    describe(cx, d).map(|i| i.target)
 }

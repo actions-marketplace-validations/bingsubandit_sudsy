@@ -95,7 +95,7 @@ token Elif "elif" #keyword
 token Else "else" #keyword
 token Except "except" #keyword
 token False "False" #keyword #constant
-token Finally "finally" #keyword
+token Finally "finally" #keyword #finally
 token For "for" #keyword
 token From "from" #keyword
 token Global "global" #keyword
@@ -161,13 +161,13 @@ node StmtFor #statement #loop =
     Async? For target:#expression In iterable=iter:#expression Colon body:#statement* Else? Colon? orelse:#statement*
 node StmtWhile #statement #loop =
     While condition=test:#expression Colon body:#statement* Else? Colon? orelse:#statement*
-node StmtIf #statement #conditional =
+node StmtIf #statement #conditional #branching =
     If condition=test:#expression Colon then=body:#statement* else=clauses:ElifElseClause*
-node StmtWith #statement #opaque
+node StmtWith #statement #opaque #branching
 node StmtMatch #statement #switch =
     Match subject:#expression Colon cases:MatchCase*
 node StmtRaise #statement #throw = Raise value=exc:#expression? From? cause:#expression?
-node StmtTry #statement #try =
+node StmtTry #statement #try #branching =
     Try Colon body:#statement* catches=handlers:ExceptHandlerExceptHandler* Else? Colon? orelse:#statement* Finally? Colon? finally=finalbody:#statement*
 node StmtAssert #statement #opaque
 node StmtImport #statement #import =
@@ -182,7 +182,7 @@ node StmtBreak #statement #break = Break
 node StmtContinue #statement #continue = Continue
 node ExprBoolOp #expression #part #binary =
     left:#expression operator:#operator right:#expression #part*
-node ExprNamed #expression #part #assignment =
+node ExprNamed #expression #part #assignment #named-expr =
     left:#expression operator:ColonEqual right:#expression
 node ExprBinOp #expression #part #binary =
     left:#expression operator:#operator right:#expression
@@ -210,7 +210,7 @@ node ExprFString #expression #part #restyle #literal =
     value:#string-part*
 node ExprTString #expression #part #restyle #literal =
     value:TString*
-node ExprStringLiteral #expression #part #restyle #literal =
+node ExprStringLiteral #expression #part #restyle #literal #string-literal =
     value:StringLiteral*
 node ExprBytesLiteral #expression #part #restyle #literal =
     value:BytesLiteral*
@@ -226,13 +226,13 @@ node ExprAttribute #expression #part #member-access =
     object:#expression Dot member:Identifier
 node ExprSubscript #expression #part #index =
     object:#expression Lsqb arguments:#expression Rsqb
-node ExprStarred #expression #part #opaque
+node ExprStarred #expression #part #opaque #rest
 node ExprName #expression #part #reference =
     name:Name
-node ExprList #expression #part #opaque
-node ExprTuple #expression #part #opaque
+node ExprList #expression #part #opaque #collection
+node ExprTuple #expression #part #opaque #collection
 node ExprSlice #expression #part #opaque
-node ExceptHandlerExceptHandler #catch =
+node ExceptHandlerExceptHandler #catch #branch =
     Except Star? parameter=type:#expression? As? name:Identifier? Colon body:#statement*
 node InterpolatedElement #opaque
 node InterpolatedStringLiteralElement #opaque
@@ -253,7 +253,7 @@ node TypeParamParamSpec #declaration =
 node InterpolatedStringFormatSpec #opaque
 node PatternArguments #opaque
 node PatternKeyword #opaque
-node Comprehension #opaque =
+node Comprehension #opaque #comprehension =
     Async? For target:#expression In iter:#expression
 node Arguments #opaque
 node Parameters #parameter-list =
@@ -263,11 +263,11 @@ node Parameter #declaration #parameter =
 node ParameterWithDefault #parameter #opaque
 node Keyword #opaque
 node Alias #opaque = name:Identifier As? asname:Identifier?
-node WithItem #opaque
-node MatchCase #case =
+node WithItem #opaque #with-item
+node MatchCase #case #branch =
     Case test=pattern:#pattern If? guard:#expression? Colon body:#statement*
-node Decorator #opaque
-node ElifElseClause #conditional =
+node Decorator #opaque #decorator
+node ElifElseClause #conditional #branch =
     Elif? Else? condition=test:#expression? Colon then=body:#statement*
 node TypeParams #opaque
 node FString #string-part #opaque

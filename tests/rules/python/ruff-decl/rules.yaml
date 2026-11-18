@@ -1,7 +1,7 @@
 unused-unpacked-variable: warn
 mutable-class-default: warn
 useless-import-alias: warn
-redefined-argument-from-local: warn
+shadowed-variable: warn
 implicit-concat-in-collection: warn
 unsorted-dunder-all: warn
 unsorted-dunder-slots: warn
