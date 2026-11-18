@@ -330,8 +330,6 @@ local lang-csharp/rules/async_suffix.rs naming-convention # lang: csharp
 local lang-csharp/rules/binding.rs unused-import # lang: csharp
 local lang-csharp/rules/flow.rs unused-variable # lang: csharp
 local lang-css/format/mod.rs key-value-layout # lang: css
-local lang-css/format/mod.rs token-case # lang: css
-local lang-css/format/text.rs token-case # lang: css
 local lang-css/format/value.rs delimited-list # lang: css
 local lang-css/lexer.rs source-lexer # lang: css
 local lang-css/parser.rs recursive-descent-parser # lang: css
@@ -373,7 +371,6 @@ local lang-makefile/rules.rs embedded-command-checks # lang: makefile
 local lang-makefile/rules.rs unique-names # lang: makefile
 local lang-markdown/format/keep.rs verbatim-formatter # lang: markdown
 local lang-powershell/format.rs block-and-statements # lang: powershell
-local lang-powershell/format.rs token-case # lang: powershell
 local lang-protobuf/format.rs key-value-layout # lang: protobuf
 local lang-python/format/block.rs blank-lines-between-members # lang: python
 local lang-python/format/comment.rs source-rewrite # lang: python

@@ -1,0 +1,3 @@
+# Names CSS writes in lowercase (syntax: crates/core-format/src/case.rs): the CSS-wide keywords as a value.
+[case]
+Ident : lower of initial|inherit|unset|revert

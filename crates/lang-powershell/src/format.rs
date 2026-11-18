@@ -4,7 +4,7 @@
 //! the words, strings and line breaks the formatter has no rule for. The tree is flat, so the
 //! formatter walks the tokens.
 //!
-//! concept: token-case, block-and-statements
+//! concept: block-and-statements
 
 use crate::generated::kind as k;
 use core_config::shared;

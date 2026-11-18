@@ -3,6 +3,12 @@
 //! concept: literal-spelling, token-case
 
 use core_format::literals::{self, FracZeros, NumberStyle, StringStyle};
+use core_format::rules::LazyRules;
+
+static ROWS: LazyRules = LazyRules::new(
+    || core_syntax::grammars::CSS.get(),
+    include_str!("../../format.rules"),
+);
 
 /// Units written in their canonical case (`PX` becomes `px`, `hz` becomes `Hz`).
 const UNITS: &[&str] = &[
@@ -87,12 +93,10 @@ pub fn url(s: &str) -> String {
 
 /// An identifier in a value: the CSS-wide keywords are lowercase.
 pub fn keyword(s: &str) -> String {
-    let lower = s.to_ascii_lowercase();
-    if matches!(lower.as_str(), "initial" | "inherit" | "unset" | "revert") {
-        lower
-    } else {
-        s.to_string()
-    }
+    ROWS.get()
+        .cases()
+        .fixed(crate::generated::kind::IDENT, s)
+        .unwrap_or_else(|| s.to_string())
 }
 
 #[cfg(test)]

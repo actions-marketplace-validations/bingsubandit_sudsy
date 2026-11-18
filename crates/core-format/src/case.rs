@@ -1,7 +1,9 @@
 //! Case of words as data: the `[case]` rows of a language's rules file say which token kinds are
 //! written in which case, `KINDS : POLICY`. `KINDS` are names of the grammar's kinds joined by `|`;
 //! `POLICY` is `upper`, `lower`, `capitalise`, `consistent` or the name of a string option that
-//! holds one of them (`keyword_case`; any other value means `consistent`). The first row that
+//! holds one of them (`keyword_case`; any other value means `consistent`). A policy may end in
+//! `of WORD|WORD|..`: only words of that list (ignoring case) are written in the case, the rest
+//! keep theirs (`TagName : lower of div|span`, the elements whose names HTML lowercases). The first row that
 //! names a kind decides; a kind without a row keeps its case.
 //!
 //! `consistent` follows sqlfluff (CP01 to CP05): the first word of a row fixes what the file may
@@ -42,6 +44,48 @@ struct Row {
     kinds: Vec<SyntaxKind>,
     /// The policy, or the option that holds it.
     policy: Result<Policy, String>,
+    /// The only words the row applies to, lowercase and sorted, one buffer with the ranges of its
+    /// words (no `String` per word); no ranges: all words.
+    words: Words,
+}
+
+#[derive(Default)]
+struct Words {
+    buf: String,
+    spans: Vec<(u32, u32)>,
+}
+
+impl Words {
+    fn parse(list: &str) -> Words {
+        let lower = list.to_ascii_lowercase();
+        let mut spans: Vec<(u32, u32)> = Vec::new();
+        let mut at = 0;
+        for w in lower.split('|') {
+            let (start, trimmed) = (at + (w.len() - w.trim_start().len()), w.trim());
+            at += w.len() + 1;
+            if !trimmed.is_empty() {
+                spans.push((start as u32, (start + trimmed.len()) as u32));
+            }
+        }
+        spans.sort_unstable_by_key(|&(a, b)| &lower.as_bytes()[a as usize..b as usize]);
+        Words { buf: lower, spans }
+    }
+
+    fn contains(&self, text: &str) -> bool {
+        let t = text.as_bytes();
+        self.spans
+            .binary_search_by(|&(a, b)| {
+                let w = self.buf.as_bytes()[a as usize..b as usize].iter().copied();
+                w.cmp(t.iter().map(u8::to_ascii_lowercase))
+            })
+            .is_ok()
+    }
+}
+
+impl Row {
+    fn covers(&self, text: &str) -> bool {
+        self.words.spans.is_empty() || self.words.contains(text)
+    }
 }
 
 /// The `[case]` rows of one language.
@@ -116,8 +160,10 @@ impl Cases {
                     .as_ref()
                     .split_once(" : ")
                     .unwrap_or_else(|| panic!("case: `{}`", l.as_ref()));
+                let (policy, words) = policy.split_once(" of ").unwrap_or((policy, ""));
                 let policy = policy.trim();
                 Row {
+                    words: Words::parse(words),
                     kinds: kinds
                         .split('|')
                         .map(|n| {
@@ -145,10 +191,20 @@ impl Cases {
                     LOWER => moves(|c| c.to_lowercase().ne(std::iter::once(c))),
                     _ => true,
                 };
-                wrong.then(|| convert(text, case)).filter(|c| c != text)
+                (wrong && row.covers(text))
+                    .then(|| convert(text, case))
+                    .filter(|c| c != text)
             }
             _ => None,
         }
+    }
+
+    /// Is `text` a word of the `of` list of the row of `kind`?
+    pub fn listed(&self, kind: SyntaxKind, text: &str) -> bool {
+        self.0
+            .iter()
+            .find(|r| r.kinds.contains(&kind))
+            .is_some_and(|r| !r.words.spans.is_empty() && r.covers(text))
     }
 
     /// A pass over the words of a file in order, with the policies the options give.
@@ -178,6 +234,9 @@ impl Recaser<'_> {
     /// The word of a token of `kind` as it must be written, `None` when it is right already.
     pub fn word(&mut self, kind: SyntaxKind, text: &str) -> Option<String> {
         let i = self.cases.0.iter().position(|r| r.kinds.contains(&kind))?;
+        if !self.cases.0[i].covers(text) {
+            return None;
+        }
         self.memory[i].visit(text, self.policies[i])
     }
 }

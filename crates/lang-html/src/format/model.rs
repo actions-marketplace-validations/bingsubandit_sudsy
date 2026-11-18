@@ -6,6 +6,7 @@
 //! tools: Prettier print-preprocess, xml:space
 
 use crate::generated::kind as k;
+use core_format::rules::LazyRules;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, SyntaxToken};
 use std::borrow::Cow;
 
@@ -124,10 +125,10 @@ pub enum Mode {
     Ignore,
 }
 
-const KNOWN: &str = "a abbr acronym address applet area article aside audio b base basefont bdi bdo bgsound big blink blockquote body br button canvas caption center cite code col colgroup command content data datalist dd del details dfn dialog dir div dl dt element em embed fieldset figcaption figure font footer form frame frameset h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe image img input ins isindex kbd keygen label legend li link listing main map mark marquee math menu menuitem meta meter multicol nav nextid nobr noembed noframes noscript object ol optgroup option output p param picture plaintext pre progress q rb rbc rp rt rtc ruby s samp script search section select shadow slot small source spacer span strike strong style sub summary sup svg table tbody td template textarea tfoot th thead time title tr track tt u ul var video wbr xmp";
-
-/// Attributes of HTML elements (the union of html-element-attributes): their names are lowercased.
-const ATTRS: &str = "accept accept-charset accesskey action align alink allow allowfullscreen alt archive async autocapitalize autocomplete autofocus autoplay axis background bgcolor border bordercolor cellpadding cellspacing char charoff charset checked cite class classid clear code codebase codetype color cols colspan compact content contenteditable controls coords crossorigin data datetime declare decoding default defer dir dirname disabled download draggable enctype enterkeyhint face fetchpriority for form formaction formenctype formmethod formnovalidate formtarget frame frameborder headers height hidden high href hreflang hspace http-equiv id imagesizes imagesrcset inert inputmode integrity is ismap itemid itemprop itemref itemscope itemtype kind label lang language link list loading longdesc loop low marginheight marginwidth max maxlength media method min minlength multiple muted name nohref nomodule nonce noresize noshade novalidate nowrap object open optimum pattern ping placeholder playsinline popover poster preload profile prompt readonly referrerpolicy rel required rev reversed rows rowspan rules sandbox scheme scope scrolling selected shape size sizes slot span spellcheck src srcdoc srclang srcset standby start step style summary tabindex target text title translate type usemap valign value valuetype version vlink vspace width wrap";
+static ROWS: LazyRules = LazyRules::new(
+    || core_syntax::grammars::HTML.get(),
+    include_str!("../../format.rules"),
+);
 
 const VOID: &[&str] = &[
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
@@ -302,8 +303,7 @@ impl<'s> Builder<'_, 's> {
                 .children_with_tokens()
                 .filter_map(|e| e.into_token())
                 .any(|t| {
-                    t.kind() == k::TAG_NAME
-                        && KNOWN.split(' ').any(|k| k.eq_ignore_ascii_case(t.text()))
+                    t.kind() == k::TAG_NAME && ROWS.get().cases().listed(k::TAG_NAME, t.text())
                 });
         n.tag_end = sig(self.g, &tag).1;
         let mut self_closing = false;
@@ -334,10 +334,10 @@ impl<'s> Builder<'_, 's> {
                             attr.name = Cow::Borrowed(self.d.src[a_start..name_end].trim_end());
                             if known_element
                                 && self.dialect == Dialect::Html
-                                && attr.name.bytes().any(|b| b.is_ascii_uppercase())
-                                && ATTRS.split(' ').any(|a| a.eq_ignore_ascii_case(&attr.name))
+                                && let Some(lower) =
+                                    ROWS.get().cases().fixed(k::ATTR_NAME, &attr.name)
                             {
-                                attr.name = Cow::Owned(attr.name.to_ascii_lowercase());
+                                attr.name = Cow::Owned(lower);
                             }
                         } else if t.kind() == k::ATTR_VALUE {
                             let v = self.slice(&t);
@@ -358,10 +358,9 @@ impl<'s> Builder<'_, 's> {
             || (parent_svg && self.d.n[parent].name != "foreignObject");
         if !n.svg
             && self.dialect == Dialect::Html
-            && n.name.bytes().any(|b| b.is_ascii_uppercase())
-            && KNOWN.split(' ').any(|k| k.eq_ignore_ascii_case(&n.name))
+            && let Some(lower) = ROWS.get().cases().fixed(k::TAG_NAME, &n.name)
         {
-            n.name = Cow::Owned(n.name.to_ascii_lowercase());
+            n.name = Cow::Owned(lower);
         }
         n.self_closing = self_closing || (!n.svg && is_void(&n.name));
         n.parent = parent;

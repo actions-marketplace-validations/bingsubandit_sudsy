@@ -61,7 +61,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | parenthesized-expression | core-format/shapes/parens.rs | Needed and unneeded parentheses and the layout of their content. | Prettier needs-parens, ruff parenthesized, ktlint no-unnecessary-parentheses | csharp, js | LOCAL: lang-python/format/paren.rs |
 | prefixed-string-quotes | core-format/literals/prefixed.rs | Quote choice, prefix spelling and f-string fields of prefixed strings. | Black string prefix normalization, ruff format | python | SINGLE-USE |
 | preprocessor-branches | lang-csharp/format/branches.rs | Formatting the #if branches that the symbols of the file leave inactive. | dotnet-format preprocessor | csharp | SINGLE-USE |
-| rules-file-formatter | core-format/rules.rs | A formatter that is only data: one rules file per language parsed against the grammar. | none (internal) | csharp, dockerfile, editorconfig, ini, java, kotlin, php, sql, toml |  |
+| rules-file-formatter | core-format/rules.rs | A formatter that is only data: one rules file per language parsed against the grammar. | none (internal) | csharp, css, dockerfile, editorconfig, html, ini, java, kotlin, php, sql, toml |  |
 | scalar-layout | lang-yaml/format/scalars.rs | Scalars: flow line layout, quote style and block scalar contents. | Prettier yaml scalars | yaml | SINGLE-USE |
 | section-layout | core-format/shapes/section.rs | A header and the entries under it, one per line with the source's blank lines. | taplo, editorconfig-checker, ini formatters | editorconfig, ini, toml |  |
 | selector-list-layout | lang-css/format/selector.rs | Selector lists printed one selector per line with combinators. | Prettier postcss selectors | css | SINGLE-USE |
@@ -70,7 +70,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | table-alignment | lang-markdown/format/table.rs | Tables with aligned columns. | Prettier markdown tables | markdown | SINGLE-USE |
 | template-literal-layout | lang-js/format/template.rs | Template literals with interpolations printed on one line. | Prettier template-literal | js | SINGLE-USE |
 | text-fill | core-format/shapes/fill.rs | Words and separators laid out in a fill: JSX children, inline markup text, prose. | Prettier fill, markdown proseWrap | html, js, markdown |  |
-| token-case | core-format/case.rs | Case of words per token kind (upper, lower, capitalise, consistent) as rows. | sqlfluff CP01-CP05, hadolint instruction case, Prettier lowercase hex and units | dockerfile, sql | LOCAL: lang-css/format/mod.rs, lang-css/format/text.rs, lang-powershell/format.rs |
+| token-case | core-format/case.rs | Case of words per token kind (upper, lower, capitalise, consistent) as rows. | sqlfluff CP01-CP05, hadolint instruction case, Prettier lowercase hex and units | css, dockerfile, html, sql |  |
 | token-flow-layout | core-format/shapes/flow.rs | Children one after another with the spacing rows and the line breaks the source has. | none (internal) | csharp, dockerfile, java, kotlin, php |  |
 | token-rewrite-rows | core-format/rewrite.rs | Token rewrites (replace, insert) as rows applied to the source before layout. | PHP-CS-Fixer short array syntax and visibility_required | php | SINGLE-USE |
 | token-spacing-rows | core-format/spacing.rs | Blanks between neighbouring tokens as ordered rows. | google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01 | csharp, dockerfile, java, kotlin, php | LOCAL: lang-shell/format/arith.rs, lang-sql/layout/space.rs |
