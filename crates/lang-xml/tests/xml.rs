@@ -67,7 +67,7 @@ fn collect(dir: &Path, out: &mut Vec<PathBuf>) {
 /// The W3C XML Conformance Test Suite (`bash tests/conformance/fetch-xml-corpus.sh` first), the
 /// UTF-8 tests of XML 1.0 fifth edition: well-formed documents (`valid`, `invalid`) must parse and
 /// format with all checks, `not-wf` ones should be rejected. Prints the numbers recorded in
-/// docs/formatting/xml.md.
+/// docs/ai/formatting/xml.md.
 ///
 /// `cargo test --profile corpus -p lang-xml --test integration -- --ignored --nocapture conformance`
 #[test]

@@ -1,5 +1,5 @@
 //! Rule fixtures: `tests/rules/<language>/<folder>/<name>.<ext>`, one input file per case, run
-//! by [`rule_fixtures`] (docs/development/testing.md describes the layout). A folder is named for
+//! by [`rule_fixtures`] (docs/ai/development/testing.md describes the layout). A folder is named for
 //! a rule or for a family of rules that share inputs; inputs are small and cover the rules' own
 //! cases.
 //!

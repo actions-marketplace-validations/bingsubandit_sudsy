@@ -8,7 +8,7 @@ or the files of the wheel matched by a regex). The version is the catalog's `ver
 of `version_re` in it. Ids missing from `entries:` and the top-level `deferred:` groups are appended
 to `entries:`; a deprecated upstream rule is added as `wontfix deprecated upstream`. Entries are
 never changed or removed: ids the catalog has and the tool lacks are printed (a renamed or removed
-rule). The catalogs of tools with no source here are inventories already (see docs/development/parity.md).
+rule). The catalogs of tools with no source here are inventories already (see docs/ai/development/parity.md).
 """
 import io
 import json
@@ -54,7 +54,7 @@ SOURCES = {
 
 
 def catalog_path(tool):
-    return ROOT / "docs/parity" / f"{tool}.yaml"
+    return ROOT / "docs/ai/parity" / f"{tool}.yaml"
 
 
 def pinned(tool):

@@ -1,4 +1,4 @@
-# Only the rules Sudsy has an equivalent for (docs/parity/yamllint.yaml), with the parameters
+# Only the rules Sudsy has an equivalent for (docs/ai/parity/yamllint.yaml), with the parameters
 # Sudsy's rules use. Everything else is off so the comparison sees nothing it cannot map.
 rules:
   anchors:

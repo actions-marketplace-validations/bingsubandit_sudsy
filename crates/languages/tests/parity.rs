@@ -1,4 +1,4 @@
-//! The parity catalog (`docs/parity/*.yaml`) only names rules and options that exist.
+//! The parity catalog (`docs/ai/parity/*.yaml`) only names rules and options that exist.
 
 use core_rules::{Extensions, SYNTAX_ERROR};
 use languages::catalog::{self, Catalog, Entry};
@@ -10,7 +10,7 @@ const COVERAGE: [&str; 6] = [
 ];
 
 fn parity_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/parity")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/ai/parity")
 }
 
 fn catalogs() -> Vec<Catalog> {

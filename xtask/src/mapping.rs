@@ -1,5 +1,5 @@
 //! The tree-sitter node table and composite settings of a language, from the `mapping` and
-//! `composite` maps of its `lang.yaml` (docs/architecture/adding-a-language.md): consts appended
+//! `composite` maps of its `lang.yaml` (docs/ai/architecture/adding-a-language.md): consts appended
 //! to `src/provider.generated.rs`.
 
 use crate::lang_crate::Lang;

@@ -1,5 +1,5 @@
 //! The provider glue and `Cargo.toml` of the tree-sitter language crates, from
-//! `crates/lang-<name>/lang.yaml` (keys: docs/architecture/adding-a-language.md).
+//! `crates/lang-<name>/lang.yaml` (keys: docs/ai/architecture/adding-a-language.md).
 
 use anyhow::{Context, Result};
 use serde_json::Value;
@@ -263,7 +263,7 @@ mod tests {
         assert!(no_duplicate_matchers(&ok).is_ok());
     }
 
-    /// The cap on the committed bench inputs of one language (docs/performance/tooling.md).
+    /// The cap on the committed bench inputs of one language (docs/ai/performance/tooling.md).
     #[test]
     fn bench_inputs_stay_under_150_kb_per_language() {
         let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../bench/inputs");

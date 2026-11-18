@@ -1,5 +1,5 @@
 //! `sudsy init`: writes a starter `sudsy.yaml`, or with `--from <tool>` the equivalent of another
-//! tool's config in the working directory (docs/config/cli.md).
+//! tool's config in the working directory (docs/ai/config/cli.md).
 
 mod biome;
 mod csharpier;
@@ -177,7 +177,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                     Some(v) => (v, "package.json".to_string()),
                     None => match sources::find(&eslint::JS_CONFIGS) {
                         Some(p) => bail!(
-                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the options by hand: docs/parity/eslint.yaml, typescript-eslint.yaml and eslint-plugin-jsonc.yaml map each rule",
+                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the options by hand: docs/ai/parity/eslint.yaml, typescript-eslint.yaml and eslint-plugin-jsonc.yaml map each rule",
                             p.display()
                         ),
                         None => bail!("{}", found("ESLint", &eslint::FILES)),
@@ -199,7 +199,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                     Some(v) => (v, "package.json".to_string()),
                     None => match sources::find(&stylelint::JS_CONFIGS) {
                         Some(p) => bail!(
-                            "{} is JavaScript and cannot be read without running it; only JSON/YAML configs (.stylelintrc, .stylelintrc.json/.yaml/.yml, package.json \"stylelint\") are supported. Write the rules by hand: docs/parity/stylelint.yaml maps each rule",
+                            "{} is JavaScript and cannot be read without running it; only JSON/YAML configs (.stylelintrc, .stylelintrc.json/.yaml/.yml, package.json \"stylelint\") are supported. Write the rules by hand: docs/ai/parity/stylelint.yaml maps each rule",
                             p.display()
                         ),
                         None => bail!("{}", found("stylelint", &stylelint::FILES)),
@@ -233,7 +233,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
             let path = sources::find(&html::HTML_VALIDATE_FILES).with_context(|| {
                 match sources::find(&html::HTML_VALIDATE_JS) {
                     Some(p) => format!(
-                        "{} is JavaScript and cannot be read without running it; only .htmlvalidate.json is supported. Write the rules by hand: docs/parity/html-validate.yaml maps each rule",
+                        "{} is JavaScript and cannot be read without running it; only .htmlvalidate.json is supported. Write the rules by hand: docs/ai/parity/html-validate.yaml maps each rule",
                         p.display()
                     ),
                     None => found("html-validate", &html::HTML_VALIDATE_FILES),
@@ -260,7 +260,7 @@ fn migrate(tool: Tool) -> Result<(Out, String)> {
                     Some(v) => (v, "package.json".to_string()),
                     None => match sources::find(&eslint::JS_CONFIGS) {
                         Some(p) => bail!(
-                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the rules by hand: docs/parity/html-eslint.yaml maps each rule",
+                            "{} is JavaScript and cannot be read without running it; only JSON/YAML legacy configs (.eslintrc.json/.yaml/.yml, package.json \"eslintConfig\") are supported. Write the rules by hand: docs/ai/parity/html-eslint.yaml maps each rule",
                             p.display()
                         ),
                         None => bail!("{}", found("ESLint", &eslint::FILES)),

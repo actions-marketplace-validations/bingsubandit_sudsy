@@ -615,7 +615,7 @@ mod tests {
 
     #[test]
     fn docs_and_ignored_paths_select_nothing() {
-        let a = sel(&["docs/roadmap.md", "bench/history.jsonl", ".cargo/tmp/x"]);
+        let a = sel(&["docs/ai/roadmap.md", "bench/history.jsonl", ".cargo/tmp/x"]);
         assert!(a.crates.is_empty() && a.bench.is_empty());
         assert_eq!(sel(&["bench/history.jsonl"]), Affected::default());
     }

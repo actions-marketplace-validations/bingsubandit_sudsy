@@ -1,4 +1,4 @@
-//! `tests/rules/csharp/<rule>/*` through the real worker: see docs/development/testing.md.
+//! `tests/rules/csharp/<rule>/*` through the real worker: see docs/ai/development/testing.md.
 
 #[test]
 fn rule_fixtures() {

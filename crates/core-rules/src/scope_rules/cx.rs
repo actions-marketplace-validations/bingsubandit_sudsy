@@ -1,6 +1,6 @@
 //! What the scope rules read besides the model: the file's flavors, grammar tags, fields and
 //! own tokens of nodes. Kinds are never named here: a language says what a kind is by its tags
-//! (`#function`, `#loop`, `#export`, `#signature`, ...; docs/rules/semantics.md#scope-rules).
+//! (`#function`, `#loop`, `#export`, `#signature`, ...; docs/ai/rules/semantics.md#scope-rules).
 
 use super::ScopeLang;
 use crate::FileContext;

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Built by scripts/parity.sh stylecop in a copy under target/parity/; StyleCopVersion comes from docs/parity/stylecop.yaml. -->
+  <!-- Built by scripts/parity.sh stylecop in a copy under target/parity/; StyleCopVersion comes from docs/ai/parity/stylecop.yaml. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Library</OutputType>

@@ -4,5 +4,5 @@ import { fileURLToPath } from 'node:url';
 
 export const site = 'https://bingsubandit.github.io';
 export const base = '/sudsy';
-export const rulesPath = process.env.SUDSY_RULES_JSON ?? fileURLToPath(new URL('../docs/rules/rules.json', import.meta.url));
+export const rulesPath = process.env.SUDSY_RULES_JSON ?? fileURLToPath(new URL('../docs/ai/rules/rules.json', import.meta.url));
 export const rules = () => JSON.parse(readFileSync(rulesPath, 'utf8')).rules;

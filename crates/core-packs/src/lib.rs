@@ -1,5 +1,5 @@
 //! Language packs: a tree-sitter grammar compiled as a shared library, installed per user and
-//! loaded on first use (`docs/architecture/language-packs.md`).
+//! loaded on first use (`docs/ai/architecture/language-packs.md`).
 //!
 //! The binary embeds a manifest (`language file sha256 size` per line) and refuses a pack whose
 //! hash differs. A build with the `static-grammars` feature of the language crates links the

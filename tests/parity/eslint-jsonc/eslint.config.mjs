@@ -1,5 +1,5 @@
 // The ESLint side of the comparison with sudsy.yaml. Each fixture group enables one rule with the
-// options its file name says; the same options are written in sudsy.yaml (docs/development/parity.md).
+// options its file name says; the same options are written in sudsy.yaml (docs/ai/development/parity.md).
 import jsonc from "eslint-plugin-jsonc";
 
 const only = (files, rules) => ({ files, rules });

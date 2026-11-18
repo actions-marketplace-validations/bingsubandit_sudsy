@@ -1,6 +1,6 @@
 //! C# rules: syntactic ones, and the semantic ones over the
 //! binding, type, value and flow layers. `var-preference` and `prefer-collection-expression` are
-//! not built (see docs/roadmap.md).
+//! not built (see docs/ai/roadmap.md).
 
 mod async_suffix;
 mod binding;

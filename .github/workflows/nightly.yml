@@ -51,7 +51,7 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: target/parity
-          key: tools-${{ matrix.name }}-${{ hashFiles('scripts/parity_tools.json', 'docs/parity/*.yaml', 'scripts/lib/jre.sh', 'dotnet-tools.json') }}
+          key: tools-${{ matrix.name }}-${{ hashFiles('scripts/parity_tools.json', 'docs/ai/parity/*.yaml', 'scripts/lib/jre.sh', 'dotnet-tools.json') }}
       # The corpora: the fetch scripts are idempotent per pinned commit, so a stale cache is updated.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

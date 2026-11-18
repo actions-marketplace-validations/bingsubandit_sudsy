@@ -1,4 +1,4 @@
-//! Kotlin formatting: ktlint's `ktlint_official` layout on the shared kit (docs/formatting/kotlin.md).
+//! Kotlin formatting: ktlint's `ktlint_official` layout on the shared kit (docs/ai/formatting/kotlin.md).
 //!
 //! Every node becomes a `Doc` by `node_doc`. The kit lays out what has a shape (bodies, argument
 //! and parameter lists, assignments); the rest is `seq`: the children one after the other with

@@ -2,7 +2,7 @@
 # Runs the ignored conformance tests of one language crate on its pinned corpus: fetches the corpus
 # (tests/conformance/fetch-<language>-corpus.sh), then `cargo test --profile corpus -p <crate>
 # -- --ignored` without the measurements. Usage: scripts/conformance.sh lang-<language>
-# (docs/development/parity.md, "Nightly").
+# (docs/ai/development/parity.md, "Nightly").
 set -euo pipefail
 cd "$(dirname "$0")/.."
 crate=${1:?usage: scripts/conformance.sh lang-<language>}

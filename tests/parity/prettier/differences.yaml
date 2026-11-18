@@ -17,7 +17,7 @@ files:
   runtime-docs/coding-guidelines/EventLogging.md: tab-blocks
   runtime-docs/coding-guidelines/mono-code-guide.md: code-span-lines
   runtime-docs/coding-guidelines/vectorization-guidelines.md: code-trailing-blanks
-  docs/formatting/csharp.md: html-after-table
+  docs/ai/formatting/csharp.md: html-after-table
   graphql/prettier/tests/format/graphql/interface/separator-detection.graphql: graphql-comment-position
   graphql/prettier/tests/format/graphql/range/issue2296.graphql: invalid-graphql
   graphql/prettier/tests/format/graphql/selection-set/empty-1.graphql: invalid-graphql

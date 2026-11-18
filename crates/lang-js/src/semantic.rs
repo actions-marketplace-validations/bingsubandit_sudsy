@@ -51,7 +51,7 @@ const fn flows(kind: &'static str, children: &'static [(Sel, Flow)]) -> Row {
 
 const IMPORTED: Flags = V.union(T).union(Flags::IMPORT);
 
-/// What JavaScript and TypeScript say to the binder (docs/formatting/js.md#scope-layer).
+/// What JavaScript and TypeScript say to the binder (docs/ai/formatting/js.md#scope-layer).
 const ROWS: &[Row] = &[
     var_scope("Program"),
     var_scope("ArrowFunctionExpression"),

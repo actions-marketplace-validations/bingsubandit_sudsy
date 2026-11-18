@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Times the end-of-change commands for the dev loop rows of docs/performance/numbers.md after an
+# Times the end-of-change commands for the dev loop rows of docs/ai/performance/numbers.md after an
 # edit of each FILE (default: one language, crates/lang-toml/src/lib.rs; a core crate such as
 # crates/core-syntax/src/lib.rs affects everything and takes far longer): gate --affected, finish
 # (on GitHub Actions: wall time of the whole run, queueing included). The edit is a comment line appended to the file

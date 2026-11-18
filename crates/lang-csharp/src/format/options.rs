@@ -1,5 +1,5 @@
 //! The C# format options: `brace_newline`, `trailing_commas` and `member_chain_min_calls` of
-//! docs/formatting/csharp.md, the shared ones, and the layout choices the presets of
+//! docs/ai/formatting/csharp.md, the shared ones, and the layout choices the presets of
 //! the plan's table differ in. Every option has a documented default; the defaults are
 //! Microsoft's layout. Presets are config files (`presets/`): they only set these options, and
 //! nothing in the formatter knows which preset is in use.

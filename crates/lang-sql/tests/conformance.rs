@@ -86,7 +86,7 @@ fn peak_mb() -> f64 {
     kb.unwrap_or(0.0) / 1024.0
 }
 
-/// The time per MB and the peak memory at growing sizes (docs/performance/numbers.md). Run with `--release`.
+/// The time per MB and the peak memory at growing sizes (docs/ai/performance/numbers.md). Run with `--release`.
 #[test]
 #[ignore = "measurement: cargo test --release -p lang-sql --test integration -- --ignored --nocapture conformance::scaling"]
 fn scaling() {

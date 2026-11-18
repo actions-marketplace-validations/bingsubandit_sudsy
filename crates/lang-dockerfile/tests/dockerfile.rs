@@ -16,7 +16,7 @@ fn fmt(input: &str) -> String {
 fn conformance() {
     let (_, unparsed) = check_corpus(lang_dockerfile::provider(), "Dockerfile", "dockerfile", &[]);
     // The grammar fails on a continuation line that starts with `[` after another one
-    // (docker-library/python, the Windows images of golang): see docs/formatting/dockerfile.md.
+    // (docker-library/python, the Windows images of golang): see docs/ai/formatting/dockerfile.md.
     assert!(unparsed.len() <= 40, "{}", unparsed.join("\n"));
 }
 

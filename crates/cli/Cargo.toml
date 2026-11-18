@@ -44,7 +44,7 @@ path = "tests/main.rs"
 
 # `cargo binstall --git https://github.com/bingsubandit/sudsy sudsy` downloads the release archive of the
 # platform (names: scripts/package-cli.sh) and installs the executable only; C# also needs the
-# `csharp-worker/` directory of the archive (docs/development/ci-release.md).
+# `csharp-worker/` directory of the archive (docs/ai/development/ci-release.md).
 [package.metadata.binstall]
 pkg-fmt = "tgz"
 

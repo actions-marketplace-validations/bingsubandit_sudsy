@@ -1,4 +1,4 @@
-//! Layout of PER-CS as PHP-CS-Fixer applies it (docs/formatting/php.md); every case also passes the
+//! Layout of PER-CS as PHP-CS-Fixer applies it (docs/ai/formatting/php.md); every case also passes the
 //! shared checks (round trip, meaning, idempotency).
 
 use provider_api::format_testing::assert_formats;

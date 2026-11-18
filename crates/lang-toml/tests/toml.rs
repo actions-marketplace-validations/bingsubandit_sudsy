@@ -208,7 +208,7 @@ fn fixtures() {
 
 /// The toml-test suite, TOML 1.0 files (`bash tests/conformance/fetch-toml-corpus.sh` first):
 /// every valid file that parses must format with all checks; invalid files are counted. Prints
-/// the numbers recorded in docs/formatting/toml.md.
+/// the numbers recorded in docs/ai/formatting/toml.md.
 ///
 /// `cargo test --profile corpus -p lang-toml --test integration -- --ignored --nocapture conformance`
 #[test]

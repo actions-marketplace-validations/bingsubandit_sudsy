@@ -16,16 +16,16 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     let schemas = languages::schemas(providers);
     let mut out = vec![
         splice(
-            "docs/rules/builtin.md",
+            "docs/ai/rules/builtin.md",
             &[("rules", crate::rules::table(&rule_docs))],
         )?,
         (
-            "docs/rules/rules.json".into(),
+            "docs/ai/rules/rules.json".into(),
             crate::rules::json(&rule_docs),
         ),
     ];
     for p in providers {
-        let rel = format!("docs/formatting/{}.md", p.language());
+        let rel = format!("docs/ai/formatting/{}.md", p.language());
         // A dialect without a doc of its own (scss, less) is documented with its config base.
         if p.config_base().is_some() && !xtask::repo_root().join(&rel).exists() {
             continue;
@@ -36,11 +36,11 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         )?);
     }
     out.push(splice(
-        "docs/formatting/engine.md",
+        "docs/ai/formatting/engine.md",
         &[("shared-options", shared_options_table(&schemas))],
     )?);
     out.push(splice(
-        "docs/architecture/syntax-tree.md",
+        "docs/ai/architecture/syntax-tree.md",
         &[("roles", roles_table()), ("operators", operators_table())],
     )?);
     let mut titles: Vec<(&str, &str)> = providers
@@ -69,20 +69,20 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     for rel in [
         "README.md",
         "editors/vscode/README.md",
-        "docs/editor/vscode.md",
+        "docs/ai/editor/vscode.md",
     ] {
         out.push(splice(rel, &[("languages", names.clone())])?);
     }
     out.push(splice(
-        "docs/architecture/overview.md",
+        "docs/ai/architecture/overview.md",
         &[("crates", crates)],
     )?);
     out.push(splice(
-        "docs/parity/README.md",
+        "docs/ai/parity/README.md",
         &[("counts", catalog_counts()?)],
     )?);
     out.push(splice(
-        "docs/development/parity.md",
+        "docs/ai/development/parity.md",
         &[("parity-tools", parity_tools()?)],
     )?);
     // The differences blocks go into the text the other generators made of the same file.
@@ -93,10 +93,10 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     Ok(out)
 }
 
-/// One row per catalog (`docs/parity/*.yaml`): the entries by coverage.
+/// One row per catalog (`docs/ai/parity/*.yaml`): the entries by coverage.
 fn catalog_counts() -> Result<String> {
     let mut catalogs = Vec::new();
-    for file in std::fs::read_dir(xtask::repo_root().join("docs/parity"))? {
+    for file in std::fs::read_dir(xtask::repo_root().join("docs/ai/parity"))? {
         let path = file?.path();
         if path.extension().is_some_and(|e| e == "yaml") {
             let text = std::fs::read_to_string(&path)?;

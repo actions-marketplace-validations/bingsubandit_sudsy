@@ -1,4 +1,4 @@
-// C and C++ (.c .h, .cc .cpp .cxx .hpp .hh .hxx .ipp), read without preprocessing by crates/lang-cpp (docs/formatting/cpp.md).
+// C and C++ (.c .h, .cc .cpp .cxx .hpp .hh .hxx .ipp), read without preprocessing by crates/lang-cpp (docs/ai/formatting/cpp.md).
 // The lexer gives the tokens, the structural layer the nodes: unwrapped lines, bracket groups, preprocessor directives and, where the branches nest, conditional groups.
 // Format: see crates/core-syntax/src/grammar/mod.rs.
 

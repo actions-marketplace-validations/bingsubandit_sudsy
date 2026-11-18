@@ -1,60 +1,30 @@
-# Sudsy docs
+# Sudsy documentation
 
-Current state only; history is in git. Update the doc for the area you change in the same commit.
+Sudsy is a formatter and linter for 26 languages in one binary. Start with the [project README](../README.md) for install and a quick try.
 
-| Doc | Covers |
+| Page | Read it to |
 |---|---|
-| [architecture/overview.md](architecture/overview.md) | Crates, dependency rules, data flow, versioned boundaries |
-| [architecture/syntax-tree.md](architecture/syntax-tree.md) | Lossless tree, trivia rule, grammars and codegen, wire encoding |
-| [architecture/csharp-worker.md](architecture/csharp-worker.md) | .NET worker, protocol, workspace, lifecycle |
-| [architecture/adding-a-language.md](architecture/adding-a-language.md) | Adding a tree-sitter language: steps and per-language cost |
-| [design/unification.md](design/unification.md) | Plan: moving the older languages onto the shared core, rule clusters, ordered steps |
-| [architecture/language-packs.md](architecture/language-packs.md) | Languages as installable packs: format, manifest, cache, ABI check, missing language |
-| [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |
-| [formatting/engine.md](formatting/engine.md) | Layout doc, printer, shapes, directives, comments, safety check |
-| [formatting/csharp.md](formatting/csharp.md) | C# formatter and options |
-| [formatting/json.md](formatting/json.md) | JSON/JSONC parser, formatter, options |
-| [formatting/css.md](formatting/css.md) | CSS / SCSS / Less hand-written parser, Prettier-style formatter, options, conformance |
-| [formatting/yaml.md](formatting/yaml.md) | YAML parser, data model, formatter, options |
-| [formatting/github-actions.md](formatting/github-actions.md) | GitHub Actions workflows and `action.yml`: selection by path, embedded `run:` scripts, rules after actionlint |
-| [formatting/js.md](formatting/js.md) | JavaScript, TypeScript, JSX and TSX: oxc parser and its adapter, formatter (statements, declarations, literals), conformance |
-| [formatting/python.md](formatting/python.md) | Python parser (ruff), adapter, formatter after `ruff format`, options, parity, conformance |
-| [formatting/php.md](formatting/php.md) | PHP: mago-syntax parser and its adapter, inline HTML, formatter, options, conformance |
-| [formatting/ruby.md](formatting/ruby.md) | Ruby: Prism parser through an FFI wrapper and its adapter, heredocs, `__END__`, formatter, options, conformance |
-| [formatting/kotlin.md](formatting/kotlin.md) | Kotlin: ktrs-parser and its adapter (CRLF, depth guard, `.kts` scripts), limits, the ktlint-style layout, rules, conformance, parity |
-| [formatting/sql.md](formatting/sql.md) | SQL: the hand-written parser, dialects, the formatter and its sqlfluff parity, conformance |
-| [formatting/toml.md](formatting/toml.md) | TOML parser (tree-sitter), formatter, options, conformance |
-| [formatting/xml.md](formatting/xml.md) | XML parser (tree-sitter), well-formedness checks, formatter, options, conformance |
-| [formatting/html.md](formatting/html.md) | HTML parser (tree-sitter, forked grammar), tree shape, conformance corpus, options |
-| [formatting/editorconfig.md](formatting/editorconfig.md) | `.editorconfig` parser (tree-sitter), formatter, options, conformance |
-| [formatting/ini.md](formatting/ini.md) | `.ini` parser (tree-sitter), formatter, options, rules, conformance |
-| [formatting/gitignore.md](formatting/gitignore.md) | `.gitignore`-syntax files parser (tree-sitter), formatter, rules, conformance |
-| [formatting/dockerfile.md](formatting/dockerfile.md) | Dockerfile parser (tree-sitter), formatter, options, grammar gap, conformance |
-| [formatting/shell.md](formatting/shell.md) | Shell (sh and Bash) parser (tree-sitter), formatter after shfmt, parser limits, conformance |
-| [formatting/powershell.md](formatting/powershell.md) | PowerShell parser (tree-sitter), formatter after PSScriptAnalyzer's Invoke-Formatter, parity, conformance |
-| [formatting/protobuf.md](formatting/protobuf.md) | Protobuf parser (tree-sitter), formatter after `buf format`, parity, conformance |
-| [formatting/graphql.md](formatting/graphql.md) | GraphQL parser (tree-sitter), formatter after Prettier, grammar gaps, rules, parity |
-| [formatting/markdown.md](formatting/markdown.md) | Markdown parser (two tree-sitter grammars), formatter, safety checks, rules, conformance |
-| [formatting/cpp.md](formatting/cpp.md) | C and C++: lossless lexer, unwrapped-line structure, `#if` groups, formatter, conformance |
-| [formatting/presets.md](formatting/presets.md) | Preset list and notes |
-| [parity/README.md](parity/README.md) | Parity catalog: what yamllint, Prettier, Biome, eslint-plugin-jsonc, StyleCop, CSharpier do and where Sudsy stands |
-| [rules/engine.md](rules/engine.md) | Rule trait, scopes, layers and depth, levels, fixes, suppressions |
-| [rules/builtin.md](rules/builtin.md) | Built-in rules |
-| [rules/semantics.md](rules/semantics.md) | Flow graphs, analyses, summaries, compiler agreement |
-| [rules/patterns.md](rules/patterns.md) | Pattern rule files |
-| [rules/plugins.md](rules/plugins.md) | Wasm plugins and `plugin-sdk` |
-| [config/sudsy-yaml.md](config/sudsy-yaml.md) | Config model, resolution, extends, overrides, schema |
-| [config/editorconfig.md](config/editorconfig.md) | `.editorconfig` mapping |
-| [config/cli.md](config/cli.md) | Commands, exit codes, output formats |
-| [editor/lsp.md](editor/lsp.md) | LSP server behaviour, analysis thread, cancellation |
-| [editor/vscode.md](editor/vscode.md) | VS Code extension, packaging, dogfooding |
-| [performance/numbers.md](performance/numbers.md) | Current numbers per hot path |
-| [performance/tooling.md](performance/tooling.md) | How to measure: bench.sh, perf-bench, speed scripts |
-| [development/dev-loop.md](development/dev-loop.md) | Build, gate, scripts, Windows/Git Bash/WSL notes |
-| [development/parity.md](development/parity.md) | `parity.sh`: differential tests against upstream tools |
-| [development/testing.md](development/testing.md) | Test layers, corpora, conformance |
-| [development/grammar-forks.md](development/grammar-forks.md) | Forked tree-sitter grammars: layout, `grammar-path`, `scripts/grammar-regen.sh` |
-| [development/site.md](development/site.md) | The public rule documentation site: build, data sources, deploy switch |
-| [development/ci-release.md](development/ci-release.md) | CI jobs, release process, placeholders |
-| [roadmap.md](roadmap.md) | Deliberately not built or deferred |
-| [bugs.md](bugs.md) | Known open bugs: symptom, cause, suggested fix |
+| [Languages](languages.md) | See each language's status, how closely it matches its reference tool, and its options. |
+| [Configuration](configuration.md) | Write `sudsy.yaml`, pick presets, suppress rules, use the CLI. |
+| [Rules](rules.md) | List and explain rules. Write pattern rules and Wasm plugins. |
+| [Performance](performance.md) | See measured speed, memory and binary size against other tools. |
+| [Editors and CI](editors-and-ci.md) | Set up VS Code, other editors, GitHub Actions and SARIF. |
+
+## Quick start
+
+```sh
+npx @sudsylint/sudsy check .          # report only, changes nothing
+sudsy init --preset python/ruff       # write a starter sudsy.yaml
+sudsy format .                        # rewrite files
+sudsy fix .                           # apply safe fixes, then format
+sudsy rules <id>                      # explain a rule
+sudsy config print <file>             # show resolved config and its sources
+```
+
+## Also in this repository
+
+- [Roadmap](ai/roadmap.md)
+- [Changelog](../CHANGELOG.md)
+- [Contributing](../CONTRIBUTING.md)
+
+Internals and design notes for contributors and AI agents: [docs/ai/](ai/README.md).

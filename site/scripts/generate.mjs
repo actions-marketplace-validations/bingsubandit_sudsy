@@ -1,6 +1,6 @@
 // Writes the data-driven pages (rules, upstream-id stubs, presets, format options) as Markdown into
-// src/content/docs/generated/ (git-ignored). Sources: docs/rules/rules.json, schemas/sudsy.schema.json,
-// crates/lang-*/presets/*.yaml and the notes column of docs/formatting/presets.md.
+// src/content/docs/generated/ (git-ignored). Sources: docs/ai/rules/rules.json, schemas/sudsy.schema.json,
+// crates/lang-*/presets/*.yaml and the notes column of docs/ai/formatting/presets.md.
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { base, site, rules } from '../config.mjs';
@@ -27,7 +27,7 @@ const fmt = (v) => (v === undefined ? '' : `\`${JSON.stringify(v)}\``);
 const chip = (name, value) => `<span data-pagefind-filter="${name}[data-v]" data-v="${value}">${name}: ${value}</span>`;
 
 // Rule config as sudsy.yaml takes it: `lint.rules` at the top level for rules of all languages,
-// under the language section otherwise (docs/config/sudsy-yaml.md).
+// under the language section otherwise (docs/ai/config/sudsy-yaml.md).
 function configuration(r) {
   const langs = r.languages.includes('all') ? [null] : r.languages;
   const indent = (t, n) => t.replace(/^/gm, ' '.repeat(n));
@@ -107,9 +107,9 @@ for (const s of stubs.values()) {
     `<!doctype html><meta charset="utf-8"><title>${s.id} | Sudsy</title>${head}<body>${tools} <code>${s.id}</code> is covered by ${ids.map((i) => `<a href="${url(i)}">${i}</a>`).join(', ')}.\n`);
 }
 
-// Presets: the notes of docs/formatting/presets.md next to each preset file.
+// Presets: the notes of docs/ai/formatting/presets.md next to each preset file.
 const notes = new Map();
-for (const m of readFileSync(root + 'docs/formatting/presets.md', 'utf8').matchAll(/^\| `([a-z]+\/[\w-]+)` \| (.*) \|$/gm)) {
+for (const m of readFileSync(root + 'docs/ai/formatting/presets.md', 'utf8').matchAll(/^\| `([a-z]+\/[\w-]+)` \| (.*) \|$/gm)) {
   notes.set(m[1], m[2].replace(/\[([^\]]*)\]\([^)]*\)/g, '$1'));
 }
 const presets = [];

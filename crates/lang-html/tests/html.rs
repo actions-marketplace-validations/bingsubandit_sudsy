@@ -163,7 +163,7 @@ fn file_names() {
 
 /// Real-world HTML (`bash tests/conformance/fetch-html-corpus.sh` first): every file parses and
 /// formats with the shared checks, or is reported as a syntax error. Prints the counts recorded
-/// in docs/formatting/html.md.
+/// in docs/ai/formatting/html.md.
 ///
 /// `cargo test --profile corpus -p lang-html --test integration -- --ignored --nocapture conformance`
 #[test]

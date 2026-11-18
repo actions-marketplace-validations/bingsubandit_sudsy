@@ -2,12 +2,12 @@
 
 Usage: parity_format.py <tool> <sudsy-binary> <target-dir>
 
-The tools are the entries of parity_format.json (documented in docs/development/parity.md): version
-(from docs/parity/<catalog>.yaml), how to install it, its command, how it takes its input and which
+The tools are the entries of parity_format.json (documented in docs/ai/development/parity.md): version
+(from docs/ai/parity/<catalog>.yaml), how to install it, its command, how it takes its input and which
 files are the fixtures. Every fixture is formatted by the tool and by Sudsy (with the fixture
 folder's sudsy.yaml, which extends the matching preset); the outputs must be equal. A fixture listed
 in the folder's `differences.yaml` may differ; it is reported as
-known; the file is `differences.yaml` (docs/development/parity.md): named differences, the fixtures that
+known; the file is `differences.yaml` (docs/ai/development/parity.md): named differences, the fixtures that
 differ, and the `ratchet` minimums of the groups (a corpus too large for entries per file) that are only counted.
 """
 import difflib
@@ -45,7 +45,7 @@ def tools():
 
 
 def catalog_version(name):
-    text = (ROOT / "docs/parity" / f"{name}.yaml").read_text(encoding="utf-8")
+    text = (ROOT / "docs/ai/parity" / f"{name}.yaml").read_text(encoding="utf-8")
     return re.search(r'^version: "([^ "]+)', text, re.M).group(1)
 
 
@@ -235,7 +235,7 @@ def sudsy_format(sudsy, fixture, work, command="format"):
 
 
 class Differences:
-    """`tests/parity/<tool>/differences.yaml` (docs/development/parity.md): `differences` (name -> `<choice|gap>  <text>`),
+    """`tests/parity/<tool>/differences.yaml` (docs/ai/development/parity.md): `differences` (name -> `<choice|gap>  <text>`),
     `files` (fixture key -> names; a ratchet group's name stands for all its files) and `ratchet` (group -> least identical files).
     `lint`: the keys with a space are the lint mode's (a tool's two modes share the file)."""
 

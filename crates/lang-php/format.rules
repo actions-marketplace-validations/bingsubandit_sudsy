@@ -1,4 +1,4 @@
-# PHP formatting as data: PER-CS as PHP-CS-Fixer's `@PER-CS` applies it (docs/formatting/php.md).
+# PHP formatting as data: PER-CS as PHP-CS-Fixer's `@PER-CS` applies it (docs/ai/formatting/php.md).
 # Syntax: crates/core-format/src/{rules,spacing,rewrite,layout}.rs.
 [space]
 # Commas and semicolons (PHP-CS-Fixer leaves the commas of an array alone).

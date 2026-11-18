@@ -1,6 +1,6 @@
 //! The intentional differences from the compared tools: the `choice` names of
-//! `tests/parity/<tool>/differences.yaml` (format: docs/development/parity.md) become the block
-//! `<!-- generated:differences:<tool> -->` of the one `docs/formatting/*.md` that holds the marker.
+//! `tests/parity/<tool>/differences.yaml` (format: docs/ai/development/parity.md) become the block
+//! `<!-- generated:differences:<tool> -->` of the one `docs/ai/formatting/*.md` that holds the marker.
 
 use anyhow::{Result, bail};
 use serde::Deserialize;
@@ -16,7 +16,7 @@ struct Differences {
 
 pub fn generate(done: &[(PathBuf, String)]) -> Result<Vec<(PathBuf, String)>> {
     let root = xtask::repo_root();
-    let docs: Vec<_> = std::fs::read_dir(root.join("docs/formatting"))?
+    let docs: Vec<_> = std::fs::read_dir(root.join("docs/ai/formatting"))?
         .map(|f| f.map(|f| f.path()))
         .collect::<std::io::Result<_>>()?;
     let mut blocks: BTreeMap<String, Vec<(String, String)>> = BTreeMap::new();
@@ -52,7 +52,7 @@ pub fn generate(done: &[(PathBuf, String)]) -> Result<Vec<(PathBuf, String)>> {
         match (doc, body.is_empty()) {
             (Some(doc), _) => {
                 let rel = format!(
-                    "docs/formatting/{}",
+                    "docs/ai/formatting/{}",
                     doc.file_name().unwrap().to_string_lossy()
                 );
                 blocks
@@ -61,7 +61,7 @@ pub fn generate(done: &[(PathBuf, String)]) -> Result<Vec<(PathBuf, String)>> {
                     .push((format!("differences:{tool}"), body));
             }
             (None, false) => bail!(
-                "tests/parity/{tool}/differences.yaml has choice names: add `{marker}` ... `<!-- /generated -->` to its docs/formatting file"
+                "tests/parity/{tool}/differences.yaml has choice names: add `{marker}` ... `<!-- /generated -->` to its docs/ai/formatting file"
             ),
             (None, true) => {}
         }

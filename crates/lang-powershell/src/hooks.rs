@@ -6,7 +6,7 @@ use crate::generated::kind;
 use core_rules::{FileContext, RuleHooks};
 use core_syntax::{TextRange, TextSize};
 
-const CATALOG: &str = include_str!("../../../docs/parity/psscriptanalyzer.yaml");
+const CATALOG: &str = include_str!("../../../docs/ai/parity/psscriptanalyzer.yaml");
 
 pub struct PowerShellHooks;
 

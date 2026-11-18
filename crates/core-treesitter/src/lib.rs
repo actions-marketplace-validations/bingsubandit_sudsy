@@ -22,7 +22,7 @@
 //! (an HTML comment).
 //!
 //! Parsing is not incremental and has no depth limit of its own (the walk is iterative; the
-//! formatter recurses). See `docs/architecture/adding-a-language.md`.
+//! formatter recurses). See `docs/ai/architecture/adding-a-language.md`.
 
 mod provider;
 

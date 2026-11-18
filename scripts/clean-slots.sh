@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Frees disk by hand in the repo's target/ and the build slots (docs/development/dev-loop.md), or
+# Frees disk by hand in the repo's target/ and the build slots (docs/ai/development/dev-loop.md), or
 # only the slot directories given, and in their WSL bench caches. gate.sh and finish.sh keep each
 # slot under its cap on their own (sweep_slot in scripts/slot-run.sh); this is for a full disk.
 #   scripts/clean-slots.sh [slot dir...]: every incremental cache (next build slower)

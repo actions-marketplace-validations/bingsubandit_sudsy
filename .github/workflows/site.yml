@@ -1,22 +1,22 @@
 name: Site
 
-# Documentation site (site/, docs/development/site.md). Built on pull requests and pushes that touch
+# Documentation site (site/, docs/ai/development/site.md). Built on pull requests and pushes that touch
 # its inputs; a push to main also deploys it to GitHub Pages.
 on:
   push:
     branches: [main]
     paths:
       - site/**
-      - docs/rules/rules.json
-      - docs/formatting/presets.md
+      - docs/ai/rules/rules.json
+      - docs/ai/formatting/presets.md
       - schemas/sudsy.schema.json
       - crates/lang-*/presets/**
       - .github/workflows/site.yml
   pull_request:
     paths:
       - site/**
-      - docs/rules/rules.json
-      - docs/formatting/presets.md
+      - docs/ai/rules/rules.json
+      - docs/ai/formatting/presets.md
       - schemas/sudsy.schema.json
       - crates/lang-*/presets/**
       - .github/workflows/site.yml

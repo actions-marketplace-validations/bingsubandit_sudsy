@@ -19,7 +19,7 @@ fn renames_tokens_statuses_and_files_but_not_upstream_keys() {
     write(&root, "tests/rules/js/no-x/a.js", "x // ^ no-x\n");
     write(
         &root,
-        "docs/parity/eslint.yaml",
+        "docs/ai/parity/eslint.yaml",
         "entries:\n  no-x: rule no-x, other\n",
     );
     write(&root, "crates/cli/src/init/eslint.rs", "\"no-x\"\n");
@@ -49,7 +49,7 @@ fn renames_tokens_statuses_and_files_but_not_upstream_keys() {
     );
     assert_eq!(read("tests/rules/js/no-y/a.js"), "x // ^ no-y\n");
     assert_eq!(
-        read("docs/parity/eslint.yaml"),
+        read("docs/ai/parity/eslint.yaml"),
         "entries:\n  no-x: rule no-y, other\n"
     );
     assert_eq!(read("CHANGELOG.md"), "no-x\n");

@@ -1,4 +1,4 @@
-//! Ruby formatting (see docs/formatting/ruby.md).
+//! Ruby formatting (see docs/ai/formatting/ruby.md).
 
 use crate::generated::kind as k;
 use core_config::shared;

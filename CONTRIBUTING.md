@@ -18,5 +18,5 @@ branch, run `git rebase --signoff origin/main` and force-push.
 
 ## Development
 
-See [docs/development/dev-loop.md](docs/development/dev-loop.md): run `scripts/gate.sh` before
+See [docs/ai/development/dev-loop.md](docs/ai/development/dev-loop.md): run `scripts/gate.sh` before
 committing and `scripts/bench.sh` after a change to anything on a hot path.

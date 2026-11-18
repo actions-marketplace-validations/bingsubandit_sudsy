@@ -1,6 +1,6 @@
 //! The option schema and presets of a language, from the `options` and `presets` keys of its
 //! `lang.yaml`: `src/schema.generated.rs` holds one const per option name and `option_schema()`,
-//! which the crate includes where its formatter lives (docs/architecture/adding-a-language.md).
+//! which the crate includes where its formatter lives (docs/ai/architecture/adding-a-language.md).
 
 use crate::lang_crate::Lang;
 use anyhow::{Result, bail};

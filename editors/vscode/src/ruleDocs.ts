@@ -1,4 +1,4 @@
-// The documentation page of a rule, as Markdown, from docs/rules/rules.json (bundled with the extension).
+// The documentation page of a rule, as Markdown, from docs/ai/rules/rules.json (bundled with the extension).
 
 /** Where the rule pages live once the documentation site is published; switch `codeDescription` links on with it. */
 export const DOCS_BASE_URL = "https://bingsubandit.github.io/sudsy/rules/";

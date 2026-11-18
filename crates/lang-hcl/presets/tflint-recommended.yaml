@@ -1,4 +1,4 @@
-# The rules of tflint-ruleset-terraform's recommended preset that Sudsy has (the rest are in docs/parity/tflint.yaml).
+# The rules of tflint-ruleset-terraform's recommended preset that Sudsy has (the rest are in docs/ai/parity/tflint.yaml).
 hcl:
   lint:
     rules:

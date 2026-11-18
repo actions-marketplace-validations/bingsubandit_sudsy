@@ -1,6 +1,6 @@
 //! `cargo xtask rename-rule <old> <new> [--dry-run]`: the mechanical part of renaming or merging a
 //! rule id. Replaces the id as a whole token (not part of a longer id) in the tracked text files
-//! that name Sudsy ids, in the `rule <id>` statuses of `docs/parity/*.yaml` (the keys there are
+//! that name Sudsy ids, in the `rule <id>` statuses of `docs/ai/parity/*.yaml` (the keys there are
 //! upstream ids and stay), and renames the files and folders named after it. Generated tables
 //! and the schema are rewritten by `cargo xtask codegen` afterwards. It leaves alone what it
 //! cannot tell from an upstream id (`LEAVE`) and lists the hits there; edit those by hand.
@@ -15,8 +15,8 @@ use std::process::Command;
 /// which spell upstream ids.
 const LEAVE: &[&str] = &[
     "CHANGELOG.md",
-    "docs/design/",
-    "docs/parity/",
+    "docs/ai/design/",
+    "docs/ai/parity/",
     "third_party/",
     "bench/",
     "tests/conformance/",
@@ -96,7 +96,7 @@ pub fn rename_rule(root: &Path, old: &str, new: &str, dry_run: bool) -> Result<V
         let Ok(text) = fs::read_to_string(&path) else {
             continue; // binary
         };
-        let catalog = rel.starts_with("docs/parity/") && rel.ends_with(".yaml");
+        let catalog = rel.starts_with("docs/ai/parity/") && rel.ends_with(".yaml");
         let (changed, n) = if catalog {
             replace_status(&text, old, new)
         } else {
@@ -107,7 +107,7 @@ pub fn rename_rule(root: &Path, old: &str, new: &str, dry_run: bool) -> Result<V
         }
         let is_leave = LEAVE
             .iter()
-            .any(|p| rel.starts_with(p) && !(catalog && *p == "docs/parity/"));
+            .any(|p| rel.starts_with(p) && !(catalog && *p == "docs/ai/parity/"));
         let corpus = rel.starts_with("tests/parity/") && !rel.ends_with("/sudsy.yaml");
         if is_leave || corpus {
             left.insert(rel.clone(), n);

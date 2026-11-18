@@ -60,7 +60,7 @@ if [ ${#ws[@]} -gt 0 ]; then
   # it skips doctests, which cargo test --doc runs.
   command -v cargo-nextest >/dev/null || { echo "GATE FAILED: cargo-nextest missing (cargo install cargo-nextest --locked)" >&2; exit 1; }
   # Crates whose tests share one C# worker per process: nextest's process per test starts a worker
-  # for each, which takes 3x as long (docs/performance/numbers.md), so cargo test runs them.
+  # for each, which takes 3x as long (docs/ai/performance/numbers.md), so cargo test runs them.
   shared=(lang-csharp)
   gate "cargo nextest" cargo nextest run "${ws[@]}" --no-fail-fast --no-tests=pass \
     -E "not ($(printf 'package(%s) | ' "${shared[@]}" | sed 's/ | $//'))"

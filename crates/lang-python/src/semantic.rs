@@ -1,7 +1,7 @@
 //! The scope model of a file, for the rules that need to know what a name binds to: the shared
 //! binder of `core_semantics::scopes` run over the tree with Python's table (which kinds open
 //! scopes, declare names, refer to names or assign). Built on the first scope rule that runs on a
-//! file and shared with the others (docs/formatting/python.md#scope-layer).
+//! file and shared with the others (docs/ai/formatting/python.md#scope-layer).
 //!
 //! Resolution is by name up the scope chain, whatever the order of the code: `x` read at the top of
 //! a module finds an `x` assigned below it. What depends on the order (a redefinition before a
@@ -57,7 +57,7 @@ const PATTERN_NAME: &[Sel] = &[Sel::Kind("Identifier")];
 const THROUGH: &[(Sel, Flow)] = &[(Sel::All, Flow::Through)];
 const TYPE_PARAM: Flags = V.union(Flags::TYPE).union(Flags::TYPE_PARAMETER);
 
-/// What Python says to the binder (docs/formatting/python.md#scope-layer).
+/// What Python says to the binder (docs/ai/formatting/python.md#scope-layer).
 const ROWS: &[Row] = &[
     Row {
         kind: "ModModule",

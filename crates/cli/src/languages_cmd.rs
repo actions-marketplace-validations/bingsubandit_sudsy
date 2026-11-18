@@ -1,4 +1,4 @@
-//! `sudsy languages list|add|remove|sync`: the installed set (`docs/architecture/language-packs.md`).
+//! `sudsy languages list|add|remove|sync`: the installed set (`docs/ai/architecture/language-packs.md`).
 
 use anyhow::{Result, anyhow, bail};
 use clap::Subcommand;

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Wall time and peak memory of Sudsy against ruff, Biome, oxlint and Prettier on real projects, check mode, every run a new
-# process (docs/performance/numbers.md, "Speed against ruff, Biome and oxlint"):
+# process (docs/ai/performance/numbers.md, "Speed against ruff, Biome and oxlint"):
 #   Python: Django (corpus/python/django/django: 883 files) format and lint against ruff (`--isolated`, default rules);
 #   JavaScript: three.js src and express lib+test, 8 copies, format against Biome and Prettier, lint (default rules)
 #   against oxlint and Biome.

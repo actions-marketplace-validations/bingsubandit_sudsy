@@ -5,7 +5,7 @@ name: Publish packages
 # It renders the packages from the assets of the published GitHub release of that tag
 # (scripts/package-channels.py), so publish the draft release first. Nothing runs on a tag push.
 # A channel whose secret is missing is skipped with a warning. Setup per channel:
-# docs/development/ci-release.md.
+# docs/ai/development/ci-release.md.
 
 on:
   workflow_dispatch:

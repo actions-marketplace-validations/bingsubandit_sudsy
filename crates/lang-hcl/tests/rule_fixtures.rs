@@ -1,4 +1,4 @@
-//! `tests/rules/hcl/<rule>/*`: see docs/development/testing.md.
+//! `tests/rules/hcl/<rule>/*`: see docs/ai/development/testing.md.
 
 #[test]
 fn rule_fixtures() {

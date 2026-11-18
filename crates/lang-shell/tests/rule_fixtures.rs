@@ -1,4 +1,4 @@
-//! `tests/rules/shell/<rule>/*`: see docs/development/testing.md.
+//! `tests/rules/shell/<rule>/*`: see docs/ai/development/testing.md.
 
 #[test]
 fn rule_fixtures() {

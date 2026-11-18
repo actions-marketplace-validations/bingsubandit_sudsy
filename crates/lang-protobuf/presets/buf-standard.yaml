@@ -1,4 +1,4 @@
-# buf's STANDARD lint category: the rules Sudsy has, at warn (the rest are in docs/parity/buf.yaml).
+# buf's STANDARD lint category: the rules Sudsy has, at warn (the rest are in docs/ai/parity/buf.yaml).
 protobuf:
   lint:
     rules:

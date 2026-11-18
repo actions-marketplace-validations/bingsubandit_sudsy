@@ -1,0 +1,66 @@
+tool: "dotnet-format-editorconfig"
+version: ".NET SDK 10 docs (formatting options pages; IDE index page updated 2026-07)"
+languages: ["csharp"]
+sources:
+  - "https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/csharp-formatting-options"
+  - "https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0055"
+  - "https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/"
+  - "docs/ai/config/editorconfig.md in this repo (what the reader maps)"
+scope: "`dotnet format` whitespace / IDE0055 options from .editorconfig and IDE2000-IDE2006"
+entries:
+  indent_style: option csharp.format.indent_style
+  indent_size / tab_width: option csharp.format.indent_size
+  max_line_length: option csharp.format.line_width
+  insert_final_newline: option csharp.format.final_newline
+  end_of_line: option csharp.format.end_of_line
+  charset: wontfix BOM preserved, no transcoding
+  trim_trailing_whitespace: formatter
+  dotnet_sort_system_directives_first: rule using-order
+  dotnet_separate_import_directive_groups: option csharp.format.separate_using_groups
+  csharp_new_line_before_open_brace: option csharp.format.brace_newline
+  csharp_new_line_before_else: option csharp.format.else_line
+  csharp_new_line_before_catch: option csharp.format.catch_line
+  csharp_new_line_before_finally: option csharp.format.finally_line
+  csharp_new_line_before_members_in_object_initializers: formatter
+  csharp_new_line_before_members_in_anonymous_types: formatter
+  csharp_new_line_between_query_expression_clauses: option csharp.format.preserve_query_breaks | `dotnet format` aligns the clauses under `from`, Sudsy indents them below it (after `=` on the next line); `false` (keep the source's breaks) is not followed
+  csharp_indent_case_contents: formatter
+  csharp_indent_switch_labels: formatter
+  csharp_indent_labels: option csharp.format.label_indent
+  csharp_indent_block_contents: formatter
+  csharp_indent_braces: formatter
+  csharp_indent_case_contents_when_block: option csharp.format.indent_switch_section_block
+  csharp_space_after_cast: formatter
+  csharp_space_after_keywords_in_control_flow_statements: formatter
+  csharp_space_between_parentheses: formatter
+  csharp_space_before_colon_in_inheritance_clause: formatter
+  csharp_space_after_colon_in_inheritance_clause: formatter
+  csharp_space_around_binary_operators: formatter
+  csharp_space_between_method_declaration_parameter_list_parentheses: formatter
+  csharp_space_between_method_declaration_empty_parameter_list_parentheses: formatter
+  csharp_space_between_method_declaration_name_and_open_parenthesis: formatter
+  csharp_space_between_method_call_parameter_list_parentheses: formatter
+  csharp_space_between_method_call_empty_parameter_list_parentheses: formatter
+  csharp_space_between_method_call_name_and_opening_parenthesis: formatter
+  csharp_space_after_comma: formatter
+  csharp_space_before_comma: formatter
+  csharp_space_after_dot: formatter
+  csharp_space_before_dot: formatter
+  csharp_space_after_semicolon_in_for_statement: formatter
+  csharp_space_before_semicolon_in_for_statement: formatter
+  csharp_space_around_declaration_statements: formatter
+  csharp_space_before_open_square_brackets: formatter
+  csharp_space_between_empty_square_brackets: formatter
+  csharp_space_between_square_brackets: formatter
+  csharp_space_* non-default values: wontfix fixed to the default value; no preset needs the other values
+  csharp_preserve_single_line_statements: option csharp.format.preserve_single_line_statements
+  csharp_preserve_single_line_blocks: option csharp.format.preserve_single_line_blocks
+  IDE0055: formatter | Sudsy formats; it does not report "would change" as IDE0055 diagnostics (`format --check` instead); the csharp_space_* values and `false` of the two initializer newline keys are not followed
+  IDE2000: formatter
+  IDE2001: formatter
+  IDE2002: formatter
+  IDE2003: formatter | not enforced; same as SA1513
+  IDE2004: formatter
+  IDE2005: formatter
+  IDE2006: formatter
+  IDE0161: sdk IDE0161

@@ -1,0 +1,44 @@
+tool: "buf"
+version: "1.75.0 (GitHub release; the version `scripts/parity.sh format buf` downloads)"
+languages: ["protobuf"]
+sources:
+  - "https://buf.build/docs/reference/cli/buf/format/"
+  - "tests/parity/buf (differential numbers, docs/ai/development/parity.md)"
+scope: "`buf format`, the de-facto Protobuf formatter, and `buf lint`. It has no style options; Sudsy's defaults reproduce its layout. Differences are measured by `scripts/parity.sh format buf` on the folder's fixtures and the Protobuf corpus (`tests/conformance/fetch-proto-corpus.sh`); the known ones are listed in `tests/parity/buf/differences.yaml`. `scripts/parity.sh buf` compares `buf lint` with Sudsy's rules on the rule fixtures; the lint entries are the rules of `buf config ls-lint-rules`."
+entries:
+  format: formatter | 320 of 323 corpus files are identical; the other 3 are listed with their reasons in tests/parity/buf/differences.yaml.
+  diff: config `sudsy format --check`
+  ENUM_FIRST_VALUE_ZERO: rule enum-first-value-zero
+  ENUM_NO_ALLOW_ALIAS: rule enum-no-allow-alias
+  ENUM_PASCAL_CASE: rule enum-pascal-case
+  ENUM_VALUE_UPPER_SNAKE_CASE: rule enum-value-upper-snake-case
+  FIELD_LOWER_SNAKE_CASE: rule field-lower-snake-case
+  FIELD_NOT_REQUIRED: rule field-not-required
+  IMPORT_NO_PUBLIC: rule import-no-public
+  MESSAGE_PASCAL_CASE: rule message-pascal-case
+  ONEOF_LOWER_SNAKE_CASE: rule oneof-lower-snake-case
+  PACKAGE_DEFINED: rule package-defined
+  PACKAGE_LOWER_SNAKE_CASE: rule package-lower-snake-case
+  RPC_PASCAL_CASE: rule rpc-pascal-case
+  SERVICE_PASCAL_CASE: rule service-pascal-case
+  SYNTAX_SPECIFIED: rule syntax-specified
+  ENUM_VALUE_PREFIX: rule enum-value-prefix
+  ENUM_ZERO_VALUE_SUFFIX: rule enum-zero-value-suffix | The suffix is not configurable.
+  FILE_LOWER_SNAKE_CASE: rule file-lower-snake-case
+  PACKAGE_VERSION_SUFFIX: rule package-version-suffix
+  RPC_REQUEST_STANDARD_NAME: rule rpc-request-standard-name
+  RPC_RESPONSE_STANDARD_NAME: rule rpc-response-standard-name
+  SERVICE_SUFFIX: rule service-suffix | The suffix is not configurable.
+deferred:
+  - gap: "Needs the other files of the module."
+    ids: [DIRECTORY_SAME_PACKAGE, PACKAGE_SAME_DIRECTORY, PACKAGE_NO_IMPORT_CYCLE, PACKAGE_SAME_CSHARP_NAMESPACE, PACKAGE_SAME_GO_PACKAGE, PACKAGE_SAME_JAVA_MULTIPLE_FILES, PACKAGE_SAME_JAVA_PACKAGE, PACKAGE_SAME_PHP_NAMESPACE, PACKAGE_SAME_RUBY_PACKAGE, PACKAGE_SAME_SWIFT_PREFIX, RPC_REQUEST_RESPONSE_UNIQUE, STABLE_PACKAGE_NO_IMPORT_UNSTABLE]
+  - gap: "Needs the module root, which the path of a file under it is compared with."
+    ids: [PACKAGE_DIRECTORY_MATCH]
+  - gap: "Needs the symbols of the imported files to know which import is used."
+    ids: [IMPORT_USED]
+  - gap: "Needs a CEL compiler."
+    ids: [PROTOVALIDATE]
+  - gap: "Not in the default categories; needs the comment that belongs to a declaration."
+    ids: [COMMENT_ENUM, COMMENT_ENUM_VALUE, COMMENT_FIELD, COMMENT_MESSAGE, COMMENT_ONEOF, COMMENT_RPC, COMMENT_SERVICE]
+  - gap: "Not in the default categories (UNARY_RPC)."
+    ids: [RPC_NO_CLIENT_STREAMING, RPC_NO_SERVER_STREAMING]

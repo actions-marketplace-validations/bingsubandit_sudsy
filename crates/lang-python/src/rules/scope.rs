@@ -1,4 +1,4 @@
-//! Rules that read what names bind to (docs/formatting/python.md#scope-layer) and are no row of
+//! Rules that read what names bind to (docs/ai/formatting/python.md#scope-layer) and are no row of
 //! the shared scope family: the model of `crate::semantic`, built on the first of them that runs
 //! on a file.
 

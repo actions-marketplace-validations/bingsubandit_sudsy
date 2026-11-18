@@ -22,9 +22,9 @@ PARITY = ROOT / os.environ.get("CARGO_TARGET_DIR", "target") / "parity"
 
 
 def catalog_entries(tool, sub=False):
-    catalog = yaml.safe_load((ROOT / "docs/parity" / f"{parity_format.tools()['lint'][tool]['catalog']}.yaml").read_text(encoding="utf-8"))
+    catalog = yaml.safe_load((ROOT / "docs/ai/parity" / f"{parity_format.tools()['lint'][tool]['catalog']}.yaml").read_text(encoding="utf-8"))
     out = []
-    for id_, value in catalog["entries"].items():  # `<status> [| <gap>]`, see docs/parity/README.md
+    for id_, value in catalog["entries"].items():  # `<status> [| <gap>]`, see docs/ai/parity/README.md
         status, _, gap = value.partition(" | ")
         kind, _, arg = status.partition(" ")
         coverage = kind if kind in ("sdk", "wontfix", "deferred") else "missing" if kind == "planned" else "partial" if gap else "covered"

@@ -2,7 +2,7 @@
 xtask = "run --quiet --package xtask --"
 
 # rust-lld (shipped with every toolchain) links the ~100 test binaries faster than MSVC link.exe
-# (docs/performance/numbers.md).
+# (docs/ai/performance/numbers.md).
 [target.x86_64-pc-windows-msvc]
 linker = "rust-lld.exe"
 

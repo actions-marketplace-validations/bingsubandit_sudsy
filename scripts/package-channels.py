@@ -4,7 +4,7 @@
 Usage: scripts/package-channels.py <npm|pypi|homebrew|scoop|winget|all> <version> <assets dir> <out dir> [tag]
 The assets dir holds the release's `sudsy-<version>-<platform>.{tar.gz,zip}` and `SHA256SUMS`;
 when it has no SHA256SUMS they are fetched with `gh release download <tag>`. Nothing is published here. Templates live in packaging/ (`@VERSION@`,
-`@URL <platform>@`, `@SHA <platform>@`). Layout of the output: see docs/development/ci-release.md.
+`@URL <platform>@`, `@SHA <platform>@`). Layout of the output: see docs/ai/development/ci-release.md.
 """
 import base64
 import hashlib

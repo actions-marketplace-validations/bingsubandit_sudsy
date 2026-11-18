@@ -1,6 +1,6 @@
 //! The rules of Ruby: scope rules on the shared binder (`scope`), and the `check` family that the
 //! pattern files in `rules/*.yaml` name for rules that read the shape of a call, a class or a
-//! clause (RuboCop's Lint department; catalog in `docs/parity/rubocop.yaml`).
+//! clause (RuboCop's Lint department; catalog in `docs/ai/parity/rubocop.yaml`).
 
 mod calls;
 mod classes;

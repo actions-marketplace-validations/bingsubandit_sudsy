@@ -2,8 +2,8 @@
 # `class regex`: matched against the path under crates/, first match wins, only crates/*/src/**/*.rs.
 # Classes: ignore (generated), shared (core-*, provider-api, languages), then the kinds of a
 # lang-* crate: formatter, rules, other (everything not listed). `budget N`: hand-written lines
-# a language may reach (design decision 3 of docs/design/shared-core.md); crossing it needs a
-# `Cost-exception:` line in a commit message (docs/architecture/adding-a-language.md).
+# a language may reach (design decision 3 of docs/ai/design/shared-core.md); crossing it needs a
+# `Cost-exception:` line in a commit message (docs/ai/architecture/adding-a-language.md).
 budget 3000
 ignore  \.generated\.rs$|/generated\.rs$
 shared  ^(core-[^/]+|provider-api|languages)/src/

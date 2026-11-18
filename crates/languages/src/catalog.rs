@@ -1,4 +1,4 @@
-//! The parity catalog (`docs/parity/*.yaml`), embedded: the source of the reasons printed for
+//! The parity catalog (`docs/ai/parity/*.yaml`), embedded: the source of the reasons printed for
 //! settings that cannot be migrated, of the checks that each `init --from` mapping agrees with it,
 //! and of the "Equivalent" ids shown for each rule.
 
@@ -69,7 +69,7 @@ impl<'de> Deserialize<'de> for Pairs {
     }
 }
 
-/// Reads a catalog file (format: docs/parity/README.md): each `id: <status> [| <gap>]` of
+/// Reads a catalog file (format: docs/ai/parity/README.md): each `id: <status> [| <gap>]` of
 /// `entries`, then each id under `deferred` with the group's `gap`.
 pub fn parse(text: &str) -> Result<Catalog, String> {
     let mut c: Catalog = serde_saphyr::from_str(text).map_err(|e| e.to_string())?;
@@ -110,7 +110,7 @@ macro_rules! catalogs {
         static CELL: OnceLock<Vec<Catalog>> = OnceLock::new();
         CELL.get_or_init(|| {
             vec![$(parse(include_str!(concat!(
-                "../../../docs/parity/", $name, ".yaml"
+                "../../../docs/ai/parity/", $name, ".yaml"
             )))
             .expect("parity catalog parses")),*]
         })

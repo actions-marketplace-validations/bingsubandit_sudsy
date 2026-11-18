@@ -1,5 +1,5 @@
-//! One entry per rule id, gathered once: `docs/rules/rules.json` (what the documentation site and
-//! the VS Code extension read) and the rule table of `docs/rules/builtin.md` are both made from it.
+//! One entry per rule id, gathered once: `docs/ai/rules/rules.json` (what the documentation site and
+//! the VS Code extension read) and the rule table of `docs/ai/rules/builtin.md` are both made from it.
 
 use core_rules::{Check, Extensions, Opt, RuleMeta};
 use languages::catalog::{self, Upstream};
@@ -79,7 +79,7 @@ fn default_json(default: Opt) -> Value {
     }
 }
 
-/// The text of `docs/rules/rules.json`.
+/// The text of `docs/ai/rules/rules.json`.
 pub fn json(docs: &[RuleDoc]) -> String {
     let rules: Vec<Value> = docs.iter().map(entry).collect();
     serde_json::to_string_pretty(&json!({ "rules": rules })).expect("serializes") + "\n"
@@ -143,7 +143,7 @@ fn cell(text: &str) -> String {
         .replace('|', "\\|")
 }
 
-/// The rule table of `docs/rules/builtin.md`.
+/// The rule table of `docs/ai/rules/builtin.md`.
 pub fn table(docs: &[RuleDoc]) -> String {
     let mut out = String::from(
         "| Rule | Language | Category | Default | Fix | Description |\n|---|---|---|---|---|---|\n",

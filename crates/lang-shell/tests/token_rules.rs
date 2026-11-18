@@ -1,4 +1,4 @@
-//! The `token:` form of pattern rules (docs/rules/patterns.md): kind, regex, not-regex,
+//! The `token:` form of pattern rules (docs/ai/rules/patterns.md): kind, regex, not-regex,
 //! skip-first and needs.
 
 use provider_api::testing::{lint_with, pattern_error, pattern_rules};

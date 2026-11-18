@@ -1,4 +1,4 @@
-//! `tests/rules/java/<rule>/*`: see docs/development/testing.md.
+//! `tests/rules/java/<rule>/*`: see docs/ai/development/testing.md.
 
 #[test]
 fn rule_fixtures() {

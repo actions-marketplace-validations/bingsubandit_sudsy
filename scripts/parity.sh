@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Differential test against an upstream tool. Usage: scripts/parity.sh [format|coverage] <tool>
 # Lint mode runs the tool and `sudsy lint` on tests/parity/<tool>/ (or the rule fixtures) and compares
-# rule (mapped through docs/parity/<tool>.yaml), line and column; format mode compares `sudsy format`
+# rule (mapped through docs/ai/parity/<tool>.yaml), line and column; format mode compares `sudsy format`
 # with the tool's output; coverage mode reports the share of the tool's default-set findings on its corpus that
-# Sudsy also reports (docs/development/parity.md). Prints every mismatch; exit 1 on any. The tools, their versions' catalogs
-# and how they are installed are the entries of scripts/parity_tools.json (docs/development/parity.md).
+# Sudsy also reports (docs/ai/development/parity.md). Prints every mismatch; exit 1 on any. The tools, their versions' catalogs
+# and how they are installed are the entries of scripts/parity_tools.json (docs/ai/development/parity.md).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 tdir=${CARGO_TARGET_DIR:-$PWD/target}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Documentation site (site/). Usage: scripts/site.sh build | dev | preview | test | scale-test [N]
-#   build        npm ci + generate pages from docs/rules/rules.json + astro build -> site/dist
+#   build        npm ci + generate pages from docs/ai/rules/rules.json + astro build -> site/dist
 #   test         build + browser smoke test (site/test/smoke.mjs; Playwright drives installed Edge or Chrome)
 #   dev          generate + astro dev server (no search: the index exists only in a build)
 #   preview      build, then serve site/dist with search at http://localhost:4321/sudsy/
@@ -27,7 +27,7 @@ case "${1:-build}" in
         return r;
       });
       require("fs").writeFileSync(dst, JSON.stringify({ rules }));
-    ' ../docs/rules/rules.json "$dir/rules.json" "$n"
+    ' ../docs/ai/rules/rules.json "$dir/rules.json" "$n"
     npm ci
     export SUDSY_RULES_JSON=$(cd "$dir" && pwd)/rules.json SITE_OUT=$(cd "$dir" && pwd)/dist
     start=$(date +%s)

@@ -3,7 +3,7 @@
 //! the old one unless something read it, and branches of one `if` or `try` do not replace each
 //! other. The language says which nodes are branches, loops, collections and the like by tags
 //! (`#branch`, `#branching`, `#collection`, `#comprehension`, `#with-item`, `#named-expr`,
-//! docs/rules/semantics.md#ordered-rules) and the rest in [`Ordered`](super::Ordered).
+//! docs/ai/rules/semantics.md#ordered-rules) and the rest in [`Ordered`](super::Ordered).
 
 mod defs;
 mod imports;

@@ -174,7 +174,7 @@ pub fn new_rule(root: &Path, language: &str, id: &str, rust: bool) -> Result<Str
     );
     let krate = root.join("crates").join(format!("lang-{language}"));
     let starter = starter(&krate).with_context(|| {
-        format!("no scaffolding for `{language}`; add the rule by hand as docs/development/testing.md describes")
+        format!("no scaffolding for `{language}`; add the rule by hand as docs/ai/development/testing.md describes")
     })?;
     let snake = id.replace('-', "_");
     let created = if rust {
@@ -202,7 +202,7 @@ pub fn new_rule(root: &Path, language: &str, id: &str, rust: bool) -> Result<Str
     Ok(format!(
         "created {}\ncreated {}\n\
          next: edit both, `cargo fmt`, `SUDSY_BLESS=1 cargo test -p lang-{language} --test integration rule_fixtures`, then `cargo xtask codegen`.\n\
-         If another tool has an equivalent, put this on its entry in docs/parity/<tool>.yaml:\n    sudsy: \"rule: {id}\"\n    coverage: \"covered\"",
+         If another tool has an equivalent, put this on its entry in docs/ai/parity/<tool>.yaml:\n    sudsy: \"rule: {id}\"\n    coverage: \"covered\"",
         created.display(),
         case.display()
     ))

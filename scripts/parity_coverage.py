@@ -1,6 +1,6 @@
 """Findings of an upstream tool on its corpus for the generic coverage mode (scripts/parity_lint.py `coverage`).
 
-A tool entry of parity_tools.json has a `coverage` object (docs/development/parity.md#coverage-mode):
+A tool entry of parity_tools.json has a `coverage` object (docs/ai/development/parity.md#coverage-mode):
 `corpus` (sources: `dir` below the repo root, `glob` patterns, `skip` substrings of the path inside `dir`, `as` the folder `dir` is copied to (default: its own name), `into` a folder the files are copied into flat: the one a language is found by), `command`
 (`{exe}`, `{prefix}`, `{group}` and `{files}`), `group` (a regex over the file's path: files of one group run in one
 command; `cwd: group` runs it in the folder `group` names), `chunk` (files per command), `ok_codes` (exit codes with an empty report meaning no findings), `timeout` (seconds) and `memory_gb` (address space) per command, `env`, `stream` (`stdout` or `stderr`: where the report is), `files` (config files

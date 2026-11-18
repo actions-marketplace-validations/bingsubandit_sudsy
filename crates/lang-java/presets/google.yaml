@@ -1,5 +1,5 @@
 # Google's Java style guide as Checkstyle's google_checks.xml reads it (the checks Sudsy has; the
-# rest are in docs/parity/checkstyle.yaml). The layout is google-java-format's, the default.
+# rest are in docs/ai/parity/checkstyle.yaml). The layout is google-java-format's, the default.
 java:
   format:
     indent_size: 2
