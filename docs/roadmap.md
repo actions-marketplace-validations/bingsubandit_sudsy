@@ -3,6 +3,7 @@
 One line each; none is committed, except the small tasks below.
 
 ## Small tasks
+- Format-string family: dispatch once per node instead of 16 `MEMO.names` calls (py.lint +3.6%).
 - Profile the `core_format::spacing` row lookup (kt.format +6.4%, java.format +4% at F2) once a profiler runs on the agent host.
 - Scope family: JS `unused-import` is still part of `unused-variable` (split it as Java, Kotlin and PHP have it); Python's `F401`/`F841` rows move on the family in L3.
 - Flow family modeling gaps (`unreachable-code`, `no-fallthrough`; [rules/semantics.md](rules/semantics.md#flow-family-core_rulesflow_rules)): JS static blocks and TS module blocks are not units of their own; PHP file level and `if`/`else` bodies (opaque wrappers); Java arrow `switch` arms and `for` heads; Ruby `begin`/`rescue`; Python `with` and `try`/`else`.
