@@ -44,7 +44,7 @@ token LBracket "[" #punctuation #glue
 token RBracket "]" #punctuation #close
 token LAngle "<" #punctuation #operator
 token RAngle ">" #punctuation #operator
-token Comma "," #punctuation #separator #glue
+token Comma "," #punctuation #separator #glue #hole
 token Semicolon ";" #punctuation #separator
 token Colon ":" #punctuation #glue
 token Dot "." #punctuation
@@ -85,7 +85,7 @@ node BindingIdentifier #pattern #declaration = name:#identifier
 node LabelIdentifier #opaque
 node ThisExpression #expression #opaque
 node ArrayExpression #expression #opaque
-node Elision #opaque
+node Elision #opaque #hole
 node ObjectExpression #expression #opaque #mapping
 node ObjectProperty #key-value = Keyword? Identifier? Operator? LBracket? key:#expression RBracket? Colon? value:#expression?
 node TemplateLiteral #expression #opaque
@@ -111,7 +111,7 @@ node ConditionalExpression #expression #conditional = condition:#expression Ques
 node AssignmentExpression #expression #assignment = LParen* left:#expression RParen* operator:#operator right:#expression
 node ArrayAssignmentTarget #expression #opaque
 node ObjectAssignmentTarget #expression #opaque
-node AssignmentTargetRest #opaque
+node AssignmentTargetRest #opaque #final
 node AssignmentTargetWithDefault #opaque
 node AssignmentTargetPropertyIdentifier #opaque
 node AssignmentTargetPropertyProperty #opaque
@@ -151,12 +151,12 @@ node AssignmentPattern #pattern #opaque #default-value
 node ObjectPattern #pattern #opaque
 node BindingProperty #opaque
 node ArrayPattern #pattern #opaque
-node BindingRestElement #pattern #opaque #rest
+node BindingRestElement #pattern #opaque #rest #final
 node Function #expression #statement #function #declaration #scope #inert =
     Identifier* Keyword? Operator? name:BindingIdentifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? body:FunctionBody?
 node FormalParameters #parameter-list = LParen? parameters:#parameter* RParen?
 node FormalParameter #parameter #opaque
-node FormalParameterRest #parameter #opaque
+node FormalParameterRest #parameter #opaque #final
 node FunctionBody #block = LBrace items:#statement* RBrace
 node ArrowFunctionExpression #expression #function #scope =
     Identifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? Arrow body:FunctionBody? expression_body:#expression?

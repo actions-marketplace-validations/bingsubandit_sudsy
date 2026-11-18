@@ -3,7 +3,7 @@
 
 use crate::generated::kind as k;
 use core_config::OptionValue;
-use core_format::doc::{self, Doc, concat, group, hardline, if_break, indent, line, lit, softline};
+use core_format::doc::{self, Doc, concat, hardline, if_break, indent, line, lit};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 
@@ -219,36 +219,6 @@ pub(crate) fn clause(body: &SyntaxNode, printed: Doc, force_space: bool) -> Doc 
         _ if force_space => concat(vec![lit(" "), printed]),
         _ => indent(concat(vec![line(), printed])),
     }
-}
-
-/// `{ a, b }`; with `can_break` the items go one per line when the line is too long, with a
-/// trailing comma. An empty list is `{}`.
-pub(crate) fn braces(
-    cx: &FormatCtx<'_>,
-    open: &SyntaxToken,
-    items: Vec<Doc>,
-    close: &SyntaxToken,
-    can_break: bool,
-) -> Doc {
-    let (open, close) = (cx.token(open), cx.token(close));
-    if items.is_empty() {
-        return concat(vec![open, close]);
-    }
-    let comma = concat(vec![lit(","), line()]);
-    let spaced = style(cx).bracket_spacing;
-    if !can_break {
-        let all = doc::join(&lit(", "), items);
-        let pad = if spaced { lit(" ") } else { Doc::Nil };
-        return concat(vec![open, pad.clone(), all, pad, close]);
-    }
-    let edge = if spaced { line() } else { softline() };
-    group(concat(vec![
-        open,
-        indent(concat(vec![edge.clone(), doc::join(&comma, items)])),
-        trailing_comma(cx, false),
-        edge,
-        close,
-    ]))
 }
 
 /// Where the comments of the tree of `anchor` are: (start of the trivia in front of a token, start

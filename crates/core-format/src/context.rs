@@ -417,9 +417,21 @@ impl<'a> FormatCtx<'a> {
         if leading.is_empty() && trailing.is_empty() {
             return self.token_text(tok);
         }
-        // Inline comments in front of a closing token (tag `#close`) sit tight against it.
-        let lead = if self.grammar.has_tag(tok.kind(), "close")
-            && !leading.is_empty()
+        let lead = if self.grammar.has_tag(tok.kind(), "close") {
+            self.close_leading(tok, &leading)
+        } else {
+            leading_comments_doc_with(&leading, self.comment_style.max_blank_after)
+        };
+        doc::concat(vec![
+            lead,
+            self.token_text(tok),
+            trailing_comments_doc(&self.comment_style, &trailing),
+        ])
+    }
+
+    /// The comments in front of a closing token: inline block comments sit tight against it.
+    fn close_leading(&self, tok: &SyntaxToken, leading: &[Comment]) -> Doc {
+        if !leading.is_empty()
             && leading
                 .iter()
                 .all(|c| c.kind == CommentKind::Block && c.breaks_after == 0)
@@ -435,12 +447,16 @@ impl<'a> FormatCtx<'a> {
                 doc::concat(leading.iter().map(comment_doc).collect()),
             ])
         } else {
-            leading_comments_doc_with(&leading, self.comment_style.max_blank_after)
-        };
+            leading_comments_doc_with(leading, self.comment_style.max_blank_after)
+        }
+    }
+
+    /// A closing token with the comments in front of it only (those after it belong to the
+    /// caller): the tight form of [`FormatCtx::token`].
+    pub fn close_token(&self, tok: &SyntaxToken) -> Doc {
         doc::concat(vec![
-            lead,
+            self.close_leading(tok, &self.leading(tok)),
             self.token_text(tok),
-            trailing_comments_doc(&self.comment_style, &trailing),
         ])
     }
 
