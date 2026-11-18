@@ -27,7 +27,7 @@ WHEEL_TAG = {
     "win32-x64": "win_amd64", "win32-arm64": "win_arm64",
 }
 NPM_SCOPE = "@sudsylint"
-DESC = "Formatter and linter for C#, JSON, YAML and more"
+DESC = "One formatter and linter for JS/TS, Python, Protobuf, Terraform and more"
 
 
 def archive_name(version, platform):
@@ -78,7 +78,7 @@ def npm(version, assets, out, tmp, **_):
     shutil.copy(PKG / "npm/bin.js", d / "bin/sudsy.js")
     (d / "bin/sudsy.js").chmod(0o755)
     shutil.copy(ROOT / "LICENSE", d / "LICENSE")
-    shutil.copy(ROOT / "README.md", d / "README.md")
+    shutil.copy(PKG / "README.md", d / "README.md")
     write_json(d / "package.json", {
         "name": f"{NPM_SCOPE}/sudsy", "version": version, "description": DESC, "license": "MIT",
         "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "homepage": f"https://github.com/{REPO}",
@@ -113,7 +113,7 @@ def pypi(version, assets, out, tmp, **_):
         files[f"{dist}/METADATA"] = (
             f"Metadata-Version: 2.4\nName: sudsy\nVersion: {version}\nSummary: {DESC}\n"
             f"License-Expression: MIT\nLicense-File: LICENSE\nProject-URL: Homepage, https://github.com/{REPO}\n"
-            f"Requires-Python: >=3.8\nDescription-Content-Type: text/markdown\n\n{(ROOT / 'README.md').read_text()}".encode(), 0o644)
+            f"Requires-Python: >=3.8\nDescription-Content-Type: text/markdown\n\n{(PKG / 'README.md').read_text()}".encode(), 0o644)
         files[f"{dist}/WHEEL"] = (f"Wheel-Version: 1.0\nGenerator: scripts/package-channels.py\nRoot-Is-Purelib: false\nTag: {tag}\n".encode(), 0o644)
         files[f"{dist}/entry_points.txt"] = (b"[console_scripts]\nsudsy = sudsy:main\n", 0o644)
         record = "".join(f"{n},{record_hash(b)},{len(b)}\n" for n, (b, _) in files.items()) + f"{dist}/RECORD,,\n"

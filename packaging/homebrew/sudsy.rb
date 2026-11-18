@@ -1,5 +1,5 @@
 class Sudsy < Formula
-  desc "Formatter and linter for C#, JSON, YAML and more"
+  desc "One formatter and linter for JS/TS, Python, Protobuf, Terraform and more"
   homepage "https://github.com/bingsubandit/sudsy"
   version "@VERSION@"
   license "MIT"
