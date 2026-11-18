@@ -120,7 +120,7 @@ pub(crate) fn bracketed_by(
         return parenthesized(cx.token(open), inner, cx.token(close));
     }
     cx.hold_leading(close);
-    let end = concat(vec![doc::hardline(), super::comment::comments_block(&end)]);
+    let end = concat(vec![doc::hardline(), core_format::comment_lines(&end)]);
     parenthesized(cx.token(open), concat(vec![inner, end]), cx.token(close))
 }
 

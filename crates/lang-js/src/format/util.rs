@@ -280,19 +280,7 @@ pub(crate) fn dangling(cx: &FormatCtx<'_>, close: &SyntaxToken) -> Doc {
     }
     cx.hold_leading(close);
     let blank = comments::blank_lines_before(cx.grammar, close) > 0;
-    concat(
-        cs.iter()
-            .enumerate()
-            .flat_map(|(i, c)| {
-                let gap = if i == 0 && blank {
-                    hardline()
-                } else {
-                    Doc::Nil
-                };
-                [gap, hardline(), core_format::context::comment_doc(c)]
-            })
-            .collect(),
-    )
+    core_format::shapes::dangling_comments(&cs, blank)
 }
 
 /// `()` that may hold block comments: they sit against the parentheses, `(/* c */)`.

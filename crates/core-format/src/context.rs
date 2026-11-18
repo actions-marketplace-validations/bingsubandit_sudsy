@@ -178,6 +178,8 @@ pub struct FormatCtx<'a> {
     held: Mutex<HashMap<TextSize, Option<Vec<Comment>>>>,
     /// Tokens whose leading comments a shape prints itself (see [`FormatCtx::hold_leading`]).
     held_leading: Mutex<std::collections::HashSet<TextSize>>,
+    /// How many leading comments of a token the layouts before it have printed (`placement`).
+    pub(crate) consumed: Mutex<HashMap<TextSize, usize>>,
     /// Is any token in `held_leading`? Asked for every token, so without the lock.
     any_held_leading: std::sync::atomic::AtomicBool,
     /// A provider's per-run data derived from the options (see [`FormatCtx::cached`]).
@@ -204,6 +206,7 @@ impl<'a> FormatCtx<'a> {
             detached: Mutex::new(Vec::new()),
             held: Mutex::new(HashMap::new()),
             held_leading: Mutex::new(std::collections::HashSet::new()),
+            consumed: Mutex::new(HashMap::new()),
             any_held_leading: std::sync::atomic::AtomicBool::new(false),
             cache: std::sync::OnceLock::new(),
             layouts: Mutex::new(HashMap::new()),

@@ -218,12 +218,9 @@ pub(crate) fn render_slots(
     while i < slots.len() {
         let (blank_before, mark, commented) = leading_info(cx, &slots[i].node)?;
         if mark == Some(IgnoreMark::Start) {
-            let mut j = i;
-            while j + 1 < slots.len()
-                && leading_info(cx, &slots[j + 1].node)?.1 != Some(IgnoreMark::End)
-            {
-                j += 1;
-            }
+            let j = ignore::region_end(slots.len(), i, |n| {
+                Ok::<_, FormatError>(leading_info(cx, &slots[n].node)?.1)
+            })? - 1;
             let tok = cx.first_token(&slots[i].node).ok_or_else(no_tokens)?;
             let last = cx.last_token(&slots[j].node).ok_or_else(no_tokens)?;
             out.push(Rendered {
