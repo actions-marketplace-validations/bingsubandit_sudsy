@@ -1,0 +1,8 @@
+id: duplicate-stage-name
+family: unique-names
+params: { container: document, item: item, name: StageName, report: item }
+message: "the stage name `{name}` is already used"
+description: Two FROM instructions name their stage alike.
+example: "FROM a AS x\nFROM b AS x   # reported"
+severity: error
+category: correctness

@@ -4,8 +4,8 @@
 //! A construct the table cannot decide turns a rule off for its scope, never guesses.
 //!
 //! concept: scope-rules
-//! what: Unused, undefined, shadowed, redeclared and use-before-define checks from a language scope table.
-//! rules: unused-variable, unused-parameter, unused-import, undefined-variable, shadowed-variable, redeclared-variable, use-before-define
+//! what: Unused, undefined, shadowed, redeclared, use-before-define and ambiguous-name checks from a language scope table.
+//! rules: unused-variable, unused-parameter, unused-import, undefined-variable, shadowed-variable, redeclared-variable, use-before-define, ambiguous-name
 //! reads: family:scope
 
 mod cx;
@@ -213,6 +213,28 @@ enum Check {
     UnusedUnpacked,
     StarUsage,
     UndefinedExport,
+    /// A declaration of the given names (`names`: look-alike letters) of the given kind.
+    AmbiguousName(Declared, &'static [&'static str]),
+}
+
+/// What an `ambiguous-name` check looks at: functions, classes, or the other declarations that
+/// are neither imports nor type parameters.
+#[derive(Clone, Copy)]
+enum Declared {
+    Variable,
+    Class,
+    Function,
+}
+
+impl Declared {
+    fn has(self, flags: Flags) -> bool {
+        match self {
+            Declared::Class => flags.contains(Flags::CLASS),
+            Declared::Function => flags.contains(Flags::FUNCTION),
+            Declared::Variable => !flags
+                .intersects(Flags::FUNCTION | Flags::CLASS | Flags::IMPORT | Flags::TYPE_PARAMETER),
+        }
+    }
 }
 
 impl Check {
@@ -253,6 +275,23 @@ pub fn build(
     let name = p.text("check")?;
     let mode = p.optional("mode");
     let check = match (name.as_str(), mode.as_deref()) {
+        ("ambiguous-name", None) => {
+            let names = p.text("names")?;
+            let names: Vec<&'static str> = names
+                .split_whitespace()
+                .map(|n| &*Box::leak(n.to_string().into_boxed_str()))
+                .collect();
+            let declared = p.choice(
+                "of",
+                true,
+                &[
+                    ("binding", Declared::Variable),
+                    ("class", Declared::Class),
+                    ("function", Declared::Function),
+                ],
+            )?;
+            Check::AmbiguousName(declared, Box::leak(names.into_boxed_slice()))
+        }
         ("undefined-variable", Some("star-usage")) => Check::StarUsage,
         ("unused-variable", Some("annotation")) => Check::UnusedAnnotation,
         ("unused-variable", Some("unpacked")) => Check::UnusedUnpacked,
@@ -409,7 +448,10 @@ impl Rule for ScopeRule {
             | Check::UnusedAnnotation
             | Check::UnusedUnpacked
             | Check::StarUsage
-            | Check::UndefinedExport => unreachable!("a row of the rule files gives its metadata"),
+            | Check::UndefinedExport
+            | Check::AmbiguousName(..) => {
+                unreachable!("a row of the rule files gives its metadata")
+            }
             Check::UnusedImport => meta!(
                 "unused-import",
                 Cleanup,
@@ -599,6 +641,24 @@ impl Rule for ScopeRule {
             | Check::UnusedUnpacked
             | Check::StarUsage
             | Check::UndefinedExport => {}
+            Check::AmbiguousName(declared, names) => {
+                let template = self.template("ambiguous name `{name}`");
+                let mut hits = Vec::new();
+                for id in m.symbol_ids() {
+                    let s = m.symbol(id);
+                    if names.contains(&&*s.name) {
+                        hits.extend(
+                            (s.decls.iter().filter(|d| declared.has(d.flags)))
+                                .map(|d| (d.name, template.replace("{name}", &s.name))),
+                        );
+                    }
+                }
+                hits.sort_by_key(|(r, _)| r.start());
+                hits.dedup();
+                for (range, text) in hits {
+                    ctx.report(range, text);
+                }
+            }
             Check::UndefinedVariable => {
                 let extra = ctx.options.list("globals");
                 let template = self.template("the variable `{name}` is not defined");

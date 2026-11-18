@@ -1,0 +1,31 @@
+id: naming-convention
+family: naming-convention
+params:
+  match: regex
+  packages: namespace=ScopedIdentifier|Identifier
+  types: type-declaration
+  methods: method-declaration=Identifier:last
+  members: declaration<field-declaration
+  constants: declaration<constant-declaration|declaration<field-declaration&static&final
+  parameters: parameter-declaration=Identifier:last
+  catch_parameters: parameter-declaration<catch=Identifier:last
+  locals: declaration<local-declaration
+  message: "name `{name}` must match `{convention}`"
+  message.packages: "package name `{name}` must match `{convention}`"
+description: >-
+  A name does not match the regular expression set for what it names (Checkstyle PackageName,
+  TypeName, MethodName, MemberName, ConstantName, ParameterName, CatchParameterName and
+  LocalVariableName). A `static final` field is a constant, as is a field of an interface; the
+  other fields are members. No fix: renaming changes every use.
+example: "class my_class {   // types: ^[A-Z][a-zA-Z0-9]*$\n}"
+severity: off
+category: style
+options:
+  - { name: packages, type: regex, default: "", description: "Regular expression a package name must match; empty: not checked." }
+  - { name: types, type: regex, default: "", description: "Regular expression a class, interface, enum, record or annotation type name must match; empty: not checked." }
+  - { name: methods, type: regex, default: "", description: "Regular expression a method name must match; empty: not checked." }
+  - { name: members, type: regex, default: "", description: "Regular expression a field name must match; empty: not checked." }
+  - { name: constants, type: regex, default: "", description: "Regular expression a constant name must match; empty: not checked." }
+  - { name: parameters, type: regex, default: "", description: "Regular expression a method parameter name must match; empty: not checked." }
+  - { name: catch_parameters, type: regex, default: "", description: "Regular expression a catch parameter name must match; empty: not checked." }
+  - { name: locals, type: regex, default: "", description: "Regular expression a local variable name must match; empty: not checked." }

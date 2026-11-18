@@ -197,10 +197,11 @@ fn provider(name: &str, v: &Value) -> String {
             .replace(']', "")
     };
     let spec = format!(
-        "Spec {{ crate_name: env!(\"CARGO_PKG_NAME\"), language: || core_packs::language!({name:?}, {grammar}::{language}), grammar: grammars::{upper}, mapping: &{mapping}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: {}, validate: {validate} }}",
+        "Spec {{ crate_name: env!(\"CARGO_PKG_NAME\"), language: || core_packs::language!({name:?}, {grammar}::{language}), grammar: grammars::{upper}, mapping: &{mapping}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {}, validate: {validate} }}",
         strings("extensions"),
         strings("file-names"),
         text(v, "formatter", ""),
+        text(v, "rules", "rules::RULES"),
         text(v, "families", "&[]"),
     );
     let body = match composite {

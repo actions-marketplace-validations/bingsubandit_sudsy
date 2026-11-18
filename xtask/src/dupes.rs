@@ -150,7 +150,7 @@ fn tokenize(src: &str) -> Vec<(u64, u32)> {
     strip_items(out)
 }
 
-/// Drops `use ...;` items and the items after `#[cfg(test)]`.
+/// Drops `use ...;` items, the metadata block of `rule!` declarations and the items after `#[cfg(test)]`.
 fn strip_items(t: Vec<(u64, u32)>) -> Vec<(u64, u32)> {
     let (use_kw, semi, hash, lb, rb, lbr, rbr) = (
         hash_str("use"),
@@ -170,6 +170,14 @@ fn strip_items(t: Vec<(u64, u32)>) -> Vec<(u64, u32)> {
         hash_str(")"),
         rbr,
     ];
+    let rule_meta = [
+        hash_str("<id>"),
+        hash_str("!"),
+        lb,
+        hash_str("pub"),
+        hash_str("<id>"),
+        lb,
+    ];
     let mut out = Vec::with_capacity(t.len());
     let mut i = 0;
     while i < t.len() {
@@ -178,6 +186,31 @@ fn strip_items(t: Vec<(u64, u32)>) -> Vec<(u64, u32)> {
                 i += 1;
             }
             i += 1;
+            continue;
+        }
+        if i + rule_meta.len() < t.len()
+            && t[i..i + rule_meta.len()]
+                .iter()
+                .map(|x| x.0)
+                .eq(rule_meta.iter().copied())
+        {
+            // `rule! { pub NAME { id, doc, ... } ... }`: the metadata block is declaration
+            // boilerplate, the same in every rule; keep the macro head, drop the block.
+            out.extend_from_slice(&t[i..i + rule_meta.len() - 1]);
+            let mut j = i + rule_meta.len() - 1;
+            let mut depth = 0;
+            while j < t.len() {
+                if t[j].0 == lb {
+                    depth += 1;
+                } else if t[j].0 == rb {
+                    depth -= 1;
+                    if depth == 0 {
+                        break;
+                    }
+                }
+                j += 1;
+            }
+            i = j + 1;
             continue;
         }
         if i + cfg_test.len() < t.len()

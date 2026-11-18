@@ -23,7 +23,7 @@ No presets.
 
 ## Rules
 Shared: suppression comments (`# sudsy-disable-next-line <rule>`), `no-empty-comment`, `comment-space`, `max-line-length`. Language rules (all `warn`):
-- `no-duplicate-pattern`: the same pattern twice with no opposite pattern between.
+- `no-duplicate-pattern`: the same pattern twice with no opposite pattern between (`unique-names` row with `reset: "!"`).
 - `redundant-pattern`: `foo/` or `/foo` after `foo` (also valid in `.dockerignore`; `**/foo` is left out because a bare name is root-only there).
 - `negation-of-excluded-parent`: `!a/b` after a literal pattern that excludes `a` (git cannot re-include below an excluded directory; wildcard patterns are not judged; not reported in `.dockerignore`, where the later pattern wins).
 - `inline-comment` (pattern rule): `*.log # note`, which is one pattern with a `#` in it.

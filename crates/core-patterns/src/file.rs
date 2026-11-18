@@ -27,7 +27,7 @@
 //! tools: ast-grep rules
 //! reads: rulefiles:pattern
 
-use crate::expr::{Ctx, Expr, RegexCache, STEP_BUDGET, Spec};
+use crate::expr::{Ctx, Expr, STEP_BUDGET, Spec};
 use crate::matcher::{Capture, Captures, SnippetParser};
 use crate::metavar::{Meta, names, template, transform};
 use core_config::Level;
@@ -35,7 +35,7 @@ use core_format::Directive;
 use core_rules::tree::{TraversalCache, significant_range};
 use core_rules::{
     Category, Check, Edit, Family, Fix, FixKind, Layer, LayoutRole, Opt, OptionDecl, Params, Re,
-    Rule, RuleContext, RuleMeta, RuleOptions,
+    RegexCache, Rule, RuleContext, RuleMeta, RuleOptions,
 };
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, TextRange};
 use serde::Deserialize;

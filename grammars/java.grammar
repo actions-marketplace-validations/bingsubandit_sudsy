@@ -95,7 +95,7 @@ node BreakStatement #child #statement #break = Keyword label:Label? Semi?
 node CastExpression #child #expression #opaque = #child*
 node CatchAlternativeType #child #opaque = #child*
 node CatchClause #child #scope #catch = Keyword parameter:CatchFormalParameter body:Block
-node CatchFormalParameter #child #opaque = #child*
+node CatchFormalParameter #child #opaque #parameter-declaration = #child*
 node CatchType #child #opaque = #child*
 node ClassBody #child #block = LBrace items:#member* RBrace
 node ClassDeclaration #child #member #opaque = #child*
@@ -103,7 +103,7 @@ node ClassDeclarationCore #child #wrapper #type-declaration #declaration #scope 
 node ClassLiteral #child #expression #opaque = #child*
 node CompactConstructorDeclaration #child #member #opaque = #child*
 node CompilationUnit #child #wrapper #scope #block = items:#child*
-node ConstantDeclaration #child #member #opaque = #child*
+node ConstantDeclaration #child #member #opaque #constant-declaration = #child*
 node ConstructorBody #child #block = LBrace items:#statement* RBrace
 node ConstructorDeclaration #child #member #declaration #function #scope = Modifiers? TypeParameters? name:Identifier parameters:FormalParameters Throws? body:ConstructorBody
 node ContinueStatement #child #statement #continue = Keyword label:Label? Semi?
@@ -125,14 +125,14 @@ node ExplicitConstructorInvocation #child #statement #opaque = #child*
 node ExpressionStatement #child #statement #expression-statement = expression:#expression? expression_token=expression:#operand? Semi?
 node ExtendsInterfaces #child #opaque #heritage = #child*
 node FieldAccess #child #expression #member-access = object:#expression? object_token=object:#operand? Dot member:Identifier? this_member=member:ThisExpression?
-node FieldDeclaration #child #member #declaration = Modifiers? #annotation* #type-token? #type? declarators:VariableDeclarator* Semi
+node FieldDeclaration #child #member #declaration #field-declaration = Modifiers? #annotation* #type-token? #type? declarators:VariableDeclarator* Semi
 node FinallyClause #child #statements = Keyword items:Block
 node ForCondition #child #opaque = #child*
 node ForInitializer #child #opaque = #child*
 node ForSpec #child #opaque = #child*
 node ForStatement #child #statement #scope #loop = Keyword ForSpec body:#statement
 node ForUpdate #child #opaque = #child*
-node FormalParameter #child #parameter #opaque = #child*
+node FormalParameter #child #parameter #opaque #parameter-declaration = #child*
 node FormalParameters #child #parameter-list = LParen parameters:#parameter* RParen
 node GenericType #child #type #opaque = #child*
 node Guard #child #opaque = #child*
@@ -153,11 +153,11 @@ node LambdaFormalParameters #child #parameter-list = LParen? parameters:#paramet
 node LocalTypeDeclaration #child #statement #opaque = #child*
 node LocalTypeModifiers #child #opaque = #child*
 node LocalVariableDeclaration #child #statement #opaque = #child*
-node LocalVariableDeclarationCore #child #wrapper #declaration = Modifiers? #annotation* #type-token? #type? InferredLocalType? declarators:VariableDeclarator*
+node LocalVariableDeclarationCore #child #wrapper #declaration #local-declaration = Modifiers? #annotation* #type-token? #type? InferredLocalType? declarators:VariableDeclarator*
 node MarkerAnnotation #child #annotation #opaque = #child*
 // `new` creates no regex in Java; `Pattern` is a static factory.
 regex-call flavor java concat "+" "Pattern.compile" "Pattern.matches"
-node MethodDeclaration #child #member #declaration #function #scope = Modifiers? TypeParameters? #annotation* #type-token? #type? name:Identifier parameters:FormalParameters Dimension* Throws? body:Block? DefaultValue? Semi?
+node MethodDeclaration #child #member #declaration #function #scope #method-declaration = Modifiers? TypeParameters? #annotation* #type-token? #type? name:Identifier parameters:FormalParameters Dimension* Throws? body:Block? DefaultValue? Semi?
 node MethodInvocation #child #expression #call = object:#expression? object_token=object:#operand? Dot? TypeArguments? callee:MethodName arguments:ArgumentList
 node MethodName #child #opaque = #child*
 node MethodReference #child #expression #opaque = #child*
@@ -167,7 +167,7 @@ node ModuleBody #child #opaque = #child*
 node ModuleDeclaration #child #opaque = #child*
 node ModuleDirective #child #opaque = #child*
 node ObjectCreationExpression #child #expression #call = object:#expression? object_token=object:#operand? Dot? Keyword TypeArguments? callee:CreatedClassType arguments:ArgumentList ClassBody?
-node PackageDeclaration #child #opaque = #child*
+node PackageDeclaration #child #opaque #namespace = #child*
 node ParenthesizedExpression #child #expression #opaque = #child*
 node PatternNode #child #opaque = #child*
 node PatternVariable #child #opaque = #child*
@@ -184,7 +184,7 @@ node ResourceSpecification #child #opaque = #child*
 node ReturnStatement #child #statement #return = Keyword value:#expression? value_token=value:#operand? Semi?
 node ScopedIdentifier #child #expression #opaque = #child*
 node ScopedTypeName #child #type #opaque = #child*
-node SpreadParameter #child #parameter #opaque = #child*
+node SpreadParameter #child #parameter #opaque #parameter-declaration = #child*
 node StatementExpression #child #wrapper #expression #opaque = #child*
 node StaticInitializer #child #member #opaque = #child*
 node SuperExpression #child #expression #opaque = #child*

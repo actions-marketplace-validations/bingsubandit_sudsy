@@ -5,7 +5,8 @@
 use regex_automata::meta;
 use regex_automata::util::syntax;
 use regex_syntax::ParserBuilder;
-use std::sync::OnceLock;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
 
 /// The longest text checked for ASCII (and so matched by the ASCII form).
 const ASCII_LIMIT: usize = 1024;
@@ -245,5 +246,32 @@ mod tests {
     fn a_pattern_too_large_for_unicode_is_an_error() {
         assert!(Re::new(r"\w{1000}\w{1000}\w{1000}").is_err());
         assert!(Re::new(r"\w{3}").is_ok());
+    }
+}
+
+/// Regexes compiled once for each source text they take.
+#[derive(Default)]
+pub struct RegexCache(Mutex<HashMap<String, Option<Arc<Re>>>>);
+
+impl std::fmt::Debug for RegexCache {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("RegexCache")
+    }
+}
+
+impl RegexCache {
+    pub fn is_match(&self, source: &str, text: &str) -> bool {
+        let re = {
+            let mut cache = self.0.lock().unwrap();
+            match cache.get(source) {
+                Some(re) => re.clone(),
+                None => {
+                    let re = Re::new(source).ok().map(Arc::new);
+                    cache.insert(source.to_string(), re.clone());
+                    re
+                }
+            }
+        };
+        re.is_some_and(|re| re.is_match(text))
     }
 }

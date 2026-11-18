@@ -1,8 +1,7 @@
 //! The Rust rules of gitignore-syntax files (they read the patterns of a file in order); rules
 //! that fit a pattern are files in `rules/`.
 //!
-//! concept: new no-duplicate-pattern, new redundant-pattern, new negation-of-excluded-parent, unique-names
-//! what: no-duplicate-pattern: The same pattern appears twice with no opposite pattern (`!x` for `x`) in between, so the second one changes nothing
+//! concept: new redundant-pattern, new negation-of-excluded-parent
 //! what: redundant-pattern: A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)
 //! what: negation-of-excluded-parent: Git cannot re-include a file when a parent directory is excluded: `!a/b` after `a/` has no effect
 
@@ -10,11 +9,7 @@ use crate::generated::kind;
 use core_rules::{Rule, RuleContext, rule};
 use core_syntax::{SyntaxNode, SyntaxNodeExt, TextRange};
 
-pub static RULES: &[&dyn Rule] = &[
-    &NoDuplicatePattern,
-    &RedundantPattern,
-    &NegationOfExcludedParent,
-];
+pub static RULES: &[&dyn Rule] = &[&RedundantPattern, &NegationOfExcludedParent];
 
 /// A pattern line: its text (the parts joined, trailing spaces dropped) and where it is.
 struct Pat {
@@ -50,36 +45,6 @@ fn patterns(doc: &SyntaxNode) -> Vec<Pat> {
             })
         })
         .collect()
-}
-
-rule! {
-    pub NoDuplicatePattern {
-        id: "no-duplicate-pattern",
-        category: Suspicious,
-        default: Off,
-        description: "The same pattern appears twice with no opposite pattern (`!x` for `x`) in \
-                  between, so the second one changes nothing.",
-        example: "*.log\nbuild/\n*.log   # reported: already listed above",
-        kinds: &[kind::DOCUMENT],
-    }
-
-    fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        let pats = patterns(node);
-        // 1-based index of each text's last line, and of the last positive (`[0]`) and negated (`[1]`) line.
-        let mut seen: std::collections::HashMap<&str, usize> = Default::default();
-        let mut last = [0usize; 2];
-        for (i, p) in pats.iter().enumerate() {
-            let me = p.negated() as usize;
-            if let Some(&j) = seen.get(p.text.as_str())
-                && last[1 - me] <= j
-            {
-                ctx.report(p.range, format!("`{}` is already listed", p.text))
-                    .related(pats[j - 1].range, "first listed here");
-            }
-            seen.insert(&p.text, i + 1);
-            last[me] = i + 1;
-        }
-    }
 }
 
 rule! {

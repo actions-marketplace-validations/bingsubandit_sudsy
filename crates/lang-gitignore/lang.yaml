@@ -4,6 +4,7 @@ extensions: [gitignore, dockerignore]
 file-names: [.gitignore, .dockerignore, .npmignore, .prettierignore, .eslintignore, .sudsyignore, .git/info/exclude]
 formatter: GitignoreFormatter
 dev-deps: [insta]
+families: "&[core_rules::unique::FAMILY]"
 options:
   - final_newline: true
   - end_of_line

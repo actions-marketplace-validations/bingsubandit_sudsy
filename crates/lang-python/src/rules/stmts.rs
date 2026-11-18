@@ -4,14 +4,12 @@
 //! concept: statement-shape-checks, simplify
 
 use super::Check;
-use super::scope::run;
 use super::tree::{callee, compare_ops, dotted, inner, span, statements};
 use crate::generated::kind as k;
 use crate::names::is_builtin_class;
 use crate::semantic::{Cx, model};
 use crate::text::code_text;
 use core_rules::RuleContext;
-use core_semantics::scopes::Flags;
 use core_syntax::roles::has;
 use core_syntax::{SyntaxElement, SyntaxNode, TextRange};
 
@@ -196,39 +194,6 @@ pub(super) fn useless_semicolon(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext
 
 pub(super) fn statement_semicolon(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     semicolon(c, n, ctx, false);
-}
-
-fn ambiguous(c: &Check, ctx: &mut RuleContext<'_>, class: fn(Flags) -> bool) {
-    run(c, ctx, |cx| {
-        let mut hits = Vec::new();
-        for id in cx.s.symbol_ids() {
-            let sym = cx.s.symbol(id);
-            if !matches!(&*sym.name, "l" | "O" | "I") {
-                continue;
-            }
-            for d in sym.decls.iter().filter(|d| class(d.flags)) {
-                hits.push((d.name, sym.name.to_string()));
-            }
-        }
-        hits
-    });
-}
-
-/// E741: `l`, `O` and `I` look like digits.
-pub(super) fn ambiguous_variable(c: &Check, _: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    ambiguous(c, ctx, |f| {
-        !f.intersects(Flags::FUNCTION | Flags::CLASS | Flags::IMPORT | Flags::TYPE_PARAMETER)
-    });
-}
-
-/// E742
-pub(super) fn ambiguous_class(c: &Check, _: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    ambiguous(c, ctx, |f| f.contains(Flags::CLASS));
-}
-
-/// E743
-pub(super) fn ambiguous_function(c: &Check, _: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    ambiguous(c, ctx, |f| f.contains(Flags::FUNCTION));
 }
 
 /// A string, bytes or number literal, a collection or comprehension (not a generator), or a

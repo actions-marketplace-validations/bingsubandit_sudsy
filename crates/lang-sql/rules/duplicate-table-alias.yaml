@@ -1,0 +1,8 @@
+id: duplicate-table-alias
+family: unique-names
+params: { container: table-list, item: table-source, deep: "true", name: "alias/name:last|table/reference/name:last", fold: lower, strip: "\"`[]" }
+message: this alias is already used by another table
+description: Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04).
+example: 'select a from t as x join u as x on x.a = x.b'
+severity: warn
+category: correctness

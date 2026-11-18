@@ -69,9 +69,9 @@ node CommonTableExpression #opaque
 node SelectClause #opaque
 node SelectClauseElement #opaque
 node FromClause #opaque
-node FromExpression #opaque
-node FromExpressionElement #opaque
-node TableExpression #opaque
+node FromExpression #opaque #table-list
+node FromExpressionElement #opaque #table-source = table:TableExpression? alias:AliasExpression?
+node TableExpression #opaque = reference:ObjectReference?
 node JoinClause #opaque
 node JoinOnCondition #opaque
 node WhereClause #opaque

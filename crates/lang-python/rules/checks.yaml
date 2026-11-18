@@ -233,8 +233,8 @@ severity: off
 category: style
 ---
 id: ambiguous-variable-name
-family: check
-params: { check: ambiguous-variable-name }
+family: scope
+params: { check: ambiguous-name, names: l O I, of: binding }
 message: "ambiguous variable name `{name}`"
 description: "A variable, parameter or `global` name that is `l`, `O` or `I`."
 example: "l = 1"
@@ -242,8 +242,8 @@ severity: off
 category: style
 ---
 id: ambiguous-class-name
-family: check
-params: { check: ambiguous-class-name }
+family: scope
+params: { check: ambiguous-name, names: l O I, of: class }
 message: "ambiguous class name `{name}`"
 description: "A class named `l`, `O` or `I`."
 example: "class l:\n    pass"
@@ -251,8 +251,8 @@ severity: off
 category: style
 ---
 id: ambiguous-function-name
-family: check
-params: { check: ambiguous-function-name }
+family: scope
+params: { check: ambiguous-name, names: l O I, of: function }
 message: "ambiguous function name `{name}`"
 description: "A function named `l`, `O` or `I`."
 example: "def l():\n    pass"

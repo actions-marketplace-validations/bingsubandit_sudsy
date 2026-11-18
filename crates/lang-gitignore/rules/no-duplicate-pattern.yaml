@@ -1,0 +1,10 @@
+id: no-duplicate-pattern
+family: unique-names
+params: { container: document, item: item, name: "parts:all", reset: "!", related: first listed here }
+message: "`{name}` is already listed"
+description: >-
+  The same pattern appears twice with no opposite pattern (`!x` for `x`) in between, so the
+  second one changes nothing.
+example: "*.log\nbuild/\n*.log   # reported: already listed above"
+severity: off
+category: suspicious

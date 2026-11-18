@@ -1,23 +1,16 @@
 //! The Rust rules of SQL; rules that fit a pattern are files in `rules/`.
 //!
-//! concept: new null-comparison, new distinct-group-by, new unused-cte, new duplicate-table-alias, new self-alias, unique-names
+//! concept: new null-comparison, new distinct-group-by, new unused-cte, new self-alias
 //! what: null-comparison: `= NULL`, `<> NULL` or `!= NULL`, which is never true: use `IS NULL` or `IS NOT NULL` (sqlfluff CV05)
 //! what: distinct-group-by: `SELECT DISTINCT` in a query that has `GROUP BY`: the grouping already makes the rows distinct (sqlfluff AM01)
 //! what: unused-cte: A common table expression that nothing in the `WITH` statement refers to (sqlfluff ST03)
-//! what: duplicate-table-alias: Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04)
 //! what: self-alias: An alias that repeats the name it is given to, `a AS a` (sqlfluff AL09)
 
 use crate::generated::kind as k;
 use core_rules::{Rule, RuleContext, rule};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxNodeExt};
 
-pub static RULES: &[&dyn Rule] = &[
-    &NullComparison,
-    &DistinctGroupBy,
-    &UnusedCte,
-    &DuplicateTableAlias,
-    &SelfAlias,
-];
+pub static RULES: &[&dyn Rule] = &[&NullComparison, &DistinctGroupBy, &UnusedCte, &SelfAlias];
 
 fn is_trivia(kind: core_syntax::SyntaxKind) -> bool {
     matches!(
@@ -115,52 +108,6 @@ rule! {
             if !used {
                 ctx.report(first.text_range(), "this common table expression is never used");
             }
-        }
-    }
-}
-
-/// The alias a table in a `FROM` clause is known by: its `AS` name, else the last part of its name.
-fn table_alias(element: &SyntaxNode) -> Option<core_syntax::SyntaxToken> {
-    let tokens = |n: &SyntaxNode| {
-        n.descendants_with_tokens()
-            .filter_map(|e| e.into_token())
-            .filter(|t| matches!(t.kind(), k::IDENTIFIER | k::QUOTED_IDENTIFIER))
-            .last()
-    };
-    match element.child(k::ALIAS_EXPRESSION) {
-        Some(alias) => tokens(&alias),
-        None => element
-            .child(k::TABLE_EXPRESSION)
-            .and_then(|t| t.child(k::OBJECT_REFERENCE).and_then(|r| tokens(&r))),
-    }
-}
-
-rule! {
-    pub DuplicateTableAlias {
-        id: "duplicate-table-alias",
-        category: Correctness,
-        default: Warn,
-        description: "Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04).",
-        example: "select a from t as x join u as x on x.a = x.b",
-        kinds: &[k::FROM_EXPRESSION],
-    }
-
-    fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        let mut elements: Vec<SyntaxNode> = node
-            .children()
-            .filter(|c| c.kind() == k::FROM_EXPRESSION_ELEMENT)
-            .collect();
-        for join in node.children().filter(|c| c.kind() == k::JOIN_CLAUSE) {
-            elements.extend(join.children().filter(|c| c.kind() == k::FROM_EXPRESSION_ELEMENT));
-        }
-        let mut seen: Vec<String> = Vec::new();
-        for e in elements {
-            let Some(alias) = table_alias(&e) else { continue };
-            let n = name(alias.text());
-            if seen.contains(&n) {
-                ctx.report(alias.text_range(), "this alias is already used by another table");
-            }
-            seen.push(n);
         }
     }
 }

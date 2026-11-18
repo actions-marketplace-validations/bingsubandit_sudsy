@@ -44,6 +44,7 @@ Rule rows of a language's rule files use the same checks as `family: scope` (`pa
 | `use-before-define` | a reference before its declaration, or evaluated while its variable is initialized | `functions`, `classes`, `variables` |
 | `redeclared-variable` | a name declared again in a scope kind of `redeclared_in`; in typed files declaration merging is allowed | |
 | `shadowed-variable` | a declaration that hides one of a scope around it (functions hoist, `var a = function a() {}` does not count) | `allow`, `kinds` |
+| `ambiguous-name` | a declaration whose name is one of `names` (look-alike letters), of `of`: `binding` (not a function, class, import or type parameter), `class` or `function` (Python `ambiguous-*-name`) | `names`, `of` |
 
 The shared code names no node kind: it reads the grammar's role tags (`#function`, `#loop`, `#parameter-list`, `#assignment`, `#call`, `#block`, ...) and the tags a grammar adds for these rules (`#export`, `#export-list`, `#module`, `#module-body`, `#signature`, `#field`, `#sequence`, `#escapes`, `#default-value`, `#expression-statement`, `#markup`, `#decorator`, `#rest`, `#global-scope`), the fields of kinds (`init`, `body`, `left`, `right`, `iterable`, `callee`, `value`), the flags the table gives a declaration (`Flags`: `CONST`, `PARAMETER`, `IMPORT`, `EXPRESSION_NAME`, `UNCHECKED`, ...) and `ScopeLang`'s facts: `flavors` (`typed`, `definition` and others by file suffix), `globals`, `globals_if`, `scope_names`, `redeclared_in`, `parameter_properties` and `markup`.
 

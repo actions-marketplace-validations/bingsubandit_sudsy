@@ -49,8 +49,6 @@ concept document-end # users: yaml
 concept document-start # users: yaml
 concept document-stream-layout # users: yaml
 concept duplicate-ids # users: github-actions
-concept duplicate-stage-name # users: dockerfile
-concept duplicate-table-alias # users: sql
 concept element-metadata-checks # users: html
 concept file-header-order # users: protobuf
 concept file-name-matches-type # users: csharp
@@ -89,7 +87,6 @@ concept min-phony # users: makefile
 concept missing-permissions # users: github-actions
 concept modifier-order # users: java
 concept multiple-labeled-controls # users: html
-concept naming-convention # users: graphql
 concept negation-of-excluded-parent # users: gitignore
 concept no-comment-before-block # users: csharp
 concept no-conditional-comment # users: html
@@ -100,10 +97,8 @@ concept no-dupe-else-if # users: js
 concept no-duplicate-anchors # users: yaml
 concept no-duplicate-class # users: html
 concept no-duplicate-doc-text # users: csharp
-concept no-duplicate-heading # users: markdown
 concept no-duplicate-id # users: html
 concept no-duplicate-include # users: xml
-concept no-duplicate-pattern # users: gitignore
 concept no-empty-statement # users: csharp
 concept no-empty-values # users: yaml
 concept no-irregular-whitespace # users: js
@@ -274,7 +269,6 @@ data tag:default-value # users: js
 data tag:delim # users: ruby
 data tag:dict # users: python
 data tag:display # users: python
-data tag:document # users: graphql
 data tag:dots # users: python
 data tag:enum-tail # users: java
 data tag:escapes # users: js
@@ -305,7 +299,6 @@ data tag:module-body # users: js
 data tag:name # users: csharp
 data tag:named-expr # users: python
 data tag:named-type # users: js
-data tag:namespace # users: csharp
 data tag:negated # users: ruby
 data tag:nest # users: css
 data tag:open # users: ruby
@@ -334,10 +327,8 @@ local lang-css/format/value.rs delimited-list # lang: css
 local lang-css/lexer.rs source-lexer # lang: css
 local lang-css/parser.rs recursive-descent-parser # lang: css
 local lang-dockerfile/rules/run_command.rs embedded-command-checks # lang: dockerfile
-local lang-dockerfile/rules/stages.rs unique-names # lang: dockerfile
 local lang-github-actions/view.rs role-accessors # lang: github-actions
 local lang-gitignore/format.rs node-sequence # lang: gitignore
-local lang-gitignore/rules.rs unique-names # lang: gitignore
 local lang-hcl/format.rs block-and-statements # lang: hcl
 local lang-hcl/rules.rs naming-convention # lang: hcl
 local lang-html/dom.rs role-accessors # lang: html
@@ -353,7 +344,6 @@ local lang-java/parser/expr.rs precedence-expression-parser # lang: java
 local lang-java/parser/mod.rs recursive-descent-parser # lang: java
 local lang-java/parser/stmt.rs recursive-descent-parser # lang: java
 local lang-java/parser/types.rs recursive-descent-parser # lang: java
-local lang-java/rules.rs naming-convention # lang: java
 local lang-js/format/rewrite.rs source-rewrite # lang: js
 local lang-js/format/ts/heritage.rs heritage-clause-layout # lang: js
 local lang-js/format/ts/parens.rs source-rewrite # lang: js
@@ -400,7 +390,6 @@ local lang-sql/parse/postgres.rs recursive-descent-parser # lang: sql
 local lang-sql/parse/stmt.rs recursive-descent-parser # lang: sql
 local lang-sql/parse/tsql.rs recursive-descent-parser # lang: sql
 local lang-sql/parse/types.rs recursive-descent-parser # lang: sql
-local lang-sql/rules.rs unique-names # lang: sql
 local lang-toml/validate.rs parse-validation # lang: toml
 local lang-xml/format.rs markup-whitespace-model # lang: xml
 local lang-xml/validate.rs parse-validation # lang: xml

@@ -20,5 +20,5 @@ token Pattern #literal
 token Eof
 token Unknown #error
 
-node Document = items:#item* Eof
+node Document #document = items:#item* Eof
 node Entry #item = parts:Pattern*

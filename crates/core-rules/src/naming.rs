@@ -1,17 +1,21 @@
 //! The `naming-convention` family: the name of a kind of declaration follows the convention an
-//! option sets. Each param but `message` is `<option>: <rows>`: the rows are `|`-separated and a
-//! row is a grammar tag, optionally `<parent-tag` (the parent has that tag); the name is the
-//! node's `name` slot, or its `key` slot. The option's value is a convention (`PascalCase`,
-//! `camelCase`, `snake_case`, `UPPER_CASE`) or `off`; leading `$` and `_` are ignored. The message
-//! has `{name}` and `{convention}`.
+//! option sets. Each param but `message` and `match` is `<option>: <rows>`: the rows are
+//! `|`-separated and a row is a grammar tag, optionally `<parent-tag` (the parent has that tag),
+//! then `&word` for each modifier keyword the declaration (the parent, with a parent tag) must
+//! have, then `=path` (a [`SlotPath`]; the node's `name` slot, or its `key` slot, by default). The
+//! option's value is a convention (`PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE`) or
+//! `off`; leading `$` and `_` are ignored. With `match: regex` the value is a regular expression
+//! the name must match instead (empty: not checked). The message has `{name}` and
+//! `{convention}` (the value); a param `message.<option>` is the message of that option.
 //!
 //! concept: naming-convention
 //! what: The name of a kind of declaration follows the convention an option sets.
 //! rules: naming-convention
 //! reads: family:naming-convention
 
-use crate::{Family, Params, Rule, RuleContext, RuleMeta};
-use core_syntax::{SyntaxElement, SyntaxNode};
+use crate::slot_path::SlotPath;
+use crate::{Family, Params, RegexCache, Rule, RuleContext, RuleMeta};
+use core_syntax::{Grammar, SyntaxNode};
 
 pub const FAMILY: Family = Family {
     name: "naming-convention",
@@ -36,33 +40,87 @@ struct Row {
     option: String,
     tag: String,
     parent: Option<String>,
+    modifiers: Vec<String>,
+    path: Option<SlotPath>,
+}
+
+impl Row {
+    fn parse(option: &str, alt: &str) -> Result<Row, String> {
+        let (alt, path) = match alt.split_once('=') {
+            Some((a, p)) => (a, Some(SlotPath::parse(p)?)),
+            None => (alt, None),
+        };
+        let mut parts = alt.split('&');
+        let head = parts.next().unwrap_or_default();
+        let (tag, parent) = match head.split_once('<') {
+            Some((t, par)) => (t, Some(par.to_string())),
+            None => (head, None),
+        };
+        Ok(Row {
+            option: option.to_string(),
+            tag: tag.to_string(),
+            parent,
+            modifiers: parts.map(str::to_string).collect(),
+            path,
+        })
+    }
+
+    fn conditions(&self) -> usize {
+        usize::from(self.parent.is_some()) + self.modifiers.len()
+    }
+
+    fn matches(&self, g: &Grammar, node: &SyntaxNode) -> bool {
+        if !g.has_tag(node.kind(), &self.tag) {
+            return false;
+        }
+        let holder = match &self.parent {
+            Some(tag) => match node.parent().filter(|p| g.has_tag(p.kind(), tag)) {
+                Some(p) => p,
+                None => return false,
+            },
+            None => node.clone(),
+        };
+        self.modifiers.iter().all(|m| has_modifier(g, &holder, m))
+    }
+}
+
+/// Whether `node` has a `modifiers` child with the keyword `word`.
+fn has_modifier(g: &Grammar, node: &SyntaxNode, word: &str) -> bool {
+    node.children()
+        .filter(|c| g.has_tag(c.kind(), "modifiers"))
+        .any(|m| {
+            m.children_with_tokens()
+                .filter_map(|e| e.into_token())
+                .any(|t| t.text() == word)
+        })
 }
 
 struct Naming {
     meta: &'static RuleMeta,
     message: String,
-    /// Rows with a parent condition first.
+    /// `message.<option>` params: the message of one option.
+    messages: Vec<(String, String)>,
+    regex: Option<RegexCache>,
+    /// Rows with the most conditions first.
     rows: Vec<Row>,
     tags: Vec<&'static str>,
 }
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
     let message = p.text("message")?;
+    let regex = p.choice("match", false, &[("convention", false), ("regex", true)])?;
     let mut rows = Vec::new();
+    let mut messages = Vec::new();
     for (option, value) in p.rest() {
+        if let Some(option) = option.strip_prefix("message.") {
+            messages.push((option.to_string(), value));
+            continue;
+        }
         for alt in value.split('|') {
-            let (tag, parent) = match alt.split_once('<') {
-                Some((t, par)) => (t, Some(par.to_string())),
-                None => (alt, None),
-            };
-            rows.push(Row {
-                option: option.clone(),
-                tag: tag.to_string(),
-                parent,
-            });
+            rows.push(Row::parse(&option, alt)?);
         }
     }
-    rows.sort_by_key(|r| r.parent.is_none());
+    rows.sort_by_key(|r| std::cmp::Reverse(r.conditions()));
     let mut tags: Vec<&'static str> = Vec::new();
     for r in &rows {
         if !tags.contains(&r.tag.as_str()) {
@@ -72,6 +130,8 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
     Ok(Box::new(Naming {
         meta,
         message,
+        messages,
+        regex: regex.then(RegexCache::default),
         rows,
         tags,
     }))
@@ -88,30 +148,31 @@ impl Rule for Naming {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let g = ctx.file.grammar;
-        let row = self.rows.iter().find(|r| {
-            g.has_tag(node.kind(), &r.tag)
-                && r.parent
-                    .as_ref()
-                    .is_none_or(|t| node.parent().is_some_and(|p| g.has_tag(p.kind(), t)))
-        });
-        let Some(row) = row else { return };
-        let Some(name) = g.slot(node, "name").or_else(|| g.slot(node, "key")) else {
+        let Some(row) = self.rows.iter().find(|r| r.matches(g, node)) else {
             return;
         };
-        let Some(token) = (match name {
-            SyntaxElement::Token(t) => Some(t),
-            SyntaxElement::Node(n) => n.first_token(),
-        }) else {
+        let default = SlotPath::parse("name|key").unwrap_or_else(|_| unreachable!());
+        let path = row.path.as_ref().unwrap_or(&default);
+        let Some(found) = path.find(g, node, ctx.file.text) else {
             return;
         };
         let convention = ctx.options.string(&row.option);
-        let text = token.text().trim_start_matches('$');
-        if !follows(convention, text) {
-            let message = self.message.replace("{name}", text);
-            ctx.report(
-                token.text_range(),
-                message.replace("{convention}", convention),
-            );
+        let (text, follows) = match &self.regex {
+            Some(cache) => (
+                &*found.text,
+                convention.is_empty() || cache.is_match(convention, &found.text),
+            ),
+            None => {
+                let text = found.text.trim_start_matches('$');
+                (text, follows(convention, text))
+            }
+        };
+        if !follows {
+            let template = (self.messages.iter())
+                .find(|(o, _)| *o == row.option)
+                .map_or(&self.message, |(_, m)| m);
+            let message = template.replace("{name}", text);
+            ctx.report(found.range, message.replace("{convention}", convention));
         }
     }
 }

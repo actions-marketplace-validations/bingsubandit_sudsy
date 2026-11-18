@@ -1,0 +1,9 @@
+id: no-duplicate-heading
+family: unique-names
+params: { container: document, item: heading, name: Inline, deep: "true", report: item, lead: Marker, related: first heading with this text }
+message: "the heading `{name}` is repeated"
+description: >-
+  Two headings have the same text (markdownlint MD024), which makes their anchors ambiguous.
+example: "## Usage\n\n## Usage   // reported"
+severity: off
+category: style

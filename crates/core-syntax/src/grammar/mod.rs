@@ -375,11 +375,19 @@ fn hot_flags(defs: &[KindDef]) -> Vec<u32> {
         .collect()
 }
 
-/// Where a labelled body item is (see [`Grammar::slot`]).
-struct FieldAt {
+/// Where a labelled body item is (see [`Grammar::slot`], [`Grammar::field_at`]).
+#[derive(Clone, Copy)]
+pub struct FieldAt {
     item: usize,
     /// The child position when each item before it and it are `One`.
     fixed: Option<usize>,
+}
+
+impl FieldAt {
+    /// The position among the children that are not skipped, when the item is at a fixed one.
+    pub fn fixed(&self) -> Option<usize> {
+        self.fixed
+    }
 }
 
 /// One node kind's body as [`crate::ast::assign`] sees it.
@@ -551,7 +559,8 @@ impl Grammar {
         self.slot_slow(kind, children.iter().cloned(), label)
     }
 
-    fn field_at(&self, kind: SyntaxKind, label: &str) -> Option<FieldAt> {
+    /// Where the body item labelled `label` (or filling the field `label`) of `kind` is.
+    pub fn field_at(&self, kind: SyntaxKind, label: &str) -> Option<FieldAt> {
         let def = self.def(kind)?;
         let mut all_one = true;
         for (i, item) in def.body.iter().enumerate() {
@@ -564,6 +573,18 @@ impl Grammar {
             }
         }
         None
+    }
+
+    /// The kinds the body item at `at` takes, sorted.
+    pub fn accepted(&self, kind: SyntaxKind, at: FieldAt) -> &[SyntaxKind] {
+        let (start, end) = self.bodies[self.body_start[kind.index() as usize] as usize + at.item];
+        &self.pool[start as usize..end as usize]
+    }
+
+    /// Is `kind` left out of the child positions (trivia, `ERROR`)?
+    #[inline]
+    pub fn is_skipped(&self, kind: SyntaxKind) -> bool {
+        self.skip.binary_search(&kind).is_ok()
     }
 
     fn accepts(&self, kind: SyntaxKind, item: usize, child: SyntaxKind) -> bool {

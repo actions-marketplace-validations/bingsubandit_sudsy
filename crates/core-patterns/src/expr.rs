@@ -10,13 +10,12 @@
 use crate::matcher::{Capture, Captures, Pattern, SnippetParser};
 use crate::metavar::Meta;
 use core_rules::tree::TraversalCache;
-use core_rules::{Check, Opt, OptionDecl, Re, RuleOptions};
+use core_rules::{Check, Opt, OptionDecl, Re, RegexCache, RuleOptions};
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
 use serde::Deserialize;
 use std::cell::Cell;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
 
 /// One name or a list of them.
 #[derive(Debug, Deserialize)]
@@ -145,33 +144,6 @@ pub enum Expr {
     Empty,
     Bare,
     Inner(Box<Expr>),
-}
-
-/// Regexes compiled once for each source text they take.
-#[derive(Default)]
-pub struct RegexCache(Mutex<HashMap<String, Option<Arc<Re>>>>);
-
-impl std::fmt::Debug for RegexCache {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("RegexCache")
-    }
-}
-
-impl RegexCache {
-    pub fn is_match(&self, source: &str, text: &str) -> bool {
-        let re = {
-            let mut cache = self.0.lock().unwrap();
-            match cache.get(source) {
-                Some(re) => re.clone(),
-                None => {
-                    let re = Re::new(source).ok().map(Arc::new);
-                    cache.insert(source.to_string(), re.clone());
-                    re
-                }
-            }
-        };
-        re.is_some_and(|re| re.is_match(text))
-    }
 }
 
 /// The node under parentheses and wrappers that hold nothing else (a Kotlin `Condition`).

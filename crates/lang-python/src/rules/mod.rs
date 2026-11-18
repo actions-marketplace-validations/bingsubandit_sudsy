@@ -191,9 +191,6 @@ const CHECKS: &[Entry] = &[
         tree::STATEMENTS,
         stmts::statement_semicolon,
     ),
-    ("ambiguous-variable-name", MODULE, stmts::ambiguous_variable),
-    ("ambiguous-class-name", MODULE, stmts::ambiguous_class),
-    ("ambiguous-function-name", MODULE, stmts::ambiguous_function),
     ("is-literal", &[k::EXPR_COMPARE], stmts::is_literal),
     (
         "type-comparison",

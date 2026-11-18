@@ -1,9 +1,8 @@
 //! Rules about the build stages of a file: what each FROM starts and what refers to it.
 //!
-//! concept: new untagged-base-image, new last-user-not-root, new duplicate-stage-name, new copy-from-unknown-stage, new copy-from-own-stage, new from-first, new build-stage-checks, unique-names
+//! concept: new untagged-base-image, new last-user-not-root, new copy-from-unknown-stage, new copy-from-own-stage, new from-first, new build-stage-checks
 //! what: untagged-base-image: A FROM image with neither a tag nor a digest, which builds on whatever `latest` is
 //! what: last-user-not-root: A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`)
-//! what: duplicate-stage-name: Two FROM instructions name their stage alike
 //! what: copy-from-unknown-stage: A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`)
 //! what: copy-from-own-stage: A `COPY --from` that names the stage it is in
 //! what: from-first: An instruction other than ARG before the first FROM
@@ -149,30 +148,6 @@ rule! {
             }
         }
         flush(&mut root, ctx);
-    }
-}
-
-rule! {
-    pub DuplicateStageName {
-        id: "duplicate-stage-name",
-        category: Correctness,
-        default: Error,
-        description: "Two FROM instructions name their stage alike.",
-        example: "FROM a AS x\nFROM b AS x   # reported",
-        kinds: &[k::DOCUMENT],
-    }
-
-    fn check(&self, doc: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        let mut seen: Vec<String> = Vec::new();
-        let insts = instructions(doc);
-        for i in insts.iter().filter(|i| i.name == "FROM") {
-            if let Some(name) = i.from().1 {
-                if seen.contains(&name) {
-                    ctx.report(i.range(ctx), format!("the stage name `{name}` is already used"));
-                }
-                seen.push(name);
-            }
-        }
     }
 }
 

@@ -1,6 +1,7 @@
 extensions: [sql]
 formatter: SqlFormatter
 parse: parse::parse_file
+families: "&[core_rules::unique::FAMILY]"
 options:
   - dialect:
       values: ["ansi", "postgres", "mysql", "tsql"]
