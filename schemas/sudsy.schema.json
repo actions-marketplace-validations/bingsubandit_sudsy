@@ -2205,7 +2205,7 @@
                       "properties": {
                         "arguments": {
                           "default": "camelCase",
-                          "description": "Style of argument names in definitions: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of argument names in definitions.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2217,7 +2217,7 @@
                         },
                         "directives": {
                           "default": "camelCase",
-                          "description": "Style of directive names: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of directive names.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2229,7 +2229,7 @@
                         },
                         "enum_values": {
                           "default": "UPPER_CASE",
-                          "description": "Style of enum values: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of enum values.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2241,7 +2241,7 @@
                         },
                         "fields": {
                           "default": "camelCase",
-                          "description": "Style of field and input field names in definitions: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of field and input field names in definitions.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2253,7 +2253,7 @@
                         },
                         "fragments": {
                           "default": "PascalCase",
-                          "description": "Style of fragment names: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of fragment names.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2265,7 +2265,7 @@
                         },
                         "operations": {
                           "default": "PascalCase",
-                          "description": "Style of operation names: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of operation names.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2277,7 +2277,7 @@
                         },
                         "types": {
                           "default": "PascalCase",
-                          "description": "Style of type names: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of type names.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -2289,7 +2289,7 @@
                         },
                         "variables": {
                           "default": "camelCase",
-                          "description": "Style of variable names: `PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE` or `off`.",
+                          "description": "Style of variable names.",
                           "enum": [
                             "PascalCase",
                             "camelCase",
@@ -3907,7 +3907,7 @@
                     "options": {
                       "additionalProperties": false,
                       "properties": {
-                        "max_depth": {
+                        "max": {
                           "default": 7,
                           "description": "The deepest allowed nesting; the operation's own selection set is level 1.",
                           "type": "integer"
