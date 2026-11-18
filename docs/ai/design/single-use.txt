@@ -351,7 +351,6 @@ local lang-hcl/format.rs block-and-statements # lang: hcl
 local lang-hcl/rules.rs naming-convention # lang: hcl
 local lang-html/dom.rs role-accessors # lang: html
 local lang-html/format/model.rs markup-whitespace-model # lang: html
-local lang-html/format/print.rs text-fill # lang: html
 local lang-html/parser/angular.rs recursive-descent-parser # lang: html
 local lang-html/parser/mod.rs recursive-descent-parser # lang: html
 local lang-html/parser/svelte.rs recursive-descent-parser # lang: html
@@ -366,7 +365,6 @@ local lang-java/parser/stmt.rs recursive-descent-parser # lang: java
 local lang-java/parser/types.rs recursive-descent-parser # lang: java
 local lang-java/rules.rs naming-convention # lang: java
 local lang-js/format/embed.rs embedded-code # lang: js
-local lang-js/format/jsx.rs text-fill # lang: js
 local lang-js/format/rewrite.rs source-rewrite # lang: js
 local lang-js/format/ts/heritage.rs heritage-clause-layout # lang: js
 local lang-js/format/ts/parens.rs source-rewrite # lang: js
@@ -383,7 +381,6 @@ local lang-kotlin/rewrite.rs source-rewrite # lang: kotlin
 local lang-makefile/format.rs key-value-layout # lang: makefile
 local lang-makefile/rules.rs embedded-command-checks # lang: makefile
 local lang-makefile/rules.rs unique-names # lang: makefile
-local lang-markdown/format/inline.rs text-fill # lang: markdown
 local lang-markdown/format/keep.rs verbatim-formatter # lang: markdown
 local lang-powershell/format.rs block-and-statements # lang: powershell
 local lang-powershell/format.rs token-case # lang: powershell

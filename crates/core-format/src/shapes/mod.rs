@@ -17,6 +17,7 @@ mod compound;
 mod conditional;
 pub mod continuation;
 mod declaration;
+pub mod fill;
 pub mod flow;
 mod heritage;
 mod key_value;
