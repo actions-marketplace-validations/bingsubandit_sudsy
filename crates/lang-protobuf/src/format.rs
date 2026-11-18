@@ -40,10 +40,10 @@ impl NodeFormatter for ProtoFormatter {
         &self,
         tree: &SyntaxNode,
         text: &str,
-        _: &core_syntax::Grammar,
+        grammar: &core_syntax::Grammar,
         _: &core_config::ResolvedOptions,
     ) -> Option<String> {
-        crate::sort::sort_header(tree, text)
+        crate::sort::sort_header(tree, text, grammar)
     }
 
     fn format_node(
