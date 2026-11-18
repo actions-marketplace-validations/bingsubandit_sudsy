@@ -74,7 +74,7 @@ pub enum Flow {
     /// As [`Flow::Outside`], and they name values in a type (an annotation, evaluated outside).
     OutsideQuery,
     /// The first flow when the predicate holds for the row's node, else the second.
-    Cond(fn(&SyntaxNode) -> bool, &'static Flow, &'static Flow),
+    Cond(&'static Pred, &'static Flow, &'static Flow),
     /// They are assigned when the node's operator is an assignment (`=`), read and assigned when
     /// it is a compound one (`+=`) or `++`/`--`, and as the node itself otherwise (`&$x`).
     Assigns,
@@ -89,6 +89,39 @@ pub enum Flow {
     /// They declare their name in the scope of the node and assign the one of the scope around it
     /// (`use (&$x)` of a closure).
     Capture,
+}
+
+/// A test of the row's node that picks between two flows.
+#[derive(Copy, Clone, Debug)]
+pub enum Pred {
+    /// The node has an own token with this text (`x: int = 1`: `=`).
+    HasToken(&'static str),
+    /// No sibling before the node has its kind (the first `for` of a comprehension).
+    FirstOfKind,
+    /// The node's first child ends with a name in the set (`typing.Optional`).
+    HeadIn(&'static [&'static str]),
+    /// The node's parent's first child ends with this name (`cast(...)`: the arguments' parent).
+    CalleeIs(&'static str),
+}
+
+impl Pred {
+    pub(crate) fn test(&self, node: &SyntaxNode, table: &Table) -> bool {
+        match self {
+            Pred::HasToken(text) => node
+                .children_with_tokens()
+                .any(|e| e.as_token().is_some_and(|t| t.text() == *text)),
+            Pred::FirstOfKind => node.prev_sibling().is_none_or(|p| p.kind() != node.kind()),
+            Pred::HeadIn(set) => node
+                .first_child()
+                .and_then(|o| table.last_name(&o))
+                .is_some_and(|name| set.contains(&name.text())),
+            Pred::CalleeIs(text) => node
+                .parent()
+                .and_then(|call| call.first_child())
+                .and_then(|callee| table.last_name(&callee))
+                .is_some_and(|name| name.text() == *text),
+        }
+    }
 }
 
 /// Where the names of a statement that sends declarations elsewhere (`global`, `nonlocal`) go.
@@ -332,6 +365,22 @@ impl Table {
 
     pub(crate) fn is_name_token(&self, kind: SyntaxKind) -> bool {
         self.name_tokens.contains(&kind)
+    }
+
+    /// The last name token of a dotted expression: `Optional` for `typing.Optional`.
+    pub(crate) fn last_name(&self, n: &SyntaxNode) -> Option<core_syntax::SyntaxToken> {
+        let start = n.text_range().start();
+        let mut t = n.last_token();
+        while let Some(tok) = t {
+            if self.is_name_token(tok.kind()) {
+                return Some(tok);
+            }
+            if tok.text_range().start() <= start {
+                return None;
+            }
+            t = tok.prev_token();
+        }
+        None
     }
 
     pub(crate) fn is_operator(&self, kind: SyntaxKind) -> bool {

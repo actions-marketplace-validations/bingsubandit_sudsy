@@ -15,7 +15,8 @@ use crate::diagnostic::Category;
 use crate::rule::{Level, Rule, RuleContext, RuleMeta};
 use crate::tree::significant_range;
 use crate::{FileContext, Params, Re};
-use core_semantics::scopes::{Access, Flags, Model, Row, ScopeId, Table, bind};
+pub use core_semantics::scopes::Ordered;
+use core_semantics::scopes::{Access, Flags, Model, ScopeId, Spec, Table, bind};
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode};
 use cx::Cx;
 use std::collections::HashSet;
@@ -23,231 +24,65 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
 
-/// What a language says when the order of its code decides what a name means (see
-/// `ordered`): the facts its tags do not carry.
-pub struct Ordered {
-    /// The module-level list of the names a module exports (`__all__`); empty: none.
-    pub exports: &'static str,
-    /// The import module whose names are directives, never unused or redefined (`__future__`).
-    pub pragma: &'static str,
-    /// The exception whose handler makes a read of a missing name no finding (`NameError`).
-    pub guard: &'static str,
-    /// Decorators (names through imports) that make a redefined function no finding.
-    pub overloads: &'static [&'static str],
-    /// Names meant to be unused besides those that start with `_`.
-    pub ignored: &'static [&'static str],
-    /// Subscripted forms whose items are values, not types (`Literal`).
-    pub value_forms: &'static [&'static str],
-    /// Subscripted forms whose items after the first are values (`Annotated`).
-    pub note_forms: &'static [&'static str],
-    /// A string in a type position is code: its names are reads.
-    pub quoted: bool,
-}
-
-impl Ordered {
-    pub const NONE: Ordered = Ordered {
-        exports: "",
-        pragma: "",
-        guard: "",
-        overloads: &[],
-        ignored: &[],
-        value_forms: &[],
-        note_forms: &[],
-        quoted: false,
-    };
-}
-
-/// What a language says to the shared scope rules.
+/// What a language says to the shared scope rules: the text of its `scope.rows`
+/// (`core_semantics::scopes::Spec`), the global names it keeps in files (`globals/*.txt`) and,
+/// for what is code, a hook.
 pub struct ScopeLang {
-    ordered: Option<Ordered>,
-    rows: &'static [Row],
-    name_tokens: &'static [&'static str],
-    hosts: &'static [&'static str],
-    bare: bool,
-    dynamic: &'static [&'static str],
-    docs: &'static str,
-    conventions: &'static [&'static str],
+    source: &'static str,
+    skip_unused: Option<fn(&SyntaxNode, SyntaxKind, &str) -> bool>,
     globals: &'static str,
     conditional_globals: &'static [(&'static str, &'static str)],
-    flavors: &'static [(&'static str, &'static [&'static str])],
-    scope_names: &'static [(&'static str, &'static str)],
-    redeclared_in: &'static [&'static str],
-    parameter_properties: &'static str,
-    markup: &'static str,
-    top_unchecked: bool,
+    spec: OnceLock<Spec>,
     sets: OnceLock<GlobalSets>,
-    labels: &'static [&'static str],
-    methods: &'static [&'static str],
-    blocks: &'static [&'static str],
-    skip_unused: Option<fn(&SyntaxNode, SyntaxKind, &str) -> bool>,
-    interpolated: &'static str,
-    unused_prefix: &'static str,
     table: OnceLock<Table>,
 }
 
 impl ScopeLang {
-    /// Rows by node kind, and the token kinds a name is written with.
-    pub const fn new(rows: &'static [Row], name_tokens: &'static [&'static str]) -> ScopeLang {
+    /// The language's rows and facts (`scope.rows`).
+    pub const fn new(source: &'static str) -> ScopeLang {
         ScopeLang {
-            ordered: None,
-            rows,
-            name_tokens,
-            hosts: &[],
-            bare: false,
-            dynamic: &[],
-            docs: "",
-            conventions: &[],
+            source,
+            skip_unused: None,
             globals: "",
             conditional_globals: &[],
-            flavors: &[],
-            scope_names: &[],
-            redeclared_in: &[],
-            parameter_properties: "",
-            markup: "",
-            top_unchecked: false,
+            spec: OnceLock::new(),
             sets: OnceLock::new(),
-            labels: &[],
-            methods: &[],
-            blocks: &[],
-            skip_unused: None,
-            interpolated: "",
-            unused_prefix: "",
             table: OnceLock::new(),
         }
     }
 
-    /// The order of the code decides what a name means (Python): the rules `unused-import`,
-    /// `unused-variable`, `undefined-variable`, `use-before-define`, `redeclared-variable`,
-    /// `shadowed-variable` and `undefined-export` read the bindings in order.
-    pub const fn ordered(mut self, ordered: Ordered) -> Self {
-        self.ordered = Some(ordered);
-        self
-    }
-
-    /// Names are bare tokens: every one that is not a declaration is a use (Java).
-    pub const fn bare(mut self) -> Self {
-        self.bare = true;
-        self
-    }
-
-    /// Calling one of these makes the names of the scope unknowable (`extract`).
-    pub const fn dynamic(mut self, names: &'static [&'static str]) -> Self {
-        self.dynamic = names;
-        self
-    }
-
-    /// Comments that start with this text (`/**`) use the imports they mention.
-    pub const fn docs(mut self, prefix: &'static str) -> Self {
-        self.docs = prefix;
-        self
-    }
-
-    /// Imports of these names are used by convention, not by name (Kotlin `getValue`).
-    pub const fn conventions(mut self, names: &'static [&'static str]) -> Self {
-        self.conventions = names;
-        self
-    }
-
-    /// Names defined everywhere, separated by spaces (`$this`, superglobals, `Array`).
+    /// Names defined everywhere, separated by white space (a `globals/*.txt` file).
     pub const fn globals(mut self, names: &'static str) -> Self {
         self.globals = names;
         self
     }
 
-    /// Names defined in the files of a flavor only (`commonjs`: `require module exports`).
+    /// Names defined in the files of a flavor only, from files (`commonjs`: `require module exports`).
     pub const fn globals_if(mut self, names: &'static [(&'static str, &'static str)]) -> Self {
         self.conditional_globals = names;
         self
     }
 
-    /// Flavors of files by name suffix. `typed` files declare types (declaration merging,
-    /// ambient names, type-only uses), `definition` files are ambient; any other flavor only
-    /// selects `globals_if`.
-    pub const fn flavors(
-        mut self,
-        flavors: &'static [(&'static str, &'static [&'static str])],
-    ) -> Self {
-        self.flavors = flavors;
-        self
-    }
-
-    /// Names that the scopes of these node kinds bind (`arguments` in a function).
-    pub const fn scope_names(mut self, names: &'static [(&'static str, &'static str)]) -> Self {
-        self.scope_names = names;
-        self
-    }
-
-    /// The node kinds of the scopes whose names `redeclared-variable` checks.
-    pub const fn redeclared_in(mut self, kinds: &'static [&'static str]) -> Self {
-        self.redeclared_in = kinds;
-        self
-    }
-
-    /// Own tokens (separated by spaces) that make a parameter a property, which is used by being
-    /// declared (`public`, `readonly`).
-    pub const fn parameter_properties(mut self, tokens: &'static str) -> Self {
-        self.parameter_properties = tokens;
-        self
-    }
-
-    /// The import that the nodes tagged `#markup` use (the JSX pragma `React`), in typed files.
-    pub const fn markup(mut self, import: &'static str) -> Self {
-        self.markup = import;
-        self
-    }
-
-    /// `undefined-variable` leaves the top scope alone: another file can define its names.
-    pub const fn top_unchecked(mut self) -> Self {
-        self.top_unchecked = true;
-        self
-    }
-
-    /// The node kinds besides blocks whose child declarations are statements.
-    pub const fn hosts(mut self, hosts: &'static [&'static str]) -> Self {
-        self.hosts = hosts;
-        self
-    }
-
-    /// Name tokens of these kinds are written with a trailing `:` (`key:`).
-    pub const fn labels(mut self, kinds: &'static [&'static str]) -> Self {
-        self.labels = kinds;
-        self
-    }
-
-    /// The node kinds of methods and of blocks, whose parameters `unused-method-argument` and
-    /// `unused-block-argument` check; `skip` answers for a method or block node whether its
-    /// parameters are left alone (an empty body, a body that raises, a bare `super`).
-    pub const fn arguments(
-        mut self,
-        methods: &'static [&'static str],
-        blocks: &'static [&'static str],
-        skip: fn(&SyntaxNode, SyntaxKind, &str) -> bool,
-    ) -> Self {
-        self.methods = methods;
-        self.blocks = blocks;
+    /// `skip` answers for a method or block node (the kinds the `methods` and `blocks` facts
+    /// name) whether its parameters are left alone (an empty body, a body that raises, a bare
+    /// `super`) in `unused-method-argument` and `unused-block-argument`.
+    pub const fn skip_unused(mut self, skip: fn(&SyntaxNode, SyntaxKind, &str) -> bool) -> Self {
         self.skip_unused = Some(skip);
         self
     }
 
-    /// Locals whose name starts with this are meant to be unused: `unused-local-variable` leaves them.
-    pub const fn unused_prefix(mut self, prefix: &'static str) -> Self {
-        self.unused_prefix = prefix;
-        self
-    }
-
-    /// Tokens of this kind hold code the tree has no nodes for (a heredoc body with `#{x}`):
-    /// the names in their `#{...}` are reads.
-    pub const fn interpolated(mut self, token: &'static str) -> Self {
-        self.interpolated = token;
-        self
+    fn spec(&self) -> &Spec {
+        self.spec
+            .get_or_init(|| Spec::parse(self.source).unwrap_or_else(|e| panic!("scope table: {e}")))
     }
 
     fn table(&self, grammar: &Grammar) -> &Table {
         self.table.get_or_init(|| {
-            Table::new(grammar, self.rows, self.hosts, self.name_tokens)
-                .bare_names(self.bare)
-                .dynamic_names(self.dynamic)
-                .label_names(self.labels, grammar)
+            let s = self.spec();
+            Table::new(grammar, s.rows, s.hosts, s.name_tokens)
+                .bare_names(s.bare)
+                .dynamic_names(s.dynamic)
+                .label_names(s.labels, grammar)
         })
     }
 }
@@ -265,8 +100,7 @@ impl ScopeLang {
 
     fn flavor(&self, name: &str, path: &Path) -> bool {
         let path = path.to_string_lossy();
-        self.flavors
-            .iter()
+        (self.spec().flavors.iter())
             .any(|(n, suffixes)| *n == name && suffixes.iter().any(|s| matches(&path, s)))
     }
 
@@ -277,18 +111,27 @@ impl ScopeLang {
         root: &SyntaxNode,
         d: &core_semantics::scopes::Decl,
     ) -> Option<String> {
-        ordered::import_target(g, root, self.ordered.as_ref()?.pragma, d)
+        ordered::import_target(g, root, self.spec().ordered.as_ref()?.pragma, d)
     }
 
     /// Is `name` one the language (or the file's flavor) declares everywhere?
     pub fn is_global(&self, name: &str, path: &Path) -> bool {
-        let sets = self.sets.get_or_init(|| GlobalSets {
-            base: self.globals.split_whitespace().collect(),
-            conditional: self
-                .conditional_globals
-                .iter()
-                .map(|(f, names)| (*f, names.split_whitespace().collect()))
-                .collect(),
+        let sets = self.sets.get_or_init(|| {
+            let spec = self.spec();
+            GlobalSets {
+                base: self
+                    .globals
+                    .split_whitespace()
+                    .chain(spec.globals.iter().copied())
+                    .collect(),
+                conditional: (self.conditional_globals.iter())
+                    .map(|(f, names)| (*f, names.split_whitespace().collect()))
+                    .chain(
+                        (spec.conditional_globals.iter())
+                            .map(|(f, names)| (*f, names.iter().copied().collect())),
+                    )
+                    .collect(),
+            }
         });
         sets.base.contains(name)
             || sets
@@ -298,25 +141,25 @@ impl ScopeLang {
     }
 
     fn scope_name(&self, kind: &str, name: &str) -> bool {
-        self.scope_names.contains(&(kind, name))
+        self.spec().scope_names.contains(&(kind, name))
     }
 
     fn checks_redeclared(&self, kind: &str) -> bool {
-        self.redeclared_in.contains(&kind)
+        self.spec().redeclared_in.contains(&kind)
     }
 
     fn skips_top(&self) -> bool {
-        self.top_unchecked
+        self.spec().top_unchecked
     }
 
     fn property_tokens(&self) -> impl Iterator<Item = &'static str> {
-        self.parameter_properties.split_whitespace()
+        self.spec().parameter_properties.iter().copied()
     }
 
     /// Is `name` the import that the markup elements of the tree use (the JSX pragma)?
     pub fn markup_import(&self, name: &str, root: &SyntaxNode, grammar: &Grammar) -> bool {
-        !self.markup.is_empty()
-            && name == self.markup
+        !self.spec().markup.is_empty()
+            && name == self.spec().markup
             && root
                 .descendants()
                 .any(|n| grammar.has_tag(n.kind(), "markup"))
@@ -333,11 +176,11 @@ pub fn model(lang: &ScopeLang, file: &FileContext<'_>) -> Rc<Model> {
     CACHE.with(|c| {
         c.get(file, || {
             let mut model = bind(file.root, file.grammar, lang.table(file.grammar));
-            if lang.ordered.as_ref().is_some_and(|o| o.quoted) {
+            if lang.spec().ordered.as_ref().is_some_and(|o| o.quoted) {
                 ordered::quoted::add_reads(&mut model, file.root, file.grammar, lang);
             }
-            if !lang.interpolated.is_empty() {
-                interpolation_reads(&mut model, file, lang.interpolated);
+            if !lang.spec().interpolated.is_empty() {
+                interpolation_reads(&mut model, file, lang.spec().interpolated);
             }
             model
         })
@@ -410,8 +253,8 @@ pub fn build(
         ("unused-variable", Some("unpacked")) => Check::UnusedUnpacked,
         (_, Some(mode)) => return Err(format!("param `mode`: unknown mode `{mode}`")),
         (name, None) => match name {
-            "unused-import" if lang.ordered.is_some() => Check::UnusedImport,
-            "undefined-export" if lang.ordered.is_some() => Check::UndefinedExport,
+            "unused-import" if lang.spec().ordered.is_some() => Check::UnusedImport,
+            "undefined-export" if lang.spec().ordered.is_some() => Check::UndefinedExport,
             "undefined-variable" => Check::UndefinedVariable,
             "unused-variable" => Check::UnusedVariable,
             "unused-parameter" => Check::UnusedParameter,
@@ -421,7 +264,7 @@ pub fn build(
             other => return Err(format!("param `check`: unknown check `{other}`")),
         },
     };
-    if lang.ordered.is_none()
+    if lang.spec().ordered.is_none()
         && check.which().is_some_and(|_| {
             matches!(
                 check,
@@ -629,7 +472,7 @@ impl Rule for ScopeRule {
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let lang = self.lang;
         let m = model(lang, file);
-        if lang.ordered.is_some()
+        if lang.spec().ordered.is_some()
             && let Some(which) = self.check.which()
         {
             let cx = Cx::new(&m, file, lang);
@@ -653,7 +496,9 @@ impl Rule for ScopeRule {
                 let mut docs: Option<String> = None;
                 for id in m.symbol_ids() {
                     let s = m.symbol(id);
-                    if !s.flags.contains(Flags::IMPORT) || lang.conventions.contains(&&*s.name) {
+                    if !s.flags.contains(Flags::IMPORT)
+                        || lang.spec().conventions.contains(&&*s.name)
+                    {
                         continue;
                     }
                     let used =
@@ -661,7 +506,7 @@ impl Rule for ScopeRule {
                     if used.contains(&*s.name) {
                         continue;
                     }
-                    let docs = docs.get_or_insert_with(|| doc_text(file, lang.docs));
+                    let docs = docs.get_or_insert_with(|| doc_text(file, lang.spec().docs));
                     if mentions(docs, &s.name) {
                         continue;
                     }
@@ -678,8 +523,8 @@ impl Rule for ScopeRule {
                     if !s.flags.contains(Flags::LET)
                         || s.flags.intersects(skip)
                         || &*s.name == "_"
-                        || (!lang.unused_prefix.is_empty()
-                            && s.name.starts_with(lang.unused_prefix))
+                        || (!lang.spec().unused_prefix.is_empty()
+                            && s.name.starts_with(lang.spec().unused_prefix))
                         || m.refs_of(id).any(|r| r.is_read())
                         || dynamic(s.scope)
                     {
@@ -706,8 +551,8 @@ impl Rule for ScopeRule {
             }
             Check::UnusedMethodArgument | Check::UnusedBlockArgument => {
                 let kinds = match self.check {
-                    Check::UnusedMethodArgument => lang.methods,
-                    _ => lang.blocks,
+                    Check::UnusedMethodArgument => lang.spec().methods,
+                    _ => lang.spec().blocks,
                 };
                 for id in m.symbol_ids() {
                     let s = m.symbol(id);

@@ -6,10 +6,12 @@
 //! hook of its own.
 
 mod build;
+mod rows;
 mod table;
 
 pub use build::bind;
-pub use table::{Declares, Flow, Place, Redirect, Row, Sel, Table};
+pub use rows::{Ordered, Spec};
+pub use table::{Declares, Flow, Place, Pred, Redirect, Row, Sel, Table};
 
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};
 use rustc_hash::FxHashMap as HashMap;

@@ -1,7 +1,7 @@
 //! The binder: one pre-order walk that opens scopes, declares names and records references as the
 //! language's [`Table`] says, then resolves every reference by name up the scope chain.
 
-use super::table::{Declares, Flow, Place, Redirect, Row, Sel, Table};
+use super::table::{Declares, Flow, Place, Pred, Redirect, Row, Sel, Table};
 use super::{
     Access, Decl, Flags, Model, RefId, Reference, Scope, ScopeId, Symbol, SymbolId, TextRef,
 };
@@ -646,7 +646,18 @@ impl Binder<'_> {
                     self.declare(name, range, node);
                     continue;
                 }
-                Some(flow) => access(self.grammar, &flow, node, state, op_text, &mut Vec::new()).0,
+                Some(flow) => {
+                    access(
+                        self.grammar,
+                        self.table,
+                        &flow,
+                        node,
+                        state,
+                        op_text,
+                        &mut Vec::new(),
+                    )
+                    .0
+                }
                 None => state,
             };
             if self.inert == 0 {
@@ -745,7 +756,15 @@ impl Binder<'_> {
                 });
             index += 1;
             self.arena.push(hit.map(|(_, (_, flow))| {
-                access(self.grammar, flow, node, state, op_text, &mut conds)
+                access(
+                    self.grammar,
+                    self.table,
+                    flow,
+                    node,
+                    state,
+                    op_text,
+                    &mut conds,
+                )
             }));
         }
     }
@@ -793,6 +812,7 @@ fn own_parts(
 /// The state a [`Flow`] gives the child, and whether the child is outside the node's scope.
 fn access(
     grammar: &Grammar,
+    table: &Table,
     flow: &Flow,
     node: &SyntaxNode,
     state: State,
@@ -834,15 +854,16 @@ fn access(
         Flow::OutsideQuery => (query, true),
         // Each test runs once for the node, whatever the number of its children.
         Flow::Cond(test, yes, no) => {
-            let key = *test as usize;
+            let key = *test as *const Pred as usize;
             let held = conds.iter().find(|(k, _)| *k == key).map(|(_, v)| *v);
             let hit = held.unwrap_or_else(|| {
-                let v = test(node);
+                let v = test.test(node, table);
                 conds.push((key, v));
                 v
             });
             access(
                 grammar,
+                table,
                 if hit { yes } else { no },
                 node,
                 state,

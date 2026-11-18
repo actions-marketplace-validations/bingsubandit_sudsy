@@ -1,0 +1,63 @@
+// What JavaScript and TypeScript say to the binder (docs/ai/formatting/js.md#scope-layer).
+// Format: core_semantics::scopes::rows. Globals: globals/*.txt.
+names Identifier
+// The node kinds besides blocks whose function and class children are declarations.
+hosts ExportDeclaration ExportNamedDeclaration ExportDefaultDeclaration SwitchCase LabeledStatement IfStatement WhileStatement DoWhileStatement ForStatement ForInStatement ForOfStatement WithStatement
+flavor typed .ts .tsx .mts .cts
+flavor definition .d.ts .d.cts .d.mts
+flavor commonjs .cjs
+scope-name Function arguments
+redeclared-in Program Function ArrowFunctionExpression BlockStatement ForStatement ForInStatement ForOfStatement SwitchStatement StaticBlock
+parameter-properties public private protected readonly override
+markup React
+
+Program var-scope
+ArrowFunctionExpression var-scope
+StaticBlock var-scope
+TSModuleBlock var-scope
+Function var-scope declares=value|function@parent expr=expression-name@scope
+Class declares=value|type|class@parent expr=expression-name@scope
+VariableDeclarator declares=value|var@var keyword-on-parent keyword=var:value|var@var keyword=let:value|let@scope keyword=const:value|const@scope keyword=using:value|const@scope
+FormalParameter declares=value|parameter
+FormalParameterRest declares=value|parameter
+CatchParameter declares=value|catch
+TSEnumDeclaration declares=value|type|enum@parent
+TSEnumMember declares=value|enum-member name-child
+TSInterfaceDeclaration declares=type|interface@parent
+TSTypeAliasDeclaration declares=type|type-alias@parent
+TSNamespaceDeclaration declares=value|type|namespace unchecked=TSNamespaceDeclaration
+TSTypeParameter declares=type|type-parameter parent-place=TSInferType:enclosing.TSConditionalType
+TSMappedType declares=type|type-parameter|unchecked
+ImportSpecifier declares=value|type|import
+ImportDefaultSpecifier declares=value|type|import
+ImportNamespaceSpecifier declares=value|type|import
+TSImportEqualsDeclaration declares=value|type|import
+BindingIdentifier binding
+IdentifierReference reference
+AssignmentExpression child=before-op/assign."="
+UpdateExpression child=all/read-write
+ForInStatement child=field.left/write
+ForOfStatement child=field.left/write
+ArrayAssignmentTarget child=all/through
+ObjectAssignmentTarget child=all/through
+AssignmentTargetRest child=all/through
+AssignmentTargetWithDefault child=first/through
+AssignmentTargetPropertyIdentifier child=first/through
+AssignmentTargetPropertyProperty child=after.":"/through
+ParenthesizedExpression child=all/through
+UnaryExpression child=with.typeof/probe
+JSXOpeningElement child=all/tag
+JSXClosingElement child=all/tag
+JSXMemberExpression child=all/tag
+TSNonNullExpression child=all/through
+TSAsExpression child=first/through
+TSSatisfiesExpression child=first/through
+TSTypeReference child=first/type
+TSClassImplements child=first/type
+TSInterfaceHeritage child=first/type
+TSTypeQuery child=all/query
+TSConditionalType child=after.":"/outside
+ExportNamedDeclaration child=with.type/type
+ExportSpecifier child=with.type/type child=first/through-type
+TSQualifiedName child=first/through-type
+StaticMemberExpression child=first/through-type

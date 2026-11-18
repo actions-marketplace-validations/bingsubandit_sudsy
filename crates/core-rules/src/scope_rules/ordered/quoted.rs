@@ -12,7 +12,7 @@ use std::collections::HashSet;
 /// `Annotated[T, ...]`?
 fn is_value(g: &Grammar, lang: &ScopeLang, string: &SyntaxNode) -> bool {
     let tag = |n: &SyntaxNode, t: &str| g.has_tag(n.kind(), t);
-    let ordered = lang.ordered.as_ref().expect("ordered");
+    let ordered = lang.spec().ordered.as_ref().expect("ordered");
     let mut child = string.clone();
     for anc in string.ancestors().skip(1) {
         if tag(&anc, "transparent") {

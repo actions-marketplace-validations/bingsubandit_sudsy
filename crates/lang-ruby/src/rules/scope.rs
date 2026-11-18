@@ -1,78 +1,10 @@
-//! What Ruby says to the shared scope rules (`core_rules::scope_rules`): a local variable exists
-//! from its first assignment in the method, class body or program (or in the block that makes it,
-//! when no scope around the block has it), a method, class or module sees none of the names
-//! around it, a block sees all of them.
+//! What Ruby says to the shared scope rules (`core_rules::scope_rules`): `../../scope.rows`, and
+//! which parameters are left alone.
 
 use super::tree::child;
 use crate::generated::kind as k;
 use core_rules::{ScopeLang, ScopeRule};
-use core_semantics::scopes::{Declares, Flags, Flow, Place, Row, Sel};
 use core_syntax::{SyntaxKind, SyntaxNode};
-
-const fn closed(kind: &'static str) -> Row {
-    Row {
-        kind,
-        var_scope: true,
-        closed: true,
-        ..Row::NONE
-    }
-}
-
-/// A parameter: the first name token of the node.
-const fn parameter(kind: &'static str) -> Row {
-    Row {
-        kind,
-        declares: Some(Declares {
-            flags: Flags::VALUE.union(Flags::PARAMETER),
-            ..Declares::NONE
-        }),
-        tokens: &[(Sel::First, Flow::Declare)],
-        ..Row::NONE
-    }
-}
-
-/// A node whose first name token is a local variable that is written (`x = 1`, `x += 1`; a target
-/// of `a, b = ...`, `for x in`, `rescue => x`: a plain write).
-const fn writes(kind: &'static str) -> Row {
-    Row {
-        kind,
-        tokens: &[(Sel::First, Flow::Assign("="))],
-        implicit: Some((Flags::VALUE.union(Flags::LET), Place::Unseen)),
-        ..Row::NONE
-    }
-}
-
-const ROWS: &[Row] = &[
-    Row {
-        kind: "Program",
-        var_scope: true,
-        ..Row::NONE
-    },
-    closed("Def"),
-    closed("Class"),
-    closed("Module"),
-    closed("SingletonClass"),
-    parameter("RequiredParameter"),
-    parameter("OptionalParameter"),
-    parameter("RestParameter"),
-    parameter("RequiredKeywordParameter"),
-    parameter("OptionalKeywordParameter"),
-    parameter("KeywordRestParameter"),
-    parameter("BlockParameter"),
-    Row {
-        kind: "LocalVariableRead",
-        reference: true,
-        ..Row::NONE
-    },
-    writes("LocalVariableWrite"),
-    writes("LocalVariableOperatorWrite"),
-    writes("LocalVariableOrWrite"),
-    writes("LocalVariableAndWrite"),
-    Row {
-        tokens: &[(Sel::First, Flow::Write)],
-        ..writes("LocalVariableTarget")
-    },
-];
 
 /// Parameters that are left alone: those of an empty method or block, of a method that raises
 /// NotImplementedError, and of a method that calls a bare `super` (which passes them all on); a
@@ -137,11 +69,7 @@ fn raises_not_implemented(call: &SyntaxNode) -> bool {
     }
 }
 
-static LANG: ScopeLang = ScopeLang::new(ROWS, &["Identifier", "Label"])
-    .labels(&["Label"])
-    .arguments(&["Def"], &["Block", "Lambda"], skip_unused)
-    .interpolated("HeredocBody")
-    .unused_prefix("_");
+static LANG: ScopeLang = ScopeLang::new(include_str!("../../scope.rows")).skip_unused(skip_unused);
 
 pub static UNUSED_LOCAL_VARIABLE: ScopeRule = ScopeRule::unused_local(&LANG);
 pub static UNUSED_METHOD_ARGUMENT: ScopeRule = ScopeRule::unused_method_argument(&LANG);

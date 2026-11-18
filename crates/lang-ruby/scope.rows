@@ -1,0 +1,32 @@
+// What Ruby says to the shared scope rules: a local variable exists from its first assignment in
+// the method, class body or program (or in the block that makes it, when no scope around the block
+// has it), a method, class or module sees none of the names around it, a block sees all of them.
+// Format: core_semantics::scopes::rows.
+names Identifier Label
+labels Label
+methods Def
+blocks Block Lambda
+interpolated HeredocBody
+unused-prefix _
+
+Program var-scope
+Def var-scope closed
+Class var-scope closed
+Module var-scope closed
+SingletonClass var-scope closed
+// A parameter: the first name token of the node.
+RequiredParameter declares=value|parameter token=first/declare
+OptionalParameter declares=value|parameter token=first/declare
+RestParameter declares=value|parameter token=first/declare
+RequiredKeywordParameter declares=value|parameter token=first/declare
+OptionalKeywordParameter declares=value|parameter token=first/declare
+KeywordRestParameter declares=value|parameter token=first/declare
+BlockParameter declares=value|parameter token=first/declare
+LocalVariableRead reference
+// A node whose first name token is a local variable that is written (`x = 1`, `x += 1`; a target
+// of `a, b = ...`, `for x in`, `rescue => x`: a plain write).
+LocalVariableWrite token=first/assign."=" implicit=value|let@unseen
+LocalVariableOperatorWrite token=first/assign."=" implicit=value|let@unseen
+LocalVariableOrWrite token=first/assign."=" implicit=value|let@unseen
+LocalVariableAndWrite token=first/assign."=" implicit=value|let@unseen
+LocalVariableTarget token=first/write implicit=value|let@unseen

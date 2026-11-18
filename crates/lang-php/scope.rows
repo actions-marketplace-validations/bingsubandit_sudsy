@@ -1,0 +1,52 @@
+// What PHP says to the shared scope rules: a variable is declared by the first write to it in its
+// function (or by a parameter, `use`, `global`, `static`), a function sees none of the names
+// around it, and a construct that can create or read variables by name makes the function's names
+// unknowable. Format: core_semantics::scopes::rows.
+names Variable Identifier
+dynamic extract parse_str mb_parse_str
+top-unchecked
+
+Program var-scope
+Function var-scope closed
+Method var-scope closed
+Closure var-scope closed
+ArrowFunction var-scope
+FunctionLikeParameter declares=value|parameter child=field.name/declare
+DirectVariable reference implicit=value|let@var
+// A call's name is no variable; `extract` and `parse_str` make the scope dynamic.
+FunctionCall token=first/type
+Assignment op-node child=field.left/assigns
+UnaryPrefix op-node child=all/assigns
+UnaryPostfix op-node child=all/assigns
+// Destructuring and element writes pass the write on to the variable they fill.
+Array child=all/through
+LegacyArray child=all/through
+List child=all/through
+ValueArrayElement child=all/through
+KeyValueArrayElement child=field.value/through
+ArrayAppend child=first/through
+ArrayAccess child=field.object/through
+ForeachKeyValueTarget child=all/write
+ForeachValueTarget child=all/write
+TryCatchClause child=kind.DirectVariable/write
+Global child=all/write
+StaticConcreteItem child=first/write
+StaticAbstractItem child=first/write
+ClosureUseClauseVariable declares=value|parameter child=all/capture
+NamedArgument child=kind.DirectVariable/write
+Unset child=all/type
+// A variable passed to a call may be filled by it (`preg_match($p, $s, $m)`): no verdict.
+PositionalArgument child=all/write
+// Tested, not read.
+IssetConstruct child=all/type
+EmptyConstruct child=all/type
+StaticPropertyAccess child=field.member/type
+PropertyAbstractItem child=first/type
+PropertyConcreteItem child=first/type
+IndirectVariable dynamic
+NestedVariable dynamic
+IncludeConstruct dynamic
+IncludeOnceConstruct dynamic
+RequireConstruct dynamic
+RequireOnceConstruct dynamic
+EvalConstruct dynamic

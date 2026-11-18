@@ -1,0 +1,13 @@
+$this
+$GLOBALS
+$_SERVER
+$_GET
+$_POST
+$_FILES
+$_COOKIE
+$_SESSION
+$_REQUEST
+$_ENV
+$argc
+$argv
+$http_response_header

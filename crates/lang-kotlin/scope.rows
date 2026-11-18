@@ -1,0 +1,12 @@
+// What Kotlin says to the shared scope rules: an import declares the last name of its path or
+// its alias, and every ReferenceExpression is a use. Format: core_semantics::scopes::rows.
+names Identifier
+docs "/**"
+// Functions a call site uses without naming them (operators, delegates, destructuring).
+conventions getValue setValue provideDelegate invoke iterator hasNext next contains compareTo equals get set plus minus times div rem unaryPlus unaryMinus not inc dec rangeTo rangeUntil plusAssign minusAssign timesAssign divAssign remAssign component1 component2 component3 component4 component5
+
+PackageDirective inert
+ImportDirective inert declares=value|type|import name-last skip-token="*"
+ReferenceExpression reference
+// An infix call (`a then b`) names its function in an operation reference.
+OperationReference token=all/through

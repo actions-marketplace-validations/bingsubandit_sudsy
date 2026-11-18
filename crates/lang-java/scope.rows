@@ -1,0 +1,23 @@
+// What Java says to the shared scope rules: names are bare tokens, so every name that is not a
+// declaration is a use, and the rows list the declarations. Format: core_semantics::scopes::rows.
+names Identifier
+bare
+docs "/**"
+
+ImportDeclaration inert
+TypeOrStaticImportDeclaration declares=value|type|import@scope name-last skip-token="*"
+LocalVariableDeclarationCore declares=value|let
+// Fields are declared so that their declarators do not land in a local's declaration.
+FieldDeclaration declares=value
+ConstantDeclaration declares=value
+VariableDeclarator token=first/declare
+FormalParameter declares=value|parameter token=last/declare
+SpreadParameter declares=value|parameter token=last/declare
+CatchFormalParameter declares=value|catch token=last/declare
+ForSpec declares=value token=last-before.":"/declare
+LambdaExpression declares=value|parameter token=last-before."->"/declare
+InferredParameters declares=value|parameter token=all/declare
+PatternVariable declares=value token=first/declare
+Resource declares=value token=last-before."="/declare
+AssignmentExpression token=before-op/assigns
+UpdateExpression token=all/assigns

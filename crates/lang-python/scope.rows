@@ -1,0 +1,45 @@
+// What Python says to the binder (docs/ai/formatting/python.md#scope-layer) and the facts the
+// order-reading scope rules ask for. Format: core_semantics::scopes::rows. Globals: globals/python.txt.
+names Name Star
+dynamic locals
+globals-if init __path__
+flavor init __init__.py
+scope-name StmtClassDef __module__ __qualname__ __class__
+ordered exports=__all__ pragma=__future__ guard=NameError overload=typing.overload overload=typing_extensions.overload ignored=__tracebackhide__ ignored=__traceback_info__ ignored=__traceback_supplement__ value-form=Literal note-form=Annotated quoted
+// Typing generics and builtin collections: a string in their subscript is a type.
+set generics AbstractSet AsyncContextManager AsyncGenerator AsyncIterable AsyncIterator Awaitable Callable ChainMap ClassVar Collection Concatenate Container ContextManager Coroutine Counter DefaultDict Deque Dict Final FrozenSet Generator Generic ItemsView Iterator Iterable KeysView List Mapping MappingView Match MutableMapping MutableSequence MutableSet NotRequired Optional OrderedDict Pattern Protocol ReadOnly Required Reversible Sequence Set Tuple Type TypeGuard TypeIs Union Unpack ValuesView frozenset dict list set tuple type
+
+ModModule var-scope
+StmtFunctionDef var-scope declares=value|function@parent name=field.name child=kind.Decorator/outside child=kind.TypeParams/outside child=kind.Arguments/outside child=field.returns/outside-query
+StmtClassDef hidden declares=value|class@parent name=field.name child=kind.Decorator/outside child=kind.TypeParams/outside child=kind.Arguments/outside child=field.returns/outside-query
+ExprLambda var-scope
+Parameter declares=value|parameter name=field.name child=field.annotation/outside-query
+ParameterWithDefault child=after."="/outside
+TypeParamTypeVar declares=value|type|type-parameter name=field.name
+TypeParamTypeVarTuple declares=value|type|type-parameter name=field.name
+TypeParamParamSpec declares=value|type|type-parameter name=field.name
+Alias declares=value|import name=field.asname name=field.name
+ExceptHandlerExceptHandler declares=value|catch name=field.name
+PatternMatchAs declares=value name=kind.Identifier
+PatternMatchStar declares=value name=kind.Identifier
+PatternMatchMapping declares=value name=kind.Identifier
+StmtGlobal redirect=top
+StmtNonlocal redirect=outer
+ExprName reference implicit=value
+ExprStringLiteral text
+StmtDelete child=all/delete
+StmtAssign child=except-last/write
+StmtAugAssign child=field.left/read-write
+StmtAnnAssign child=field.left/?has-token."=":write:write-bare child=field.annotation/query
+StmtFor child=field.target/write
+StmtTypeAlias child=field.name/write
+WithItem child=after.as/write
+ExprNamed child=field.left/write-var
+Comprehension child=field.target/write child=field.iter/?first-of-kind:outside:through
+ExprTuple child=all/through
+ExprList child=all/through
+ExprStarred child=all/through
+Parenthesized child=all/through
+ExprBinOp child=all/through-type
+ExprSubscript child=all/?head-in.generics:query:through-type
+Arguments child=first/?callee-is.cast:query:through

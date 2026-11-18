@@ -16,7 +16,7 @@ Not formatted yet: the file is kept as written.
 
 ## Lint
 The rules are RuboCop's Lint department (catalog `docs/ai/parity/rubocop.yaml`, every Lint cop of RuboCop 1.92.3 with its status). Three kinds, all on the tree of the grammar:
-- Scope rules (`src/rules/scope.rs`, a table for `core_rules::scope_rules`, [../rules/semantics.md](../rules/semantics.md#scope-rules-core_rulesscope_rules)): `unused-local-variable` (Lint/UselessAssignment), `unused-method-argument`, `unused-block-argument`, `underscore-prefixed-variable-used`. Ruby has no declaration syntax: a write declares, a block parameter shadows, a `#{x}` in a heredoc body reads `x` (the body is one token), and the shorthand `f(x:)` reads `x`.
+- Scope rules (`scope.rows`, a table for `core_rules::scope_rules`, and the parameters left alone in `src/rules/scope.rs`; [../rules/semantics.md](../rules/semantics.md#scope-rules-core_rulesscope_rules)): `unused-local-variable` (Lint/UselessAssignment), `unused-method-argument`, `unused-block-argument`, `underscore-prefixed-variable-used`. Ruby has no declaration syntax: a write declares, a block parameter shadows, a `#{x}` in a heredoc body reads `x` (the body is one token), and the shorthand `f(x:)` reads `x`.
 - Shared bug rules on the roles (`no-assignment-in-condition`: also `a && b = c`).
 - The `check` family (`rules/checks.yaml` names a check, `src/rules/*.rs` holds the checks, one Rust function on the node kinds it lists): rules that read the shape of a call, a class or a clause. Operators are calls here (`x == x` is a `Call`), a `do` block belongs to the outer call, and the root is two nested `Program` nodes (a check on `Program` takes the inner one).
 
