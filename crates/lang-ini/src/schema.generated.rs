@@ -1,6 +1,10 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
 pub const SPACE_AROUND_EQUALS: &str = "space_around_equals";
+#[allow(dead_code)]
+pub fn space_around_equals(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_AROUND_EQUALS, true)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

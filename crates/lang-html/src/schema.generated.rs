@@ -7,6 +7,35 @@ pub const WHITESPACE_SENSITIVITY: &str = "whitespace_sensitivity";
 pub const BRACKET_SAME_LINE: &str = "bracket_same_line";
 #[allow(dead_code)]
 pub const SINGLE_ATTRIBUTE_PER_LINE: &str = "single_attribute_per_line";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EmbeddedLanguageFormatting { Auto, Off }
+#[allow(dead_code)]
+pub fn embedded_language_formatting(o: &core_config::ResolvedOptions) -> EmbeddedLanguageFormatting {
+    match o.text(EMBEDDED_LANGUAGE_FORMATTING) {
+        "off" => EmbeddedLanguageFormatting::Off,
+        _ => EmbeddedLanguageFormatting::Auto,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum WhitespaceSensitivity { Css, Strict, Ignore }
+#[allow(dead_code)]
+pub fn whitespace_sensitivity(o: &core_config::ResolvedOptions) -> WhitespaceSensitivity {
+    match o.text(WHITESPACE_SENSITIVITY) {
+        "strict" => WhitespaceSensitivity::Strict,
+        "ignore" => WhitespaceSensitivity::Ignore,
+        _ => WhitespaceSensitivity::Css,
+    }
+}
+#[allow(dead_code)]
+pub fn bracket_same_line(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(BRACKET_SAME_LINE, false)
+}
+#[allow(dead_code)]
+pub fn single_attribute_per_line(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SINGLE_ATTRIBUTE_PER_LINE, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

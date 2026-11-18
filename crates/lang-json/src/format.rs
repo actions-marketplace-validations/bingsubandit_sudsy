@@ -12,24 +12,24 @@ include!("schema.generated.rs");
 pub struct JsonFormatter;
 
 fn list_style(options: &ResolvedOptions, is_object: bool) -> ListStyle {
-    let jsonc = options.str(DIALECT) == "jsonc";
+    let jsonc = dialect(options) == Dialect::Jsonc;
     ListStyle {
         padding: options.bool(if is_object {
             shared::BRACKET_SPACING
         } else {
             shared::ARRAY_BRACKET_SPACING
         }),
-        trailing_comma: if jsonc && options.str(TRAILING_COMMAS) == "multiline" {
+        trailing_comma: if jsonc && trailing_commas(options) == TrailingCommas::Multiline {
             TrailingComma::WhenBroken
         } else {
             TrailingComma::Never
         },
-        layout: match options.str(COLLAPSE) {
-            "always" => ListLayout::Fit,
-            "never" => ListLayout::Break,
-            "opening_break" if is_object => ListLayout::PreserveFirstBreak,
-            "opening_break" => ListLayout::Fit,
-            _ => ListLayout::PreserveBreak,
+        layout: match collapse(options) {
+            Collapse::Always => ListLayout::Fit,
+            Collapse::Never => ListLayout::Break,
+            Collapse::OpeningBreak if is_object => ListLayout::PreserveFirstBreak,
+            Collapse::OpeningBreak => ListLayout::Fit,
+            Collapse::Preserve => ListLayout::PreserveBreak,
         },
         ..ListStyle::default()
     }

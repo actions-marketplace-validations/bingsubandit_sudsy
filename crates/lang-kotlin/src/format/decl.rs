@@ -208,17 +208,14 @@ fn paren_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let parent = parent_kind(node);
     let (min, comma) = match parent {
         k::FUN => (
-            cx.options.int("function_signature_wrap_min_parameters") as usize,
+            super::function_signature_wrap_min_parameters(cx.options),
             true,
         ),
-        k::PRIMARY_CONSTRUCTOR => (
-            cx.options.int("class_signature_wrap_min_parameters") as usize,
-            true,
-        ),
+        k::PRIMARY_CONSTRUCTOR => (super::class_signature_wrap_min_parameters(cx.options), true),
         k::FUNCTION_TYPE | k::CATCH | k::PROPERTY_ACCESSOR => (usize::MAX, false),
         _ => (usize::MAX, true),
     };
-    let multiline = cx.options.str("trailing_commas") == "multiline";
+    let multiline = super::trailing_commas(cx.options) == super::TrailingCommas::Multiline;
     let trailing = if comma && multiline {
         TrailingComma::WhenBroken
     } else {

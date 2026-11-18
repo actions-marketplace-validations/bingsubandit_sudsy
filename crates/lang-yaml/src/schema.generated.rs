@@ -11,6 +11,65 @@ pub const DOCUMENT_END: &str = "document_end";
 pub const BLANK_LINES_AFTER_KEY: &str = "blank_lines_after_key";
 #[allow(dead_code)]
 pub const COMMENT_SPACING: &str = "comment_spacing";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SequenceIndent { Preserve, Indented, Flush }
+#[allow(dead_code)]
+pub fn sequence_indent(o: &core_config::ResolvedOptions) -> SequenceIndent {
+    match o.text(SEQUENCE_INDENT) {
+        "indented" => SequenceIndent::Indented,
+        "flush" => SequenceIndent::Flush,
+        _ => SequenceIndent::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum QuoteStyle { Preserve, Single, Double, PreferDouble }
+#[allow(dead_code)]
+pub fn quote_style(o: &core_config::ResolvedOptions) -> QuoteStyle {
+    match o.text(QUOTE_STYLE) {
+        "single" => QuoteStyle::Single,
+        "double" => QuoteStyle::Double,
+        "prefer_double" => QuoteStyle::PreferDouble,
+        _ => QuoteStyle::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DocumentStart { Preserve, Always, Never }
+#[allow(dead_code)]
+pub fn document_start(o: &core_config::ResolvedOptions) -> DocumentStart {
+    match o.text(DOCUMENT_START) {
+        "always" => DocumentStart::Always,
+        "never" => DocumentStart::Never,
+        _ => DocumentStart::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DocumentEnd { Preserve, Always, Never }
+#[allow(dead_code)]
+pub fn document_end(o: &core_config::ResolvedOptions) -> DocumentEnd {
+    match o.text(DOCUMENT_END) {
+        "always" => DocumentEnd::Always,
+        "never" => DocumentEnd::Never,
+        _ => DocumentEnd::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BlankLinesAfterKey { Preserve, Remove }
+#[allow(dead_code)]
+pub fn blank_lines_after_key(o: &core_config::ResolvedOptions) -> BlankLinesAfterKey {
+    match o.text(BLANK_LINES_AFTER_KEY) {
+        "remove" => BlankLinesAfterKey::Remove,
+        _ => BlankLinesAfterKey::Preserve,
+    }
+}
+#[allow(dead_code)]
+pub fn comment_spacing(o: &core_config::ResolvedOptions) -> usize {
+    o.uint(COMMENT_SPACING, 1)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

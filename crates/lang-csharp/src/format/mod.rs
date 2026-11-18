@@ -14,9 +14,8 @@ mod options;
 mod query;
 mod seq;
 
-pub use options::{
-    BRACE_NEWLINE, MEMBER_CHAIN_MIN_CALLS, PREPROCESSOR_SYMBOLS, TRAILING_COMMAS, option_schema,
-};
+pub use core_config::shared::BRACE_NEWLINE;
+pub use options::{MEMBER_CHAIN_MIN_CALLS, PREPROCESSOR_SYMBOLS, TRAILING_COMMAS, option_schema};
 
 use self::options::{
     attach_comments, constructor_initializer_on_new_line, fluid_assignments, hanging_base_list,

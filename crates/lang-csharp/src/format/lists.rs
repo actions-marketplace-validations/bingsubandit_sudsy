@@ -3,8 +3,8 @@
 
 use super::ROWS;
 use super::options::{
-    anonymous_type_brace_on_new_line, collection_blank_lines, creation_brace_on_new_line,
-    empty_braces, expand_crowded_initializers, hug_closing_paren, hug_only_sole_lambda,
+    anonymous_type_brace_on_new_line, collection_max_blank_lines, creation_brace_on_new_line,
+    empty_body_text, expand_crowded_initializers, hug_closing_paren, hug_only_sole_lambda,
     initializer_layout, nested_brace_on_new_line, trailing_comma,
 };
 use super::seq::{R, Sep, direct_tokens, sep_doc, separator, seq_of};
@@ -33,7 +33,7 @@ pub fn plain_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let style = match node.kind() {
         k::PROPERTY_PATTERN_CLAUSE => ListStyle {
             padding: true,
-            empty: empty_braces(cx.options),
+            empty: empty_body_text(cx.options),
             leading_line: nested_brace_on_new_line(cx.options)
                 && property_pattern_follows_something(node),
             ..ListStyle::default()
@@ -129,11 +129,11 @@ fn brace_style(cx: &FormatCtx<'_>, node: &SyntaxNode) -> ListStyle {
             node.kind(),
             k::COLLECTION_INITIALIZER_EXPRESSION | k::ARRAY_INITIALIZER_EXPRESSION
         ) {
-            collection_blank_lines(cx.options)
+            collection_max_blank_lines(cx.options)
         } else {
             1
         },
-        empty: empty_braces(cx.options),
+        empty: empty_body_text(cx.options),
         ..ListStyle::default()
     }
 }
@@ -153,7 +153,7 @@ pub fn collection_expression(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         padding: false,
         trailing_comma: trailing_comma(cx.options),
         layout: initializer_layout(cx.options),
-        max_blank_lines: collection_blank_lines(cx.options),
+        max_blank_lines: collection_max_blank_lines(cx.options),
         ..ListStyle::default()
     };
     delimited_list(cx, node, &style)

@@ -13,7 +13,10 @@ pub(crate) const NG_NESTED: &str = "ng-nested";
 
 /// Is the code one embedded expression (of a host or of an Angular template)?
 pub(crate) fn is_expression(options: &core_config::ResolvedOptions) -> bool {
-    matches!(options.get("embed_mode"), Some(core_config::OptionValue::String(m)) if m == EXPRESSION || m == NG_EXPRESSION || m == NG_NESTED)
+    matches!(
+        options.text("embed_mode"),
+        EXPRESSION | NG_EXPRESSION | NG_NESTED
+    )
 }
 
 /// Is `node` the expression of an embedded expression (the only element of the `[ ]`)? It stands
@@ -29,8 +32,7 @@ pub(crate) fn is_root(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
 
 /// [`is_root`], and the operands of a binary are not indented (Angular's nested expressions are).
 pub(crate) fn is_unindented_root(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
-    is_root(cx, node)
-        && !matches!(cx.options.get("embed_mode"), Some(core_config::OptionValue::String(m)) if m == NG_NESTED)
+    is_root(cx, node) && !cx.options.is("embed_mode", NG_NESTED)
 }
 
 pub(crate) fn format(

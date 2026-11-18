@@ -9,7 +9,7 @@ use crate::FormatCtx;
 use crate::comments;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_syntax::roles;
 use core_syntax::{Assoc, Grammar, SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -50,21 +50,15 @@ pub struct BinaryPolicy {
 
 impl BinaryPolicy {
     pub fn of(options: &ResolvedOptions) -> Self {
-        let text = |name: &str| match options.get(name) {
-            Some(OptionValue::String(s)) => s.as_str(),
-            _ => "",
-        };
+        let text = |name: &str| options.text(name);
         Self {
             operator_line: if text(OPERATOR_LINE) == "end" {
                 OperatorLine::End
             } else {
                 OperatorLine::Start
             },
-            indent: match options.get(INDENT) {
-                Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(1),
-                _ => 1,
-            },
-            indent_nested: !matches!(options.get(INDENT_NESTED), Some(OptionValue::Bool(false))),
+            indent: options.uint(INDENT, 1),
+            indent_nested: options.flag(INDENT_NESTED, true),
             hug: match text(HUG) {
                 "assignment" => Hug::Assignment,
                 "statement" => Hug::Statement,

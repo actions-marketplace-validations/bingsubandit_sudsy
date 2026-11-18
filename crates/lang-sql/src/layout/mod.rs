@@ -9,7 +9,7 @@ mod seq;
 mod space;
 mod wrap;
 
-use core_config::{OptionValue, ResolvedOptions, shared};
+use core_config::{ResolvedOptions, shared};
 use core_format::rules::LazyRules;
 use core_format::{Doc, doc};
 use core_syntax::{Grammar, SyntaxNode, grammars};
@@ -19,13 +19,10 @@ static ROWS: LazyRules = LazyRules::new(|| grammars::SQL.get(), include_str!("..
 
 /// One level of indentation.
 fn unit(options: &ResolvedOptions) -> String {
-    let int = |name, fallback: usize| match options.get(name) {
-        Some(OptionValue::Int(n)) => *n as usize,
-        _ => fallback,
-    };
-    match options.get(shared::INDENT_STYLE) {
-        Some(OptionValue::String(s)) if s == "tab" => "\t".into(),
-        _ => " ".repeat(int(shared::INDENT_SIZE, 4)),
+    if options.is(shared::INDENT_STYLE, "tab") {
+        "\t".into()
+    } else {
+        " ".repeat(options.uint(shared::INDENT_SIZE, 4))
     }
 }
 
@@ -39,9 +36,9 @@ fn signature(seq: &Seq) -> Vec<(u32, String)> {
 
 pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -> Doc {
     let mut seq = Seq::build(root, grammar);
-    match options.get("dialect") {
-        Some(OptionValue::String(d)) if d == "mysql" => blocks::add_indents(&mut seq),
-        Some(OptionValue::String(d)) if d == "tsql" => blocks::add_tsql_indents(&mut seq),
+    match options.text("dialect") {
+        "mysql" => blocks::add_indents(&mut seq),
+        "tsql" => blocks::add_tsql_indents(&mut seq),
         _ => {}
     }
     let mut recase = ROWS.get().cases().recaser(options);
@@ -52,13 +49,11 @@ pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -
     }
     let unit = unit(options);
     let tab = unit.chars().count().max(1);
-    let width = match options.get(shared::LINE_WIDTH) {
-        Some(OptionValue::Int(n)) => *n as usize,
-        _ => 80,
-    };
-    let comma = match options.get("comma_position") {
-        Some(OptionValue::String(s)) if s == "leading" => breaks::Pos::Leading,
-        _ => breaks::Pos::Trailing,
+    let width = options.uint(shared::LINE_WIDTH, 80);
+    let comma = if options.is("comma_position", "leading") {
+        breaks::Pos::Leading
+    } else {
+        breaks::Pos::Trailing
     };
     for _ in 0..40 {
         let before = signature(&seq);

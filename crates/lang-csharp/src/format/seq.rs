@@ -3,9 +3,9 @@
 
 use super::flat;
 use super::options::{
-    brace_on_new_line, clauses_on_closing_line, constructor_initializer_on_new_line,
-    creation_brace_on_new_line, do_while_on_closing_line, expand_empty_bodies, hanging_base_list,
-    keeps_attribute_line, label_outdent, nested_brace_on_new_line, space_after_delegate,
+    clauses_on_closing_line, constructor_initializer_on_new_line, creation_brace_on_new_line,
+    do_while_on_closing_line, expand_empty_bodies, hanging_base_list, keeps_attribute_line,
+    label_outdent, nested_brace_on_new_line, space_after_delegate,
     space_after_empty_last_for_clause, space_between_empty_for_clauses,
 };
 use crate::generated::kind as k;
@@ -322,7 +322,7 @@ pub fn sep_doc(cx: &FormatCtx<'_>, sep: Sep) -> Doc {
         Sep::Hard | Sep::Embedded => doc::hardline(),
         Sep::HardIndented => doc::indent(doc::hardline()),
         Sep::Brace(element) => {
-            if brace_on_new_line(cx.options, element) {
+            if cx.options.brace_on_new_line(element) {
                 doc::hardline()
             } else {
                 doc::lit(" ")

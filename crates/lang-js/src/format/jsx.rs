@@ -163,7 +163,7 @@ fn attribute(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
                 let inner = raw[1..raw.len() - 1]
                     .replace("&apos;", "'")
                     .replace("&quot;", "\"");
-                let single = cx.options.bool("jsx_single_quote");
+                let single = super::jsx_single_quote(cx.options);
                 let (preferred, other) = if single { ('\'', '"') } else { ('"', '\'') };
                 let count = |q: char| inner.matches(q).count();
                 let q = if count(preferred) > count(other) {
@@ -264,7 +264,7 @@ fn opening(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
     head.push(indent(concat(printed)));
     let mut tail = close_tokens(cx);
     let same_line = (attrs.is_empty() && !name_comments)
-        || (cx.options.bool("bracket_same_line")
+        || (super::bracket_same_line(cx.options)
             && (!name_comments || !attrs.is_empty())
             && !attrs.last().is_some_and(|a| has_trailing_comment(cx, a)));
     if self_closing {
@@ -524,11 +524,7 @@ fn element(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
             > 1;
     let mut forced_break =
         will_break(&opening_doc) || contains_tag || many_attributes || many_expressions;
-    let raw_ws = if cx
-        .options
-        .get("quote_style")
-        .is_some_and(|v| matches!(v, core_config::OptionValue::String(s) if s == "single"))
-    {
+    let raw_ws = if super::quote_style(cx.options) == super::QuoteStyle::Single {
         "{' '}"
     } else {
         "{\" \"}"

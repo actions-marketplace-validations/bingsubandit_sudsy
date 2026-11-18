@@ -8,7 +8,7 @@
 //! be (`upper`, `lower` or `capitalise`), each word that differs rules cases out, and once none is
 //! left the words after it, and so the whole file, take the case the last non-empty set preferred.
 
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_syntax::{Grammar, SyntaxKind};
 
 const UPPER: u8 = 1;
@@ -154,10 +154,7 @@ impl Cases {
                 .iter()
                 .map(|r| match &r.policy {
                     Ok(p) => *p,
-                    Err(name) => match options.get(name) {
-                        Some(OptionValue::String(s)) => policy_of(s).unwrap_or(Policy::Consistent),
-                        _ => Policy::Consistent,
-                    },
+                    Err(name) => policy_of(options.text(name)).unwrap_or(Policy::Consistent),
                 })
                 .collect(),
             memory: self.0.iter().map(|_| Memory::default()).collect(),

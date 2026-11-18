@@ -1,6 +1,6 @@
 //! `quoted-strings`: which strings must, may or must not be quoted, and with which quotes.
 
-use crate::format::{Quotes, restyle};
+use crate::format::{QuoteStyle, restyle};
 use crate::generated::{Scalar, kind};
 use crate::resolve::{plain_round_trips, resolves_to_str};
 use crate::rules::is_key;
@@ -246,8 +246,8 @@ rule! {
             };
             let report_ = ctx.report(range, report);
             let target = match wanted {
-                Some('\'') => Some(Quotes::Single),
-                Some(_) => Some(Quotes::Double),
+                Some('\'') => Some(QuoteStyle::Single),
+                Some(_) => Some(QuoteStyle::Double),
                 None => None,
             };
             if let Some(new) = target.and_then(|q| restyle(text, token.kind(), q)) {

@@ -8,7 +8,7 @@ use super::chain::{MemberChain, member_chain as print_chain};
 use crate::comments::{self, CommentKind};
 use crate::doc::{self, Doc};
 use crate::{Directive, FormatCtx, FormatError};
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 use std::cell::RefCell;
 
@@ -78,14 +78,8 @@ impl ChainPolicy {
     /// The policy of the `member_chain_*` options a language declares (the others keep a neutral
     /// value that its style does not read).
     pub fn of(options: &ResolvedOptions) -> Self {
-        let text = |name: &str| match options.get(name) {
-            Some(OptionValue::String(s)) => s.as_str(),
-            _ => "",
-        };
-        let int = |name: &str, default: usize| match options.get(name) {
-            Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(default),
-            _ => default,
-        };
+        let text = |name: &str| options.text(name);
+        let int = |name: &str, default: usize| options.uint(name, default);
         Self {
             style: match text(STYLE) {
                 "grouped" => Style::Grouped,
@@ -104,16 +98,7 @@ impl ChainPolicy {
                 "always" => KeepAccesses::Always,
                 _ => KeepAccesses::Never,
             },
-            head_calls: match options.get(HEAD_CALLS) {
-                Some(OptionValue::List(items)) => items
-                    .iter()
-                    .filter_map(|i| match i {
-                        OptionValue::String(s) => Some(s.clone()),
-                        _ => None,
-                    })
-                    .collect(),
-                _ => Vec::new(),
-            },
+            head_calls: options.strings(HEAD_CALLS),
             break_on_block: match text(BREAK_ON_BLOCK) {
                 "inner" => BreakOnBlock::Inner,
                 "any" => BreakOnBlock::Any,

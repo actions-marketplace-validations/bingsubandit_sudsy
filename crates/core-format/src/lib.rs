@@ -73,17 +73,13 @@ pub fn deep<R>(f: impl FnOnce() -> R) -> R {
 /// Printer settings from the shared options (`line_width`, `indent_size`, `indent_style`); an
 /// option the provider's schema does not declare keeps the printer default.
 pub fn print_options(options: &ResolvedOptions) -> PrintOptions {
-    use core_config::{OptionValue, shared};
+    use core_config::shared;
     let default = PrintOptions::default();
-    let int = |name, fallback: usize| match options.get(name) {
-        Some(OptionValue::Int(n)) => *n as usize,
-        _ => fallback,
-    };
+    let int = |name, fallback: usize| options.uint(name, fallback);
     PrintOptions {
         line_width: int(shared::LINE_WIDTH, default.line_width),
         indent_width: int(shared::INDENT_SIZE, default.indent_width),
-        use_tabs: matches!(options.get(shared::INDENT_STYLE),
-            Some(OptionValue::String(s)) if s == "tab"),
+        use_tabs: options.is(shared::INDENT_STYLE, "tab"),
     }
 }
 
@@ -141,16 +137,13 @@ pub fn format_tree(root: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<String, Form
         (printed, keep)
     };
     out.truncate(out.trim_end_matches(['\n', ' ', '\t']).len().max(keep));
-    let final_newline = !matches!(
-        cx.options.get(core_config::shared::FINAL_NEWLINE),
-        Some(core_config::OptionValue::Bool(false))
-    );
+    let final_newline = cx.options.flag(core_config::shared::FINAL_NEWLINE, true);
     if final_newline && !cx.exact_end(root) && !out.is_empty() && !out.ends_with('\n') {
         out.push('\n');
     }
-    let ending = match cx.options.get(core_config::shared::END_OF_LINE) {
-        Some(core_config::OptionValue::String(s)) if s == "lf" => LineEnding::Lf,
-        Some(core_config::OptionValue::String(s)) if s == "crlf" => LineEnding::CrLf,
+    let ending = match cx.options.text(core_config::shared::END_OF_LINE) {
+        "lf" => LineEnding::Lf,
+        "crlf" => LineEnding::CrLf,
         _ => LineEnding::of_tree(root),
     };
     Ok(match ending {

@@ -3,7 +3,7 @@
 
 use super::flat;
 use super::options::{
-    blank_after_block, blank_before_comment, empty_braces, expand_empty_bodies,
+    blank_after_block, blank_before_comment, empty_body_text, expand_empty_bodies,
     indent_switch_section_block, preserve_single_line_blocks, preserve_single_line_statements,
     remove_accessor_blank_lines, separate_all_members, separate_members, trailing_comma,
 };
@@ -127,7 +127,7 @@ fn with_braces(
 fn block_style(cx: &FormatCtx<'_>) -> BlockStyle {
     BlockStyle {
         max_blank_lines: 1,
-        empty: empty_braces(cx.options),
+        empty: empty_body_text(cx.options),
         force_blank: None,
         expand_empty: false,
         keep_same_line: false,
@@ -490,7 +490,7 @@ fn arms_style(cx: &FormatCtx<'_>, node: &SyntaxNode) -> ListStyle {
         },
         padding: enum_in_line,
         trailing_comma: trailing_comma(cx.options),
-        empty: empty_braces(cx.options),
+        empty: empty_body_text(cx.options),
         expand_empty: node.kind() == k::ENUM_DECLARATION && !keeps_empty_inline(cx, node),
         force_blank: blank_rule(cx).filter(|_| node.kind() == k::ENUM_DECLARATION),
         ..ListStyle::default()

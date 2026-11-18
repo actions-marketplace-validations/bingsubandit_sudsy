@@ -8,7 +8,7 @@
 //! - `new Foo` becomes `new Foo()` and an arrow's lone parameter gets its parentheses.
 
 use crate::generated::kind as k;
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_format::comments;
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken};
 
@@ -22,8 +22,7 @@ pub(crate) fn rewrite(
     grammar: &Grammar,
     options: &ResolvedOptions,
 ) -> Option<String> {
-    let avoid_parens =
-        matches!(options.get("arrow_parens"), Some(OptionValue::String(s)) if s == "avoid");
+    let avoid_parens = super::arrow_parens(options) == super::ArrowParens::Avoid;
     let mut edits: Vec<Edit> = Vec::new();
     // Comments in front of a cut token lead what follows it; ones after it would move.
     let mut cut = |tok: SyntaxToken| {

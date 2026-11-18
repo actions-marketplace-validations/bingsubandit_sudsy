@@ -9,7 +9,7 @@ use crate::FormatCtx;
 use crate::comments;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_syntax::roles;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -56,10 +56,7 @@ pub struct AssignPolicy {
 
 impl AssignPolicy {
     pub fn of(options: &ResolvedOptions) -> Self {
-        let text = |name: &str| match options.get(name) {
-            Some(OptionValue::String(s)) => s.as_str(),
-            _ => "",
-        };
+        let text = |name: &str| options.text(name);
         Self {
             style: match text(LAYOUT) {
                 "fluid" => AssignStyle::Fluid,
@@ -67,10 +64,7 @@ impl AssignPolicy {
                 _ => AssignStyle::Compact,
             },
             conditional_always: text(CONDITIONAL) == "always",
-            indent: match options.get(INDENT) {
-                Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(1),
-                _ => 1,
-            },
+            indent: options.uint(INDENT, 1),
         }
     }
 }

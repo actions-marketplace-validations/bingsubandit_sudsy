@@ -2,7 +2,6 @@
 //! one-line "words" printer, statement endings and clauses, and brace lists.
 
 use crate::generated::kind as k;
-use core_config::OptionValue;
 use core_format::doc::{self, Doc, concat, hardline, if_break, lit};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
@@ -25,19 +24,19 @@ pub(crate) struct Style {
 
 pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
     cx.cached(|| Style {
-        semi: cx.options.bool("semi"),
-        single_quote: matches!(cx.options.get("quote_style"),
-            Some(OptionValue::String(s)) if s == "single"),
-        commas: match cx.options.get("trailing_commas") {
-            _ if matches!(cx.options.get("embed_mode"),
-                Some(OptionValue::String(m))
-                    if m == super::embed::NG_EXPRESSION || m == super::embed::NG_NESTED) =>
+        semi: super::semi(cx.options),
+        single_quote: super::quote_style(cx.options) == super::QuoteStyle::Single,
+        commas: match super::trailing_commas(cx.options) {
+            _ if matches!(
+                cx.options.text("embed_mode"),
+                super::embed::NG_EXPRESSION | super::embed::NG_NESTED
+            ) =>
             {
                 1
             }
-            Some(OptionValue::String(s)) if s == "none" => 0,
-            Some(OptionValue::String(s)) if s == "es5" => 1,
-            _ => 2,
+            super::TrailingCommas::None => 0,
+            super::TrailingCommas::Es5 => 1,
+            super::TrailingCommas::All => 2,
         },
         bracket_spacing: cx.options.bool("bracket_spacing"),
         call: core_format::shapes::CallStyle::of(cx.options),

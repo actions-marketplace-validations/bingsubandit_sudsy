@@ -5,6 +5,39 @@ pub const COLLAPSE: &str = "collapse";
 pub const TRAILING_COMMAS: &str = "trailing_commas";
 #[allow(dead_code)]
 pub const DIALECT: &str = "dialect";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Collapse { Preserve, Always, Never, OpeningBreak }
+#[allow(dead_code)]
+pub fn collapse(o: &core_config::ResolvedOptions) -> Collapse {
+    match o.text(COLLAPSE) {
+        "always" => Collapse::Always,
+        "never" => Collapse::Never,
+        "opening_break" => Collapse::OpeningBreak,
+        _ => Collapse::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TrailingCommas { Never, Multiline }
+#[allow(dead_code)]
+pub fn trailing_commas(o: &core_config::ResolvedOptions) -> TrailingCommas {
+    match o.text(TRAILING_COMMAS) {
+        "multiline" => TrailingCommas::Multiline,
+        _ => TrailingCommas::Never,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Dialect { Auto, Json, Jsonc }
+#[allow(dead_code)]
+pub fn dialect(o: &core_config::ResolvedOptions) -> Dialect {
+    match o.text(DIALECT) {
+        "json" => Dialect::Json,
+        "jsonc" => Dialect::Jsonc,
+        _ => Dialect::Auto,
+    }
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

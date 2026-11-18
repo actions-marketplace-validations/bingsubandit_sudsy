@@ -10,7 +10,7 @@ use super::chain::ends_in_line_comment;
 use crate::FormatCtx;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_syntax::roles;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -30,15 +30,9 @@ pub struct ConditionalPolicy {
 impl ConditionalPolicy {
     pub fn of(options: &ResolvedOptions) -> Self {
         Self {
-            chained: matches!(options.get(LAYOUT), Some(OptionValue::String(s)) if s == "chained"),
-            indent: match options.get(INDENT) {
-                Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(1),
-                _ => 1,
-            },
-            tab_width: match options.get("indent_size") {
-                Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(2),
-                _ => 2,
-            },
+            chained: options.is(LAYOUT, "chained"),
+            indent: options.uint(INDENT, 1),
+            tab_width: options.uint("indent_size", 2),
         }
     }
 }

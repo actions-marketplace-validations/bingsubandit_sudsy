@@ -3,6 +3,26 @@
 pub const TRAILING_COMMAS: &str = "trailing_commas";
 #[allow(dead_code)]
 pub const DECLARATION_BRACE: &str = "declaration_brace";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TrailingCommas { Never, Multiline }
+#[allow(dead_code)]
+pub fn trailing_commas(o: &core_config::ResolvedOptions) -> TrailingCommas {
+    match o.text(TRAILING_COMMAS) {
+        "never" => TrailingCommas::Never,
+        _ => TrailingCommas::Multiline,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DeclarationBrace { NextLine, SameLine }
+#[allow(dead_code)]
+pub fn declaration_brace(o: &core_config::ResolvedOptions) -> DeclarationBrace {
+    match o.text(DECLARATION_BRACE) {
+        "same_line" => DeclarationBrace::SameLine,
+        _ => DeclarationBrace::NextLine,
+    }
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

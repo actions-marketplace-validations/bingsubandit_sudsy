@@ -1,6 +1,10 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
 pub const SINGLE_QUOTE: &str = "single_quote";
+#[allow(dead_code)]
+pub fn single_quote(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SINGLE_QUOTE, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

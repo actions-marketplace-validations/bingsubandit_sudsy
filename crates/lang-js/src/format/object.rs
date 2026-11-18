@@ -6,7 +6,7 @@
 use super::ast::{parent, un};
 use super::util::{R, inline, is_tok, kids, node_of, shape_error, style, token_of};
 use crate::generated::kind as k;
-use core_config::{OptionValue, ResolvedOptions};
+use core_config::ResolvedOptions;
 use core_format::doc::{Doc, concat, hardline, indent, lit};
 use core_format::shapes::{self, ListLayout, ListStyle, TrailingComma};
 use core_format::{FormatCtx, FormatError};
@@ -212,7 +212,7 @@ fn property(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
             .find_map(node_of)
             .is_some_and(|key| {
                 let width = super::ast::text_of(cx, key).chars().count();
-                width < usize::try_from(cx.options.int("indent_size")).unwrap_or(2) + 3
+                width < cx.options.uint("indent_size", 2) + 3
             });
     super::assign::assign_like(
         cx,
@@ -284,20 +284,16 @@ fn is_identifier(s: &str) -> bool {
 
 /// How `quote_props` is applied to the property names of the objects (and class bodies,
 /// interfaces, type literals and enums) of one tree, node by node (`rewrite` walks the tree once).
-pub(crate) struct KeyEdits<'a> {
-    mode: &'a str,
+pub(crate) struct KeyEdits {
+    mode: super::QuoteProps,
     /// Does the tree hold TypeScript syntax? Found when first asked.
     ts: std::cell::OnceCell<bool>,
 }
 
-impl<'a> KeyEdits<'a> {
-    pub(crate) fn new(options: &'a ResolvedOptions) -> Self {
-        let mode = match options.get("quote_props") {
-            Some(OptionValue::String(s)) => s.as_str(),
-            _ => "preserve",
-        };
+impl KeyEdits {
+    pub(crate) fn new(options: &ResolvedOptions) -> Self {
         KeyEdits {
-            mode,
+            mode: super::quote_props(options),
             ts: std::cell::OnceCell::new(),
         }
     }
@@ -312,7 +308,7 @@ impl<'a> KeyEdits<'a> {
         grammar: &Grammar,
         edits: &mut Vec<(usize, Option<&'static str>)>,
     ) {
-        if self.mode == "preserve"
+        if self.mode == super::QuoteProps::Preserve
             || !matches!(
                 object.kind(),
                 k::OBJECT_EXPRESSION
@@ -336,7 +332,7 @@ impl<'a> KeyEdits<'a> {
         let keys: Vec<(SyntaxNode, bool)> =
             object.children().filter_map(|p| key_of(&p, &ts)).collect();
         // A quoted name that is not a plain identifier (or number) keeps the quotes of all names.
-        let needs_quotes = self.mode == "consistent"
+        let needs_quotes = self.mode == super::QuoteProps::Consistent
             && keys.iter().any(|(key, quoted)| {
                 *quoted
                     && tok(key).is_some_and(|t| {

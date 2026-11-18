@@ -288,29 +288,26 @@ impl NodeFormatter for MarkupFormatter {
         if node.kind() != k::DOCUMENT {
             return Ok(None);
         }
-        let mode = match cx.options.str(WHITESPACE_SENSITIVITY) {
-            "strict" => Mode::Strict,
-            "ignore" => Mode::Ignore,
-            _ => Mode::Css,
+        let mode = match whitespace_sensitivity(cx.options) {
+            WhitespaceSensitivity::Strict => Mode::Strict,
+            WhitespaceSensitivity::Ignore => Mode::Ignore,
+            WhitespaceSensitivity::Css => Mode::Css,
         };
         let src = node.text().to_string();
         let tree = model::build(cx.grammar, node, &src, mode, self.dialect);
         let embed = |l: &str, m, c: &str, w, q| cx.embed(l, m, c, w, q);
-        let auto = cx.options.str(EMBEDDED_LANGUAGE_FORMATTING) == "auto";
+        let auto = embedded_language_formatting(cx.options) == EmbeddedLanguageFormatting::Auto;
         Ok(Some(print::block(
             &tree,
             print::Opts {
                 grammar: cx.grammar,
                 dialect: self.dialect,
-                indent_blocks: cx
-                    .options
-                    .get(INDENT_SCRIPT_AND_STYLE)
-                    .is_some_and(|v| *v == core_config::OptionValue::Bool(true)),
+                indent_blocks: cx.options.flag(INDENT_SCRIPT_AND_STYLE, false),
                 embed: auto.then_some(&embed),
                 width: cx.options.int("line_width") as usize,
                 tab: cx.options.int("indent_size") as usize,
-                bracket_same_line: cx.options.bool(BRACKET_SAME_LINE),
-                single_attribute_per_line: cx.options.bool(SINGLE_ATTRIBUTE_PER_LINE),
+                bracket_same_line: bracket_same_line(cx.options),
+                single_attribute_per_line: single_attribute_per_line(cx.options),
             },
         )))
     }

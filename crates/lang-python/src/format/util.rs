@@ -1,7 +1,6 @@
 //! Helpers shared by the formatting modules: children, tokens, options, document shapes.
 
 use crate::generated::kind as k;
-use core_config::OptionValue;
 use core_format::doc::{self, Doc, concat, if_break, line, lit, softline};
 use core_format::{FormatCtx, FormatError, comments};
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
@@ -62,17 +61,12 @@ pub(crate) struct Style {
 
 pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
     cx.cached(|| Style {
-        quote: match cx.options.get("quote_style") {
-            Some(OptionValue::String(s)) if s == "single" => {
-                core_format::literals::prefixed::Quote::Single
-            }
-            Some(OptionValue::String(s)) if s == "preserve" => {
-                core_format::literals::prefixed::Quote::Preserve
-            }
-            _ => core_format::literals::prefixed::Quote::Double,
+        quote: match super::quote_style(cx.options) {
+            super::QuoteStyle::Single => core_format::literals::prefixed::Quote::Single,
+            super::QuoteStyle::Preserve => core_format::literals::prefixed::Quote::Preserve,
+            super::QuoteStyle::Double => core_format::literals::prefixed::Quote::Double,
         },
-        magic_comma: !matches!(cx.options.get("magic_trailing_comma"),
-            Some(OptionValue::String(s)) if s == "ignore"),
+        magic_comma: super::magic_trailing_comma(cx.options) == super::MagicTrailingComma::Respect,
         width: cx.options.int("line_width") as usize,
         indent: cx.options.int("indent_size") as usize,
     })

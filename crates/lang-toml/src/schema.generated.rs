@@ -5,6 +5,31 @@ pub const COLLAPSE: &str = "collapse";
 pub const TRAILING_COMMAS: &str = "trailing_commas";
 #[allow(dead_code)]
 pub const ALIGN_COMMENTS: &str = "align_comments";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Collapse { Preserve, Always, Never }
+#[allow(dead_code)]
+pub fn collapse(o: &core_config::ResolvedOptions) -> Collapse {
+    match o.text(COLLAPSE) {
+        "always" => Collapse::Always,
+        "never" => Collapse::Never,
+        _ => Collapse::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TrailingCommas { Never, Multiline }
+#[allow(dead_code)]
+pub fn trailing_commas(o: &core_config::ResolvedOptions) -> TrailingCommas {
+    match o.text(TRAILING_COMMAS) {
+        "never" => TrailingCommas::Never,
+        _ => TrailingCommas::Multiline,
+    }
+}
+#[allow(dead_code)]
+pub fn align_comments(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(ALIGN_COMMENTS, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

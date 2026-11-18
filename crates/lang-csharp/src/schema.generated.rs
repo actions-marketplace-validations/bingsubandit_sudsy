@@ -1,9 +1,5 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const BRACE_NEWLINE: &str = "brace_newline";
-#[allow(dead_code)]
-pub const BRACE_SAME_LINE: &str = "brace_same_line";
-#[allow(dead_code)]
 pub const TRAILING_COMMAS: &str = "trailing_commas";
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_MIN_CALLS: &str = "member_chain_min_calls";
@@ -109,6 +105,306 @@ pub const SORT_USINGS: &str = "sort_usings";
 pub const SORT_USINGS_SYSTEM_FIRST: &str = "sort_usings_system_first";
 #[allow(dead_code)]
 pub const SEPARATE_USING_GROUPS: &str = "separate_using_groups";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TrailingCommas { Preserve, Never, Multiline }
+#[allow(dead_code)]
+pub fn trailing_commas(o: &core_config::ResolvedOptions) -> TrailingCommas {
+    match o.text(TRAILING_COMMAS) {
+        "never" => TrailingCommas::Never,
+        "multiline" => TrailingCommas::Multiline,
+        _ => TrailingCommas::Preserve,
+    }
+}
+#[allow(dead_code)]
+pub fn derive_symbol_sets(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(DERIVE_SYMBOL_SETS, false)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BlankLinesBetweenMembers { Preserve, Separate, Always }
+#[allow(dead_code)]
+pub fn blank_lines_between_members(o: &core_config::ResolvedOptions) -> BlankLinesBetweenMembers {
+    match o.text(BLANK_LINES_BETWEEN_MEMBERS) {
+        "separate" => BlankLinesBetweenMembers::Separate,
+        "always" => BlankLinesBetweenMembers::Always,
+        _ => BlankLinesBetweenMembers::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AccessorBlankLines { Preserve, Remove }
+#[allow(dead_code)]
+pub fn accessor_blank_lines(o: &core_config::ResolvedOptions) -> AccessorBlankLines {
+    match o.text(ACCESSOR_BLANK_LINES) {
+        "remove" => AccessorBlankLines::Remove,
+        _ => AccessorBlankLines::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CollectionBlankLines { Preserve, Remove }
+#[allow(dead_code)]
+pub fn collection_blank_lines(o: &core_config::ResolvedOptions) -> CollectionBlankLines {
+    match o.text(COLLECTION_BLANK_LINES) {
+        "remove" => CollectionBlankLines::Remove,
+        _ => CollectionBlankLines::Preserve,
+    }
+}
+#[allow(dead_code)]
+pub fn inline_accessor_bodies(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(INLINE_ACCESSOR_BODIES, false)
+}
+#[allow(dead_code)]
+pub fn preserve_single_line_blocks(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(PRESERVE_SINGLE_LINE_BLOCKS, false)
+}
+#[allow(dead_code)]
+pub fn preserve_single_line_statements(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(PRESERVE_SINGLE_LINE_STATEMENTS, false)
+}
+#[allow(dead_code)]
+pub fn indent_switch_section_block(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(INDENT_SWITCH_SECTION_BLOCK, true)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SwitchArmLayout { Inline, Assignment }
+#[allow(dead_code)]
+pub fn switch_arm_layout(o: &core_config::ResolvedOptions) -> SwitchArmLayout {
+    match o.text(SWITCH_ARM_LAYOUT) {
+        "assignment" => SwitchArmLayout::Assignment,
+        _ => SwitchArmLayout::Inline,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum WrappedBraceLine { Creation, All, None }
+#[allow(dead_code)]
+pub fn wrapped_brace_line(o: &core_config::ResolvedOptions) -> WrappedBraceLine {
+    match o.text(WRAPPED_BRACE_LINE) {
+        "all" => WrappedBraceLine::All,
+        "none" => WrappedBraceLine::None,
+        _ => WrappedBraceLine::Creation,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum InitializerCollapse { Preserve, Always }
+#[allow(dead_code)]
+pub fn initializer_collapse(o: &core_config::ResolvedOptions) -> InitializerCollapse {
+    match o.text(INITIALIZER_COLLAPSE) {
+        "always" => InitializerCollapse::Always,
+        _ => InitializerCollapse::Preserve,
+    }
+}
+#[allow(dead_code)]
+pub fn preserve_query_breaks(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(PRESERVE_QUERY_BREAKS, false)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum InitializerExpand { Fit, Crowded }
+#[allow(dead_code)]
+pub fn initializer_expand(o: &core_config::ResolvedOptions) -> InitializerExpand {
+    match o.text(INITIALIZER_EXPAND) {
+        "crowded" => InitializerExpand::Crowded,
+        _ => InitializerExpand::Fit,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LambdaArgumentHug { Last, Sole }
+#[allow(dead_code)]
+pub fn lambda_argument_hug(o: &core_config::ResolvedOptions) -> LambdaArgumentHug {
+    match o.text(LAMBDA_ARGUMENT_HUG) {
+        "sole" => LambdaArgumentHug::Sole,
+        _ => LambdaArgumentHug::Last,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ConstructorInitializerLine { SameLine, NewLine }
+#[allow(dead_code)]
+pub fn constructor_initializer_line(o: &core_config::ResolvedOptions) -> ConstructorInitializerLine {
+    match o.text(CONSTRUCTOR_INITIALIZER_LINE) {
+        "new_line" => ConstructorInitializerLine::NewLine,
+        _ => ConstructorInitializerLine::SameLine,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MemberAttributeLine { OwnLine, Keep }
+#[allow(dead_code)]
+pub fn member_attribute_line(o: &core_config::ResolvedOptions) -> MemberAttributeLine {
+    match o.text(MEMBER_ATTRIBUTE_LINE) {
+        "keep" => MemberAttributeLine::Keep,
+        _ => MemberAttributeLine::OwnLine,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ParameterAttributeLayout { Inline, Hanging }
+#[allow(dead_code)]
+pub fn parameter_attribute_layout(o: &core_config::ResolvedOptions) -> ParameterAttributeLayout {
+    match o.text(PARAMETER_ATTRIBUTE_LAYOUT) {
+        "hanging" => ParameterAttributeLayout::Hanging,
+        _ => ParameterAttributeLayout::Inline,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BaseListLayout { Inline, Hanging }
+#[allow(dead_code)]
+pub fn base_list_layout(o: &core_config::ResolvedOptions) -> BaseListLayout {
+    match o.text(BASE_LIST_LAYOUT) {
+        "hanging" => BaseListLayout::Hanging,
+        _ => BaseListLayout::Inline,
+    }
+}
+#[allow(dead_code)]
+pub fn unbreakable_single_item_lists(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(UNBREAKABLE_SINGLE_ITEM_LISTS, false)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DoWhileLine { NewLine, SameLine }
+#[allow(dead_code)]
+pub fn do_while_line(o: &core_config::ResolvedOptions) -> DoWhileLine {
+    match o.text(DO_WHILE_LINE) {
+        "same_line" => DoWhileLine::SameLine,
+        _ => DoWhileLine::NewLine,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ClauseKeywordLine { NewLine, SameLine }
+#[allow(dead_code)]
+pub fn clause_keyword_line(o: &core_config::ResolvedOptions) -> ClauseKeywordLine {
+    match o.text(CLAUSE_KEYWORD_LINE) {
+        "same_line" => ClauseKeywordLine::SameLine,
+        _ => ClauseKeywordLine::NewLine,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ElseLine { Inherit, NewLine, SameLine }
+#[allow(dead_code)]
+pub fn else_line(o: &core_config::ResolvedOptions) -> ElseLine {
+    match o.text(ELSE_LINE) {
+        "new_line" => ElseLine::NewLine,
+        "same_line" => ElseLine::SameLine,
+        _ => ElseLine::Inherit,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CatchLine { Inherit, NewLine, SameLine }
+#[allow(dead_code)]
+pub fn catch_line(o: &core_config::ResolvedOptions) -> CatchLine {
+    match o.text(CATCH_LINE) {
+        "new_line" => CatchLine::NewLine,
+        "same_line" => CatchLine::SameLine,
+        _ => CatchLine::Inherit,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FinallyLine { Inherit, NewLine, SameLine }
+#[allow(dead_code)]
+pub fn finally_line(o: &core_config::ResolvedOptions) -> FinallyLine {
+    match o.text(FINALLY_LINE) {
+        "new_line" => FinallyLine::NewLine,
+        "same_line" => FinallyLine::SameLine,
+        _ => FinallyLine::Inherit,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LabelIndent { NoChange, OneLess, FlushLeft }
+#[allow(dead_code)]
+pub fn label_indent(o: &core_config::ResolvedOptions) -> LabelIndent {
+    match o.text(LABEL_INDENT) {
+        "one_less" => LabelIndent::OneLess,
+        "flush_left" => LabelIndent::FlushLeft,
+        _ => LabelIndent::NoChange,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EmptyBraces { Space, Tight, Expanded }
+#[allow(dead_code)]
+pub fn empty_braces(o: &core_config::ResolvedOptions) -> EmptyBraces {
+    match o.text(EMPTY_BRACES) {
+        "tight" => EmptyBraces::Tight,
+        "expanded" => EmptyBraces::Expanded,
+        _ => EmptyBraces::Space,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ClosingParenLine { OwnLine, SameLine }
+#[allow(dead_code)]
+pub fn closing_paren_line(o: &core_config::ResolvedOptions) -> ClosingParenLine {
+    match o.text(CLOSING_PAREN_LINE) {
+        "same_line" => ClosingParenLine::SameLine,
+        _ => ClosingParenLine::OwnLine,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BlankLinesAfterBlock { Preserve, Require }
+#[allow(dead_code)]
+pub fn blank_lines_after_block(o: &core_config::ResolvedOptions) -> BlankLinesAfterBlock {
+    match o.text(BLANK_LINES_AFTER_BLOCK) {
+        "require" => BlankLinesAfterBlock::Require,
+        _ => BlankLinesAfterBlock::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BlankLineBeforeComment { Preserve, Require }
+#[allow(dead_code)]
+pub fn blank_line_before_comment(o: &core_config::ResolvedOptions) -> BlankLineBeforeComment {
+    match o.text(BLANK_LINE_BEFORE_COMMENT) {
+        "require" => BlankLineBeforeComment::Require,
+        _ => BlankLineBeforeComment::Preserve,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BlankLineAfterComment { Preserve, Remove }
+#[allow(dead_code)]
+pub fn blank_line_after_comment(o: &core_config::ResolvedOptions) -> BlankLineAfterComment {
+    match o.text(BLANK_LINE_AFTER_COMMENT) {
+        "remove" => BlankLineAfterComment::Remove,
+        _ => BlankLineAfterComment::Preserve,
+    }
+}
+#[allow(dead_code)]
+pub fn space_after_delegate(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_AFTER_DELEGATE, true)
+}
+#[allow(dead_code)]
+pub fn space_between_empty_for_clauses(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_BETWEEN_EMPTY_FOR_CLAUSES, false)
+}
+#[allow(dead_code)]
+pub fn space_after_empty_last_for_clause(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE, false)
+}
+#[allow(dead_code)]
+pub fn sort_usings(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SORT_USINGS, false)
+}
+#[allow(dead_code)]
+pub fn sort_usings_system_first(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SORT_USINGS_SYSTEM_FIRST, true)
+}
+#[allow(dead_code)]
+pub fn separate_using_groups(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SEPARATE_USING_GROUPS, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

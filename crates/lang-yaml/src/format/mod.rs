@@ -23,40 +23,11 @@ use std::borrow::Cow;
 
 include!("../schema.generated.rs");
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum SequenceIndent {
-    Preserve,
-    Indented,
-    Flush,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Quotes {
-    Preserve,
-    Single,
-    Double,
-    /// Double quotes, single when the text has a `"`.
-    PreferDouble,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum DocumentEnd {
-    Preserve,
-    Always,
-    Never,
-}
-
-pub(crate) enum DocumentStart {
-    Preserve,
-    Always,
-    Never,
-}
-
 /// The options formatting code reads.
 pub(crate) struct Style {
     pub indent: usize,
     pub sequence: SequenceIndent,
-    pub quotes: Quotes,
+    pub quotes: QuoteStyle,
     pub document_start: DocumentStart,
     pub document_end: DocumentEnd,
     pub max_blank: usize,
@@ -67,29 +38,12 @@ pub(crate) struct Style {
 impl Style {
     fn of(options: &ResolvedOptions) -> Style {
         Style {
-            drop_blank_after_key: options.str(BLANK_LINES_AFTER_KEY) == "remove",
+            drop_blank_after_key: blank_lines_after_key(options) == BlankLinesAfterKey::Remove,
             indent: options.int(shared::INDENT_SIZE) as usize,
-            sequence: match options.str(SEQUENCE_INDENT) {
-                "indented" => SequenceIndent::Indented,
-                "flush" => SequenceIndent::Flush,
-                _ => SequenceIndent::Preserve,
-            },
-            quotes: match options.str(QUOTE_STYLE) {
-                "prefer_double" => Quotes::PreferDouble,
-                "single" => Quotes::Single,
-                "double" => Quotes::Double,
-                _ => Quotes::Preserve,
-            },
-            document_start: match options.str(DOCUMENT_START) {
-                "always" => DocumentStart::Always,
-                "never" => DocumentStart::Never,
-                _ => DocumentStart::Preserve,
-            },
-            document_end: match options.str(DOCUMENT_END) {
-                "always" => DocumentEnd::Always,
-                "never" => DocumentEnd::Never,
-                _ => DocumentEnd::Preserve,
-            },
+            sequence: sequence_indent(options),
+            quotes: quote_style(options),
+            document_start: document_start(options),
+            document_end: document_end(options),
             max_blank: options.int(shared::MAX_BLANK_LINES) as usize,
         }
     }
@@ -122,7 +76,7 @@ impl NodeFormatter for YamlFormatter {
 
     fn comment_style(&self, options: &ResolvedOptions) -> CommentStyle {
         CommentStyle {
-            gap: options.int(COMMENT_SPACING) as usize,
+            gap: comment_spacing(options),
             ..CommentStyle::default()
         }
     }

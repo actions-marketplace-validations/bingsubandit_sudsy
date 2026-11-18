@@ -21,6 +21,28 @@ pub const MEMBER_CHAIN_MIN_CALLS: &str = "member_chain_min_calls";
 pub const MEMBER_CHAIN_FORCE_LINKS: &str = "member_chain_force_links";
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_INDENT: &str = "member_chain_indent";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TrailingCommas { Never, Multiline }
+#[allow(dead_code)]
+pub fn trailing_commas(o: &core_config::ResolvedOptions) -> TrailingCommas {
+    match o.text(TRAILING_COMMAS) {
+        "never" => TrailingCommas::Never,
+        _ => TrailingCommas::Multiline,
+    }
+}
+#[allow(dead_code)]
+pub fn function_signature_wrap_min_parameters(o: &core_config::ResolvedOptions) -> usize {
+    o.uint(FUNCTION_SIGNATURE_WRAP_MIN_PARAMETERS, 2)
+}
+#[allow(dead_code)]
+pub fn class_signature_wrap_min_parameters(o: &core_config::ResolvedOptions) -> usize {
+    o.uint(CLASS_SIGNATURE_WRAP_MIN_PARAMETERS, 1)
+}
+#[allow(dead_code)]
+pub fn class_signature_wrap_min_supertypes(o: &core_config::ResolvedOptions) -> usize {
+    o.uint(CLASS_SIGNATURE_WRAP_MIN_SUPERTYPES, 2)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

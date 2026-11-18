@@ -306,6 +306,48 @@ impl ResolvedOptions {
         }
     }
 
+    /// The string of an option; empty when the option is absent or not a string.
+    pub fn text(&self, name: &str) -> &str {
+        match self.0.get(name) {
+            Some(OptionValue::String(s)) => s,
+            _ => "",
+        }
+    }
+
+    /// Does the string option have this value?
+    pub fn is(&self, name: &str, value: &str) -> bool {
+        self.text(name) == value
+    }
+
+    /// An integer option as a count; `fallback` when it is absent or negative.
+    pub fn uint(&self, name: &str, fallback: usize) -> usize {
+        match self.0.get(name) {
+            Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(fallback),
+            _ => fallback,
+        }
+    }
+
+    /// A boolean option; `fallback` when it is absent.
+    pub fn flag(&self, name: &str, fallback: bool) -> bool {
+        match self.0.get(name) {
+            Some(OptionValue::Bool(b)) => *b,
+            _ => fallback,
+        }
+    }
+
+    /// Does the list option hold this string?
+    pub fn has(&self, name: &str, item: &str) -> bool {
+        matches!(self.0.get(name), Some(OptionValue::List(items))
+            if items.iter().any(|i| matches!(i, OptionValue::String(s) if s == item)))
+    }
+
+    /// Does the opening brace of this element start a line? `brace_newline` says where braces go
+    /// in general (`all` or `none`), the `brace_same_line` list names the elements that keep
+    /// theirs on the line anyway.
+    pub fn brace_on_new_line(&self, element: &str) -> bool {
+        self.is(shared::BRACE_NEWLINE, "all") && !self.has(shared::BRACE_SAME_LINE, element)
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (&String, &OptionValue)> {
         self.0.iter()
     }
@@ -325,6 +367,8 @@ pub mod shared {
     pub const ARRAY_BRACKET_SPACING: &str = "array_bracket_spacing";
     /// Not a top-level `format:` option: only providers that list it have it.
     pub const MAX_BLANK_LINES: &str = "max_blank_lines";
+    pub const BRACE_NEWLINE: &str = "brace_newline";
+    pub const BRACE_SAME_LINE: &str = "brace_same_line";
     pub const NAMES: [&str; 7] = [
         LINE_WIDTH,
         INDENT_SIZE,

@@ -162,7 +162,7 @@ fn semicolon(node: &SyntaxNode) -> Option<SyntaxToken> {
 impl Pr<'_, '_> {
     /// Is the text a list of declarations a host hands over (`style=""`, see `parse`)?
     fn declarations_only(&self) -> bool {
-        matches!(self.cx.options.get("embed_mode"), Some(core_config::OptionValue::String(m)) if m == "declarations")
+        self.cx.options.is("embed_mode", "declarations")
     }
 
     /// The declarations of the rule `parse` wrapped them in, one per line, without the braces.

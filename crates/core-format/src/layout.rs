@@ -124,7 +124,7 @@ impl Row {
         self.arg(key)
             .and_then(|v| v.strip_prefix("option:"))
             .and_then(|v| v.split_once('='))
-            .is_some_and(|(name, value)| cx.options.str(name) == value)
+            .is_some_and(|(name, value)| cx.options.is(name, value))
     }
 }
 

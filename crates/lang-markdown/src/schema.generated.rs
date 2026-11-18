@@ -1,6 +1,16 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
 pub const EMBEDDED_LANGUAGE_FORMATTING: &str = "embedded_language_formatting";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EmbeddedLanguageFormatting { Auto, Off }
+#[allow(dead_code)]
+pub fn embedded_language_formatting(o: &core_config::ResolvedOptions) -> EmbeddedLanguageFormatting {
+    match o.text(EMBEDDED_LANGUAGE_FORMATTING) {
+        "off" => EmbeddedLanguageFormatting::Off,
+        _ => EmbeddedLanguageFormatting::Auto,
+    }
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

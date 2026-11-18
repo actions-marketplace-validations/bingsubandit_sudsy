@@ -9,7 +9,7 @@ use serde_json::Value;
 /// `shared::` constructors with no argument.
 const SHARED_NO_ARG: [&str; 2] = ["indent_style", "end_of_line"];
 /// Names `shared::NAMES` already has a const for.
-const SHARED_NAMES: [&str; 8] = [
+const SHARED_NAMES: [&str; 10] = [
     "max_blank_lines",
     "line_width",
     "indent_size",
@@ -18,6 +18,8 @@ const SHARED_NAMES: [&str; 8] = [
     "end_of_line",
     "bracket_spacing",
     "array_bracket_spacing",
+    "brace_newline",
+    "brace_same_line",
 ];
 
 fn lit(v: &Value) -> String {
@@ -93,6 +95,74 @@ fn def(entry: &Value) -> Result<(String, String)> {
     ))
 }
 
+fn pascal(name: &str) -> String {
+    let word = |w: &str| w[..1].to_uppercase() + &w[1..];
+    name.split('_')
+        .filter(|w| !w.is_empty())
+        .map(word)
+        .collect()
+}
+
+/// The typed getter of an option declared in full: an enum for a choice, `bool` or `usize`.
+/// A getter never panics: an option the resolved set lacks (code embedded in another language
+/// reads the host's options) has its default.
+fn getter(name: &str, body: &Value) -> String {
+    let Some(m) = body.as_object() else {
+        return String::new();
+    };
+    let konst = name.to_uppercase();
+    let o = "o: &core_config::ResolvedOptions";
+    let allow = "#[allow(dead_code)]\n";
+    if let Some(values) = m.get("values").and_then(Value::as_array) {
+        let words: Vec<&str> = values.iter().filter_map(Value::as_str).collect();
+        let plain = |w: &&str| {
+            w.starts_with(|c: char| c.is_ascii_lowercase())
+                && w.chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
+        };
+        if words.is_empty() || !words.iter().all(plain) {
+            return String::new();
+        }
+        let ty = pascal(name);
+        let default = m.get("default").and_then(Value::as_str).unwrap_or(words[0]);
+        let variants = words
+            .iter()
+            .map(|w| pascal(w))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let arms: String = words
+            .iter()
+            .filter(|w| **w != default)
+            .map(|w| format!("        {w:?} => {ty}::{},\n", pascal(w)))
+            .collect();
+        let derive = "#[derive(Clone, Copy, Debug, PartialEq, Eq)]\n";
+        return format!(
+            "{allow}{derive}pub enum {ty} {{ {variants} }}\n{allow}pub fn {name}({o}) -> {ty} {{\n    match o.text({konst}) {{\n{arms}        _ => {ty}::{},\n    }}\n}}\n",
+            pascal(default)
+        );
+    }
+    let default = m.get("default").map(lit).unwrap_or_default();
+    if m.contains_key("range") {
+        let default = if default.is_empty() {
+            "0".into()
+        } else {
+            default
+        };
+        return format!(
+            "{allow}pub fn {name}({o}) -> usize {{\n    o.uint({konst}, {default})\n}}\n"
+        );
+    }
+    if m.contains_key("kind") {
+        return String::new();
+    }
+    let default = if default.is_empty() {
+        "false".into()
+    } else {
+        default
+    };
+    format!("{allow}pub fn {name}({o}) -> bool {{\n    o.flag({konst}, {default})\n}}\n")
+}
+
 /// `src/schema.generated.rs` of a language with an `options` key.
 pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
     let Some(options) = l.yaml.get("options").and_then(Value::as_array) else {
@@ -100,6 +170,7 @@ pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
     };
     let mut consts = String::new();
     let mut defs = String::new();
+    let mut getters = String::new();
     for entry in options {
         let (opt, expr) = def(entry)?;
         if !SHARED_NAMES.contains(&opt.as_str()) {
@@ -107,6 +178,9 @@ pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
                 "#[allow(dead_code)]\npub const {}: &str = {opt:?};\n",
                 opt.to_uppercase()
             );
+            if let Some(body) = entry.as_object().and_then(|m| m.values().next()) {
+                getters += &getter(&opt, body);
+            }
         }
         defs += &format!("        {expr},\n");
     }
@@ -116,6 +190,6 @@ pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
         .map(|p| format!("        core_config::Preset::new(\"{name}/{p}\", include_str!(\"../presets/{p}.yaml\")),\n"))
         .collect();
     Ok(Some(format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\n{consts}\n#[rustfmt::skip]\npub fn option_schema() -> core_config::OptionSchema {{\n    core_config::OptionSchema::new(vec![\n{defs}    ])\n    .with_presets(vec![\n{presets}    ])\n}}\n"
+        "// Generated from lang.yaml by `cargo xtask codegen`.\n{consts}{getters}\n#[rustfmt::skip]\npub fn option_schema() -> core_config::OptionSchema {{\n    core_config::OptionSchema::new(vec![\n{defs}    ])\n    .with_presets(vec![\n{presets}    ])\n}}\n"
     )))
 }

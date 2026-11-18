@@ -43,6 +43,60 @@ pub const ARROW_PARENS: &str = "arrow_parens";
 pub const BRACKET_SAME_LINE: &str = "bracket_same_line";
 #[allow(dead_code)]
 pub const JSX_SINGLE_QUOTE: &str = "jsx_single_quote";
+#[allow(dead_code)]
+pub fn semi(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SEMI, true)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum QuoteStyle { Double, Single }
+#[allow(dead_code)]
+pub fn quote_style(o: &core_config::ResolvedOptions) -> QuoteStyle {
+    match o.text(QUOTE_STYLE) {
+        "single" => QuoteStyle::Single,
+        _ => QuoteStyle::Double,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum QuoteProps { AsNeeded, Consistent, Preserve }
+#[allow(dead_code)]
+pub fn quote_props(o: &core_config::ResolvedOptions) -> QuoteProps {
+    match o.text(QUOTE_PROPS) {
+        "consistent" => QuoteProps::Consistent,
+        "preserve" => QuoteProps::Preserve,
+        _ => QuoteProps::AsNeeded,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TrailingCommas { All, Es5, None }
+#[allow(dead_code)]
+pub fn trailing_commas(o: &core_config::ResolvedOptions) -> TrailingCommas {
+    match o.text(TRAILING_COMMAS) {
+        "es5" => TrailingCommas::Es5,
+        "none" => TrailingCommas::None,
+        _ => TrailingCommas::All,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ArrowParens { Always, Avoid }
+#[allow(dead_code)]
+pub fn arrow_parens(o: &core_config::ResolvedOptions) -> ArrowParens {
+    match o.text(ARROW_PARENS) {
+        "avoid" => ArrowParens::Avoid,
+        _ => ArrowParens::Always,
+    }
+}
+#[allow(dead_code)]
+pub fn bracket_same_line(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(BRACKET_SAME_LINE, false)
+}
+#[allow(dead_code)]
+pub fn jsx_single_quote(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(JSX_SINGLE_QUOTE, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

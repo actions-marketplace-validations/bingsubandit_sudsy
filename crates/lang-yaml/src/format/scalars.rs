@@ -1,7 +1,7 @@
 //! Scalars: line layout of flow scalars, quote style, and block scalar contents.
 
 use super::comments;
-use super::{Quotes, Style};
+use super::{QuoteStyle, Style};
 use crate::generated::kind as k;
 use crate::scalar::{block_header, flow_value, quoted};
 use crate::tree::{block_parent_indent, is_trivia};
@@ -85,11 +85,11 @@ fn split_lines(text: &str) -> Vec<&str> {
 
 /// The token text in the requested quote style, if that is possible without changing the value
 /// and without more escapes than the source has.
-pub(crate) fn restyle(text: &str, kind: SyntaxKind, quotes: Quotes) -> Option<String> {
+pub(crate) fn restyle(text: &str, kind: SyntaxKind, quotes: QuoteStyle) -> Option<String> {
     if text.contains(['\n', '\r']) {
         return None;
     }
-    if quotes == Quotes::PreferDouble {
+    if quotes == QuoteStyle::PreferDouble {
         return prefer_double_restyle(text, kind);
     }
     let value = flow_value(kind, text)?;
@@ -97,14 +97,14 @@ pub(crate) fn restyle(text: &str, kind: SyntaxKind, quotes: Quotes) -> Option<St
         return None;
     }
     match (kind, quotes) {
-        (k::DOUBLE_QUOTED, Quotes::Single) => {
+        (k::DOUBLE_QUOTED, QuoteStyle::Single) => {
             let escapes_before = text.matches('\\').count();
             let escapes_after = value.matches('\'').count();
             (escapes_after <= escapes_before)
                 .then(|| quoted(k::SINGLE_QUOTED, &value))
                 .flatten()
         }
-        (k::SINGLE_QUOTED, Quotes::Double) => {
+        (k::SINGLE_QUOTED, QuoteStyle::Double) => {
             let escapes_before = text.matches("''").count();
             let escapes_after = value.matches(['"', '\\']).count();
             (escapes_after == 0 || escapes_after <= escapes_before)
@@ -210,7 +210,7 @@ mod tests {
 
     #[test]
     fn quotes_change_only_when_no_new_escapes_are_needed() {
-        use Quotes::{Double, Single};
+        use QuoteStyle::{Double, Single};
         assert_eq!(
             restyle("\"a b\"", k::DOUBLE_QUOTED, Single).unwrap(),
             "'a b'"

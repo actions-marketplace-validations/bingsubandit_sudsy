@@ -20,15 +20,15 @@ pub struct TomlFormatter;
 fn array_style(options: &ResolvedOptions) -> ListStyle {
     ListStyle {
         padding: options.bool(shared::ARRAY_BRACKET_SPACING),
-        trailing_comma: if options.str(TRAILING_COMMAS) == "multiline" {
+        trailing_comma: if trailing_commas(options) == TrailingCommas::Multiline {
             TrailingComma::WhenBroken
         } else {
             TrailingComma::Never
         },
-        layout: match options.str(COLLAPSE) {
-            "always" => ListLayout::Fit,
-            "never" => ListLayout::Break,
-            _ => ListLayout::PreserveBreak,
+        layout: match collapse(options) {
+            Collapse::Always => ListLayout::Fit,
+            Collapse::Never => ListLayout::Break,
+            Collapse::Preserve => ListLayout::PreserveBreak,
         },
         ..ListStyle::default()
     }
@@ -78,7 +78,7 @@ fn pair(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> {
             ..KeyValueStyle::default()
         },
     )?;
-    if cx.options.bool(ALIGN_COMMENTS) {
+    if align_comments(cx.options) {
         let extra = cx.cached(AlignTable::default).extra(node);
         if extra > 0 {
             align::pad_comment(&mut d, extra);
@@ -111,7 +111,7 @@ fn table(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> {
 
 /// The items, then the comments after them (owned by the end-of-file token).
 fn document(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> {
-    if cx.options.bool(ALIGN_COMMENTS) {
+    if align_comments(cx.options) {
         cx.cached(|| AlignTable::build(cx, node));
     }
     core_format::shapes::document(cx, node, cx.options.max_blank_lines(), None)

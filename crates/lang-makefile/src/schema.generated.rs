@@ -3,6 +3,14 @@
 pub const SPACE_AROUND_ASSIGNMENT: &str = "space_around_assignment";
 #[allow(dead_code)]
 pub const SPACE_BEFORE_COLON: &str = "space_before_colon";
+#[allow(dead_code)]
+pub fn space_around_assignment(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_AROUND_ASSIGNMENT, true)
+}
+#[allow(dead_code)]
+pub fn space_before_colon(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_BEFORE_COLON, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

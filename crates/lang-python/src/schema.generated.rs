@@ -5,6 +5,27 @@ pub const QUOTE_STYLE: &str = "quote_style";
 pub const MAGIC_TRAILING_COMMA: &str = "magic_trailing_comma";
 #[allow(dead_code)]
 pub const TARGET_VERSION: &str = "target_version";
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum QuoteStyle { Double, Single, Preserve }
+#[allow(dead_code)]
+pub fn quote_style(o: &core_config::ResolvedOptions) -> QuoteStyle {
+    match o.text(QUOTE_STYLE) {
+        "single" => QuoteStyle::Single,
+        "preserve" => QuoteStyle::Preserve,
+        _ => QuoteStyle::Double,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MagicTrailingComma { Respect, Ignore }
+#[allow(dead_code)]
+pub fn magic_trailing_comma(o: &core_config::ResolvedOptions) -> MagicTrailingComma {
+    match o.text(MAGIC_TRAILING_COMMA) {
+        "ignore" => MagicTrailingComma::Ignore,
+        _ => MagicTrailingComma::Respect,
+    }
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {
