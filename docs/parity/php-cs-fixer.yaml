@@ -1,0 +1,9 @@
+tool: "php-cs-fixer"
+version: "3.95.31 (GitHub release; run by the static PHP 8.4.23 build of static-php-cli)"
+languages: ["php"]
+sources:
+  - "https://cs.symfony.com/doc/ruleSets/PER-CS3x0.html"
+  - "https://www.php-fig.org/per/coding-style/"
+scope: "PHP-CS-Fixer with the `@PER-CS` rule set. Formatting (our own layout code) is measured by `scripts/parity.sh format php-cs-fixer` on the PHP corpus (`tests/conformance/fetch-php-corpus.sh`); its rules are not catalogued yet."
+entries:
+  per-cs: formatter | The whole rule set is the formatter's.

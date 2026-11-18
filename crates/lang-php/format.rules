@@ -1,0 +1,115 @@
+# PHP formatting as data: PER-CS as PHP-CS-Fixer's `@PER-CS` applies it (docs/formatting/php.md).
+# Syntax: crates/core-format/src/{rules,spacing,rewrite,layout}.rs.
+[space]
+# Commas and semicolons (PHP-CS-Fixer leaves the commas of an array alone).
+* / kind=Comma&parent!=Array|LegacyArray|List : no
+* / kind=Semi : no
+kind=Comma&parent!=Array|LegacyArray|List / kind!=RParen|RBracket : yes
+kind=Comma&parent!=Array|LegacyArray|List / * : no
+kind=Comma / * : keep
+* / kind=Comma : keep
+kind=Semi&parent=For / kind!=RParen : yes
+kind=Semi&parent=For / * : no
+# Parentheses.
+kind=LParen / * : no
+* / kind=RParen : no
+kind=Keyword&text=if|elseif|while|for|foreach|switch|catch|match|use|class&parent!=Method|Function|Class|PropertyAccess|StaticMethodCall|MethodCall / kind=LParen : yes
+kind=Keyword&text=function&parent=Closure / kind=LParen : yes
+kind=Keyword&text=function / kind=LParen : no
+kind=Keyword&text=array|list|isset|unset|empty|eval|exit|die|fn / kind=LParen : no
+kind=Identifier / kind=LParen : no
+kind=RParen / kind=Keyword&text=use&parent=Closure : yes
+# Braces.
+* / kind=LBrace&parent=Block|SwitchBraceDelimitedBody|Match : yes
+kind=RBrace / kind=Keyword&text=else|elseif|catch|finally|while : yes
+# Types.
+kind=Operator&parent=UnionHint|IntersectionHint / * : no
+* / kind=Operator&parent=UnionHint|IntersectionHint : no
+kind=Question&parent=NullableHint / * : no
+# Operators.
+kind=Cast / * : yes
+kind=Question / kind=Colon&parent=Conditional : no
+kind=Question&parent=Conditional / kind=Colon : no
+* / kind=Question|Colon&parent=Conditional : yes
+kind=Question|Colon&parent=Conditional / * : yes
+* / kind=Colon&parent=FunctionLikeReturnTypeHint|EnumBackingTypeHint|NamedArgument|SwitchExpressionCase|SwitchDefaultCase : no
+* / kind=Colon : keep
+* / kind=Assign&parent=DeclareItem : no
+kind=Assign&parent=DeclareItem / * : no
+kind=Colon&parent=FunctionLikeReturnTypeHint|EnumBackingTypeHint|NamedArgument / * : yes
+* / text=.&kind=Operator&parent=Binary|Assignment : yes
+text=.&kind=Operator&parent=Binary|Assignment / * : yes
+# Keywords (single_space_around_construct).
+kind=Keyword&text=abstract|as|case|catch|class|const|do|else|elseif|enum|final|finally|for|foreach|function|if|insteadof|interface|match|namespace|new|private|protected|public|readonly|static|switch|trait|try|use|while&parent!=ClassConstantAccess|StaticPropertyAccess|StaticMethodCall / kind!=ColonColon|RParen|LParen|RBracket : yes
+* / kind=Keyword&text=as|else|elseif|insteadof : yes
+
+# Tokens that stay on one line although the source breaks between them: the opening brace of a
+# control structure or closure, and what follows a closing brace (`} else {`).
+[joined]
+* / kind=LBrace&parent=Block&grand!=Method|Function
+* / kind=LBrace&parent=SwitchBraceDelimitedBody|Match
+kind=RBrace / kind=Keyword&text=else|elseif|catch|finally|while
+
+# Blanks around binary operators, assignments and `=>` are at least one.
+[at_least_one]
+kind=Operator|Assign&parent=Binary|Assignment / *
+* / kind=Operator|Assign&parent=Binary|Assignment
+kind=DoubleArrow&parent=KeyValueArrayElement|MatchExpressionArm|MatchDefaultArm|ArrowFunction / *
+* / kind=DoubleArrow&parent=KeyValueArrayElement|MatchExpressionArm|MatchDefaultArm|ArrowFunction
+
+# Operators that start a line (`operator_linebreak`).
+[op_first]
+kind=Operator&parent=Binary
+kind=Question|Colon&parent=Conditional
+
+[rewrite]
+# Code rewrites of PER-CS that PHP-CS-Fixer makes besides layout (syntax in
+# crates/core-format/src/rewrite.rs): `array(...)` is `[...]` (array_syntax), `new Foo` is
+# `new Foo()` (new_with_parentheses), a class member without visibility is `public`
+# (modifier_keywords).
+kind=Keyword&text=array&parent=LegacyArray : replace through next "["
+kind=RParen&parent=LegacyArray : replace "]"
+kind!=RParen&end_of=Instantiation : insert after "()"
+kind=Keyword&text=var&parent=PlainProperty&sibling!=public|protected|private : replace "public"
+kind=Keyword&text=static|readonly|function|const&parent=Method|PlainProperty|ClassLikeConstant&grand=Class|Trait|Interface|Enum|AnonymousClass&sibling!=public|protected|private&before!=static|readonly|function|const : insert before "public "
+
+[flow]
+exact = yes
+source_hang = yes
+keep_blank_lines = yes
+flat_after = AttributeList
+closers = RParen|RBracket|RBrace|Semi
+unhang = LBrace
+
+[comments]
+max_blank_after = unlimited
+
+[file]
+one_line_verbatim = yes
+verbatim_if = InlineText|CloseTag|ShortOpeningTag|EchoTag
+exact_end = InlineText
+
+# A blank line between statements: after the opening tag, around the namespace declaration,
+# after the imports and between the groups of imports (`use` and `use function`).
+[blank]
+kind=FullOpeningTag / *
+* / kind=Namespace
+kind=Use / kind!=Use
+kind=Use / kind=Use : group=Keyword
+
+[layout]
+Program : document
+Namespace : scope body=NamespaceImplicitBody
+Class|Enum|Interface|Trait : braced open=LBrace gap=option:declaration_brace
+AnonymousClass : braced open=LBrace gap=space
+Method|Function : with_body body=Block params=FunctionLikeParameterList gap=option:declaration_brace
+Block&parent=Method|Function|Closure : block
+Block : block empty=expand
+SwitchBraceDelimitedBody : block
+SwitchExpressionCase|SwitchDefaultCase : case colon=Colon
+ArgumentList : list trailing=option:trailing_commas=multiline
+FunctionLikeParameterList : list trailing=option:trailing_commas=multiline no_trailing_after=Ellipsis
+Match : braced_list open=LBrace trailing=option:trailing_commas=multiline
+IfColonDelimitedBody|IfColonDelimitedBodyElseIfClause|IfColonDelimitedBodyElseClause|WhileColonDelimitedBody|ForColonDelimitedBody|ForeachColonDelimitedBody|SwitchColonDelimitedBody|DeclareColonDelimitedBody : colon_body colon=Colon clauses=IfColonDelimitedBodyElseIfClause|IfColonDelimitedBodyElseClause
+Array|LegacyArray|List : array trailing=option:trailing_commas=multiline
+InterpolatedString|DocumentString|ShellExecuteString : verbatim

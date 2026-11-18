@@ -1,0 +1,2 @@
+# The Sudsy side of the comparison with PHP-CS-Fixer `@PER-CS`: Sudsy's own defaults.
+extends: []

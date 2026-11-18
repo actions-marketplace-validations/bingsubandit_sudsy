@@ -7,4 +7,12 @@ options:
   - indent_style
   - final_newline: true
   - end_of_line
+  - trailing_commas:
+      values: ["never", "multiline"]
+      default: "multiline"
+      doc: "Trailing comma after the last argument, parameter or `match` arm of a list that is laid out on several lines: `multiline` adds one, `never` removes it."
+  - declaration_brace:
+      values: ["next_line", "same_line"]
+      default: "next_line"
+      doc: "Where the `{` of a class, interface, trait, enum, function or method goes (PER Coding Style: its own line). Control structures, closures and anonymous classes keep it on the line."
 presets: [phpstan]

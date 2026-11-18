@@ -10846,6 +10846,15 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "declaration_brace": {
+                    "default": "next_line",
+                    "description": "Where the `{` of a class, interface, trait, enum, function or method goes (PER Coding Style: its own line). Control structures, closures and anonymous classes keep it on the line.",
+                    "enum": [
+                      "next_line",
+                      "same_line"
+                    ],
+                    "type": "string"
+                  },
                   "end_of_line": {
                     "default": "auto",
                     "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -10883,6 +10892,15 @@
                     "maximum": 1000,
                     "minimum": 20,
                     "type": "integer"
+                  },
+                  "trailing_commas": {
+                    "default": "multiline",
+                    "description": "Trailing comma after the last argument, parameter or `match` arm of a list that is laid out on several lines: `multiline` adds one, `never` removes it.",
+                    "enum": [
+                      "never",
+                      "multiline"
+                    ],
+                    "type": "string"
                   }
                 },
                 "type": "object"
@@ -12110,6 +12128,15 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "declaration_brace": {
+              "default": "next_line",
+              "description": "Where the `{` of a class, interface, trait, enum, function or method goes (PER Coding Style: its own line). Control structures, closures and anonymous classes keep it on the line.",
+              "enum": [
+                "next_line",
+                "same_line"
+              ],
+              "type": "string"
+            },
             "end_of_line": {
               "default": "auto",
               "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -12147,6 +12174,15 @@
               "maximum": 1000,
               "minimum": 20,
               "type": "integer"
+            },
+            "trailing_commas": {
+              "default": "multiline",
+              "description": "Trailing comma after the last argument, parameter or `match` arm of a list that is laid out on several lines: `multiline` adds one, `never` removes it.",
+              "enum": [
+                "never",
+                "multiline"
+              ],
+              "type": "string"
             }
           },
           "type": "object"

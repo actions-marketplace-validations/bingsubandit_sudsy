@@ -46,7 +46,7 @@ token RParen ")" #punctuation #close
 token LBracket "[" #punctuation #glue
 token RBracket "]" #punctuation
 token Semi ";" #punctuation #stmt
-token Comma "," #punctuation #separator #glue
+token Comma "," #punctuation #separator
 token Colon ":" #punctuation
 token ColonColon "::" #punctuation
 // `->` and `?->`

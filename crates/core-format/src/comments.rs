@@ -78,6 +78,8 @@ pub struct CommentStyle {
     /// A comment after code keeps the blanks the source has before it when they are more than
     /// `gap` (comments aligned in a column stay aligned).
     pub keep_gap: bool,
+    /// Blank lines kept after a comment in front of code.
+    pub max_blank_after: usize,
 }
 
 impl Default for CommentStyle {
@@ -86,6 +88,7 @@ impl Default for CommentStyle {
             gap: 1,
             attach_comments: false,
             keep_gap: false,
+            max_blank_after: 1,
         }
     }
 }

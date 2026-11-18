@@ -9,7 +9,8 @@ use core_syntax::{SyntaxNode, SyntaxToken};
 
 #[derive(Clone, Debug)]
 pub struct BlockStyle {
-    /// Blank lines between items kept from the source.
+    /// Blank lines between items kept from the source (`usize::MAX`: all of them, and a blank
+    /// line before the closing delimiter stays too).
     pub max_blank_lines: usize,
     /// What stands between the delimiters of an empty block.
     pub empty: &'static str,
@@ -172,8 +173,9 @@ fn braces_of(
             closing,
         ]);
     }
-    let blank_before_close =
-        !dangling.is_empty() && body.is_some() && comments::blank_lines_before(g, close) > 0;
+    let blank_before_close = body.is_some()
+        && (!dangling.is_empty() || style.max_blank_lines == usize::MAX)
+        && comments::blank_lines_before(g, close) > 0;
     let first_hardline = match (&body, lead_blank) {
         (None, _) => Doc::Nil,
         (Some(_), true) => doc::concat(vec![doc::hardline(), doc::hardline()]),
@@ -186,6 +188,11 @@ fn braces_of(
             first_hardline,
             body.unwrap_or(Doc::Nil),
             dangling_comments(&dangling, blank_before_close),
+            if dangling.is_empty() && blank_before_close {
+                doc::hardline()
+            } else {
+                Doc::Nil
+            },
         ])),
         doc::hardline(),
         closing,

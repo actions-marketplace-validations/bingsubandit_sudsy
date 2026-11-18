@@ -14,11 +14,15 @@ pub mod directives;
 pub mod doc;
 mod error;
 pub mod ignore;
+mod layout;
 mod lines;
 pub mod literals;
 pub mod printer;
+pub mod rewrite;
+pub mod rules;
 pub mod safety;
 pub mod shapes;
+pub mod spacing;
 pub mod testing;
 
 pub use context::{DefaultFormatter, EmbedMode, Embedder, FormatCtx, NodeFormatter, Variants};

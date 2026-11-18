@@ -119,6 +119,10 @@ def install(spec, catalog, version, prefix):
             exe.write_text(f'#!/bin/sh\nexec "{java}" -jar "{jar}" "$@"\n')
             exe.chmod(0o755)
     elif "release" in spec:
+        for name, url in spec.get("files", {}).items():  # more downloads next to the executable (a phar for a static interpreter)
+            if not (prefix / name).exists():
+                prefix.mkdir(parents=True, exist_ok=True)
+                run(["curl", "-fsSL", "-o", prefix / name, url.format(version=version)], ROOT)
         if not executable(prefix, spec["exe"]).exists():
             prefix.mkdir(parents=True, exist_ok=True)
             system = {"win32": "windows", "linux": "linux", "darwin": "darwin"}.get(sys.platform, sys.platform)
@@ -200,10 +204,27 @@ def upstream_batch(config, prefix, found, work):
         copy = name.replace("/", "__")
         shutil.copy(fixture, folder / copy)
         names[name] = copy
-    patterns = sorted({"*" + Path(copy).suffix for copy in names.values()})
-    command = [str(a).format(exe=exe, root=ROOT) for a in config["command"]] + patterns
-    r = run(command, folder, check=False)
-    rejected = set(re.findall(config["reject"], (r.stdout + r.stderr).decode("utf-8", "replace"), re.M))
+    command = [str(a).format(exe=exe, prefix=prefix, root=ROOT) for a in config["command"]]
+    rejected = set()
+
+    def reject(r):
+        rejected.update(re.findall(config["reject"], (r.stdout + r.stderr).decode("utf-8", "replace"), re.M))
+
+    if "chunk" in config:  # a tool that stops at the first file that raises: runs of `chunk` files, a failed one file by file
+        copies = list(names.values())
+        for i in range(0, len(copies), config["chunk"]):
+            group = copies[i : i + config["chunk"]]
+            r = run(command + group, folder, check=False)
+            if r.returncode == 0:
+                reject(r)
+                continue
+            for copy in group:
+                r = run(command + [copy], folder, check=False)
+                reject(r)
+                if r.returncode != 0:
+                    rejected.add(copy)
+    else:
+        reject(run(command + (config.get("args") or sorted({"*" + Path(c).suffix for c in names.values()})), folder, check=False))
     return {n: None if c in rejected else (folder / c).read_bytes().decode("utf-8") for n, c in names.items()}
 
 

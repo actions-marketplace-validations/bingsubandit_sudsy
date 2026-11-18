@@ -213,6 +213,32 @@
         {"dir": "tests/conformance/corpus/kotlin", "suffixes": [".kt", ".kts"], "skip": "kotlin/compiler/", "prefix": "corpus/", "ratchet": "real-world", "recursive": true}
       ]
     },
+    "php-cs-fixer": {
+      "catalog": "php-cs-fixer",
+      "install": {
+        "release": "https://dl.static-php.dev/static-php-cli/common/{asset}",
+        "assets": {
+          "linux-x86_64": "php-8.4.23-cli-linux-x86_64.tar.gz",
+          "linux-aarch64": "php-8.4.23-cli-linux-aarch64.tar.gz",
+          "darwin-arm64": "php-8.4.23-cli-macos-aarch64.tar.gz",
+          "darwin-x86_64": "php-8.4.23-cli-macos-x86_64.tar.gz",
+          "windows": "php-8.4.23-cli-win.zip"
+        },
+        "files": {"php-cs-fixer.phar": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/download/v{version}/php-cs-fixer.phar"},
+        "exe": "php"
+      },
+      "fetch": ["tests/conformance/fetch-php-corpus.sh"],
+      "command": ["{exe}", "{prefix}/php-cs-fixer.phar", "fix", "--config={root}/tests/parity/php-cs-fixer/per-cs.config", "--sequential", "--no-interaction", "--show-progress=none", "-v"],
+      "chunk": 200,
+      "input": "batch",
+      "reject": "^\\s+\\d+\\) (?:.*/)?([^/\\s]+\\.php)\\s*$",
+      "tool_may_reject": true,
+      "parallel": true,
+      "quiet": true,
+      "fixtures": [
+        {"dir": "tests/conformance/corpus/php", "suffixes": [".php"], "prefix": "corpus/", "ratchet": "real-world", "recursive": true}
+      ]
+    },
     "invoke-formatter": {
       "catalog": "psscriptanalyzer",
       "install": {"psmodule": "PSScriptAnalyzer"},

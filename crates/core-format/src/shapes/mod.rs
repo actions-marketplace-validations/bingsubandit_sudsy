@@ -8,6 +8,7 @@ mod block;
 mod call_chain;
 mod chain;
 mod conditional;
+pub mod flow;
 mod key_value;
 mod list;
 mod parens;

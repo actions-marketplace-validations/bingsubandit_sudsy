@@ -94,7 +94,7 @@ fn inline_text_at_the_end_is_kept() {
     for s in [
         "<p>hi</p>\n\n",
         "<p>hi</p>",
-        "<?php\n$a = 1;\n?>\n<p>x</p>\n\n",
+        "<?php\n\n$a = 1;\n?>\n<p>x</p>\n\n",
         "<?php $a;\n?>\n  ",
     ] {
         assert_eq!(fmt(s), s);

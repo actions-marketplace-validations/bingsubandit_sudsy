@@ -133,6 +133,12 @@ pub trait NodeFormatter: Send + Sync {
     fn exact_end(&self, _root: &SyntaxNode) -> bool {
         false
     }
+
+    /// Must a blank line stand between these two statements although the source has none (the
+    /// language's `BlankRule`)?
+    fn blank_between(&self, _cx: &FormatCtx<'_>, _prev: &SyntaxNode, _next: &SyntaxNode) -> bool {
+        false
+    }
 }
 
 /// Other parses of the text being formatted, under other symbol sets (see
@@ -311,6 +317,11 @@ impl<'a> FormatCtx<'a> {
         self.formatter.exact_end(root)
     }
 
+    /// See [`NodeFormatter::blank_between`].
+    pub fn blank_between(&self, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
+        self.formatter.blank_between(self, prev, next)
+    }
+
     pub fn format_unguarded(&self, node: &SyntaxNode) -> Result<Doc, FormatError> {
         crate::deep(|| match self.formatter.format_node(node, self)? {
             Some(doc) => Ok(doc),
@@ -421,7 +432,7 @@ impl<'a> FormatCtx<'a> {
                 doc::concat(leading.iter().map(comment_doc).collect()),
             ])
         } else {
-            leading_comments_doc(&leading)
+            leading_comments_doc_with(&leading, self.comment_style.max_blank_after)
         };
         doc::concat(vec![
             lead,
@@ -447,7 +458,7 @@ impl<'a> FormatCtx<'a> {
     }
 
     pub fn leading_comments_doc(&self, tok: &SyntaxToken) -> Doc {
-        leading_comments_doc(&self.leading(tok))
+        leading_comments_doc_with(&self.leading(tok), self.comment_style.max_blank_after)
     }
 
     /// Holds back the leading comments of `tok` for the rest of the run, so that a shape can
@@ -471,7 +482,7 @@ impl<'a> FormatCtx<'a> {
 
     /// The comments [`FormatCtx::hold_leading`] held back, as printed leading comments.
     pub fn held_leading(&self, tok: &SyntaxToken) -> Doc {
-        leading_comments_doc(&self.leading_of(tok))
+        leading_comments_doc_with(&self.leading_of(tok), self.comment_style.max_blank_after)
     }
 
     /// The comments in front of `tok`, as the comment style wants them attached to it.
@@ -647,6 +658,11 @@ fn lines_doc(text: &str) -> Doc {
 
 /// Own-line comments go on their own lines, inline block comments stay inline.
 pub fn leading_comments_doc(cs: &[Comment]) -> Doc {
+    leading_comments_doc_with(cs, 1)
+}
+
+/// [`leading_comments_doc`] keeping up to `max_blank` blank lines after a comment.
+pub fn leading_comments_doc_with(cs: &[Comment], max_blank: usize) -> Doc {
     if cs.is_empty() {
         return Doc::Nil;
     }
@@ -661,7 +677,7 @@ pub fn leading_comments_doc(cs: &[Comment]) -> Doc {
         parts.push(comment_doc(c));
         if c.kind == CommentKind::Line || c.breaks_after > 0 {
             parts.push(doc::hardline());
-            if c.breaks_after >= 2 {
+            for _ in 0..c.breaks_after.saturating_sub(1).min(max_blank) {
                 parts.push(doc::hardline());
             }
         } else {
