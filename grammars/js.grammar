@@ -86,7 +86,7 @@ node Elision #opaque
 node ObjectExpression #expression #opaque #mapping
 node ObjectProperty #key-value = Keyword? Identifier? Operator? LBracket? key:#expression RBracket? Colon? value:#expression?
 node TemplateLiteral #expression #opaque
-node TaggedTemplateExpression #expression #opaque
+node TaggedTemplateExpression #expression #opaque #escapes
 node TemplateElement #opaque
 node ComputedMemberExpression #expression #index = object:#expression QuestionDot? LBracket arguments:#expression RBracket
 node StaticMemberExpression #expression #member-access = object:#expression Dot? QuestionDot? member:IdentifierName
@@ -112,7 +112,7 @@ node AssignmentTargetRest #opaque
 node AssignmentTargetWithDefault #opaque
 node AssignmentTargetPropertyIdentifier #opaque
 node AssignmentTargetPropertyProperty #opaque
-node SequenceExpression #expression #opaque
+node SequenceExpression #expression #opaque #sequence
 node Super #expression #opaque
 node AwaitExpression #expression #unary = operator:Keyword operand:#expression
 node ChainExpression #expression #opaque
@@ -122,7 +122,7 @@ node BlockStatement #statement #block #scope = LBrace items:#statement* RBrace
 node VariableDeclaration #statement #declaration #inert-bare = Identifier* Keyword? Identifier* declarators:VariableDeclarator*
 node VariableDeclarator #declaration = name:#pattern Operator? type:TSTypeAnnotation? Operator? init:#expression?
 node EmptyStatement #statement #opaque #inert
-node ExpressionStatement #statement #opaque
+node ExpressionStatement #statement #opaque #expression-statement
 node IfStatement #statement #conditional = Keyword LParen condition:#expression RParen then:#statement Keyword? else:#statement?
 node DoWhileStatement #statement #loop = Keyword body:#statement Keyword LParen condition:#expression RParen Semicolon?
 node WhileStatement #statement #loop = Keyword LParen condition:#expression RParen body:#statement
@@ -144,11 +144,11 @@ node TryStatement #statement #try = Keyword body:BlockStatement catches:CatchCla
 node CatchClause #scope #catch = Keyword LParen? parameter:CatchParameter? RParen? body:BlockStatement
 node CatchParameter #opaque
 node DebuggerStatement #statement #opaque
-node AssignmentPattern #pattern #opaque
+node AssignmentPattern #pattern #opaque #default-value
 node ObjectPattern #pattern #opaque
 node BindingProperty #opaque
 node ArrayPattern #pattern #opaque
-node BindingRestElement #pattern #opaque
+node BindingRestElement #pattern #opaque #rest
 node Function #expression #statement #function #declaration #scope #inert =
     Identifier* Keyword? Operator? name:BindingIdentifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? body:FunctionBody?
 node FormalParameters #parameter-list = LParen? parameters:#parameter* RParen?
@@ -157,13 +157,13 @@ node FormalParameterRest #parameter #opaque
 node FunctionBody #block = LBrace items:#statement* RBrace
 node ArrowFunctionExpression #expression #function #scope =
     Identifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? Arrow body:FunctionBody? expression_body:#expression?
-node YieldExpression #expression #opaque
+node YieldExpression #expression #opaque #escapes
 node Class #expression #statement #type-declaration #declaration #scope =
     Decorator* Identifier* Keyword name:BindingIdentifier? type_parameters:TSTypeParameterDeclaration? Keyword? superclass:#expression? super_type_arguments:TSTypeParameterInstantiation? Identifier? implements:TSClassImplements* members:ClassBody
 node ClassBody #block = LBrace items:#member* RBrace
 node MethodDefinition #member #declaration =
     Decorator* Identifier* Operator? LBracket? name:#expression RBracket? Question? value:Function
-node PropertyDefinition #member #declaration =
+node PropertyDefinition #member #declaration #field =
     Decorator* Identifier* LBracket? name:#expression RBracket? Question? Operator? type:TSTypeAnnotation? Operator? value:#expression?
 node PrivateIdentifier #expression #opaque
 node StaticBlock #member #block #scope = Identifier LBrace items:#statement* RBrace
@@ -176,11 +176,11 @@ node ImportDefaultSpecifier #opaque
 node ImportNamespaceSpecifier #opaque
 node WithClause #opaque
 node ImportAttribute #opaque
-node ExportDeclaration #statement #opaque
-node ExportNamedDeclaration #statement #opaque
-node ExportFromDeclaration #statement #opaque
-node ExportDefaultDeclaration #statement #opaque
-node ExportAllDeclaration #statement #opaque
+node ExportDeclaration #statement #opaque #export
+node ExportNamedDeclaration #statement #opaque #export #export-list
+node ExportFromDeclaration #statement #opaque #export-list
+node ExportDefaultDeclaration #statement #opaque #export
+node ExportAllDeclaration #statement #opaque #export #export-list
 node ExportSpecifier #opaque
 node V8IntrinsicExpression #expression #opaque
 node BooleanLiteral #expression #literal = value:Keyword
@@ -190,7 +190,7 @@ node StringLiteral #expression #literal = value:String? StringLiteral?
 node BigIntLiteral #expression #literal = value:BigInt
 node RegExpLiteral #expression #literal = value:RegExp
 node JSXElement #expression #opaque
-node JSXOpeningElement #opaque
+node JSXOpeningElement #opaque #markup
 node JSXClosingElement #opaque
 node JSXFragment #expression #opaque
 node JSXOpeningFragment #opaque
@@ -248,23 +248,23 @@ node TSInterfaceDeclaration #statement #type-declaration #declaration #scope =
 node TSInterfaceBody #block = LBrace items:#member* RBrace
 node TSPropertySignature #member #opaque
 node TSIndexSignature #member #opaque
-node TSCallSignatureDeclaration #member #scope
-node TSMethodSignature #member #scope
-node TSConstructSignatureDeclaration #member #scope
+node TSCallSignatureDeclaration #member #scope #signature
+node TSMethodSignature #member #scope #signature
+node TSConstructSignatureDeclaration #member #scope #signature
 node TSIndexSignatureName #opaque
 node TSInterfaceHeritage #opaque
 node TSTypePredicate #opaque
-node TSExternalModuleDeclaration #statement #opaque
-node TSNamespaceDeclaration #statement #opaque
-node TSGlobalDeclaration #statement #opaque
-node TSModuleBlock #block #scope = LBrace items:#statement* RBrace
+node TSExternalModuleDeclaration #statement #opaque #module
+node TSNamespaceDeclaration #statement #opaque #module
+node TSGlobalDeclaration #statement #opaque #module #global-scope
+node TSModuleBlock #block #scope #module-body = LBrace items:#statement* RBrace
 node TSTypeLiteral #opaque
 node TSInferType #opaque
 node TSTypeQuery #opaque
 node TSImportType #opaque
 node TSImportTypeQualifiedName #opaque
-node TSFunctionType #scope
-node TSConstructorType #scope
+node TSFunctionType #scope #signature
+node TSConstructorType #scope #signature
 node TSMappedType #scope
 node TSTemplateLiteralType #opaque
 node TSAsExpression #expression #opaque
@@ -273,8 +273,8 @@ node TSTypeAssertion #expression #opaque
 node TSImportEqualsDeclaration #statement #opaque
 node TSExternalModuleReference #opaque
 node TSNonNullExpression #expression #unary = operand:#expression operator:#operator
-node Decorator #statement #opaque
-node TSExportAssignment #statement #opaque
+node Decorator #statement #opaque #decorator
+node TSExportAssignment #statement #opaque #export-list
 node TSNamespaceExportDeclaration #statement #opaque
 node TSInstantiationExpression #expression #opaque
 node JSDocNullableType #opaque
