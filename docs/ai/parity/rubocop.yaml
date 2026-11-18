@@ -24,7 +24,7 @@ entries:
   Lint/ConstantOverwrittenInRescue: deferred | disabled or pending by default in RuboCop
   Lint/ConstantReassignment: deferred | disabled or pending by default in RuboCop
   Lint/ConstantResolution: deferred | disabled or pending by default in RuboCop
-  Lint/CopDirectiveSyntax: rule unknown-cop-name | only the unknown department of a cop name; not the other malformed directives or an unknown cop of a known department
+  Lint/CopDirectiveSyntax: rule unknown-rule-in-directive | only the unknown department of a cop name; not the other malformed directives or an unknown cop of a known department
   Lint/DataDefineOverride: deferred | disabled or pending by default in RuboCop
   Lint/Debugger: planned
   Lint/DeprecatedClassMethods: planned

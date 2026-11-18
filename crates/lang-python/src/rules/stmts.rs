@@ -428,66 +428,6 @@ pub(super) fn multiple_starred(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<
     }
 }
 
-/// The nearest enclosing scope-opening node, and the child of it that holds `n`.
-fn enclosing(n: &SyntaxNode) -> Option<(SyntaxNode, SyntaxNode)> {
-    let mut child = n.clone();
-    for a in n.ancestors().skip(1) {
-        if matches!(
-            a.kind(),
-            k::STMT_FUNCTION_DEF
-                | k::STMT_CLASS_DEF
-                | k::EXPR_LAMBDA
-                | k::MOD_MODULE
-                | k::EXPR_LIST_COMP
-                | k::EXPR_SET_COMP
-                | k::EXPR_DICT_COMP
-                | k::EXPR_GENERATOR
-        ) {
-            return Some((a, child));
-        }
-        child = a;
-    }
-    None
-}
-
-/// F701 and F702: `break` and `continue` outside a loop's body.
-fn outside_loop(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let mut child = n.clone();
-    for a in n.ancestors().skip(1) {
-        match a.kind() {
-            k::STMT_FOR | k::STMT_WHILE => {
-                let in_else = a
-                    .children_with_tokens()
-                    .filter_map(|e| e.into_token())
-                    .find(|t| t.kind() == k::ELSE)
-                    .is_some_and(|e| child.text_range().start() >= e.text_range().end());
-                if is_statement(child.kind()) && !in_else {
-                    return;
-                }
-            }
-            k::STMT_FUNCTION_DEF | k::STMT_CLASS_DEF | k::EXPR_LAMBDA | k::MOD_MODULE => break,
-            _ => {}
-        }
-        child = a;
-    }
-    c.hit(ctx, span(ctx, n), "");
-}
-
-pub(super) fn break_outside_loop(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    outside_loop(c, n, ctx);
-}
-
-pub(super) fn continue_outside_loop(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    outside_loop(c, n, ctx);
-}
-
-/// F706: `return` outside a function.
-pub(super) fn return_outside_function(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if enclosing(n).is_none_or(|(a, _)| a.kind() != k::STMT_FUNCTION_DEF) {
-        c.hit(ctx, span(ctx, n), "");
-    }
-}
-
 /// F704: `yield`, `yield from` or `await` outside a function.
 pub(super) fn yield_outside_function(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     let comprehension = |a: &SyntaxNode| {

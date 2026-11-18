@@ -220,132 +220,13 @@ pub(super) fn in_dict_keys(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>)
     }
 }
 
-/// Is the expression in the test of an `if` whose body is only a `raise` (an argument check)?
-fn exception_check(n: &SyntaxNode) -> bool {
-    let mut child = n.clone();
-    for a in n.ancestors().skip(1) {
-        match a.kind() {
-            k::STMT_IF | k::ELIF_ELSE_CLAUSE
-                if !is_statement(child.kind()) && child.kind() != k::ELIF_ELSE_CLAUSE =>
-            {
-                let owner = if a.kind() == k::STMT_IF {
-                    a
-                } else {
-                    a.parent().unwrap_or(a)
-                };
-                let body: Vec<SyntaxNode> = statements(&owner).collect();
-                return matches!(&body[..], [only] if only.kind() == k::STMT_RAISE);
-            }
-            kind if is_statement(kind) => return false,
-            _ => {}
-        }
-        child = a;
-    }
-    false
-}
-
-/// The name of the function the node is in (empty in a lambda or outside of functions).
-fn function_name(n: &SyntaxNode) -> String {
-    for a in n.ancestors().skip(1) {
-        match a.kind() {
-            k::STMT_FUNCTION_DEF => {
-                return a
-                    .children()
-                    .find(|c| c.kind() == k::IDENTIFIER)
-                    .map(|i| code_text(&i))
-                    .unwrap_or_default();
-            }
-            k::EXPR_LAMBDA => return String::new(),
-            _ => {}
-        }
-    }
-    String::new()
-}
-
 pub(super) fn has_token(n: &SyntaxNode, kind: SyntaxKind) -> bool {
     tokens(n).any(|t| t.kind() == kind)
-}
-
-/// SIM201, SIM202 and SIM208: a negated comparison or a double negation.
-fn unary(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>, want: Option<SyntaxKind>) {
-    if !has_token(n, k::NOT) {
-        return;
-    }
-    let Some(operand) = n.children().next().map(|o| inner(&o)) else {
-        return;
-    };
-    let hit = match operand.kind() {
-        k::EXPR_COMPARE => {
-            let ops = compare_ops(&operand);
-            let skip =
-                exception_check(n) || matches!(function_name(n).as_str(), "__eq__" | "__ne__");
-            matches!(&ops[..], [(_, op, _)] if !skip && op[..] == [want.unwrap_or(k::UNKNOWN)])
-        }
-        k::EXPR_UNARY_OP => want.is_none() && has_token(&operand, k::NOT),
-        _ => false,
-    };
-    if hit {
-        c.hit(ctx, span(ctx, n), "");
-    }
-}
-
-pub(super) fn negate_equal_op(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    unary(c, n, ctx, Some(k::EQ_EQUAL));
-}
-
-pub(super) fn negate_not_equal_op(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    unary(c, n, ctx, Some(k::NOT_EQUAL));
-}
-
-pub(super) fn double_negation(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    unary(c, n, ctx, None);
 }
 
 pub(super) fn boolean(e: &SyntaxNode) -> Option<bool> {
     let e = inner(e);
     (e.kind() == k::EXPR_BOOLEAN_LITERAL).then(|| code_text(&e) == "True")
-}
-
-/// SIM210, SIM211 and SIM212: a conditional expression that is a boolean or a swapped one.
-fn if_expr(
-    c: &Check,
-    n: &SyntaxNode,
-    ctx: &mut RuleContext<'_>,
-    f: impl FnOnce(&[SyntaxNode; 3]) -> bool,
-) {
-    let parts: Vec<SyntaxNode> = n.children().collect();
-    if let Ok(parts) = <[SyntaxNode; 3]>::try_from(parts)
-        && f(&parts)
-    {
-        c.hit(ctx, span(ctx, n), "");
-    }
-}
-
-pub(super) fn if_expr_true_false(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if_expr(c, n, ctx, |[body, _, orelse]| {
-        boolean(body) == Some(true) && boolean(orelse) == Some(false)
-    });
-}
-
-pub(super) fn if_expr_false_true(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if_expr(c, n, ctx, |[body, _, orelse]| {
-        boolean(body) == Some(false) && boolean(orelse) == Some(true)
-    });
-}
-
-pub(super) fn if_expr_twisted_arms(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if_expr(c, n, ctx, |[body, test, orelse]| {
-        let (test, orelse) = (inner(test), inner(orelse));
-        boolean(body).is_none()
-            && boolean(&orelse).is_none()
-            && test.kind() == k::EXPR_UNARY_OP
-            && has_token(&test, k::NOT)
-            && test.children().next().map(|o| inner(&o)).is_some_and(|o| {
-                o.kind() == k::EXPR_NAME
-                    && orelse.kind() == k::EXPR_NAME
-                    && code_text(&o) == code_text(&orelse)
-            })
-    });
 }
 
 /// PIE810: `a.startswith(x) or a.startswith(y)`.

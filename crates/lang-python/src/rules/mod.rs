@@ -3,7 +3,6 @@
 //! --rust` adds a module under `rules/` and lists it here.
 
 mod branch;
-mod control;
 mod decl;
 mod isort;
 mod lints;
@@ -29,13 +28,12 @@ pub static FAMILIES: &[Family] = &[
         build: |meta, p| core_rules::scope_rules::build(&crate::semantic::LANG, meta, p),
     },
     core_rules::regex_source::FAMILY,
+    core_rules::simplify::FAMILY,
 ];
 
 pub(super) use core_rules::checks::{Entry, NodeCheck as Check};
 
 const CALL: &[core_syntax::SyntaxKind] = &[k::EXPR_CALL];
-const UNARY: &[core_syntax::SyntaxKind] = &[k::EXPR_UNARY_OP];
-const IF_EXPR: &[core_syntax::SyntaxKind] = &[k::EXPR_IF];
 const HANDLER: &[core_syntax::SyntaxKind] = &[k::EXCEPT_HANDLER_EXCEPT_HANDLER];
 const MODULE: &[core_syntax::SyntaxKind] = &[k::MOD_MODULE];
 
@@ -44,16 +42,6 @@ const CHECKS: &[Entry] = &[
         "forward-annotation-syntax-error",
         MODULE,
         scope::forward_annotation_syntax_error,
-    ),
-    (
-        "needless-bool",
-        &[k::STMT_IF, k::ELIF_ELSE_CLAUSE],
-        branch::needless_bool,
-    ),
-    (
-        "if-with-same-arms",
-        &[k::STMT_IF],
-        branch::if_with_same_arms,
     ),
     (
         "open-file-without-with",
@@ -178,11 +166,6 @@ const CHECKS: &[Entry] = &[
         decl::useless_import_alias,
     ),
     (
-        "collapsible-if",
-        &[k::STMT_IF, k::ELIF_ELSE_CLAUSE],
-        control::collapsible_if,
-    ),
-    (
         "undefined-local-with-nested-import-star-usage",
         MODULE,
         scope::nested_import_star,
@@ -242,21 +225,6 @@ const CHECKS: &[Entry] = &[
         stmts::multiple_starred,
     ),
     (
-        "break-outside-loop",
-        &[k::STMT_BREAK],
-        stmts::break_outside_loop,
-    ),
-    (
-        "continue-outside-loop",
-        &[k::STMT_CONTINUE],
-        stmts::continue_outside_loop,
-    ),
-    (
-        "return-outside-function",
-        &[k::STMT_RETURN],
-        stmts::return_outside_function,
-    ),
-    (
         "yield-outside-function",
         &[k::EXPR_YIELD, k::EXPR_YIELD_FROM, k::EXPR_AWAIT],
         stmts::yield_outside_function,
@@ -280,24 +248,6 @@ const CHECKS: &[Entry] = &[
         "in-dict-keys",
         &[k::EXPR_COMPARE, k::COMPREHENSION, k::STMT_FOR],
         lints::in_dict_keys,
-    ),
-    ("negate-equal-op", UNARY, lints::negate_equal_op),
-    ("negate-not-equal-op", UNARY, lints::negate_not_equal_op),
-    ("double-negation", UNARY, lints::double_negation),
-    (
-        "if-expr-with-true-false",
-        IF_EXPR,
-        lints::if_expr_true_false,
-    ),
-    (
-        "if-expr-with-false-true",
-        IF_EXPR,
-        lints::if_expr_false_true,
-    ),
-    (
-        "if-expr-with-twisted-arms",
-        IF_EXPR,
-        lints::if_expr_twisted_arms,
     ),
     (
         "multiple-starts-ends-with",

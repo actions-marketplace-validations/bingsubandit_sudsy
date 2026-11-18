@@ -39,6 +39,7 @@ pub mod rule;
 pub mod scope_rules;
 mod sections;
 pub mod shared;
+pub mod simplify;
 pub mod sorted;
 pub mod sorting;
 pub mod suppress;

@@ -43,9 +43,9 @@ severity: error
 category: suspicious
 ---
 id: no-extra-boolean-cast
-family: check
-params: { check: extra-boolean-cast }
-message: "{name}"
+family: simplify
+params: { check: redundant-cast, calls: Boolean }
+message: "Redundant {name}."
 description: "`!!x` or `Boolean(x)` where the value is used as a boolean anyway (a condition, `!`, `Boolean(...)`)."
 example: "if (!!a) {}   # reported"
 severity: off

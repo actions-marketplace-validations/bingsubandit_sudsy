@@ -20,7 +20,7 @@ use core_syntax::{Grammar, SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 
 pub static RULES: &[&dyn Rule] = &[];
 
-pub static FAMILIES: &[Family] = &[FAMILY, SCOPE, REGEX];
+pub static FAMILIES: &[Family] = &[FAMILY, SCOPE, REGEX, core_rules::simplify::FAMILY];
 
 /// The scope rules, shared with the other languages (`core_rules::scope_rules`).
 const SCOPE: Family = Family {
@@ -57,11 +57,6 @@ const CHECKS: &[Entry] = &[
         misc::use_isnan,
     ),
     ("valid-typeof", &[k::BINARY_EXPRESSION], misc::valid_typeof),
-    (
-        "extra-boolean-cast",
-        &[k::UNARY_EXPRESSION, k::CALL_EXPRESSION, k::NEW_EXPRESSION],
-        misc::extra_boolean_cast,
-    ),
     (
         "unsafe-finally",
         &[

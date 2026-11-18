@@ -152,3 +152,50 @@ pub fn directive_comment(grammar: &Grammar, rule: &str) -> Option<String> {
     let (open, close) = grammar.comments.block.as_ref()?;
     Some(format!("{open} {marker} {rule} {close}"))
 }
+
+crate::rule! {
+    pub UnknownRuleInDirective {
+        id: "unknown-rule-in-directive",
+        category: Suspicious,
+        default: Off,
+        description: "A comment that disables a rule of another tool (the grammar's `suppress \
+                  directive` markers) by a `Group/Name` whose group the tool does not have, such \
+                  as an extension that is not loaded (the grammar's `suppress directive-group` \
+                  rows list the groups there are).",
+        example: "# rubocop:disable Rails/Foo   // Rails is not a department of RuboCop itself",
+    }
+
+    fn check_file(&self, file: &FileContext<'_>, ctx: &mut crate::rule::RuleContext<'_>) {
+        let g = file.grammar;
+        let rows = |role: &'static str| g.suppressions.iter().filter(move |s| s.role == role);
+        let groups: Vec<&str> = rows("directive-group").map(|s| s.marker.as_str()).collect();
+        for marker in rows("directive").map(|s| s.marker.as_str()) {
+            if !file.text.contains(marker) {
+                continue;
+            }
+            for token in file
+                .root
+                .descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .filter(|t| g.has_tag(t.kind(), "comment") && t.text().contains(marker))
+            {
+                let text = token.text();
+                let rest = &text[text.find(marker).unwrap_or(0) + marker.len()..];
+                let line = rest.lines().next().unwrap_or("");
+                // the word after the marker is the action (`disable`), then come the names
+                let names = line.split_once(char::is_whitespace).map_or("", |(_, r)| r);
+                let names = names.split_once("--").map_or(names, |(n, _)| n);
+                let unknown = names
+                    .split(|c: char| c == ',' || c.is_whitespace())
+                    .filter_map(|n| n.split_once('/'))
+                    .find(|(group, _)| !groups.contains(group));
+                if let Some((group, name)) = unknown {
+                    ctx.report(
+                        token.text_range(),
+                        format!("unknown rule `{group}/{name}` in a directive"),
+                    );
+                }
+            }
+        }
+    }
+}

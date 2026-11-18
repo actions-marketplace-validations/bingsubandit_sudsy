@@ -61,15 +61,6 @@ example: "class A < B\n  def initialize; end\nend"
 severity: off
 category: suspicious
 ---
-id: unknown-cop-name
-family: check
-params: { check: unknown-cop-name }
-message: "unknown cop `{name}` in a RuboCop directive"
-description: "A `# rubocop:disable Department/Cop` comment whose department RuboCop does not have (an extension such as Rails or RSpec that the project does not load) (RuboCop Lint/CopDirectiveSyntax)."
-example: "# rubocop:disable Rails/Foo"
-severity: off
-category: suspicious
----
 id: useless-access-modifier
 family: check
 params: { check: useless-access-modifier }

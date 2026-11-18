@@ -10,6 +10,9 @@
 //! hoisted "var"                        // declaration keywords whose bare declarations hoist (optional)
 //! suppress disable-next-line "sudsy-disable-next-line"   // role, marker; roles: disable-next-line,
 //!                                                        // disable-line, disable, enable, disable-file, ignore*
+//!                                                        // `directive` marks the comments of another tool
+//!                                                        // (`"rubocop:"`), `directive-group` lists the groups
+//!                                                        // its rule names may start with; a row takes several markers
 //! token Whitespace #trivia #whitespace // variable-text token with tags
 //! token LBrace "{" #punctuation        // fixed-text token
 //! format percent operator "%"         // format strings: see `FormatRow`

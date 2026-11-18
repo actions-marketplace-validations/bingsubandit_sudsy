@@ -473,11 +473,16 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
             }
             "suppress" => {
                 let role = c.ident("suppression role")?;
-                let marker = c.string("suppression marker")?;
-                suppressions.push(Suppression {
-                    role: role.to_string(),
-                    marker: marker.to_string(),
-                });
+                loop {
+                    let marker = c.string("suppression marker")?;
+                    suppressions.push(Suppression {
+                        role: role.to_string(),
+                        marker: marker.to_string(),
+                    });
+                    if c.peek().is_none() {
+                        break;
+                    }
+                }
             }
             "token" | "node" => {
                 let is_token = keyword == "token";

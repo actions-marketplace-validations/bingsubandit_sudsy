@@ -14,6 +14,8 @@ suppress disable "sudsy-disable"
 suppress enable "sudsy-enable"
 suppress disable-file "sudsy-disable-file"
 suppress ignore "sudsy-ignore"
+suppress directive "rubocop:"
+suppress directive-group "Lint" "Style" "Layout" "Metrics" "Naming" "Security" "Gemspec" "Bundler" "Migration"
 
 token Whitespace #trivia #whitespace
 token Newline #trivia #newline

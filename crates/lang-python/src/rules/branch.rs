@@ -2,7 +2,6 @@
 //! (flake8-simplify, tryceratops, flake8-return, flake8-bugbear).
 
 use super::Check;
-use super::lints::boolean;
 use super::tree::{callee, inner, span, statements, tokens};
 use crate::generated::kind as k;
 use crate::semantic::{Cx, model};
@@ -16,72 +15,6 @@ fn has_elif(clause: &SyntaxNode) -> bool {
 
 fn clauses(n: &SyntaxNode) -> impl Iterator<Item = SyntaxNode> {
     n.children().filter(|c| c.kind() == k::ELIF_ELSE_CLAUSE)
-}
-
-fn bool_return(s: &SyntaxNode) -> Option<bool> {
-    if s.kind() != k::STMT_RETURN {
-        return None;
-    }
-    boolean(&s.children().next()?)
-}
-
-/// The only statement of a body, when it is a `return True` or `return False`.
-fn only_bool_return(mut body: impl Iterator<Item = SyntaxNode>) -> Option<bool> {
-    let (s, rest) = (body.next()?, body.next());
-    rest.is_none().then(|| bool_return(&s)).flatten()
-}
-
-/// SIM103: `if x: return True` followed (or continued by `else`) by `return False`.
-pub(super) fn needless_bool(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let Some(a) = only_bool_return(statements(n)) else {
-        return;
-    };
-    let other = if n.kind() == k::ELIF_ELSE_CLAUSE {
-        // The last `elif` of a chain that ends in `else`.
-        let last = n
-            .next_sibling()
-            .filter(|e| !has_elif(e) && e.next_sibling().is_none());
-        if !has_elif(n) {
-            return;
-        }
-        last.and_then(|e| only_bool_return(statements(&e)))
-    } else {
-        let mut rest = clauses(n);
-        match (rest.next(), rest.next()) {
-            (None, _) => n.next_sibling().and_then(|s| bool_return(&s)),
-            (Some(e), None) if !has_elif(&e) => only_bool_return(statements(&e)),
-            _ => None,
-        }
-    };
-    if other.is_some_and(|b| b != a) {
-        c.hit(ctx, span(ctx, n), "");
-    }
-}
-
-/// The statements of a body as one text, to compare bodies.
-fn body_key(n: &SyntaxNode) -> String {
-    statements(n)
-        .map(|s| code_text(&s))
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-/// SIM114: two neighbouring branches of an `if` chain with the same body.
-pub(super) fn if_with_same_arms(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if clauses(n).next().is_none() {
-        return;
-    }
-    let mut previous = body_key(n);
-    for clause in clauses(n) {
-        if !has_elif(&clause) {
-            break;
-        }
-        let key = body_key(&clause);
-        if key == previous && !key.is_empty() {
-            c.hit(ctx, span(ctx, &clause), "");
-        }
-        previous = key;
-    }
 }
 
 const OPENERS: &[&str] = &[

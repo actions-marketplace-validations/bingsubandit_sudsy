@@ -39,7 +39,7 @@ rescue
 ^^^^^^ no-empty-catch
 end
 # rubocop:disable Foo/Bar
-^^^^^^^^^^^^^^^^^^^^^^^^^ unknown-cop-name
+^^^^^^^^^^^^^^^^^^^^^^^^^ unknown-rule-in-directive
 h = { true: 1 }
 ^ unused-local-variable
 #     ^^^^^ boolean-symbol

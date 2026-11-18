@@ -5,7 +5,6 @@
 mod calls;
 mod classes;
 mod clauses;
-mod comments;
 mod literals;
 mod scope;
 mod tree;
@@ -117,11 +116,6 @@ const CHECKS: &[Entry] = &[
         "return-in-void-context",
         &[k::RETURN],
         classes::return_in_void_context,
-    ),
-    (
-        "unknown-cop-name",
-        &[k::PROGRAM],
-        comments::unknown_cop_name,
     ),
 ];
 

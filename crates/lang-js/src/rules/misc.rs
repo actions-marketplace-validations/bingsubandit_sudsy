@@ -1,6 +1,6 @@
 //! Checks on one statement or expression of its own.
 
-use super::{Check, code_text, has_own, operator, span, test_of, un};
+use super::{Check, code_text, has_own, operator, span, un};
 use crate::generated::kind as k;
 use core_rules::RuleContext;
 use core_syntax::SyntaxNode;
@@ -118,52 +118,5 @@ pub(super) fn valid_typeof(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>)
     };
     if invalid {
         c.hit(ctx, span(ctx, &other), "");
-    }
-}
-
-/// Is `node` where a boolean is expected anyway?
-fn in_boolean_context(node: &SyntaxNode) -> bool {
-    let mut outer = node.clone();
-    while let Some(p) = outer
-        .parent()
-        .filter(|p| p.kind() == k::PARENTHESIZED_EXPRESSION)
-    {
-        outer = p;
-    }
-    let Some(parent) = outer.parent() else {
-        return false;
-    };
-    match parent.kind() {
-        k::IF_STATEMENT
-        | k::WHILE_STATEMENT
-        | k::DO_WHILE_STATEMENT
-        | k::FOR_STATEMENT
-        | k::CONDITIONAL_EXPRESSION => test_of(&parent).as_ref() == Some(&outer),
-        k::UNARY_EXPRESSION => operator(&parent) == "!",
-        k::CALL_EXPRESSION | k::NEW_EXPRESSION => {
-            is_boolean_callee(&parent) && parent.children().nth(1).as_ref() == Some(&outer)
-        }
-        _ => false,
-    }
-}
-
-fn is_boolean_callee(call: &SyntaxNode) -> bool {
-    call.children()
-        .next()
-        .is_some_and(|c| c.kind() == k::IDENTIFIER_REFERENCE && code_text(&c) == "Boolean")
-}
-
-/// `!!x` or `Boolean(x)` where a boolean is expected anyway.
-pub(super) fn extra_boolean_cast(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let cast = if n.kind() == k::UNARY_EXPRESSION {
-        let inner = n.children().next().map(|n| un(&n));
-        let double = operator(n) == "!"
-            && inner.is_some_and(|i| i.kind() == k::UNARY_EXPRESSION && operator(&i) == "!");
-        double.then_some("Redundant double negation.")
-    } else {
-        is_boolean_callee(n).then_some("Redundant Boolean call.")
-    };
-    if let Some(message) = cast.filter(|_| in_boolean_context(n)) {
-        c.hit(ctx, span(ctx, n), message);
     }
 }

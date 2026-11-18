@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Lint
+* Ruby `unknown-cop-name` is renamed `unknown-rule-in-directive` (no alias): a shared rule that
+  reads the grammar's `suppress directive` rows. The Python `not a == b`, `not not a` rules
+  (`negate-equal-op`, `negate-not-equal-op`, `double-negation`) now offer an unsafe fix.
 * PowerShell uses the shared rules, renamed (config keys and the `powershell/psscriptanalyzer` preset
   follow, no aliases): `no-invoke-expression` is `no-eval`, `no-write-host` is `no-print`,
   `empty-catch-block` is `no-empty-catch`. They report the whole command or clause, not its first

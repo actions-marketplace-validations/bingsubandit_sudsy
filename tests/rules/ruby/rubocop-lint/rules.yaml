@@ -21,7 +21,7 @@ no-self-assign: warn
 struct-new-override: warn
 no-empty-catch: warn
 underscore-prefixed-variable-used: warn
-unknown-cop-name: warn
+unknown-rule-in-directive: warn
 unused-block-argument: warn
 unused-local-variable: warn
 unused-method-argument: warn

@@ -624,6 +624,34 @@
     {
       "category": "suspicious",
       "default_level": "off",
+      "description": "A comment that disables a rule of another tool (the grammar's `suppress directive` markers) by a `Group/Name` whose group the tool does not have, such as an extension that is not loaded (the grammar's `suppress directive-group` rows list the groups there are).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "x = :true\ny = :ok\nz = 'a #{b}'\n\"a #{1} #{x} #{[:a]}\"\n/(?<a>x)(y)/\n/(?<a>x)(?:y)/\na = a\n@b ||= @b\nc = d\nf == 0.1\nf == 0\nbegin\n  x\nend while y\ncase x\nwhen 1\nwhen 2 then z\nend\nbegin\n  1\nrescue Exception\nend\nbegin\n  1\nrescue\nend\n# rubocop:disable Foo/Bar\nh = { true: 1 }\n",
+        "language": "ruby",
+        "spans": [
+          {
+            "column": 1,
+            "length": 25,
+            "line": 27
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unknown-rule-in-directive",
+      "languages": [
+        "all"
+      ],
+      "options": [],
+      "presets": [
+        "ruby/rubocop"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
       "description": "A number that a double-precision parser (JavaScript, most JSON libraries) cannot hold: an integer beyond 2^53 - 1, a value that overflows to infinity, underflows to zero or is subnormal.",
       "example": {
         "config": null,
@@ -12745,7 +12773,7 @@
       "description": "`not` applied to `not`.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -12756,7 +12784,7 @@
           }
         ]
       },
-      "fix": null,
+      "fix": "unsafe",
       "id": "double-negation",
       "languages": [
         "python"
@@ -13071,7 +13099,7 @@
       "description": "A conditional expression with `False` and `True` arms.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -13099,7 +13127,7 @@
       "description": "A conditional expression with `True` and `False` arms.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -13127,7 +13155,7 @@
       "description": "A conditional expression `b if not a else a`.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -13242,7 +13270,7 @@
       "description": "A membership test, `for` or comprehension over `.keys()` with no arguments.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -13803,7 +13831,7 @@
       "description": "`not` applied to a comparison with `==`.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -13814,7 +13842,7 @@
           }
         ]
       },
-      "fix": null,
+      "fix": "unsafe",
       "id": "negate-equal-op",
       "languages": [
         "python"
@@ -13831,7 +13859,7 @@
       "description": "`not` applied to a comparison with `!=`.",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = a != b\nx = a == b\nx = not a < b\nx = not a == b == c\nx = a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "input": "a = b = c = d = k = 1\nx = k in d.keys()\nx = k not in d.keys()\nx = k in d.keys(1)\nx = [k for k in d.keys()]\nfor k in d.keys():\n    pass\nx = not a == b\nx = not a != b\nx = not a < b\nx = not a == b == c\nx = not not a\nx = True if a else False\nx = False if a else True\nx = 1 if a else 1\nx = b if not a else a\nx = b if a else a\n",
         "language": "python",
         "spans": [
@@ -13842,7 +13870,7 @@
           }
         ]
       },
-      "fix": null,
+      "fix": "unsafe",
       "id": "negate-not-equal-op",
       "languages": [
         "python"
@@ -16219,34 +16247,6 @@
       },
       "fix": null,
       "id": "underscore-prefixed-variable-used",
-      "languages": [
-        "ruby"
-      ],
-      "options": [],
-      "presets": [
-        "ruby/rubocop"
-      ],
-      "upstream": []
-    },
-    {
-      "category": "suspicious",
-      "default_level": "off",
-      "description": "A `# rubocop:disable Department/Cop` comment whose department RuboCop does not have (an extension such as Rails or RSpec that the project does not load) (RuboCop Lint/CopDirectiveSyntax).",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "x = :true\ny = :ok\nz = 'a #{b}'\n\"a #{1} #{x} #{[:a]}\"\n/(?<a>x)(y)/\n/(?<a>x)(?:y)/\na = a\n@b ||= @b\nc = d\nf == 0.1\nf == 0\nbegin\n  x\nend while y\ncase x\nwhen 1\nwhen 2 then z\nend\nbegin\n  1\nrescue Exception\nend\nbegin\n  1\nrescue\nend\n# rubocop:disable Foo/Bar\nh = { true: 1 }\n",
-        "language": "ruby",
-        "spans": [
-          {
-            "column": 1,
-            "length": 25,
-            "line": 27
-          }
-        ]
-      },
-      "fix": null,
-      "id": "unknown-cop-name",
       "languages": [
         "ruby"
       ],

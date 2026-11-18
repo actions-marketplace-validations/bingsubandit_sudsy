@@ -5584,10 +5584,6 @@
                 }
               ]
             },
-            "unknown-cop-name": {
-              "$ref": "#/definitions/rule",
-              "description": "A `# rubocop:disable Department/Cop` comment whose department RuboCop does not have (an extension such as Rails or RSpec that the project does not load) (RuboCop Lint/CopDirectiveSyntax)."
-            },
             "unknown-needs": {
               "$ref": "#/definitions/rule",
               "description": "`needs` names a job that the workflow does not define."
@@ -5622,6 +5618,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "unknown-rule-in-directive": {
+              "$ref": "#/definitions/rule",
+              "description": "A comment that disables a rule of another tool (the grammar's `suppress directive` markers) by a `Group/Name` whose group the tool does not have, such as an extension that is not loaded (the grammar's `suppress directive-group` rows list the groups there are)."
             },
             "unnecessary-collection-call": {
               "$ref": "#/definitions/rule",
