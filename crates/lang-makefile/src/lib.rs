@@ -1,4 +1,3 @@
-mod embedded;
 mod format;
 mod rules;
 

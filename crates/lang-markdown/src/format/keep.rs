@@ -7,7 +7,7 @@ impl Render<'_> {
     /// fence would gain one.
     pub(super) fn keep(&self, e: &SyntaxElement, top: bool) -> bool {
         let range = e.text_range();
-        let from = self.line_start(usize::from(range.start()));
+        let from = self.cs().line_start(usize::from(range.start()));
         let open_fence = matches!(e, SyntaxElement::Node(n) if n.kind() == k::FENCED_CODE
             && n.children_with_tokens().filter(|c| c.kind() == k::FENCE).count() < 2);
         // Prettier keeps setext headings as written.
@@ -41,7 +41,7 @@ impl Render<'_> {
         }
         n.descendants().any(|d| match d.kind() {
             k::INLINE => {
-                let chain = self.chain(&d);
+                let chain = self.cs().chain(&d);
                 let text = &self.src[d.text_range()];
                 text.split('\n').skip(1).any(|l| {
                     let lazy = !in_container(l, &chain);

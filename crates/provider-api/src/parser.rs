@@ -44,7 +44,6 @@ pub struct ParserProvider {
     formatter: &'static dyn NodeFormatter,
     hooks: &'static dyn RuleHooks,
     rules: LazyRules,
-    embedded: Option<fn(&SyntaxNode, &str) -> Vec<Embedded>>,
     /// The name and config base of a dialect that has a provider of its own.
     dialect: Option<(&'static str, &'static str)>,
 }
@@ -79,7 +78,6 @@ impl ParserProvider {
             parse,
             formatter: spec.formatter,
             hooks: spec.hooks,
-            embedded: None,
             dialect: None,
         }
     }
@@ -95,12 +93,6 @@ impl ParserProvider {
     /// a dialect, or a directory).
     pub fn with_matchers(mut self, matchers: Vec<FileMatcher>) -> Self {
         self.matchers = matchers;
-        self
-    }
-
-    /// Finds the code of other languages in a tree (a function of the language crate).
-    pub fn with_embedded(mut self, find: fn(&SyntaxNode, &str) -> Vec<Embedded>) -> Self {
-        self.embedded = Some(find);
         self
     }
 }
@@ -135,7 +127,11 @@ impl LanguageProvider for ParserProvider {
     }
 
     fn embedded(&self, root: &SyntaxNode, text: &str) -> Vec<Embedded> {
-        self.embedded.map_or_else(Vec::new, |find| find(root, text))
+        let grammar = self.grammar.get();
+        if grammar.embed_rows().is_empty() {
+            return Vec::new();
+        }
+        core_syntax::embed_rows::find(grammar, self.dialect.map(|d| d.0), root, text)
     }
 
     fn formatter(&self) -> &dyn NodeFormatter {

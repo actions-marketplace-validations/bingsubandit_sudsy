@@ -12,9 +12,9 @@ impl Render<'_> {
         let mut prev_kept = false;
         let mut prev: Option<SyntaxElement> = None;
         let chain = if parent.kind() == k::BLOCK_QUOTE || parent.kind() == k::LIST_ITEM {
-            self.chain_in(parent)
+            self.cs().chain_in(parent)
         } else {
-            self.chain(parent)
+            self.cs().chain(parent)
         };
         let top = parent.kind() == k::DOCUMENT;
         for e in Self::block_elems(parent) {
@@ -58,8 +58,8 @@ impl Render<'_> {
 
     /// Indented code from the source: its first line has lost its indentation in the token.
     pub(super) fn indented(&self, t: &SyntaxToken) -> Vec<String> {
-        let chain = self.chain_of_token(t);
-        let from = self.line_start(start(t));
+        let chain = self.cs().chain_of_token(t);
+        let from = self.cs().line_start(start(t));
         let text = &self.src[from..end(t)];
         let mut lines = raw_lines_all(text, &chain);
         // A container's marker on the first line (`-     code`) cannot be told from the code.
@@ -86,7 +86,7 @@ impl Render<'_> {
             self.indented(t)
         } else if kind == k::HTML_BLOCK || kind == k::HTML_COMMENT {
             // The text of an HTML block ends where its last line does.
-            let mut lines = raw_lines(t.text(), &self.chain_of_token(t));
+            let mut lines = raw_lines(t.text(), &self.cs().chain_of_token(t));
             if let Some(l) = lines.last_mut() {
                 *l = l.trim_end().to_string();
             }
@@ -107,7 +107,7 @@ impl Render<'_> {
                     .to_string(),
             ]
         } else {
-            raw_lines(t.text(), &self.chain_of_token(t))
+            raw_lines(t.text(), &self.cs().chain_of_token(t))
         }
     }
 
@@ -181,7 +181,7 @@ impl Render<'_> {
 
     /// A blank line between the blocks of the item: they are separated by one in the output.
     pub(super) fn item_spread(&self, item: &SyntaxNode) -> bool {
-        let inside = self.chain_in(item);
+        let inside = self.cs().chain_in(item);
         let kids = Self::block_elems(item);
         kids.windows(2)
             .any(|w| self.blank_between(&w[0], &w[1], &inside))
@@ -195,7 +195,7 @@ impl Render<'_> {
                     SyntaxElement::Node(items[i].clone()),
                     SyntaxElement::Node(n.clone()),
                 );
-                self.blank_between(&a, &b, &self.chain(&items[i]))
+                self.blank_between(&a, &b, &self.cs().chain(&items[i]))
             })
     }
 
@@ -267,77 +267,12 @@ impl Render<'_> {
         out
     }
 
-    /// The content lines of a fenced block as `(start, prefix, end)`: where each stands in the
-    /// source (without its line break) and how much of its start belongs to the containers and
-    /// the fence's indentation; and whether the closing fence was found. The content is read from
-    /// the source, line by line up to the closing fence: blank content has no token, and the
-    /// closing fence may stand outside the node.
-    pub(crate) fn fence_lines(&self, n: &SyntaxNode) -> (Vec<(usize, usize, usize)>, bool) {
-        let chain = self.chain(n);
-        let open = n.token(k::FENCE);
-        let (mut lines, mut closed) = (Vec::new(), false);
-        if let Some(open) = open {
-            let fence = open.text().trim();
-            let (fch, flen) = (fence.chars().next().unwrap_or('`'), fence.len());
-            // Indentation of the opening fence beyond its containers: content loses as much.
-            let lead = open.text().len() - open.text().trim_start().len();
-            let before = strip(
-                &self.src[self.line_start(start(&open))..start(&open)],
-                &chain,
-            );
-            let fence_indent = lead
-                + if before.trim().is_empty() {
-                    before.len()
-                } else {
-                    0
-                };
-            let from = self.src[end(&open)..]
-                .find('\n')
-                .map_or(self.src.len(), |i| end(&open) + i + 1);
-            let mut pieces = self.src[from..].split('\n').peekable();
-            let mut at = from;
-            while let Some(piece) = pieces.next() {
-                let raw = piece.strip_suffix('\r').unwrap_or(piece);
-                let line_start = at;
-                at += piece.len() + 1;
-                // The empty piece after the file's last line break is not a line.
-                if raw.is_empty() && pieces.peek().is_none() && self.src.ends_with('\n') {
-                    break;
-                }
-                if !in_container(raw, &chain) {
-                    break;
-                }
-                let l = strip(raw, &chain);
-                let t = l.trim_start();
-                if l.len() - t.len() < 4
-                    && t.len() >= flen
-                    && t.chars().take_while(|c| *c == fch).count() >= flen
-                    && t.trim_end_matches(fch).trim().is_empty()
-                {
-                    closed = true;
-                    break;
-                }
-                let cut = l
-                    .bytes()
-                    .take(fence_indent)
-                    .take_while(|b| *b == b' ')
-                    .count();
-                lines.push((
-                    line_start,
-                    raw.len() - l.len() + cut,
-                    line_start + raw.len(),
-                ));
-            }
-        }
-        (lines, closed)
-    }
-
     pub(super) fn fenced(&self, n: &SyntaxNode) -> Vec<String> {
         let info = n
             .token(k::INFO)
             .map(|t| t.text().trim().to_string())
             .unwrap_or_default();
-        let lines: Vec<String> = (self.fence_lines(n).0.into_iter())
+        let lines: Vec<String> = (self.cs().fence_lines(n, k::FENCE).0.into_iter())
             .map(|(start, prefix, end)| self.src[start + prefix..end].to_string())
             .collect();
         let tilde = info.contains('`');

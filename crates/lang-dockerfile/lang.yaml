@@ -4,7 +4,6 @@ extensions: [dockerfile]
 file-names: [Dockerfile, Containerfile, "Dockerfile.*", "Containerfile.*"]
 formatter: DockerfileFormatter
 families: rules::FAMILIES
-embedded: embedded::find
 dev-deps: [insta, lang-shell]
 options:
   - indent_size: 4

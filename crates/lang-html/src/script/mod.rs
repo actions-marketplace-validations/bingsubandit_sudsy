@@ -18,8 +18,6 @@ mod keys;
 mod props;
 mod region;
 
-pub use region::find;
-
 use core_rules::checks::FileCache;
 use core_rules::{Family, FileContext, Params, Rule, RuleContext, RuleMeta};
 use core_semantics::scopes::{Model, ScopeId};

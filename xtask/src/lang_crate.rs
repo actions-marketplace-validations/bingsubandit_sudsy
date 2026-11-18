@@ -207,10 +207,6 @@ fn provider(name: &str, v: &Value) -> String {
         Some(c) => format!("provider_of_composite({spec}, Some({c}))"),
         None => format!("provider_of({spec})"),
     };
-    let body = match v.get("embedded").and_then(Value::as_str) {
-        Some(f) => format!("{body}.with_embedded({f})"),
-        None => body,
-    };
     format!(
         "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}\n}}\n"
     )

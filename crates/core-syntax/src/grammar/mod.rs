@@ -33,6 +33,8 @@
 
 mod parse;
 
+use crate::containers::ContainerRow;
+use crate::embed_rows::EmbedRow;
 use crate::kind::{LanguageId, SyntaxKind};
 use crate::regex::{RegexCall, RegexRow};
 use crate::scan::{Limits, TriviaRow, TriviaSyntax};
@@ -216,6 +218,10 @@ pub struct Grammar {
     pub limits: Limits,
     /// The `format` rows: how a format string and its arguments are written.
     pub formats: Vec<FormatRow>,
+    /// The `embed` rows: where the code of other languages is.
+    embeds: Vec<EmbedRow>,
+    /// The `container` rows.
+    containers: Vec<ContainerRow>,
     nodes: Vec<KindDef>,
     tokens: Vec<KindDef>,
     by_name: HashMap<String, SyntaxKind>,
@@ -638,6 +644,16 @@ impl Grammar {
     /// The `regex` row of the token kind `kind`.
     pub fn regex_row(&self, kind: SyntaxKind) -> Option<&RegexRow> {
         self.regex_rows.iter().find(|r| r.kind == Some(kind))
+    }
+
+    /// The `container` rows.
+    pub fn containers(&self) -> &[ContainerRow] {
+        &self.containers
+    }
+
+    /// The `embed` rows.
+    pub fn embed_rows(&self) -> &[EmbedRow] {
+        &self.embeds
     }
 
     /// The `regex-call` rows: calls whose first argument is a regex source.

@@ -1,57 +1,14 @@
 //! Containers (quotes, list items) and the source lines of blocks.
 
 use super::*;
-use core_syntax::SyntaxNodeExt;
 
 impl Render<'_> {
-    pub(super) fn line_start(&self, off: usize) -> usize {
-        self.src[..off].rfind('\n').map_or(0, |i| i + 1)
-    }
-
-    /// Absolute column where the content of a quote or list item starts.
-    pub(super) fn content_col(&self, n: &SyntaxNode) -> usize {
-        let marker = n
-            .tokens()
-            .find(|t| t.kind() == k::QUOTE_MARKER || t.kind() == k::LIST_MARKER);
-        marker.map_or(0, |t| end(&t) - self.line_start(start(&t)))
-    }
-
-    /// The containers around `node`, outermost first.
-    pub(super) fn chain(&self, node: &SyntaxNode) -> Vec<Cont> {
-        let mut out = Vec::new();
-        let mut parent_col = None;
-        let mut ancestors: Vec<SyntaxNode> = node
-            .ancestors()
-            .skip(1)
-            .filter(|a| a.kind() == k::BLOCK_QUOTE || a.kind() == k::LIST_ITEM)
-            .collect();
-        ancestors.reverse();
-        for a in ancestors {
-            let col = self.content_col(&a);
-            if a.kind() == k::BLOCK_QUOTE {
-                out.push(Cont::Quote);
-            } else {
-                out.push(Cont::Item(col.saturating_sub(parent_col.unwrap_or(0))));
-            }
-            parent_col = Some(col);
+    /// The containers of the source, through the grammar's `container` rows.
+    pub(super) fn cs(&self) -> Containers<'_> {
+        Containers {
+            grammar: core_syntax::grammars::MARKDOWN.get(),
+            src: self.src,
         }
-        out
-    }
-
-    /// Chain for the content of `node` itself when it is a container.
-    pub(super) fn chain_in(&self, node: &SyntaxNode) -> Vec<Cont> {
-        let mut c = self.chain(node);
-        let parent_col = node
-            .ancestors()
-            .skip(1)
-            .find(|a| a.kind() == k::BLOCK_QUOTE || a.kind() == k::LIST_ITEM)
-            .map_or(0, |a| self.content_col(&a));
-        c.push(if node.kind() == k::BLOCK_QUOTE {
-            Cont::Quote
-        } else {
-            Cont::Item(self.content_col(node).saturating_sub(parent_col))
-        });
-        c
     }
 
     /// The blocks of a container, as elements.
@@ -77,8 +34,8 @@ impl Render<'_> {
             return Vec::new();
         };
         let chain = match e {
-            SyntaxElement::Node(n) => self.chain(n),
-            SyntaxElement::Token(t) => self.chain_of_token(t),
+            SyntaxElement::Node(n) => self.cs().chain(n),
+            SyntaxElement::Token(t) => self.cs().chain_of_token(t),
         };
         let (mut from, mut to) = (start(&f), end(&l));
         if let SyntaxElement::Node(n) = e
@@ -93,20 +50,10 @@ impl Render<'_> {
             }
         }
         // A top-level block keeps the indentation of its first line.
-        let line = self.line_start(from);
+        let line = self.cs().line_start(from);
         if chain.is_empty() && self.src[line..from].trim().is_empty() {
             from = line;
         }
         raw_lines(&self.src[from..to], &chain)
-    }
-
-    pub(super) fn chain_of_token(&self, t: &SyntaxToken) -> Vec<Cont> {
-        t.parent().map_or(Vec::new(), |p| {
-            let mut c = self.chain(&p);
-            if p.kind() == k::BLOCK_QUOTE || p.kind() == k::LIST_ITEM {
-                c = self.chain_in(&p);
-            }
-            c
-        })
     }
 }

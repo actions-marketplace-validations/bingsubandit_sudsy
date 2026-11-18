@@ -6,7 +6,6 @@
 
 mod blocks;
 mod containers;
-mod embedded;
 mod inline;
 mod keep;
 mod signature;
@@ -15,10 +14,9 @@ mod table;
 use crate::generated::kind as k;
 use signature::signature;
 
-pub(crate) use embedded::find as find_embedded;
-
 use core_config::shared;
 use core_format::{Doc, FormatCtx, FormatError, NodeFormatter, doc};
+use core_syntax::containers::{Cont, Containers, in_container, strip};
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
@@ -71,13 +69,6 @@ impl NodeFormatter for MarkdownFormatter {
     }
 }
 
-/// A container whose prefix every line of its content carries.
-enum Cont {
-    Quote,
-    /// Width of the continuation indentation, relative to the container around it.
-    Item(usize),
-}
-
 struct Render<'a> {
     src: &'a str,
     tab: usize,
@@ -108,45 +99,6 @@ fn start(t: &SyntaxToken) -> usize {
 
 fn end(t: &SyntaxToken) -> usize {
     usize::from(t.text_range().end())
-}
-
-/// Does a line still belong to the containers (a quote needs its `>`, an item its indentation or a blank)?
-fn in_container(line: &str, chain: &[Cont]) -> bool {
-    let mut line = line;
-    for c in chain {
-        match c {
-            Cont::Quote => {
-                if !line.trim_start_matches(' ').starts_with('>') {
-                    return false;
-                }
-            }
-            Cont::Item(w) => {
-                if !line.trim().is_empty() && line.bytes().take_while(|b| *b == b' ').count() < *w {
-                    return false;
-                }
-            }
-        }
-        line = strip(line, std::slice::from_ref(c));
-    }
-    true
-}
-
-/// Removes the container prefix from a line.
-fn strip<'a>(mut line: &'a str, chain: &[Cont]) -> &'a str {
-    for c in chain {
-        line = match c {
-            Cont::Quote => {
-                let t = line.trim_start_matches(' ');
-                t.strip_prefix('>')
-                    .map_or(line, |r| r.strip_prefix(' ').unwrap_or(r))
-            }
-            Cont::Item(w) => {
-                let n = line.bytes().take(*w).take_while(|b| *b == b' ').count();
-                &line[n..]
-            }
-        };
-    }
-    line
 }
 
 /// Could a line, once unindented, start a block that interrupts a paragraph (a heading, quote,

@@ -7,7 +7,6 @@ families: "&[core_rules::max::FAMILY]"
 composite:
   text: Word
   continuation: true
-embedded: embedded::find
 dev-deps: [core-config, core-incremental, lang-shell]
 options:
   - indent_size: 2

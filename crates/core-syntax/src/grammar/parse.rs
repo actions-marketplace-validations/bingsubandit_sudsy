@@ -320,6 +320,8 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut trivia: Vec<TriviaRow> = Vec::new();
     let mut limits = Limits::default();
     let mut formats: Vec<FormatRow> = Vec::new();
+    let mut embeds: Vec<(usize, &[Lexeme<'_>])> = Vec::new();
+    let mut containers: Vec<(usize, &[Lexeme<'_>])> = Vec::new();
     let mut raw: Vec<RawKind> = Vec::with_capacity(lexed.decls.len());
 
     for d in &lexed.decls {
@@ -455,6 +457,8 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
             "string" => strings.extend(string_row(&mut c)?),
             "regex" => regex_rows.push(regex_row(&mut c)?),
             "regex-call" => regex_calls.push(regex_call_row(&mut c)?),
+            "embed" => embeds.push((d.line, c.rest)),
+            "container" => containers.push((d.line, c.rest)),
             "trivia" => trivia.push(trivia_row(&mut c)?),
             "limits" => limits = limits_row(&mut c)?,
             "format" => {
@@ -557,7 +561,117 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     grammar.trivia = TriviaSyntax::new(trivia);
     grammar.limits = limits;
     grammar.formats = formats;
+    for (line, rest) in containers {
+        let mut c = Cursor { line, rest };
+        let kind = |c: &mut Cursor<'_>| match grammar.by_name.get(c.ident("a kind")?) {
+            Some(k) => Ok(*k),
+            None => err(line, "container row of unknown kind"),
+        };
+        let node = kind(&mut c)?;
+        let (mut marker, mut prefix) = (None, None);
+        while c.peek().is_some() {
+            match c.ident("a container attribute")? {
+                "marker" => marker = Some(kind(&mut c)?),
+                "prefix" => prefix = Some(c.string("a prefix")?.to_string()),
+                other => return err(line, format!("unknown container attribute `{other}`")),
+            }
+        }
+        let Some(marker) = marker else {
+            return err(line, "a container row needs a marker");
+        };
+        grammar.containers.push(ContainerRow {
+            node,
+            marker,
+            prefix,
+        });
+    }
+    for (line, rest) in embeds {
+        let row = embed_row(&grammar, &mut Cursor { line, rest })?;
+        grammar.embeds.push(row);
+    }
     Ok(grammar)
+}
+
+/// An `embed <Kind> language "name" attribute...` row (see [`EmbedRow`]).
+fn embed_row(grammar: &Grammar, c: &mut Cursor<'_>) -> Result<EmbedRow, GrammarError> {
+    let line = c.line;
+    let kind = |name: &str| match grammar.by_name.get(name) {
+        Some(k) => Ok(*k),
+        None => err(line, format!("embed row of unknown kind `{name}`")),
+    };
+    let strings = |c: &mut Cursor<'_>| {
+        let mut out = Vec::new();
+        while let Some(Lexeme::Str(s)) = c.peek() {
+            out.push(s.to_string());
+            c.next();
+        }
+        out
+    };
+    let kinds = |c: &mut Cursor<'_>| {
+        let mut out = Vec::new();
+        while let Some(Lexeme::Ident(n)) = c.peek() {
+            if n.starts_with(|ch: char| ch.is_ascii_lowercase()) {
+                break;
+            }
+            out.push(kind(n)?);
+            c.next();
+        }
+        Ok::<_, GrammarError>(out)
+    };
+    let mut row = EmbedRow {
+        kind: Some(kind(c.ident("a kind")?)?),
+        ..EmbedRow::default()
+    };
+    while c.peek().is_some() {
+        match c.ident("an embed attribute")? {
+            "language" => row.language = c.string("a language")?.to_string(),
+            "in" => row.parent = Some(kind(c.ident("a kind")?)?),
+            "lead" => row.lead = strings(c),
+            "named" => {
+                let k = kind(c.ident("a token kind")?)?;
+                row.named = Some((k, c.string("a name")?.to_string()));
+            }
+            "root" => row.root = true,
+            "dialect" => row.dialect = Some(c.string("a dialect")?.to_string()),
+            "when" => row.when = strings(c),
+            "skip-start" => row.skip_start = strings(c),
+            "content" => row.content = Some(kind(c.ident("a kind")?)?),
+            "fence" => row.fence = Some(kind(c.ident("a token kind")?)?),
+            "after" => row.after = Some(kind(c.ident("a token kind")?)?),
+            "body" => row.body = true,
+            "trim" => row.trim = true,
+            "join" => row.join = true,
+            "info" => row.info = Some(kind(c.ident("a token kind")?)?),
+            "alias" => {
+                let s = strings(c);
+                row.alias = s.chunks(2).map(|p| (p[0].clone(), p[1].clone())).collect();
+            }
+            "attr" => {
+                let name = c.string("an attribute name")?.to_string();
+                row.attr = Some((name, strings(c)));
+            }
+            "carve-lines" => row.carve_lines = strings(c),
+            "carve-end" => {
+                let ch = c.string("a character")?.chars().next().unwrap_or('\\');
+                let directive = match c.peek() {
+                    Some(Lexeme::Ident("directive")) => {
+                        c.next();
+                        Some(c.string("a directive")?.to_string())
+                    }
+                    _ => None,
+                };
+                row.carve_end = Some((ch, directive));
+            }
+            "carve-line-start" => row.carve_line_start = strings(c),
+            "carve-kind" => row.carve_kind = kinds(c)?,
+            "carve-first" => row.carve_first = kinds(c)?,
+            "format" => row.format = true,
+            "strip" => row.strip = true,
+            "no-lint" => row.no_lint = true,
+            other => return err(line, format!("unknown embed attribute `{other}`")),
+        }
+    }
+    Ok(row)
 }
 
 /// A `trivia <Token> attribute...` row (see [`TriviaRow`]): `line "p"...`, `not "p"...`,
@@ -881,6 +995,8 @@ fn resolve(
         trivia: TriviaSyntax::default(),
         limits: Limits::default(),
         formats: Vec::new(),
+        embeds: Vec::new(),
+        containers: Vec::new(),
         token_flags: super::hot_flags(&tokens),
         node_flags: super::hot_flags(&nodes),
         nodes,

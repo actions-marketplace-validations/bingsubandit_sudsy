@@ -14,6 +14,8 @@
 
 pub mod ast;
 pub mod codegen;
+pub mod containers;
+pub mod embed_rows;
 pub mod embedded;
 pub mod grammar;
 pub mod grammars;

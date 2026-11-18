@@ -50,6 +50,10 @@ token Unknown #error
 
 node Document = items:#block-item* Eof
 node Heading #block-item = Inline
+// The code of a fenced block: the first word of the info string names the language (a name or a file extension), the container prefix of each line is the host's part.
+embed FencedCode language "" when "```" "~~~" info Info alias "javascript" "js" "typescript" "ts" fence Fence format strip
+container BlockQuote marker QuoteMarker prefix ">"
+container ListItem marker ListMarker
 node BlockQuote #block-item = QuoteMarker items:#block-item*
 node List #block-item = items:ListItem*
 node ListItem = ListMarker TaskMarker? items:#block-item*

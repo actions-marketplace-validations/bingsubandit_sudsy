@@ -69,6 +69,8 @@ node BlockTag #content #opaque = value:BlockTagText
 node Block #content #opaque = items:#content*
 node Interpolation #content #opaque = LBraceBrace Chunk? RBraceBrace
 node Chunk #content #opaque = value:#chunk
+// A Vue file's `<script>` and `<script setup>` are one JavaScript program (as the Vue compiler and `vue-eslint-parser` read them): one region from the first block to the last, the markup between them the host's. The host reads the parse itself, so the language's own rules do not run on it.
+embed Element language "js" dialect "vue" root named TagName "script" content Chunk attr "lang" "js" "ts" "tsx" "jsx" join no-lint
 node Element #content #opaque = start:#start-tag content:#content* end:EndTag?
 // `>` or `/>`: `<br>` and `<br />` are the same node.
 node StartTag #start-tag #mapping #opaque = Lt TagName entries:Attribute* #tag-end

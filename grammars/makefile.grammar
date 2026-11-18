@@ -46,6 +46,8 @@ node Prereqs = Word*
 node Recipe = Semi? items:#item*
 // One command; the shell code is `ShellText`.
 node RecipeLine #item #command = Prefix* ShellText?
+// The commands of a recipe are Shell code; Make's own syntax in them (`$(CC)`, `$@`, `$$`, the tab that starts a continued line) is the host's.
+embed RecipeLine language "shell" after Prefix trim carve-line-start "	" carve-kind Call MakeRef carve-first MakeEscape
 node ShellText = MakeRef* MakeEscape* Word*
 node Assign #item = Targets? Colon? Word Op Value?
 node Define #item = Keyword Word Op? Raw? Keyword

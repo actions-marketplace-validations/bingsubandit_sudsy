@@ -66,7 +66,7 @@ impl Render<'_> {
                     .join("\n"),
             );
         } else if [k::HTML_BLOCK, k::HTML_COMMENT, k::CODE_TEXT, k::CODE_SPAN].contains(&kind) {
-            let lines = raw_lines(&text, &self.chain_of_token(t));
+            let lines = raw_lines(&text, &self.cs().chain_of_token(t));
             out.push(
                 lines
                     .iter()

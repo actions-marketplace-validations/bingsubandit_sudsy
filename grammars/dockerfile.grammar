@@ -39,4 +39,8 @@ token Unknown #error
 
 node Document = items:#item* Eof
 // ONBUILD and HEALTHCHECK hold an instruction of their own.
+// The shell of `RUN` and, in shell form, of `CMD` and `ENTRYPOINT` (also under `ONBUILD` and `HEALTHCHECK`), and the body of a heredoc. Docker drops the comment lines inside a continued instruction and, with `# escape=`` `, the backtick continuation before the shell reads it.
+embed ShellCommand language "shell" in Instruction lead "run" skip-start "<<" carve-lines "#" carve-end "`" directive "escape"
+embed ShellCommand language "shell" in Instruction lead "cmd" "entrypoint" skip-start "<<" "[" carve-lines "#" carve-end "`" directive "escape"
+embed Heredoc language "shell" in Instruction lead "run" "cmd" "entrypoint" body
 node Instruction #item = Keyword? args:#arg* nested:Instruction?

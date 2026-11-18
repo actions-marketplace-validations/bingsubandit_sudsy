@@ -65,7 +65,7 @@ impl Render<'_> {
                         out.push_str(&self.escape(t));
                     } else if !is_trivia(kind) {
                         // A line break inside a token (code span) is kept, minus the container prefix.
-                        let chain = t.parent().map(|p| self.chain(&p)).unwrap_or_default();
+                        let chain = t.parent().map(|p| self.cs().chain(&p)).unwrap_or_default();
                         let text = raw_lines_all(t.text(), &chain);
                         out.push_str(&text.join(&NEWLINE_IN_TOKEN.to_string()));
                     }
