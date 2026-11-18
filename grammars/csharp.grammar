@@ -734,7 +734,7 @@ node NamespaceDeclaration #member #declaration #block #namespace #scope =
     attribute_lists:AttributeList* modifiers:#modifier* namespace_keyword:NamespaceKeyword name:#name open_brace:OpenBraceToken externs:ExternAliasDirective* usings:UsingDirective* members=items:#member* close_brace:CloseBraceToken semicolon:SemicolonToken?
 node FileScopedNamespaceDeclaration #member #declaration #namespace #scope =
     attribute_lists:AttributeList* modifiers:#modifier* namespace_keyword:NamespaceKeyword name:#name semicolon:SemicolonToken externs:ExternAliasDirective* usings:UsingDirective* members:#member*
-node AttributeList #delimited-list #opaque =
+node AttributeList #annotation #delimited-list #opaque =
     open_bracket:OpenBracketToken target:AttributeTargetSpecifier? attributes:Attribute* close_bracket:CloseBracketToken
 node AttributeTargetSpecifier #list-prefix #opaque =
     identifier:#attribute-target colon:ColonToken
@@ -766,11 +766,11 @@ node EnumDeclaration #member #declaration #type-declaration #delimited-list #sco
     attribute_lists:AttributeList* modifiers:#modifier* enum_keyword:EnumKeyword identifier=name:IdentifierToken base_list:BaseList? open_brace:OpenBraceToken? members:EnumMemberDeclaration* close_brace:CloseBraceToken? semicolon:SemicolonToken?
 node DelegateDeclaration #member #declaration =
     attribute_lists:AttributeList* modifiers:#modifier* delegate_keyword:DelegateKeyword return_type:#type identifier=name:IdentifierToken type_parameter_list:TypeParameterList? parameter_list:ParameterList constraint_clauses:TypeParameterConstraintClause* semicolon:SemicolonToken
-node EnumMemberDeclaration #member #declaration =
+node EnumMemberDeclaration #member #declaration #enum-constant =
     attribute_lists:AttributeList* modifiers:#modifier* identifier=name:IdentifierToken equals_value:EqualsValueClause?
 node ExtensionBlockDeclaration #member #declaration #type-declaration #scope =
     attribute_lists:AttributeList* modifiers:#modifier* keyword:ExtensionKeyword type_parameter_list:TypeParameterList? parameter_list:ParameterList? constraint_clauses:TypeParameterConstraintClause* open_brace:OpenBraceToken? members:#member* close_brace:CloseBraceToken? semicolon:SemicolonToken?
-node BaseList #opaque =
+node BaseList #heritage #opaque =
     colon:ColonToken types:#base-type*
 node SimpleBaseType #base-type #opaque =
     type:#type

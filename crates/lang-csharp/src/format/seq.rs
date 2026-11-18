@@ -6,9 +6,8 @@
 use super::flat;
 use super::options::{
     clauses_on_closing_line, constructor_initializer_on_new_line, creation_brace_on_new_line,
-    do_while_on_closing_line, expand_empty_bodies, hanging_base_list, keeps_attribute_line,
-    label_outdent, nested_brace_on_new_line, space_after_delegate,
-    space_after_empty_last_for_clause, space_between_empty_for_clauses,
+    do_while_on_closing_line, expand_empty_bodies, label_outdent, nested_brace_on_new_line,
+    space_after_delegate, space_after_empty_last_for_clause, space_between_empty_for_clauses,
 };
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc};
@@ -186,10 +185,8 @@ fn separator_raw(
             && pk == k::IS_PATTERN_EXPRESSION
             && matches!(n.children().next(), Some(c) if c.kind() == k::PROPERTY_PATTERN_CLAUSE);
         let property_pattern = nk == k::PROPERTY_PATTERN_CLAUSE || bare_property_pattern;
-        if (hanging_base_list(cx.options) && nk == k::BASE_LIST)
-            || (nested_brace_on_new_line(cx.options) && property_pattern)
-        {
-            return Sep::None; // these start with a `line` of their own
+        if nested_brace_on_new_line(cx.options) && property_pattern {
+            return Sep::None; // starts with a `line` of its own
         }
         if nk == k::BLOCK {
             return if block_is_empty(cx, n) && keeps_empty_inline(cx, n) {
@@ -256,19 +253,7 @@ fn separator_raw(
     if let SyntaxElement::Node(p) = prev
         && p.kind() == k::ATTRIBUTE_LIST
     {
-        // `member_attribute_line: keep`: an attribute list the source leaves on its member's line
-        // stays there.
-        let first_of_next = match next {
-            SyntaxElement::Node(n) => cx.first_token(n),
-            SyntaxElement::Token(t) => Some(t.clone()),
-        };
-        let kept = keeps_attribute_line(cx.options)
-            && matches!((cx.last_token(p), first_of_next), (Some(a), Some(b))
-            if !cx.has_line_break(
-                parent,
-                core_syntax::TextRange::new(a.text_range().end(), b.text_range().start()),
-            ));
-        return if inline_attributes(pk) || kept {
+        return if inline_attributes(pk) {
             Sep::Space
         } else {
             Sep::Hard
@@ -369,6 +354,14 @@ pub fn seq_of(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R
         return el(cx, only);
     }
     let pk = node.kind();
+    // Leading attribute lists of a member each on a line of their own, or (with
+    // `member_attribute_line: keep`) on the line of what follows when the source has them so.
+    if !inline_attributes(pk) && !flat::inside(cx, node) {
+        let (lead, n) = core_format::shapes::lead_annotations(cx, els, &|e| el(cx, e))?;
+        if n > 0 && n < els.len() {
+            return Ok(doc::concat(vec![lead, seq_of(cx, node, &els[n..])?]));
+        }
+    }
     let paren_condition = has_paren_condition(pk);
     let mut parts = Vec::with_capacity(els.len() * 2);
     let mut i = 0;

@@ -148,6 +148,22 @@ options:
       values: ["preserve", "remove"]
       default: "preserve"
       doc: "Blank line between the last `//` or `///` comment in front of code and that code: `preserve` keeps the source's (at most one); `remove` drops it. Comments at the start of a file and `////` comments keep theirs."
+  - blank_compact_kinds:
+      kind: "words"
+      default: ["FieldDeclaration", "UsingDirective", "ExternAliasDirective"]
+      doc: "Node kinds of which two in a row need no blank line between them when `blank_lines_between_members` is `always`."
+  - blank_after_block_kinds:
+      kind: "words"
+      default: ["GetAccessorDeclaration", "SetAccessorDeclaration", "InitAccessorDeclaration", "AddAccessorDeclaration", "RemoveAccessorDeclaration", "UnknownAccessorDeclaration"]
+      doc: "Node kinds that get a blank line before them after a closing brace when `blank_lines_between_members` is `always`."
+  - blank_directives_skip:
+      kind: "words"
+      default: ["#if", "#el", "#endif", "#endregion"]
+      doc: "Preprocessor directives (by their first characters) in front of a member or statement after which the blank line before it is the source's: the item may start after the directive, so the blank line options add none."
+  - blank_directives_attach:
+      kind: "words"
+      default: ["#pragma"]
+      doc: "Preprocessor directives (by their first characters) that follow an item with no blank line between and have a blank line after them (`#pragma warning disable` after a member): they belong to that item, and the blank line options add no blank line before them."
   - space_after_delegate:
       default: true
       doc: "A space between `delegate` and the parameter list of an anonymous method (`delegate (int x) { }`); when false `delegate(int x) { }`."

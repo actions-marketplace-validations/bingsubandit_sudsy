@@ -5,18 +5,19 @@
 
 use super::flat;
 use super::options::{
-    blank_after_block, blank_before_comment, empty_body_text, expand_empty_bodies,
-    indent_switch_section_block, preserve_single_line_blocks, preserve_single_line_statements,
-    remove_accessor_blank_lines, separate_all_members, separate_members, trailing_comma,
+    empty_body_text, expand_empty_bodies, hanging_base_list, indent_switch_section_block,
+    preserve_single_line_blocks, preserve_single_line_statements, remove_accessor_blank_lines,
+    separate_all_members, trailing_comma,
 };
 use super::seq::{
     R, Sep, block_is_empty, braced_element, direct_tokens, is_empty_braces, keeps_empty_inline,
     sep_doc, separator, seq_of,
 };
 use crate::generated::kind as k;
+use core_format::blank;
 use core_format::seq::{children, el};
 use core_format::shapes::{
-    BlankRule, BlockStyle, ListLayout, ListStyle, block_between, delimited_list_between,
+    BlockStyle, HeaderStyle, ListLayout, ListStyle, block_between, delimited_list_between, header,
     statement_sequence_with,
 };
 use core_format::{FormatCtx, FormatError, comments, doc};
@@ -44,7 +45,7 @@ pub fn compilation_unit(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         cx,
         &items,
         1,
-        blank_rule(cx),
+        blank::rule(cx),
         preserve_single_line_statements(cx.options),
     )?];
     if let Some(SyntaxElement::Token(eof)) = els.last() {
@@ -83,7 +84,7 @@ pub fn file_scoped_namespace(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         cx,
         &rest,
         1,
-        blank_rule(cx),
+        blank::rule(cx),
         false,
     )?);
     Ok(doc::concat(parts))
@@ -100,14 +101,14 @@ fn with_braces(
     let open = direct_tokens(node, k::OPEN_BRACE_TOKEN).into_iter().next();
     let close = direct_tokens(node, k::CLOSE_BRACE_TOKEN).into_iter().last();
     let (Some(open), Some(close)) = (open, close) else {
-        return seq_of(cx, node, &els);
+        return heading(cx, node, &els);
     };
     let (Some(oi), Some(ci)) = (position(&els, &open), position(&els, &close)) else {
-        return seq_of(cx, node, &els);
+        return heading(cx, node, &els);
     };
     let mut parts = Vec::new();
     if oi > 0 {
-        parts.push(seq_of(cx, node, &els[..oi])?);
+        parts.push(heading(cx, node, &els[..oi])?);
         let sep = if (is_empty_braces(cx, &open, &close) && keeps_empty_inline(cx, node))
             || flat::inside(cx, node)
         {
@@ -137,134 +138,13 @@ fn block_style(cx: &FormatCtx<'_>) -> BlockStyle {
     }
 }
 
-/// A method with a body, or a type: what `blank_lines_between_members: separate` sets apart.
-fn has_body_or_members(member: &SyntaxNode) -> bool {
-    let kind = member.kind();
-    if matches!(
-        kind,
-        k::METHOD_DECLARATION
-            | k::CONSTRUCTOR_DECLARATION
-            | k::DESTRUCTOR_DECLARATION
-            | k::OPERATOR_DECLARATION
-            | k::CONVERSION_OPERATOR_DECLARATION
-    ) {
-        return member
-            .children()
-            .any(|c| matches!(c.kind(), k::BLOCK | k::ARROW_EXPRESSION_CLAUSE));
-    }
-    matches!(
-        kind,
-        k::CLASS_DECLARATION
-            | k::STRUCT_DECLARATION
-            | k::INTERFACE_DECLARATION
-            | k::RECORD_DECLARATION
-            | k::RECORD_STRUCT_DECLARATION
-            | k::ENUM_DECLARATION
-            | k::NAMESPACE_DECLARATION
-            | k::FILE_SCOPED_NAMESPACE_DECLARATION
-    )
-}
-
-/// Is `member` a field (consecutive fields need no blank line between them) or a `using`?
-fn is_run_member(member: &SyntaxNode) -> bool {
-    matches!(
-        member.kind(),
-        k::FIELD_DECLARATION | k::USING_DIRECTIVE | k::EXTERN_ALIAS_DIRECTIVE
-    )
-}
-
-/// Is `node` a member of a type, a namespace or a compilation unit (not a statement)?
-fn in_member_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
-    node.parent().is_some_and(|p| {
-        let kind = p.kind();
-        kind == k::COMPILATION_UNIT
-            || kind == k::FILE_SCOPED_NAMESPACE_DECLARATION
-            || cx.grammar.has_tag(kind, "namespace")
-            || cx.grammar.has_tag(kind, "type-declaration")
-    })
-}
-
-/// Does a blank line have to stand between two neighbours (the previous item's last node and the
-/// next item's first) although the source has none? The blank line options decide.
-fn blank_between(cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
-    let leading = cx
-        .first_token(next)
-        .map(|t| comments::leading_comments(cx.grammar, &t))
-        .unwrap_or_default();
-    let directive = |c: &comments::Comment| c.text().trim_start().starts_with('#');
-    // A `#pragma` that follows an item without a blank line and has one after it belongs to that
-    // item: the blank line after it is the separation.
-    if leading
-        .last()
-        .is_some_and(|c| c.text().trim_start().starts_with("#pragma") && c.breaks_after >= 2)
-        && cx
-            .first_token(next)
-            .is_some_and(|t| comments::blank_lines_before(cx.grammar, &t) == 0)
-    {
-        return false;
-    }
-    // A conditional directive or one that closes a region in front of the item (`#if`, `#else`,
-    // `#endif`, `#endregion`): the blank line, if any, is the source's, since the item may start
-    // after the directive. Other directives (`#nullable`, `#pragma`, `#region`) stay with the
-    // item and a required blank line goes in front of them.
-    if leading.iter().any(|c| {
-        let t = c.text();
-        ["#if", "#el", "#endif", "#endregion"]
-            .iter()
-            .any(|d| t.trim_start().starts_with(d))
-    }) {
-        return false;
-    }
-    let o = cx.options;
-    let after_block = cx
-        .last_token(prev)
-        .is_some_and(|t| t.kind() == k::CLOSE_BRACE_TOKEN);
-    if after_block
-        && (blank_after_block(o)
-            || (separate_all_members(o)
-                && next.parent().is_some_and(|p| p.kind() == k::ACCESSOR_LIST)))
-    {
-        return true;
-    }
-    if blank_before_comment(o)
-        && leading
-            .first()
-            .is_some_and(|c| c.kind == comments::CommentKind::Line && !c.text().starts_with("////"))
-    {
-        return true;
-    }
-    let enum_member = next.kind() == k::ENUM_MEMBER_DECLARATION;
-    if !separate_members(o) || !(enum_member || in_member_list(cx, next)) {
-        return false;
-    }
-    // Usings in a row stay in a row, comments above one of them or not.
-    let usings = prev.kind() == k::USING_DIRECTIVE && next.kind() == k::USING_DIRECTIVE;
-    let decorated = leading.iter().any(|c| !directive(c))
-        || next.children().any(|c| c.kind() == k::ATTRIBUTE_LIST);
-    (decorated && !usings)
-        || (!enum_member
-            && if separate_all_members(o) {
-                !(is_run_member(prev) && prev.kind() == next.kind())
-            } else {
-                has_body_or_members(prev) || has_body_or_members(next)
-            })
-}
-
-/// The blank line rule of the sequences of a body (members, statements, switch sections), if an
-/// option needs one.
-fn blank_rule(cx: &FormatCtx<'_>) -> Option<BlankRule> {
-    let o = cx.options;
-    (separate_members(o) || blank_after_block(o) || blank_before_comment(o))
-        .then_some(blank_between as BlankRule)
-}
-
 /// Blocks, namespaces, types and switch statements.
 pub fn braced(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     if flat::inside(cx, node) && !block_is_empty(cx, node) {
         return with_braces(cx, node, |open, close| flat::block(cx, node, open, close));
     }
     let style = BlockStyle {
-        force_blank: blank_rule(cx),
+        force_blank: blank::rule(cx),
         expand_empty: expand_empty_bodies(cx.options) && !keeps_empty_inline(cx, node),
         keep_same_line: node.kind() == k::BLOCK && preserve_single_line_statements(cx.options),
         ..block_style(cx)
@@ -309,7 +189,7 @@ pub fn accessor_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             } else {
                 1
             },
-            force_blank: blank_rule(cx),
+            force_blank: blank::rule(cx),
             ..block_style(cx)
         };
         return with_braces(cx, node, |open, close| {
@@ -385,9 +265,8 @@ pub fn accessor_declaration(cx: &FormatCtx<'_>, accessor: &SyntaxNode) -> Option
     })())
 }
 
-/// `: A, B` after a type: on the line of the type when it fits, else on the next line, one
-/// further type per line (`base_list_layout: hanging`).
-pub fn base_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
+/// The text of `: A, B` after a type, one further type per line when it breaks.
+fn base_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let mut els = children(cx, node).into_iter();
     let Some(SyntaxElement::Token(colon)) = els.next() else {
         return Err(FormatError::Shape("base list without `:`".into()));
@@ -404,13 +283,42 @@ pub fn base_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             SyntaxElement::Token(comma) => rest.push(cx.token(&comma)),
         }
     }
-    Ok(doc::group(doc::indent(doc::concat(vec![
-        doc::line(),
+    Ok(doc::concat(vec![
         cx.token(&colon),
         doc::lit(" "),
         first.unwrap_or(doc::Doc::Nil),
         doc::indent(doc::concat(rest)),
-    ]))))
+    ]))
+}
+
+/// The children of a node in front of its body. With `base_list_layout: hanging` the `#heritage`
+/// base list is a clause of the type's header: it stays on the line while it fits, else it moves
+/// to the next line.
+fn heading(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R {
+    let heritage = els
+        .iter()
+        .position(|e| cx.grammar.has_tag(e.kind(), "heritage"));
+    let (Some(at), true) = (heritage, hanging_base_list(cx.options)) else {
+        return seq_of(cx, node, els);
+    };
+    let SyntaxElement::Node(list) = &els[at] else {
+        return seq_of(cx, node, els);
+    };
+    let style = HeaderStyle {
+        grouped: true,
+        continuation: 1,
+        ..HeaderStyle::default()
+    };
+    let mut parts = vec![header(
+        seq_of(cx, node, &els[..at])?,
+        vec![(doc::line(), base_list(cx, list)?)],
+        &style,
+    )];
+    if at + 1 < els.len() {
+        parts.push(sep_doc(cx, separator(cx, node, &els[at], &els[at + 1])));
+        parts.push(seq_of(cx, node, &els[at + 1..])?);
+    }
+    Ok(doc::concat(parts))
 }
 
 /// `: base(args)` of a constructor, on its own line below the signature.
@@ -474,7 +382,7 @@ pub fn switch_section(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
                 cx,
                 &statements,
                 1,
-                blank_rule(cx),
+                blank::rule(cx),
                 preserve_single_line_statements(cx.options),
             )?,
         ])));
@@ -494,7 +402,7 @@ fn arms_style(cx: &FormatCtx<'_>, node: &SyntaxNode) -> ListStyle {
         trailing_comma: trailing_comma(cx.options),
         empty: empty_body_text(cx.options),
         expand_empty: node.kind() == k::ENUM_DECLARATION && !keeps_empty_inline(cx, node),
-        force_blank: blank_rule(cx).filter(|_| node.kind() == k::ENUM_DECLARATION),
+        force_blank: blank::rule(cx).filter(|_| node.kind() == k::ENUM_DECLARATION),
         ..ListStyle::default()
     }
 }

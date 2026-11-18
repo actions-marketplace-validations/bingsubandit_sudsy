@@ -20,7 +20,7 @@ pub use core_config::shared::BRACE_NEWLINE;
 pub use options::{MEMBER_CHAIN_MIN_CALLS, PREPROCESSOR_SYMBOLS, TRAILING_COMMAS, option_schema};
 
 use self::options::{
-    attach_comments, constructor_initializer_on_new_line, fluid_assignments, hanging_base_list,
+    attach_comments, constructor_initializer_on_new_line, fluid_assignments,
     hanging_parameter_attributes, inline_accessor_bodies, label_outdent, sort_usings,
     switch_arm_as_assignment, unbreakable_single_item_lists, using_order,
 };
@@ -87,6 +87,10 @@ impl NodeFormatter for CSharpFormatter {
         variants: &mut dyn Variants,
     ) -> Option<(String, Vec<Vec<String>>)> {
         branches::merge(tree, output, options, variants)
+    }
+
+    fn blank_between(&self, cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
+        core_format::blank::by_options(cx, prev, next)
     }
 
     fn comment_style(&self, options: &ResolvedOptions) -> CommentStyle {
@@ -181,7 +185,6 @@ impl NodeFormatter for CSharpFormatter {
             k::SWITCH_EXPRESSION_ARM if switch_arm_as_assignment(cx.options) => {
                 chains::switch_arm(cx, node)?
             }
-            k::BASE_LIST if hanging_base_list(cx.options) => braces::base_list(cx, node)?,
             k::PARENTHESIZED_EXPRESSION => chains::parenthesized(cx, node)?,
             k::QUERY_EXPRESSION => query::query_expression(cx, node)?,
             k::QUERY_BODY => query::query_body(cx, node)?,

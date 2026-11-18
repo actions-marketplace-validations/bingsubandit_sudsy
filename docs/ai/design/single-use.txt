@@ -62,7 +62,6 @@ concept from-first # users: dockerfile
 concept getter-return # users: js
 concept heading-increment # users: markdown
 concept heading-level # users: html
-concept heritage-clause-layout # users: java
 concept html-tag-table # users: html
 concept implicit-string-concat # users: python
 concept import-usage-checks # users: js
@@ -277,7 +276,6 @@ data tag:dict # users: python
 data tag:display # users: python
 data tag:document # users: graphql
 data tag:dots # users: python
-data tag:enum-constant # users: java
 data tag:enum-tail # users: java
 data tag:escapes # users: js
 data tag:export # users: js
@@ -286,7 +284,6 @@ data tag:final # users: js
 data tag:finally # users: python
 data tag:global-scope # users: js
 data tag:head # users: makefile
-data tag:heritage # users: java
 data tag:hole # users: js
 data tag:hug-wrapper # users: js
 data tag:huggable-always # users: js
@@ -329,7 +326,6 @@ data tag:with-item # users: python
 data tag:wrapper # users: java
 local lang-cpp/format.rs verbatim-formatter # lang: cpp
 local lang-cpp/lexer.rs source-lexer # lang: cpp
-local lang-csharp/format/braces.rs declaration-kit # lang: csharp
 local lang-csharp/rules/async_suffix.rs naming-convention # lang: csharp
 local lang-csharp/rules/binding.rs unused-import # lang: csharp
 local lang-csharp/rules/flow.rs unused-variable # lang: csharp

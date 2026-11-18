@@ -1,22 +1,22 @@
 //! Declarations, read from grammar tags: the annotations in front of one (`#modifiers` holding
 //! `#annotation` nodes), a type's header with its heritage clauses (`#heritage`, the body a
-//! `#block`), the members of a body (`#compact` members need no blank line between them) and an
+//! `#block`), the members of a body (kinds in `blank_compact_kinds` need no blank line between them) and an
 //! enum body (`#enum-constant`, `#separator`, the `;` a `#stray`, the members after it an
 //! `#enum-tail`). The language prints the elements (a [`Printer`]).
 //!
 //! concept: declaration-kit
 //! what: Annotations, type headers with heritage clauses, member sequences and enum bodies of declarations.
 //! tools: google-java-format declarations and annotations, ktlint annotation and class-signature, Prettier class bodies
-//! reads: tag:annotation, tag:heritage, option:type_use_annotations
+//! reads: tag:annotation, tag:heritage, option:type_use_annotations, option:member_attribute_line
 
 use super::{BlockStyle, braces, statement_sequence_with};
 use crate::FormatCtx;
 use crate::comments;
 use crate::doc::{self, Doc, GroupId};
 use crate::error::FormatError;
-use crate::seq::{flat, kids};
+use crate::seq::{first, flat, kids, last};
 use core_config::OptionValue;
-use core_syntax::{SyntaxElement, SyntaxNode};
+use core_syntax::{SyntaxElement, SyntaxNode, TextRange};
 
 type R = Result<Doc, FormatError>;
 
@@ -168,9 +168,25 @@ pub fn lead_annotations(
         .iter()
         .take_while(|e| cx.grammar.has_tag(e.kind(), "annotation"))
         .count();
+    // With the option `member_attribute_line: keep` an annotation the source leaves on the line
+    // of what follows it stays there.
+    let keep = cx.options.is("member_attribute_line", "keep");
     let mut parts = Vec::new();
-    for e in &els[..lead] {
-        parts.extend([print(e)?, doc::hardline()]);
+    for (i, e) in els[..lead].iter().enumerate() {
+        let same_line = keep
+            && matches!((last(cx, e), els.get(i + 1).and_then(|n| first(cx, n))), (Some(a), Some(b))
+            if !cx.has_line_break(
+                &a.parent().unwrap_or_else(|| unreachable!("a token has a parent")),
+                TextRange::new(a.text_range().end(), b.text_range().start()),
+            ));
+        parts.extend([
+            print(e)?,
+            if same_line {
+                doc::lit(" ")
+            } else {
+                doc::hardline()
+            },
+        ]);
     }
     Ok((doc::concat(parts), lead))
 }
