@@ -1,0 +1,5 @@
+# PHPStan level 0 checks that Sudsy has, at warn.
+php:
+  lint:
+    rules:
+      undefined-variable: warn

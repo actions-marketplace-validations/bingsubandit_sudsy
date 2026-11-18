@@ -16,7 +16,6 @@ def f(a):
     with g() as a:
 #        ^ undefined-name
 #               ^ redefined-argument-from-local
-#               ^ unused-variable
         pass
 
 x = ["a" "b", "c"]
@@ -31,10 +30,8 @@ class A:
 
 import sys
 ^ unsorted-imports
-#      ^^^ unused-import
 import os
 #      ^^ redefined-while-unused
-#      ^^ unused-import
 
 import functools
 class A:
@@ -46,7 +43,6 @@ class A:
 def f(x=list()):
 #       ^^^^^^ function-call-in-default
 #       ^^^^^^ mutable-argument-default
-#       ^^^^^^ unnecessary-collection-call
     pass
 
 import subprocess

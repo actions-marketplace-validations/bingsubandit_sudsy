@@ -17,4 +17,4 @@ options:
       values: ["auto", "off"]
       default: "auto"
       doc: "Format the code of a fenced block with the formatter of the language its info string names (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way."
-presets: [prettier-compat]
+presets: [prettier-compat, markdownlint]

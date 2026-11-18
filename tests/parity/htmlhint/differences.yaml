@@ -1,1 +1,1 @@
-coverage: 0.3  # share of the default-set findings of htmlhint on its corpus that Sudsy also reports with its default config (scripts/parity.sh coverage htmlhint)
+coverage: 5.0  # share of the default-set findings of htmlhint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage htmlhint; at least 85% is the bar)

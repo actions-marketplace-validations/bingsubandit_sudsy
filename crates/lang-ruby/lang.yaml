@@ -9,3 +9,4 @@ options:
   - final_newline: true
   - end_of_line
 families: rules::FAMILIES
+presets: [rubocop]

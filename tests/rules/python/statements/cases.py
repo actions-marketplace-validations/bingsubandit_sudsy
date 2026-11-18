@@ -1,7 +1,5 @@
 """Docstring: not code for E402."""
 import os
-^^^^^^^^^ unsorted-imports
-#      ^^ unused-import
 __version__ = "1"
 x = 1
 import sys
@@ -27,7 +25,6 @@ def f():
         pass
     except:
 #   ^ default-except-not-last
-#   ^ try-except-pass
 #   ^^^^^^ bare-except
         pass
     except ValueError:
@@ -39,18 +36,14 @@ def f():
 
 def g(l: "int", O=1, *I):
 #     ^ ambiguous-variable-name
-#        ^^^^^ quoted-annotation
 #               ^ ambiguous-variable-name
 #                     ^ ambiguous-variable-name
     l = 1
 #   ^ ambiguous-variable-name
-#   ^ unused-variable
     if x: pass
 #       ^ multiple-statements-on-one-line-colon
     a = 1; b = 2;
-#   ^ unused-variable
 #        ^ multiple-statements-on-one-line-semicolon
-#          ^ unused-variable
 #               ^ useless-semicolon
     return {"k": 1, "k": 2, x: 1, x: 2}
 #                   ^^^ no-duplicate-keys
@@ -68,7 +61,6 @@ def O():
 
 
 from __future__ import division
-^ unsorted-imports
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ late-future-import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ module-import-not-at-top-of-file
 

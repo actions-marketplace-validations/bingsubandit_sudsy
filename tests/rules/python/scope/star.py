@@ -2,7 +2,6 @@ from star import *
 ^^^^^^^^^^^^^^^^^^ undefined-local-with-import-star
 
 __all__ = ["present", "from_star"]
-#         ^^^^^^^^^^^^^^^^^^^^^^^^ unsorted-dunder-all
 #                     ^^^^^^^^^^^ undefined-local-with-import-star-usage
 present = 1
 print(undefined, present, len)
@@ -16,7 +15,6 @@ def nested():
 
 
 def f(a: "Missing"):
-#        ^^^^^^^^^ quoted-annotation
 #         ^^^^^^^ undefined-local-with-import-star-usage
     x: int
     print(x)

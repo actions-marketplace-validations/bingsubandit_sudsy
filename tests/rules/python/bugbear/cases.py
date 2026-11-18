@@ -1,6 +1,5 @@
 import collections
 from typing import Sequence
-^^^^^^^^^^^^^^^^^^^^^^^^^^^ deprecated-import
 
 x = a = b = 1
 
@@ -12,7 +11,6 @@ def f(a=[], b={}, c=set(), d=list(), e=collections.deque(), g=[x for x in a]):
 #                   ^^^^^ mutable-argument-default
 #                            ^^^^^^ function-call-in-default
 #                            ^^^^^^ mutable-argument-default
-#                            ^^^^^^ unnecessary-collection-call
 #                                      ^^^^^^^^^^^^^^^^^^^ function-call-in-default
 #                                      ^^^^^^^^^^^^^^^^^^^ mutable-argument-default
 #                                                             ^^^^^^^^^^^^^^ mutable-argument-default

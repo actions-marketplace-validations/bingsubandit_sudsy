@@ -194,8 +194,8 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `need-braces` | java | style | off | none | An `if`, `else`, `for`, `while` or `do` whose body is a single statement without braces (Checkstyle NeedBraces). `else if` is fine. |
 | `parameter-assignment` | java | style | off | none | A parameter is assigned a new value (Checkstyle ParameterAssignment). No fix. |
 | `string-literal-equality` | java | correctness | warn | none | `==` or `!=` with a string literal as an operand compares references (Checkstyle StringLiteralEquality). |
-| `unused-import` | java, kotlin, python | cleanup | warn | none | An import whose name the file does not use (Checkstyle UnusedImports, ktlint no-unused-imports). Imports with `*` are not checked, and a name in a doc comment counts as a use where the language has doc comments. No fix: removing an import can change which declaration a name means. |
-| `unused-local-variable` | java, ruby | cleanup | warn | none | A local variable that is never read: it is declared, and perhaps assigned, and that is all (Checkstyle UnusedLocalVariable, RuboCop Lint/UselessAssignment). No fix. |
+| `unused-import` | java, kotlin, python | cleanup | off | none | An import whose name the file does not use (Checkstyle UnusedImports, ktlint no-unused-imports). Imports with `*` are not checked, and a name in a doc comment counts as a use where the language has doc comments. No fix: removing an import can change which declaration a name means. |
+| `unused-local-variable` | java, ruby | cleanup | off | none | A local variable that is never read: it is declared, and perhaps assigned, and that is all (Checkstyle UnusedLocalVariable, RuboCop Lint/UselessAssignment). No fix. |
 | `upper-ell` | java | suspicious | warn | none | An integer literal that ends in a lower case `l` (Checkstyle UpperEll). |
 | `adjacent-overload-signatures` | js | style | off | none | Overloads of one function or method (or call and construct signatures) with other members between them. Equivalent: typescript-eslint adjacent-overload-signatures. |
 | `array-type` | js | style | off | none | `Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>`; write `T[]` and `readonly T[]`. Equivalent: typescript-eslint array-type (partial). |
@@ -330,42 +330,42 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `ambiguous-class-name` | python | style | off | none | A class named `l`, `O` or `I`. |
 | `ambiguous-function-name` | python | style | off | none | A function named `l`, `O` or `I`. |
 | `ambiguous-variable-name` | python | style | off | none | A variable, parameter or `global` name that is `l`, `O` or `I`. |
-| `any-eq-parameter` | python | style | warn | none | `other: Any` in `__eq__` or `__ne__`. |
+| `any-eq-parameter` | python | style | off | none | `other: Any` in `__eq__` or `__ne__`. |
 | `assert-false` | python | suspicious | warn | none | An `assert` whose test is the literal `False`. |
 | `assert-tuple` | python | correctness | warn | none | An `assert` whose test is a tuple (a message written inside the parentheses). |
 | `bare-except` | python | suspicious | warn | none | An `except` clause without an exception type, unless its body has a bare `raise` of its own. |
 | `bare-raise-outside-handler` | python | correctness | warn | none | A `raise` with no exception in code that no `except` clause of its function contains. |
-| `blind-except` | python | suspicious | warn | none | `except Exception` or `except BaseException` whose body neither raises again nor logs the traceback. |
+| `blind-except` | python | suspicious | off | none | `except Exception` or `except BaseException` whose body neither raises again nor logs the traceback. |
 | `break-outside-loop` | python | correctness | warn | none | A `break` that no loop of its function or class contains. |
 | `cached-method` | python | suspicious | warn | none | A method decorated with `functools.lru_cache` or `functools.cache` (not a static method): the cache keeps `self` alive. |
-| `collapsible-if` | python | style | warn | none | An `if` whose only statement is another `if`, neither having `elif` or `else`. |
+| `collapsible-if` | python | style | off | none | An `if` whose only statement is another `if`, neither having `elif` or `else`. |
 | `continue-outside-loop` | python | correctness | warn | none | A `continue` that no loop of its function or class contains. |
-| `custom-type-var-return` | python | style | warn | none | A method whose `self` is annotated with a type variable that the return annotation repeats. |
-| `datetime-utc-alias` | python | style | warn | none | `datetime.timezone.utc` (also imported as `timezone.utc`), for a target version that has `datetime.UTC` (3.11). |
+| `custom-type-var-return` | python | style | off | none | A method whose `self` is annotated with a type variable that the return annotation repeats. |
+| `datetime-utc-alias` | python | style | off | none | `datetime.timezone.utc` (also imported as `timezone.utc`), for a target version that has `datetime.UTC` (3.11). |
 | `default-except-not-last` | python | correctness | warn | none | A bare `except:` followed by another handler. |
-| `default-type-arguments` | python | style | warn | none | `Generator[X, None, None]` or `AsyncGenerator[X, None]`, for a target version where the arguments have defaults (3.13). |
-| `deprecated-import` | python | style | warn | none | An import from `typing_extensions` of a name that `typing`, `collections.abc` or `warnings` has in the target version, from `typing` of an alias of a `collections.abc` class, or of `List`, `Dict`, `Set`, `FrozenSet`, `Tuple`, `Type`. |
-| `deprecated-typing-alias` | python | style | warn | none | A subscript of `typing.List`, `Dict`, `Set`, `FrozenSet`, `Tuple` or `Type`, for a target version where the builtin is generic (3.9). |
-| `double-negation` | python | style | warn | none | `not` applied to `not`. |
+| `default-type-arguments` | python | style | off | none | `Generator[X, None, None]` or `AsyncGenerator[X, None]`, for a target version where the arguments have defaults (3.13). |
+| `deprecated-import` | python | style | off | none | An import from `typing_extensions` of a name that `typing`, `collections.abc` or `warnings` has in the target version, from `typing` of an alias of a `collections.abc` class, or of `List`, `Dict`, `Set`, `FrozenSet`, `Tuple`, `Type`. |
+| `deprecated-typing-alias` | python | style | off | none | A subscript of `typing.List`, `Dict`, `Set`, `FrozenSet`, `Tuple` or `Type`, for a target version where the builtin is generic (3.9). |
+| `double-negation` | python | style | off | none | `not` applied to `not`. |
 | `exec-call` | python | suspicious | warn | none | A call of the builtin `exec`. |
-| `explicit-return-none` | python | style | warn | none | A `return None` in a function whose other returns (if any) return nothing or `None`, and that is not a generator. Left alone: a function that is only `return None`, a property, a function annotated with anything but `None`. |
-| `f-string` | python | style | warn | none | A `"...".format(...)` on a string literal whose fields all name an argument. |
+| `explicit-return-none` | python | style | off | none | A `return None` in a function whose other returns (if any) return nothing or `None`, and that is not a generator. Left alone: a function that is only `return None`, a property, a function annotated with anything but `None`. |
+| `f-string` | python | style | off | none | A `"...".format(...)` on a string literal whose fields all name an argument. |
 | `f-string-missing-placeholders` | python | suspicious | warn | none | An f-string with no replacement field in any of its parts. |
 | `forward-annotation-syntax-error` | python | correctness | warn | none | A quoted annotation that is not an expression. |
 | `function-call-in-default` | python | suspicious | warn | none | A call in the default of a parameter (not in a lambda, not a call of an immutable builtin such as `tuple`). |
 | `future-feature-not-defined` | python | correctness | warn | none | A name imported from `__future__` that the module does not have. |
-| `generic-class` | python | style | warn | none | A class with `Generic[...]` among its bases, for a target version with type parameters (3.12). |
-| `generic-function` | python | style | warn | none | A function outside a class whose signature uses a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12). |
-| `get-attr-with-constant` | python | style | warn | none | `getattr(x, "name")` with a literal name that is an identifier (two arguments). |
+| `generic-class` | python | style | off | none | A class with `Generic[...]` among its bases, for a target version with type parameters (3.12). |
+| `generic-function` | python | style | off | none | A function outside a class whose signature uses a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12). |
+| `get-attr-with-constant` | python | style | off | none | `getattr(x, "name")` with a literal name that is an identifier (two arguments). |
 | `hasattr-call` | python | suspicious | warn | none | A call of `hasattr` or `getattr` that asks for `"__call__"`. |
-| `if-expr-with-false-true` | python | style | warn | none | A conditional expression with `False` and `True` arms. |
-| `if-expr-with-true-false` | python | style | warn | none | A conditional expression with `True` and `False` arms. |
+| `if-expr-with-false-true` | python | style | off | none | A conditional expression with `False` and `True` arms. |
+| `if-expr-with-true-false` | python | style | off | none | A conditional expression with `True` and `False` arms. |
 | `if-expr-with-twisted-arms` | python | style | off | none | A conditional expression `b if not a else a`. |
 | `if-tuple` | python | correctness | warn | none | An `if` or `elif` whose test is a tuple. |
-| `if-with-same-arms` | python | style | warn | none | Two neighbouring branches of an `if`/`elif` chain with the same body. |
-| `implicit-concat-in-collection` | python | suspicious | warn | none | An element of a list, tuple or set that is several string literals one after the other, without parentheses. |
+| `if-with-same-arms` | python | style | off | none | Two neighbouring branches of an `if`/`elif` chain with the same body. |
+| `implicit-concat-in-collection` | python | suspicious | off | none | An element of a list, tuple or set that is several string literals one after the other, without parentheses. |
 | `import-shadowed-by-loop-var` | python | suspicious | warn | none | A `for` variable with the name of an import. |
-| `in-dict-keys` | python | style | warn | none | A membership test, `for` or comprehension over `.keys()` with no arguments. |
+| `in-dict-keys` | python | style | off | none | A membership test, `for` or comprehension over `.keys()` with no arguments. |
 | `invalid-escape-sequence` | python | suspicious | warn | none | A backslash in a string that is not raw and does not start an escape sequence (`\d`, `\_`), also in the pieces of an f-string. |
 | `invalid-print-syntax` | python | correctness | warn | none | `print >> file, ...` of Python 2. |
 | `invalid-syntax` | python | correctness | error | none | Code that Python rejects when it compiles the file, though the grammar allows it (a duplicate parameter, `nonlocal` at module level, `await` in a sync function, ...). |
@@ -376,22 +376,22 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `module-import-not-at-top-of-file` | python | style | off | none | An import at module level after code (docstrings, `__all__`, blocks, and `sys.path` or `os.environ` setup are not code). |
 | `multiple-imports-on-one-line` | python | style | off | none | An `import` that names several modules. |
 | `multiple-starred-expressions` | python | correctness | warn | none | An assignment target with two starred names. |
-| `multiple-starts-ends-with` | python | style | warn | none | `a.startswith(x) or a.startswith(y)` (also `endswith`): the methods take a tuple. |
+| `multiple-starts-ends-with` | python | style | off | none | `a.startswith(x) or a.startswith(y)` (also `endswith`): the methods take a tuple. |
 | `multiple-statements-on-one-line-colon` | python | style | off | none | A compound statement whose body starts on the line of its colon (not `def`, not a lone `...`). |
 | `multiple-statements-on-one-line-semicolon` | python | style | off | none | Statements joined by `;`. |
 | `mutable-argument-default` | python | suspicious | warn | none | A parameter whose default is a list, dict or set (literal, comprehension or `list()`, `dict()`, `set()`, `collections.deque()`, ...), unless its annotation is an immutable type. |
-| `mutable-class-default` | python | suspicious | warn | none | A class attribute assigned a list, dict, set or comprehension (or a call that builds one) without a `ClassVar` or `Final` annotation; data classes, Pydantic models and named tuples are left alone. |
-| `needless-bool` | python | style | warn | none | An `if` that returns `True` (or `False`) and is followed, or continued by `else`, by the opposite boolean. |
-| `negate-equal-op` | python | style | warn | none | `not` applied to a comparison with `==`. |
-| `negate-not-equal-op` | python | style | warn | none | `not` applied to a comparison with `!=`. |
-| `nested-with` | python | style | warn | none | A `with` whose only statement is another `with` (both sync or both async). |
+| `mutable-class-default` | python | suspicious | off | none | A class attribute assigned a list, dict, set or comprehension (or a call that builds one) without a `ClassVar` or `Final` annotation; data classes, Pydantic models and named tuples are left alone. |
+| `needless-bool` | python | style | off | none | An `if` that returns `True` (or `False`) and is followed, or continued by `else`, by the opposite boolean. |
+| `negate-equal-op` | python | style | off | none | `not` applied to a comparison with `==`. |
+| `negate-not-equal-op` | python | style | off | none | `not` applied to a comparison with `!=`. |
+| `nested-with` | python | style | off | none | A `with` whose only statement is another `with` (both sync or both async). |
 | `none-comparison` | python | suspicious | warn | none | A comparison of a value to `None` with `==` or `!=`. |
 | `not-in-test` | python | style | off | none | A membership test negated in front of the expression (`not a in b`). |
 | `not-is-test` | python | style | off | none | An identity test negated in front of the expression (`not a is b`). |
-| `open-file-without-with` | python | suspicious | warn | none | A call of `open` (or of `tempfile.NamedTemporaryFile` and the like) that is not the context of a `with`, not returned and not given to `enter_context`. |
-| `optional-annotation` | python | style | warn | none | A `typing.Optional[...]` subscript, for a target version that has `X \| Y` (3.10). |
-| `os-error-alias` | python | style | warn | none | `EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`. |
-| `outdated-version-block` | python | suspicious | warn | none | A test of `sys.version_info` against a version older than the target's, or of `sys.version_info[0]` against a number: the result is always the same. |
+| `open-file-without-with` | python | suspicious | off | none | A call of `open` (or of `tempfile.NamedTemporaryFile` and the like) that is not the context of a `with`, not returned and not given to `enter_context`. |
+| `optional-annotation` | python | style | off | none | A `typing.Optional[...]` subscript, for a target version that has `X \| Y` (3.10). |
+| `os-error-alias` | python | style | off | none | `EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`. |
+| `outdated-version-block` | python | suspicious | off | none | A test of `sys.version_info` against a version older than the target's, or of `sys.version_info[0]` against a number: the result is always the same. |
 | `percent-format-expected-mapping` | python | correctness | warn | none | A `%` format with `%(name)s` placeholders applied to a tuple, list or set. |
 | `percent-format-expected-sequence` | python | correctness | warn | none | A `%` format with several positional placeholders applied to a dict. |
 | `percent-format-extra-named-arguments` | python | correctness | warn | none | A `%` format applied to a dict with keys no placeholder names. |
@@ -403,82 +403,82 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `percent-format-unsupported-format-character` | python | correctness | warn | none | A `%` format with a conversion character Python does not know. |
 | `pprint` | python | style | off | none | A call of `pprint.pprint`. |
 | `print` | python | style | off | none | A call of the builtin `print` without a `file` argument (or with `file=None`). |
-| `printf-string-formatting` | python | style | warn | none | A `"..." % x` whose format string and values pair up (a tuple of as many values, a dict for named fields, or one value for one field). |
-| `quoted-annotation` | python | style | warn | none | A quoted name in a parameter, return or variable annotation, for a target version that does not evaluate annotations (3.14). |
+| `printf-string-formatting` | python | style | off | none | A `"..." % x` whose format string and values pair up (a tuple of as many values, a dict for named fields, or one value for one field). |
+| `quoted-annotation` | python | style | off | none | A quoted name in a parameter, return or variable annotation, for a target version that does not evaluate annotations (3.14). |
 | `raise-not-implemented` | python | correctness | warn | none | A `raise` of `NotImplemented`. |
-| `raise-vanilla-class` | python | style | warn | none | A `raise` of the builtin `Exception`. |
+| `raise-vanilla-class` | python | style | off | none | A `raise` of the builtin `Exception`. |
 | `raise-without-from-inside-except` | python | suspicious | off | none | A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound. |
-| `redefined-argument-from-local` | python | suspicious | warn | none | A `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function. |
+| `redefined-argument-from-local` | python | suspicious | off | none | A `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function. |
 | `redefined-while-unused` | python | suspicious | warn | none | A function, class or import redefined, or an import covered by a name of a function, before anything read the first. |
 | `redundant-tuple-in-exception-handler` | python | style | warn | none | An `except` clause that names a tuple of one exception. |
-| `regex-flag-alias` | python | style | warn | none | `re.A`, `re.I`, `re.L`, `re.M`, `re.S`, `re.U` or `re.X`, the short names of `re.ASCII`, `re.IGNORECASE`, `re.LOCALE`, `re.MULTILINE`, `re.DOTALL`, `re.UNICODE` and `re.VERBOSE`. |
+| `regex-flag-alias` | python | style | off | none | `re.A`, `re.I`, `re.L`, `re.M`, `re.S`, `re.U` or `re.X`, the short names of `re.ASCII`, `re.IGNORECASE`, `re.LOCALE`, `re.MULTILINE`, `re.DOTALL`, `re.UNICODE` and `re.VERBOSE`. |
 | `return-outside-function` | python | correctness | warn | none | A `return` that is not inside a function. |
-| `set-attr-with-constant` | python | style | warn | none | A statement `setattr(x, "name", v)` with a literal name that is an identifier. |
-| `static-join` | python | style | warn | none | `"sep".join([a, b])` of a list or tuple written out in the call, which an f-string says directly. |
+| `set-attr-with-constant` | python | style | off | none | A statement `setattr(x, "name", v)` with a literal name that is an identifier. |
+| `static-join` | python | style | off | none | `"sep".join([a, b])` of a list or tuple written out in the call, which an f-string says directly. |
 | `string-dot-format-extra-named-arguments` | python | correctness | warn | none | A `.format` call with keywords no field names. |
 | `string-dot-format-extra-positional-arguments` | python | correctness | warn | none | A `.format` call with positional arguments no field uses. |
 | `string-dot-format-invalid-format` | python | correctness | warn | none | A `"...".format(...)` whose string does not parse. |
 | `string-dot-format-missing-arguments` | python | correctness | warn | none | A `.format` call without an argument for a field. |
 | `string-dot-format-mixing-automatic` | python | correctness | warn | none | A `.format` string with both `{}` and `{0}`. |
-| `subprocess-run-without-check` | python | suspicious | warn | none | A call of `subprocess.run` with no `check` keyword (and no `**kwargs`). |
+| `subprocess-run-without-check` | python | suspicious | off | none | A call of `subprocess.run` with no `check` keyword (and no `**kwargs`). |
 | `true-false-comparison` | python | style | off | none | A comparison of a value to `True` or `False` with `==` or `!=`. |
-| `try-except-pass` | python | suspicious | warn | none | A handler for everything (`except:`, `except Exception`) whose only statement is `pass`. |
-| `type-alias-annotation` | python | style | warn | none | `X: TypeAlias = ...`, for a target version with the `type` statement (3.12). |
-| `type-check-without-type-error` | python | style | warn | none | A branch tested with `isinstance`, `issubclass` or `callable` that raises a builtin exception other than `TypeError` (and `NotImplementedError`). |
+| `try-except-pass` | python | suspicious | off | none | A handler for everything (`except:`, `except Exception`) whose only statement is `pass`. |
+| `type-alias-annotation` | python | style | off | none | `X: TypeAlias = ...`, for a target version with the `type` statement (3.12). |
+| `type-check-without-type-error` | python | style | off | none | A branch tested with `isinstance`, `issubclass` or `callable` that raises a builtin exception other than `TypeError` (and `NotImplementedError`). |
 | `type-comparison` | python | suspicious | warn | none | A comparison with `==` or `!=` where a side is `type(x)` or a builtin class (the builtin, not a name that shadows it). |
-| `type-var-name-variance` | python | style | warn | none | A `TypeVar` with `covariant=True` whose name does not end with `_co`, or with `contravariant=True` and a name that does not end with `_contra`. |
+| `type-var-name-variance` | python | style | off | none | A `TypeVar` with `covariant=True` whose name does not end with `_co`, or with `contravariant=True` and a name that does not end with `_contra`. |
 | `undefined-export` | python | correctness | warn | none | A name in `__all__` that the module does not bind. |
 | `undefined-local` | python | correctness | warn | none | A name read in a function before the function assigns it, while an enclosing scope binds it too. |
-| `undefined-local-with-import-star` | python | suspicious | warn | none | A star import. |
-| `undefined-local-with-import-star-usage` | python | suspicious | warn | none | A name that no scope binds in a file that has a star import. |
+| `undefined-local-with-import-star` | python | suspicious | off | none | A star import. |
+| `undefined-local-with-import-star-usage` | python | suspicious | off | none | A name that no scope binds in a file that has a star import. |
 | `undefined-local-with-nested-import-star-usage` | python | correctness | warn | none | A star import in a function or class. |
 | `undefined-name` | python | correctness | warn | none | A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`). |
-| `unicode-literal` | python | style | warn | none | A string with the `u` prefix. |
-| `union-annotation` | python | style | warn | none | A `typing.Union[...]` subscript, for a target version that has `X \| Y` (3.10). |
-| `unnecessary-collection-call` | python | style | warn | none | `dict()`, `list()` or `tuple()` with no arguments (`dict` with keyword arguments only). |
-| `unnecessary-placeholder` | python | style | warn | none | A `pass` or `...` statement in a body of two statements or more. |
-| `unsorted-dunder-all` | python | style | warn | none | An `__all__` list or tuple of strings out of order: constants (upper case) first, then classes (capitalized), then the rest, each in natural order. |
-| `unsorted-dunder-slots` | python | style | warn | none | A `__slots__` list or tuple of strings out of natural order. |
-| `unsorted-imports` | python | style | warn | none | A block of imports that differs from the isort layout (ruff's defaults): sections of future, standard library, third-party, first-party and relative imports, `import x` before `from x import y`, names in natural order without regard to case, members as constants, classes, then variables, one statement for each module, lines over 88 columns in parentheses, one blank line between sections and after the block (two before a definition at module level). A folder or file next to the file, in the project root or in its `src` folder, is first-party. |
-| `unused-annotation` | python | suspicious | warn | none | A local variable annotated without a value and never read. |
-| `unused-unpacked-variable` | python | suspicious | warn | none | A name of a tuple target in a function that the function never reads (not `_` names, not in functions that call `locals()`). |
+| `unicode-literal` | python | style | off | none | A string with the `u` prefix. |
+| `union-annotation` | python | style | off | none | A `typing.Union[...]` subscript, for a target version that has `X \| Y` (3.10). |
+| `unnecessary-collection-call` | python | style | off | none | `dict()`, `list()` or `tuple()` with no arguments (`dict` with keyword arguments only). |
+| `unnecessary-placeholder` | python | style | off | none | A `pass` or `...` statement in a body of two statements or more. |
+| `unsorted-dunder-all` | python | style | off | none | An `__all__` list or tuple of strings out of order: constants (upper case) first, then classes (capitalized), then the rest, each in natural order. |
+| `unsorted-dunder-slots` | python | style | off | none | A `__slots__` list or tuple of strings out of natural order. |
+| `unsorted-imports` | python | style | off | none | A block of imports that differs from the isort layout (ruff's defaults): sections of future, standard library, third-party, first-party and relative imports, `import x` before `from x import y`, names in natural order without regard to case, members as constants, classes, then variables, one statement for each module, lines over 88 columns in parentheses, one blank line between sections and after the block (two before a definition at module level). A folder or file next to the file, in the project root or in its `src` folder, is first-party. |
+| `unused-annotation` | python | suspicious | off | none | A local variable annotated without a value and never read. |
+| `unused-unpacked-variable` | python | suspicious | off | none | A name of a tuple target in a function that the function never reads (not `_` names, not in functions that call `locals()`). |
 | `useless-expression` | python | suspicious | warn | none | An expression statement that is only a name, an attribute, a number, a constant or a collection display. |
-| `useless-import-alias` | python | style | warn | none | `import a as a` or `from m import a as a`. |
-| `useless-object-inheritance` | python | style | warn | none | A class with the builtin `object` as a base. |
+| `useless-import-alias` | python | style | off | none | `import a as a` or `from m import a as a`. |
+| `useless-object-inheritance` | python | style | off | none | A class with the builtin `object` as a base. |
 | `useless-semicolon` | python | style | off | none | A `;` at the end of a line. |
-| `verbose-raise` | python | style | warn | none | `raise e` in the `except ... as e` clause, where a bare `raise` keeps the traceback. |
+| `verbose-raise` | python | style | off | none | `raise e` in the `except ... as e` clause, where a bare `raise` keeps the traceback. |
 | `yield-outside-function` | python | correctness | warn | none | A `yield`, `yield from` or `await` outside a function. |
 | `zip-without-explicit-strict` | python | suspicious | off | none | A call of `zip` with several arguments (or a starred one) and no `strict` keyword, for Python 3.10 and later. |
-| `ambiguous-block-association` | ruby | suspicious | warn | none | A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`). |
+| `ambiguous-block-association` | ruby | suspicious | off | none | A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`). |
 | `binary-operator-with-identical-operands` | ruby | suspicious | warn | none | `x == x`, `a && a` and other comparison, logical and bitwise operators whose two sides are the same code (RuboCop Lint/BinaryOperatorWithIdenticalOperands). |
 | `boolean-symbol` | ruby | suspicious | warn | none | The symbol `:true` or `:false`, which is probably meant to be the boolean (RuboCop Lint/BooleanSymbol). |
-| `constant-definition-in-block` | ruby | suspicious | warn | none | A constant, class or module defined directly in a block (RuboCop Lint/ConstantDefinitionInBlock); `enums` blocks (Sorbet) are allowed. |
-| `empty-when` | ruby | suspicious | warn | none | A `when` with no statements and no comment (RuboCop Lint/EmptyWhen). |
+| `constant-definition-in-block` | ruby | suspicious | off | none | A constant, class or module defined directly in a block (RuboCop Lint/ConstantDefinitionInBlock); `enums` blocks (Sorbet) are allowed. |
+| `empty-when` | ruby | suspicious | off | none | A `when` with no statements and no comment (RuboCop Lint/EmptyWhen). |
 | `float-comparison` | ruby | suspicious | warn | none | `==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when` (RuboCop Lint/FloatComparison); comparing with 0 or `nil` is fine. |
-| `hash-compare-by-identity` | ruby | suspicious | warn | none | A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity). |
+| `hash-compare-by-identity` | ruby | suspicious | off | none | A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity). |
 | `ineffective-access-modifier` | ruby | correctness | warn | none | `private` or `protected` before `def self.name`, which it does not affect (RuboCop Lint/IneffectiveAccessModifier); `private_class_method :name` in the class makes the method private on purpose. |
-| `inherit-exception` | ruby | suspicious | warn | none | A class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`) (RuboCop Lint/InheritException). |
+| `inherit-exception` | ruby | suspicious | off | none | A class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`) (RuboCop Lint/InheritException). |
 | `interpolation-check` | ruby | suspicious | warn | none | A single-quoted string that holds `#{...}`, which would interpolate in double quotes (RuboCop Lint/InterpolationCheck). |
-| `literal-in-interpolation` | ruby | suspicious | warn | none | A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation). |
-| `missing-super` | ruby | suspicious | warn | none | `initialize` of a class with a parent other than Object, and the lifecycle callbacks `inherited` and `method_added`, that do not call `super` (RuboCop Lint/MissingSuper). |
+| `literal-in-interpolation` | ruby | suspicious | off | none | A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation). |
+| `missing-super` | ruby | suspicious | off | none | `initialize` of a class with a parent other than Object, and the lifecycle callbacks `inherited` and `method_added`, that do not call `super` (RuboCop Lint/MissingSuper). |
 | `mixed-regexp-capture-types` | ruby | suspicious | warn | none | A regexp literal that has both `(?<name>...)` and plain `(...)` groups (RuboCop Lint/MixedRegexpCaptureTypes). |
 | `no-assignment-in-logical-condition` | ruby | suspicious | warn | none | `if a && b = c`: the condition is a logical operation whose right operand is an assignment not wrapped in parentheses (RuboCop Lint/AssignmentInCondition); a plain assignment condition is `no-assignment-in-condition`. |
-| `parentheses-as-grouped-expression` | ruby | suspicious | warn | none | A space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`) (RuboCop Lint/ParenthesesAsGroupedExpression). |
-| `post-condition-loop` | ruby | suspicious | warn | none | A `begin ... end while cond` or `until` loop, which behaves unlike the other loops (RuboCop Lint/Loop). |
-| `raise-exception` | ruby | suspicious | warn | none | Raising `Exception` itself (`raise Exception`, `raise Exception.new`), which a plain `rescue` does not catch (RuboCop Lint/RaiseException). |
-| `redundant-string-coercion` | ruby | suspicious | warn | none | `to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn` (RuboCop Lint/RedundantStringCoercion). |
+| `parentheses-as-grouped-expression` | ruby | suspicious | off | none | A space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`) (RuboCop Lint/ParenthesesAsGroupedExpression). |
+| `post-condition-loop` | ruby | suspicious | off | none | A `begin ... end while cond` or `until` loop, which behaves unlike the other loops (RuboCop Lint/Loop). |
+| `raise-exception` | ruby | suspicious | off | none | Raising `Exception` itself (`raise Exception`, `raise Exception.new`), which a plain `rescue` does not catch (RuboCop Lint/RaiseException). |
+| `redundant-string-coercion` | ruby | suspicious | off | none | `to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn` (RuboCop Lint/RedundantStringCoercion). |
 | `rescue-exception` | ruby | suspicious | warn | none | A `rescue` that names `Exception` (RuboCop Lint/RescueException). |
 | `return-in-void-context` | ruby | suspicious | warn | none | `return value` in `initialize` or a setter method, whose result is ignored (RuboCop Lint/ReturnInVoidContext). |
 | `self-assignment` | ruby | suspicious | warn | none | `a = a`, `@a \|\|= @a` and the like for a local, instance, class or global variable or a constant (RuboCop Lint/SelfAssignment). |
 | `struct-new-override` | ruby | suspicious | warn | none | A `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`, `:count`) (RuboCop Lint/StructNewOverride). |
-| `suppressed-exception` | ruby | suspicious | warn | none | A `rescue` clause with no statements, unless a comment follows it before the end of the `begin`, method or block (RuboCop Lint/SuppressedException). |
-| `underscore-prefixed-variable-used` | ruby | style | warn | none | A variable whose name starts with `_`, which says it is unused, is read (RuboCop Lint/UnderscorePrefixedVariableName). No fix. |
-| `unknown-cop-name` | ruby | suspicious | warn | none | A `# rubocop:disable Department/Cop` comment whose department RuboCop does not have (an extension such as Rails or RSpec that the project does not load) (RuboCop Lint/CopDirectiveSyntax). |
-| `unused-block-argument` | ruby | cleanup | warn | none | A block parameter that the block never reads (RuboCop Lint/UnusedBlockArgument). Names that start with `_` and empty blocks are left alone. No fix. |
-| `unused-method-argument` | ruby | cleanup | warn | none | A method parameter that the method never reads (RuboCop Lint/UnusedMethodArgument). Names that start with `_`, empty methods and methods that only raise NotImplementedError are left alone. No fix. |
+| `suppressed-exception` | ruby | suspicious | off | none | A `rescue` clause with no statements, unless a comment follows it before the end of the `begin`, method or block (RuboCop Lint/SuppressedException). |
+| `underscore-prefixed-variable-used` | ruby | style | off | none | A variable whose name starts with `_`, which says it is unused, is read (RuboCop Lint/UnderscorePrefixedVariableName). No fix. |
+| `unknown-cop-name` | ruby | suspicious | off | none | A `# rubocop:disable Department/Cop` comment whose department RuboCop does not have (an extension such as Rails or RSpec that the project does not load) (RuboCop Lint/CopDirectiveSyntax). |
+| `unused-block-argument` | ruby | cleanup | off | none | A block parameter that the block never reads (RuboCop Lint/UnusedBlockArgument). Names that start with `_` and empty blocks are left alone. No fix. |
+| `unused-method-argument` | ruby | cleanup | off | none | A method parameter that the method never reads (RuboCop Lint/UnusedMethodArgument). Names that start with `_`, empty methods and methods that only raise NotImplementedError are left alone. No fix. |
 | `useless-access-modifier` | ruby | suspicious | warn | none | A bare `private`, `protected`, `public` or `module_function` that repeats the visibility already in force, or is followed by no method definition (RuboCop Lint/UselessAccessModifier). |
-| `useless-method-definition` | ruby | suspicious | warn | none | A method whose whole body is a bare `super` (RuboCop Lint/UselessMethodDefinition). |
-| `useless-times` | ruby | suspicious | warn | none | `0.times` and `1.times` with a block (RuboCop Lint/UselessTimes). |
+| `useless-method-definition` | ruby | suspicious | off | none | A method whose whole body is a bare `super` (RuboCop Lint/UselessMethodDefinition). |
+| `useless-times` | ruby | suspicious | off | none | `0.times` and `1.times` with a block (RuboCop Lint/UselessTimes). |
 | `and-or-is-not-if-else` | shell | suspicious | off | none | A list `a && b \|\| c` of three commands, unless `c` is `echo`, `printf`, `true`, `:`, `return` or `exit`. |
 | `cd-without-exit` | shell | suspicious | warn | none | `cd`, `pushd` or `popd` whose failure is not handled (`cd dir \|\| exit`). Not reported with `set -e`, for `cd ..` or `cd /`, or for `popd -n`. |
 | `declare-and-assign-separately` | shell | suspicious | off | none | `export`, `local`, `declare`, `readonly` or `typeset` with a command substitution as the value reports the status of the declaration, not of the command. |
@@ -692,7 +692,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `file-name-matches-type` | csharp | style | off | none | The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}`. Not checked when that type is partial. No fix. Equivalent: StyleCop SA1649. |
 | `inheritdoc-on-inheriting-member` | csharp | style | off | none | `<inheritdoc />` without `cref` on a type without a base list, or on a member that neither overrides nor implements anything (a constructor whose signature matches a base constructor is fine). No fix. Equivalent: StyleCop SA1648. |
 | `member-order` | csharp | style | off | none | Members are out of order. Compared with the member before, in the order of the `element_order` option: the kind (fields, constructors, finalizers, delegates, events, enums, interfaces, properties, indexers, operators, methods, structs, classes; in a namespace or file: namespaces, delegates, enums, interfaces, structs, classes), the access (public, internal, protected internal, protected, private protected, private), constants before other fields, static before instance members, readonly fields before the others. A trait only counts between members that agree on the traits listed before it. No fix: moving members would have to take their comments and directives along. Options: `element_order` (default `["kind", "accessibility", "constant", "static", "readonly"]`; one of `kind`, `accessibility`, `constant`, `static`, `readonly`): The traits that decide the order, most important first. A trait that is left out is not checked. Equivalent: StyleCop SA1201, StyleCop SA1202, StyleCop SA1203, StyleCop SA1204, StyleCop SA1214. |
-| `no-assignment-in-condition` | csharp, java, js, kotlin, php, python, ruby | suspicious | warn | none | The condition of an `if`, ternary or loop is an assignment not wrapped in parentheses of its own (ESLint no-cond-assign, PHPCS Generic.CodeAnalysis.AssignmentInCondition). Python's `:=` is the idiom and is left alone. Equivalent: eslint no-cond-assign (partial). |
+| `no-assignment-in-condition` | csharp, java, js, kotlin, php, python, ruby | suspicious | off | none | The condition of an `if`, ternary or loop is an assignment not wrapped in parentheses of its own (ESLint no-cond-assign, PHPCS Generic.CodeAnalysis.AssignmentInCondition). Python's `:=` is the idiom and is left alone. Equivalent: eslint no-cond-assign (partial). |
 | `no-comment-before-block` | csharp | style | off | none | A comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its `{`. Put it inside the block or above the statement. Equivalent: StyleCop SA1108. |
 | `no-constant-comparison` | csharp, java, js, kotlin, php, python, ruby | suspicious | warn | none | An equality or comparison of two literals (ruff PLR0133, ESLint no-constant-binary-expression). Equivalent: eslint no-constant-binary-expression (partial). |
 | `no-constant-condition` | csharp, java, js, kotlin, php, python, ruby | suspicious | warn | none | The condition of an `if`, ternary or loop is a literal, so one branch never runs (ESLint no-constant-condition, PHPCS Generic.CodeAnalysis.UnconditionalIfStatement). `while (true)` and `while (1)` are the usual endless loop and are left alone. Equivalent: eslint no-constant-condition (partial). |

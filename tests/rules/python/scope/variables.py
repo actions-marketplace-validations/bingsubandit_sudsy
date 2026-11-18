@@ -3,8 +3,6 @@ def f(items):
 #   ^^^^^^ unused-variable
     used = 2
     a, b = items
-#   ^ unused-unpacked-variable
-#      ^ unused-unpacked-variable
     c = d = 3
 #   ^ unused-variable
 #       ^ unused-variable

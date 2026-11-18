@@ -5,7 +5,7 @@ description: >-
   (ESLint no-cond-assign, PHPCS Generic.CodeAnalysis.AssignmentInCondition). Python's `:=` is the
   idiom and is left alone.
 example: 'if (a = b) {}'
-severity: warn
+severity: off
 category: suspicious
 report-on: field condition
 rule:

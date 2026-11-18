@@ -1,0 +1,15 @@
+# sqlfluff's default rules that Sudsy has, at warn, with their default options.
+sql:
+  lint:
+    rules:
+      count-star: warn
+      distinct-group-by: warn
+      duplicate-table-alias: warn
+      else-null: warn
+      implicit-alias: warn
+      null-comparison: warn
+      prefer-coalesce: warn
+      right-join: warn
+      self-alias: warn
+      union-distinct: warn
+      unused-cte: warn

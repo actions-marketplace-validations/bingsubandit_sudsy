@@ -1,0 +1,12 @@
+# actionlint's checks that Sudsy has, at warn.
+github-actions:
+  lint:
+    rules:
+      cyclic-needs: warn
+      deprecated-commands: warn
+      duplicate-ids: warn
+      invalid-expression: warn
+      invalid-job-id: warn
+      invalid-runs-on: warn
+      script-injection: warn
+      unknown-needs: warn

@@ -512,13 +512,9 @@ def coverage(tool, sudsy, version, prefix, exe):
     work = prefix / "coverage"
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
-    if spec and "sudsy" in spec:  # a tool entry's own all-rules config: the presets that stand for the tool's set
-        config = spec["sudsy"]
-        if "mapped_rules" in config:  # no preset: every Sudsy rule the catalog maps, on, with its default options
-            config = {config["mapped_rules"]: {"lint": {"rules": {r: "warn" for r in sorted(set(mapping.values())) if r != "syntax-error"}}}}
-        full = json.dumps(config)
-    else:
-        full = (folder / "sudsy.yaml").read_text(encoding="utf-8")
+    preset = parity_format.tools()["lint"][tool]["preset"]  # the preset that mirrors the tool's own default set: the headline
+    own = sorted({v for v in rule_map(tool).values() if v != "syntax-error"})  # every Sudsy rule the catalog maps, with default options
+    full = json.dumps({"extends": [f"preset:{preset}"], {"eslint-plugin-vue": "vue", "eslint-plugin-svelte": "svelte"}.get(tool, preset.split("/")[0]): {"lint": {"rules": {r: "warn" for r in own}}}})
     names = {}
     for _, name, source in ([] if spec else corpus_sources(tool, suffixes)):
         if tool == "eslint":  # both tools read a `.js` as a module by default: a file with `import`/`export` is one, the others are scripts
@@ -581,8 +577,9 @@ def coverage(tool, sudsy, version, prefix, exe):
         total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
         return per, hit, total, round(1000 * hit / total) / 10 if total else 100.0
 
-    everything = score(run_sudsy(full))[3]  # every rule the tool's set maps to, on: what the default-off rules hold back
-    ours = run_sudsy(None)  # the headline: Sudsy's default config, as a user gets it with no sudsy.yaml
+    everything = score(run_sudsy(full))[3]  # informational: every mapped rule on
+    default = score(run_sudsy(None))[3]  # informational: Sudsy's default config, as a user gets it with no sudsy.yaml
+    ours = run_sudsy(json.dumps({"extends": [f"preset:{preset}"]}))  # the headline: the preset that mirrors the tool's default set
     per, hit, total, share = score(ours)
     extra = {}  # Sudsy rule -> its findings in files where the tool reports its rule nowhere (a false positive, or a suppression comment)
     wanted = {(f, mapping[r]) for f, r, _ in found if r in mapping}
@@ -597,7 +594,7 @@ def coverage(tool, sudsy, version, prefix, exe):
     print("only Sudsy (files the tool reports the rule in nowhere): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
     for rule, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:int(os.environ.get("COVERAGE_TOP", 15))]:
         print(f"  {rule}: {c} of {n} covered" + ("" if rule in mapping else " (no Sudsy rule)"))
-    print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}% with the default config, {everything}% with all mapped rules on")
+    print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
     return ratchet(tool, folder, share)
 
 
@@ -622,7 +619,7 @@ def rubocop_coverage(sudsy, version, prefix):
     work = prefix / "coverage"
     shutil.rmtree(work, ignore_errors=True)
     shutil.copytree(ROOT / "tests/conformance/corpus/ruby", work)  # the tree, not flat names: a cop's Include and Exclude patterns read the path
-    shutil.copy(folder / "sudsy.yaml", work / "sudsy.yaml")
+    preset = parity_format.tools()["lint"]["rubocop"]["preset"]
     (work / ".rubocop.yml").write_text("AllCops:\n  TargetRubyVersion: 3.4\n  NewCops: disable\n  SuggestExtensions: false\n", encoding="utf-8")
     run = subprocess.run([str(prefix / "bin/rubocop"), "--only", "Lint", "-f", "json", "--cache-root", str(prefix / "cache"), "-P", "."],
                          cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
@@ -631,15 +628,27 @@ def rubocop_coverage(sudsy, version, prefix):
     except json.JSONDecodeError:
         sys.exit(f"rubocop produced no report:\n{run.stdout[:500]}\n{run.stderr[-2000:]}")
     found = [(os.path.normpath(f["path"]), o["cop_name"], o["location"]["start_line"]) for f in report["files"] for o in f["offenses"]]
-    out =subprocess.run([sudsy, "lint", "--format", "json", "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False).stdout
-    ours = {(os.path.normpath(d["path"]), d["rule"], d["range"]["start"]["line"]) for d in json.loads(out)["diagnostics"]}
-    per = {}  # cop -> [findings, covered]
-    for file, cop, line in found:
-        row = per.setdefault(cop, [0, 0])
-        row[0] += 1
-        row[1] += any((file, r, line) in ours for r in mapping.get(cop, ()))
-    total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
-    share = round(1000 * hit / total) / 10 if total else 100.0
+    def run_sudsy(config):  # Sudsy's findings with `config` as the sudsy.yaml of the corpus (None: no file)
+        (work / "sudsy.yaml").unlink(missing_ok=True)
+        if config is not None:
+            (work / "sudsy.yaml").write_text(config, encoding="utf-8")
+        out = subprocess.run([sudsy, "lint", "--format", "json", "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False).stdout
+        return {(os.path.normpath(d["path"]), d["rule"], d["range"]["start"]["line"]) for d in json.loads(out)["diagnostics"]}
+
+    def score(ours):
+        per = {}  # cop -> [findings, covered]
+        for file, cop, line in found:
+            row = per.setdefault(cop, [0, 0])
+            row[0] += 1
+            row[1] += any((file, r, line) in ours for r in mapping.get(cop, ()))
+        total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
+        return per, hit, total, round(1000 * hit / total) / 10 if total else 100.0
+
+    own = sorted({r for rules in mapping.values() for r in rules} - {"syntax-error"})
+    everything = score(run_sudsy(json.dumps({"extends": [f"preset:{preset}"], "ruby": {"lint": {"rules": {r: "warn" for r in own}}}})))[3]
+    default = score(run_sudsy(None))[3]
+    ours = run_sudsy(json.dumps({"extends": [f"preset:{preset}"]}))
+    per, hit, total, share = score(ours)
     for cop, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:25]:
         print(f"  {cop}: {c} of {n} covered" + ("" if cop in mapping else " (no Sudsy rule)"))
     wanted = {(f, r, l) for f, c, l in found if c in mapping for r in mapping[c]}
@@ -649,7 +658,7 @@ def rubocop_coverage(sudsy, version, prefix):
         if r in mapped and (f, r, l) not in wanted:
             extra[r] = extra.get(r, 0) + 1
     print("only Sudsy (RuboCop reports the mapped cop nowhere on the line): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
-    print(f"rubocop {version}: {hit} of {total} findings of {len(per)} cops in {len(report['files'])} files covered = {share}%")
+    print(f"rubocop {version}: {hit} of {total} findings of {len(per)} cops in {len(report['files'])} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
     return ratchet("rubocop", folder, share)
 
 

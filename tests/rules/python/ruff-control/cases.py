@@ -21,8 +21,6 @@ except Exception:
 
 import pdb
 ^^^^^^^^^^ leftover-debugger
-^^^^^^^^^^ unsorted-imports
-#      ^^^ unused-import
 
 def f(x):
     if x:

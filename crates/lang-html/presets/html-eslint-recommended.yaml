@@ -1,0 +1,13 @@
+# @html-eslint's recommended rules that Sudsy has, at warn.
+html:
+  lint:
+    rules:
+      attr-quotes: warn
+      deprecated: warn
+      element-required-attributes: warn
+      heading-level: warn
+      missing-doctype: warn
+      no-deprecated-attr: warn
+      no-duplicate-id: warn
+      no-duplicate-keys: warn
+      no-implicit-close: warn

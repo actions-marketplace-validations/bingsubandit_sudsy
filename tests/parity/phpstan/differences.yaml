@@ -1,1 +1,1 @@
-coverage: 0.0  # share of the default-set findings of phpstan on its corpus that Sudsy also reports with its default config (scripts/parity.sh coverage phpstan)
+coverage: 0.0  # share of the default-set findings of phpstan on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage phpstan; at least 85% is the bar)

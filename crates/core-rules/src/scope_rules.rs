@@ -252,7 +252,7 @@ impl Rule for ScopeRule {
             Check::UnusedImport => meta!(
                 "unused-import",
                 Cleanup,
-                Warn,
+                Off,
                 "An import whose name the file does not use (Checkstyle UnusedImports, ktlint \
                  no-unused-imports). Imports with `*` are not checked, and a name in a doc \
                  comment counts as a use where the language has doc comments. No fix: removing \
@@ -262,7 +262,7 @@ impl Rule for ScopeRule {
             Check::UnusedLocal => meta!(
                 "unused-local-variable",
                 Cleanup,
-                Warn,
+                Off,
                 "A local variable that is never read: it is declared, and perhaps assigned, and \
                  that is all (Checkstyle UnusedLocalVariable, RuboCop Lint/UselessAssignment). No fix.",
                 "int count = 0;   // never read"
@@ -288,7 +288,7 @@ impl Rule for ScopeRule {
             Check::UnusedMethodArgument => meta!(
                 "unused-method-argument",
                 Cleanup,
-                Warn,
+                Off,
                 "A method parameter that the method never reads (RuboCop Lint/UnusedMethodArgument). \
                  Names that start with `_`, empty methods and methods that only raise \
                  NotImplementedError are left alone. No fix.",
@@ -297,7 +297,7 @@ impl Rule for ScopeRule {
             Check::UnusedBlockArgument => meta!(
                 "unused-block-argument",
                 Cleanup,
-                Warn,
+                Off,
                 "A block parameter that the block never reads (RuboCop Lint/UnusedBlockArgument). \
                  Names that start with `_` and empty blocks are left alone. No fix.",
                 "items.each { |a, b| puts a }   # b is not used"
@@ -305,7 +305,7 @@ impl Rule for ScopeRule {
             Check::UnderscorePrefixed => meta!(
                 "underscore-prefixed-variable-used",
                 Style,
-                Warn,
+                Off,
                 "A variable whose name starts with `_`, which says it is unused, is read \
                  (RuboCop Lint/UnderscorePrefixedVariableName). No fix.",
                 "def f(_a)\n  _a\nend"

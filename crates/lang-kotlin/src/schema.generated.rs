@@ -28,5 +28,6 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::assignment_indent(1),
     ])
     .with_presets(vec![
+        core_config::Preset::new("kotlin/ktlint", include_str!("../presets/ktlint.yaml")),
     ])
 }

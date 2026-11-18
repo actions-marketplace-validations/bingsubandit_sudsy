@@ -20,6 +20,5 @@ pub fn option_schema() -> core_config::OptionSchema {
     ])
     .with_presets(vec![
         core_config::Preset::new("python/ruff", include_str!("../presets/ruff.yaml")),
-        core_config::Preset::new("python/ruff-extra", include_str!("../presets/ruff-extra.yaml")),
     ])
 }

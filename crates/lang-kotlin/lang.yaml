@@ -22,3 +22,4 @@ options:
   - assignment_layout: ["break"]
   - assignment_conditional: ["always"]
   - assignment_indent: [1]
+presets: [ktlint]

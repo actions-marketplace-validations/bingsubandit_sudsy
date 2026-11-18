@@ -12,5 +12,6 @@ pub fn option_schema() -> core_config::OptionSchema {
     ])
     .with_presets(vec![
         core_config::Preset::new("markdown/prettier-compat", include_str!("../presets/prettier-compat.yaml")),
+        core_config::Preset::new("markdown/markdownlint", include_str!("../presets/markdownlint.yaml")),
     ])
 }

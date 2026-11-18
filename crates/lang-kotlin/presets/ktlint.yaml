@@ -1,0 +1,14 @@
+# ktlint's ktlint_official rules that Sudsy has, at warn, with their default options.
+kotlin:
+  lint:
+    rules:
+      class-naming: warn
+      comment-space: warn
+      enum-entry-name-case: warn
+      max-line-length: warn
+      no-empty-class-body: warn
+      no-empty-file: warn
+      no-unit-return: warn
+      no-wildcard-imports: warn
+      package-name: warn
+      unused-import: warn

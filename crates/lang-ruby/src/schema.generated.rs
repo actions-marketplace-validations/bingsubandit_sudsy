@@ -10,5 +10,6 @@ pub fn option_schema() -> core_config::OptionSchema {
         shared::end_of_line(),
     ])
     .with_presets(vec![
+        core_config::Preset::new("ruby/rubocop", include_str!("../presets/rubocop.yaml")),
     ])
 }

@@ -31,5 +31,6 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice("type_case", &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of data types: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
     ])
     .with_presets(vec![
+        core_config::Preset::new("sql/sqlfluff", include_str!("../presets/sqlfluff.yaml")),
     ])
 }

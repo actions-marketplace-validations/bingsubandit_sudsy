@@ -1,61 +1,105 @@
-# ruff's default rules (`F`, `E4`, `E7`, `E9`) that Sudsy has: all on, as ruff runs them.
+# ruff 0.17's default rule set (`ruff check --isolated`) that Sudsy has, at warn; the rules ruff reports as errors for a syntax error stay errors.
 python:
   lint:
     rules:
-      none-comparison: warn
-      true-false-comparison: warn
-      not-in-test: warn
-      not-is-test: warn
-      type-comparison: warn
-      is-literal: warn
-      bare-except: warn
-      lambda-assignment: warn
-      multiple-imports-on-one-line: warn
-      f-string-missing-placeholders: warn
+      any-eq-parameter: warn
       assert-tuple: warn
-      if-tuple: warn
-      raise-not-implemented: warn
-      return-outside-function: warn
-      unused-import: warn
-      redefined-while-unused: warn
-      undefined-name: warn
-      unused-variable: warn
-      unused-annotation: warn
-      undefined-export: warn
-      undefined-local: warn
-      import-shadowed-by-loop-var: warn
-      undefined-local-with-import-star: warn
-      late-future-import: warn
-      undefined-local-with-import-star-usage: warn
-      undefined-local-with-nested-import-star-usage: warn
-      future-feature-not-defined: warn
-      no-duplicate-keys: warn
-      multiple-starred-expressions: warn
-      invalid-print-syntax: warn
+      bare-except: warn
+      bare-raise-outside-handler: warn
+      blind-except: warn
       break-outside-loop: warn
+      cached-method: warn
+      collapsible-if: warn
       continue-outside-loop: warn
-      yield-outside-function: warn
+      custom-type-var-return: warn
+      datetime-utc-alias: warn
       default-except-not-last: warn
-      forward-annotation-syntax-error: warn
-      invalid-syntax: error
-      module-import-not-at-top-of-file: warn
-      multiple-statements-on-one-line-colon: warn
-      multiple-statements-on-one-line-semicolon: warn
-      useless-semicolon: warn
-      ambiguous-variable-name: warn
-      ambiguous-class-name: warn
-      ambiguous-function-name: warn
-      percent-format-invalid-format: warn
-      percent-format-unsupported-format-character: warn
-      percent-format-mixed-positional-and-named: warn
+      default-type-arguments: warn
+      deprecated-import: warn
+      deprecated-typing-alias: warn
+      double-negation: warn
+      exec-call: warn
+      explicit-return-none: warn
+      f-string: warn
+      f-string-missing-placeholders: warn
+      function-call-in-default: warn
+      future-feature-not-defined: warn
+      generic-class: warn
+      generic-function: warn
+      get-attr-with-constant: warn
+      hasattr-call: warn
+      if-expr-with-false-true: warn
+      if-expr-with-true-false: warn
+      if-tuple: warn
+      if-with-same-arms: warn
+      implicit-concat-in-collection: warn
+      import-shadowed-by-loop-var: warn
+      in-dict-keys: warn
+      invalid-escape-sequence: warn
+      invalid-print-syntax: warn
+      is-literal: warn
+      late-future-import: warn
+      leftover-debugger: warn
+      multiple-starred-expressions: warn
+      multiple-starts-ends-with: warn
+      mutable-argument-default: warn
+      mutable-class-default: warn
+      needless-bool: warn
+      negate-equal-op: warn
+      negate-not-equal-op: warn
+      nested-with: warn
+      no-duplicate-keys: warn
+      open-file-without-with: warn
+      optional-annotation: warn
+      os-error-alias: warn
+      outdated-version-block: warn
       percent-format-expected-mapping: warn
       percent-format-expected-sequence: warn
       percent-format-extra-named-arguments: warn
+      percent-format-invalid-format: warn
       percent-format-missing-argument: warn
+      percent-format-mixed-positional-and-named: warn
       percent-format-positional-count-mismatch: warn
       percent-format-star-requires-sequence: warn
-      string-dot-format-invalid-format: warn
+      percent-format-unsupported-format-character: warn
+      printf-string-formatting: warn
+      quoted-annotation: warn
+      raise-not-implemented: warn
+      raise-vanilla-class: warn
+      redefined-argument-from-local: warn
+      redefined-while-unused: warn
+      redundant-tuple-in-exception-handler: warn
+      regex-flag-alias: warn
+      return-outside-function: warn
+      set-attr-with-constant: warn
+      static-join: warn
       string-dot-format-extra-named-arguments: warn
       string-dot-format-extra-positional-arguments: warn
+      string-dot-format-invalid-format: warn
       string-dot-format-missing-arguments: warn
       string-dot-format-mixing-automatic: warn
+      subprocess-run-without-check: warn
+      try-except-pass: warn
+      type-alias-annotation: warn
+      type-check-without-type-error: warn
+      type-var-name-variance: warn
+      undefined-export: warn
+      undefined-local: warn
+      undefined-local-with-nested-import-star-usage: warn
+      undefined-name: warn
+      unicode-literal: warn
+      union-annotation: warn
+      unnecessary-collection-call: warn
+      unnecessary-placeholder: warn
+      unsorted-dunder-all: warn
+      unsorted-dunder-slots: warn
+      unsorted-imports: warn
+      unused-annotation: warn
+      unused-import: warn
+      unused-unpacked-variable: warn
+      unused-variable: warn
+      useless-expression: warn
+      useless-import-alias: warn
+      useless-object-inheritance: warn
+      verbose-raise: warn
+      yield-outside-function: warn

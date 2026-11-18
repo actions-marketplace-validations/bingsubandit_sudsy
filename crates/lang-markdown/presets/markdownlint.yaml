@@ -1,0 +1,21 @@
+# markdownlint's default rules that Sudsy has, at warn, with their default options.
+markdown:
+  lint:
+    rules:
+      commands-show-output: warn
+      descriptive-link-text: warn
+      fenced-code-language: warn
+      heading-increment: warn
+      max-line-length: warn
+      no-alt-text: warn
+      no-bare-urls: warn
+      no-duplicate-heading: warn
+      no-emphasis-as-heading: warn
+      no-empty-links: warn
+      no-inline-html: warn
+      no-missing-space-atx: warn
+      no-reversed-links: warn
+      no-space-in-code: warn
+      no-space-in-links: warn
+      no-trailing-punctuation: warn
+      single-title: warn

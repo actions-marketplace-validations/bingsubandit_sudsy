@@ -1,0 +1,15 @@
+# eslint-plugin-svelte's flat/recommended rules that Sudsy has, at warn.
+svelte:
+  lint:
+    rules:
+      no-at-debug-tags: warn
+      no-at-html-tags: warn
+      no-dupe-on-directives: warn
+      no-dupe-style-properties: warn
+      no-dupe-use-directives: warn
+      no-object-in-text-mustaches: warn
+      no-raw-special-elements: warn
+      no-unknown-style-directive-property: warn
+      no-useless-children-snippet: warn
+      no-useless-mustaches: warn
+      require-each-key: warn

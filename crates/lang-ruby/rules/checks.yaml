@@ -4,7 +4,7 @@ params: { check: ambiguous-block-association }
 message: "the braces block binds to `{name}`, not to the outer call: add parentheses"
 description: "A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`)."
 example: "puts [1].map { |x| x }"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: float-comparison
@@ -49,7 +49,7 @@ params: { check: constant-definition-in-block }
 message: "a constant or class defined in a block belongs to the enclosing scope, not to the block"
 description: "A constant, class or module defined directly in a block (RuboCop Lint/ConstantDefinitionInBlock); `enums` blocks (Sorbet) are allowed."
 example: "describe 'x' do\n  FOO = 1\nend"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: missing-super
@@ -58,7 +58,7 @@ params: { check: missing-super }
 message: "call `super` to invoke the callback `{name}` defined in the parent class"
 description: "`initialize` of a class with a parent other than Object, and the lifecycle callbacks `inherited` and `method_added`, that do not call `super` (RuboCop Lint/MissingSuper)."
 example: "class A < B\n  def initialize; end\nend"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: rescue-exception
@@ -76,7 +76,7 @@ params: { check: suppressed-exception }
 message: "do not suppress exceptions: an empty `rescue` hides the error"
 description: "A `rescue` clause with no statements, unless a comment follows it before the end of the `begin`, method or block (RuboCop Lint/SuppressedException)."
 example: "begin\n  f\nrescue\nend"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: unknown-cop-name
@@ -85,7 +85,7 @@ params: { check: unknown-cop-name }
 message: "unknown cop `{name}` in a RuboCop directive"
 description: "A `# rubocop:disable Department/Cop` comment whose department RuboCop does not have (an extension such as Rails or RSpec that the project does not load) (RuboCop Lint/CopDirectiveSyntax)."
 example: "# rubocop:disable Rails/Foo"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: useless-access-modifier
@@ -103,7 +103,7 @@ params: { check: raise-exception }
 message: "raising `Exception` is rescued only by `rescue Exception`: raise `StandardError` or a subclass"
 description: "Raising `Exception` itself (`raise Exception`, `raise Exception.new`), which a plain `rescue` does not catch (RuboCop Lint/RaiseException)."
 example: 'raise Exception, "m"'
-severity: warn
+severity: off
 category: suspicious
 ---
 id: parentheses-as-grouped-expression
@@ -112,7 +112,7 @@ params: { check: parentheses-as-grouped-expression }
 message: "`{name}` is read as a grouped expression, not as the arguments: remove the space before it"
 description: "A space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`) (RuboCop Lint/ParenthesesAsGroupedExpression)."
 example: "puts (x)"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: hash-compare-by-identity
@@ -121,7 +121,7 @@ params: { check: hash-compare-by-identity }
 message: "use `Hash#compare_by_identity` instead of `object_id` as the key"
 description: "A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity)."
 example: "h[x.object_id]"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: useless-times
@@ -130,7 +130,7 @@ params: { check: useless-times }
 message: "the block runs at most once: do not call `times`"
 description: "`0.times` and `1.times` with a block (RuboCop Lint/UselessTimes)."
 example: "1.times { x }"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: struct-new-override
@@ -148,7 +148,7 @@ params: { check: redundant-string-coercion }
 message: "`to_s` is redundant here: the value is converted anyway"
 description: "`to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn` (RuboCop Lint/RedundantStringCoercion)."
 example: '"#{x.to_s}"'
-severity: warn
+severity: off
 category: suspicious
 ---
 id: literal-in-interpolation
@@ -157,7 +157,7 @@ params: { check: literal-in-interpolation }
 message: "a literal in `#{...}` belongs in the string itself"
 description: "A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation)."
 example: '"a #{1}"'
-severity: warn
+severity: off
 category: suspicious
 ---
 id: mixed-regexp-capture-types
@@ -193,7 +193,7 @@ params: { check: empty-when }
 message: "a `when` branch has no body"
 description: "A `when` with no statements and no comment (RuboCop Lint/EmptyWhen)."
 example: "case x\nwhen 1\nend"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: post-condition-loop
@@ -202,7 +202,7 @@ params: { check: post-condition-loop }
 message: "`begin ... end {name}` runs the body once before the test: use `loop do ... break` instead"
 description: "A `begin ... end while cond` or `until` loop, which behaves unlike the other loops (RuboCop Lint/Loop)."
 example: "begin\n  x\nend while y"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: inherit-exception
@@ -211,7 +211,7 @@ params: { check: inherit-exception }
 message: "inheriting from `Exception` makes the class hard to rescue: inherit from `StandardError`"
 description: "A class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`) (RuboCop Lint/InheritException)."
 example: "class A < Exception; end"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: useless-method-definition
@@ -220,7 +220,7 @@ params: { check: useless-method-definition }
 message: "the method only calls `super`: remove it"
 description: "A method whose whole body is a bare `super` (RuboCop Lint/UselessMethodDefinition)."
 example: "def f(a)\n  super\nend"
-severity: warn
+severity: off
 category: suspicious
 ---
 id: return-in-void-context

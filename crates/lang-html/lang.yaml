@@ -18,4 +18,4 @@ options:
   - single_attribute_per_line:
       default: false
       doc: "Put every attribute of a tag that has several on its own line."
-presets: [html-validate-standard, html-validate-recommended]
+presets: [html-validate-standard, html-validate-recommended, htmlhint, html-eslint-recommended, eslint-plugin-vue-recommended, eslint-plugin-svelte-recommended]
