@@ -13,6 +13,7 @@
 //! being of kind `K`.
 
 use crate::FormatCtx;
+use crate::calls::CallRules;
 use crate::case::Cases;
 use crate::comments::CommentStyle;
 use crate::context::NodeFormatter;
@@ -85,6 +86,9 @@ struct BlankRow {
 pub struct RuleFormatter {
     space: SpaceRules,
     cases: Cases,
+    /// The `[call]`, `[hug]` and `[simple]` text, parsed when a call asks for it.
+    call_text: &'static str,
+    calls: OnceLock<CallRules>,
     rewrite: RewriteRules,
     layout: Layout,
     blank: Vec<BlankRow>,
@@ -97,7 +101,7 @@ pub struct RuleFormatter {
 }
 
 impl RuleFormatter {
-    pub fn parse(g: &Grammar, text: &str) -> RuleFormatter {
+    pub fn parse(g: &Grammar, text: &'static str) -> RuleFormatter {
         let yes = |settings: &[(&str, &str)], key: &str| {
             settings.iter().any(|(k, v)| *k == key && *v == "yes")
         };
@@ -125,6 +129,8 @@ impl RuleFormatter {
         RuleFormatter {
             space: SpaceRules::parse(g, text),
             cases: Cases::parse(g, section(text, "case")),
+            call_text: text,
+            calls: OnceLock::new(),
             rewrite: RewriteRules::parse(g, text),
             layout: Layout::parse(g, &layout),
             blank: section(text, "blank")
@@ -154,6 +160,12 @@ impl RuleFormatter {
                 None => 1,
             },
         }
+    }
+
+    /// The `[call]`, `[simple]` and `[hug]` rows.
+    pub fn calls(&self, g: &Grammar) -> &CallRules {
+        self.calls
+            .get_or_init(|| CallRules::parse(g, self.call_text))
     }
 
     /// The `[case]` rows.

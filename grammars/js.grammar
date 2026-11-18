@@ -92,9 +92,9 @@ node IdentifierReference #expression #reference #pure = name:#identifier? Identi
 node BindingIdentifier #pattern #declaration = name:#identifier
 node LabelIdentifier #opaque
 node ThisExpression #expression #opaque #pure
-node ArrayExpression #expression #opaque #pure
+node ArrayExpression #expression #opaque #pure #huggable #huggable-body
 node Elision #opaque #hole
-node ObjectExpression #expression #opaque #mapping #pure
+node ObjectExpression #expression #opaque #mapping #pure #huggable #huggable-body
 node ObjectProperty #key-value = Keyword? Identifier? Operator? LBracket? key:#expression RBracket? Colon? value:#expression?
 node TemplateLiteral #expression #opaque #quoted #pure
 node TaggedTemplateExpression #expression #opaque #escapes #raw-strings #pure
@@ -102,7 +102,7 @@ node TemplateElement #opaque
 node ComputedMemberExpression #expression #index #pure = object:#expression QuestionDot? LBracket arguments:#expression RBracket
 node StaticMemberExpression #expression #member-access #pure = object:#expression Dot? QuestionDot? member:IdentifierName
 node PrivateFieldExpression #expression #member-access #pure = object:#expression Dot? QuestionDot? member:PrivateIdentifier
-node CallExpression #expression #call =
+node CallExpression #expression #call #huggable-tail =
     callee:#expression QuestionDot? type_arguments:TSTypeParameterInstantiation? LParen arguments:#expression* RParen
 node NewExpression #expression #call =
     Keyword callee:#expression type_arguments:TSTypeParameterInstantiation? LParen? arguments:#expression* RParen?
@@ -115,7 +115,7 @@ node UnaryExpression #expression #unary #pure = operator:#operator operand:#expr
 node BinaryExpression #expression #binary-chain #binary #pure = left:#expression operator:#operator right:#expression
 node PrivateInExpression #expression #binary-chain #binary #pure = left:PrivateIdentifier operator:#operator right:#expression
 node LogicalExpression #expression #binary-chain #binary #pure = left:#expression operator:#operator right:#expression
-node ConditionalExpression #expression #conditional #pure = condition:#expression Question then:#expression Colon else:#expression
+node ConditionalExpression #expression #conditional #pure #huggable-tail = condition:#expression Question then:#expression Colon else:#expression
 node AssignmentExpression #expression #assignment = LParen* left:#expression RParen* operator:#operator right:#expression
 node ArrayAssignmentTarget #expression #opaque
 node ObjectAssignmentTarget #expression #opaque
@@ -160,13 +160,13 @@ node ObjectPattern #pattern #opaque
 node BindingProperty #opaque
 node ArrayPattern #pattern #opaque
 node BindingRestElement #pattern #opaque #rest #final
-node Function #expression #statement #function #declaration #scope #inert #pure =
+node Function #expression #statement #function #huggable-always #declaration #scope #inert #pure =
     Identifier* Keyword? Operator? name:BindingIdentifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? body:FunctionBody?
 node FormalParameters #parameter-list = LParen? parameters:#parameter* RParen?
 node FormalParameter #parameter #opaque
 node FormalParameterRest #parameter #opaque #final
 node FunctionBody #block = LBrace items:#statement* RBrace
-node ArrowFunctionExpression #expression #function #scope #pure =
+node ArrowFunctionExpression #expression #function #huggable-function #scope #pure =
     Identifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? Arrow body:FunctionBody? expression_body:#expression?
 node YieldExpression #expression #opaque #escapes
 node Class #expression #statement #type-declaration #declaration #scope #pure =
@@ -200,10 +200,10 @@ node NumericLiteral #expression #literal #pure = value:Number
 node StringLiteral #expression #literal #quoted #pure = value:String? StringLiteral?
 node BigIntLiteral #expression #literal #pure = value:BigInt
 node RegExpLiteral #expression #literal #regex #pure = value:RegExp
-node JSXElement #expression #opaque
+node JSXElement #expression #opaque #huggable-body
 node JSXOpeningElement #opaque #markup
 node JSXClosingElement #opaque
-node JSXFragment #expression #opaque
+node JSXFragment #expression #opaque #huggable-body
 node JSXOpeningFragment #opaque
 node JSXClosingFragment #opaque
 node JSXNamespacedName #opaque
@@ -247,7 +247,7 @@ node TSSymbolKeyword #opaque
 node TSThisType #opaque
 node TSObjectKeyword #opaque
 node TSBigIntKeyword #opaque
-node TSTypeReference #opaque
+node TSTypeReference #opaque #named-type
 node TSQualifiedName #opaque
 node TSTypeParameterInstantiation #opaque
 node TSTypeParameter #opaque
@@ -278,9 +278,9 @@ node TSFunctionType #scope #signature
 node TSConstructorType #scope #signature
 node TSMappedType #scope
 node TSTemplateLiteralType #opaque
-node TSAsExpression #expression #opaque
-node TSSatisfiesExpression #expression #opaque
-node TSTypeAssertion #expression #opaque
+node TSAsExpression #expression #opaque #hug-wrapper #huggable-body
+node TSSatisfiesExpression #expression #opaque #hug-wrapper #huggable-body
+node TSTypeAssertion #expression #opaque #hug-wrapper
 node TSImportEqualsDeclaration #statement #opaque
 node TSExternalModuleReference #opaque
 node TSNonNullExpression #expression #unary = operand:#expression operator:#operator
