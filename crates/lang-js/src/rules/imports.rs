@@ -15,7 +15,7 @@ pub(super) fn require_imports(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'
         let Some(callee) = n.children().next() else {
             return;
         };
-        if code_text(&callee, ctx.file.grammar) != "require" {
+        if code_text(&callee) != "require" {
             return;
         }
         // A `require` the file declares itself is not the module loader.
@@ -78,10 +78,7 @@ fn type_only_names(cx: &Cx, d: &SyntaxNode) -> (Vec<String>, usize) {
             continue;
         }
         let local = s.descendants().find(|n| n.kind() == k::BINDING_IDENTIFIER);
-        let name = local
-            .as_ref()
-            .map(|l| code_text(l, cx.g))
-            .unwrap_or_default();
+        let name = local.as_ref().map(code_text).unwrap_or_default();
         let sym = local.as_ref().and_then(|l| cx.symbol_of(l));
         let mut refs = sym.into_iter().flat_map(|sid| cx.s.refs_of(sid)).peekable();
         if !cx.jsx_pragma(&name) && refs.peek().is_some() && refs.all(|r| only_type_use(cx, r)) {

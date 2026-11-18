@@ -18,12 +18,13 @@ pub mod grammars;
 pub mod kind;
 pub mod roles;
 pub mod shape;
+pub mod strings;
 pub mod tree;
 pub mod trivia;
 pub mod wire;
 
 pub use embedded::Embedded;
-pub use grammar::{Assoc, Grammar, Precedence};
+pub use grammar::{Assoc, Grammar, KeySyntax, Precedence};
 pub use kind::{LanguageId, SyntaxKind};
 pub use rowan::{Checkpoint, GreenNode, TextRange, TextSize};
 pub use tree::{

@@ -92,7 +92,7 @@ pub(super) fn extra_non_null(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_
 }
 
 /// The name a type annotation refers to (`: Foo`, not `: a.Foo` or `: Foo[]`).
-fn annotated_name(node: Option<SyntaxNode>, g: &Grammar) -> Option<String> {
+fn annotated_name(node: Option<SyntaxNode>) -> Option<String> {
     let reference = (node?.children().find(|c| c.kind() == k::TS_TYPE_ANNOTATION))?
         .children()
         .next()
@@ -100,23 +100,22 @@ fn annotated_name(node: Option<SyntaxNode>, g: &Grammar) -> Option<String> {
         .children()
         .next()
         .filter(|n| n.kind() == k::IDENTIFIER_REFERENCE)?;
-    Some(code_text(&reference, g))
+    Some(code_text(&reference))
 }
 
 /// The name of the class or interface whose body holds `member`.
-fn owner_name(member: &SyntaxNode, g: &Grammar) -> Option<String> {
+fn owner_name(member: &SyntaxNode) -> Option<String> {
     let id = (member.parent()?.parent()?)
         .children()
         .find(|c| c.kind() == k::BINDING_IDENTIFIER)?;
-    Some(code_text(&id, g))
+    Some(code_text(&id))
 }
 
 /// A class method `new(): C`, an interface `new (): I` and an interface method `constructor()`.
 pub(super) fn misused_new(_: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let named = |name: &str| {
         (n.children().next())
-            .is_some_and(|key| key.kind() == k::IDENTIFIER_NAME && code_text(&key, g) == name)
+            .is_some_and(|key| key.kind() == k::IDENTIFIER_NAME && code_text(&key) == name)
     };
     let message = match n.kind() {
         k::TS_METHOD_SIGNATURE if named("constructor") => {
@@ -124,8 +123,7 @@ pub(super) fn misused_new(_: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) 
         }
         k::TS_CONSTRUCT_SIGNATURE_DECLARATION
             if n.parent().is_some_and(|p| p.kind() == k::TS_INTERFACE_BODY)
-                && annotated_name(Some(n.clone()), g)
-                    .is_some_and(|t| Some(t) == owner_name(n, g)) =>
+                && annotated_name(Some(n.clone())).is_some_and(|t| Some(t) == owner_name(n)) =>
         {
             "Interfaces cannot be constructed, only classes."
         }
@@ -135,7 +133,7 @@ pub(super) fn misused_new(_: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) 
             };
             // a body means a method that happens to be called `new`
             if function.children().any(|c| c.kind() == k::FUNCTION_BODY)
-                || annotated_name(Some(function), g).is_none_or(|t| Some(t) != owner_name(n, g))
+                || annotated_name(Some(function)).is_none_or(|t| Some(t) != owner_name(n))
             {
                 return;
             }
@@ -160,7 +158,6 @@ fn is_literal(kind: SyntaxKind) -> bool {
 
 /// `let a: 'a' = 'a'`, `x as 'a'` on the same literal.
 pub(super) fn prefer_as_const(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let Some(literal) = n.children().next().filter(|l| is_literal(l.kind())) else {
         return;
     };
@@ -174,72 +171,72 @@ pub(super) fn prefer_as_const(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'
             .and_then(|_| parent.next_sibling()),
         _ => None,
     };
-    if value.is_some_and(|v| v != *n && code_text(&un(v), g) == code_text(&literal, g)) {
+    if value.is_some_and(|v| v != *n && code_text(&un(&v)) == code_text(&literal)) {
         c.hit(ctx, span(ctx, n), "");
     }
 }
 
 /// The expression of a call of the global `name`, through an optional chain.
-fn is_call(n: &SyntaxNode, name: &str, g: &Grammar) -> bool {
+fn is_call(n: &SyntaxNode, name: &str) -> bool {
     let n = match n.kind() {
         k::CHAIN_EXPRESSION => n.children().next(),
         _ => Some(n.clone()),
     };
     n.filter(|n| n.kind() == k::CALL_EXPRESSION)
         .and_then(|n| n.children().next())
-        .is_some_and(|f| f.kind() == k::IDENTIFIER_REFERENCE && code_text(&f, g) == name)
+        .is_some_and(|f| f.kind() == k::IDENTIFIER_REFERENCE && code_text(&f) == name)
 }
 
-fn is_name(n: &SyntaxNode, names: &[&str], g: &Grammar) -> bool {
-    n.kind() == k::IDENTIFIER_REFERENCE && names.contains(&code_text(n, g).as_str())
+fn is_name(n: &SyntaxNode, names: &[&str]) -> bool {
+    n.kind() == k::IDENTIFIER_REFERENCE && names.contains(&code_text(n).as_str())
 }
 
 /// The operand of a unary expression whose operator is one of `ops`.
-fn operand(n: &SyntaxNode, ops: &[&str], g: &Grammar) -> Option<SyntaxNode> {
-    (n.kind() == k::UNARY_EXPRESSION && ops.contains(&operator(n, g).as_str()))
-        .then(|| n.children().next().map(un))?
+fn operand(n: &SyntaxNode, ops: &[&str]) -> Option<SyntaxNode> {
+    (n.kind() == k::UNARY_EXPRESSION && ops.contains(&operator(n).as_str()))
+        .then(|| n.children().next().map(|n| un(&n)))?
 }
 
 /// Does `value` of `ty`'s kind tell its type by itself?
-fn inferrable(ty: &SyntaxNode, value: SyntaxNode, g: &Grammar) -> bool {
-    let value = un(value);
+fn inferrable(ty: &SyntaxNode, value: SyntaxNode) -> bool {
+    let value = un(&value);
     let literal = |v: &SyntaxNode, kind| v.kind() == kind;
     match ty.kind() {
         k::TS_BIG_INT_KEYWORD => {
-            let v = operand(&value, &["-"], g).unwrap_or(value);
-            is_call(&v, "BigInt", g) || is_literal(v.kind())
+            let v = operand(&value, &["-"]).unwrap_or(value);
+            is_call(&v, "BigInt") || is_literal(v.kind())
         }
         k::TS_BOOLEAN_KEYWORD => {
-            operand(&value, &["!"], g).is_some()
-                || is_call(&value, "Boolean", g)
+            operand(&value, &["!"]).is_some()
+                || is_call(&value, "Boolean")
                 || literal(&value, k::BOOLEAN_LITERAL)
         }
         k::TS_NUMBER_KEYWORD => {
-            let v = operand(&value, &["+", "-"], g).unwrap_or(value);
-            is_name(&v, &["Infinity", "NaN"], g)
-                || is_call(&v, "Number", g)
+            let v = operand(&value, &["+", "-"]).unwrap_or(value);
+            is_name(&v, &["Infinity", "NaN"])
+                || is_call(&v, "Number")
                 || literal(&v, k::NUMERIC_LITERAL)
         }
         k::TS_NULL_KEYWORD => literal(&value, k::NULL_LITERAL),
         k::TS_STRING_KEYWORD => {
-            is_call(&value, "String", g)
+            is_call(&value, "String")
                 || matches!(value.kind(), k::STRING_LITERAL | k::TEMPLATE_LITERAL)
         }
-        k::TS_SYMBOL_KEYWORD => is_call(&value, "Symbol", g),
+        k::TS_SYMBOL_KEYWORD => is_call(&value, "Symbol"),
         k::TS_UNDEFINED_KEYWORD => {
-            operand(&value, &["void"], g).is_some() || is_name(&value, &["undefined"], g)
+            operand(&value, &["void"]).is_some() || is_name(&value, &["undefined"])
         }
         k::TS_TYPE_REFERENCE => {
             ty.children()
                 .next()
-                .is_some_and(|t| code_text(&t, g) == "RegExp")
+                .is_some_and(|t| code_text(&t) == "RegExp")
                 && (literal(&value, k::REG_EXP_LITERAL)
-                    || is_call(&value, "RegExp", g)
+                    || is_call(&value, "RegExp")
                     || (value.kind() == k::NEW_EXPRESSION
                         && value
                             .children()
                             .next()
-                            .is_some_and(|f| is_name(&f, &["RegExp"], g))))
+                            .is_some_and(|f| is_name(&f, &["RegExp"]))))
         }
         _ => false,
     }
@@ -248,9 +245,8 @@ fn inferrable(ty: &SyntaxNode, value: SyntaxNode, g: &Grammar) -> bool {
 /// `const a: number = 5`, a parameter `b: string = "x"`, a property `c: boolean = true`
 /// (not `readonly` or optional ones).
 pub(super) fn inferrable_types(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     if matches!(n.kind(), k::PROPERTY_DEFINITION | k::ACCESSOR_PROPERTY)
-        && (has_own(n, g, "readonly") || has_own(n, g, "?"))
+        && (has_own(n, "readonly") || has_own(n, "?"))
     {
         return;
     }
@@ -274,7 +270,7 @@ pub(super) fn inferrable_types(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<
     let (Some(value), Some(ty)) = (value, annotation.children().next()) else {
         return;
     };
-    if inferrable(&ty, value, g) {
+    if inferrable(&ty, value) {
         // a parameter property starts at its name, after the modifiers
         let first = (n.kind() == k::FORMAL_PARAMETER)
             .then(|| n.children().find(|c| c.kind() != k::DECORATOR))
@@ -283,7 +279,7 @@ pub(super) fn inferrable_types(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<
         let name = if ty.kind() == k::TS_TYPE_REFERENCE {
             "RegExp".into()
         } else {
-            code_text(&ty, g)
+            code_text(&ty)
         };
         c.hit(ctx, TextRange::new(start, span(ctx, n).end()), &name);
     }
@@ -291,7 +287,6 @@ pub(super) fn inferrable_types(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<
 
 /// `Array<T>`, `ReadonlyArray<T>`, `Readonly<T[]>` where `T[]` is the form to write.
 pub(super) fn array_type(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let Some(name) = n
         .children()
         .next()
@@ -309,7 +304,7 @@ pub(super) fn array_type(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     let (Some(only), None) = (arguments.next(), arguments.next()) else {
         return;
     };
-    let name = code_text(&name, g);
+    let name = code_text(&name);
     if matches!(name.as_str(), "Array" | "ReadonlyArray")
         || (name == "Readonly" && only.kind() == k::TS_ARRAY_TYPE)
     {
@@ -378,7 +373,7 @@ pub(super) fn triple_slash_reference(c: &Check, root: &SyntaxNode, ctx: &mut Rul
         })
         .filter_map(|n| n.children().find(|s| s.kind() == k::STRING_LITERAL))
         .map(|s| {
-            let text = code_text(&s, g);
+            let text = code_text(&s);
             text[1..text.len() - 1].to_string()
         })
         .collect();
@@ -398,7 +393,6 @@ struct Signature {
 
 /// A function or method of a body, by the name its overloads share.
 fn signature(n: &SyntaxNode, ctx: &RuleContext<'_>) -> Option<Signature> {
-    let g = ctx.file.grammar;
     let plain = |name: String, call| Signature {
         name,
         call,
@@ -410,7 +404,7 @@ fn signature(n: &SyntaxNode, ctx: &RuleContext<'_>) -> Option<Signature> {
         }
         k::FUNCTION => {
             let id = n.children().find(|c| c.kind() == k::BINDING_IDENTIFIER)?;
-            Some(plain(code_text(&id, g), false))
+            Some(plain(code_text(&id), false))
         }
         k::TS_CALL_SIGNATURE_DECLARATION => Some(plain("call".into(), true)),
         k::TS_CONSTRUCT_SIGNATURE_DECLARATION => Some(plain("new".into(), false)),
@@ -426,10 +420,10 @@ fn signature(n: &SyntaxNode, ctx: &RuleContext<'_>) -> Option<Signature> {
                     format!("\"{name}\"")
                 }
                 Some(name) => name,
-                None => code_text(&key, g),
+                None => code_text(&key),
             };
             Some(Signature {
-                is_static: has_own(n, g, "static"),
+                is_static: has_own(n, "static"),
                 ..plain(name, false)
             })
         }

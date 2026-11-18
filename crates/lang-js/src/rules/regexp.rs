@@ -67,22 +67,17 @@ fn cook(source: &str) -> String {
 
 /// The string an expression always evaluates to: literals, `+`, and the names of variables that
 /// are written once, with an initializer that is one itself.
-fn constant(
-    cx: Option<&Cx>,
-    n: &SyntaxNode,
-    g: &core_syntax::Grammar,
-    depth: u8,
-) -> Option<String> {
+fn constant(cx: Option<&Cx>, n: &SyntaxNode, depth: u8) -> Option<String> {
     if depth > 16 {
         return None;
     }
     match n.kind() {
-        k::STRING_LITERAL => Some(cook(&code_text(n, g))),
+        k::STRING_LITERAL => Some(cook(&code_text(n))),
         k::TEMPLATE_LITERAL => {
-            let text = code_text(n, g);
+            let text = code_text(n);
             (!text.contains("${")).then(|| text[1..text.len() - 1].to_string())
         }
-        k::PARENTHESIZED_EXPRESSION => constant(cx, &n.children().next()?, g, depth + 1),
+        k::PARENTHESIZED_EXPRESSION => constant(cx, &n.children().next()?, depth + 1),
         k::BINARY_EXPRESSION => {
             let mut parts = n.children();
             let (left, right) = (parts.next()?, parts.next()?);
@@ -91,7 +86,7 @@ fn constant(
                 .filter_map(|e| e.into_token())
                 .any(|t| t.text() == "+");
             plus.then_some(())?;
-            Some(constant(cx, &left, g, depth + 1)? + &constant(cx, &right, g, depth + 1)?)
+            Some(constant(cx, &left, depth + 1)? + &constant(cx, &right, depth + 1)?)
         }
         k::IDENTIFIER_REFERENCE => {
             let cx = cx?;
@@ -106,12 +101,7 @@ fn constant(
             if !once || decl.node(&cx.root).kind() != k::VARIABLE_DECLARATOR {
                 return None;
             }
-            constant(
-                Some(cx),
-                &cx.slot(&decl.node(&cx.root), "init")?,
-                g,
-                depth + 1,
-            )
+            constant(Some(cx), &cx.slot(&decl.node(&cx.root), "init")?, depth + 1)
         }
         _ => None,
     }
@@ -127,14 +117,14 @@ fn pattern(ctx: &RuleContext<'_>, n: &SyntaxNode) -> Option<String> {
     let mut parts = n.children();
     let callee = parts
         .next()
-        .filter(|f| f.kind() == k::IDENTIFIER_REFERENCE && code_text(f, g) == "RegExp")?;
+        .filter(|f| f.kind() == k::IDENTIFIER_REFERENCE && code_text(f) == "RegExp")?;
     let _ = callee;
     let arg = parts.next()?;
     // A string literal needs no model: only the names of variables do.
     let cx = (arg.kind() != k::STRING_LITERAL)
         .then(|| model(ctx.file))
         .flatten();
-    constant(cx.as_deref(), &arg, g, 0)
+    constant(cx.as_deref(), &arg, 0)
 }
 
 fn hex(chars: &[char], from: usize, len: usize) -> Option<u32> {

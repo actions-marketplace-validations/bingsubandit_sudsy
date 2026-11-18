@@ -49,14 +49,14 @@ fn is_target_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-fn is_target(n: &SyntaxNode, g: &Grammar) -> bool {
+fn is_target(n: &SyntaxNode) -> bool {
     let initialized = |d: SyntaxNode| {
         d.children_with_tokens()
             .any(|e| e.as_token().is_some_and(|t| t.text() == "="))
     };
     is_target_kind(n.kind())
         && (n.kind() != k::VARIABLE_DECLARATION
-            || !has_own(n, g, "var")
+            || !has_own(n, "var")
             || n.children().any(initialized))
 }
 
@@ -94,7 +94,7 @@ fn walk(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>, reached: &Reached)
                 || matches!(child.kind(), k::EMPTY_STATEMENT | k::FUNCTION));
         if statement && reached.is_dead(start(ctx, &child)) {
             // a run of unreachable statements is one report; a statement that is not reported ends it
-            let target = is_target(&child, g);
+            let target = is_target(&child);
             if target && !reported {
                 c.hit(ctx, span(ctx, &child), "");
             }
@@ -133,7 +133,7 @@ fn returns(n: &SyntaxNode, out: &mut Vec<SyntaxNode>) {
 /// A getter must return a value on every path.
 pub(super) fn getter_return(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     let g = ctx.file.grammar;
-    if !has_own(n, g, "get") {
+    if !has_own(n, "get") {
         return;
     }
     let Some(function) = n.children().find(|f| f.kind() == k::FUNCTION) else {
@@ -202,7 +202,7 @@ pub(super) fn fallthrough(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) 
         .collect();
     for pair in cases.windows(2) {
         let (case, next) = (&pair[0], &pair[1]);
-        let skip = usize::from(!has_own(case, g, "default"));
+        let skip = usize::from(!has_own(case, "default"));
         let body: Vec<_> = case.children().skip(skip).collect();
         let Some(next_token) = code_token(next, g) else {
             continue;
@@ -225,7 +225,7 @@ pub(super) fn fallthrough(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) 
             _ => false,
         };
         if !in_block && !comment_before(&next_token, g).is_some_and(|m| says_fallthrough(&m)) {
-            let name = if has_own(next, g, "default") {
+            let name = if has_own(next, "default") {
                 "default"
             } else {
                 "case"

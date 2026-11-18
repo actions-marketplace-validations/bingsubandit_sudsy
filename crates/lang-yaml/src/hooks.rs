@@ -7,7 +7,7 @@ use crate::model::{Value, resolve_plain};
 use crate::scalar::{double_quoted_value, plain_value, single_quoted_value};
 use core_rules::{RuleHooks, Scalar};
 use core_syntax::ast::AstNode;
-use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 use std::borrow::Cow;
 
 pub struct YamlHooks;
@@ -30,7 +30,7 @@ fn scalar_value<'a>(token: &SyntaxToken, text: &'a str) -> Option<Cow<'a, str>> 
 }
 
 impl RuleHooks for YamlHooks {
-    fn key_name<'a>(&self, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
+    fn key_name<'a>(&self, _g: &Grammar, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
         let SyntaxElement::Node(node) = key else {
             return Cow::Borrowed("");
         };
@@ -53,10 +53,6 @@ impl RuleHooks for YamlHooks {
         Cow::Borrowed(&text[usize::from(start)..usize::from(end)])
     }
 
-    fn merge_key(&self) -> Option<&str> {
-        Some("<<")
-    }
-
     fn inline_mapping_line(&self, line: &str) -> bool {
         let mut body = line.trim_start_matches(' ');
         while let Some(rest) = body.strip_prefix("- ") {
@@ -70,7 +66,7 @@ impl RuleHooks for YamlHooks {
         !value.is_empty() && !value.contains(' ')
     }
 
-    fn scalar<'a>(&self, item: &SyntaxNode, text: &'a str) -> Option<Scalar<'a>> {
+    fn scalar<'a>(&self, _g: &Grammar, item: &SyntaxNode, text: &'a str) -> Option<Scalar<'a>> {
         let token = ScalarNode::cast(item.clone())?.value()?;
         let value = scalar_value(&token, text)?;
         if token.kind() != kind::PLAIN {

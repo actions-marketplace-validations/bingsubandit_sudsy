@@ -5,36 +5,16 @@ use crate::generated::kind as k;
 use crate::text::code_text;
 use core_rules::RuleContext;
 use core_rules::tree::significant_range;
-use core_syntax::{SyntaxNode, SyntaxToken, TextRange};
+use core_syntax::{SyntaxNode, TextRange};
 
-/// The expression inside the parentheses of a `Parenthesized`, however many.
-pub fn inner(n: &SyntaxNode) -> SyntaxNode {
-    let mut n = n.clone();
-    while n.kind() == k::PARENTHESIZED {
-        match n.children().next() {
-            Some(c) => n = c,
-            None => break,
-        }
-    }
-    n
-}
+pub use core_syntax::roles::un as inner;
 
 /// The span of `n` without the trivia around it.
 pub fn span(ctx: &RuleContext<'_>, n: &SyntaxNode) -> TextRange {
     significant_range(n, ctx.file.grammar)
 }
 
-/// The own tokens of a node that are code.
-pub fn tokens(n: &SyntaxNode) -> impl Iterator<Item = SyntaxToken> {
-    n.children_with_tokens()
-        .filter_map(|e| e.into_token())
-        .filter(|t| {
-            !matches!(
-                t.kind(),
-                k::WHITESPACE | k::NEWLINE | k::COMMENT | k::CONTINUATION
-            )
-        })
-}
+pub use core_syntax::roles::code_tokens as tokens;
 
 /// The positional arguments and the keywords of a call or a class header.
 pub fn arguments(args: &SyntaxNode) -> (Vec<SyntaxNode>, Vec<SyntaxNode>) {

@@ -83,14 +83,6 @@ fn assignment(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
 struct Hooks;
 
 impl AssignHooks for Hooks {
-    fn outer(&self, n: &SyntaxNode) -> SyntaxNode {
-        super::ast::outer(n)
-    }
-
-    fn inner(&self, n: &SyntaxNode) -> SyntaxNode {
-        un(n)
-    }
-
     fn chain_parent(&self, _cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
         matches!(n.kind(), k::ASSIGNMENT_EXPRESSION | k::VARIABLE_DECLARATOR)
     }

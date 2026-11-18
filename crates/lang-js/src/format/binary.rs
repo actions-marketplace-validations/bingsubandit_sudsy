@@ -75,14 +75,6 @@ fn leading_token(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Option<core_syntax::S
 struct Hooks;
 
 impl shapes::BinaryHooks for Hooks {
-    fn outer(&self, n: &SyntaxNode) -> SyntaxNode {
-        outer(n)
-    }
-
-    fn inner(&self, n: &SyntaxNode) -> SyntaxNode {
-        un(n)
-    }
-
     /// Prettier's tree has no parentheses; only ones with a comment in the way (a comment after
     /// the `)` or inside, not in front of the content) are in the way of flattening.
     fn flattens(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {

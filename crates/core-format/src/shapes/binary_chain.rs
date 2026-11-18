@@ -10,6 +10,7 @@ use crate::comments;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
 use core_config::{OptionValue, ResolvedOptions};
+use core_syntax::roles;
 use core_syntax::{Assoc, Grammar, SyntaxElement, SyntaxNode, SyntaxToken};
 
 pub const OPERATOR_LINE: &str = "binary_operator_line";
@@ -100,14 +101,6 @@ pub trait BinaryHooks {
     /// Does a line comment follow the token on its line (a line break must follow it)?
     fn comment_ends_line(&self, cx: &FormatCtx<'_>, t: &SyntaxToken) -> bool {
         ends_in_line_comment(cx, t)
-    }
-    /// The node as its parent holds it (with the parentheses around it).
-    fn outer(&self, n: &SyntaxNode) -> SyntaxNode {
-        n.clone()
-    }
-    /// The node without the parentheses around it.
-    fn inner(&self, n: &SyntaxNode) -> SyntaxNode {
-        n.clone()
     }
     /// May the operand `n` (as its parent holds it) flatten into the chain?
     fn flattens(&self, _cx: &FormatCtx<'_>, _n: &SyntaxNode) -> bool {
@@ -217,7 +210,7 @@ pub fn binary_chain(
         let top = &spine[spine.len() - 1];
         let next = if right_assoc { &top.right } else { &top.left };
         let SyntaxElement::Node(n) = next else { break };
-        let inner = hooks.inner(n);
+        let inner = roles::un(n);
         if !g.has_tag(inner.kind(), "binary-chain") || !hooks.flattens(cx, n) {
             break;
         }
@@ -243,7 +236,7 @@ pub fn binary_chain(
         &spine[steps - 1].left
     };
 
-    let outer = hooks.outer(node);
+    let outer = roles::outer(node);
     let parent = outer.parent();
     let place = hooks
         .place(cx, node)
@@ -257,8 +250,8 @@ pub fn binary_chain(
         && !(place == Place::Bare && logical)
         && [
             parent.as_ref().map(SyntaxNode::kind),
-            node_kind(hooks, &spine[0].left),
-            node_kind(hooks, &spine[0].right),
+            node_kind(&spine[0].left),
+            node_kind(&spine[0].right),
         ]
         .iter()
         .all(|k| *k != Some(node.kind()));
@@ -359,8 +352,8 @@ pub fn binary_chain(
     })
 }
 
-fn node_kind(hooks: &dyn BinaryHooks, e: &SyntaxElement) -> Option<core_syntax::SyntaxKind> {
-    e.as_node().map(|n| hooks.inner(n).kind())
+fn node_kind(e: &SyntaxElement) -> Option<core_syntax::SyntaxKind> {
+    e.as_node().map(|n| roles::un(n).kind())
 }
 
 /// The place from the roles around the chain and the policy.

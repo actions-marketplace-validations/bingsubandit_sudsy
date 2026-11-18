@@ -10,6 +10,7 @@ use crate::comments;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
 use core_config::{OptionValue, ResolvedOptions};
+use core_syntax::roles;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
 pub const LAYOUT: &str = "assignment_layout";
@@ -90,14 +91,6 @@ pub struct Assign<'a> {
 
 /// What the language prints or judges itself; every method has a default.
 pub trait AssignHooks {
-    /// The node as its parent holds it (with the parentheses around it).
-    fn outer(&self, n: &SyntaxNode) -> SyntaxNode {
-        n.clone()
-    }
-    /// The node without the parentheses around it.
-    fn inner(&self, n: &SyntaxNode) -> SyntaxNode {
-        n.clone()
-    }
     /// Is the node (a parent of an assignment) one whose value a chain `a = b = c` continues?
     fn chain_parent(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
         cx.grammar.has_tag(n.kind(), "assignment")
@@ -242,13 +235,13 @@ fn choose(
     if a.op_token.is_some_and(|t| ends_in_line_comment(cx, t)) {
         return BreakAlways;
     }
-    let right_inner = right.as_node().map(|n| hooks.inner(n));
+    let right_inner = right.as_node().map(roles::un);
     let right_assign = right_inner.as_ref().filter(|n| is_assignment(cx, n));
     let fluid = policy.style == AssignStyle::Fluid;
     if fluid && is_assignment(cx, a.node) {
-        let held = hooks.outer(a.node);
+        let held = roles::outer(a.node);
         let parent = held.parent();
-        let grand = parent.as_ref().and_then(|p| hooks.outer(p).parent());
+        let grand = parent.as_ref().and_then(|p| roles::outer(p).parent());
         if parent.as_ref().is_some_and(|p| hooks.chain_parent(cx, p))
             && grand.is_some_and(|gp| right_assign.is_some() || !g.has_tag(gp.kind(), "statement"))
         {
@@ -262,7 +255,7 @@ fn choose(
     let head_of_long_chain = fluid
         && right_assign
             .and_then(|r| g.slot(r, "right"))
-            .and_then(|e| e.as_node().map(|n| hooks.inner(n)))
+            .and_then(|e| e.as_node().map(roles::un))
             .is_some_and(|n| is_assignment(cx, &n));
     if head_of_long_chain || own_line_comment_before(cx, right) {
         return BreakAfterOperator;
@@ -274,7 +267,7 @@ fn choose(
         if g.has_tag(r.kind(), "conditional")
             && (policy.conditional_always
                 || g.slot(r, "condition")
-                    .and_then(|e| e.as_node().map(|n| hooks.inner(n)))
+                    .and_then(|e| e.as_node().map(roles::un))
                     .is_some_and(|t| {
                         g.has_tag(t.kind(), "binary-chain") && !hooks.inline_binary(cx, &t)
                     }))

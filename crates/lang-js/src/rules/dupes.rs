@@ -34,7 +34,6 @@ fn members(
     kinds: &[SyntaxKind],
     class: bool,
 ) {
-    let g = ctx.file.grammar;
     // name -> (init, get, set) seen, first range
     let mut seen: HashMap<String, (u8, TextRange)> = HashMap::new();
     for m in n.children().filter(|m| kinds.contains(&m.kind())) {
@@ -51,15 +50,15 @@ fn members(
         let Some(name) = key_name(&key, ctx.file.text) else {
             continue;
         };
-        let kind = if has_own(&m, g, "get") {
+        let kind = if has_own(&m, "get") {
             2
-        } else if has_own(&m, g, "set") {
+        } else if has_own(&m, "set") {
             4
         } else {
             1
         };
         let key_node = key.clone();
-        let key = if class && has_own(&m, g, "static") {
+        let key = if class && has_own(&m, "static") {
             format!("static {name}")
         } else {
             name.clone()
@@ -92,13 +91,13 @@ pub(super) fn dupe_class_members(c: &Check, n: &SyntaxNode, ctx: &mut RuleContex
 }
 
 /// The operands of `node` joined by `op` (`||` or `&&`), parentheses looked through.
-fn split(node: SyntaxNode, op: &str, g: &core_syntax::Grammar, out: &mut Vec<SyntaxNode>) {
-    let node = un(node);
-    if node.kind() == k::LOGICAL_EXPRESSION && operator(&node, g) == op {
+fn split(node: SyntaxNode, op: &str, out: &mut Vec<SyntaxNode>) {
+    let node = un(&node);
+    if node.kind() == k::LOGICAL_EXPRESSION && operator(&node) == op {
         let mut parts = node.children();
         if let (Some(l), Some(r)) = (parts.next(), parts.last()) {
-            split(l, op, g, out);
-            split(r, op, g, out);
+            split(l, op, out);
+            split(r, op, out);
             return;
         }
     }
@@ -106,14 +105,14 @@ fn split(node: SyntaxNode, op: &str, g: &core_syntax::Grammar, out: &mut Vec<Syn
 }
 
 /// `node` as OR of ANDs of source texts.
-fn dnf(node: SyntaxNode, g: &core_syntax::Grammar) -> Vec<Vec<String>> {
+fn dnf(node: SyntaxNode) -> Vec<Vec<String>> {
     let mut ors = Vec::new();
-    split(node, "||", g, &mut ors);
+    split(node, "||", &mut ors);
     ors.into_iter()
         .map(|o| {
             let mut ands = Vec::new();
-            split(o, "&&", g, &mut ands);
-            ands.iter().map(|a| code_text(a, g)).collect()
+            split(o, "&&", &mut ands);
+            ands.iter().map(code_text).collect()
         })
         .collect()
 }
@@ -121,14 +120,14 @@ fn dnf(node: SyntaxNode, g: &core_syntax::Grammar) -> Vec<Vec<String>> {
 /// A condition of an `else if` that an earlier one of the chain already covers.
 pub(super) fn dupe_else_if(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     let g = ctx.file.grammar;
-    let Some(test) = test_of(n).map(un) else {
+    let Some(test) = test_of(n).map(|n| un(&n)) else {
         return;
     };
     let mut conditions = vec![test.clone()];
-    if test.kind() == k::LOGICAL_EXPRESSION && operator(&test, g) == "&&" {
-        split(test.clone(), "&&", g, &mut conditions);
+    if test.kind() == k::LOGICAL_EXPRESSION && operator(&test) == "&&" {
+        split(test.clone(), "&&", &mut conditions);
     }
-    let mut list: Vec<Vec<Vec<String>>> = conditions.into_iter().map(|t| dnf(t, g)).collect();
+    let mut list: Vec<Vec<Vec<String>>> = conditions.into_iter().map(dnf).collect();
     let mut current = n.clone();
     while let Some(parent) = current.parent() {
         let after_else = std::iter::successors(current.prev_sibling_or_token(), |e| {
@@ -143,7 +142,7 @@ pub(super) fn dupe_else_if(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>)
         let Some(earlier) = test_of(&current) else {
             return;
         };
-        let earlier = dnf(earlier, g);
+        let earlier = dnf(earlier);
         for ors in &mut list {
             ors.retain(|o| !earlier.iter().any(|e| e.iter().all(|a| o.contains(a))));
         }

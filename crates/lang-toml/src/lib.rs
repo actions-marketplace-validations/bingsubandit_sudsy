@@ -3,7 +3,6 @@
 
 mod align;
 mod format;
-mod hooks;
 mod rules;
 mod validate;
 

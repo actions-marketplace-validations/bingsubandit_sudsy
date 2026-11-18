@@ -189,17 +189,16 @@ fn space_runs(pattern: &str) -> Vec<usize> {
 
 /// `/a  b/` and `new RegExp("a  b")`.
 pub(super) fn regex_spaces(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let pattern = if n.kind() == k::REG_EXP_LITERAL {
         code_token(n, ctx.file.grammar).map(|t| regex_body(t.text()).to_string())
     } else {
         let mut parts = n.children();
         let callee = parts
             .next()
-            .filter(|f| f.kind() == k::IDENTIFIER_REFERENCE && code_text(f, g) == "RegExp");
+            .filter(|f| f.kind() == k::IDENTIFIER_REFERENCE && code_text(f) == "RegExp");
         let arg = parts.next().filter(|a| a.kind() == k::STRING_LITERAL);
         callee.and(arg).map(|a| {
-            let text = code_text(&a, g);
+            let text = code_text(&a);
             text[1..text.len() - 1].to_string()
         })
     };
@@ -325,7 +324,7 @@ fn loses_precision(raw: &str) -> bool {
 }
 
 pub(super) fn loss_of_precision(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if loses_precision(&code_text(n, ctx.file.grammar)) {
+    if loses_precision(&code_text(n)) {
         c.hit(ctx, span(ctx, n), "");
     }
 }

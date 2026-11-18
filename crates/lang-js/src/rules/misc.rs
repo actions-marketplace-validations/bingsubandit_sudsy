@@ -4,7 +4,7 @@ use super::dupes::key_name;
 use super::{Check, code_text, has_own, operator, span, test_of, un};
 use crate::generated::kind as k;
 use core_rules::RuleContext;
-use core_syntax::{Grammar, SyntaxNode};
+use core_syntax::SyntaxNode;
 
 fn first_and_last(n: &SyntaxNode) -> Option<(SyntaxNode, SyntaxNode)> {
     Some((n.children().next()?, n.children().last()?))
@@ -12,7 +12,6 @@ fn first_and_last(n: &SyntaxNode) -> Option<(SyntaxNode, SyntaxNode)> {
 
 /// `catch (e) { throw e; }`
 pub(super) fn useless_catch(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let Some(handler) = n.children().find(|c| c.kind() == k::CATCH_CLAUSE) else {
         return;
     };
@@ -24,7 +23,7 @@ pub(super) fn useless_catch(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>
     let (Some(only), None) = (statements.next(), statements.next()) else {
         return;
     };
-    let thrown = only.children().next().map(un);
+    let thrown = only.children().next().map(|n| un(&n));
     let (Some(param), Some(thrown)) = (param, thrown) else {
         return;
     };
@@ -35,9 +34,9 @@ pub(super) fn useless_catch(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>
     if only.kind() == k::THROW_STATEMENT
         && named
         && thrown.kind() == k::IDENTIFIER_REFERENCE
-        && code_text(&thrown, g) == code_text(&param, g)
+        && code_text(&thrown) == code_text(&param)
     {
-        if has_own(n, g, "finally") {
+        if has_own(n, "finally") {
             c.hit(ctx, span(ctx, &handler), "catch clause");
         } else {
             c.hit(ctx, span(ctx, n), "try/catch wrapper");
@@ -46,16 +45,16 @@ pub(super) fn useless_catch(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>
 }
 
 /// The text of a reference (`a`, `this.a.b`, `a["b"]`), `None` for anything else.
-fn reference(n: &SyntaxNode, g: &Grammar, text: &str) -> Option<String> {
-    let n = un(n.clone());
+fn reference(n: &SyntaxNode, text: &str) -> Option<String> {
+    let n = un(n);
     match n.kind() {
-        k::IDENTIFIER_REFERENCE | k::THIS_EXPRESSION | k::SUPER => Some(code_text(&n, g)),
+        k::IDENTIFIER_REFERENCE | k::THIS_EXPRESSION | k::SUPER => Some(code_text(&n)),
         k::STATIC_MEMBER_EXPRESSION | k::COMPUTED_MEMBER_EXPRESSION => {
             let (object, property) = first_and_last(&n)?;
-            let object = reference(&object, g, text)?;
+            let object = reference(&object, text)?;
             match key_name(&property, text) {
                 Some(name) => Some(format!("{object}.{name}")),
-                None => Some(format!("{object}[{}]", reference(&property, g, text)?)),
+                None => Some(format!("{object}[{}]", reference(&property, text)?)),
             }
         }
         _ => None,
@@ -73,8 +72,8 @@ fn value(p: &SyntaxNode) -> Option<SyntaxNode> {
 }
 
 /// Pairs of a target and the value assigned to it that are the same reference; collects the values.
-fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<SyntaxNode>) {
-    let (l, r) = (un(l.clone()), un(r.clone()));
+fn pairs(l: &SyntaxNode, r: &SyntaxNode, text: &str, out: &mut Vec<SyntaxNode>) {
+    let (l, r) = (un(l), un(r));
     match (l.kind(), r.kind()) {
         (k::ARRAY_ASSIGNMENT_TARGET, k::ARRAY_EXPRESSION) => {
             let (ls, rs): (Vec<_>, Vec<_>) = (l.children().collect(), r.children().collect());
@@ -82,7 +81,7 @@ fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<
                 if a.kind() == k::ASSIGNMENT_TARGET_REST && i < rs.len() - 1 {
                     break;
                 }
-                pairs(a, b, g, text, out);
+                pairs(a, b, text, out);
                 if b.kind() == k::SPREAD_ELEMENT {
                     break;
                 }
@@ -90,7 +89,7 @@ fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<
         }
         (k::ASSIGNMENT_TARGET_REST, k::SPREAD_ELEMENT) => {
             if let (Some(a), Some(b)) = (l.children().next(), r.children().next()) {
-                pairs(&a, &b, g, text, out);
+                pairs(&a, &b, text, out);
             }
         }
         (k::OBJECT_ASSIGNMENT_TARGET, k::OBJECT_EXPRESSION) => {
@@ -102,7 +101,7 @@ fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<
             for left in l.children() {
                 let shorthand = left.kind() == k::ASSIGNMENT_TARGET_PROPERTY_IDENTIFIER;
                 if (!shorthand && left.kind() != k::ASSIGNMENT_TARGET_PROPERTY_PROPERTY)
-                    || (shorthand && has_own(&left, g, "="))
+                    || (shorthand && has_own(&left, "="))
                 {
                     continue;
                 }
@@ -114,7 +113,7 @@ fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<
                 };
                 let Some(name) = key.and_then(|key| {
                     if shorthand {
-                        Some(code_text(&key, g))
+                        Some(code_text(&key))
                     } else {
                         key_name(&key, text)
                     }
@@ -135,12 +134,12 @@ fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<
                     left.children().last()
                 };
                 if let (Some(a), Some(b)) = (target, right.and_then(value)) {
-                    pairs(&a, &b, g, text, out);
+                    pairs(&a, &b, text, out);
                 }
             }
         }
         _ => {
-            if reference(&l, g, text).is_some_and(|a| Some(a) == reference(&r, g, text)) {
+            if reference(&l, text).is_some_and(|a| Some(a) == reference(&r, text)) {
                 out.push(r);
             }
         }
@@ -149,33 +148,31 @@ fn pairs(l: &SyntaxNode, r: &SyntaxNode, g: &Grammar, text: &str, out: &mut Vec<
 
 /// `a = a`, `[a, b] = [a, b]`, `a.b = a.b`.
 pub(super) fn self_assign(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
-    if !matches!(operator(n, g).as_str(), "=" | "&&=" | "||=" | "??=") {
+    if !matches!(operator(n).as_str(), "=" | "&&=" | "||=" | "??=") {
         return;
     }
     let Some((left, right)) = first_and_last(n) else {
         return;
     };
     let mut found = Vec::new();
-    pairs(&left, &right, g, ctx.file.text, &mut found);
+    pairs(&left, &right, ctx.file.text, &mut found);
     for value in found {
-        c.hit(ctx, span(ctx, &value), &code_text(&value, g));
+        c.hit(ctx, span(ctx, &value), &code_text(&value));
     }
 }
 
-fn is_nan(n: &SyntaxNode, g: &Grammar) -> bool {
-    matches!(code_text(&un(n.clone()), g).as_str(), "NaN" | "Number.NaN")
+fn is_nan(n: &SyntaxNode) -> bool {
+    matches!(code_text(&un(n)).as_str(), "NaN" | "Number.NaN")
 }
 
 pub(super) fn use_isnan(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     match n.kind() {
         k::BINARY_EXPRESSION => {
             let compares = matches!(
-                operator(n, g).as_str(),
+                operator(n).as_str(),
                 "==" | "===" | "!=" | "!==" | "<" | ">" | "<=" | ">="
             );
-            if compares && first_and_last(n).is_some_and(|(l, r)| is_nan(&l, g) || is_nan(&r, g)) {
+            if compares && first_and_last(n).is_some_and(|(l, r)| is_nan(&l) || is_nan(&r)) {
                 c.hit(
                     ctx,
                     span(ctx, n),
@@ -184,12 +181,12 @@ pub(super) fn use_isnan(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
             }
         }
         k::SWITCH_STATEMENT => {
-            if n.children().next().is_some_and(|d| is_nan(&d, g)) {
+            if n.children().next().is_some_and(|d| is_nan(&d)) {
                 c.hit(ctx, span(ctx, n), "'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.");
             }
         }
         _ => {
-            if has_own(n, g, "case") && n.children().next().is_some_and(|t| is_nan(&t, g)) {
+            if has_own(n, "case") && n.children().next().is_some_and(|t| is_nan(&t)) {
                 c.hit(
                     ctx,
                     span(ctx, n),
@@ -213,14 +210,13 @@ const TYPEOF_VALUES: [&str; 8] = [
 
 /// `typeof x === "strnig"`
 pub(super) fn valid_typeof(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
-    if !matches!(operator(n, g).as_str(), "==" | "===" | "!=" | "!==") {
+    if !matches!(operator(n).as_str(), "==" | "===" | "!=" | "!==") {
         return;
     }
-    let Some((l, r)) = first_and_last(n).map(|(l, r)| (un(l), un(r))) else {
+    let Some((l, r)) = first_and_last(n).map(|(l, r)| (un(&l), un(&r))) else {
         return;
     };
-    let typeof_of = |x: &SyntaxNode| x.kind() == k::UNARY_EXPRESSION && operator(x, g) == "typeof";
+    let typeof_of = |x: &SyntaxNode| x.kind() == k::UNARY_EXPRESSION && operator(x) == "typeof";
     let other = if typeof_of(&l) {
         r
     } else if typeof_of(&r) {
@@ -228,7 +224,7 @@ pub(super) fn valid_typeof(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>)
     } else {
         return;
     };
-    let text = code_text(&other, g);
+    let text = code_text(&other);
     let literal = match other.kind() {
         k::STRING_LITERAL => Some(&text[1..text.len() - 1]),
         k::TEMPLATE_LITERAL if !text.contains("${") => Some(&text[1..text.len() - 1]),
@@ -244,7 +240,7 @@ pub(super) fn valid_typeof(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>)
 }
 
 /// Is `node` where a boolean is expected anyway?
-fn in_boolean_context(node: &SyntaxNode, g: &Grammar) -> bool {
+fn in_boolean_context(node: &SyntaxNode) -> bool {
     let mut outer = node.clone();
     while let Some(p) = outer
         .parent()
@@ -261,32 +257,31 @@ fn in_boolean_context(node: &SyntaxNode, g: &Grammar) -> bool {
         | k::DO_WHILE_STATEMENT
         | k::FOR_STATEMENT
         | k::CONDITIONAL_EXPRESSION => test_of(&parent).as_ref() == Some(&outer),
-        k::UNARY_EXPRESSION => operator(&parent, g) == "!",
+        k::UNARY_EXPRESSION => operator(&parent) == "!",
         k::CALL_EXPRESSION | k::NEW_EXPRESSION => {
-            is_boolean_callee(&parent, g) && parent.children().nth(1).as_ref() == Some(&outer)
+            is_boolean_callee(&parent) && parent.children().nth(1).as_ref() == Some(&outer)
         }
         _ => false,
     }
 }
 
-fn is_boolean_callee(call: &SyntaxNode, g: &Grammar) -> bool {
+fn is_boolean_callee(call: &SyntaxNode) -> bool {
     call.children()
         .next()
-        .is_some_and(|c| c.kind() == k::IDENTIFIER_REFERENCE && code_text(&c, g) == "Boolean")
+        .is_some_and(|c| c.kind() == k::IDENTIFIER_REFERENCE && code_text(&c) == "Boolean")
 }
 
 /// `!!x` or `Boolean(x)` where a boolean is expected anyway.
 pub(super) fn extra_boolean_cast(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let cast = if n.kind() == k::UNARY_EXPRESSION {
-        let inner = n.children().next().map(un);
-        let double = operator(n, g) == "!"
-            && inner.is_some_and(|i| i.kind() == k::UNARY_EXPRESSION && operator(&i, g) == "!");
+        let inner = n.children().next().map(|n| un(&n));
+        let double = operator(n) == "!"
+            && inner.is_some_and(|i| i.kind() == k::UNARY_EXPRESSION && operator(&i) == "!");
         double.then_some("Redundant double negation.")
     } else {
-        is_boolean_callee(n, g).then_some("Redundant Boolean call.")
+        is_boolean_callee(n).then_some("Redundant Boolean call.")
     };
-    if let Some(message) = cast.filter(|_| in_boolean_context(n, g)) {
+    if let Some(message) = cast.filter(|_| in_boolean_context(n)) {
         c.hit(ctx, span(ctx, n), message);
     }
 }

@@ -14,11 +14,13 @@ fn main() {
         .collect();
     names.sort();
     let mut out = String::new();
+    let mut ids = Vec::new();
     for name in &names {
         let text = fs::read_to_string(dir.join(format!("{name}.grammar"))).unwrap();
         let header = text.lines().find(|l| l.starts_with("language ")).unwrap();
         let mut parts = header.split_whitespace().skip(1);
         let (language, id) = (parts.next().unwrap(), parts.next().unwrap());
+        ids.push((id.to_string(), name.clone()));
         out += &format!(
             "pub const {}: LazyGrammar = LazyGrammar::new(\"{language}\", {id}, {name});
 
@@ -35,6 +37,15 @@ fn main() {
          pub fn by_name(language: &str) -> Option<&'static Grammar> {{\n    \
          [{}].into_iter().map(|g| g()).find(|g| g.language == language)\n}}\n",
         names.join(", ")
+    );
+    let arms: String = ids
+        .iter()
+        .map(|(id, name)| format!("        {id} => {name}(),\n"))
+        .collect();
+    out += &format!(
+        "/// The built-in grammar of the language with this id: what a kind of that language is asked.\n\
+         pub fn of(language: LanguageId) -> Option<&'static Grammar> {{\n    \
+         Some(match language.get() {{\n{arms}        _ => return None,\n    }})\n}}\n"
     );
     fs::write(
         PathBuf::from(env::var("OUT_DIR").unwrap()).join("registry.rs"),

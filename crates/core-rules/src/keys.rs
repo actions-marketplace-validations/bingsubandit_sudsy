@@ -3,6 +3,7 @@
 //! `key-name-casing`.
 
 use crate::hooks::Accessor;
+use crate::names;
 use crate::options::{Check, Opt, OptionDecl};
 use crate::rule;
 use crate::rule::RuleContext;
@@ -59,17 +60,20 @@ rule! {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let (grammar, hooks, text) = (ctx.file.grammar, ctx.file.hooks, ctx.file.text);
-        let merge_key = hooks
-            .merge_key()
+        let merge_key = grammar
+            .keys()
+            .merge
+            .as_deref()
             .filter(|_| ctx.options.string("merge_keys") == "allow");
         // Ranges are found only for the keys that are reported (finding one reads the tree), so
         // the first occurrence is kept as its index and looked up again on a duplicate.
-        if hooks.custom_keys() {
-            return custom_keys(node, ctx, merge_key);
+        let flat = hooks.flat_keys(node);
+        if flat.is_some() || !grammar.keys().accessors.is_empty() {
+            return custom_keys(node, flat, ctx, merge_key);
         }
         let mut seen = Seen::default();
         for (index, (_, key)) in entries(node, grammar).enumerate() {
-            let name = hooks.key_name(&key, text);
+            let name = hooks.key_name(grammar, &key, text);
             if merge_key == Some(&*name) || !hooks.is_name(&key, text) {
                 continue;
             }
@@ -84,11 +88,15 @@ rule! {
     }
 }
 
-/// `no-duplicate-keys` for a language with flat or accessor entries (see `RuleHooks::custom_keys`).
-fn custom_keys(node: &SyntaxNode, ctx: &mut RuleContext<'_>, merge_key: Option<&str>) {
+/// `no-duplicate-keys` for a language with flat or accessor entries.
+fn custom_keys(
+    node: &SyntaxNode,
+    flat: Option<Vec<SyntaxElement>>,
+    ctx: &mut RuleContext<'_>,
+    merge_key: Option<&str>,
+) {
     let (grammar, hooks, text) = (ctx.file.grammar, ctx.file.hooks, ctx.file.text);
-    let accessors = hooks.has_accessors();
-    let flat = hooks.flat_keys(node);
+    let accessors = !grammar.keys().accessors.is_empty();
     let mut seen = Seen::default();
     // name -> (kinds seen: 1 plain, 2 getter, 4 setter; index of the first), with accessors only
     let mut kinds: HashMap<Cow<'_, str>, (u8, usize)> = HashMap::new();
@@ -104,12 +112,12 @@ fn custom_keys(node: &SyntaxNode, ctx: &mut RuleContext<'_>, merge_key: Option<&
         key_range(at.as_ref().unwrap_or(key), grammar)
     };
     for (index, (entry, key)) in listed.chain(walked).enumerate() {
-        let name = hooks.key_name(&key, text);
+        let name = hooks.key_name(grammar, &key, text);
         if merge_key == Some(&*name) || !hooks.is_name(&key, text) {
             continue;
         }
         let repeat = if accessors {
-            let kind = match hooks.accessor(&entry) {
+            let kind = match names::accessor(grammar, &entry) {
                 None => 1,
                 Some(Accessor::Get) => 2,
                 Some(Accessor::Set) => 4,
@@ -183,7 +191,7 @@ rule! {
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let (grammar, hooks, text) = (ctx.file.grammar, ctx.file.hooks, ctx.file.text);
         for (_, key) in entries(node, grammar) {
-            if hooks.key_name(&key, text).trim().is_empty() {
+            if hooks.key_name(grammar, &key, text).trim().is_empty() {
                 ctx.report(key_range(&key, grammar), "empty key");
             }
         }
@@ -259,12 +267,12 @@ rule! {
             return;
         }
         for (_, key) in entries(node, grammar) {
-            let parts = hooks.key_parts(&key, text);
+            let parts = names::parts_of(grammar, &key, text);
             let whole;
             let names: &[Cow<'_, str>] = match &parts {
                 Some(parts) => parts,
                 None => {
-                    whole = [hooks.key_name(&key, text)];
+                    whole = [hooks.key_name(grammar, &key, text)];
                     &whole
                 }
             };

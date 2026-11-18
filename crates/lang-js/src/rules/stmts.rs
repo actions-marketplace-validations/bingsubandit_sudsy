@@ -10,17 +10,15 @@ use std::collections::HashSet;
 /// Does the expression do nothing (ESLint's defaults: short circuits, ternaries and tagged
 /// templates count as nothing)? A call, `new`, assignment, update, `await`, `yield`, `import()`,
 /// `void` and `delete` do something.
-fn does_nothing(n: &SyntaxNode, g: &Grammar) -> bool {
+fn does_nothing(n: &SyntaxNode) -> bool {
     match n.kind() {
         k::PARENTHESIZED_EXPRESSION
         | k::CHAIN_EXPRESSION
         | k::TS_AS_EXPRESSION
         | k::TS_TYPE_ASSERTION
         | k::TS_NON_NULL_EXPRESSION
-        | k::TS_INSTANTIATION_EXPRESSION => {
-            n.children().next().is_some_and(|e| does_nothing(&e, g))
-        }
-        k::UNARY_EXPRESSION => !has_own(n, g, "void") && !has_own(n, g, "delete"),
+        | k::TS_INSTANTIATION_EXPRESSION => n.children().next().is_some_and(|e| does_nothing(&e)),
+        k::UNARY_EXPRESSION => !has_own(n, "void") && !has_own(n, "delete"),
         k::ARRAY_EXPRESSION
         | k::ARROW_FUNCTION_EXPRESSION
         | k::BINARY_EXPRESSION
@@ -52,8 +50,7 @@ fn does_nothing(n: &SyntaxNode, g: &Grammar) -> bool {
 
 /// `no-unused-expressions`
 pub(super) fn unused_expressions(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
-    if n.children().next().is_some_and(|e| does_nothing(&e, g)) {
+    if n.children().next().is_some_and(|e| does_nothing(&e)) {
         c.hit(ctx, span(ctx, n), "");
     }
 }
@@ -82,7 +79,7 @@ pub(super) fn unexpected_multiline(c: &Check, n: &SyntaxNode, ctx: &mut RuleCont
             .filter_map(|e| e.into_token())
             .find(|t| t.text() == text)
     };
-    if has_own(n, g, "?.") {
+    if has_own(n, "?.") {
         return;
     }
     match n.kind() {
@@ -114,8 +111,8 @@ pub(super) fn unexpected_multiline(c: &Check, n: &SyntaxNode, ctx: &mut RuleCont
 }
 
 /// The value of a constant enum initializer, written so equal values read equal.
-fn enum_value(init: &SyntaxNode, g: &Grammar) -> Option<String> {
-    let text = code_text(init, g);
+fn enum_value(init: &SyntaxNode) -> Option<String> {
+    let text = code_text(init);
     match init.kind() {
         k::STRING_LITERAL => Some(format!("s{}", &text[1..text.len() - 1])),
         k::TEMPLATE_LITERAL if !text.contains("${") => {
@@ -140,13 +137,12 @@ fn enum_value(init: &SyntaxNode, g: &Grammar) -> Option<String> {
 
 /// `no-duplicate-enum-values`
 pub(super) fn duplicate_enum_values(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let mut seen = HashSet::new();
     for member in n.descendants().filter(|m| m.kind() == k::TS_ENUM_MEMBER) {
-        if !has_own(&member, g, "=") {
+        if !has_own(&member, "=") {
             continue;
         }
-        let Some(value) = member.children().last().and_then(|i| enum_value(&i, g)) else {
+        let Some(value) = member.children().last().and_then(|i| enum_value(&i)) else {
             continue;
         };
         if !seen.insert(value.clone()) {
@@ -170,10 +166,10 @@ fn is_function(kind: SyntaxKind) -> bool {
     matches!(kind, k::FUNCTION | k::ARROW_FUNCTION_EXPRESSION | k::CLASS)
 }
 
-fn label_of(n: &SyntaxNode, g: &Grammar) -> Option<String> {
+fn label_of(n: &SyntaxNode) -> Option<String> {
     n.children()
         .find(|l| l.kind() == k::LABEL_IDENTIFIER)
-        .map(|l| code_text(&l, g))
+        .map(|l| code_text(&l))
 }
 
 /// Is `block` the `finally` block of a `try`?
@@ -188,7 +184,7 @@ fn is_finalizer(block: &SyntaxNode, g: &Grammar) -> bool {
 /// `return`, `throw`, and a `break` or `continue` that leaves the `finally` block.
 pub(super) fn unsafe_finally(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     let g = ctx.file.grammar;
-    let label = label_of(n, g);
+    let label = label_of(n);
     let jump = n.kind();
     let mut current = n.clone();
     while let Some(p) = current.parent() {
@@ -201,7 +197,7 @@ pub(super) fn unsafe_finally(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_
                 return;
             }
             k::SWITCH_STATEMENT if label.is_none() && jump == k::BREAK_STATEMENT => return,
-            k::LABELED_STATEMENT if label.is_some() && label_of(&p, g) == label => return,
+            k::LABELED_STATEMENT if label.is_some() && label_of(&p) == label => return,
             k::BLOCK_STATEMENT if is_finalizer(&p, g) => {
                 c.hit(ctx, span(ctx, n), g.name(jump));
                 return;
@@ -219,11 +215,10 @@ fn has_yield(n: &SyntaxNode) -> bool {
 
 /// A generator with a body and no `yield`.
 pub(super) fn require_yield(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let g = ctx.file.grammar;
     let method = n
         .parent()
         .filter(|p| matches!(p.kind(), k::METHOD_DEFINITION | k::OBJECT_PROPERTY));
-    let generator = has_own(n, g, "*") || method.is_some_and(|m| has_own(&m, g, "*"));
+    let generator = has_own(n, "*") || method.is_some_and(|m| has_own(&m, "*"));
     let Some(body) = n.children().find(|b| b.kind() == k::FUNCTION_BODY) else {
         return;
     };

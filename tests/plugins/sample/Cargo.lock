@@ -165,6 +165,7 @@ dependencies = [
  "regex",
  "regex-automata",
  "regex-syntax",
+ "rowan",
 ]
 
 [[package]]

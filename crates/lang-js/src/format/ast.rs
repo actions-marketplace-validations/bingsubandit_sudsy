@@ -6,34 +6,7 @@ use crate::generated::kind as k;
 use core_format::FormatCtx;
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
-/// The expression inside any number of parentheses.
-pub(crate) fn un(n: &SyntaxNode) -> SyntaxNode {
-    let mut n = n.clone();
-    while n.kind() == k::PARENTHESIZED_EXPRESSION {
-        match n.children().next() {
-            Some(c) => n = c,
-            None => break,
-        }
-    }
-    n
-}
-
-/// `n` with the parentheses around it: the node as its parent holds it.
-pub(crate) fn outer(n: &SyntaxNode) -> SyntaxNode {
-    let mut n = n.clone();
-    while let Some(p) = n.parent() {
-        if p.kind() != k::PARENTHESIZED_EXPRESSION {
-            break;
-        }
-        n = p;
-    }
-    n
-}
-
-/// The node that holds `n` (and its parentheses).
-pub(crate) fn parent(n: &SyntaxNode) -> Option<SyntaxNode> {
-    outer(n).parent()
-}
+pub(crate) use core_syntax::roles::{outer, parent, un};
 
 pub(crate) fn is_member(kind: SyntaxKind) -> bool {
     matches!(

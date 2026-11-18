@@ -55,7 +55,7 @@ rule! {
         let entries = keyed(node, grammar);
         let names: Vec<_> = entries
             .iter()
-            .map(|(_, k)| hooks.key_name(k, text))
+            .map(|(_, k)| hooks.key_name(grammar, k, text))
             .collect();
         if !ctx
             .options
@@ -136,7 +136,7 @@ rule! {
             } else {
                 return;
             };
-            let Some(scalar) = hooks.scalar(&item, text) else {
+            let Some(scalar) = hooks.scalar(grammar, &item, text) else {
                 return;
             };
             at.push(significant_range(&item, grammar));

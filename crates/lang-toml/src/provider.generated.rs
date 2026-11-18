@@ -7,7 +7,7 @@ core_syntax::include_generated!();
 
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {
-    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("toml", tree_sitter_toml_ng::LANGUAGE), grammar: grammars::TOML, mapping: &MAPPING, extensions: &["toml"], file_names: &[], schema: option_schema(), formatter: &TomlFormatter, hooks: &hooks::TomlHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: Some(validate::validate) })
+    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("toml", tree_sitter_toml_ng::LANGUAGE), grammar: grammars::TOML, mapping: &MAPPING, extensions: &["toml"], file_names: &[], schema: option_schema(), formatter: &TomlFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: Some(validate::validate) })
 }
 
 pub const MAPPING: Mapping = Mapping {

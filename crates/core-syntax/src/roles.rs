@@ -8,6 +8,8 @@
 //! is optional. A required field must be declared in the node's body, as the item's label or as
 //! an alias (`when_true=then:#expression`); the item itself may be optional or repeated.
 
+use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
+
 pub struct Role {
     pub name: &'static str,
     pub fields: &'static str,
@@ -202,4 +204,69 @@ impl Role {
             .split_whitespace()
             .map(|f| f.strip_suffix('?').map_or((f, true), |n| (n, false)))
     }
+}
+
+/// Does the kind carry the tag? Answered by the grammar of the kind's own language.
+#[inline]
+pub fn has(kind: SyntaxKind, tag: &str) -> bool {
+    crate::grammars::of(kind.lang()).is_some_and(|g| g.has_tag(kind, tag))
+}
+
+/// The node without the `#transparent` wrappers around it (parentheses): the expression inside
+/// any number of them.
+pub fn un(node: &SyntaxNode) -> SyntaxNode {
+    let mut n = node.clone();
+    let Some(g) = crate::grammars::of(n.kind().lang()) else {
+        return n;
+    };
+    while g.has_tag(n.kind(), "transparent")
+        && let Some(inner) = n.children().next()
+    {
+        n = inner;
+    }
+    n
+}
+
+/// The node with the `#transparent` wrappers around it: as its parent holds it.
+pub fn outer(node: &SyntaxNode) -> SyntaxNode {
+    let mut n = node.clone();
+    let Some(g) = crate::grammars::of(n.kind().lang()) else {
+        return n;
+    };
+    while let Some(p) = n.parent() {
+        if !g.has_tag(p.kind(), "transparent") {
+            break;
+        }
+        n = p;
+    }
+    n
+}
+
+/// The node that holds `node` and the wrappers around it.
+pub fn parent(node: &SyntaxNode) -> Option<SyntaxNode> {
+    outer(node).parent()
+}
+
+/// The own tokens of a node that are code: neither trivia nor empty.
+pub fn code_tokens(node: &SyntaxNode) -> impl Iterator<Item = SyntaxToken> {
+    let g = crate::grammars::of(node.kind().lang());
+    node.children_with_tokens()
+        .filter_map(|e| e.into_token())
+        .filter(move |t| !g.is_some_and(|g| g.is_trivia(t.kind())))
+}
+
+/// The code tokens of a node written one after the other: `a.b` for a dotted name, the node
+/// without its whitespace and comments.
+pub fn code_text(node: &SyntaxNode) -> String {
+    let g = crate::grammars::of(node.kind().lang());
+    node.descendants_with_tokens()
+        .filter_map(|e| e.into_token())
+        .filter(|t| !g.is_some_and(|g| g.is_trivia(t.kind())))
+        .map(|t| t.text().to_owned())
+        .collect()
+}
+
+/// Does the node have an own code token with this text?
+pub fn has_own_token(node: &SyntaxNode, text: &str) -> bool {
+    code_tokens(node).any(|t| t.text() == text)
 }

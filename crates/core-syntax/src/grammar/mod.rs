@@ -110,6 +110,32 @@ pub struct Precedence {
     pub assoc: Assoc,
 }
 
+/// The `keys` line: how the name of an entry's key is read from the text (see `core_rules::names`).
+/// A key is its text with one pair of quotes stripped; the options change that.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct KeySyntax {
+    /// Names are case-insensitive.
+    pub lowercase: bool,
+    /// Escapes of a `#string` key are decoded (`"a\u0062"` is `ab`).
+    pub decode: bool,
+    /// A prefix that is not part of the name (a GraphQL variable's `$`).
+    pub strip: Option<String>,
+    /// The node kind of an alias an entry may have, which is its name instead (a GraphQL response name).
+    pub alias: Option<SyntaxKind>,
+    pub(crate) alias_name: Option<String>,
+    /// The node kinds that have an alias in their body: the only entries to look for one in.
+    pub alias_in: Vec<SyntaxKind>,
+    /// A key that merges other mappings and may repeat (YAML `<<`).
+    pub merge: Option<String>,
+    /// Words that make an entry a getter or a setter, in that order (`get`, `set`); a getter and
+    /// a setter may share a name.
+    pub accessors: Vec<String>,
+    /// The grammar has `#key-part` tokens: its keys may be paths.
+    pub parts: bool,
+    /// No option applies: a key is its text with the quotes stripped.
+    pub plain: bool,
+}
+
 /// One `precedence <level> <assoc> "op"...` line.
 #[derive(Clone, Debug)]
 pub struct PrecedenceRow {
@@ -132,6 +158,7 @@ pub struct Grammar {
     operators: HashMap<String, String>,
     /// The `precedence` lines (a handful of rows: scanned, no table).
     precedence_rows: Vec<PrecedenceRow>,
+    keys: KeySyntax,
     nodes: Vec<KindDef>,
     tokens: Vec<KindDef>,
     by_name: HashMap<String, SyntaxKind>,
@@ -139,8 +166,8 @@ pub struct Grammar {
     source: Box<str>,
     hash: OnceLock<String>,
     /// Hot tags per kind, indexed like `tokens` and `nodes`.
-    token_flags: Vec<u16>,
-    node_flags: Vec<u16>,
+    token_flags: Vec<u32>,
+    node_flags: Vec<u32>,
     /// Per body item of every node, in node order: the range of `pool` holding the sorted kinds
     /// the item accepts. `body_start[i]..body_start[i + 1]` are the items of node `i`.
     bodies: Vec<(u32, u32)>,
@@ -154,7 +181,7 @@ pub struct Grammar {
 
 /// Tags that formatting code asks about for every token or node: answered from a bit set
 /// instead of scanning the tag strings.
-const HOT_TAGS: [&str; 15] = [
+const HOT_TAGS: [&str; 19] = [
     "trivia",
     "separator",
     "optional",
@@ -170,16 +197,69 @@ const HOT_TAGS: [&str; 15] = [
     "parenthesized",
     "stray",
     "list-prefix",
+    "string",
+    "transparent",
+    "key-part",
+    "number",
 ];
 
-fn hot_flags(defs: &[KindDef]) -> Vec<u16> {
+/// The index of a hot tag in [`HOT_TAGS`]: a `match`, which compiles to a length switch where a scan
+/// of the table would compare every name (the rule dispatch asks for tags that are not hot too).
+#[inline]
+fn hot_index(tag: &str) -> Option<usize> {
+    Some(match tag {
+        "trivia" => 0,
+        "separator" => 1,
+        "optional" => 2,
+        "restyle" => 3,
+        "comment" => 4,
+        "delimited-list" => 5,
+        "block" => 6,
+        "key-value" => 7,
+        "verbatim-trivia" => 8,
+        "glue" => 9,
+        "close" => 10,
+        "indentable" => 11,
+        "parenthesized" => 12,
+        "stray" => 13,
+        "list-prefix" => 14,
+        "string" => 15,
+        "transparent" => 16,
+        "key-part" => 17,
+        "number" => 18,
+        _ => return None,
+    })
+}
+
+/// The bit of a hot tag, found by its name (a tag missing from the table fails the build).
+const fn hot_bit(tag: &str) -> u32 {
+    let mut i = 0;
+    while i < HOT_TAGS.len() {
+        if HOT_TAGS[i].len() == tag.len() {
+            let (a, b) = (HOT_TAGS[i].as_bytes(), tag.as_bytes());
+            let mut j = 0;
+            while j < a.len() && a[j] == b[j] {
+                j += 1;
+            }
+            if j == a.len() {
+                return 1 << i;
+            }
+        }
+        i += 1;
+    }
+    panic!("not a hot tag")
+}
+
+const TRIVIA: u32 = hot_bit("trivia");
+
+fn hot_flags(defs: &[KindDef]) -> Vec<u32> {
     defs.iter()
         .map(|d| {
             HOT_TAGS
                 .iter()
                 .enumerate()
                 .filter(|(_, t)| d.has_tag(t))
-                .fold(0u16, |acc, (i, _)| acc | 1 << i)
+                .fold(0u32, |acc, (i, _)| acc | 1 << i)
         })
         .collect()
 }
@@ -412,6 +492,11 @@ impl Grammar {
         }
     }
 
+    /// The grammar's `keys` line (all defaults without one).
+    pub fn keys(&self) -> &KeySyntax {
+        &self.keys
+    }
+
     /// The precedence level and associativity of binary operator text (the grammar's `precedence`
     /// lines); `None` for text with no entry.
     pub fn precedence(&self, text: &str) -> Option<Precedence> {
@@ -495,14 +580,16 @@ impl Grammar {
         list.get(kind.index() as usize)
     }
 
+    #[inline]
     pub fn has_tag(&self, kind: SyntaxKind, tag: &str) -> bool {
-        if let Some(bit) = HOT_TAGS.iter().position(|t| *t == tag) {
+        if let Some(bit) = hot_index(tag) {
             return self.flags_of(kind) & (1 << bit) != 0;
         }
         self.def(kind).is_some_and(|d| d.has_tag(tag))
     }
 
-    fn flags_of(&self, kind: SyntaxKind) -> u16 {
+    #[inline]
+    fn flags_of(&self, kind: SyntaxKind) -> u32 {
         if kind.lang() != self.language_id {
             return 0;
         }
@@ -527,8 +614,9 @@ impl Grammar {
         body.trim()
     }
 
+    #[inline]
     pub fn is_trivia(&self, kind: SyntaxKind) -> bool {
-        self.flags_of(kind) & 1 != 0
+        self.flags_of(kind) & TRIVIA != 0
     }
 
     /// All kinds (tokens first, then nodes) carrying `tag`, in id order.
@@ -544,5 +632,15 @@ impl Grammar {
             return "ERROR";
         }
         self.def(kind).map_or("?", |d| d.name.as_str())
+    }
+}
+
+#[cfg(test)]
+mod hot_tests {
+    #[test]
+    fn hot_index_matches_the_table() {
+        for (i, t) in super::HOT_TAGS.iter().enumerate() {
+            assert_eq!(super::hot_index(t), Some(i));
+        }
     }
 }

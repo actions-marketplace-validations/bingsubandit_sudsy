@@ -92,14 +92,6 @@ fn should_extra_indent(node: &SyntaxNode) -> bool {
 struct Hooks;
 
 impl shapes::ConditionalHooks for Hooks {
-    fn outer(&self, n: &SyntaxNode) -> SyntaxNode {
-        outer(n)
-    }
-
-    fn inner(&self, n: &SyntaxNode) -> SyntaxNode {
-        un(n)
-    }
-
     fn wrap_branches(&self, _cx: &FormatCtx<'_>, node: &SyntaxNode, top: &SyntaxNode) -> bool {
         node.children().any(|c| is_jsx(un(&c).kind())) || chain_contains_jsx(top)
     }

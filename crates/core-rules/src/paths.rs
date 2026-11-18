@@ -1,6 +1,7 @@
 //! Key paths (`a.b[0]["odd key"].c`, the form eslint-plugin-jsonc's `pathPattern` matches) of
 //! mappings and sequences, for the rules that can be limited to part of a document.
 
+use crate::names;
 use crate::options::{Check, Opt, OptionDecl};
 use crate::rule::RuleContext;
 use crate::sorting::cached_regex;
@@ -34,9 +35,8 @@ fn key_path(node: &SyntaxNode, ctx: &RuleContext<'_>) -> String {
     let mut segments: Vec<String> = Vec::new();
     let key_of = |n: &SyntaxNode, out: &mut Vec<String>| {
         if let Some(key) = grammar.slot(n, "key") {
-            let parts = hooks
-                .key_parts(&key, text)
-                .unwrap_or_else(|| vec![hooks.key_name(&key, text)]);
+            let parts = names::parts_of(grammar, &key, text)
+                .unwrap_or_else(|| vec![hooks.key_name(grammar, &key, text)]);
             out.extend(parts.iter().rev().map(|p| segment(p)));
         }
     };

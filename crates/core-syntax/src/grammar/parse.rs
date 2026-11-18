@@ -310,6 +310,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut requires_roles = false;
     let mut operators: HashMap<String, String> = HashMap::new();
     let mut precedence_rows: Vec<PrecedenceRow> = Vec::new();
+    let mut keys = KeySyntax::default();
     let mut raw: Vec<RawKind> = Vec::with_capacity(lexed.decls.len());
 
     for d in &lexed.decls {
@@ -353,6 +354,24 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
                 }
             }
             "roles" => requires_roles = true,
+            "keys" => {
+                while let Some(Lexeme::Ident(option)) = c.next() {
+                    match *option {
+                        "lowercase" => keys.lowercase = true,
+                        "decode" => keys.decode = true,
+                        "strip" => keys.strip = Some(c.string("a prefix")?.to_string()),
+                        "alias" => keys.alias_name = Some(c.ident("a node kind")?.to_string()),
+                        "merge" => keys.merge = Some(c.string("a merge key")?.to_string()),
+                        "accessors" => {
+                            while let Some(Lexeme::Str(w)) = c.peek() {
+                                keys.accessors.push(w.to_string());
+                                c.next();
+                            }
+                        }
+                        other => return err(d.line, format!("unknown keys option `{other}`")),
+                    }
+                }
+            }
             "operators" => {
                 let kind = c.ident("an operator kind")?;
                 if !crate::roles::OPERATOR_KINDS.iter().any(|k| k.0 == kind) {
@@ -451,6 +470,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         requires_roles,
         operators,
         precedence_rows,
+        keys,
         raw,
         source,
     )
@@ -466,6 +486,7 @@ fn resolve(
     requires_roles: bool,
     operators: HashMap<String, String>,
     precedence_rows: Vec<PrecedenceRow>,
+    keys: KeySyntax,
     raw: Vec<RawKind>,
     source: &str,
 ) -> Result<Grammar, GrammarError> {
@@ -560,6 +581,7 @@ fn resolve(
         requires_roles,
         operators,
         precedence_rows,
+        keys,
         token_flags: super::hot_flags(&tokens),
         node_flags: super::hot_flags(&nodes),
         nodes,
@@ -574,6 +596,24 @@ fn resolve(
         tag_nodes: HashMap::new(),
     };
     grammar.resolve();
+    grammar.keys.alias = grammar
+        .keys
+        .alias_name
+        .as_deref()
+        .and_then(|n| grammar.by_name.get(n).copied());
+    if let Some(kind) = grammar.keys.alias {
+        grammar.keys.alias_in = grammar
+            .nodes
+            .iter()
+            .filter(|d| d.body.iter().any(|i| i.target == Target::Kind(kind)))
+            .map(|d| d.kind)
+            .collect();
+    }
+    grammar.keys.plain = !grammar.keys.lowercase
+        && !grammar.keys.decode
+        && grammar.keys.strip.is_none()
+        && grammar.keys.alias_name.is_none();
+    grammar.keys.parts = grammar.tokens.iter().any(|d| d.has_tag("key-part"));
     Ok(grammar)
 }
 

@@ -1,9 +1,11 @@
 //! What the shared rules ask a language about its own syntax. A language that tags its grammar
-//! (`#mapping`, `#sequence`) gets the shared key and sequence rules with no code of its own; a
-//! language whose keys or scalars need decoding implements the hooks it needs.
+//! (`#mapping`, `#sequence`, `#key-part`) and gives it a `keys` line gets the shared key and
+//! sequence rules with no code of its own; a language whose keys or scalars the rows cannot
+//! describe implements the hooks it needs.
 
+use crate::names;
 use crate::rule::FileContext;
-use core_syntax::{SyntaxElement, SyntaxNode, TextRange};
+use core_syntax::{Grammar, SyntaxElement, SyntaxNode, TextRange};
 use std::borrow::Cow;
 
 /// A scalar the sorting of sequence items understands.
@@ -21,26 +23,9 @@ pub enum Accessor {
 }
 
 pub trait RuleHooks: Send + Sync {
-    /// Does the language need the special key walk (`flat_keys`, accessors)? Off, `no-duplicate-keys`
-    /// reads each mapping's `#key-value` entries and asks nothing else.
-    fn custom_keys(&self) -> bool {
-        false
-    }
-
-    /// Does the language have accessor entries (JavaScript `get a() {}`)? Only then
-    /// `no-duplicate-keys` asks [`RuleHooks::accessor`] and lets a getter and a setter share a name.
-    fn has_accessors(&self) -> bool {
-        false
-    }
-
     /// The keys, in order, of a `#mapping` whose entries are not nodes of their own (a Python
     /// dict is flat: `key : value , ...`); `None` when the entries are `#key-value` nodes.
     fn flat_keys(&self, _mapping: &SyntaxNode) -> Option<Vec<SyntaxElement>> {
-        None
-    }
-
-    /// Whether the `#key-value` entry is a getter or a setter.
-    fn accessor(&self, _entry: &SyntaxNode) -> Option<Accessor> {
         None
     }
 
@@ -51,32 +36,16 @@ pub trait RuleHooks: Send + Sync {
     }
 
     /// The identity of a key (the `key` item of a `#key-value` entry): the name that is compared,
-    /// sorted and checked. `text` is the file's text. The default is the key's text with one pair
-    /// of matching quotes stripped.
-    fn key_name<'a>(&self, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
-        let range = key.text_range();
-        let raw = text[range].trim();
-        let inner = ['"', '\'']
-            .iter()
-            .find_map(|&q| raw.strip_prefix(q)?.strip_suffix(q));
-        Cow::Borrowed(inner.unwrap_or(raw))
-    }
-
-    /// The separately named parts of a key that is a path (TOML's `a.b`), which naming conventions
-    /// are checked on one by one; `None` when the key is one name (the default).
-    fn key_parts<'a>(&self, _key: &SyntaxElement, _text: &'a str) -> Option<Vec<Cow<'a, str>>> {
-        None
-    }
-
-    /// A key that merges other mappings into its own and may therefore repeat (YAML's `<<`).
-    fn merge_key(&self) -> Option<&str> {
-        None
+    /// sorted and checked. `text` is the file's text. The default reads the grammar's `keys` line
+    /// ([`names::key_name`]).
+    fn key_name<'a>(&self, g: &Grammar, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
+        names::key_name(g, key, text)
     }
 
     /// The value of a string or number item of a sequence (`item` is the value node); `None` for
-    /// anything else, which `sorted-array-values` leaves alone. The default has no scalars.
-    fn scalar<'a>(&self, _item: &SyntaxNode, _text: &'a str) -> Option<Scalar<'a>> {
-        None
+    /// anything else, which `sorted-array-values` leaves alone ([`names::scalar`]).
+    fn scalar<'a>(&self, g: &Grammar, item: &SyntaxNode, text: &'a str) -> Option<Scalar<'a>> {
+        names::scalar(g, item, text)
     }
 
     /// Is the line a `key: value` entry whose value is one unbreakable word (no space)? Lets

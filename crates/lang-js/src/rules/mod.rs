@@ -18,6 +18,7 @@ mod unused;
 use crate::generated::kind as k;
 use core_rules::tree::significant_range;
 use core_rules::{Family, Params, Rule, RuleContext, RuleMeta};
+use core_syntax::roles::{code_text, code_tokens as own_code, has_own_token as has_own, un};
 use core_syntax::{Grammar, SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 
 pub static RULES: &[&dyn Rule] = &[];
@@ -219,13 +220,6 @@ fn span(ctx: &RuleContext<'_>, n: &SyntaxNode) -> TextRange {
     significant_range(n, ctx.file.grammar)
 }
 
-/// The own tokens of `n` that are code (not trivia).
-fn own_code<'g>(n: &SyntaxNode, g: &'g Grammar) -> impl Iterator<Item = SyntaxToken> + 'g {
-    (n.children_with_tokens())
-        .filter_map(|e| e.into_token())
-        .filter(|t| !g.is_trivia(t.kind()))
-}
-
 /// The first token of `n` that is code (the node's own first token may be leading trivia).
 fn code_token(n: &SyntaxNode, g: &Grammar) -> Option<SyntaxToken> {
     (n.descendants_with_tokens())
@@ -233,40 +227,15 @@ fn code_token(n: &SyntaxNode, g: &Grammar) -> Option<SyntaxToken> {
         .find(|t| !g.is_trivia(t.kind()))
 }
 
-/// Does `n` have an own code token with this text?
-fn has_own(n: &SyntaxNode, g: &Grammar, text: &str) -> bool {
-    own_code(n, g).any(|t| t.text() == text)
-}
-
-/// The text of the code tokens of `n` joined: the node without its whitespace and comments.
-fn code_text(n: &SyntaxNode, g: &Grammar) -> String {
-    (n.descendants_with_tokens())
-        .filter_map(|e| e.into_token())
-        .filter(|t| !g.is_trivia(t.kind()))
-        .map(|t| t.text().to_string())
-        .collect()
-}
-
-/// The expression inside any number of parentheses.
-fn un(mut n: SyntaxNode) -> SyntaxNode {
-    while n.kind() == k::PARENTHESIZED_EXPRESSION {
-        match n.children().next() {
-            Some(inner) => n = inner,
-            None => break,
-        }
-    }
-    n
-}
-
 /// The operator of a unary, binary, logical or assignment expression.
-fn operator(n: &SyntaxNode, g: &Grammar) -> String {
+fn operator(n: &SyntaxNode) -> String {
     let ops = |t: &SyntaxToken| {
         matches!(
             t.kind(),
             k::OPERATOR | k::KEYWORD | k::L_ANGLE | k::R_ANGLE | k::PIPE
         )
     };
-    own_code(n, g)
+    own_code(n)
         .find(ops)
         .map_or_else(String::new, |t| t.text().to_string())
 }

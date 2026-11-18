@@ -4,12 +4,16 @@
 //! tables, tables and arrays of tables that conflict, extending an inline table or a value).
 
 use crate::generated::kind;
-use crate::hooks::key_parts;
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};
 use provider_api::ParseError;
 use rowan::{GreenNodeData as Green, GreenTokenData, NodeOrToken};
 use std::borrow::Cow;
 use std::collections::HashMap;
+
+/// The parts of the key at `start`, see `names::key_parts`.
+fn key_parts<'a>(key: &Green, start: u32, text: &'a str, out: &mut Vec<Cow<'a, str>>) -> u32 {
+    core_rules::names::key_parts(core_syntax::grammars::TOML.get(), key, start, text, out)
+}
 
 type Err<'a> = dyn FnMut(TextRange, &str, String) + 'a;
 

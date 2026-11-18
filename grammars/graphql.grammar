@@ -10,6 +10,7 @@ suppress enable "sudsy-enable"
 suppress disable-file "sudsy-disable-file"
 suppress ignore "sudsy-ignore"
 suppress ignore "prettier-ignore"
+keys strip "$" alias Alias
 
 token Whitespace #trivia #whitespace
 token Newline #trivia #newline

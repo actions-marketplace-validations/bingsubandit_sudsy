@@ -3,11 +3,9 @@
 
 core_syntax::include_generated!();
 mod format;
-mod hooks;
 mod lexer;
 mod parser;
 mod rules;
-mod string;
 mod value_rules;
 
 pub use format::{COLLAPSE, DIALECT, JsonFormatter, TRAILING_COMMAS, option_schema};
@@ -51,7 +49,7 @@ pub fn provider() -> ParserProvider {
         file_names: &[],
         schema: option_schema(),
         formatter: &JsonFormatter,
-        hooks: &hooks::JsonHooks,
+        hooks: &core_rules::DEFAULT_HOOKS,
         rules: rules::RULES,
         pattern_files: provider_api::pattern_files!(),
         families: &[],

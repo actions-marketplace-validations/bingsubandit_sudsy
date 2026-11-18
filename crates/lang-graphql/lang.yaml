@@ -2,7 +2,6 @@ grammar-crate: tree-sitter-graphql
 grammar-path: grammars/tree-sitter-graphql
 extensions: [graphql, gql]
 formatter: GraphqlFormatter
-hooks: hooks::GraphqlHooks
 dev-deps: [insta]
 families: "&[core_rules::unique::FAMILY]"
 options:

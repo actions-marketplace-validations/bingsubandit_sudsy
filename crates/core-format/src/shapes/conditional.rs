@@ -11,6 +11,7 @@ use crate::FormatCtx;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
 use core_config::{OptionValue, ResolvedOptions};
+use core_syntax::roles;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
 pub const LAYOUT: &str = "conditional_layout";
@@ -60,14 +61,6 @@ pub trait ConditionalHooks {
     /// Does a line comment follow the token on its line (a line break must follow it)?
     fn comment_ends_line(&self, cx: &FormatCtx<'_>, t: &SyntaxToken) -> bool {
         ends_in_line_comment(cx, t)
-    }
-    /// The node as its parent holds it (with the parentheses around it).
-    fn outer(&self, n: &SyntaxNode) -> SyntaxNode {
-        n.clone()
-    }
-    /// The node without the parentheses around it.
-    fn inner(&self, n: &SyntaxNode) -> SyntaxNode {
-        n.clone()
     }
     /// The branches are wrapped in parentheses that show when they break (JSX); `top` is the
     /// first conditional of the chain the node is in.
@@ -193,7 +186,7 @@ fn chained(
     use doc::{align, concat, group, hardline, if_break, indent, lit, softline};
     let g = cx.grammar;
     let kind = node.kind();
-    let held = hooks.outer(node);
+    let held = roles::outer(node);
     let parent = held.parent();
     let same_parent = parent.as_ref().is_some_and(|p| p.kind() == kind);
     let slot_is = |up: &SyntaxNode, field: &str, n: &SyntaxNode| {
@@ -208,15 +201,15 @@ fn chained(
     // The top of the chain of conditionals this one is in (through branches, not tests).
     let mut top = node.clone();
     let first_non_cond = loop {
-        let up = hooks.outer(&top).parent();
+        let up = roles::outer(&top).parent();
         match up {
-            Some(up) if up.kind() == kind && !slot_is(&up, "condition", &hooks.outer(&top)) => {
+            Some(up) if up.kind() == kind && !slot_is(&up, "condition", &roles::outer(&top)) => {
                 top = up
             }
             other => break other,
         }
     };
-    let inner_of = |e: &SyntaxElement| e.as_node().map(|n| hooks.inner(n));
+    let inner_of = |e: &SyntaxElement| e.as_node().map(roles::un);
     let is_cond = |n: &Option<SyntaxNode>| n.as_ref().is_some_and(|n| n.kind() == kind);
     let (then_u, other_u) = (inner_of(&p.then), inner_of(&p.other));
     let wrap_mode = hooks.wrap_branches(cx, node, &top);

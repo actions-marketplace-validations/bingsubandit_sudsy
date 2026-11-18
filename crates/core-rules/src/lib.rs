@@ -23,6 +23,7 @@ pub mod hooks;
 pub mod keys;
 pub mod layout;
 pub mod lines;
+pub mod names;
 pub mod options;
 pub mod paths;
 pub mod project;

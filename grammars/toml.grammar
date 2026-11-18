@@ -28,8 +28,8 @@ token BareKey #key-part
 token QuotedKey #key-part #string
 // A multi-line string may change its line breaks (`end_of_line`): TomlFormatter::extra_check compares the text.
 token String #literal #string #restyle
-token Integer #literal
-token Float #literal
+token Integer #literal #number
+token Float #literal #number
 token Boolean #literal
 token DateTime #literal
 

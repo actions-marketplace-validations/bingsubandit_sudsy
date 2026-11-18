@@ -264,7 +264,7 @@ fn member_written(cx: &Cx, id: &SyntaxNode) -> bool {
             if object.kind() != k::IDENTIFIER_REFERENCE {
                 return false;
             }
-            let methods: &[&str] = match code_text(&object, cx.g).as_str() {
+            let methods: &[&str] = match code_text(&object).as_str() {
                 "Object" => &[
                     "assign",
                     "defineProperty",
@@ -276,7 +276,7 @@ fn member_written(cx: &Cx, id: &SyntaxNode) -> bool {
                 _ => return false,
             };
             let global = ref_at(cx, cx.range(&object).start()).is_some_and(|r| r.symbol.is_none());
-            return first && methods.contains(&code_text(&member, cx.g).as_str()) && global;
+            return first && methods.contains(&code_text(&member).as_str()) && global;
         }
         _ => return false,
     }

@@ -3,7 +3,7 @@
 //! `#a`, Svelte's `on:` and `use:`) may repeat and are not names.
 
 use core_rules::RuleHooks;
-use core_syntax::SyntaxElement;
+use core_syntax::{Grammar, SyntaxElement};
 use std::borrow::Cow;
 
 pub struct HtmlHooks;
@@ -19,7 +19,7 @@ impl RuleHooks for HtmlHooks {
             && !text[start..].starts_with("v-on")
     }
 
-    fn key_name<'a>(&self, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
+    fn key_name<'a>(&self, _g: &Grammar, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
         let range = key.text_range();
         let end = key.parent().map_or(range.end(), |p| p.text_range().end());
         let name = &text[usize::from(range.start())..usize::from(end)];

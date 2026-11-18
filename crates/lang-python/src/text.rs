@@ -3,19 +3,7 @@
 use crate::generated::kind as k;
 use core_syntax::{SyntaxNode, TextSize};
 
-/// The code tokens of `n` written one after the other: `a.b` for a dotted name.
-pub fn code_text(n: &SyntaxNode) -> String {
-    n.descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-        .filter(|t| {
-            !matches!(
-                t.kind(),
-                k::WHITESPACE | k::NEWLINE | k::COMMENT | k::CONTINUATION
-            )
-        })
-        .map(|t| t.text().to_owned())
-        .collect()
-}
+pub use core_syntax::roles::code_text;
 
 /// One quoted piece of a string literal.
 pub struct Part {

@@ -3,16 +3,12 @@
 
 use crate::generated::kind as k;
 use core_rules::RuleHooks;
-use core_syntax::{SyntaxElement, SyntaxNode};
+use core_syntax::{Grammar, SyntaxElement, SyntaxNode};
 use std::borrow::Cow;
 
 pub struct PythonHooks;
 
 impl RuleHooks for PythonHooks {
-    fn custom_keys(&self) -> bool {
-        true
-    }
-
     /// The first node of each `key: value` item; a `**mapping` item has none.
     fn flat_keys(&self, mapping: &SyntaxNode) -> Option<Vec<SyntaxElement>> {
         let (mut at_start, mut skip) = (true, false);
@@ -44,7 +40,7 @@ impl RuleHooks for PythonHooks {
 
     /// The source text without comments around it, quotes included, so `"a"` and `'a'` differ
     /// from the name `a`.
-    fn key_name<'a>(&self, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
+    fn key_name<'a>(&self, _g: &Grammar, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
         let raw = text[key.text_range()].trim();
         match key {
             SyntaxElement::Node(n) if n.kind() == k::EXPR_NUMBER_LITERAL => {
