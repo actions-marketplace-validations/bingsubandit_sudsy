@@ -15,14 +15,16 @@
 //! and the parameters of a function argument stay on its line) and `hook` (the arguments stay on
 //! the line, as part of the argument list).
 //!
-//! `[simple]` (Prettier's "simple call argument"): `leaf`, `regex = Kind:N` (a leaf of a pattern
-//! of at most N characters), `single_line` (a literal with expressions that has no line break),
+//! `[simple]` (Prettier's "simple call argument") and `[hug]`: `key = Kind|#tag[:ARG]|...` rows,
+//! the first row naming a node deciding. Keys: `leaf`, `regex` (`Kind:N`: a leaf of a pattern of
+//! at most N characters), `single_line` (a literal with expressions that has no line break),
 //! `object`, `array`, `items` (every child simple, one level deeper), `members` (every child
-//! simple), `operand` (the first child simple), `unary = Kind: op op` (the last child simple),
-//! `call` (callee and arguments simple, only at the top). `[hug]`: `composition = yes` (a function composition breaks its arguments), `no_composition` (parent kinds), `short` (always short),
-//! `short_binary`, `cast = Kind : TypeArgumentsKind` (short when the first child is and the last
-//! has no type arguments), `not_last = Kind,Kind` (a pair of arguments the last of which does not
-//! hug), `numeric` and `signed_numeric` (the items of a concise array), `concise = Kind`.
+//! simple), `operand` (the first child simple), `unary` (`Kind: op op`: the last child simple),
+//! `call` (callee and arguments simple, only at the top); `composition = yes` (a function
+//! composition breaks its arguments), `no_composition` (parent kinds), `short` (always short),
+//! `short_binary`, `cast` (`Kind:TypeArgumentsKind`: short when the first child is and the last
+//! has no type arguments), `not_last` (`First:Last`: a pair of arguments the last of which does
+//! not hug), `numeric` and `signed_numeric` (the items of a concise array), `concise`.
 
 use crate::FormatCtx;
 use crate::comments;
@@ -50,11 +52,24 @@ enum Pick {
     Tag(&'static str),
 }
 
-#[derive(Clone, Debug)]
-enum Names {
-    Set(usize),
-    Text(Vec<&'static str>),
+impl Pick {
+    fn parse(g: &Grammar, n: &'static str) -> Pick {
+        match n.trim().strip_prefix('#') {
+            Some(t) => Pick::Tag(t),
+            None => Pick::Kind(kind(g, n)),
+        }
+    }
+
+    fn matches(&self, g: &Grammar, k: SyntaxKind) -> bool {
+        match self {
+            Pick::Kind(p) => *p == k,
+            Pick::Tag(t) => g.has_tag(k, t),
+        }
+    }
 }
+
+/// Callee texts.
+type Names = Vec<&'static str>;
 
 #[derive(Clone, Debug)]
 enum Cond {
@@ -83,35 +98,53 @@ struct Pattern {
     effect: Effect,
 }
 
-#[derive(Default)]
-struct Simple {
-    leaf: Vec<Pick>,
-    regex: Vec<(SyntaxKind, usize)>,
-    single_line: Vec<SyntaxKind>,
-    object: Vec<SyntaxKind>,
-    array: Vec<SyntaxKind>,
-    items: Vec<SyntaxKind>,
-    members: Vec<SyntaxKind>,
-    operand: Vec<SyntaxKind>,
-    unary: Vec<(SyntaxKind, Vec<&'static str>)>,
-    call: Vec<SyntaxKind>,
-    short: Vec<SyntaxKind>,
-    short_binary: Vec<SyntaxKind>,
-    cast: Vec<(SyntaxKind, SyntaxKind)>,
-    not_last: Vec<(SyntaxKind, SyntaxKind)>,
-    numeric: Vec<SyntaxKind>,
-    signed_numeric: Vec<SyntaxKind>,
-    concise: Vec<SyntaxKind>,
-    no_composition: Vec<SyntaxKind>,
-    composition: bool,
+/// What a `[simple]` or `[hug]` row says about the nodes it names.
+#[derive(Debug)]
+enum Rule {
+    Leaf,
+    Regex(usize),
+    SingleLine,
+    Object,
+    Array,
+    Items,
+    Members,
+    Operand,
+    Unary(Vec<&'static str>),
+    Call,
+    Short,
+    ShortBinary,
+    Cast(SyntaxKind),
+    NotLast(SyntaxKind),
+    Numeric,
+    SignedNumeric,
+    Concise,
+    NoComposition,
+}
+
+impl Rule {
+    fn is_simple(&self) -> bool {
+        matches!(
+            self,
+            Rule::Leaf
+                | Rule::Regex(_)
+                | Rule::SingleLine
+                | Rule::Object
+                | Rule::Array
+                | Rule::Items
+                | Rule::Members
+                | Rule::Operand
+                | Rule::Unary(_)
+                | Rule::Call
+        )
+    }
 }
 
 /// The rows of `[call]`, `[simple]` and `[hug]`.
 #[derive(Default)]
 pub struct CallRules {
-    sets: Vec<Vec<&'static str>>,
     patterns: Vec<Pattern>,
-    simple: Simple,
+    rows: Vec<(Pick, Rule)>,
+    composition: bool,
 }
 
 fn kind(g: &Grammar, n: &str) -> SyntaxKind {
@@ -123,109 +156,25 @@ fn kinds(g: &Grammar, v: &str) -> Vec<SyntaxKind> {
     v.split('|').map(|n| kind(g, n)).collect()
 }
 
-fn picks(g: &Grammar, v: &'static str) -> Vec<Pick> {
-    v.split('|')
-        .map(|n| match n.trim().strip_prefix('#') {
-            Some(t) => Pick::Tag(t),
-            None => Pick::Kind(kind(g, n)),
-        })
-        .collect()
+/// The `[call]` rows being read: the grammar and the sets declared so far.
+struct Parse<'a> {
+    g: &'a Grammar,
+    sets: Vec<(&'a str, Names)>,
 }
 
-fn pairs(g: &Grammar, v: &str, sep: char) -> Vec<(SyntaxKind, SyntaxKind)> {
-    v.split('|')
-        .filter_map(|p| p.split_once(sep))
-        .map(|(a, b)| (kind(g, a), kind(g, b)))
-        .collect()
-}
-
-impl CallRules {
-    pub fn parse(g: &Grammar, text: &'static str) -> CallRules {
-        let mut rules = CallRules::default();
-        let mut names: Vec<&str> = Vec::new();
-        // (one pass over the text: the three sections are read from it together)
-        let (mut call, mut all) = (Vec::new(), Vec::new());
-        let mut inside = "";
-        for l in text.lines().map(str::trim) {
-            if let Some(n) = l.strip_prefix('[').and_then(|l| l.strip_suffix(']')) {
-                inside = n;
-            } else if !l.is_empty() && !l.starts_with('#') {
-                match inside {
-                    "call" => call.push(l),
-                    "simple" | "hug" => {
-                        all.extend(l.split_once('=').map(|(k, v)| (k.trim(), v.trim())))
-                    }
-                    _ => {}
-                }
-            }
-        }
-        for &l in &call {
-            if let Some(rest) = l.strip_prefix("set ") {
-                let (name, list) = rest
-                    .split_once('=')
-                    .unwrap_or_else(|| panic!("call: `{l}`"));
-                names.push(name.trim());
-                rules.sets.push(list.split('|').map(str::trim).collect());
-            }
-        }
-        for l in call.iter().filter(|l| !l.starts_with("set ")) {
-            rules.patterns.push(rules.pattern_row(g, &names, l));
-        }
-        let get = |key: &str| all.iter().find(|(k, _)| *k == key).map(|(_, v)| *v);
-        let list = |key: &str| get(key).map(|v| kinds(g, v)).unwrap_or_default();
-        let s = &mut rules.simple;
-        s.leaf = get("leaf").map(|v| picks(g, v)).unwrap_or_default();
-        s.regex = get("regex")
-            .into_iter()
-            .flat_map(|v| v.split('|'))
-            .filter_map(|p| p.split_once(':'))
-            .map(|(n, max)| (kind(g, n), max.trim().parse().expect("regex length")))
-            .collect();
-        s.single_line = list("single_line");
-        s.object = list("object");
-        s.array = list("array");
-        s.items = list("items");
-        s.members = list("members");
-        s.operand = list("operand");
-        s.unary = get("unary")
-            .into_iter()
-            .flat_map(|v| v.split('|'))
-            .filter_map(|p| p.split_once(':'))
-            .map(|(n, ops)| (kind(g, n), ops.split_whitespace().collect()))
-            .collect();
-        s.call = list("call");
-        s.short = list("short");
-        s.short_binary = list("short_binary");
-        s.cast = get("cast")
-            .into_iter()
-            .flat_map(|v| v.split('|'))
-            .filter_map(|p| p.split_once(':'))
-            .map(|(n, t)| (kind(g, n), kind(g, t)))
-            .collect();
-        s.not_last = get("not_last")
-            .map(|v| pairs(g, v, ','))
-            .unwrap_or_default();
-        s.numeric = list("numeric");
-        s.signed_numeric = list("signed_numeric");
-        s.concise = list("concise");
-        s.no_composition = list("no_composition");
-        s.composition = get("composition") == Some("yes");
-        rules
-    }
-
-    fn names(&self, declared: &[&str], v: &'static str) -> Names {
+impl Parse<'_> {
+    fn names(&self, v: &'static str) -> Names {
         match v.strip_prefix('@') {
-            Some(n) => Names::Set(
-                declared
-                    .iter()
-                    .position(|d| *d == n)
-                    .unwrap_or_else(|| panic!("call: set `{n}`")),
-            ),
-            None => Names::Text(v.split('|').map(str::trim).collect()),
+            Some(n) => match self.sets.iter().find(|(d, _)| *d == n) {
+                Some((_, names)) => names.clone(),
+                None => panic!("call: set `{n}`"),
+            },
+            None => v.split('|').map(str::trim).collect(),
         }
     }
 
-    fn pattern_row(&self, g: &Grammar, declared: &[&str], l: &'static str) -> Pattern {
+    fn pattern(&self, l: &'static str) -> Pattern {
+        let g = self.g;
         let (head, effect) = l.rsplit_once(':').unwrap_or_else(|| panic!("call: `{l}`"));
         let (callee_part, args_part) = head
             .split_once(" / ")
@@ -245,7 +194,7 @@ impl CallRules {
         };
         for c in callee_part.split('&').filter(|c| *c != "*") {
             match c.trim().split_once('=') {
-                Some(("callee", v)) => p.callee = Some(self.names(declared, v)),
+                Some(("callee", v)) => p.callee = Some(self.names(v)),
                 Some(("node", v)) => p.node = kinds(g, v),
                 Some(("parent", v)) => p.parent = kinds(g, v),
                 _ => panic!("call: `{c}`"),
@@ -259,14 +208,12 @@ impl CallRules {
             *last = s;
             p.repeat = true;
         }
-        p.args = shapes
-            .into_iter()
-            .map(|s| self.shape(g, declared, s))
-            .collect();
+        p.args = shapes.into_iter().map(|s| self.shape(s)).collect();
         p
     }
 
-    fn shape(&self, g: &Grammar, declared: &[&str], s: &'static str) -> Shape {
+    fn shape(&self, s: &'static str) -> Shape {
+        let g = self.g;
         let mut parts = s.split('&');
         let head = parts.next().unwrap_or("*").trim();
         let mut shape = Shape {
@@ -274,7 +221,7 @@ impl CallRules {
             ..Shape::default()
         };
         if !shape.any {
-            shape.picks = picks(g, head);
+            shape.picks = head.split('|').map(|n| Pick::parse(g, n)).collect();
         }
         for c in parts {
             shape.conds.push(match c.trim() {
@@ -285,8 +232,8 @@ impl CallRules {
                 c => match c.split_once('=') {
                     Some(("own-line", k)) => Cond::OwnLine(Some(kind(g, k))),
                     Some(("params", n)) => Cond::Params(false, n.parse().expect("params")),
-                    Some(("callee", v)) => Cond::Callee(self.names(declared, v)),
-                    Some(("arg", v)) => Cond::Arg(Box::new(self.shape(g, declared, v))),
+                    Some(("callee", v)) => Cond::Callee(self.names(v)),
+                    Some(("arg", v)) => Cond::Arg(Box::new(self.shape(v))),
                     _ => match c.strip_prefix("params<=") {
                         Some(n) => Cond::Params(true, n.parse().expect("params")),
                         None => panic!("call: condition `{c}`"),
@@ -296,13 +243,77 @@ impl CallRules {
         }
         shape
     }
+}
 
-    fn name_matches(&self, names: &Names, text: Option<&str>) -> bool {
-        let Some(text) = text else { return false };
-        match names {
-            Names::Set(i) => self.sets[*i].contains(&text),
-            Names::Text(v) => v.contains(&text),
+impl CallRules {
+    pub fn parse(g: &Grammar, text: &'static str) -> CallRules {
+        let mut rules = CallRules::default();
+        let (mut call, mut sets, mut inside) = (Vec::new(), Vec::new(), "");
+        for l in text.lines().map(str::trim) {
+            if let Some(n) = l.strip_prefix('[').and_then(|l| l.strip_suffix(']')) {
+                inside = n;
+            } else if l.is_empty() || l.starts_with('#') {
+                continue;
+            } else if inside == "call" {
+                match l.strip_prefix("set ") {
+                    Some(r) => {
+                        let (name, list) = r.split_once('=').expect("call: set");
+                        sets.push((name.trim(), list.split('|').map(str::trim).collect()));
+                    }
+                    None => call.push(l),
+                }
+            } else if let Some((key, v)) = l.split_once('=')
+                && matches!(inside, "simple" | "hug")
+            {
+                rules.rows_of(g, key.trim(), v);
+            }
         }
+        let p = Parse { g, sets };
+        rules.patterns = call.into_iter().map(|l| p.pattern(l)).collect();
+        rules
+    }
+
+    /// The rows of one `key = Kind|#tag[:ARG]|...` line.
+    fn rows_of(&mut self, g: &Grammar, key: &str, v: &'static str) {
+        if key == "composition" {
+            self.composition = v.trim() == "yes";
+            return;
+        }
+        for part in v.split('|') {
+            let (n, arg) = part.split_once(':').unwrap_or((part, ""));
+            let rule = match key {
+                "leaf" => Rule::Leaf,
+                "regex" => Rule::Regex(arg.trim().parse().expect("regex length")),
+                "single_line" => Rule::SingleLine,
+                "object" => Rule::Object,
+                "array" => Rule::Array,
+                "items" => Rule::Items,
+                "members" => Rule::Members,
+                "operand" => Rule::Operand,
+                "unary" => Rule::Unary(arg.split_whitespace().collect()),
+                "call" => Rule::Call,
+                "short" => Rule::Short,
+                "short_binary" => Rule::ShortBinary,
+                "cast" => Rule::Cast(kind(g, arg)),
+                "not_last" => Rule::NotLast(kind(g, arg)),
+                "numeric" => Rule::Numeric,
+                "signed_numeric" => Rule::SignedNumeric,
+                "concise" => Rule::Concise,
+                "no_composition" => Rule::NoComposition,
+                k => panic!("call rules: key `{k}`"),
+            };
+            self.rows.push((Pick::parse(g, n), rule));
+        }
+    }
+
+    /// The first row that names the kind `k` and satisfies `f`.
+    fn find(&self, g: &Grammar, k: SyntaxKind, f: fn(&Rule) -> bool) -> Option<&Rule> {
+        let hit = |(p, r): &&(Pick, Rule)| f(r) && p.matches(g, k);
+        self.rows.iter().find(hit).map(|(_, r)| r)
+    }
+
+    fn is(&self, g: &Grammar, k: SyntaxKind, f: fn(&Rule) -> bool) -> bool {
+        self.find(g, k, f).is_some()
     }
 
     /// The effect of the first `[call]` row that matches the call `node` with callee `callee`
@@ -331,195 +342,151 @@ impl CallRules {
         self.patterns
             .iter()
             .find(|p| {
+                let n = p.args.len();
                 (p.node.is_empty() || p.node.contains(&kind))
-                    && (if p.repeat {
-                        args.len() >= p.args.len()
-                    } else {
-                        args.len() == p.args.len()
-                    })
+                    && (args.len() == n || (p.repeat && args.len() > n))
                     && (p.parent.is_empty()
                         || node.parent().is_some_and(|x| p.parent.contains(&x.kind())))
                     && p.callee
                         .as_ref()
-                        .is_none_or(|n| self.name_matches(n, callee_text()))
-                    && self.args_match(cx, p, args)
+                        .is_none_or(|n| callee_text().is_some_and(|t| n.contains(&t)))
+                    && args
+                        .iter()
+                        .enumerate()
+                        .all(|(i, a)| self.shape_matches(cx, &p.args[i.min(n - 1)], a))
             })
             .map(|p| p.effect)
-    }
-
-    fn args_match(&self, cx: &FormatCtx<'_>, p: &Pattern, args: &[SyntaxNode]) -> bool {
-        let n = p.args.len();
-        if p.repeat {
-            if args.len() < n {
-                return false;
-            }
-        } else if args.len() != n {
-            return false;
-        }
-        args.iter().enumerate().all(|(i, a)| {
-            let s = &p.args[i.min(n - 1)];
-            self.shape_matches(cx, s, a)
-        })
     }
 
     fn shape_matches(&self, cx: &FormatCtx<'_>, s: &Shape, arg: &SyntaxNode) -> bool {
         let n = un(arg);
         let g = cx.grammar;
-        (s.any
-            || s.picks.iter().any(|p| match p {
-                Pick::Kind(k) => n.kind() == *k,
-                Pick::Tag(t) => g.has_tag(n.kind(), t),
-            }))
+        (s.any || s.picks.iter().any(|p| p.matches(g, n.kind())))
             && s.conds.iter().all(|c| match c {
                 Cond::Block => g
                     .slot(&n, "body")
                     .is_some_and(|b| g.has_tag(b.kind(), "block")),
                 Cond::Params(le, count) => {
-                    let have = g.slot(&n, "parameters").map_or(0, |p| {
-                        p.as_node().map_or(0, |p| {
+                    let have = g
+                        .slot(&n, "parameters")
+                        .and_then(|p| p.into_node())
+                        .map_or(0, |p| {
                             p.children()
                                 .filter(|c| g.has_tag(c.kind(), "parameter"))
                                 .count()
-                        })
-                    });
+                        });
                     if *le { have <= *count } else { have == *count }
                 }
                 Cond::Callee(names) => {
                     let callee = g.slot(&n, "callee").and_then(|c| c.into_node());
-                    self.name_matches(
-                        names,
-                        callee.map(|c| callee_text(cx, &c)).as_ref().and_then(|c| c.as_deref()),
-                    )
+                    let text = callee.and_then(|c| callee_text(cx, &c));
+                    text.is_some_and(|t| names.contains(&t.as_str()))
                 }
                 Cond::Arg(shape) => {
                     let mut args = g.slots(&n, "arguments").filter_map(|e| e.into_node());
                     matches!((args.next(), args.next()), (Some(a), None) if self.shape_matches(cx, shape, &a))
                 }
-                Cond::OwnLine(literal) => match literal {
-                    None => template_on_own_line(cx, &n, &n),
-                    Some(k) => n
-                        .last_child()
-                        .filter(|l| l.kind() == *k)
-                        .is_some_and(|l| template_on_own_line(cx, &n, &l)),
-                },
+                Cond::OwnLine(None) => template_on_own_line(cx, &n, &n),
+                Cond::OwnLine(Some(k)) => n
+                    .last_child()
+                    .filter(|l| l.kind() == *k)
+                    .is_some_and(|l| template_on_own_line(cx, &n, &l)),
                 Cond::Comments(inside) => {
                     !has_comment(cx, &n)
                         && (!inside
                             || !n
                                 .descendants_with_tokens()
                                 .filter_map(|e| e.into_token())
-                                .any(|t| token_has_comment(cx, &t)))
+                                .any(|t| comments::token_has_comment(cx.grammar, &t)))
                 }
             })
     }
 
     /// Prettier's `isSimpleCallArgument`.
     pub fn is_simple(&self, cx: &FormatCtx<'_>, n: &SyntaxNode, depth: u32) -> bool {
-        let s = &self.simple;
         let (g, n) = (cx.grammar, un(n));
-        let k = n.kind();
         let simple_at = |c: &SyntaxNode, d: u32| self.is_simple(cx, c, d);
-        if let Some((_, max)) = s.regex.iter().find(|(r, _)| *r == k) {
-            return n
-                .text()
-                .to_string()
-                .rfind('/')
-                .is_some_and(|end| end <= max + 1);
-        }
-        if s.leaf.iter().any(|p| match p {
-            Pick::Kind(l) => *l == k,
-            Pick::Tag(t) => g.has_tag(k, t),
-        }) {
-            return true;
-        }
-        if s.single_line.contains(&k) {
-            return !n.text().to_string().contains('\n')
-                && n.children().all(|c| simple_at(&c, depth + 1));
-        }
-        if s.object.contains(&k) {
-            return n.children().all(|p| {
+        let text = || n.text().to_string();
+        let Some(rule) = self.find(g, n.kind(), Rule::is_simple) else {
+            return false;
+        };
+        match rule {
+            Rule::Regex(max) => text().rfind('/').is_some_and(|end| end <= max + 1),
+            Rule::SingleLine => {
+                !text().contains('\n') && n.children().all(|c| simple_at(&c, depth + 1))
+            }
+            Rule::Object => n.children().all(|p| {
                 g.has_tag(p.kind(), "key-value")
                     && !p
                         .children_with_tokens()
                         .any(|e| e.as_token().is_some_and(|t| t.text() == "["))
                     && (p.children().count() == 1
                         || p.last_child().is_some_and(|v| simple_at(&v, depth + 1)))
-            });
-        }
-        if s.array.contains(&k) {
-            return n
+            }),
+            Rule::Array => n
                 .children()
-                .all(|c| g.has_tag(c.kind(), "hole") || simple_at(&c, depth + 1));
-        }
-        if s.items.contains(&k) {
-            return n.children().all(|c| simple_at(&c, depth + 1));
-        }
-        if s.members.contains(&k) {
-            return n.children().all(|c| simple_at(&c, depth));
-        }
-        if s.operand.contains(&k) {
-            return n.first_child().is_some_and(|o| simple_at(&o, depth));
-        }
-        if let Some((_, ops)) = s.unary.iter().find(|(u, _)| *u == k) {
-            let op = g
-                .slot(&n, "operator")
-                .and_then(|e| e.into_token())
-                .map_or(String::new(), |t| t.text().to_owned());
-            return ops.contains(&op.as_str())
-                && n.last_child().is_some_and(|a| simple_at(&a, depth));
-        }
-        if s.call.contains(&k) {
-            let callee = g.slot(&n, "callee").and_then(|c| c.into_node());
+                .all(|c| g.has_tag(c.kind(), "hole") || simple_at(&c, depth + 1)),
+            Rule::Items => n.children().all(|c| simple_at(&c, depth + 1)),
+            Rule::Members => n.children().all(|c| simple_at(&c, depth)),
+            Rule::Operand => n.first_child().is_some_and(|o| simple_at(&o, depth)),
+            Rule::Unary(ops) => {
+                let op = g.slot(&n, "operator").and_then(|e| e.into_token());
+                op.is_some_and(|t| ops.contains(&t.text()))
+                    && n.last_child().is_some_and(|a| simple_at(&a, depth))
+            }
             // A call inside a call argument is not simple.
-            return depth == 0
-                && callee.is_some_and(|c| simple_at(&c, depth))
-                && g.slots(&n, "arguments")
-                    .filter_map(|e| e.into_node())
-                    .all(|a| simple_at(&a, depth + 1));
+            Rule::Call => {
+                let callee = g.slot(&n, "callee").and_then(|c| c.into_node());
+                depth == 0
+                    && callee.is_some_and(|c| simple_at(&c, depth))
+                    && g.slots(&n, "arguments")
+                        .filter_map(|e| e.into_node())
+                        .all(|a| simple_at(&a, depth + 1))
+            }
+            _ => true,
         }
-        false
     }
 
     /// Prettier's `isHopefullyShortCallArgument`: an argument that is cheap to print before a
     /// hugged first argument.
     pub fn is_short(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-        let s = &self.simple;
         let n = un(n);
-        let k = n.kind();
-        if s.short_binary.contains(&k) {
-            return n.children().all(|c| self.is_short(cx, &c));
+        match self.find(cx.grammar, n.kind(), |r| {
+            matches!(r, Rule::Short | Rule::ShortBinary | Rule::Cast(_))
+        }) {
+            Some(Rule::Short) => true,
+            Some(Rule::ShortBinary) => n.children().all(|c| self.is_short(cx, &c)),
+            Some(Rule::Cast(targs)) => {
+                n.first_child().is_some_and(|e| self.is_short(cx, &e))
+                    && n.last_child()
+                        .is_some_and(|t| t.children().all(|c| c.kind() != *targs))
+            }
+            _ => self.is_simple(cx, &n, 0),
         }
-        if s.short.contains(&k) {
-            return true;
-        }
-        if let Some((_, targs)) = s.cast.iter().find(|(c, _)| *c == k) {
-            return n.first_child().is_some_and(|e| self.is_short(cx, &e))
-                && n.last_child()
-                    .is_some_and(|t| t.children().all(|c| c.kind() != *targs));
-        }
-        self.is_simple(cx, &n, 0)
     }
 
     /// Does a call with several function arguments (or one that has a function argument) break
     /// its arguments (`composition = yes`)?
     pub fn composition(&self) -> bool {
-        self.simple.composition
+        self.composition
     }
 
     /// Arguments of a call under a node of this kind are never a function composition.
-    pub fn no_composition(&self, parent: SyntaxKind) -> bool {
-        self.simple.no_composition.contains(&parent)
+    pub fn no_composition(&self, g: &Grammar, parent: SyntaxKind) -> bool {
+        self.is(g, parent, |r| matches!(r, Rule::NoComposition))
     }
 
     /// An argument pair `(a, b)` whose last argument is not hugged.
-    pub fn not_last(&self, first: SyntaxKind, last: SyntaxKind) -> bool {
-        self.simple.not_last.contains(&(first, last))
+    pub fn not_last(&self, g: &Grammar, first: SyntaxKind, last: SyntaxKind) -> bool {
+        self.rows
+            .iter()
+            .any(|(p, r)| matches!(r, Rule::NotLast(l) if *l == last) && p.matches(g, first))
     }
 
     /// An array of two or more numbers, which prints as a fill.
     pub fn is_concise_array(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-        let s = &self.simple;
-        if !s.concise.contains(&n.kind()) {
+        let g = cx.grammar;
+        if !self.is(g, n.kind(), |r| matches!(r, Rule::Concise)) {
             return false;
         }
         let items: Vec<SyntaxNode> = n.children().collect();
@@ -528,23 +495,25 @@ impl CallRules {
 
     /// A number (signed, without comments inside) with no line comment after it or its comma.
     fn concise_item(&self, cx: &FormatCtx<'_>, i: &SyntaxNode) -> bool {
-        let s = &self.simple;
+        let g = cx.grammar;
         let line_comment = |t: &core_syntax::SyntaxToken| {
-            comments::trailing_comments(cx.grammar, t)
+            comments::trailing_comments(g, t)
                 .iter()
                 .any(|c| c.kind == comments::CommentKind::Line)
         };
-        let number = s.numeric.contains(&i.kind())
-            || (s.signed_numeric.contains(&i.kind())
+        let numeric = |n: &SyntaxNode| self.is(g, n.kind(), |r| matches!(r, Rule::Numeric));
+        let number = numeric(i)
+            || (self.is(g, i.kind(), |r| matches!(r, Rule::SignedNumeric))
                 && i.last_child()
-                    .is_some_and(|c| s.numeric.contains(&c.kind()) && !has_comment(cx, &c))
-                && !cx.first_token(i).is_some_and(|t| token_has_comment(cx, &t)));
+                    .is_some_and(|c| numeric(&c) && !has_comment(cx, &c))
+                && !cx
+                    .first_token(i)
+                    .is_some_and(|t| comments::token_has_comment(g, &t)));
         number
             && !cx.last_token(i).is_some_and(|t| {
                 line_comment(&t)
-                    || t.next_token().is_some_and(|c| {
-                        cx.grammar.has_tag(c.kind(), "separator") && line_comment(&c)
-                    })
+                    || t.next_token()
+                        .is_some_and(|c| g.has_tag(c.kind(), "separator") && line_comment(&c))
             })
     }
 }
@@ -555,11 +524,6 @@ fn callee_text(cx: &FormatCtx<'_>, callee: &SyntaxNode) -> Option<String> {
     let g = cx.grammar;
     (g.has_tag(c.kind(), "reference") || g.has_tag(c.kind(), "member-access"))
         .then(|| code_text(&c))
-}
-
-fn token_has_comment(cx: &FormatCtx<'_>, t: &core_syntax::SyntaxToken) -> bool {
-    !comments::leading_comments(cx.grammar, t).is_empty()
-        || !comments::trailing_comments(cx.grammar, t).is_empty()
 }
 
 /// A comment in front of the first token of `n` or after its last.
@@ -583,12 +547,9 @@ pub fn template_on_own_line(cx: &FormatCtx<'_>, n: &SyntaxNode, lit: &SyntaxNode
         return false;
     }
     let mut prev = first.prev_token();
-    while let Some(t) = prev {
+    while let Some(t) = prev.take().filter(|t| cx.grammar.is_trivia(t.kind())) {
         if cx.grammar.has_tag(t.kind(), "newline") {
             return false;
-        }
-        if !cx.grammar.is_trivia(t.kind()) {
-            break;
         }
         prev = t.prev_token();
     }

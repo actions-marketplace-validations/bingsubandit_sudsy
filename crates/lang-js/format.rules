@@ -26,14 +26,14 @@ no_composition = Decorator
 short = RegExpLiteral
 short_binary = BinaryExpression|LogicalExpression
 cast = TSAsExpression:TSTypeParameterInstantiation|TSSatisfiesExpression:TSTypeParameterInstantiation
-not_last = ArrowFunctionExpression,ArrayExpression
+not_last = ArrowFunctionExpression:ArrayExpression
 numeric = NumericLiteral
 signed_numeric = UnaryExpression
 concise = ArrayExpression
 
 [simple]
-leaf = #literal|#reference|ThisExpression|Super|PrivateIdentifier|IdentifierName
 regex = RegExpLiteral:5
+leaf = #literal|#reference|ThisExpression|Super|PrivateIdentifier|IdentifierName
 single_line = TemplateLiteral
 object = ObjectExpression
 array = ArrayExpression

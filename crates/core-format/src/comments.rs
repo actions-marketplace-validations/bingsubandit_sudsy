@@ -725,6 +725,11 @@ pub fn has_trailing_comment(g: &Grammar, tok: &SyntaxToken) -> bool {
     comment_follows(g, tok)
 }
 
+/// A comment in front of `tok` or after it.
+pub fn token_has_comment(g: &Grammar, tok: &SyntaxToken) -> bool {
+    !leading_comments(g, tok).is_empty() || has_trailing_comment(g, tok)
+}
+
 pub fn trailing_comments(g: &Grammar, tok: &SyntaxToken) -> Vec<Comment> {
     if !comment_follows(g, tok) {
         return Vec::new();

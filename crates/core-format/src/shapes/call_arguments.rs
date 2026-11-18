@@ -54,13 +54,13 @@ impl CallStyle {
                 .get("hug_first_argument")
                 .is_some_and(|_| options.bool("hug_first_argument")),
             body: false,
-            last: match options.get("hug_last_argument") {
-                Some(_) => match options.str("hug_last_argument") {
-                    "last" => HugLast::Last,
-                    "sole" => HugLast::Sole,
-                    _ => HugLast::Never,
-                },
-                None => HugLast::Never,
+            last: match options
+                .get("hug_last_argument")
+                .map(|_| options.str("hug_last_argument"))
+            {
+                Some("last") => HugLast::Last,
+                Some("sole") => HugLast::Sole,
+                _ => HugLast::Never,
             },
         }
     }
@@ -185,7 +185,8 @@ fn should_group_last(
     !has_comment(cx, last)
         && can_hug(cx, last, false)
         && penultimate.is_none_or(|p| p.kind() != last.kind())
-        && (args.len() != 2 || penultimate.is_none_or(|p| !rules.not_last(p.kind(), last.kind())))
+        && (args.len() != 2
+            || penultimate.is_none_or(|p| !rules.not_last(cx.grammar, p.kind(), last.kind())))
         && !(args.len() > 1 && rules.is_concise_array(cx, last))
 }
 
@@ -215,7 +216,7 @@ pub fn plan(
 ) -> Plan {
     let broken = rules.composition()
         && is_composition(cx, args)
-        && !parent(node).is_some_and(|p| rules.no_composition(p.kind()));
+        && !parent(node).is_some_and(|p| rules.no_composition(cx.grammar, p.kind()));
     if broken {
         return Plan { broken, hug: None };
     }
@@ -304,14 +305,6 @@ impl Args {
         self
     }
 
-    fn close_line(&self) -> Doc {
-        if self.hug_close {
-            Doc::Nil
-        } else {
-            doc::line()
-        }
-    }
-
     /// Does any argument contain a forced line break?
     pub fn will_break(&self) -> bool {
         self.printed.iter().any(Doc::will_break)
@@ -322,18 +315,24 @@ impl Args {
         !matches!(self.dangling, Doc::Nil)
     }
 
-    fn broken_out(&self) -> Doc {
-        doc::group_broken(doc::concat(vec![
+    /// `open`, the indented printed arguments (after `lead`), `close`; `tail` stands in front of
+    /// the `)` unless it hugs the last argument.
+    fn wrapped(&self, lead: Doc, tail: Doc) -> Doc {
+        doc::concat(vec![
             self.open.clone(),
             doc::indent(doc::concat(vec![
-                doc::line(),
+                lead,
                 doc::concat(self.printed.clone()),
                 self.trailing.clone(),
                 self.dangling.clone(),
             ])),
-            self.close_line(),
+            if self.hug_close { Doc::Nil } else { tail },
             self.close.clone(),
-        ]))
+        ])
+    }
+
+    fn broken_out(&self) -> Doc {
+        doc::group_broken(self.wrapped(doc::line(), doc::line()))
     }
 
     /// The candidates with the argument `at` hugged, tried flat: the separators are spaces.
@@ -411,21 +410,7 @@ impl Args {
                 doc::conditional_group(states),
             ]);
         }
-        let contents = doc::concat(vec![
-            self.open.clone(),
-            doc::indent(doc::concat(vec![
-                doc::softline(),
-                doc::concat(self.printed.clone()),
-                self.trailing.clone(),
-                self.dangling.clone(),
-            ])),
-            if self.hug_close {
-                Doc::Nil
-            } else {
-                doc::softline()
-            },
-            self.close.clone(),
-        ]);
+        let contents = self.wrapped(doc::softline(), doc::softline());
         if unbroken {
             contents
         } else if self.will_break() {
@@ -472,10 +457,7 @@ pub fn call_arguments(
         .children_with_tokens()
         .filter_map(|e| e.into_token())
         .filter(|t| !g.is_trivia(t.kind()))
-        .all(|t| {
-            comments::leading_comments(g, &t).is_empty()
-                && comments::trailing_comments(g, &t).is_empty()
-        })
+        .all(|t| !comments::token_has_comment(g, &t))
         && c.slots.iter().all(|s| {
             cx.first_token(&s.node)
                 .is_some_and(|t| comments::leading_comments(g, &t).is_empty())
@@ -553,30 +535,13 @@ fn body_hug(
     let head = doc::shared(seq::plain(cx, rows.space(), head, |e| seq::el(cx, e))?);
     let body = doc::shared(cx.format(body)?);
     let (open, close) = (cx.token(&c.open), cx.token(&c.close));
-    let flat = doc::concat(vec![
-        open.clone(),
-        head.clone(),
-        doc::lit(" "),
-        body.clone(),
-        close.clone(),
-    ]);
-    let hugged = doc::concat(vec![
-        open.clone(),
-        head.clone(),
-        doc::indent(doc::concat(vec![doc::hardline(), body.clone()])),
-        doc::hardline(),
-        close.clone(),
-    ]);
-    let expanded = doc::group(doc::concat(vec![
-        open,
-        doc::indent(doc::concat(vec![
-            doc::softline(),
-            head,
-            doc::lit(" "),
-            body,
-        ])),
-        doc::softline(),
-        close,
-    ]));
-    Ok(Some(doc::conditional_group(vec![flat, hugged, expanded])))
+    let wrap = |inner: Doc, tail: Doc| doc::concat(vec![open.clone(), inner, tail, close.clone()]);
+    let inline = doc::concat(vec![head.clone(), doc::lit(" "), body.clone()]);
+    let hung = doc::indent(doc::concat(vec![doc::hardline(), body.clone()]));
+    let wide = doc::indent(doc::concat(vec![doc::softline(), inline.clone()]));
+    Ok(Some(doc::conditional_group(vec![
+        wrap(inline, Doc::Nil),
+        wrap(doc::concat(vec![head, hung]), doc::hardline()),
+        doc::group(wrap(wide, doc::softline())),
+    ])))
 }
