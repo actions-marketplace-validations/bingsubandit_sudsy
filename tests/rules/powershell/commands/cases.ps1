@@ -1,14 +1,14 @@
 Write-Host "hi"
-^^^^^^^^^^ no-write-host
+^^^^^^^^^^^^^^^ no-print
 write-host
-^^^^^^^^^^ no-write-host
+^^^^^^^^^^ no-print
 Write-Output "ok"
 Get-Help Write-Host
 iex $script
 ^^^ no-cmdlet-aliases
-^^^ no-invoke-expression
+^^^^^^^^^^^ no-eval
 Invoke-Expression -Command $c
-^^^^^^^^^^^^^^^^^ no-invoke-expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no-eval
 ConvertTo-SecureString $p -AsPlainText -Force
 ^^^^^^^^^^^^^^^^^^^^^^ no-plain-text-secure-string
 ConvertTo-SecureString $p
@@ -21,7 +21,7 @@ Get-CimInstance Win32_Process
 ConvertTo-SecureString -AsPlainText "x" -Force
 ^^^^^^^^^^^^^^^^^^^^^^ no-plain-text-secure-string
 function Get-Other { Write-Host "y" }
-#                    ^^^^^^^^^^ no-write-host
+#                    ^^^^^^^^^^^^^^ no-print
 function Get-It {
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
   param()

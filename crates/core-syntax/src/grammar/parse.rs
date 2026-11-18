@@ -310,6 +310,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut requires_roles = false;
     let mut operators: HashMap<String, String> = HashMap::new();
     let mut hoisted: Vec<String> = Vec::new();
+    let mut case_insensitive = false;
     let mut rule_rows: Vec<RuleRow> = Vec::new();
     let mut precedence_rows: Vec<PrecedenceRow> = Vec::new();
     let mut keys = KeySyntax::default();
@@ -400,6 +401,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
                 }
                 rule_rows.push(row);
             }
+            "case-insensitive" => case_insensitive = true,
             "hoisted" => {
                 while c.peek().is_some() {
                     hoisted.push(c.string("a declaration keyword")?.to_string());
@@ -518,6 +520,7 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         requires_roles,
         operators,
         hoisted,
+        case_insensitive,
         rule_rows,
         precedence_rows,
         keys,
@@ -769,6 +772,7 @@ fn resolve(
     requires_roles: bool,
     operators: HashMap<String, String>,
     hoisted: Vec<String>,
+    case_insensitive: bool,
     rule_rows: Vec<RuleRow>,
     precedence_rows: Vec<PrecedenceRow>,
     keys: KeySyntax,
@@ -866,6 +870,7 @@ fn resolve(
         requires_roles,
         operators,
         hoisted,
+        case_insensitive,
         rule_rows,
         precedence_rows,
         keys,

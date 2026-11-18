@@ -3,6 +3,7 @@
 One line each; none is committed, except the small tasks below.
 
 ## Small tasks
+- Read shared rule specs once per process, not per embedded language.
 - Human docs (docs/*.md, README.md) carry numbers copied from docs/ai; refresh them when a parity or performance number changes.
 - Format-string family: dispatch once per node instead of 16 `MEMO.names` calls (py.lint +3.6%).
 - Profile the `core_format::spacing` row lookup (kt.format +6.4%, java.format +4% at F2) once a profiler runs on the agent host.

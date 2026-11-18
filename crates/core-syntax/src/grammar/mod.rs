@@ -6,6 +6,7 @@
 //! comments line "//" block "/*" "*/"   // either part optional
 //! trivia Comment line "#" block "/*" "*/"   // text between tokens: see `trivia_row`; `limits stack 256 bytes 16 depth 2000`
 //! rule no-print level off calls "print" // a rule's level and option values in this language (optional rows)
+//! case-insensitive                    // command and function names compare without case (PowerShell; optional)
 //! hoisted "var"                        // declaration keywords whose bare declarations hoist (optional)
 //! suppress disable-next-line "sudsy-disable-next-line"   // role, marker; roles: disable-next-line,
 //!                                                        // disable-line, disable, enable, disable-file, ignore*
@@ -195,6 +196,8 @@ pub struct Grammar {
     operators: HashMap<String, String>,
     /// Declaration keywords whose declarations hoist (`hoisted` line: JS `var`).
     hoisted: Vec<String>,
+    /// Names compare without case (`case-insensitive` line).
+    case_insensitive: bool,
     /// The `rule` rows: a shared rule's level and option values for this language.
     rule_rows: Vec<RuleRow>,
     /// The `precedence` lines (a handful of rows: scanned, no table).
@@ -457,6 +460,11 @@ impl Grammar {
     /// The language's `rule` row of the rule `id`.
     pub fn rule_row(&self, id: &str) -> Option<&RuleRow> {
         self.rule_rows.iter().find(|r| r.id == id)
+    }
+
+    /// Do names compare without case (`case-insensitive` line)?
+    pub fn is_case_insensitive(&self) -> bool {
+        self.case_insensitive
     }
 
     /// Is `keyword` one of the `hoisted` declaration keywords?

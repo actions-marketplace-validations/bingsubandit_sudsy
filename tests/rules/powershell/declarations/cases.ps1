@@ -12,9 +12,9 @@ function Fetch-Data {
         [switch]$Quiet
     )
     try { Get-Item x } catch { }
-#                      ^^^^^^^^^ empty-catch-block
+#                      ^^^^^^^^^ no-empty-catch
     try { Get-Item x } catch {
-#                      ^ empty-catch-block
+#                      ^ no-empty-catch
         # ignored
     }
     try { Get-Item x } catch { Write-Error $_ }

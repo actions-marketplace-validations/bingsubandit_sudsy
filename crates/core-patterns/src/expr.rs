@@ -81,6 +81,8 @@ pub struct Spec {
     pub same: Option<Vec<String>>,
     /// The node holds no node and no comment before its closing bracket.
     pub empty: Option<bool>,
+    /// The node holds no node and no token but its brackets; a comment does not count.
+    pub bare: Option<bool>,
     /// The node, looked through parentheses and single-child wrappers, holds this rule.
     pub inner: Option<Box<Spec>>,
 }
@@ -136,6 +138,7 @@ pub enum Expr {
     Single(String),
     Same(String, String),
     Empty,
+    Bare,
     Inner(Box<Expr>),
 }
 
@@ -185,9 +188,22 @@ pub(crate) fn unwrap(node: &SyntaxNode, g: &Grammar) -> SyntaxNode {
     }
 }
 
-/// No node inside and no comment before the last token (a closing bracket).
-fn is_empty(node: &SyntaxNode, g: &Grammar) -> bool {
+/// No node and no token between the first and the last (the brackets): a block with no statement,
+/// comments aside.
+fn is_bare(node: &SyntaxNode, g: &Grammar) -> bool {
     if node.children().any(|c| !g.has_tag(c.kind(), "trivia")) {
+        return false;
+    }
+    node.children_with_tokens()
+        .filter_map(|e| e.into_token())
+        .filter(|t| !g.is_trivia(t.kind()) && !t.text().is_empty())
+        .count()
+        <= 2
+}
+
+/// Bare, and no comment before the last token (a closing bracket).
+fn is_empty(node: &SyntaxNode, g: &Grammar) -> bool {
+    if !is_bare(node, g) {
         return false;
     }
     let end = node
@@ -366,6 +382,9 @@ impl Expr {
         if spec.empty == Some(true) {
             all.push(Expr::Empty);
         }
+        if spec.bare == Some(true) {
+            all.push(Expr::Bare);
+        }
         if let Some(s) = &spec.inner {
             all.push(Expr::Inner(Box::new(sub(s)?)));
         }
@@ -373,7 +392,7 @@ impl Expr {
             0 => Err(
                 "a rule needs at least one of pattern, kind, regex, path, nth, inside, not-inside, \
                       has, not-has, parent, child, option, in-option, all, any, not, role, operator, fields, \
-                      items, single, same, empty, inner, regex-option, rethrows"
+                      items, single, same, empty, bare, inner, regex-option, rethrows"
                     .into(),
             ),
             1 => Ok(all.remove(0)),
@@ -425,7 +444,7 @@ impl Expr {
             Expr::InOption(name) => {
                 let range = cx.ranges.significant_range(node, cx.grammar);
                 cx.options
-                    .list_has(name, &cx.text[range])
+                    .list_has(name, &cx.text[range], cx.grammar.is_case_insensitive())
                     .then(Captures::new)
             }
             Expr::Rethrows => {
@@ -517,6 +536,7 @@ impl Expr {
                 same_words(&a, &b, cx.grammar).then(Captures::new)
             }
             Expr::Empty => is_empty(node, cx.grammar).then(Captures::new),
+            Expr::Bare => is_bare(node, cx.grammar).then(Captures::new),
             Expr::Inner(e) => e.matches(&unwrap(node, cx.grammar), cx),
         }
     }
@@ -529,7 +549,10 @@ impl Expr {
         };
         match self {
             Expr::Regex(re, _) => re.is_match(t.text()).then(Captures::new),
-            Expr::InOption(name) => cx.options.list_has(name, t.text()).then(Captures::new),
+            Expr::InOption(name) => cx
+                .options
+                .list_has(name, t.text(), cx.grammar.is_case_insensitive())
+                .then(Captures::new),
             Expr::Role(names, _) => names
                 .iter()
                 .any(|n| cx.grammar.has_tag(t.kind(), n))
@@ -565,7 +588,8 @@ impl Expr {
             | Expr::Operator(_)
             | Expr::Same(..)
             | Expr::Single(_)
-            | Expr::Empty => false,
+            | Expr::Empty
+            | Expr::Bare => false,
         }
     }
 
@@ -619,6 +643,7 @@ impl Expr {
             | Expr::Single(_)
             | Expr::Same(..)
             | Expr::Empty
+            | Expr::Bare
             | Expr::Inner(_) => {}
         }
     }

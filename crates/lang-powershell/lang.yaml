@@ -27,6 +27,7 @@ mapping:
   AssignStmt: assignment_statement
   Foreach: foreach_statement
   Block: statement_block
+  CommandName: command_name
   Whitespace: line_continuation
   String: single_quoted_string expandable_string
   HereString: single_quoted_here_string expandable_here_string

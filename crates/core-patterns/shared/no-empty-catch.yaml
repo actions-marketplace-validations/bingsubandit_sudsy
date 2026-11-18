@@ -3,18 +3,22 @@ message: 'the catch clause is empty: the error is swallowed'
 description: >-
   A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as
   none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle
-  EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `broad_only` only a clause that
+  EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `comment_handles` off a comment does not count (PSScriptAnalyzer). With `broad_only` only a clause that
   catches everything or one of the `types` is reported.
 example: 'try { run(); } catch (e) { }'
 severity: warn
 category: suspicious
 options:
+  - { name: comment_handles, type: bool, default: true, description: A comment in the body counts as handling the error }
   - { name: broad_only, type: bool, default: false, description: Report only a clause that catches everything or a broad type }
   - { name: types, type: list, default: [], description: Types that count as broad }
 rule:
   role: catch
   any:
     - fields: { body: { empty: true } }
+    - all:
+        - not: { option: comment_handles }
+        - fields: { body: { bare: true } }
     - all:
         - { single: body }
         - fields: { body: { role: empty-statement } }

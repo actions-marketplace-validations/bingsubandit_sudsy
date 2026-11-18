@@ -14,13 +14,13 @@ entries:
   PSAlignAssignmentStatement: formatter
   PSUseCorrectCasing: wontfix needs the command and parameter tables of a PowerShell runtime
   PSAvoidUsingCmdletAliases: rule no-cmdlet-aliases | The table is fixed (a Windows host's); PSScriptAnalyzer reads the aliases of the host it runs on, so on Linux `ls` and `cat` are not aliases there, and user-defined aliases are not known. No fix that expands the alias. `& ls` is reported at the `&`.
-  PSAvoidUsingWriteHost: rule no-write-host
-  PSAvoidUsingInvokeExpression: rule no-invoke-expression
+  PSAvoidUsingWriteHost: rule no-print
+  PSAvoidUsingInvokeExpression: rule no-eval
   PSAvoidUsingConvertToSecureStringWithPlainText: rule no-plain-text-secure-string
   PSAvoidUsingWMICmdlet: rule no-wmi-cmdlets
   PSAvoidUsingPlainTextForPassword: rule no-plain-text-password | `SuppressMessageAttribute` is not honored (see the scope).
   PSAvoidDefaultValueSwitchParameter: rule no-default-true-switch | Other values that evaluate to true (`= 1`) are not reported.
-  PSAvoidUsingEmptyCatchBlock: rule empty-catch-block
+  PSAvoidUsingEmptyCatchBlock: rule no-empty-catch
   PSUseApprovedVerbs: rule approved-verbs | Names without a dash are not checked; the verb list is fixed and cannot follow the host.
   PSAvoidGlobalVars: rule no-global-vars | Variables inside strings, and `Get-Variable -Scope Global`, are not looked at.
   PSAvoidTrailingWhitespace: formatter

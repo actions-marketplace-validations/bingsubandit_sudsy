@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Lint
+* PowerShell uses the shared rules, renamed (config keys and the `powershell/psscriptanalyzer` preset
+  follow, no aliases): `no-invoke-expression` is `no-eval`, `no-write-host` is `no-print`,
+  `empty-catch-block` is `no-empty-catch`. They report the whole command or clause, not its first
+  token. Command names in `calls` lists match without regard to case in PowerShell.
 * `no-control-regex`, `no-regex-spaces` and `no-misleading-character-class` also exist for Java
   (`Pattern.compile`, `Pattern.matches`), C# (`new Regex`, the static `Regex` methods) and PHP
   (`preg_*`); they are off by default.

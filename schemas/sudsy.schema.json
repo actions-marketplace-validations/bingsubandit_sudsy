@@ -1055,10 +1055,6 @@
               "$ref": "#/definitions/rule",
               "description": "A `CASE` branch `ELSE NULL` (sqlfluff ST01)."
             },
-            "empty-catch-block": {
-              "$ref": "#/definitions/rule",
-              "description": "A `catch` clause whose block has no statement (a comment does not count)."
-            },
             "empty-heading": {
               "$ref": "#/definitions/rule",
               "description": "Screen readers need text in a heading; whitespace is not text. An image with an `alt` or an `<svg>` inside counts as content."
@@ -2764,7 +2760,7 @@
               "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement)."
             },
             "no-empty-catch": {
-              "description": "A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `broad_only` only a clause that catches everything or one of the `types` is reported.",
+              "description": "A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `comment_handles` off a comment does not count (PSScriptAnalyzer). With `broad_only` only a clause that catches everything or one of the `types` is reported.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2781,6 +2777,11 @@
                         "broad_only": {
                           "default": false,
                           "description": "Report only a clause that catches everything or a broad type",
+                          "type": "boolean"
+                        },
+                        "comment_handles": {
+                          "default": true,
+                          "description": "A comment in the body counts as handling the error",
                           "type": "boolean"
                         },
                         "types": {
@@ -2904,7 +2905,8 @@
                       "properties": {
                         "calls": {
                           "default": [
-                            "exec"
+                            "Invoke-Expression",
+                            "iex"
                           ],
                           "description": "Calls that run a string as code",
                           "items": {
@@ -3061,10 +3063,6 @@
               "$ref": "#/definitions/rule",
               "description": "A declaration at the top of a file, or in an at-rule such as `@media` that is not inside a rule."
             },
-            "no-invoke-expression": {
-              "$ref": "#/definitions/rule",
-              "description": "A call of `Invoke-Expression` or its alias `iex`."
-            },
             "no-irregular-whitespace": {
               "$ref": "#/definitions/rule",
               "description": "A no-break space, zero-width space or other unusual whitespace character outside a string."
@@ -3206,9 +3204,7 @@
                       "properties": {
                         "calls": {
                           "default": [
-                            "print",
-                            "pprint.pprint",
-                            "pp"
+                            "Write-Host"
                           ],
                           "description": "Calls that print",
                           "items": {
@@ -3217,12 +3213,12 @@
                           "type": "array"
                         },
                         "console": {
-                          "default": "^file[ ]*=[ ]*(None|sys[.]std(out|err))$",
+                          "default": "\\b\\B",
                           "description": "An argument that sends the output to the console",
                           "type": "string"
                         },
                         "redirect": {
-                          "default": "^file[ ]*=",
+                          "default": "\\b\\B",
                           "description": "An argument that sends the output elsewhere",
                           "type": "string"
                         }
@@ -3543,10 +3539,6 @@
             "no-wrapper-object-types": {
               "$ref": "#/definitions/rule",
               "description": "The global types `BigInt`, `Boolean`, `Number`, `Object`, `String` and `Symbol` as type names."
-            },
-            "no-write-host": {
-              "$ref": "#/definitions/rule",
-              "description": "A call of `Write-Host`."
             },
             "none-comparison": {
               "$ref": "#/definitions/rule",

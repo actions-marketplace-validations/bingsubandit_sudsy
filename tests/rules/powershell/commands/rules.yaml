@@ -1,5 +1,5 @@
-no-write-host: warn
-no-invoke-expression: warn
+no-print: warn
+no-eval: warn
 no-plain-text-secure-string: error
 no-wmi-cmdlets: warn
 no-cmdlet-aliases: warn

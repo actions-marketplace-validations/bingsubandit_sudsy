@@ -28,6 +28,7 @@ pub const MAPPING: Mapping = Mapping {
         ("assignment_statement", "AssignStmt"),
         ("binary_expression", "Binary"),
         ("statement_block", "Block"),
+        ("command_name", "CommandName"),
         ("foreach_statement", "Foreach"),
         ("function_definition", "Function"),
         ("hashtable_expression", "Hash"),

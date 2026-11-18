@@ -40,6 +40,11 @@ fn main() {
             // A rule none of whose roles a node of the grammar has is not built in at all.
             .filter(|p| {
                 let text = fs::read_to_string(p).unwrap();
+                // A `per-language` rule without a `rule` row of the grammar is never listed.
+                let id = p.file_stem().unwrap().to_string_lossy();
+                if text.contains("per-language: true") && grammar.rule_row(&id).is_none() {
+                    return false;
+                }
                 // The rule's own roles are those of its first line with `role:`; a rule with none
                 // (written on kinds or patterns) is always built in.
                 let roles = text

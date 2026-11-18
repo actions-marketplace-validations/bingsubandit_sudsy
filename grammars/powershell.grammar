@@ -4,6 +4,11 @@
 
 language powershell 10 "PowerShell"
 comments line "#" block "<#" "#>"
+roles
+case-insensitive
+rule no-empty-catch level off comment_handles "false"
+rule no-eval calls "Invoke-Expression" "iex"
+rule no-print calls "Write-Host"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
 suppress disable "sudsy-disable"
@@ -15,58 +20,61 @@ token Whitespace #trivia #whitespace
 token Newline #trivia #newline
 token Comment #trivia #comment
 
+// Tokens carry `#el` (a body part, like the nodes) and `#tok` (a token only, so a body can tell a token run from a node).
 // Identifiers, variables, numbers, member names, `.` and `::`: whatever the grammar does not name.
-token Word #literal
+token Word #literal #el #tok
+// The name of a command (`Get-Item`, `iex`), whole.
+token CommandName #el #tok
 // `-Name` in a command.
-token Parameter
+token Parameter #el #tok
 // Reserved words (`if`, `else`, `function`, `param`, ...).
-token Keyword
+token Keyword #el #tok
 // Single-quoted and double-quoted strings, whole, with their variables and `$(...)` inside.
-token String #string
+token String #string #el #tok
 // `@'...'@` and `@"..."@`, whole.
-token HereString #string
+token HereString #string #el #tok
 // `=`, `+=`, `-=`, ...
-token Assign
+token Assign #el #tok
 // `+`, `-`, `-eq`, `-and`, `!`, `-not`, `..`, ...
-token Op
-token Comma ","
-token Semi ";"
-token Pipe "|"
-token OpenBrace "{"
-token CloseBrace "}"
+token Op #el #tok
+token Comma "," #el #tok
+token Semi ";" #el #tok
+token Pipe "|" #el #tok
+token OpenBrace "{" #el #tok
+token CloseBrace "}" #el #tok
 // `@{`
-token HashOpen
+token HashOpen #el #tok
 // `(`, `$(` and `@(`
-token OpenParen
-token CloseParen ")"
-token OpenBracket "["
-token CloseBracket "]"
+token OpenParen #el #tok
+token CloseParen ")" #el #tok
+token OpenBracket "[" #el #tok
+token CloseBracket "]" #el #tok
 
 token Eof
 token Unknown #error
 
-node Program = items:#el* Eof
+node Program #opaque = items:#el* Eof
 // `a + b`, `a -eq b`: the operators of a binary expression.
-node Binary #el = parts:#el*
+node Binary #el #opaque = parts:#el*
 // `-not a`, `-1`, `a++`, `-split a`: the operators of a unary expression.
-node Unary #el = parts:#el*
+node Unary #el #opaque = parts:#el*
 // `@{ ... }`
-node Hash #el = parts:#el*
+node Hash #el #opaque = parts:#el*
 // `key = value` in a hashtable.
-node HashEntry #el = parts:#el*
+node HashEntry #el #opaque = parts:#el*
 // `Get-Item -Path x`: a command with its name, parameters and arguments.
-node Command #el = parts:#el*
+node Command #el #call = callee:CommandName? arguments:#el*
 // `function Name(...) { }`, `filter`, `workflow`: the name is the first `Word` after the keyword.
-node Function #el = parts:#el*
+node Function #el #opaque = parts:#el*
 // The `{ }` body of a function and a script block used as a value.
-node ScriptBlock #el = parts:#el*
+node ScriptBlock #el #opaque = parts:#el*
 // A declared parameter: `[Parameter()][string]$Name = 'x'`.
-node ParamDecl #el = parts:#el*
+node ParamDecl #el #opaque = parts:#el*
 // `$x = ...`, `$x += ...`
-node AssignStmt #el = parts:#el*
+node AssignStmt #el #opaque = parts:#el*
 // `catch [Type] { }`
-node CatchClause #el = parts:#el*
+node CatchClause #el #catch = Keyword types:#tok* body:Block
 // `foreach ($x in $xs) { }`
-node Foreach #el = parts:#el*
+node Foreach #el #opaque = parts:#el*
 // The `{ }` of a statement (`if`, `try`, `catch`, ...).
-node Block #el = parts:#el*
+node Block #el #opaque = parts:#el*

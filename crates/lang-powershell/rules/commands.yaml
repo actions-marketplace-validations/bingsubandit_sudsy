@@ -1,21 +1,3 @@
-id: no-write-host
-message: Write-Host cannot be redirected or captured; use Write-Output, Write-Verbose or Write-Information
-description: A call of `Write-Host`.
-example: 'Write-Host "done"'
-severity: off
-category: suspicious
-rule: { kind: Command, regex: '(?i)^write-host(\s|$)' }
-report-on: first-token
----
-id: no-invoke-expression
-message: Invoke-Expression runs a string as code; call the command directly or use `&`
-description: A call of `Invoke-Expression` or its alias `iex`.
-example: 'iex $script'
-severity: warn
-category: suspicious
-rule: { kind: Command, regex: '(?i)^(invoke-expression|iex)(\s|$)' }
-report-on: first-token
----
 id: no-plain-text-secure-string
 message: do not convert a plain text string with ConvertTo-SecureString -AsPlainText; read the secret as a SecureString
 description: A call of `ConvertTo-SecureString` with `-AsPlainText`.

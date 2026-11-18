@@ -994,7 +994,7 @@ impl PatternRule {
                 && c.kind.is_none_or(|k| capture.kind == Some(k))
                 && c.in_option.as_ref().is_none_or(|(option, is_list)| {
                     if *is_list {
-                        options.list_has(option, captured)
+                        options.list_has(option, captured, false)
                     } else {
                         options.string(option) == captured
                     }

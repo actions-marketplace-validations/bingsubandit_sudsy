@@ -14,16 +14,6 @@ severity: warn
 category: suspicious
 rule: { kind: ParamDecl, regex: '(?is)\[switch\]\s*\$\w+\s*=\s*\$true\b' }
 ---
-id: empty-catch-block
-message: the catch block is empty; handle the error or write why it is ignored
-description: A `catch` clause whose block has no statement (a comment does not count).
-example: 'try { f } catch { }'
-severity: off
-category: suspicious
-rule:
-  kind: CatchClause
-  child: { kind: Block, regex: '(?s)^\{(\s|#[^\n]*|<#.*?#>)*\}$' }
----
 id: approved-verbs
 message: the verb of the function name is not an approved PowerShell verb (see Get-Verb)
 description: A function named `Verb-Noun` whose verb is not in the list `Get-Verb` returns. Names without a dash are not checked.

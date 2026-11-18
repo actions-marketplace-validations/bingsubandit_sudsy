@@ -165,12 +165,13 @@ impl RuleOptions {
         }
     }
 
-    /// Is `text` an item of the list option, without building the list.
-    pub fn list_has(&self, name: &str, text: &str) -> bool {
+    /// Is `text` an item of the list option, without building the list (`fold`: ignoring ASCII
+    /// case).
+    pub fn list_has(&self, name: &str, text: &str, fold: bool) -> bool {
         match self.values.get(name) {
-            Some(OptionValue::List(items)) => items
-                .iter()
-                .any(|i| matches!(i, OptionValue::String(s) if s == text)),
+            Some(OptionValue::List(items)) => items.iter().any(|i| {
+                matches!(i, OptionValue::String(s) if if fold { s.eq_ignore_ascii_case(text) } else { s == text })
+            }),
             _ => false,
         }
     }
