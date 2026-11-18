@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       npm:
-        description: "npm: sudsy and @sudsy/cli-* (secret NPM_TOKEN)"
+        description: "npm: sudsy and @sudsylint/cli-* (secret NPM_TOKEN)"
         type: boolean
         default: false
       pypi:
