@@ -246,6 +246,10 @@ impl NodeFormatter for LazyRules {
         self.get().exact_end((self.grammar)(), root)
     }
 
+    fn rows(&self) -> &'static str {
+        self.text
+    }
+
     fn rewrite_source(
         &self,
         tree: &SyntaxNode,
