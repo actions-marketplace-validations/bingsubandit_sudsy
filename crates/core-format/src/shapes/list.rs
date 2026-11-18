@@ -19,6 +19,8 @@ pub enum TrailingComma {
     Never,
     /// Only when the list is laid out on several lines.
     WhenBroken,
+    /// Always, on one line too (Python's one-item tuple `(a,)`).
+    Always,
     /// `WhenBroken` when the source has a separator after the last item, else `Never`.
     AsSource,
 }
@@ -100,6 +102,10 @@ pub struct ListStyle {
     pub inner_id: Option<doc::GroupId>,
     /// Indentation levels of the items; 0 counts as 1 (a continuation indent is 2).
     pub indent_levels: usize,
+    /// A blank line in front of the comments before the closing delimiter stays.
+    pub keep_blank_before_end_comments: bool,
+    /// The ignore comments (`sudsy-ignore`, `fmt: off`) in front of an item keep it as written.
+    pub ignore_marks: bool,
 }
 
 impl Default for ListStyle {
@@ -126,19 +132,44 @@ impl Default for ListStyle {
             id: None,
             inner_id: None,
             indent_levels: 1,
+            keep_blank_before_end_comments: true,
+            ignore_marks: true,
         }
+    }
+}
+
+/// What a caller reads off the source of a list to choose its style.
+pub struct ListFacts<'a> {
+    /// The number of items.
+    pub items: usize,
+    /// The separator after the last item, if the source has one.
+    pub last_sep: Option<&'a SyntaxToken>,
+    /// The node of the only item, when the list has one item and it is a plain node.
+    pub only: Option<&'a SyntaxNode>,
+}
+
+/// A style given, or chosen from the facts of the list.
+#[derive(Clone, Copy)]
+pub enum StyleOf<'a> {
+    Given(&'a ListStyle),
+    By(&'a dyn Fn(&ListFacts<'_>) -> ListStyle),
+}
+
+impl<'a> From<&'a ListStyle> for StyleOf<'a> {
+    fn from(s: &'a ListStyle) -> Self {
+        StyleOf::Given(s)
     }
 }
 
 /// `open item, item, item close` in a group; the node's directives `BreakAll` and `KeepTogether`
 /// override the style's layout. Separator tokens are re-created from `style.separator`; their
 /// comments are kept.
-pub fn delimited_list(
+pub fn delimited_list<'a>(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
-    style: &ListStyle,
+    style: impl Into<StyleOf<'a>>,
 ) -> Result<Doc, FormatError> {
-    list_of(cx, node, container(cx, node)?, style)
+    list_of(cx, node, container(cx, node)?, style.into())
 }
 
 /// [`delimited_list`] for the delimiters `open` and `close` among the children of `node`; the
@@ -154,7 +185,25 @@ pub fn delimited_list_between(
         cx,
         node,
         container_between(cx, node, Some((open, close)), style.unwrap)?,
-        style,
+        style.into(),
+    )
+}
+
+/// [`delimited_list`] for the children of `items` between the delimiters `open` and `close`, which
+/// stand outside it, in `node`.
+pub fn delimited_list_around<'a>(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    items: &SyntaxNode,
+    open: &SyntaxToken,
+    close: &SyntaxToken,
+    style: impl Into<StyleOf<'a>>,
+) -> Result<Doc, FormatError> {
+    list_of(
+        cx,
+        node,
+        super::container_around(cx, items, open, close)?,
+        style.into(),
     )
 }
 
@@ -162,8 +211,16 @@ fn list_of(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
     c: super::Container,
-    style: &ListStyle,
+    style: StyleOf<'_>,
 ) -> Result<Doc, FormatError> {
+    let owned;
+    let style = match style {
+        StyleOf::Given(s) => s,
+        StyleOf::By(f) => {
+            owned = f(&c.facts());
+            &owned
+        }
+    };
     let g = cx.grammar;
     // The separator goes right after an item and its trailing comments after the separator:
     // `b, // c` and `b, /* c */` whether or not the source had a comma.
@@ -186,7 +243,7 @@ fn list_of(
             trailing != TrailingComma::Never
         };
         if let Some(t) = (keeps && !s.hole)
-            .then(|| cx.last_token(&s.node))
+            .then(|| s.last_token(cx))
             .flatten()
             .filter(|t| comments::has_trailing_comment(g, t))
         {
@@ -194,7 +251,7 @@ fn list_of(
             tails.push((i, t));
         }
     }
-    let mut items = render_slots(cx, &c.slots)?;
+    let mut items = render_slots(cx, &c.slots, style.ignore_marks)?;
     let mut tail_comments: Vec<(usize, Doc)> = tails
         .iter()
         .map(|(i, t)| (*i, cx.reattach_trailing(t)))
@@ -318,7 +375,7 @@ fn list_of(
         // (`x: y,` kept as written in a list of `;` members ends with its separator too)
         let own_sep = !style.separator.is_empty()
             && items[i].verbatim
-            && cx.last_token(&items[i].last).is_some_and(|t| {
+            && items[i].last_token(cx).is_some_and(|t| {
                 t.text() == style.separator
                     || (matches!(t.text(), ";" | ",") && matches!(style.separator, ";" | ","))
             });
@@ -328,6 +385,7 @@ fn list_of(
             (true, _) if last_hole => doc::lit(style.separator),
             (true, _) if last_final => Doc::Nil,
             (true, TrailingComma::Never) => Doc::Nil,
+            (true, TrailingComma::Always) => doc::lit(broken),
             (true, _) => match fill_id {
                 Some(id) => doc::if_break_in(id, doc::lit(broken), Doc::Nil),
                 None => doc::if_break(doc::lit(broken), Doc::Nil),
@@ -341,7 +399,9 @@ fn list_of(
         }
         inner.push(separator_comments(cx, &items[i]));
     }
-    let blank_before_close = !dangling.is_empty() && comments::blank_lines_before(g, &c.close) > 0;
+    let blank_before_close = style.keep_blank_before_end_comments
+        && !dangling.is_empty()
+        && comments::blank_lines_before(g, &c.close) > 0;
     inner.push(dangling_comments(&dangling, blank_before_close));
     let inner = if fill {
         fill_parts.push(doc::concat(inner));
@@ -351,8 +411,12 @@ fn list_of(
     };
     // The items in a group of their own, after the opening delimiter and its line break.
     let inner = if style.hang || style.inner_id.is_some() {
+        // (a magic trailing comma puts each item on a line of its own)
+        let magic = style.layout == ListLayout::MagicTrailingComma
+            && c.slots.last().is_some_and(|s| s.sep.is_some());
         match style.inner_id {
             Some(id) => doc::group_with_id(id, inner),
+            None if magic => doc::group_broken(inner),
             None => doc::group(inner),
         }
     } else {
@@ -476,7 +540,7 @@ fn spans_lines(
 /// delimiter? (A break before the closing one after the separator of the last item counts.)
 fn item_breaks(cx: &FormatCtx<'_>, node: &SyntaxNode, c: &super::Container) -> bool {
     let g = cx.grammar;
-    let ends = |s: &super::Slot| s.sep.clone().or_else(|| cx.last_token(&s.node));
+    let ends = |s: &super::Slot| s.sep.clone().or_else(|| s.last_token(cx));
     let breaks = |s: &super::Slot| ends(s).is_some_and(|t| comments::break_after(g, &t));
     c.slots.windows(2).any(|w| breaks(&w[0]))
         || (c.slots.last().is_some_and(breaks) && breaks_after_open(cx, node, &c.open))
