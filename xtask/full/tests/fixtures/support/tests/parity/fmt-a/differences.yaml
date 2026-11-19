@@ -1,0 +1,8 @@
+ratchet:
+  real-world: 90
+  tests: 5
+  other: 5
+target-files:
+  real-world: 100
+  tests: 10
+  other: 50

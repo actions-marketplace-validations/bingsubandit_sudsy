@@ -1,0 +1,73 @@
+# Rows of the README "Language support" table (xtask/full/src/support.rs): the reference tools per
+# language. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
+# to the ratchet groups of this one. No `format` list: Sudsy does not format the language.
+- language: JavaScript / TypeScript
+  format: [{tool: prettier-js, name: Prettier}]
+  lint: [{tool: eslint, name: ESLint}, {tool: typescript-eslint, name: typescript-eslint}]
+- language: Python
+  format: [{tool: ruff, name: ruff format}]
+  lint: [{tool: ruff, name: ruff}]
+- language: Protobuf
+  format: [{tool: buf, name: buf format}]
+  lint: [{tool: buf, name: buf}]
+- language: Terraform (HCL)
+  format: [{tool: terraform, name: terraform fmt}]
+  lint: [{tool: tflint, name: tflint}]
+- language: GraphQL
+  format: [{tool: prettier, name: Prettier, groups: [graphql]}]
+- language: TOML
+  format: [{tool: taplo, name: taplo}]
+- language: HTML
+  format: [{tool: prettier-html, name: Prettier, groups: [prettier-html, real-world]}]
+  lint: [{tool: html-eslint, name: html-eslint}, {tool: html-validate, name: html-validate}, {tool: htmlhint, name: htmlhint}]
+- language: Vue / Svelte
+  format: [{tool: prettier-html, name: Prettier, groups: [prettier-vue, real-world-vue, prettier-svelte, real-world-svelte]}]
+  lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
+- language: Angular templates
+  format: [{tool: prettier-angular, name: Prettier}]
+- language: CSS / SCSS / Less
+  format: [{tool: prettier-css, name: Prettier}]
+  lint: [{tool: stylelint, name: stylelint}, {tool: stylelint-scss, name: stylelint-scss}, {tool: stylelint-less, name: stylelint-less}]
+- language: Markdown
+  format: [{tool: prettier, name: Prettier, groups: [markdown]}]
+  lint: [{tool: markdownlint, name: markdownlint}]
+- language: YAML
+  format: [{tool: prettier, name: Prettier, groups: [yaml]}]
+  lint: [{tool: yamllint, name: yamllint}]
+- language: JSON / JSONC
+  format: [{tool: prettier, name: Prettier, groups: [json]}, {tool: biome, name: Biome}]
+  lint: [{tool: eslint-jsonc, name: eslint-plugin-jsonc}]
+- language: PowerShell
+  format: [{tool: invoke-formatter, name: Invoke-Formatter}]
+  lint: [{tool: psscriptanalyzer, name: PSScriptAnalyzer}]
+- language: PHP
+  format: [{tool: php-cs-fixer, name: PHP-CS-Fixer}]
+  lint: [{tool: phpstan, name: PHPStan}]
+- language: Java
+  format: [{tool: google-java-format, name: google-java-format}]
+  lint: [{tool: checkstyle, name: Checkstyle}]
+- language: Kotlin
+  format: [{tool: ktlint, name: ktlint}]
+  lint: [{tool: ktlint, name: ktlint}]
+- language: Shell
+  format: [{tool: shfmt, name: shfmt}]
+  lint: [{tool: shellcheck, name: ShellCheck}]
+- language: SQL
+  format: [{tool: sqlfluff, name: sqlfluff}]
+  lint: [{tool: sqlfluff, name: sqlfluff}]
+- language: C#
+  format: [{tool: csharpier, name: CSharpier}]
+  lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]
+- language: XML
+  format: [{tool: csharpier-xml, name: CSharpier XML}]
+- language: C / C++
+  format: [{tool: clang-format, name: clang-format}]
+- language: Ruby
+  lint: [{tool: rubocop, name: RuboCop}]
+- language: Dockerfile
+  lint: [{tool: hadolint, name: hadolint}]
+- language: Makefile
+  lint: [{tool: checkmake, name: checkmake}]
+- language: GitHub Actions
+  lint: [{tool: actionlint, name: actionlint}]
+- language: INI, EditorConfig, .gitignore

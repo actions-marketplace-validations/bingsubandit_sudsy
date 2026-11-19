@@ -71,6 +71,10 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         &[
             ("languages", names.clone()),
             ("speed", crate::speed::table()?),
+            (
+                "support",
+                crate::support::table(&xtask::repo_root(), include_str!("../support.yaml"))?,
+            ),
         ],
     )?);
     for rel in ["editors/vscode/README.md", "docs/ai/editor/vscode.md"] {

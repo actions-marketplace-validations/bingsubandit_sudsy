@@ -4,47 +4,15 @@ Status, measured results, presets and options for every language.
 
 ## How to read the numbers
 
+The status and the headline numbers of every language are in the generated table "Language support" of the [README](../README.md#language-support); this page holds what the table leaves out: corpora, tool versions, presets, options and the main differences.
+
 - **Identical:** share of corpus files where `sudsy format` gives the same bytes as the reference formatter. The corpus is real-world code unless the row says otherwise.
 - **Stable:** formatting a second time changes no file. "Not measured" means the run did not record it.
-- **Findings:** share of the reference linter's findings on the corpus that Sudsy also reports with the named preset. This is recall. False positives are not counted.
+- **Findings:** share of the reference linter's findings on the corpus that Sudsy also reports with the named preset, on the same line. This is recall. False positives are not counted.
 - All numbers compare against the reference tool with its default settings, not your project's config. See [keep your current style](configuration.md#keep-your-current-style).
 - With no config, lint reports likely bugs only. Findings numbers need the preset. See [configuration](configuration.md#presets).
-- **Status:** *ready* means 85% or more identical and stable. *Partial* means it works but differs more, or its lint is below 85% findings. *Lint only* means no reference formatter was compared. *Experimental* means little or no support.
-- HTML and PowerShell format at 93%, but are partial: their lint findings (64% and 34%) miss the 85% bar.
 - Every number comes from a pinned tool version. Versions are in the sections below.
-- The main differences per language are listed in each section. The complete lists live in the source checkout (see [Reproduce](#reproduce-needs-a-source-checkout)).
 - Language names in `sudsy.yaml` sections match `sudsy languages list`: `js` (JavaScript and TypeScript), `python`, `hcl`, `shell`, and so on.
-
-## Summary
-
-| Language | Status | Formats like | Identical | Stable | Lints like | Findings |
-|---|---|---|---:|---|---|---|---:|
-| [JavaScript / TypeScript](#javascript--typescript) | ready | Prettier 3.9.10 | 93% of 2,456 | yes | ESLint, typescript-eslint | 100% |
-| [Python](#python) | ready | ruff format 0.17.4 | 93% of 1,085 | yes | ruff | 96% |
-| [Protobuf](#protobuf) | ready | buf format 1.75.0 | 99% of 323 | yes | buf STANDARD | 86% |
-| [Terraform (HCL)](#terraform-hcl) | ready | terraform fmt 1.17.1 | 98% of 318 | yes | tflint | 20% |
-| [GraphQL](#graphql) | ready | Prettier 3.9.10 | 98% of 132 | yes | none | n/a |
-| [TOML](#toml) | ready | taplo 0.10 | 95% of 213 | not measured | none | n/a |
-| [HTML](#html-vue-svelte-angular) | partial | Prettier 3.9.10 | 93% of 233 | Angular: no; others not measured | html-validate | 64% |
-| [PowerShell](#powershell) | partial | Invoke-Formatter | 93% of 211 | not measured | PSScriptAnalyzer | 34% |
-| [PHP](#php) | partial | PHP-CS-Fixer 3.95.31 | 88% of 10,382 | yes | PHPStan (`php/phpstan`) | 0% |
-| [Markdown](#markdown) | partial | Prettier 3.9.10 | 86% of 64 | not measured | markdownlint | 83% |
-| [Java](#java) | partial | google-java-format 2.0.0 | 91% of 5,338 | yes | Checkstyle | 26% |
-| [Shell](#shell) | partial | shfmt | 82% of 82 | yes | ShellCheck | 47% |
-| [SQL](#sql) | partial | sqlfluff 4.5.0 | 78% of 867 | yes | sqlfluff | 4% |
-| [C#](#c) | partial | CSharpier 1.3.0 | 72% of 7,615 | not measured | StyleCop | not measured |
-| [Kotlin](#kotlin) | partial | ktlint 1.8.0 | 76% of 5,776 | yes | ktlint | 13% |
-| [Vue / Svelte](#html-vue-svelte-angular) | partial | Prettier | 83% / 89% real-world | not measured | eslint-plugin-vue / -svelte | 87% / 100% |
-| [YAML](#yaml) | partial | Prettier | not measured | not measured | yamllint | 74% |
-| [JSON / JSONC](#json) | partial | Prettier, Biome | not measured | not measured | eslint-plugin-jsonc | not measured |
-| [CSS / SCSS / Less](#css-scss-less) | partial | Prettier 3.9.10 | 93% of 533 | yes | stylelint | 13% |
-| [XML](#xml) | partial | CSharpier XML | not measured | not measured | none | n/a |
-| [Ruby](#ruby) | lint only | none | n/a | n/a | RuboCop (Lint department) | 96% |
-| [Dockerfile](#dockerfile) | lint only | none | n/a | n/a | hadolint | 28% |
-| [Makefile](#makefile) | lint only | none | n/a | n/a | checkmake | 74% |
-| [GitHub Actions](#github-actions) | lint only | none | n/a | n/a | actionlint | 5% |
-| [C / C++](#c--c) | experimental | none | n/a | n/a | none | n/a |
-| [INI, EditorConfig, .gitignore](#ini-editorconfig-gitignore) | experimental | none | n/a | n/a | none | n/a |
 
 ## Options every formatter shares
 

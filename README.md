@@ -13,7 +13,7 @@ One binary and one config file in place of Prettier, ESLint, ruff, buf, terrafor
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** Ready: JavaScript/TypeScript, Python, Protobuf, Terraform, GraphQL and TOML. The rest are partial; see the [status table](#languages). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** Ready: JavaScript/TypeScript, Python, Protobuf, Terraform, GraphQL and TOML. The rest are partial; see the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Try it
 
@@ -45,58 +45,54 @@ A typical repo runs one tool per language. Each tool has its own install, config
 + sudsy check
 ```
 
-- **Keep your current style.** A preset reproduces each tool's output. The [table below](#languages) shows how closely, measured on thousands of real-world files per language. Presets are plain config, and every style choice is a named option.
+- **Keep your current style.** A preset reproduces each tool's output. The [table below](#language-support) shows how closely, measured on thousands of real-world files per language. Presets are plain config, and every style choice is a named option.
 - **Formatting never changes meaning.** Tests and corpus runs check that every formatted file has the same syntax tree as the input, and that formatting twice changes nothing.
 - **Your own rules.** Write a rule as a YAML [pattern](docs/rules.md#pattern-rules) (ast-grep style, with fixes), or as a sandboxed [Wasm plugin](docs/rules.md#wasm-plugins).
 - **Editor and CI built in.** It includes a language server (with a VS Code extension) and outputs GitHub annotations and SARIF.
 
 **Who it is for:** repos with several languages, where one tool and one config replace five or ten. It fits best today when most of the code is in the ready languages, for example a TypeScript and Python service with Protobuf APIs and Terraform infrastructure. **Who it is not for yet:** a JavaScript-only or Python-only repo already on Biome or ruff. Those tools are faster, and Sudsy adds nothing there except the same config across languages.
 
-## Languages
+## Language support
 
-Each percentage is measured on real-world code against the reference tool's own output, with the tool's default settings.
-- **Identical:** the share of files that Sudsy formats byte-for-byte like the reference tool. The main differences per language are in [docs/languages.md](docs/languages.md).
-- **Findings:** the share of the reference tool's findings that Sudsy also reports, with the preset named in the table. This is recall only; false positives are not counted here.
-- **Preset:** what to put in `extends:` to get that tool's style and rules.
+Each number is measured on real-world code against the reference tool with its default settings, and counts every difference except the reviewed intentional ones. `Ready` means every number is at least 85%.
 
-**Ready to format.** At least 85% identical. Lint is ready only where Findings is 85% or more.
+<!-- generated:support -->
+| Language | Format | Lint | Status |
+|---|---|---|---|
+| JavaScript / TypeScript | not measured Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | In progress |
+| Python | not measured ruff format | █████████░ 94% ruff | In progress |
+| Protobuf | not measured buf format | ████████░░ 85% buf | In progress |
+| Terraform (HCL) | not measured terraform fmt | █░░░░░░░░░ 18% tflint | In progress |
+| GraphQL | not measured Prettier | no reference tool | not measured |
+| TOML | not measured taplo | no reference tool | not measured |
+| HTML | not measured Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
+| Vue / Svelte | not measured Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
+| Angular templates | not measured Prettier | no reference tool | not measured |
+| CSS / SCSS / Less | not measured Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | In progress |
+| Markdown | not measured Prettier | ███████░░░ 73% markdownlint | In progress |
+| YAML | not measured Prettier | ███████░░░ 72% yamllint | In progress |
+| JSON / JSONC | not measured Prettier<br>not measured Biome | not measured eslint-plugin-jsonc | not measured |
+| PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
+| PHP | not measured PHP-CS-Fixer | not measured PHPStan | not measured |
+| Java | not measured google-java-format | ██░░░░░░░░ 23% Checkstyle | In progress |
+| Kotlin | not measured ktlint | █░░░░░░░░░ 11% ktlint | In progress |
+| Shell | not measured shfmt | ████░░░░░░ 47% ShellCheck | In progress |
+| SQL | not measured sqlfluff | ░░░░░░░░░░ 3% sqlfluff | In progress |
+| C# | not measured CSharpier | not measured StyleCop<br>not measured Roslynator | not measured |
+| XML | not measured CSharpier XML | no reference tool | not measured |
+| C / C++ | not measured clang-format | no reference tool | not measured |
+| Ruby | no reference tool | █████████░ 96% RuboCop | Lint only |
+| Dockerfile | no reference tool | ███░░░░░░░ 35% hadolint | Lint only |
+| Makefile | no reference tool | █████████░ 96% checkmake | Lint only |
+| GitHub Actions | no reference tool | ░░░░░░░░░░ 5% actionlint | Lint only |
+| INI, EditorConfig, .gitignore | no reference tool | no reference tool | not measured |
 
-| Language | Formats like | Identical | Stable | Lints like | Findings | Presets |
-|---|---|---:|---|---|---:|---|
-| JavaScript / TypeScript | Prettier | 93% of 2,456 | yes | ESLint, typescript-eslint recommended¹ | 100% | `js/eslint-recommended`, `js/typescript-eslint-recommended` |
-| Python | ruff format (Black) | 93% of 1,085 | yes | ruff default rules | 96% | `python/ruff` |
-| Protobuf | buf format | 99% of 323 | yes | buf STANDARD | 86% | `protobuf/buf-standard` |
-| Terraform (HCL) | terraform fmt | 98% of 318 | yes | tflint recommended | 20% | `hcl/tflint-recommended` |
-| GraphQL | Prettier | 98% of 132 | yes | — | — | — |
-| TOML | taplo | 95% of 213 | not measured | — | — | `toml/taplo-compat` |
+Format: the share of real-world files where `sudsy format` gives the same bytes as the tool; Lint: the share of the tool's findings that Sudsy also reports on the same line, with the preset that mirrors the tool. Both leave out only reviewed intentional differences, and both are measured with the tool's default settings. Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). What the numbers leave out: [docs/languages.md](docs/languages.md) and [docs/ai/parity/README.md](docs/ai/parity/README.md). Presets: [configuration](docs/configuration.md#presets).
+<!-- /generated -->
 
-Stable: formatting a second time changes no file in the corpus. ¹ Core rules only. ESLint plugins such as react, import and jsx-a11y, and type-aware TypeScript rules, are not covered yet.
+Languages that are small downloads are fetched once with `sudsy languages add <name>` ([language packs](docs/configuration.md#language-packs)). All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorConfig, Gitignore, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->.
 
-**Partial.** Works, but expect more differences from your current tool. HTML and PowerShell format well but miss the lint bar.
-
-| Language | Formats like | Identical | Lints like | Findings | Preset |
-|---|---|---:|---|---:|---|
-| HTML | Prettier | 93% of 233 | html-validate | 64% | `html/html-validate-recommended` |
-| PowerShell | Invoke-Formatter | 93% of 211 | PSScriptAnalyzer | 34% | `powershell/psscriptanalyzer` |
-| PHP | PHP-CS-Fixer (PER-CS) | 88% of 10,382 | PHPStan | 0% | `php/phpstan` |
-| Markdown | Prettier | 86% of 64 | markdownlint | 83% | `markdown/prettier-compat`, `markdown/markdownlint` |
-| Java | google-java-format | 82% of 5,337 | Checkstyle (Google) | 26% | `java/google` |
-| Shell | shfmt | 82% of 82 | ShellCheck | 47% | `shell/shellcheck` |
-| SQL | sqlfluff | 78% of 867 | sqlfluff | 4% | `sql/sqlfluff` |
-| C# (needs .NET 10) | CSharpier | 72% of 7,615² | StyleCop | not measured | `csharp/csharpier-compat`, `csharp/stylecop` |
-| Kotlin | ktlint | 76% of 5,776 | ktlint | 13% | `kotlin/ktlint` |
-| Vue / Svelte | Prettier | 83% / 89% | eslint-plugin-vue / -svelte | 87% / 100% | `html/eslint-plugin-vue-recommended`, `…-svelte-recommended` |
-| YAML, JSON, CSS, XML | Prettier / Biome / CSharpier | not measured | yamllint / stylelint | 74% / 13% | `yaml/yamllint`, `css/stylelint-standard` |
-
-² The 7,659-file corpus minus the files CSharpier itself leaves alone.
-
-**Lint first:** Ruby is linted, with RuboCop's Lint department at 96% (`ruby/rubocop`), but not reformatted. Dockerfile (hadolint 28%), Makefile (checkmake 74%) and GitHub Actions (actionlint 5%) are formatted too, but no reference formatter has been compared yet.
-
-**Experimental:** C/C++ (not formatted, no rules yet), INI, EditorConfig, .gitignore.
-
-All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorConfig, Gitignore, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->.
-
-Corpora (for example Django for Python, the .NET runtime, Roslyn and ASP.NET Core for C#), tool versions and how to rerun each comparison: [docs/languages.md](docs/languages.md).
+Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
 
 ## Performance
 

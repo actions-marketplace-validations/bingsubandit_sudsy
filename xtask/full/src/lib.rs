@@ -9,6 +9,7 @@ mod docs;
 pub mod manifests;
 mod rules;
 mod speed;
+pub mod support;
 mod vscode;
 
 use anyhow::Result;
