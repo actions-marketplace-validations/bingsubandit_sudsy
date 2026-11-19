@@ -56,7 +56,7 @@ Mapping table (approved). Plain options (`brace_wrapping`, `short_*`, `pointer_a
 | wrapping | Phase 3 |
 | unread constructs | flow shape |
 
-Shared capabilities, built in the shared crates with unit tests or a fixture of a second language: (1) column-aligned Doc primitive in `core-format::printer` (run the format parity of csharpier, prettier, prettier-js, ruff, gjf, ktlint, php-cs-fixer before landing); (2) plain options in `Flow::want`; (3) `compound::body` join; (4) heritage colon/comma option incl. constructor initializers; (5) member outdent (case labels, access specifiers); (6) `align.rs` over statements; (7) `BinaryPolicy` `non_assignment`. Directive-aware shape checking and `macro_word` / `macro_name` are Phase 2 work.
+Shared capabilities, built in the shared crates with unit tests or a fixture of a second language: (1) column-aligned Doc primitive in `core-format::printer` (run the format parity of csharpier, prettier, prettier-js, ruff, gjf, ktlint, php-cs-fixer before landing); (2) plain options in `Flow::want`; (3) `compound::body` join; (4) heritage colon/comma option incl. constructor initializers; (5) member outdent (case labels, access specifiers); (6) `align.rs` over statements; (7) none: assignments are `#assignment` nodes, so `binary_operator_line: start` already is clang-format's `NonAssignment`; (5) is a column outdent in `core-format` (shift by N columns, negative allowed, read from `access_modifier_outdent`), built in the first landing of the formatter step. Directive-aware shape checking and `macro_word` / `macro_name` are Phase 2 work.
 
 **Checkpoint 2:** report the table. The lead approves it before code is written.
 

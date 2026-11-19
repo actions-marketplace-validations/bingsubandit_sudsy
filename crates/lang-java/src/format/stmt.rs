@@ -3,7 +3,7 @@
 //! concept: compound-statement, block-and-statements
 
 use super::*;
-use core_format::shapes::{self, BlockStyle};
+use core_format::shapes::{self, BlockStyle, Join};
 
 pub(super) fn rule(
     cx: &FormatCtx<'_>,
@@ -98,7 +98,7 @@ fn control(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             (is_tok(e, "else") || (is_tok(e, "while") && node.kind() == k::DO_STATEMENT)) && !head;
         if is_body {
             let inline = e.kind() == k::IF_STATEMENT && before.is_some_and(|b| is_tok(b, "else"));
-            parts.push(shapes::compound_body(cx, e, el(cx, e)?, inline, true));
+            parts.push(shapes::compound_body(cx, e, el(cx, e)?, inline, Join::Fits));
         } else if trailing_kw {
             let (Some(body), Some(kw)) = (before, e.as_token()) else {
                 return Err(core_format::FormatError::Shape("control statement".into()));

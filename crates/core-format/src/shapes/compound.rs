@@ -15,14 +15,25 @@ use crate::doc::{self, Doc};
 use crate::seq::{first, last};
 use core_syntax::{SyntaxElement, SyntaxToken};
 
+/// Where a body that is not a block goes (a language option such as `short_ifs`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Join {
+    /// On the next line when the enclosing group breaks (the head's group).
+    Hang,
+    /// On the head's line when the whole fits, else on the next line.
+    Fits,
+    /// Always on the next line.
+    Never,
+}
+
 /// The body of a compound statement after its head. `inline`: a body that is not a block still
-/// follows on the line (`else if`); `grouped`: the move to the next line is a group of its own.
+/// follows on the line (`else if`); `join`: where any other body goes.
 pub fn body(
     cx: &FormatCtx<'_>,
     body: &SyntaxElement,
     printed: Doc,
     inline: bool,
-    grouped: bool,
+    join: Join,
 ) -> Doc {
     let (g, kind) = (cx.grammar, body.kind());
     if g.has_tag(kind, "empty-statement") {
@@ -30,8 +41,16 @@ pub fn body(
     } else if inline || g.has_tag(kind, "block") {
         doc::concat(vec![gap_before(cx, body), printed])
     } else {
-        let moved = doc::indent(doc::concat(vec![doc::line(), printed]));
-        if grouped { doc::group(moved) } else { moved }
+        moved(printed, join)
+    }
+}
+
+/// A body on the line after its head, or joined to it when it fits.
+fn moved(printed: Doc, join: Join) -> Doc {
+    match join {
+        Join::Hang => doc::indent(doc::concat(vec![doc::line(), printed])),
+        Join::Fits => doc::group(doc::indent(doc::concat(vec![doc::line(), printed]))),
+        Join::Never => doc::indent(doc::concat(vec![doc::hardline(), printed])),
     }
 }
 
@@ -94,4 +113,21 @@ fn blank_before_first_comment(cx: &FormatCtx<'_>, tok: &SyntaxToken) -> bool {
         .map(|t| comments::count_breaks(t.text()))
         .sum::<usize>()
         > 1
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::printer::{PrintOptions, print};
+
+    fn render(join: Join) -> String {
+        let mut d = doc::concat(vec![doc::lit("if (a)"), moved(doc::lit("b();"), join)]);
+        print(&mut d, &PrintOptions::default())
+    }
+
+    #[test]
+    fn a_body_joins_the_head_only_when_the_policy_lets_it_fit() {
+        assert_eq!(render(Join::Fits), "if (a) b();");
+        assert_eq!(render(Join::Never), "if (a)\n  b();");
+    }
 }

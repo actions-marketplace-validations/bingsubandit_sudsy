@@ -42,7 +42,8 @@ pub enum Doc {
     Concat(Vec<Doc>),
     Group(Box<Group>),
     Indent(Box<Doc>),
-    /// Indent by this many extra spaces (not levels).
+    /// Indent by this many extra spaces (not levels); [`ALIGN_TO_COLUMN`]: up to the column the
+    /// contents start at.
     Align(usize, Box<Doc>),
     /// `broken` when the enclosing group (or, with `group`, the group with that id, printed
     /// before it) is broken, else `flat`.
@@ -595,6 +596,9 @@ pub fn indent(d: Doc) -> Doc {
 pub fn outdent(levels: usize, d: Doc) -> Doc {
     Doc::Outdent(levels, Box::new(d))
 }
+
+/// The `spaces` of [`align`] that mean "the column where the contents start".
+pub const ALIGN_TO_COLUMN: usize = usize::MAX;
 
 pub fn align(spaces: usize, d: Doc) -> Doc {
     Doc::Align(spaces, Box::new(d))

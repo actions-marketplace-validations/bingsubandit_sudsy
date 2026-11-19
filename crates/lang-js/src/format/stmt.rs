@@ -8,7 +8,7 @@ use super::util::{
 };
 use crate::generated::kind as k;
 use core_format::doc::{Doc, concat, group, hardline, indent, line, lit, softline};
-use core_format::shapes::{self, BlockStyle};
+use core_format::shapes::{self, BlockStyle, Join};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::roles::un;
 use core_syntax::{SyntaxElement, SyntaxNode};
@@ -170,7 +170,7 @@ fn clause(cx: &FormatCtx<'_>, body: &SyntaxNode, force_space: bool) -> Result<Do
 }
 
 fn clause_of(cx: &FormatCtx<'_>, body: &SyntaxNode, printed: Doc, force_space: bool) -> Doc {
-    shapes::compound_body(cx, &body.clone().into(), printed, force_space, false)
+    shapes::compound_body(cx, &body.clone().into(), printed, force_space, Join::Hang)
 }
 
 /// `while (test) body` and `with (object) body`; `soft` lets the parenthesis content break.

@@ -75,6 +75,13 @@ pub fn walk<W: Walker>(w: &mut W, n: usize, top: W::Scope) {
     stack.finish(|l, e| w.close(l, e));
 }
 
+/// The first and last token of an item of a separated list: the item is the tokens `first..next`,
+/// and when a separator follows (`separated`, at `next`) it belongs to the item, so the items
+/// follow one another. `None` for an item of no token.
+pub fn list_item(first: usize, next: usize, separated: bool) -> Option<(usize, usize)> {
+    (next > first).then(|| (first, if separated { next } else { next - 1 }))
+}
+
 /// "No group", "no token": the sentinel of the index tables.
 pub const NONE: u32 = u32::MAX;
 
@@ -329,6 +336,13 @@ mod tests {
         walk(&mut w, 5, 1);
         assert_eq!(w.2, vec![1, 7, 7, 7, 1]);
         assert_eq!(w.1, vec![(1, 20), (2, 50)]);
+    }
+
+    #[test]
+    fn a_list_item_takes_the_separator_after_it() {
+        assert_eq!(list_item(2, 5, true), Some((2, 5)));
+        assert_eq!(list_item(2, 5, false), Some((2, 4)));
+        assert_eq!(list_item(2, 2, true), None);
     }
 
     #[test]

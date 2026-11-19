@@ -160,6 +160,23 @@ fn deep_nodes() {
     assert_eq!(texts(src, Dialect::Cpp, kind::BINARY).len(), 2);
 }
 
+/// Declarators, constructor initializers and a template's declaration are nodes the shapes read.
+#[test]
+fn declarators_initializers_and_templates() {
+    let src =
+        "int a = 1, *b;\nstruct S { S() : x(1), y{2} {} } s1, s2;\ntemplate <class T> T id(T v);\n";
+    let one = |wanted, expected: &[&str]| assert_eq!(texts(src, Dialect::Cpp, wanted), expected);
+    // each declarator and initializer takes the comma after it
+    one(kind::DECLARATOR, &["a = 1,", "*b", "s1,", "s2"]);
+    one(kind::INITIALIZER, &["x(1),", "y{2}"]);
+    one(kind::CONSTRUCTOR_INITIALIZERS, &[": x(1), y{2}"]);
+    one(kind::TEMPLATE_PARAMETERS, &["<class T>"]);
+    one(
+        kind::TEMPLATE_DECLARATION,
+        &["template <class T> T id(T v);"],
+    );
+}
+
 /// Labels, macro calls and `try` are statements of their own; `.f = v` and `[x = x]` hold no assignment.
 #[test]
 fn deep_precision() {

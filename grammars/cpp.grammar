@@ -164,15 +164,19 @@ node TryStatement #child #statement #try = Keyword body:Block catches:CatchClaus
 node CatchClause #child #scope #catch = Keyword parameter:Condition body:Block
 
 // Declarations.
-node SimpleDeclaration #child #statement #member #declaration = #part*
+node SimpleDeclaration #child #statement #member #declaration = #part* declarators:Declarator* #part*
 node FunctionDeclaration #child #statement #member #declaration #function #scope = #part* parameters:ParameterList #part* body:Block?
 node ParameterList #child #parameter-list = Lpar parameters:#parameter* Rpar
 node Parameter #child #parameter #opaque = #child*
-node ClassSpecifier #child #statement #member #type-declaration #declaration #scope = #part* members:Block? #part*
-node EnumSpecifier #child #statement #member #type-declaration #declaration #scope = #part* members:Block? #part*
+node ClassSpecifier #child #statement #member #type-declaration #declaration #scope = #part* members:Block? declarators:Declarator* #part*
+node EnumSpecifier #child #statement #member #type-declaration #declaration #scope = #part* members:Block? declarators:Declarator* #part*
 node BaseClause #child #part #opaque #heritage = #child*
 node NamespaceDeclaration #child #statement #member #declaration #scope = #part* body:Block?
-node TemplateDeclaration #child #statement #member #opaque = #child*
+node TemplateDeclaration #child #statement #member #opaque = #part* parameters:TemplateParameters? #part* declaration:#statement?
 node TemplateParameters #child #part #opaque = #child*
-node ConstructorInitializers #child #part #opaque = #child*
+node ConstructorInitializers #child #part #opaque #heritage = Colon initializers:Initializer* #part*
+// `a(1)`, `b{2}`, `Base(args)...` of a constructor initializer list.
+node Initializer #child #opaque = #child*
+// One declarator of a declaration of variables: its pointer decorations, name and initializer.
+node Declarator #child #opaque = #child*
 node AccessSpecifier #child #member #opaque = #child*

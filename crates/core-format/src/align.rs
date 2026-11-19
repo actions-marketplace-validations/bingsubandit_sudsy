@@ -1,5 +1,5 @@
-//! `align_comments`: the trailing comments of consecutive `#key-value` entries start in one
-//! column. A run is the entries of one parent with no blank line or comment line between them; the
+//! `align_comments`: the trailing comments of consecutive `#key-value` entries (or, in a language
+//! without them, `#statement`s) start in one column. A run is the entries of one parent with no blank line or comment line between them; the
 //! column is one past the widest entry of the run (entries without a comment count). A run with an
 //! entry on several lines is not aligned.
 //!
@@ -19,6 +19,17 @@ use core_syntax::SyntaxNode;
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthStr;
 
+/// The tags whose nodes form the runs, in the order they are tried.
+const RUN_TAGS: [&str; 2] = ["key-value", "statement"];
+
+/// The tag of the runs `kind` belongs to.
+pub(crate) fn run_tag(
+    g: &core_syntax::Grammar,
+    kind: core_syntax::SyntaxKind,
+) -> Option<&'static str> {
+    RUN_TAGS.into_iter().find(|t| g.has_tag(kind, t))
+}
+
 /// Extra spaces in front of the trailing comment of an entry, by the entry's start offset.
 #[derive(Default)]
 pub(crate) struct AlignTable(HashMap<u32, usize>);
@@ -32,28 +43,25 @@ impl AlignTable {
     }
 
     /// The runs of the whole tree `node` belongs to.
-    pub fn build(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Self {
+    pub fn build(cx: &FormatCtx<'_>, node: &SyntaxNode, tag: &str) -> Self {
         let measure = cx.measuring();
         let mut table = AlignTable::default();
         let Some(root) = node.ancestors().last() else {
             return table;
         };
         for parent in root.descendants() {
-            if parent
-                .children()
-                .any(|n| cx.grammar.has_tag(n.kind(), "key-value"))
-            {
-                table.container(&measure, &parent);
+            if parent.children().any(|n| cx.grammar.has_tag(n.kind(), tag)) {
+                table.container(&measure, &parent, tag);
             }
         }
         table
     }
 
-    fn container(&mut self, cx: &FormatCtx<'_>, parent: &SyntaxNode) {
+    fn container(&mut self, cx: &FormatCtx<'_>, parent: &SyntaxNode, tag: &str) {
         let mut run: Vec<SyntaxNode> = Vec::new();
         for pair in parent
             .children()
-            .filter(|n| cx.grammar.has_tag(n.kind(), "key-value"))
+            .filter(|n| cx.grammar.has_tag(n.kind(), tag))
         {
             let apart = cx.first_token(&pair).is_some_and(|t| {
                 !comments::leading_comments(cx.grammar, &t).is_empty()
@@ -129,5 +137,25 @@ pub(crate) fn pad_comment(d: &mut Doc, extra: usize) -> bool {
         Doc::Group(g) => pad_comment(&mut g.contents, extra),
         Doc::Indent(inner) | Doc::Align(_, inner) => pad_comment(inner, extra),
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core_syntax::grammars;
+
+    #[test]
+    fn runs_are_of_entries_or_statements() {
+        let g = grammars::json();
+        let member = g.kind_by_name("Member").unwrap();
+        assert_eq!(run_tag(g, member), Some("key-value"));
+        let g = grammars::csharp();
+        let statement = g.kind_by_name("ExpressionStatement").unwrap();
+        assert_eq!(run_tag(g, statement), Some("statement"));
+        assert_eq!(
+            run_tag(g, g.kind_by_name("ClassDeclaration").unwrap()),
+            None
+        );
     }
 }

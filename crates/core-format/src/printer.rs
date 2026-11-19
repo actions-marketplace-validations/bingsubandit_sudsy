@@ -6,7 +6,7 @@
 //! tools: Prettier printDocToString
 //! reads: grammar:language
 
-use crate::doc::{Doc, GroupId};
+use crate::doc::{self, Doc, GroupId};
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthChar;
 
@@ -430,7 +430,14 @@ impl<'a> Printer<'a> {
                 push(cmds, i, mode, d);
             }
             Doc::Align(n, d) => {
-                let i = self.indents.align(indent, *n);
+                // `doc::ALIGN_TO_COLUMN`: the lines of the contents start at the column the
+                // contents start at.
+                let n = if *n == doc::ALIGN_TO_COLUMN {
+                    self.pos.saturating_sub(self.indents.levels[indent].width)
+                } else {
+                    *n
+                };
+                let i = self.indents.align(indent, n);
                 push(cmds, i, mode, d);
             }
             Doc::IfBreak {

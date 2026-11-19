@@ -282,3 +282,19 @@ b"
         "ab"
     );
 }
+
+#[test]
+fn contents_aligned_to_a_column_wrap_under_their_start() {
+    let rows = || concat(vec![t("a,"), hardline(), t("b)")]);
+    assert_eq!(
+        run(concat(vec![t("call("), align(ALIGN_TO_COLUMN, rows())]), 80),
+        "call(a,\n     b)"
+    );
+    // inside an indent the column counts from the indentation
+    let d = indent(concat(vec![
+        hardline(),
+        t("x = f("),
+        align(ALIGN_TO_COLUMN, rows()),
+    ]));
+    assert_eq!(run(d, 80), "\n  x = f(a,\n        b)");
+}

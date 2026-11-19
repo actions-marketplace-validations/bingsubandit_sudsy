@@ -87,6 +87,44 @@ pub fn heritage(
     doc::concat(parts)
 }
 
+/// Where the colon and the commas of a clause that follows the head go when the clause breaks
+/// (`Ctor() : a(1), b(2)`; the option values `before_colon`, `before_comma`, `after_colon`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ClauseBreak {
+    /// The colon starts the first line below the head; commas end the lines.
+    BeforeColon,
+    /// The colon starts the first line below the head; commas start the next lines.
+    BeforeComma,
+    /// The colon ends the head's line; commas end the lines.
+    AfterColon,
+}
+
+impl ClauseBreak {
+    pub fn from_option(value: &str) -> Option<ClauseBreak> {
+        match value {
+            "before_colon" => Some(ClauseBreak::BeforeColon),
+            "before_comma" => Some(ClauseBreak::BeforeComma),
+            "after_colon" => Some(ClauseBreak::AfterColon),
+            _ => None,
+        }
+    }
+}
+
+/// `: a, b` after a head: a group that stays on the head's line when it fits and else breaks as
+/// `style` says, indented one level.
+pub fn clause_break(items: Vec<Doc>, style: ClauseBreak) -> Doc {
+    let mut body = Vec::new();
+    for (i, item) in items.into_iter().enumerate() {
+        match (style, i) {
+            (ClauseBreak::AfterColon, 0) => body.extend([doc::lit(" :"), doc::line(), item]),
+            (_, 0) => body.extend([doc::line(), doc::lit(": "), item]),
+            (ClauseBreak::BeforeComma, _) => body.extend([doc::line(), doc::lit(", "), item]),
+            _ => body.extend([doc::lit(","), doc::line(), item]),
+        }
+    }
+    doc::group(doc::indent(doc::concat(body)))
+}
+
 /// A clause that is a keyword and a list (`throws A, B`, `implements A, B`): a group, the list
 /// after the keyword, a break after each comma that indents the next item `levels` levels.
 pub fn clause_list(
@@ -106,4 +144,44 @@ pub fn clause_list(
         }
     }
     Ok(doc::group(doc::concat(parts)))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::printer::{PrintOptions, print};
+
+    fn render(style: ClauseBreak, width: usize) -> String {
+        let items = vec![doc::lit("a(1)"), doc::lit("b(2)")];
+        let mut d = doc::concat(vec![doc::lit("C()"), clause_break(items, style)]);
+        let opts = PrintOptions {
+            line_width: width,
+            ..PrintOptions::default()
+        };
+        print(&mut d, &opts)
+    }
+
+    #[test]
+    fn the_clause_stays_on_the_head_line_when_it_fits() {
+        assert_eq!(render(ClauseBreak::BeforeColon, 80), "C() : a(1), b(2)");
+        assert_eq!(render(ClauseBreak::AfterColon, 80), "C() : a(1), b(2)");
+    }
+
+    #[test]
+    fn a_broken_clause_puts_the_colon_and_commas_where_the_style_says() {
+        assert_eq!(
+            render(ClauseBreak::BeforeColon, 8),
+            "C()\n  : a(1),\n  b(2)"
+        );
+        assert_eq!(
+            render(ClauseBreak::BeforeComma, 8),
+            "C()\n  : a(1)\n  , b(2)"
+        );
+        assert_eq!(render(ClauseBreak::AfterColon, 8), "C() :\n  a(1),\n  b(2)");
+        assert_eq!(
+            ClauseBreak::from_option("after_colon"),
+            Some(ClauseBreak::AfterColon)
+        );
+        assert_eq!(ClauseBreak::from_option("x"), None);
+    }
 }

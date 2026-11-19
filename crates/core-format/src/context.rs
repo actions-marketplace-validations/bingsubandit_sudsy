@@ -257,11 +257,23 @@ impl<'a> FormatCtx<'a> {
         cx
     }
 
-    /// Extra blanks in front of the trailing comment of a `#key-value` entry (`align_comments`).
+    /// Extra blanks in front of the trailing comment of a `#key-value` entry or `#statement`
+    /// (`align_comments`); the first one asked for decides which of the two the runs are of.
     pub(crate) fn comment_pad(&self, entry: &SyntaxNode) -> usize {
+        let Some(tag) = crate::align::run_tag(self.grammar, entry.kind()) else {
+            return 0;
+        };
         self.comment_align
-            .get_or_init(|| crate::align::AlignTable::build(self, entry))
+            .get_or_init(|| crate::align::AlignTable::build(self, entry, tag))
             .extra(entry)
+    }
+
+    /// Pads the trailing comment in `d`, the layout of `entry`, to the column of its run.
+    pub fn align_trailing_comment(&self, entry: &SyntaxNode, d: &mut Doc) {
+        let extra = self.comment_pad(entry);
+        if extra > 0 {
+            crate::align::pad_comment(d, extra);
+        }
     }
 
     /// The engine's formatter of other languages' code, when the host runs under one.

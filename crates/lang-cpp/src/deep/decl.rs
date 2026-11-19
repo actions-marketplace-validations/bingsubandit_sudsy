@@ -7,7 +7,7 @@
 use super::expr::is_builtin;
 use super::{BODY, CLASS, Cx, ENUM, NONE, SCOPE};
 use crate::generated::kind as k;
-use core_syntax::SyntaxKind;
+use core_syntax::{SyntaxKind, spans};
 
 type Read = (usize, Option<SyntaxKind>);
 
@@ -230,6 +230,7 @@ impl Cx<'_> {
     /// The declarators of a declaration of variables, `x = 1, *p, a[3], b{2}`.
     pub(super) fn declarators(&mut self, mut q: usize, b: usize) -> usize {
         loop {
+            let first = q;
             while self.is(q, b, k::STAR)
                 || self.is(q, b, k::AMP)
                 || self.is(q, b, k::AMP_AMP)
@@ -253,7 +254,12 @@ impl Cx<'_> {
                 let e = self.expression(q, b);
                 q = e.max(q);
             }
-            if self.is(q, b, k::COMMA) {
+            // A declarator takes the comma after it, so the declarators follow one another.
+            let comma = self.is(q, b, k::COMMA);
+            if let Some((a, z)) = spans::list_item(first, q, comma) {
+                self.emit(a, z, k::DECLARATOR);
+            }
+            if comma {
                 q += 1;
                 continue;
             }
@@ -340,6 +346,7 @@ impl Cx<'_> {
     fn initializers(&mut self, colon: usize, b: usize) -> usize {
         let mut q = colon + 1;
         loop {
+            let first = q;
             let e = self.name_end(q, b, false);
             if e == q {
                 break;
@@ -352,11 +359,15 @@ impl Cx<'_> {
             if self.is(q, b, k::ELLIPSIS) {
                 q += 1;
             }
-            if self.is(q, b, k::COMMA) {
-                q += 1;
-            } else {
+            // An initializer takes the comma after it, so the initializers follow one another.
+            let comma = self.is(q, b, k::COMMA);
+            if let Some((a, z)) = spans::list_item(first, q, comma) {
+                self.emit(a, z, k::INITIALIZER);
+            }
+            if !comma {
                 break;
             }
+            q += 1;
         }
         self.emit(colon, q - 1, k::CONSTRUCTOR_INITIALIZERS);
         q

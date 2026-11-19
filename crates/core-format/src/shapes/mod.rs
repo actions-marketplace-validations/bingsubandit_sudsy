@@ -52,7 +52,7 @@ pub use call_chain::{
     member_chain as call_chain, soft_group_count as chain_soft_groups,
 };
 pub use chain::{MemberChain, ends_in_line_comment, gap_after_operator, member_chain};
-pub use compound::{body as compound_body, continuation as compound_continuation};
+pub use compound::{Join, body as compound_body, continuation as compound_continuation};
 pub use conditional::{
     Around, ConditionalHooks, ConditionalPolicy, NoConditionalHooks, conditional,
 };
@@ -60,7 +60,7 @@ pub use declaration::{
     Annotations, Clause, HeaderStyle, Printer, annotated, annotations_above, enum_body,
     has_arguments, has_doc_comment, header, lead_annotations, members, modifiers, type_declaration,
 };
-pub use heritage::{HeritageLayout, clause_list, heritage};
+pub use heritage::{ClauseBreak, HeritageLayout, clause_break, clause_list, heritage};
 pub use initializer::initializer;
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{
