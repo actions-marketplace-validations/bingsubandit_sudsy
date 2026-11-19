@@ -1,6 +1,7 @@
-# The Sudsy side of the comparison with shfmt's defaults (tabs, no flags): Sudsy's own defaults, run as `fix`
+# The Sudsy side of the comparison with shfmt's defaults (tabs, no flags): the shfmt preset, run as `fix`
 # with the rule that mirrors the one token rewrite of shfmt (`$(...)` for backticks).
-extends: []
+extends:
+  - preset:shell/shfmt
 lint:
   rules:
     no-backticks: warn

@@ -1,0 +1,8 @@
+# Formats like shfmt with its defaults (tabs): trailing comments of consecutive lines aligned,
+# `<<-` heredocs re-indented.
+shell:
+  format:
+    indent_style: tab
+    comment_column: align
+    heredoc_indent: reindent
+    case_last_terminator: add

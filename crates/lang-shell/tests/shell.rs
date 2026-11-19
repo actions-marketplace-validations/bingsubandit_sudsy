@@ -1,4 +1,5 @@
-use provider_api::format_testing::{assert_file_names, assert_formats, check_corpus};
+use core_config::OptionValue;
+use provider_api::format_testing::{Formatting, assert_file_names, assert_formats, check_corpus};
 
 /// Formats with every check of the shared helper (round trip, meaning, idempotency, comments).
 #[track_caller]
@@ -110,5 +111,53 @@ fn bash_the_upstream_grammar_rejects() {
     assert_eq!(
         fmt("for x do :; done\nif grep -q 404$; then :; fi\ncase $a in\n --*' '*) :;;\nesac\n"),
         "for x; do :; done\nif grep -q 404$; then :; fi\ncase $a in\n--*' '*) : ;;\nesac\n"
+    );
+}
+
+/// Formats with the options of the `shfmt` preset.
+#[track_caller]
+fn shfmt_style(input: &str) -> String {
+    let options = [
+        "comment_column:align",
+        "heredoc_indent:reindent",
+        "case_last_terminator:add",
+    ]
+    .map(|o| {
+        let (k, v) = o.split_once(':').expect("option");
+        (k, OptionValue::String(v.into()))
+    });
+    core_format::testing::assert_formats(
+        &Formatting {
+            options: options.to_vec(),
+            ..Formatting::new(lang_shell::provider(), "a.sh")
+        },
+        input,
+    )
+}
+
+#[test]
+fn shfmt_options() {
+    // Trailing comments of consecutive lines share a column; other lines keep one blank.
+    assert_eq!(
+        shfmt_style("a   # x\nlong_one   # y\n\nc    # z\n"),
+        "a        # x\nlong_one # y\n\nc # z\n"
+    );
+    assert_eq!(
+        shfmt_style("a=1 # one\nlonger=2   # two\nbb=3\n"),
+        "a=1      # one\nlonger=2 # two\nbb=3\n"
+    );
+    // A `<<-` body and delimiter are re-indented; a blank body line stays empty.
+    assert_eq!(
+        shfmt_style("if x; then\n\t\t\tcat <<-EOF\n\t\ta\n\n\t\t\t\tb\n\tEOF\nfi\n"),
+        "if x; then\n\tcat <<-EOF\n\t\ta\n\n\t\tb\n\tEOF\nfi\n"
+    );
+    assert_eq!(
+        shfmt_style("cat <<EOF\n\ta\nEOF\n"),
+        "cat <<EOF\n\ta\nEOF\n"
+    );
+    // The last arm gets its `;;`.
+    assert_eq!(
+        shfmt_style("case $x in\n  a) b ;;\n  *)\n    c\nesac\n"),
+        "case $x in\na) b ;;\n*)\n\tc\n\t;;\nesac\n"
     );
 }

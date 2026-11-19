@@ -18,8 +18,10 @@ token Comment #trivia #comment
 token Keyword
 // `;` ends a statement; the formatter adds and drops it by layout, so the safety check ignores it.
 token Semi ";" #separator
-// `&`, `&&`, `||`, `|`, `|&` and the ends of a case arm (`;;`, `;&`, `;;&`).
+// `&`, `&&`, `||`, `|` and `|&`.
 token Op
+// The end of a case arm (`;;`, `;&`, `;;&`); the last arm may go without one.
+token CaseEnd ";;" #optional
 // A word or a piece of one: quoting and expansions stay inside as written. A lone `\` is a line continuation.
 token Word #literal
 // What a word means: `'..'` is raw, `".."` and bare text have escapes (bare text is the row without delimiters).
@@ -30,8 +32,9 @@ string Word escape "\\" continuation unknown drop
 token Arith #restyle
 // `<<` or `<<-`, the delimiter word follows.
 token HeredocOp
-token HeredocBody
-token HeredocEnd
+// The leading tabs of the lines of a `<<-` heredoc are ignored by the shell and may go.
+token HeredocBody #restyle
+token HeredocEnd #restyle
 
 token Eof
 token Unknown #error

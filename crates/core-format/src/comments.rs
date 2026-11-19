@@ -85,6 +85,9 @@ pub struct CommentStyle {
     /// A comment after code keeps the blanks the source has before it when they are more than
     /// `gap` (comments aligned in a column stay aligned).
     pub keep_gap: bool,
+    /// A comment after code starts one blank after it, or in the column of the trailing comments
+    /// of the lines around it (`comment_column`); the source's blanks do not count.
+    pub align_lines: bool,
     /// Blank lines kept after a comment in front of code.
     pub max_blank_after: usize,
     /// The width at which an own-line `//` comment wraps onto more `//` lines; every `//x` comment
@@ -104,6 +107,7 @@ impl Default for CommentStyle {
             attach_comments: false,
             attach_docs: false,
             keep_gap: false,
+            align_lines: false,
             max_blank_after: 1,
             reflow_width: None,
             trailing_counts_after: &[],
@@ -113,6 +117,17 @@ impl Default for CommentStyle {
 }
 
 impl CommentStyle {
+    /// The default style, with the trailing comments aligned in columns when the string option
+    /// `option` is `align` and keeping the source's blanks before them otherwise.
+    pub fn column_option(options: &core_config::ResolvedOptions, option: &str) -> Self {
+        let align = options.is(option, "align");
+        CommentStyle {
+            keep_gap: !align,
+            align_lines: align,
+            ..Default::default()
+        }
+    }
+
     pub fn gap_doc(&self) -> crate::Doc {
         match self.gap {
             1 => crate::doc::lit(" "),
@@ -138,6 +153,9 @@ impl CommentStyle {
 
     /// The gap before `c`: `gap`, or the blanks the source has when `keep_gap` and they are more.
     pub fn gap_before(&self, c: &Comment) -> crate::Doc {
+        if self.align_lines {
+            return crate::doc::lit(GAP_MARK);
+        }
         let source = match (&c.element, self.keep_gap) {
             (SyntaxElement::Token(t), true) => t
                 .prev_token()
@@ -151,6 +169,64 @@ impl CommentStyle {
             self.gap_doc()
         }
     }
+}
+
+/// Written in place of the blank before a trailing comment under `align_lines`: a blank and a
+/// zero-width mark, which [`align_marked_gaps`] replaces by the blanks that align the comments.
+pub const GAP_MARK: &str = " \u{1}";
+
+/// Pads the [`GAP_MARK`]s of `out` so that the trailing comments of consecutive lines start in one
+/// column, one past the widest text before a comment of the run (characters, a tab counts one); a
+/// line without a trailing comment ends the run. `keep` (the output length up to which trailing
+/// blanks are significant) follows the padding.
+pub fn align_marked_gaps(out: &mut String, keep: &mut usize) {
+    const MARK: char = '\u{1}';
+    // (offset of the mark, line number, characters before the mark)
+    let mut cells: Vec<(usize, usize, usize)> = Vec::new();
+    let (mut line, mut seen) = (0, 0);
+    for (at, _) in out.match_indices(MARK) {
+        line += out[seen..at].matches('\n').count();
+        seen = at;
+        if cells.last().is_some_and(|c| c.1 == line) {
+            continue;
+        }
+        let start = out[..at].rfind('\n').map_or(0, |i| i + 1);
+        cells.push((at, line, out[start..at].chars().count()));
+    }
+    let mut pads = vec![0usize; cells.len()];
+    let mut i = 0;
+    while i < cells.len() {
+        let mut j = i + 1;
+        while j < cells.len() && cells[j].1 == cells[j - 1].1 + 1 {
+            j += 1;
+        }
+        let widest = cells[i..j].iter().map(|c| c.2).max().unwrap_or(0);
+        for k in i..j {
+            pads[k] = widest - cells[k].2;
+        }
+        i = j;
+    }
+    // A mark that no cell took (a second one on a line) is dropped.
+    let mut result = String::with_capacity(out.len());
+    let (mut last, mut cell, mut delta) = (0, 0, 0isize);
+    for (at, _) in out.match_indices(MARK) {
+        result.push_str(&out[last..at]);
+        last = at + MARK.len_utf8();
+        let pad = match cells.get(cell) {
+            Some(c) if c.0 == at => {
+                cell += 1;
+                pads[cell - 1]
+            }
+            _ => 0,
+        };
+        result.push_str(&" ".repeat(pad));
+        if at < *keep {
+            delta += pad as isize - MARK.len_utf8() as isize;
+        }
+    }
+    result.push_str(&out[last..]);
+    *keep = keep.saturating_add_signed(delta);
+    *out = result;
 }
 
 /// Number of line breaks in `text` (`\r\n` counts once).

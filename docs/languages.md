@@ -153,12 +153,11 @@ The status and the headline numbers of every language are in the generated table
 
 - **Formatter:** shfmt 3.14.1. Corpus: install scripts of dotnet, nvm, rustup, docker, Homebrew and others.
 - **Linter:** ShellCheck 0.11.0.
-- **Presets:** `shell/shellcheck`.
-- **Options:** `max_blank_lines`.
+- **Presets:** `shell/shellcheck`, `shell/shfmt`.
+- **Options:** `max_blank_lines`, `comment_column`, `heredoc_indent`, `case_last_terminator`.
 - **Differences:**
   - Backticks stay. shfmt rewrites them to `$(...)`.
-  - A last `case` arm without `;;` stays.
-  - Tabs in `<<-` heredocs are kept.
+  - Without the `shell/shfmt` preset a last `case` arm without `;;` stays, tabs in `<<-` heredocs are kept and trailing comments keep their blanks.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format shfmt`, `scripts/parity.sh coverage shellcheck`.
 
 ## SQL

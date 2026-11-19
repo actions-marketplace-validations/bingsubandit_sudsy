@@ -20,9 +20,13 @@ include!("schema.generated.rs");
 pub struct ShellFormatter;
 
 impl NodeFormatter for ShellFormatter {
-    /// The blanks inside `$(( ))` may change, nothing else but trivia.
+    /// The blanks inside `$(( ))` may change, and the leading tabs of the lines of a `<<-`
+    /// heredoc (which it ignores), nothing else but trivia.
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
         match item {
+            SyntaxElement::Token(t) if matches!(t.kind(), k::HEREDOC_BODY | k::HEREDOC_END) => {
+                core_format::shapes::continuation::heredoc_value(t, k::HEREDOC_OP, "<<-")
+            }
             SyntaxElement::Token(t) => t.text().split_whitespace().collect::<String>().into(),
             SyntaxElement::Node(n) => n.text().to_string().into(),
         }
@@ -30,12 +34,9 @@ impl NodeFormatter for ShellFormatter {
 
     fn comment_style(
         &self,
-        _: &core_config::ResolvedOptions,
+        options: &core_config::ResolvedOptions,
     ) -> core_format::comments::CommentStyle {
-        core_format::comments::CommentStyle {
-            keep_gap: true,
-            ..Default::default()
-        }
+        core_format::comments::CommentStyle::column_option(options, "comment_column")
     }
 
     fn format_node(
@@ -86,7 +87,9 @@ impl E {
     }
     /// The text of an operator token.
     fn op(&self) -> Option<&str> {
-        self.tok().filter(|t| t.kind() == k::OP).map(|t| t.text())
+        self.tok()
+            .filter(|t| matches!(t.kind(), k::OP | k::CASE_END))
+            .map(|t| t.text())
     }
     fn is_kw(&self, words: &[&str]) -> bool {
         self.kw().is_some_and(|w| words.contains(&w))
@@ -401,7 +404,17 @@ fn heredoc(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> {
             SyntaxElement::Node(n) => n.text().to_string(),
         })
         .collect();
-    parts.push(core_format::shapes::continuation::heredoc(&raw));
+    let op = elems(cx, node)
+        .iter()
+        .find(|e| e.is(k::HEREDOC_OP))
+        .and_then(|e| e.tok().map(|t| t.text().to_string()))
+        .unwrap_or_default();
+    parts.push(core_format::shapes::continuation::heredoc_by_option(
+        cx,
+        &raw,
+        (&op, "<<-"),
+        "heredoc_indent",
+    ));
     Ok(doc::concat(parts))
 }
 
@@ -741,7 +754,7 @@ fn case_item(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> 
     let (pats, rest) = es.split_at(pi);
     let rest = &rest[1..];
     let (body, term) = match rest.split_last() {
-        Some((t, body)) if t.op().is_some_and(|o| o.starts_with(";")) => (body, Some(t)),
+        Some((t, body)) if t.is(k::CASE_END) => (body, Some(t)),
         _ => (rest, None),
     };
     let mut parts = Vec::new();
@@ -778,20 +791,26 @@ fn case_item(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> 
         if term.is_some() {
             inner.push(dangling(cx, after, !body.is_empty()));
         }
-        if let Some(t) = term.and_then(E::tok) {
-            inner.extend([doc::hardline(), kw(cx, t)]);
-        }
+        inner.extend(end(cx, term, true));
         parts.push(doc::indent(doc::concat(inner)));
     } else {
         if !body.is_empty() {
             parts.push(doc::lit(" "));
             parts.push(inline_list(cx, body, false)?);
         }
-        if let Some(t) = term.and_then(E::tok) {
-            parts.extend([doc::lit(" "), kw(cx, t)]);
-        }
+        parts.extend(end(cx, term, false));
     }
     Ok(doc::concat(parts))
+}
+
+/// The `;;` of a case arm, the one it has or the one `case_last_terminator` adds.
+fn end(cx: &FormatCtx<'_>, term: Option<&E>, own_line: bool) -> Option<Doc> {
+    core_format::shapes::continuation::item_terminator(
+        cx,
+        term.and_then(E::tok).map(|t| kw(cx, t)),
+        ("case_last_terminator", k::CASE_END),
+        own_line,
+    )
 }
 
 /// `name() body` and `function name body`.

@@ -85,7 +85,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 | prettier-js | 81.6% (3403 of 4169) | 84.0% (3403 of 4051) |
 | prettier | 92.1% (223 of 242) | 95.3% (223 of 234) |
 | ruff | 78.3% (1303 of 1664) | 79.4% (1303 of 1641) |
-| shfmt | 81.7% (67 of 82) | 81.7% (67 of 82) |
+| shfmt | 86.6% (71 of 82) | 86.6% (71 of 82) |
 | sqlfluff | 60.5% (678 of 1121) | 78.2% (678 of 867) |
 | taplo | 95.3% (203 of 213) | 98.1% (203 of 207) |
 | terraform | 98.7% (314 of 318) | 99.1% (314 of 317) |

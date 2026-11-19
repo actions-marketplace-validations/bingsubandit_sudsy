@@ -7909,6 +7909,7 @@
           "preset:python/ruff",
           "preset:ruby/rubocop",
           "preset:shell/shellcheck",
+          "preset:shell/shfmt",
           "preset:sql/sqlfluff",
           "preset:toml/taplo-compat",
           "preset:xml/csharpier-compat",
@@ -13377,6 +13378,24 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "case_last_terminator": {
+                    "default": "keep",
+                    "description": "The last arm of a `case` without `;;`: `keep` leaves it as written, `add` ends it with `;;`.",
+                    "enum": [
+                      "keep",
+                      "add"
+                    ],
+                    "type": "string"
+                  },
+                  "comment_column": {
+                    "default": "keep",
+                    "description": "A comment after code: `keep` leaves the blanks before it as written (at least one); `align` writes one blank, or pads it so that the trailing comments of consecutive lines start in one column.",
+                    "enum": [
+                      "keep",
+                      "align"
+                    ],
+                    "type": "string"
+                  },
                   "end_of_line": {
                     "default": "auto",
                     "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -13391,6 +13410,15 @@
                     "default": true,
                     "description": "End the file with a newline.",
                     "type": "boolean"
+                  },
+                  "heredoc_indent": {
+                    "default": "keep",
+                    "description": "The body and the delimiter of a `<<-` heredoc: `keep` leaves them as written; `reindent` drops their leading tabs (which `<<-` ignores) and indents the body one level and the delimiter as deep as the command (tab indentation only).",
+                    "enum": [
+                      "keep",
+                      "reindent"
+                    ],
+                    "type": "string"
                   },
                   "indent_size": {
                     "default": 4,
@@ -14721,6 +14749,24 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "case_last_terminator": {
+              "default": "keep",
+              "description": "The last arm of a `case` without `;;`: `keep` leaves it as written, `add` ends it with `;;`.",
+              "enum": [
+                "keep",
+                "add"
+              ],
+              "type": "string"
+            },
+            "comment_column": {
+              "default": "keep",
+              "description": "A comment after code: `keep` leaves the blanks before it as written (at least one); `align` writes one blank, or pads it so that the trailing comments of consecutive lines start in one column.",
+              "enum": [
+                "keep",
+                "align"
+              ],
+              "type": "string"
+            },
             "end_of_line": {
               "default": "auto",
               "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -14735,6 +14781,15 @@
               "default": true,
               "description": "End the file with a newline.",
               "type": "boolean"
+            },
+            "heredoc_indent": {
+              "default": "keep",
+              "description": "The body and the delimiter of a `<<-` heredoc: `keep` leaves them as written; `reindent` drops their leading tabs (which `<<-` ignores) and indents the body one level and the delimiter as deep as the command (tab indentation only).",
+              "enum": [
+                "keep",
+                "reindent"
+              ],
+              "type": "string"
             },
             "indent_size": {
               "default": 4,

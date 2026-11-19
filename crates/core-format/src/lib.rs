@@ -132,7 +132,10 @@ impl LineEnding {
 pub fn format_tree(root: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<String, FormatError> {
     take_peak();
     let mut doc = cx.format_unguarded(root)?;
-    let (printed, keep) = printer::print_protected(&mut doc, &print_options(cx.options));
+    let (mut printed, mut keep) = printer::print_protected(&mut doc, &print_options(cx.options));
+    if cx.comment_style.align_lines {
+        comments::align_marked_gaps(&mut printed, &mut keep);
+    }
     // A document of ordinary depth drops the usual way; only a pathological one needs this.
     if take_peak() > 64 {
         doc.dispose();

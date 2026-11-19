@@ -16,7 +16,19 @@ options:
   - final_newline: true
   - end_of_line
   - max_blank_lines: [1, "Largest number of blank lines kept between statements and comments."]
-presets: [shellcheck]
+  - comment_column:
+      values: ["keep", "align"]
+      default: "keep"
+      doc: "A comment after code: `keep` leaves the blanks before it as written (at least one); `align` writes one blank, or pads it so that the trailing comments of consecutive lines start in one column."
+  - heredoc_indent:
+      values: ["keep", "reindent"]
+      default: "keep"
+      doc: "The body and the delimiter of a `<<-` heredoc: `keep` leaves them as written; `reindent` drops their leading tabs (which `<<-` ignores) and indents the body one level and the delimiter as deep as the command (tab indentation only)."
+  - case_last_terminator:
+      values: ["keep", "add"]
+      default: "keep"
+      doc: "The last arm of a `case` without `;;`: `keep` leaves it as written, `add` ends it with `;;`."
+presets: [shellcheck, shfmt]
 mapping:
   same: 'program command pipeline list subshell do_group case_item heredoc_redirect string array comment heredoc_body heredoc_end word'
   Command: declaration_command unset_command variable_assignments
@@ -40,4 +52,5 @@ mapping:
   HeredocOp: '<< <<-'
   Word: number raw_string ansi_c_string translated_string expansion simple_expansion brace_expression extglob_pattern regex special_variable_name variable_name file_descriptor test_operator heredoc_start subscript
   Keyword: 'if then elif else fi while until for in do done case esac function select ! { } ( )'
-  Op: '& && || | |& ;; ;& ;;&'
+  Op: '& && || | |&'
+  CaseEnd: ';; ;& ;;&'

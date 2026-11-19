@@ -118,6 +118,107 @@ pub fn heredoc(raw: &str) -> Doc {
     doc::line_suffix(doc::line_start(raw))
 }
 
+/// What ends the last item of a container: the item's own terminator `existing` (written as is), or,
+/// when it has none and the string option `option` is `add`, the fixed text of the `#optional`
+/// token `kind` (`;;` ending the last `case` arm). It follows a blank, or a line break with
+/// `own_line`. `None`: nothing is written.
+pub fn item_terminator(
+    cx: &crate::FormatCtx<'_>,
+    existing: Option<Doc>,
+    (option, kind): (&str, core_syntax::SyntaxKind),
+    own_line: bool,
+) -> Option<Doc> {
+    let end = match existing {
+        Some(d) => d,
+        None if cx.options.is(option, "add") => doc::text(cx.grammar.def(kind)?.text.clone()?),
+        None => return None,
+    };
+    let gap = if own_line {
+        doc::hardline()
+    } else {
+        doc::lit(" ")
+    };
+    Some(doc::concat(vec![gap, end]))
+}
+
+/// Does the heredoc operator of the node that holds `body` (a body or delimiter token) read
+/// `dash_op` (`<<-`, whose body and delimiter ignore leading tabs)?
+fn is_dash_heredoc(
+    body: &core_syntax::SyntaxToken,
+    op: core_syntax::SyntaxKind,
+    dash_op: &str,
+) -> bool {
+    body.parent().is_some_and(|p| {
+        p.children_with_tokens()
+            .filter_map(|e| e.into_token())
+            .any(|t| t.kind() == op && t.text() == dash_op)
+    })
+}
+
+/// The value of a heredoc body or delimiter token for the meaning check: the text, but of a
+/// `dash_op` heredoc without the leading tabs of its lines (a plain heredoc keeps them: they are
+/// content).
+pub fn heredoc_value<'a>(
+    body: &'a core_syntax::SyntaxToken,
+    op: core_syntax::SyntaxKind,
+    dash_op: &str,
+) -> std::borrow::Cow<'a, str> {
+    if !is_dash_heredoc(body, op, dash_op) {
+        return body.text().into();
+    }
+    body.text()
+        .split('\n')
+        .map(|l| l.trim_start_matches('\t'))
+        .collect::<Vec<_>>()
+        .join("\n")
+        .into()
+}
+
+/// A heredoc body and delimiter line (`raw`): with the string option `option` set to `reindent`,
+/// tab indentation and the operator `op_text` being `dash_op`, [`heredoc_reindented`]; else
+/// [`heredoc`].
+pub fn heredoc_by_option(
+    cx: &crate::FormatCtx<'_>,
+    raw: &str,
+    (op_text, dash_op): (&str, &str),
+    option: &str,
+) -> Doc {
+    if op_text == dash_op
+        && cx.options.is(option, "reindent")
+        && cx.options.is("indent_style", "tab")
+    {
+        heredoc_reindented(raw)
+    } else {
+        heredoc(raw)
+    }
+}
+
+/// A `<<-` heredoc whose body and delimiter line lose their leading tabs (which `<<-` ignores):
+/// the body is indented one level below the line of the command, the delimiter line is as deep.
+fn heredoc_reindented(raw: &str) -> Doc {
+    let mut lines: Vec<&str> = raw
+        .split('\n')
+        .map(|l| l.trim_start_matches('\t'))
+        .collect();
+    let end = lines.pop().unwrap_or_default();
+    let body: Vec<Doc> = lines
+        .into_iter()
+        .flat_map(|l| {
+            let line = if l.is_empty() {
+                Doc::Nil
+            } else {
+                Doc::Verbatim(l.to_string())
+            };
+            [doc::hardline(), line]
+        })
+        .collect();
+    doc::line_suffix(doc::concat(vec![
+        doc::indent(doc::concat(body)),
+        doc::hardline(),
+        doc::text(end),
+    ]))
+}
+
 /// Text of several lines as written, with no trailing blanks (but after a `\`, which they would
 /// turn into a continuation) and no carriage returns; after the first line each starts at column 0
 /// (`tab`: the first after a tab).
