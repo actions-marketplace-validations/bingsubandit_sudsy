@@ -197,3 +197,10 @@ pub fn structured_trivia(token: &SyntaxToken, grammar: &Grammar) -> Option<Synta
 pub fn is_code(token: &SyntaxToken, grammar: &Grammar) -> bool {
     !grammar.is_trivia(token.kind()) && structured_trivia(token, grammar).is_none()
 }
+
+/// Whether the node's parent is of a kind whose grammar name is in `names` (a rule's list option
+/// of places a rewrite is left alone).
+pub fn parent_named_in(node: &SyntaxNode, grammar: &Grammar, names: &[&str]) -> bool {
+    node.parent()
+        .is_some_and(|p| names.contains(&grammar.name(p.kind())))
+}

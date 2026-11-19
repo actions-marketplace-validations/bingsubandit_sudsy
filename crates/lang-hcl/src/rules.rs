@@ -59,6 +59,13 @@ rule! {
                   does (tflint terraform_deprecated_interpolation). The fix writes the expression. \
                   Not in Nomad job files (`.nomad`, `.nomad.hcl`), whose agent fills those in at run time.",
         example: "name = \"${var.name}\"   // name = var.name",
+        options: [OptionDecl {
+            name: "except_in",
+            default: Opt::List(&[]),
+            check: Check::Any,
+            description: "Kinds of the parent (for example `Tuple`) whose strings are left alone. `Tuple`: only a \
+                      string that is a whole argument is reported and unwrapped, as `terraform fmt` does.",
+        }],
         kinds: &[k::QUOTED_TEMPLATE],
     }
 
@@ -85,6 +92,9 @@ rule! {
             ctx.report(range, message);
             return;
         };
+        if core_rules::tree::parent_named_in(&whole, ctx.file.grammar, &ctx.options.list("except_in")) {
+            return;
+        }
         let is_key = whole.parent().is_some_and(|o| o.kind() == k::OBJECT_ELEM && o.first_child().as_ref() == Some(&whole));
         let inner = expr.text().to_string().trim().to_string();
         let text = if is_key { format!("({inner})") } else { inner };
