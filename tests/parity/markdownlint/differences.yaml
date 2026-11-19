@@ -1,1 +1,1 @@
-coverage: 82.7  # share of the default-set findings of markdownlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage markdownlint; at least 85% is the bar)
+coverage: 62.9  # share of the default-set findings of markdownlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage markdownlint; at least 85% is the bar)

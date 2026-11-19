@@ -13,4 +13,4 @@ intentional:
   target-specific-variable: tool-wrong
   double-colon-rule: tool-wrong
   multi-target-rule: tool-wrong
-coverage: 73.5  # share of the default-set findings of checkmake on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkmake; at least 85% is the bar)
+coverage: 55.0  # share of the default-set findings of checkmake on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkmake; at least 85% is the bar)

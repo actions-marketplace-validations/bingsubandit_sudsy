@@ -24,7 +24,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | angular-eslint | - | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
 | buf | 85.9% | - | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
-| checkmake | 73.5% | - | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
+| checkmake | 55.0% | - | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
 | checkstyle | 25.5% | - | 126 | 36 | 12 | 72 | 0 | 6 | 0 | 72 |
 | clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
 | csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -40,7 +40,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | html-validate | 63.7% | - | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
 | htmlhint | 5.0% | - | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
 | ktlint | 13.2% | - | 97 | 34 | 8 | 55 | 0 | 0 | 0 | 55 |
-| markdownlint | 82.7% | - | 53 | 25 | 16 | 0 | 0 | 0 | 12 | 0 |
+| markdownlint | 62.9% | - | 53 | 25 | 16 | 0 | 0 | 0 | 12 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | phpstan | 0.0% | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
@@ -59,11 +59,11 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | terraform | - | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 19.6% | - | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
 | typescript-eslint | 100.0% | - | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
-| yamllint | 73.8% | - | 66 | 62 | 3 | 1 | 0 | 0 | 0 | 1 |
+| yamllint | 35.9% | - | 66 | 62 | 3 | 1 | 0 | 0 | 0 | 1 |
 <!-- /generated -->
 
 ## Lint coverage by function
-The share of the findings of each reference tool's default or recommended set on its real-world corpus that Sudsy also reports in the same file, with the Sudsy preset that mirrors that set (`scripts/parity.sh coverage <tool>`, [../development/parity.md](../development/parity.md#coverage-mode); the ratchet is `coverage:` in `tests/parity/<tool>/differences.yaml`). The usability bar is 85%. Sudsy's own defaults keep the bug-only policy ([../config/sudsy-yaml.md](../config/sudsy-yaml.md#zero-config)), so the default-config share is low by design and printed for information; all mapped rules on adds every rule the catalog maps to the preset. Top missing rules: the five with most findings Sudsy does not report (rules with no Sudsy rule yet, or `planned`).
+The share of the findings of each reference tool's default or recommended set on its real-world corpus that Sudsy also reports on the same line, with the Sudsy preset that mirrors that set (`scripts/parity.sh coverage <tool>`, [../development/parity.md](../development/parity.md#coverage-mode); the ratchet is `coverage:` in `tests/parity/<tool>/differences.yaml`). The usability bar is 85%. Sudsy's own defaults keep the bug-only policy ([../config/sudsy-yaml.md](../config/sudsy-yaml.md#zero-config)), so the default-config share is low by design and printed for information; all mapped rules on adds every rule the catalog maps to the preset. Top missing rules: the five with most findings Sudsy does not report (rules with no Sudsy rule yet, or `planned`).
 
 | Language | Tool | Preset | Preset | Default config | All mapped rules on | Top 5 missing rules (findings) |
 |---|---|---|---:|---:|---:|---|

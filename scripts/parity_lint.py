@@ -513,7 +513,7 @@ def message_name(message):
 
 def target_line(tool, per, hit, total, owned, prefix="", wrong=0):
     """The target number of a coverage run (docs/ai/design/parity-target.md): `hit` is the findings the mapped rule reports on the
-    same line (the column is not compared); the findings of `wontfix` catalog entries (out of scope) and the reviewed `tool-wrong`
+    same line (the column is not compared, as in the raw share); the findings of `wontfix` catalog entries (out of scope) and the reviewed `tool-wrong`
     ones (`wrong`, pinned per finding in differences.yaml as `<file> <tool>:<rule> <line>`) leave the denominator; the `owned`
     findings of `formatter` ids stay in it, as missing, until a proof run exists."""
     wontfix = {f"{prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["coverage"] == "wontfix"}
@@ -524,8 +524,8 @@ def target_line(tool, per, hit, total, owned, prefix="", wrong=0):
 
 def coverage(tool, sudsy, version, prefix, exe):
     """The share of the findings of `tool`'s default (ruff) or recommended (ESLint, typescript-eslint) set on its
-    real-world corpus that the mapped Sudsy rule also reports in the same file: by rule and file, and by the
-    reported name where the tool's message quotes one and Sudsy's does too, not by position. Sudsy runs with its
+    real-world corpus that the mapped Sudsy rule also reports on the same line of the same file (the column is not
+    compared), and by the reported name where the tool's message quotes one and Sudsy's does too. Sudsy runs with its
     default config, as a user gets it with no sudsy.yaml; the share with every mapped rule on is printed beside it.
     Fails when the share is below `coverage:` of tests/parity/<tool>/differences.yaml (a ratchet: it may only go up)."""
     spec = parity_format.tools()["lint"][tool].get("coverage")
@@ -607,27 +607,26 @@ def coverage(tool, sudsy, version, prefix, exe):
     reviewed = parity_format.Differences(folder, lint=True)  # `<file> <tool>:<rule> <line>`: a finding where the tool is wrong, pinned per finding
 
     def score(ours):
-        """`(per, raw hits, total, raw share, same-line hits, tool-wrong findings)`; raw: the mapped rule reports in the same file,
-        target: on the same line. `per`: upstream rule -> [findings, raw covered, covered on the line]."""
+        """`(per, hits, total, share, tool-wrong findings)`: a finding is covered when the mapped rule reports it on the same line.
+        `per`: upstream rule -> [findings, covered]."""
         named = {r for (_, r), ms in ours.items() if any(message_name(m) for m, _ in ms)}  # rules whose messages quote a name
         per, wrong = {}, 0
         for file, rule, message, line in found:
-            row = per.setdefault(rule, [0, 0, 0])
+            row = per.setdefault(rule, [0, 0])
             row[0] += 1
             target = mapping.get(rule)
             n = message_name(message)
             reports = [(m, l) for m, l in ours.get((file, target), []) if target not in named or n is None or n in m] if target else []
-            row[1] += bool(reports)
             on_line = any(l == line for _, l in reports)
-            row[2] += on_line
+            row[1] += on_line
             wrong += not on_line and reviewed.status(f"{file} {tool}:{rule} {line}") == "tool-wrong"
         total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
-        return per, hit, total, round(1000 * hit / total) / 10 if total else 100.0, sum(r[2] for r in per.values()), wrong
+        return per, hit, total, round(1000 * hit / total) / 10 if total else 100.0, wrong
 
     everything = score(run_sudsy(full))[3]  # informational: every mapped rule on
     default = score(run_sudsy(None))[3]  # informational: Sudsy's default config, as a user gets it with no sudsy.yaml
     ours = run_sudsy(json.dumps({"extends": [f"preset:{preset}"]}))  # the headline: the preset that mirrors the tool's default set
-    per, hit, total, share, on_line, wrong = score(ours)
+    per, hit, total, share, wrong = score(ours)
     extra = {}  # Sudsy rule -> its findings in files where the tool reports its rule nowhere (a false positive, or a suppression comment)
     wanted = {(f, mapping[r]) for f, r, _, _ in found if r in mapping}
     on = set()  # the Sudsy rules of the rules that the tool's set turns on
@@ -639,9 +638,9 @@ def coverage(tool, sudsy, version, prefix, exe):
         if r in on and (f, r) not in wanted and f not in fatal:
             extra[r] = extra.get(r, 0) + len(ms)
     print("only Sudsy (files the tool reports the rule in nowhere): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
-    for rule, (n, c, l) in sorted(per.items(), key=lambda kv: kv[1][2] - kv[1][0])[:int(os.environ.get("COVERAGE_TOP", 15))]:
-        print(f"  {rule}: {c} of {n} covered in the file, {l} on the line" + ("" if rule in mapping else " (no Sudsy rule)"))
-    print(target_line(tool, per, on_line, total, owned, "@typescript-eslint/" if tool == "typescript-eslint" else f"{PLUGINS[tool]}/" if tool in PLUGINS else "", wrong))
+    for rule, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:int(os.environ.get("COVERAGE_TOP", 15))]:
+        print(f"  {rule}: {c} of {n} covered on the line" + ("" if rule in mapping else " (no Sudsy rule)"))
+    print(target_line(tool, per, hit, total, owned, "@typescript-eslint/" if tool == "typescript-eslint" else f"{PLUGINS[tool]}/" if tool in PLUGINS else "", wrong))
     print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
     return ratchet(tool, folder, share)
 

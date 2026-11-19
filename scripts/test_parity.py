@@ -80,8 +80,8 @@ class Runner(unittest.TestCase):
         spec = {"format": "regex", "pattern": r"^(?P<file>[^:]+):(?P<line>\d+): (?P<rule>\w+) (?P<message>.*)$"}
         found = pc.parse("a.txt:3: r1 one\nb.txt:5: r2 two\n", spec, {})
         self.assertEqual(found, [("a.txt", "r1", "one", 3), ("b.txt", "r2", "two", 5)])
-        # 4 findings of one rule: 3 covered in the file (raw), 2 on the line, 1 reviewed as the tool being wrong
-        per = {"r1": [4, 3, 2]}
+        # 4 findings of one rule: 2 covered on the line, 1 reviewed as the tool being wrong
+        per = {"r1": [4, 2]}
         line = pl.target_line("checkmake", per, 2, 4, 0, "", 1)
         self.assertIn("target 66.7% (2 of 3, same line)", line)
         self.assertIn("tool-wrong 1", line)
