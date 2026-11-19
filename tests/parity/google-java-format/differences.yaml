@@ -4,6 +4,10 @@ files:
   real-world: layout-gaps
 ratchet:
   real-world: 4890
+  fixtures: 1
+target-files:
+  fixtures: 1
+  real-world: 5337
 second-format:
   real-world: 0
 refused:

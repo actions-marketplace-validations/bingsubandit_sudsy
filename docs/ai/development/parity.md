@@ -19,6 +19,8 @@ files:                  # fixture key -> names; a lint key is `<file> <tool|suds
   corpus/bats-core/contrib/release.sh: subst-indent, array-indent
 ratchet:                # a corpus too large to list: the least identical files; the group's name in `files` gives it a difference
   prettier-tests: 302
+target-files:           # per ratchet group (`fixtures` for ungrouped files): the files of the target (all minus the intentional ones, tool-rejected included); the README table's denominator; the run prints the measured value and fails when it is stale
+  prettier-tests: 1200
 second-format:          # per ratchet group (`fixtures` for ungrouped files): the most files that may change on a second format
   prettier-tests: 0
 refused:                # per ratchet group: the most files Sudsy's safety check refuses (an internal error, not a syntax error)

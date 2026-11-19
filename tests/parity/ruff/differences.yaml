@@ -8,6 +8,10 @@ ratchet:
   black-tests: 190
   ruff-fixtures: 107
   real-world: 1006
+target-files:
+  black-tests: 297
+  real-world: 1085
+  ruff-fixtures: 259
 second-format:
   black-tests: 0
   real-world: 0

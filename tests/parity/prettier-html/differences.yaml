@@ -28,5 +28,13 @@ ratchet:
   real-world: 216
   real-world-svelte: 941
   real-world-vue: 782
+target-files:
+  prettier-html: 144
+  prettier-svelte: 76
+  prettier-vue: 80
+  prettier-vue-html: 10
+  real-world: 233
+  real-world-svelte: 1055
+  real-world-vue: 941
 flags:
   no-config: the tool runs with `--no-config` (and no editorconfig), so a project's own Prettier options are not applied; Sudsy's JS, CSS and HTML options for them are not mapped yet

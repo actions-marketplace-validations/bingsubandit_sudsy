@@ -1,3 +1,7 @@
+ratchet:
+  fixtures: 203
+target-files:
+  fixtures: 207
 differences:
   comment-dropped: choice  taplo drops the comment after an array item that is followed by a comma on the next line; Sudsy keeps it
   multiline-string-array: gap  taplo keeps an array with a multi-line string on one line; Sudsy expands it

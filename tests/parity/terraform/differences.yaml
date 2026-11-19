@@ -1,3 +1,7 @@
+ratchet:
+  fixtures: 314
+target-files:
+  fixtures: 317
 differences:
   token-rewrite: gap  terraform fmt rewrites tokens (it quotes a bare block label, `list` becomes `list(any)`); Sudsy keeps the tokens
 files:

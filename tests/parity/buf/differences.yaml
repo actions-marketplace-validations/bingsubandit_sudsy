@@ -1,3 +1,7 @@
+ratchet:
+  fixtures: 320
+target-files:
+  fixtures: 323
 differences:
   empty-statements: gap  empty statements (`;`) are kept; buf drops them
   statement-comments: gap  comments inside a statement before its `;` stay line comments on their own lines; buf joins them into block comments on the statement's line

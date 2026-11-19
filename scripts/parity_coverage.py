@@ -86,10 +86,11 @@ def parse(output, spec, rules):
     return out
 
 
-def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out, before):
+def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out, before, pinned=lambda f: False):
     """The proof run of docs/ai/design/parity-target.md (every coverage run of a tool with `formatter` entries): the corpus of `work` is copied, formatted with
     `sudsy format` under the tool's preset and checked by the tool again; returns the findings of `layout` ids (the `formatter`
-    catalog entries) that remain. A finding left counts as missing in the target; `before` is the same count before formatting."""
+    catalog entries) that remain. A finding left counts as missing in the target, unless `pinned(finding)` (a reviewed `tool-wrong` one);
+    `before` is the same count before formatting."""
     after = prefix / "proof"
     shutil.rmtree(after, ignore_errors=True)
     shutil.copytree(work, after)
@@ -106,7 +107,7 @@ def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out,
     invalid = {n for n in rejected if marker and (sources[n].parent / marker).exists()}
     reference = spec.get("reference_parser")  # a command (`{file}`) that exits non-zero on a syntax error: the language's own parser
     invalid |= {n for n in rejected - invalid if reference and subprocess.run([a.format(python=sys.executable, file=sources[n]) for a in reference], capture_output=True, check=False).returncode}
-    left = [f for f in found if f[1] in layout and f[0] not in left_out and f[0] not in invalid]
+    left = [f for f in found if f[1] in layout and f[0] not in left_out and f[0] not in invalid and not pinned(f)]
     per = Counter(f[1] for f in left)
     print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
           + (", ".join(f"{r} {n}" for r, n in per.most_common(12)) or "none"))

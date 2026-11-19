@@ -550,7 +550,7 @@ def run_plain(tool, prefix, work):
     return [(Path(r["filePath"]).name, m["ruleId"], m["message"], m["line"]) for r in results for m in r["messages"] if m["ruleId"] and not m.get("fatal")], fatal
 
 
-def proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before):
+def proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before, pinned=lambda f: False):
     """The proof run of a tool that has no `coverage` entry (`parity_coverage.proof` is the other): the corpus folder is copied, formatted with
     `sudsy format` under the tool's preset and checked again; returns the findings of `layout` ids that remain (a file `sudsy format`
     rejects stays as it was, so its findings remain and count)."""
@@ -561,7 +561,7 @@ def proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before):
     run = subprocess.run([sudsy, "format", "."], cwd=after, capture_output=True, text=True, encoding="utf-8", check=False)
     (after / "sudsy.yaml").unlink()
     found, _ = run_plain(tool, prefix, after)
-    left = [f for f in found if f[1] in layout and f[0] not in fatal]
+    left = [f for f in found if f[1] in layout and f[0] not in fatal and not pinned(f)]
     per = collections.Counter(f[1] for f in left)
     rejected = sorted({Path(m).name for m in re.findall(r"^error: (.+?): \d+:\d+:", run.stderr, re.M)})
     print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
@@ -620,11 +620,13 @@ def coverage(tool, sudsy, version, prefix, exe):
     else:
         found, fatal = run_plain(tool, prefix, work)
     found = [f for f in found if f[0] not in fatal]
+    reviewed = parity_format.Differences(folder, lint=True)  # `<file> <tool>:<rule> <line>`: a finding where the tool is wrong, pinned per finding
+    pinned = lambda f: reviewed.status(f"{f[0]} {tool}:{f[1]} {f[3]}") == "tool-wrong"  # a pinned finding leaves the proof run's count too
     owned = sum(f[1] in layout for f in found)  # `formatter` ids: `sudsy format` does their work, so they are no findings to cover in the raw share
     if layout:  # the proof run: the formatter findings that remain after `sudsy format` are the ones that count as missing
         before = [f for f in found if f[1] in layout]
-        owned = (parity_coverage.proof(tool, spec, prefix, work, exe, {"actionlint": actionlint_check}, sudsy, preset, layout, fatal, before) if spec
-                 else proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before))
+        owned = (parity_coverage.proof(tool, spec, prefix, work, exe, {"actionlint": actionlint_check}, sudsy, preset, layout, fatal, before, pinned) if spec
+                 else proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before, pinned))
     found = [f for f in found if f[1] not in layout]
     print(f"input filters: files the tool cannot read {len(fatal)}, formatter-owned findings left out of raw (in the target they count as missing: {owned}{', after the proof run' if layout else ''})")
     def run_sudsy(config):  # Sudsy's findings with `config` as the sudsy.yaml of the corpus (None: no file, the default a user gets)
@@ -636,8 +638,6 @@ def coverage(tool, sudsy, version, prefix, exe):
         for d in json.loads(out)["diagnostics"]:
             result.setdefault((parity_coverage.norm(d["path"], work) if spec else Path(d["path"]).name, aliases.get(d["rule"], d["rule"])), []).append((d["message"], d["range"]["start"]["line"]))
         return result
-
-    reviewed = parity_format.Differences(folder, lint=True)  # `<file> <tool>:<rule> <line>`: a finding where the tool is wrong, pinned per finding
 
     examples = {}
     filehits = [0]  # the audit: findings with a report of the mapped rule anywhere in the file

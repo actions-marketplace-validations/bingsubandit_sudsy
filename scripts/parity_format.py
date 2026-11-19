@@ -289,6 +289,8 @@ class Differences:
         self.defs = {n: v.split(None, 1) for n, v in (data.get("differences") or {}).items()}
         self.files = {k: [n.strip() for n in v.split(",")] for k, v in (data.get("files") or {}).items()}
         self.ratchet = data.get("ratchet") or {}
+        self.target_files = data.get("target-files") or {}  # group -> files of the target (all minus the intentional ones, tool-rejected included): the README table's denominator
+        self.by_group = {}  # group -> [files of the target, files measured]
         self.second_format = data.get("second-format") or {}  # group -> most files that may change on a second format
         self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
         self.intentional = data.get("intentional") or {}
@@ -317,8 +319,11 @@ class Differences:
             return "tool-wrong" if self.lint or (ours is not None and self.pins.get(key) == pin(ours)) else "REVIEW"
         return None
 
-    def tally(self, same, status=None, count=1):
+    def tally(self, same, status=None, count=1, group="fixtures"):
         self.total += count
+        row = self.by_group.setdefault(group, [0, 0])
+        row[0] += count * (same or status not in ("invalid-input", "tool-wrong"))
+        row[1] += count
         self.same += count if same else 0
         if status and not same:
             self.groups[status] += count
@@ -362,21 +367,21 @@ class Differences:
         return bad
 
 
-def verdict(name, theirs, ours, diffs, label, quiet=False):
+def verdict(name, theirs, ours, diffs, label, quiet=False, group="fixtures"):
     """Prints the result of one fixture; returns 1 for a mismatch. `quiet`: no line for an equal pair, no diff."""
     if theirs is not None and theirs == ours:
-        diffs.tally(True)
+        diffs.tally(True, group=group)
         if not quiet:
             print(f"{name}: ok")
         return 0
     if theirs is None:  # the tool rejecting a file is the evidence it is invalid input: the target leaves it out, the raw share keeps it
-        diffs.tally(False, "invalid-input")
+        diffs.tally(False, "invalid-input", group=group)
         if not quiet:
             print(f"{name}: rejected by the tool, intentional: invalid-input")
         return 0
     known = diffs.known(name)
     state = diffs.status(name, ours) if known else None
-    diffs.tally(False, state)
+    diffs.tally(False, state, group=group)
     if state == "REVIEW":
         print(f"{name}: REVIEW (Sudsy's output differs from the pinned one; counts against Sudsy)")
         return 1
@@ -509,12 +514,15 @@ def main():
             same = theirs is not None and theirs == ours
             tally[2 if theirs is None else 0 if same else 1] += 1
             state = "invalid-input" if theirs is None else None if same or not known.known(name) else known.status(name, ours)
-            known.tally(same, state)
+            known.tally(same, state, group=group)
             if state == "REVIEW":
                 print(f"{name}: REVIEW (Sudsy's output differs from the pinned one; counts against Sudsy)")
                 bad += 1
         else:
-            bad += verdict(name, theirs, ours, known, tool, quiet)
+            bad += verdict(name, theirs, ours, known, tool, quiet, group or "fixtures")
+            if only is None:  # a run without ratchet groups is one group, `fixtures`
+                tally = groups.setdefault("fixtures", [0, 0, 0])
+                tally[2 if theirs is None else 0 if theirs == ours else 1] += 1
     for group, (same, different, rejected) in sorted(groups.items()):
         floor = known.ratchet.get(group, 0)
         if different:
@@ -523,6 +531,11 @@ def main():
         print(f"ratchet {group}: {same} identical, {different} different, {rejected} rejected by {tool} ({note}: {floor})")
         bad += same < floor
     if only is None:
+        for group, (target, measured) in sorted(known.by_group.items()):  # the denominator of the README table: a stale value fails like a ratchet
+            top = known.target_files.get(group)
+            note = "at the recorded value" if top == target else f"STALE: set target-files {group} in differences.yaml to {target}"
+            print(f"target-files {group}: {target} of {measured} files ({note}: {top})")
+            bad += top != target
         ceilings = known.second_format
         for group in sorted(set(unstable) | set(ceilings)):
             now, top = unstable[group], ceilings.get(group, 0)
@@ -544,9 +557,10 @@ def main():
     print("input filters: " + ", ".join(f"{k} {filters[k]}" for k in ("non-UTF-8 files", "skip", "skip_with")) + f", rejected by {tool} {rejected}")
     if "--pin" in sys.argv:  # for the lead to paste into `pins:` after review: the runner never writes them
         print("pins (tool-wrong names):")
-        for (name, _, _), (_, ours, _, _) in zip(found, results):
-            if ours is not None and any(known.intentional.get(n) == "tool-wrong" for n in known.files.get(name, [])):
-                print(f"  {name}: {pin(ours)}")
+        for (name, *_), (_, ours, *_) in zip(found, results):
+            wrong = any(known.intentional.get(n) == "tool-wrong" for n in known.files.get(name, []))
+            if ours is not None and (wrong or known.status(name, ours) == "REVIEW"):  # every file the run printed as REVIEW has its current hash here
+                print(f"  {name}: {pin(ours)}" + ("" if wrong else "  (REVIEW)"))
     print(f"{len(found)} fixtures, {bad} mismatch(es) ({tool} {version})")
     return 1 if bad else 0
 

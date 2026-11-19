@@ -1,3 +1,13 @@
+ratchet:
+  graphql: 123
+  json: 4
+  markdown: 90
+  yaml: 5
+target-files:
+  graphql: 124
+  json: 4
+  markdown: 100
+  yaml: 5
 differences:
   code-span-backticks: gap  a code span with three backticks (tree-sitter-md does not read it as code) is kept; Prettier writes one backtick
   list-looseness: gap  a list item holding a paragraph, a nested list and an indented continuation keeps the blank lines of the source; Prettier's looseness differs

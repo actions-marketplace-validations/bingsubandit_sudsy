@@ -47,6 +47,11 @@ class Runner(unittest.TestCase):
         self.assertEqual(bad, 0)
         self.assertIn("raw 33.3% (1 of 3); target 100.0% (1 of 1); intentional: invalid-input 1, tool-wrong 1, REVIEW 0", out)
 
+    def test_files_of_the_target_are_counted_per_group_without_the_intentional_ones(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, diffs, _ = run_verdicts(self.folder(tmp, "ours"), [("ok.txt", "x", "x"), ("a.txt", "t", "ours"), ("b.txt", None, "o"), ("c.txt", "t", "u")])
+        self.assertEqual(diffs.by_group, {"fixtures": [2, 4]})  # a.txt is tool-wrong, b.txt is invalid-input: both leave the target
+
     def test_changed_output_of_a_pinned_file_is_reviewed_and_counts_against_sudsy(self):
         with tempfile.TemporaryDirectory() as tmp:
             bad, diffs, out = run_verdicts(self.folder(tmp, "ours"), [("ok.txt", "x", "x"), ("a.txt", "t", "changed")])

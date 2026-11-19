@@ -1,3 +1,7 @@
+ratchet:
+  fixtures: 323
+target-files:
+  fixtures: 324
 differences:
   width-accounting: choice  CSharpier's width accounting keeps a tag on one line after a long multi-line header comment (.resx) or below a tag far longer than the width; Sudsy breaks the attributes
   text-as-written: gap  text content and attribute values stay as written; CSharpier writes a double quote in a value as `&quot;`, puts CDATA and `xml:space="preserve"` content on lines of their own and trims its whitespace

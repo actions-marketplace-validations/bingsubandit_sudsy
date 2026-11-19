@@ -21,6 +21,11 @@ ratchet:
   components: 679
   angular: 444
   realworld-app: 11
+target-files:
+  angular: 446
+  components: 682
+  prettier-angular: 80
+  realworld-app: 11
 second-format:
   components: 0
   prettier-angular: 0

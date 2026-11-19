@@ -4,7 +4,7 @@
 
 <p align="center"><b>One formatter and linter for your whole repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest, measured file by file against each of them.<br>
-<b><!-- generated:support-headline -->Ready for 2 languages, early support for 25 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 7 languages, early support for 20 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -13,7 +13,7 @@ One binary and one config file in place of Prettier, ESLint, ruff, buf, terrafor
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Try it
 
@@ -59,28 +59,28 @@ Each number is measured on real-world code against the reference tool with its d
 <!-- generated:support -->
 | Language | Format | Lint | Status |
 |---|---|---|---|
-| JavaScript / TypeScript | not measured Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | In progress |
-| Python | not measured ruff format | █████████░ 94% ruff | In progress |
-| Protobuf | not measured buf format | ████████░░ 85% buf | In progress |
-| Terraform (HCL) | not measured terraform fmt | █░░░░░░░░░ 18% tflint | In progress |
-| GraphQL | not measured Prettier | no reference tool | not measured |
-| TOML | not measured taplo | no reference tool | not measured |
-| HTML | not measured Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
-| Vue / Svelte | not measured Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
-| Angular templates | not measured Prettier | no reference tool | not measured |
-| CSS / SCSS / Less | not measured Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | In progress |
-| Markdown | not measured Prettier | ████████░░ 83% markdownlint | In progress |
-| YAML | not measured Prettier | ███████░░░ 74% yamllint | In progress |
-| JSON / JSONC | not measured Prettier<br>not measured Biome | not measured eslint-plugin-jsonc | not measured |
+| JavaScript / TypeScript | ████████░░ 84% Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | In progress |
+| Python | ███████░░░ 79% ruff format | █████████░ 94% ruff | In progress |
+| Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
+| Terraform (HCL) | █████████░ 99% terraform fmt | █░░░░░░░░░ 18% tflint | In progress |
+| GraphQL | █████████░ 99% Prettier | no reference tool | Ready |
+| TOML | █████████░ 98% taplo | no reference tool | Ready |
+| HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
+| Vue / Svelte | ████████░░ 85% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
+| Angular templates | █████████░ 97% Prettier | no reference tool | Ready |
+| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | In progress |
+| Markdown | █████████░ 90% Prettier | ████████░░ 83% markdownlint | In progress |
+| YAML | ██████████ 100% Prettier | ███████░░░ 74% yamllint | In progress |
+| JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
 | PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
-| PHP | not measured PHP-CS-Fixer | not measured PHPStan | not measured |
-| Java | not measured google-java-format | ██░░░░░░░░ 23% Checkstyle | In progress |
-| Kotlin | not measured ktlint | █░░░░░░░░░ 11% ktlint | In progress |
-| Shell | not measured shfmt | ████░░░░░░ 47% ShellCheck | In progress |
-| SQL | not measured sqlfluff | ░░░░░░░░░░ 3% sqlfluff | In progress |
-| C# | not measured CSharpier | not measured StyleCop<br>not measured Roslynator | not measured |
-| XML | not measured CSharpier XML | no reference tool | not measured |
-| C / C++ | not measured clang-format | no reference tool | not measured |
+| PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
+| Java | █████████░ 91% google-java-format | ██░░░░░░░░ 23% Checkstyle | In progress |
+| Kotlin | ███████░░░ 76% ktlint | █░░░░░░░░░ 11% ktlint | In progress |
+| Shell | ████████░░ 81% shfmt | ████░░░░░░ 47% ShellCheck | In progress |
+| SQL | ███████░░░ 78% sqlfluff | ░░░░░░░░░░ 3% sqlfluff | In progress |
+| C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
+| XML | █████████░ 99% CSharpier XML | no reference tool | Ready |
+| C / C++ | █░░░░░░░░░ 14% clang-format | no reference tool | In progress |
 | Ruby | no reference tool | █████████░ 96% RuboCop | Lint only: Ready |
 | Dockerfile | no reference tool | ███░░░░░░░ 35% hadolint | Lint only: In progress |
 | Makefile | no reference tool | █████████░ 96% checkmake | Lint only: Ready |

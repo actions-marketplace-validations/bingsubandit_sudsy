@@ -9,10 +9,13 @@
       "tool_may_reject": true,
       "reference_parser": {"npm": "graphql", "version": "16.11.0", "script": "try { require(process.argv[1]).parse(require('fs').readFileSync(process.argv[2], 'utf8')); } catch (e) { process.exit(1); }"},
       "fixtures": [
-        {"suffixes": [".json", ".jsonc", ".yaml", ".yml", ".md", ".graphql", ".gql"]},
-        {"dir": "docs", "suffixes": [".md"], "prefix": "docs/", "recursive": true},
-        {"dir": "tests/conformance/corpus/runtime-docs/docs", "suffixes": [".md"], "prefix": "runtime-docs/", "recursive": true},
-        {"dir": "tests/conformance/corpus/graphql", "suffixes": [".graphql", ".gql"], "prefix": "graphql/", "recursive": true}
+        {"suffixes": [".json", ".jsonc"], "ratchet": "json"},
+        {"suffixes": [".yaml", ".yml"], "ratchet": "yaml"},
+        {"suffixes": [".md"], "ratchet": "markdown"},
+        {"suffixes": [".graphql", ".gql"], "ratchet": "graphql"},
+        {"dir": "docs", "suffixes": [".md"], "prefix": "docs/", "ratchet": "markdown", "recursive": true},
+        {"dir": "tests/conformance/corpus/runtime-docs/docs", "suffixes": [".md"], "prefix": "runtime-docs/", "ratchet": "markdown", "recursive": true},
+        {"dir": "tests/conformance/corpus/graphql", "suffixes": [".graphql", ".gql"], "prefix": "graphql/", "ratchet": "graphql", "recursive": true}
       ]
     },
     "prettier-js": {"speed": {"language": "JS/TS", "label": "Prettier", "corpus": "js", "format": ["node", "{prefix}/node_modules/prettier/bin/prettier.cjs", "--check", "--no-cache", "--log-level", "warn", "."]}, 

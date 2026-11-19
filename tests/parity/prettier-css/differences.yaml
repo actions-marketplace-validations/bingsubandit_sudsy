@@ -15,5 +15,10 @@ ratchet:
   prettier-scss: 78
   prettier-less: 34
   real-world: 494
+target-files:
+  prettier-css: 154
+  prettier-less: 40
+  prettier-scss: 90
+  real-world: 533
 flags:
   no-config: the tool runs with `--no-config` (and no editorconfig), so a project's own Prettier options are not applied; Sudsy's JS, CSS and HTML options for them are not mapped yet

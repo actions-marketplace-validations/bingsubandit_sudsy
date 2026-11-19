@@ -26,6 +26,19 @@ ratchet:
   webkit: 0
   gnu: 0
   microsoft: 0
+target-files:
+  chromium: 10
+  fmt: 70
+  folly: 2299
+  gnu: 10
+  google: 10
+  linux: 2872
+  llvm: 420
+  microsoft: 10
+  mozilla: 10
+  range-v3: 593
+  sqlite: 325
+  webkit: 10
 second-format:
   llvm: 0
   folly: 0

@@ -21,7 +21,7 @@
   format: [{tool: prettier-html, name: Prettier, groups: [prettier-html, real-world]}]
   lint: [{tool: html-eslint, name: html-eslint}, {tool: html-validate, name: html-validate}, {tool: htmlhint, name: htmlhint}]
 - language: Vue / Svelte
-  format: [{tool: prettier-html, name: Prettier, groups: [prettier-vue, real-world-vue, prettier-svelte, real-world-svelte]}]
+  format: [{tool: prettier-html, name: Prettier, groups: [prettier-vue, prettier-vue-html, real-world-vue, prettier-svelte, real-world-svelte]}]
   lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
 - language: Angular templates
   format: [{tool: prettier-angular, name: Prettier}]
