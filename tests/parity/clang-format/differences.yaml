@@ -1,0 +1,54 @@
+differences:
+  layout-gap: gap  "the formatter prints the source as written (no layout yet); a file is identical when clang-format also leaves it unchanged"
+files:
+  llvm: layout-gap
+  fmt: layout-gap
+  range-v3: layout-gap
+  folly: layout-gap
+  linux: layout-gap
+  sqlite: layout-gap
+  google: layout-gap
+  chromium: layout-gap
+  mozilla: layout-gap
+  webkit: layout-gap
+  gnu: layout-gap
+  microsoft: layout-gap
+ratchet:
+  llvm: 227
+  fmt: 20
+  range-v3: 49
+  folly: 367
+  linux: 312
+  sqlite: 0
+  google: 0
+  chromium: 0
+  mozilla: 0
+  webkit: 0
+  gnu: 0
+  microsoft: 0
+second-format:
+  llvm: 0
+  folly: 0
+  linux: 0
+  fmt: 0
+  range-v3: 0
+  sqlite: 0
+  google: 0
+  chromium: 0
+  mozilla: 0
+  webkit: 0
+  gnu: 0
+  microsoft: 0
+refused:
+  llvm: 0
+  folly: 0
+  linux: 0
+  fmt: 0
+  range-v3: 0
+  sqlite: 0
+  google: 0
+  chromium: 0
+  mozilla: 0
+  webkit: 0
+  gnu: 0
+  microsoft: 0

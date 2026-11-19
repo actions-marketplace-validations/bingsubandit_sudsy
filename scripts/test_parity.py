@@ -59,7 +59,7 @@ class Runner(unittest.TestCase):
                 (base / name).write_bytes(data)
             filters = Counter()
             found = pf.fixtures({"fixtures": [{"suffixes": [".txt"], "recursive": True, "skip": "skipped/", "skip_with": ".opt"}]}, base, filters)
-        self.assertEqual([name for name, _, _ in found], ["a.txt"])
+        self.assertEqual([name for name, _, _, _ in found], ["a.txt"])
         self.assertEqual(dict(filters), {"skip": 1, "skip_with": 1, "non-UTF-8 files": 1})
 
     def test_fix_command_is_compared(self):
