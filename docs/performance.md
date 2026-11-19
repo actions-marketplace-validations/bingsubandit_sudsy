@@ -9,6 +9,34 @@ Speed against the tools Sudsy replaces: the generated table in the [README](../R
 - A new process per run, caches off. Sudsy and the tool alternate; best of 5 wall seconds, and the peak memory of the best run.
 - The numbers come from one `speed.yml` run on `ubuntu-24.04-arm`; compare ratios, not absolute values.
 
+<!-- generated:speed-method -->
+Runner: Linux aarch64, 8 cores. Best of 5 runs, a new process each, caches off, `format --check` and `lint` with the Sudsy preset that mirrors the tool. Rerun one row: `scripts/speed.sh <tool>`.
+
+Corpus of each row ([docs/languages.md](languages.md) has the sources):
+
+- JSON: the valid files of JSONTestSuite
+- YAML: the GitHub Actions workflows of real repositories, 8 copies, without 16 files Sudsy cannot parse and the GitHub Actions workflows of real repositories and the yaml-test-suite cases
+- JS/TS: three.js src, express lib and test, 8 copies and TypeScript sources of vuejs/core, docusaurus, excalidraw and MUI
+- CSS: the CSS, SCSS and Less corpus and the CSS corpus (css-tricks, Bootstrap, and others)
+- HTML: the HTML corpus (mdn learning-area and others), without 37 files Sudsy cannot parse and the HTML corpus (Prettier tests, mdn learning-area)
+- TOML: the toml-test valid files and the TOML fixtures of the repository
+- Python: the Python corpus (Django, Requests, Flask, Click, HTTPX, pytest, Black)
+- SQL: the ANSI dialect fixtures of sqlfluff, without 3 files Sudsy cannot parse
+- Shell: the shell script corpus
+- Java: the Java corpus (5 projects)
+- Kotlin: the Kotlin corpus
+- PHP: the PHP corpus
+- Protobuf: the Protobuf corpus
+- HCL: the Terraform corpus
+- C#: dotnet/runtime CoreLib, without 14 files Sudsy cannot parse
+- XML: the XML fixtures and the project files of dotnet/aspnetcore, without 1 files Sudsy cannot parse
+- Ruby: the Ruby corpus
+- Markdown: the dotnet/runtime documentation
+- Dockerfile: the Dockerfile corpus
+- GitHub Actions: the GitHub Actions workflows of real repositories
+- Makefile: the Makefile corpus
+<!-- /generated -->
+
 ## C# lint
 
 Lint uses Roslyn's semantic model, one file at a time with one worker.

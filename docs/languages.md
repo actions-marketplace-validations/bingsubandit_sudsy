@@ -10,6 +10,9 @@ The status and the headline numbers of every language are in the generated table
 - **Lint:** share of the reference linter's findings on the corpus that Sudsy also reports with the named preset, on the same line. This is recall. False positives are not counted.
 - All numbers compare against the reference tool with its default settings, not your project's config. See [keep your current style](configuration.md#keep-your-current-style).
 - With no config, lint reports likely bugs only. Lint numbers need the preset. See [configuration](configuration.md#presets).
+- A language with no reference tool shows the number of rules Sudsy has: every rule available to the language, its own and the shared ones, counted from the rule registry.
+- Both numbers leave out only reviewed intentional differences (`tool-wrong`, `invalid-input`, `wontfix`). Raw numbers and the lists are in `tests/parity/<tool>/differences.yaml` and [ai/parity/README.md](ai/parity/README.md).
+- Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint).
 - Every number comes from a pinned tool version. Versions are in the sections below.
 - Language names in `sudsy.yaml` sections match `sudsy languages list`: `js` (JavaScript and TypeScript), `python`, `hcl`, `shell`, and so on.
 

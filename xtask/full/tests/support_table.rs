@@ -14,7 +14,7 @@ fn table_from_fixture_ratchets() {
   lint: [{tool: lint-a, name: LintA}]
 - language: Delta
 ";
-    let table = xtask_full::support::render(&root, support).unwrap();
+    let table = xtask_full::support::render(&root, support, &|_| 0).unwrap();
     let (headline, ready) = (table.headline.clone(), table.ready.clone());
     let table = table.table;
     let rows: Vec<&str> = table.lines().skip(2).take(4).collect();
@@ -22,9 +22,9 @@ fn table_from_fixture_ratchets() {
         rows,
         [
             "| Alpha | ████████░░ 86% FmtA | ████████░░ 85% LintA | Ready |",
+            "| Gamma | none | ████████░░ 85% LintA | Lint only: Ready |",
             "| Beta | █████████░ 90% FmtA<br>not measured Gone | ████████░░ 85% LintA | In progress |",
-            "| Gamma | no reference tool | ████████░░ 85% LintA | Lint only: Ready |",
-            "| Delta | no reference tool | no reference tool | not measured |",
+            "| Delta | none | none | not measured |",
         ]
     );
     assert_eq!(headline, "Ready for 2 languages, early support for 2 more.");

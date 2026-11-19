@@ -31,23 +31,58 @@ struct Run {
     mb: f64,
 }
 
-/// The table and the line under it.
-pub(crate) fn table() -> Result<String> {
+fn load() -> Result<Speed> {
     let path = xtask::repo_root().join("bench/speed.json");
     let text =
         std::fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
-    let speed: Speed =
-        serde_json::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
+    serde_json::from_str(&text).with_context(|| format!("parsing {}", path.display()))
+}
+
+/// The languages of the rows in file order.
+fn languages(speed: &Speed) -> Vec<&str> {
     let mut languages: Vec<&str> = Vec::new();
     for row in &speed.rows {
         if !languages.contains(&row.language.as_str()) {
             languages.push(&row.language);
         }
     }
+    languages
+}
+
+/// The runner, the method and the corpus of each language: the generated block of docs/performance.md.
+pub(crate) fn method() -> Result<String> {
+    let speed = load()?;
+    let corpora: Vec<String> = languages(&speed)
+        .into_iter()
+        .filter_map(|language| {
+            let mut texts: Vec<&str> = Vec::new();
+            for row in speed
+                .rows
+                .iter()
+                .filter(|r| r.language == language && !r.corpus.is_empty())
+            {
+                if !texts.contains(&row.corpus.as_str()) {
+                    texts.push(&row.corpus);
+                }
+            }
+            (!texts.is_empty()).then(|| format!("- {language}: {}", texts.join(" and ")))
+        })
+        .collect();
+    Ok(format!(
+        "Runner: {}. Best of {} runs, a new process each, caches off, `format --check` and `lint` with the Sudsy preset that mirrors the tool. Rerun one row: `scripts/speed.sh <tool>`.\n\nCorpus of each row ([docs/languages.md](languages.md) has the sources):\n\n{}\n",
+        speed.runner,
+        speed.runs,
+        corpora.join("\n")
+    ))
+}
+
+/// The table and the line under it.
+pub(crate) fn table() -> Result<String> {
+    let speed = load()?;
+    let languages = languages(&speed);
     let mut out = String::from(
         "| Language | Task | Compared with | Sudsy speed | Time (Sudsy / tool) | Peak memory (Sudsy / tool) |\n|---|---|---|---|---|---|\n",
     );
-    let mut corpora = Vec::new();
     for language in &languages {
         let mut rows: Vec<&Row> = speed
             .rows
@@ -55,15 +90,6 @@ pub(crate) fn table() -> Result<String> {
             .filter(|r| r.language == *language)
             .collect();
         rows.sort_by(|a, b| a.task.cmp(&b.task)); // stable: Format before Lint, tools in file order
-        let mut texts: Vec<&str> = Vec::new();
-        for row in rows.iter().filter(|r| !r.corpus.is_empty()) {
-            if !texts.contains(&row.corpus.as_str()) {
-                texts.push(&row.corpus);
-            }
-        }
-        if !texts.is_empty() {
-            corpora.push(format!("{language}: {}", texts.join(" and ")));
-        }
         let mut task = "";
         for (i, row) in rows.iter().enumerate() {
             let (language_cell, task_cell) = (
@@ -92,12 +118,7 @@ pub(crate) fn table() -> Result<String> {
             );
         }
     }
-    out += &format!(
-        "\nRunner: {}. Best of {} runs, a new process each, caches off, `format --check` and `lint` with the Sudsy preset that mirrors the tool. Corpus ([docs/languages.md](docs/languages.md)): {}. Rerun one row: `scripts/speed.sh <tool>`.\n",
-        speed.runner,
-        speed.runs,
-        corpora.join("; ")
-    );
+    out += "\nMethod, runner and corpora: [docs/performance.md](docs/performance.md).\n";
     Ok(out)
 }
 

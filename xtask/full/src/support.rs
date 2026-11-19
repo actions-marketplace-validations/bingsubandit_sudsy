@@ -11,23 +11,46 @@ use std::path::Path;
 /// The CLAUDE.md usability bar, in percent.
 const BAR: f64 = 85.0;
 
+/// The statuses in the order of the table.
+/// A cell of a language with no reference tool: what Sudsy has.
+const NO_TOOL: &str = "{} · reference tool: none found";
+
+const STATUSES: [&str; 5] = [
+    "Ready",
+    "Lint only: Ready",
+    "In progress",
+    "Lint only: In progress",
+    "not measured",
+];
+
 #[derive(Deserialize)]
-struct Row {
-    language: String,
+pub(crate) struct Row {
+    pub language: String,
     #[serde(default)]
-    format: Vec<Tool>,
+    pub format: Vec<Tool>,
     #[serde(default)]
-    lint: Vec<Tool>,
+    pub lint: Vec<Tool>,
+    /// Rule languages whose rules count for a row with no lint reference tool.
+    #[serde(default)]
+    pub rules: Vec<String>,
+    /// Sudsy formats the language although no reference formatter was found.
+    #[serde(default)]
+    pub formatter: bool,
 }
 
 /// A reference tool: its `tests/parity` folder, its name in the table and, for a folder that serves
 /// several languages, the ratchet groups of this language.
 #[derive(Deserialize)]
-struct Tool {
-    tool: String,
-    name: String,
+pub(crate) struct Tool {
+    pub tool: String,
+    pub name: String,
     #[serde(default)]
     groups: Vec<String>,
+}
+
+/// The rows of `support.yaml`.
+pub(crate) fn rows(support_yaml: &str) -> Result<Vec<Row>> {
+    serde_saphyr::from_str(support_yaml).context("parsing support.yaml")
 }
 
 /// The keys of a `differences.yaml` the table reads.
@@ -49,10 +72,14 @@ pub struct Support {
 }
 
 /// The texts of `support_yaml` with the numbers below `root`.
-pub fn render(root: &Path, support_yaml: &str) -> Result<Support> {
-    let rows: Vec<Row> = serde_saphyr::from_str(support_yaml).context("parsing support.yaml")?;
+pub fn render(
+    root: &Path,
+    support_yaml: &str,
+    rule_count: &dyn Fn(&[String]) -> usize,
+) -> Result<Support> {
+    let rows = rows(support_yaml)?;
     let mut out = String::from("| Language | Format | Lint | Status |\n|---|---|---|---|\n");
-    let mut ready: Vec<&str> = Vec::new();
+    let mut measured = Vec::new();
     for row in &rows {
         let format: Vec<Option<f64>> = row
             .format
@@ -65,17 +92,32 @@ pub fn render(root: &Path, support_yaml: &str) -> Result<Support> {
             .map(|t| Ok(ratchets(root, &t.tool)?.target))
             .collect::<Result<_>>()?;
         let status = status(row.format.is_empty(), &format, &lint);
-        if status.ends_with("Ready") {
-            ready.push(&row.language);
-        }
-        out += &format!(
+        let line = format!(
             "| {} | {} | {} | {status} |\n",
             row.language,
-            cell(&row.format, &format),
-            cell(&row.lint, &lint),
+            cell(&row.format, &format).unwrap_or_else(|| {
+                if row.formatter {
+                    NO_TOOL.replace("{}", "Sudsy formatter")
+                } else {
+                    "none".into()
+                }
+            }),
+            cell(&row.lint, &lint).unwrap_or_else(|| match rule_count(&row.rules) {
+                n if n > 0 && !row.rules.is_empty() => NO_TOOL.replace("{}", &format!("{n} rules")),
+                _ => "none".into(),
+            }),
         );
+        measured.push((status, row.language.as_str(), line));
     }
-    out += "\nFormat: the share of real-world files where `sudsy format` gives the same bytes as the tool; Lint: the share of the tool's findings that Sudsy also reports on the same line, with the preset that mirrors the tool. Both leave out only reviewed intentional differences, and both are measured with the tool's default settings. Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). What the numbers leave out: [docs/languages.md](docs/languages.md) and [docs/ai/parity/README.md](docs/ai/parity/README.md). Presets: [configuration](docs/configuration.md#presets).\n";
+    // By status, the rows of one status in the order of `support.yaml` (the sort is stable).
+    measured.sort_by_key(|(status, ..)| STATUSES.iter().position(|s| s == status));
+    let ready: Vec<&str> = measured
+        .iter()
+        .filter(|(status, ..)| status.ends_with("Ready"))
+        .map(|(_, language, _)| *language)
+        .collect();
+    out += &measured.iter().map(|m| m.2.as_str()).collect::<String>();
+    out += "\nHow to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).\n";
     let (n, rest) = (ready.len(), rows.len() - ready.len());
     let headline = match n {
         0 => format!("Early support for {rest} languages."),
@@ -129,29 +171,31 @@ fn format_share(root: &Path, tool: &Tool) -> Result<Option<f64>> {
 }
 
 /// One line per tool: bar, percent (rounded down, so the text never reads as passing the bar when it
-/// does not) and name; `no reference tool` when the language has none.
-fn cell(tools: &[Tool], shares: &[Option<f64>]) -> String {
+/// does not) and name; `None` when the language has no reference tool.
+fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
     if tools.is_empty() {
-        return "no reference tool".into();
+        return None;
     }
-    tools
-        .iter()
-        .zip(shares)
-        .map(|(t, s)| match s {
-            Some(p) => {
-                let full = ((p / 10.0).floor() as usize).min(10);
-                format!(
-                    "{}{} {:.0}% {}",
-                    "█".repeat(full),
-                    "░".repeat(10 - full),
-                    p.floor(),
-                    t.name
-                )
-            }
-            None => format!("not measured {}", t.name),
-        })
-        .collect::<Vec<_>>()
-        .join("<br>")
+    Some(
+        tools
+            .iter()
+            .zip(shares)
+            .map(|(t, s)| match s {
+                Some(p) => {
+                    let full = ((p / 10.0).floor() as usize).min(10);
+                    format!(
+                        "{}{} {:.0}% {}",
+                        "█".repeat(full),
+                        "░".repeat(10 - full),
+                        p.floor(),
+                        t.name
+                    )
+                }
+                None => format!("not measured {}", t.name),
+            })
+            .collect::<Vec<_>>()
+            .join("<br>"),
+    )
 }
 
 fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &'static str {

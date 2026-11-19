@@ -15,8 +15,10 @@
   lint: [{tool: tflint, name: tflint}]
 - language: GraphQL
   format: [{tool: prettier, name: Prettier, groups: [graphql]}]
+  rules: [graphql]
 - language: TOML
   format: [{tool: taplo, name: taplo}]
+  rules: [toml]
 - language: HTML
   format: [{tool: prettier-html, name: Prettier, groups: [prettier-html, real-world]}]
   lint: [{tool: html-eslint, name: html-eslint}, {tool: html-validate, name: html-validate}, {tool: htmlhint, name: htmlhint}]
@@ -25,6 +27,7 @@
   lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
 - language: Angular templates
   format: [{tool: prettier-angular, name: Prettier}]
+  rules: [angular]
 - language: CSS / SCSS / Less
   format: [{tool: prettier-css, name: Prettier}]
   lint: [{tool: stylelint, name: stylelint}, {tool: stylelint-scss, name: stylelint-scss}, {tool: stylelint-less, name: stylelint-less}]
@@ -60,14 +63,21 @@
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]
 - language: XML
   format: [{tool: csharpier-xml, name: CSharpier XML}]
+  rules: [xml]
 - language: C / C++
   format: [{tool: clang-format, name: clang-format}]
+  rules: [c, cpp]
 - language: Ruby
   lint: [{tool: rubocop, name: RuboCop}]
 - language: Dockerfile
   lint: [{tool: hadolint, name: hadolint}]
+  formatter: true
 - language: Makefile
   lint: [{tool: checkmake, name: checkmake}]
+  formatter: true
 - language: GitHub Actions
   lint: [{tool: actionlint, name: actionlint}]
+  formatter: true
 - language: INI, EditorConfig, .gitignore
+  formatter: true
+  rules: [ini, editorconfig, gitignore]

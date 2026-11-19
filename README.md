@@ -15,9 +15,17 @@ One binary and one config file in place of Prettier, ESLint, ruff, buf, terrafor
 
 > **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
-## Try it
+## Install
 
-This is read-only: `check` reports and changes no files. It needs no install and no config.
+| Channel | Command |
+|---|---|
+| npm | `npm i -D @sudsylint/sudsy` |
+| PyPI | `pip install sudsy` or `uvx sudsy` |
+| Homebrew | `brew install bingsubandit/sudsy/sudsy` |
+| Scoop | `scoop bucket add sudsy https://github.com/bingsubandit/scoop-sudsy; scoop install sudsy` |
+| Binary | [GitHub releases](https://github.com/bingsubandit/sudsy/releases): Linux, macOS and Windows, each for x64 and arm64 |
+
+Or try it without installing. This is read-only: `check` reports and changes no files, and needs no config.
 
 ```sh
 npx @sudsylint/sudsy check src/      # or: uvx sudsy check src/
@@ -32,7 +40,7 @@ b.js:3:18: warning[no-debugger]: Unexpected 'debugger' statement.
 
 With no config, lint reports likely bugs only, never style. `sudsy format` rewrites the files. `sudsy fix` applies safe fixes, then formats.
 
-Some languages are small downloads, fetched once with `sudsy languages add` (for example `sudsy languages add toml protobuf`). Until then, their files are skipped with a warning. `sudsy languages list` shows what is installed. The `sudsy-full` release archives contain every language.
+Some languages are small downloads, fetched once with `sudsy languages add <name>` ([language packs](docs/configuration.md#language-packs)); until then their files are skipped with a warning. `sudsy languages list` shows what is installed. The `sudsy-full` release archives contain every language. Only C# needs more: it uses Roslyn in a worker process that every channel bundles, and the worker needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Every other language works without .NET.
 
 ## Why
 
@@ -46,8 +54,6 @@ A typical repo runs one tool per language. Each tool has its own install, config
 ```
 
 - **Keep your current style.** A preset reproduces each tool's output. The [table below](#language-support) shows how closely, measured on thousands of real-world files per language. Presets are plain config, and every style choice is a named option.
-- **Formatting never changes meaning.** Tests and corpus runs check that every formatted file has the same syntax tree as the input, and that formatting twice changes nothing.
-- **Your own rules.** Write a rule as a YAML [pattern](docs/rules.md#pattern-rules) (ast-grep style, with fixes), or as a sandboxed [Wasm plugin](docs/rules.md#wasm-plugins).
 - **Editor and CI built in.** It includes a language server (with a VS Code extension) and outputs GitHub annotations and SARIF.
 
 **Who it is for:** repos with several languages, where one tool and one config replace five or ten. It fits best today when most of the code is in the ready languages, for example a TypeScript and Python service with Protobuf APIs and Terraform infrastructure. **Who it is not for yet:** a JavaScript-only or Python-only repo already on Biome or ruff. Those tools are faster, and Sudsy adds nothing there except the same config across languages.
@@ -59,40 +65,62 @@ Each number is measured on real-world code against the reference tool with its d
 <!-- generated:support -->
 | Language | Format | Lint | Status |
 |---|---|---|---|
+| Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
+| GraphQL | █████████░ 99% Prettier | 20 rules · reference tool: none found | Ready |
+| TOML | █████████░ 98% taplo | 14 rules · reference tool: none found | Ready |
+| Angular templates | █████████░ 97% Prettier | 141 rules · reference tool: none found | Ready |
+| XML | █████████░ 99% CSharpier XML | 16 rules · reference tool: none found | Ready |
+| Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
+| Makefile | Sudsy formatter · reference tool: none found | █████████░ 96% checkmake | Lint only: Ready |
 | JavaScript / TypeScript | ████████░░ 84% Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | In progress |
 | Python | ███████░░░ 79% ruff format | █████████░ 94% ruff | In progress |
-| Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █░░░░░░░░░ 18% tflint | In progress |
-| GraphQL | █████████░ 99% Prettier | no reference tool | Ready |
-| TOML | █████████░ 98% taplo | no reference tool | Ready |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 85% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
-| Angular templates | █████████░ 97% Prettier | no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | In progress |
 | Markdown | ████████░░ 89% Prettier | ████████░░ 83% markdownlint | In progress |
 | YAML | ██████████ 100% Prettier | ███████░░░ 74% yamllint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
-| PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
 | PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
 | Java | █████████░ 91% google-java-format | ██░░░░░░░░ 23% Checkstyle | In progress |
 | Kotlin | ███████░░░ 78% ktlint | █░░░░░░░░░ 11% ktlint | In progress |
 | Shell | ████████░░ 81% shfmt | ████░░░░░░ 47% ShellCheck | In progress |
 | SQL | ███████░░░ 78% sqlfluff | ░░░░░░░░░░ 3% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
-| XML | █████████░ 99% CSharpier XML | no reference tool | Ready |
-| C / C++ | █░░░░░░░░░ 14% clang-format | no reference tool | In progress |
-| Ruby | no reference tool | █████████░ 96% RuboCop | Lint only: Ready |
-| Dockerfile | no reference tool | ███░░░░░░░ 35% hadolint | Lint only: In progress |
-| Makefile | no reference tool | █████████░ 96% checkmake | Lint only: Ready |
-| GitHub Actions | no reference tool | ░░░░░░░░░░ 5% actionlint | Lint only: In progress |
-| INI, EditorConfig, .gitignore | no reference tool | no reference tool | not measured |
+| C / C++ | █░░░░░░░░░ 14% clang-format | 24 rules · reference tool: none found | In progress |
+| Dockerfile | Sudsy formatter · reference tool: none found | ███░░░░░░░ 35% hadolint | Lint only: In progress |
+| GitHub Actions | Sudsy formatter · reference tool: none found | ░░░░░░░░░░ 5% actionlint | Lint only: In progress |
+| PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
+| INI, EditorConfig, .gitignore | Sudsy formatter · reference tool: none found | 23 rules · reference tool: none found | not measured |
 
-Format: the share of real-world files where `sudsy format` gives the same bytes as the tool; Lint: the share of the tool's findings that Sudsy also reports on the same line, with the preset that mirrors the tool. Both leave out only reviewed intentional differences, and both are measured with the tool's default settings. Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). What the numbers leave out: [docs/languages.md](docs/languages.md) and [docs/ai/parity/README.md](docs/ai/parity/README.md). Presets: [configuration](docs/configuration.md#presets).
+How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->
 
-Languages that are small downloads are fetched once with `sudsy languages add <name>` ([language packs](docs/configuration.md#language-packs)). All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorConfig, Gitignore, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->.
+All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorConfig, Gitignore, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->. Some are [language packs](#install). Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
 
-Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
+## Beyond parity
+
+<!-- generated:beyond -->
+Sudsy format options vs other tools:
+
+| Language | Sudsy options | Reference tool | Tool options |
+|---|---:|---|---:|
+| JavaScript / TypeScript | 28 | Prettier | [17](https://prettier.io/docs/options) |
+| CSS / SCSS / Less | 7 | Prettier | [5](https://prettier.io/docs/options) |
+| YAML | 14 | Prettier | [7](https://prettier.io/docs/options) |
+| GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
+| Python | 12 | ruff format | [9](https://docs.astral.sh/ruff/settings/#format) |
+| Shell | 8 | shfmt | [6](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd) |
+| Java | 23 | google-java-format | [1](https://github.com/google/google-java-format#using-the-formatter) |
+| Protobuf | 4 | buf format | [0](https://buf.build/docs/format/style) |
+| Terraform (HCL) | 3 | terraform fmt | [0](https://developer.hashicorp.com/terraform/cli/commands/fmt) |
+| C# | 64 | CSharpier | [5](https://csharpier.com/docs/Options) |
+<!-- /generated -->
+
+- **Your own rules:** [YAML patterns](docs/rules.md#pattern-rules) with fixes, and sandboxed [Wasm plugins](docs/rules.md#wasm-plugins).
+- **One config for every language:** one [`sudsy.yaml`](docs/configuration.md), with `overrides` per path and presets that reproduce each tool.
+- **Safe fixes:** `sudsy fix` applies only [safe fixes](docs/rules.md#fixes), re-parses after each round and undoes a round that leaves the file unparsable.
+- **Meaning check:** tests and corpus runs [compare the syntax tree before and after formatting](docs/ai/formatting/engine.md) and fail on any change, and on a second format that changes anything.
 
 ## Performance
 
@@ -152,22 +180,10 @@ Corpora, tool versions and the main differences per language: [docs/languages.md
 | GitHub Actions | Lint | actionlint | 2.1× slower | 0.14 s / 0.065 s | 76 / 71 MB |
 | Makefile | Lint | checkmake | 3.7× slower | 0.059 s / 0.016 s | 70 / 28 MB |
 
-Runner: Linux aarch64, 8 cores. Best of 5 runs, a new process each, caches off, `format --check` and `lint` with the Sudsy preset that mirrors the tool. Corpus ([docs/languages.md](docs/languages.md)): JSON: the valid files of JSONTestSuite; YAML: the GitHub Actions workflows of real repositories, 8 copies, without 16 files Sudsy cannot parse and the GitHub Actions workflows of real repositories and the yaml-test-suite cases; JS/TS: three.js src, express lib and test, 8 copies and TypeScript sources of vuejs/core, docusaurus, excalidraw and MUI; CSS: the CSS, SCSS and Less corpus and the CSS corpus (css-tricks, Bootstrap, and others); HTML: the HTML corpus (mdn learning-area and others), without 37 files Sudsy cannot parse and the HTML corpus (Prettier tests, mdn learning-area); TOML: the toml-test valid files and the TOML fixtures of the repository; Python: the Python corpus (Django, Requests, Flask, Click, HTTPX, pytest, Black); SQL: the ANSI dialect fixtures of sqlfluff, without 3 files Sudsy cannot parse; Shell: the shell script corpus; Java: the Java corpus (5 projects); Kotlin: the Kotlin corpus; PHP: the PHP corpus; Protobuf: the Protobuf corpus; HCL: the Terraform corpus; C#: dotnet/runtime CoreLib, without 14 files Sudsy cannot parse; XML: the XML fixtures and the project files of dotnet/aspnetcore, without 1 files Sudsy cannot parse; Ruby: the Ruby corpus; Markdown: the dotnet/runtime documentation; Dockerfile: the Dockerfile corpus; GitHub Actions: the GitHub Actions workflows of real repositories; Makefile: the Makefile corpus. Rerun one row: `scripts/speed.sh <tool>`.
+Method, runner and corpora: [docs/performance.md](docs/performance.md).
 <!-- /generated -->
 
-Sudsy does the same work as each tool: `format --check` and `lint` with the preset that mirrors it. The binary is about 53 MB: it holds the parsers for every language and a Wasm runtime for plugins. Method: [docs/performance.md](docs/performance.md).
-
-## Install
-
-| Channel | Command |
-|---|---|
-| npm | `npm i -D @sudsylint/sudsy` |
-| PyPI | `pip install sudsy` or `uvx sudsy` |
-| Homebrew | `brew install bingsubandit/sudsy/sudsy` |
-| Scoop | `scoop bucket add sudsy https://github.com/bingsubandit/scoop-sudsy; scoop install sudsy` |
-| Binary | [GitHub releases](https://github.com/bingsubandit/sudsy/releases): Linux, macOS and Windows, each for x64 and arm64 |
-
-Only C# needs more. It uses Roslyn in a worker process that every channel above bundles, and the worker needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Every other language works without .NET.
+Sudsy does the same work as each tool: `format --check` and `lint` with the preset that mirrors it. The binary is about 53 MB: it holds the parsers for every language and a Wasm runtime for plugins.
 
 ## Configure
 

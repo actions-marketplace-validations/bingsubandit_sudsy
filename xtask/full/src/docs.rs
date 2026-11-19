@@ -66,7 +66,18 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         .collect();
     crates.dedup();
     let crates = crates.join(", ");
-    let support = crate::support::render(&xtask::repo_root(), include_str!("../support.yaml"))?;
+    // The rules a language has: its own and the shared ones.
+    let rule_count = |ids: &[String]| {
+        rule_docs
+            .iter()
+            .filter(|d| d.languages.iter().any(|l| l == "all" || ids.contains(l)))
+            .count()
+    };
+    let support = crate::support::render(
+        &xtask::repo_root(),
+        include_str!("../support.yaml"),
+        &rule_count,
+    )?;
     out.push(splice(
         "README.md",
         &[
@@ -75,7 +86,15 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             ("support", support.table),
             ("support-headline", support.headline),
             ("support-ready", support.ready),
+            (
+                "beyond",
+                crate::beyond::render(providers, include_str!("../tool-options.yaml"))?,
+            ),
         ],
+    )?);
+    out.push(splice(
+        "docs/performance.md",
+        &[("speed-method", crate::speed::method()?)],
     )?);
     for rel in ["editors/vscode/README.md", "docs/ai/editor/vscode.md"] {
         out.push(splice(rel, &[("languages", names.clone())])?);
