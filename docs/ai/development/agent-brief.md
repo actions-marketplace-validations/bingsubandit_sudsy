@@ -4,7 +4,7 @@ The standard brief of a build agent; a task prompt links it and adds only the ta
 
 ## Working files
 - First, write `.cargo/tmp/TASK.md` (gitignored, survives a restart): the whole prompt plus a progress section; update it as you go. A resumed agent reads it first.
-- Write the slot to `.cargo/tmp/SLOT` (`/scratch/slots/sudsy/<n>`); the scripts read it when `CARGO_TARGET_DIR` is unset ([dev-loop.md](dev-loop.md#parallel-agents)). Plain `cargo` still needs the variable.
+- Write the slot to `.cargo/tmp/SLOT` (`/scratch/slots/sudsy/<n>`); the scripts read it before `CARGO_TARGET_DIR` (the inherited one names the lead's slot; [dev-loop.md](dev-loop.md#parallel-agents)). Plain `cargo` still needs the variable.
 - Commit WIP often (`WIP: <what>`); `land.sh` squashes before the push.
 - Multi-step commands (loops, heredocs, several git calls) go in `.cargo/tmp/*.sh`, written with Write, run with `bash`. One plain command per call otherwise.
 - PATH is set for agents: no PATH prefixes. No wait loops, `sleep` or Monitor: see the finish and background rules in CLAUDE.md.
