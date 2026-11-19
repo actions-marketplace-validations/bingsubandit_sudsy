@@ -134,3 +134,20 @@ fn matches_the_extension() {
         &["a.sqlx", "sql"],
     );
 }
+
+/// A backslash escapes the quote in MySQL and ANSI, and is a character in PostgreSQL and T-SQL.
+#[test]
+fn backslash_escape_depends_on_the_dialect() {
+    let strings = |text: &str, dialect: &str| {
+        let parsed = parse(text, dialect);
+        (parsed.tree.descendants_with_tokens())
+            .filter_map(|e| e.into_token())
+            .filter(|t| t.kind() == kind::STRING)
+            .map(|t| t.text().to_string())
+            .collect::<Vec<_>>()
+    };
+    let text = r"SELECT 'a\' + 'b';";
+    assert_eq!(strings(text, "mysql")[0], r"'a\' + '");
+    assert_eq!(strings(text, "postgres"), [r"'a\'", "'b'"]);
+    assert_eq!(strings(r"SELECT E'a\'b';", "postgres"), [r"E'a\'b'"]);
+}

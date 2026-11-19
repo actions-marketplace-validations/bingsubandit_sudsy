@@ -65,7 +65,6 @@ pub fn string(raw: &str, single: bool) -> String {
     let style = StringStyle {
         single,
         keep_quoted: true,
-        interpolation: true,
     };
     let row = core_syntax::grammars::CSS
         .get()

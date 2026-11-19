@@ -8,7 +8,7 @@ use crate::format::{QuoteStyle, restyle};
 use crate::generated::{Scalar, kind};
 use crate::resolve::{plain_round_trips, resolves_to_str};
 use crate::rules::is_key;
-use crate::scalar::flow_value;
+use crate::scalar::{self, flow_value};
 use core_rules::Re;
 use core_rules::rule;
 use core_rules::sorting::cached_regex;
@@ -65,11 +65,12 @@ fn quotes_are_needed(token: &SyntaxToken, value: &str, in_flow: bool) -> bool {
 /// `value` as a quoted scalar of the type wanted, or of the type with fewer escapes.
 fn quote(value: &str, wanted: Option<char>) -> String {
     let double = wanted.map_or(!value.contains(['"', '\\']), |c| c == '"');
-    if double {
-        format!("\"{}\"", value.replace('\\', "\\\\").replace('"', "\\\""))
+    let kind = if double {
+        kind::DOUBLE_QUOTED
     } else {
-        format!("'{}'", value.replace('\'', "''"))
-    }
+        kind::SINGLE_QUOTED
+    };
+    scalar::quoted(kind, value).expect("a quoted scalar row writes any value")
 }
 
 rule! {

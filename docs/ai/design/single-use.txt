@@ -325,9 +325,7 @@ local lang-sql/parse/types.rs recursive-descent-parser # lang: sql
 local lang-toml/validate.rs parse-validation # lang: toml
 local lang-xml/format.rs markup-whitespace-model # lang: xml
 local lang-xml/validate.rs parse-validation # lang: xml
-local lang-yaml/format/scalars.rs literal-spelling # lang: yaml
 local lang-yaml/parser/block.rs recursive-descent-parser # lang: yaml
 local lang-yaml/parser/flow.rs recursive-descent-parser # lang: yaml
 local lang-yaml/parser/mod.rs recursive-descent-parser # lang: yaml
 local lang-yaml/parser/scan.rs source-lexer # lang: yaml
-local lang-yaml/quoted_strings.rs literal-spelling # lang: yaml

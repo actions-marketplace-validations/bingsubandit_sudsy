@@ -22,6 +22,15 @@ pub enum Unknown {
     Invalid,
 }
 
+/// What is wrong with an escape ([`StringSyntax::check_escape`]).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Bad {
+    /// The row does not define the escaped character.
+    Unknown(char),
+    /// A hex escape has fewer digits than it needs.
+    Hex,
+}
+
 /// One `string` row.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct StringSyntax {
@@ -185,18 +194,48 @@ impl StringSyntax {
                 (self.opener.starts_with(e) && after.starts_with(&self.opener[e.len_utf8()..]))
                     || (last.starts_with(e) && inner[..i].ends_with(head))
             };
-            let known = kept
-                || e == quote
-                || e == esc
-                || self.map.iter().any(|m| m.0 == e)
-                || self.hex.iter().any(|h| h.0 == e)
-                || self.named == Some(e)
-                || (self.hexrun > 0 && e.is_ascii_hexdigit())
-                || (self.octal > 0 && e.is_digit(8))
-                || (self.continuation && matches!(e, '\n' | '\r' | '\u{2028}' | '\u{2029}'));
-            if !known {
+            if !kept && !self.defines(e, quote) && !(self.continuation && is_break(e)) {
                 found(i, e);
             }
+        }
+    }
+
+    /// Does the row give the escaped character `e` a meaning (written between `quote`)?
+    fn defines(&self, e: char, quote: char) -> bool {
+        e == quote
+            || Some(e) == self.escape
+            || self.map.iter().any(|m| m.0 == e)
+            || self.hex.iter().any(|h| h.0 == e)
+            || self.named == Some(e)
+            || (self.hexrun > 0 && e.is_ascii_hexdigit())
+            || (self.octal > 0 && e.is_digit(8))
+    }
+
+    /// The length of the well-formed escape that starts with the escape character at `src[at]`
+    /// (written between `quote`), or what is wrong with it. A line break after the character is
+    /// no error here: it continues the string or ends it ([`StringSyntax::escape_len`]).
+    pub fn check_escape(&self, src: &str, at: usize, quote: char) -> Result<usize, Bad> {
+        let rest = &src[at + 1..];
+        let Some(e) = rest.chars().next() else {
+            return Ok(1);
+        };
+        if is_break(e) {
+            return Ok(self.escape_len(src, at, false));
+        }
+        if let Some(&(_, n)) = self.hex.iter().find(|h| h.0 == e) {
+            let digits = (rest.bytes().skip(1).take(n))
+                .take_while(u8::is_ascii_hexdigit)
+                .count();
+            return if digits >= if self.short_hex { 1 } else { n } {
+                Ok(2 + digits)
+            } else {
+                Err(Bad::Hex)
+            };
+        }
+        if self.defines(e, quote) {
+            Ok(self.escape_len(src, at, false))
+        } else {
+            Err(Bad::Unknown(e))
         }
     }
 
@@ -465,6 +504,46 @@ impl StringSyntax {
     }
 }
 
+/// The value of a word written as quoted pieces and bare text one after the other (`a"b c"'d'`):
+/// a piece that opens with a delimiter of a row is read by that row, the text between them by
+/// the row without delimiters (an unquoted piece is kept as written when there is none).
+pub fn concat_value(rows: &[&StringSyntax], text: &str) -> String {
+    let special = |c: char| {
+        rows.iter()
+            .any(|r| r.escape == Some(c) || r.quotes.contains(&c))
+    };
+    if !text.contains(special) {
+        return text.to_string();
+    }
+    let bare = rows.iter().find(|r| r.quotes.is_empty());
+    let opens = |c: char| rows.iter().find(|r| r.quotes.contains(&c));
+    let next = |at: usize| text[at..].chars().next().map_or(0, char::len_utf8);
+    let (mut out, mut i) = (String::new(), 0);
+    while i < text.len() {
+        let c = text[i..].chars().next().unwrap_or('\0');
+        let quoted = opens(c);
+        let end = if let Some(row) = quoted {
+            row.scan(text, i, false).0
+        } else {
+            let mut j = i;
+            while j < text.len()
+                && (j == i || opens(text[j..].chars().next().unwrap_or('\0')).is_none())
+            {
+                let skip = bare.is_some_and(|b| b.escape.is_some_and(|e| text[j..].starts_with(e)));
+                j += next(j) + if skip { next(j + next(j)) } else { 0 };
+            }
+            j
+        };
+        let piece = &text[i..end];
+        match quoted.or(bare) {
+            Some(row) => out.push_str(&row.value(piece).unwrap_or(piece.into())),
+            None => out.push_str(piece),
+        }
+        i = end;
+    }
+    out
+}
+
 /// The lines of a block string without the indentation they all share (the first line does not
 /// count) and without the blank lines around them, as the GraphQL spec reads it.
 pub fn dedent(inner: &str) -> Vec<&str> {
@@ -487,6 +566,10 @@ pub fn dedent(inner: &str) -> Vec<&str> {
         .skip(start)
         .take(end.saturating_sub(start))
         .collect()
+}
+
+fn is_break(c: char) -> bool {
+    matches!(c, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
 fn hex_value(digits: &[char]) -> u32 {
@@ -619,6 +702,32 @@ mod tests {
         assert_eq!(row.value(r"'\26 x'").unwrap(), "&x");
         assert_eq!(row.pieces(r#"x "a" 'b\'' "c"#), [r#""a""#, r"'b\''"]);
         assert_eq!(super::dedent("\n  a\n    b\n  "), ["a", "  b"]);
+    }
+
+    #[test]
+    fn check_escape_reads_one_escape_and_names_what_is_wrong() {
+        let row = r#"string S quote "\"" escape "\\" map "n" 10 hex "u" 4"#;
+        let g = Grammar::parse(&format!("language t 1\ntoken S\n{row}")).unwrap();
+        let row = g.string_row(g.kind_by_name("S").unwrap());
+        assert_eq!(row.check_escape(r"\n", 0, '"'), Ok(2));
+        assert_eq!(row.check_escape(r"\u00e9x", 0, '"'), Ok(6));
+        assert_eq!(row.check_escape(r"\u00", 0, '"'), Err(super::Bad::Hex));
+        assert_eq!(
+            row.check_escape(r"\q", 0, '"'),
+            Err(super::Bad::Unknown('q'))
+        );
+        assert_eq!(row.check_escape("\\\n", 0, '"'), Ok(1));
+    }
+
+    #[test]
+    fn concat_reads_quoted_pieces_and_bare_text_by_their_rows() {
+        let rows = r#"string S quote "'"
+string S quote "\"" escape "\\" unknown keep map "\\" 92
+string S escape "\\" unknown drop"#;
+        let g = Grammar::parse(&format!("language t 1\ntoken S\n{rows}")).unwrap();
+        let rows: Vec<_> = g.string_rows(g.kind_by_name("S").unwrap()).collect();
+        let word = |t| super::concat_value(&rows, t);
+        assert_eq!(word(r#"a\ b"c\\d\n"'e\f'"#), r"a bc\d\ne\f");
     }
 
     #[test]

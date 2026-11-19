@@ -286,24 +286,21 @@ pub fn block_comment_len(b: &[u8]) -> (usize, bool) {
     }
 }
 
-/// The length of the string or character literal that starts at `b[0]` (a quote), a suffix
+/// The length of the string or character literal that starts at `src[i]` (a quote), a suffix
 /// included; it ends at the line's end when the closing quote is missing.
-fn quoted_len(b: &[u8]) -> usize {
-    let q = b[0];
-    let mut i = 1;
-    while i < b.len() {
-        match b[i] {
-            b'\\' if i + 1 < b.len() => i += 2,
-            b'\n' => return i,
-            c if c == q => {
-                i += 1;
-                break;
-            }
-            _ => i += 1,
-        }
-    }
-    let i = i.min(b.len());
-    i + b[i..].iter().take_while(|&&c| ident_byte(c)).count()
+fn quoted_len(src: &str, i: usize) -> usize {
+    let row = (core_syntax::grammars::CPP.get())
+        .string_rows(k::STRING)
+        .next()
+        .expect("the C++ grammar has a string row");
+    let (end, closed) = row.scan(src, i, false);
+    let b = src.as_bytes();
+    let suffix = if closed {
+        b[end..].iter().take_while(|&&c| ident_byte(c)).count()
+    } else {
+        0
+    };
+    end - i + suffix
 }
 
 /// The length of the raw string literal whose `R"` starts at `b[0..2]`, a suffix included, and
@@ -458,14 +455,14 @@ pub fn lex(src: &str, dialect: Dialect) -> Lexed {
                 }
             } else {
                 let kind = if b[i + p] == b'"' { k::STRING } else { k::CHAR };
-                tok!(kind, p + quoted_len(&b[i + p..]));
+                tok!(kind, p + quoted_len(src, i + p));
                 continue;
             }
         }
         if c == b'"' || c == b'\'' {
             tok!(
                 if c == b'"' { k::STRING } else { k::CHAR },
-                quoted_len(&b[i..])
+                quoted_len(src, i)
             );
         } else if ident_byte(c) && !c.is_ascii_digit() {
             let len = b[i..].iter().take_while(|&&c| ident_byte(c)).count();

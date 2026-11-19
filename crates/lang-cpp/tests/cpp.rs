@@ -280,3 +280,15 @@ fn structure_stats() {
         );
     }
 }
+
+#[test]
+fn a_backslash_before_a_line_break_continues_the_string() {
+    let src = "const char* s = \"a\\\r\nb\"; char c = '\\\\'; char* t = \"open\nint x;\n";
+    let parsed = assert_parses(&provider(Dialect::Cpp), "a.cc", src);
+    let strings: Vec<String> = (parsed.tree.descendants_with_tokens())
+        .filter_map(|e| e.into_token())
+        .filter(|t| t.kind() == kind::STRING || t.kind() == kind::CHAR)
+        .map(|t| t.text().to_string())
+        .collect();
+    assert_eq!(strings, ["\"a\\\r\nb\"", "'\\\\'", "\"open"]);
+}

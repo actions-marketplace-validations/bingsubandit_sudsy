@@ -47,6 +47,9 @@ token WordLiteral #restyle
 token Word #name-part
 token QuotedIdentifier #name-part
 token String #literal #string
+// Both quotes: a `"` string only in MySQL and ANSI. The first row is the dialects where a backslash is a character, the second the ones where it escapes.
+string String quote "'" "\"" double
+string String quote "'" "\"" double escape "\\"
 token Number #literal
 // The raw lines of a `COPY .. FROM STDIN` block.
 token Data

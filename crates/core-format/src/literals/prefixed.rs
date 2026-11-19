@@ -38,16 +38,16 @@ pub fn string<'a>(syn: &StringSyntax, text: &'a str, quote: Quote) -> Cow<'a, st
         return Cow::Borrowed(text);
     };
     let new_prefix = prefix_of(prefix);
-    let (prefer, other) = match quote {
-        Quote::Single => ('\'', '"'),
-        _ => ('"', '\''),
+    let prefer = match quote {
+        Quote::Single => '\'',
+        _ => '"',
     };
     let q_char = q.chars().next().unwrap_or('"');
     let fstring = new_prefix.contains('f') || new_prefix.contains('t');
     let result = if quote == Quote::Preserve || (q.len() == 3 && q_char == prefer) {
         None
     } else {
-        requote(&new_prefix, q, q_char, prefer, other, body, fstring)
+        requote(syn, &new_prefix, q, q_char, prefer, body, fstring)
     };
     match result {
         Some(s) => Cow::Owned(s),
@@ -57,14 +57,15 @@ pub fn string<'a>(syn: &StringSyntax, text: &'a str, quote: Quote) -> Cow<'a, st
 }
 
 fn requote(
+    syn: &StringSyntax,
     prefix: &str,
     q: &str,
     q_char: char,
     prefer: char,
-    _other: char,
     body: &str,
     fstring: bool,
 ) -> Option<String> {
+    let esc = syn.escape.unwrap_or('\\');
     let triple = q.len() == 3;
     let (orig, new) = (q_char, if q_char == prefer { q_char } else { prefer });
     if orig == new {
@@ -82,22 +83,25 @@ fn requote(
         let body = if triple {
             Cow::Borrowed(body)
         } else {
-            Cow::Owned(unescape_quote(body, orig))
+            Cow::Owned(unescape_quote(body, orig, esc))
         };
-        escape_quote(&body, new, triple)
+        escape_quote(&body, new, triple, esc)
     };
-    if fstring && has_backslash_in_field(&new_body) {
+    if fstring && has_backslash_in_field(&new_body, esc) {
         return None;
     }
     let mut new_body = new_body;
     if triple && new == '"' && new_body.ends_with(new) {
         new_body.pop();
         // (an odd run of backslashes already escapes it)
-        let run = new_body.len() - new_body.trim_end_matches('\\').len();
-        new_body.push_str(if run % 2 == 1 { "\"" } else { "\\\"" });
+        let run = new_body.len() - new_body.trim_end_matches(esc).len();
+        if run.is_multiple_of(2) {
+            new_body.push(esc);
+        }
+        new_body.push(new);
     }
-    let orig_esc = body.matches('\\').count();
-    let new_esc = new_body.matches('\\').count();
+    let orig_esc = body.matches(esc).count();
+    let new_esc = new_body.matches(esc).count();
     if new_esc > orig_esc || (new_esc == orig_esc && orig == prefer) {
         return None;
     }
@@ -105,12 +109,12 @@ fn requote(
 }
 
 /// `\'` (an escaped quote of the old kind) becomes `'`.
-fn unescape_quote(body: &str, q: char) -> String {
+fn unescape_quote(body: &str, q: char, esc: char) -> String {
     let mut out = String::with_capacity(body.len());
     let mut chars = body.chars().peekable();
     let mut bs = 0;
     while let Some(c) = chars.next() {
-        if c == '\\' {
+        if c == esc {
             bs += 1;
             if chars.peek() == Some(&q) && bs % 2 == 1 {
                 // An odd run's last backslash escapes the quote: drop only that one.
@@ -128,21 +132,21 @@ fn unescape_quote(body: &str, q: char) -> String {
 
 /// An unescaped `q` gets a backslash (in a triple-quoted string only a run of three would end it,
 /// Black escapes every one).
-fn escape_quote(body: &str, q: char, triple: bool) -> String {
+fn escape_quote(body: &str, q: char, triple: bool, esc: char) -> String {
     let mut out = String::with_capacity(body.len() + 2);
     let mut bs = 0;
     let chars: Vec<char> = body.chars().collect();
     for (i, &c) in chars.iter().enumerate() {
         if c == q && bs % 2 == 0 && (!triple || chars[i..].starts_with(&[q, q, q])) {
-            out.push('\\');
+            out.push(esc);
         }
-        bs = if c == '\\' { bs + 1 } else { 0 };
+        bs = if c == esc { bs + 1 } else { 0 };
         out.push(c);
     }
     out
 }
 
-fn has_backslash_in_field(body: &str) -> bool {
+fn has_backslash_in_field(body: &str, esc: char) -> bool {
     let b = body.as_bytes();
     let mut i = 0;
     while i < b.len() {
@@ -157,7 +161,7 @@ fn has_backslash_in_field(body: &str) -> bool {
                 match b[j] {
                     b'{' => depth += 1,
                     b'}' => depth -= 1,
-                    b'\\' => return true,
+                    c if c as char == esc => return true,
                     _ => {}
                 }
                 j += 1;

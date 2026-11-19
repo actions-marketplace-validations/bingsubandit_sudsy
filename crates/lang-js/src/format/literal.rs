@@ -88,7 +88,6 @@ fn directive(raw: &str, single: bool) -> String {
 const STRING: StringStyle = StringStyle {
     single: false,
     keep_quoted: false,
-    interpolation: false,
 };
 
 /// The `string` row of the string token.

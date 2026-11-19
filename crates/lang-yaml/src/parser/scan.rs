@@ -5,6 +5,8 @@
 
 use super::{Parser, R};
 use crate::generated::kind as k;
+use core_syntax::grammars;
+use core_syntax::strings::Bad;
 
 pub(crate) fn is_blank(c: u8) -> bool {
     matches!(c, b' ' | b'\t')
@@ -471,6 +473,7 @@ impl Parser<'_> {
 
     /// Scans a double-quoted scalar and emits its token; returns whether it spans lines.
     pub(crate) fn scan_double(&mut self) -> R<bool> {
+        let row = grammars::YAML.get().string_row(k::DOUBLE_QUOTED);
         let start = self.pos;
         let mut i = start + 1;
         let mut multiline = false;
@@ -484,28 +487,19 @@ impl Parser<'_> {
                     i += 1;
                     break;
                 }
-                b'\\' => match self.at(i + 1) {
-                    b'0' | b'a' | b'b' | b't' | b'\t' | b'n' | b'v' | b'f' | b'r' | b'e' | b' '
-                    | b'"' | b'/' | b'\\' | b'N' | b'_' | b'L' | b'P' => i += 2,
-                    c @ (b'x' | b'u' | b'U') => {
-                        let digits = match c {
-                            b'x' => 2,
-                            b'u' => 4,
-                            _ => 8,
-                        };
-                        if !(0..digits).all(|d| self.at(i + 2 + d).is_ascii_hexdigit()) {
-                            self.pos = i;
-                            return self.fail("bad-escape", "an escape needs hexadecimal digits");
-                        }
-                        i += 2 + digits;
-                    }
-                    b'\n' | b'\r' => {
-                        multiline = true;
-                        i = self.quoted_newline(i + 1)?;
-                    }
-                    _ => {
+                b'\\' if matches!(self.at(i + 1), b'\n' | b'\r') => {
+                    multiline = true;
+                    i = self.quoted_newline(i + 1)?;
+                }
+                b'\\' => match row.check_escape(self.src, i, '"') {
+                    Ok(n) => i += n,
+                    Err(bad) => {
                         self.pos = i;
-                        return self.fail("bad-escape", "an invalid escape sequence");
+                        let message = match bad {
+                            Bad::Hex => "an escape needs hexadecimal digits",
+                            Bad::Unknown(_) => "an invalid escape sequence",
+                        };
+                        return self.fail("bad-escape", message);
                     }
                 },
                 b'\n' | b'\r' => {

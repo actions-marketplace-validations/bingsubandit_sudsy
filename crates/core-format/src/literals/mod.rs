@@ -16,9 +16,6 @@ pub struct StringStyle {
     pub single: bool,
     /// A string that already has the chosen quote is kept as written (its escapes too).
     pub keep_quoted: bool,
-    /// A `#{ }` interpolation is copied as written; a string whose interpolation holds a quote
-    /// is kept.
-    pub interpolation: bool,
 }
 
 /// A string token (`'..'` or `".."`) with the preferred quote, unless its text has more of that
@@ -30,11 +27,15 @@ pub fn string(raw: &str, style: StringStyle, syn: &StringSyntax) -> String {
         return raw.to_string();
     };
     let body = &raw[1..raw.len() - 1];
-    if style.interpolation
-        && body
-            .split("#{")
-            .skip(1)
-            .any(|s| s.split('}').next().is_some_and(|i| i.contains(['"', '\''])))
+    // The code parts of the row (`#{ }`) are copied as written; a string whose part holds a quote
+    // is kept.
+    let nest = syn.nest.as_ref();
+    if let Some((open, close)) = nest
+        && body.split(open.as_str()).skip(1).any(|s| {
+            s.split(close.as_str())
+                .next()
+                .is_some_and(|i| i.contains(['"', '\'']))
+        })
     {
         return raw.to_string();
     }
@@ -54,24 +55,28 @@ pub fn string(raw: &str, style: StringStyle, syn: &StringSyntax) -> String {
     }
     let mut out = String::with_capacity(raw.len() + 2);
     out.push(quote);
-    let mut chars = body.chars();
-    let (mut depth, mut prev) = (0, ' ');
-    while let Some(c) = chars.next() {
-        let inside = style.interpolation && (depth > 0 || (c == '{' && prev == '#'));
-        prev = c;
-        if inside {
-            match c {
-                '{' => depth += 1,
-                '}' => depth -= 1,
-                _ => {}
+    let mut depth = 0;
+    let mut chars = body.char_indices();
+    while let Some((i, c)) = chars.next() {
+        if let Some((open, _)) = nest.filter(|_| depth == 0 && c != escape)
+            && body[i..].starts_with(open.as_str())
+        {
+            out.push_str(open);
+            for _ in 1..open.chars().count() {
+                chars.next();
             }
+            depth = 1;
+            continue;
+        }
+        if depth > 0 {
+            depth += i32::from(c == '{') - i32::from(c == '}');
             out.push(c);
             continue;
         }
         match c {
             c if c == escape => match chars.next() {
-                Some(e) if e == other => out.push(e),
-                Some(e) => {
+                Some((_, e)) if e == other => out.push(e),
+                Some((_, e)) => {
                     out.push(escape);
                     out.push(e);
                 }
@@ -86,6 +91,25 @@ pub fn string(raw: &str, style: StringStyle, syn: &StringSyntax) -> String {
     }
     out.push(quote);
     out
+}
+
+/// `text` (a token of the row `from`) written as a token of the row `to`: `None` when the value
+/// cannot be written there or the new token needs more escapes (escape characters, doubled
+/// delimiters) than the old one has.
+pub fn requote(from: &StringSyntax, to: &StringSyntax, text: &str) -> Option<String> {
+    let value = from.value(text)?;
+    let out = to.encode(&value)?;
+    let (quote, escape) = (to.quotes.first(), to.escape);
+    let needed = value
+        .chars()
+        .filter(|c| Some(c) == quote || Some(*c) == escape)
+        .count();
+    let written = match (from.escape, from.quotes.first()) {
+        (Some(e), _) => text.matches(e).count(),
+        (None, Some(q)) => text.matches(format!("{q}{q}").as_str()).count(),
+        _ => 0,
+    };
+    (needed <= written).then_some(out)
 }
 
 /// The body with `\"` and `\'` as plain quotes (other escapes stay): the one thing a quote
@@ -213,7 +237,6 @@ mod tests {
     const JS: StringStyle = StringStyle {
         single: false,
         keep_quoted: false,
-        interpolation: false,
     };
 
     fn syn() -> StringSyntax {
@@ -233,11 +256,14 @@ mod tests {
         assert_eq!(string("\"it's\"", single, &syn()), "\"it's\"");
         let css = StringStyle {
             keep_quoted: true,
-            interpolation: true,
             ..JS
         };
         assert_eq!(string("\"\\\"\\'\"", css, &syn()), "\"\\\"\\'\"");
-        assert_eq!(string("'#{\"a\"}'", css, &syn()), "'#{\"a\"}'");
+        let scss = StringSyntax {
+            nest: Some(("#{".into(), "}".into())),
+            ..syn()
+        };
+        assert_eq!(string("'#{\"a\"}'", css, &scss), "'#{\"a\"}'");
     }
 
     #[test]

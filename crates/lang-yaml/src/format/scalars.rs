@@ -9,8 +9,8 @@ use super::{QuoteStyle, Style};
 use crate::generated::kind as k;
 use crate::scalar::{block_header, flow_value, quoted};
 use crate::tree::{block_parent_indent, is_trivia};
-use core_format::{Doc, FormatCtx, FormatError, doc};
-use core_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
+use core_format::{Doc, FormatCtx, FormatError, doc, literals};
+use core_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, grammars};
 use std::borrow::Cow;
 
 fn token_of(node: &SyntaxNode, what: &str) -> Result<SyntaxToken, FormatError> {
@@ -100,23 +100,13 @@ pub(crate) fn restyle(text: &str, kind: SyntaxKind, quotes: QuoteStyle) -> Optio
     if value.chars().any(|c| c.is_control()) {
         return None;
     }
-    match (kind, quotes) {
-        (k::DOUBLE_QUOTED, QuoteStyle::Single) => {
-            let escapes_before = text.matches('\\').count();
-            let escapes_after = value.matches('\'').count();
-            (escapes_after <= escapes_before)
-                .then(|| quoted(k::SINGLE_QUOTED, &value))
-                .flatten()
-        }
-        (k::SINGLE_QUOTED, QuoteStyle::Double) => {
-            let escapes_before = text.matches("''").count();
-            let escapes_after = value.matches(['"', '\\']).count();
-            (escapes_after == 0 || escapes_after <= escapes_before)
-                .then(|| quoted(k::DOUBLE_QUOTED, &value))
-                .flatten()
-        }
-        _ => None,
-    }
+    let to = match (kind, quotes) {
+        (k::DOUBLE_QUOTED, QuoteStyle::Single) => k::SINGLE_QUOTED,
+        (k::SINGLE_QUOTED, QuoteStyle::Double) => k::DOUBLE_QUOTED,
+        _ => return None,
+    };
+    let row = |kind| grammars::YAML.get().string_row(kind);
+    literals::requote(row(kind), row(to), text)
 }
 
 /// The `prefer_double` quote rule: a quoted scalar with escapes other than `\"` (double) or any backslash

@@ -23,6 +23,7 @@ use core_rules::{EmbeddedTree, Family, Params, Re, Rule, RuleContext, RuleMeta};
 use core_syntax::SyntaxNode;
 use core_syntax::SyntaxNodeExt;
 use core_syntax::grammars::SHELL;
+use core_syntax::strings;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -79,20 +80,6 @@ fn flag_names(arg: &str) -> Vec<String> {
     }
 }
 
-/// A word without its quotes and escapes.
-fn unquote(word: &str) -> String {
-    let (mut out, mut quote, mut chars) = (String::new(), None, word.chars());
-    while let Some(c) = chars.next() {
-        match (c, quote) {
-            ('\\', q) if q != Some('\'') => out.extend(chars.next()),
-            ('\'' | '"', None) => quote = Some(c),
-            (c, Some(q)) if c == q => quote = None,
-            _ => out.push(c),
-        }
-    }
-    out
-}
-
 /// The commands of a shell tree, in order: the words of each `Command` node (a word is a token,
 /// a string, a concatenation or a substitution; assignments and redirections are not words). A
 /// command inside `$(...)` is a `Command` node of its own, found like the others.
@@ -101,11 +88,14 @@ fn shell_commands(root: &SyntaxNode) -> Vec<Cmd> {
     let kind = |n| shell.kind_by_name(n);
     let command = kind("Command");
     let words = ["Word", "String", "Concat", "Subst"].map(kind);
+    let rows: Vec<_> = shell
+        .string_rows(shell.kind_by_name("Word").expect("Word"))
+        .collect();
     let mut out = Vec::new();
     for node in root.descendants().filter(|n| Some(n.kind()) == command) {
         let mut words = (node.children_with_tokens())
             .filter(|e| words.contains(&Some(e.kind())))
-            .map(|e| unquote(&e.to_string()));
+            .map(|e| strings::concat_value(&rows, &e.to_string()));
         if let Some(name) = words.next() {
             out.push(Cmd {
                 name,

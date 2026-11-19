@@ -117,3 +117,8 @@ F12d (measured, not built): the passes were run in reduced forms and the sqlfluf
 ### SQL: F12c MySQL block indents
 
 F12c: the MySQL `BEGIN`/`LOOP`/`REPEAT`/`WHILE .. DO`/`UNTIL`/`END` scan (`add_indents`, 50 lines) reads flat statements by keyword; a parse of the blocks would be a MySQL parser feature of about the same size, so it stays until `Doc` indent (F12d) can read block nodes
+
+### String literals (F1b/F1c rest)
+
+Left on hand-written string reading, measured once. Ruby: strings are `Quote` and `StringPart` tokens, never one token, so a `string` row has no token to sit on; `interpolation_check` and the regexp capture scan are 45 lines of lint on text that decode no escape. HTML expression scanners (`angular.rs` `string_step`, `svelte.rs`, `template.rs`): one-byte steps that carry the open quote between calls, and template literals nest; the JS row's `scan` takes a whole string, so each needs its own restructuring for about 25 lines. TOML `validate::string` (55 lines): `check_escape` replaces about 20 of them; the rest is the three-quote run rule, the scalar-value check and the blanks-then-break rule of multi-line strings, which only TOML has. Shell `arith.rs` quote scan: 3 lines over a `char` vector. The `rows()` accessor of the Java and Kotlin formatters (3 lines each): a default method that returns the formatter's `LazyRules` is the same 3 lines, and a `format.rules` text in `ParserSpec` would turn on the rows of every language that has the file, which changes their output. The per-language `string_value` wrappers (JS `literal.rs`, Python `util.rs`) and a callee-to-row map per grammar for `regex-call` (js.lint instr +3.00%: the callee text is built per call) stay open.
+

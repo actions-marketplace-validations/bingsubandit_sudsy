@@ -79,6 +79,7 @@ token Keyword #keyword
 token Number #literal
 token String #literal #string
 token Char #literal #string
+string String Char quote "\"" "'" escape "\\" continuation line
 // The `<...>` of #include.
 token HeaderName #literal
 // A byte that starts no other token (`@`, a backquote, a stray backslash).

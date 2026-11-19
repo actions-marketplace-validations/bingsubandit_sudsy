@@ -22,6 +22,10 @@ token Semi ";" #separator
 token Op
 // A word or a piece of one: quoting and expansions stay inside as written. A lone `\` is a line continuation.
 token Word #literal
+// What a word means: `'..'` is raw, `".."` and bare text have escapes (bare text is the row without delimiters).
+string Word quote "'"
+string Word quote "\"" escape "\\" continuation unknown keep map "\"" 34 "\\" 92 "$" 36 "`" 96
+string Word escape "\\" continuation unknown drop
 // `$(( expr ))`: the blanks inside the brackets may go.
 token Arith #restyle
 // `<<` or `<<-`, the delimiter word follows.

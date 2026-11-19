@@ -4,6 +4,7 @@
 
 use crate::generated::kind as k;
 use core_syntax::parse::{self, ParseError, Token};
+use core_syntax::strings::Bad;
 
 /// `comments`: whether comments are allowed (JSONC); otherwise each is an error.
 pub fn lex(src: &str, comments: bool) -> (Vec<Token>, Vec<ParseError>) {
@@ -147,10 +148,7 @@ impl Lexer<'_> {
                     self.error(start, "unterminated-string", "unterminated string");
                     break;
                 }
-                '\\' => {
-                    self.pos += 1;
-                    self.escape(at);
-                }
+                '\\' => self.escape(at),
                 c if (c as u32) < 0x20 => {
                     self.pos += 1;
                     self.error(
@@ -165,26 +163,17 @@ impl Lexer<'_> {
         self.emit(k::STRING, start);
     }
 
-    /// After a backslash at `at`.
+    /// After a backslash at `at`: the escape is read by the string row.
     fn escape(&mut self, at: usize) {
-        match self.peek() {
-            Some('"' | '\\' | '/' | 'b' | 'f' | 'n' | 'r' | 't') => self.pos += 1,
-            Some('u') => {
-                self.pos += 1;
-                for _ in 0..4 {
-                    match self.peek() {
-                        Some(h) if h.is_ascii_hexdigit() => self.pos += 1,
-                        _ => {
-                            self.error(at, "invalid-string", "invalid \\u escape");
-                            return;
-                        }
-                    }
-                }
+        let row = core_syntax::grammars::JSON.get().string_row(k::STRING);
+        match row.check_escape(self.src, at, '"') {
+            Ok(n) => self.pos = at + n,
+            Err(Bad::Hex) => {
+                self.pos = at + 2;
+                self.error(at, "invalid-string", "invalid \\u escape");
             }
-            // The string ends (or the line does) right after the backslash.
-            None | Some('\n' | '\r') => {}
-            Some(c) => {
-                self.pos += c.len_utf8();
+            Err(Bad::Unknown(c)) => {
+                self.pos = at + 1 + c.len_utf8();
                 self.error(at, "invalid-string", format!("invalid escape `\\{c}`"));
             }
         }

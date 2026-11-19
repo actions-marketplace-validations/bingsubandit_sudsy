@@ -3,6 +3,7 @@
 //! concept: source-lexer
 
 use super::dialect::Dialect;
+use crate::generated::kind as k;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum T {
@@ -210,23 +211,16 @@ fn line_end(b: &[u8], from: usize) -> usize {
     find(b, from, b'\n').unwrap_or(b.len())
 }
 
-/// The end of a quoted run opened at `i`: `close` ends it, a doubled `close` (and a backslash when
-/// `escape`) stays inside. Unterminated: the rest of the file.
-fn quoted(b: &[u8], i: usize, close: u8, escape: bool, open: &mut bool) -> usize {
-    let mut j = i + 1;
-    while j < b.len() {
-        let c = b[j];
-        if c == close {
-            if b.get(j + 1) == Some(&close) {
-                j += 2;
-                continue;
-            }
-            return j + 1;
-        }
-        j += if escape && c == b'\\' { 2 } else { 1 };
-    }
-    *open = true;
-    b.len()
+/// The end of the quoted run opened at `i`, read by the `string` row of the dialect's escape
+/// (`escape`: a backslash escapes). Unterminated: the rest of the file.
+fn quoted(src: &str, i: usize, escape: bool, open: &mut bool) -> usize {
+    let row = (core_syntax::grammars::SQL.get())
+        .string_rows(k::STRING)
+        .nth(usize::from(escape))
+        .expect("the SQL grammar has two string rows");
+    let (end, closed) = row.scan(src, i, false);
+    *open |= !closed;
+    end
 }
 
 fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
@@ -252,7 +246,7 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         b'/' if next == Some(b'*') => return (T::BlockComment, block_comment(b, i, d, open)),
         b'\\' if d == Dialect::Postgres => return (T::LineComment, meta_command_end(b, i)),
         b'\'' => {
-            let end = quoted(b, i, b'\'', d == Dialect::Mysql || d == Dialect::Ansi, open);
+            let end = quoted(src, i, d == Dialect::Mysql || d == Dialect::Ansi, open);
             return (
                 T::Str,
                 if d == Dialect::Postgres {
@@ -264,7 +258,7 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         }
         b'"' => {
             let esc = matches!(d, Dialect::Mysql | Dialect::Ansi);
-            let end = quoted(b, i, b'"', esc, open);
+            let end = quoted(src, i, esc, open);
             return (
                 if d == Dialect::Mysql {
                     T::Str
@@ -306,7 +300,7 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         b';' => return (T::Semi, i + 1),
         b':' if next == Some(b':') => return (T::Cast, i + 2),
         b':' if d == Dialect::Postgres && matches!(next, Some(b'\'' | b'"')) => {
-            return (T::Var, quoted(b, i + 1, next.unwrap_or(b'\''), false, open));
+            return (T::Var, quoted(src, i + 1, false, open));
         }
         b'U' | b'u'
             if d == Dialect::Postgres
@@ -314,7 +308,7 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
                 && matches!(b.get(i + 2), Some(b'\'' | b'"')) =>
         {
             let q = b[i + 2];
-            let end = quoted(b, i + 2, q, false, open);
+            let end = quoted(src, i + 2, false, open);
             return (
                 if q == b'"' { T::Quoted } else { T::Str },
                 uescape(src, end),
@@ -504,7 +498,7 @@ fn word(src: &str, i: usize, first: char, d: Dialect, open: &mut bool) -> (T, us
         && matches!(b[i], b'n' | b'N' | b'e' | b'E' | b'x' | b'X' | b'b' | b'B')
     {
         let escape = matches!(b[i], b'e' | b'E') || d == Dialect::Mysql;
-        return (T::Str, quoted(b, i + 1, b'\'', escape, open));
+        return (T::Str, quoted(src, i + 1, escape, open));
     }
     if d == Dialect::Postgres
         && matches!(b[i], b'u' | b'U')
@@ -512,7 +506,7 @@ fn word(src: &str, i: usize, first: char, d: Dialect, open: &mut bool) -> (T, us
         && matches!(b.get(i + 2), Some(b'\'' | b'"'))
     {
         let q = b[i + 2];
-        let end = quoted(b, i + 2, q, false, open);
+        let end = quoted(src, i + 2, false, open);
         return (
             if q == b'"' { T::Quoted } else { T::Str },
             uescape(src, end),
