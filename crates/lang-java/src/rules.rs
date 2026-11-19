@@ -1,5 +1,7 @@
 //! The Rust rules of Java (Checkstyle): the checks that read several nodes. The checks on one
 //! node's own text are pattern files in `rules/`.
+//!
+//! concept: none (glue: the list of rules)
 
 use core_rules::Rule;
 
