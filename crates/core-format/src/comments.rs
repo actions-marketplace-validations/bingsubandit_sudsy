@@ -93,6 +93,8 @@ pub struct CommentStyle {
     /// Tokens after which the width of a comment at the end of the line counts when a group on that
     /// line is measured (a token that cannot break afterwards, like `;`).
     pub trailing_counts_after: &'static [&'static str],
+    /// The lines of a block comment lose their trailing blanks (`comment_trim_lines`).
+    pub trim_lines: bool,
 }
 
 impl Default for CommentStyle {
@@ -105,6 +107,7 @@ impl Default for CommentStyle {
             max_blank_after: 1,
             reflow_width: None,
             trailing_counts_after: &[],
+            trim_lines: false,
         }
     }
 }

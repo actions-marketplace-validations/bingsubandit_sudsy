@@ -231,7 +231,9 @@ fn conditional(
             break;
         }
     }
+    // (a lone `if` is only braced for a branch of its own line: the layout decides the width)
     let long = chain
+        && branches.len() > 1
         && branches
             .last()
             .and_then(|b| code_end(g, b))

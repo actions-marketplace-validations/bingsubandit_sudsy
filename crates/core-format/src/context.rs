@@ -156,8 +156,12 @@ pub trait NodeFormatter: Send + Sync {
 
     /// How comments are printed; the default keeps their text and puts one space before a
     /// comment after code.
-    fn comment_style(&self, _options: &ResolvedOptions) -> CommentStyle {
-        CommentStyle::default()
+    fn comment_style(&self, options: &ResolvedOptions) -> CommentStyle {
+        CommentStyle {
+            trim_lines: options.get("comment_trim_lines")
+                == Some(&core_config::OptionValue::Bool(true)),
+            ..CommentStyle::default()
+        }
     }
 
     /// Whether the end of the file is text the formatter must not change (PHP: inline HTML after
@@ -742,6 +746,13 @@ fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
             Some(width) => doc::reflow(st.line_text(c), width),
             None => verbatim_text(&text),
         },
+        CommentKind::Block if st.trim_lines && text.contains('\n') => verbatim_text(
+            &text
+                .lines()
+                .map(str::trim_end)
+                .collect::<Vec<_>>()
+                .join("\n"),
+        ),
         CommentKind::Block => verbatim_text(&text),
     }
 }

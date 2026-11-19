@@ -32,6 +32,7 @@ options:
   - assignment_keep_break_kinds: [["Property", "BinaryExpression"]]
   - annotation_inline: ["single"]
   - semicolon_keep_parents: [["ClassBody", "EnumEntry"]]
+  - comment_trim_lines: [true]
   - format_rules: [["curly"]]
   - curly_style: ["chain"]
   - settle_keywords: [["if", "else", "for", "while"]]

@@ -9127,6 +9127,11 @@
               "minimum": 1,
               "type": "integer"
             },
+            "comment_trim_lines": {
+              "default": true,
+              "description": "The lines of a block comment lose their trailing blanks.",
+              "type": "boolean"
+            },
             "curly_style": {
               "default": "chain",
               "description": "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
@@ -12300,6 +12305,11 @@
                     "maximum": 1000,
                     "minimum": 1,
                     "type": "integer"
+                  },
+                  "comment_trim_lines": {
+                    "default": true,
+                    "description": "The lines of a block comment lose their trailing blanks.",
+                    "type": "boolean"
                   },
                   "curly_style": {
                     "default": "chain",

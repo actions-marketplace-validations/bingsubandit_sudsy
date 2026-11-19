@@ -554,6 +554,14 @@ pub mod shared {
         )
     }
 
+    pub fn comment_trim_lines(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            "comment_trim_lines",
+            default,
+            "The lines of a block comment lose their trailing blanks.",
+        )
+    }
+
     pub fn format_rules(default: &[&str]) -> OptionDef {
         OptionDef::words(
             "format_rules",
