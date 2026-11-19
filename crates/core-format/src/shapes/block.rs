@@ -10,7 +10,7 @@ use crate::FormatCtx;
 use crate::comments::{self, Comment};
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
-use core_syntax::{SyntaxNode, SyntaxToken};
+use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Clone, Debug)]
 pub struct BlockStyle {
@@ -27,19 +27,123 @@ pub struct BlockStyle {
     pub keep_same_line: bool,
     /// A blank line after the opening delimiter stays.
     pub keep_leading_blank: bool,
+    /// A blank line before the closing delimiter stays (google-java-format: before the `}` that an
+    /// `else` or `catch` follows).
+    pub keep_trailing_blank: bool,
+}
+
+impl BlockStyle {
+    /// What `Default` gives, for `const` styles: `BlockStyle { .. BlockStyle::DEFAULT }`.
+    pub const DEFAULT: BlockStyle = BlockStyle {
+        max_blank_lines: 1,
+        empty: "",
+        force_blank: None,
+        expand_empty: false,
+        keep_same_line: false,
+        keep_leading_blank: false,
+        keep_trailing_blank: false,
+    };
 }
 
 impl Default for BlockStyle {
     fn default() -> Self {
+        BlockStyle::DEFAULT
+    }
+}
+
+/// The parts of a compound statement that follow its first block: the kinds of the clauses
+/// (`catch`, `finally`) and the keywords (`else`).
+#[derive(Clone, Copy, Debug)]
+pub struct Continuations<'a> {
+    pub clauses: &'a [SyntaxKind],
+    pub words: &'a [&'a str],
+}
+
+impl Continuations<'_> {
+    /// `base` for a block of a compound statement: an empty block that is part of a longer
+    /// statement keeps its closing delimiter on a line of its own, and a blank line before the
+    /// closing delimiter stays when a clause or keyword follows the block.
+    pub fn style(&self, cx: &FormatCtx<'_>, block: &SyntaxNode, base: BlockStyle) -> BlockStyle {
         BlockStyle {
-            max_blank_lines: 1,
-            empty: "",
-            force_blank: None,
-            expand_empty: false,
-            keep_same_line: false,
-            keep_leading_blank: false,
+            expand_empty: block.children().next().is_none() && self.within(cx, block),
+            keep_trailing_blank: self.follows(cx, block),
+            ..base
         }
     }
+
+    /// Does the next significant element after `block` start a clause or is a keyword of the set?
+    fn follows(&self, cx: &FormatCtx<'_>, block: &SyntaxNode) -> bool {
+        let mut next = block.next_sibling_or_token();
+        while let Some(e) = &next {
+            if !matches!(e, SyntaxElement::Token(t) if cx.grammar.is_trivia(t.kind())) {
+                break;
+            }
+            next = e.next_sibling_or_token();
+        }
+        next.is_some_and(|e| match &e {
+            SyntaxElement::Node(n) => self.clauses.contains(&n.kind()),
+            SyntaxElement::Token(t) => self.words.contains(&t.text()),
+        })
+    }
+
+    /// Is `block` part of a longer statement: the body of a clause, of a `#try` that has one, or
+    /// of a statement that has a keyword of the set?
+    fn within(&self, cx: &FormatCtx<'_>, block: &SyntaxNode) -> bool {
+        let Some(parent) = block.parent() else {
+            return false;
+        };
+        self.clauses.contains(&parent.kind())
+            || (cx.grammar.has_tag(parent.kind(), "try")
+                && parent.children().any(|c| self.clauses.contains(&c.kind())))
+            || parent
+                .children_with_tokens()
+                .any(|c| c.as_token().is_some_and(|t| self.words.contains(&t.text())))
+    }
+}
+
+/// Where a labeled statement puts its label.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct LabelStyle {
+    /// The body goes on the next line (at the indentation of the statement), else after the label.
+    pub body_on_next_line: bool,
+    /// Levels the label moves out of the statement's indentation.
+    pub outdent: usize,
+}
+
+/// A labeled statement: the `head` (`label:`), then the `body`. A `bare` body (an empty
+/// statement) follows the head directly.
+pub fn labeled(head: Doc, body: Doc, style: LabelStyle, bare: bool) -> Doc {
+    let head = if style.outdent > 0 {
+        doc::outdent(style.outdent, head)
+    } else {
+        head
+    };
+    let sep = if bare && !style.body_on_next_line {
+        Doc::Nil
+    } else if style.body_on_next_line {
+        doc::hardline()
+    } else {
+        doc::lit(" ")
+    };
+    doc::concat(vec![head, sep, body])
+}
+
+/// A `label: body` node (`#labeled`): `print` prints a run of its elements (the label with its
+/// colon, then the body). A node of fewer than three elements is a shape error.
+pub fn labeled_statement(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    style: LabelStyle,
+    print: &dyn Fn(&[SyntaxElement]) -> Result<Doc, FormatError>,
+) -> Result<Doc, FormatError> {
+    let els = crate::seq::kids(cx, node);
+    if els.len() < 3 {
+        return Err(FormatError::Shape("labeled statement".into()));
+    }
+    let bare = els[2]
+        .as_node()
+        .is_some_and(|b| cx.grammar.has_tag(b.kind(), "empty-statement"));
+    Ok(labeled(print(&els[..2])?, print(&els[2..])?, style, bare))
 }
 
 /// `open`, the items one per line and indented, `close`. An empty block is `open close`. Separator
@@ -179,7 +283,9 @@ fn braces_of(
         ]);
     }
     let blank_before_close = body.is_some()
-        && (!dangling.is_empty() || style.max_blank_lines == usize::MAX)
+        && (!dangling.is_empty()
+            || style.keep_trailing_blank
+            || style.max_blank_lines == usize::MAX)
         && comments::blank_lines_before(g, close) > 0;
     let first_hardline = match (&body, lead_blank) {
         (None, _) => Doc::Nil,

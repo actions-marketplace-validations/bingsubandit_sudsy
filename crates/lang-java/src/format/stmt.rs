@@ -19,8 +19,8 @@ pub(super) fn rule(
         | k::FOR_STATEMENT
         | k::ENHANCED_FOR_STATEMENT
         | k::DO_STATEMENT
-        | k::LABELED_STATEMENT
         | k::SYNCHRONIZED_STATEMENT => control(cx, node),
+        k::LABELED_STATEMENT => labeled(cx, node),
         k::SWITCH_BLOCK_STATEMENT_GROUP => switch_group(cx, node),
         k::FOR_SPEC => for_spec(cx, node),
         k::SWITCH_STATEMENT_RULE | k::SWITCH_EXPRESSION_RULE => switch_rule(cx, node),
@@ -54,32 +54,27 @@ fn is_statement(kind: core_syntax::SyntaxKind) -> bool {
     )
 }
 
+/// The clauses and keywords that go on after a block of a compound statement.
+const CONTINUATIONS: shapes::Continuations<'static> = shapes::Continuations {
+    clauses: &[k::CATCH_CLAUSE, k::FINALLY_CLAUSE],
+    words: &["else"],
+};
+
 fn block(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let style = BlockStyle {
-        expand_empty: node.children().next().is_none() && keeps_lines(node),
+    let base = BlockStyle {
         keep_leading_blank: true,
         ..BlockStyle::default()
     };
-    shapes::block(cx, node, &style)
+    shapes::block(cx, node, &CONTINUATIONS.style(cx, node, base))
 }
 
-/// An empty block that is part of a longer statement (`catch`, `finally`, `if` with an `else`,
-/// `try` with a `catch`) keeps its `}` on a line of its own.
-fn keeps_lines(block: &SyntaxNode) -> bool {
-    let Some(parent) = block.parent() else {
-        return false;
+/// `label:` on a line of its own, the statement below it at the same indentation.
+fn labeled(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
+    let style = shapes::LabelStyle {
+        body_on_next_line: true,
+        outdent: 0,
     };
-    let has = |kind| parent.children().any(|c| c.kind() == kind);
-    match parent.kind() {
-        k::CATCH_CLAUSE | k::FINALLY_CLAUSE => true,
-        k::TRY_STATEMENT | k::TRY_WITH_RESOURCES_STATEMENT => {
-            has(k::CATCH_CLAUSE) || has(k::FINALLY_CLAUSE)
-        }
-        k::IF_STATEMENT => parent
-            .children_with_tokens()
-            .any(|c| c.as_token().is_some_and(|t| t.text() == "else")),
-        _ => false,
-    }
+    shapes::labeled_statement(cx, node, style, &|els| seq(cx, els)).or_else(|_| generic(cx, node))
 }
 
 /// `if (...) body else body`, loops and the like: a block body follows on the line, any other
@@ -198,16 +193,5 @@ fn for_spec(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 
 /// `case X -> body`: an expression body moves to the next line when it does not fit.
 fn switch_rule(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let Some(arrow) = els.iter().position(|e| e.kind() == k::ARROW) else {
-        return generic(cx, node);
-    };
-    let body = &els[arrow + 1..];
-    if body.len() != 1 || body[0].kind() == k::BLOCK {
-        return generic(cx, node);
-    }
-    Ok(doc::group(doc::concat(vec![
-        seq(cx, &els[..=arrow])?,
-        cont(doc::concat(vec![doc::line(), el(cx, &body[0])?])),
-    ])))
+    shapes::arrow_body(cx, node, &decl::Java(cx), k::ARROW, 2).or_else(|_| generic(cx, node))
 }

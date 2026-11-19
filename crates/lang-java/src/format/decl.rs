@@ -6,7 +6,7 @@ use super::*;
 use core_format::shapes::{self, Annotations, ListStyle, Printer};
 
 /// Java's printing of the elements of a declaration.
-struct Java<'a>(&'a FormatCtx<'a>);
+pub(super) struct Java<'a>(pub(super) &'a FormatCtx<'a>);
 
 impl Printer for Java<'_> {
     fn el(&self, e: &SyntaxElement) -> R {
@@ -48,7 +48,9 @@ pub(super) fn rule(
         k::FIELD_DECLARATION | k::CONSTANT_DECLARATION => variables(cx, node, true),
         k::LOCAL_VARIABLE_DECLARATION => variables(cx, node, false),
         k::MODIFIERS => modifiers(cx, node),
-        k::THROWS => throws(cx, node),
+        k::THROWS | k::SUPER_INTERFACES | k::EXTENDS_INTERFACES | k::PERMITS => {
+            shapes::clause_list(cx, node, &Java(cx), 2)
+        }
         k::FORMAL_PARAMETER | k::SPREAD_PARAMETER => parameter(cx, node),
         k::RESOURCE_SPECIFICATION => resources(cx, node),
         k::FORMAL_PARAMETERS | k::RECORD_HEADER => hanging_list(cx, node, None),
@@ -173,22 +175,6 @@ fn method(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     Ok(doc::concat(parts))
 }
 
-/// `throws A, B`: the continuation lines are indented under the first type.
-fn throws(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let mut parts = Vec::new();
-    let els = kids(cx, node);
-    for (i, e) in els.iter().enumerate() {
-        if i == 1 {
-            parts.push(doc::lit(" "));
-        }
-        parts.push(el(cx, e)?);
-        if is_tok(e, ",") {
-            parts.push(cont(doc::line()));
-        }
-    }
-    Ok(doc::group(doc::concat(parts)))
-}
-
 /// `Type name`: a long type moves the name to the next line.
 fn parameter(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let els = flat(cx, node);
@@ -257,65 +243,8 @@ pub(super) fn paren_list_extra(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 }
 
 fn paren_list_in(cx: &FormatCtx<'_>, node: &SyntaxNode, extra: bool) -> R {
-    let els = kids(cx, node);
-    let (Some(open), Some(close)) = (els.first(), els.last()) else {
-        return generic(cx, node);
-    };
-    if els.len() == 2 {
-        return seq(cx, &els);
-    }
-    let items = &els[1..els.len() - 1];
-    let args = node.kind() == k::ARGUMENT_LIST;
-    let format = args
-        && items.len() > 2
-        && items.first().is_some_and(|e| {
-            first(cx, e).is_some_and(|t| t.kind() == k::STRING)
-                && matches!(e.kind(), k::STRING | k::BINARY_EXPRESSION)
-                && match e {
-                    SyntaxElement::Token(t) => t.text().contains('%'),
-                    SyntaxElement::Node(n) => n.text().to_string().contains('%'),
-                }
-        });
-    let mut parts = Vec::new();
-    let mut rest = Vec::new();
-    for (i, e) in items.iter().enumerate() {
-        let sink = if format && i >= 2 {
-            &mut rest
-        } else {
-            &mut parts
-        };
-        sink.push(el(cx, e)?);
-        if is_tok(e, ",") {
-            sink.push(doc::line());
-        }
-    }
-    if format {
-        parts.push(doc::group(doc::concat(rest)));
-    }
-    let hug = items.len() == 1
-        && items[0]
-            .as_node()
-            .is_some_and(|n| shapes::hugs_last(cx, &shapes::CallStyle::of(cx.options), n, 1));
-    if hug {
-        return Ok(doc::group(doc::concat(vec![
-            el(cx, open)?,
-            doc::concat(parts),
-            el(cx, close)?,
-        ])));
-    }
-    let body = doc::concat(parts);
-    // Annotation arguments break all or none.
-    let body = if node.kind() == k::ANNOTATION_ARGUMENT_LIST {
-        body
-    } else {
-        doc::group(body)
-    };
-    let inner = cont(doc::concat(vec![doc::softline(), body]));
-    Ok(doc::group(doc::concat(vec![
-        el(cx, open)?,
-        if extra { cont(inner) } else { inner },
-        el(cx, close)?,
-    ])))
+    let call = shapes::CallStyle::of(cx.options);
+    shapes::paren_list(cx, node, &Java(cx), &call, 2, extra).or_else(|_| generic(cx, node))
 }
 
 #[allow(unused_imports)]

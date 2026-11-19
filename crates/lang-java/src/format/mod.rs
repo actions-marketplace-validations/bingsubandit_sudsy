@@ -13,7 +13,7 @@ mod stmt;
 
 use crate::generated::kind as k;
 use core_config::shared;
-use core_format::comments::{self, CommentKind};
+use core_format::comments::{self, CommentStyle};
 use core_format::doc::{self, Doc};
 use core_format::rules::LazyRules;
 use core_format::{FormatCtx, FormatError, NodeFormatter};
@@ -84,6 +84,19 @@ impl NodeFormatter for JavaFormatter {
         ROWS.get().blank_between(cx, prev, next)
     }
 
+    fn comment_style(&self, options: &core_config::ResolvedOptions) -> CommentStyle {
+        CommentStyle {
+            reflow_width: Some(core_format::print_options(options).line_width),
+            trailing_counts_after: &[";", ")", "]", "}"],
+            attach_docs: true,
+            ..CommentStyle::default()
+        }
+    }
+
+    fn reflows_comments(&self) -> bool {
+        true
+    }
+
     fn format_node(
         &self,
         node: &SyntaxNode,
@@ -152,50 +165,9 @@ pub(super) fn el(cx: &FormatCtx<'_>, e: &SyntaxElement) -> R {
     }
 }
 
-/// A token with its comments. A line comment after it moves to the end of the line without
-/// breaking the group around it, except after a token that has more of the list to come.
+/// A token with its comments (line comments after a closer stay at the end of the line).
 fn tok(cx: &FormatCtx<'_>, t: &SyntaxToken) -> Doc {
-    let trailing = comments::trailing_comments(cx.grammar, t);
-    if trailing.is_empty() {
-        return cx.token(t);
-    }
-    let lead = if cx.is_held_leading(t) {
-        Doc::Nil
-    } else {
-        cx.leading_comments_doc(t)
-    };
-    let mut parts = vec![lead, cx.token_text(t)];
-    for c in &trailing {
-        let text = doc::text(c.text().to_string());
-        if c.kind == CommentKind::Block {
-            parts.push(doc::lit(" "));
-            parts.push(text);
-        } else {
-            parts.push(doc::line_suffix(doc::concat(vec![doc::lit(" "), text])));
-            if !matches!(t.text(), ")" | ";" | "]" | "}") && !closes_next(t) {
-                parts.push(doc::break_parent());
-            }
-        }
-    }
-    doc::concat(parts)
-}
-
-/// [`gap`] after the last token of an element.
-pub(super) fn gap_after(cx: &FormatCtx<'_>, e: &SyntaxElement) -> Doc {
-    last(cx, e).map_or_else(|| doc::lit(" "), |t| gap(cx, &t))
-}
-
-/// Whether the next token closes the construct the token is in (`false // c` before `)`).
-fn closes_next(t: &SyntaxToken) -> bool {
-    let mut next = t.next_token();
-    while let Some(n) = next {
-        if !n.text().trim().is_empty() && !n.text().starts_with("//") && !n.text().starts_with("/*")
-        {
-            return matches!(n.text(), ")" | "]" | "}");
-        }
-        next = n.next_token();
-    }
-    false
+    core_format::seq::token_deferring_comments(cx, t, cx.comment_style.trailing_counts_after)
 }
 
 pub(super) fn is_tok(e: &SyntaxElement, text: &str) -> bool {

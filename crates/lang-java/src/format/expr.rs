@@ -139,24 +139,7 @@ fn assignment(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 }
 
 fn lambda(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let Some(arrow) = els.iter().position(|e| e.kind() == k::ARROW) else {
-        return generic(cx, node);
-    };
-    let head = seq(cx, &els[..=arrow])?;
-    let body = &els[arrow + 1..];
-    if body.first().is_some_and(|b| b.kind() == k::BLOCK) {
-        return Ok(doc::concat(vec![head, doc::lit(" "), seq(cx, body)?]));
-    }
-    let sep = if matches!(gap_after(cx, &els[arrow]), Doc::Nil | Doc::Text(_)) {
-        doc::line()
-    } else {
-        doc::hardline()
-    };
-    Ok(doc::group(doc::concat(vec![
-        head,
-        cont(doc::group(doc::concat(vec![sep, seq(cx, body)?]))),
-    ])))
+    shapes::arrow_body(cx, node, &decl::Java(cx), k::ARROW, 2).or_else(|_| generic(cx, node))
 }
 
 /// Prefix and postfix operators stick to their operand.
@@ -193,48 +176,10 @@ fn cast(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     ])))
 }
 
-/// `{a, b}`: on one line, else after the `{` one per line, or filled when the elements are
-/// literals or arrays. A trailing comma of the source stays and breaks the braces.
+/// `{a, b}`: the shared initializer; elements of fewer than ten characters are filled
+/// (google-java-format).
 fn initializer(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let els = kids(cx, node);
-    let (Some(open), Some(close)) = (els.first(), els.last()) else {
-        return generic(cx, node);
-    };
-    let inner = &els[1..els.len() - 1];
-    let items: Vec<_> = inner.iter().filter(|e| !is_tok(e, ",")).collect();
-    if items.is_empty() {
-        return seq(cx, &els);
-    }
-    let trailing = inner.last().is_some_and(|e| is_tok(e, ","));
-    let filled = items
-        .iter()
-        .all(|e| matches!(e.kind(), k::CHAR | k::NUMBER | k::ARRAY_INITIALIZER));
-    let commas: Vec<_> = inner.iter().filter(|e| is_tok(e, ",")).collect();
-    let mut parts = Vec::new();
-    for (i, e) in items.iter().enumerate() {
-        let comma = match commas.get(i) {
-            Some(c) => el(cx, c)?,
-            None => doc::nil(),
-        };
-        parts.push(doc::concat(vec![el(cx, e)?, comma]));
-        if i + 1 < items.len() {
-            let broken = commas
-                .get(i)
-                .and_then(|c| c.as_token())
-                .is_some_and(|c| line_comment_after(cx, c));
-            parts.push(if broken { doc::hardline() } else { doc::line() });
-        }
-    }
-    let body = if filled {
-        doc::fill(parts)
-    } else {
-        doc::concat(parts)
-    };
-    let mut out = vec![shapes::between(el(cx, open)?, body, el(cx, close)?)];
-    if trailing {
-        out.push(doc::break_parent());
-    }
-    Ok(doc::group(doc::concat(out)))
+    shapes::initializer(cx, node, &decl::Java(cx), 10).or_else(|_| generic(cx, node))
 }
 
 /// `a.b().c()`: the shared member chain (`core_format::shapes::call_chain`) under the

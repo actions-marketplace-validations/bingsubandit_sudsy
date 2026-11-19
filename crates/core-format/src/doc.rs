@@ -61,6 +61,15 @@ pub enum Doc {
     /// Contents indented one level when the group with this id was printed broken (the group
     /// decides the indentation of a later part of the line).
     IndentIfBreak(GroupId, Box<Doc>),
+    /// A line comment (`// text`) printed at the current column: when it is wider than the limit
+    /// (the second field), it wraps at a blank onto lines that start with `//`.
+    Reflow(Box<(String, usize)>),
+    /// Takes this many columns when a group is measured and prints nothing: the width of a line
+    /// comment that [`Doc::LineSuffix`] puts at the end of the line.
+    Reserve(usize),
+    /// The first document when a line of the probe's width fits `levels` indentation levels below
+    /// the current one, together with what follows it on its line, else the second.
+    FitsBelow(Box<FitsBelow>),
     /// A subtree that is cloned by reference count: layouts that try several candidates share
     /// the documents the candidates have in common instead of copying them (see [`shared`]).
     Shared(Arc<SharedDoc>),
@@ -69,6 +78,16 @@ pub enum Doc {
     /// A hard line when a line suffix is pending, else nothing: what follows must not move before
     /// the comment (it does not break the enclosing groups).
     LineSuffixBoundary,
+}
+
+/// The parts of [`Doc::FitsBelow`].
+#[derive(Clone, Debug, PartialEq)]
+pub struct FitsBelow {
+    pub levels: usize,
+    /// A [`Doc::Reserve`] of the width of the line.
+    pub probe: Doc,
+    pub fits: Doc,
+    pub otherwise: Doc,
 }
 
 /// Names a group so that [`Doc::IndentIfBreak`] can ask whether it was printed broken.
@@ -140,6 +159,7 @@ impl Doc {
                 s.chars().count()
             }
             Doc::Verbatim(s) => s.chars().count(),
+            Doc::Reserve(n) => *n,
             Doc::Line => 1,
             Doc::Concat(ps) | Doc::Fill(ps) => {
                 let mut n = 0;
@@ -205,7 +225,45 @@ impl Doc {
                 d.flattened()
             }
             Doc::Shared(s) => s.doc.clone().flattened(),
+            Doc::FitsBelow(f) => f.fits.flattened(),
             other => other,
+        })
+    }
+
+    /// [`Doc::flattened`], `None` when the document holds a forced break, a comment waiting for
+    /// the end of the line or text that is not printed as it is (a group that is broken, a
+    /// hard line, verbatim text).
+    pub fn try_flattened(self) -> Option<Doc> {
+        crate::deep(|| {
+            Some(match self {
+                Doc::Nil | Doc::Text(_) | Doc::LineSuffixBoundary => self,
+                Doc::Line => lit(" "),
+                Doc::SoftLine => Doc::Nil,
+                Doc::Verbatim(_)
+                | Doc::LineStart(_)
+                | Doc::Outdent(..)
+                | Doc::NewlineIfNeeded
+                | Doc::HardLine
+                | Doc::BreakParent
+                | Doc::Reflow(..)
+                | Doc::Reserve(_)
+                | Doc::FitsBelow(_)
+                | Doc::LineSuffix(_) => return None,
+                Doc::Concat(parts) | Doc::Fill(parts) => Doc::Concat(
+                    parts
+                        .into_iter()
+                        .map(Doc::try_flattened)
+                        .collect::<Option<_>>()?,
+                ),
+                Doc::Group(g) if !g.broken => g.contents.try_flattened()?,
+                Doc::Group(_) => return None,
+                Doc::Indent(d) | Doc::Align(_, d) | Doc::Label(_, d) | Doc::IndentIfBreak(_, d) => {
+                    d.try_flattened()?
+                }
+                Doc::IfBreak { flat, .. } => flat.try_flattened()?,
+                Doc::Shared(s) if !s.forced => s.doc.clone().try_flattened()?,
+                Doc::Shared(_) => return None,
+            })
         })
     }
 
@@ -216,6 +274,8 @@ impl Doc {
             Doc::Nil
             | Doc::Text(_)
             | Doc::Verbatim(_)
+            | Doc::Reflow(..)
+            | Doc::Reserve(_)
             | Doc::Line
             | Doc::SoftLine
             | Doc::LineSuffixBoundary => false,
@@ -315,6 +375,8 @@ impl Doc {
             Doc::Nil
             | Doc::Text(_)
             | Doc::Verbatim(_)
+            | Doc::Reflow(..)
+            | Doc::Reserve(_)
             | Doc::Line
             | Doc::SoftLine
             | Doc::LineSuffixBoundary => false,
@@ -324,6 +386,8 @@ impl Doc {
                 .iter_mut()
                 .fold(false, |forced, d| d.propagate_breaks() | forced),
             Doc::Indent(d) | Doc::Align(_, d) | Doc::LineSuffix(d) => d.propagate_breaks(),
+            // (either may be chosen: a break forces the parent when both have one)
+            Doc::FitsBelow(f) => f.fits.propagate_breaks() & f.otherwise.propagate_breaks(),
             Doc::IfBreak { broken, flat, .. } => {
                 broken.propagate_breaks() | flat.propagate_breaks()
             }
@@ -535,6 +599,27 @@ pub fn if_break_in(id: GroupId, broken: Doc, flat: Doc) -> Doc {
 /// See [`Doc::Label`].
 pub fn label(tag: &'static str, d: Doc) -> Doc {
     Doc::Label(tag, Box::new(d))
+}
+
+/// See [`Doc::FitsBelow`]: `fits` when `width` columns fit `levels` levels below the current
+/// indentation, else `otherwise`.
+pub fn fits_below(levels: usize, width: usize, fits: Doc, otherwise: Doc) -> Doc {
+    Doc::FitsBelow(Box::new(FitsBelow {
+        levels,
+        probe: Doc::Reserve(width),
+        fits,
+        otherwise,
+    }))
+}
+
+/// See [`Doc::Reflow`].
+pub fn reflow(text: impl Into<String>, limit: usize) -> Doc {
+    Doc::Reflow(Box::new((text.into(), limit)))
+}
+
+/// See [`Doc::Reserve`].
+pub fn reserve(columns: usize) -> Doc {
+    Doc::Reserve(columns)
 }
 
 /// See [`Doc::LineSuffixBoundary`].

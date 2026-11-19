@@ -7,6 +7,7 @@
 //! tools: none (internal)
 //! reads: grammar:language
 
+mod arrow;
 mod assignment;
 mod binary_chain;
 mod block;
@@ -20,13 +21,17 @@ mod declaration;
 pub mod fill;
 pub mod flow;
 mod heritage;
+mod initializer;
 mod key_value;
 mod list;
 mod maybe_parenthesize;
+mod paren_list;
 mod parens;
 mod section;
 mod signature;
+pub mod tabular;
 
+pub use arrow::arrow_body;
 pub use assignment::{
     Assign, AssignHooks, AssignLayout, AssignPolicy, AssignStyle, NoAssignHooks, assignment,
 };
@@ -34,8 +39,9 @@ pub use binary_chain::{
     BinaryHooks, BinaryPolicy, Hug, NoBinaryHooks, OperatorLine, Place, binary_chain, flattens,
 };
 pub use block::{
-    BlockStyle, annotation_line, blank_before, block, block_between, block_open_inside, braces,
-    document, spread_cases_style, statement_sequence, statement_sequence_with,
+    BlockStyle, Continuations, LabelStyle, annotation_line, blank_before, block, block_between,
+    block_open_inside, braces, document, labeled, labeled_statement, spread_cases_style,
+    statement_sequence, statement_sequence_with,
 };
 pub use call_arguments::{
     Args, CallStyle, Expanded, HugLast, Item, Plan, call_arguments, can_hug, expression_of,
@@ -54,13 +60,15 @@ pub use declaration::{
     Annotations, Clause, HeaderStyle, Printer, annotation_args, annotations_above, enum_body,
     has_arguments, has_doc_comment, header, lead_annotations, members, modifiers, type_declaration,
 };
-pub use heritage::{HeritageLayout, heritage};
+pub use heritage::{HeritageLayout, clause_list, heritage};
+pub use initializer::initializer;
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{
     ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, delimited_list,
     delimited_list_around, delimited_list_between,
 };
 pub use maybe_parenthesize::{between, enclosed, head_test, keyword_argument, maybe_parenthesize};
+pub use paren_list::paren_list;
 pub use parens::{
     Need, NoParenHooks, ParenHooks, ParenLayout, ParenPolicy, Unneeded, binary_needs, first_char,
     is_dropped_close, paren_group, parenthesized, unwrap, wrap,

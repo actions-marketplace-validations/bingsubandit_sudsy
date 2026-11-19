@@ -124,3 +124,53 @@ pub fn plain(
     }
     Ok(doc::concat(parts))
 }
+
+/// A token with its comments: a line comment after it moves to the end of the line without
+/// breaking the group around it when the token ends a construct (`closers`, which also count the
+/// comment's width in the line) or the next token closes one; after any other token it breaks the
+/// group (the list goes on below it).
+pub fn token_deferring_comments(cx: &FormatCtx<'_>, t: &SyntaxToken, closers: &[&str]) -> Doc {
+    use crate::comments::CommentKind;
+    let trailing = comments::trailing_comments(cx.grammar, t);
+    if trailing.is_empty() {
+        return cx.token(t);
+    }
+    let lead = if cx.is_held_leading(t) {
+        Doc::Nil
+    } else {
+        cx.leading_comments_doc(t)
+    };
+    let mut parts = vec![lead, cx.token_text(t)];
+    let ends = closers.contains(&t.text());
+    for c in &trailing {
+        let text = doc::text(cx.comment_style.line_text(c).into_owned());
+        if c.kind == CommentKind::Block {
+            parts.push(doc::lit(" "));
+            parts.push(text);
+        } else {
+            parts.push(doc::line_suffix(doc::concat(vec![doc::lit(" "), text])));
+            if ends {
+                parts.push(doc::reserve(
+                    1 + cx.comment_style.line_text(c).chars().count(),
+                ));
+            }
+            if !ends && !closes_next(t, closers) {
+                parts.push(doc::break_parent());
+            }
+        }
+    }
+    doc::concat(parts)
+}
+
+/// Whether the next token that is not a comment is one of `closers`.
+fn closes_next(t: &SyntaxToken, closers: &[&str]) -> bool {
+    let mut next = t.next_token();
+    while let Some(n) = next {
+        let s = n.text();
+        if !s.trim().is_empty() && !s.starts_with("//") && !s.starts_with("/*") {
+            return closers.contains(&s);
+        }
+        next = n.next_token();
+    }
+    false
+}
