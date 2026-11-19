@@ -5,7 +5,7 @@
 //!   the descendants tagged `of`), `children` (the children tagged `of`; with `single-line:
 //!   true` only of a node written on one line) or `decimals` (the digits after the point of each
 //!   token tagged `of`, which must be `#number`; reported per token);
-//! - `report`: the tag of a descendant whose first token gets the report (default: the node).
+//! - `report`: the tag of a descendant whose first token gets the report (default: the node); the first token that is not trivia, so blank lines before it are not reported.
 //!
 //! The message has `{count}` and `{max}`.
 //!
@@ -129,7 +129,11 @@ impl Rule for Max {
             Some(t) => node
                 .descendants()
                 .find(|d| g.has_tag(d.kind(), t))
-                .and_then(|d| d.first_token())
+                .and_then(|d| {
+                    d.descendants_with_tokens()
+                        .filter_map(|e| e.into_token())
+                        .find(|t| crate::tree::is_code(t, g))
+                })
                 .map(|t| t.text_range()),
         };
         if let Some(range) = range {

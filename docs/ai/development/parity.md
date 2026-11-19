@@ -61,6 +61,63 @@ Every run (format, lint, coverage) prints two numbers, defined in [../design/par
 - fixed: after `sudsy fix --unsafe .`, StyleCop must report none of those formatter ids whose coverage is `covered` (in any fixture) or `partial` (in the `layout_*` fixtures; the older fixtures show their gap), and what it still reports for `rule:` ids must match `sudsy lint`.
 The fixtures' `sudsy.yaml` extends `preset:csharp/stylecop`, so the formatter ids are checked under the preset's options and the `rule:` ids with the rules the preset enables. The `layout_*` fixtures are the layout rules' violations; the `doc_*` fixtures (summary, tags, wording, text) are the SA16xx documentation rules' cases, valid C# in which every partial type has only parts that StyleCop and Sudsy judge alike (StyleCop accepts one documented part, Sudsy checks each); the run prints the formatter ids no fixture violates (the build would pass vacuously for them). Needs the .NET SDK and network for the NuGet restore. To add a case, add a `.cs` file and enable its Sudsy rules in the preset (`crates/lang-csharp/presets/stylecop.yaml`); the catalog drives the id mapping.
 
+## Numbers
+
+Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.sh coverage [--proof] <tool>`; definitions in [../design/parity-target.md](../design/parity-target.md)). Format: identical files; coverage: findings the mapped rule reports on the tool's line. The ratchets `coverage:` (raw) and `target:` of `differences.yaml` hold the coverage numbers; `cargo xtask codegen` copies them into [../parity/README.md](../parity/README.md).
+
+| Format run | Raw | Target |
+|---|---:|---:|
+| biome | 100.0% (4 of 4) | 100.0% (4 of 4) |
+| buf | 99.1% (320 of 323) | 99.1% (320 of 323) |
+| clang-format | 14.7% (975 of 6639) | 14.7% (975 of 6639) |
+| csharpier-xml | 86.4% (323 of 374) | 99.7% (323 of 324) |
+| csharpier | 100.0% (9 of 9) | 100.0% (9 of 9) |
+| dotnet-format | 91.7% (11 of 12) | 91.7% (11 of 12) |
+| google-java-format | 91.6% (4889 of 5338) | 91.6% (4889 of 5338) |
+| invoke-formatter | not run here | not run here |
+| ktlint | 68.6% (4009 of 5848) | 69.4% (4009 of 5776) |
+| php-cs-fixer | 88.4% (9189 of 10389) | 88.5% (9189 of 10382) |
+| prettier-angular | 96.0% (1191 of 1241) | 96.1% (1191 of 1239) |
+| prettier-css | 87.2% (714 of 819) | 87.2% (714 of 819) |
+| prettier-html | 84.8% (2185 of 2576) | 84.8% (2185 of 2576) |
+| prettier-js | 81.6% (3403 of 4169) | 81.6% (3403 of 4169) |
+| prettier | 92.1% (223 of 242) | 95.7% (223 of 233) |
+| ruff | 78.3% (1303 of 1664) | 78.3% (1303 of 1664) |
+| shfmt | 81.7% (67 of 82) | 81.7% (67 of 82) |
+| sqlfluff | 60.5% (678 of 1121) | 78.2% (678 of 867) |
+| taplo | 95.3% (203 of 213) | 98.1% (203 of 207) |
+| terraform | 98.7% (314 of 318) | 99.1% (314 of 317) |
+
+| Coverage run | Raw | Target |
+|---|---:|---:|
+| actionlint | 5.1% (37 of 721) | 5.1% (37 of 721) |
+| buf | 85.8% (2027 of 2362) | 85.8% (2027 of 2362) |
+| checkmake | 60.9% (349 of 573) | 96.9% (349 of 360) |
+| checkstyle | 25.2% (13871 of 54940) | 23.1% (13871 of 59978) |
+| eslint-jsonc | not run here (no corpus, or the tool is not installed) | - |
+| eslint-plugin-svelte | 100.0% (67 of 67) | 100.0% (67 of 67) |
+| eslint-plugin-vue | 87.2% (1241 of 1423) | 14.5% (1241 of 8558) |
+| eslint | 100.0% (4411 of 4413) | 100.0% (4411 of 4413) |
+| hadolint | 15.1% (119 of 790) | 15.1% (119 of 790) |
+| html-eslint | 0.2% (37 of 19963) | 0.2% (37 of 19963) |
+| html-validate | 61.5% (616 of 1001) | 62.9% (616 of 980) |
+| htmlhint | 5.0% (65 of 1301) | 5.0% (65 of 1301) |
+| ktlint | 13.0% (15437 of 118565) | 11.9% (15437 of 129297) |
+| markdownlint | 82.6% (1538 of 1862) | 73.8% (1538 of 2084) |
+| phpstan | not run here (no corpus, or the tool is not installed) | - |
+| psscriptanalyzer | not run here (no corpus, or the tool is not installed) | - |
+| rubocop | 96.2% (7717 of 8022) | 96.2% (7717 of 8022) |
+| ruff | 94.6% (4132 of 4367) | 94.6% (4132 of 4367) |
+| shellcheck | 47.0% (109 of 232) | 47.0% (109 of 232) |
+| sqlfluff | 4.3% (826 of 19170) | 3.3% (826 of 25090) |
+| stylecop | not run here (no corpus, or the tool is not installed) | - |
+| stylelint-less | not run here (no corpus, or the tool is not installed) | - |
+| stylelint-scss | not run here (no corpus, or the tool is not installed) | - |
+| stylelint | 69.3% (8792 of 12686) | 69.3% (8792 of 12686) |
+| tflint | 18.9% (27 of 143) | 18.9% (27 of 143) |
+| typescript-eslint | 100.0% (3644 of 3644) | 100.0% (3644 of 3644) |
+| yamllint | 73.8% (2152 of 2917) | 72.9% (2152 of 2950) |
+
 ## Nightly
 `.github/workflows/nightly.yml` (daily 02:17 UTC, and `workflow_dispatch`) runs every parity tool of `scripts/parity_tools.json` and every language crate with ignored conformance tests, so a broken ratchet (`ratchet` minima, `second-format` and `refused` maxima, a new mismatch) or a broken corpus test fails without a person. `scripts/ci-nightly-matrix.py` builds the job matrix: one job per tool (`scripts/parity.sh [format] <tool>`) and per crate (`scripts/conformance.sh lang-<x>`: the fetch script, then `cargo test --profile corpus -p lang-<x> -- --ignored` minus the measurements `measure_startup_cost`, `scaling` and `model_cost`; `#[ignore]` reasons with "measurement", "prints timings" or "flaky" do not select a crate). A new tool or crate joins by existing; nothing is listed twice. Jobs do not stop each other and carry the tool's or crate's name. Tools (`target/parity`, keyed on the pins in `parity_tools.json`, `docs/ai/parity/*.yaml`, `jre.sh`, `dotnet-tools.json`) and corpora (`tests/conformance/corpus`, keyed on the fetch scripts, which update a stale cache by commit) are cached per job; the Cargo cache is saved from the default branch only. A cache is saved only by a passing job.
 

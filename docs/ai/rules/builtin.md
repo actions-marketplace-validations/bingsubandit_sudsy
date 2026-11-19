@@ -283,7 +283,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `no-unit-return` | kotlin | cleanup | warn | none | A function with a block body that declares `: Unit` (ktlint no-unit-return). |
 | `package-name` | kotlin | style | off | none | A package whose name has an uppercase letter or an underscore (ktlint package-name). |
 | `max-body-length` | makefile | cleanup | off | none | A rule whose recipe has more lines than allowed (checkmake `maxbodylength`). Every physical line counts, a continued command and a tab-indented comment included. Options: `max` (default `5`): The most lines a recipe may have. |
-| `min-phony` | makefile | suspicious | off | none | A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the `.PHONY` line, or the last rule's when there is none. Options: `required` (default `["all", "clean", "test"]`): The targets every Makefile must declare `.PHONY`. |
+| `min-phony` | makefile | suspicious | off | none | A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the last `.PHONY` line, or the last rule's when there is none. Options: `required` (default `["all", "clean", "test"]`): The targets every Makefile must declare `.PHONY`. |
 | `phony-declared` | makefile | suspicious | off | none | A target with no recipe that is not declared `.PHONY` (checkmake `phonydeclared`); targets that start with a `.` are special and skipped. |
 | `timestamp-expanded` | makefile | suspicious | warn | none | A variable whose value runs `date` and that is not simply expanded (`:=`, `::=`): every use runs `date` again and the values differ within one build (checkmake `timestampexpanded`). |
 | `unique-targets` | makefile | suspicious | off | none | A target defined by more than one rule, which merges prerequisites and overrides recipes (checkmake `uniquetargets`). Double-colon rules, `.PHONY` and the targets of `ignore` are skipped. Options: `ignore` (default `[]`): Targets that may be defined more than once. |
@@ -292,7 +292,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `fenced-code-language` | markdown | style | off | none | A fenced code block without an info string (markdownlint MD040); name the language, or `text`. |
 | `heading-increment` | markdown | style | off | none | A heading is more than one level deeper than the heading before it (an `h4` right after an `h2`). Going back up by any number of levels is fine (markdownlint MD001). |
 | `no-alt-text` | markdown | style | off | none | An image with empty alternate text, `![](url)` (markdownlint MD045). |
-| `no-bare-urls` | markdown | style | off | none | A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a space or starts the paragraph. Reported on the paragraph. |
+| `no-bare-urls` | markdown | style | off | none | A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a space or starts the paragraph. Reported on the URL. |
 | `no-duplicate-heading` | markdown | style | off | none | Two headings have the same text (markdownlint MD024), which makes their anchors ambiguous. |
 | `no-emphasis-as-heading` | markdown | style | off | none | A one-line paragraph that is only emphasized text without closing punctuation (markdownlint MD036); use a heading. |
 | `no-empty-links` | markdown | correctness | warn | none | A link whose destination is empty or only `#` (markdownlint MD042). |

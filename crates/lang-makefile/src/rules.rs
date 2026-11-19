@@ -66,7 +66,7 @@ rule! {
         category: Suspicious,
         default: Off,
         description: "A target that must exist and be declared `.PHONY` (checkmake `minphony`). \
-                  Reported on the `.PHONY` line, or the last rule's when there is none.",
+                  Reported on the last `.PHONY` line, or the last rule's when there is none.",
         example: ".PHONY: all   # `clean` and `test` are missing",
         options: [OptionDecl {
             name: "required",
@@ -82,6 +82,7 @@ rule! {
         let declared = phony(doc);
         let at = all
             .iter()
+            .rev()
             .find(|r| targets(r).iter().any(|t| t.text() == ".PHONY"))
             .or(all.last())
             .and_then(head)

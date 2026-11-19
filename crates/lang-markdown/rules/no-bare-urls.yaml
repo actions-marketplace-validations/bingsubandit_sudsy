@@ -2,12 +2,13 @@ id: no-bare-urls
 message: wrap the URL in <> or write a link
 description: >-
   A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a
-  space or starts the paragraph. Reported on the paragraph.
+  space or starts the paragraph. Reported on the URL.
 example: 'See https://example.com   # See <https://example.com>'
 severity: off
 category: style
+report-on: $URL
 rule:
   kind: Inline
-  regex: '(?:^|\s)https?://[^\s<>]'
+  regex: '(?:^|\s)(?<URL>https?://[^\s<>]+)'
   not-inside:
     kind: Heading

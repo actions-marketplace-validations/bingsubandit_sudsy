@@ -11690,13 +11690,18 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "build:\n\techo 1\n\techo 2\n\techo 3\n\techo 4\n\techo 5\n\techo 6\nfine:\n\techo 1\n",
+        "input": "build:\n\techo 1\n\techo 2\n\techo 3\n\techo 4\n\techo 5\n\techo 6\nfine:\n\techo 1\n\n\nblank-before:\n\techo 1\n\techo 2\n\techo 3\n\techo 4\n\techo 5\n\techo 6\n",
         "language": "makefile",
         "spans": [
           {
             "column": 1,
             "length": 5,
             "line": 1
+          },
+          {
+            "column": 1,
+            "length": 12,
+            "line": 12
           }
         ]
       },
@@ -11721,7 +11726,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the `.PHONY` line, or the last rule's when there is none.",
+      "description": "A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the last `.PHONY` line, or the last rule's when there is none.",
       "example": {
         "config": "min-phony:\n  level: warn\n  options:\n    required: [all, build]\n",
         "fixed": null,
@@ -12036,7 +12041,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a space or starts the paragraph. Reported on the paragraph.",
+      "description": "A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a space or starts the paragraph. Reported on the URL.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12045,7 +12050,7 @@
         "spans": [
           {
             "column": 1,
-            "length": 28,
+            "length": 19,
             "line": 1
           }
         ]

@@ -3,14 +3,208 @@ differences:
   target-specific-variable: choice  a target-specific variable assignment is a variable; checkmake does not read it as one
   double-colon-rule: choice  a repeated `::` rule is allowed, as make does; checkmake reports it
   multi-target-rule: choice  each target of a rule like `c d:` is checked on its own; checkmake reads one target named `c d`
+  comment-before-recipe: choice  the tool reads a target whose recipe follows comment lines as having none; make attaches the recipe to the target
+  phony-line-after: choice  the tool reports a missing .PHONY target on the line after the last `.PHONY` line; Sudsy reports the `.PHONY` line itself
+  rule-in-define: choice  the tool reads the lines inside a `define` block as rules; they are the text of a macro
 files:
   phony-declared/cases checkmake:phony-declared 9: empty-recipe
   timestamp-expanded/cases sudsy:timestamp-expanded 8: target-specific-variable
   unique-targets/cases checkmake:unique-targets 6: double-colon-rule
   unique-targets/cases sudsy:unique-targets 10: multi-target-rule
+  makefile/cli/Makefile checkmake:minphony 138: phony-line-after
+  makefile/cli/Makefile checkmake:phonydeclared 114: comment-before-recipe
+  makefile/cli/internal/gocompat/Makefile checkmake:minphony 13: phony-line-after
+  makefile/cli/vendor/github.com/cpuguy83/go-md2man/v2/Makefile checkmake:minphony 48: phony-line-after
+  makefile/cli/vendor/github.com/distribution/reference/Makefile checkmake:minphony 24: phony-line-after
+  makefile/cli/vendor/github.com/felixge/httpsnoop/Makefile checkmake:minphony 2: phony-line-after
+  makefile/cli/vendor/github.com/gorilla/mux/Makefile checkmake:minphony 32: phony-line-after
+  makefile/cli/vendor/github.com/prometheus/procfs/Makefile checkmake:minphony 31: phony-line-after
+  makefile/cli/vendor/github.com/spf13/cobra/Makefile checkmake:minphony 9: phony-line-after
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:minphony 345: phony-line-after
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 101: comment-before-recipe
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 111: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 120: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 138: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 144: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 156: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 157: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 158: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 159: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 160: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 161: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 162: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 165: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 221: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 234: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 249: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 317: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 36: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 39: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 43: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 48: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 52: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 55: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 58: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 61: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 64: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 67: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 70: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:phonydeclared 74: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 121: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 139: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 145: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 162: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 166: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 219: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 222: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 235: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 250: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 318: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 44: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 49: target-specific-variable
+  makefile/cli/vendor/go.opentelemetry.io/otel/Makefile checkmake:uniquetargets 75: target-specific-variable
+  makefile/cli/vendor/google.golang.org/grpc/Makefile checkmake:minphony 39: phony-line-after
+  makefile/git/Documentation/Makefile checkmake:minphony 574: phony-line-after
+  makefile/git/Documentation/Makefile checkmake:phonydeclared 396: target-specific-variable
+  makefile/git/Documentation/Makefile checkmake:phonydeclared 446: target-specific-variable
+  makefile/git/Documentation/Makefile checkmake:uniquetargets 264: double-colon-rule
+  makefile/git/Makefile checkmake:maxbodylength 3567: rule-in-define
+  makefile/git/Makefile checkmake:maxbodylength 3857: double-colon-rule
+  makefile/git/Makefile checkmake:phonydeclared 2674: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2684: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2685: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2686: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2688: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2703: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2964: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2974: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2981: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2985: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2989: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 2993: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 3000: target-specific-variable
+  makefile/git/Makefile checkmake:phonydeclared 3003: target-specific-variable
+  makefile/git/Makefile checkmake:phonydeclared 3563: rule-in-define
+  makefile/git/Makefile checkmake:phonydeclared 3564: rule-in-define
+  makefile/git/Makefile checkmake:phonydeclared 3565: rule-in-define
+  makefile/git/Makefile checkmake:phonydeclared 3566: rule-in-define
+  makefile/git/Makefile checkmake:phonydeclared 3609: multi-target-rule
+  makefile/git/Makefile checkmake:phonydeclared 4093: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2572: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2575: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2594: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2599: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2623: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2630: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2675: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2689: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2968: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 2975: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2982: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2986: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2990: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 2994: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 3259: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 3272: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 3274: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 3412: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 3565: rule-in-define
+  makefile/git/Makefile checkmake:uniquetargets 3566: rule-in-define
+  makefile/git/Makefile checkmake:uniquetargets 3567: rule-in-define
+  makefile/git/Makefile checkmake:uniquetargets 3651: double-colon-rule
+  makefile/git/Makefile checkmake:uniquetargets 4093: target-specific-variable
+  makefile/git/Makefile checkmake:uniquetargets 4109: double-colon-rule
+  makefile/git/contrib/contacts/Makefile checkmake:minphony 72: phony-line-after
+  makefile/git/contrib/credential/libsecret/Makefile checkmake:minphony 33: phony-line-after
+  makefile/git/contrib/credential/netrc/Makefile checkmake:uniquetargets 10: double-colon-rule
+  makefile/git/contrib/credential/wincred/Makefile checkmake:minphony 26: phony-line-after
+  makefile/git/contrib/diff-highlight/Makefile checkmake:minphony 25: phony-line-after
+  makefile/git/contrib/diff-highlight/t/Makefile checkmake:uniquetargets 12: double-colon-rule
+  makefile/git/contrib/subtree/Makefile checkmake:minphony 111: phony-line-after
+  makefile/git/contrib/subtree/Makefile checkmake:uniquetargets 57: double-colon-rule
+  makefile/git/contrib/subtree/t/Makefile checkmake:minphony 89: phony-line-after
+  makefile/git/contrib/subtree/t/Makefile checkmake:uniquetargets 37: double-colon-rule
+  makefile/git/git-gui/Makefile checkmake:minphony 232: phony-line-after
+  makefile/git/git-gui/Makefile checkmake:uniquetargets 181: double-colon-rule
+  makefile/git/git-gui/Makefile checkmake:uniquetargets 183: double-colon-rule
+  makefile/git/git-gui/po/glossary/Makefile checkmake:uniquetargets 11: double-colon-rule
+  makefile/git/gitk-git/Makefile checkmake:minphony 85: phony-line-after
+  makefile/git/gitk-git/Makefile checkmake:uniquetargets 54: double-colon-rule
+  makefile/git/gitweb/Makefile checkmake:minphony 142: phony-line-after
+  makefile/git/t/Makefile checkmake:minphony 210: phony-line-after
+  makefile/git/t/Makefile checkmake:uniquetargets 215: double-colon-rule
+  makefile/git/t/Makefile checkmake:uniquetargets 64: double-colon-rule
+  makefile/git/t/interop/Makefile checkmake:minphony 23: phony-line-after
+  makefile/git/t/interop/Makefile checkmake:uniquetargets 14: double-colon-rule
+  makefile/git/t/perf/Makefile checkmake:minphony 25: phony-line-after
+  makefile/git/t/perf/Makefile checkmake:uniquetargets 10: double-colon-rule
+  makefile/git/templates/Makefile checkmake:uniquetargets 29: double-colon-rule
+  makefile/kubernetes/build/root/Makefile checkmake:minphony 525: phony-line-after
+  makefile/kubernetes/build/root/Makefile checkmake:phonydeclared 375: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:phonydeclared 424: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:phonydeclared 425: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:phonydeclared 488: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 191: multi-target-rule
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 375: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 399: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 424: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 425: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 426: multi-target-rule
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 450: target-specific-variable
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 469: multi-target-rule
+  makefile/kubernetes/build/root/Makefile checkmake:uniquetargets 488: target-specific-variable
+  makefile/prometheus/Makefile checkmake:minphony 257: phony-line-after
+  makefile/prometheus/documentation/examples/Makefile checkmake:minphony 18: phony-line-after
+  makefile/prometheus/documentation/prometheus-mixin/Makefile checkmake:minphony 25: phony-line-after
+  makefile/redis/Makefile checkmake:minphony 181: phony-line-after
+  makefile/redis/Makefile checkmake:uniquetargets 128: target-specific-variable
+  makefile/redis/Makefile checkmake:uniquetargets 129: target-specific-variable
+  makefile/redis/Makefile checkmake:uniquetargets 140: target-specific-variable
+  makefile/redis/Makefile checkmake:uniquetargets 141: target-specific-variable
+  makefile/redis/deps/Makefile checkmake:minphony 166: phony-line-after
+  makefile/redis/deps/croaring/Makefile checkmake:minphony 74: phony-line-after
+  makefile/redis/deps/lua/Makefile checkmake:minphony 127: phony-line-after
+  makefile/redis/deps/lua/etc/Makefile checkmake:minphony 45: phony-line-after
+  makefile/redis/deps/lua/src/Makefile checkmake:minphony 121: phony-line-after
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 111: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 125: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 127: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 132: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 135: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 145: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 147: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:phonydeclared 324: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 101: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 127: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 147: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 234: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 327: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 374: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 375: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 386: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 387: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 388: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 396: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 397: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 398: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 406: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 407: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 408: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 416: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 417: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 459: target-specific-variable
+  makefile/redis/deps/xxhash/Makefile checkmake:uniquetargets 477: target-specific-variable
+  makefile/redis/modules/Makefile checkmake:minphony 96: phony-line-after
+  makefile/redis/modules/vector-sets/Makefile checkmake:minphony 93: phony-line-after
+  makefile/redis/src/Makefile checkmake:minphony 550: phony-line-after
+  makefile/redis/tests/modules/Makefile checkmake:minphony 113: phony-line-after
 intentional:
   empty-recipe: tool-wrong
   target-specific-variable: tool-wrong
   double-colon-rule: tool-wrong
   multi-target-rule: tool-wrong
-coverage: 55.0  # share of the default-set findings of checkmake on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkmake; at least 85% is the bar)
+  comment-before-recipe: tool-wrong
+  phony-line-after: tool-wrong
+  rule-in-define: tool-wrong
+coverage: 60.9  # share of the default-set findings of checkmake on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkmake; at least 85% is the bar)
+target: 96.9  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage checkmake

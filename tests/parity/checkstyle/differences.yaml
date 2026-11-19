@@ -1,1 +1,2 @@
-coverage: 25.5  # share of the default-set findings of checkstyle on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkstyle; at least 85% is the bar)
+coverage: 25.2  # share of the default-set findings of checkstyle on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkstyle; at least 85% is the bar)
+target: 23.1  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage checkstyle

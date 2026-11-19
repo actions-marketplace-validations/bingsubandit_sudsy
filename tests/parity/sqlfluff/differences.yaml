@@ -14,4 +14,5 @@ ratchet:
   sqlfluff-tsql: 108
   postgres-regress: 37
 rejected: invalid-input  # a file the tool rejects is not compared (the tool rejecting it is the evidence)
-coverage: 4.4  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+coverage: 4.3  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+target: 3.3  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage sqlfluff

@@ -47,9 +47,12 @@ Where Sudsy differs from checkmake by design:
 
 <!-- generated:differences:checkmake -->
 
+- `comment-before-recipe`: the tool reads a target whose recipe follows comment lines as having none; make attaches the recipe to the target
 - `double-colon-rule`: a repeated `::` rule is allowed, as make does; checkmake reports it
 - `empty-recipe`: a rule with an explicit empty recipe (`$(OBJS): ;`) has a body; checkmake reads it as none
 - `multi-target-rule`: each target of a rule like `c d:` is checked on its own; checkmake reads one target named `c d`
+- `phony-line-after`: the tool reports a missing .PHONY target on the line after the last `.PHONY` line; Sudsy reports the `.PHONY` line itself
+- `rule-in-define`: the tool reads the lines inside a `define` block as rules; they are the text of a macro
 - `target-specific-variable`: a target-specific variable assignment is a variable; checkmake does not read it as one
 <!-- /generated -->
 

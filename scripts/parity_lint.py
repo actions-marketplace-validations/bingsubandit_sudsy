@@ -4,6 +4,7 @@ Usage: parity_lint.py <tool> <sudsy-binary> <target-dir> [--coverage]
 
 The tool's version, install and corpora come from its entry in parity_tools.json (parity_format.prepare).
 """
+import collections
 import json
 import os
 import re
@@ -511,15 +512,21 @@ def message_name(message):
     return re.sub(r"^(?:v-(?:bind|on|slot):|[:@#])", "", name) if name else None
 
 
+def target_numbers(tool, per, hit, total, owned, prefix="", wrong=0):
+    """`(target share, denominator, out of scope findings)` of a coverage run: see `target_line`."""
+    wontfix = {f"{prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["coverage"] == "wontfix"}
+    out = sum(row[0] for rule, row in per.items() if rule in wontfix)
+    left = total + owned - out - wrong
+    return (round(1000 * hit / left) / 10 if left else 100.0), left, out
+
+
 def target_line(tool, per, hit, total, owned, prefix="", wrong=0):
     """The target number of a coverage run (docs/ai/design/parity-target.md): `hit` is the findings the mapped rule reports on the
     same line (the column is not compared, as in the raw share); the findings of `wontfix` catalog entries (out of scope) and the reviewed `tool-wrong`
     ones (`wrong`, pinned per finding in differences.yaml as `<file> <tool>:<rule> <line>`) leave the denominator; the `owned`
     findings of `formatter` ids stay in it, as missing, until a proof run exists."""
-    wontfix = {f"{prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["coverage"] == "wontfix"}
-    out = sum(row[0] for rule, row in per.items() if rule in wontfix)
-    left = total + owned - out - wrong
-    return f"target {round(1000 * hit / left) / 10 if left else 100.0}% ({hit} of {left}, same line); intentional: out of scope (wontfix) {out}, tool-wrong {wrong}, formatter findings counted as missing {owned}"
+    share, left, out = target_numbers(tool, per, hit, total, owned, prefix, wrong)
+    return f"target {share}% ({hit} of {left}, same line); intentional: out of scope (wontfix) {out}, tool-wrong {wrong}, formatter findings counted as missing {owned}"
 
 
 def coverage(tool, sudsy, version, prefix, exe):
@@ -606,11 +613,17 @@ def coverage(tool, sudsy, version, prefix, exe):
 
     reviewed = parity_format.Differences(folder, lint=True)  # `<file> <tool>:<rule> <line>`: a finding where the tool is wrong, pinned per finding
 
+    examples = {}
+    filehits = [0]  # the audit: findings with a report of the mapped rule anywhere in the file
+    offsets = {}  # upstream rule -> Counter(Sudsy line minus tool line) of the findings reported on another line
+
     def score(ours):
         """`(per, hits, total, share, tool-wrong findings)`: a finding is covered when the mapped rule reports it on the same line.
         `per`: upstream rule -> [findings, covered]."""
         named = {r for (_, r), ms in ours.items() if any(message_name(m) for m, _ in ms)}  # rules whose messages quote a name
         per, wrong = {}, 0
+        offsets.clear()
+        filehits[0] = 0
         for file, rule, message, line in found:
             row = per.setdefault(rule, [0, 0])
             row[0] += 1
@@ -619,6 +632,13 @@ def coverage(tool, sudsy, version, prefix, exe):
             reports = [(m, l) for m, l in ours.get((file, target), []) if target not in named or n is None or n in m] if target else []
             on_line = any(l == line for _, l in reports)
             row[1] += on_line
+            filehits[0] += bool(reports)
+            if not on_line and os.environ.get("COVERAGE_MISSES"):  # every finding Sudsy does not report on the tool's line: `file rule line`
+                print(f"MISS {file} {tool}:{rule} {line}")
+            if reports and not on_line and line is not None:  # a report in the file on another line: the offset of the nearest one
+                off = min((l - line for _, l in reports), key=abs)
+                offsets.setdefault(rule, collections.Counter())[off] += 1
+                examples.setdefault((rule, off), f"{file}:{line}")
             wrong += not on_line and reviewed.status(f"{file} {tool}:{rule} {line}") == "tool-wrong"
         total, hit = sum(r[0] for r in per.values()), sum(r[1] for r in per.values())
         return per, hit, total, round(1000 * hit / total) / 10 if total else 100.0, wrong
@@ -640,20 +660,25 @@ def coverage(tool, sudsy, version, prefix, exe):
     print("only Sudsy (files the tool reports the rule in nowhere): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
     for rule, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:int(os.environ.get("COVERAGE_TOP", 15))]:
         print(f"  {rule}: {c} of {n} covered on the line" + ("" if rule in mapping else " (no Sudsy rule)"))
+    if os.environ.get("COVERAGE_OFFSETS"):
+        print(f"  audit: {filehits[0]} of {total} findings have a report of the mapped rule in the file ({round(1000 * filehits[0] / total) / 10 if total else 100.0}%), {hit} of them on the line")  # the line audit: where Sudsy reports a finding the tool puts on another line
+        for rule, c in sorted(offsets.items()):
+            print(f"  offsets {rule}: " + ", ".join(f"{o:+d} x{n} e.g. {examples[(rule, o)]}" for o, n in c.most_common(4)) + f" (of {per[rule][0] - per[rule][1]} missed)")
     print(target_line(tool, per, hit, total, owned, "@typescript-eslint/" if tool == "typescript-eslint" else f"{PLUGINS[tool]}/" if tool in PLUGINS else "", wrong))
     print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
-    return ratchet(tool, folder, share)
+    target = target_numbers(tool, per, hit, total, owned, "@typescript-eslint/" if tool == "typescript-eslint" else f"{PLUGINS[tool]}/" if tool in PLUGINS else "", wrong)[0]
+    return ratchet(tool, folder, share, "coverage") | ratchet(tool, folder, target, "target")
 
 
-def ratchet(tool, folder, share):
-    """Fails when `share` is below `coverage:` of the tool's differences.yaml; says when to raise it."""
+def ratchet(tool, folder, share, key):
+    """Fails when `share` is below the `key` (`coverage` raw, `target`) of the tool's differences.yaml; says when to raise it."""
     ratchets = folder / "differences.yaml"
-    floor = (yaml.safe_load(ratchets.read_text(encoding="utf-8")) or {}).get("coverage") if ratchets.exists() else None
+    floor = (yaml.safe_load(ratchets.read_text(encoding="utf-8")) or {}).get(key) if ratchets.exists() else None
     if floor is None or share < floor:
-        print(f"COVERAGE below the ratchet: {share}% < {floor}%" if floor is not None else f"no `coverage:` ratchet in tests/parity/{tool}/differences.yaml: set it to {share}")
+        print(f"{key.upper()} below the ratchet: {share}% < {floor}%" if floor is not None else f"no `{key}:` ratchet in tests/parity/{tool}/differences.yaml: set it to {share}")
         return 1
     if share > floor:
-        print(f"coverage improved: raise `coverage:` in tests/parity/{tool}/differences.yaml to {share}")
+        print(f"{key} improved: raise `{key}:` in tests/parity/{tool}/differences.yaml to {share}")
     return 0
 
 
@@ -708,7 +733,7 @@ def rubocop_coverage(sudsy, version, prefix):
     print("input filters: none (the corpus is copied whole)")
     print(target_line("rubocop", per, hit, total, 0))
     print(f"rubocop {version}: {hit} of {total} findings of {len(per)} cops in {len(report['files'])} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
-    return ratchet("rubocop", folder, share)
+    return ratchet("rubocop", folder, share, "coverage")
 
 
 def install_of(config):

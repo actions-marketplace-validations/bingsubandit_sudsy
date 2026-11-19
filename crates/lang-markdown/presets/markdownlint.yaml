@@ -6,7 +6,10 @@ markdown:
       descriptive-link-text: warn
       fenced-code-language: warn
       heading-increment: warn
-      max-line-length: warn
+      max-line-length:
+        level: warn
+        options:
+          max: 80
       no-alt-text: warn
       no-bare-urls: warn
       no-duplicate-heading: warn
