@@ -101,5 +101,17 @@ Every `choice` in `differences.yaml` and every `wontfix` in the catalog gets one
 - Record raw and target per tool in the counts table and in [../development/parity.md](../development/parity.md).
 - The ratchets of `differences.yaml` stay on raw identical counts.
 
+### Phase 5: fix what the inventory found
+Each item below is its own landing, ranked by the number of files or findings it moves.
+- **Style and token gaps from Phase 2 get options or fix rules** (named, user-settable, set by the tool's preset): shfmt `comment-column`, `heredoc-tabs`, `case-last-arm`, `expr-kept`; taplo `multiline-string-array`, `inline-table-array`; terraform `token-rewrite`; buf `empty-statements`; XML `text-as-written`; Markdown `tab-blocks`, `code-trailing-blanks`; the rest of the Phase 2 gap list. Single-file trivia (an `empty-file` choice) may stay counted when an option costs more than it moves; say so in the commit.
+- **Reference-tool features that are turned off get built:**
+  - gjf Javadoc formatting, unused-import removal and long-string reflow (then the flags go);
+  - mapping the projects' own Prettier options in the real-world JS, CSS and HTML groups (`project-options`), then `--no-config` goes;
+  - ruff fixtures with `.options.json` run with those options.
+- **Unclear items are investigated and resolved:**
+  - the four stylelint rules that "differ from stylelint" (`declaration-block-single-line-max-declarations`, `function-url-quotes`, `selector-max-combinators`, `selector-type-case`): each becomes a fix or a `tool-wrong` entry;
+  - the JS class-header line comment that moves into the body: fix or `tool-wrong`.
+- **Tools with no measured share get a coverage corpus where one can run:** angular-eslint, biome, graphql-eslint, stylelint-scss, stylelint-less, eslint-plugin-jsonc, taplo, terraform, detekt, PMD, PHPCS. C# analyzers and clang-tidy stay unmeasured (no compiling corpus; no C/C++ lint yet), named as such in the README.
+
 ## Done when
-Every parity run prints raw, target and the intentional groups with counts. No `choice` entry is left without an `intentional` value or a change to `gap`. Every `formatter` entry with a corpus has a proof result. The counts table shows both numbers. Docs describe current state.
+Every parity run prints raw, target and the intentional groups with counts. No `choice` entry is left without an `intentional` value or a change to `gap`. Every `formatter` entry with a corpus has a proof result. The counts table shows both numbers. Every Phase 5 item is landed or named as a gap with its count. Docs describe current state.
