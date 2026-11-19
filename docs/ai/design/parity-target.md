@@ -31,9 +31,9 @@ The target leaves out only reviewed intentional cases. Everything else counts ag
 - **Every run prints three things:** raw %, target %, and per intentional group its count.
 
 Lint position (user decision 2026-11-19):
-- **The target compares lines.** A finding is covered only when the mapped rule reports it on the same line. A report on another line counts as missing, unless it is a reviewed `tool-wrong` entry (pinned per finding). The column is not compared.
-- **The raw share keeps "same rule, same file"**, which is also the CLAUDE.md usability bar.
-- **Both numbers are printed,** so the gap between them shows how many findings are reported on another line.
+- **Raw and target both compare lines** (also the CLAUDE.md usability bar). A finding is covered only when the mapped rule reports it on the same line; the column is not compared.
+- **In the target only,** a report on another line that is a reviewed `tool-wrong` entry (pinned per finding) leaves the count.
+- **The old "same rule, same file" share is gone** from raw and target alike.
 
 ## Phases
 
