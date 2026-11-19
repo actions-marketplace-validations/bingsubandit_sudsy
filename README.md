@@ -4,7 +4,7 @@
 
 <p align="center"><b>One formatter and linter for your whole repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest, measured file by file against each of them.<br>
-<b>Ready for 6 languages, early support for 20 more.</b></p>
+<b><!-- generated:support-headline -->Ready for 2 languages, early support for 25 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -13,7 +13,7 @@ One binary and one config file in place of Prettier, ESLint, ruff, buf, terrafor
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** Ready: JavaScript/TypeScript, Python, Protobuf, Terraform, GraphQL and TOML. The rest are partial; see the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Try it
 
@@ -81,10 +81,10 @@ Each number is measured on real-world code against the reference tool with its d
 | C# | not measured CSharpier | not measured StyleCop<br>not measured Roslynator | not measured |
 | XML | not measured CSharpier XML | no reference tool | not measured |
 | C / C++ | not measured clang-format | no reference tool | not measured |
-| Ruby | no reference tool | █████████░ 96% RuboCop | Lint only |
-| Dockerfile | no reference tool | ███░░░░░░░ 35% hadolint | Lint only |
-| Makefile | no reference tool | █████████░ 96% checkmake | Lint only |
-| GitHub Actions | no reference tool | ░░░░░░░░░░ 5% actionlint | Lint only |
+| Ruby | no reference tool | █████████░ 96% RuboCop | Lint only: Ready |
+| Dockerfile | no reference tool | ███░░░░░░░ 35% hadolint | Lint only: In progress |
+| Makefile | no reference tool | █████████░ 96% checkmake | Lint only: Ready |
+| GitHub Actions | no reference tool | ░░░░░░░░░░ 5% actionlint | Lint only: In progress |
 | INI, EditorConfig, .gitignore | no reference tool | no reference tool | not measured |
 
 Format: the share of real-world files where `sudsy format` gives the same bytes as the tool; Lint: the share of the tool's findings that Sudsy also reports on the same line, with the preset that mirrors the tool. Both leave out only reviewed intentional differences, and both are measured with the tool's default settings. Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). What the numbers leave out: [docs/languages.md](docs/languages.md) and [docs/ai/parity/README.md](docs/ai/parity/README.md). Presets: [configuration](docs/configuration.md#presets).

@@ -66,15 +66,15 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         .collect();
     crates.dedup();
     let crates = crates.join(", ");
+    let support = crate::support::render(&xtask::repo_root(), include_str!("../support.yaml"))?;
     out.push(splice(
         "README.md",
         &[
             ("languages", names.clone()),
             ("speed", crate::speed::table()?),
-            (
-                "support",
-                crate::support::table(&xtask::repo_root(), include_str!("../support.yaml"))?,
-            ),
+            ("support", support.table),
+            ("support-headline", support.headline),
+            ("support-ready", support.ready),
         ],
     )?);
     for rel in ["editors/vscode/README.md", "docs/ai/editor/vscode.md"] {

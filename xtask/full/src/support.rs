@@ -40,10 +40,19 @@ struct Ratchets {
     target: Option<f64>,
 }
 
-/// The table of `support_yaml` with the numbers below `root`, and the line under it.
-pub fn table(root: &Path, support_yaml: &str) -> Result<String> {
+/// The generated texts of the README: the table with the line under it, the headline count and the
+/// note naming the ready languages.
+pub struct Support {
+    pub table: String,
+    pub headline: String,
+    pub ready: String,
+}
+
+/// The texts of `support_yaml` with the numbers below `root`.
+pub fn render(root: &Path, support_yaml: &str) -> Result<Support> {
     let rows: Vec<Row> = serde_saphyr::from_str(support_yaml).context("parsing support.yaml")?;
     let mut out = String::from("| Language | Format | Lint | Status |\n|---|---|---|---|\n");
+    let mut ready: Vec<&str> = Vec::new();
     for row in &rows {
         let format: Vec<Option<f64>> = row
             .format
@@ -55,16 +64,38 @@ pub fn table(root: &Path, support_yaml: &str) -> Result<String> {
             .iter()
             .map(|t| Ok(ratchets(root, &t.tool)?.target))
             .collect::<Result<_>>()?;
+        let status = status(row.format.is_empty(), &format, &lint);
+        if status.ends_with("Ready") {
+            ready.push(&row.language);
+        }
         out += &format!(
-            "| {} | {} | {} | {} |\n",
+            "| {} | {} | {} | {status} |\n",
             row.language,
             cell(&row.format, &format),
             cell(&row.lint, &lint),
-            status(row.format.is_empty(), &format, &lint),
         );
     }
     out += "\nFormat: the share of real-world files where `sudsy format` gives the same bytes as the tool; Lint: the share of the tool's findings that Sudsy also reports on the same line, with the preset that mirrors the tool. Both leave out only reviewed intentional differences, and both are measured with the tool's default settings. Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). What the numbers leave out: [docs/languages.md](docs/languages.md) and [docs/ai/parity/README.md](docs/ai/parity/README.md). Presets: [configuration](docs/configuration.md#presets).\n";
-    Ok(out)
+    let (n, rest) = (ready.len(), rows.len() - ready.len());
+    let headline = match n {
+        0 => format!("Early support for {rest} languages."),
+        _ => format!("Ready for {n} languages, early support for {rest} more."),
+    };
+    let ready = match ready.split_last() {
+        None => "No language is ready yet.".to_string(),
+        Some((last, [])) => format!("Ready: {last}. The rest are in progress."),
+        Some((last, rest)) => {
+            format!(
+                "Ready: {} and {last}. The rest are in progress.",
+                rest.join(", ")
+            )
+        }
+    };
+    Ok(Support {
+        table: out,
+        headline,
+        ready,
+    })
 }
 
 fn ratchets(root: &Path, tool: &str) -> Result<Ratchets> {
@@ -125,13 +156,12 @@ fn cell(tools: &[Tool], shares: &[Option<f64>]) -> String {
 
 fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &'static str {
     let all: Vec<Option<f64>> = format.iter().chain(lint).copied().collect();
-    if all.iter().all(Option::is_none) {
-        "not measured"
-    } else if no_formatter {
-        "Lint only"
-    } else if all.iter().all(|s| s.is_some_and(|p| p >= BAR)) {
-        "Ready"
-    } else {
-        "In progress"
+    let ready = all.iter().all(|s| s.is_some_and(|p| p >= BAR));
+    match (all.iter().all(Option::is_none), no_formatter, ready) {
+        (true, ..) => "not measured",
+        (_, true, true) => "Lint only: Ready",
+        (_, true, false) => "Lint only: In progress",
+        (_, false, true) => "Ready",
+        (_, false, false) => "In progress",
     }
 }
