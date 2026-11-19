@@ -4,7 +4,7 @@
 
 use super::*;
 use core_format::FormatError;
-use core_format::shapes::{self, ChainPolicy};
+use core_format::shapes::{self, ChainPolicy, ListLayout, ListStyle, Printer, TrailingComma};
 
 pub(super) fn rule(
     cx: &FormatCtx<'_>,
@@ -15,7 +15,7 @@ pub(super) fn rule(
         k::BINARY_EXPRESSION => binary(cx, node),
         k::TERNARY_EXPRESSION => ternary(cx, node),
         k::METHOD_INVOCATION => chain(cx, node),
-        k::LAMBDA_EXPRESSION => lambda(cx, node),
+        k::LAMBDA_EXPRESSION => return arrow(cx, node),
         k::ASSIGNMENT_EXPRESSION | k::ELEMENT_VALUE_PAIR => assignment(cx, node),
         k::UNARY_EXPRESSION | k::UPDATE_EXPRESSION => tight(cx, node),
         k::CAST_EXPRESSION => cast(cx, node),
@@ -138,8 +138,15 @@ fn assignment(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     }
 }
 
-fn lambda(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::arrow_body(cx, node, &decl::Java(cx), k::ARROW, 2).or_else(|_| generic(cx, node))
+/// `head -> body` (a lambda or a switch rule): the shared arrow body, the body two levels in.
+pub(super) fn arrow(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<R> {
+    const STYLE: shapes::ArrowStyle = shapes::ArrowStyle {
+        levels: 2,
+        own_group: true,
+        hug_block: true,
+    };
+    let print = |els: &[SyntaxElement]| decl::Java(cx).seq(els);
+    shapes::arrow_body(cx, node, &print, k::ARROW, &STYLE).transpose()
 }
 
 /// Prefix and postfix operators stick to their operand.
@@ -176,10 +183,19 @@ fn cast(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     ])))
 }
 
-/// `{a, b}`: the shared initializer; elements of fewer than ten characters are filled
-/// (google-java-format).
+/// `{a, b}`: the shared list; elements of fewer than ten characters are filled, elements the
+/// source lays out in rows keep their rows, a trailing comma stays and breaks the braces.
 fn initializer(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::initializer(cx, node, &decl::Java(cx), 10).or_else(|_| generic(cx, node))
+    let style = ListStyle {
+        trailing_comma: TrailingComma::AsSource,
+        layout: ListLayout::MagicTrailingComma,
+        max_blank_lines: 0,
+        hang: true,
+        rows: true,
+        fill_below: 10,
+        ..ListStyle::default()
+    };
+    shapes::delimited_list(cx, node, &style).or_else(|_| generic(cx, node))
 }
 
 /// `a.b().c()`: the shared member chain (`core_format::shapes::call_chain`) under the

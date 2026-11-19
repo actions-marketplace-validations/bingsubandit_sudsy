@@ -23,7 +23,7 @@ pub(super) fn rule(
         k::LABELED_STATEMENT => labeled(cx, node),
         k::SWITCH_BLOCK_STATEMENT_GROUP => switch_group(cx, node),
         k::FOR_SPEC => for_spec(cx, node),
-        k::SWITCH_STATEMENT_RULE | k::SWITCH_EXPRESSION_RULE => switch_rule(cx, node),
+        k::SWITCH_STATEMENT_RULE | k::SWITCH_EXPRESSION_RULE => return expr::arrow(cx, node),
         _ => return None,
     })
 }
@@ -189,9 +189,4 @@ fn for_spec(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         ])),
         el(cx, close)?,
     ])))
-}
-
-/// `case X -> body`: an expression body moves to the next line when it does not fit.
-fn switch_rule(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::arrow_body(cx, node, &decl::Java(cx), k::ARROW, 2).or_else(|_| generic(cx, node))
 }

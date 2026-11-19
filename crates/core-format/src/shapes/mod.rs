@@ -21,7 +21,6 @@ mod declaration;
 pub mod fill;
 pub mod flow;
 mod heritage;
-mod initializer;
 mod key_value;
 mod list;
 mod maybe_parenthesize;
@@ -31,7 +30,7 @@ mod section;
 mod signature;
 pub mod tabular;
 
-pub use arrow::arrow_body;
+pub use arrow::{ArrowStyle, arrow_body};
 pub use assignment::{
     Assign, AssignHooks, AssignLayout, AssignPolicy, AssignStyle, NoAssignHooks, assignment,
 };
@@ -61,7 +60,6 @@ pub use declaration::{
     has_arguments, has_doc_comment, header, lead_annotations, members, modifiers, type_declaration,
 };
 pub use heritage::{ClauseBreak, HeritageLayout, clause_break, clause_list, heritage};
-pub use initializer::initializer;
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{
     ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, delimited_list,
@@ -141,6 +139,24 @@ impl Slot {
             .rev()
             .find_map(|e| e.as_node().cloned())
             .unwrap_or_else(|| self.node.clone())
+    }
+
+    /// The item as one element (`None` for a run).
+    fn element(&self) -> Option<SyntaxElement> {
+        match (self.run().is_empty(), self.bare()) {
+            (false, _) => None,
+            (true, Some(t)) => Some(SyntaxElement::Token(t.clone())),
+            (true, None) => Some(SyntaxElement::Node(self.node.clone())),
+        }
+    }
+
+    /// The characters of the item in the source, without the comments around it.
+    fn source_len(&self, cx: &FormatCtx<'_>) -> usize {
+        let first = self.bare().cloned().or_else(|| cx.first_token(&self.node));
+        match (first, self.last_token(cx)) {
+            (Some(a), Some(b)) => usize::from(b.text_range().end() - a.text_range().start()),
+            _ => 0,
+        }
     }
 
     /// The last token of the item.

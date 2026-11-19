@@ -5,7 +5,7 @@
 
 use super::{
     BlankRule, container, container_between, dangling_comments, gap, render_slots,
-    separator_comments,
+    separator_comments, tabular,
 };
 use crate::FormatCtx;
 use crate::comments;
@@ -106,6 +106,13 @@ pub struct ListStyle {
     pub keep_blank_before_end_comments: bool,
     /// The ignore comments (`sudsy-ignore`, `fmt: off`) in front of an item keep it as written.
     pub ignore_marks: bool,
+    /// Items that the source lays out in rows keep their rows: after the opening delimiter, one
+    /// row per line (a row that is too wide wraps like a fill), the closing delimiter on a line
+    /// of its own ([`tabular`](super::tabular)). Not for a list with comments.
+    pub rows: bool,
+    /// The items are filled (as with `ListLayout::Fill`) when each is shorter than this many
+    /// characters in the source (0: never).
+    pub fill_below: usize,
 }
 
 impl Default for ListStyle {
@@ -134,6 +141,8 @@ impl Default for ListStyle {
             indent_levels: 1,
             keep_blank_before_end_comments: true,
             ignore_marks: true,
+            rows: false,
+            fill_below: 0,
         }
     }
 }
@@ -313,6 +322,40 @@ fn list_of(
         ]));
     }
 
+    if style.rows
+        && c.prefix.is_none()
+        && c.slots.len() >= 4
+        && !commented(cx, node, &c.open, &c.close)
+    {
+        let els: Option<Vec<_>> = c.slots.iter().map(|s| s.element()).collect();
+        let columns = els.and_then(|els| tabular::columns(cx, &els.iter().collect::<Vec<_>>()));
+        if let Some(columns) = columns {
+            let docs = items
+                .iter_mut()
+                .zip(&c.slots)
+                .map(|(i, s)| {
+                    let comma = if s.sep.is_some() {
+                        doc::lit(",")
+                    } else {
+                        Doc::Nil
+                    };
+                    doc::concat(vec![std::mem::replace(&mut i.doc, Doc::Nil), comma])
+                })
+                .collect();
+            let table = tabular::rows(docs, columns, &doc::line());
+            return Ok(doc::concat(vec![
+                before,
+                doc::group(doc::concat(vec![
+                    opening,
+                    doc::indent(doc::concat(vec![doc::hardline(), table])),
+                    doc::hardline(),
+                    closing,
+                ])),
+                after,
+            ]));
+        }
+    }
+
     let flat = style.layout == ListLayout::Flat
         || (style.break_from > 0
             && c.slots.len() < style.break_from
@@ -334,7 +377,8 @@ fn list_of(
     let (last_hole, last_final) = items.last().map_or((false, false), |i| {
         (i.hole, g.has_tag(i.last.kind(), "final"))
     });
-    let fill = style.layout == ListLayout::Fill;
+    let fill = style.layout == ListLayout::Fill
+        || (style.fill_below > 0 && c.slots.iter().all(|s| s.source_len(cx) < style.fill_below));
     // (a fill measures its contents flat: its trailing comma asks the group of the whole list)
     let fill_id = fill.then(doc::new_group_id);
     let mut fill_parts: Vec<Doc> = Vec::new();
@@ -350,7 +394,13 @@ fn list_of(
     for i in 0..items.len() {
         if i > 0 {
             // (a blank line in a fill is a hard break: the fill must not print `, ` before it)
-            let base = if fill && items[i].blank_before > 0 {
+            // (and after a line comment, which ends its line)
+            let line_comment = items[i - 1].sep.as_ref().is_some_and(|t| {
+                comments::trailing_comments(g, t)
+                    .iter()
+                    .any(|c| c.kind != comments::CommentKind::Block)
+            });
+            let base = if fill && (items[i].blank_before > 0 || line_comment) {
                 doc::hardline()
             } else {
                 line.clone()

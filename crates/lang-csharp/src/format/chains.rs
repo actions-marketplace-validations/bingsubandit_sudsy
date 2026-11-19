@@ -134,23 +134,18 @@ pub fn arrow_clause(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 /// A lambda with an expression body for `assignment_layout: fluid`: the body moves to its own
 /// line when the lambda does not fit (always after a comment after `=>`). `None` for a block body.
 pub fn lambda(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Option<Doc>, FormatError> {
-    let els = children(cx, node);
-    let Some((SyntaxElement::Node(body), head)) = els.split_last() else {
-        return Ok(None);
+    const STYLE: shapes::ArrowStyle = shapes::ArrowStyle {
+        levels: 1,
+        own_group: false,
+        hug_block: false,
     };
-    let arrow = head.last().and_then(|e| e.as_token());
-    let Some(arrow) = arrow.filter(|_| body.kind() != k::BLOCK) else {
-        return Ok(None);
-    };
-    let sep = if ends_in_line_comment(cx, arrow) {
-        doc::hardline()
-    } else {
-        doc::line()
-    };
-    Ok(Some(doc::group(doc::concat(vec![
-        seq_of(cx, node, head)?,
-        doc::indent(doc::concat(vec![sep, cx.format(body)?])),
-    ]))))
+    shapes::arrow_body(
+        cx,
+        node,
+        &|els| seq_of(cx, node, els),
+        k::EQUALS_GREATER_THAN_TOKEN,
+        &STYLE,
+    )
 }
 
 /// `pattern => expr` in a switch expression, laid out like an assignment (`switch_arm_layout`).
