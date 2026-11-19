@@ -20,7 +20,7 @@ Status, measured results, presets and options for every language.
 | Language | Status | Formats like | Identical | Stable | Lints like | Findings |
 |---|---|---|---:|---|---|---|---:|
 | [JavaScript / TypeScript](#javascript--typescript) | ready | Prettier 3.9.10 | 93% of 2,456 | yes | ESLint, typescript-eslint | 100% |
-| [Python](#python) | ready | ruff format 0.17.4 | 92% of 1,085 | yes | ruff | 96% |
+| [Python](#python) | ready | ruff format 0.17.4 | 93% of 1,085 | yes | ruff | 96% |
 | [Protobuf](#protobuf) | ready | buf format 1.75.0 | 99% of 323 | yes | buf STANDARD | 86% |
 | [Terraform (HCL)](#terraform-hcl) | ready | terraform fmt 1.17.1 | 98% of 318 | yes | tflint | 20% |
 | [GraphQL](#graphql) | ready | Prettier 3.9.10 | 98% of 132 | yes | none | n/a |
@@ -29,15 +29,15 @@ Status, measured results, presets and options for every language.
 | [PowerShell](#powershell) | partial | Invoke-Formatter | 93% of 211 | not measured | PSScriptAnalyzer | 34% |
 | [PHP](#php) | partial | PHP-CS-Fixer 3.95.31 | 88% of 10,382 | yes | PHPStan (`php/phpstan`) | 0% |
 | [Markdown](#markdown) | partial | Prettier 3.9.10 | 86% of 64 | not measured | markdownlint | 83% |
-| [Java](#java) | partial | google-java-format 2.0.0 | 84% of 5,337 | yes | Checkstyle | 26% |
+| [Java](#java) | partial | google-java-format 2.0.0 | 82% of 5,337 | yes | Checkstyle | 26% |
 | [Shell](#shell) | partial | shfmt | 82% of 82 | yes | ShellCheck | 47% |
 | [SQL](#sql) | partial | sqlfluff 4.5.0 | 78% of 867 | yes | sqlfluff | 4% |
 | [C#](#c) | partial | CSharpier 1.3.0 | 72% of 7,615 | not measured | StyleCop | not measured |
 | [Kotlin](#kotlin) | partial | ktlint 1.8.0 | 69% of 5,776 | yes | ktlint | 13% |
-| [Vue / Svelte](#html-vue-svelte-angular) | partial | Prettier | 68-73% | not measured | eslint-plugin-vue / -svelte | 87% / 100% |
+| [Vue / Svelte](#html-vue-svelte-angular) | partial | Prettier | 83% / 89% real-world | not measured | eslint-plugin-vue / -svelte | 87% / 100% |
 | [YAML](#yaml) | partial | Prettier | not measured | not measured | yamllint | 74% |
 | [JSON / JSONC](#json) | partial | Prettier, Biome | not measured | not measured | eslint-plugin-jsonc | not measured |
-| [CSS / SCSS / Less](#css-scss-less) | partial | Prettier 3.9.10 | not measured | yes | stylelint | 13% |
+| [CSS / SCSS / Less](#css-scss-less) | partial | Prettier 3.9.10 | 93% of 533 | yes | stylelint | 13% |
 | [XML](#xml) | partial | CSharpier XML | not measured | not measured | none | n/a |
 | [Ruby](#ruby) | lint only | none | n/a | n/a | RuboCop (Lint department) | 96% |
 | [Dockerfile](#dockerfile) | lint only | none | n/a | n/a | hadolint | 28% |
@@ -69,7 +69,7 @@ Status, measured results, presets and options for every language.
 
 - **Status:** ready. Config section: `python`.
 - **Formatter:** ruff format 0.17.4 (Black style).
-  - Identical: 1,004 of 1,085 real-world files (92.5%). Stable: yes.
+  - Identical: 1,006 of 1,085 real-world files (92.7%). Stable: yes.
   - Black's tests: 180 of 302. Ruff's formatter fixtures: 96 of 277. Stable in all groups.
 - **Linter:** ruff default rules, 95.6%.
 - **Presets:** `python/ruff`.
@@ -134,10 +134,10 @@ Status, measured results, presets and options for every language.
 | Input | Identical |
 |---|---:|
 | HTML, real-world | 216 of 233 (92.7%) |
-| HTML, Prettier tests | 127 of 144 (88.2%) |
-| Vue, real-world (vuejs/core) | 8 of 11 |
-| Vue, Prettier tests | 55 of 80 (68.8%) |
-| Svelte, real-world (sveltejs/realworld) | 17 of 24 |
+| HTML, Prettier tests | 129 of 144 (89.6%) |
+| Vue, real-world | 782 of 941 (83.1%) |
+| Vue, Prettier tests | 56 of 80 (70.0%) |
+| Svelte, real-world | 941 of 1,055 (89.2%) |
 | Svelte, plugin samples | 51 of 76 (67.1%) |
 | Angular templates (`--parser angular`), components | 681 of 684 |
 | Angular, Prettier tests | 56 of 80 |
@@ -164,7 +164,7 @@ Status, measured results, presets and options for every language.
 ## PHP
 
 - **Status:** partial. Config section: `php`.
-- **Formatter:** PHP-CS-Fixer 3.95.31 with `@PER-CS`. Identical: 9,185 of 10,382 files (88.5%). Corpus: Laravel, Symfony, WordPress, Composer. Stable: yes.
+- **Formatter:** PHP-CS-Fixer 3.95.31 with `@PER-CS`. Identical: 9,189 of 10,382 files (88.5%). Corpus: Laravel, Symfony, WordPress, Composer. Stable: yes.
 - **Linter:** PHPStan mapping exists, 0.0%. Sudsy does no type analysis.
 - **Presets:** `php/phpstan`.
 - **Options:** `trailing_commas`, `declaration_brace`. Default `line_width` is 120.
@@ -190,7 +190,7 @@ Status, measured results, presets and options for every language.
 ## Java
 
 - **Status:** partial.
-- **Formatter:** google-java-format 2.0.0, run with `--skip-javadoc-formatting --skip-removing-unused-imports --skip-reflowing-long-strings`. Identical: 4,504 of 5,337 files (84.4%). Corpus: Guava, Gson, Error Prone, Commons Lang. Stable: yes.
+- **Formatter:** google-java-format 2.0.0, run with `--skip-javadoc-formatting --skip-removing-unused-imports --skip-reflowing-long-strings`. Identical: 4,403 of 5,337 files (82.5%). Corpus: Guava, Gson, Error Prone, Commons Lang. Stable: yes.
 - **Linter:** Checkstyle, 25.5%.
 - **Presets:** `java/google`.
 - **Options:** `member_chain_*`, `binary_*`, `assignment_*` and `conditional_*` layout options. Default `line_width` is 100.
@@ -242,7 +242,7 @@ Status, measured results, presets and options for every language.
 ## Kotlin
 
 - **Status:** partial.
-- **Formatter:** ktlint 1.8.0 (`ktlint_official`). Identical: 3,986 of 5,776 files (69%). Corpus: coroutines, ktor, nowinandroid, ktlint. Stable: yes.
+- **Formatter:** ktlint 1.8.0 (`ktlint_official`). Identical: 4,009 of 5,776 files (69%). Corpus: coroutines, ktor, nowinandroid, ktlint. Stable: yes.
 - **Linter:** ktlint, 13.2%.
 - **Presets:** `kotlin/ktlint`.
 - **Options:** `trailing_commas`, `function_signature_wrap_min_parameters`, `class_signature_wrap_min_parameters`, `member_chain_style`. Default `line_width` is 140.
@@ -275,7 +275,7 @@ Status, measured results, presets and options for every language.
 ## CSS, SCSS, Less
 
 - **Status:** partial. Config section: `css` (also `scss`, `less`).
-- **Formatter:** Prettier 3.9.10 (`--no-config`). The run records a minimum of identical files: CSS 108, SCSS 78, Less 34, real-world 494. Totals: not measured. Stable: yes on the conformance corpus (Bootstrap, Bulma and others).
+- **Formatter:** Prettier 3.9.10 (`--no-config`). Identical: real-world 494 of 533 (92.7%); Prettier's own tests CSS 108 of 154, SCSS 78 of 90, Less 34 of 40. Stable: yes on the conformance corpus (Bootstrap, Bulma and others).
 - **Linter:** stylelint standard, 13.4%. SCSS and Less plugins: not measured.
 - **Presets:** `css/stylelint-recommended`, `css/stylelint-standard`.
 - **Options:** `single_quote`, `max_blank_lines`. Default `line_width` is 80.

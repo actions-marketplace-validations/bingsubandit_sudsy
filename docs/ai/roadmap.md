@@ -2,6 +2,40 @@
 
 One line each; none is committed, except the small tasks below.
 
+## Distance to the usability bar
+Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% identical to the reference tool on real-world code, `second-format` 0, lint 85% of the reference set's findings). Distance = shortfall of format below 85% plus shortfall of lint below 85%, a leg with no reference run or no real-world corpus counted as the full 85 (`?`, itself a gap). Numbers: [../languages.md](../languages.md) (format, tool versions), [parity/README.md](parity/README.md#lint-coverage-by-function) (lint, preset, missing rules). Format counts re-measured with `scripts/parity.sh format <tool>`; second-format is 0 wherever a run reports it.
+
+| # | Language | Format identical (tool) | Lint coverage (tool, preset) | Biggest causes |
+|---|---|---|---|---|
+| 1 | C / C++ | none (no clang-format run) | none (no clang-tidy catalog) | no formatter, no lint rules ([design/cpp.md](design/cpp.md)) |
+| 2 | JSON | ? (fixtures only, no real-world corpus) | ? (eslint-plugin-jsonc; corpus is JSONTestSuite) | no real-world corpus; no coverage run |
+| 3 | XML | ? (CSharpier XML, 372 project files, count not recorded) | none | no corpus count; no reference linter |
+| 4 | GitHub Actions | none (YAML formatter, no reference) | 5.4% (actionlint, `github-actions/actionlint`) | `syntax-check` 235, `expression/types` 155, `events` 115 findings |
+| 5 | Dockerfile | none (no reference) | 27.6% (hadolint, `dockerfile/hadolint`) | `DL4006` 153, `DL3003` 64, `DL3008` 54 |
+| 6 | C# | 72.1% of 7,615 (CSharpier 1.3.0; not re-run, corpus absent on the host) | ? (StyleCop; corpus does not compile) | lists differing by a comma, `#if` comments (252 files), wrapped arguments and chains (299) |
+| 7 | Makefile | none (no reference) | 73.5% (checkmake, `makefile/checkmake`) | `uniquetargets` 88, `phonydeclared` 59 |
+| 8 | YAML | ? (no Prettier corpus count) | 73.8% (yamllint, `yaml/yamllint`) | no real-world format corpus; `comments` 325, `indentation` 160, `syntax` 136 |
+| 9 | Kotlin | 69.4% of 5,776 (ktlint 1.8.0) | 13.2% (ktlint, `kotlin/ktlint`) | planned layout rules `function-signature` 30,800, `argument-list-wrapping` 24,113; rewrites (`: Unit`, `;`, modifier order) |
+| 10 | SQL | 78.2% of 867 (sqlfluff 4.5.0) | 4.4% (sqlfluff, `sql/sqlfluff`) | planned `CP02` 5,770, `CP01` 3,992, `LT05`; 189 parse gaps and 189 layout gaps |
+| 11 | PHP | 88.5% of 10,382 (PHP-CS-Fixer 3.95.31) | 0.0% (PHPStan, `php/phpstan`) | type analysis (`class.notFound` 7,407, `variable.undefined` 591); inline-text files (~790) |
+| 12 | Ruby | none (no reference) | 96.2% (RuboCop Lint, `ruby/rubocop`) | no formatter run |
+| 13 | GraphQL | 97.7% of 132 (Prettier) | ? (graphql-eslint, no coverage run) | no coverage run |
+| 14 | CSS / SCSS / Less | 92.7% of 533 (Prettier, `--no-config`) | 13.4% (stylelint, `css/stylelint-standard`) | `rule-empty-line-before` 3,832, `color-function-notation` 3,181; SCSS layout and comments |
+| 15 | Terraform (HCL) | 98.1% of 318 (terraform fmt) | 19.6% (tflint, `hcl/tflint-recommended`) | module-level rules: `terraform_required_providers` 37, `unused_declarations` 31, `typed_variables` 27 |
+| 16 | Java | 82.5% of 5,337 (google-java-format 2.0.0) | 25.5% (Checkstyle, `java/google`) | `MissingJavadocMethod` 18,283, `MethodName` 7,887, `JavadocParagraph` 5,301; 934 files with layout gaps (line comments, chains in ternaries) |
+| 17 | PowerShell | 92.9% of 211 (Invoke-Formatter; not re-run, no `pwsh` on the host) | 34.4% (PSScriptAnalyzer) | `PSUseShouldProcessForStateChangingFunctions` 140, `PSUseDeclaredVarsMoreThanAssignments` 130 |
+| 18 | Shell | 81.7% of 82 (shfmt 3.14.1) | 47.0% (ShellCheck, `shell/shellcheck`) | `SC2140` 22, `SC2034` 14, `SC1091` 12; backticks, `case` in `if`, arithmetic spacing |
+| 19 | HTML | 92.7% of 233 (Prettier) | 63.7% (html-validate; htmlhint 5.0%, html-eslint 0.3%) | `wcag/h63` 48, `parser-error` 21; html-eslint `indent` 16,182 planned; embedded code 56 files |
+| 20 | Markdown | 85.9% of 64 (Prettier; small corpus) | 82.7% (markdownlint, `markdown/markdownlint`) | `MD010` 309 (tabs); corpus of 64 files |
+| 21 | Vue | 83.1% of 941 (Prettier) | 87.2% (eslint-plugin-vue) | `vue-js-layout` 183 files; `vue/attributes-order` 81 |
+| 22 | Svelte | 89.2% of 1,055 (Prettier + plugin) | 100.0% (eslint-plugin-svelte) | `svelte-attributes` 139 files; second-format not measured |
+| 23 | Protobuf | 99.1% of 323 (buf format) | 85.9% (buf, `protobuf/buf-standard`) | at the bar; `RPC_REQUEST_RESPONSE_UNIQUE` 117 (cross-file) |
+| 24 | TOML | 95.3% of 213 (taplo; fixtures) | no reference linter | at the bar; second-format not measured |
+| 25 | JavaScript / TypeScript | 93.2% of 2,456 (Prettier) | 100% (ESLint, typescript-eslint) | at the bar; Prettier options of the projects (168 files) |
+| 26 | Python | 92.7% of 1,085 (ruff format 0.17.4) | 95.6% (ruff, `python/ruff`) | at the bar; `RUF100` 83 |
+
+Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP; recorded and not re-run: C#, PowerShell, Markdown, GraphQL, XML and all lint shares.
+
 ## Small tasks
 - perf-bench builds the base tree with the candidate's tools/perf-bench, so a `FileContext`/`parse_regions` API change fails the base build; build the base with its own perf-bench.
 - Read shared rule specs once per process, not per embedded language.
@@ -18,8 +52,8 @@ One line each; none is committed, except the small tasks below.
 - Java member chains: 101 files fewer than before the kit (4402 of 5337); closing them needs `this`-head, head-call counting and chain-in-cast policy values. Call arguments (hug rules) wait for the object, array and template roles of R4; the `member_chain_*` option declarations repeat in three `lang.yaml` files and want one shared declaration.
 - Ruby lint: generalization step (the `check` family of `lang-ruby` and the Java/Kotlin/PHP/Ruby scope tables); close the named gaps of `docs/ai/parity/rubocop.yaml` (UselessAssignment overwritten-before-read cases, 168 findings; the `planned` cops), read `# rubocop:disable` comments, and report `a && b = c` at the assignment line.
 - Java: generalization step ([architecture/adding-a-language.md](architecture/adding-a-language.md#after-a-language-lands-the-generalization-step)).
-- Java formatter gaps (named in `tests/parity/google-java-format/differences.yaml`, 84.4% identical): re-wrap line comments over the width and write `//x` as `// x`; drop `()` from `@A()` (the safety check compares node kinds, so the token pair needs `#optional`); indent a chain in a ternary condition one level more; AOSP's import groups.
-- PHP formatter gaps (named in `docs/ai/formatting/php.md`, 9,185 of 10,382 identical): format the PHP islands of files with inline text, one `use` per trait and the blank after `<?php` (W1 rewrite rows), parameter attributes on their own line, `case x: stmt;` and `// no break` placement, comments after an operator at a line end, rewrites for `else if`, braces, modifier order and import order; PHP: generalization step ([architecture/adding-a-language.md](architecture/adding-a-language.md#after-a-language-lands-the-generalization-step)).
+- Java formatter gaps (named in `tests/parity/google-java-format/differences.yaml`, 82.5% identical): re-wrap line comments over the width and write `//x` as `// x`; drop `()` from `@A()` (the safety check compares node kinds, so the token pair needs `#optional`); indent a chain in a ternary condition one level more; AOSP's import groups.
+- PHP formatter gaps (named in `docs/ai/formatting/php.md`, 9,189 of 10,382 identical): format the PHP islands of files with inline text, one `use` per trait and the blank after `<?php` (W1 rewrite rows), parameter attributes on their own line, `case x: stmt;` and `// no break` placement, comments after an operator at a line end, rewrites for `else if`, braces, modifier order and import order; PHP: generalization step ([architecture/adding-a-language.md](architecture/adding-a-language.md#after-a-language-lands-the-generalization-step)).
 - Flow::between calls the op_first, joined and at_least_one closures up to three times per token pair; cache op_first(a) once per pair (Kotlin format is +1.02% over the shared Flow)
 - Kotlin: generalization step ([architecture/adding-a-language.md](architecture/adding-a-language.md#after-a-language-lands-the-generalization-step)); the `intellij_idea` and `android_studio` code styles as options; `.kts` and Gradle Kotlin DSL checks.
 - Kotlin formatter (signatures, parameter and argument lists, trailing commas, import order, expression bodies and braces are in): binary chains on the kit, the `: Unit`, `;` and comment-spacing rewrites (a shared rewrite layer first), blank lines in lambdas, width of values moved below `=`, `string-template-indent`, measured by `scripts/parity.sh format ktlint` (the `real-world` ratchet); Kotlin lint: the `planned` entries of `docs/ai/parity/ktlint.yaml` (`no-unused-imports`, `string-template`, naming rules).

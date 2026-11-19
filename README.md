@@ -64,7 +64,7 @@ Each percentage is measured on real-world code against the reference tool's own 
 | Language | Formats like | Identical | Stable | Lints like | Findings | Presets |
 |---|---|---:|---|---|---:|---|
 | JavaScript / TypeScript | Prettier | 93% of 2,456 | yes | ESLint, typescript-eslint recommended¹ | 100% | `js/eslint-recommended`, `js/typescript-eslint-recommended` |
-| Python | ruff format (Black) | 92% of 1,085 | yes | ruff default rules | 96% | `python/ruff` |
+| Python | ruff format (Black) | 93% of 1,085 | yes | ruff default rules | 96% | `python/ruff` |
 | Protobuf | buf format | 99% of 323 | yes | buf STANDARD | 86% | `protobuf/buf-standard` |
 | Terraform (HCL) | terraform fmt | 98% of 318 | yes | tflint recommended | 20% | `hcl/tflint-recommended` |
 | GraphQL | Prettier | 98% of 132 | yes | — | — | — |
@@ -80,12 +80,12 @@ Stable: formatting a second time changes no file in the corpus. ¹ Core rules on
 | PowerShell | Invoke-Formatter | 93% of 211 | PSScriptAnalyzer | 34% | `powershell/psscriptanalyzer` |
 | PHP | PHP-CS-Fixer (PER-CS) | 88% of 10,382 | PHPStan | 0% | `php/phpstan` |
 | Markdown | Prettier | 86% of 64 | markdownlint | 83% | `markdown/prettier-compat`, `markdown/markdownlint` |
-| Java | google-java-format | 84% of 5,337 | Checkstyle (Google) | 26% | `java/google` |
+| Java | google-java-format | 82% of 5,337 | Checkstyle (Google) | 26% | `java/google` |
 | Shell | shfmt | 82% of 82 | ShellCheck | 47% | `shell/shellcheck` |
 | SQL | sqlfluff | 78% of 867 | sqlfluff | 4% | `sql/sqlfluff` |
 | C# (needs .NET 10) | CSharpier | 72% of 7,615² | StyleCop | not measured | `csharp/csharpier-compat`, `csharp/stylecop` |
 | Kotlin | ktlint | 69% of 5,776 | ktlint | 13% | `kotlin/ktlint` |
-| Vue / Svelte | Prettier | ~70% | eslint-plugin-vue / -svelte | 87% / 100% | `html/eslint-plugin-vue-recommended`, `…-svelte-recommended` |
+| Vue / Svelte | Prettier | 83% / 89% | eslint-plugin-vue / -svelte | 87% / 100% | `html/eslint-plugin-vue-recommended`, `…-svelte-recommended` |
 | YAML, JSON, CSS, XML | Prettier / Biome / CSharpier | not measured | yamllint / stylelint | 74% / 13% | `yaml/yamllint`, `css/stylelint-standard` |
 
 ² The 7,659-file corpus minus the files CSharpier itself leaves alone.
