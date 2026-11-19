@@ -1,14 +1,9 @@
 //! A formatter that is only data: one rules file per language with the sections `[space]`,
 //! `[joined]`, `[at_least_one]`, `[op_first]` and `[flow]` ([`crate::spacing`]), `[rewrite]`
-//! ([`crate::rewrite`]), `[case]` ([`crate::case`]), `[lines]` ([`crate::frames`]), `[layout]` ([`crate::layout`]), `[blank]`, `[file]` and `[comments]`
-//! (here). [`LazyRules`] turns the file into the language's `NodeFormatter`.
-//!
-//! `[flow]`: `exact`, `source_hang` and `keep_blank_lines` (`yes`/`no`, see
-//! [`crate::shapes::flow::Flow`]) besides the kind lists. `[file]`: `one_line_verbatim = yes` (a
-//! file of one line stays as written), `verbatim_if = A|B` (so does a file with a token of those
-//! kinds), `exact_end = A|B` (a file whose last token is of those kinds keeps its end).
-//! `[comments]`: `max_blank_after = unlimited|N`. `[blank]` rows `PREV / NEXT [: group=KIND]` say
-//! between which statements or members a blank line is required ([`crate::blank`]).
+//! ([`crate::rewrite`]), `[case]` ([`crate::case`]), `[lines]` ([`crate::frames`]), `[layout]` ([`crate::layout`]) and `[blank]`
+//! ([`crate::blank`]: rows `PREV / NEXT [: group=KIND]` say between which statements or members a
+//! blank line is required). [`LazyRules`] turns the file into the language's `NodeFormatter`; the
+//! language's [`RuleFacts`] say what no row does.
 //!
 //! concept: rules-file-formatter
 //! what: A formatter that is only data: one rules file per language parsed against the grammar.
@@ -52,11 +47,54 @@ pub fn settings<'a>(text: &'a str, name: &str) -> Vec<(&'a str, &'a str)> {
         .collect()
 }
 
+/// What a language says about how its rules file is run, as a table of the language.
+#[derive(Clone, Copy, Debug)]
+pub struct RuleFacts {
+    /// The flow keeps what the source has where no row decides ([`crate::shapes::flow::Flow`]).
+    pub exact: bool,
+    /// A line break in the source starts a hanging part ([`crate::shapes::flow::Flow`]).
+    pub source_hang: bool,
+    /// Blank lines in the source stay ([`crate::shapes::flow::Flow`]).
+    pub keep_blank_lines: bool,
+    /// Kinds after which a hanging part ends ([`crate::shapes::flow::Flow`]).
+    pub unhang: &'static [&'static str],
+    /// Patterns (as in `[space]` rows) of the tokens that start a line when a line breaks at them.
+    pub op_first: &'static [&'static str],
+    /// A file of one line stays as written.
+    pub one_line_verbatim: bool,
+    /// A file with a token of these kinds stays as written.
+    pub verbatim_if: &'static [&'static str],
+    /// A file whose last token is of these kinds keeps its end.
+    pub exact_end: &'static [&'static str],
+    /// Most blank lines kept after a comment (`None`: one).
+    pub max_blank_after: Option<usize>,
+}
+
+impl RuleFacts {
+    pub const DEFAULT: RuleFacts = RuleFacts {
+        exact: false,
+        source_hang: false,
+        keep_blank_lines: false,
+        unhang: &[],
+        op_first: &[],
+        one_line_verbatim: false,
+        verbatim_if: &[],
+        exact_end: &[],
+        max_blank_after: None,
+    };
+}
+
+impl Default for RuleFacts {
+    fn default() -> Self {
+        RuleFacts::DEFAULT
+    }
+}
+
 pub struct RuleFormatter {
     space: SpaceRules,
     brackets: Brackets,
     cases: Cases,
-    /// The `[call]`, `[hug]` and `[simple]` text, parsed when a call asks for it.
+    /// The `[call]` text, parsed when a call asks for it.
     call_text: &'static str,
     calls: OnceLock<CallRules>,
     rewrite: RewriteRules,
@@ -71,33 +109,19 @@ pub struct RuleFormatter {
 }
 
 impl RuleFormatter {
-    pub fn parse(g: &Grammar, text: &'static str) -> RuleFormatter {
-        let yes = |settings: &[(&str, &str)], key: &str| {
-            settings.iter().any(|(k, v)| *k == key && *v == "yes")
-        };
-        let kinds = |v: &str| -> Vec<SyntaxKind> {
-            v.split('|')
+    pub fn parse(g: &Grammar, text: &'static str, facts: &RuleFacts) -> RuleFormatter {
+        let kinds = |names: &[&str]| -> Vec<SyntaxKind> {
+            names
+                .iter()
                 .map(|n| {
-                    g.kind_by_name(n.trim())
+                    g.kind_by_name(n)
                         .unwrap_or_else(|| panic!("rules: kind `{n}`"))
                 })
                 .collect()
         };
-        let get = |settings: &[(&str, &str)], key: &str| {
-            settings
-                .iter()
-                .find(|(k, _)| *k == key)
-                .map(|(_, v)| kinds(v))
-                .unwrap_or_default()
-        };
-        let (flow, file, comments) = (
-            settings(text, "flow"),
-            settings(text, "file"),
-            settings(text, "comments"),
-        );
         let layout: Vec<&str> = section(text, "layout").collect();
         RuleFormatter {
-            space: SpaceRules::parse(g, text),
+            space: SpaceRules::parse(g, text, facts),
             brackets: Brackets::parse(g, text),
             cases: Cases::parse(g, section(text, "case")),
             call_text: text,
@@ -106,25 +130,21 @@ impl RuleFormatter {
             layout: Layout::parse(g, &layout),
             blank: Blank::parse(g, section(text, "blank")),
             file: File {
-                one_line: yes(&file, "one_line_verbatim"),
-                any: get(&file, "verbatim_if"),
+                one_line: facts.one_line_verbatim,
+                any: kinds(facts.verbatim_if),
             },
-            exact_end: get(&file, "exact_end"),
-            exact: yes(&flow, "exact"),
-            source_hang: yes(&flow, "source_hang"),
-            keep_blank_lines: yes(&flow, "keep_blank_lines"),
-            max_blank_after: match comments.iter().find(|(k, _)| *k == "max_blank_after") {
-                Some((_, "unlimited")) => usize::MAX,
-                Some((_, n)) => n.parse().unwrap_or(1),
-                None => 1,
-            },
+            exact_end: kinds(facts.exact_end),
+            exact: facts.exact,
+            source_hang: facts.source_hang,
+            keep_blank_lines: facts.keep_blank_lines,
+            max_blank_after: facts.max_blank_after.unwrap_or(1),
         }
     }
 
-    /// The `[call]`, `[simple]` and `[hug]` rows.
+    /// The `[call]` rows.
     pub fn calls(&self, g: &Grammar) -> &CallRules {
         self.calls
-            .get_or_init(|| CallRules::parse(g, self.call_text))
+            .get_or_init(|| CallRules::parse(g, self.call_text, &Default::default()))
     }
 
     /// The `[case]` rows.
@@ -230,6 +250,7 @@ impl RuleFormatter {
 pub struct LazyRules {
     grammar: fn() -> &'static Grammar,
     text: &'static str,
+    facts: RuleFacts,
     cell: OnceLock<RuleFormatter>,
 }
 
@@ -238,13 +259,20 @@ impl LazyRules {
         LazyRules {
             grammar,
             text,
+            facts: RuleFacts::DEFAULT,
             cell: OnceLock::new(),
         }
     }
 
+    /// The language's [`RuleFacts`].
+    pub const fn facts(mut self, facts: RuleFacts) -> LazyRules {
+        self.facts = facts;
+        self
+    }
+
     pub fn get(&self) -> &RuleFormatter {
         self.cell
-            .get_or_init(|| RuleFormatter::parse((self.grammar)(), self.text))
+            .get_or_init(|| RuleFormatter::parse((self.grammar)(), self.text, &self.facts))
     }
 }
 

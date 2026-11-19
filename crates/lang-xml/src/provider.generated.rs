@@ -23,6 +23,7 @@ pub const MAPPING: Mapping = Mapping {
         ("Reference", "Chunk"),
         ("XmlDecl", "Chunk"),
     ],
+    checked: &["AttValue", "CharData", "Reference", "CData", "PI", "XmlDecl"],
     kinds: &[
         ("CDSect", "CData"),
         ("doctypedecl", "Doctype"),

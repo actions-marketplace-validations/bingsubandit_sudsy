@@ -27,26 +27,3 @@ node=CallExpression&callee=@test / StringLiteral|TemplateLiteral,#function&block
 node=CallExpression&callee=@test / StringLiteral|TemplateLiteral,CallExpression&callee=@wrapper&arg=#function,NumericLiteral : test
 # `useEffect(() => { ... }, [a, b])`.
 * / ArrowFunctionExpression&params=0&block&comments=none,ArrayExpression&comments=none-inside : hook
-
-[hug]
-composition = yes
-no_composition = Decorator
-short = RegExpLiteral
-short_binary = BinaryExpression|LogicalExpression
-cast = TSAsExpression:TSTypeParameterInstantiation|TSSatisfiesExpression:TSTypeParameterInstantiation
-not_last = ArrowFunctionExpression:ArrayExpression
-numeric = NumericLiteral
-signed_numeric = UnaryExpression
-concise = ArrayExpression
-
-[simple]
-regex = RegExpLiteral:5
-leaf = #literal|#reference|ThisExpression|Super|PrivateIdentifier|IdentifierName
-single_line = TemplateLiteral
-object = ObjectExpression
-array = ArrayExpression
-items = ImportExpression
-members = ComputedMemberExpression
-operand = StaticMemberExpression|PrivateFieldExpression|UpdateExpression|TSNonNullExpression|ChainExpression
-unary = UnaryExpression: ! - + ~
-call = CallExpression|NewExpression

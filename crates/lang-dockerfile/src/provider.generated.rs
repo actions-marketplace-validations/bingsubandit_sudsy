@@ -18,6 +18,7 @@ pub const MAPPING: Mapping = Mapping {
     wrap: &[
         ("Raw", "Instruction"),
     ],
+    checked: &[],
     kinds: &[
         ("source_file", "Document"),
         ("heredoc_block", "Heredoc"),

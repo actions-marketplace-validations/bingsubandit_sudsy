@@ -24,6 +24,7 @@ pub const MAPPING: Mapping = Mapping {
         ("QuotedKey", "Key"),
         ("String", "Literal"),
     ],
+    checked: &[],
     kinds: &[
         ("table_array_element", "ArrayTable"),
         ("offset_date_time", "DateTime"),

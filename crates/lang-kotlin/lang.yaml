@@ -1,6 +1,7 @@
 extensions: [kt, kts]
 formatter: KotlinFormatter
 parse: adapter::parse_file
+limits: {stack: 256, bytes: 16, depth: 2000, run: "!-+@", tagged: ["@", 12]}
 options:
   - indent_size: 4
   - line_width: 140

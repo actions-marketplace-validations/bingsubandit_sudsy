@@ -17,6 +17,7 @@ pub const MAPPING: Mapping = Mapping {
     unknown: "Unknown",
     wrap: &[
     ],
+    checked: &[],
     kinds: &[
         ("arithmetic_expansion", "Arith"),
         ("variable_assignment", "Assign"),

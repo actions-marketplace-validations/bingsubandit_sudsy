@@ -22,15 +22,15 @@ token Equals "=" #punctuation
 
 token Name
 // Quotes included. XmlFormatter::extra_check compares the text without them.
-token AttValue #literal #string #restyle #checked
+token AttValue #literal #string #restyle
 // Text with its surrounding blanks, references, CDATA sections, processing instructions, the XML
 // declaration and the DOCTYPE; the adapter wraps each in a Chunk.
-token CharData #chunk #checked
-token Reference #chunk #checked
-token CData #chunk #checked
-token PI #chunk #checked
-token XmlDecl #chunk #checked
-// Errors inside a `#checked` token are reported; not inside a DOCTYPE, whose declarations tree-sitter-xml cannot always parse.
+token CharData #chunk
+token Reference #chunk
+token CData #chunk
+token PI #chunk
+token XmlDecl #chunk
+// Errors inside the tokens of the mapping's `checked` list are reported; not inside a DOCTYPE, whose declarations tree-sitter-xml cannot always parse.
 token Doctype #chunk
 
 token Eof

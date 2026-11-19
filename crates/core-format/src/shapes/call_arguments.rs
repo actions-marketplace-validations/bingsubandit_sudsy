@@ -1,6 +1,6 @@
 //! Call arguments: the parenthesized list of a call, with the layouts Prettier calls hugging.
 //!
-//! [`plan`] reads the arguments' kinds and decides, from grammar tags and the `[call]`, `[hug]` rows
+//! [`plan`] reads the arguments' kinds and decides, from grammar tags and the `[call]` rows and the language's `CallSets`
 //! ([`crate::calls`]), whether the list must break (a function composition) and which argument
 //! hugs: the last one or the first one, kept on the call's line while its own body breaks.
 //! [`Args::layout`] then builds the document: the conditional group of flat, hugged and
@@ -15,9 +15,9 @@
 //! holds one argument expression: the last child node).
 //!
 //! concept: call-arguments-hug
-//! what: Call arguments flat, hugged (first or last) or broken out, decided by grammar tags and call, hug and simple rows.
+//! what: Call arguments flat, hugged (first or last) or broken out, decided by grammar tags, `[call]` rows and call kind sets.
 //! tools: Prettier call-arguments (last-arg hug, test calls, composition, React hooks), google-java-format argument lists
-//! reads: rules:call, rules:hug, rules:simple, tag:huggable
+//! reads: rules:call, tag:huggable
 
 use super::{ListStyle, container, delimited_list};
 use crate::FormatCtx;

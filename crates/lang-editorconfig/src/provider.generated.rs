@@ -17,6 +17,7 @@ pub const MAPPING: Mapping = Mapping {
     unknown: "Unknown",
     wrap: &[
     ],
+    checked: &[],
     kinds: &[
         ("assignment_operator", "Equals"),
         ("pattern", "Glob"),

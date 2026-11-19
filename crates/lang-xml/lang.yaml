@@ -15,6 +15,7 @@ options:
   - max_blank_lines: [1, "Largest number of blank lines kept between elements, comments and declarations."]
 presets: [csharpier-compat]
 mapping:
+  checked: 'AttValue CharData Reference CData PI XmlDecl'
   wrap: {CharData: Chunk, Reference: Chunk, CData: Chunk, PI: Chunk, XmlDecl: Chunk, Doctype: Chunk}
   same: 'document element STag ETag Attribute Comment Name AttValue CharData PI'
   EmptyTag: EmptyElemTag

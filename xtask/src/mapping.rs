@@ -32,11 +32,12 @@ pub fn consts(name: &str, l: &Lang) -> Result<String> {
     let Some(Value::Object(map)) = l.yaml.get("mapping") else {
         return Ok(String::new());
     };
-    let (mut kinds, mut wrap) = (Vec::new(), Vec::new());
+    let (mut kinds, mut wrap, mut checked) = (Vec::new(), Vec::new(), Vec::new());
     let mut same = Vec::new();
     for (key, v) in map {
         match key.as_str() {
             "same" => same = words(v),
+            "checked" => checked = words(v),
             "wrap" => {
                 for (from, to) in v.as_object().context("`wrap` is a map")? {
                     wrap.push((from.clone(), to.as_str().unwrap_or_default().to_string()));
@@ -60,8 +61,9 @@ pub fn consts(name: &str, l: &Lang) -> Result<String> {
     let mut seen = std::collections::HashSet::new();
     kinds.retain(|(from, _)| seen.insert(from.clone()));
     let mut out = format!(
-        "\npub const MAPPING: Mapping = Mapping {{\n    whitespace: \"Whitespace\",\n    newline: \"Newline\",\n    eof: \"Eof\",\n    unknown: \"Unknown\",\n    wrap: &[\n{}    ],\n    kinds: &[\n{}    ],\n}};\n",
+        "\npub const MAPPING: Mapping = Mapping {{\n    whitespace: \"Whitespace\",\n    newline: \"Newline\",\n    eof: \"Eof\",\n    unknown: \"Unknown\",\n    wrap: &[\n{}    ],\n    checked: &{:?},\n    kinds: &[\n{}    ],\n}};\n",
         pairs(&wrap),
+        checked,
         pairs(&kinds)
     );
     if let Some(Value::Object(c)) = l.yaml.get("composite") {

@@ -4,7 +4,7 @@
 //! // comment
 //! language json 1 "JSON"              // name, LanguageId (1..=31), display name (optional)
 //! comments line "//" block "/*" "*/"   // either part optional
-//! trivia Comment line "#" block "/*" "*/"   // text between tokens: see `trivia_row`; `limits stack 256 bytes 16 depth 2000`
+//! trivia Comment line "#" block "/*" "*/"   // text between tokens: see `trivia_row`
 //! rule no-print level off calls "print" // a rule's level and option values in this language (optional rows)
 //! imports keywords "import" modifiers "static" alias-after "as"   // the words of an import statement (optional)
 //! case-insensitive                    // command and function names compare without case (PowerShell; optional)
@@ -43,7 +43,7 @@ use crate::containers::ContainerRow;
 use crate::embed_rows::EmbedRow;
 use crate::kind::{LanguageId, SyntaxKind};
 use crate::regex::{RegexCall, RegexRow};
-use crate::scan::{Limits, TriviaRow, TriviaSyntax};
+use crate::scan::{TriviaRow, TriviaSyntax};
 use crate::strings::{StringSyntax, Unknown};
 use crate::tree::{SyntaxElement, SyntaxNode};
 use std::borrow::Cow;
@@ -240,8 +240,6 @@ pub struct Grammar {
     string_first: Vec<u32>,
     /// The `trivia` rows.
     pub trivia: TriviaSyntax,
-    /// The `limits` row.
-    pub limits: Limits,
     /// The `format` rows: how a format string and its arguments are written.
     pub formats: Vec<FormatRow>,
     /// The `embed` rows: where the code of other languages is.

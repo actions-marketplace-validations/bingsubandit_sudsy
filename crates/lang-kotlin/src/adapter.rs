@@ -6,7 +6,7 @@
 //! (every keyword is `Keyword`), and whitespace, comments and KDoc are left to `replay`, which
 //! splits the text between tokens by the grammar's `trivia` row.
 //!
-//! What ktrs needs from its caller is declared in the grammar (`limits`: the parse thread's stack,
+//! What ktrs needs from its caller is declared in `lang.yaml` (`limits`: the parse thread's stack,
 //! the largest file, the nesting it cannot recurse through and the nested annotation arguments it
 //! is exponential in) and done by `provider_api::adapter::guarded`; it requires `\n` line breaks
 //! (`Lf` maps the offsets back).
@@ -34,7 +34,7 @@ pub fn parse(src: &str, kind: FileKind) -> ParseResult {
     // ktrs wants `\n`.
     let lf = Lf::new(src);
     let grammar = grammars::KOTLIN.get();
-    let walked = guarded(src, grammar, || walk(&lf, kind));
+    let walked = guarded(src, grammar, &crate::LIMITS, || walk(&lf, kind));
     let (tokens, nodes, mut errors) = match walked {
         Ok(found) => found,
         Err(refused) => return refused,

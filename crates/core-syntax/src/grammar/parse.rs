@@ -321,7 +321,6 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
     let mut regex_rows: Vec<RegexRow> = Vec::new();
     let mut regex_calls: Vec<RegexCall> = Vec::new();
     let mut trivia: Vec<TriviaRow> = Vec::new();
-    let mut limits = Limits::default();
     let mut formats: Vec<FormatRow> = Vec::new();
     let mut embeds: Vec<(usize, &[Lexeme<'_>])> = Vec::new();
     let mut containers: Vec<(usize, &[Lexeme<'_>])> = Vec::new();
@@ -480,7 +479,6 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
             "embed" => embeds.push((d.line, c.rest)),
             "container" => containers.push((d.line, c.rest)),
             "trivia" => trivia.push(trivia_row(&mut c)?),
-            "limits" => limits = limits_row(&mut c)?,
             "format" => {
                 let flavor = c.ident("a format flavor")?.to_string();
                 let via = match c.ident("`operator` or `method`")? {
@@ -585,7 +583,6 @@ pub(super) fn parse(source: &str) -> Result<Grammar, GrammarError> {
         }
     }
     grammar.trivia = TriviaSyntax::new(trivia);
-    grammar.limits = limits;
     grammar.formats = formats;
     for (line, rest) in containers {
         let mut c = Cursor { line, rest };
@@ -789,33 +786,6 @@ fn regex_call_row(c: &mut Cursor<'_>) -> Result<RegexCall, GrammarError> {
         return err(c.line, "a regex-call row needs a flavor and callees");
     }
     Ok(row)
-}
-
-/// A `limits` row: `stack <MB>`, `bytes <MB>`, `depth <n>`, `run "chars"`, `tagged "c" <n>`.
-fn limits_row(c: &mut Cursor<'_>) -> Result<Limits, GrammarError> {
-    let mut l = Limits::default();
-    let line = c.line;
-    let int = |c: &mut Cursor<'_>| match c.next() {
-        Some(Lexeme::Int(n)) => Ok(*n as usize),
-        _ => err(line, "expected a number"),
-    };
-    while c.peek().is_some() {
-        match c.ident("a limit")? {
-            "stack" => l.stack_mb = int(c)?,
-            "bytes" => l.bytes_mb = int(c)?,
-            "depth" => l.depth = int(c)?,
-            "run" => c
-                .string("characters")?
-                .bytes()
-                .for_each(|b| l.run[b as usize] = true),
-            "tagged" => {
-                let mark = c.string("a mark")?.as_bytes()[0];
-                l.tagged = Some((mark, int(c)?));
-            }
-            other => return err(line, format!("unknown limit `{other}`")),
-        }
-    }
-    Ok(l)
 }
 
 /// A `string <Token>... attribute...` row (one entry per token) (see [`StringSyntax`] for the meaning of each attribute):
@@ -1031,7 +1001,6 @@ fn resolve(
         regex_calls: Vec::new(),
         string_first: Vec::new(),
         trivia: TriviaSyntax::default(),
-        limits: Limits::default(),
         formats: Vec::new(),
         embeds: Vec::new(),
         containers: Vec::new(),

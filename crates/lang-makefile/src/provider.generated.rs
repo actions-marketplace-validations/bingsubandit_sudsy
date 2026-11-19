@@ -17,6 +17,7 @@ pub const MAPPING: Mapping = Mapping {
     unknown: "Unknown",
     wrap: &[
     ],
+    checked: &[],
     kinds: &[
         ("variable_assignment", "Assign"),
         ("shell_assignment", "Assign"),

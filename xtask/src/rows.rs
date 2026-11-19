@@ -30,7 +30,7 @@ pub fn check(root: &Path) -> Result<()> {
             root.join(format!("grammars/{lang}.grammar")),
         )?)?;
         let parsed = catch_unwind(AssertUnwindSafe(|| {
-            let rows = RuleFormatter::parse(&grammar, text);
+            let rows = RuleFormatter::parse(&grammar, text, &Default::default());
             rows.calls(&grammar);
             core_format::spacing::shadowed_rows(&grammar, text)
         }));

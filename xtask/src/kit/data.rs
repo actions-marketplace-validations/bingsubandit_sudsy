@@ -311,6 +311,7 @@ impl Langs {
     /// `row-key:`, and `tag:` for the tags shared code reads.
     pub fn data_items(&self, root: &Path) -> Result<BTreeMap<String, BTreeSet<Lang>>> {
         let blob = shared_text(root);
+        let reads = tag_reads(&blob);
         let mut out: BTreeMap<String, BTreeSet<Lang>> = BTreeMap::new();
         for (lang, d) in &self.langs {
             let mut add = |k: String| {
@@ -324,9 +325,9 @@ impl Langs {
                 .for_each(|l| add(format!("rules-section:{l}")));
             d.keys.iter().for_each(|l| add(format!("row-key:{l}")));
             for t in &d.tags {
-                if blob.contains(&format!("\"{t}\""))
-                    || blob.contains(&format!("#{t}"))
-                    || blob.contains(&format!("role: {t}"))
+                if reads.contains(t.as_str())
+                    || mentions(&blob, &format!("#{t}"))
+                    || mentions(&blob, &format!("role: {t}"))
                 {
                     add(format!("tag:{t}"));
                 }
@@ -334,6 +335,36 @@ impl Langs {
         }
         Ok(out)
     }
+}
+
+/// The tag names the shared code asks about: the string that follows `tag` on a line (`has_tag(k,
+/// "x")`, `tagged(n, "x")`; after `tags` all strings to the end of the line). A slot, option or
+/// field of the same name is not a read of the tag.
+fn tag_reads(text: &str) -> BTreeSet<&str> {
+    let mut out = BTreeSet::new();
+    for line in text.lines() {
+        for (at, _) in line.match_indices("tag") {
+            let rest = &line[at..];
+            let mut parts = rest.split('"');
+            parts.next();
+            if rest.starts_with("tags") {
+                out.extend(parts.step_by(2));
+            } else if let Some(first) = parts.next() {
+                out.insert(first);
+            }
+        }
+    }
+    out
+}
+
+/// Does `text` hold `word` as a whole name (`#modifier` is not in `#modifiers` or `#modifier-list`)?
+fn mentions(text: &str, word: &str) -> bool {
+    text.match_indices(word).any(|(i, _)| {
+        !text[i + word.len()..]
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    })
 }
 
 /// The text of the shared crates' sources and shared pattern files.

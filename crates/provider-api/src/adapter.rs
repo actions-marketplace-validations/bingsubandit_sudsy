@@ -15,6 +15,7 @@
 //! reads: grammar:trivia
 
 use crate::provider::{ParseError, ParseResult};
+use core_syntax::scan::Limits;
 use core_syntax::trivia::is_line_break;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TreeBuilder};
 use std::borrow::Cow;
@@ -328,16 +329,17 @@ pub fn replay_with(
     replay(src, Kinds::of(grammar), tokens, nodes, scan, retag)
 }
 
-/// Runs `parse` as the grammar's `limits` row allows: a file over the size limit or nested deeper
-/// than the depth limit is refused, a panic is a refusal, and a row with a `stack` runs the parser
+/// Runs `parse` as the language's [`Limits`] (`limits:` of its `lang.yaml`) allow: a file over the
+/// size limit or nested deeper than the depth limit is refused, a panic is a refusal, and a `stack` runs the parser
 /// on a thread with it (`parse` returns what the parser found, to be replayed). A refused file is
 /// one `Unknown` token and one error.
 pub fn guarded<R: Send>(
     src: &str,
     grammar: &Grammar,
+    limits: &Limits,
     parse: impl FnOnce() -> R + Send,
 ) -> Result<R, ParseResult> {
-    let stack = grammar.limits.stack_mb;
+    let stack = limits.stack_mb;
     let thread = |parse| {
         std::thread::scope(|s| {
             let thread = std::thread::Builder::new().stack_size(stack << 20);
@@ -349,7 +351,7 @@ pub fn guarded<R: Send>(
                 .ok()
         })
     };
-    refusing(src, grammar, parse, |parse| {
+    refusing(src, grammar, limits, parse, |parse| {
         if stack == 0 {
             catch(parse)
         } else {
@@ -358,14 +360,13 @@ pub fn guarded<R: Send>(
     })
 }
 
-/// [`guarded`] on the caller's thread, for a result that cannot cross threads (the limits row
-/// has no `stack`).
+/// [`guarded`] on the caller's thread with no limits, for a result that cannot cross threads.
 pub fn guarded_local<R>(
     src: &str,
     grammar: &Grammar,
     parse: impl FnOnce() -> R,
 ) -> Result<R, ParseResult> {
-    refusing(src, grammar, parse, catch)
+    refusing(src, grammar, &Limits::default(), parse, catch)
 }
 
 fn catch<R>(parse: impl FnOnce() -> R) -> Option<R> {
@@ -375,11 +376,12 @@ fn catch<R>(parse: impl FnOnce() -> R) -> Option<R> {
 fn refusing<P, R>(
     src: &str,
     grammar: &Grammar,
+    limits: &Limits,
     parse: P,
     exec: impl FnOnce(P) -> Option<R>,
 ) -> Result<R, ParseResult> {
     let refuse = |why: String| whole_file(src, Kinds::of(grammar), why);
-    if let Some(why) = grammar.limits.refuse(src) {
+    if let Some(why) = limits.refuse(src) {
         return Err(refuse(why));
     }
     exec(parse).ok_or_else(|| refuse(format!("the {} parser failed on this file", grammar.title)))

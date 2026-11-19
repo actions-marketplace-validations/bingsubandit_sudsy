@@ -102,7 +102,7 @@ pub fn generate(langs: &[Lang]) -> Result<Vec<(PathBuf, String)>> {
         if yaml.get("parse").is_some() {
             files.push((
                 rel.join("src/provider.generated.rs"),
-                adapter_provider(name, yaml),
+                adapter_provider(name, yaml) + &limits(yaml),
             ));
         }
         if let Some(schema) = crate::options::generate(name, l)? {
@@ -215,6 +215,34 @@ fn provider(name: &str, v: &Value) -> String {
 
 /// The provider of a language with a `parse` function (`fn(&SourceFile) -> ParseResult`) in
 /// place of a tree-sitter grammar.
+/// `LIMITS` for a `limits: {stack, bytes, depth, run, tagged: [mark, n]}` map: what the parser of
+/// an adapter that recurses is given (`provider_api::adapter::guarded`).
+fn limits(v: &Value) -> String {
+    let Some(Value::Object(m)) = v.get("limits") else {
+        return String::new();
+    };
+    let num = |k: &str| m.get(k).and_then(Value::as_u64).unwrap_or(0);
+    let tagged = match m.get("tagged").and_then(Value::as_array) {
+        Some(t) => format!(
+            "Some((b{:?}, {}))",
+            t[0].as_str()
+                .unwrap_or_default()
+                .chars()
+                .next()
+                .unwrap_or(' '),
+            t[1].as_u64().unwrap_or(0)
+        ),
+        None => "None".to_string(),
+    };
+    format!(
+        "\npub const LIMITS: core_syntax::scan::Limits = core_syntax::scan::Limits::new({}, {}, {}, {:?}, {tagged});\n",
+        num("stack"),
+        num("bytes"),
+        num("depth"),
+        text(v.get("limits").unwrap_or(v), "run", ""),
+    )
+}
+
 fn adapter_provider(name: &str, v: &Value) -> String {
     let hooks = text(v, "hooks", "core_rules::DEFAULT_HOOKS");
     let strings = |key| {

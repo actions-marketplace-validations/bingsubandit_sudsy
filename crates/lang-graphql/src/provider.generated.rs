@@ -17,6 +17,7 @@ pub const MAPPING: Mapping = Mapping {
     unknown: "Unknown",
     wrap: &[
     ],
+    checked: &[],
     kinds: &[
         ("arguments_definition", "ArgsDef"),
         ("boolean_value", "Bool"),

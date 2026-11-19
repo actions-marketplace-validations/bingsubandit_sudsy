@@ -1,6 +1,6 @@
 //! Calls and `new`: the callee and the argument list. The layouts of the arguments (hugging a last
 //! or first function or object argument, test calls, `require`, hooks) are core-format's
-//! `shapes::call_arguments` over the rows of `format.rules`. Member chains are `chain.rs`.
+//! `shapes::call_arguments` over the `[call]` rows of `format.rules` and kind sets. Member chains are `chain.rs`.
 //!
 //! concept: call-arguments-hug
 
@@ -9,7 +9,7 @@ use super::ast::{Call, un};
 use super::chain;
 use super::util::{R, kids, shape_error, token_of};
 use crate::generated::kind as k;
-use core_format::calls::{CallRules, Effect};
+use core_format::calls::{CallRules, CallSets, Effect};
 use core_format::doc::{self, Doc, concat, group, lit};
 use core_format::shapes;
 use core_format::{FormatCtx, FormatError, comments};
@@ -25,11 +25,57 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
     }
 }
 
-/// The rows of `format.rules`: test calls, `require`, hooks, simple arguments.
+/// Prettier's kind sets for call arguments (`isSimpleCallArgument`, `isHopefullyShortCallArgument`,
+/// the hug checks).
+const SETS: CallSets = CallSets {
+    leaf: &[
+        "#literal",
+        "#reference",
+        "ThisExpression",
+        "Super",
+        "PrivateIdentifier",
+        "IdentifierName",
+    ],
+    regex: &[("RegExpLiteral", 5)],
+    single_line: &["TemplateLiteral"],
+    object: &["ObjectExpression"],
+    array: &["ArrayExpression"],
+    items: &["ImportExpression"],
+    members: &["ComputedMemberExpression"],
+    operand: &[
+        "StaticMemberExpression",
+        "PrivateFieldExpression",
+        "UpdateExpression",
+        "TSNonNullExpression",
+        "ChainExpression",
+    ],
+    unary: &[("UnaryExpression", &["!", "-", "+", "~"])],
+    call: &["CallExpression", "NewExpression"],
+    composition: true,
+    no_composition: &["Decorator"],
+    short: &["RegExpLiteral"],
+    short_binary: &["BinaryExpression", "LogicalExpression"],
+    cast: &[
+        ("TSAsExpression", "TSTypeParameterInstantiation"),
+        ("TSSatisfiesExpression", "TSTypeParameterInstantiation"),
+    ],
+    not_last: &[("ArrowFunctionExpression", "ArrayExpression")],
+    numeric: &["NumericLiteral"],
+    signed_numeric: &["UnaryExpression"],
+    concise: &["ArrayExpression"],
+};
+
+/// The `[call]` rows of `format.rules` (test calls, `require`, hooks) and [`SETS`].
 static ROWS: OnceLock<CallRules> = OnceLock::new();
 
 pub(crate) fn rules() -> &'static CallRules {
-    ROWS.get_or_init(|| CallRules::parse(grammars::JS.get(), include_str!("../../format.rules")))
+    ROWS.get_or_init(|| {
+        CallRules::parse(
+            grammars::JS.get(),
+            include_str!("../../format.rules"),
+            &SETS,
+        )
+    })
 }
 
 fn call(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {

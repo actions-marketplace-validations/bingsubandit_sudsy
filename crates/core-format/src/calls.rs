@@ -1,6 +1,6 @@
-//! The `[call]`, `[simple]` and `[hug]` sections of a language's rules file: what a call's
-//! arguments look like for the layout that hugs, keeps on a line or breaks them
-//! ([`crate::shapes::call_arguments`]).
+//! What a call's arguments look like for the layout that hugs, keeps on a line or breaks them
+//! ([`crate::shapes::call_arguments`]): the `[call]` section of a language's rules file and a
+//! [`CallSets`] of kind sets.
 //!
 //! `[call]`: `set NAME = text|text` names a list of callee texts (a dotted name without blanks);
 //! a row `CALLEE / ARGS : EFFECT` says that a call whose callee and arguments match is printed
@@ -15,21 +15,10 @@
 //! and the parameters of a function argument stay on its line) and `hook` (the arguments stay on
 //! the line, as part of the argument list).
 //!
-//! `[simple]` (Prettier's "simple call argument") and `[hug]`: `key = Kind|#tag[:ARG]|...` rows,
-//! the first row naming a node deciding. Keys: `leaf`, `regex` (`Kind:N`: a leaf of a pattern of
-//! at most N characters), `single_line` (a literal with expressions that has no line break),
-//! `object`, `array`, `items` (every child simple, one level deeper), `members` (every child
-//! simple), `operand` (the first child simple), `unary` (`Kind: op op`: the last child simple),
-//! `call` (callee and arguments simple, only at the top); `composition = yes` (a function
-//! composition breaks its arguments), `no_composition` (parent kinds), `short` (always short),
-//! `short_binary`, `cast` (`Kind:TypeArgumentsKind`: short when the first child is and the last
-//! has no type arguments), `not_last` (`First:Last`: a pair of arguments the last of which does
-//! not hug), `numeric` and `signed_numeric` (the items of a concise array), `concise`.
-//!
 //! concept: call-arguments-hug
 //! what: Call arguments flat, hugged (first or last) or broken out, decided by grammar tags and call, hug and simple rows.
 //! tools: Prettier call-arguments (last-arg hug, test calls, composition, React hooks), google-java-format argument lists
-//! reads: rules:call, rules:hug, rules:simple, tag:huggable
+//! reads: rules:call, tag:huggable
 
 use crate::FormatCtx;
 use crate::comments;
@@ -103,8 +92,8 @@ struct Pattern {
     effect: Effect,
 }
 
-/// What a `[simple]` or `[hug]` row says about the nodes it names.
-#[derive(Debug)]
+/// What a [`CallSets`] entry says about the nodes it names.
+#[derive(Clone, Debug)]
 enum Rule {
     Leaf,
     Regex(usize),
@@ -144,7 +133,51 @@ impl Rule {
     }
 }
 
-/// The rows of `[call]`, `[simple]` and `[hug]`.
+/// The kind sets of a language's call arguments, as a table of the language. An entry is a kind
+/// name or `#tag`; in each set the first entry that names a node decides.
+#[derive(Default)]
+pub struct CallSets {
+    /// Prettier's `isSimpleCallArgument`: a leaf is simple.
+    pub leaf: &'static [&'static str],
+    /// A leaf pattern (kind, most characters up to its closing delimiter) is simple.
+    pub regex: &'static [(&'static str, usize)],
+    /// A literal with expressions that has no line break and simple children.
+    pub single_line: &'static [&'static str],
+    /// An object whose values are simple.
+    pub object: &'static [&'static str],
+    /// An array whose items are simple (a hole is).
+    pub array: &'static [&'static str],
+    /// Every child simple, one level deeper.
+    pub items: &'static [&'static str],
+    /// Every child simple.
+    pub members: &'static [&'static str],
+    /// The first child simple.
+    pub operand: &'static [&'static str],
+    /// (kind, operators): the last child simple and the operator one of the texts.
+    pub unary: &'static [(&'static str, &'static [&'static str])],
+    /// Callee and arguments simple, only at the top.
+    pub call: &'static [&'static str],
+    /// A function composition breaks its arguments.
+    pub composition: bool,
+    /// Arguments of a call under a node of these kinds are never a composition.
+    pub no_composition: &'static [&'static str],
+    /// Prettier's `isHopefullyShortCallArgument`: always short.
+    pub short: &'static [&'static str],
+    /// Short when every child is.
+    pub short_binary: &'static [&'static str],
+    /// (kind, type arguments kind): short when the first child is and the last has no type arguments.
+    pub cast: &'static [(&'static str, &'static str)],
+    /// (first kind, last kind): a pair of arguments the last of which does not hug.
+    pub not_last: &'static [(&'static str, &'static str)],
+    /// The items of a concise array.
+    pub numeric: &'static [&'static str],
+    /// A signed number: this kind with a numeric last child.
+    pub signed_numeric: &'static [&'static str],
+    /// An array of two or more numbers prints as a fill.
+    pub concise: &'static [&'static str],
+}
+
+/// The `[call]` rows and the [`CallSets`].
 #[derive(Default)]
 pub struct CallRules {
     patterns: Vec<Pattern>,
@@ -251,64 +284,64 @@ impl Parse<'_> {
 }
 
 impl CallRules {
-    pub fn parse(g: &Grammar, text: &'static str) -> CallRules {
+    pub fn parse(g: &Grammar, text: &'static str, sets: &CallSets) -> CallRules {
         let mut rules = CallRules::default();
-        let (mut call, mut sets, mut inside) = (Vec::new(), Vec::new(), "");
+        let (mut call, mut names, mut inside) = (Vec::new(), Vec::new(), "");
         for l in text.lines().map(str::trim) {
             if let Some(n) = l.strip_prefix('[').and_then(|l| l.strip_suffix(']')) {
                 inside = n;
-            } else if l.is_empty() || l.starts_with('#') {
+            } else if l.is_empty() || l.starts_with('#') || inside != "call" {
                 continue;
-            } else if inside == "call" {
+            } else {
                 match l.strip_prefix("set ") {
                     Some(r) => {
                         let (name, list) = r.split_once('=').expect("call: set");
-                        sets.push((name.trim(), list.split('|').map(str::trim).collect()));
+                        names.push((name.trim(), list.split('|').map(str::trim).collect()));
                     }
                     None => call.push(l),
                 }
-            } else if let Some((key, v)) = l.split_once('=')
-                && matches!(inside, "simple" | "hug")
-            {
-                rules.rows_of(g, key.trim(), v);
             }
         }
-        let p = Parse { g, sets };
+        let p = Parse { g, sets: names };
         rules.patterns = call.into_iter().map(|l| p.pattern(l)).collect();
+        rules.add_sets(g, sets);
         rules
     }
 
-    /// The rows of one `key = Kind|#tag[:ARG]|...` line.
-    fn rows_of(&mut self, g: &Grammar, key: &str, v: &'static str) {
-        if key == "composition" {
-            self.composition = v.trim() == "yes";
-            return;
+    /// The rows of the sets: the hug sets, then the simple ones.
+    fn add_sets(&mut self, g: &Grammar, s: &CallSets) {
+        self.composition = s.composition;
+        let mut rows: Vec<(Pick, Rule)> = Vec::new();
+        let picks = |rows: &mut Vec<(Pick, Rule)>, names: &[&'static str], rule: Rule| {
+            rows.extend(names.iter().map(|n| (Pick::parse(g, n), rule.clone())));
+        };
+        picks(&mut rows, s.no_composition, Rule::NoComposition);
+        picks(&mut rows, s.short, Rule::Short);
+        picks(&mut rows, s.short_binary, Rule::ShortBinary);
+        for (n, arg) in s.cast {
+            rows.push((Pick::parse(g, n), Rule::Cast(kind(g, arg))));
         }
-        for part in v.split('|') {
-            let (n, arg) = part.split_once(':').unwrap_or((part, ""));
-            let rule = match key {
-                "leaf" => Rule::Leaf,
-                "regex" => Rule::Regex(arg.trim().parse().expect("regex length")),
-                "single_line" => Rule::SingleLine,
-                "object" => Rule::Object,
-                "array" => Rule::Array,
-                "items" => Rule::Items,
-                "members" => Rule::Members,
-                "operand" => Rule::Operand,
-                "unary" => Rule::Unary(arg.split_whitespace().collect()),
-                "call" => Rule::Call,
-                "short" => Rule::Short,
-                "short_binary" => Rule::ShortBinary,
-                "cast" => Rule::Cast(kind(g, arg)),
-                "not_last" => Rule::NotLast(kind(g, arg)),
-                "numeric" => Rule::Numeric,
-                "signed_numeric" => Rule::SignedNumeric,
-                "concise" => Rule::Concise,
-                "no_composition" => Rule::NoComposition,
-                k => panic!("call rules: key `{k}`"),
-            };
-            self.rows.push((Pick::parse(g, n), rule));
+        for (n, arg) in s.not_last {
+            rows.push((Pick::parse(g, n), Rule::NotLast(kind(g, arg))));
         }
+        picks(&mut rows, s.numeric, Rule::Numeric);
+        picks(&mut rows, s.signed_numeric, Rule::SignedNumeric);
+        picks(&mut rows, s.concise, Rule::Concise);
+        for (n, max) in s.regex {
+            rows.push((Pick::parse(g, n), Rule::Regex(*max)));
+        }
+        picks(&mut rows, s.leaf, Rule::Leaf);
+        picks(&mut rows, s.single_line, Rule::SingleLine);
+        picks(&mut rows, s.object, Rule::Object);
+        picks(&mut rows, s.array, Rule::Array);
+        picks(&mut rows, s.items, Rule::Items);
+        picks(&mut rows, s.members, Rule::Members);
+        picks(&mut rows, s.operand, Rule::Operand);
+        for (n, ops) in s.unary {
+            rows.push((Pick::parse(g, n), Rule::Unary(ops.to_vec())));
+        }
+        picks(&mut rows, s.call, Rule::Call);
+        self.rows = rows;
     }
 
     /// The first row that names the kind `k` and satisfies `f`.
@@ -471,7 +504,7 @@ impl CallRules {
     }
 
     /// Does a call with several function arguments (or one that has a function argument) break
-    /// its arguments (`composition = yes`)?
+    /// its arguments ([`CallSets::composition`])?
     pub fn composition(&self) -> bool {
         self.composition
     }

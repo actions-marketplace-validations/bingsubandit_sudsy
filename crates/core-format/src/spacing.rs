@@ -1,8 +1,8 @@
 //! Token spacing as data: a language's rows say which blanks stand between two neighbouring
 //! tokens (`Flow::want` and its companions), so a spacing change is a row, not a function.
 //!
-//! The text has sections `[space]`, `[joined]`, `[at_least_one]` and `[op_first]`; a line is
-//! `PREV / NEXT : RESULT` (`[op_first]`: one pattern). The first row of a section that matches
+//! The text has sections `[space]`, `[joined]` and `[at_least_one]`; a line is
+//! `PREV / NEXT : RESULT`. The first row of a section that matches
 //! wins. `RESULT` is `yes` (one blank), `no` or `keep` (as the source has it); the other sections
 //! have no result. A pattern is `*` or conditions joined by `&`: `key=a|b` or `key!=a|b` with
 //! `key` one of `kind` and `parent` and `grand` (names of the grammar's kinds, of the token, of
@@ -17,7 +17,7 @@
 //! concept: token-spacing-rows
 //! what: Blanks between neighbouring tokens as ordered rows.
 //! tools: google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01
-//! reads: rules:space, rules:joined, rules:at_least_one, rules:op_first
+//! reads: rules:space, rules:joined, rules:at_least_one
 
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxToken};
 
@@ -555,23 +555,13 @@ pub fn shadowed_rows(grammar: &Grammar, text: &str) -> Vec<String> {
             }
         }
     }
-    let pats: Vec<(&str, Pattern)> = crate::rules::section(text, "op_first")
-        .map(|l| (l, Pattern::parse(grammar, l)))
-        .collect();
-    for (j, (line, p)) in pats.iter().enumerate() {
-        if let Some((first, _)) = pats[..j].iter().find(|(_, e)| p.implies(e)) {
-            out.push(format!(
-                "[op_first] `{line}` is never reached: `{first}` matches first"
-            ));
-        }
-    }
     out
 }
 
 impl SpaceRules {
     /// The sections `[space]`, `[joined]`, `[at_least_one]`, `[op_first]` and the kind lists
-    /// `flat_after`, `closers` and `unhang` of `[flow]`.
-    pub fn parse(grammar: &Grammar, text: &str) -> SpaceRules {
+    /// `flat_after` and `closers` of `[flow]`; `unhang` and `op_first` are the language's `RuleFacts`.
+    pub fn parse(grammar: &Grammar, text: &str, facts: &crate::rules::RuleFacts) -> SpaceRules {
         let rows = |name| {
             crate::rules::section(text, name)
                 .map(|l| row(grammar, l))
@@ -595,12 +585,22 @@ impl SpaceRules {
             space,
             joined: rows("joined"),
             at_least_one: rows("at_least_one"),
-            op_first: crate::rules::section(text, "op_first")
+            op_first: facts
+                .op_first
+                .iter()
                 .map(|l| Pattern::parse(grammar, l))
                 .collect(),
             flat_after: kinds("flat_after"),
             closers: kinds("closers"),
-            unhang: kinds("unhang"),
+            unhang: facts
+                .unhang
+                .iter()
+                .map(|n| {
+                    grammar
+                        .kind_by_name(n)
+                        .unwrap_or_else(|| panic!("spacing: unknown kind `{n}`"))
+                })
+                .collect(),
         }
     }
 

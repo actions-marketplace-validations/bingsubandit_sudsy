@@ -16,6 +16,7 @@ const fn mapping(
         eof: "Eof",
         unknown: "Unknown",
         wrap,
+        checked: &[],
         kinds,
     }
 }

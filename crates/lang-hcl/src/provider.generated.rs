@@ -17,6 +17,7 @@ pub const MAPPING: Mapping = Mapping {
     unknown: "Unknown",
     wrap: &[
     ],
+    checked: &[],
     kinds: &[
         ("binary_operation", "Binary"),
         ("bool_lit", "Bool"),

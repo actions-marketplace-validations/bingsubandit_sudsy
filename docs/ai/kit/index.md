@@ -294,7 +294,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | tree-shape-check | core-syntax/shape.rs | Checks a tree against the node bodies of its grammar. | none (conformance) | cpp, csharp, css, dockerfile, editorconfig, gitignore, graphql, hcl, html, ini, java, js, json, kotlin, makefile, markdown, php, powershell, protobuf, python, ruby, shell, sql, toml, xml, yaml |  |
 | tree-sitter-adapter | core-treesitter/lib.rs +1 | A language-neutral adapter from tree-sitter to the lossless tree through a node-name mapping. | tree-sitter | dockerfile, editorconfig, gitignore, graphql, hcl, ini, makefile, markdown, powershell, protobuf, shell, toml, xml, yaml |  |
 | trivia-attachment | core-syntax/trivia.rs | The single rule that attaches comments and whitespace to tokens as leading or trailing trivia. | none (internal) | cpp, csharp, css, dockerfile, editorconfig, gitignore, graphql, hcl, html, ini, java, js, json, kotlin, makefile, markdown, php, powershell, protobuf, python, ruby, shell, sql, toml, xml, yaml |  |
-| trivia-rows | core-syntax/scan.rs | Comments, line continuations and size limits that adapters of external parsers read from the grammar. | none (adapter data as rows) | cpp, html, java, js, kotlin, php, python, ruby |  |
+| trivia-rows | core-syntax/scan.rs | Comments and line continuations that adapters of external parsers read from the grammar, and the size limits of their parsers. | none (adapter data as rows) | cpp, html, java, js, kotlin, php, python, ruby |  |
 
 ## semantics
 

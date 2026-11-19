@@ -50,6 +50,8 @@ pub struct Mapping {
     pub kinds: &'static [(&'static str, &'static str)],
     /// Token kind name -> node kind name wrapping it.
     pub wrap: &'static [(&'static str, &'static str)],
+    /// Token kind names whose errors are reported although their tree-sitter children are swallowed.
+    pub checked: &'static [&'static str],
 }
 
 /// The `kinds` entry for a tree-sitter node. A `from` written `"name"` (quoted, as in tree-sitter
@@ -184,7 +186,7 @@ impl Converter {
                             .iter()
                             .find(|(t, _)| t == target)
                             .map(|(_, w)| kind(w)),
-                        grammar.has_tag(k, "checked"),
+                        m.checked.contains(target),
                     ),
                     (true, true) => Entry::Trivia(k),
                 };
@@ -343,7 +345,7 @@ impl Converter {
                 }
             }
             Entry::Token(kind, wrap, string) => {
-                // The children of a token are swallowed: an error inside a `#checked` token is reported here.
+                // The children of a token are swallowed: an error inside a `checked` token (the mapping's list) is reported here.
                 if string && n.has_error() {
                     s.error(start, end - start, "syntax error".into());
                 }
@@ -689,6 +691,7 @@ mod tests {
             unknown: "",
             kinds,
             wrap: &[],
+            checked: &[],
         }
     }
 

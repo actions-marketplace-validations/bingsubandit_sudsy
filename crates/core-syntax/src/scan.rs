@@ -1,11 +1,11 @@
-//! What adapters of external parsers read from a grammar about the text between tokens and the
-//! size of what the parser may be given: the `trivia` rows (comments and line continuations) and
-//! the `limits` row.
+//! What adapters of external parsers read about the text between tokens (the grammar's `trivia`
+//! rows: comments and line continuations) and about the size of what the parser may be given (the
+//! `limits:` of `lang.yaml`).
 //!
 //! concept: trivia-rows
-//! what: Comments, line continuations and size limits that adapters of external parsers read from the grammar.
+//! what: Comments and line continuations that adapters of external parsers read from the grammar, and the size limits of their parsers.
 //! tools: none (adapter data as rows)
-//! reads: grammar:trivia, grammar:limits
+//! reads: grammar:trivia
 
 use crate::kind::SyntaxKind;
 
@@ -176,7 +176,7 @@ impl TriviaRow {
     }
 }
 
-/// The `limits` row (`run` is a table of the bytes of `run "chars"`): what a parser that recurses is given. Sizes are in MB.
+/// The `limits` of a `lang.yaml` (`run` is a table of the bytes of `run: "chars"`): what a parser that recurses is given. Sizes are in MB.
 #[derive(Clone, Debug)]
 pub struct Limits {
     /// `stack`: the stack of the thread the parser runs on (0: the caller's thread).
@@ -204,6 +204,30 @@ impl Default for Limits {
 }
 
 impl Limits {
+    /// The limits a `lang.yaml` `limits:` map names (`run`: the characters of `run`).
+    pub const fn new(
+        stack_mb: usize,
+        bytes_mb: usize,
+        depth: usize,
+        run: &str,
+        tagged: Option<(u8, usize)>,
+    ) -> Limits {
+        let mut table = [false; 256];
+        let chars = run.as_bytes();
+        let mut i = 0;
+        while i < chars.len() {
+            table[chars[i] as usize] = true;
+            i += 1;
+        }
+        Limits {
+            stack_mb,
+            bytes_mb,
+            depth,
+            run: table,
+            tagged,
+        }
+    }
+
     /// Why a parser must not run on `src`, when it must not.
     pub fn refuse(&self, src: &str) -> Option<String> {
         if self.bytes_mb > 0 && src.len() > self.bytes_mb << 20 {

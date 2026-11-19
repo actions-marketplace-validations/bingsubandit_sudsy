@@ -57,11 +57,6 @@ kind=Operator|Assign&parent=Binary|Assignment / *
 kind=DoubleArrow&parent=KeyValueArrayElement|MatchExpressionArm|MatchDefaultArm|ArrowFunction / *
 * / kind=DoubleArrow&parent=KeyValueArrayElement|MatchExpressionArm|MatchDefaultArm|ArrowFunction
 
-# Operators that start a line (`operator_linebreak`).
-[op_first]
-kind=Operator&parent=Binary
-kind=Question|Colon&parent=Conditional
-
 [rewrite]
 # Code rewrites of PER-CS that PHP-CS-Fixer makes besides layout (syntax in
 # crates/core-format/src/rewrite.rs): `array(...)` is `[...]` (array_syntax), `new Foo` is
@@ -74,20 +69,8 @@ kind=Keyword&text=var&parent=PlainProperty&sibling!=public|protected|private : r
 kind=Keyword&text=static|readonly|function|const&parent=Method|PlainProperty|ClassLikeConstant&grand=Class|Trait|Interface|Enum|AnonymousClass&sibling!=public|protected|private&before!=static|readonly|function|const : insert before "public "
 
 [flow]
-exact = yes
-source_hang = yes
-keep_blank_lines = yes
 flat_after = AttributeList
 closers = RParen|RBracket|RBrace|Semi
-unhang = LBrace
-
-[comments]
-max_blank_after = unlimited
-
-[file]
-one_line_verbatim = yes
-verbatim_if = InlineText|CloseTag|ShortOpeningTag|EchoTag
-exact_end = InlineText
 
 # A blank line between statements: after the opening tag, around the namespace declaration,
 # after the imports and between the groups of imports (`use` and `use function`).
