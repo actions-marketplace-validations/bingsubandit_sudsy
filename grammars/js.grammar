@@ -125,7 +125,7 @@ node AssignmentTargetPropertyIdentifier #opaque
 node AssignmentTargetPropertyProperty #opaque
 node SequenceExpression #expression #opaque #sequence #pure
 node Super #expression #opaque
-node AwaitExpression #expression #unary = operator:Keyword operand:#expression
+node AwaitExpression #expression #unary #await = operator:Keyword operand:#expression
 node ChainExpression #expression #opaque
 node ParenthesizedExpression #expression #parenthesized #transparent
 node Directive #statement #opaque
@@ -146,7 +146,7 @@ node ForOfStatement #statement #scope #loop =
 node ContinueStatement #statement #continue = Keyword label:LabelIdentifier? Semicolon?
 node BreakStatement #statement #break = Keyword label:LabelIdentifier? Semicolon?
 node ReturnStatement #statement #return = Keyword value:#expression? Semicolon?
-node WithStatement #statement #opaque
+node WithStatement #statement #opaque #with
 node SwitchStatement #statement #scope #switch #fallthrough = Keyword LParen discriminant=subject:#expression RParen LBrace cases:SwitchCase* RBrace
 node SwitchCase #case = Keyword test:#expression? Colon body:#statement*
 node LabeledStatement #statement #labeled = label:LabelIdentifier Colon body:#statement
@@ -168,7 +168,7 @@ node FormalParameterRest #parameter #opaque #final
 node FunctionBody #block = LBrace items:#statement* RBrace
 node ArrowFunctionExpression #expression #function #huggable-function #scope #pure =
     Identifier? type_parameters:TSTypeParameterDeclaration? parameters:FormalParameters return_type:TSTypeAnnotation? Arrow body:FunctionBody? expression_body:#expression?
-node YieldExpression #expression #opaque #escapes
+node YieldExpression #expression #opaque #yield #escapes
 node Class #expression #statement #type-declaration #declaration #scope #pure =
     Decorator* Identifier* Keyword name:BindingIdentifier? type_parameters:TSTypeParameterDeclaration? Keyword? superclass:#expression? super_type_arguments:TSTypeParameterInstantiation? Identifier? implements:TSClassImplements* members:ClassBody
 node ClassBody #block = LBrace items:#member* RBrace

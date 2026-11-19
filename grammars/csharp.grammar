@@ -334,7 +334,7 @@ node RefType #type #expression #opaque =
     ref_keyword:RefKeyword read_only_keyword:ReadOnlyKeyword? type:#type
 node ScopedType #type #expression #opaque =
     scoped_keyword:ScopedKeyword type:#type
-node ParenthesizedExpression #expression #opaque =
+node ParenthesizedExpression #expression #parenthesized =
     open_paren:OpenParenToken expression:#expression close_paren:CloseParenToken
 node TupleExpression #expression #delimited-list #opaque =
     open_paren:OpenParenToken arguments:Argument* close_paren:CloseParenToken

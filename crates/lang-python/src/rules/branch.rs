@@ -76,18 +76,6 @@ pub(super) fn open_file_without_with(c: &Check, n: &SyntaxNode, ctx: &mut RuleCo
     }
 }
 
-/// SIM117: a `with` whose only statement is another `with`.
-pub(super) fn nested_with(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let mut body = statements(n);
-    let (Some(s), None) = (body.next(), body.next()) else {
-        return;
-    };
-    let is_async = |w: &SyntaxNode| tokens(w).any(|t| t.kind() == k::ASYNC);
-    if s.kind() == k::STMT_WITH && is_async(n) == is_async(&s) {
-        c.hit(ctx, span(ctx, n), "");
-    }
-}
-
 /// The class a `raise` names: `X` of `raise X` and `raise X(...)`.
 fn raised_class(r: &SyntaxNode) -> Option<SyntaxNode> {
     let exc = r.children().next()?;

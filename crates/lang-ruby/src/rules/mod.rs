@@ -23,10 +23,13 @@ pub static RULES: &[&dyn Rule] = &[
     &scope::UNDERSCORE_PREFIXED,
 ];
 
-pub static FAMILIES: &[Family] = &[Family {
-    name: "check",
-    build: build_check,
-}];
+pub static FAMILIES: &[Family] = &[
+    Family {
+        name: "check",
+        build: build_check,
+    },
+    core_rules::simplify::FAMILY,
+];
 
 const CALL: &[SyntaxKind] = &[k::CALL];
 const MODULE_BODY: &[SyntaxKind] = &[k::CLASS, k::MODULE];
@@ -76,7 +79,6 @@ const CHECKS: &[Entry] = &[
         CALL,
         calls::hash_compare_by_identity,
     ),
-    ("useless-times", CALL, calls::useless_times),
     ("struct-new-override", CALL, calls::struct_new_override),
     (
         "redundant-string-coercion",
@@ -92,11 +94,6 @@ const CHECKS: &[Entry] = &[
         "mixed-regexp-capture-types",
         &[k::REGULAR_EXPRESSION],
         literals::mixed_regexp_capture_types,
-    ),
-    (
-        "binary-operator-with-identical-operands",
-        &[k::CALL, k::AND, k::OR],
-        literals::identical_operands,
     ),
     ("empty-when", &[k::WHEN], clauses::empty_when),
     (

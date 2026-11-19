@@ -98,8 +98,8 @@ severity: off
 category: suspicious
 ---
 id: useless-times
-family: check
-params: { check: useless-times }
+family: simplify
+params: { check: repeat-once, method: times, max: "1", with: "block pass" }
 message: "the block runs at most once: do not call `times`"
 description: "`0.times` and `1.times` with a block (RuboCop Lint/UselessTimes)."
 example: "1.times { x }"
@@ -143,8 +143,8 @@ severity: warn
 category: suspicious
 ---
 id: binary-operator-with-identical-operands
-family: check
-params: { check: binary-operator-with-identical-operands }
+family: simplify
+params: { check: identical-operands, operators: "== != === <=> =~ > >= < <= | ^ && ||" }
 message: "binary operator `{name}` has identical operands"
 description: "`x == x`, `a && a` and other comparison, logical and bitwise operators whose two sides are the same code (RuboCop Lint/BinaryOperatorWithIdenticalOperands)."
 example: "x == x"

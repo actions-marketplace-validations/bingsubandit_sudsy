@@ -143,8 +143,8 @@ severity: warn
 category: correctness
 ---
 id: yield-outside-function
-family: check
-params: { check: yield-outside-function }
+family: simplify
+params: { check: jump-outside, jump: "yield await" }
 message: "`yield` or `await` outside of a function"
 description: "A `yield`, `yield from` or `await` outside a function."
 example: "yield 1"
@@ -314,7 +314,7 @@ severity: off
 category: style
 ---
 id: assert-false
-family: check
+family: simplify
 params: { check: assert-false }
 message: "do not `assert False`: `python -O` removes it, raise `AssertionError()`"
 description: "An `assert` whose test is the literal `False`."
@@ -533,7 +533,7 @@ severity: off
 category: suspicious
 ---
 id: nested-with
-family: check
+family: simplify
 params: { check: nested-with }
 message: "use a single `with` statement with several contexts"
 description: "A `with` whose only statement is another `with` (both sync or both async)."

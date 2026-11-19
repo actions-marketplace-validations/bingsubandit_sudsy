@@ -5,3 +5,6 @@ js:
     rules:
       shadowed-variable: error
       use-before-define: error
+      no-lonely-if: error
+      no-else-return: error
+      no-unneeded-ternary: error

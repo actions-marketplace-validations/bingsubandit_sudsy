@@ -14,17 +14,13 @@ Python binary chain, `maybe_parenthesize`, conditional, blank lines between memb
 
 HTML `print/embed.rs` (the printer lays embedded code out as `Doc`s of width-aware placements per element kind: `<script>` lines, attribute `expand`/hug/`explode_object`, Vue and Angular expressions; `lang-html` is the only host with `Opts::embed`, every other host splices text with a prefix in `core_incremental::embedded`, so no second user for a shared Doc-level path (measured: the text helpers moved to `core_format::embed`, -60 HTML lines; what is left is 620 lines of per-element placement over `model::N`, which no other host has); its `script_language` and `style_language` tables become `embed` rows when the printer reads the tree's elements instead of `model::N`)
 
-### C#: `constant-on-right` and `suppression-justification`
+### C#: `suppression-justification`
 
-C# `constant-on-right` and `suppression-justification`
+A pattern row (`kind: Attribute`, a `not-has` of a `NameEquals` `Justification` or a `has` of an empty or `<Pending>` value) reproduces the rule with one message and the attribute name as span, and passes the C# fixtures, but the decision (a suppression needs a reason that says something) is a mechanism any language with a reason on a suppression shares (Kotlin `@Suppress`, ESLint directive descriptions). Missing capability: an `#annotation` role with `name`, `arguments` and named arguments (`#key-value`) on C# `Attribute` (an `#opaque` node today) and Java/Kotlin annotations, then a `suppress` family check with rows for the attribute names, the argument name and the empty values. The Rust rule stays in `declarations.rs`.
 
-### Ruby: `identical_operands` and `useless_times`
+### Unused suppressions: ruff RUF100 and ESLint unused directives
 
-Ruby `identical_operands` and `useless_times` (operator `Call` nodes as `#binary`)
-
-### Python: `#assert` role, `nested_with`, `yield_outside_function`
-
-Python `#assert` role, `nested_with`, `yield_outside_function`
+A suppression comment that silences nothing needs three things Sudsy has none of: (1) the tool's own codes at run time (`# noqa: F401` names ruff codes, the rules carry Sudsy ids; the code to id mapping lives only in `docs/ai/parity/ruff.yaml`, so every rule row would get a `codes` key, 125 rows for ruff), (2) a hook in `engine::silence` that returns which directive silenced which diagnostic, so the unused ones become findings of a shared `unused-suppression` rule, (3) `noqa` and `eslint-disable` read as suppressions with an optional code list (today only the `sudsy-*` markers suppress, the foreign `directive` rows only feed `unknown-rule-in-directive`). Measured with ruff 0.17.4 on the ruff parity corpus (`ruff check --isolated --ignore-noqa --select <the catalog's mapped codes>,RUF100` on the 1,666 files of the ruff parity work folder; 56 files have findings): 136 RUF100 findings, of them 58 `Unused blanket noqa` (no selected rule fires on the line: reachable with (2) and (3) alone), 46 `non-enabled` (32 are `E501`, not mapped: reachable with the code table), 32 `unused` (`F401` 20, `E741` 6: need (1) to (3)). Sudsy's own rules would agree on the line for the 32 `unused` and 58 blanket findings only as far as the mapped rules do (ruff coverage 95.6%). ESLint reports unused directives with no rule id (`reportUnusedDisableDirectives`), so the parity run drops them and the catalog has no entry: nothing to ratchet. Not built: a `codes` row in 125 rule files plus an engine hook is a step of its own, and a native `unused-suppression` for the `sudsy-*` markers alone moves no parity number.
 
 ### Rewrites left in language code
 

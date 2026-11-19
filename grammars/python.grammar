@@ -177,13 +177,14 @@ node StmtWhile #statement #loop =
     While condition=test:#expression Colon body:#statement* Else? Colon? orelse:#statement*
 node StmtIf #statement #conditional #branching =
     If condition=test:#expression Colon then=body:#statement* else=clauses:ElifElseClause*
-node StmtWith #statement #opaque #branching
+node StmtWith #statement #opaque #with #branching
 node StmtMatch #statement #switch =
     Match subject:#expression Colon cases:MatchCase*
 node StmtRaise #statement #throw = Raise value=exc:#expression? From? cause:#expression?
 node StmtTry #statement #try #branching =
     Try Colon body:#statement* catches=handlers:ExceptHandlerExceptHandler* Else? Colon? orelse:#statement* Finally? Colon? finally=finalbody:#statement*
-node StmtAssert #statement #opaque
+node StmtAssert #statement #assert =
+    Assert test:#expression Comma? message:#expression?
 node StmtImport #statement #import =
     Import path=names:Alias*
 node StmtImportFrom #statement #import =
@@ -212,10 +213,10 @@ node ExprListComp #expression #part #scope #display
 node ExprSetComp #expression #part #scope #display
 node ExprDictComp #expression #part #scope #dict #display
 node ExprGenerator #expression #part #scope #display
-node ExprAwait #expression #part #unary =
+node ExprAwait #expression #part #unary #await =
     operator:Await operand:#expression
-node ExprYield #expression #part #opaque
-node ExprYieldFrom #expression #part #opaque
+node ExprYield #expression #part #opaque #yield
+node ExprYieldFrom #expression #part #opaque #yield
 node ExprCompare #expression #part #binary =
     left:#expression operator:#operator* right:#expression #part*
 node ExprCall #expression #part #call =

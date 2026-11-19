@@ -205,24 +205,6 @@ pub fn hash_compare_by_identity(check: &NodeCheck, node: &SyntaxNode, ctx: &mut 
     }
 }
 
-/// `0.times { }`, `1.times { }`: the block runs never or once.
-pub fn useless_times(check: &NodeCheck, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let literal = node.children().next().filter(|r| r.kind() == k::INTEGER);
-    let small = literal.is_some_and(|r| {
-        let text = text_of(ctx, &r).replace('_', "");
-        text.parse::<i64>().is_ok_and(|v| v <= 1)
-    });
-    let block = node.child(k::BLOCK).is_some() || node.child(k::BLOCK_ARGUMENT).is_some();
-    if small
-        && block
-        && node.token(k::DOT).is_some()
-        && method_name(node).is_some_and(|n| n.text() == "times")
-    {
-        let range = span(ctx, node);
-        check.hit(ctx, range, "");
-    }
-}
-
 /// The methods every `Struct` has: a member of that name replaces one.
 const STRUCT_METHODS: &str = "all? any? chain chunk chunk_while class clone collect collect_concat compact count cycle deconstruct deconstruct_keys define_singleton_method detect display dig drop drop_while dup each each_cons each_entry each_pair each_slice each_with_index each_with_object entries enum_for eql? equal? extend filter filter_map find find_all find_index first flat_map freeze frozen? grep grep_v group_by hash include? inject inspect instance_eval instance_exec instance_of? instance_variable_defined? instance_variable_get instance_variable_set instance_variables is_a? itself kind_of? lazy length map max max_by member? members method methods min min_by minmax minmax_by nil? none? object_id one? partition private_methods protected_methods public_method public_methods public_send reduce reject remove_instance_variable respond_to? reverse_each select send singleton_class singleton_method singleton_methods size slice_after slice_before slice_when sort sort_by sum take take_while tally tap then to_a to_enum to_h to_s to_set uniq values values_at yield_self zip";
 

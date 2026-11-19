@@ -211,6 +211,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `no-dupe-class-members` | js | suspicious | error | none | A class member declared twice (a getter and a setter may share one, a static and an instance member may not clash). Equivalent: eslint no-dupe-class-members. |
 | `no-dupe-else-if` | js | suspicious | warn | none | An `else if` condition that an earlier condition of the chain already covers. Equivalent: eslint no-dupe-else-if. |
 | `no-duplicate-enum-values` | js | suspicious | off | none | Two members of one enum initialized with the same string or number. Equivalent: typescript-eslint no-duplicate-enum-values. |
+| `no-else-return` | js | style | off | none | An `else` after an `if` chain whose branches all end in `return`: the code of the `else` can follow the `if`. An `else if` is left alone (ESLint `allowElseIf`). Equivalent: eslint no-else-return (partial). |
 | `no-empty-character-class` | js | suspicious | warn | none | `[]` in a regex literal, which matches nothing. Equivalent: eslint no-empty-character-class. |
 | `no-empty-object-type` | js | suspicious | off | none | The type `{}` (not in an intersection) and an interface with no members and at most one `extends`. Equivalent: typescript-eslint no-empty-object-type (partial). |
 | `no-empty-pattern` | js | suspicious | warn | none | A destructuring pattern with nothing in it (`{}`, `[]`). Equivalent: eslint no-empty-pattern. |
@@ -221,6 +222,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `no-import-assign` | js | suspicious | error | none | An imported binding that is assigned to, and the members of a namespace import (`import * as ns`) that are assigned to, deleted or passed to `Object.assign` and the like. Equivalent: eslint no-import-assign. |
 | `no-inferrable-types` | js | style | off | none | A type annotation of a variable, parameter or property that its initial value already gives (`const a: number = 5`; not `readonly` or optional properties). Equivalent: typescript-eslint no-inferrable-types (partial). |
 | `no-irregular-whitespace` | js | suspicious | warn | none | A no-break space, zero-width space or other unusual whitespace character outside a string. Equivalent: eslint no-irregular-whitespace. |
+| `no-lonely-if` | js | style | off | none | An `if` that is the only statement of an `else` block: write `else if`. Equivalent: eslint no-lonely-if. |
 | `no-loss-of-precision` | js | suspicious | warn | none | A number literal that the double it becomes cannot represent exactly. Equivalent: eslint no-loss-of-precision. |
 | `no-misused-new` | js | suspicious | error | none | A class method `new(): C` that returns the class, an interface `new (): I` that returns the interface, and an interface method `constructor()`. Equivalent: typescript-eslint no-misused-new. |
 | `no-namespace` | js | style | off | none | A `namespace` or `module Name` declaration (not `declare module "x"` or `declare global`), except in a `.d.ts` file. Equivalent: typescript-eslint no-namespace (partial). |
@@ -234,6 +236,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `no-this-alias` | js | style | off | none | `const self = this` and `self = this` (destructuring `this` is allowed). Equivalent: typescript-eslint no-this-alias (partial). |
 | `no-unexpected-multiline` | js | suspicious | warn | none | `[`, `(` or a template at the start of a line right after an expression, which continues it (`a\n[b]` is a property access, not two statements). Equivalent: eslint no-unexpected-multiline. |
 | `no-unnecessary-type-constraint` | js | suspicious | off | none | A type parameter constrained to `any` or `unknown`. Equivalent: typescript-eslint no-unnecessary-type-constraint. |
+| `no-unneeded-ternary` | js | style | off | none | A conditional expression whose two arms are boolean literals: `a ? true : false` is `!!a`, `a ? false : true` is `!a`. Equivalent: eslint no-unneeded-ternary (partial). |
 | `no-unsafe-finally` | js | suspicious | warn | none | `return`, `throw`, and a `break` or `continue` that leaves the block, in a `finally` block: they override the `try`'s own outcome. Equivalent: eslint no-unsafe-finally. |
 | `no-unsafe-function-type` | js | suspicious | off | none | The global type `Function` as a type name, `extends` or `implements` target. Equivalent: typescript-eslint no-unsafe-function-type. |
 | `no-unsafe-negation` | js | suspicious | error | none | `!a in b` and `!a instanceof B` negate `a`, not the test. Equivalent: eslint no-unsafe-negation (partial). |

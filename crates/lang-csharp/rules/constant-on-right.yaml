@@ -1,0 +1,9 @@
+id: constant-on-right
+family: simplify
+params: { check: constant-first, calls: nameof, owners: "byte sbyte short ushort int uint long ulong char float double decimal", members: "MaxValue MinValue" }
+fix-kind: safe
+message: "put the constant on the right side of the comparison"
+description: "A comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`. Without the type layer a constant is a literal, `nameof`, `int.MaxValue`-style member or an expression of those; a named constant on the left is not recognised."
+example: "if (null == x) { }   // write: if (x == null) { }"
+severity: off
+category: style

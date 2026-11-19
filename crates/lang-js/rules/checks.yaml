@@ -222,3 +222,30 @@ description: Two members of one enum initialized with the same string or number.
 example: "enum E { A = 0, B = 0 }   # the second member is reported"
 severity: off
 category: suspicious
+---
+id: no-lonely-if
+family: simplify
+params: { check: lonely-if }
+message: "Unexpected `if` as the only statement in an `else` block."
+description: "An `if` that is the only statement of an `else` block: write `else if`."
+example: "if (a) { x(); } else { if (b) { y(); } }"
+severity: off
+category: style
+---
+id: no-else-return
+family: simplify
+params: { check: superfluous-else, jump: return }
+message: "Unnecessary `else` after `return`."
+description: "An `else` after an `if` chain whose branches all end in `return`: the code of the `else` can follow the `if`. An `else if` is left alone (ESLint `allowElseIf`)."
+example: "function f(a) { if (a) { return 1; } else { return 2; } }"
+severity: off
+category: style
+---
+id: no-unneeded-ternary
+family: simplify
+params: { check: boolean-conditional, then: any, else: any }
+message: "Unnecessary use of boolean literals in conditional expression."
+description: "A conditional expression whose two arms are boolean literals: `a ? true : false` is `!!a`, `a ? false : true` is `!a`."
+example: "const x = a ? true : false;"
+severity: off
+category: style

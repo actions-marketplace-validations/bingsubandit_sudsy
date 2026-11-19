@@ -50,7 +50,6 @@ const CHECKS: &[Entry] = &[
         CALL,
         branch::open_file_without_with,
     ),
-    ("nested-with", &[k::STMT_WITH], branch::nested_with),
     (
         "type-check-without-type-error",
         &[k::STMT_IF],
@@ -223,11 +222,6 @@ const CHECKS: &[Entry] = &[
         stmts::multiple_starred,
     ),
     (
-        "yield-outside-function",
-        &[k::EXPR_YIELD, k::EXPR_YIELD_FROM, k::EXPR_AWAIT],
-        stmts::yield_outside_function,
-    ),
-    (
         "get-attr-with-constant",
         CALL,
         lints::get_attr_with_constant,
@@ -252,7 +246,6 @@ const CHECKS: &[Entry] = &[
         &[k::EXPR_BOOL_OP],
         lints::multiple_starts_ends_with,
     ),
-    ("assert-false", &[k::STMT_ASSERT], lints::assert_false),
     (
         "set-attr-with-constant",
         &[k::STMT_EXPR],

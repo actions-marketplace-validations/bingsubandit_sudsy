@@ -229,11 +229,6 @@ pub(super) fn has_token(n: &SyntaxNode, kind: SyntaxKind) -> bool {
     tokens(n).any(|t| t.kind() == kind)
 }
 
-pub(super) fn boolean(e: &SyntaxNode) -> Option<bool> {
-    let e = inner(e);
-    (e.kind() == k::EXPR_BOOLEAN_LITERAL).then(|| code_text(&e) == "True")
-}
-
 /// PIE810: `a.startswith(x) or a.startswith(y)`.
 pub(super) fn multiple_starts_ends_with(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     if !has_token(n, k::OR) {
@@ -270,12 +265,6 @@ pub(super) fn multiple_starts_ends_with(c: &Check, n: &SyntaxNode, ctx: &mut Rul
     names.sort_unstable();
     for name in names {
         c.hit(ctx, span(ctx, n), name);
-    }
-}
-
-pub(super) fn assert_false(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    if n.children().next().and_then(|t| boolean(&t)) == Some(false) {
-        c.hit(ctx, span(ctx, n), "");
     }
 }
 

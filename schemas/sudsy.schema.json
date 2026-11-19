@@ -2747,6 +2747,10 @@
               "$ref": "#/definitions/rule",
               "description": "A call of `egrep` or `fgrep`."
             },
+            "no-else-return": {
+              "$ref": "#/definitions/rule",
+              "description": "An `else` after an `if` chain whose branches all end in `return`: the code of the `else` can follow the `if`. An `else if` is left alone (ESLint `allowElseIf`)."
+            },
             "no-emphasis-as-heading": {
               "$ref": "#/definitions/rule",
               "description": "A one-line paragraph that is only emphasized text without closing punctuation (markdownlint MD036); use a heading."
@@ -3074,6 +3078,10 @@
             "no-lone-template": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files."
+            },
+            "no-lonely-if": {
+              "$ref": "#/definitions/rule",
+              "description": "An `if` that is the only statement of an `else` block: write `else if`."
             },
             "no-loss-of-precision": {
               "$ref": "#/definitions/rule",
@@ -3451,6 +3459,10 @@
             "no-unneeded-base-prefix": {
               "$ref": "#/definitions/rule",
               "description": "`base.M()` or `base[i]` where the type does not override the member, so `this` binds to the same one. The fix writes `this`."
+            },
+            "no-unneeded-ternary": {
+              "$ref": "#/definitions/rule",
+              "description": "A conditional expression whose two arms are boolean literals: `a ? true : false` is `!!a`, `a ? false : true` is `!a`."
             },
             "no-unsafe-finally": {
               "$ref": "#/definitions/rule",

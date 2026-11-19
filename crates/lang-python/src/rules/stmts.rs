@@ -398,26 +398,6 @@ pub(super) fn multiple_starred(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<
     }
 }
 
-/// F704: `yield`, `yield from` or `await` outside a function.
-pub(super) fn yield_outside_function(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-    let comprehension = |a: &SyntaxNode| {
-        matches!(
-            a.kind(),
-            k::EXPR_LIST_COMP | k::EXPR_SET_COMP | k::EXPR_DICT_COMP | k::EXPR_GENERATOR
-        )
-    };
-    let is_await = n.kind() == k::EXPR_AWAIT;
-    let scope = n.ancestors().skip(1).find(|a| {
-        matches!(
-            a.kind(),
-            k::STMT_FUNCTION_DEF | k::STMT_CLASS_DEF | k::EXPR_LAMBDA | k::MOD_MODULE
-        ) || (!is_await && comprehension(a))
-    });
-    if !scope.is_some_and(|a| matches!(a.kind(), k::STMT_FUNCTION_DEF | k::EXPR_LAMBDA)) {
-        c.hit(ctx, span(ctx, n), "");
-    }
-}
-
 const FUTURE: &[&str] = &[
     "nested_scopes",
     "generators",

@@ -107,7 +107,7 @@ entries:
   no-dupe-keys: rule no-duplicate-keys
   no-duplicate-case: rule no-duplicate-case
   no-duplicate-imports: planned
-  no-else-return: planned
+  no-else-return: rule no-else-return | the allowElseIf option and the skip for an else that declares names are not supported; one extra report in the three.js corpus (98 matched)
   no-empty: rule no-empty-block, no-empty-catch | the `allowEmptyCatch` option is not supported
   no-empty-character-class: rule no-empty-character-class
   no-empty-function: planned
@@ -129,7 +129,7 @@ entries:
   no-irregular-whitespace: rule no-irregular-whitespace
   no-iterator: planned
   no-label-var: planned
-  no-lonely-if: planned
+  no-lonely-if: rule no-lonely-if
   no-loss-of-precision: rule no-loss-of-precision
   no-magic-numbers: planned
   no-misleading-character-class: rule no-misleading-character-class | the surrogate pair, emoji modifier, flag and joined-sequence checks are not made
@@ -190,7 +190,7 @@ entries:
   no-undefined: planned
   no-underscore-dangle: planned
   no-unexpected-multiline: rule no-unexpected-multiline
-  no-unneeded-ternary: planned
+  no-unneeded-ternary: rule no-unneeded-ternary | the `defaultAssignment` option is not supported
   no-unsafe-finally: rule no-unsafe-finally
   no-unsafe-negation: rule no-unsafe-negation | the `enforceForOrderingRelations` option is not supported
   no-unsafe-optional-chaining: planned

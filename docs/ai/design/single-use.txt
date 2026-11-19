@@ -22,7 +22,6 @@ concept comment-syntax # users: hcl
 concept component-option-checks # users: html
 concept component-props-model # users: html
 concept component-value-layout # users: css
-concept constant-on-right # users: csharp
 concept constructor-summary-standard-text # users: csharp
 concept container-rows # users: markdown
 concept copy-from-own-stage # users: dockerfile
@@ -241,7 +240,6 @@ data tag:module-body # users: js
 data tag:named-expr # users: python
 data tag:named-type # users: js
 data tag:negated # users: ruby
-data tag:parenthesized # users: js
 data tag:quoted # users: js
 data tag:raw-strings # users: js
 data tag:regex # users: js

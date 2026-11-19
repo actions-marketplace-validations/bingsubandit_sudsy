@@ -34,6 +34,7 @@ pub static FAMILIES: &[Family] = &[
     finding::FAMILY,
     core_rules::regex_source::FAMILY,
     core_rules::imports::family::<core_rules::imports::Plain>(),
+    core_rules::simplify::FAMILY,
 ];
 
 pub static RULES: &[&dyn Rule] = &[
@@ -62,7 +63,6 @@ pub static RULES: &[&dyn Rule] = &[
     &directives::DirectiveKeywordSpace,
     &expressions::NullableShorthand,
     &expressions::UseLambda,
-    &expressions::ConstantOnRight,
     &expressions::UseLiteralSuffix,
     &declarations::SeparateFieldDeclarations,
     &declarations::SuppressionJustification,

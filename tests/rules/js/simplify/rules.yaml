@@ -1,0 +1,3 @@
+no-lonely-if: warn
+no-else-return: warn
+no-unneeded-ternary: warn

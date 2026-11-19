@@ -10,19 +10,29 @@
 //!   whose negation is reported, `except-in` names the functions where it is left alone and
 //!   `except-guard: true` leaves a test whose `if` only throws), `double-negation`,
 //!   `redundant-cast` (`!!x` or a call of one of the names in `calls` where a boolean is expected
-//!   anyway), `jump-outside` (param `jump`: `break`, `continue` or `return`; `inside` lists the
-//!   tags a `break` may be in besides `loop`).
+//!   anyway), `jump-outside` (param `jump`: `break`, `continue`, `return`, `yield` or `await`, or
+//!   several words of them; `inside` lists the tags a `break` may be in besides `loop`; a `yield`
+//!   is also outside in a comprehension), `identical-operands` (`a == a`: a `#binary`, or a
+//!   `#call` of an operator method on an `object` with one argument; `operators` lists the
+//!   operators checked), `repeat-once` (a call of `method` on an integer of at most `max` with a
+//!   block, in the fields named by `with`: Ruby `0.times { }`), `constant-first` (a comparison
+//!   whose left operand is a constant and whose right is not; `calls` name the functions whose
+//!   call is a constant, `owners` and `members` the `owner.member` constants), `assert-false`
+//!   (an `#assert` of `false`), `nested-with` (a `#with` whose only statement is a `#with` of
+//!   the same kind), `lonely-if` (an `if` that is the only statement of an `else`),
+//!   `superfluous-else` (a final `else` after branches that all end in the `jump` statement
+//!   `return`, `throw`, `break` or `continue`; an `if` with an `else` that does counts).
 //! - the message has `{name}` where the check passes a name.
 //!
 //! concept: simplify
 //! what: Statements and expressions that say in several words what fewer say, and jumps with nothing to jump out of.
-//! tools: ruff SIM and PLR rules, ESLint no-lonely-if no-extra-boolean-cast, RuboCop Style simplifications
-//! rules: collapsible-if, needless-bool, if-with-same-arms, boolean-conditional, twisted-conditional, negated-comparison, double-negation, redundant-cast, jump-outside
+//! tools: ruff SIM, PLR, RET and B rules, ESLint no-lonely-if no-else-return no-unneeded-ternary no-extra-boolean-cast, RuboCop Lint simplifications
+//! rules: collapsible-if, needless-bool, if-with-same-arms, boolean-conditional, twisted-conditional, negated-comparison, double-negation, redundant-cast, jump-outside, identical-operands, repeat-once, constant-first, assert-false, nested-with, lonely-if, superfluous-else
 //! reads: family:simplify
 
 use crate::tree::significant_range;
 use crate::{Edit, Family, Params, Rule, RuleContext, RuleMeta};
-use core_syntax::roles::{code_text, outer, un};
+use core_syntax::roles::{code_text, code_tokens, outer, un};
 use core_syntax::{Grammar, SyntaxNode, TextRange};
 
 pub const FAMILY: Family = Family {
@@ -35,7 +45,7 @@ enum Check {
     CollapsibleIf,
     NeedlessBool,
     SameArms,
-    BooleanConditional(bool, bool),
+    BooleanConditional(Option<bool>, Option<bool>),
     TwistedConditional,
     NegatedComparison {
         operator: String,
@@ -45,16 +55,38 @@ enum Check {
     DoubleNegation,
     RedundantCast(Vec<String>),
     Jump {
-        jump: &'static str,
+        jump: Vec<&'static str>,
         inside: Vec<String>,
     },
+    IdenticalOperands(Vec<String>),
+    RepeatOnce {
+        method: String,
+        max: i64,
+        with: Vec<String>,
+    },
+    ConstantFirst(Constants),
+    AssertFalse,
+    NestedWith,
+    LonelyIf,
+    SuperfluousElse(&'static str),
 }
+
+/// What makes an expression a constant besides a literal.
+#[derive(Clone)]
+struct Constants {
+    calls: Vec<String>,
+    owners: Vec<String>,
+    members: Vec<String>,
+}
+
+/// The tags of the jumps `jump-outside` knows.
+const JUMPS: [&str; 5] = ["break", "continue", "return", "yield", "await"];
 
 struct Simplify {
     meta: &'static RuleMeta,
     message: String,
     check: Check,
-    tags: &'static [&'static str],
+    tags: Vec<&'static str>,
 }
 
 fn words(p: &mut Params, key: &str) -> Vec<String> {
@@ -65,44 +97,86 @@ fn words(p: &mut Params, key: &str) -> Vec<String> {
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
     let name = p.text("check")?;
-    let flag = |p: &mut Params, k: &str| p.choice(k, true, &[("true", true), ("false", false)]);
-    let (check, tags): (Check, &'static [&'static str]) = match name.as_str() {
-        "collapsible-if" => (Check::CollapsibleIf, &["conditional"]),
-        "needless-bool" => (Check::NeedlessBool, &["conditional"]),
-        "if-with-same-arms" => (Check::SameArms, &["conditional"]),
+    let flag = |p: &mut Params, k: &str| {
+        p.choice(
+            k,
+            true,
+            &[("true", Some(true)), ("false", Some(false)), ("any", None)],
+        )
+    };
+    let (check, tags): (Check, Vec<&'static str>) = match name.as_str() {
+        "collapsible-if" => (Check::CollapsibleIf, vec!["conditional"]),
+        "needless-bool" => (Check::NeedlessBool, vec!["conditional"]),
+        "if-with-same-arms" => (Check::SameArms, vec!["conditional"]),
         "boolean-conditional" => {
             let (a, b) = (flag(&mut p, "then")?, flag(&mut p, "else")?);
-            (Check::BooleanConditional(a, b), &["conditional"])
+            (Check::BooleanConditional(a, b), vec!["conditional"])
         }
-        "twisted-conditional" => (Check::TwistedConditional, &["conditional"]),
+        "twisted-conditional" => (Check::TwistedConditional, vec!["conditional"]),
         "negated-comparison" => (
             Check::NegatedComparison {
                 operator: p.text("operator")?,
                 except_in: words(&mut p, "except-in"),
                 guard: p.flag("except-guard")?,
             },
-            &["unary"],
+            vec!["unary"],
         ),
-        "double-negation" => (Check::DoubleNegation, &["unary"]),
+        "double-negation" => (Check::DoubleNegation, vec!["unary"]),
         "redundant-cast" => (
             Check::RedundantCast(words(&mut p, "calls")),
-            &["unary", "call"],
+            vec!["unary", "call"],
         ),
         "jump-outside" => {
-            let (jump, tags): (&'static str, &'static [&'static str]) =
-                match p.text("jump")?.as_str() {
-                    "break" => ("break", &["break"]),
-                    "continue" => ("continue", &["continue"]),
-                    "return" => ("return", &["return"]),
-                    other => return Err(format!("param `jump`: unknown jump `{other}`")),
-                };
+            let mut jump = Vec::new();
+            for w in words(&mut p, "jump") {
+                match JUMPS.iter().find(|j| **j == w) {
+                    Some(j) => jump.push(*j),
+                    None => return Err(format!("param `jump`: unknown jump `{w}`")),
+                }
+            }
             (
                 Check::Jump {
-                    jump,
+                    jump: jump.clone(),
                     inside: words(&mut p, "inside"),
                 },
-                tags,
+                jump,
             )
+        }
+        "identical-operands" => (
+            Check::IdenticalOperands(words(&mut p, "operators")),
+            vec!["binary", "call"],
+        ),
+        "repeat-once" => (
+            Check::RepeatOnce {
+                method: p.text("method")?,
+                max: p
+                    .text("max")?
+                    .parse()
+                    .map_err(|_| "param `max`: not an integer".to_string())?,
+                with: words(&mut p, "with"),
+            },
+            vec!["call"],
+        ),
+        "constant-first" => (
+            Check::ConstantFirst(Constants {
+                calls: words(&mut p, "calls"),
+                owners: words(&mut p, "owners"),
+                members: words(&mut p, "members"),
+            }),
+            vec!["binary"],
+        ),
+        "assert-false" => (Check::AssertFalse, vec!["assert"]),
+        "nested-with" => (Check::NestedWith, vec!["with"]),
+        "lonely-if" => (Check::LonelyIf, vec!["conditional"]),
+        "superfluous-else" => {
+            let jump = p.text("jump")?;
+            let Some(jump) = ["return", "throw", "break", "continue"]
+                .into_iter()
+                .find(|j| *j == jump)
+            else {
+                return Err(format!("param `jump`: unknown jump `{jump}`"));
+            };
+            (Check::SuperfluousElse(jump), vec!["conditional"])
         }
         other => return Err(format!("param `check`: unknown check `{other}`")),
     };
@@ -122,12 +196,12 @@ impl Rule for Simplify {
     }
 
     fn tags(&self) -> &[&'static str] {
-        self.tags
+        &self.tags
     }
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let g = ctx.file.grammar;
-        let range = significant_range(node, g);
+        let range = || significant_range(node, g);
         let hit = match &self.check {
             Check::CollapsibleIf => collapsible_if(g, node).then(String::new),
             Check::NeedlessBool => needless_bool(g, node).then(String::new),
@@ -154,7 +228,7 @@ impl Rule for Simplify {
                     return;
                 };
                 let edits = negation_edits(ctx.file.text, node, &raw, Some((&inner, operator)));
-                self.report(ctx, range, "", edits);
+                self.report(ctx, range(), "", edits);
                 return;
             }
             Check::DoubleNegation => {
@@ -162,14 +236,36 @@ impl Rule for Simplify {
                     return;
                 };
                 let edits = negation_edits(ctx.file.text, node, &raw, None);
-                self.report(ctx, range, "", edits);
+                self.report(ctx, range(), "", edits);
                 return;
             }
             Check::RedundantCast(calls) => redundant_cast(g, node, calls),
             Check::Jump { jump, inside } => jump_outside(g, node, jump, inside).then(String::new),
+            Check::IdenticalOperands(operators) => identical_operands(g, node, ctx, operators),
+            Check::RepeatOnce { method, max, with } => {
+                repeat_once(g, node, method, *max, with).then(String::new)
+            }
+            Check::ConstantFirst(constants) => {
+                self.constant_first(g, node, ctx, constants);
+                return;
+            }
+            Check::AssertFalse => assert_false(g, node).then(String::new),
+            Check::NestedWith => nested_with(g, node).then(String::new),
+            Check::LonelyIf => {
+                if let Some(inner) = lonely_if(g, node) {
+                    self.report(ctx, significant_range(&inner, g), "", None);
+                }
+                return;
+            }
+            Check::SuperfluousElse(jump) => {
+                if let Some(e) = superfluous_else(g, node, jump) {
+                    self.report(ctx, significant_range(&e, g), "", None);
+                }
+                return;
+            }
         };
         if let Some(name) = hit {
-            self.report(ctx, range, &name, None);
+            self.report(ctx, range(), &name, None);
         }
     }
 }
@@ -189,6 +285,197 @@ impl Simplify {
             edits.map(|e| ("Simplify the expression", e)),
         );
     }
+
+    /// `constant-first`: the report is on the left operand; the fix swaps the operands and the
+    /// operator's direction, unless a comment is inside.
+    fn constant_first(
+        &self,
+        g: &Grammar,
+        n: &SyntaxNode,
+        ctx: &mut RuleContext<'_>,
+        c: &Constants,
+    ) {
+        let Some(op) = g.slot(n, "operator").and_then(|o| o.into_token()) else {
+            return;
+        };
+        if !matches!(g.operator_kind(op.text()), Some("equality" | "comparison")) {
+            return;
+        }
+        let mut operands = n.children();
+        let (Some(left), Some(right), None) = (operands.next(), operands.next(), operands.next())
+        else {
+            return;
+        };
+        if !is_constant(g, &left, c) || is_constant(g, &right, c) {
+            return;
+        }
+        let whole = significant_range(n, g);
+        let has_comment = n
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .any(|t| whole.contains_range(t.text_range()) && g.has_tag(t.kind(), "comment"));
+        let flip = match op.text() {
+            "<" => ">",
+            "<=" => ">=",
+            ">" => "<",
+            ">=" => "<=",
+            other @ ("==" | "!=" | "===" | "!==") => other,
+            _ => "",
+        };
+        let fix = (!has_comment && !flip.is_empty()).then(|| {
+            let text = |x: &SyntaxNode| ctx.file.text[significant_range(x, g)].to_owned();
+            let swapped = format!("{} {flip} {}", text(&right), text(&left));
+            (
+                "Put the constant on the right",
+                vec![Edit::replace(whole, swapped)],
+            )
+        });
+        ctx.report_fix(significant_range(&left, g), self.message.clone(), fix);
+    }
+}
+
+/// The operator of `a == a`: both operands are the same code. A `#binary` has them in its
+/// fields; so has a call of an operator method (`operators` lists them) on an `object` with one
+/// argument (Ruby `a == b` is the call `a.==(b)`), found by its own operator token first, as
+/// most calls are not one.
+fn identical_operands(
+    g: &Grammar,
+    n: &SyntaxNode,
+    ctx: &RuleContext<'_>,
+    operators: &[String],
+) -> Option<String> {
+    let (left, op, right) = if g.has_tag(n.kind(), "binary") {
+        let op = g.slot(n, "operator")?.into_token()?;
+        (node(g, n, "left")?, op, node(g, n, "right")?)
+    } else {
+        // the method name is the first token, or the second after a `.`
+        let op = code_tokens(n)
+            .take(2)
+            .find(|t| g.has_tag(t.kind(), "operator"))?;
+        if !operators.iter().any(|o| o == op.text()) {
+            return None;
+        }
+        let mut args = node(g, n, "arguments")?.children();
+        let (Some(right), None) = (args.next(), args.next()) else {
+            return None;
+        };
+        (node(g, n, "object")?, op, right)
+    };
+    let same = |a: &SyntaxNode, b: &SyntaxNode| {
+        ctx.file.text[significant_range(a, g)] == ctx.file.text[significant_range(b, g)]
+    };
+    (operators.iter().any(|o| o == op.text()) && same(&left, &right)).then(|| op.text().to_string())
+}
+
+/// `0.times { }`: a call of `method` on an integer of at most `max` that has a block.
+fn repeat_once(g: &Grammar, n: &SyntaxNode, method: &str, max: i64, with: &[String]) -> bool {
+    g.slot(n, "member")
+        .and_then(|m| m.into_token())
+        .is_some_and(|m| m.text() == method)
+        && node(g, n, "object").is_some_and(|o| {
+            g.has_tag(o.kind(), "literal")
+                && code_text(&o)
+                    .replace('_', "")
+                    .parse::<i64>()
+                    .is_ok_and(|v| v <= max)
+        })
+        && with.iter().any(|f| g.slot(n, f).is_some())
+}
+
+/// Is the value known without names: a literal, a call of a function of `calls`, a member of an
+/// owner of `owners` (`int.MaxValue`) or an arithmetic, bitwise or logical expression of those?
+fn is_constant(g: &Grammar, n: &SyntaxNode, c: &Constants) -> bool {
+    let n = un(n);
+    let k = n.kind();
+    let all = |n: &SyntaxNode| n.children().all(|x| is_constant(g, &x, c));
+    if g.has_tag(k, "literal") {
+        return true;
+    }
+    if g.has_tag(k, "parenthesized") {
+        return all(&n);
+    }
+    let op = g.slot(&n, "operator").and_then(|o| o.into_token());
+    let kind = op.as_ref().and_then(|o| g.operator_kind(o.text()));
+    if g.has_tag(k, "unary") {
+        return op.is_some_and(|o| !matches!(o.text(), "++" | "--"))
+            && matches!(kind, Some("arithmetic" | "logical" | "bitwise"))
+            && all(&n);
+    }
+    if g.has_tag(k, "binary") {
+        return matches!(kind, Some("arithmetic" | "bitwise")) && all(&n);
+    }
+    if g.has_tag(k, "call") {
+        return node(g, &n, "callee").is_some_and(|f| c.calls.contains(&code_text(&f)));
+    }
+    if g.has_tag(k, "member-access") {
+        let text = |e: core_syntax::SyntaxElement| match e {
+            core_syntax::SyntaxElement::Node(m) => code_text(&m),
+            core_syntax::SyntaxElement::Token(t) => t.text().to_string(),
+        };
+        return node(g, &n, "object").is_some_and(|o| c.owners.contains(&code_text(&o)))
+            && g.slot(&n, "member")
+                .is_some_and(|m| c.members.contains(&text(m)));
+    }
+    false
+}
+
+fn assert_false(g: &Grammar, n: &SyntaxNode) -> bool {
+    node(g, n, "test").is_some_and(|t| boolean(g, &t) == Some(false))
+}
+
+/// A `with` whose only statement is another `with` of the same kind (both `async`, or neither).
+fn nested_with(g: &Grammar, n: &SyntaxNode) -> bool {
+    let own: Vec<SyntaxNode> = n
+        .children()
+        .filter(|c| g.has_tag(c.kind(), "statement"))
+        .collect();
+    let [inner] = &unblock(g, own)[..] else {
+        return false;
+    };
+    let lead = |n: &SyntaxNode| code_tokens(n).next().map(|t| t.text().to_string());
+    g.has_tag(inner.kind(), "with") && lead(n) == lead(inner)
+}
+
+/// The `if` that is the only statement of the last `else` of `n`.
+fn lonely_if(g: &Grammar, n: &SyntaxNode) -> Option<SyntaxNode> {
+    if !is_statement_conditional(g, n) || !has_condition(g, n) || is_elif(g, n) {
+        return None;
+    }
+    let (_, tested, stmts) = following(g, n).pop()?;
+    match &stmts[..] {
+        [s] if !tested && is_statement_conditional(g, s) && has_condition(g, s) => Some(s.clone()),
+        _ => None,
+    }
+}
+
+/// Does a statement of `b` always end in a statement tagged `jump`: it is one, or an `if` with
+/// an `else` all of whose branches do?
+fn always_jumps(g: &Grammar, b: &[SyntaxNode], jump: &str) -> bool {
+    b.iter()
+        .any(|s| g.has_tag(s.kind(), jump) || exhaustive_if(g, s, jump))
+}
+
+fn exhaustive_if(g: &Grammar, s: &SyntaxNode, jump: &str) -> bool {
+    if !is_statement_conditional(g, s) || !has_condition(g, s) {
+        return false;
+    }
+    let rest = following(g, s);
+    matches!(rest.last(), Some((_, false, _)))
+        && always_jumps(g, &body(g, s), jump)
+        && rest.iter().all(|(_, _, b)| always_jumps(g, b, jump))
+}
+
+/// The last `else` of `n` when every branch before it always ends in a statement tagged `jump`.
+fn superfluous_else(g: &Grammar, n: &SyntaxNode, jump: &str) -> Option<SyntaxNode> {
+    if !is_statement_conditional(g, n) || !has_condition(g, n) || is_elif(g, n) {
+        return None;
+    }
+    let rest = following(g, n);
+    let ((last, tested, _), before) = rest.split_last()?;
+    (!tested
+        && always_jumps(g, &body(g, n), jump)
+        && before.iter().all(|(_, _, b)| always_jumps(g, b, jump)))
+    .then(|| last.clone())
 }
 
 fn nodes(g: &Grammar, n: &SyntaxNode, label: &str) -> Vec<SyntaxNode> {
@@ -334,10 +621,20 @@ fn same_arms(g: &Grammar, n: &SyntaxNode) -> Vec<SyntaxNode> {
     out
 }
 
-fn boolean_conditional(g: &Grammar, n: &SyntaxNode, then: bool, other: bool) -> bool {
+/// Is the expression a boolean literal, `want` when given?
+fn is_boolean(g: &Grammar, e: &SyntaxNode, want: Option<bool>) -> bool {
+    boolean(g, e).is_some_and(|b| want.is_none_or(|w| w == b))
+}
+
+fn boolean_conditional(
+    g: &Grammar,
+    n: &SyntaxNode,
+    then: Option<bool>,
+    other: Option<bool>,
+) -> bool {
     g.has_tag(n.kind(), "expression")
-        && node(g, n, "then").is_some_and(|t| boolean(g, &t) == Some(then))
-        && node(g, n, "else").is_some_and(|e| boolean(g, &e) == Some(other))
+        && node(g, n, "then").is_some_and(|t| is_boolean(g, &t, then))
+        && node(g, n, "else").is_some_and(|e| is_boolean(g, &e, other))
 }
 
 /// The operand of a logical negation (`not x`, `!x`).
@@ -501,7 +798,29 @@ fn redundant_cast(g: &Grammar, n: &SyntaxNode, calls: &[String]) -> Option<Strin
     in_boolean_context(g, n, calls).then_some(found)
 }
 
-fn jump_outside(g: &Grammar, n: &SyntaxNode, jump: &str, inside: &[String]) -> bool {
+/// Is a `yield` or `await` outside a function: its nearest scope is a type, a comprehension
+/// (not for `await`) or the file?
+fn suspend_outside(g: &Grammar, n: &SyntaxNode) -> bool {
+    let is_await = g.has_tag(n.kind(), "await");
+    for a in n.ancestors().skip(1) {
+        let k = a.kind();
+        if g.has_tag(k, "function") {
+            return false;
+        }
+        if g.has_tag(k, "type-declaration")
+            || (!is_await && g.has_tag(k, "scope") && g.has_tag(k, "display"))
+        {
+            return true;
+        }
+    }
+    true
+}
+
+fn jump_outside(g: &Grammar, n: &SyntaxNode, jump: &[&str], inside: &[String]) -> bool {
+    if jump.iter().any(|j| matches!(*j, "yield" | "await")) {
+        return suspend_outside(g, n);
+    }
+    let jump = jump.first().copied().unwrap_or_default();
     if g.slot(n, "label").is_some() {
         return false;
     }

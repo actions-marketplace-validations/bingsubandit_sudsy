@@ -120,6 +120,11 @@ pub const ROLES: &[Role] = &[
         doc: "goes on with the next pass of the innermost loop, or of the labeled one",
     },
     Role {
+        name: "assert",
+        fields: "test message?",
+        doc: "checks a condition that must hold, with an optional message (`assert test, message`)",
+    },
+    Role {
         name: "labeled",
         fields: "label body",
         doc: "a statement with a name that `break` and `continue` can address",
@@ -220,10 +225,24 @@ pub fn common_operator_kind(text: &str) -> Option<&'static str> {
 
 /// Tags a kind carries beside its role (or `#opaque`) that shared rules read: not roles, so a kind
 /// with one still needs a role or `#opaque`.
-pub const MARKS: &[(&str, &str)] = &[(
-    "pure",
-    "an expression that has no effect of its own (a name, a literal, a member access): as a whole statement it does nothing",
-)];
+pub const MARKS: &[(&str, &str)] = &[
+    (
+        "pure",
+        "an expression that has no effect of its own (a name, a literal, a member access): as a whole statement it does nothing",
+    ),
+    (
+        "with",
+        "a statement that runs its body inside a resource or scope it opens (Python `with`, JS `with`); its statements are the node's statement children",
+    ),
+    (
+        "yield",
+        "an expression that hands a value to the caller of a generator (`yield`, `yield from`)",
+    ),
+    (
+        "await",
+        "an expression that waits for an asynchronous result (`await x`)",
+    ),
+];
 
 /// Is `name` a role or a mark?
 pub fn is_tag(name: &str) -> bool {
