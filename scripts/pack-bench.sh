@@ -3,6 +3,7 @@
 # (best and median of 8 runs per round), and the sizes of both binaries and of the pack.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 target=${CARGO_TARGET_DIR:-target}
 work=$target/pack-bench
 exe=$(case "$(uname -s)" in MINGW* | MSYS* | CYGWIN*) echo .exe ;; esac)

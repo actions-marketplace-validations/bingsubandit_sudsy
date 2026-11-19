@@ -5,6 +5,7 @@
 # Afterwards restart the server with the extension's restart command.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 out=${CARGO_TARGET_DIR:-$PWD/target}/dogfood
 cargo build -p cli
 dotnet build workers/csharp/Sudsy.Worker

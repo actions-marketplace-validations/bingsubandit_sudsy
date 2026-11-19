@@ -7,6 +7,7 @@
 # and how they are installed are the entries of scripts/parity_tools.json (docs/ai/development/parity.md).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 tdir=${CARGO_TARGET_DIR:-$PWD/target}
 mode=lint
 extra=()

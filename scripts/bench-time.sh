@@ -5,6 +5,7 @@
 # bootstrap 95% confidence interval. Only meaningful within one host and one run.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 root=$PWD; work=${CARGO_TARGET_DIR:-$root/target}/bench
 base_src= rounds=11 head= base= record=0
 while [ $# -gt 0 ]; do

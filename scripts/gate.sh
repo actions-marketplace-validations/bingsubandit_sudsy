@@ -7,6 +7,7 @@
 # Each step is killed after GATE_TIMEOUT seconds (default 1800) and the gate fails.
 set -uo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 rust_only=0 affected=0 pkg=() base=()
 while [ $# -gt 0 ]; do
   case "$1" in

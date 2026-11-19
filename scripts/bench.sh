@@ -23,6 +23,7 @@
 # Run from Git Bash on Windows (WSL needs scripts/bench-setup-wsl.sh once) or natively on Linux.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 root=$PWD
 # WSL cache key: the slot (CARGO_TARGET_DIR name) when set, else the checkout name.
 slot=$(basename "${CARGO_TARGET_DIR:-$root}")

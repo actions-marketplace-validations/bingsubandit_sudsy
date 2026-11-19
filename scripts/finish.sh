@@ -15,6 +15,7 @@
 # or ends in `FINISH RUNNING` with exit 3: call --wait again. No background job, Monitor or sleep.
 set -uo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 slot=$(basename "${CARGO_TARGET_DIR:-$PWD}")
 wf_ref=${SUDSY_FINISH_REF:-main}
 gdir=$(git rev-parse --git-dir)

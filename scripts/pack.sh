@@ -6,6 +6,7 @@
 #   SUDSY_PACK_MANIFEST=$PWD/out/manifest.txt cargo build --release -p cli --no-default-features
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 
 out=${1:?usage: pack.sh <out dir> [language...]}
 shift

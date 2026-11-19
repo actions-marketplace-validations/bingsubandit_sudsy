@@ -7,6 +7,7 @@
 # Run in an idle slot of a clean worktree: CARGO_TARGET_DIR=<slot> scripts/devloop-times.sh [FILE...]
 set -uo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 run() { local t=$SECONDS; "$@" >/dev/null 2>&1; echo "$*: exit $? in $((SECONDS - t))s"; }
 [ $# -gt 0 ] || set -- crates/lang-toml/src/lib.rs
 for f in "$@"; do

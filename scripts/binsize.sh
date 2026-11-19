@@ -4,6 +4,7 @@
 # (default release profile, features of the checkout) into <slot>/binsize-target, copied and `strip`ped.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+. scripts/lib/slot.sh
 slot=${CARGO_TARGET_DIR:-target}
 export CARGO_TARGET_DIR=$slot/binsize-target
 [ $# -gt 0 ] || set -- HEAD

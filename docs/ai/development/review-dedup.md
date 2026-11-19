@@ -1,5 +1,5 @@
 # Review: does the diff re-implement something in the index?
-The lead runs this on every language step with a fresh reviewer that sees only `docs/ai/kit/index.md` and the diff (`git diff origin/main`), never the author's reasoning.
+The lead runs this on every language step with a fresh reviewer that sees only `docs/ai/kit/index.md` and the diff (`git diff origin/main`), not the author's reasoning.
 
 Prompt:
 > You get the kit index (one row per concept: id, module, what, tools, used by, flags) and a diff. For every added or changed hunk of Rust in a `lang-*` crate, say which index entries it re-implements or could have used instead, with the row id and one line why. Also list added `new` concepts whose `what` matches an existing row. Answer "none" per hunk when nothing matches. Do not review style or correctness.

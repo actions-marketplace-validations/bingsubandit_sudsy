@@ -1,6 +1,6 @@
 # Sudsy docs
 
-Current state only; history is in git. Update the doc for the area you change in the same commit.
+Current state only; history is in git. Update the doc of the area you change in the same commit. Agents start with [development/agent-brief.md](development/agent-brief.md).
 
 | Doc | Covers |
 |---|---|
@@ -9,6 +9,7 @@ Current state only; history is in git. Update the doc for the area you change in
 | [architecture/csharp-worker.md](architecture/csharp-worker.md) | .NET worker, protocol, workspace, lifecycle |
 | [architecture/adding-a-language.md](architecture/adding-a-language.md) | Adding a tree-sitter language: steps and per-language cost |
 | [design/unification.md](design/unification.md) | Plan: moving the older languages onto the shared core, rule clusters, ordered steps |
+| [design/hard-cases.md](design/hard-cases.md) | Hard cases left open by unification steps, each with its numbers and missing capability |
 | [architecture/language-packs.md](architecture/language-packs.md) | Languages as installable packs: format, manifest, cache, ABI check, missing language |
 | [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |
 | [formatting/engine.md](formatting/engine.md) | Layout doc, printer, shapes, directives, comments, safety check |
@@ -50,6 +51,8 @@ Current state only; history is in git. Update the doc for the area you change in
 | [editor/vscode.md](editor/vscode.md) | VS Code extension, packaging, dogfooding |
 | [performance/numbers.md](performance/numbers.md) | Current numbers per hot path |
 | [performance/tooling.md](performance/tooling.md) | How to measure: bench.sh, perf-bench, speed scripts |
+| [performance/checklist.md](performance/checklist.md) | Six patterns that overran the bench, and the local allocation check |
+| [development/agent-brief.md](development/agent-brief.md) | The standard brief of a build agent: working files, checks, finish, landing, report |
 | [development/dev-loop.md](development/dev-loop.md) | Build, gate, scripts, Windows/Git Bash/WSL notes |
 | [development/parity.md](development/parity.md) | `parity.sh`: differential tests against upstream tools |
 | [development/testing.md](development/testing.md) | Test layers, corpora, conformance |
