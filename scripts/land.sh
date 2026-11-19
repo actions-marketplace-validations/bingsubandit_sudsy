@@ -108,6 +108,11 @@ while [ $attempt -lt 3 ]; do
     cargo xtask codegen --check || die "codegen --check"
     cargo xtask dupes --check || die "dupes --check"
     scripts/cost.sh --languages --check origin/main HEAD || die "cost.sh --languages --check (add a Language-only: or Cost-exception: line to the commit message and git commit --amend)"
+    # Presets are pure config (CLAUDE.md): formatter and rule code never compares a preset name.
+    presets=$(git diff origin/main HEAD -- 'crates/core-*/src' 'crates/lang-*/src' ':!crates/core-config' |
+      grep -E '^\+[^+]' | grep -vE '^\+\s*//' | grep -i 'preset' | grep -E '==|!=|matches!|starts_with|contains\(|match ')
+    [ -z "$presets" ] || die "code compares a preset name (presets are pure config; make the difference a named option):
+$presets"
     review || exit 1
   fi
   # --- 4. look and push -----------------------------------------------------------------------------
