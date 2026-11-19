@@ -566,6 +566,27 @@ impl SpaceRules {
             .and_then(|r| r.result)
     }
 
+    /// `want` and `joined` for every pair of neighbouring tokens (entry `i` is the gap before
+    /// token `i`; the first has none): each token's parent and grandparent are looked up once.
+    pub fn gaps(&self, tokens: &[SyntaxToken]) -> Vec<(Option<bool>, bool)> {
+        let cxs: Vec<Ctx<'_>> = tokens.iter().map(Ctx::new).collect();
+        let mut out = vec![(None, false)];
+        out.extend(cxs.windows(2).map(|w| {
+            let (a, b) = (&w[0], &w[1]);
+            let slot = self.index.slot(a.kind);
+            let want = self
+                .index
+                .rows(b.token)
+                .iter()
+                .filter(|i| self.index.allows(**i, slot))
+                .map(|i| &self.space[*i as usize])
+                .find(|r| r.matches(a, b))
+                .and_then(|r| r.result);
+            (want, self.joined.iter().any(|r| r.matches(a, b)))
+        }));
+        out
+    }
+
     /// `Flow::joined`.
     pub fn joined(&self, a: &SyntaxToken, b: &SyntaxToken) -> bool {
         if self.joined.is_empty() {

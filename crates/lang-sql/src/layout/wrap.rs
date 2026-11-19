@@ -239,6 +239,14 @@ fn lift_comment(seq: &mut Seq, s: usize, c: usize) {
             }
         }
     }
+    // A gap that touches a comment is "as written": the moved comment and its new neighbours.
+    seq.gaps.remove(c);
+    seq.gaps.insert(s, Default::default());
+    for i in [s + 1, c + 1] {
+        if let Some(g) = seq.gaps.get_mut(i) {
+            *g = Default::default();
+        }
+    }
 }
 
 /// Fixes every line that is too long and can be (from the end, so indexes stay valid); returns

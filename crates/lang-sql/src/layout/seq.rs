@@ -9,7 +9,7 @@
 //! concept: line-layout-engine
 
 use crate::generated::kind as k;
-use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
+use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 use std::borrow::Cow;
 
 pub const NONE: u32 = u32::MAX;
@@ -61,6 +61,10 @@ pub struct Seq {
     pub points: Vec<Point>,
     pub blocks: Vec<Block>,
     pub nodes: Vec<Node>,
+    /// What the spacing rows say about the gap before each block.
+    pub gaps: Vec<super::space::Gap>,
+    /// The rows `gaps` come from.
+    pub rules: &'static core_format::spacing::SpaceRules,
 }
 
 pub fn is_comment(kind: SyntaxKind) -> bool {
@@ -68,15 +72,22 @@ pub fn is_comment(kind: SyntaxKind) -> bool {
 }
 
 impl Seq {
-    pub fn build(root: &SyntaxNode, grammar: &Grammar) -> Seq {
+    pub fn build(
+        root: &SyntaxNode,
+        grammar: &Grammar,
+        rules: &'static core_format::spacing::SpaceRules,
+    ) -> Seq {
         let mut seq = Seq {
             points: Vec::new(),
             blocks: Vec::new(),
             nodes: Vec::new(),
+            gaps: Vec::new(),
+            rules,
         };
         let mut point = Point::default();
         let mut stack: Vec<(u32, Option<SyntaxElement>)> = Vec::new();
         let mut last_code = NONE;
+        let mut tokens: Vec<SyntaxToken> = Vec::new();
         seq.open(root.kind(), &mut stack, root);
         while let Some((node, next)) = stack.last_mut() {
             let len = seq.nodes.len() as u32;
@@ -127,10 +138,12 @@ impl Seq {
                             text: text.to_string(),
                             node: owner,
                         });
+                        tokens.push(t);
                     }
                 }
             }
         }
+        seq.gaps = super::space::gaps(&seq.rules.gaps(&tokens));
         seq
     }
 

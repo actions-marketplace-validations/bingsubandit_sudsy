@@ -30,16 +30,20 @@ fn unit(options: &ResolvedOptions) -> String {
     }
 }
 
-/// The signature of the layout, to see whether a round changed it.
-fn signature(seq: &Seq) -> Vec<(u32, String)> {
-    seq.points
-        .iter()
-        .map(|p| (p.newlines, p.ws.to_string()))
-        .collect()
+/// The signature of the layout (a hash of its line breaks and blanks), to see whether a round
+/// changed it.
+fn signature(seq: &Seq) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    for p in &seq.points {
+        p.newlines.hash(&mut h);
+        p.ws.hash(&mut h);
+    }
+    h.finish()
 }
 
 pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -> Doc {
-    let mut seq = Seq::build(root, grammar);
+    let mut seq = Seq::build(root, grammar, ROWS.get().space());
     match options.text("dialect") {
         "mysql" => blocks::add_indents(&mut seq),
         "tsql" => blocks::add_tsql_indents(&mut seq),

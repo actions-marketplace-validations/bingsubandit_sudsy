@@ -71,9 +71,9 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | template-literal-layout | lang-js/format/template.rs | Template literals with interpolations printed on one line. | Prettier template-literal | js | SINGLE-USE |
 | text-fill | core-format/shapes/fill.rs | Words and separators laid out in a fill: JSX children, inline markup text, prose. | Prettier fill, markdown proseWrap | html, js, markdown |  |
 | token-case | core-format/case.rs | Case of words per token kind (upper, lower, capitalise, consistent) as rows. | sqlfluff CP01-CP05, hadolint instruction case, Prettier lowercase hex and units | css, dockerfile, html, sql |  |
-| token-flow-layout | core-format/shapes/flow.rs | Children one after another with the spacing rows and the line breaks the source has. | none (internal) | csharp, dockerfile, java, kotlin, php |  |
+| token-flow-layout | core-format/shapes/flow.rs | Children one after another with the spacing rows and the line breaks the source has. | none (internal) | csharp, dockerfile, java, kotlin, php, sql |  |
 | token-rewrite-rows | core-format/rewrite.rs | Token rewrites (replace, insert) as rows applied to the source before layout. | PHP-CS-Fixer short array syntax and visibility_required | php | SINGLE-USE |
-| token-spacing-rows | core-format/spacing.rs | Blanks between neighbouring tokens as ordered rows. | google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01 | csharp, dockerfile, java, kotlin, php | LOCAL: lang-shell/format/arith.rs, lang-sql/layout/space.rs |
+| token-spacing-rows | core-format/spacing.rs | Blanks between neighbouring tokens as ordered rows. | google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01 | csharp, dockerfile, java, kotlin, php, sql | LOCAL: lang-shell/format/arith.rs |
 | trailing-comment-alignment | core-format/align.rs | Trailing comments of consecutive entries start in one column. | taplo align_comments | toml | SINGLE-USE |
 | type-expression-layout | lang-js/format/ts/mod.rs | Type annotations: unions, intersections, generics, function, mapped and tuple types. | Prettier typescript types | js | SINGLE-USE |
 | unary-expression-layout | lang-js/format/unary.rs | Unary, update, await, yield, spread, return and throw expressions. | Prettier unary and keyword expressions | js | SINGLE-USE |

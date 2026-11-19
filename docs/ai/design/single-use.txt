@@ -209,9 +209,6 @@ data row-key:hug.numeric # users: js
 data row-key:hug.short # users: js
 data row-key:hug.short_binary # users: js
 data row-key:hug.signed_numeric # users: js
-data row-key:joined.grand # users: php
-data row-key:joined.kind # users: php
-data row-key:joined.parent # users: php
 data row-key:joined.text # users: php
 data row-key:layout.body # users: php
 data row-key:layout.clauses # users: php
@@ -251,7 +248,6 @@ data rules-section:call # users: js
 data rules-section:comments # users: php
 data rules-section:file # users: php
 data rules-section:hug # users: js
-data rules-section:joined # users: php
 data rules-section:op_first # users: php
 data rules-section:rewrite # users: php
 data rules-section:simple # users: js
@@ -377,7 +373,6 @@ local lang-ruby/rules/calls.rs call-shape-checks # lang: ruby
 local lang-shell/format.rs block-and-statements # lang: shell
 local lang-shell/format/arith.rs token-spacing-rows # lang: shell
 local lang-shell/format/words.rs block-and-statements # lang: shell
-local lang-sql/layout/space.rs token-spacing-rows # lang: sql
 local lang-sql/parse/bits.rs recursive-descent-parser # lang: sql
 local lang-sql/parse/clauses.rs recursive-descent-parser # lang: sql
 local lang-sql/parse/expr.rs precedence-expression-parser # lang: sql

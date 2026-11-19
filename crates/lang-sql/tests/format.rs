@@ -93,6 +93,27 @@ fn spacing_of_names_brackets_and_prefix_operators() {
 }
 
 #[test]
+fn function_signature_brackets_close_up_and_procedure_brackets_stay() {
+    assert_eq!(
+        formats("create function f (a int) returns int as $$ select 1 $$ language sql;\n"),
+        "create function f(a int) returns int as $$ select 1 $$ language sql;\n"
+    );
+    assert_eq!(
+        formats("create procedure p (a int) language sql as $$ select 1 $$;\n"),
+        "create procedure p (a int) language sql as $$ select 1 $$;\n"
+    );
+}
+
+#[test]
+fn a_line_start_colon_command_keeps_its_blank() {
+    let subject = Formatting::new(lang_sql::provider(), "a.sql");
+    assert_eq!(
+        assert_formats(&subject, ":r file.sql\nselect 1;\n"),
+        ":r file.sql\nselect 1;\n"
+    );
+}
+
+#[test]
 fn errors_are_refused() {
     let provider = lang_sql::provider();
     let file = SourceFile::new("a.sql", 1, "SELEC FROM WHERE ;;");
