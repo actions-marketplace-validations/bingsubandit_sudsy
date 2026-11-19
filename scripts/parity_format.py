@@ -31,10 +31,10 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def run(cmd, cwd, stdin=None, check=True):
+def run(cmd, cwd, stdin=None, check=True, env=None):
     data = stdin.encode("utf-8") if stdin is not None else None
     cmd = [shutil.which(cmd[0]) or cmd[0], *map(str, cmd[1:])]
-    r = subprocess.run(cmd, cwd=cwd, input=data, capture_output=True, check=False)
+    r = subprocess.run(cmd, cwd=cwd, input=data, capture_output=True, check=False, env=env)
     if check and r.returncode != 0:
         raise SystemExit(f"{' '.join(map(str, cmd))} failed:\n{r.stderr.decode()}{r.stdout.decode()}")
     return r
@@ -42,6 +42,13 @@ def run(cmd, cwd, stdin=None, check=True):
 
 def tools():
     return json.loads((ROOT / "scripts/parity_tools.json").read_text())
+
+
+def tool_command(config, prefix, **names):
+    """The `command` of a tool entry with its placeholders filled (`{prefix}`, `{python}`, `{root}` and `names`),
+    and the environment of the run: the process's plus the entry's `env` (a Python tool: `{python} -m <tool>`, PYTHONPATH `{prefix}`)."""
+    command = [str(a).format(prefix=prefix, python=sys.executable, root=ROOT, **names) for a in config["command"]]
+    return command, {**os.environ, **{k: v.format(prefix=prefix) for k, v in config.get("env", {}).items()}}
 
 
 def catalog_version(name):
@@ -184,8 +191,9 @@ def upstream(config, prefix, version, copy, work):
         copy = work / "theirs" / copy.name
         copy.parent.mkdir(exist_ok=True)
         shutil.copy(work / copy.name, copy)
-    command = [str(a).format(prefix=prefix, exe=exe, file=copy.name, root=ROOT, python=sys.executable) for a in config["command"]]
-    r = run(command, copy.parent if mode == "in-place" else work, text if mode == "stdin" else None, check=False)
+    group = re.search(config["group"], copy.name) if "group" in config else None  # `{group}`: the first group of the fixture name (sqlfluff: its dialect)
+    command, env = tool_command(config, prefix, exe=exe, file=copy.name, group=group.group(1) if group else "")
+    r = run(command, copy.parent if mode == "in-place" else work, text if mode == "stdin" else None, check=False, env=env)
     if r.returncode != 0:
         if config.get("tool_may_reject"):
             return None

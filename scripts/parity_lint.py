@@ -202,7 +202,7 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         "html-validate": ("html", ".html", ["node", f"{prefix}/node_modules/html-validate/bin/html-validate.mjs", "-c", "htmlvalidate.json", "-f", "json"],
                           lambda d: (d["ruleId"], d["line"]), lambda out: [m for r in json.loads(out) for m in r["messages"]]),
         # one report for the whole folder: a list of findings with the code, file and row; --select is added below
-        "ruff": ("python", ".py", [sys.executable, str(ROOT / "scripts/parity_ruff.py"), str(prefix), "check", "--isolated", "--no-cache", "--output-format", "json", "--exit-zero", "--ignore-noqa", "--target-version", "py314"],
+        "ruff": ("python", ".py", parity_format.tool_command(parity_format.tools()["lint"]["ruff"], prefix)[0],
                  lambda d: (d["code"], d["location"]["row"]), json.loads),
         "checkmake": ("makefile", ".mk", [exe, "--format", '{"rule":"{{.Rule}}","line":{{.LineNumber}}}'],
                       lambda d: (d["rule"], d["line"]),
@@ -273,7 +273,7 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         for label, name, source in sources:
             name, text = read(name, source)
             (where / name).write_text(text, encoding="utf-8", newline="")
-        run = subprocess.run(command + ["."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
+        run = subprocess.run(command + ["."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False, env=parity_format.tool_command(parity_format.tools()["lint"]["ruff"], prefix)[1])
         batch = {name: [] for _, name, _ in sources}
         for d in json.loads(run.stdout):
             batch.setdefault(Path(d["filename"]).name, []).append(d)
@@ -550,8 +550,8 @@ def coverage(tool, sudsy, version, prefix, exe):
         found = [f for f in found if f[0] not in broken]
         fatal = broken
     elif tool == "ruff":
-        run = subprocess.run([sys.executable, str(ROOT / "scripts/parity_ruff.py"), str(prefix), "check", "--isolated", "--no-cache", "--output-format", "json", "--exit-zero", "--ignore-noqa", "--target-version", "py314", "."],
-                             cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
+        command, env = parity_format.tool_command(parity_format.tools()["lint"]["ruff"], prefix)
+        run = subprocess.run([*command, "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False, env=env)
         found = [(Path(d["filename"]).name, d["code"], d["message"]) for d in json.loads(run.stdout) if d["code"]]
         fatal = set()
     else:

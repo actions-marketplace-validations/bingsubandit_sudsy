@@ -50,17 +50,15 @@ fn main() -> Result<()> {
             a.extend(rest);
             full(&a)
         }
-        ["css-data", dir] => {
-            let path = xtask::repo_root().join("crates/lang-css/data/names.txt");
-            std::fs::write(path, xtask::css_data(std::path::Path::new(dir))?)?;
-            Ok(())
+        ["generate", language, dir] => {
+            xtask::generate_table(&xtask::repo_root(), language, std::path::Path::new(dir))
         }
         ["new-rule", language, id] => print_new_rule(language, id, false),
         ["new-rule", language, id, "--rust"] => print_new_rule(language, id, true),
         ["rename-rule", old, new] => rename(old, new, false),
         ["rename-rule", old, new, "--dry-run"] => rename(old, new, true),
         _ => bail!(
-            "usage: cargo xtask codegen [--check] | affected [--base REV] [--all] | dupes [--check|--baseline] | new-rule <language> <id> [--rust] | rename-rule <old> <new> [--dry-run] | css-data <npm dir>"
+            "usage: cargo xtask codegen [--check] | affected [--base REV] [--all] | dupes [--check|--baseline] | new-rule <language> <id> [--rust] | rename-rule <old> <new> [--dry-run] | generate <language> <npm dir>"
         ),
     }
 }
