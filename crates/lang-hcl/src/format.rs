@@ -8,11 +8,16 @@
 
 use crate::generated::kind as k;
 use core_config::shared;
+use core_format::columns;
+use core_format::frames::Frames;
+use core_format::rules::LazyRules;
 use core_format::{Doc, FormatCtx, FormatError, NodeFormatter, doc};
-use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
+use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, grammars};
 use rowan::WalkEvent;
 
 include!("schema.generated.rs");
+
+static ROWS: LazyRules = LazyRules::new(|| grammars::HCL.get(), include_str!("../format.rules"));
 
 pub struct HclFormatter;
 
@@ -42,51 +47,11 @@ impl NodeFormatter for HclFormatter {
     }
 }
 
-/// What a token is for the spacing rules (hclwrite's token types).
-#[derive(Clone, Copy, PartialEq)]
-enum T {
-    Ident,
-    Keyword,
-    Dot,
-    Comma,
-    Ellipsis,
-    OParen,
-    CParen,
-    OBrace,
-    CBrace,
-    OBrack,
-    CBrack,
-    /// `[*]`.
-    Splat,
-    /// `${` and `%{`.
-    Open,
-    /// The `}` that ends one of them.
-    End,
-    OQuote,
-    CQuote,
-    OHeredoc,
-    /// Template text and heredoc markers: no spaces next to them.
-    Lit,
-    Strip,
-    Equal,
-    Minus,
-    Bang,
-    /// Any other operator or separator, a number or a string.
-    Other,
-}
-
-impl T {
-    fn bracket(self) -> i32 {
-        match self {
-            T::OParen | T::OBrace | T::OBrack | T::Open => 1,
-            T::CParen | T::CBrace | T::CBrack | T::End => -1,
-            _ => 0,
-        }
-    }
-}
-
 struct Tok {
-    ty: T,
+    kind: SyntaxKind,
+    /// The `[space]` rows' answer for the blank between the token before and this one. Kept
+    /// instead of the token, so the tree's cursors are freed as the walk goes on.
+    gap: bool,
     text: String,
     /// Text written before the token as it stands: the blanks and line breaks of template text.
     raw: String,
@@ -122,48 +87,6 @@ impl Line {
     }
 }
 
-fn classify(t: &SyntaxToken) -> T {
-    let text = t.text();
-    match t.kind() {
-        k::IDENT | k::BOOL | k::NULL => T::Ident,
-        k::KEYWORD => T::Keyword,
-        k::TEMPLATE_TEXT | k::HEREDOC_ID => T::Lit,
-        k::STRIP => T::Strip,
-        k::LEGACY_INDEX => T::Dot,
-        k::PUNCT => {
-            let in_template = t
-                .parent()
-                .is_some_and(|p| matches!(p.kind(), k::INTERPOLATION | k::TEMPLATE_DIRECTIVE));
-            // The opening quote is the first token of its template; trivia may stand before it.
-            let first =
-                std::iter::successors(t.prev_sibling_or_token(), |e| e.prev_sibling_or_token())
-                    .all(|e| matches!(e.kind(), k::WHITESPACE | k::NEWLINE | k::COMMENT));
-            match text {
-                "." | ".*" => T::Dot,
-                "," => T::Comma,
-                "..." => T::Ellipsis,
-                "(" => T::OParen,
-                ")" => T::CParen,
-                "{" => T::OBrace,
-                "}" if in_template => T::End,
-                "}" => T::CBrace,
-                "[" => T::OBrack,
-                "]" => T::CBrack,
-                "[*]" => T::Splat,
-                "${" | "%{" => T::Open,
-                "=" => T::Equal,
-                "-" => T::Minus,
-                "!" => T::Bang,
-                "<<" | "<<-" => T::OHeredoc,
-                "\"" if first => T::OQuote,
-                "\"" => T::CQuote,
-                _ => T::Other,
-            }
-        }
-        _ => T::Other,
-    }
-}
-
 /// Splits the token stream into lines. Blanks and line breaks inside template text stay as written
 /// (`raw`); a line break anywhere else ends the line.
 fn lines(root: &SyntaxNode) -> Vec<Line> {
@@ -173,6 +96,8 @@ fn lines(root: &SyntaxNode) -> Vec<Line> {
     let mut raw = String::new();
     // Templates entered whose first token has not come yet: the trivia before it is the code's.
     let mut opening = 0;
+    let rows = ROWS.get().space();
+    let mut prev: Option<SyntaxToken> = None;
     for event in root.preorder_with_tokens() {
         match event {
             WalkEvent::Enter(SyntaxElement::Node(n))
@@ -200,10 +125,9 @@ fn lines(root: &SyntaxNode) -> Vec<Line> {
                     k::WHITESPACE => {}
                     k::NEWLINE => lines.extend(text.matches('\n').map(|_| Line::default())),
                     kind => {
-                        let ty = classify(&t);
-                        match ty {
-                            T::Open => text_mode.push(false),
-                            T::End => {
+                        match kind {
+                            k::TEMPLATE_OPEN => text_mode.push(false),
+                            k::TEMPLATE_CLOSE => {
                                 text_mode.pop();
                             }
                             _ => {}
@@ -215,13 +139,16 @@ fn lines(root: &SyntaxNode) -> Vec<Line> {
                             text
                         };
                         let line = lines.last_mut().expect("a line");
+                        let gap = prev.as_ref().is_some_and(|p| rows.spaced(p, &t));
                         line.lead.push(Tok {
-                            ty,
+                            kind,
+                            gap,
                             text,
                             raw: std::mem::take(&mut raw),
                             spaces: 0,
                             line_comment,
                         });
+                        prev = Some(t);
                         if kind != k::COMMENT {
                             text_mode
                                 .extend(std::iter::repeat_n(true, std::mem::take(&mut opening)));
@@ -235,94 +162,25 @@ fn lines(root: &SyntaxNode) -> Vec<Line> {
     lines
 }
 
-/// Whether a `-` after `before` is a sign.
-fn unary(before: Option<&Tok>) -> bool {
-    let Some(b) = before else { return true };
-    match b.ty {
-        T::Equal | T::Comma | T::OParen | T::OBrack | T::OBrace | T::Minus | T::Bang => true,
-        T::Dot => b.text == ".*",
-        T::Other => {
-            !b.text.starts_with('"') && b.text.chars().next().is_some_and(|c| !c.is_alphanumeric())
-        }
-        _ => false,
-    }
-}
-
-fn space_after(s: &Tok, before: Option<&Tok>, a: &Tok) -> bool {
-    let (st, at) = (s.ty, a.ty);
-    let ident = matches!(st, T::Ident | T::Keyword);
-    if !a.raw.is_empty() {
-        return false;
-    }
-    if ident && at == T::OParen
-        || st == T::Dot
-        || at == T::Dot
-        || at == T::Comma
-        || at == T::Ellipsis
-    {
-        return false;
-    }
-    if st == T::Comma {
-        return true;
-    }
-    let tight = matches!(st, T::Lit | T::OQuote | T::OHeredoc | T::Strip | T::Bang)
-        || matches!(at, T::Lit | T::CQuote | T::Strip | T::End)
-        || st == T::End && at == T::Open
-        || st == T::Minus && unary(before)
-        || matches!(at, T::OBrack | T::Splat)
-            && (st == T::Ident || st.bracket() < 0 && st != T::End);
-    if tight {
-        return false;
-    }
-    match (st, at) {
-        (T::Open, _) => at == T::OBrace,
-        (T::OBrace, _) => at != T::CBrace,
-        (_, T::CBrace) => true,
-        _ => st.bracket() <= 0 && at.bracket() >= 0,
-    }
-}
-
+/// The blanks in front of each token of a cell: the `[space]` rows, none inside template text.
 fn space_cell(cell: &mut [Tok]) {
-    for i in 1..cell.len() {
-        let (head, tail) = cell.split_at_mut(i);
-        let before = i.checked_sub(2).map(|b| &head[b]);
-        tail[0].spaces = usize::from(space_after(&head[i - 1], before, &tail[0]));
+    for next in cell.iter_mut().skip(1) {
+        next.spaces = usize::from(next.raw.is_empty() && next.gap);
     }
 }
 
 fn indent(lines: &mut [Line], size: usize) {
     split_cells(lines);
-    // Net number of brackets each open line left, innermost last.
-    let mut stack: Vec<i32> = Vec::new();
+    let brackets = ROWS.get().brackets();
+    let mut frames = Frames::default();
     for line in lines.iter_mut() {
         if line.lead.is_empty() {
             continue;
         }
-        let net: i32 = line
-            .lead
-            .iter()
-            .chain(&line.assign)
-            .map(|t| t.ty.bracket())
+        let net: i32 = (line.lead.iter().chain(&line.assign))
+            .map(|t| brackets.net(t.kind))
             .sum();
-        let depth = if net > 0 {
-            let depth = stack.len();
-            stack.push(net);
-            depth
-        } else {
-            let mut closed = -net;
-            while closed > 0
-                && let Some(top) = stack.last_mut()
-            {
-                if closed >= *top {
-                    closed -= *top;
-                    stack.pop();
-                } else {
-                    *top -= closed;
-                    closed = 0;
-                }
-            }
-            stack.len()
-        };
+        let depth = frames.line(net);
         space_cell(&mut line.lead);
         if let Some(first) = line.lead.first_mut() {
             first.spaces = depth * size;
@@ -338,6 +196,7 @@ fn indent(lines: &mut [Line], size: usize) {
 /// The `=` and what follows it become the assign cell of a line that holds a whole expression, a
 /// trailing `#` comment the comment cell.
 fn split_cells(lines: &mut [Line]) {
+    let brackets = ROWS.get().brackets();
     for line in lines {
         if line.lead.len() > 1 && line.lead.last().is_some_and(|t| t.line_comment) {
             line.comment = line.lead.pop();
@@ -346,12 +205,17 @@ fn split_cells(lines: &mut [Line]) {
             .lead
             .iter()
             .skip(1)
-            .position(|t| t.ty == T::Equal)
+            .position(|t| t.kind == k::PUNCT && t.text == "=")
             .map(|i| i + 1)
         else {
             continue;
         };
-        if line.lead[eq..].iter().map(|t| t.ty.bracket()).sum::<i32>() == 0 {
+        if line.lead[eq..]
+            .iter()
+            .map(|t| brackets.net(t.kind))
+            .sum::<i32>()
+            == 0
+        {
             line.assign = line.lead.split_off(eq);
         }
     }
@@ -360,46 +224,27 @@ fn split_cells(lines: &mut [Line]) {
 /// Runs of consecutive lines with an assign cell: the `=` lines up one space after the widest key.
 /// Runs of consecutive lines with a comment: the comments line up one space after the longest code.
 fn align(lines: &mut [Line]) {
-    for_runs(
+    columns::runs(
         lines,
         |l| !l.assign.is_empty(),
         |run| {
-            let widest = run.iter().map(|l| columns(&l.lead)).max().unwrap_or(0);
-            for l in run {
-                l.assign[0].spaces = widest - columns(&l.lead) + 1;
-            }
+            columns::pad(
+                run,
+                |l| columns(&l.lead),
+                |l, pad| l.assign[0].spaces = pad + 1,
+            );
         },
     );
-    for_runs(
+    columns::runs(
         lines,
         |l| l.comment.is_some(),
         |run| {
-            let widest = run
-                .iter()
-                .map(|l| columns(&l.lead) + columns(&l.assign))
-                .max()
-                .unwrap_or(0);
-            for l in run {
-                let own = columns(&l.lead) + columns(&l.assign);
+            let own = |l: &Line| columns(&l.lead) + columns(&l.assign);
+            columns::pad(run, own, |l, pad| {
                 if let Some(c) = &mut l.comment {
-                    c.spaces = widest - own + 1;
+                    c.spaces = pad + 1;
                 }
-            }
+            });
         },
     );
-}
-
-fn for_runs(lines: &mut [Line], member: impl Fn(&Line) -> bool, mut each: impl FnMut(&mut [Line])) {
-    let mut start = None;
-    for i in 0..=lines.len() {
-        let inside = lines.get(i).is_some_and(&member);
-        match (start, inside) {
-            (None, true) => start = Some(i),
-            (Some(s), false) => {
-                each(&mut lines[s..i]);
-                start = None;
-            }
-            _ => {}
-        }
-    }
 }
