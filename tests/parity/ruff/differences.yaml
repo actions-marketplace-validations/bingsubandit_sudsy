@@ -18,4 +18,4 @@ refused:
 flags:
   skip_with: "a fixture that has an `.options.json` is skipped: its options are not mapped to Sudsy's yet"
 coverage: 94.6  # share of the default-set findings of ruff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage ruff; at least 85% is the bar)
-target: 94.6  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage ruff
+target: 94.6

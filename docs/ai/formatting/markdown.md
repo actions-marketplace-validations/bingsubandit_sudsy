@@ -27,7 +27,6 @@ Line oriented, prose kept as written (Prettier's `proseWrap: preserve`, checked 
 
 <!-- generated:differences:prettier -->
 
-- `invalid-graphql`: the file is not valid GraphQL (Prettier's range markers, an empty selection set): Sudsy rejects it
 - `toc-indent`: a table of contents with nested lists indented by three columns is kept as written because the output would not parse to the same lists
 <!-- /generated -->
 

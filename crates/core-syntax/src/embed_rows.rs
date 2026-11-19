@@ -236,7 +236,8 @@ fn region(grammar: &Grammar, row: &EmbedRow, host: &SyntaxElement, text: &str) -
     if let Some(kind) = row.parent {
         let parent = parent.as_ref().filter(|p| p.kind() == kind)?;
         if !row.lead.is_empty() {
-            let first = parent.tokens().next()?;
+            // The instruction's first token that is not trivia: blank lines and comments before it belong to the node.
+            let first = parent.tokens().find(|t| !grammar.is_trivia(t.kind()))?;
             let word = first.text();
             if !row.lead.iter().any(|l| word.eq_ignore_ascii_case(l)) {
                 return None;

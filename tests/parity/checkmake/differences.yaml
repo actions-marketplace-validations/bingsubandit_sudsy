@@ -207,4 +207,4 @@ intentional:
   phony-line-after: tool-wrong
   rule-in-define: tool-wrong
 coverage: 60.9  # share of the default-set findings of checkmake on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkmake; at least 85% is the bar)
-target: 96.9  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage checkmake
+target: 96.9

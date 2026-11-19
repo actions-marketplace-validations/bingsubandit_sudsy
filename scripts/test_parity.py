@@ -88,10 +88,10 @@ class Runner(unittest.TestCase):
         self.assertIn("tool-wrong 1", line)
         self.assertIn("formatter findings counted as missing 2", pl.target_line("checkmake", per, 2, 4, 2, "", 0))
 
-    def test_rejected_files_are_invalid_input_and_a_refuted_one_is_reviewed(self):
+    def test_a_file_the_tool_rejects_is_invalid_input_without_an_entry_and_a_refuted_one_is_reviewed(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
-            (folder / "differences.yaml").write_text("rejected: invalid-input\ndifferences:\n  bad: gap  g\nintentional:\n  bad: invalid-input\nfiles:\n  c.txt: bad\n", encoding="utf-8")
+            (folder / "differences.yaml").write_text("differences:\n  bad: gap  g\nintentional:\n  bad: invalid-input\nfiles:\n  c.txt: bad\n", encoding="utf-8")
             bad, diffs, out = run_verdicts(folder, [("ok.txt", "x", "x"), ("a.txt", None, "o")])
             self.assertEqual(bad, 0)
             self.assertIn("raw 50.0% (1 of 2); target 100.0% (1 of 1); intentional: invalid-input 1", out)

@@ -293,7 +293,6 @@ class Differences:
         self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
         self.intentional = data.get("intentional") or {}
         self.pins = data.get("pins") or {}
-        self.rejected = data.get("rejected")  # `invalid-input`: a file the tool rejects is not compared (the tool rejecting it is the evidence)
         self.flags = data.get("flags") or {}  # reference-tool flag that turns a feature off -> why it is there (a named gap, printed with its count)
         self.refuted = set()  # `invalid-input` files that the reference parser accepts: Sudsy's rejection is a bug
         self.lint = lint
@@ -370,10 +369,10 @@ def verdict(name, theirs, ours, diffs, label, quiet=False):
         if not quiet:
             print(f"{name}: ok")
         return 0
-    if theirs is None and diffs.rejected:
-        diffs.tally(False, diffs.rejected)
+    if theirs is None:  # the tool rejecting a file is the evidence it is invalid input: the target leaves it out, the raw share keeps it
+        diffs.tally(False, "invalid-input")
         if not quiet:
-            print(f"{name}: rejected by the tool, intentional: {diffs.rejected}")
+            print(f"{name}: rejected by the tool, intentional: invalid-input")
         return 0
     known = diffs.known(name)
     state = diffs.status(name, ours) if known else None
@@ -509,9 +508,7 @@ def main():
             tally = groups.setdefault(group, [0, 0, 0])
             same = theirs is not None and theirs == ours
             tally[2 if theirs is None else 0 if same else 1] += 1
-            state = None if same or not known.known(name) else known.status(name, ours)
-            if theirs is None and known.rejected:
-                state = known.rejected
+            state = "invalid-input" if theirs is None else None if same or not known.known(name) else known.status(name, ours)
             known.tally(same, state)
             if state == "REVIEW":
                 print(f"{name}: REVIEW (Sudsy's output differs from the pinned one; counts against Sudsy)")

@@ -19,3 +19,7 @@ RUN apt-get install --yes \
     curl \
     git
 RUN apt-get update
+
+# a blank line or a comment before an instruction does not hide it
+RUN apt-get install -y curl=7.88
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apt-get-no-recommends

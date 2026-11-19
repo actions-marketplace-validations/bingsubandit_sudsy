@@ -1,7 +1,7 @@
 """Findings of an upstream tool on its corpus for the generic coverage mode (scripts/parity_lint.py `coverage`).
 
 A tool entry of parity_tools.json has a `coverage` object (docs/ai/development/parity.md#coverage-mode):
-`corpus` (sources: `dir` below the repo root, `glob` patterns, `skip` substrings of the path inside `dir`, `esm` `[module, script]` suffixes by content (ESLint), `invalid_marker` (the file name next to an input that marks it invalid: the proof run leaves those out when Sudsy rejects them), `as` the folder `dir` is copied to (default: its own name), `into` a folder the files are copied into flat: the one a language is found by), `command`
+`corpus` (sources: `dir` below the repo root, `glob` patterns, `skip` substrings of the path inside `dir`, `esm` `[module, script]` suffixes by content (ESLint), `invalid_marker` (the file name next to an input that marks it invalid: the proof run leaves those out when Sudsy rejects them), `reference_parser` (a command with `{file}` that exits non-zero on a syntax error: a file Sudsy rejects and it rejects too is invalid, as a marked one), `as` the folder `dir` is copied to (default: its own name), `into` a folder the files are copied into flat: the one a language is found by), `command`
 (`{exe}`, `{prefix}`, `{group}` and `{files}`), `group` (a regex over the file's path: files of one group run in one
 command; `cwd: group` runs it in the folder `group` names), `chunk` (files per command), `ok_codes` (exit codes with an empty report meaning no findings), `timeout` (seconds) and `memory_gb` (address space) per command, `env`, `stream` (`stdout` or `stderr`: where the report is), `files` (config files
 written next to the corpus), `parse` (how the report turns into findings) and `sudsy` (the Sudsy side's config).
@@ -87,7 +87,7 @@ def parse(output, spec, rules):
 
 
 def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out, before):
-    """The proof run of docs/ai/design/parity-target.md (`coverage --proof`): the corpus of `work` is copied, formatted with
+    """The proof run of docs/ai/design/parity-target.md (every coverage run of a tool with `formatter` entries): the corpus of `work` is copied, formatted with
     `sudsy format` under the tool's preset and checked by the tool again; returns the findings of `layout` ids (the `formatter`
     catalog entries) that remain. A finding left counts as missing in the target; `before` is the same count before formatting."""
     after = prefix / "proof"
@@ -104,11 +104,13 @@ def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out,
     rejected = {n for n in (norm(m, after) for m in re.findall(r"^error: (.+?): \d+:\d+:", run.stderr, re.M)) if n in sources}
     marker = spec.get("invalid_marker")
     invalid = {n for n in rejected if marker and (sources[n].parent / marker).exists()}
+    reference = spec.get("reference_parser")  # a command (`{file}`) that exits non-zero on a syntax error: the language's own parser
+    invalid |= {n for n in rejected - invalid if reference and subprocess.run([a.format(python=sys.executable, file=sources[n]) for a in reference], capture_output=True, check=False).returncode}
     left = [f for f in found if f[1] in layout and f[0] not in left_out and f[0] not in invalid]
     per = Counter(f[1] for f in left)
     print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
           + (", ".join(f"{r} {n}" for r, n in per.most_common(12)) or "none"))
-    print(f"proof: `sudsy format` rejects {len(rejected)} files: {len(invalid)} that the corpus marks as invalid (invalid-input, left out), "
+    print(f"proof: `sudsy format` rejects {len(rejected)} files: {len(invalid)} that the corpus marks or the reference parser rejects (invalid-input, left out), "
           f"{len(rejected) - len(invalid)} that it does not (Sudsy bugs, counted)" + "".join(f"\n  bug: {n}" for n in sorted(rejected - invalid)))
     return len(left)
 

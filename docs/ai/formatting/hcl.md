@@ -20,8 +20,6 @@ The layout is `terraform fmt`'s (hashicorp/hcl `hclwrite.Format`, which `tofu fm
 Where Sudsy differs from terraform by design:
 
 <!-- generated:differences:terraform -->
-
-- `semantic-error`: terraform rejects a file for a semantic error (a repeated plugin name); Sudsy formats it
 <!-- /generated -->
 `cargo test --profile corpus -p lang-hcl --test integration -- --ignored --nocapture conformance` checks every corpus file: parses without errors, round-trips, formats with the same tokens and idempotently.
 

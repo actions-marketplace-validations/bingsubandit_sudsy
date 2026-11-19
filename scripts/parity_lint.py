@@ -529,6 +529,47 @@ def target_line(tool, per, hit, total, owned, prefix="", wrong=0):
     return f"target {share}% ({hit} of {left}, same line); intentional: out of scope (wontfix) {out}, tool-wrong {wrong}, formatter findings counted as missing {owned}"
 
 
+def run_plain(tool, prefix, work):
+    """`(findings, files the tool cannot read)` of ruff, ESLint, typescript-eslint or an ESLint plugin on the corpus folder `work`
+    (the ESLint config is written into it); findings are `(file name, rule, message, line)`."""
+    if tool == "ruff":
+        command, env = parity_format.tool_command(parity_format.tools()["lint"]["ruff"], prefix)
+        run = subprocess.run([*command, "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False, env=env)
+        return [(Path(d["filename"]).name, d["code"], d["message"], d["location"]["row"]) for d in json.loads(run.stdout) if d["code"]], set()
+    config = (plugin_config(tool, f'...{PLUGINS[tool]}.configs["flat/recommended"]') if tool in PLUGINS else
+              'import js from "@eslint/js";\nexport default [{ linterOptions: { noInlineConfig: true } }, js.configs.recommended];\n' if tool == "eslint" else
+              'import tseslint from "typescript-eslint";\nexport default [{ linterOptions: { noInlineConfig: true } }, ...tseslint.configs.recommended];\n')
+    (work / "eslint.config.mjs").write_text(config, encoding="utf-8")
+    run = subprocess.run(["node", f"{prefix}/node_modules/eslint/bin/eslint.js", "-c", "eslint.config.mjs", "-f", "json", "--no-warn-ignored", "."],
+                         cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
+    try:
+        results = json.loads(run.stdout)
+    except json.JSONDecodeError:
+        sys.exit(f"eslint produced no report:\n{run.stdout}\n{run.stderr}")
+    fatal = {Path(r["filePath"]).name for r in results if any(m.get("fatal") for m in r["messages"])}
+    return [(Path(r["filePath"]).name, m["ruleId"], m["message"], m["line"]) for r in results for m in r["messages"] if m["ruleId"] and not m.get("fatal")], fatal
+
+
+def proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before):
+    """The proof run of a tool that has no `coverage` entry (`parity_coverage.proof` is the other): the corpus folder is copied, formatted with
+    `sudsy format` under the tool's preset and checked again; returns the findings of `layout` ids that remain (a file `sudsy format`
+    rejects stays as it was, so its findings remain and count)."""
+    after = prefix / "proof"
+    shutil.rmtree(after, ignore_errors=True)
+    shutil.copytree(work, after)
+    (after / "sudsy.yaml").write_text(json.dumps({"extends": [f"preset:{preset}"]}), encoding="utf-8")
+    run = subprocess.run([sudsy, "format", "."], cwd=after, capture_output=True, text=True, encoding="utf-8", check=False)
+    (after / "sudsy.yaml").unlink()
+    found, _ = run_plain(tool, prefix, after)
+    left = [f for f in found if f[1] in layout and f[0] not in fatal]
+    per = collections.Counter(f[1] for f in left)
+    rejected = sorted({Path(m).name for m in re.findall(r"^error: (.+?): \d+:\d+:", run.stderr, re.M)})
+    print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
+          + (", ".join(f"{r} {n}" for r, n in per.most_common(12)) or "none"))
+    print(f"proof: `sudsy format` rejects {len(rejected)} files (Sudsy bugs, counted)" + "".join(f"\n  bug: {n}" for n in rejected))
+    return len(left)
+
+
 def coverage(tool, sudsy, version, prefix, exe):
     """The share of the findings of `tool`'s default (ruff) or recommended (ESLint, typescript-eslint) set on its
     real-world corpus that the mapped Sudsy rule also reports on the same line of the same file (the column is not
@@ -548,10 +589,11 @@ def coverage(tool, sudsy, version, prefix, exe):
     if spec:
         for other in spec.get("map_also", []):  # the tool runs another tool's checks too (hadolint: shellcheck's on `RUN`)
             mapping = {**rule_map(other), **mapping}
-    layout = set()  # the rules the formatter owns: `sudsy format` does their work, so they are not findings to cover
+    # the rules the formatter owns (the `formatter` catalog entries): `sudsy format` does their work, so they are not findings to cover
+    rule_prefix = f"{PLUGINS[tool]}/" if tool in PLUGINS else "@typescript-eslint/" if tool == "typescript-eslint" else ""
+    layout = {f"{rule_prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["sudsy"] == "formatter"}
     if tool in PLUGINS:
         mapping = {f"{PLUGINS[tool]}/{r}": v for r, v in mapping.items()}
-        layout = {f"{PLUGINS[tool]}/{e['id']}" for e in catalog_entries(tool) if e["sudsy"] == "formatter"}
     folder = ROOT / "tests/parity" / tool
     work = prefix / "coverage"
     shutil.rmtree(work, ignore_errors=True)
@@ -575,32 +617,16 @@ def coverage(tool, sudsy, version, prefix, exe):
         broken = {f[0] for f in found if f[1] in spec.get("unreadable", [])}  # files the tool cannot read at all (buf: imports the corpus lacks)
         found = [f for f in found if f[0] not in broken]
         fatal = broken
-    elif tool == "ruff":
-        command, env = parity_format.tool_command(parity_format.tools()["lint"]["ruff"], prefix)
-        run = subprocess.run([*command, "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False, env=env)
-        found = [(Path(d["filename"]).name, d["code"], d["message"], d["location"]["row"]) for d in json.loads(run.stdout) if d["code"]]
-        fatal = set()
     else:
-        config = (plugin_config(tool, f'...{PLUGINS[tool]}.configs["flat/recommended"]') if tool in PLUGINS else
-                  'import js from "@eslint/js";\nexport default [{ linterOptions: { noInlineConfig: true } }, js.configs.recommended];\n' if tool == "eslint" else
-                  'import tseslint from "typescript-eslint";\nexport default [{ linterOptions: { noInlineConfig: true } }, ...tseslint.configs.recommended];\n')
-        (work / "eslint.config.mjs").write_text(config, encoding="utf-8")
-        run = subprocess.run(["node", f"{prefix}/node_modules/eslint/bin/eslint.js", "-c", "eslint.config.mjs", "-f", "json", "--no-warn-ignored", "."],
-                             cwd=work, capture_output=True, text=True, encoding="utf-8", check=False)
-        try:
-            results = json.loads(run.stdout)
-        except json.JSONDecodeError:
-            sys.exit(f"eslint produced no report:\n{run.stdout}\n{run.stderr}")
-        fatal = {Path(r["filePath"]).name for r in results if any(m.get("fatal") for m in r["messages"])}
-        found = [(Path(r["filePath"]).name, m["ruleId"], m["message"], m["line"]) for r in results for m in r["messages"] if m["ruleId"] and not m.get("fatal")]
+        found, fatal = run_plain(tool, prefix, work)
     found = [f for f in found if f[0] not in fatal]
     owned = sum(f[1] in layout for f in found)  # `formatter` ids: `sudsy format` does their work, so they are no findings to cover in the raw share
-    if "--proof" in sys.argv:  # the formatter findings that remain after `sudsy format` are the ones that count as missing
-        if not spec:
-            sys.exit(f"{tool}: the proof run needs a `coverage` entry in scripts/parity_tools.json")
-        owned = parity_coverage.proof(tool, spec, prefix, work, exe, {"actionlint": actionlint_check}, sudsy, preset, layout, fatal, [f for f in found if f[1] in layout])
+    if layout:  # the proof run: the formatter findings that remain after `sudsy format` are the ones that count as missing
+        before = [f for f in found if f[1] in layout]
+        owned = (parity_coverage.proof(tool, spec, prefix, work, exe, {"actionlint": actionlint_check}, sudsy, preset, layout, fatal, before) if spec
+                 else proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before))
     found = [f for f in found if f[1] not in layout]
-    print(f"input filters: files the tool cannot read {len(fatal)}, formatter-owned findings left out of raw (in the target they count as missing: {owned}{', after the proof run' if '--proof' in sys.argv else ', all of them: no proof run'})")
+    print(f"input filters: files the tool cannot read {len(fatal)}, formatter-owned findings left out of raw (in the target they count as missing: {owned}{', after the proof run' if layout else ''})")
     def run_sudsy(config):  # Sudsy's findings with `config` as the sudsy.yaml of the corpus (None: no file, the default a user gets)
         (work / "sudsy.yaml").unlink(missing_ok=True)
         if config is not None:

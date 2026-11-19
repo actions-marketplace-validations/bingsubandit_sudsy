@@ -44,11 +44,8 @@ pub fn descending_specificity(c: &Check, sheet: &SyntaxNode, ctx: &mut RuleConte
             let spec = sel.specificity();
             let prior = seen.entry(key).or_default();
             if prior.iter().any(|p| spec < *p) {
-                c.hit(
-                    ctx,
-                    significant_range(&prelude, ctx.file.grammar),
-                    &sel.text,
-                );
+                // The selector of the list that is lower, not the whole list.
+                c.hit_item(ctx, sel.range, &prelude, &sel.text);
             }
             prior.push(spec);
         }

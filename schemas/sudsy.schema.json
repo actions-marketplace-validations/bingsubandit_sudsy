@@ -540,7 +540,7 @@
             },
             "color-function-notation": {
               "$ref": "#/definitions/rule",
-              "description": "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`); a function with a nested call (`var()`) is left alone."
+              "description": "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`), also with a call such as `var()` as an argument."
             },
             "color-hex-length": {
               "description": "A hex color that can be written with three or four digits (`#aabbcc` is `#abc`); with the `style` option set to `long`, one that is written short.",

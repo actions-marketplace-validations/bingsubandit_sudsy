@@ -1266,7 +1266,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`); a function with a nested call (`var()`) is left alone.",
+      "description": "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`), also with a call such as `var()` as an argument.",
       "example": {
         "config": null,
         "fixed": null,
@@ -1287,6 +1287,11 @@
             "column": 12,
             "length": 3,
             "line": 6
+          },
+          {
+            "column": 12,
+            "length": 4,
+            "line": 15
           }
         ]
       },
@@ -5787,7 +5792,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM debian:12\nRUN apt-get update && apt-get install curl\nRUN apt-get install -y curl=7.88 wget=1.21\nRUN apt-get install -y --no-install-recommends curl\nRUN apt-get install -qq -y -t stable curl=7.88\nRUN apt-get -y install foo/stable\nRUN apt-get install -yq ./a.deb\nRUN apt-get install --yes \\\n    curl \\\n    git\nRUN apt-get update\n",
+        "input": "FROM debian:12\nRUN apt-get update && apt-get install curl\nRUN apt-get install -y curl=7.88 wget=1.21\nRUN apt-get install -y --no-install-recommends curl\nRUN apt-get install -qq -y -t stable curl=7.88\nRUN apt-get -y install foo/stable\nRUN apt-get install -yq ./a.deb\nRUN apt-get install --yes \\\n    curl \\\n    git\nRUN apt-get update\n\n# a blank line or a comment before an instruction does not hide it\nRUN apt-get install -y curl=7.88\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -5819,6 +5824,11 @@
             "column": 1,
             "length": 1,
             "line": 8
+          },
+          {
+            "column": 1,
+            "length": 32,
+            "line": 14
           }
         ]
       },
@@ -5840,7 +5850,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM debian:12\nRUN apt-get update && apt-get install curl\nRUN apt-get install -y curl=7.88 wget=1.21\nRUN apt-get install -y --no-install-recommends curl\nRUN apt-get install -qq -y -t stable curl=7.88\nRUN apt-get -y install foo/stable\nRUN apt-get install -yq ./a.deb\nRUN apt-get install --yes \\\n    curl \\\n    git\nRUN apt-get update\n",
+        "input": "FROM debian:12\nRUN apt-get update && apt-get install curl\nRUN apt-get install -y curl=7.88 wget=1.21\nRUN apt-get install -y --no-install-recommends curl\nRUN apt-get install -qq -y -t stable curl=7.88\nRUN apt-get -y install foo/stable\nRUN apt-get install -yq ./a.deb\nRUN apt-get install --yes \\\n    curl \\\n    git\nRUN apt-get update\n\n# a blank line or a comment before an instruction does not hide it\nRUN apt-get install -y curl=7.88\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -5878,7 +5888,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM debian:12\nRUN apt-get update && apt-get install curl\nRUN apt-get install -y curl=7.88 wget=1.21\nRUN apt-get install -y --no-install-recommends curl\nRUN apt-get install -qq -y -t stable curl=7.88\nRUN apt-get -y install foo/stable\nRUN apt-get install -yq ./a.deb\nRUN apt-get install --yes \\\n    curl \\\n    git\nRUN apt-get update\n",
+        "input": "FROM debian:12\nRUN apt-get update && apt-get install curl\nRUN apt-get install -y curl=7.88 wget=1.21\nRUN apt-get install -y --no-install-recommends curl\nRUN apt-get install -qq -y -t stable curl=7.88\nRUN apt-get -y install foo/stable\nRUN apt-get install -yq ./a.deb\nRUN apt-get install --yes \\\n    curl \\\n    git\nRUN apt-get update\n\n# a blank line or a comment before an instruction does not hide it\nRUN apt-get install -y curl=7.88\n",
         "language": "dockerfile",
         "spans": [
           {

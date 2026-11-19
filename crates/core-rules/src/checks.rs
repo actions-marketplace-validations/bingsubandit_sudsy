@@ -8,6 +8,7 @@
 //! tools: none (plumbing of Rust checks)
 //! reads: family:check
 
+use crate::tree::significant_range;
 use crate::{Diagnostic, FileContext, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxKind, SyntaxNode, TextRange};
 use std::cell::RefCell;
@@ -69,6 +70,19 @@ impl NodeCheck {
         name: &str,
     ) -> &'a mut Diagnostic {
         ctx.report(range, self.message.replace("{name}", name))
+    }
+
+    /// Reports one item of a list at `item` (its range, when the item has one), else at the
+    /// significant range of `node`, the whole list.
+    pub fn hit_item<'a>(
+        &self,
+        ctx: &'a mut RuleContext<'_>,
+        item: Option<TextRange>,
+        node: &SyntaxNode,
+        name: &str,
+    ) -> &'a mut Diagnostic {
+        let range = item.unwrap_or_else(|| significant_range(node, ctx.file.grammar));
+        self.hit(ctx, range, name)
     }
 }
 

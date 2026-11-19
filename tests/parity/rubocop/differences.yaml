@@ -1,2 +1,2 @@
 coverage: 96.2  # share of the default-set findings of rubocop on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage rubocop; at least 85% is the bar)
-target: 96.2  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage rubocop
+target: 96.2

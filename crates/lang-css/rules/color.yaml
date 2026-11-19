@@ -11,13 +11,13 @@ report-on: first-token
 ---
 id: color-function-notation
 message: "write the color function with spaces and `/` before the alpha value, not commas"
-description: "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`); a function with a nested call (`var()`) is left alone."
+description: "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`), also with a call such as `var()` as an argument."
 example: "a { color: rgb(0, 0, 0) }   # reported"
 severity: off
 category: style
 rule:
   kind: Function
-  regex: '^(?i:rgba?|hsla?)\([^(),]+,[^(),]+,[^(),]+(?:,[^(),]+)?\)$'
+  regex: '^(?i:rgba?|hsla?)\((?:[^(),]|\((?:[^()]|\([^()]*\))*\))+,(?:[^(),]|\((?:[^()]|\([^()]*\))*\))+,(?:[^(),]|\((?:[^()]|\([^()]*\))*\))+(?:,(?:[^(),]|\((?:[^()]|\([^()]*\))*\))+)?\)$'
 report-on: first-token
 ---
 id: alpha-value-notation

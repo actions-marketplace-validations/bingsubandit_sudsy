@@ -1,10 +1,7 @@
 differences:
-  semantic-error: choice  terraform rejects a file for a semantic error (a repeated plugin name); Sudsy formats it
   token-rewrite: gap  terraform fmt rewrites tokens (it quotes a bare block label, `list` becomes `list(any)`); Sudsy keeps the tokens
 files:
-  corpus/packer/hcl2template/testdata/init/duplicate_required_plugins/packer.pkr.hcl: semantic-error
   corpus/terraform/internal/command/testdata/fmt/general_in.tf: token-rewrite
   corpus/terraform/internal/command/testdata/fmt/variable_type_in.tf: token-rewrite
   corpus/terraform/internal/configs/testdata/valid-files/variables.tf: token-rewrite
 intentional:
-  semantic-error: invalid-input

@@ -1,4 +1,4 @@
 differences: {}
 files: {}
 coverage: 87.2  # share of the default-set findings of eslint-plugin-vue on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage eslint-plugin-vue; at least 85% is the bar)
-target: 14.5  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage eslint-plugin-vue
+target: 23.0

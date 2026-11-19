@@ -37,7 +37,6 @@ Where Sudsy differs from taplo by design:
 <!-- generated:differences:taplo -->
 
 - `comment-dropped`: taplo drops the comment after an array item that is followed by a comma on the next line; Sudsy keeps it
-- `taplo-rejects`: taplo rejects a valid file (`[[ products ]]` with blanks inside the brackets, some Unicode keys, strings, comments and datetimes); Sudsy formats it
 <!-- /generated -->
 
 ## Rules

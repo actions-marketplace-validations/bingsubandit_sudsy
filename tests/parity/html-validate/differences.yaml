@@ -10,4 +10,4 @@ files:
   accessibility/elements sudsy:input-missing-label 14: aria-hidden
   accessibility/elements sudsy:input-missing-label 15: aria-hidden
 coverage: 61.5  # share of the default-set findings of html-validate on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage html-validate; at least 85% is the bar)
-target: 62.9  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage html-validate
+target: 62.9

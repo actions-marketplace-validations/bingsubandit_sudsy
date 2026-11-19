@@ -9,4 +9,4 @@ files:
   comparisons/constant sudsy:no-constant-comparison 2: constant-comparison-scope
   empty/blocks eslint:no-empty-block 6: switch-block
 coverage: 100.0  # share of the default-set findings of eslint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage eslint; at least 85% is the bar)
-target: 100.0  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage eslint
+target: 100.0

@@ -1,28 +1,16 @@
 differences:
-  taplo-rejects: choice  taplo rejects a valid file (`[[ products ]]` with blanks inside the brackets, some Unicode keys, strings, comments and datetimes); Sudsy formats it
   comment-dropped: choice  taplo drops the comment after an array item that is followed by a comma on the next line; Sudsy keeps it
   multiline-string-array: gap  taplo keeps an array with a multi-line string on one line; Sudsy expands it
   inline-table-array: gap  taplo expands an array inside a long inline table even when it fits after the break; Sudsy breaks only what does not fit
   empty-file: gap  taplo writes a newline for an empty file; Sudsy keeps it empty
   crlf-in-string: gap  taplo keeps CRLF inside a multi-line string and converts the rest; Sudsy writes LF everywhere
 files:
-  fixtures/handwritten-values.toml: taplo-rejects
-  valid/comment/nonascii.toml: taplo-rejects
-  valid/datetime/edge.toml: taplo-rejects
-  valid/key/quoted-unicode.toml: taplo-rejects
   valid/comment/tricky.toml: comment-dropped
   valid/array/string-with-comma-2.toml: multiline-string-array
   valid/inline-table/spaces.toml: inline-table-array
   valid/empty-file.toml: empty-file
-  valid/string/quoted-unicode.toml: taplo-rejects
   valid/string/multiline-escaped-crlf.toml: crlf-in-string
 intentional:
-  taplo-rejects: tool-wrong
   comment-dropped: tool-wrong
 pins:
-  fixtures/handwritten-values.toml: 57e56ebeffea1341
-  valid/comment/nonascii.toml: b2f1303380594322
   valid/comment/tricky.toml: d19743d782ccb292
-  valid/datetime/edge.toml: 550403bb048081a4
-  valid/key/quoted-unicode.toml: 3ee75b690e51c3ef
-  valid/string/quoted-unicode.toml: 765e3d81ce74761d
