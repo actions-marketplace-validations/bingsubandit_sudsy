@@ -6,12 +6,11 @@ ratchet:
 target-files:
   graphql: 124
   json: 4
-  markdown: 100
+  markdown: 101
   yaml: 5
 differences:
   code-span-backticks: gap  a code span with three backticks (tree-sitter-md does not read it as code) is kept; Prettier writes one backtick
   list-looseness: gap  a list item holding a paragraph, a nested list and an indented continuation keeps the blank lines of the source; Prettier's looseness differs
-  toc-indent: choice  a table of contents with nested lists indented by three columns is kept as written because the output would not parse to the same lists
   tab-blocks: gap  a block with a tab is kept as written (the width of a tab depends on its column); Prettier re-indents the nested list
   code-span-lines: gap  a code span over two lines in a list item keeps the text of the span; Prettier removes the indentation of the second line
   code-trailing-blanks: gap  trailing blanks inside a code block are code and stay; Prettier removes them
@@ -22,16 +21,12 @@ files:
   runtime-docs/coding-guidelines/coding-style.md: code-span-backticks
   docs/ai/design/parity-target.md: list-looseness
   runtime-docs/coding-guidelines/breaking-change-rules.md: list-looseness
-  runtime-docs/coding-guidelines/clr-code-guide.md: toc-indent
+  runtime-docs/coding-guidelines/clr-code-guide.md: tab-blocks
   runtime-docs/coding-guidelines/EventLogging.md: tab-blocks
   runtime-docs/coding-guidelines/mono-code-guide.md: code-span-lines
   runtime-docs/coding-guidelines/vectorization-guidelines.md: code-trailing-blanks
   docs/ai/formatting/csharp.md: html-after-table
   graphql/prettier/tests/format/graphql/interface/separator-detection.graphql: graphql-comment-position
-intentional:
-  toc-indent: tool-wrong
 flags:
   no-config: the tool runs with `--no-config` (and no editorconfig), so a project's own Prettier options are not applied; Sudsy's JS, CSS and HTML options for them are not mapped yet
   embedded-language-formatting-off: "Prettier runs with `--embedded-language-formatting=off` and the folder's sudsy.yaml sets `embedded_language_formatting: off`: the formatters of the fenced languages make other choices than Prettier's"
-pins:
-  runtime-docs/coding-guidelines/clr-code-guide.md: d76e8e41f57543e8

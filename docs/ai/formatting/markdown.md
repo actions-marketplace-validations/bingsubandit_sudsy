@@ -26,8 +26,6 @@ Line oriented, prose kept as written (Prettier's `proseWrap: preserve`, checked 
 - Where Sudsy differs from Prettier by design (named in `tests/parity/prettier/differences.yaml`, with the GraphQL ones):
 
 <!-- generated:differences:prettier -->
-
-- `toc-indent`: a table of contents with nested lists indented by three columns is kept as written because the output would not parse to the same lists
 <!-- /generated -->
 
 ## Options
