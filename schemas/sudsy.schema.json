@@ -9257,16 +9257,6 @@
               "minimum": 20,
               "type": "integer"
             },
-            "list_extra_indent_parents": {
-              "default": [
-                "SuperTypeCallEntry"
-              ],
-              "description": "Node kinds whose parameter or argument list is indented one level more when it breaks (the arguments of a supertype call).",
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
             "member_chain_force_links": {
               "default": 4,
               "description": "A chain of member accesses and calls with at least this many dots always breaks (`wrapped` style; 0: never).",
@@ -12475,16 +12465,6 @@
                     "maximum": 1000,
                     "minimum": 20,
                     "type": "integer"
-                  },
-                  "list_extra_indent_parents": {
-                    "default": [
-                      "SuperTypeCallEntry"
-                    ],
-                    "description": "Node kinds whose parameter or argument list is indented one level more when it breaks (the arguments of a supertype call).",
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
                   },
                   "member_chain_force_links": {
                     "default": 4,

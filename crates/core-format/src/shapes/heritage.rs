@@ -42,7 +42,8 @@ pub fn heritage(
         // A head that spans lines (the parameters) keeps the supertypes on the line of its end.
         let mut parts = if head.will_break() {
             all[0] = doc::lit(" ");
-            vec![head, doc::lit(" "), colon, doc::concat(all)]
+            // (the arguments of a call among them go one level in, like the closing parenthesis)
+            vec![head, doc::lit(" "), colon, doc::indent(doc::concat(all))]
         } else {
             vec![doc::group(doc::concat(vec![
                 head,
@@ -71,7 +72,7 @@ pub fn heritage(
         HeritageLayout::Fit => unreachable!(),
         HeritageLayout::Hugged => {
             parts.push(doc::lit(" "));
-            parts.push(first);
+            parts.push(doc::indent(first));
             parts.push(doc::indent(doc::concat(rest)));
         }
         HeritageLayout::Wrapped => {

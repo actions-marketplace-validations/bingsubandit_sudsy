@@ -33,7 +33,6 @@ options:
   - annotation_inline: ["single"]
   - semicolon_keep_parents: [["ClassBody", "EnumEntry"]]
   - raw_string_calls: [["trimIndent", "trimMargin"]]
-  - list_extra_indent_parents: [["SuperTypeCallEntry"]]
   - ctor_own_line_kinds: [["AnnotationEntry"]]
   - comment_trim_lines: [true]
   - format_rules: [["curly"]]

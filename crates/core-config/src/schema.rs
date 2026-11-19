@@ -562,14 +562,6 @@ pub mod shared {
         )
     }
 
-    pub fn list_extra_indent_parents(default: &[&str]) -> OptionDef {
-        OptionDef::words(
-            "list_extra_indent_parents",
-            default,
-            "Node kinds whose parameter or argument list is indented one level more when it breaks (the arguments of a supertype call).",
-        )
-    }
-
     pub fn ctor_own_line_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
             "ctor_own_line_kinds",
