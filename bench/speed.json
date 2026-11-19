@@ -1,0 +1,823 @@
+{
+ "runner": "Linux aarch64, 8 cores",
+ "runs": 5,
+ "commit": "55e10507",
+ "rows": [
+  {
+   "id": "prettier/JSON/format",
+   "language": "JSON",
+   "task": "Format",
+   "tool": "Prettier",
+   "version": "3.9.10",
+   "corpus": "the valid files of JSONTestSuite",
+   "files": 95,
+   "bytes": 1190,
+   "sudsy": {
+    "s": 0.009,
+    "mb": 43
+   },
+   "other": {
+    "s": 0.232,
+    "mb": 85
+   }
+  },
+  {
+   "id": "prettier/YAML/format",
+   "language": "YAML",
+   "task": "Format",
+   "tool": "Prettier",
+   "version": "3.9.10",
+   "corpus": "the GitHub Actions workflows of real repositories, 8 copies, without 16 files Sudsy cannot parse",
+   "files": 3144,
+   "bytes": 3761296,
+   "sudsy": {
+    "s": 0.151,
+    "mb": 103
+   },
+   "other": {
+    "s": 6.481,
+    "mb": 237
+   }
+  },
+  {
+   "id": "prettier-js/JS/TS/format",
+   "language": "JS/TS",
+   "task": "Format",
+   "tool": "Prettier",
+   "version": "3.9.10",
+   "corpus": "three.js src, express lib and test, 8 copies",
+   "files": 848,
+   "bytes": 4619096,
+   "sudsy": {
+    "s": 0.211,
+    "mb": 172
+   },
+   "other": {
+    "s": 4.865,
+    "mb": 298
+   }
+  },
+  {
+   "id": "prettier-css/CSS/format",
+   "language": "CSS",
+   "task": "Format",
+   "tool": "Prettier",
+   "version": "3.9.10",
+   "corpus": "the CSS, SCSS and Less corpus",
+   "files": 534,
+   "bytes": 3036204,
+   "sudsy": {
+    "s": 0.144,
+    "mb": 157
+   },
+   "other": {
+    "s": 5.612,
+    "mb": 392
+   }
+  },
+  {
+   "id": "prettier-html/HTML/format",
+   "language": "HTML",
+   "task": "Format",
+   "tool": "Prettier",
+   "version": "3.9.10",
+   "corpus": "the HTML corpus (mdn learning-area and others), without 37 files Sudsy cannot parse",
+   "files": 220,
+   "bytes": 626750,
+   "sudsy": {
+    "s": 0.026,
+    "mb": 98
+   },
+   "other": {
+    "s": 1.4,
+    "mb": 169
+   }
+  },
+  {
+   "id": "prettier-angular/Angular/format",
+   "language": "Angular",
+   "task": "Format",
+   "tool": "Prettier",
+   "version": "3.9.10",
+   "not_measured": "Prettier picks its Angular parser from the .component.html name, which the corpus files do not carry"
+  },
+  {
+   "id": "biome/JSON/format",
+   "language": "JSON",
+   "task": "Format",
+   "tool": "Biome",
+   "version": "2.6.4",
+   "corpus": "the valid files of JSONTestSuite",
+   "files": 95,
+   "bytes": 1190,
+   "sudsy": {
+    "s": 0.009,
+    "mb": 43
+   },
+   "other": {
+    "s": 0.037,
+    "mb": 42
+   }
+  },
+  {
+   "id": "taplo/TOML/format",
+   "language": "TOML",
+   "task": "Format",
+   "tool": "taplo",
+   "version": "0.10.0",
+   "corpus": "the toml-test valid files and the TOML fixtures of the repository",
+   "files": 213,
+   "bytes": 37235,
+   "sudsy": {
+    "s": 0.012,
+    "mb": 45
+   },
+   "other": {
+    "s": 0.019,
+    "mb": 40
+   }
+  },
+  {
+   "id": "ruff/Python/format",
+   "language": "Python",
+   "task": "Format",
+   "tool": "ruff",
+   "version": "0.17.4",
+   "corpus": "the Python corpus (Django, Requests, Flask, Click, HTTPX, pytest, Black)",
+   "files": 1085,
+   "bytes": 9052527,
+   "sudsy": {
+    "s": 0.314,
+    "mb": 224
+   },
+   "other": {
+    "s": 0.066,
+    "mb": 58
+   }
+  },
+  {
+   "id": "ruff/Python/lint",
+   "language": "Python",
+   "task": "Lint",
+   "tool": "ruff",
+   "version": "0.17.4",
+   "corpus": "the Python corpus (Django, Requests, Flask, Click, HTTPX, pytest, Black)",
+   "files": 1085,
+   "bytes": 9052527,
+   "sudsy": {
+    "s": 0.34,
+    "mb": 245
+   },
+   "other": {
+    "s": 0.165,
+    "mb": 57
+   }
+  },
+  {
+   "id": "sqlfluff/SQL/format",
+   "language": "SQL",
+   "task": "Format",
+   "tool": "sqlfluff",
+   "version": "4.5.0",
+   "corpus": "the ANSI dialect fixtures of sqlfluff, without 3 files Sudsy cannot parse",
+   "files": 211,
+   "bytes": 35608,
+   "sudsy": {
+    "s": 0.012,
+    "mb": 57
+   },
+   "other": {
+    "s": 4.628,
+    "mb": 52
+   }
+  },
+  {
+   "id": "sqlfluff/SQL/lint",
+   "language": "SQL",
+   "task": "Lint",
+   "tool": "sqlfluff",
+   "version": "4.5.0",
+   "corpus": "the ANSI dialect fixtures of sqlfluff, without 3 files Sudsy cannot parse",
+   "files": 211,
+   "bytes": 35608,
+   "sudsy": {
+    "s": 0.043,
+    "mb": 52
+   },
+   "other": {
+    "s": 5.267,
+    "mb": 52
+   }
+  },
+  {
+   "id": "shfmt/Shell/format",
+   "language": "Shell",
+   "task": "Format",
+   "tool": "shfmt",
+   "version": "3.14.1",
+   "corpus": "the shell script corpus",
+   "files": 82,
+   "bytes": 571479,
+   "sudsy": {
+    "s": 0.059,
+    "mb": 79
+   },
+   "other": {
+    "s": 0.023,
+    "mb": 52
+   }
+  },
+  {
+   "id": "google-java-format/Java/format",
+   "language": "Java",
+   "task": "Format",
+   "tool": "google-java-format",
+   "version": "2.0.0",
+   "corpus": "the Java corpus (5 projects)",
+   "files": 5337,
+   "bytes": 48826908,
+   "sudsy": {
+    "s": 1.091,
+    "mb": 646
+   },
+   "other": {
+    "s": 20.533,
+    "mb": 998
+   }
+  },
+  {
+   "id": "ktlint/Kotlin/format",
+   "language": "Kotlin",
+   "task": "Format",
+   "tool": "ktlint",
+   "version": "1.8.0",
+   "corpus": "the Kotlin corpus",
+   "files": 5848,
+   "bytes": 30609136,
+   "sudsy": {
+    "s": 1.614,
+    "mb": 501
+   },
+   "other": {
+    "s": 48.418,
+    "mb": 715
+   }
+  },
+  {
+   "id": "ktlint/Kotlin/lint",
+   "language": "Kotlin",
+   "task": "Lint",
+   "tool": "ktlint",
+   "version": "1.8.0",
+   "corpus": "the Kotlin corpus",
+   "files": 5848,
+   "bytes": 30609136,
+   "sudsy": {
+    "s": 1.142,
+    "mb": 485
+   },
+   "other": {
+    "s": 48.01,
+    "mb": 683
+   }
+  },
+  {
+   "id": "php-cs-fixer/PHP/format",
+   "language": "PHP",
+   "task": "Format",
+   "tool": "PHP-CS-Fixer",
+   "version": "3.95.31",
+   "corpus": "the PHP corpus",
+   "files": 10389,
+   "bytes": 98358487,
+   "sudsy": {
+    "s": 1.773,
+    "mb": 1161
+   },
+   "other": {
+    "s": 285.459,
+    "mb": 70
+   }
+  },
+  {
+   "id": "invoke-formatter/PowerShell/format",
+   "language": "PowerShell",
+   "task": "Format",
+   "tool": "Invoke-Formatter",
+   "version": "1.25.0",
+   "not_measured": "no PowerShell (pwsh) on the host that wrote this table"
+  },
+  {
+   "id": "buf/Protobuf/format",
+   "language": "Protobuf",
+   "task": "Format",
+   "tool": "buf",
+   "version": "1.75.0",
+   "corpus": "the Protobuf corpus",
+   "files": 323,
+   "bytes": 2312295,
+   "sudsy": {
+    "s": 0.069,
+    "mb": 118
+   },
+   "other": {
+    "s": 0.246,
+    "mb": 74
+   }
+  },
+  {
+   "id": "buf/Protobuf/lint",
+   "language": "Protobuf",
+   "task": "Lint",
+   "tool": "buf",
+   "version": "1.75.0",
+   "not_measured": "the analysis runs per module, not on a folder of unrelated files"
+  },
+  {
+   "id": "terraform/HCL/format",
+   "language": "HCL",
+   "task": "Format",
+   "tool": "terraform fmt",
+   "version": "1.17.1",
+   "corpus": "the Terraform corpus",
+   "files": 318,
+   "bytes": 1077521,
+   "sudsy": {
+    "s": 0.112,
+    "mb": 123
+   },
+   "other": {
+    "s": 0.397,
+    "mb": 87
+   }
+  },
+  {
+   "id": "csharpier/C#/format",
+   "language": "C#",
+   "task": "Format",
+   "tool": "CSharpier",
+   "version": "1.3.0",
+   "corpus": "dotnet/runtime CoreLib, without 14 files Sudsy cannot parse",
+   "files": 1665,
+   "bytes": 27039008,
+   "sudsy": {
+    "s": 4.355,
+    "mb": 572
+   },
+   "other": {
+    "s": 14.382,
+    "mb": 456
+   }
+  },
+  {
+   "id": "csharpier-xml/XML/format",
+   "language": "XML",
+   "task": "Format",
+   "tool": "CSharpier",
+   "version": "1.3.0",
+   "corpus": "the XML fixtures and the project files of dotnet/aspnetcore, without 1 files Sudsy cannot parse",
+   "files": 373,
+   "bytes": 1181202,
+   "sudsy": {
+    "s": 0.112,
+    "mb": 104
+   },
+   "other": {
+    "s": 0.443,
+    "mb": 97
+   }
+  },
+  {
+   "id": "dotnet-format/C# (.editorconfig)/format",
+   "language": "C# (.editorconfig)",
+   "task": "Format",
+   "tool": "dotnet format",
+   "version": "",
+   "not_measured": "its fixtures are small .editorconfig cases, each in a folder of its own, not a corpus"
+  },
+  {
+   "id": "yamllint/YAML/lint",
+   "language": "YAML",
+   "task": "Lint",
+   "tool": "yamllint",
+   "version": "1.38.0",
+   "corpus": "the GitHub Actions workflows of real repositories and the yaml-test-suite cases",
+   "files": 395,
+   "bytes": 470260,
+   "sudsy": {
+    "s": 0.071,
+    "mb": 62
+   },
+   "other": {
+    "s": 1.249,
+    "mb": 55
+   }
+  },
+  {
+   "id": "eslint/JS/TS/lint",
+   "language": "JS/TS",
+   "task": "Lint",
+   "tool": "ESLint",
+   "version": "9.39.5",
+   "corpus": "three.js src, express lib and test, 8 copies",
+   "files": 848,
+   "bytes": 4619096,
+   "sudsy": {
+    "s": 0.273,
+    "mb": 189
+   },
+   "other": {
+    "s": 4.296,
+    "mb": 451
+   }
+  },
+  {
+   "id": "rubocop/Ruby/lint",
+   "language": "Ruby",
+   "task": "Lint",
+   "tool": "RuboCop",
+   "version": "1.92.3",
+   "corpus": "the Ruby corpus",
+   "files": 18849,
+   "bytes": 86103536,
+   "sudsy": {
+    "s": 2.997,
+    "mb": 1180
+   },
+   "other": {
+    "s": 264.551,
+    "mb": 377
+   }
+  },
+  {
+   "id": "typescript-eslint/JS/TS/lint",
+   "language": "JS/TS",
+   "task": "Lint",
+   "tool": "typescript-eslint",
+   "version": "8.72.2",
+   "corpus": "TypeScript sources of vuejs/core, docusaurus, excalidraw and MUI",
+   "files": 1115,
+   "bytes": 7883847,
+   "sudsy": {
+    "s": 0.315,
+    "mb": 240
+   },
+   "other": {
+    "s": 7.544,
+    "mb": 730
+   }
+  },
+  {
+   "id": "eslint-plugin-vue/Vue/lint",
+   "language": "Vue",
+   "task": "Lint",
+   "tool": "eslint-plugin-vue",
+   "version": "10.12.1",
+   "not_measured": "no runner yet: the flat config for .vue files needs vue-eslint-parser and a corpus of .vue files"
+  },
+  {
+   "id": "eslint-plugin-svelte/Svelte/lint",
+   "language": "Svelte",
+   "task": "Lint",
+   "tool": "eslint-plugin-svelte",
+   "version": "3.24.1",
+   "not_measured": "no runner yet: the flat config for .svelte files needs svelte-eslint-parser and a corpus of .svelte files"
+  },
+  {
+   "id": "eslint-jsonc/JSON/lint",
+   "language": "JSON",
+   "task": "Lint",
+   "tool": "eslint-plugin-jsonc",
+   "version": "3.4.2",
+   "not_measured": "no mirroring preset"
+  },
+  {
+   "id": "stylelint/CSS/lint",
+   "language": "CSS",
+   "task": "Lint",
+   "tool": "stylelint",
+   "version": "17.16.0",
+   "corpus": "the CSS corpus (css-tricks, Bootstrap, and others)",
+   "files": 75,
+   "bytes": 1087424,
+   "sudsy": {
+    "s": 0.271,
+    "mb": 113
+   },
+   "other": {
+    "s": 2.041,
+    "mb": 355
+   }
+  },
+  {
+   "id": "stylelint-scss/SCSS/lint",
+   "language": "SCSS",
+   "task": "Lint",
+   "tool": "stylelint-scss",
+   "version": "7.4.0",
+   "not_measured": "no mirroring preset"
+  },
+  {
+   "id": "stylelint-less/Less/lint",
+   "language": "Less",
+   "task": "Lint",
+   "tool": "stylelint-less",
+   "version": "4.2.2",
+   "not_measured": "no mirroring preset"
+  },
+  {
+   "id": "html-validate/HTML/lint",
+   "language": "HTML",
+   "task": "Lint",
+   "tool": "html-validate",
+   "version": "11.21.0",
+   "corpus": "the HTML corpus (Prettier tests, mdn learning-area)",
+   "files": 257,
+   "bytes": 1030833,
+   "sudsy": {
+    "s": 0.09,
+    "mb": 104
+   },
+   "other": {
+    "s": 2.268,
+    "mb": 285
+   }
+  },
+  {
+   "id": "markdownlint/Markdown/lint",
+   "language": "Markdown",
+   "task": "Lint",
+   "tool": "markdownlint",
+   "version": "0.24.0",
+   "corpus": "the dotnet/runtime documentation",
+   "files": 23,
+   "bytes": 408803,
+   "sudsy": {
+    "s": 0.096,
+    "mb": 87
+   },
+   "other": {
+    "s": 0.719,
+    "mb": 198
+   }
+  },
+  {
+   "id": "hadolint/Dockerfile/lint",
+   "language": "Dockerfile",
+   "task": "Lint",
+   "tool": "hadolint",
+   "version": "2.15.1",
+   "corpus": "the Dockerfile corpus",
+   "files": 211,
+   "bytes": 684692,
+   "sudsy": {
+    "s": 0.071,
+    "mb": 70
+   },
+   "other": {
+    "s": 2.572,
+    "mb": 74
+   }
+  },
+  {
+   "id": "shellcheck/Shell/lint",
+   "language": "Shell",
+   "task": "Lint",
+   "tool": "ShellCheck",
+   "version": "0.11.0",
+   "corpus": "the shell script corpus",
+   "files": 81,
+   "bytes": 571008,
+   "sudsy": {
+    "s": 0.089,
+    "mb": 86
+   },
+   "other": {
+    "s": 170.251,
+    "mb": 9735
+   }
+  },
+  {
+   "id": "actionlint/GitHub Actions/lint",
+   "language": "GitHub Actions",
+   "task": "Lint",
+   "tool": "actionlint",
+   "version": "1.7.12",
+   "corpus": "the GitHub Actions workflows of real repositories",
+   "files": 395,
+   "bytes": 470260,
+   "sudsy": {
+    "s": 0.135,
+    "mb": 76
+   },
+   "other": {
+    "s": 0.065,
+    "mb": 71
+   }
+  },
+  {
+   "id": "checkmake/Makefile/lint",
+   "language": "Makefile",
+   "task": "Lint",
+   "tool": "checkmake",
+   "version": "0.3.2",
+   "corpus": "the Makefile corpus",
+   "files": 59,
+   "bytes": 355794,
+   "sudsy": {
+    "s": 0.059,
+    "mb": 70
+   },
+   "other": {
+    "s": 0.016,
+    "mb": 28
+   }
+  },
+  {
+   "id": "psscriptanalyzer/PowerShell/lint",
+   "language": "PowerShell",
+   "task": "Lint",
+   "tool": "PSScriptAnalyzer",
+   "version": "1.25.0",
+   "not_measured": "no PowerShell (pwsh) on the host that wrote this table"
+  },
+  {
+   "id": "tflint/HCL/lint",
+   "language": "HCL",
+   "task": "Lint",
+   "tool": "tflint",
+   "version": "0.66.0",
+   "corpus": "the Terraform corpus",
+   "files": 222,
+   "bytes": 1001112,
+   "sudsy": {
+    "s": 0.2,
+    "mb": 120
+   },
+   "other": {
+    "s": 4.686,
+    "mb": 89
+   }
+  },
+  {
+   "id": "checkstyle/Java/lint",
+   "language": "Java",
+   "task": "Lint",
+   "tool": "Checkstyle",
+   "version": "14.4.0",
+   "corpus": "the Java corpus (5 projects)",
+   "files": 5337,
+   "bytes": 48826908,
+   "sudsy": {
+    "s": 0.958,
+    "mb": 591
+   },
+   "other": {
+    "s": 146.162,
+    "mb": 1173
+   }
+  },
+  {
+   "id": "htmlhint/HTML/lint",
+   "language": "HTML",
+   "task": "Lint",
+   "tool": "HTMLHint",
+   "version": "1.9.2",
+   "corpus": "the HTML corpus (Prettier tests, mdn learning-area)",
+   "files": 257,
+   "bytes": 1030833,
+   "sudsy": {
+    "s": 0.066,
+    "mb": 82
+   },
+   "other": {
+    "s": 0.263,
+    "mb": 100
+   }
+  },
+  {
+   "id": "html-eslint/HTML/lint",
+   "language": "HTML",
+   "task": "Lint",
+   "tool": "html-eslint",
+   "version": "0.68.0",
+   "corpus": "the HTML corpus (Prettier tests, mdn learning-area)",
+   "files": 257,
+   "bytes": 1030833,
+   "sudsy": {
+    "s": 0.062,
+    "mb": 82
+   },
+   "other": {
+    "s": 0.124,
+    "mb": 75
+   }
+  },
+  {
+   "id": "phpstan/PHP/lint",
+   "language": "PHP",
+   "task": "Lint",
+   "tool": "PHPStan",
+   "version": "2.3.6",
+   "not_measured": "the analysis runs per project folder, not on a folder of unrelated files"
+  },
+  {
+   "id": "stylecop/C#/lint",
+   "language": "C#",
+   "task": "Lint",
+   "tool": "StyleCop",
+   "version": "1.2.0-beta.556",
+   "not_measured": "the compiler skips analyzers when the compilation has errors, and the C# corpus does not compile on its own"
+  },
+  {
+   "id": "biome-js/JS/TS/format",
+   "language": "JS/TS",
+   "task": "Format",
+   "tool": "Biome",
+   "version": "2.6.4",
+   "corpus": "three.js src, express lib and test, 8 copies",
+   "files": 848,
+   "bytes": 4619096,
+   "sudsy": {
+    "s": 0.27,
+    "mb": 158
+   },
+   "other": {
+    "s": 0.184,
+    "mb": 104
+   }
+  },
+  {
+   "id": "biome-js/JS/TS/lint",
+   "language": "JS/TS",
+   "task": "Lint",
+   "tool": "Biome",
+   "version": "2.6.4",
+   "corpus": "three.js src, express lib and test, 8 copies",
+   "files": 848,
+   "bytes": 4619096,
+   "sudsy": {
+    "s": 0.271,
+    "mb": 205
+   },
+   "other": {
+    "s": 0.381,
+    "mb": 146
+   }
+  },
+  {
+   "id": "oxlint/JS/TS/lint",
+   "language": "JS/TS",
+   "task": "Lint",
+   "tool": "oxlint",
+   "version": "1.94.0",
+   "corpus": "three.js src, express lib and test, 8 copies",
+   "files": 848,
+   "bytes": 4619096,
+   "sudsy": {
+    "s": 0.239,
+    "mb": 199
+   },
+   "other": {
+    "s": 0.057,
+    "mb": 160
+   }
+  },
+  {
+   "id": "dprint/JSON/format",
+   "language": "JSON",
+   "task": "Format",
+   "tool": "dprint",
+   "version": "0.64.3",
+   "corpus": "the valid files of JSONTestSuite",
+   "files": 95,
+   "bytes": 1190,
+   "sudsy": {
+    "s": 0.007,
+    "mb": 73
+   },
+   "other": {
+    "s": 0.012,
+    "mb": 73
+   }
+  },
+  {
+   "id": "dprint/YAML/format",
+   "language": "YAML",
+   "task": "Format",
+   "tool": "dprint",
+   "version": "0.64.3",
+   "corpus": "the GitHub Actions workflows of real repositories, 8 copies, without 16 files Sudsy cannot parse",
+   "files": 3144,
+   "bytes": 3761296,
+   "sudsy": {
+    "s": 0.166,
+    "mb": 99
+   },
+   "other": {
+    "s": 0.231,
+    "mb": 73
+   }
+  }
+ ]
+}

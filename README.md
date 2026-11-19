@@ -100,17 +100,66 @@ Corpora (for example Django for Python, the .NET runtime, Roslyn and ASP.NET Cor
 
 ## Performance
 
-Measured in check mode, with a new process per run and caches off, best of 5. Machine: Linux, 8-core Neoverse-V2. Each tool lints with its own default rules, so the rule sets differ: ruff runs 407 rules on Django, and Sudsy runs far fewer.
+<!-- generated:speed -->
+| Language | Task | Compared with | Sudsy speed | Time (Sudsy / tool) | Peak memory (Sudsy / tool) |
+|---|---|---|---|---|---|
+| JSON | Format | Prettier | 26× faster | 0.009 s / 0.23 s | 43 / 85 MB |
+|  |  | Biome | 4.1× faster | 0.009 s / 0.037 s | 43 / 42 MB |
+|  |  | dprint | 1.7× faster | 0.007 s / 0.012 s | 73 / 73 MB |
+|  | Lint | eslint-plugin-jsonc | not measured: no mirroring preset | - | - |
+| YAML | Format | Prettier | 43× faster | 0.15 s / 6.48 s | 103 / 237 MB |
+|  |  | dprint | 1.4× faster | 0.17 s / 0.23 s | 99 / 73 MB |
+|  | Lint | yamllint | 18× faster | 0.071 s / 1.25 s | 62 / 55 MB |
+| JS/TS | Format | Prettier | 23× faster | 0.21 s / 4.87 s | 172 / 298 MB |
+|  |  | Biome | 1.5× slower | 0.27 s / 0.18 s | 158 / 104 MB |
+|  | Lint | ESLint | 16× faster | 0.27 s / 4.30 s | 189 / 451 MB |
+|  |  | typescript-eslint | 24× faster | 0.32 s / 7.54 s | 240 / 730 MB |
+|  |  | Biome | 1.4× faster | 0.27 s / 0.38 s | 205 / 146 MB |
+|  |  | oxlint | 4.2× slower | 0.24 s / 0.057 s | 199 / 160 MB |
+| CSS | Format | Prettier | 39× faster | 0.14 s / 5.61 s | 157 / 392 MB |
+|  | Lint | stylelint | 7.5× faster | 0.27 s / 2.04 s | 113 / 355 MB |
+| HTML | Format | Prettier | 54× faster | 0.026 s / 1.40 s | 98 / 169 MB |
+|  | Lint | html-validate | 25× faster | 0.090 s / 2.27 s | 104 / 285 MB |
+|  |  | HTMLHint | 4.0× faster | 0.066 s / 0.26 s | 82 / 100 MB |
+|  |  | html-eslint | 2.0× faster | 0.062 s / 0.12 s | 82 / 75 MB |
+| Angular | Format | Prettier | not measured: Prettier picks its Angular parser from the .component.html name, which the corpus files do not carry | - | - |
+| TOML | Format | taplo | 1.6× faster | 0.012 s / 0.019 s | 45 / 40 MB |
+| Python | Format | ruff | 4.8× slower | 0.31 s / 0.066 s | 224 / 58 MB |
+|  | Lint | ruff | 2.1× slower | 0.34 s / 0.17 s | 245 / 57 MB |
+| SQL | Format | sqlfluff | 386× faster | 0.012 s / 4.63 s | 57 / 52 MB |
+|  | Lint | sqlfluff | 122× faster | 0.043 s / 5.27 s | 52 / 52 MB |
+| Shell | Format | shfmt | 2.6× slower | 0.059 s / 0.023 s | 79 / 52 MB |
+|  | Lint | ShellCheck | 1913× faster | 0.089 s / 170.25 s | 86 / 9735 MB |
+| Java | Format | google-java-format | 19× faster | 1.09 s / 20.53 s | 646 / 998 MB |
+|  | Lint | Checkstyle | 153× faster | 0.96 s / 146.16 s | 591 / 1173 MB |
+| Kotlin | Format | ktlint | 30× faster | 1.61 s / 48.42 s | 501 / 715 MB |
+|  | Lint | ktlint | 42× faster | 1.14 s / 48.01 s | 485 / 683 MB |
+| PHP | Format | PHP-CS-Fixer | 161× faster | 1.77 s / 285.46 s | 1161 / 70 MB |
+|  | Lint | PHPStan | not measured: the analysis runs per project folder, not on a folder of unrelated files | - | - |
+| PowerShell | Format | Invoke-Formatter | not measured: no PowerShell (pwsh) on the host that wrote this table | - | - |
+|  | Lint | PSScriptAnalyzer | not measured: no PowerShell (pwsh) on the host that wrote this table | - | - |
+| Protobuf | Format | buf | 3.6× faster | 0.069 s / 0.25 s | 118 / 74 MB |
+|  | Lint | buf | not measured: the analysis runs per module, not on a folder of unrelated files | - | - |
+| HCL | Format | terraform fmt | 3.5× faster | 0.11 s / 0.40 s | 123 / 87 MB |
+|  | Lint | tflint | 23× faster | 0.20 s / 4.69 s | 120 / 89 MB |
+| C# | Format | CSharpier | 3.3× faster | 4.36 s / 14.38 s | 572 / 456 MB |
+|  | Lint | StyleCop | not measured: the compiler skips analyzers when the compilation has errors, and the C# corpus does not compile on its own | - | - |
+| XML | Format | CSharpier | 4.0× faster | 0.11 s / 0.44 s | 104 / 97 MB |
+| C# (.editorconfig) | Format | dotnet format | not measured: its fixtures are small .editorconfig cases, each in a folder of its own, not a corpus | - | - |
+| Ruby | Lint | RuboCop | 88× faster | 3.00 s / 264.55 s | 1180 / 377 MB |
+| Vue | Lint | eslint-plugin-vue | not measured: no runner yet: the flat config for .vue files needs vue-eslint-parser and a corpus of .vue files | - | - |
+| Svelte | Lint | eslint-plugin-svelte | not measured: no runner yet: the flat config for .svelte files needs svelte-eslint-parser and a corpus of .svelte files | - | - |
+| SCSS | Lint | stylelint-scss | not measured: no mirroring preset | - | - |
+| Less | Lint | stylelint-less | not measured: no mirroring preset | - | - |
+| Markdown | Lint | markdownlint | 7.5× faster | 0.096 s / 0.72 s | 87 / 198 MB |
+| Dockerfile | Lint | hadolint | 36× faster | 0.071 s / 2.57 s | 70 / 74 MB |
+| GitHub Actions | Lint | actionlint | 2.1× slower | 0.14 s / 0.065 s | 76 / 71 MB |
+| Makefile | Lint | checkmake | 3.7× slower | 0.059 s / 0.016 s | 70 / 28 MB |
 
-| Task | Sudsy | Others |
-|---|---|---|
-| Format JS (848 files, 7 MB) | 0.22 s | Biome 0.15 s, Prettier 4.21 s (19× slower) |
-| Lint JS | 0.11 s | oxlint 0.05 s, Biome 0.32 s |
-| Format Python (Django, 883 files) | 0.18 s | ruff 0.04 s (4.5× faster) |
-| Lint Python (Django) | 0.11 s | ruff 0.11 s |
-| Format C# (7,659 files, 12 cores) | 8–10 s | CSharpier 42–43 s |
+Runner: Linux aarch64, 8 cores. Best of 5 runs, a new process each, caches off, `format --check` and `lint` with the Sudsy preset that mirrors the tool. Corpus ([docs/languages.md](docs/languages.md)): JSON: the valid files of JSONTestSuite; YAML: the GitHub Actions workflows of real repositories, 8 copies, without 16 files Sudsy cannot parse and the GitHub Actions workflows of real repositories and the yaml-test-suite cases; JS/TS: three.js src, express lib and test, 8 copies and TypeScript sources of vuejs/core, docusaurus, excalidraw and MUI; CSS: the CSS, SCSS and Less corpus and the CSS corpus (css-tricks, Bootstrap, and others); HTML: the HTML corpus (mdn learning-area and others), without 37 files Sudsy cannot parse and the HTML corpus (Prettier tests, mdn learning-area); TOML: the toml-test valid files and the TOML fixtures of the repository; Python: the Python corpus (Django, Requests, Flask, Click, HTTPX, pytest, Black); SQL: the ANSI dialect fixtures of sqlfluff, without 3 files Sudsy cannot parse; Shell: the shell script corpus; Java: the Java corpus (5 projects); Kotlin: the Kotlin corpus; PHP: the PHP corpus; Protobuf: the Protobuf corpus; HCL: the Terraform corpus; C#: dotnet/runtime CoreLib, without 14 files Sudsy cannot parse; XML: the XML fixtures and the project files of dotnet/aspnetcore, without 1 files Sudsy cannot parse; Ruby: the Ruby corpus; Markdown: the dotnet/runtime documentation; Dockerfile: the Dockerfile corpus; GitHub Actions: the GitHub Actions workflows of real repositories; Makefile: the Makefile corpus. Rerun one row: `scripts/speed.sh <tool>`.
+<!-- /generated -->
 
-Sudsy is far faster than the JavaScript and .NET tools, and slower than the Rust ones. Memory: 180 MB vs ruff's 47 MB on Django. The binary is about 53 MB: it holds the parsers for every language and a Wasm runtime for plugins. Method and more inputs: [docs/performance.md](docs/performance.md).
+Sudsy does the same work as each tool: `format --check` and `lint` with the preset that mirrors it. The binary is about 53 MB: it holds the parsers for every language and a Wasm runtime for plugins. Method: [docs/performance.md](docs/performance.md).
 
 ## Install
 
