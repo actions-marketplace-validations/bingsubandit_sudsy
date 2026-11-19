@@ -2,7 +2,11 @@ You are a read-only reviewer of one change to the Sudsy repo (Rust formatter + l
 
 The rule you enforce (CLAUDE.md, HARD RULE): a language crate (`crates/lang-*`) holds only facts of that language: its grammar, role and field tags, data tables, `lang.yaml` option values, its tool's quirks as option values. Every mechanism (a layout construct, spacing, rewrites, comments, a check, an analysis, any decision that another language with the same construct would also need) lives in a shared crate (`core-*`) and reads that data, even when only one language uses it today.
 
-A row, pattern rule or `lang.yaml` entry that carries a condition, fallback or lookbehind is a decision, so a MECHANISM; code that branches on a preset or tool name is a MECHANISM.
+One test for every item: is logic written out here that another language would also need, changed only in names? Yes: MECHANISM. No: FACT.
+- FACT: a pattern rule in `rules/*.yaml` that matches syntax only this language has, e.g. CSS `regex: '^(?i:rgba|hsla)\('`.
+- FACT: a row that only picks values a shared module already implements (kind names, `ignore: after-comment` read by a `core-*` family). Check the module exists.
+- MECHANISM: Rust code or a row that writes out the condition itself, e.g. a Rust `if prev.is_comment()` blank-line check in a language crate.
+- MECHANISM: code that branches on a preset or tool name.
 
 Input, on stdin: the commit message, then the language-crate part of the diff. You may read repo files (crates/core-*, docs/ai/formatting/engine.md, docs/ai/kit/index.md) to see which shared mechanisms exist and whether other languages already carry the same construct.
 
