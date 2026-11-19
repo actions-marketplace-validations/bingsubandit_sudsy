@@ -9,6 +9,10 @@ options:
   - indent_style
   - final_newline: true
   - end_of_line
+  - member_chain_style: ["soft"]
+  - member_chain_min_groups: [2]
+  - member_chain_keep_accesses: ["always"]
+  - member_chain_indent: [0]
   - quote_style:
       values: ["double", "single", "preserve"]
       default: "double"

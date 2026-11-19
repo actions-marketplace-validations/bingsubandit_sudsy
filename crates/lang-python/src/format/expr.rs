@@ -1,7 +1,7 @@
 //! Expressions: dispatch on the node kind, names, literals, attribute and call chains, subscripts,
 //! parameters and patterns.
 //!
-//! concept: member-chain, literal-spelling
+//! concept: literal-spelling
 
 use super::literal;
 use super::util::*;
@@ -9,6 +9,7 @@ use super::{list, op};
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc, concat, group};
 use core_format::literals::prefixed;
+use core_format::shapes;
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -291,34 +292,6 @@ fn parenthesized_node(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     Ok(bracketed_by(cx, open, concat(inner?), close))
 }
 
-/// One link of an attribute, call and subscript chain.
-enum Link {
-    Attr(SyntaxNode),
-    Call(SyntaxNode),
-    Sub(SyntaxNode),
-}
-
-/// The head of a chain and its links, innermost first.
-fn links(node: &SyntaxNode) -> (SyntaxNode, Vec<Link>) {
-    let mut out = Vec::new();
-    let mut cur = node.clone();
-    loop {
-        let next = match cur.kind() {
-            k::EXPR_ATTRIBUTE | k::EXPR_CALL | k::EXPR_SUBSCRIPT => cur.children().next(),
-            _ => None,
-        };
-        let Some(inner) = next else { break };
-        out.push(match cur.kind() {
-            k::EXPR_ATTRIBUTE => Link::Attr(cur.clone()),
-            k::EXPR_CALL => Link::Call(cur.clone()),
-            _ => Link::Sub(cur.clone()),
-        });
-        cur = inner;
-    }
-    out.reverse();
-    (cur, out)
-}
-
 /// Does a comment stand after the head of an attribute chain, between the dot and the names, or between a
 /// callee and its `(` or `[`?
 pub(crate) fn chain_has_comments(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
@@ -364,97 +337,60 @@ pub(crate) fn chain_has_comments(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool 
     }
 }
 
+/// What Python prints in a member chain: a decimal number before `.attr` in parentheses
+/// (`(1).real`; `0x1.real` and `1j.real` stay as they are), a subscript's own layout, the break
+/// that exists only inside brackets.
+struct ChainHooks<'a, 'b>(&'a FormatCtx<'b>);
+
+impl shapes::ChainHooks for ChainHooks<'_, '_> {
+    /// Nodes print as expressions (the formatter's own entry, not the generic dispatch).
+    fn element(&self, e: &SyntaxElement, _: bool) -> Option<R> {
+        let n = e.as_node()?;
+        let dotted_number = n.kind() == k::EXPR_NUMBER_LITERAL
+            && n.parent().is_some_and(|p| {
+                p.kind() == k::EXPR_ATTRIBUTE && p.first_child().as_ref() == Some(n)
+            })
+            && n.first_token().is_some_and(|t| {
+                t.kind() == k::FLOAT
+                    || t.kind() == k::INT
+                        && !t.text().get(..2).is_some_and(|p| {
+                            ["0x", "0b", "0o"].contains(&p.to_ascii_lowercase().as_str())
+                        })
+            });
+        let d = expr(self.0, n);
+        Some(if dotted_number {
+            d.map(|d| concat(vec![doc::lit("("), d, doc::lit(")")]))
+        } else {
+            d
+        })
+    }
+
+    fn link(&self, node: &SyntaxNode, _: bool) -> Option<Result<(Doc, bool), FormatError>> {
+        (node.kind() == k::EXPR_SUBSCRIPT).then(|| subscript_tail(self.0, node).map(|d| (d, false)))
+    }
+
+    fn separator(&self) -> Doc {
+        soft_brk()
+    }
+}
+
 /// ruff's fluent layout: two or more attributes that follow a call or subscript.
-pub(crate) fn is_fluent(_cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
-    if !fluent_allowed() {
-        return false;
-    }
-    let (_, ls) = links(node);
-    let mut after = 0;
-    let mut prev_bracket = false;
-    for l in &ls {
-        match l {
-            Link::Attr(_) => {
-                if prev_bracket {
-                    after += 1;
-                }
-                prev_bracket = false;
-            }
-            _ => prev_bracket = true,
-        }
-    }
-    after >= 2
+pub(crate) fn is_fluent(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    fluent_allowed()
+        && shapes::chain_soft_groups(cx, node, &style(cx).chain, &ChainHooks(cx))
+            >= style(cx).chain.min_groups
 }
 
 /// `value.attr(args)[index]`, with a line break before each `.attr` that follows a call or
-/// subscript when the chain is fluent.
+/// subscript when the chain is fluent: the shared member chain in the `soft` style.
 fn trailers(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    let (head, ls) = links(node);
-    let fluent = is_fluent(cx, node);
-    let head_doc = expr(cx, &head)?;
-    let mut first = vec![if needs_dot_parens(&head, &ls) {
-        concat(vec![doc::lit("("), head_doc, doc::lit(")")])
+    let s = style(cx);
+    let policy = if fluent_allowed() {
+        &s.chain
     } else {
-        head_doc
-    }];
-    let mut rest: Vec<Doc> = Vec::new();
-    let mut after_bracket = false;
-    // A comment after the head ends its line: the first `.attr` goes to the next one (ruff).
-    let mut after_comment = matches!(ls.first(), Some(Link::Attr(_)))
-        && core_format::comments::comment_at_end(cx.grammar, &head)
-        && cx
-            .last_token(&head)
-            .is_some_and(|l| core_format::comments::has_trailing_comment(cx.grammar, &l));
-    for l in &ls {
-        let in_rest = !rest.is_empty();
-        match l {
-            Link::Attr(n) => {
-                if ((fluent || in_rest) && after_bracket) || after_comment {
-                    rest.push(soft_brk());
-                    after_comment = false;
-                }
-                let target = if rest.is_empty() {
-                    &mut first
-                } else {
-                    &mut rest
-                };
-                for e in kids(cx, n).iter().skip(1) {
-                    target.push(elem(cx, e)?);
-                }
-                after_bracket = false;
-            }
-            Link::Call(n) => {
-                let target = if in_rest { &mut rest } else { &mut first };
-                if let Some(a) = n.children().nth(1) {
-                    target.push(list::arguments(cx, &a)?);
-                }
-                after_bracket = true;
-            }
-            Link::Sub(n) => {
-                let target = if in_rest { &mut rest } else { &mut first };
-                target.push(subscript_tail(cx, n)?);
-                after_bracket = true;
-            }
-        }
-    }
-    if rest.is_empty() {
-        return Ok(concat(first));
-    }
-    Ok(group(concat(vec![concat(first), concat(rest)])))
-}
-
-/// A decimal integer or a float is parenthesized before `.attr` (`(1).real`); `0x1.real` and `1j.real`
-/// stay as they are.
-fn needs_dot_parens(head: &SyntaxNode, ls: &[Link]) -> bool {
-    head.kind() == k::EXPR_NUMBER_LITERAL
-        && matches!(ls.first(), Some(Link::Attr(_)))
-        && head.first_token().is_some_and(|t| {
-            t.kind() == k::FLOAT
-                || t.kind() == k::INT
-                    && !t.text().get(..2).is_some_and(|p| {
-                        ["0x", "0b", "0o"].contains(&p.to_ascii_lowercase().as_str())
-                    })
-        })
+        &s.chain_flat
+    };
+    shapes::call_chain(cx, node, policy, &ChainHooks(cx))
 }
 
 /// `[index]` of a subscript.

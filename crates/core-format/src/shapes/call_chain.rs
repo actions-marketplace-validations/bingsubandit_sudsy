@@ -9,7 +9,7 @@
 //! tools: Prettier member-chain, google-java-format dot chains
 //! reads: option:member_chain_min_calls
 
-use super::chain::{MemberChain, member_chain as print_chain};
+use super::chain::{MemberChain, ends_in_line_comment, member_chain as print_chain};
 use crate::comments::{self, CommentKind};
 use crate::doc::{self, Doc};
 use crate::{Directive, FormatCtx, FormatError};
@@ -25,6 +25,7 @@ pub const SHORT_HEAD: &str = "member_chain_short_head";
 pub const INDENT: &str = "member_chain_indent";
 pub const STYLE: &str = "member_chain_style";
 pub const FORCE_LINKS: &str = "member_chain_force_links";
+pub const MIN_GROUPS: &str = "member_chain_min_groups";
 #[path = "call_chain_wrapped.rs"]
 mod wrapped;
 /// The label of the document of a chain printed in the `grouped` style.
@@ -32,9 +33,12 @@ pub const CHAIN_LABEL: &str = "member-chain";
 
 /// The algorithms of reference tools: `fluent` (C#, Java) groups the links at the dots;
 /// `grouped` (JS) cuts them into a first group and call groups; `wrapped` (Kotlin) puts every dot
-/// after the accesses of the head on a line of its own.
+/// after the accesses of the head on a line of its own; `soft` (Python) keeps the accesses in front
+/// of the first call with the head and puts every access that follows a call or an index on a
+/// line of its own, in a group that is the chain's own and has no indent of its own.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Style {
+    Soft,
     Fluent,
     Grouped,
     Wrapped,
@@ -74,6 +78,8 @@ pub struct ChainPolicy {
     pub indent: usize,
     /// A chain with at least this many dots always breaks (`wrapped`; 0: never).
     pub force_links: usize,
+    /// A chain with fewer groups after the first is never broken at the dots (`soft`).
+    pub min_groups: usize,
     /// A chain of at most this many characters on one line of the source with fewer dots than
     /// `force_links` is never broken (`wrapped`: a third of the line width; 0: none).
     pub flat_below: usize,
@@ -89,9 +95,11 @@ impl ChainPolicy {
             style: match text(STYLE) {
                 "grouped" => Style::Grouped,
                 "wrapped" => Style::Wrapped,
+                "soft" => Style::Soft,
                 _ => Style::Fluent,
             },
             force_links: int(FORCE_LINKS, 0),
+            min_groups: int(MIN_GROUPS, 0),
             flat_below: if text(STYLE) == "wrapped" {
                 int("line_width", 0) / 3
             } else {
@@ -138,6 +146,10 @@ pub trait ChainHooks {
     /// Is the chain a whole statement (`grouped` style: a short head name stays only then)?
     fn statement(&self, _chain: &SyntaxNode) -> bool {
         true
+    }
+    /// The break in front of a group (`soft` style).
+    fn separator(&self) -> Doc {
+        doc::softline()
     }
 }
 
@@ -253,12 +265,13 @@ impl<'a> Walk<'a> {
     fn walk_in(&self, node: &SyntaxNode) -> Option<SyntaxElement> {
         let g = self.cx.grammar;
         let call = self.tag(node, "call");
+        let unary = self.tag(node, "unary");
         let all = self.significant(node);
         let field = |name: &str| g.slot_in(node.kind(), &all, name);
         let receiver = match field("object") {
             Some(o) => Some(o),
             None if call => field("callee"),
-            None if self.tag(node, "unary") => field("operand"),
+            None if unary => field("operand"),
             None => None,
         };
         if call && self.call_heads {
@@ -270,33 +283,36 @@ impl<'a> Walk<'a> {
                 return Some(SyntaxElement::Node(node.clone()));
             }
         }
-        let mut elems = all.clone();
-        elems.retain(|e| Some(e) != receiver.as_ref());
         // A member whose name is itself a chain (`a?.b.c()`: the `?` and then the chain) continues it.
         // A member that is a call on a plain name (`a.b(c)` as `a`, `.`, `b(c)`) is the call link itself.
-        let selector = match field("member") {
-            Some(SyntaxElement::Node(m)) if !call && self.tag(&m, "call") => {
-                let callee = self.cx.grammar.slot(&m, "callee");
+        let member = if call { None } else { field("member") };
+        let selector = match &member {
+            Some(SyntaxElement::Node(m)) if self.tag(m, "call") => {
+                let callee = self.cx.grammar.slot(m, "callee");
                 !callee
                     .and_then(|c| c.into_node())
                     .is_some_and(|c| self.is_link(&c))
             }
             _ => false,
         };
-        let nested = match field("member") {
-            Some(SyntaxElement::Node(m)) if !call && !selector && self.is_link(&m) => Some(m),
+        let nested = match member {
+            Some(SyntaxElement::Node(m)) if !selector && self.is_link(&m) => Some(m),
             _ => None,
         };
-        if let Some(m) = &nested {
-            elems.retain(|e| e.as_node() != Some(m));
-        }
-        let head = self.descend(receiver);
-        let dotted = matches!(elems.first(), Some(SyntaxElement::Token(t)) if matches!(t.text(), "." | "?."));
         let index = self.tag(node, "index");
         let literal = index
             && field("arguments")
                 .and_then(|a| a.into_node())
                 .is_some_and(|a| self.tag(&a, "literal"));
+        let elems: Vec<SyntaxElement> = all
+            .into_iter()
+            .filter(|e| {
+                Some(e) != receiver.as_ref()
+                    && nested.as_ref().is_none_or(|m| e.as_node() != Some(m))
+            })
+            .collect();
+        let head = self.descend(receiver);
+        let dotted = matches!(elems.first(), Some(SyntaxElement::Token(t)) if matches!(t.text(), "." | "?."));
         self.links.borrow_mut().push(Link {
             node: node.clone(),
             elems,
@@ -304,7 +320,7 @@ impl<'a> Walk<'a> {
             call: call || selector,
             index,
             literal,
-            postfix: self.tag(node, "unary"),
+            postfix: unary,
             marker: nested.is_some(),
         });
         if let Some(m) = nested {
@@ -323,21 +339,29 @@ impl<'a> Walk<'a> {
         }
     }
 
-    /// The text of a link, and whether a comment or a blank line follows it.
-    fn link_doc(&self, link: &Link, last: bool, in_head: bool) -> Result<(Doc, bool), FormatError> {
+    /// The text of a link.
+    fn link_text(&self, link: &Link, last: bool, in_head: bool) -> Result<Doc, FormatError> {
         if let Some(d) = self.hooks.link(&link.node, last) {
-            return d;
+            return d.map(|d| d.0);
         }
         let parts = link
             .elems
             .iter()
             .map(|e| self.element(e, in_head))
             .collect::<Result<Vec<_>, _>>()?;
+        Ok(doc::concat(parts))
+    }
+
+    /// The text of a link, and whether a comment or a blank line follows it.
+    fn link_doc(&self, link: &Link, last: bool, in_head: bool) -> Result<(Doc, bool), FormatError> {
+        if let Some(d) = self.hooks.link(&link.node, last) {
+            return d;
+        }
         let commented = link.elems.iter().filter_map(|e| e.as_token()).any(|t| {
             !comments::leading_comments(self.cx.grammar, t).is_empty()
                 || !comments::trailing_comments(self.cx.grammar, t).is_empty()
         });
-        Ok((doc::concat(parts), commented))
+        Ok((self.link_text(link, last, in_head)?, commented))
     }
 }
 
@@ -418,6 +442,143 @@ fn merges_first_group(
         || text.chars().count() <= short_head
 }
 
+/// Does link `i` start a group (at a dot), given the `count` of groups started before it?
+fn starts_group(links: &[Link], i: usize, count: usize, policy: &ChainPolicy) -> bool {
+    let link = &links[i];
+    if link.marker {
+        links.get(i + 1).is_some_and(|n| n.dotted)
+    } else if link.dotted {
+        match i.checked_sub(1).map(|p| &links[p]) {
+            Some(p) if p.marker => false,
+            Some(p)
+                if policy.keep_accesses == KeepAccesses::Always
+                    || (policy.keep_accesses == KeepAccesses::Head && count <= 1) =>
+            {
+                !(p.dotted && !p.call)
+            }
+            _ => true,
+        }
+    } else {
+        false
+    }
+}
+
+/// The links that stay with the head (`None`) and the group each other link belongs to.
+fn group_links(links: &[Link], policy: &ChainPolicy) -> (Vec<Option<usize>>, usize) {
+    let mut group_of: Vec<Option<usize>> = Vec::with_capacity(links.len());
+    let mut count = 0usize;
+    for i in 0..links.len() {
+        if starts_group(links, i, count, policy) {
+            count += 1;
+        }
+        group_of.push(count.checked_sub(1));
+    }
+    (group_of, count)
+}
+
+/// The first group joins the head.
+fn merge_first(group_of: &mut [Option<usize>], group_count: &mut usize) {
+    for g in group_of.iter_mut() {
+        *g = match *g {
+            Some(0) | None => None,
+            Some(n) => Some(n - 1),
+        };
+    }
+    *group_count -= 1;
+}
+
+/// Does a line comment end the head?
+fn head_commented(cx: &FormatCtx<'_>, head: &SyntaxElement) -> bool {
+    match head {
+        SyntaxElement::Node(n) => cx.last_token(n),
+        SyntaxElement::Token(t) => Some(t.clone()),
+    }
+    .is_some_and(|t| ends_in_line_comment(cx, &t))
+}
+
+/// The groups of the `soft` style: the first one stays with the head unless a call or an index
+/// comes between them, or a line comment ends the head. The flag says which of the two it was.
+fn soft_groups(
+    cx: &FormatCtx<'_>,
+    head: &SyntaxElement,
+    links: &[Link],
+    policy: &ChainPolicy,
+) -> (Vec<Option<usize>>, usize, bool) {
+    let (mut group_of, mut count) = group_links(links, policy);
+    let at_head = group_of.first().is_some_and(|g| g.is_some());
+    let commented = at_head && head_commented(cx, head);
+    if at_head && !commented {
+        merge_first(&mut group_of, &mut count);
+    }
+    (group_of, count, commented)
+}
+
+/// How many groups the chain `node` has after the one on the head's line (`soft` style).
+pub fn soft_group_count(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    policy: &ChainPolicy,
+    hooks: &dyn ChainHooks,
+) -> usize {
+    let w = Walk {
+        cx,
+        hooks,
+        call_heads: false,
+        links: RefCell::new(Vec::with_capacity(4)),
+        dropped: RefCell::new(Vec::new()),
+    };
+    let Some(head) = w.walk(node) else { return 0 };
+    let links = w.links.take();
+    soft_groups(cx, &head, &links, policy).1
+}
+
+/// The head, then the groups each behind a break of the hooks, all in a group of their own.
+fn soft(
+    w: &Walk<'_>,
+    head: &SyntaxElement,
+    lead: Vec<Doc>,
+    links: &[Link],
+    policy: &ChainPolicy,
+) -> Result<Doc, FormatError> {
+    let mut first = lead;
+    // Too few groups to break: the parts one after the other, without the group bookkeeping.
+    let mut started = 0;
+    for i in 0..links.len() {
+        started += usize::from(starts_group(links, i, started, policy));
+    }
+    if started < policy.min_groups && !(links[0].dotted && head_commented(w.cx, head)) {
+        first.push(w.element(head, false)?);
+        for link in links {
+            first.push(w.link_text(link, false, false)?);
+        }
+        return Ok(doc::concat(first));
+    }
+    let (group_of, count, commented) = soft_groups(w.cx, head, links, policy);
+    first.push(w.element(head, false)?);
+    let mut groups: Vec<Vec<Doc>> = vec![Vec::new(); count];
+    for (link, g) in links.iter().zip(&group_of) {
+        let d = w.link_text(link, false, false)?;
+        match g {
+            Some(g) => groups[*g].push(d),
+            None => first.push(d),
+        }
+    }
+    if count < policy.min_groups && !commented {
+        first.extend(groups.into_iter().flatten());
+        return Ok(doc::concat(first));
+    }
+    let mut rest = Vec::new();
+    for g in groups {
+        rest.push(w.hooks.separator());
+        rest.extend(g);
+    }
+    let mut rest = doc::concat(rest);
+    for _ in 0..policy.indent {
+        rest = doc::indent(rest);
+    }
+    Ok(doc::group(doc::concat(vec![doc::concat(first), rest])))
+}
+
 /// The chain that ends with `node`: on one line if it fits, else the head and then one group per
 /// line.
 pub fn member_chain(
@@ -430,7 +591,7 @@ pub fn member_chain(
         cx,
         hooks,
         call_heads: policy.style == Style::Grouped,
-        links: RefCell::new(Vec::new()),
+        links: RefCell::new(Vec::with_capacity(4)),
         dropped: RefCell::new(Vec::new()),
     };
     let head = w.walk(node);
@@ -439,7 +600,7 @@ pub fn member_chain(
         // `.name` or `[i]` after a `?`: the part of the chain that follows the head.
         let docs = links
             .iter()
-            .map(|l| w.link_doc(l, false, false).map(|d| d.0))
+            .map(|l| w.link_text(l, false, false))
             .collect::<Result<Vec<_>, _>>()?;
         return Ok(doc::concat(docs));
     };
@@ -452,6 +613,9 @@ pub fn member_chain(
     let head_call = head.as_node().is_some_and(|n| w.tag(n, "call"));
     if policy.style == Style::Wrapped {
         return wrapped::wrapped(&w, node, &head, lead, &links, policy, hooks);
+    }
+    if policy.style == Style::Soft {
+        return soft(&w, &head, lead, &links, policy);
     }
     let directives = cx.directives_of(node);
     let break_all = directives.has(&Directive::BreakAll);
@@ -469,41 +633,10 @@ pub fn member_chain(
     // A head that is a call or `new` counts as a call.
     let calls = links.iter().filter(|l| l.call).count() + usize::from(head_call);
 
-    // The links that stay with the head (`None`) and the groups that start at a dot.
-    let mut group_of: Vec<Option<usize>> = Vec::with_capacity(links.len());
-    let mut group_count = 0usize;
-    for (i, link) in links.iter().enumerate() {
-        let prev = i.checked_sub(1).map(|p| &links[p]);
-        let starts = if link.marker {
-            links.get(i + 1).is_some_and(|n| n.dotted)
-        } else if link.dotted {
-            match prev {
-                Some(p) if p.marker => false,
-                Some(p)
-                    if policy.keep_accesses == KeepAccesses::Always
-                        || (policy.keep_accesses == KeepAccesses::Head && group_count <= 1) =>
-                {
-                    !(p.dotted && !p.call)
-                }
-                _ => true,
-            }
-        } else {
-            false
-        };
-        if starts {
-            group_count += 1;
-        }
-        group_of.push(group_count.checked_sub(1));
-    }
+    let (mut group_of, mut group_count) = group_links(&links, policy);
     let called = group_of.first().is_some_and(|g| g.is_none());
     if group_count > 0 && merges_first_group(cx, &head, called, policy.short_head) {
-        for g in group_of.iter_mut() {
-            *g = match *g {
-                Some(0) | None => None,
-                Some(n) => Some(n - 1),
-            };
-        }
-        group_count -= 1;
+        merge_first(&mut group_of, &mut group_count);
     }
     // A call named in `head_calls` among the first two groups pulls the groups before it along.
     let pulled = (0..group_count.min(2)).rev().find(|&g| {
@@ -528,7 +661,7 @@ pub fn member_chain(
     let mut head_parts = vec![doc::concat(lead)];
     let mut groups: Vec<Vec<Doc>> = vec![Vec::new(); group_count];
     for (link, g) in links.iter().zip(&group_of) {
-        let d = w.link_doc(link, false, broken_head && g.is_none())?.0;
+        let d = w.link_text(link, false, broken_head && g.is_none())?;
         match g {
             Some(g) => groups[*g].push(d),
             None => head_parts.push(d),

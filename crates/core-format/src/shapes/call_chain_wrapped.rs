@@ -66,7 +66,7 @@ pub(super) fn wrapped(
     let mut open_end: Vec<bool> = Vec::new();
     let mut starts: Vec<usize> = Vec::new();
     for (i, l) in links.iter().enumerate() {
-        let d = w.link_doc(l, i + 1 == links.len(), false)?.0;
+        let d = w.link_text(l, i + 1 == links.len(), false)?;
         if i < split {
             head_parts.push(d);
         } else if l.dotted || groups.is_empty() {

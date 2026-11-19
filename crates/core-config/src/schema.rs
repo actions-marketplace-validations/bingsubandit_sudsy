@@ -436,9 +436,9 @@ pub mod shared {
     pub fn member_chain_style(default: &'static str) -> OptionDef {
         OptionDef::choice(
             "member_chain_style",
-            &["fluent", "grouped", "wrapped"],
+            &["fluent", "grouped", "wrapped", "soft"],
             default,
-            "Layout of a chain of member accesses and calls that does not fit: `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+            "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
         )
     }
 
@@ -448,6 +448,15 @@ pub mod shared {
             default,
             (0, 1000),
             "A chain of member accesses and calls with at least this many dots always breaks (`wrapped` style; 0: never).",
+        )
+    }
+
+    pub fn member_chain_min_groups(default: i64) -> OptionDef {
+        OptionDef::int(
+            "member_chain_min_groups",
+            default,
+            (0, 1000),
+            "A chain of member accesses and calls with fewer groups after the one on the head's line is never broken at the dots (`soft` style).",
         )
     }
 
@@ -507,7 +516,7 @@ pub mod shared {
         OptionDef::int(
             "member_chain_indent",
             default,
-            (1, 4),
+            (0, 4),
             "Levels of indentation of the lines of a broken member chain.",
         )
     }

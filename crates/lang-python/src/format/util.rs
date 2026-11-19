@@ -59,6 +59,9 @@ pub(crate) struct Style {
     pub magic_comma: bool,
     pub width: usize,
     pub indent: usize,
+    /// The member chain policy, and the same with no break at the dots (`fluent_allowed` is off).
+    pub chain: core_format::shapes::ChainPolicy,
+    pub chain_flat: core_format::shapes::ChainPolicy,
 }
 
 pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
@@ -71,6 +74,12 @@ pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
         magic_comma: super::magic_trailing_comma(cx.options) == super::MagicTrailingComma::Respect,
         width: cx.options.int("line_width") as usize,
         indent: cx.options.int("indent_size") as usize,
+        chain: core_format::shapes::ChainPolicy::of(cx.options),
+        chain_flat: {
+            let mut p = core_format::shapes::ChainPolicy::of(cx.options);
+            p.min_groups = usize::MAX;
+            p
+        },
     })
 }
 

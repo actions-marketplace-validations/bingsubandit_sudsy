@@ -43,7 +43,7 @@ pub use call_arguments::{
 };
 pub use call_chain::{
     CHAIN_LABEL, ChainHooks, ChainPolicy, NoHooks, is_flat as flat_chain,
-    member_chain as call_chain,
+    member_chain as call_chain, soft_group_count as chain_soft_groups,
 };
 pub use chain::{MemberChain, ends_in_line_comment, gap_after_operator, member_chain};
 pub use compound::{body as compound_body, continuation as compound_continuation};

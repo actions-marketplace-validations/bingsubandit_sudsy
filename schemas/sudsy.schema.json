@@ -6880,7 +6880,7 @@
               "default": 1,
               "description": "Levels of indentation of the lines of a broken member chain.",
               "maximum": 4,
-              "minimum": 1,
+              "minimum": 0,
               "type": "integer"
             },
             "member_chain_keep_accesses": {
@@ -8041,7 +8041,7 @@
               "default": 2,
               "description": "Levels of indentation of the lines of a broken member chain.",
               "maximum": 4,
-              "minimum": 1,
+              "minimum": 0,
               "type": "integer"
             },
             "member_chain_keep_accesses": {
@@ -8271,7 +8271,7 @@
               "default": 1,
               "description": "Levels of indentation of the lines of a broken member chain.",
               "maximum": 4,
-              "minimum": 1,
+              "minimum": 0,
               "type": "integer"
             },
             "member_chain_min_calls": {
@@ -8290,11 +8290,12 @@
             },
             "member_chain_style": {
               "default": "grouped",
-              "description": "Layout of a chain of member accesses and calls that does not fit: `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+              "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
               "enum": [
                 "fluent",
                 "grouped",
-                "wrapped"
+                "wrapped",
+                "soft"
               ],
               "type": "string"
             },
@@ -8578,7 +8579,7 @@
               "default": 1,
               "description": "Levels of indentation of the lines of a broken member chain.",
               "maximum": 4,
-              "minimum": 1,
+              "minimum": 0,
               "type": "integer"
             },
             "member_chain_min_calls": {
@@ -8590,11 +8591,12 @@
             },
             "member_chain_style": {
               "default": "wrapped",
-              "description": "Layout of a chain of member accesses and calls that does not fit: `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+              "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
               "enum": [
                 "fluent",
                 "grouped",
-                "wrapped"
+                "wrapped",
+                "soft"
               ],
               "type": "string"
             },
@@ -9578,7 +9580,7 @@
                     "default": 1,
                     "description": "Levels of indentation of the lines of a broken member chain.",
                     "maximum": 4,
-                    "minimum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "member_chain_keep_accesses": {
@@ -10678,7 +10680,7 @@
                     "default": 2,
                     "description": "Levels of indentation of the lines of a broken member chain.",
                     "maximum": 4,
-                    "minimum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "member_chain_keep_accesses": {
@@ -10908,7 +10910,7 @@
                     "default": 1,
                     "description": "Levels of indentation of the lines of a broken member chain.",
                     "maximum": 4,
-                    "minimum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "member_chain_min_calls": {
@@ -10927,11 +10929,12 @@
                   },
                   "member_chain_style": {
                     "default": "grouped",
-                    "description": "Layout of a chain of member accesses and calls that does not fit: `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+                    "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
                     "enum": [
                       "fluent",
                       "grouped",
-                      "wrapped"
+                      "wrapped",
+                      "soft"
                     ],
                     "type": "string"
                   },
@@ -11215,7 +11218,7 @@
                     "default": 1,
                     "description": "Levels of indentation of the lines of a broken member chain.",
                     "maximum": 4,
-                    "minimum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "member_chain_min_calls": {
@@ -11227,11 +11230,12 @@
                   },
                   "member_chain_style": {
                     "default": "wrapped",
-                    "description": "Layout of a chain of member accesses and calls that does not fit: `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+                    "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
                     "enum": [
                       "fluent",
                       "grouped",
-                      "wrapped"
+                      "wrapped",
+                      "soft"
                     ],
                     "type": "string"
                   },
@@ -11797,6 +11801,41 @@
                     "enum": [
                       "respect",
                       "ignore"
+                    ],
+                    "type": "string"
+                  },
+                  "member_chain_indent": {
+                    "default": 0,
+                    "description": "Levels of indentation of the lines of a broken member chain.",
+                    "maximum": 4,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "member_chain_keep_accesses": {
+                    "default": "always",
+                    "description": "In a broken member chain an access stays on the line of the call after it (`.a.b()` is one group) instead of starting a line of its own: `always`, or `head` in the first group only (which stays on the line of the head when the head name is short or a type name).",
+                    "enum": [
+                      "never",
+                      "head",
+                      "always"
+                    ],
+                    "type": "string"
+                  },
+                  "member_chain_min_groups": {
+                    "default": 2,
+                    "description": "A chain of member accesses and calls with fewer groups after the one on the head's line is never broken at the dots (`soft` style).",
+                    "maximum": 1000,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "member_chain_style": {
+                    "default": "soft",
+                    "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+                    "enum": [
+                      "fluent",
+                      "grouped",
+                      "wrapped",
+                      "soft"
                     ],
                     "type": "string"
                   },
@@ -13097,6 +13136,41 @@
               "enum": [
                 "respect",
                 "ignore"
+              ],
+              "type": "string"
+            },
+            "member_chain_indent": {
+              "default": 0,
+              "description": "Levels of indentation of the lines of a broken member chain.",
+              "maximum": 4,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "member_chain_keep_accesses": {
+              "default": "always",
+              "description": "In a broken member chain an access stays on the line of the call after it (`.a.b()` is one group) instead of starting a line of its own: `always`, or `head` in the first group only (which stays on the line of the head when the head name is short or a type name).",
+              "enum": [
+                "never",
+                "head",
+                "always"
+              ],
+              "type": "string"
+            },
+            "member_chain_min_groups": {
+              "default": 2,
+              "description": "A chain of member accesses and calls with fewer groups after the one on the head's line is never broken at the dots (`soft` style).",
+              "maximum": 1000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "member_chain_style": {
+              "default": "soft",
+              "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+              "enum": [
+                "fluent",
+                "grouped",
+                "wrapped",
+                "soft"
               ],
               "type": "string"
             },
