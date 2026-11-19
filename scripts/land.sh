@@ -67,21 +67,28 @@ rebase() {
 # HARD RULE review: when the change adds lines to a language crate, a fresh headless Claude session
 # (scripts/review-hard-rule.md, read-only tools) sorts each added function into fact, glue or
 # mechanism; a mechanism refuses the landing. Its output goes to .cargo/tmp/review.txt and, for the
-# lead, to hard-rule-reviews.log in the common git dir. A diff already reviewed PASS is not reviewed again.
+# lead, to hard-rule-reviews.log in the common git dir. The verdict is kept per content (the commit
+# message and the diff without line numbers): the model is not deterministic on borderline items, so
+# the same change is never reviewed twice and a FAIL cannot be rerun into a PASS; a changed diff or
+# message (a fix, a Language-only or Lead-approved line) gets a new review.
 review() {
-  local d out key log
+  local d out key log verdicts prev
   d=$(git diff origin/main HEAD -- 'crates/lang-*')
   grep -q '^+[^+]' <<<"$d" || return 0
-  key=$(git rev-parse HEAD^{tree})
+  key=$({ git log -1 --format=%B HEAD; grep -v -e '^@@' -e '^index ' <<<"$d"; } | sha256sum | cut -c1-16)
   log="$(git rev-parse --git-common-dir)/hard-rule-reviews.log"
-  grep -q "^PASS $key" .cargo/tmp/review-pass 2>/dev/null && return 0
+  verdicts="$(git rev-parse --git-common-dir)/hard-rule-verdicts"
+  prev=$(grep "^$key " "$verdicts" 2>/dev/null | tail -1 | cut -d' ' -f2)
+  [ "$prev" = PASS ] && return 0
+  [ "$prev" = FAIL ] && { echo "LAND FAILED: HARD RULE review already failed this exact change (.cargo/tmp/review.txt); change the code, or escalate to the lead"; return 1; }
   out=$({ git log -1 --format=%B HEAD; echo; echo '--- diff'; echo "$d"; } |
     timeout 600 claude -p --model haiku --allowedTools Read Grep Glob \
       --append-system-prompt "$(cat scripts/review-hard-rule.md)" "Review the change on stdin." 2>&1)
   mkdir -p .cargo/tmp; echo "$out" >.cargo/tmp/review.txt
   { echo "== $(date -u +%FT%TZ) $(git rev-parse --abbrev-ref HEAD) $(git log -1 --format=%s HEAD)"; echo "$out"; } >>"$log"
-  if grep -q '^VERDICT: PASS' <<<"$out"; then echo "PASS $key" >>.cargo/tmp/review-pass; return 0; fi
+  if grep -q '^VERDICT: PASS' <<<"$out"; then echo "$key PASS" >>"$verdicts"; return 0; fi
   grep -q '^VERDICT: FAIL' <<<"$out" || { echo "LAND FAILED: HARD RULE review gave no verdict (.cargo/tmp/review.txt)"; return 1; }
+  echo "$key FAIL" >>"$verdicts"
   echo "$out" | grep '| MECHANISM |'
   echo "LAND FAILED: HARD RULE review: move each MECHANISM above into a shared crate (or name a real fact in a Language-only: line), amend, run again; a finding you hold to be wrong goes to the lead"
   return 1
