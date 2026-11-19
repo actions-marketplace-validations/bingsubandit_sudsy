@@ -127,17 +127,18 @@ fn rewrite_loop(
     options: &ResolvedOptions,
 ) -> Result<Option<(SourceFile, ParseResult)>, FileFormatError> {
     let grammar = provider.grammar();
+    let listed = options.strings("format_rules");
     let mut current: Option<(SourceFile, ParseResult)> = None;
     // The rules that rewrite the source take a round of their own: the language's rewrite follows.
     let rounds = provider.formatter().rewrite_rounds()
-        + usize::from(!format_rules(provider.formatter().rows()).is_empty());
+        + usize::from(!format_rules(provider.formatter().rows(), &listed).is_empty());
     for _ in 0..rounds {
         let (text, tree) = match &current {
             Some((f, p)) => (&f.text, &p.tree),
             None => (&file.text, &parsed.tree),
         };
         // One walk of the nodes serves the rules' kinds and the rows' scan.
-        let rules = format_rules(provider.formatter().rows());
+        let rules = format_rules(provider.formatter().rows(), &listed);
         let wanted: Vec<_> = rules
             .iter()
             .flat_map(|r| r.rule.format_kinds(grammar))
@@ -208,9 +209,9 @@ fn rewrite_loop(
 
 /// The shared rules that rewrite the source that the language has rows for, found once per
 /// language (the rows' text is static).
-fn format_rules(rows: &'static str) -> std::sync::Arc<Vec<ActiveRule<'static>>> {
+fn format_rules(rows: &'static str, listed: &[String]) -> std::sync::Arc<Vec<ActiveRule<'static>>> {
     type Store = std::sync::Mutex<
-        std::collections::HashMap<(usize, usize), std::sync::Arc<Vec<ActiveRule<'static>>>>,
+        std::collections::HashMap<(usize, usize, String), std::sync::Arc<Vec<ActiveRule<'static>>>>,
     >;
     static STORE: std::sync::OnceLock<Store> = std::sync::OnceLock::new();
     let mut store = STORE
@@ -218,12 +219,16 @@ fn format_rules(rows: &'static str) -> std::sync::Arc<Vec<ActiveRule<'static>>> 
         .lock()
         .unwrap_or_else(|e| e.into_inner());
     store
-        .entry((rows.as_ptr() as usize, rows.len()))
+        .entry((rows.as_ptr() as usize, rows.len(), listed.join(",")))
         .or_insert_with(|| {
             let active = core_rules::shared::RULES
                 .iter()
                 .copied()
-                .filter(|r| r.formats() && rows.contains(&format!("[{}]", r.meta().id)))
+                .filter(|r| {
+                    r.formats()
+                        && (rows.contains(&format!("[{}]", r.meta().id))
+                            || listed.iter().any(|l| l == r.meta().id))
+                })
                 .filter_map(|rule| {
                     let options =
                         RuleOptions::resolve(rule.meta().options, &Default::default()).ok()?;
@@ -240,7 +245,7 @@ fn format_rules(rows: &'static str) -> std::sync::Arc<Vec<ActiveRule<'static>>> 
 }
 
 /// The source with the fixes of the shared rules that rewrite it (`core_rules::Rule::formats`)
-/// applied, for the ones the language has rows for; `None` when none of them has anything to do.
+/// applied, for the ones the language has rows for or lists in `format_rules`; `None` when none of them has anything to do.
 fn rule_rewrite(
     provider: &dyn LanguageProvider,
     id: &str,
@@ -251,7 +256,7 @@ fn rule_rewrite(
 ) -> Option<String> {
     let formatter = provider.formatter();
     let rows = formatter.rows();
-    let active = format_rules(rows);
+    let active = format_rules(rows, &options.strings("format_rules"));
     if active.is_empty() {
         return None;
     }

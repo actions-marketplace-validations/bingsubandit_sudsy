@@ -8,37 +8,3 @@ category: style
 rule:
   any: [{ kind: VariableDeclarator }, { kind: FormalParameter }, { kind: SpreadParameter }]
   child: { kind: Dimension }
----
-id: need-braces
-message: 'the body is not in braces'
-description: >-
-  An `if`, `else`, `for`, `while` or `do` whose body is a single statement without braces
-  (Checkstyle NeedBraces). `else if` is fine.
-example: 'if (x) return;'
-severity: off
-category: style
-rule:
-  any:
-    - { kind: IfStatement }
-    - { kind: ForStatement }
-    - { kind: EnhancedForStatement }
-    - { kind: WhileStatement }
-    - { kind: DoStatement }
-  child:
-    any:
-      - { kind: ExpressionStatement }
-      - { kind: ReturnStatement }
-      - { kind: ThrowStatement }
-      - { kind: BreakStatement }
-      - { kind: ContinueStatement }
-      - { kind: YieldStatement }
-      - { kind: LocalVariableDeclaration }
-      - { kind: ForStatement }
-      - { kind: EnhancedForStatement }
-      - { kind: WhileStatement }
-      - { kind: DoStatement }
-      - { kind: TryStatement }
-      - { kind: SwitchStatement }
-      - { kind: SynchronizedStatement }
-      - { kind: LabeledStatement }
-report-on: first-token

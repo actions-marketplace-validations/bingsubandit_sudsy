@@ -4,6 +4,10 @@ kotlin:
     rules:
       class-naming: warn
       comment-space: warn
+      curly:
+        level: warn
+        options:
+          style: chain
       enum-entry-name-case: warn
       max-line-length: warn
       modifier-order: warn

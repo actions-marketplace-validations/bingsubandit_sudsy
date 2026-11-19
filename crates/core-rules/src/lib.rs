@@ -17,6 +17,7 @@ pub mod checks;
 pub mod commands;
 pub mod comments;
 pub mod configure;
+pub mod curly;
 mod declare;
 pub mod diagnostic;
 pub mod embed_keys;

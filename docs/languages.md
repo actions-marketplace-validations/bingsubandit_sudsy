@@ -242,7 +242,7 @@ Status, measured results, presets and options for every language.
 ## Kotlin
 
 - **Status:** partial.
-- **Formatter:** ktlint 1.8.0 (`ktlint_official`). Identical: 4,370 of 5,776 files (76%). Corpus: coroutines, ktor, nowinandroid, ktlint. Stable: yes.
+- **Formatter:** ktlint 1.8.0 (`ktlint_official`). Identical: 4,407 of 5,776 files (76%). Corpus: coroutines, ktor, nowinandroid, ktlint. Stable: yes.
 - **Linter:** ktlint, 13.2%.
 - **Presets:** `kotlin/ktlint`.
 - **Options:** `trailing_commas`, `function_signature_wrap_min_parameters`, `class_signature_wrap_min_parameters`, `member_chain_style`. Default `line_width` is 140.

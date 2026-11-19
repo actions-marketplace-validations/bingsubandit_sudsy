@@ -104,6 +104,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | constructor-summary-standard-text | lang-csharp/rules/doc_wording.rs | The summary of a constructor starts with "Initializes a new instance of the <see cref="T"/> class" (struct), "Initializes static members of the ..." for a static construc | stylecop SA1642 | csharp | SINGLE-USE |
 | copy-from-own-stage | lang-dockerfile/rules/stages.rs | A `COPY --from` that names the stage it is in | hadolint DL3023 | dockerfile | SINGLE-USE |
 | copy-from-unknown-stage | lang-dockerfile/rules/stages.rs | A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`) | hadolint DL3022 | dockerfile | SINGLE-USE |
+| curly-braces | core-rules/curly.rs | Single-statement bodies of if, else, loops and when entries put in braces. | Checkstyle NeedBraces, ktlint multiline-if-else; checkstyle NeedBraces | cpp, csharp, java, js, json, kotlin, php, python, ruby, sql, yaml |  |
 | debug-assert-message | lang-csharp/rules/symbol_checks.rs | `Debug.Assert` without a message, or with a constant blank one | stylecop SA1405 | csharp | SINGLE-USE |
 | debug-fail-message | lang-csharp/rules/symbol_checks.rs | `Debug.Fail` with a constant blank message | stylecop SA1406 | csharp | SINGLE-USE |
 | declaration-checks | lang-python/rules/decl.rs | Checks of declarations: class attributes and import aliases. | ruff PIE, pylint | python | SINGLE-USE |

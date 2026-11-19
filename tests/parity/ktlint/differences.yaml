@@ -1,11 +1,9 @@
 ratchet:
-  real-world: 4370
+  real-world: 4407
 second-format:
   real-world: 0
 refused:
   real-world: 0
-differences:
-  if-without-else-braces: gap  an `if` without `else` whose branch is on its own line gets braces from ktlint (37 files); no shared curly rewrite with a fix exists yet
 rejected: invalid-input  # a file the tool rejects is not compared (the tool rejecting it is the evidence)
 coverage: 13.0  # share of the default-set findings of ktlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage ktlint; at least 85% is the bar)
 target: 11.9  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage ktlint

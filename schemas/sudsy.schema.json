@@ -704,6 +704,41 @@
               "$ref": "#/definitions/rule",
               "description": "A `COUNT` of the constant 1 or 0 (sqlfluff CV04)."
             },
+            "curly": {
+              "description": "The body of an `if`, `else`, loop or `when` entry is a statement without braces. Style `always` wants braces on every body; `chain` only on the branches of a chain where one has braces, spans lines or passes the line width, and on a loop body on its own line. `else if` is fine.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "style": {
+                          "default": "always",
+                          "description": "`always`: every body; `chain`: see the rule. The `style` row of the language's `curly_style` option overrides it in the formatter.",
+                          "enum": [
+                            "always",
+                            "chain"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "custom-media-pattern": {
               "description": "A `@custom-media` name, without its `--`, that does not match the `pattern` option (a regex). An empty pattern allows everything.",
               "oneOf": [
@@ -2402,10 +2437,6 @@
                   "type": "object"
                 }
               ]
-            },
-            "need-braces": {
-              "$ref": "#/definitions/rule",
-              "description": "An `if`, `else`, `for`, `while` or `do` whose body is a single statement without braces (Checkstyle NeedBraces). `else if` is fine."
             },
             "needless-bool": {
               "$ref": "#/definitions/rule",
@@ -9096,6 +9127,15 @@
               "minimum": 1,
               "type": "integer"
             },
+            "curly_style": {
+              "default": "chain",
+              "description": "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
+              "enum": [
+                "always",
+                "chain"
+              ],
+              "type": "string"
+            },
             "end_of_line": {
               "default": "auto",
               "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -9110,6 +9150,16 @@
               "default": true,
               "description": "End the file with a newline.",
               "type": "boolean"
+            },
+            "format_rules": {
+              "default": [
+                "curly"
+              ],
+              "description": "Ids of shared rules that rewrite the source before the layout (their fixes), besides those the language has a section for in `format.rules`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "function_signature_wrap_min_parameters": {
               "default": 2,
@@ -12251,6 +12301,15 @@
                     "minimum": 1,
                     "type": "integer"
                   },
+                  "curly_style": {
+                    "default": "chain",
+                    "description": "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
+                    "enum": [
+                      "always",
+                      "chain"
+                    ],
+                    "type": "string"
+                  },
                   "end_of_line": {
                     "default": "auto",
                     "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -12265,6 +12324,16 @@
                     "default": true,
                     "description": "End the file with a newline.",
                     "type": "boolean"
+                  },
+                  "format_rules": {
+                    "default": [
+                      "curly"
+                    ],
+                    "description": "Ids of shared rules that rewrite the source before the layout (their fixes), besides those the language has a section for in `format.rules`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "function_signature_wrap_min_parameters": {
                     "default": 2,

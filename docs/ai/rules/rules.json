@@ -70,6 +70,71 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "The body of an `if`, `else`, loop or `when` entry is a statement without braces. Style `always` wants braces on every body; `chain` only on the branches of a chain where one has braces, spans lines or passes the line width, and on a loop body on its own line. `else if` is fine.",
+      "example": {
+        "config": null,
+        "fixed": "class A {\n  void f(boolean x, int[] xs) {\n    if (x) { return; }\n    if (x) {\n      g();\n    } else { g(); }\n    if (x) {\n      g();\n    } else if (!x) {\n      g();\n    } else {\n      g();\n    }\n    for (int i = 0; i < 3; i++) { g(); }\n    for (int v : xs) { g(); }\n    while (x) { g(); }\n    do { g(); } while (x);\n    for (int v : xs) {\n      g();\n    }\n  }\n}\n",
+        "input": "class A {\n  void f(boolean x, int[] xs) {\n    if (x) return;\n    if (x) {\n      g();\n    } else g();\n    if (x) {\n      g();\n    } else if (!x) {\n      g();\n    } else {\n      g();\n    }\n    for (int i = 0; i < 3; i++) g();\n    for (int v : xs) g();\n    while (x) g();\n    do g(); while (x);\n    for (int v : xs) {\n      g();\n    }\n  }\n}\n",
+        "language": "java",
+        "spans": [
+          {
+            "column": 5,
+            "length": 2,
+            "line": 3
+          },
+          {
+            "column": 5,
+            "length": 2,
+            "line": 4
+          },
+          {
+            "column": 5,
+            "length": 3,
+            "line": 14
+          },
+          {
+            "column": 5,
+            "length": 3,
+            "line": 15
+          },
+          {
+            "column": 5,
+            "length": 5,
+            "line": 16
+          },
+          {
+            "column": 5,
+            "length": 2,
+            "line": 17
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "curly",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "choices": [
+            "always",
+            "chain"
+          ],
+          "default": "always",
+          "description": "`always`: every body; `chain`: see the rule. The `style` row of the language's `curly_style` option overrides it in the formatter.",
+          "name": "style",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "java/google",
+        "kotlin/ktlint"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A key does not follow one of the allowed naming conventions. The checks are those of eslint-plugin-jsonc: a key with punctuation or whitespace never matches, `camelCase` also rejects `_` and `-`, `snake_case` and `kebab-case` reject capitals. No fix: renaming a key changes the data.",
       "example": {
         "config": "key-name-casing:\n  level: warn\n  options:\n    allowed: [snake_case, kebab-case]\n    ignored_keys: [\"^P\"]\n",
@@ -8218,59 +8283,6 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
-    },
-    {
-      "category": "style",
-      "default_level": "off",
-      "description": "An `if`, `else`, `for`, `while` or `do` whose body is a single statement without braces (Checkstyle NeedBraces). `else if` is fine.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "class A {\n  void f(boolean x, int[] xs) {\n    if (x) return;\n    if (x) {\n      g();\n    } else g();\n    if (x) {\n      g();\n    } else if (!x) {\n      g();\n    } else {\n      g();\n    }\n    for (int i = 0; i < 3; i++) g();\n    for (int v : xs) g();\n    while (x) g();\n    do g(); while (x);\n    for (int v : xs) {\n      g();\n    }\n  }\n}\n",
-        "language": "java",
-        "spans": [
-          {
-            "column": 5,
-            "length": 2,
-            "line": 3
-          },
-          {
-            "column": 5,
-            "length": 2,
-            "line": 4
-          },
-          {
-            "column": 5,
-            "length": 3,
-            "line": 14
-          },
-          {
-            "column": 5,
-            "length": 3,
-            "line": 15
-          },
-          {
-            "column": 5,
-            "length": 5,
-            "line": 16
-          },
-          {
-            "column": 5,
-            "length": 2,
-            "line": 17
-          }
-        ]
-      },
-      "fix": null,
-      "id": "need-braces",
-      "languages": [
-        "java"
-      ],
-      "options": [],
-      "presets": [
-        "java/google"
-      ],
       "upstream": []
     },
     {

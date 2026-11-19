@@ -554,6 +554,23 @@ pub mod shared {
         )
     }
 
+    pub fn format_rules(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "format_rules",
+            default,
+            "Ids of shared rules that rewrite the source before the layout (their fixes), besides those the language has a section for in `format.rules`.",
+        )
+    }
+
+    pub fn curly_style(default: &'static str) -> OptionDef {
+        OptionDef::choice(
+            "curly_style",
+            &["always", "chain"],
+            default,
+            "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
+        )
+    }
+
     pub fn settle_keywords(default: &[&str]) -> OptionDef {
         OptionDef::words(
             "settle_keywords",

@@ -24,6 +24,10 @@ pub const ANNOTATION_INLINE: &str = "annotation_inline";
 #[allow(dead_code)]
 pub const SEMICOLON_KEEP_PARENTS: &str = "semicolon_keep_parents";
 #[allow(dead_code)]
+pub const FORMAT_RULES: &str = "format_rules";
+#[allow(dead_code)]
+pub const CURLY_STYLE: &str = "curly_style";
+#[allow(dead_code)]
 pub const SETTLE_KEYWORDS: &str = "settle_keywords";
 #[allow(dead_code)]
 pub const SIGNATURE_WRAP_ANNOTATED: &str = "signature_wrap_annotated";
@@ -81,6 +85,8 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::assignment_keep_break_kinds(&["Property", "BinaryExpression"]),
         core_config::shared::annotation_inline("single"),
         core_config::shared::semicolon_keep_parents(&["ClassBody", "EnumEntry"]),
+        core_config::shared::format_rules(&["curly"]),
+        core_config::shared::curly_style("chain"),
         core_config::shared::settle_keywords(&["if", "else", "for", "while"]),
         core_config::shared::signature_wrap_annotated(true),
         core_config::shared::annotation_source_kinds(&["ValueParameter"]),

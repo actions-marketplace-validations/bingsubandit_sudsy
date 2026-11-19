@@ -127,15 +127,6 @@ fn expression_body(tree: &SyntaxNode, edits: &mut Vec<(usize, usize, String)>) {
     }
 }
 
-fn braced(n: &SyntaxNode) -> bool {
-    n.kind() == k::BLOCK && n.children_with_tokens().any(|e| e.kind() == k::LBRACE)
-}
-
-/// What a branch (`then`, `else`, a loop body) holds.
-fn content(branch: &SyntaxNode) -> Option<SyntaxNode> {
-    branch.children().find(|c| !c.text_range().is_empty())
-}
-
 /// The start of the first token of `n` that is not trivia (a node starts with its leading blanks).
 fn code_start(n: &SyntaxNode) -> usize {
     n.descendants_with_tokens()
@@ -146,130 +137,6 @@ fn code_start(n: &SyntaxNode) -> usize {
         })
 }
 
-/// The blanks (with a line break) between the code before a branch and the branch.
-fn break_before(n: &SyntaxNode, text: &str) -> Option<(usize, usize)> {
-    let start = code_start(n);
-    let mut at = start;
-    let mut tok = n
-        .descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-        .find(|t| usize::from(t.text_range().start()) == start)?
-        .prev_token();
-    while let Some(t) = tok {
-        match t.kind() {
-            k::WHITESPACE | k::NEWLINE => at = t.text_range().start().into(),
-            // The branch stays below the comment.
-            k::COMMENT => return Some((start, start)),
-            _ => break,
-        }
-        tok = t.prev_token();
-    }
-    (text[at..start].contains('\n')).then_some((at, start))
-}
-
-fn wrap(n: &SyntaxNode, text: &str, edits: &mut Vec<(usize, usize, String)>) {
-    if let Some(end) = last_code_end(n) {
-        let start = code_start(n);
-        match break_before(n, text) {
-            Some((at, _)) => edits.push((at, start, " { ".into())),
-            None => edits.push((start, start, "{ ".into())),
-        }
-        edits.push((end, end, " }".into()));
-    }
-}
-
-/// The branches of the `if`/`else` chain that starts at `n`; empty when there is no `else`.
-fn if_branches(n: &SyntaxNode) -> Vec<SyntaxNode> {
-    let (mut out, mut cur) = (Vec::new(), n.clone());
-    loop {
-        out.extend(
-            cur.children()
-                .find(|c| c.kind() == k::THEN)
-                .and_then(|b| content(&b)),
-        );
-        let Some(c) = cur
-            .children()
-            .find(|c| c.kind() == k::ELSE)
-            .and_then(|b| content(&b))
-        else {
-            out.clear();
-            return out;
-        };
-        if c.kind() == k::IF {
-            cur = c;
-        } else {
-            out.push(c);
-            return out;
-        }
-    }
-}
-
-/// The body of a loop when it stands on a line of its own.
-fn loop_body(n: &SyntaxNode, text: &str) -> Option<SyntaxNode> {
-    let body = n
-        .children()
-        .find(|c| c.kind() == k::BODY)
-        .and_then(|b| content(&b))?;
-    let close = n
-        .children_with_tokens()
-        .filter_map(|e| e.into_token())
-        .find(|t| t.kind() == k::RPAR)?;
-    let gap = &text[usize::from(close.text_range().end())..code_start(&body)];
-    (gap.contains('\n') && !braced(&body)).then_some(body)
-}
-
-/// Does the text from `start` to `end`, on one line, go past the line width?
-fn too_long(text: &str, start: usize, end: usize, width: usize) -> bool {
-    let column = start - text[..start].rfind('\n').map_or(0, |i| i + 1);
-    let flat: usize = text[start..end]
-        .split_whitespace()
-        .map(|w| w.chars().count() + 1)
-        .sum();
-    column + flat > width + 1
-}
-
-/// Braces around the branches that have none, when another one has them or spans lines (or would,
-/// on one line, go past the width), or the body of a loop is on a line of its own: `if`/`else`
-/// chains, `when` entries, loops.
-fn bracing(tree: &SyntaxNode, text: &str, width: usize, edits: &mut Vec<(usize, usize, String)>) {
-    let multi = |n: &SyntaxNode| {
-        (braced(n) && n.children().any(|c| !c.text_range().is_empty()))
-            || last_code_end(n).is_some_and(|end| text[code_start(n)..end].contains('\n'))
-            || break_before(n, text).is_some()
-    };
-    for n in tree.descendants() {
-        let (branches, long): (Vec<SyntaxNode>, bool) = match n.kind() {
-            k::IF if n.parent().is_none_or(|p| p.kind() != k::ELSE) => {
-                let branches = if_branches(&n);
-                let end = branches.last().and_then(last_code_end);
-                let long = end.is_some_and(|e| too_long(text, code_start(&n), e, width));
-                (branches, long)
-            }
-            k::WHEN => {
-                let entries: Vec<_> = n.children().filter(|e| e.kind() == k::WHEN_ENTRY).collect();
-                let long = entries.iter().any(|e| {
-                    last_code_end(e).is_some_and(|end| too_long(text, code_start(e), end, width))
-                });
-                (
-                    entries.iter().filter_map(|e| e.children().last()).collect(),
-                    long,
-                )
-            }
-            k::WHILE | k::FOR => (loop_body(&n, text).into_iter().collect(), true),
-            _ => continue,
-        };
-        if !long && !branches.iter().any(multi) {
-            continue;
-        }
-        for b in branches
-            .iter()
-            .filter(|b| !braced(b) && b.kind() != k::WHEN_CONDITION_EXPRESSION)
-        {
-            wrap(b, text, edits);
-        }
-    }
-}
-
 /// The source with the rewrites applied, or `None` when there is nothing to rewrite.
 pub fn rewrite(
     tree: &SyntaxNode,
@@ -277,7 +144,6 @@ pub fn rewrite(
     g: &Grammar,
     options: &core_config::ResolvedOptions,
 ) -> Option<String> {
-    let width = options.int("line_width") as usize;
     let mut edits: Vec<(usize, usize, String)> = sort_edits(tree, text, g, &IMPORT_ORDER)
         .into_iter()
         .map(|(r, new)| (r.start().into(), r.end().into(), new))
@@ -285,7 +151,6 @@ pub fn rewrite(
     blank_before_kdoc(tree, text, &mut edits);
     enum_trailing_comma(tree, text, &mut edits);
     expression_body(tree, &mut edits);
-    bracing(tree, text, width, &mut edits);
     core_format::rewrite::redundant_semicolons(
         g,
         tree,

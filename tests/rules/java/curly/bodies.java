@@ -1,9 +1,9 @@
 class A {
   void f(boolean x, int[] xs) {
     if (x) return;
-//  ^^ need-braces
+//  ^^ curly
     if (x) {
-//  ^^ need-braces
+//  ^^ curly
       g();
     } else g();
     if (x) {
@@ -14,13 +14,13 @@ class A {
       g();
     }
     for (int i = 0; i < 3; i++) g();
-//  ^^^ need-braces
+//  ^^^ curly
     for (int v : xs) g();
-//  ^^^ need-braces
+//  ^^^ curly
     while (x) g();
-//  ^^^^^ need-braces
+//  ^^^^^ curly
     do g(); while (x);
-//  ^^ need-braces
+//  ^^ curly
     for (int v : xs) {
       g();
     }

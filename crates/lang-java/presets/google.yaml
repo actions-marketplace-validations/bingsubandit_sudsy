@@ -9,7 +9,7 @@ java:
       array-type-style: warn
       no-wildcard-imports: warn
       modifier-order: warn
-      need-braces: warn
+      curly: warn
       max-line-length:
         level: warn
         options:
