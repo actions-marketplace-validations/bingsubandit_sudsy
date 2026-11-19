@@ -30,7 +30,10 @@ The target leaves out only reviewed intentional cases. Everything else counts ag
 - **No silent filters.** Every input filter (non-UTF-8 files, `skip`, `skip_with`, a tool rejecting a file, flags that turn off features of the reference tool) prints its count in every run.
 - **Every run prints three things:** raw %, target %, and per intentional group its count.
 
-Lint coverage keeps the CLAUDE.md bar: the mapped rule is reported in the same file; the position is not compared.
+Lint position (user decision 2026-11-19):
+- **The target compares lines.** A finding is covered only when the mapped rule reports it on the same line. A report on another line counts as missing, unless it is a reviewed `tool-wrong` entry (pinned per finding). The column is not compared.
+- **The raw share keeps "same rule, same file"**, which is also the CLAUDE.md usability bar.
+- **Both numbers are printed,** so the gap between them shows how many findings are reported on another line.
 
 ## Phases
 
