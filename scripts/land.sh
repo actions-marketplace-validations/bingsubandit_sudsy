@@ -83,7 +83,7 @@ review() {
   if grep -q '^VERDICT: PASS' <<<"$out"; then echo "PASS $key" >>.cargo/tmp/review-pass; return 0; fi
   grep -q '^VERDICT: FAIL' <<<"$out" || { echo "LAND FAILED: HARD RULE review gave no verdict (.cargo/tmp/review.txt)"; return 1; }
   echo "$out" | grep '| MECHANISM |'
-  echo "LAND FAILED: HARD RULE review: move each MECHANISM above into a shared crate (or name a real fact in a Language-only: line), amend, run again"
+  echo "LAND FAILED: HARD RULE review: move each MECHANISM above into a shared crate (or name a real fact in a Language-only: line), amend, run again; a finding you hold to be wrong goes to the lead"
   return 1
 }
 
