@@ -311,15 +311,19 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
             fixture.unlink()  # buf compiles the whole folder: fixtures that share a package must not meet
         total += len(upstream)
         problems = []
+        diffs.tally(True, count=len(upstream & ours))
         for side, rows in ((tool, upstream - ours), ("sudsy", ours - upstream)):
             for rule, line, column in sorted(rows):
                 key = f"{label} {side}:{rule} {line}"
-                if not diffs.known(key):
+                listed = diffs.known(key)
+                diffs.tally(False, diffs.status(key) if listed else None)
+                if not listed:
                     problems.append(f"  only {side}: {rule} {line}" + (f":{column}" if column else ""))
         print(f"{label}: {len(upstream)} {tool}, {len(ours)} sudsy: {'MISMATCH' if problems else 'ok'}")
         print("\n".join(problems))
         mismatches += len(problems)
     mismatches += diffs.finish()
+    diffs.summary()
     print(f"{total} {tool} findings, {mismatches} mismatch(es) ({tool} {version}, {sum(k in diffs.files for k in diffs.differing)} known)")
     return 1 if mismatches else 0
 
@@ -385,14 +389,18 @@ def psscriptanalyzer(sudsy, version, prefix):
             for d in json.loads(out)["diagnostics"] if d["rule"] in set(mapping.values())}
     for rule, count in sorted((r, sum(1 for u in upstream if u[1] == r)) for r in set(mapping.values())):
         print(f"{rule}: {count} psscriptanalyzer, {sum(1 for o in ours if o[1] == rule)} sudsy")
+    diffs.tally(True, count=len(upstream & ours))
     for side, rows in (("psscriptanalyzer", upstream - ours), ("sudsy", ours - upstream)):
         for path, rule, line in sorted(rows):
             key = f"{path} {side}:{rule} {line}"
-            if not diffs.known(key):
+            listed = diffs.known(key)
+            diffs.tally(False, diffs.status(key) if listed else None)
+            if not listed:
                 src = (work / path).read_text(encoding="utf-8-sig", errors="replace").splitlines()[line - 1].strip()[:90]
                 print(f"  only {side}: {key}  | {src}")
                 mismatches += 1
     mismatches += diffs.finish()
+    diffs.summary()
     print(f"{len(upstream)} psscriptanalyzer findings, {mismatches} mismatch(es) (psscriptanalyzer {version}, {sum(k in diffs.files for k in diffs.differing)} known)")
     return 1 if mismatches else 0
 
@@ -411,9 +419,11 @@ def sudsy_lint(sudsy, fixture, cwd, only=None):
     }
 
 
-def compare(label, upstream, ours, tool):
-    """Prints the differences between two `{(rule, line, column)}` sets; returns their count."""
+def compare(label, upstream, ours, tool, diffs):
+    """Prints the differences between two `{(rule, line, column)}` sets; returns their count (`diffs` tallies raw and target)."""
     only_upstream, only_ours = sorted(upstream - ours), sorted(ours - upstream)
+    diffs.tally(True, count=len(upstream & ours))
+    diffs.tally(False, count=len(only_upstream) + len(only_ours))
     status = "ok" if not (only_upstream or only_ours) else "MISMATCH"
     print(f"{label}: {len(upstream)} {tool}, {len(ours)} sudsy: {status}")
     for rule, line, col in only_upstream:
@@ -459,6 +469,7 @@ def stylecop(sudsy, version):
     mapping = rule_map("stylecop")
     formatter, partial = formatter_ids("stylecop")
     mismatches = 0
+    diffs = parity_format.Differences(ROOT / "tests/parity/stylecop", lint=True)
     for name in ("plain", "fixed"):
         work = PARITY / f"stylecop-{name}"
         shutil.rmtree(work, ignore_errors=True)
@@ -471,13 +482,14 @@ def stylecop(sudsy, version):
             print(f"formatter ids no fixture violates: {' '.join(idle)}")
         for fixture in sorted(work.glob("*.cs")):
             upstream = {(mapping[r], l, c) for f, r, l, c in built if f == fixture.name and r in mapping}
-            mismatches += compare(f"{fixture.name} ({name})", upstream, sudsy_lint(sudsy, fixture, work, set(mapping.values())), "stylecop")
+            mismatches += compare(f"{fixture.name} ({name})", upstream, sudsy_lint(sudsy, fixture, work, set(mapping.values())), "stylecop", diffs)
         if name == "fixed":
             for f, r, l, c in sorted(built):
                 # A `partial` entry's gap is only expected outside the `layout_*` fixtures.
                 if r in formatter or (r in partial and f.startswith("layout_")):
                     print(f"  formatter id left after fix: {f}: {r} {l}:{c}")
                     mismatches += 1
+    diffs.summary()
     print(f"stylecop {version}: {mismatches} mismatch(es)")
     return 1 if mismatches else 0
 
@@ -497,6 +509,15 @@ def message_name(message):
     m = re.search(r"`([^`]+)`|'([^']+)'|\"([^\"]+)\"", message)
     name = next((g for g in m.groups() if g), None) if m else None
     return re.sub(r"^(?:v-(?:bind|on|slot):|[:@#])", "", name) if name else None
+
+
+def target_line(tool, per, hit, total, owned, prefix=""):
+    """The target number of a coverage run (docs/ai/design/parity-target.md): the findings of `wontfix` catalog entries (out of
+    scope) leave the denominator; the `owned` findings of `formatter` ids stay in it, as missing, until a proof run exists."""
+    wontfix = {f"{prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["coverage"] == "wontfix"}
+    out = sum(n for rule, (n, _) in per.items() if rule in wontfix)
+    left = total + owned - out
+    return f"target {round(1000 * hit / left) / 10 if left else 100.0}% ({hit} of {left}); intentional: out of scope (wontfix) {out}, formatter findings counted as missing {owned}"
 
 
 def coverage(tool, sudsy, version, prefix, exe):
@@ -542,11 +563,7 @@ def coverage(tool, sudsy, version, prefix, exe):
         names = dict.fromkeys(range(count))
         fatal = set()
         layout = {e["id"] for e in catalog_entries(tool, sub=True) if e["sudsy"] == "formatter"}  # layout: `sudsy format` does it
-        print(f"left out: {sum(f[1] in layout for f in found)} findings of {len(layout)} layout rules the formatter owns")
-        found = [f for f in found if f[1] not in layout]
         broken = {f[0] for f in found if f[1] in spec.get("unreadable", [])}  # files the tool cannot read at all (buf: imports the corpus lacks)
-        if broken:
-            print(f"left out: {len(broken)} files the tool cannot read ({', '.join(spec['unreadable'])})")
         found = [f for f in found if f[0] not in broken]
         fatal = broken
     elif tool == "ruff":
@@ -566,8 +583,11 @@ def coverage(tool, sudsy, version, prefix, exe):
         except json.JSONDecodeError:
             sys.exit(f"eslint produced no report:\n{run.stdout}\n{run.stderr}")
         fatal = {Path(r["filePath"]).name for r in results if any(m.get("fatal") for m in r["messages"])}
-        found = [(Path(r["filePath"]).name, m["ruleId"], m["message"]) for r in results for m in r["messages"] if m["ruleId"] and not m.get("fatal") and m["ruleId"] not in layout]
+        found = [(Path(r["filePath"]).name, m["ruleId"], m["message"]) for r in results for m in r["messages"] if m["ruleId"] and not m.get("fatal")]
     found = [f for f in found if f[0] not in fatal]
+    owned = sum(f[1] in layout for f in found)  # `formatter` ids: `sudsy format` does their work, so they are no findings to cover in the raw share
+    found = [f for f in found if f[1] not in layout]
+    print(f"input filters: files the tool cannot read {len(fatal)}, formatter-owned findings left out of raw {owned} (in the target they count as missing)")
     def run_sudsy(config):  # Sudsy's findings with `config` as the sudsy.yaml of the corpus (None: no file, the default a user gets)
         (work / "sudsy.yaml").unlink(missing_ok=True)
         if config is not None:
@@ -608,6 +628,7 @@ def coverage(tool, sudsy, version, prefix, exe):
     print("only Sudsy (files the tool reports the rule in nowhere): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
     for rule, (n, c) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:int(os.environ.get("COVERAGE_TOP", 15))]:
         print(f"  {rule}: {c} of {n} covered" + ("" if rule in mapping else " (no Sudsy rule)"))
+    print(target_line(tool, per, hit, total, owned, "@typescript-eslint/" if tool == "typescript-eslint" else f"{PLUGINS[tool]}/" if tool in PLUGINS else ""))
     print(f"{tool} {version}: {hit} of {total} findings of {len(per)} rules in {len(names) - len(fatal)} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
     return ratchet(tool, folder, share)
 
@@ -672,6 +693,8 @@ def rubocop_coverage(sudsy, version, prefix):
         if r in mapped and (f, r, l) not in wanted:
             extra[r] = extra.get(r, 0) + 1
     print("only Sudsy (RuboCop reports the mapped cop nowhere on the line): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
+    print("input filters: none (the corpus is copied whole)")
+    print(target_line("rubocop", per, hit, total, 0))
     print(f"rubocop {version}: {hit} of {total} findings of {len(per)} cops in {len(report['files'])} files covered = {share}% with preset:{preset} (informational: {default}% default config, {everything}% all mapped rules on)")
     return ratchet("rubocop", folder, share)
 
@@ -707,11 +730,13 @@ def main():
     fixtures = sorted(p for p in folder.iterdir() if p.suffix in suffixes and p.name != "sudsy.yaml")
     eslint = {"eslint-jsonc": eslint_jsonc, "markdownlint": markdownlint}[tool](prefix, folder) if tool in ("eslint-jsonc", "markdownlint") else None
     mismatches = 0
+    diffs = parity_format.Differences(folder, lint=True)
     for fixture in fixtures:
         found = eslint.get(fixture.name, set()) if eslint is not None else yamllint(fixture, folder, prefix)
         # An upstream rule with no mapping can never match: report it.
         upstream = {(mapping.get(r, f"<unmapped {tool} rule {r}>"), l, c) for r, l, c in found}
-        mismatches += compare(fixture.name, upstream, sudsy_lint(sudsy, fixture, folder), tool)
+        mismatches += compare(fixture.name, upstream, sudsy_lint(sudsy, fixture, folder), tool, diffs)
+    diffs.summary()
     print(f"{len(fixtures)} fixtures, {mismatches} mismatch(es) ({tool} {version})")
     return 1 if mismatches else 0
 

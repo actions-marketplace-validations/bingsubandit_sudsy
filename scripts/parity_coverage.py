@@ -14,20 +14,23 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def corpus_files(spec):
-    """`[(path inside the work folder, source)]`: the sources of the corpus, named from the folder of the corpus."""
+def corpus_files(spec, filters):
+    """`[(path inside the work folder, source)]`: the sources of the corpus, named from the folder of the corpus; `filters` counts the `skip` ones."""
     out = []
     for source in spec["corpus"]:
         base = ROOT / source["dir"]
         for pattern in source["glob"]:
             for p in sorted(base.rglob(pattern)):
                 inside = p.relative_to(base).as_posix()
-                if p.is_file() and not any(s in inside for s in source.get("skip", [])):
+                if p.is_file() and any(s in inside for s in source.get("skip", [])):
+                    filters["skip"] += 1
+                elif p.is_file():
                     name = f"{source['as']}/{inside}" if "as" in source else p.relative_to(base.parent).as_posix()
                     out.append((f"{source['into']}/{name.replace('/', '__')}" if "into" in source else name, p))
     return list(dict(out).items())
@@ -89,7 +92,8 @@ def norm(path, work):
 def findings(tool, spec, prefix, work, exe, rules):
     """Copies the corpus into `work`, writes the config files and runs the tool; returns `(findings, files)`
     where `findings` is `[(path, rule, message)]` and `files` the number of corpus files."""
-    files = corpus_files(spec)
+    filters = Counter()
+    files = corpus_files(spec, filters)
     for inside, source in files:
         (work / inside).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(source, work / inside)
@@ -132,6 +136,7 @@ def findings(tool, spec, prefix, work, exe, rules):
                 found += [(norm(f if os.path.isabs(f) or not folder else f"{folder}/{f}", work), r, m) for f, r, m in parse(report, spec["parse"], rules)]
             except (json.JSONDecodeError, KeyError, ValueError) as error:
                 raise SystemExit(f"{tool}: no usable report ({error}):\n{report[:500]}\n{stderr[:500]}")
+    print(f"input filters: skip {filters['skip']}, the tool did not finish (time or memory limit, or a crash) {len(skipped)}")
     if skipped:
         print(f"the tool did not finish (time or memory limit, or a crash) on {len(skipped)} file(s), which are left out: {', '.join(skipped)}")
     return found, len(files) - len(skipped)

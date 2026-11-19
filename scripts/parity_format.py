@@ -156,8 +156,9 @@ def install(spec, catalog, version, prefix):
                 target.chmod(0o755)
 
 
-def fixtures(config, folder):
-    """The fixtures as (name, path, ratchet group or None); names are the keys of differences.yaml."""
+def fixtures(config, folder, filters):
+    """The fixtures as (name, path, ratchet group or None); names are the keys of differences.yaml.
+    `filters` counts the files left out: `skip`, `skip_with` and non-UTF-8 files."""
     out = []
     for source in config["fixtures"]:
         base = ROOT / source["dir"] if "dir" in source else folder
@@ -172,11 +173,18 @@ def fixtures(config, folder):
             walk = base.rglob("*") if source.get("recursive") else base.iterdir()
             paths = [(p.relative_to(base).as_posix(), p) for p in sorted(walk) if p.is_file() and ".git" not in p.parts]
         for rel, path in paths:
-            if not rel.endswith(suffixes) or path.name == "sudsy.yaml" or rel.startswith(source.get("skip", "\0")) or not rel.startswith(source.get("only", "")) or ("skip_with" in source and path.with_suffix(source["skip_with"]).exists()):
+            if not rel.endswith(suffixes) or path.name == "sudsy.yaml" or not rel.startswith(source.get("only", "")):
+                continue
+            if rel.startswith(source.get("skip", "\0")):
+                filters["skip"] += 1
+                continue
+            if "skip_with" in source and path.with_suffix(source["skip_with"]).exists():
+                filters["skip_with"] += 1
                 continue
             try:
                 path.read_bytes().decode("utf-8")
             except UnicodeDecodeError:
+                filters["non-UTF-8 files"] += 1
                 continue
             out.append((source.get("prefix", "") + rel, path, source.get("ratchet")))
     return out
@@ -242,10 +250,24 @@ def sudsy_format(sudsy, fixture, work, command="format"):
     return (fixture.read_bytes().decode("utf-8") if r.returncode == 0 else None), b"internal error" in r.stderr
 
 
+INTENTIONAL = ("invalid-input", "tool-wrong")
+
+
+def pin(text):
+    """The pin of Sudsy's output for a `tool-wrong` file."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def percent(part, whole):
+    return f"{round(1000 * part / whole) / 10 if whole else 100.0}%"
+
+
 class Differences:
     """`tests/parity/<tool>/differences.yaml` (docs/ai/development/parity.md): `differences` (name -> `<choice|gap>  <text>`),
-    `files` (fixture key -> names; a ratchet group's name stands for all its files) and `ratchet` (group -> least identical files).
-    `lint`: the keys with a space are the lint mode's (a tool's two modes share the file)."""
+    `files` (fixture key -> names; a ratchet group's name stands for all its files), `ratchet` (group -> least identical files),
+    `intentional` (name -> `invalid-input` or `tool-wrong`) and `pins` (file -> `pin()` of Sudsy's output, for the `tool-wrong` names).
+    `lint`: the keys with a space are the lint mode's (a tool's two modes share the file); a lint finding is pinned by its key (file, line, rule).
+    The target number leaves out the intentional files: `status` says which, `tally` counts, `summary` prints raw and target."""
 
     def __init__(self, folder, lint=False):
         path = folder / "differences.yaml"
@@ -255,13 +277,39 @@ class Differences:
         self.ratchet = data.get("ratchet") or {}
         self.second_format = data.get("second-format") or {}  # group -> most files that may change on a second format
         self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
+        self.intentional = data.get("intentional") or {}
+        self.pins = data.get("pins") or {}
         self.lint = lint
         self.differing = {}  # key -> files that differ, listed or not
+        self.same = self.total = 0
+        self.groups = Counter()  # intentional kind or `REVIEW` -> files
 
     def known(self, key, count=1):
         """Records that `key` differs; True when it is listed."""
         self.differing[key] = count
         return key in self.files
+
+    def status(self, key, ours=None):
+        """`invalid-input` or `tool-wrong` for a listed key whose name is intentional; `REVIEW` for a `tool-wrong` file whose
+        Sudsy output is not the pinned one (it counts against Sudsy); else None."""
+        kinds = {self.intentional[n] for n in self.files.get(key, []) if n in self.intentional}
+        if "invalid-input" in kinds:
+            return "invalid-input"
+        if "tool-wrong" in kinds:
+            return "tool-wrong" if self.lint or (ours is not None and self.pins.get(key) == pin(ours)) else "REVIEW"
+        return None
+
+    def tally(self, same, status=None, count=1):
+        self.total += count
+        self.same += count if same else 0
+        if status and not same:
+            self.groups[status] += count
+
+    def summary(self):
+        """raw: identical of all; target: identical of all but the intentional ones (`REVIEW` stays in)."""
+        left = self.total - sum(n for k, n in self.groups.items() if k != "REVIEW")
+        groups = ", ".join(f"{k} {self.groups[k]}" for k in (*INTENTIONAL, "REVIEW"))
+        print(f"raw {percent(self.same, self.total)} ({self.same} of {self.total}); target {percent(self.same, left)} ({self.same} of {left}); intentional: {groups}")
 
     def finish(self, filtered=False):
         """Prints the problems of the lists and the report; returns the number of problems."""
@@ -273,6 +321,10 @@ class Differences:
         for n in sorted(set(self.defs) - used):
             print(f"UNUSED difference name: {n}")
             bad += 1
+        for n, kind in self.intentional.items():
+            if n not in self.defs or kind not in INTENTIONAL:
+                print(f"intentional {n}: a defined name with the value {' or '.join(INTENTIONAL)}, not `{kind}`")
+                bad += 1
         for n, (kind, _) in self.defs.items():
             if kind not in ("choice", "gap"):
                 print(f"difference {n}: the kind is `choice` or `gap`, not `{kind}`")
@@ -295,11 +347,18 @@ class Differences:
 def verdict(name, theirs, ours, diffs, label, quiet=False):
     """Prints the result of one fixture; returns 1 for a mismatch. `quiet`: no line for an equal pair, no diff."""
     if theirs is not None and theirs == ours:
+        diffs.tally(True)
         if not quiet:
             print(f"{name}: ok")
         return 0
-    if diffs.known(name):
-        print(f"{name}: known difference ({', '.join(diffs.files[name])})")
+    known = diffs.known(name)
+    state = diffs.status(name, ours) if known else None
+    diffs.tally(False, state)
+    if state == "REVIEW":
+        print(f"{name}: REVIEW (Sudsy's output differs from the pinned one; counts against Sudsy)")
+        return 1
+    if known:
+        print(f"{name}: known difference ({', '.join(diffs.files[name])})" + (f", intentional: {state}" if state else ""))
         return 0
     print(f"{name}: DIFFERENT (the tool rejects the file)" if theirs is None else f"{name}: DIFFERENT")
     if theirs is not None and not quiet:
@@ -332,6 +391,7 @@ def editorconfig_cases(version, sudsy, parity):
                 outputs.append((case / "input.cs").read_bytes().decode("utf-8"))
         bad += verdict(name, *outputs, known, "dotnet-format")
     bad += known.finish()
+    known.summary()
     print(f"{len(cases)} cases, {bad} mismatch(es) (dotnet format {version})")
     return bad
 
@@ -368,7 +428,8 @@ def main():
     shutil.copy(folder / "sudsy.yaml", work / "sudsy.yaml")
     known = Differences(folder)
     only = os.environ.get("PARITY_FILTER")  # a name substring: those fixtures only, with their diffs, no ratchet
-    found = [f for f in fixtures(config, folder) if only is None or only in f[0]]
+    filters = Counter()
+    found = [f for f in fixtures(config, folder, filters) if only is None or only in f[0]]
     quiet = bool(config.get("quiet")) and only is None
 
     batch = upstream_batch(config, prefix, found, work) if config["input"] == "batch" else None
@@ -405,7 +466,13 @@ def main():
     for (name, _, group), (theirs, ours, _, _) in zip(found, results):
         if group and only is None:
             tally = groups.setdefault(group, [0, 0, 0])
-            tally[2 if theirs is None else 0 if theirs == ours else 1] += 1
+            same = theirs is not None and theirs == ours
+            tally[2 if theirs is None else 0 if same else 1] += 1
+            state = None if same or not known.known(name) else known.status(name, ours)
+            known.tally(same, state)
+            if state == "REVIEW":
+                print(f"{name}: REVIEW (Sudsy's output differs from the pinned one; counts against Sudsy)")
+                bad += 1
         else:
             bad += verdict(name, theirs, ours, known, tool, quiet)
     for group, (same, different, rejected) in sorted(groups.items()):
@@ -429,6 +496,14 @@ def main():
             print(f"refused {group}: {now} files ({note}: {top})")
             bad += now > top
     bad += known.finish(only is not None)
+    known.summary()
+    rejected = sum(theirs is None for theirs, *_ in results)
+    print("input filters: " + ", ".join(f"{k} {filters[k]}" for k in ("non-UTF-8 files", "skip", "skip_with")) + f", rejected by {tool} {rejected}")
+    if "--pin" in sys.argv:  # for the lead to paste into `pins:` after review: the runner never writes them
+        print("pins (tool-wrong names):")
+        for (name, _, _), (_, ours, _, _) in zip(found, results):
+            if ours is not None and any(known.intentional.get(n) == "tool-wrong" for n in known.files.get(name, [])):
+                print(f"  {name}: {pin(ours)}")
     print(f"{len(found)} fixtures, {bad} mismatch(es) ({tool} {version})")
     return 1 if bad else 0
 
