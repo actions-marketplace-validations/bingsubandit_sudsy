@@ -29,7 +29,34 @@ Checks: lossless round-trip on all corpora, `cargo xtask codegen --check` (rows 
 **Checkpoint 1:** report the node and role list, parse speed and any ambiguity left as an opaque node, before building the formatter on it.
 
 ### Phase 2: mapping table, then the formatter on shapes
-Write the mapping table of [../architecture/adding-a-language.md](../architecture/adding-a-language.md): each clang-format construct to a shape and the options it needs. Expected rows: braces and statements to `shapes::block` and `shapes::compound`; control statements to `shapes::flow`; argument and parameter lists to `shapes::call_arguments` and `shapes::list` (`BinPackArguments`/`BinPackParameters` as options; packing through `fill`); binary expressions to `shapes::binary_chain` (`BreakBeforeBinaryOperators` as `binary_operator_line`); `=` to `shapes::assignment`; return type on its own line to `shapes::signature` (an option); base clauses to `shapes::heritage`; access specifiers and `case` labels to `shapes::block`/`shapes::declaration` (an option for the label offset); preprocessor lines through `core_format::directives` (kept as written); comments through `core_format::comments`; trailing comment alignment through `columns`/`align`. A construct with no shape extends the nearest shape with an option, in core-format, never in `lang-cpp`.
+Mapping table (approved). Plain options (`brace_wrapping`, `short_*`, `pointer_alignment`, `space_before_parens`) are `lang.yaml` options read in shared Rust (shapes, `Flow::want`, spacing code); no option conditions in `[space]` rows and no new row keys.
+
+| clang-format construct | Shape and option |
+|---|---|
+| blank lines | `max_blank_lines`, `[blank]` rows |
+| braces | `brace_wrapping` words via `brace_on_new_line` |
+| if / loops / try | `shapes::flow`, `short_ifs`, `short_loops`; new `compound::body` join policy |
+| switch / case | `indent_case_labels`, `short_case_labels`; case label outdent (member outdent) |
+| access specifiers | `access_modifier_outdent`; new member outdent in `declaration.rs` |
+| namespaces | `namespace_indentation`; `inner` = `[layout]` row, parent NamespaceDeclaration |
+| class / enum bodies | `short_enums`; delimited list Fit |
+| base clauses | `shapes::heritage`; new option: before colon, after colon, before comma |
+| constructor initializers | parser: Initializer children + `#heritage` |
+| signature / parameters | Fill; new column-aligned Doc primitive; `break_after_return_type`; `penalty_return_type` counted in Phase 3 |
+| call arguments | parser: Arguments delimited list with `#separator`; Fill; `hug_last_argument` |
+| binary / ternary | new `BinaryPolicy` `non_assignment`; `AlignOperands` via column-align |
+| `=` | parser: `declarator` / `initializer` fields on SimpleDeclaration |
+| init lists | row InitList : array, `ListStyle.padding`, `columns.rs` |
+| lambdas | `short_lambdas` via `join` |
+| pointer alignment, spaces | plain options in shared Rust |
+| templates | parser: `declaration` field on TemplateDeclaration |
+| comments | new `align.rs` run rule over `#statement` / `#member` |
+| preprocessor | verbatim layout + `continuation.rs`, `align_escaped_newlines`; `macro_word` / `macro_name`, `StatementMacros` / `ForEachMacros` as plain `lang.yaml` word lists read by the shared role pass |
+| includes | not built |
+| wrapping | Phase 3 |
+| unread constructs | flow shape |
+
+Shared capabilities, built in the shared crates with unit tests or a fixture of a second language: (1) column-aligned Doc primitive in `core-format::printer` (run the format parity of csharpier, prettier, prettier-js, ruff, gjf, ktlint, php-cs-fixer before landing); (2) plain options in `Flow::want`; (3) `compound::body` join; (4) heritage colon/comma option incl. constructor initializers; (5) member outdent (case labels, access specifiers); (6) `align.rs` over statements; (7) `BinaryPolicy` `non_assignment`. Directive-aware shape checking and `macro_word` / `macro_name` are Phase 2 work.
 
 **Checkpoint 2:** report the table. The lead approves it before code is written.
 
@@ -40,6 +67,7 @@ Run the parity, classify the differing files by cause, rank by count. Known shar
 
 ### Phase 4: speed
 cpp/c format instructions and allocations per byte within 2x of `java.format` on the bench inputs (the first attempt ran 1,034 M instructions and about 20 allocations per byte for 97 KB). Check [../performance/checklist.md](../performance/checklist.md).
+C/C++ parse per byte within 1.5x of `java.parse` (deep pass; now 1.86x for C and 1.96x for C++).
 
 ## Done when
 second-format 0 and refused 0 in every project; identical counts at least the verbatim baseline in every project and recorded per project; the formatter on shapes with the HARD RULE review passing; docs (`docs/ai/formatting/cpp.md`, roadmap status table, `docs/languages.md`, numbers) current. Landings: phase 0, then phases 1-2 (tree and first formatter), then each phase 3 fix.
