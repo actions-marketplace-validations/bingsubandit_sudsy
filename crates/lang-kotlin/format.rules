@@ -77,3 +77,7 @@ kind=Keyword&text=fun|val|var / kind=Lt&parent=TypeArgumentList|TypeParameterLis
 * / kind=Lt&parent=TypeArgumentList|TypeParameterList : no
 kind=Gt&parent=TypeParameterList&grand=Fun|Property / * : yes
 * / kind=Lbracket&parent=Indices : no
+
+# The order of the modifier keywords (ktlint's modifier-order).
+[modifier-order]
+order = public protected private internal expect actual final open abstract sealed const external override lateinit tailrec vararg suspend inner enum annotation fun companion inline value infix operator data

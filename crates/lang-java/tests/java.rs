@@ -94,6 +94,30 @@ fn imports_sort_static_first() {
     );
 }
 
+/// The rewrite layer: a `;` that ends nothing is dropped (`[rewrite]` rows) and the modifiers go in
+/// the order of the Java Language Specification (the `modifier-order` rule's fix).
+#[test]
+fn rewrites_run_before_layout() {
+    // (`fmt`'s checks compare the input's tokens with the output's, which the rewrites change)
+    let provider = lang_java::provider();
+    let options = provider_api::LanguageProvider::option_schema(&provider).defaults();
+    let run = |text: &str| {
+        let file = provider_api::SourceFile::new("A.java", 1, text);
+        let directives = core_format::DirectiveTable::default();
+        provider_api::format_file(&provider, &file, &options, &directives).unwrap()
+    };
+    assert_eq!(
+        run("class A {\n  int x;;\n  ;\n  void f() { ; int a = 1;; }\n};\n"),
+        "class A {\n  int x;\n\n  void f() {\n    int a = 1;\n  }\n}\n"
+    );
+    assert_eq!(
+        run(
+            "class A {\n  static public final int X = 1;\n  @Deprecated final private synchronized void f() {}\n}\n"
+        ),
+        "class A {\n  public static final int X = 1;\n\n  @Deprecated\n  private final synchronized void f() {}\n}\n"
+    );
+}
+
 /// google-java-format's layout: blank lines between members, wrapped parameters, `throws` and
 /// string concatenations, one-line chains, enum constants one per line.
 #[test]

@@ -85,7 +85,6 @@ concept markup-layout # users: html
 concept member-order # users: csharp
 concept min-phony # users: makefile
 concept missing-permissions # users: github-actions
-concept modifier-order # users: java
 concept multiple-labeled-controls # users: html
 concept negation-of-excluded-parent # users: gitignore
 concept no-comment-before-block # users: csharp
@@ -146,7 +145,6 @@ concept template-expression-checks # users: html
 concept template-literal-layout # users: js
 concept template-syntax-checks # users: html
 concept timestamp-expanded # users: makefile
-concept token-rewrite-rows # users: php
 concept trailing-comment-alignment # users: toml
 concept type-expression-layout # users: js
 concept typescript-type-checks # users: js
@@ -224,10 +222,6 @@ data row-key:layout.trailing_commas # users: php
 data row-key:op_first.kind # users: php
 data row-key:op_first.parent # users: php
 data row-key:rewrite.before # users: php
-data row-key:rewrite.end_of # users: php
-data row-key:rewrite.grand # users: php
-data row-key:rewrite.kind # users: php
-data row-key:rewrite.parent # users: php
 data row-key:rewrite.sibling # users: php
 data row-key:rewrite.text # users: php
 data row-key:simple.array # users: js
@@ -246,7 +240,6 @@ data rules-section:comments # users: php
 data rules-section:file # users: php
 data rules-section:hug # users: js
 data rules-section:op_first # users: php
-data rules-section:rewrite # users: php
 data rules-section:simple # users: js
 data tag:annotation-arguments # users: java
 data tag:arg # users: dockerfile

@@ -1,3 +1,11 @@
+# Code rewrites before layout (syntax: crates/core-format/src/rewrite.rs): the semicolons Prettier
+# drops (after a class member, an empty statement) and `new Foo` is `new Foo()`.
+[rewrite]
+kind=Semicolon&parent=ClassBody : replace ""
+kind=Semicolon&parent=EmptyStatement&grand=Program|BlockStatement|FunctionBody|SwitchCase|StaticBlock|TSModuleBlock : replace ""
+kind!=RParen&end_of=NewExpression : insert after "()"
+kind=RParen&parent!=NewExpression&end_of=NewExpression : insert after "()"
+
 # Call arguments as data (Prettier's printCallArguments; syntax: crates/core-format/src/calls.rs).
 [call]
 set test = it|it.only|it.skip|describe|describe.only|describe.skip|test|test.only|test.skip|test.step|test.describe|test.describe.only|test.describe.parallel|test.describe.parallel.only|test.describe.serial|test.describe.serial.only|skip|xit|xdescribe|xtest|fit|fdescribe|ftest

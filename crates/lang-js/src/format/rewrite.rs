@@ -1,11 +1,12 @@
 //! Changes to the source text that the safety check could not follow if the formatter made them:
 //! the generic check compares nodes and tokens, so a token the output adds or drops is added or
 //! dropped here, and the tree is read again (`NodeFormatter::rewrite_source`).
-//! - Semicolons that mean nothing (`};`, `;;`, a `;` after a class method) are dropped, as
-//!   Prettier does.
 //! - Parentheses around a type that its place does not need, and a leading `&` or lone `|` of a
 //!   type (`format/ts/parens.rs`).
-//! - `new Foo` becomes `new Foo()` and an arrow's lone parameter gets its parentheses.
+//! - An arrow's lone parameter gets its parentheses.
+//!
+//! The semicolons that mean nothing (`};`, `;;`, a `;` after a class method) and `new Foo()` are
+//! rows of `format.rules` (`[rewrite]`).
 //!
 //! concept: new source-rewrite
 //! what: Edits to the source text made before layout that the safety check cannot follow.
@@ -25,6 +26,7 @@ pub(crate) fn rewrite(
     text: &str,
     grammar: &Grammar,
     options: &ResolvedOptions,
+    rows: &'static core_format::rules::RuleFormatter,
 ) -> Option<String> {
     let avoid_parens = super::arrow_parens(options) == super::ArrowParens::Avoid;
     let mut edits: Vec<Edit> = Vec::new();
@@ -32,19 +34,15 @@ pub(crate) fn rewrite(
     let mut cut = |tok: SyntaxToken| {
         edits.push((usize::from(tok.text_range().start()), None));
     };
-    let semicolons = |node: &SyntaxNode| {
-        node.children_with_tokens()
-            .filter_map(|e| e.into_token())
-            .filter(|t| t.kind() == k::SEMICOLON)
-            .collect::<Vec<_>>()
-    };
     let mut inserts: Vec<Edit> = Vec::new();
     let mut later: Vec<Edit> = Vec::new();
     // Text moved from elsewhere: where it goes and what.
     let mut moved: Vec<(usize, String)> = Vec::new();
     let keys = super::object::KeyEdits::new(options);
     let mut key_edits: Vec<Edit> = Vec::new();
+    let mut scan = rows.rewrite_scan();
     for node in tree.descendants() {
+        scan.visit(&node);
         keys.of(&node, text, grammar, &mut key_edits);
         // `) // c` then `{` on the next line becomes `) { // c`: the comment moves inside the block.
         if matches!(
@@ -232,22 +230,6 @@ pub(crate) fn rewrite(
             }
         }
         match node.kind() {
-            k::CLASS_BODY => semicolons(&node).into_iter().for_each(&mut cut),
-            k::EMPTY_STATEMENT
-                if node.parent().is_some_and(|p| {
-                    matches!(
-                        p.kind(),
-                        k::PROGRAM
-                            | k::BLOCK_STATEMENT
-                            | k::FUNCTION_BODY
-                            | k::SWITCH_CASE
-                            | k::STATIC_BLOCK
-                            | k::TS_MODULE_BLOCK
-                    )
-                }) =>
-            {
-                semicolons(&node).into_iter().for_each(&mut cut)
-            }
             k::TS_PARENTHESIZED_TYPE | k::TS_UNION_TYPE | k::TS_INTERSECTION_TYPE => {
                 for t in super::ts::redundant_type_tokens(&node, grammar) {
                     // The blank after a bar or `&` goes with it (`/*1*/ | /*2*/ C`).
@@ -317,15 +299,6 @@ pub(crate) fn rewrite(
                     inserts.push((usize::from(last.text_range().end()), Some(")")));
                 }
             }
-            k::NEW_EXPRESSION
-                if !node
-                    .children_with_tokens()
-                    .any(|e| e.as_token().is_some_and(|t| t.kind() == k::L_PAREN)) =>
-            {
-                if let Some(last) = last_token(grammar, &node) {
-                    inserts.push((usize::from(last.text_range().end()), Some("()")));
-                }
-            }
             k::FORMAL_PARAMETERS
                 if avoid_parens
                     && node.parent().is_some_and(|p| {
@@ -375,6 +348,12 @@ pub(crate) fn rewrite(
                 }
             }
             _ => {}
+        }
+    }
+    for (from, to, with) in scan.edits(grammar, tree) {
+        edits.extend((from..to).map(|at| (at, None)));
+        if !with.is_empty() {
+            edits.push((from, Some(with)));
         }
     }
     edits.extend(inserts);

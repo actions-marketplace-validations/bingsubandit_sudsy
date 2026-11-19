@@ -27,6 +27,14 @@ pub struct TraversalCache {
 }
 
 impl TraversalCache {
+    /// A cache whose nodes by kind (by kind index) were found by the caller's own walk: it holds
+    /// the kinds the asking rules need.
+    pub fn with_index(index: Vec<Vec<SyntaxNode>>) -> Self {
+        let cache = TraversalCache::default();
+        let _ = cache.by_kind.set(index);
+        cache
+    }
+
     /// The nodes of the file of the given kinds, in document order: one walk of the file answers
     /// every rule that looks for kinds.
     pub fn nodes(&self, root: &SyntaxNode, kinds: &[SyntaxKind]) -> Vec<SyntaxNode> {

@@ -98,6 +98,32 @@ impl Pattern {
         self.matches_in(&Ctx::new(t))
     }
 
+    /// Like [`Pattern::matches`], with the `end_of` answers of a whole file found once
+    /// ([`Pattern::end_kinds`], [`EndSet`]) instead of per token.
+    pub fn matches_ends(&self, t: &SyntaxToken, ends: &EndSet) -> bool {
+        let mut cx = Ctx::new(t);
+        cx.ends = Some(ends);
+        self.matches_in(&cx)
+    }
+
+    /// The kinds of the nodes a positive `parent=` condition names.
+    pub fn parent_kinds(&self) -> Vec<SyntaxKind> {
+        self.0
+            .iter()
+            .filter(|c| matches!(c.key, Key::Parent) && !c.not)
+            .flat_map(|c| c.kinds.iter().copied())
+            .collect()
+    }
+
+    /// The kinds of the nodes a positive `end_of` condition names (their last tokens match).
+    pub fn end_kinds(&self) -> Vec<SyntaxKind> {
+        self.0
+            .iter()
+            .filter(|c| matches!(c.key, Key::EndOf) && !c.not)
+            .flat_map(|c| c.kinds.iter().copied())
+            .collect()
+    }
+
     /// Every token this pattern matches is also matched by `broad` (provable from the conditions).
     fn implies(&self, broad: &Pattern) -> bool {
         broad.0.iter().all(|b| {
@@ -131,7 +157,7 @@ impl Pattern {
     }
 
     /// The kinds a matching token's `kind=` condition allows, when it has one.
-    fn kinds(&self) -> Option<&[SyntaxKind]> {
+    pub(crate) fn kinds(&self) -> Option<&[SyntaxKind]> {
         self.0
             .iter()
             .find(|c| matches!(c.key, Key::Kind) && !c.not)
@@ -181,6 +207,11 @@ impl Pattern {
                         }
                         found
                     }
+                    Key::EndOf if cx.ends.is_some() && !c.not => {
+                        let ends = cx.ends.unwrap();
+                        let at = cx.token.text_range().start();
+                        ends.contains(&c.kinds, at)
+                    }
                     Key::EndOf => t.parent().is_some_and(|mut n| {
                         loop {
                             if last_code(&n).is_none_or(|l| l != *t) {
@@ -210,6 +241,40 @@ struct Ctx<'a> {
     kind: SyntaxKind,
     parent: std::cell::OnceCell<Option<core_syntax::SyntaxNode>>,
     grand: std::cell::OnceCell<Option<SyntaxKind>>,
+    ends: Option<&'a EndSet>,
+}
+
+/// The last token of every node of some kinds, as `(kind, start of the token)`: what `end_of`
+/// asks, answered with one walk of the tree instead of a climb per token.
+#[derive(Default)]
+pub struct EndSet {
+    /// One bit per byte offset where some such node ends: a token that is not at one skips the
+    /// hash lookup.
+    any: Vec<u64>,
+    set: std::collections::HashSet<(SyntaxKind, core_syntax::TextSize)>,
+}
+
+impl EndSet {
+    /// Notes the end of `node`.
+    pub fn add(&mut self, node: &core_syntax::SyntaxNode) {
+        if let Some(l) = last_code(node) {
+            let at = l.text_range().start();
+            let bit = usize::from(at);
+            if self.any.len() <= bit / 64 {
+                self.any.resize(bit / 64 + 1, 0);
+            }
+            self.any[bit / 64] |= 1 << (bit % 64);
+            self.set.insert((node.kind(), at));
+        }
+    }
+
+    fn contains(&self, kinds: &[SyntaxKind], at: core_syntax::TextSize) -> bool {
+        let bit = usize::from(at);
+        self.any
+            .get(bit / 64)
+            .is_some_and(|w| w >> (bit % 64) & 1 == 1)
+            && kinds.iter().any(|k| self.set.contains(&(*k, at)))
+    }
 }
 
 impl<'a> Ctx<'a> {
@@ -219,6 +284,7 @@ impl<'a> Ctx<'a> {
             kind: token.kind(),
             parent: std::cell::OnceCell::new(),
             grand: std::cell::OnceCell::new(),
+            ends: None,
         }
     }
 
@@ -241,7 +307,7 @@ impl<'a> Ctx<'a> {
 }
 
 /// The last token of the node that is not blank.
-fn last_code(n: &core_syntax::SyntaxNode) -> Option<SyntaxToken> {
+pub(crate) fn last_code(n: &core_syntax::SyntaxNode) -> Option<SyntaxToken> {
     let mut cur = n.last_token();
     while let Some(t) = &cur {
         if !t.text().trim().is_empty() {

@@ -11,7 +11,7 @@
 //! tools: PHP-CS-Fixer short array syntax and visibility_required
 //! reads: rules:rewrite
 
-use crate::spacing::Pattern;
+use crate::spacing::{EndSet, Pattern};
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken};
 
 enum Action {
@@ -21,7 +21,17 @@ enum Action {
     InsertAfter(String),
 }
 
-pub struct RewriteRules(Vec<(Pattern, Action)>);
+pub struct RewriteRules {
+    rows: Vec<(Pattern, Action)>,
+    /// By node kind: bit 0, a row looks at the tokens of a node of it (`parent=`); bit 1, a row
+    /// looks at its last token (`end_of=`).
+    anchors: Vec<u8>,
+    /// Does every row have an anchor? Then only the tokens the anchors name are looked at,
+    /// found while the caller walks the nodes anyway; else every token is.
+    anchored: bool,
+    /// The token kinds the `parent=` rows can match; `None`: any.
+    parent_tokens: Option<Vec<core_syntax::SyntaxKind>>,
+}
 
 impl RewriteRules {
     pub fn parse(grammar: &Grammar, text: &str) -> RewriteRules {
@@ -44,31 +54,141 @@ impl RewriteRules {
                 (Pattern::parse(grammar, pattern), action)
             })
             .collect();
-        RewriteRules(rows)
+        let rows: Vec<(Pattern, Action)> = rows;
+        let mut anchors: Vec<u8> = Vec::new();
+        let mut set = |kinds: Vec<core_syntax::SyntaxKind>, bit: u8| {
+            for k in kinds {
+                let at = k.index() as usize;
+                if anchors.len() <= at {
+                    anchors.resize(at + 1, 0);
+                }
+                anchors[at] |= bit;
+            }
+        };
+        let mut anchored = true;
+        let mut parent_tokens: Option<Vec<core_syntax::SyntaxKind>> = Some(Vec::new());
+        for (p, _) in &rows {
+            let (parents, ends) = (p.parent_kinds(), p.end_kinds());
+            if !parents.is_empty() {
+                match (p.kinds(), &mut parent_tokens) {
+                    (Some(ks), Some(all)) => all.extend_from_slice(ks),
+                    _ => parent_tokens = None,
+                }
+            }
+            anchored &= !parents.is_empty() || !ends.is_empty();
+            set(parents, 1);
+            set(ends, 2);
+        }
+        RewriteRules {
+            rows,
+            anchors,
+            anchored,
+            parent_tokens,
+        }
+    }
+
+    /// A scan of one tree: the caller shows it every node ([`RewriteScan::visit`], in any order)
+    /// and takes the edits.
+    pub fn scan(&self) -> RewriteScan<'_> {
+        RewriteScan {
+            rules: self,
+            ends: EndSet::default(),
+            tokens: Vec::new(),
+        }
     }
 
     /// The source with the rows applied, `None` when no token matches.
     pub fn apply(&self, grammar: &Grammar, tree: &SyntaxNode, text: &str) -> Option<String> {
-        let mut edits: Vec<(usize, usize, &str)> = Vec::new();
-        for t in tree
-            .descendants_with_tokens()
-            .filter_map(|e| e.into_token())
-            .filter(|t| !grammar.is_trivia(t.kind()))
-        {
-            let Some((_, action)) = self.0.iter().find(|(p, _)| p.matches(&t)) else {
-                continue;
-            };
-            let (start, end) = (
-                usize::from(t.text_range().start()),
-                usize::from(t.text_range().end()),
-            );
-            edits.push(match action {
-                Action::Replace(x) => (start, end, x),
-                Action::InsertBefore(x) => (start, start, x),
-                Action::InsertAfter(x) => (end, end, x),
-                Action::ReplaceThroughNext(x) => (start, next_end(grammar, &t)?, x),
-            });
+        let mut scan = self.scan();
+        for n in tree.descendants() {
+            scan.visit(&n);
         }
+        scan.apply(grammar, tree, text)
+    }
+
+    /// Adds what the scan looks at to `wanted` ([`core_syntax::tree::find`]): the nodes that
+    /// end something, and the tokens of the nodes a `parent=` row names ([`RewriteScan::add_token`]).
+    pub fn wanted(&self, wanted: &mut core_syntax::tree::Wanted) {
+        let set = |v: &mut Vec<bool>, at: usize| {
+            if v.len() <= at {
+                v.resize(at + 1, false);
+            }
+            v[at] = true;
+        };
+        for (i, f) in self.anchors.iter().enumerate() {
+            if f & 1 != 0 {
+                set(&mut wanted.parents, i);
+            }
+            if f & 2 != 0 {
+                set(&mut wanted.nodes, i);
+            }
+        }
+        match &self.parent_tokens {
+            Some(kinds) => kinds
+                .iter()
+                .for_each(|k| set(&mut wanted.tokens, k.index() as usize)),
+            None => wanted.any_token = true,
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.rows.is_empty()
+    }
+
+    /// The edits the rows make, `(from, to, text)` in document order: a language that rewrites
+    /// more of its own in the same round merges them with its edits.
+    pub fn edits(&self, grammar: &Grammar, tree: &SyntaxNode) -> Vec<(usize, usize, &str)> {
+        let mut scan = self.scan();
+        for n in tree.descendants() {
+            scan.visit(&n);
+        }
+        scan.edits(grammar, tree)
+    }
+}
+
+/// The rows' view of a tree while its nodes go by.
+pub struct RewriteScan<'r> {
+    rules: &'r RewriteRules,
+    ends: EndSet,
+    /// The tokens the anchors name (when every row has one).
+    tokens: Vec<SyntaxToken>,
+}
+
+impl<'r> RewriteScan<'r> {
+    /// A token `find` found for the rows ([`RewriteRules::wanted`]), instead of [`RewriteScan::visit`]
+    /// of its parent.
+    pub fn add_token(&mut self, token: SyntaxToken) {
+        self.tokens.push(token);
+    }
+
+    pub fn visit(&mut self, node: &SyntaxNode) {
+        let flags = self
+            .rules
+            .anchors
+            .get(node.kind().index() as usize)
+            .copied()
+            .unwrap_or(0);
+        if flags & 1 != 0 && self.rules.anchored {
+            self.tokens
+                .extend(node.children_with_tokens().filter_map(|e| e.into_token()));
+        }
+        if flags & 2 != 0 {
+            self.visit_end(node);
+        }
+    }
+
+    fn visit_end(&mut self, node: &SyntaxNode) {
+        self.ends.add(node);
+        if self.rules.anchored
+            && let Some(l) = crate::spacing::last_code(node)
+        {
+            self.tokens.push(l);
+        }
+    }
+
+    /// The source with the rows applied, `None` when no token matches.
+    pub fn apply(self, grammar: &Grammar, tree: &SyntaxNode, text: &str) -> Option<String> {
+        let edits = self.edits(grammar, tree);
         if edits.is_empty() {
             return None;
         }
@@ -81,6 +201,56 @@ impl RewriteRules {
         }
         out.push_str(&text[at..]);
         Some(out)
+    }
+
+    pub fn edits(mut self, grammar: &Grammar, tree: &SyntaxNode) -> Vec<(usize, usize, &'r str)> {
+        let rules = self.rules;
+        let mut edits: Vec<(usize, usize, &str)> = Vec::new();
+        let mut one = |t: SyntaxToken| -> bool {
+            if grammar.is_trivia(t.kind()) {
+                return true;
+            }
+            let kind = t.kind();
+            let Some((_, action)) = rules.rows.iter().find(|(p, _)| {
+                p.kinds().is_none_or(|ks| ks.contains(&kind)) && p.matches_ends(&t, &self.ends)
+            }) else {
+                return true;
+            };
+            let (start, end) = (
+                usize::from(t.text_range().start()),
+                usize::from(t.text_range().end()),
+            );
+            edits.push(match action {
+                Action::Replace(x) => (start, end, &x[..]),
+                Action::InsertBefore(x) => (start, start, &x[..]),
+                Action::InsertAfter(x) => (end, end, &x[..]),
+                Action::ReplaceThroughNext(x) => match next_end(grammar, &t) {
+                    Some(e) => (start, e, &x[..]),
+                    None => return false,
+                },
+            });
+            true
+        };
+        if rules.anchored {
+            let mut tokens = std::mem::take(&mut self.tokens);
+            tokens.sort_by_key(|t| t.text_range().start());
+            tokens.dedup();
+            for t in tokens {
+                if !one(t) {
+                    return Vec::new();
+                }
+            }
+        } else {
+            for t in tree
+                .descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+            {
+                if !one(t) {
+                    return Vec::new();
+                }
+            }
+        }
+        edits
     }
 }
 

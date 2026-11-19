@@ -31,6 +31,10 @@ pub(super) use core_format::seq::{break_after, el, first, kids, last, multiline}
 pub(super) type R = Result<Doc, FormatError>;
 
 impl NodeFormatter for KotlinFormatter {
+    fn rows(&self) -> &'static str {
+        ROWS.rows()
+    }
+
     /// Braces around a branch can make the branch before it need them too.
     fn rewrite_rounds(&self) -> usize {
         3

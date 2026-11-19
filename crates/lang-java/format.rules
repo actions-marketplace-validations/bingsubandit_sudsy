@@ -38,3 +38,11 @@ kind!=FieldDeclaration|ConstantDeclaration / *
 * / * : prev.doc=yes
 * / * : annotation_args=yes
 * / * : prev.annotation_args=yes
+
+# A `;` that ends nothing: between members, after a class, among the statements of a block.
+[rewrite]
+kind=Semi&parent=Program|TopLevelDeclaration|ClassBody|InterfaceBody|AnnotationTypeBody|RecordBody|Block|ConstructorBody : replace ""
+
+# The order of the modifier keywords (JLS, the Java Language Specification; google-java-format).
+[modifier-order]
+order = public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp

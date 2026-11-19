@@ -25,6 +25,7 @@ pub static RULES: &[&dyn Rule] = &[
     &SortedKeys,
     &SortedArrayValues,
     &crate::suppress::UnknownRuleInDirective,
+    &crate::modifiers::ModifierOrder,
 ];
 
 rule! {

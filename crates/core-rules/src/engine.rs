@@ -67,10 +67,14 @@ pub fn run_file_rules<'a>(
     file: &'a FileContext<'a>,
     active: &[ActiveRule<'_>],
     format: crate::rule::FormatInput<'a>,
-    rows: &'a str,
+    index: Option<Vec<Vec<core_syntax::SyntaxNode>>>,
 ) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::new();
-    let ranges = crate::tree::TraversalCache::default();
+    let indexed = index.is_some();
+    let ranges = match index {
+        Some(i) => crate::tree::TraversalCache::with_index(i),
+        None => crate::tree::TraversalCache::default(),
+    };
     for a in active {
         let mut ctx = RuleContext::new(
             file,
@@ -79,9 +83,9 @@ pub fn run_file_rules<'a>(
             a.severity,
             &mut diagnostics,
         );
-        ctx.ranges = Some(&ranges);
+        // (the shared index of nodes by kind pays only when several rules ask)
+        ctx.ranges = (indexed || active.len() > 1).then_some(&ranges);
         ctx.format = Some(format);
-        ctx.rows = rows;
         a.rule.check_file(file, &mut ctx);
     }
     diagnostics.sort_by(|a, b| {

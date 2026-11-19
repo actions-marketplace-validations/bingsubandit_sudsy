@@ -2154,7 +2154,7 @@
             },
             "modifier-order": {
               "$ref": "#/definitions/rule",
-              "description": "The modifiers of a declaration are not in the order of the Java Language Specification: `public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp` (Checkstyle ModifierOrder). No fix: the check does not rewrite code."
+              "description": "The modifiers of a declaration are not in the order the style wants (Java: `public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp`; Kotlin: ktlint's order). The fix puts them in order."
             },
             "module-import-not-at-top-of-file": {
               "$ref": "#/definitions/rule",

@@ -93,6 +93,82 @@ pub fn code_span(node: &SyntaxNode, grammar: &crate::Grammar) -> Option<rowan::T
     ))
 }
 
+/// What [`find`] looks for, each a set by kind index.
+#[derive(Default)]
+pub struct Wanted {
+    /// Node kinds: every node of one is found (the root included; nodes with no text are not).
+    pub nodes: Vec<bool>,
+    /// Node kinds whose direct child tokens of a kind of `tokens` are found.
+    pub parents: Vec<bool>,
+    pub tokens: Vec<bool>,
+    /// Every token kind, whatever `tokens` says.
+    pub any_token: bool,
+}
+
+/// The nodes and the tokens `wanted` names, in document order. Walks the green tree, so a red
+/// element is made for a hit only.
+pub fn find(root: &SyntaxNode, wanted: &Wanted) -> (Vec<SyntaxNode>, Vec<SyntaxToken>) {
+    use rowan::{GreenNodeData, NodeOrToken};
+    type Hit = (SyntaxKind, u32, u32, bool);
+    fn walk(n: &GreenNodeData, at: u32, w: &Wanted, hits: &mut Vec<Hit>) {
+        let has =
+            |set: &[bool], k: SyntaxKind| set.get(k.index() as usize).copied().unwrap_or(false);
+        let kind = SyntaxKind(n.kind().0);
+        let len = u32::from(n.text_len());
+        if len > 0 && has(&w.nodes, kind) {
+            hits.push((kind, at, len, false));
+        }
+        let parent = has(&w.parents, kind);
+        let mut at = at;
+        for c in n.children() {
+            match c {
+                NodeOrToken::Node(c) => {
+                    walk(c, at, w, hits);
+                    at += u32::from(c.text_len());
+                }
+                NodeOrToken::Token(t) => {
+                    let (k, l) = (SyntaxKind(t.kind().0), u32::from(t.text_len()));
+                    if parent && l > 0 && (w.any_token || has(&w.tokens, k)) {
+                        hits.push((k, at, l, true));
+                    }
+                    at += l;
+                }
+            }
+        }
+    }
+    let mut hits = Vec::new();
+    walk(
+        &root.green(),
+        u32::from(root.text_range().start()),
+        wanted,
+        &mut hits,
+    );
+    let (mut nodes, mut tokens) = (Vec::new(), Vec::new());
+    for (kind, at, len, is_token) in hits {
+        let range = rowan::TextRange::at(at.into(), len.into());
+        match root.covering_element(range) {
+            NodeOrToken::Token(t) if is_token && t.kind() == kind => tokens.push(t),
+            NodeOrToken::Token(_) if is_token => {}
+            e => {
+                let Some(mut n) = (match e {
+                    NodeOrToken::Node(n) => Some(n),
+                    NodeOrToken::Token(t) => t.parent(),
+                }) else {
+                    continue;
+                };
+                while n.kind() != kind && n.parent().is_some_and(|p| p.text_range() == range) {
+                    let Some(p) = n.parent() else { break };
+                    n = p;
+                }
+                if n.kind() == kind && n.text_range() == range {
+                    nodes.push(n);
+                }
+            }
+        }
+    }
+    (nodes, tokens)
+}
+
 /// Prints the tree. The lossless invariant is `print(&tree) == source`.
 pub fn print(node: &SyntaxNode) -> String {
     node.text().to_string()

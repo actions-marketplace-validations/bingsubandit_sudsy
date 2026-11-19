@@ -6,6 +6,7 @@ kotlin:
       comment-space: warn
       enum-entry-name-case: warn
       max-line-length: warn
+      modifier-order: warn
       no-empty-class-body: warn
       no-empty-file: warn
       no-unit-return: warn

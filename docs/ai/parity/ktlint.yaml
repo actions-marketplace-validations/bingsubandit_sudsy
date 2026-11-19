@@ -52,7 +52,7 @@ entries:
   max-line-length: rule max-line-length | ktlint_official allows 140 columns (the `max` option defaults to 120); no exemption for package, import and raw-string lines.
   mixed-condition-operators: planned
   modifier-list-spacing: formatter
-  modifier-order: planned | a Rust rule over the modifier list
+  modifier-order: rule modifier-order | The shared rule over the `#modifiers` node; ktlint's order, annotations stay in place
   multiline-expression-wrapping: planned
   multiline-if-else: planned
   multiline-loop: planned

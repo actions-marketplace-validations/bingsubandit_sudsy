@@ -79,7 +79,14 @@ impl ParserProvider {
             ),
             parse,
             formatter: spec.formatter,
-            hooks: spec.hooks,
+            // (leaked once per language: the provider lives as long as the process)
+            hooks: match spec.formatter.rows() {
+                "" => spec.hooks,
+                rows => Box::leak(Box::new(core_rules::hooks::WithRows {
+                    inner: spec.hooks,
+                    rows,
+                })),
+            },
             dialect: None,
         }
     }

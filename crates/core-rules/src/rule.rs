@@ -186,7 +186,7 @@ impl<'a> RuleContext<'a> {
             layout: None,
             ranges: None,
             format: None,
-            rows: "",
+            rows: file.hooks.rows(),
         }
     }
 
@@ -258,6 +258,13 @@ pub trait Rule: Send + Sync {
     /// rule is `off` in lint unless the config turns it on (it reads its rows through `RuleContext::section`).
     fn formats(&self) -> bool {
         false
+    }
+
+    /// For a [`Rule::formats`] rule: the node kinds its `check_file` asks for with
+    /// `RuleContext::nodes`. The formatter finds them in its one walk of the nodes and hands them
+    /// to the rule, so the rule needs no walk of its own.
+    fn format_kinds(&self, _grammar: &core_syntax::Grammar) -> Vec<SyntaxKind> {
+        Vec::new()
     }
 
     /// Node scope: the kinds [`Rule::check`] is called for.

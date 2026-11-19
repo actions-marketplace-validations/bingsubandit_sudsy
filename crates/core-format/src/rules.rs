@@ -24,7 +24,7 @@ use crate::doc::Doc;
 use crate::error::FormatError;
 use crate::frames::Brackets;
 use crate::layout::{File, Layout};
-use crate::rewrite::RewriteRules;
+use crate::rewrite::{RewriteRules, RewriteScan};
 use crate::seq::kids;
 use crate::shapes::flow::Flow;
 use crate::spacing::SpaceRules;
@@ -206,6 +206,17 @@ impl RuleFormatter {
         self.rewrite.apply(g, tree, text)
     }
 
+    /// The `[rewrite]` rows, when there are any.
+    pub fn rewrite_rules(&self) -> Option<&RewriteRules> {
+        (!self.rewrite.is_empty()).then_some(&self.rewrite)
+    }
+
+    /// A scan for the `[rewrite]` rows ([`crate::rewrite::RewriteRules::scan`]): a language that
+    /// walks the nodes itself shows them to it and merges the edits with its own.
+    pub fn rewrite_scan(&self) -> crate::rewrite::RewriteScan<'_> {
+        self.rewrite.scan()
+    }
+
     pub fn comment_style(&self) -> CommentStyle {
         CommentStyle {
             max_blank_after: self.max_blank_after,
@@ -266,6 +277,24 @@ impl NodeFormatter for LazyRules {
         _: &ResolvedOptions,
     ) -> Option<String> {
         self.get().rewrite_source(grammar, tree, text)
+    }
+
+    fn rewrite_rows(&self) -> Option<&RewriteRules> {
+        self.get().rewrite_rules()
+    }
+
+    fn rewrite_scanned(
+        &self,
+        tree: &SyntaxNode,
+        text: &str,
+        grammar: &Grammar,
+        _: &ResolvedOptions,
+        scan: Option<RewriteScan<'_>>,
+    ) -> Option<String> {
+        match scan {
+            Some(s) => s.apply(grammar, tree, text),
+            None => self.get().rewrite_source(grammar, tree, text),
+        }
     }
 
     fn comment_style(&self, _: &ResolvedOptions) -> CommentStyle {

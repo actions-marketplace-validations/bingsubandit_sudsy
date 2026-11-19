@@ -57,6 +57,12 @@ pub trait RuleHooks: Send + Sync {
     /// Is the line a `key: value` entry whose value is one unbreakable word (no space)? Lets
     /// `max-line-length` accept it with `allow_non_breakable_inline_mappings`. The default has no
     /// such lines.
+    /// The language's `format.rules` text (`NodeFormatter::rows`): a rule with a section named like
+    /// it there reads its rows from it, in lint and when the formatter runs it.
+    fn rows(&self) -> &'static str {
+        ""
+    }
+
     fn inline_mapping_line(&self, _line: &str) -> bool {
         false
     }
@@ -65,6 +71,43 @@ pub trait RuleHooks: Send + Sync {
     /// `SuppressMessageAttribute`), as `(rule id, range)`. The default has none.
     fn suppressed_ranges(&self, _file: &FileContext<'_>) -> Vec<(String, TextRange)> {
         Vec::new()
+    }
+}
+
+/// `inner` with the language's rows (`RuleHooks::rows`): what a provider hands the rules when its
+/// formatter has rows.
+pub struct WithRows {
+    pub inner: &'static dyn RuleHooks,
+    pub rows: &'static str,
+}
+
+impl RuleHooks for WithRows {
+    fn flat_keys(&self, mapping: &SyntaxNode) -> Option<Vec<SyntaxElement>> {
+        self.inner.flat_keys(mapping)
+    }
+
+    fn is_name(&self, g: &Grammar, key: &SyntaxElement, text: &str) -> bool {
+        self.inner.is_name(g, key, text)
+    }
+
+    fn key_name<'a>(&self, g: &Grammar, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
+        self.inner.key_name(g, key, text)
+    }
+
+    fn scalar<'a>(&self, g: &Grammar, item: &SyntaxNode, text: &'a str) -> Option<Scalar<'a>> {
+        self.inner.scalar(g, item, text)
+    }
+
+    fn rows(&self) -> &'static str {
+        self.rows
+    }
+
+    fn inline_mapping_line(&self, line: &str) -> bool {
+        self.inner.inline_mapping_line(line)
+    }
+
+    fn suppressed_ranges(&self, file: &FileContext<'_>) -> Vec<(String, TextRange)> {
+        self.inner.suppressed_ranges(file)
     }
 }
 

@@ -37,6 +37,12 @@ include!("schema.generated.rs");
 
 pub struct JsFormatter;
 
+/// The `[rewrite]` rows of `format.rules`: the semicolons that mean nothing and `new Foo()`.
+static ROWS: core_format::rules::LazyRules = core_format::rules::LazyRules::new(
+    || core_syntax::grammars::JS.get(),
+    include_str!("../format.rules"),
+);
+
 /// The last token of `node` that is not trivia (JS has no structured trivia, so this is
 /// `FormatCtx::last_token` without its ancestor checks, which cost on every node).
 fn last_significant(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<core_syntax::SyntaxToken> {
@@ -239,16 +245,17 @@ impl NodeFormatter for JsFormatter {
         grammar: &core_syntax::Grammar,
         options: &core_config::ResolvedOptions,
     ) -> Option<String> {
+        // The rows' edits are made in the same round as the language's own.
+        let rewrite = |text: &str| rewrite::rewrite(tree, text, grammar, options, ROWS.get());
         // The tree of an embedded expression is the one of `[\n text \n]` (`adapter::parse_file`).
         if embed::is_expression(options) {
-            let wrapped = format!("[\n{text}\n]");
-            let out = rewrite::rewrite(tree, &wrapped, grammar, options)?;
+            let out = rewrite(&format!("[\n{text}\n]"))?;
             return out
                 .strip_prefix("[\n")
                 .and_then(|o| o.strip_suffix("\n]"))
                 .map(str::to_string);
         }
-        rewrite::rewrite(tree, text, grammar, options)
+        rewrite(text)
     }
 
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {

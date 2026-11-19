@@ -44,6 +44,26 @@ pub(super) fn spaced(a: &SyntaxToken, b: &SyntaxToken) -> bool {
 pub(super) type R = Result<Doc, FormatError>;
 
 impl NodeFormatter for JavaFormatter {
+    fn rows(&self) -> &'static str {
+        ROWS.rows()
+    }
+
+    fn rewrite_rows(&self) -> Option<&core_format::rewrite::RewriteRules> {
+        ROWS.get().rewrite_rules()
+    }
+
+    fn rewrite_scanned(
+        &self,
+        tree: &SyntaxNode,
+        text: &str,
+        grammar: &core_syntax::Grammar,
+        _: &core_config::ResolvedOptions,
+        scan: Option<core_format::rewrite::RewriteScan<'_>>,
+    ) -> Option<String> {
+        core_rules::imports::sort_source(tree, text, grammar, &IMPORT_ORDER)
+            .or_else(|| scan.and_then(|s| s.apply(grammar, tree, text)))
+    }
+
     fn rewrite_source(
         &self,
         tree: &SyntaxNode,
@@ -52,6 +72,12 @@ impl NodeFormatter for JavaFormatter {
         _: &core_config::ResolvedOptions,
     ) -> Option<String> {
         core_rules::imports::sort_source(tree, text, grammar, &IMPORT_ORDER)
+            .or_else(|| ROWS.get().rewrite_source(grammar, tree, text))
+    }
+
+    /// The import order, then the `[rewrite]` rows (the modifier order is a rule's round).
+    fn rewrite_rounds(&self) -> usize {
+        2
     }
 
     fn blank_between(&self, cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {

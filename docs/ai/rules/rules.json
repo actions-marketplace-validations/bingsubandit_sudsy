@@ -208,6 +208,45 @@
       ]
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "The modifiers of a declaration are not in the order the style wants (Java: `public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp`; Kotlin: ktlint's order). The fix puts them in order.",
+      "example": {
+        "config": null,
+        "fixed": "class A {\n  public static final int A = 1;\n  public static final int B = 1;\n  @Deprecated private final int c = 1;\n  private final @Deprecated int d = 1;\n  public synchronized void f() {}\n}\n",
+        "input": "class A {\n  static public final int A = 1;\n  public static final int B = 1;\n  @Deprecated final private int c = 1;\n  private final @Deprecated int d = 1;\n  synchronized public void f() {}\n}\n",
+        "language": "java",
+        "spans": [
+          {
+            "column": 10,
+            "length": 6,
+            "line": 2
+          },
+          {
+            "column": 21,
+            "length": 7,
+            "line": 4
+          },
+          {
+            "column": 16,
+            "length": 6,
+            "line": 6
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "modifier-order",
+      "languages": [
+        "all"
+      ],
+      "options": [],
+      "presets": [
+        "java/google",
+        "kotlin/ktlint"
+      ],
+      "upstream": []
+    },
+    {
       "category": "correctness",
       "default_level": "error",
       "description": "A mapping has the same key twice (after decoding escapes and quotes); parsers disagree on which value wins.",
@@ -7164,44 +7203,6 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
-    },
-    {
-      "category": "style",
-      "default_level": "off",
-      "description": "The modifiers of a declaration are not in the order of the Java Language Specification: `public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp` (Checkstyle ModifierOrder). No fix: the check does not rewrite code.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "class A {\n  static public final int A = 1;\n  public static final int B = 1;\n  @Deprecated final private int c = 1;\n  private final @Deprecated int d = 1;\n  synchronized public void f() {}\n}\n",
-        "language": "java",
-        "spans": [
-          {
-            "column": 10,
-            "length": 6,
-            "line": 2
-          },
-          {
-            "column": 21,
-            "length": 7,
-            "line": 4
-          },
-          {
-            "column": 16,
-            "length": 6,
-            "line": 6
-          }
-        ]
-      },
-      "fix": null,
-      "id": "modifier-order",
-      "languages": [
-        "java"
-      ],
-      "options": [],
-      "presets": [
-        "java/google"
-      ],
       "upstream": []
     },
     {

@@ -103,6 +103,25 @@ pub trait NodeFormatter: Send + Sync {
         ""
     }
 
+    /// The `[rewrite]` rows of the language, for a formatter that lets the shared format loop
+    /// scan them in its one walk of the nodes ([`NodeFormatter::rewrite_scanned`]).
+    fn rewrite_rows(&self) -> Option<&crate::rewrite::RewriteRules> {
+        None
+    }
+
+    /// [`NodeFormatter::rewrite_source`] with the scan of [`NodeFormatter::rewrite_rows`] already
+    /// made (`None` when it has no rows); the default ignores it.
+    fn rewrite_scanned(
+        &self,
+        tree: &SyntaxNode,
+        text: &str,
+        grammar: &Grammar,
+        options: &ResolvedOptions,
+        _scan: Option<crate::rewrite::RewriteScan<'_>>,
+    ) -> Option<String> {
+        self.rewrite_source(tree, text, grammar, options)
+    }
+
     fn rewrite_source(
         &self,
         _tree: &SyntaxNode,

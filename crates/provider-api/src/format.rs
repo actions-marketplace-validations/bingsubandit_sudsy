@@ -101,11 +101,49 @@ pub fn format_parsed_with(
             Some((f, p)) => (&f.text, &p.tree),
             None => (&file.text, &parsed.tree),
         };
-        let Some(next) = rule_rewrite(provider, &file.id, tree, text, options)
+        // One walk of the nodes serves the rules' kinds and the rows' scan.
+        let rules = format_rules(provider.formatter().rows());
+        let wanted: Vec<_> = rules
+            .iter()
+            .flat_map(|r| r.rule.format_kinds(grammar))
+            .collect();
+        let mut scan = provider.formatter().rewrite_rows().map(|r| r.scan());
+        let mut index: Vec<Vec<SyntaxNode>> = Vec::new();
+        if scan.is_some() || !wanted.is_empty() {
+            let mut w = core_syntax::tree::Wanted::default();
+            for k in &wanted {
+                let at = k.index() as usize;
+                if w.nodes.len() <= at {
+                    w.nodes.resize(at + 1, false);
+                }
+                w.nodes[at] = true;
+            }
+            let rule_nodes = w.nodes.clone();
+            if let Some(r) = provider.formatter().rewrite_rows() {
+                r.wanted(&mut w);
+            }
+            let (nodes, tokens) = core_syntax::tree::find(tree, &w);
+            if let Some(s) = &mut scan {
+                tokens.into_iter().for_each(|t| s.add_token(t));
+            }
+            for n in nodes {
+                if let Some(s) = &mut scan {
+                    s.visit(&n);
+                }
+                let at = n.kind().index() as usize;
+                if rule_nodes.get(at).copied().unwrap_or(false) {
+                    if index.len() <= at {
+                        index.resize_with(at + 1, Vec::new);
+                    }
+                    index[at].push(n);
+                }
+            }
+        }
+        let Some(next) = rule_rewrite(provider, &file.id, tree, text, options, index)
             .or_else(|| {
                 provider
                     .formatter()
-                    .rewrite_source(tree, text, grammar, options)
+                    .rewrite_scanned(tree, text, grammar, options, scan)
             })
             .filter(|t| t != text)
         else {
@@ -177,6 +215,7 @@ fn rule_rewrite(
     tree: &SyntaxNode,
     text: &str,
     options: &ResolvedOptions,
+    index: Vec<Vec<SyntaxNode>>,
 ) -> Option<String> {
     let formatter = provider.formatter();
     let rows = formatter.rows();
@@ -196,7 +235,8 @@ fn rule_rewrite(
         embedded: &[],
         semantics: None,
     };
-    let diagnostics = core_rules::run_file_rules(&context, &active, FormatInput { options }, rows);
+    let diagnostics =
+        core_rules::run_file_rules(&context, &active, FormatInput { options }, Some(index));
     let chosen = core_rules::fixes::select(&diagnostics, |_| true);
     if chosen.is_empty() {
         return None;
