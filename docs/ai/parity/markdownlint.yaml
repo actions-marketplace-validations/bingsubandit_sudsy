@@ -7,7 +7,7 @@ sources:
   - "https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc"
 entries:
   MD001: rule heading-increment
-  MD003: formatter
+  MD003: rule heading-style | `consistent` only (the first heading's style); the fix writes a setext heading of one line as atx, the other way is not fixed. No `setext_with_atx` styles.
   MD004: formatter | The second of two adjacent lists uses `*` (Prettier's way to keep them apart), which `consistent` reports.
   MD005: formatter
   MD007: formatter
@@ -28,7 +28,7 @@ entries:
   MD026: rule no-trailing-punctuation | No `punctuation` option; reported on the heading, not at the punctuation.
   MD027: formatter
   MD028: deferred | A blank line between two block quotes; needs a rule over adjacent siblings.
-  MD029: formatter
+  MD029: formatter | A list that starts at another number than 0 or 1 (after a fence that ends the list) is kept, because the start number is meaning.
   MD030: formatter
   MD031: formatter
   MD032: formatter
@@ -45,7 +45,7 @@ entries:
   MD043: deferred | Needs a configured heading structure; off by default.
   MD044: deferred | Needs a configured list of names; no names by default.
   MD045: rule no-alt-text | An HTML `<img alt="">` is not an image here.
-  MD046: formatter | A document that mixes both is not unified (`consistent`).
+  MD046: formatter | Indented code blocks are kept as written, so a document that mixes both is not unified (`consistent`).
   MD047: formatter
   MD048: formatter
   MD049: formatter | Other delimiters stay as written, so `consistent` may still report.

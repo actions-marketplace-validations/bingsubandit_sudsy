@@ -16,6 +16,7 @@ use core_syntax::{TextRange, TextSize};
 
 pub static RULES: &[&dyn Rule] = &[
     &MaxLineLength,
+    &NoTrailingWhitespace,
     &CommentSpace,
     &NoEmptyComment,
     &NoDuplicateKeys,
@@ -27,6 +28,7 @@ pub static RULES: &[&dyn Rule] = &[
     &crate::suppress::UnknownRuleInDirective,
     &crate::modifiers::ModifierOrder,
     &crate::curly::Curly,
+    &crate::heading_style::HeadingStyle,
 ];
 
 rule! {
@@ -86,6 +88,32 @@ rule! {
                 range,
                 format!("line is {length} characters long; the limit is {max}"),
             );
+        }
+    }
+}
+
+rule! {
+    NoTrailingWhitespace {
+        id: "no-trailing-whitespace",
+        category: Style,
+        default: Off,
+        description: "Spaces or tabs at the end of a line.",
+        example: "text   \n   // reported at the spaces",
+    }
+
+    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        for line in 0..file.lines.line_count() {
+            let (start, end) = file.lines.line_range(file.text, line);
+            let kept = file.text[start..end].trim_end_matches([' ', '\t']).len();
+            if start + kept < end {
+                ctx.report(
+                    TextRange::new(
+                        TextSize::from((start + kept) as u32),
+                        TextSize::from(end as u32),
+                    ),
+                    "trailing whitespace",
+                );
+            }
         }
     }
 }

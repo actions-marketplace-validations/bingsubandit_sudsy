@@ -832,6 +832,68 @@ pub fn indented_run(cs: &[Comment], min_col: usize) -> usize {
         .count()
 }
 
+/// The significant token before `tok`.
+pub fn prev_significant(g: &Grammar, tok: &SyntaxToken) -> Option<SyntaxToken> {
+    std::iter::successors(tok.prev_token(), SyntaxToken::prev_token)
+        .find(|t| !g.is_trivia(t.kind()))
+}
+
+/// The first significant token of a node.
+fn first_significant(g: &Grammar, node: &SyntaxNode) -> Option<SyntaxToken> {
+    std::iter::successors(node.first_token(), SyntaxToken::next_token)
+        .find(|t| !g.is_trivia(t.kind()))
+}
+
+/// The last significant token of a node.
+fn last_significant(g: &Grammar, node: &SyntaxNode) -> Option<SyntaxToken> {
+    std::iter::successors(node.last_token(), SyntaxToken::prev_token)
+        .find(|t| !g.is_trivia(t.kind()))
+}
+
+/// The block collections (nodes of the kinds `blocks`) that end right before `tok`, innermost
+/// first, with the range of the leading comments `cs` of `tok` each one keeps; a collection
+/// keeps the comments indented at least as far as itself, so a comment after a nested block
+/// stays with it. With the option `comment_indent: content` only the innermost collection
+/// keeps comments, those deeper than `tok` (at the end of a file, deeper than column 0): each
+/// is then indented like the line before it or like `tok`.
+pub fn block_takers(
+    g: &Grammar,
+    options: &core_config::ResolvedOptions,
+    cs: &[Comment],
+    tok: &SyntaxToken,
+    blocks: &[SyntaxKind],
+) -> Vec<(SyntaxNode, usize, usize)> {
+    let Some(prev) = prev_significant(g, tok) else {
+        return Vec::new();
+    };
+    let mut content = None;
+    let (mut out, mut start) = (Vec::new(), 0);
+    for a in prev.parent_ancestors() {
+        if last_significant(g, &a).as_ref() != Some(&prev) {
+            break;
+        }
+        if blocks.contains(&a.kind()) {
+            let content = *content.get_or_insert_with(|| options.is("comment_indent", "content"));
+            let col = if content {
+                1 + if tok.text_range().is_empty() {
+                    0
+                } else {
+                    column(tok)
+                }
+            } else {
+                first_significant(g, &a).as_ref().map_or(0, column)
+            };
+            let take = indented_run(&cs[start..], col);
+            out.push((a, start, start + take));
+            start += take;
+            if content {
+                break;
+            }
+        }
+    }
+    out
+}
+
 /// Does no non-trivia token come before `tok`?
 pub fn starts_file(g: &Grammar, tok: &SyntaxToken) -> bool {
     run_before(g, tok).1.is_none()

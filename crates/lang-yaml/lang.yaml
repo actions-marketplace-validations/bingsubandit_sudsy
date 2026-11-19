@@ -34,4 +34,8 @@ options:
       range: [1, 10]
       default: 1
       doc: "Spaces between a value and a comment after it on the same line."
+  - comment_indent:
+      values: ["preserve", "content"]
+      default: "preserve"
+      doc: "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token)."
 presets: [prettier-compat, yamllint]

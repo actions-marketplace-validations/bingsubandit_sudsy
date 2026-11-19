@@ -5,7 +5,7 @@
 //! `concept: <id>[, <id>...]` (a language module may write `new <id>`; any module `none (<reason>)`),
 //! `what:`, `tools:`, optionally `kind:`, `rules:` (lint rule ids) and `reads:` (the data a shared
 //! mechanism reads: `rules:<section>[.<key>]`, `grammar:<line>`, `tag:<name>`, `option:<name>`,
-//! `rule:<id>`, `family:<name>`, `path:<rust path>`), which gives the languages that use it.
+//! `rule:<id>`, `family:<name>`, `path:<rust path>`), which gives the languages that use it. A shared module whose `reads:` has only `option:`, `rule:` and `path:` entries may have one user: codegen adds its concept to the single-use list, marked `(shared)`.
 
 use anyhow::{Result, bail};
 use std::collections::{BTreeMap, BTreeSet};

@@ -55,6 +55,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `break_constructor_initializers` | `before_colon`, `before_comma` | cpp `before_colon`, c `before_colon` |
 | `break_template_declarations` | `yes`, `multiline`, `no` | cpp `multiline`, c `multiline` |
 | `collapse` | json: `preserve`, `always`, `never`, `opening_break`; toml: `preserve`, `always`, `never` | json `preserve`, toml `preserve` |
+| `comment_indent` | `preserve`, `content` | yaml `preserve`, github-actions `preserve` |
 | `comment_spacing` | int 1-10 | yaml `1`, github-actions `1` |
 | `conditional_indent` | int 1-4 | java `2`, js `1`, csharp `1` |
 | `conditional_layout` | `indented`, `chained` | java `indented`, js `chained`, csharp `indented` |

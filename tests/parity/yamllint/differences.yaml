@@ -1,2 +1,16 @@
-coverage: 73.8  # share of the default-set findings of yamllint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage yamllint; at least 85% is the bar)
-target: 72.9
+differences:
+  required-colon-space: "choice  YAML needs a space between a tag or anchor on an empty key and the colon (`!!null : a`), or the colon joins the property; yamllint reports too many spaces before the colon"
+  plain-colon-scalar: "choice  a scalar like `:x` in a flow mapping is plain text in YAML 1.2; PyYAML reads the colon as an indicator and yamllint reports the space before it"
+files:
+  yaml-test-suite/FH7J/in.yaml yamllint:colons 2: required-colon-space
+  yaml-test-suite/FH7J/in.yaml yamllint:colons 4: required-colon-space
+  yaml-test-suite/WZ62/in.yaml yamllint:colons 3: required-colon-space
+  yaml-test-suite/PW8X/in.yaml yamllint:colons 3: required-colon-space
+  yaml-test-suite/PW8X/in.yaml yamllint:colons 5: required-colon-space
+  yaml-test-suite/58MP/in.yaml yamllint:colons 1: plain-colon-scalar
+  yaml-test-suite/5T43/in.yaml yamllint:colons 2: plain-colon-scalar
+intentional:
+  required-colon-space: tool-wrong
+  plain-colon-scalar: tool-wrong
+coverage: 74.3  # share of the default-set findings of yamllint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage yamllint; at least 85% is the bar)
+target: 74.1  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage yamllint

@@ -69,8 +69,8 @@ Each number is measured on real-world code against the reference tool with its d
 | Vue / Svelte | not measured Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
 | Angular templates | not measured Prettier | no reference tool | not measured |
 | CSS / SCSS / Less | not measured Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | In progress |
-| Markdown | not measured Prettier | ███████░░░ 73% markdownlint | In progress |
-| YAML | not measured Prettier | ███████░░░ 72% yamllint | In progress |
+| Markdown | not measured Prettier | ████████░░ 83% markdownlint | In progress |
+| YAML | not measured Prettier | ███████░░░ 74% yamllint | In progress |
 | JSON / JSONC | not measured Prettier<br>not measured Biome | not measured eslint-plugin-jsonc | not measured |
 | PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
 | PHP | not measured PHP-CS-Fixer | not measured PHPStan | not measured |

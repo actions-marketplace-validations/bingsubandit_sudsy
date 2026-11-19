@@ -1,6 +1,6 @@
 //! Rules that read the whole document: ids and references, classes, headings, `<main>`, comments.
 //!
-//! concept: new no-duplicate-id, new no-duplicate-class, new no-multiple-main, new heading-level, new no-missing-references, new no-redundant-for, new no-conditional-comment, new input-missing-label, new multiple-labeled-controls, new unique-landmark, new map-dup-name, new no-trailing-whitespace, new unrecognized-char-ref, unique-names
+//! concept: new no-duplicate-id, new no-duplicate-class, new no-multiple-main, new heading-level, new no-missing-references, new no-redundant-for, new no-conditional-comment, new input-missing-label, new multiple-labeled-controls, new unique-landmark, new map-dup-name, new unrecognized-char-ref, unique-names
 //! what: no-duplicate-id: An `id` that an earlier element of the document already has
 //! what: no-duplicate-class: A class name written twice in one `class` attribute
 //! what: no-multiple-main: A second `<main>` element that is not `hidden`: a page has one main landmark
@@ -12,7 +12,6 @@
 //! what: multiple-labeled-controls: A `<label>` without `for` that holds more than one control: it labels only the first
 //! what: unique-landmark: Landmarks of one kind (`<nav>`, `<aside>`, or an element with the same landmark `role`) that a screen reader user cannot tell apart: with several of them, each needs an `
 //! what: map-dup-name: A `<map>` whose `name` an earlier `<map>` already has: `usemap` finds the first
-//! what: no-trailing-whitespace: Spaces or tabs at the end of a line
 //! what: unrecognized-char-ref: A named character reference in text (`&name;`) that HTML does not define
 
 use crate::dom;
@@ -35,7 +34,6 @@ pub static RULES: &[&dyn Rule] = &[
     &MultipleLabeledControls,
     &UniqueLandmark,
     &MapDupName,
-    &NoTrailingWhitespace,
     &UnrecognizedCharRef,
 ];
 
@@ -412,30 +410,6 @@ rule! {
                     seen.check(ctx, v, r, || format!("duplicate map name `{v}`"), "first used here");
                 }
             }
-        }
-    }
-}
-
-rule! {
-    NoTrailingWhitespace {
-        id: "no-trailing-whitespace",
-        category: Style,
-        default: Off,
-        description: "Spaces or tabs at the end of a line.",
-        example: "<p>text   \n</p>   // reported at the spaces",
-    }
-
-    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let mut start = 0;
-        for line in file.text.split('\n') {
-            let body = line.trim_end_matches('\r');
-            let kept = body.trim_end_matches([' ', '\t']).len();
-            if kept < body.len() {
-                let at = TextSize::try_from(start + kept).unwrap_or_default();
-                let len = TextSize::try_from(body.len() - kept).unwrap_or_default();
-                ctx.report(TextRange::at(at, len), "trailing whitespace");
-            }
-            start += line.len() + 1;
         }
     }
 }

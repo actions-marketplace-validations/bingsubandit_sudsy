@@ -143,6 +143,15 @@ snap!(
     "a: &a x\nb: [x: 1, y]\nc: {? k : v, z, ? w}\nd: [\"q\": 1]\ne: { *a : 1 }\n"
 );
 snap!(
+    flow_keys_are_flattened,
+    "&mapping\n&key [ &item a,b, c ]: value\n"
+);
+snap!(
+    comment_indent_content,
+    "a:\n  - n: 1\n    m: 2\n\n  # c1\n  # c2\nb: 1\n",
+    [("comment_indent", s("content"))]
+);
+snap!(
     flow_keys_are_never_broken,
     "[aaaaaaaaaaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb, cccccccccccccccccccc]: v\n",
     [("line_width", n(30))]

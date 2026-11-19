@@ -43,6 +43,7 @@ Checked against actionlint by `scripts/parity.sh actionlint` ([../development/pa
 | `max_blank_lines` | int 0-10 | `1` | Largest number of blank lines kept between entries, comments and documents. |
 | `blank_lines_after_key` | `preserve`, `remove` | `preserve` | Blank lines between a key and its block value on the next line: `preserve` keeps them (up to `max_blank_lines`); `remove` drops them. |
 | `comment_spacing` | int 1-10 | `1` | Spaces between a value and a comment after it on the same line. |
+| `comment_indent` | `preserve`, `content` | `preserve` | A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token). |
 <!-- /generated -->
 
 ## Conformance

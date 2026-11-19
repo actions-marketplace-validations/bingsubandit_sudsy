@@ -13,7 +13,6 @@ files:
   docs/ai/design/parity-target.md: list-looseness
   runtime-docs/coding-guidelines/breaking-change-rules.md: list-looseness
   runtime-docs/coding-guidelines/clr-code-guide.md: toc-indent
-  runtime-docs/coding-guidelines/cross-platform-performance-and-eventing.md: tab-blocks
   runtime-docs/coding-guidelines/EventLogging.md: tab-blocks
   runtime-docs/coding-guidelines/mono-code-guide.md: code-span-lines
   runtime-docs/coding-guidelines/vectorization-guidelines.md: code-trailing-blanks

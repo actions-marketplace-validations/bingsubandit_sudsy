@@ -160,11 +160,15 @@ fn explicit_entry(cx: &FormatCtx<'_>, st: &Style, p: &Parts, question: &SyntaxTo
     Ok(doc::concat(out))
 }
 
-/// A key is one line. A flow collection as a key is printed as written so that it never breaks.
+/// A key is one line. A flow collection as a key is printed on one line so that it never breaks;
+/// as written when it has a comment or a line break inside.
 fn key_doc(cx: &FormatCtx<'_>, key: &SyntaxNode) -> R {
     let is_flow = |n: &SyntaxNode| matches!(n.kind(), k::FLOW_MAPPING | k::FLOW_SEQUENCE);
     if is_flow(key) || key.kind() == k::PROPERTY_NODE && key.children().any(|c| is_flow(&c)) {
-        Ok(cx.verbatim_node(key))
+        Ok(cx
+            .format(key)?
+            .try_flattened()
+            .unwrap_or_else(|| cx.verbatim_node(key)))
     } else {
         cx.format(key)
     }
@@ -393,7 +397,9 @@ pub(crate) fn flow_pair(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             out.push(cx.format(key)?);
         }
         if let Some(colon) = &p.colon {
-            out.push(doc::lit(" "));
+            if p.key.as_ref().is_none_or(space_before_colon) {
+                out.push(doc::lit(" "));
+            }
             out.push(tok(cx, colon));
             if let Some(v) = &p.value {
                 out.push(value_doc(cx, v)?);

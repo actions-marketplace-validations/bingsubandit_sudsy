@@ -135,6 +135,62 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "Headings are written in more than one style: `#` in front of the text (atx) or text over `===` or `---` (setext). Style `consistent` takes the first heading's. The fix rewrites a heading of one line, level 1 or 2.",
+      "example": {
+        "config": null,
+        "fixed": "# Title\n\n  # Section\n\n  ## Sub\n\n## Atx\n\n  Two\n  lines\n  ---\n",
+        "input": "# Title\n\n  Section\n  =======\n\n  Sub\n  ---\n\n## Atx\n\n  Two\n  lines\n  ---\n",
+        "language": "markdown",
+        "spans": [
+          {
+            "column": 3,
+            "length": 7,
+            "line": 3
+          },
+          {
+            "column": 3,
+            "length": 3,
+            "line": 6
+          },
+          {
+            "column": 3,
+            "length": 3,
+            "line": 11
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "heading-style",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "atx",
+            "setext"
+          ],
+          "default": "consistent",
+          "description": "`atx`, `setext`, or `consistent` (the first heading's style).",
+          "name": "style",
+          "type": "string"
+        },
+        {
+          "default": "Heading",
+          "description": "The name of the grammar kind of a heading node.",
+          "name": "kind",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "markdown/markdownlint"
+      ],
+      "upstream": []
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A key does not follow one of the allowed naming conventions. The checks are those of eslint-plugin-jsonc: a key with punctuation or whitespace never matches, `camelCase` also rejects `_` and `-`, `snake_case` and `kebab-case` reject capitals. No fix: renaming a key changes the data.",
       "example": {
         "config": "key-name-casing:\n  level: warn\n  options:\n    allowed: [snake_case, kebab-case]\n    ignored_keys: [\"^P\"]\n",
@@ -515,6 +571,52 @@
           "id": "suspicious/noEmptyObjectKeys",
           "partial": false,
           "tool": "Biome"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Spaces or tabs at the end of a line.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<p>text   \n</p>\n<p>fine</p>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 8,
+            "length": 3,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-trailing-whitespace",
+      "languages": [
+        "all"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "yaml/yamllint",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "no-trailing-spaces",
+          "partial": false,
+          "tool": "html-eslint"
+        },
+        {
+          "id": "no-trailing-whitespace",
+          "partial": true,
+          "tool": "html-validate"
+        },
+        {
+          "id": "trailing-spaces",
+          "partial": true,
+          "tool": "yamllint"
         }
       ]
     },
@@ -22949,49 +23051,6 @@
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": []
-    },
-    {
-      "category": "style",
-      "default_level": "off",
-      "description": "Spaces or tabs at the end of a line.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "<!DOCTYPE html>\n<title>x</title>\n<p>text   \n</p>\n<p>fine</p>\n",
-        "language": "html",
-        "spans": [
-          {
-            "column": 8,
-            "length": 3,
-            "line": 3
-          }
-        ]
-      },
-      "fix": null,
-      "id": "no-trailing-whitespace",
-      "languages": [
-        "angular",
-        "html",
-        "svelte",
-        "vue"
-      ],
-      "options": [],
-      "presets": [
-        "html/html-validate-recommended",
-        "html/html-validate-recommended"
-      ],
-      "upstream": [
-        {
-          "id": "no-trailing-spaces",
-          "partial": false,
-          "tool": "html-eslint"
-        },
-        {
-          "id": "no-trailing-whitespace",
-          "partial": true,
-          "tool": "html-validate"
-        }
-      ]
     },
     {
       "category": "suspicious",

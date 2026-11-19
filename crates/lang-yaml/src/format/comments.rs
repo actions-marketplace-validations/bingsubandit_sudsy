@@ -37,14 +37,14 @@ pub(crate) fn leading(cx: &FormatCtx<'_>, t: &SyntaxToken) -> Doc {
     if cs.is_empty() {
         return Doc::Nil;
     }
-    let skip = taken_before(&cs, t);
+    let skip = taken_before(cx, &cs, t);
     leading_comments_doc(&cs[skip..])
 }
 
 /// Does the token have leading comments the collections before it have not taken?
 pub(crate) fn has_remaining_comments(cx: &FormatCtx<'_>, t: &SyntaxToken) -> bool {
     let cs = comments::leading_comments(cx.grammar, t);
-    taken_before(&cs, t) < cs.len()
+    taken_before(cx, &cs, t) < cs.len()
 }
 
 pub(crate) fn has_leading_comments(cx: &FormatCtx<'_>, t: &SyntaxToken) -> bool {
@@ -58,7 +58,7 @@ pub(crate) fn has_trailing_comments(cx: &FormatCtx<'_>, t: &SyntaxToken) -> bool
 /// Blank lines to print before the token (or its first remaining leading comment).
 pub(crate) fn blank_lines_before(cx: &FormatCtx<'_>, t: &SyntaxToken, st: &Style) -> usize {
     let cs = comments::leading_comments(cx.grammar, t);
-    let skip = taken_before(&cs, t);
+    let skip = taken_before(cx, &cs, t);
     let blank = match skip {
         0 => comments::blank_lines_before(cx.grammar, t),
         n => cs[n - 1].breaks_after.saturating_sub(1),
@@ -89,33 +89,23 @@ pub(crate) fn breaks(n: usize) -> Doc {
 }
 
 /// The block collections that end right before `t`, innermost first, with the range of `cs` each
-/// one takes.
-fn takers(cs: &[Comment], t: &SyntaxToken) -> Vec<(SyntaxNode, usize, usize)> {
-    let Some(prev) = prev_significant(t) else {
-        return Vec::new();
-    };
-    let mut out = Vec::new();
-    let mut start = 0;
-    for a in prev.parent_ancestors() {
-        if last_token(&a).as_ref() != Some(&prev) {
-            break;
-        }
-        if matches!(a.kind(), k::BLOCK_MAPPING | k::BLOCK_SEQUENCE) {
-            let col = first_token(&a).map_or(0, |f| comments::column(&f));
-            let take = comments::indented_run(&cs[start..], col);
-            out.push((a, start, start + take));
-            start += take;
-        }
-    }
-    out
+/// one takes (`core_format::comments::block_takers`).
+fn takers(cx: &FormatCtx<'_>, cs: &[Comment], t: &SyntaxToken) -> Vec<(SyntaxNode, usize, usize)> {
+    comments::block_takers(
+        cx.grammar,
+        cx.options,
+        cs,
+        t,
+        &[k::BLOCK_MAPPING, k::BLOCK_SEQUENCE],
+    )
 }
 
 /// How many leading comments of `t` the collections before it took.
-fn taken_before(cs: &[Comment], t: &SyntaxToken) -> usize {
+fn taken_before(cx: &FormatCtx<'_>, cs: &[Comment], t: &SyntaxToken) -> usize {
     if cs.is_empty() {
         return 0;
     }
-    takers(cs, t).last().map_or(0, |(_, _, end)| *end)
+    takers(cx, cs, t).last().map_or(0, |(_, _, end)| *end)
 }
 
 /// The comments a block collection takes from the token after it, printed after its last entry.
@@ -129,7 +119,7 @@ pub(crate) fn dangling(cx: &FormatCtx<'_>, st: &Style, collection: &SyntaxNode) 
     if cs.is_empty() {
         return Doc::Nil;
     }
-    let Some((_, start, end)) = takers(&cs, &next)
+    let Some((_, start, end)) = takers(cx, &cs, &next)
         .into_iter()
         .find(|(n, _, _)| n == collection)
     else {

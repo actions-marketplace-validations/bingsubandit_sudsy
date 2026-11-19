@@ -1507,6 +1507,47 @@
               "$ref": "#/definitions/rule",
               "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`."
             },
+            "heading-style": {
+              "description": "Headings are written in more than one style: `#` in front of the text (atx) or text over `===` or `---` (setext). Style `consistent` takes the first heading's. The fix rewrites a heading of one line, level 1 or 2.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "default": "Heading",
+                          "description": "The name of the grammar kind of a heading node.",
+                          "type": "string"
+                        },
+                        "style": {
+                          "default": "consistent",
+                          "description": "`atx`, `setext`, or `consistent` (the first heading's style).",
+                          "enum": [
+                            "consistent",
+                            "atx",
+                            "setext"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "html-self-closing": {
               "$ref": "#/definitions/rule",
               "description": "Vue's `html-self-closing` (eslint-plugin-vue) with its defaults: HTML elements, components, SVG and MathML elements without content are self-closing, void HTML elements are not. The elements of the file's root (`<template>`, `<script>`) are left alone."
@@ -7957,6 +7998,15 @@
               "description": "Spaces inside the braces of a one-line mapping or object: `{ a: 1 }` or `{a: 1}`.",
               "type": "boolean"
             },
+            "comment_indent": {
+              "default": "preserve",
+              "description": "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token).",
+              "enum": [
+                "preserve",
+                "content"
+              ],
+              "type": "string"
+            },
             "comment_spacing": {
               "default": 1,
               "description": "Spaces between a value and a comment after it on the same line.",
@@ -11143,6 +11193,15 @@
                     "description": "Spaces inside the braces of a one-line mapping or object: `{ a: 1 }` or `{a: 1}`.",
                     "type": "boolean"
                   },
+                  "comment_indent": {
+                    "default": "preserve",
+                    "description": "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token).",
+                    "enum": [
+                      "preserve",
+                      "content"
+                    ],
+                    "type": "string"
+                  },
                   "comment_spacing": {
                     "default": 1,
                     "description": "Spaces between a value and a comment after it on the same line.",
@@ -13910,6 +13969,15 @@
                     "description": "Spaces inside the braces of a one-line mapping or object: `{ a: 1 }` or `{a: 1}`.",
                     "type": "boolean"
                   },
+                  "comment_indent": {
+                    "default": "preserve",
+                    "description": "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token).",
+                    "enum": [
+                      "preserve",
+                      "content"
+                    ],
+                    "type": "string"
+                  },
                   "comment_spacing": {
                     "default": 1,
                     "description": "Spaces between a value and a comment after it on the same line.",
@@ -15244,6 +15312,15 @@
               "default": true,
               "description": "Spaces inside the braces of a one-line mapping or object: `{ a: 1 }` or `{a: 1}`.",
               "type": "boolean"
+            },
+            "comment_indent": {
+              "default": "preserve",
+              "description": "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token).",
+              "enum": [
+                "preserve",
+                "content"
+              ],
+              "type": "string"
             },
             "comment_spacing": {
               "default": 1,

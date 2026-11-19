@@ -1,0 +1,10 @@
+---
+source: crates/lang-yaml/tests/format.rs
+expression: "format! (\"{input}\\n-----\\n{out}\")"
+---
+&mapping
+&key [ &item a,b, c ]: value
+
+-----
+&mapping
+&key [&item a, b, c]: value

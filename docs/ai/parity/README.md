@@ -40,7 +40,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | html-validate | 61.5% | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
 | htmlhint | 5.0% | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
 | ktlint | 13.0% | 11.9% | 97 | 34 | 8 | 55 | 0 | 0 | 0 | 55 |
-| markdownlint | 82.6% | 73.8% | 53 | 25 | 16 | 0 | 0 | 0 | 12 | 0 |
+| markdownlint | 83.6% | 83.4% | 53 | 23 | 18 | 0 | 0 | 0 | 12 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | phpstan | 0.0% | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
@@ -59,7 +59,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | terraform | - | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 18.9% | 18.9% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
 | typescript-eslint | 100.0% | 100.0% | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
-| yamllint | 73.8% | 72.9% | 66 | 62 | 3 | 1 | 0 | 0 | 0 | 1 |
+| yamllint | 74.3% | 74.1% | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
 <!-- /generated -->
 
 ## Lint coverage by function

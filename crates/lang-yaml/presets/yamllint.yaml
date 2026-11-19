@@ -7,6 +7,7 @@ yaml:
     sequence_indent: indented
     max_blank_lines: 2
     comment_spacing: 2
+    comment_indent: content
     end_of_line: lf
     bracket_spacing: false
   lint:
@@ -21,6 +22,7 @@ yaml:
         options:
           check_keys: true
           allowed: []
+      no-trailing-whitespace: error
       no-undefined-alias: error
       document-start: warn
       comment-space: warn

@@ -12,6 +12,8 @@ pub const BLANK_LINES_AFTER_KEY: &str = "blank_lines_after_key";
 #[allow(dead_code)]
 pub const COMMENT_SPACING: &str = "comment_spacing";
 #[allow(dead_code)]
+pub const COMMENT_INDENT: &str = "comment_indent";
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SequenceIndent { Preserve, Indented, Flush }
 #[allow(dead_code)]
@@ -70,6 +72,16 @@ pub fn blank_lines_after_key(o: &core_config::ResolvedOptions) -> BlankLinesAfte
 pub fn comment_spacing(o: &core_config::ResolvedOptions) -> usize {
     o.uint(COMMENT_SPACING, 1)
 }
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CommentIndent { Preserve, Content }
+#[allow(dead_code)]
+pub fn comment_indent(o: &core_config::ResolvedOptions) -> CommentIndent {
+    match o.text(COMMENT_INDENT) {
+        "content" => CommentIndent::Content,
+        _ => CommentIndent::Preserve,
+    }
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {
@@ -88,6 +100,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::max_blank_lines(1, "Largest number of blank lines kept between entries, comments and documents."),
         core_config::OptionDef::choice("blank_lines_after_key", &["preserve", "remove"], "preserve", "Blank lines between a key and its block value on the next line: `preserve` keeps \n             them (up to `max_blank_lines`); `remove` drops them."),
         core_config::OptionDef::int("comment_spacing", 1, (1, 10), "Spaces between a value and a comment after it on the same line."),
+        core_config::OptionDef::choice("comment_indent", &["preserve", "content"], "preserve", "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token)."),
         ])
         .with_presets(vec![
         core_config::Preset::new("yaml/prettier-compat", include_str!("../presets/prettier-compat.yaml")),

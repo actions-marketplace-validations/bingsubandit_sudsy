@@ -38,7 +38,7 @@ pub(crate) struct Style {
 }
 
 impl Style {
-    fn of(options: &ResolvedOptions) -> Style {
+    pub(super) fn of(options: &ResolvedOptions) -> Style {
         Style {
             drop_blank_after_key: blank_lines_after_key(options) == BlankLinesAfterKey::Remove,
             indent: options.int(shared::INDENT_SIZE) as usize,

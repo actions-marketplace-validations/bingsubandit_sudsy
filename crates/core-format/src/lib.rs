@@ -34,6 +34,7 @@ pub mod safety;
 pub mod seq;
 pub mod shapes;
 pub mod spacing;
+pub mod tabs;
 pub mod testing;
 
 pub use context::{DefaultFormatter, EmbedMode, Embedder, FormatCtx, NodeFormatter, Variants};

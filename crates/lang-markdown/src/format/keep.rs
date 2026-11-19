@@ -17,7 +17,7 @@ impl Render<'_> {
             && atx_level(self.src, n).is_none());
         open_fence
             || setext
-            || top && self.src[from..usize::from(range.end())].contains('\t')
+            || top && tab_matters(e, &self.src[from..usize::from(range.end())])
             || top
                 && matches!(e, SyntaxElement::Node(n)
                 if (n.kind() == k::BLOCK_QUOTE || n.kind() == k::LIST)
@@ -77,4 +77,18 @@ impl Render<'_> {
                         }
                 })
     }
+}
+
+/// The lists of Markdown, for the shared tab rule.
+const LISTS: core_format::tabs::ListFacts = core_format::tabs::ListFacts {
+    bullets: &['-', '*', '+'],
+    ordered: &['.', ')'],
+    list: k::LIST,
+    verbatim: &[k::FENCED_CODE, k::HTML],
+};
+
+/// Does a tab in the block change what the renderer writes? Not one that indents a list marker of
+/// a list without code or HTML in it: the tree tells the nesting.
+fn tab_matters(e: &SyntaxElement, text: &str) -> bool {
+    core_format::tabs::tab_changes_layout(e, text, &LISTS)
 }

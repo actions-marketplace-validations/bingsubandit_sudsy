@@ -6,6 +6,7 @@ markdown:
       descriptive-link-text: warn
       fenced-code-language: warn
       heading-increment: warn
+      heading-style: warn
       max-line-length:
         level: warn
         options:

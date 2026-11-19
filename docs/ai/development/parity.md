@@ -81,7 +81,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 | prettier-css | 87.2% (714 of 819) | 87.4% (714 of 817) |
 | prettier-html | 84.8% (2185 of 2576) | 86.1% (2185 of 2539) |
 | prettier-js | 81.6% (3403 of 4169) | 84.0% (3403 of 4051) |
-| prettier | 92.1% (223 of 242) | 95.7% (223 of 233) |
+| prettier | 92.1% (223 of 242) | 95.3% (223 of 234) |
 | ruff | 78.3% (1303 of 1664) | 79.4% (1303 of 1641) |
 | shfmt | 81.7% (67 of 82) | 81.7% (67 of 82) |
 | sqlfluff | 60.5% (678 of 1121) | 78.2% (678 of 867) |
@@ -103,7 +103,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 | html-validate | 61.5% (616 of 1001) | 62.9% (616 of 980) |
 | htmlhint | 5.0% (65 of 1301) | 5.0% (65 of 1301) |
 | ktlint | 13.0% (15437 of 118565) | 11.9% (15437 of 129297) |
-| markdownlint | 82.6% (1538 of 1862) | 73.8% (1538 of 2084) |
+| markdownlint | 82.6% (1538 of 1862) | 82.4% (1538 of 1867) |
 | phpstan | not run here (no corpus, or the tool is not installed) | - |
 | psscriptanalyzer | not run here (no corpus, or the tool is not installed) | - |
 | rubocop | 96.2% (7717 of 8022) | 96.2% (7717 of 8022) |
@@ -116,7 +116,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 | stylelint | 94.1% (11934 of 12686) | 94.1% (11934 of 12686) |
 | tflint | 18.9% (27 of 143) | 18.9% (27 of 143) |
 | typescript-eslint | 100.0% (3644 of 3644) | 100.0% (3644 of 3644) |
-| yamllint | 73.8% (2152 of 2917) | 72.9% (2152 of 2950) |
+| yamllint | 74.3% (2232 of 3004) | 74.1% (2232 of 3013) |
 
 ## Nightly
 `.github/workflows/nightly.yml` (daily 02:17 UTC, and `workflow_dispatch`) runs every parity tool of `scripts/parity_tools.json` and every language crate with ignored conformance tests, so a broken ratchet (`ratchet` minima, `second-format` and `refused` maxima, a new mismatch) or a broken corpus test fails without a person. `scripts/ci-nightly-matrix.py` builds the job matrix: one job per tool (`scripts/parity.sh [format] <tool>`) and per crate (`scripts/conformance.sh lang-<x>`: the fetch script, then `cargo test --profile corpus -p lang-<x> -- --ignored` minus the measurements `measure_startup_cost`, `scaling` and `model_cost`; `#[ignore]` reasons with "measurement", "prints timings" or "flaky" do not select a crate). A new tool or crate joins by existing; nothing is listed twice. Jobs do not stop each other and carry the tool's or crate's name. Tools (`target/parity`, keyed on the pins in `parity_tools.json`, `docs/ai/parity/*.yaml`, `jre.sh`, `dotnet-tools.json`) and corpora (`tests/conformance/corpus`, keyed on the fetch scripts, which update a stale cache by commit) are cached per job; the Cargo cache is saved from the default branch only. A cache is saved only by a passing job.

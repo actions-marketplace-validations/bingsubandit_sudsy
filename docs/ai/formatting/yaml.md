@@ -27,6 +27,7 @@ Loaded from our tree. Core schema (`yes`, `on`, `0b1`, `1_000` are strings), tag
 | `max_blank_lines` | int 0-10 | `1` | Largest number of blank lines kept between entries, comments and documents. |
 | `blank_lines_after_key` | `preserve`, `remove` | `preserve` | Blank lines between a key and its block value on the next line: `preserve` keeps them (up to `max_blank_lines`); `remove` drops them. |
 | `comment_spacing` | int 1-10 | `1` | Spaces between a value and a comment after it on the same line. |
+| `comment_indent` | `preserve`, `content` | `preserve` | A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token). |
 <!-- /generated -->
 
 `sequence_indent: preserve` is default because both styles are common (Kubernetes vs GitHub Actions) and the zero-config goal is the smallest diff. No `indent_style`: tabs cannot indent YAML.
@@ -39,8 +40,8 @@ Loaded from our tree. Core schema (`yes`, `on`, `0b1`, `1_000` are strings), tag
 - Comments: `comment_spacing` spaces separate a comment from the code before it. Comment text is never rewritten; the space after `#` is the `comment-space` lint rule (safe fix).
 - Block scalars: re-indented, never re-wrapped; trailing blanks kept; indentation indicator rewritten; blank lines after `keep` are exact.
 - Multi-line plain/quoted scalars keep line structure; continuation lines are re-indented.
-- Placement after `key:`, `-`, `?`, `---` (`block::node_after`): scalars stay on their line, a collection after `-` starts on the dash line, a comment after the indicator keeps the value on the next line. A flow collection that does not fit moves under its key; one used as a key prints as written.
-- Hook: comments between the end of a nested block collection and the next token stay indented with the collection (printed after its last entry).
+- Placement after `key:`, `-`, `?`, `---` (`block::node_after`): scalars stay on their line, a collection after `-` starts on the dash line, a comment after the indicator keeps the value on the next line. A flow collection that does not fit moves under its key; one used as a key prints on one line (as written when it holds a comment or a line break). In a flow pair `? key : value` the colon touches the key unless the key is an alias or an empty node with properties.
+- Hook: comments between the end of a nested block collection and the next token stay indented with the collection (printed after its last entry). `comment_indent: content` (yamllint preset) gives them to the innermost collection only, when they are deeper than the next token, so each is indented like the line before it or like the next token (yamllint `comments-indentation`); a comment after a scalar that sits on its own line is still indented like the collection, not like that scalar.
 - `sudsy-ignore` before an entry and `-start`/`-end` among entries of a block collection keep them as written.
 - Safety: generic tree comparison, then the data-model comparison.
 
@@ -49,3 +50,12 @@ Long plain/quoted scalars and comments are not re-wrapped; properties split over
 
 ## Conformance
 yaml-test-suite `data` branch at `6ad3d2c` (`tests/conformance/fetch-yaml-corpus.sh`), `cargo test --profile corpus -p lang-yaml --test integration -- --ignored conformance::`: 308 valid cases parse, round-trip and satisfy the attachment rule; 94 error cases error; 279/279 with `in.json` have an equal data model; all valid cases format with every check, also under each single option value and two combined sets.
+
+## Where yamllint is wrong
+Findings of yamllint on Sudsy's output that YAML requires (named in `tests/parity/yamllint/differences.yaml`):
+
+<!-- generated:differences:yamllint -->
+
+- `plain-colon-scalar`: a scalar like `:x` in a flow mapping is plain text in YAML 1.2; PyYAML reads the colon as an indicator and yamllint reports the space before it
+- `required-colon-space`: YAML needs a space between a tag or anchor on an empty key and the colon (`!!null : a`), or the colon joins the property; yamllint reports too many spaces before the colon
+<!-- /generated -->

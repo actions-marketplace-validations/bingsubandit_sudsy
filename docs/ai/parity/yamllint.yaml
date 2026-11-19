@@ -65,7 +65,7 @@ entries:
   quoted-strings.extra-required / extra-allowed: rule quoted-strings
   quoted-strings.allow-quoted-quotes: rule quoted-strings
   quoted-strings.check-keys: rule quoted-strings
-  trailing-spaces: formatter
+  trailing-spaces: rule no-trailing-whitespace | Also reports inside block scalars, where the content is data and the formatter keeps it.
   truthy: rule ambiguous-booleans
   truthy.allowed-values: rule ambiguous-booleans
   truthy.check-keys: rule ambiguous-booleans

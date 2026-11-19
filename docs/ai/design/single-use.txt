@@ -2,7 +2,8 @@
 # Every data item (grammar line type, format.rules section, row key, grammar tag read by shared code) and every concept
 # with fewer than two users, and every LOCAL entry (a language module that carries a concept without using its shared
 # mechanism). An entry that is no longer true is removed by `cargo xtask codegen`; adding one fails the check:
-# a second language adopts the shared form (docs/ai/architecture/adding-a-language.md).
+# a second language adopts the shared form (docs/ai/architecture/adding-a-language.md). The one exception is a concept
+# of a shared module that reads no data (`reads:` only `option:`, `rule:`, `path:`): codegen adds it, marked `(shared)`.
 concept accessor-order # users: csharp
 concept ambiguous-booleans # users: yaml
 concept angular-expression-pipes # users: html
@@ -10,10 +11,10 @@ concept angular-microsyntax # users: html
 concept angular-template-layout # users: html
 concept arrow-function-layout # users: js
 concept async-suffix # users: csharp
-concept behavior-summaries # users: csharp
+concept behavior-summaries # users: csharp (shared)
 concept block-collection-layout # users: yaml
 concept build-stage-checks # users: dockerfile
-concept capability-layers # users: 
+concept capability-layers # users:  (shared)
 concept cd-without-exit # users: shell
 concept class-body-checks # users: ruby
 concept clause-checks # users: ruby
@@ -59,12 +60,13 @@ concept from-first # users: dockerfile
 concept getter-return # users: js
 concept heading-increment # users: markdown
 concept heading-level # users: html
+concept heading-style # users:  (shared)
 concept html-tag-table # users: html
 concept implicit-string-concat # users: python
 concept import-usage-checks # users: js
 concept indent-balance-layout # users: sql
 concept input-missing-label # users: html
-concept invalid-escape-sequence # users: python
+concept invalid-escape-sequence # users: python (shared)
 concept invalid-expression # users: github-actions
 concept invalid-job-id # users: github-actions
 concept invalid-property-value # users: editorconfig
@@ -72,7 +74,7 @@ concept invalid-runs-on # users: github-actions
 concept jsx-layout # users: js
 concept known-names-table # users: css
 concept last-user-not-root # users: dockerfile
-concept layout-directives # users: 
+concept layout-directives # users:  (shared)
 concept legacy-api-upgrade # users: python
 concept line-layout-engine # users: sql
 concept line-wrapping # users: sql
@@ -105,8 +107,7 @@ concept no-missing-references # users: html
 concept no-multiple-main # users: html
 concept no-redundant-for # users: html
 concept no-returns-on-void # users: csharp
-concept no-throw-generic # users: python
-concept no-trailing-whitespace # users: html
+concept no-throw-generic # users: python (shared)
 concept no-typename-prefix # users: graphql
 concept no-undefined-alias # users: yaml
 concept no-unexpected-multiline # users: js
@@ -119,7 +120,7 @@ concept phony-declared # users: makefile
 concept possible-null-dereference # users: csharp
 concept prefer-const # users: js
 concept prefer-rest-params # users: js
-concept prefixed-string-quotes # users: python
+concept prefixed-string-quotes # users: python (shared)
 concept preprocessor-branches # users: csharp
 concept property-summary-matches-accessors # users: csharp
 concept property-summary-omits-restricted-accessor # users: csharp
@@ -131,7 +132,7 @@ concept scalar-type-resolution # users: yaml
 concept script-injection # users: github-actions
 concept selector-list-layout # users: css
 concept self-alias # users: sql
-concept semantic-facts # users: csharp
+concept semantic-facts # users: csharp (shared)
 concept separate-attributes # users: csharp
 concept separate-field-declarations # users: csharp
 concept single-class-per-file # users: csharp
@@ -139,12 +140,13 @@ concept single-namespace-per-file # users: csharp
 concept single-title # users: markdown
 concept style-declaration-checks # users: css
 concept suppression-justification # users: csharp
+concept tab-keep # users: markdown (shared)
 concept table-alignment # users: markdown
 concept template-expression-checks # users: html
 concept template-literal-layout # users: js
 concept template-syntax-checks # users: html
 concept timestamp-expanded # users: makefile
-concept trailing-comment-alignment # users: toml
+concept trailing-comment-alignment # users: toml (shared)
 concept type-expression-layout # users: js
 concept typescript-type-checks # users: js
 concept unary-expression-layout # users: js

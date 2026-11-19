@@ -39,3 +39,47 @@ fn headers_declare_concepts_and_new_ones() {
     assert!(parse_header("fn f() {}\n").ids.is_empty());
     assert!(parse_header("//! concept: none (glue: x)\n").none.is_some());
 }
+
+fn kit_with(id: &str, shared: bool, reads: &[&str]) -> xtask::kit::Kit {
+    let concept = xtask::kit::Concept {
+        id: id.to_string(),
+        kind: "x".to_string(),
+        modules: Vec::new(),
+        what: String::new(),
+        tools: Vec::new(),
+        shared,
+        reads: reads.iter().map(|r| r.to_string()).collect(),
+        rules: Vec::new(),
+        used_by: ["markdown".to_string()].into(),
+        local: Vec::new(),
+    };
+    xtask::kit::Kit {
+        modules: Vec::new(),
+        concepts: [(id.to_string(), concept)].into(),
+        errors: Vec::new(),
+        data: Default::default(),
+    }
+}
+
+#[test]
+fn a_shared_concept_that_reads_no_data_may_join_the_single_use_list() {
+    let reads = ["option:kind", "rule:a-b", "path:core_format::tabs"];
+    let kit = kit_with("a-b", true, &reads);
+    assert_eq!(
+        xtask::kit::single_use(&kit)["concept a-b"],
+        "users: markdown (shared)"
+    );
+    assert!(xtask::kit::check_ratchet(&kit, "").is_empty());
+}
+
+#[test]
+fn a_single_use_concept_that_reads_data_or_is_a_language_one_may_not() {
+    for kit in [
+        kit_with("a-b", true, &["tag:call"]),
+        kit_with("a-b", false, &[]),
+    ] {
+        let errors = xtask::kit::check_ratchet(&kit, "");
+        assert_eq!(errors.len(), 1, "{errors:?}");
+        assert!(errors[0].contains("new entry `concept a-b`"));
+    }
+}

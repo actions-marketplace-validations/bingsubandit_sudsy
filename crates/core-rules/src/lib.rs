@@ -28,6 +28,7 @@ pub mod family;
 pub mod fixes;
 pub mod flow_rules;
 pub mod format_strings;
+pub mod heading_style;
 pub mod hooks;
 pub mod imports;
 pub mod keys;
