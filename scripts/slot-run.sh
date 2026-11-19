@@ -41,6 +41,11 @@ touch_changed() {
   if [ "$wt" != "$PWD" ]; then
     { if [ -n "$head" ] && git cat-file -e "$head" 2>/dev/null; then git diff --name-only "$head"; else git ls-files; fi
       [ ! -f "$rec" ] || tail -n +2 "$rec"; dirty; } | sort -u | xargs -r -d '\n' touch -c 2>/dev/null || true
+  elif [ -n "$head" ] && [ "$head" != "$(git rev-parse HEAD)" ] && git cat-file -e "$head" 2>/dev/null; then
+    # Same worktree, HEAD moved since the last build (WIP commits, rebase, reset, checkout): the files
+    # that differ between the two commits may carry an mtime older than that build (a restored or
+    # copied file), so cargo would call them built. Uncommitted files of the record were built as they are.
+    git diff --name-only "$head" HEAD | sort -u | xargs -r -d '\n' touch -c 2>/dev/null || true
   fi
   { echo "$PWD $(git rev-parse HEAD)"; dirty; } >"$rec.$BASHPID" && mv -f "$rec.$BASHPID" "$rec"
 }
