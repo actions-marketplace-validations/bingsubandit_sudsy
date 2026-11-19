@@ -288,12 +288,19 @@ fn restyled(g: &Grammar, root: &SyntaxNode) -> Vec<SyntaxElement> {
 fn same_values(
     g: &Grammar,
     f: &dyn NodeFormatter,
+    options: &core_config::ResolvedOptions,
     a: &SyntaxNode,
     b: &SyntaxNode,
 ) -> Result<(), String> {
     let (a, b) = (restyled(g, a), restyled(g, b));
+    // (a raw string that a call strips the indentation of may be re-indented: see `raw_string`)
+    let value = |e: &SyntaxElement| -> String {
+        e.as_node()
+            .and_then(|n| crate::shapes::raw_string::value(options, g, n))
+            .unwrap_or_else(|| f.value(e).into_owned())
+    };
     for (x, y) in a.iter().zip(&b) {
-        let (vx, vy) = (f.value(x), f.value(y));
+        let (vx, vy) = (value(x), value(y));
         if vx != vy {
             return Err(format!(
                 "{} `{vx}` became {} `{vy}`",
@@ -322,6 +329,7 @@ fn describe(g: &Grammar, ev: Option<(usize, Event<'_>)>) -> String {
 pub fn verify(
     g: &Grammar,
     formatter: &dyn NodeFormatter,
+    options: &core_config::ResolvedOptions,
     before_tree: &SyntaxNode,
     after: &str,
     reparse: impl FnOnce(&str) -> Result<SyntaxNode, String>,
@@ -332,7 +340,8 @@ pub fn verify(
         .map_err(FormatError::Safety)?
         > 0
     {
-        same_values(g, formatter, before_tree, &after_tree).map_err(FormatError::Safety)?;
+        same_values(g, formatter, options, before_tree, &after_tree)
+            .map_err(FormatError::Safety)?;
     }
     formatter
         .extra_check(before_tree, &after_tree)

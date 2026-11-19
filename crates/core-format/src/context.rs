@@ -84,8 +84,7 @@ pub trait NodeFormatter: Send + Sync {
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
         match item {
             SyntaxElement::Token(t) => Cow::Borrowed(t.text()),
-            // (the code of a node with its lines trimmed: formatting may re-indent them and moves
-            // the comments around it)
+            // (the code of a node: formatting moves the comments around it)
             SyntaxElement::Node(n) => {
                 let toks: Vec<_> = n
                     .descendants_with_tokens()
@@ -98,7 +97,7 @@ pub trait NodeFormatter: Send + Sync {
                 let from = toks.iter().position(|t| code(&t)).unwrap_or(0);
                 let to = toks.iter().rposition(|t| code(&t)).map_or(0, |i| i + 1);
                 let text: String = toks[from..to].iter().map(|t| t.text()).collect();
-                Cow::Owned(text.lines().map(str::trim).collect::<Vec<_>>().join("\n"))
+                Cow::Owned(text)
             }
         }
     }

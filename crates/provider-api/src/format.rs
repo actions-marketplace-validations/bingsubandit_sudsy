@@ -313,7 +313,7 @@ fn format_checked(
                 None => Ok(result.tree),
             }
         };
-        safety::verify(grammar, provider.formatter(), tree, text, reparse)
+        safety::verify(grammar, provider.formatter(), options, tree, text, reparse)
     };
     let mut variants = Reparses {
         provider,

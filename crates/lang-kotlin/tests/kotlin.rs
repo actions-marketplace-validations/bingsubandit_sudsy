@@ -233,3 +233,29 @@ fn ktlint_class_header_raw_string_and_enum_semicolon() {
         "enum class E {\n    A,\n    B,\n    ;\n}\n"
     );
 }
+
+/// A raw string without a `trimIndent()`-like call keeps its bytes, and the safety check refuses
+/// a re-indent of it; the same re-indent before `trimIndent()` is allowed.
+#[test]
+fn a_plain_raw_string_keeps_its_bytes() {
+    let p = provider();
+    let options = p.option_schema().defaults();
+    let verify = |before: &str, after: &str| {
+        let tree = p.parse(&SourceFile::new("A.kt", 1, before)).unwrap().tree;
+        core_format::safety::verify(p.grammar(), p.formatter(), &options, &tree, after, |t| {
+            p.parse(&SourceFile::new("A.kt", 1, t))
+                .map(|r| r.tree)
+                .map_err(|e| e.to_string())
+        })
+    };
+    let plain = "fun f() {\n    val s = \"\"\"\n        a\n          b\n    \"\"\"\n}\n";
+    let moved = "fun f() {\n    val s = \"\"\"\n    a\n      b\n    \"\"\"\n}\n";
+    assert_eq!(
+        Subject::format(&Formatting::new(provider(), "A.kt"), plain).unwrap(),
+        plain
+    );
+    assert!(verify(plain, moved).is_err());
+    let trim = plain.replace("\"\"\"\n}", "\"\"\".trimIndent()\n}");
+    let trim_moved = moved.replace("\"\"\"\n}", "\"\"\".trimIndent()\n}");
+    assert!(verify(&trim, &trim_moved).is_ok());
+}

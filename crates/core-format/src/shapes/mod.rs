@@ -26,7 +26,7 @@ mod list;
 mod maybe_parenthesize;
 mod paren_list;
 mod parens;
-mod raw_string;
+pub(crate) mod raw_string;
 mod section;
 mod signature;
 pub mod tabular;
