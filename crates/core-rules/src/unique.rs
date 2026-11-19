@@ -11,8 +11,10 @@ use crate::slot_path::{Found, SlotPath, green_children};
 use crate::tree::significant_range;
 use crate::{Family, Params};
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode, TextRange};
+use rowan::GreenNodeData;
+use rustc_hash::FxHashMap as HashMap;
 use std::borrow::Cow;
-use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::hash::Hash;
 use std::sync::OnceLock;
 
@@ -64,6 +66,8 @@ struct UniqueNames {
     deep: bool,
     name: SlotPath,
     group: Option<SlotPath>,
+    /// The name and group paths start with the same label: one descent for both.
+    shared_start: bool,
     lower: bool,
     strip: Vec<char>,
     reset: Option<String>,
@@ -73,18 +77,21 @@ struct UniqueNames {
 }
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
+    let name = SlotPath::parse(&p.optional("name").unwrap_or_else(|| "name".into()))?;
+    let group = p
+        .optional("group")
+        .map(|g| SlotPath::parse(&g))
+        .transpose()?;
     let rule = UniqueNames {
         meta,
+        shared_start: group.as_ref().is_some_and(|g| name.shares_start(g)),
         message: p.text("message")?,
         tags: [Box::leak(p.text("container")?.into_boxed_str())],
         item: p.text("item")?,
         item_kinds: OnceLock::new(),
         deep: p.flag("deep")?,
-        name: SlotPath::parse(&p.optional("name").unwrap_or_else(|| "name".into()))?,
-        group: p
-            .optional("group")
-            .map(|g| SlotPath::parse(&g))
-            .transpose()?,
+        name,
+        group,
         lower: p.choice("fold", false, &[("none", false), ("lower", true)])?,
         strip: p.optional("strip").unwrap_or_default().chars().collect(),
         reset: p.optional("reset"),
@@ -128,40 +135,32 @@ impl Rule for UniqueNames {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let grammar = ctx.file.grammar;
-        let items = || node.children().filter(|c| self.is_item(grammar, c.kind()));
-        let green_only = !self.deep && !self.report_item && self.lead.is_none();
-        // Most containers hold fewer than two items: count before reading any name (on the green
-        // tree when the names are read from it too: no red node per child).
-        if self.deep {
-            let mut n = 0;
-            self.each(node, grammar, &mut |_| n += 1);
-            if n < 2 {
-                return;
-            }
-        } else if green_only {
-            let green = node.green();
-            let two = green
-                .children()
-                .filter(|c| {
-                    matches!(c, rowan::NodeOrToken::Node(n)
-                        if self.is_item(grammar, SyntaxKind(n.kind().0)))
-                })
-                .nth(1);
-            if two.is_none() {
-                return;
-            }
-        } else if items().nth(1).is_none() {
+        if !self.deep && !self.report_item && self.lead.is_none() {
+            return self.check_green(node, ctx);
+        }
+        // Most containers hold fewer than two items: count before reading any name.
+        let mut n = 0;
+        self.each(node, grammar, &mut |_| n += 1);
+        if n < 2 {
             return;
         }
-        let mut seen: Seen<'_> = HashMap::new();
-        if !green_only {
-            self.each(node, grammar, &mut |item| self.visit(item, ctx, &mut seen));
-            return;
-        }
-        // Names are read from the green tree where the paths allow it: no red node per item.
-        let text = ctx.file.text;
+        let mut seen: Seen<'_> = HashMap::default();
+        self.each(node, grammar, &mut |item| self.visit(item, ctx, &mut seen));
+    }
+}
+
+type Seen<'t> = HashMap<(Cow<'t, str>, Cow<'t, str>), (TextRange, bool)>;
+
+impl UniqueNames {
+    /// [`Rule::check`] for the rules that read names from the green tree where the paths allow
+    /// it: no red node per child. The first item waits until a second one shows that the
+    /// container has a name worth reading.
+    fn check_green(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
+        let grammar = ctx.file.grammar;
         let green = node.green();
         let start = u32::from(node.text_range().start());
+        let mut seen: Seen<'_> = HashMap::default();
+        let mut first = None;
         let mut index = 0;
         for (at, child) in green_children(&green, start) {
             let rowan::NodeOrToken::Node(child) = child else {
@@ -171,30 +170,58 @@ impl Rule for UniqueNames {
                 continue;
             }
             index += 1;
-            let name = self.name.find_green(grammar, child, at, text);
-            if matches!(name, Some(None)) {
+            if index == 1 {
+                first = Some((at, child));
                 continue;
             }
-            let group = match &self.group {
-                Some(g) => g.find_green(grammar, child, at, text),
-                None => Some(None),
-            };
-            match (name, group) {
-                (Some(Some(found)), Some(group)) => self.note(ctx, &mut seen, found, group, None),
-                (Some(None), Some(_)) => {}
-                _ => {
-                    if let Some(item) = items().nth(index - 1) {
-                        self.visit(&item, ctx, &mut seen);
-                    }
+            if let Some((at, child)) = first.take() {
+                self.green_item(node, ctx, &mut seen, at, child, 1);
+            }
+            self.green_item(node, ctx, &mut seen, at, child, index);
+        }
+    }
+
+    /// The `index`th item (from 1) of `node`, at `at` in the file.
+    fn green_item<'t>(
+        &self,
+        node: &SyntaxNode,
+        ctx: &mut RuleContext<'t>,
+        seen: &mut Seen<'t>,
+        at: u32,
+        child: &GreenNodeData,
+        index: usize,
+    ) {
+        let grammar = ctx.file.grammar;
+        let text = ctx.file.text;
+        let read = match &self.group {
+            Some(g) if self.shared_start => self.name.find_green_with(g, grammar, child, at, text),
+            Some(g) => self
+                .name
+                .find_green(grammar, child, at, text)
+                .and_then(|n| {
+                    let group = g.find_green(grammar, child, at, text)?;
+                    Some(n.map(|n| (n, group)))
+                }),
+            None => self
+                .name
+                .find_green(grammar, child, at, text)
+                .map(|n| n.map(|n| (n, None))),
+        };
+        match read {
+            Some(Some((found, group))) => self.note(ctx, seen, found, group, None),
+            Some(None) => {}
+            None => {
+                let item = node
+                    .children()
+                    .filter(|c| self.is_item(grammar, c.kind()))
+                    .nth(index - 1);
+                if let Some(item) = item {
+                    self.visit(&item, ctx, seen);
                 }
             }
         }
     }
-}
 
-type Seen<'t> = HashMap<(Cow<'t, str>, Cow<'t, str>), (TextRange, bool)>;
-
-impl UniqueNames {
     /// One item read from the red tree.
     fn visit<'t>(&self, item: &SyntaxNode, ctx: &mut RuleContext<'t>, seen: &mut Seen<'t>) {
         let grammar = ctx.file.grammar;
@@ -255,22 +282,40 @@ impl UniqueNames {
         if self.reset.is_some() {
             seen.retain(|_, (_, n)| *n == negated);
         }
-        let key = (group, key);
-        match seen.get(&key) {
-            Some((first, _)) => {
-                let message = self
-                    .message
-                    .replace("{name}", &name)
-                    .replace("{group}", &key.0);
-                let first = *first;
+        match seen.entry((group, key)) {
+            Entry::Occupied(e) => {
+                let message = fill(&self.message, &name, &e.key().0);
+                let first = e.get().0;
                 let d = ctx.report(range, message);
                 if let Some(related) = &self.related {
                     d.related(first, related);
                 }
             }
-            None => {
-                seen.insert(key, (range, negated));
+            Entry::Vacant(e) => {
+                e.insert((range, negated));
             }
         }
     }
+}
+
+/// `template` with `{name}` and `{group}` filled in: one allocation.
+fn fill(template: &str, name: &str, group: &str) -> String {
+    let mut out = String::with_capacity(template.len() + name.len() + group.len());
+    let mut rest = template;
+    while let Some(at) = rest.find('{') {
+        out.push_str(&rest[..at]);
+        rest = &rest[at..];
+        if let Some(r) = rest.strip_prefix("{name}") {
+            out.push_str(name);
+            rest = r;
+        } else if let Some(r) = rest.strip_prefix("{group}") {
+            out.push_str(group);
+            rest = r;
+        } else {
+            out.push('{');
+            rest = &rest[1..];
+        }
+    }
+    out.push_str(rest);
+    out
 }

@@ -7,10 +7,14 @@
 //! is its source with blanks collapsed, and the text of `:all` runs from the first part to the
 //! last.
 //!
+//! A path is read against the grammar once, at its first use: each label becomes a table by kind
+//! of node (child position and accepted kinds), so a walk of the green tree is raw kind compares
+//! with no lookups by name.
+//!
 //! concept: none (glue: slot paths of rule rows)
 
 use crate::tree::significant_range;
-use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, TextRange};
+use core_syntax::{Grammar, LanguageId, SyntaxElement, SyntaxKind, SyntaxNode, TextRange};
 use rowan::{GreenNodeData, GreenTokenData, NodeOrToken};
 use std::borrow::Cow;
 use std::sync::OnceLock;
@@ -22,16 +26,6 @@ enum Pick {
     All,
 }
 
-struct Step {
-    label: String,
-    key: Option<String>,
-    /// The kind a capitalized label names, read from the grammar at the first use.
-    kind: OnceLock<Option<SyntaxKind>>,
-    /// Where the label and the `key` slot are in the kind of node they were first read from.
-    label_at: OnceLock<(SyntaxKind, Option<Fixed>)>,
-    key_at: OnceLock<(SyntaxKind, Option<Fixed>)>,
-}
-
 /// A label at a fixed child position of a kind of node: how many children that are not skipped
 /// come before it, and the kinds it takes.
 struct Fixed {
@@ -39,26 +33,73 @@ struct Fixed {
     accepted: Vec<SyntaxKind>,
 }
 
-impl Fixed {
-    fn of(grammar: &Grammar, kind: SyntaxKind, label: &str) -> Option<Fixed> {
-        let at = grammar.field_at(kind, label)?;
-        Some(Fixed {
-            nth: at.fixed()?,
-            accepted: grammar.accepted(kind, at).to_vec(),
+/// Per node kind of the grammar (by `SyntaxKind::index`): where a label is; `None` when the kind
+/// has no such label or it is not at a fixed position.
+type FixedByKind = Vec<Option<Fixed>>;
+
+fn fixed_table(grammar: &Grammar, label: &str) -> FixedByKind {
+    grammar
+        .nodes()
+        .iter()
+        .map(|def| {
+            let at = grammar.field_at(def.kind, label)?;
+            Some(Fixed {
+                nth: at.fixed()?,
+                accepted: grammar.accepted(def.kind, at).to_vec(),
+            })
         })
+        .collect()
+}
+
+/// The kinds that take no child position (trivia, `ERROR`) as flags by kind index, and the
+/// language the tables are of.
+struct Skip {
+    lang: LanguageId,
+    tokens: Vec<bool>,
+    nodes: Vec<bool>,
+}
+
+impl Skip {
+    fn of(grammar: &Grammar) -> Skip {
+        Skip {
+            lang: grammar.root().lang(),
+            tokens: grammar
+                .tokens()
+                .iter()
+                .map(|d| grammar.is_skipped(d.kind))
+                .collect(),
+            nodes: grammar
+                .nodes()
+                .iter()
+                .map(|d| grammar.is_skipped(d.kind))
+                .collect(),
+        }
     }
 
+    #[inline]
+    fn has(&self, kind: SyntaxKind) -> bool {
+        let flags = if kind.is_token() {
+            &self.tokens
+        } else {
+            &self.nodes
+        };
+        flags.get(kind.index() as usize).copied().unwrap_or(false)
+    }
+}
+
+impl Fixed {
     /// The child at the position (`None` when it is not one the label takes), with its start.
+    #[inline]
     fn child<'a>(
         &self,
-        grammar: &Grammar,
+        skip: &Skip,
         node: &'a GreenNodeData,
         start: u32,
     ) -> Option<(u32, Green<'a>)> {
         let mut seen = 0;
         for (at, c) in green_children(node, start) {
             let k = green_kind(c);
-            if grammar.is_skipped(k) {
+            if skip.has(k) {
                 continue;
             }
             if seen < self.nth {
@@ -71,41 +112,47 @@ impl Fixed {
     }
 }
 
-/// `cell`'s [`Fixed`] of `label` in `kind`, looked up once for the first kind seen.
-fn fixed_of<'c>(
-    cell: &'c OnceLock<(SyntaxKind, Option<Fixed>)>,
-    grammar: &Grammar,
-    kind: SyntaxKind,
-    label: &str,
-    other: &'c mut Option<Fixed>,
-) -> Option<&'c Fixed> {
-    let (first, fixed) = cell.get_or_init(|| (kind, Fixed::of(grammar, kind, label)));
-    if *first == kind {
-        fixed.as_ref()
-    } else {
-        *other = Fixed::of(grammar, kind, label);
-        other.as_ref()
-    }
+/// One step of a path, read against the grammar.
+struct Step {
+    label: String,
+    key: Option<String>,
+    /// The kind a capitalized label names: the step takes the children of that kind.
+    kind: Option<SyntaxKind>,
+    /// Where the label and the `key` slot are in each kind of node (empty for a step by kind and
+    /// for no `key`).
+    label_at: FixedByKind,
+    key_at: FixedByKind,
 }
 
 impl Step {
-    fn new(label: &str, key: Option<&str>) -> Step {
+    fn resolve(grammar: &Grammar, label: &str, key: Option<&str>) -> Step {
+        let kind = grammar
+            .kind_by_name(label)
+            .filter(|_| label.starts_with(char::is_uppercase));
         Step {
             label: label.to_string(),
             key: key.map(str::to_string),
-            kind: OnceLock::new(),
-            label_at: OnceLock::new(),
-            key_at: OnceLock::new(),
+            kind,
+            label_at: match kind {
+                Some(_) => Vec::new(),
+                None => fixed_table(grammar, label),
+            },
+            key_at: match key {
+                Some(_) => fixed_table(grammar, "key"),
+                None => Vec::new(),
+            },
         }
     }
 
-    /// The kind this step selects children by, when its label is a kind name.
-    fn by_kind(&self, grammar: &Grammar) -> Option<SyntaxKind> {
-        *self.kind.get_or_init(|| {
-            grammar
-                .kind_by_name(&self.label)
-                .filter(|_| self.label.starts_with(char::is_uppercase))
-        })
+    /// Where the label (`key`: the `key` slot) is in nodes of `kind`; `None` when it has no fixed
+    /// place there.
+    #[inline]
+    fn at(&self, skip: &Skip, kind: SyntaxKind, key: bool) -> Option<&Fixed> {
+        if kind.lang() != skip.lang {
+            return None;
+        }
+        let table = if key { &self.key_at } else { &self.label_at };
+        table.get(kind.index() as usize)?.as_ref()
     }
 }
 
@@ -114,7 +161,18 @@ struct Alt {
     pick: Pick,
 }
 
-pub struct SlotPath(Vec<Alt>);
+/// The paths of a spec read against the grammar.
+struct Plan {
+    alts: Vec<Alt>,
+    skip: Skip,
+}
+
+type Spec = Vec<(Vec<(String, Option<String>)>, Pick)>;
+
+pub struct SlotPath {
+    spec: Spec,
+    plan: OnceLock<Plan>,
+}
 
 /// A part found by a [`SlotPath`]: its text and where it is.
 pub struct Found<'t> {
@@ -137,14 +195,34 @@ impl SlotPath {
                 .filter(|s| *s != ".")
                 .map(
                     |s| match s.strip_suffix(']').and_then(|s| s.split_once('[')) {
-                        Some((label, key)) => Step::new(label, Some(key)),
-                        None => Step::new(s, None),
+                        Some((label, key)) => (label.to_string(), Some(key.to_string())),
+                        None => (s.to_string(), None),
                     },
                 )
                 .collect();
-            alts.push(Alt { steps, pick });
+            alts.push((steps, pick));
         }
-        Ok(SlotPath(alts))
+        Ok(SlotPath {
+            spec: alts,
+            plan: OnceLock::new(),
+        })
+    }
+
+    fn plan(&self, grammar: &Grammar) -> &Plan {
+        self.plan.get_or_init(|| Plan {
+            alts: self
+                .spec
+                .iter()
+                .map(|(steps, pick)| Alt {
+                    steps: steps
+                        .iter()
+                        .map(|(label, key)| Step::resolve(grammar, label, key.as_deref()))
+                        .collect(),
+                    pick: *pick,
+                })
+                .collect(),
+            skip: Skip::of(grammar),
+        })
     }
 
     /// What the path finds in `node`. No allocation unless the text of a part spans blanks.
@@ -154,7 +232,8 @@ impl SlotPath {
         node: &SyntaxNode,
         text: &'t str,
     ) -> Option<Found<'t>> {
-        self.0.iter().find_map(|alt| {
+        let plan = self.plan(grammar);
+        plan.alts.iter().find_map(|alt| {
             let (mut first, mut last) = (None, None);
             let stop_at_first = alt.pick == Pick::First;
             visit(grammar, node, &alt.steps, text, &mut |part| {
@@ -169,19 +248,117 @@ impl SlotPath {
                 Pick::Last => (last.clone()?, last?),
             };
             let range = TextRange::new(span(grammar, &first).start(), span(grammar, &last).end());
-            let source = &text[range];
-            let text = if source.contains(char::is_whitespace) {
-                Cow::Owned(source.split_whitespace().collect::<Vec<_>>().join(" "))
-            } else {
-                Cow::Borrowed(source)
-            };
-            Some(Found { text, range })
+            Some(found(text, range))
         })
     }
+
+    /// [`SlotPath::find`] on the green tree, so no red element is allocated: `None` when a step
+    /// needs the red tree (a label with no fixed position, a part that is a node), `Some(None)`
+    /// when the path finds nothing.
+    pub fn find_green<'t>(
+        &self,
+        grammar: &Grammar,
+        node: &GreenNodeData,
+        start: u32,
+        text: &'t str,
+    ) -> Option<Option<Found<'t>>> {
+        self.green_below(self.plan(grammar), node, start, text, 0)
+    }
+
+    /// Do `self` and `other` both go below the same plain label first (one alternative each, a
+    /// label of the node and not a kind, no key, and more steps after it)? Then
+    /// [`SlotPath::find_green_with`] reads that node once for both.
+    pub fn shares_start(&self, other: &SlotPath) -> bool {
+        match (&self.spec[..], &other.spec[..]) {
+            ([(x, _)], [(y, _)]) => {
+                x.len() > 1
+                    && y.len() > 1
+                    && x[0] == y[0]
+                    && x[0].1.is_none()
+                    && !x[0].0.starts_with(char::is_uppercase)
+            }
+            _ => false,
+        }
+    }
+
+    /// [`SlotPath::find_green`] for two paths that [share their start](SlotPath::shares_start):
+    /// the node of the first step is read once and both go on below it. `None` when a path needs
+    /// the red tree; `Some(None)` when `self` finds nothing (`other` is then not read).
+    #[allow(clippy::type_complexity)]
+    pub fn find_green_with<'t>(
+        &self,
+        other: &SlotPath,
+        grammar: &Grammar,
+        node: &GreenNodeData,
+        start: u32,
+        text: &'t str,
+    ) -> Option<Option<(Found<'t>, Option<Found<'t>>)>> {
+        let (a, b) = (self.plan(grammar), other.plan(grammar));
+        let first = &a.alts[0].steps[0];
+        let fixed = first.at(&a.skip, SyntaxKind(node.kind().0), false)?;
+        let (at, below) = fixed.child(&a.skip, node, start)?;
+        let NodeOrToken::Node(below) = below else {
+            return None;
+        };
+        let Some(name) = self.green_below(a, below, at, text, 1)? else {
+            return Some(None);
+        };
+        Some(Some((name, other.green_below(b, below, at, text, 1)?)))
+    }
+
+    /// The first part of the path's alternatives, reading each from its step number `from`.
+    fn green_below<'t>(
+        &self,
+        plan: &Plan,
+        node: &GreenNodeData,
+        start: u32,
+        text: &'t str,
+        from: usize,
+    ) -> Option<Option<Found<'t>>> {
+        for alt in &plan.alts {
+            let (mut first, mut last) = (None, None);
+            let stop = alt.pick == Pick::First;
+            visit_green(
+                &plan.skip,
+                node,
+                start,
+                &alt.steps[from..],
+                text,
+                &mut |at, len| {
+                    first.get_or_insert((at, len));
+                    last = Some((at, len));
+                    stop
+                },
+            )?;
+            let (first, last) = match alt.pick {
+                Pick::First | Pick::All => (first, last),
+                Pick::Last => (last, last),
+            };
+            if let (Some(first), Some(last)) = (first, last) {
+                let range = TextRange::new(first.0.into(), (last.0 + last.1).into());
+                return Some(Some(found(text, range)));
+            }
+        }
+        Some(None)
+    }
+}
+
+/// The part of `text` at `range`, blanks collapsed.
+fn found(text: &str, range: TextRange) -> Found<'_> {
+    let source = &text[range];
+    // Blanks are rare: a byte scan finds the names that have none (ASCII) before any char decode.
+    let maybe_blank = source.bytes().any(|b| b <= b' ' || b >= 0x80);
+    let text = if maybe_blank && source.contains(char::is_whitespace) {
+        Cow::Owned(source.split_whitespace().collect::<Vec<_>>().join(" "))
+    } else {
+        Cow::Borrowed(source)
+    };
+    Found { text, range }
 }
 
 type Green<'a> = NodeOrToken<&'a GreenNodeData, &'a GreenTokenData>;
 
+#[inline]
 fn green_kind(c: Green<'_>) -> SyntaxKind {
     match c {
         NodeOrToken::Node(n) => SyntaxKind(n.kind().0),
@@ -190,6 +367,7 @@ fn green_kind(c: Green<'_>) -> SyntaxKind {
 }
 
 /// The children of a green node with their start offsets.
+#[inline]
 pub(crate) fn green_children(
     node: &GreenNodeData,
     start: u32,
@@ -205,52 +383,15 @@ pub(crate) fn green_children(
     })
 }
 
-impl SlotPath {
-    /// [`SlotPath::find`] on the green tree, so no red element is allocated: `None` when a step
-    /// needs the red tree (a label with no fixed position, a part that is a node), `Some(None)`
-    /// when the path finds nothing.
-    pub fn find_green<'t>(
-        &self,
-        grammar: &Grammar,
-        node: &GreenNodeData,
-        start: u32,
-        text: &'t str,
-    ) -> Option<Option<Found<'t>>> {
-        for alt in &self.0 {
-            let (mut first, mut last) = (None, None);
-            let stop = alt.pick == Pick::First;
-            visit_green(grammar, node, start, &alt.steps, text, &mut |at, len| {
-                first.get_or_insert((at, len));
-                last = Some((at, len));
-                stop
-            })?;
-            let (first, last) = match alt.pick {
-                Pick::First | Pick::All => (first, last),
-                Pick::Last => (last, last),
-            };
-            if let (Some(first), Some(last)) = (first, last) {
-                let range = TextRange::new(first.0.into(), (last.0 + last.1).into());
-                let source = &text[range];
-                let text = if source.contains(char::is_whitespace) {
-                    Cow::Owned(source.split_whitespace().collect::<Vec<_>>().join(" "))
-                } else {
-                    Cow::Borrowed(source)
-                };
-                return Some(Some(Found { text, range }));
-            }
-        }
-        Some(None)
-    }
-}
-
-/// [`visit`] on green nodes; the parts are `(start, length)` of tokens. `None`: not possible here.
-fn visit_green(
-    grammar: &Grammar,
+/// Calls `found` with the `(start, length)` of each token part the steps name below `node`, in
+/// order, until it returns true. `None`: not possible on the green tree here.
+fn visit_green<F: FnMut(u32, u32) -> bool>(
+    skip: &Skip,
     node: &GreenNodeData,
     start: u32,
     steps: &[Step],
     text: &str,
-    found: &mut dyn FnMut(u32, u32) -> bool,
+    found: &mut F,
 ) -> Option<bool> {
     let (step, rest) = steps.split_first()?;
     let mut visit_child = |at: u32, child: Green<'_>| -> Option<bool> {
@@ -258,10 +399,8 @@ fn visit_green(
             let NodeOrToken::Node(part) = child else {
                 return None;
             };
-            let kind = SyntaxKind(part.kind().0);
-            let mut other = None;
-            let fixed = fixed_of(&step.key_at, grammar, kind, "key", &mut other)?;
-            let (kat, kc) = fixed.child(grammar, part, at)?;
+            let fixed = step.at(skip, SyntaxKind(part.kind().0), true)?;
+            let (kat, kc) = fixed.child(skip, part, at)?;
             let NodeOrToken::Token(kt) = kc else {
                 return None;
             };
@@ -272,11 +411,11 @@ fn visit_green(
         match (rest.is_empty(), child) {
             (true, NodeOrToken::Token(t)) => Some(found(at, u32::from(t.text_len()))),
             (true, NodeOrToken::Node(_)) => None,
-            (false, NodeOrToken::Node(n)) => visit_green(grammar, n, at, rest, text, found),
+            (false, NodeOrToken::Node(n)) => visit_green(skip, n, at, rest, text, found),
             (false, NodeOrToken::Token(_)) => Some(false),
         }
     };
-    match step.by_kind(grammar) {
+    match step.kind {
         Some(k) => {
             for (at, child) in green_children(node, start) {
                 if green_kind(child) == k && visit_child(at, child)? {
@@ -286,10 +425,8 @@ fn visit_green(
             Some(false)
         }
         None => {
-            let kind = SyntaxKind(node.kind().0);
-            let mut other = None;
-            let fixed = fixed_of(&step.label_at, grammar, kind, &step.label, &mut other)?;
-            let (at, child) = fixed.child(grammar, node, start)?;
+            let fixed = step.at(skip, SyntaxKind(node.kind().0), false)?;
+            let (at, child) = fixed.child(skip, node, start)?;
             visit_child(at, child)
         }
     }
@@ -320,7 +457,7 @@ fn visit(
             (false, _) => false,
         }
     };
-    match step.by_kind(grammar) {
+    match step.kind {
         Some(kind) => node
             .children_with_tokens()
             .filter(|c| c.kind() == kind)
