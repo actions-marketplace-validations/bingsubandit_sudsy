@@ -53,7 +53,7 @@ impl shapes::AssignHooks for AssignHooks {
                 (string || property_initializer || rhs.kind() == k::COLLECTION_EXPRESSION)
                     .then_some(BreakAfterOperator)
             }
-            shapes::AssignStyle::Break => None,
+            _ => None,
         }
     }
 }

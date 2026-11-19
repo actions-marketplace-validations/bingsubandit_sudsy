@@ -33,7 +33,7 @@ Status, measured results, presets and options for every language.
 | [Shell](#shell) | partial | shfmt | 82% of 82 | yes | ShellCheck | 47% |
 | [SQL](#sql) | partial | sqlfluff 4.5.0 | 78% of 867 | yes | sqlfluff | 4% |
 | [C#](#c) | partial | CSharpier 1.3.0 | 72% of 7,615 | not measured | StyleCop | not measured |
-| [Kotlin](#kotlin) | partial | ktlint 1.8.0 | 69% of 5,776 | yes | ktlint | 13% |
+| [Kotlin](#kotlin) | partial | ktlint 1.8.0 | 76% of 5,776 | yes | ktlint | 13% |
 | [Vue / Svelte](#html-vue-svelte-angular) | partial | Prettier | 83% / 89% real-world | not measured | eslint-plugin-vue / -svelte | 87% / 100% |
 | [YAML](#yaml) | partial | Prettier | not measured | not measured | yamllint | 74% |
 | [JSON / JSONC](#json) | partial | Prettier, Biome | not measured | not measured | eslint-plugin-jsonc | not measured |
@@ -242,7 +242,7 @@ Status, measured results, presets and options for every language.
 ## Kotlin
 
 - **Status:** partial.
-- **Formatter:** ktlint 1.8.0 (`ktlint_official`). Identical: 4,009 of 5,776 files (69%). Corpus: coroutines, ktor, nowinandroid, ktlint. Stable: yes.
+- **Formatter:** ktlint 1.8.0 (`ktlint_official`). Identical: 4,370 of 5,776 files (76%). Corpus: coroutines, ktor, nowinandroid, ktlint. Stable: yes.
 - **Linter:** ktlint, 13.2%.
 - **Presets:** `kotlin/ktlint`.
 - **Options:** `trailing_commas`, `function_signature_wrap_min_parameters`, `class_signature_wrap_min_parameters`, `member_chain_style`. Default `line_width` is 140.

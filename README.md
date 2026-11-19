@@ -84,7 +84,7 @@ Stable: formatting a second time changes no file in the corpus. ¹ Core rules on
 | Shell | shfmt | 82% of 82 | ShellCheck | 47% | `shell/shellcheck` |
 | SQL | sqlfluff | 78% of 867 | sqlfluff | 4% | `sql/sqlfluff` |
 | C# (needs .NET 10) | CSharpier | 72% of 7,615² | StyleCop | not measured | `csharp/csharpier-compat`, `csharp/stylecop` |
-| Kotlin | ktlint | 69% of 5,776 | ktlint | 13% | `kotlin/ktlint` |
+| Kotlin | ktlint | 76% of 5,776 | ktlint | 13% | `kotlin/ktlint` |
 | Vue / Svelte | Prettier | 83% / 89% | eslint-plugin-vue / -svelte | 87% / 100% | `html/eslint-plugin-vue-recommended`, `…-svelte-recommended` |
 | YAML, JSON, CSS, XML | Prettier / Biome / CSharpier | not measured | yamllint / stylelint | 74% / 13% | `yaml/yamllint`, `css/stylelint-standard` |
 

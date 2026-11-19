@@ -21,6 +21,9 @@ use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 pub const LAYOUT: &str = "assignment_layout";
 pub const CONDITIONAL: &str = "assignment_conditional";
 pub const INDENT: &str = "assignment_indent";
+pub const LEFT_PARAMS: &str = "assignment_left_min_parameters";
+pub const LEFT_UNLESS: &str = "assignment_left_unless_kinds";
+pub const KEEP_BREAK: &str = "assignment_keep_break_kinds";
 
 /// How a right side that is not decided by its kind is laid out.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -32,6 +35,8 @@ pub enum AssignStyle {
     Fluid,
     /// It moves below the operator when the whole does not fit.
     Break,
+    /// As `Break`, but a value with no place to break a line stays on the operator's line.
+    Multiline,
 }
 
 /// The layouts of an assignment, in Prettier's names.
@@ -66,6 +71,7 @@ impl AssignPolicy {
             style: match text(LAYOUT) {
                 "fluid" => AssignStyle::Fluid,
                 "break" => AssignStyle::Break,
+                "multiline" => AssignStyle::Multiline,
                 _ => AssignStyle::Compact,
             },
             conditional_always: text(CONDITIONAL) == "always",
@@ -143,6 +149,14 @@ pub fn assignment(
         return Ok(a.left);
     };
     let right = hooks.right_doc(cx, right, layout)?;
+    let layout = if policy.style == AssignStyle::Multiline
+        && layout == AssignLayout::BreakAfterOperator
+        && !right.has_break_point()
+    {
+        AssignLayout::NeverBreakAfterOperator
+    } else {
+        layout
+    };
     Ok(render(layout, a.left, a.op, right, policy.indent))
 }
 
@@ -234,6 +248,13 @@ fn choose(
     if a.op_token.is_some_and(|t| ends_in_line_comment(cx, t)) {
         return BreakAlways;
     }
+    // A break the source has after the operator stays (`assignment_keep_break_kinds`).
+    if let Some(t) = a.op_token
+        && comments::break_after(g, t)
+        && cx.options.list_has(KEEP_BREAK, g.name(a.node.kind()))
+    {
+        return BreakAlways;
+    }
     let right_inner = right.as_node().map(roles::un);
     let right_assign = right_inner.as_ref().filter(|n| is_assignment(cx, n));
     let fluid = policy.style == AssignStyle::Fluid;
@@ -277,9 +298,27 @@ fn choose(
     if let Some(l) = hooks.layout(cx, a, right, policy) {
         return l;
     }
+    // A signature with a line per parameter keeps a value that spans lines on the operator's
+    // line (`) = call(`).
+    let wrapped = match cx.options.get(LEFT_PARAMS) {
+        Some(core_config::OptionValue::Int(n)) => *n,
+        _ => 0,
+    };
+    let g = cx.grammar;
+    if wrapped > 0
+        && !a
+            .node
+            .children_with_tokens()
+            .any(|c| cx.options.list_has(LEFT_UNLESS, g.name(c.kind())))
+        && a.node.children().any(|p| {
+            cx.grammar.has_tag(p.kind(), "parameter-list") && p.children().count() as i64 >= wrapped
+        })
+    {
+        return NeverBreakAfterOperator;
+    }
     match policy.style {
         AssignStyle::Compact => NeverBreakAfterOperator,
         AssignStyle::Fluid => Fluid,
-        AssignStyle::Break => BreakAfterOperator,
+        AssignStyle::Break | AssignStyle::Multiline => BreakAfterOperator,
     }
 }
