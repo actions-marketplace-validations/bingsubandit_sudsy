@@ -535,6 +535,9 @@ fn option_int(cx: &FormatCtx<'_>, row: &Row, key: &str) -> usize {
 /// first stays on the line of the `)`.
 fn heritage(cx: &FormatCtx<'_>, node: &SyntaxNode, row: &Row, flow: &Flow<'_>) -> Option<R> {
     let els = kids(cx, node);
+    if let Some(r) = ctor_own_line(cx, &els, row, flow) {
+        return Some(r);
+    }
     let colon = els
         .iter()
         .position(|e| row.kinds_arg("colon").contains(&e.kind()))?;
@@ -577,6 +580,48 @@ fn heritage(cx: &FormatCtx<'_>, node: &SyntaxNode, row: &Row, flow: &Flow<'_>) -
             layout,
             tail.transpose()?,
         ))
+    })())
+}
+
+/// A constructor (`ctor=K`) with a modifier of the kinds of `ctor_own_line_kinds` (annotations) goes below the name, one level in, with its annotations on lines of their own;
+/// what follows it (the supertypes, the body) stays under that level.
+fn ctor_own_line(
+    cx: &FormatCtx<'_>,
+    els: &[SyntaxElement],
+    row: &Row,
+    flow: &Flow<'_>,
+) -> Option<R> {
+    let g = cx.grammar;
+    let at = els
+        .iter()
+        .position(|e| row.kinds_arg("ctor").contains(&e.kind()))?;
+    let ctor = els[at].as_node()?;
+    ctor.children()
+        .filter(|m| g.has_tag(m.kind(), "modifiers"))
+        .flat_map(|m| m.children())
+        .any(|c| cx.options.list_has("ctor_own_line_kinds", g.name(c.kind())))
+        .then_some(())?;
+    Some((|| {
+        let mut parts = vec![doc::hardline()];
+        for e in kids(cx, ctor) {
+            match e.as_node().filter(|m| g.has_tag(m.kind(), "modifiers")) {
+                Some(m) => {
+                    for x in kids(cx, m) {
+                        parts.push(el(cx, &x)?);
+                        let note = g.has_tag(x.kind(), "annotation");
+                        parts.push(if note { doc::hardline() } else { doc::lit(" ") });
+                    }
+                }
+                None => parts.push(el(cx, &e)?),
+            }
+        }
+        if at + 1 < els.len() {
+            parts.extend([doc::lit(" "), flow.seq(cx, &els[at + 1..])?]);
+        }
+        Ok(doc::concat(vec![
+            flow.seq(cx, &els[..at])?,
+            doc::indent(doc::concat(parts)),
+        ]))
     })())
 }
 

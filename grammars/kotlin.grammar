@@ -170,7 +170,7 @@ node CharacterConstant #expression #item #literal =
     value:Character
 node IntegerConstant #expression #item #literal =
     value:Integer
-node StringTemplate #expression #item #literal =
+node StringTemplate #expression #item #literal #restyle =
     StringInterpolationPrefix? OpenQuote value:#template-entry* ClosingQuote
 node LongStringTemplateEntry #template-entry #opaque
 node ShortStringTemplateEntry #template-entry #opaque

@@ -26,7 +26,7 @@ When : cases open=Lbrace
 # stay none, any become one).
 [flow]
 flat_after = ModifierList|AnnotationEntry
-closers = Rpar|Rbracket
+closers = Rpar|Rbracket|Semicolon
 
 [space]
 * / kind=Comma|Semicolon : no

@@ -9182,6 +9182,16 @@
               "description": "The lines of a block comment lose their trailing blanks.",
               "type": "boolean"
             },
+            "ctor_own_line_kinds": {
+              "default": [
+                "AnnotationEntry"
+              ],
+              "description": "Node kinds among the modifiers of a primary constructor (annotations) that put the constructor below the type name, one level in, with the supertypes and the body under that level.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "curly_style": {
               "default": "chain",
               "description": "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
@@ -9246,6 +9256,16 @@
               "minimum": 20,
               "type": "integer"
             },
+            "list_extra_indent_parents": {
+              "default": [
+                "SuperTypeCallEntry"
+              ],
+              "description": "Node kinds whose parameter or argument list is indented one level more when it breaks (the arguments of a supertype call).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "member_chain_force_links": {
               "default": 4,
               "description": "A chain of member accesses and calls with at least this many dots always breaks (`wrapped` style; 0: never).",
@@ -9277,6 +9297,17 @@
                 "soft"
               ],
               "type": "string"
+            },
+            "raw_string_calls": {
+              "default": [
+                "trimIndent",
+                "trimMargin"
+              ],
+              "description": "Names of the calls (`trimIndent`) that strip the common indentation of a multi-line raw string they follow: its lines are written at the indentation of the code around it.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "semicolon_keep_parents": {
               "default": [
@@ -12370,6 +12401,16 @@
                     "description": "The lines of a block comment lose their trailing blanks.",
                     "type": "boolean"
                   },
+                  "ctor_own_line_kinds": {
+                    "default": [
+                      "AnnotationEntry"
+                    ],
+                    "description": "Node kinds among the modifiers of a primary constructor (annotations) that put the constructor below the type name, one level in, with the supertypes and the body under that level.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "curly_style": {
                     "default": "chain",
                     "description": "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
@@ -12434,6 +12475,16 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "list_extra_indent_parents": {
+                    "default": [
+                      "SuperTypeCallEntry"
+                    ],
+                    "description": "Node kinds whose parameter or argument list is indented one level more when it breaks (the arguments of a supertype call).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "member_chain_force_links": {
                     "default": 4,
                     "description": "A chain of member accesses and calls with at least this many dots always breaks (`wrapped` style; 0: never).",
@@ -12465,6 +12516,17 @@
                       "soft"
                     ],
                     "type": "string"
+                  },
+                  "raw_string_calls": {
+                    "default": [
+                      "trimIndent",
+                      "trimMargin"
+                    ],
+                    "description": "Names of the calls (`trimIndent`) that strip the common indentation of a multi-line raw string they follow: its lines are written at the indentation of the code around it.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "semicolon_keep_parents": {
                     "default": [

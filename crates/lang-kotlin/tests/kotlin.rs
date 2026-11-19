@@ -216,3 +216,20 @@ fn a_layout_wrapped_branch_is_stable() {
     let out = Subject::format(&formatting, &format!("fun f() {{\nif (c) {call}\n}}\n")).unwrap();
     assert_eq!(Subject::format(&formatting, &out).unwrap(), out);
 }
+
+/// An annotated primary constructor goes below the name with everything after it one level in; a
+/// raw string before `trimIndent()` takes the indentation of its code; the arguments of a
+/// supertype call are one level deeper; the `;` after enum entries stays at the entries' level.
+#[test]
+fn ktlint_class_header_raw_string_and_enum_semicolon() {
+    assert_eq!(
+        fmt(
+            "class A @Inject constructor(val a: Int) : B(1) {\n    val s = \"\"\"\n        x\n    \"\"\".trimIndent()\n}\n"
+        ),
+        "class A\n    @Inject\n    constructor(\n        val a: Int,\n    ) : B(1) {\n        val s =\n            \"\"\"\n            x\n            \"\"\".trimIndent()\n    }\n"
+    );
+    assert_eq!(
+        fmt("enum class E {\n    A,\n    B,\n    ;\n}\n"),
+        "enum class E {\n    A,\n    B,\n    ;\n}\n"
+    );
+}

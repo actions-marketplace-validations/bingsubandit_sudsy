@@ -26,6 +26,7 @@ mod list;
 mod maybe_parenthesize;
 mod paren_list;
 mod parens;
+mod raw_string;
 mod section;
 mod signature;
 pub mod tabular;
@@ -84,7 +85,7 @@ use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 /// Source text of a node exactly as written (plus its outer comments).
 pub fn verbatim(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Doc {
-    cx.verbatim_node(node)
+    raw_string::reindent(cx, node).unwrap_or_else(|| cx.verbatim_node(node))
 }
 
 /// Decides whether a blank line must stand between two items (the previous item's last node and

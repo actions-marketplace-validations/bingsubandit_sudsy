@@ -87,7 +87,12 @@ pub fn parameter_list(
         },
         ..ListStyle::default()
     };
-    delimited_list(cx, node, &style)
+    let list = delimited_list(cx, node, &style)?;
+    let extra = node.parent().is_some_and(|p| {
+        cx.options
+            .list_has("list_extra_indent_parents", cx.grammar.name(p.kind()))
+    });
+    Ok(if extra { doc::indent(list) } else { list })
 }
 
 /// Does the option `signature_wrap_annotated` ask for one parameter per line and a parameter

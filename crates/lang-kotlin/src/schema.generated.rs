@@ -24,6 +24,12 @@ pub const ANNOTATION_INLINE: &str = "annotation_inline";
 #[allow(dead_code)]
 pub const SEMICOLON_KEEP_PARENTS: &str = "semicolon_keep_parents";
 #[allow(dead_code)]
+pub const RAW_STRING_CALLS: &str = "raw_string_calls";
+#[allow(dead_code)]
+pub const LIST_EXTRA_INDENT_PARENTS: &str = "list_extra_indent_parents";
+#[allow(dead_code)]
+pub const CTOR_OWN_LINE_KINDS: &str = "ctor_own_line_kinds";
+#[allow(dead_code)]
 pub const COMMENT_TRIM_LINES: &str = "comment_trim_lines";
 #[allow(dead_code)]
 pub const FORMAT_RULES: &str = "format_rules";
@@ -87,6 +93,9 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::assignment_keep_break_kinds(&["Property", "BinaryExpression"]),
         core_config::shared::annotation_inline("single"),
         core_config::shared::semicolon_keep_parents(&["ClassBody", "EnumEntry"]),
+        core_config::shared::raw_string_calls(&["trimIndent", "trimMargin"]),
+        core_config::shared::list_extra_indent_parents(&["SuperTypeCallEntry"]),
+        core_config::shared::ctor_own_line_kinds(&["AnnotationEntry"]),
         core_config::shared::comment_trim_lines(true),
         core_config::shared::format_rules(&["curly"]),
         core_config::shared::curly_style("chain"),

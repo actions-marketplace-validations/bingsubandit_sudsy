@@ -554,6 +554,30 @@ pub mod shared {
         )
     }
 
+    pub fn raw_string_calls(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "raw_string_calls",
+            default,
+            "Names of the calls (`trimIndent`) that strip the common indentation of a multi-line raw string they follow: its lines are written at the indentation of the code around it.",
+        )
+    }
+
+    pub fn list_extra_indent_parents(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "list_extra_indent_parents",
+            default,
+            "Node kinds whose parameter or argument list is indented one level more when it breaks (the arguments of a supertype call).",
+        )
+    }
+
+    pub fn ctor_own_line_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "ctor_own_line_kinds",
+            default,
+            "Node kinds among the modifiers of a primary constructor (annotations) that put the constructor below the type name, one level in, with the supertypes and the body under that level.",
+        )
+    }
+
     pub fn comment_trim_lines(default: bool) -> OptionDef {
         OptionDef::boolean(
             "comment_trim_lines",
