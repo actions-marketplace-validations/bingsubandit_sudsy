@@ -5,3 +5,12 @@ a { color: blue }
 a { color: green }
 ^ no-descending-specificity
 @media print { a { color: red } }
+td:not([align]) { color: red }
+table td { color: blue }
+^^^^^^^^ no-descending-specificity
+a[d] b { color: red }
+c b { color: blue }
+^^^ no-descending-specificity
+p:not(.c) b { color: red }
+b { color: blue }
+^ no-descending-specificity

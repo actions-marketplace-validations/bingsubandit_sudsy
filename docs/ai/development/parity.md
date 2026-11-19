@@ -115,7 +115,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 | stylecop | not run here (no corpus, or the tool is not installed) | - |
 | stylelint-less | not run here (no corpus, or the tool is not installed) | - |
 | stylelint-scss | not run here (no corpus, or the tool is not installed) | - |
-| stylelint | 94.1% (11934 of 12686) | 94.1% (11934 of 12686) |
+| stylelint | 94.7% (12012 of 12686) | 94.7% (12012 of 12686) |
 | tflint | 18.9% (27 of 143) | 18.9% (27 of 143) |
 | typescript-eslint | 100.0% (3644 of 3644) | 100.0% (3644 of 3644) |
 | yamllint | 74.3% (2232 of 3004) | 74.1% (2232 of 3013) |

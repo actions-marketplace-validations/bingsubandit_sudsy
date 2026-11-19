@@ -30,9 +30,17 @@ pub fn descending_specificity(c: &Check, sheet: &SyntaxNode, ctx: &mut RuleConte
             .or_default();
         for sel in model::selectors(&prelude) {
             let key: String = sel.compounds.last().map_or(String::new(), |comp| {
+                // The compound without its pseudo-classes and what their arguments hold (`td:not([align])` is `td`).
+                let pseudo = |p: &model::Piece| p.part == model::Part::PseudoClass;
                 comp.pieces
                     .iter()
-                    .filter(|p| p.part != model::Part::PseudoClass)
+                    .filter(|p| {
+                        !pseudo(p)
+                            && !comp
+                                .pieces
+                                .iter()
+                                .any(|q| pseudo(q) && q.range.contains_range(p.range))
+                    })
                     .map(|p| {
                         &ctx.file.text[usize::from(p.range.start())..usize::from(p.range.end())]
                     })

@@ -279,18 +279,22 @@ impl Scan {
                             })
                         }));
                     }
+                    self.space |= n.last_token().is_some_and(|t| is_trivia(t.kind()));
                 }
                 SyntaxElement::Node(n) => {
                     // `[attr=value]`, or a parenthesized group that is not an argument.
                     let text = n.text().to_string();
                     self.text.push_str(&text);
-                    if n.first_token().is_some_and(|t| t.kind() == k::L_BRACKET) {
+                    // The whitespace before and after the group belongs to it: it still separates the compounds.
+                    self.space |= n.first_token().is_some_and(|t| is_trivia(t.kind()));
+                    if tokens(&n).next().is_some_and(|t| t.kind() == k::L_BRACKET) {
                         let name = tokens(&n)
                             .nth(1)
                             .map(|t| t.text().to_string())
                             .unwrap_or_default();
                         self.piece(Part::Attribute, name, n.text_range());
                     }
+                    self.space |= n.last_token().is_some_and(|t| is_trivia(t.kind()));
                 }
             }
         }
