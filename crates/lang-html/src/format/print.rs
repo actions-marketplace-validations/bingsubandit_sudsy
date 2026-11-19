@@ -9,6 +9,7 @@ use super::model::{Dialect, N, T, Tree, is_ws, pre_like};
 use core_format::EmbedMode;
 use core_format::context::verbatim_text;
 use core_format::doc::{self, Doc, GroupId};
+use core_format::embed as embed_text;
 use core_format::shapes;
 
 mod angular;
@@ -59,62 +60,15 @@ fn s(x: impl Into<String>) -> Doc {
     doc::text(x)
 }
 
-/// Removes the blank lines before the text and the blanks after it.
+/// The quote of a template literal in embedded script.
+const TEMPLATE: char = '`';
+
 fn trim_preserve_indentation(v: &str) -> &str {
-    let mut v = v.trim_end_matches(is_ws);
-    while let Some(i) = v.find('\n') {
-        if v[..i]
-            .chars()
-            .all(|c| matches!(c, '\t' | '\x0c' | '\r' | ' '))
-        {
-            v = &v[i + 1..];
-        } else {
-            break;
-        }
-    }
-    v
+    embed_text::trim_blank_lines(v, is_ws)
 }
 
-/// Per line of `code`: does it start inside a template literal (its indentation is part of the
-/// string)?
-fn starts_in_template(code: &str) -> Vec<bool> {
-    let (mut inside, mut escaped) = (false, false);
-    code.split('\n')
-        .map(|line| {
-            let start = inside;
-            for c in line.chars() {
-                match c {
-                    '\\' => escaped = !escaped,
-                    '`' if !escaped => inside = !inside,
-                    _ => escaped = false,
-                }
-            }
-            start
-        })
-        .collect()
-}
-
-/// `v` without the indentation all its lines share; the lines inside a template literal stay.
 fn dedent(v: &str) -> String {
-    let indent = |l: &str| l.chars().take_while(|c| matches!(c, ' ' | '\t')).count();
-    let inside = starts_in_template(v);
-    let code = || v.split('\n').zip(&inside).filter(|(_, i)| !**i);
-    let min = code()
-        .filter(|(l, _)| !l.trim().is_empty())
-        .map(|(l, _)| indent(l))
-        .min()
-        .unwrap_or(0);
-    v.split('\n')
-        .zip(&inside)
-        .map(|(l, i)| {
-            if *i {
-                l.to_string()
-            } else {
-                l.chars().skip(min.min(indent(l))).collect::<String>()
-            }
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
+    embed_text::dedent(v, TEMPLATE)
 }
 
 fn unescape_quotes(v: &str) -> String {

@@ -12,11 +12,7 @@ Python binary chain, `maybe_parenthesize`, conditional, blank lines between memb
 
 ### HTML: `print/embed.rs`
 
-HTML `print/embed.rs` (the printer lays embedded code out as `Doc`s of width-aware placements per element kind: `<script>` lines, attribute `expand`/hug/`explode_object`, Vue and Angular expressions; `lang-html` is the only host with `Opts::embed`, every other host splices text with a prefix in `core_incremental::embedded`, so no second user for a shared Doc-level path; its `script_language` and `style_language` tables become `embed` rows when the printer reads the tree's elements instead of `model::N`)
-
-### Dockerfile: `run-command` family
-
-the `run-command` family of the Dockerfile as a host-agnostic family (a second user needs a check on the commands of Shell text in another host: none maps today)
+HTML `print/embed.rs` (the printer lays embedded code out as `Doc`s of width-aware placements per element kind: `<script>` lines, attribute `expand`/hug/`explode_object`, Vue and Angular expressions; `lang-html` is the only host with `Opts::embed`, every other host splices text with a prefix in `core_incremental::embedded`, so no second user for a shared Doc-level path (measured: the text helpers moved to `core_format::embed`, -60 HTML lines; what is left is 620 lines of per-element placement over `model::N`, which no other host has); its `script_language` and `style_language` tables become `embed` rows when the printer reads the tree's elements instead of `model::N`)
 
 ### C#: `constant-on-right` and `suppression-justification`
 

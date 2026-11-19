@@ -4,7 +4,9 @@
 //!
 //! concept: embedded-code
 
-use super::{Embed, P, dedent, s, starts_in_template, trim_preserve_indentation, unescape_quotes};
+use super::{
+    Embed, P, TEMPLATE, dedent, embed_text, s, trim_preserve_indentation, unescape_quotes,
+};
 use crate::format::model::{Dialect, N};
 use core_format::EmbedMode;
 use core_format::context::verbatim_text;
@@ -55,20 +57,8 @@ fn style_language(n: &N) -> Option<&'static str> {
     }
 }
 
-/// The lines of `code` one per line, except the lines that start inside a template literal: their
-/// indentation is part of the string and stays.
 pub(super) fn lines(code: &str) -> Doc {
-    let mut chunks = Vec::<String>::new();
-    for (line, inside) in code.split('\n').zip(starts_in_template(code)) {
-        match chunks.last_mut() {
-            Some(last) if inside => {
-                last.push('\n');
-                last.push_str(line);
-            }
-            _ => chunks.push(line.to_string()),
-        }
-    }
-    doc::join(&doc::hardline(), chunks.iter().map(|c| verbatim_text(c)))
+    embed_text::lines(code, TEMPLATE)
 }
 
 /// An event handler: an expression when it parses as one (`f();` is the expression `f()` too), else

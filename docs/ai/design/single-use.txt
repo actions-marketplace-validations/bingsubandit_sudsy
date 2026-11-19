@@ -262,7 +262,6 @@ local lang-css/format/mod.rs key-value-layout # lang: css
 local lang-css/format/value.rs delimited-list # lang: css
 local lang-css/lexer.rs source-lexer # lang: css
 local lang-css/parser.rs recursive-descent-parser # lang: css
-local lang-dockerfile/rules/run_command.rs embedded-command-checks # lang: dockerfile
 local lang-github-actions/view.rs role-accessors # lang: github-actions
 local lang-gitignore/format.rs node-sequence # lang: gitignore
 local lang-hcl/format.rs block-and-statements # lang: hcl
@@ -293,7 +292,6 @@ local lang-kotlin/format/decl.rs signature-layout # lang: kotlin
 local lang-kotlin/format/expr.rs binary-chain-layout # lang: kotlin
 local lang-kotlin/rewrite.rs source-rewrite # lang: kotlin
 local lang-makefile/format.rs key-value-layout # lang: makefile
-local lang-makefile/rules.rs embedded-command-checks # lang: makefile
 local lang-makefile/rules.rs unique-names # lang: makefile
 local lang-markdown/format/keep.rs verbatim-formatter # lang: markdown
 local lang-powershell/format.rs block-and-statements # lang: powershell

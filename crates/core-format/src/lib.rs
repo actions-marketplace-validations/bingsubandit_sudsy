@@ -19,6 +19,7 @@ pub mod comments;
 pub mod context;
 pub mod directives;
 pub mod doc;
+pub mod embed;
 mod error;
 pub mod frames;
 pub mod ignore;

@@ -13,6 +13,7 @@
 
 pub mod cases;
 pub mod checks;
+pub mod commands;
 pub mod comments;
 pub mod configure;
 mod declare;
