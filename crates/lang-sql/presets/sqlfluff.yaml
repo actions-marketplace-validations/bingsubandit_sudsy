@@ -23,5 +23,6 @@ sql:
       right-join: warn
       self-alias: warn
       type-case: warn
+      special-chars-in-identifier: warn
       union-distinct: warn
       unused-cte: warn

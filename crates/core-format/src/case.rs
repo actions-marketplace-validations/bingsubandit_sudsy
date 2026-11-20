@@ -207,6 +207,36 @@ impl Cases {
             .is_some_and(|r| !r.words.spans.is_empty() && r.covers(text))
     }
 
+    /// Does any row name `kind`?
+    pub fn covers(&self, kind: SyntaxKind) -> bool {
+        self.0.iter().any(|r| r.kinds.contains(&kind))
+    }
+
+    /// The kinds of the row whose policy is the option `option` (none: no such row).
+    pub fn kinds_of(&self, option: &str) -> &[SyntaxKind] {
+        self.0
+            .iter()
+            .find(|r| matches!(&r.policy, Err(name) if name == option))
+            .map_or(&[], |r| &r.kinds)
+    }
+
+    /// A pass whose row of the option `option` has the policy `policy` (a lint rule: the policy is the
+    /// rule's own option, not the formatter's); the other rows are not asked.
+    pub fn recaser_of(&self, option: &str, policy: &str) -> Recaser<'_> {
+        Recaser {
+            policies: self
+                .0
+                .iter()
+                .map(|r| match &r.policy {
+                    Err(name) if name == option => policy_of(policy).unwrap_or(Policy::Consistent),
+                    _ => Policy::Consistent,
+                })
+                .collect(),
+            memory: self.0.iter().map(|_| Memory::default()).collect(),
+            cases: self,
+        }
+    }
+
     /// A pass over the words of a file in order, with the policies the options give.
     pub fn recaser(&self, options: &ResolvedOptions) -> Recaser<'_> {
         Recaser {

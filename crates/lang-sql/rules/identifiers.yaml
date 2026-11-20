@@ -1,0 +1,15 @@
+id: special-chars-in-identifier
+message: this quoted identifier has characters other than letters, digits and underscores
+description: >-
+  A quoted identifier with a space or another character that is not a letter, a digit or an
+  underscore (sqlfluff RF05). A column of a select element that has an alias is left alone.
+example: 'select a as "my col" from "my table"'
+severity: off
+category: style
+rule:
+  any:
+    - { kind: ObjectReference }
+    - { kind: AliasExpression }
+  not:
+    parent: { kind: SelectClauseElement, child: { kind: AliasExpression } }
+token: { kind: [QuotedIdentifier], regex: '^.[A-Za-z0-9_]*[^A-Za-z0-9_].' }

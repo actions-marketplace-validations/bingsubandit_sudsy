@@ -21917,6 +21917,50 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A quoted identifier with a space or another character that is not a letter, a digit or an underscore (sqlfluff RF05). A column of a select element that has an alias is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select \"a b\", \"ab\", x as \"c d\" from \"my t\" as \"q r\";\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 8,
+            "length": 5,
+            "line": 1
+          },
+          {
+            "column": 37,
+            "length": 6,
+            "line": 1
+          },
+          {
+            "column": 47,
+            "length": 5,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "special-chars-in-identifier",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "RF05",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "Data type names are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP05).",
       "example": {
         "config": null,

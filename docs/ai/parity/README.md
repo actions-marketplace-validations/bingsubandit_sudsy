@@ -50,7 +50,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | ruff | 94.6% | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
 | shellcheck | 86.6% | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 63.7% | 48.7% | 97 | 37 | 0 | 41 | 0 | 0 | 19 | 41 |
+| sqlfluff | 63.7% | 48.7% | 97 | 38 | 0 | 40 | 0 | 0 | 19 | 40 |
 | stylecop | - | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
 | stylelint | 94.7% | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
 | stylelint-less | - | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |

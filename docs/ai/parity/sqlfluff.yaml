@@ -62,7 +62,7 @@ entries:
   RF02: planned
   RF03: planned
   RF04: planned
-  RF05: planned
+  RF05: rule special-chars-in-identifier
   RF06: planned
   ST02: planned
   ST04: planned

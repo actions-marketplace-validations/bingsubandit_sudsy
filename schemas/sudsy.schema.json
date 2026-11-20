@@ -5652,6 +5652,10 @@
               "$ref": "#/definitions/rule",
               "description": "Svelte's `spaced-html-comment` (eslint-plugin-svelte)."
             },
+            "special-chars-in-identifier": {
+              "$ref": "#/definitions/rule",
+              "description": "A quoted identifier with a space or another character that is not a letter, a digit or an underscore (sqlfluff RF05). A column of a select element that has an alias is left alone."
+            },
             "split-command-output": {
               "$ref": "#/definitions/rule",
               "description": "An unquoted `$(...)` among the elements of an array assignment is split into words and globbed."

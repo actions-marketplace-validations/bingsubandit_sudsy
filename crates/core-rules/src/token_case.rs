@@ -10,11 +10,11 @@
 //! tools: sqlfluff CP01-CP05
 //! reads: family:token-case, rules:case
 
+use crate::checks::FileCache;
 use crate::diagnostic::Edit;
 use crate::{Family, Params, Rule, RuleContext, RuleMeta};
-use core_config::{OptionValue, ResolvedOptions};
 use core_format::case::Cases;
-use core_syntax::{Grammar, SyntaxKind, TextRange};
+use core_syntax::{SyntaxKind, TextRange};
 
 pub const FAMILY: Family = Family {
     name: "token-case",
@@ -37,14 +37,10 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
     Ok(Box::new(rule))
 }
 
-/// The token kinds of the `[case]` row whose policy is the option `option`.
-fn row_kinds(grammar: &Grammar, ctx: &RuleContext<'_>, option: &str) -> Vec<SyntaxKind> {
-    ctx.section("case")
-        .filter_map(|row| row.split_once(" : "))
-        .filter(|(_, policy)| policy.split(" of ").next().map(str::trim) == Some(option))
-        .flat_map(|(kinds, _)| kinds.split('|'))
-        .filter_map(|name| grammar.kind_by_name(name.trim()))
-        .collect()
+thread_local! {
+    /// The tokens of the last file whose kind has a `[case]` row: the five rules of a language
+    /// share one walk.
+    static TOKENS: FileCache<Vec<(SyntaxKind, TextRange)>> = const { FileCache::new() };
 }
 
 impl Rule for TokenCase {
@@ -60,27 +56,24 @@ impl Rule for TokenCase {
         let cases = ctx.parsed("token-case", || {
             Cases::parse(file.grammar, ctx.section("case"))
         });
-        let kinds = ctx.parsed(self.meta.id, || row_kinds(file.grammar, ctx, &self.option));
+        let kinds = cases.kinds_of(&self.option);
         if kinds.is_empty() {
             return;
         }
-        // The other rows of the file's rows keep the policy `consistent` (no option, no row).
-        let mut options = ResolvedOptions::default();
-        options.set(
-            &self.option,
-            OptionValue::String(ctx.options.string("policy").to_string()),
-        );
-        let mut recase = cases.recaser(&options);
-        for token in file
-            .root
-            .descendants_with_tokens()
-            .filter_map(|e| e.into_token())
-            .filter(|t| kinds.contains(&t.kind()))
-        {
-            if let Some(fixed) = recase.word(token.kind(), token.text()) {
-                let message =
-                    (self.message.replace("{name}", token.text())).replace("{fixed}", &fixed);
-                let range: TextRange = token.text_range();
+        let tokens = TOKENS.with(|c| {
+            c.get(file, || {
+                (file.root.descendants_with_tokens())
+                    .filter_map(|e| e.into_token())
+                    .filter(|t| cases.covers(t.kind()))
+                    .map(|t| (t.kind(), t.text_range()))
+                    .collect()
+            })
+        });
+        let mut recase = cases.recaser_of(&self.option, ctx.options.string("policy"));
+        for &(kind, range) in tokens.iter().filter(|(k, _)| kinds.contains(k)) {
+            let text = &file.text[range];
+            if let Some(fixed) = recase.word(kind, text) {
+                let message = (self.message.replace("{name}", text)).replace("{fixed}", &fixed);
                 ctx.report_fix(
                     range,
                     message,
