@@ -22205,7 +22205,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\njobs: {}\n",
+        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -22232,6 +22232,31 @@
             "column": 13,
             "length": 11,
             "line": 10
+          },
+          {
+            "column": 7,
+            "length": 4,
+            "line": 14
+          },
+          {
+            "column": 9,
+            "length": 7,
+            "line": 18
+          },
+          {
+            "column": 9,
+            "length": 7,
+            "line": 27
+          },
+          {
+            "column": 7,
+            "length": 1,
+            "line": 28
+          },
+          {
+            "column": 9,
+            "length": 7,
+            "line": 30
           }
         ]
       },
@@ -22245,6 +22270,11 @@
         "github-actions/actionlint"
       ],
       "upstream": [
+        {
+          "id": "events/inputs",
+          "partial": true,
+          "tool": "actionlint"
+        },
         {
           "id": "events",
           "partial": true,
@@ -22321,6 +22351,65 @@
       "upstream": [
         {
           "id": "expression/syntax",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A branch, tag or path filter that is not a valid pattern (a bad range or escape, a character a ref name cannot have, `.` or `..` in a path).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on:\n  push:\n    branches:\n      - 'release/**'\n      - '^foo-'\n    tags:\n      - 'v*+'\n      - 'v[9-1]'\n      - 'v[0-'\n      - 'v1.*'\n    paths:\n      - ./foo/bar.txt\n      - 'src/**'\n      - '  foo'\njobs: {}\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 9,
+            "length": 7,
+            "line": 5
+          },
+          {
+            "column": 9,
+            "length": 5,
+            "line": 7
+          },
+          {
+            "column": 9,
+            "length": 8,
+            "line": 8
+          },
+          {
+            "column": 9,
+            "length": 6,
+            "line": 9
+          },
+          {
+            "column": 9,
+            "length": 13,
+            "line": 12
+          },
+          {
+            "column": 9,
+            "length": 7,
+            "line": 14
+          }
+        ]
+      },
+      "fix": null,
+      "id": "invalid-glob",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "glob",
           "partial": true,
           "tool": "actionlint"
         }
@@ -22769,9 +22858,15 @@
       ],
       "options": [],
       "presets": [
-        "yaml/yamllint"
+        "yaml/yamllint",
+        "github-actions/actionlint"
       ],
       "upstream": [
+        {
+          "id": "syntax-check/undefined-alias",
+          "partial": true,
+          "tool": "actionlint"
+        },
         {
           "id": "anchors",
           "partial": false,
@@ -22808,8 +22903,15 @@
         "yaml"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
       "upstream": [
+        {
+          "id": "syntax-check/unused-anchor",
+          "partial": true,
+          "tool": "actionlint"
+        },
         {
           "id": "anchors.forbid-unused-anchors",
           "partial": false,
@@ -22820,7 +22922,7 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A step that uses a popular action at a major version that runs on a retired runtime.",
+      "description": "A step that uses a popular action at a version whose runner is retired.",
       "example": {
         "config": null,
         "fixed": null,
@@ -23052,7 +23154,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on: push\nenv:\n  A: 1\n  a: 2\njobs:\n  build:\n    runs-on: ubuntu-latest\n    stepz: []\n    steps:\n      - run: echo hi\n        uses: actions/checkout@v4\n      - name: nothing\n      - uses: actions/checkout@v4\n        timeout-minutes: 0\n    container:\n      image: ''\n  empty:\n    steps:\n      -\n",
+        "input": "on: push\nenv:\n  A: 1\n  a: 2\njobs:\n  build:\n    runs-on: ubuntu-latest\n    stepz: []\n    steps:\n      - run: echo hi\n        uses: actions/checkout@v4\n      - name: nothing\n      - uses: actions/checkout@v4\n        timeout-minutes: 0\n    container:\n      image: ''\n  empty:\n    steps:\n      -\n  matrix:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b, a]\n        exclude:\n          - os: c\n          - arch: x\n    steps:\n      - run: echo\n",
         "language": "github-actions",
         "spans": [
           {
@@ -23099,6 +23201,21 @@
             "column": 7,
             "length": 1,
             "line": 19
+          },
+          {
+            "column": 20,
+            "length": 1,
+            "line": 24
+          },
+          {
+            "column": 17,
+            "length": 1,
+            "line": 26
+          },
+          {
+            "column": 13,
+            "length": 4,
+            "line": 27
           }
         ]
       },
@@ -23112,6 +23229,26 @@
         "github-actions/actionlint"
       ],
       "upstream": [
+        {
+          "id": "syntax-check/merge-key",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "matrix",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "id/step",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "credentials",
+          "partial": true,
+          "tool": "actionlint"
+        },
         {
           "id": "syntax-check",
           "partial": true,

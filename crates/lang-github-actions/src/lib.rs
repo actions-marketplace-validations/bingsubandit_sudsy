@@ -37,6 +37,7 @@ static RULES: &[&dyn Rule] = &[
     &shape::InvalidEvent,
     &shape::InvalidPermissions,
     &shape::OutdatedAction,
+    &shape::InvalidGlob,
 ];
 
 pub struct GithubActionsProvider {

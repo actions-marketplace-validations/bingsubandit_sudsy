@@ -8,7 +8,15 @@ entries:
   "expression/syntax": "rule invalid-expression | The grammar is not parsed: a misplaced operator or a missing operand is not reported."
   expression/context: rule expression-context | The contexts and special functions each key offers (table in `lang-github-actions/src/expression.rs`).
   expression/types: rule expression-types | Properties of the typed contexts, argument counts and types, `format` placeholders; not the types of `steps`, `needs`, `matrix` and `inputs` (they depend on other keys).
-  action/outdated-runner: rule outdated-action | A table of popular actions and the last retired major version.
+  action/outdated-runner: rule outdated-action | The specs of actionlint's list of outdated popular actions (`data/outdated-actions.txt`, copied from its pinned release).
+  syntax-check/undefined-alias: rule no-undefined-alias | The shared YAML rule, enabled by the preset for workflows.
+  syntax-check/unused-anchor: rule no-unused-anchors | The shared YAML rule, enabled by the preset for workflows.
+  syntax-check/merge-key: rule workflow-syntax | partial, only where the section has a fixed key list (the `<<` is an unexpected key).
+  glob: rule invalid-glob | Glob syntax (ranges, escapes, quantifiers), ref name characters and path dots of the filters; messages differ.
+  events/inputs: rule invalid-event | A default that does not fit the type or the options, options on a non-choice input, a choice without options, a default on a required workflow_call input.
+  matrix: rule workflow-syntax | Duplicate values, and excluded keys or values no combination has (the types of values are compared structurally).
+  id/step: rule workflow-syntax | The characters of a step id.
+  credentials: rule workflow-syntax | A password of a container or service credentials that is not an expression.
   if-cond: rule if-condition | Constant conditions and text around the markers of an `if:`.
   expression/untrusted: rule script-injection | The contexts are a fixed list.
   deprecated-commands: rule deprecated-commands
@@ -30,6 +38,6 @@ deferred:
   - gap: "Needs the metadata of the action a step uses (inputs, outputs, runner version), a repository file (a local action, a reusable workflow) or the network."
     ids: ["action", "syntax-check/workflow-call", "syntax-check/local-action"]
   - gap: "Offline, not built: the types of the file-derived contexts (`steps`, `needs`, `matrix`, `inputs`), `if:` conditions that are always true, event and activity names, filters and globs, matrix keys, permission scopes, step id characters, service credentials, runner label conflicts, and the structure checks (a required key missing, a section of the wrong kind or empty)."
-    ids: ["events/inputs", "glob", "matrix", "credentials", "id/step", "runner-label/conflict", "syntax-check/yaml"]
+    ids: ["runner-label/conflict", "syntax-check/yaml"]
   - gap: "The checks of the shell and Python of `run:` are Sudsy's Shell and PowerShell rules, run on the embedded script; there is no pyflakes."
     ids: ["shellcheck", "pyflakes"]

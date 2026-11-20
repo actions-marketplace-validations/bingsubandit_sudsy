@@ -16,8 +16,12 @@ use core_syntax::{Grammar, SyntaxElement, SyntaxNode, SyntaxNodeExt, TextRange};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+mod combos;
 mod format;
+mod typed;
+pub use combos::Combos;
 pub use format::Format;
+pub use typed::{Typed, Value};
 
 /// What a node must be.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -74,6 +78,10 @@ pub struct Row {
     pub unique: bool,
     /// A null, empty string, empty mapping or empty sequence is an error.
     pub non_empty: bool,
+    /// The entries of the mapping declare a type, a default and options.
+    pub typed: Option<&'static Typed>,
+    /// The mapping lists values per key, with include and exclude entries.
+    pub combos: Option<&'static Combos>,
 }
 
 impl Row {
@@ -91,6 +99,8 @@ impl Row {
         unique: false,
         empty_map_ok: false,
         non_empty: false,
+        typed: None,
+        combos: None,
     };
 }
 
@@ -381,6 +391,16 @@ impl Walk<'_> {
         {
             self.report(row, at, message);
         }
+        if let Val::Scalar { text, .. } = val
+            && row.format == Format::Expression
+            && !text.is_empty()
+            && !self.is_expression(text)
+        {
+            let message = format!(
+                "\"{name}\" should be specified via an expression such as a secret: do not put the value directly"
+            );
+            self.report(row, at, message);
+        }
     }
 
     fn check_names<'t>(
@@ -445,6 +465,12 @@ impl Walk<'_> {
                     seen.push(lower);
                 }
             }
+        }
+        if let Some(combos) = row.combos {
+            self.combos(row, combos, &entries);
+        }
+        if let Some(typed) = row.typed {
+            self.typed(row, typed, &entries);
         }
         for (a, b) in row.exclusive {
             let find = |k: &str| entries.iter().position(|e| e.0 == k);

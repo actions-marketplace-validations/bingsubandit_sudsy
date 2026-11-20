@@ -358,7 +358,13 @@ def actionlint_check(d):
         return "runner-label/unknown" if "unknown" in message else "runner-label/conflict"
     if kind == "syntax-check" and "is duplicated" in message:
         return "syntax-check/duplicate-job" if 'in "jobs" section' in message else "syntax-check/duplicate-key"
-    if kind == "syntax-check" and re.search(r"anchor|alias|merge key|could not parse", message):
+    if kind == "syntax-check" and "unknown anchor" in message:
+        return "syntax-check/undefined-alias"
+    if kind == "syntax-check" and "is defined but not used" in message:
+        return "syntax-check/unused-anchor"
+    if kind == "syntax-check" and "merge key" in message:
+        return "syntax-check/merge-key"
+    if kind == "syntax-check" and re.search(r"anchor|alias|could not parse", message):
         return "syntax-check/yaml"
     return kind
 

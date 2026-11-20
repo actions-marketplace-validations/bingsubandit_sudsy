@@ -10,10 +10,13 @@ github-actions:
       if-condition: warn
       invalid-expression: warn
       invalid-event: warn
+      invalid-glob: warn
       invalid-job-id: warn
       invalid-permissions: warn
       outdated-action: warn
       invalid-runs-on: warn
+      no-undefined-alias: warn
+      no-unused-anchors: warn
       script-injection: warn
       unknown-needs: warn
       workflow-syntax: warn

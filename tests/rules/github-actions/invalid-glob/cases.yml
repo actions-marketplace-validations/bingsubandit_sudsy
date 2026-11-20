@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+      - 'release/**'
+      - '^foo-'
+#       ^^^^^^^ invalid-glob
+    tags:
+      - 'v*+'
+#       ^^^^^ invalid-glob
+      - 'v[9-1]'
+#       ^^^^^^^^ invalid-glob
+      - 'v[0-'
+#       ^^^^^^ invalid-glob
+      - 'v1.*'
+    paths:
+      - ./foo/bar.txt
+#       ^^^^^^^^^^^^^ invalid-glob
+      - 'src/**'
+      - '  foo'
+#       ^^^^^^^ invalid-glob
+jobs: {}

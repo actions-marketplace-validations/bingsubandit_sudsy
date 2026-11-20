@@ -4,13 +4,14 @@
 //! concept: key-shape
 
 use core_rules::rule;
-use core_rules::shape::{Format, Kind, Row, Shape, Variant, check};
+use core_rules::shape::{Combos, Format, Kind, Row, Shape, Typed, Value, Variant, check};
 use core_rules::{FileContext, RuleContext};
 
 const S: &str = "workflow-syntax";
 const E: &str = "invalid-event";
 const P: &str = "invalid-permissions";
 const O: &str = "outdated-action";
+const G: &str = "invalid-glob";
 
 #[rustfmt::skip]
 const EVENTS: &[&str] = &[
@@ -34,17 +35,30 @@ const PR_TYPES: &[&str] = &[
     "demilestoned", "ready_for_review", "review_requested", "review_request_removed",
     "auto_merge_enabled", "auto_merge_disabled",
 ];
-/// The last major version of each popular action that runs on a runtime GitHub has retired.
-#[rustfmt::skip]
-const OUTDATED: &[(&str, u32)] = &[
-    ("actions/checkout", 3), ("actions/cache", 3), ("actions/setup-node", 3), ("actions/setup-python", 4),
-    ("actions/setup-go", 4), ("actions/setup-java", 3), ("actions/setup-dotnet", 3),
-    ("actions/upload-artifact", 3), ("actions/download-artifact", 3), ("actions/github-script", 6),
-    ("actions/labeler", 4), ("actions/stale", 5), ("azure/login", 1), ("azure/aks-set-context", 3),
-    ("aws-actions/configure-aws-credentials", 3), ("docker/login-action", 2),
-    ("docker/build-push-action", 4), ("docker/metadata-action", 4), ("docker/setup-buildx-action", 2),
-    ("docker/setup-qemu-action", 2), ("codecov/codecov-action", 3),
-];
+/// The specs of popular actions whose runner is retired (actionlint's list of its pinned release).
+const OUTDATED: &str = include_str!("../data/outdated-actions.txt");
+static MATRIX: Combos = Combos {
+    include: "include",
+    exclude: "exclude",
+};
+static DISPATCH_INPUT: Typed = Typed {
+    type_key: "type",
+    default_key: "default",
+    options_key: "options",
+    required_key: "required",
+    choice: "choice",
+    types: &[("boolean", Value::Bool), ("number", Value::Number)],
+    required_no_default: false,
+};
+static CALL_INPUT: Typed = Typed {
+    type_key: "type",
+    default_key: "default",
+    options_key: "options",
+    required_key: "required",
+    choice: "",
+    types: &[("boolean", Value::Bool), ("number", Value::Number)],
+    required_no_default: true,
+};
 const FILTER_PAIRS: &[(&str, &str)] = &[
     ("branches", "branches-ignore"),
     ("tags", "tags-ignore"),
@@ -106,6 +120,14 @@ static SHAPE: Shape = Shape {
         row!("on.merge_group", E, Kind::Map, keys: &["types", "branches", "branches-ignore"], exclusive: FILTER_PAIRS),
         row!("on.schedule", E, Kind::Seq, non_empty: true),
         row!("on.schedule.*", E, Kind::Map, keys: &["cron", "timezone"], required: &["cron"]),
+        row!("on.workflow_dispatch.inputs", E, Kind::Map, typed: Some(&DISPATCH_INPUT)),
+        row!("on.workflow_call.inputs", E, Kind::Map, typed: Some(&CALL_INPUT)),
+        row!("on.*.branches.*|on.*.branches-ignore.*|on.*.tags.*|on.*.tags-ignore.*|on.image_version.versions.*",
+            G, Kind::Str, format: Format::RefGlob),
+        row!("on.*.paths.*|on.*.paths-ignore.*", G, Kind::Str, format: Format::PathGlob),
+        row!("jobs.*.steps.*.id", S, Kind::Str, format: Format::Identifier),
+        row!("jobs.*.container.credentials.password|jobs.*.services.*.credentials.password", S, Kind::Str,
+            format: Format::Expression),
         row!("jobs.*.steps.*.uses", O, Kind::Str, format: Format::Outdated(OUTDATED)),
         row!("on.schedule.*.cron", E, Kind::Str, format: Format::Cron),
         row!("on.image_version", E, Kind::Map, keys: &["names", "versions"]),
@@ -162,7 +184,7 @@ static SHAPE: Shape = Shape {
         row!("jobs.*.timeout-minutes|jobs.*.steps.*.timeout-minutes", S, Kind::Float, format: Format::Positive),
         row!("jobs.*.strategy.max-parallel", S, Kind::Int, format: Format::Positive),
         row!("jobs.*.strategy", S, Kind::Map, keys: &["matrix", "fail-fast", "max-parallel"], non_empty: true),
-        row!("jobs.*.strategy.matrix", S, Kind::Any, unique: true),
+        row!("jobs.*.strategy.matrix", S, Kind::Any, unique: true, combos: Some(&MATRIX)),
         row!("jobs.*.strategy.matrix.*", S, Kind::Seq, non_empty: true),
         row!("jobs.*.outputs", S, Kind::Map, non_empty: true),
         row!("jobs.*.outputs.*", S, Kind::Scalar),
@@ -220,9 +242,15 @@ shape_rule!(
     "on:\n  pushh: {}   # reported\njobs: {}"
 );
 shape_rule!(
+    InvalidGlob,
+    "invalid-glob",
+    "A branch, tag or path filter that is not a valid pattern (a bad range or escape, a character a ref name cannot have, `.` or `..` in a path).",
+    "on:\n  push:\n    tags: ['v*+']   # reported\njobs: {}"
+);
+shape_rule!(
     OutdatedAction,
     "outdated-action",
-    "A step that uses a popular action at a major version that runs on a retired runtime.",
+    "A step that uses a popular action at a version whose runner is retired.",
     "on: push\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v2   # reported"
 );
 shape_rule!(

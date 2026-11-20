@@ -26,3 +26,16 @@ jobs:
       -
 #     ^ workflow-syntax
 #     ^ workflow-syntax
+  matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [a, b, a]
+#                  ^ workflow-syntax
+        exclude:
+          - os: c
+#               ^ workflow-syntax
+          - arch: x
+#           ^^^^ workflow-syntax
+    steps:
+      - run: echo

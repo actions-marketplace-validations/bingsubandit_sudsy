@@ -90,7 +90,7 @@ Each number is measured on real-world code against the reference tool with its d
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | 25 rules · reference tool: none found | In progress |
 | Dockerfile | Sudsy formatter · reference tool: none found | ███████░░░ 78% hadolint | Lint only: In progress |
-| GitHub Actions | Sudsy formatter · reference tool: none found | ████░░░░░░ 44% actionlint | Lint only: In progress |
+| GitHub Actions | Sudsy formatter · reference tool: none found | ██████░░░░ 66% actionlint | Lint only: In progress |
 | PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
 | INI, EditorConfig, .gitignore | Sudsy formatter · reference tool: none found | 24 rules · reference tool: none found | not measured |
 

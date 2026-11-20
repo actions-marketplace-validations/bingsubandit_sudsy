@@ -1703,6 +1703,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `${{ }}` expression that is not closed or empty, does not parse (unbalanced brackets, a string that is not closed, a character expressions do not have such as a double quote), or names a context or function that does not exist."
             },
+            "invalid-glob": {
+              "$ref": "#/definitions/rule",
+              "description": "A branch, tag or path filter that is not a valid pattern (a bad range or escape, a character a ref name cannot have, `.` or `..` in a path)."
+            },
             "invalid-job-id": {
               "$ref": "#/definitions/rule",
               "description": "A job id must start with a letter or `_` and contain only letters, digits, `-` and `_`."
@@ -3815,7 +3819,7 @@
             },
             "outdated-action": {
               "$ref": "#/definitions/rule",
-              "description": "A step that uses a popular action at a major version that runs on a retired runtime."
+              "description": "A step that uses a popular action at a version whose runner is retired."
             },
             "outdated-version-block": {
               "$ref": "#/definitions/rule",

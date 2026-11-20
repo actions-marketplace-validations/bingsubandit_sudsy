@@ -14,4 +14,28 @@ on:
     - cron: '0 0 * * 9'
 #           ^^^^^^^^^^^ invalid-event
     - cron: '*/15 0-5 * * mon'
+  workflow_dispatch:
+    inputs:
+      kind:
+#     ^^^^ invalid-event
+        type: choice
+      flag:
+        type: boolean
+        default: yes
+#       ^^^^^^^ invalid-event
+      ok:
+        type: choice
+        options: [a, b]
+        default: a
+  workflow_call:
+    inputs:
+      n:
+        type: number
+        default: x
+#       ^^^^^^^ invalid-event
+      r:
+#     ^ invalid-event
+        required: true
+        default: 1
+#       ^^^^^^^ invalid-event
 jobs: {}
