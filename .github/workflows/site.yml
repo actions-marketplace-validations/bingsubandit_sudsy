@@ -8,6 +8,8 @@ on:
     paths:
       - site/**
       - docs/ai/rules/rules.json
+      - docs/ai/parity/site.json
+      - assets/logo/og.png
       - docs/ai/formatting/presets.md
       - schemas/sudsy.schema.json
       - crates/lang-*/presets/**
@@ -16,6 +18,8 @@ on:
     paths:
       - site/**
       - docs/ai/rules/rules.json
+      - docs/ai/parity/site.json
+      - assets/logo/og.png
       - docs/ai/formatting/presets.md
       - schemas/sudsy.schema.json
       - crates/lang-*/presets/**

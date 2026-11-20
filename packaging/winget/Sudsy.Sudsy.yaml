@@ -1,4 +1,4 @@
-PackageIdentifier: Coox.Sudsy
+PackageIdentifier: Sudsy.Sudsy
 PackageVersion: @VERSION@
 DefaultLocale: en-US
 ManifestType: version

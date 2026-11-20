@@ -1,83 +1,130 @@
 # Rows of the README "Language support" table (xtask/full/src/support.rs): the reference tools per
 # language. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
-# to the ratchet groups of this one. No `format` list: Sudsy does not format the language.
+# to the ratchet groups of this one. No `format` list: Sudsy does not format the language. `ids` are the
+# language ids of the row (the first is its page slug, every language must be in one row), `speed` the
+# language names of its rows in bench/speed.json.
 - language: JavaScript / TypeScript
+  ids: [js]
+  speed: [JS/TS]
   format: [{tool: prettier-js, name: Prettier}]
   lint: [{tool: eslint, name: ESLint}, {tool: typescript-eslint, name: typescript-eslint}]
 - language: Python
+  ids: [python]
+  speed: [Python]
   format: [{tool: ruff, name: ruff format}]
   lint: [{tool: ruff, name: ruff}]
 - language: Protobuf
+  ids: [protobuf]
+  speed: [Protobuf]
   format: [{tool: buf, name: buf format}]
   lint: [{tool: buf, name: buf}]
 - language: Terraform (HCL)
+  ids: [hcl]
+  speed: [HCL]
   format: [{tool: terraform, name: terraform fmt}]
   lint: [{tool: tflint, name: tflint}]
 - language: GraphQL
+  ids: [graphql]
   format: [{tool: prettier, name: Prettier, groups: [graphql]}]
-  rules: [graphql]
 - language: TOML
+  ids: [toml]
+  speed: [TOML]
   format: [{tool: taplo, name: taplo}]
-  rules: [toml]
 - language: HTML
+  ids: [html]
+  speed: [HTML]
   format: [{tool: prettier-html, name: Prettier, groups: [prettier-html, real-world]}]
   lint: [{tool: html-eslint, name: html-eslint}, {tool: html-validate, name: html-validate}, {tool: htmlhint, name: htmlhint}]
 - language: Vue / Svelte
+  ids: [vue, svelte]
+  speed: [Vue, Svelte]
   format: [{tool: prettier-html, name: Prettier, groups: [prettier-vue, prettier-vue-html, real-world-vue, prettier-svelte, real-world-svelte]}]
   lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
 - language: Angular templates
+  ids: [angular]
+  speed: [Angular]
   format: [{tool: prettier-angular, name: Prettier}]
-  rules: [angular]
 - language: CSS / SCSS / Less
+  ids: [css, scss, less]
+  speed: [CSS, SCSS, Less]
   format: [{tool: prettier-css, name: Prettier}]
   lint: [{tool: stylelint, name: stylelint}, {tool: stylelint-scss, name: stylelint-scss}, {tool: stylelint-less, name: stylelint-less}]
 - language: Markdown
+  ids: [markdown]
+  speed: [Markdown]
   format: [{tool: prettier, name: Prettier, groups: [markdown]}]
   lint: [{tool: markdownlint, name: markdownlint}]
 - language: YAML
+  ids: [yaml]
+  speed: [YAML]
   format: [{tool: prettier, name: Prettier, groups: [yaml]}]
   lint: [{tool: yamllint, name: yamllint}]
 - language: JSON / JSONC
+  ids: [json]
+  speed: [JSON]
   format: [{tool: prettier, name: Prettier, groups: [json]}, {tool: biome, name: Biome}]
   lint: [{tool: eslint-jsonc, name: eslint-plugin-jsonc}]
 - language: PowerShell
+  ids: [powershell]
+  speed: [PowerShell]
   format: [{tool: invoke-formatter, name: Invoke-Formatter}]
   lint: [{tool: psscriptanalyzer, name: PSScriptAnalyzer}]
 - language: PHP
+  ids: [php]
+  speed: [PHP]
   format: [{tool: php-cs-fixer, name: PHP-CS-Fixer}]
   lint: [{tool: phpstan, name: PHPStan}]
 - language: Java
+  ids: [java]
+  speed: [Java]
   format: [{tool: google-java-format, name: google-java-format}]
   lint: [{tool: checkstyle, name: Checkstyle}]
 - language: Kotlin
+  ids: [kotlin]
+  speed: [Kotlin]
   format: [{tool: ktlint, name: ktlint}]
   lint: [{tool: ktlint, name: ktlint}]
 - language: Shell
+  ids: [shell]
+  speed: [Shell]
   format: [{tool: shfmt, name: shfmt}]
   lint: [{tool: shellcheck, name: ShellCheck}]
 - language: SQL
+  ids: [sql]
+  speed: [SQL]
   format: [{tool: sqlfluff, name: sqlfluff}]
   lint: [{tool: sqlfluff, name: sqlfluff}]
 - language: C#
+  ids: [csharp]
+  speed: [C#, C# (.editorconfig)]
   format: [{tool: csharpier, name: CSharpier}]
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]
 - language: XML
+  ids: [xml]
+  speed: [XML]
   format: [{tool: csharpier-xml, name: CSharpier XML}]
-  rules: [xml]
 - language: C / C++
+  ids: [c, cpp]
   format: [{tool: clang-format, name: clang-format}]
-  rules: [c, cpp]
 - language: Ruby
+  ids: [ruby]
+  speed: [Ruby]
   lint: [{tool: rubocop, name: RuboCop}]
 - language: Dockerfile
+  ids: [dockerfile]
+  speed: [Dockerfile]
   lint: [{tool: hadolint, name: hadolint}]
   formatter: true
 - language: Makefile
+  ids: [makefile]
+  speed: [Makefile]
   lint: [{tool: checkmake, name: checkmake}]
   formatter: true
 - language: GitHub Actions
+  ids: [github-actions]
+  speed: [GitHub Actions]
   lint: [{tool: actionlint, name: actionlint}]
   formatter: true
 - language: INI, EditorConfig, .gitignore
+  ids: [ini, editorconfig, gitignore]
   formatter: true
-  rules: [ini, editorconfig, gitignore]

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Packaging
+* The VS Code publisher is `sudsy` (extension id `sudsy.sudsy`) and the winget id is `Sudsy.Sudsy`.
+  The package descriptions and READMEs are generated from the language support data and no longer
+  claim languages that are still in progress; npm and PyPI packages carry keywords.
+
 ### Lint
 * Ruby `unknown-cop-name` is renamed `unknown-rule-in-directive` (no alias): a shared rule that
   reads the grammar's `suppress directive` rows. The Python `not a == b`, `not not a` rules

@@ -191,7 +191,7 @@ fn tool_name(tool: &str) -> &str {
 /// An upstream setting that maps to a rule.
 pub struct Upstream {
     /// The tool's display name ("StyleCop").
-    pub tool: &'static str,
+    pub tool: String,
     pub id: String,
     pub partial: bool,
 }
@@ -207,8 +207,13 @@ impl std::fmt::Display for Upstream {
 /// The upstream settings that map to the rule `rule` in one of `languages` (`all`: every
 /// language), in catalog order.
 pub fn upstream(rule: &str, languages: &[&str]) -> Vec<Upstream> {
+    upstream_in(all(), rule, languages)
+}
+
+/// [`upstream`] over the given catalogs (the docs generator reads every file of `docs/ai/parity`).
+pub fn upstream_in(catalogs: &[Catalog], rule: &str, languages: &[&str]) -> Vec<Upstream> {
     let mut out = Vec::new();
-    for c in all() {
+    for c in catalogs {
         let applies = languages.contains(&"all")
             || c.languages.iter().any(|l| languages.contains(&l.as_str()));
         if !applies {
@@ -218,7 +223,7 @@ pub fn upstream(rule: &str, languages: &[&str]) -> Vec<Upstream> {
             if e.rules().any(|r| r == rule) && matches!(e.coverage.as_str(), "covered" | "partial")
             {
                 out.push(Upstream {
-                    tool: tool_name(&c.tool),
+                    tool: tool_name(&c.tool).to_string(),
                     id: e.id.clone(),
                     partial: e.coverage == "partial",
                 });

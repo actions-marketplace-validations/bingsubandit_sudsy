@@ -1,4 +1,4 @@
-PackageIdentifier: Coox.Sudsy
+PackageIdentifier: Sudsy.Sudsy
 PackageVersion: @VERSION@
 InstallerType: zip
 NestedInstallerType: portable

@@ -1,6 +1,6 @@
 {
     "version": "@VERSION@",
-    "description": "One formatter and linter for JS/TS, Python, Protobuf, Terraform and more",
+    "description": "@DESCRIPTION@",
     "homepage": "https://github.com/bingsubandit/sudsy",
     "license": "MIT",
     "notes": "Formatting C# needs the .NET 10 runtime.",

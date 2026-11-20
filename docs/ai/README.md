@@ -9,6 +9,7 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [architecture/csharp-worker.md](architecture/csharp-worker.md) | .NET worker, protocol, workspace, lifecycle |
 | [architecture/adding-a-language.md](architecture/adding-a-language.md) | Adding a tree-sitter language: steps and per-language cost |
 | [design/unification.md](design/unification.md) | Plan: moving the older languages onto the shared core, rule clusters, ordered steps |
+| [design/discoverability.md](design/discoverability.md) | Plan: how people and agents find Sudsy (site pages, registry metadata, agents, integrations); phase 1 built |
 | [design/hard-cases.md](design/hard-cases.md) | Hard cases left open by unification steps, each with its numbers and missing capability |
 | [architecture/language-packs.md](architecture/language-packs.md) | Languages as installable packs: format, manifest, cache, ABI check, missing language |
 | [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |

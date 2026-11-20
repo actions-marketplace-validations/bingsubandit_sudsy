@@ -1,5 +1,5 @@
 class Sudsy < Formula
-  desc "One formatter and linter for JS/TS, Python, Protobuf, Terraform and more"
+  desc "@DESCRIPTION@"
   homepage "https://github.com/bingsubandit/sudsy"
   version "@VERSION@"
   license "MIT"

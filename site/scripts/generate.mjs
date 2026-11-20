@@ -4,12 +4,15 @@
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { base, site, rules } from '../config.mjs';
+import { check, names, pages } from './pages.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const out = fileURLToPath(new URL('../src/content/docs/generated/', import.meta.url));
 const pub = fileURLToPath(new URL('../public/', import.meta.url));
 mkdirSync(pub, { recursive: true });
-copyFileSync(root + 'assets/logo/soap_color.svg', pub + 'favicon.svg'); // git-ignored copy
+copyFileSync(root + 'assets/logo/soap_color.svg', pub + 'favicon.svg'); // git-ignored copies
+copyFileSync(root + 'assets/logo/og.png', pub + 'og.png');
+writeFileSync(pub + 'robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${site}${base}/sitemap-index.xml\n`);
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 
@@ -59,6 +62,8 @@ function example(e, id) {
   ].filter(Boolean).join('\n\n');
 }
 
+const { langName, tools: byTool } = names();
+const languageLinks = (r) => r.languages.map((l) => (l === 'all' ? 'all languages' : langName.has(l) ? `[${langName.get(l).name}](${base}/languages/${langName.get(l).slug}/)` : l)).join(', ');
 const realLanguages = [...new Set(rules().flatMap((r) => r.languages))].filter((l) => l !== 'all');
 const ruleIds =new Set(rules().map((r) => r.id.toLowerCase()));
 const stubs = new Map(); // slug -> { id, tools, rules }
@@ -75,13 +80,23 @@ for (const r of rules()) {
   const body = [
     `<div class="meta" data-pagefind-sort="id[data-id]" data-id="${r.id}">${chips.join('')}</div>`,
     md(r.description),
+    `Languages: ${languageLinks(r)}. Category: ${r.category}. Fix: ${r.fix ?? 'none'}.`,
     r.upstream.length &&
       '## Upstream equivalents\n\n' +
-        table(['Tool', 'Id', 'Coverage'], r.upstream.map((u) => [u.tool, `\`${u.id}\``, u.partial ? 'partial' : 'full'])),
+        table(['Tool', 'Id', 'Coverage', 'Measured for the tool'], r.upstream.map((u) => {
+          const t = byTool.get(u.tool.toLowerCase());
+          return [t ? `[${u.tool}](${base}/compare/${t.tool}/)` : u.tool, `\`${u.id}\``, u.partial ? 'partial' : 'full',
+            t?.coverage == null ? 'not measured' : `${Math.floor(t.coverage)}% of the tool's findings`];
+        })),
     `<div class="example">\n\n${example(r.example, r.id)}\n\n</div>`,
     configuration(r),
   ].filter(Boolean).join('\n\n');
-  put(`rule-${r.id}.md`, { title: r.id, slug: `rules/${r.id}`, description: md(r.description).slice(0, 160) }, body);
+  const langs = r.languages.includes('all') ? 'all languages' : r.languages.map((l) => langName.get(l)?.name ?? l).join(', ');
+  const like = [...new Set(r.upstream.map((u) => `${u.tool} ${u.id}`))].slice(0, 3);
+  put(`rule-${r.id}.md`, {
+    title: r.id, slug: `rules/${r.id}`, description: md(r.description).slice(0, 160),
+    head: [{ tag: 'title', content: `${r.id}: ${langs} lint rule${like.length ? `, like ${like.join(', ')}` : ''} | Sudsy` }],
+  }, body);
 
   for (const u of r.upstream) {
     const slug = u.id.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
@@ -135,4 +150,5 @@ put('format-options.md', { title: 'Format options', slug: 'reference/format-opti
         Object.entries(props).sort(([a], [b]) => a.localeCompare(b)).map(([n, o]) =>
           [`\`${n}\``, o.type, fmt(o.default), o.enum ? o.enum.map((c) => `\`${c}\``).join(', ') : o.minimum !== undefined ? `${o.minimum}..${o.maximum ?? ''}` : '', cell(o.description ?? '')]))).join('\n\n'));
 
+check(out, pages({ put, cell, table }));
 console.log(`generated ${rules().length} rules, ${stubs.size} upstream stubs, ${presets.length} presets`);

@@ -30,9 +30,13 @@ pub(crate) struct Row {
     pub format: Vec<Tool>,
     #[serde(default)]
     pub lint: Vec<Tool>,
-    /// Rule languages whose rules count for a row with no lint reference tool.
+    /// The language ids of the row (`provider.language()`); the first is the page slug. Their rules
+    /// count for a row with no lint reference tool.
     #[serde(default)]
-    pub rules: Vec<String>,
+    pub ids: Vec<String>,
+    /// The `language` names of the rows of `bench/speed.json` that belong to this row.
+    #[serde(default)]
+    pub speed: Vec<String>,
     /// Sudsy formats the language although no reference formatter was found.
     #[serde(default)]
     pub formatter: bool,
@@ -80,30 +84,20 @@ pub fn render(
     let rows = rows(support_yaml)?;
     let mut out = String::from("| Language | Format | Lint | Status |\n|---|---|---|---|\n");
     let mut measured = Vec::new();
-    for row in &rows {
-        let format: Vec<Option<f64>> = row
-            .format
-            .iter()
-            .map(|t| format_share(root, t))
-            .collect::<Result<_>>()?;
-        let lint: Vec<Option<f64>> = row
-            .lint
-            .iter()
-            .map(|t| Ok(ratchets(root, &t.tool)?.target))
-            .collect::<Result<_>>()?;
-        let status = status(row.format.is_empty(), &format, &lint);
+    for m in measure(root, &rows)? {
+        let (row, status) = (m.row, m.status);
         let line = format!(
             "| {} | {} | {} | {status} |\n",
             row.language,
-            cell(&row.format, &format).unwrap_or_else(|| {
+            cell(&row.format, &m.format).unwrap_or_else(|| {
                 if row.formatter {
                     NO_TOOL.replace("{}", "Sudsy formatter")
                 } else {
                     "none".into()
                 }
             }),
-            cell(&row.lint, &lint).unwrap_or_else(|| match rule_count(&row.rules) {
-                n if n > 0 && !row.rules.is_empty() => NO_TOOL.replace("{}", &format!("{n} rules")),
+            cell(&row.lint, &m.lint).unwrap_or_else(|| match rule_count(&row.ids) {
+                n if n > 0 => NO_TOOL.replace("{}", &format!("{n} rules")),
                 _ => "none".into(),
             }),
         );
@@ -138,6 +132,39 @@ pub fn render(
         headline,
         ready,
     })
+}
+
+/// A row with its measured shares: format and lint per tool, and the status.
+pub(crate) struct Measured<'a> {
+    pub row: &'a Row,
+    pub format: Vec<Option<f64>>,
+    pub lint: Vec<Option<f64>>,
+    pub status: &'static str,
+}
+
+/// The shares of every row, in the order of `rows`.
+pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'a>>> {
+    rows.iter()
+        .map(|row| {
+            let format: Vec<Option<f64>> = row
+                .format
+                .iter()
+                .map(|t| format_share(root, t))
+                .collect::<Result<_>>()?;
+            let lint: Vec<Option<f64>> = row
+                .lint
+                .iter()
+                .map(|t| Ok(ratchets(root, &t.tool)?.target))
+                .collect::<Result<_>>()?;
+            let status = status(row.format.is_empty(), &format, &lint);
+            Ok(Measured {
+                row,
+                format,
+                lint,
+                status,
+            })
+        })
+        .collect()
 }
 
 fn ratchets(root: &Path, tool: &str) -> Result<Ratchets> {

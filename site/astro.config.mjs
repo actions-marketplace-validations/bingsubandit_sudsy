@@ -14,11 +14,20 @@ export default defineConfig({
       title: 'Sudsy',
       logo: { src: '../assets/logo/soap_color.svg', alt: 'Sudsy' },
       favicon: '/favicon.svg',
+      // Starlight adds the canonical link (from `site`), og:title, og:description and og:url, and the sitemap.
+      head: [
+        { tag: 'meta', attrs: { property: 'og:image', content: `${site}${base}/og.png` } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: `${site}${base}/og.png` } },
+      ],
       customCss: ['./src/styles/site.css'],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/bingsubandit/sudsy' }],
       sidebar: [
         { label: 'Getting started', link: '/getting-started/' },
         { label: 'Rules', link: '/rules/' },
+        { label: 'Languages', link: '/languages/' },
+        { label: 'Compared tools', link: '/compare/' },
         {
           label: 'Reference',
           items: [

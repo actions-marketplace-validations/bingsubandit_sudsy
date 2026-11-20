@@ -97,21 +97,7 @@ pub(crate) fn table() -> Result<String> {
                 if row.task == task { "" } else { &row.task },
             );
             task = &row.task;
-            let (speed_cell, time, memory) = match (&row.sudsy, &row.other) {
-                (Some(s), Some(o)) => (
-                    verdict(s.s, o.s),
-                    format!("{} / {}", seconds(s.s), seconds(o.s)),
-                    format!("{:.0} / {:.0} MB", s.mb, o.mb),
-                ),
-                _ => (
-                    format!(
-                        "not measured: {}",
-                        row.not_measured.as_deref().unwrap_or("no result")
-                    ),
-                    "-".into(),
-                    "-".into(),
-                ),
-            };
+            let (speed_cell, time, memory) = cells(row);
             out += &format!(
                 "| {language_cell} | {task_cell} | {} | {speed_cell} | {time} | {memory} |\n",
                 row.tool
@@ -120,6 +106,46 @@ pub(crate) fn table() -> Result<String> {
     }
     out += "\nMethod, runner and corpora: [docs/performance.md](docs/performance.md).\n";
     Ok(out)
+}
+
+/// The speed, time and memory cells of a row.
+fn cells(row: &Row) -> (String, String, String) {
+    match (&row.sudsy, &row.other) {
+        (Some(s), Some(o)) => (
+            verdict(s.s, o.s),
+            format!("{} / {}", seconds(s.s), seconds(o.s)),
+            format!("{:.0} / {:.0} MB", s.mb, o.mb),
+        ),
+        _ => (
+            format!(
+                "not measured: {}",
+                row.not_measured.as_deref().unwrap_or("no result")
+            ),
+            "-".into(),
+            "-".into(),
+        ),
+    }
+}
+
+/// The rows of the given `bench/speed.json` language names as `[language, task, tool, speed, time,
+/// memory]`, for the language pages of the site.
+pub(crate) fn rows_of(names: &[String]) -> Result<Vec<[String; 6]>> {
+    let speed = load()?;
+    Ok(speed
+        .rows
+        .iter()
+        .filter(|r| names.contains(&r.language))
+        .map(|r| {
+            let (s, t, m) = cells(r);
+            [r.language.clone(), r.task.clone(), r.tool.clone(), s, t, m]
+        })
+        .collect())
+}
+
+/// Every language name of `bench/speed.json`.
+pub(crate) fn language_names() -> Result<Vec<String>> {
+    let speed = load()?;
+    Ok(languages(&speed).into_iter().map(String::from).collect())
 }
 
 /// What Sudsy is against the tool: `same` within 10%, else `N× faster` or `N× slower`.

@@ -2,7 +2,7 @@
 
 **One formatter and linter for your whole repo.** One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest, measured file by file against each of them.
 
-Ready for JavaScript/TypeScript, Python, Protobuf, Terraform, GraphQL and TOML; 20 more languages are partial or early. Early release (v0.0.x): config may change before 1.0.
+<!-- generated:support-headline -->Ready for 7 languages, early support for 20 more.<!-- /generated --> <!-- generated:support-ready -->Ready: Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> Early release (v0.0.x): config may change before 1.0.
 
 ## Try it
 

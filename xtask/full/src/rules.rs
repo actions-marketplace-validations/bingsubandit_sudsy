@@ -2,7 +2,7 @@
 //! the VS Code extension read) and the rule table of `docs/ai/rules/builtin.md` are both made from it.
 
 use core_rules::{Check, Extensions, Opt, RuleMeta};
-use languages::catalog::{self, Upstream};
+use languages::catalog::{self, Catalog, Upstream};
 use provider_api::LanguageProvider;
 use provider_api::fixtures::{self, Example};
 use serde_json::{Value, json};
@@ -20,7 +20,7 @@ pub struct RuleDoc {
 }
 
 /// Every rule, shared rules first, then by language in provider order, then by id.
-pub fn collect(providers: &[Box<dyn LanguageProvider>]) -> Vec<RuleDoc> {
+pub fn collect(providers: &[Box<dyn LanguageProvider>], catalogs: &[Catalog]) -> Vec<RuleDoc> {
     let rules = languages::rules(providers, &Extensions::default());
     let mut presets = languages::rule_presets(providers);
     let mut examples: Vec<(String, Example)> = Vec::new();
@@ -58,7 +58,7 @@ pub fn collect(providers: &[Box<dyn LanguageProvider>]) -> Vec<RuleDoc> {
     }
     for doc in &mut docs {
         let languages: Vec<&str> = doc.languages.iter().map(String::as_str).collect();
-        doc.upstream = catalog::upstream(doc.meta.id, &languages);
+        doc.upstream = catalog::upstream_in(catalogs, doc.meta.id, &languages);
     }
     let order: Vec<&str> = std::iter::once("all")
         .chain(providers.iter().map(|p| p.language()))

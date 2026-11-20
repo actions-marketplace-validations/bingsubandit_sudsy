@@ -8,6 +8,7 @@ when it has no SHA256SUMS they are fetched with `gh release download <tag>`. Not
 """
 import base64
 import hashlib
+import json
 import re
 import shutil
 import subprocess
@@ -27,7 +28,18 @@ WHEEL_TAG = {
     "win32-x64": "win_amd64", "win32-arm64": "win_arm64",
 }
 NPM_SCOPE = "@sudsylint"
-DESC = "One formatter and linter for JS/TS, Python, Protobuf, Terraform and more"
+# Description and keywords: generated with the README support table (`cargo xtask codegen`).
+META = json.loads((PKG / "meta.json").read_text())
+DESC = META["description"]
+# PyPI trove classifiers (the license is the `License-Expression`, which excludes a license classifier).
+CLASSIFIERS = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Code Generators",
+]
 
 
 def archive_name(version, platform):
@@ -50,7 +62,9 @@ def unpack(assets, version, platform, into):
 
 def render(template, version, urls, hashes):
     text = (PKG / template).read_text()
-    text = text.replace("@VERSION@", version)
+    text = text.replace("@VERSION@", version).replace("@DESCRIPTION@", DESC)
+    text = text.replace("@HEADLINE@", META["headline"]).replace("@READY@", META["ready"])
+    text = text.replace("@TAGS@", "\n".join(f"- {k}" for k in META["keywords"][:16]))  # winget allows 16
     text = re.sub(r"@URL ([\w-]+)@", lambda m: urls[m[1]], text)
     return re.sub(r"@SHA ([\w-]+)@", lambda m: hashes[m[1]], text)
 
@@ -69,7 +83,7 @@ def npm(version, assets, out, tmp, **_):
         (d / "CHANGELOG.md").unlink()
         write_json(d / "package.json", {
             "name": f"{NPM_SCOPE}/cli-{p}", "version": version, "description": f"{DESC} (binary for {p})",
-            "license": "MIT", "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "os": [os_], "cpu": [cpu],
+            "license": "MIT", "keywords": META["keywords"], "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "os": [os_], "cpu": [cpu],
             "files": [exe(p), "csharp-worker", "LICENSE"],
             "publishConfig": {"access": "public"},
         })
@@ -80,7 +94,7 @@ def npm(version, assets, out, tmp, **_):
     shutil.copy(ROOT / "LICENSE", d / "LICENSE")
     shutil.copy(PKG / "README.md", d / "README.md")
     write_json(d / "package.json", {
-        "name": f"{NPM_SCOPE}/sudsy", "version": version, "description": DESC, "license": "MIT",
+        "name": f"{NPM_SCOPE}/sudsy", "version": version, "description": DESC, "license": "MIT", "keywords": META["keywords"],
         "repository": {"type": "git", "url": f"git+https://github.com/{REPO}.git"}, "homepage": f"https://github.com/{REPO}",
         "bin": {"sudsy": "bin/sudsy.js"}, "files": ["bin", "LICENSE", "README.md"],
         "optionalDependencies": {f"{NPM_SCOPE}/cli-{p}": version for p in PLATFORMS},
@@ -88,7 +102,6 @@ def npm(version, assets, out, tmp, **_):
 
 
 def write_json(path, obj):
-    import json
     write_text(path, json.dumps(obj, indent=2) + "\n")
 
 
@@ -110,9 +123,11 @@ def pypi(version, assets, out, tmp, **_):
                     files[f"sudsy/bin/{rel}"] = (f.read_bytes(), 0o755 if f.stat().st_mode & 0o111 or rel == "sudsy.exe" else 0o644)
         files["sudsy/__init__.py"] = ((PKG / "pypi/__init__.py").read_bytes(), 0o644)
         tag = f"py3-none-{WHEEL_TAG[p]}"
+        classifiers = "".join(f"Classifier: {c}\n" for c in CLASSIFIERS)
         files[f"{dist}/METADATA"] = (
             f"Metadata-Version: 2.4\nName: sudsy\nVersion: {version}\nSummary: {DESC}\n"
-            f"License-Expression: MIT\nLicense-File: LICENSE\nProject-URL: Homepage, https://github.com/{REPO}\n"
+            f"License-Expression: MIT\nLicense-File: LICENSE\nKeywords: {','.join(META['keywords'])}\n"
+            f"{classifiers}Project-URL: Homepage, https://github.com/{REPO}\n"
             f"Requires-Python: >=3.8\nDescription-Content-Type: text/markdown\n\n{(PKG / 'README.md').read_text()}".encode(), 0o644)
         files[f"{dist}/WHEEL"] = (f"Wheel-Version: 1.0\nGenerator: scripts/package-channels.py\nRoot-Is-Purelib: false\nTag: {tag}\n".encode(), 0o644)
         files[f"{dist}/entry_points.txt"] = (b"[console_scripts]\nsudsy = sudsy:main\n", 0o644)
@@ -146,7 +161,7 @@ def scoop(version, assets, out, tag, **_):
 
 
 def winget(version, assets, out, tag, **_):
-    manifests([(f"winget/Coox.Sudsy{s}.yaml", f"manifests/c/Coox/Sudsy/{version}/Coox.Sudsy{s}.yaml")
+    manifests([(f"winget/Sudsy.Sudsy{s}.yaml", f"manifests/s/Sudsy/Sudsy/{version}/Sudsy.Sudsy{s}.yaml")
                for s in ("", ".installer", ".locale.en-US")], out, version, assets, tag,
               ["win32-x64", "win32-arm64"], str.upper)  # winget wants uppercase hashes
 

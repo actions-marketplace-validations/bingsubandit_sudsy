@@ -3,7 +3,7 @@
   "displayName": "Sudsy",
   "description": "Formatter and linter for source and data files.",
   "version": "0.0.2",
-  "publisher": "Coox",
+  "publisher": "sudsy",
   "icon": "icon.png",
   "license": "MIT",
   "private": true,

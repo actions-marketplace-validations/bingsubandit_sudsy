@@ -14,7 +14,7 @@ rm -rf "$out/assets"
 # binary of this machine.
 python3 -m json.tool "$out/packages/scoop/bucket/sudsy.json" > /dev/null
 python3 -m json.tool "$out/packages/npm/sudsy/package.json" > /dev/null
-! grep -rIl '@VERSION@\|@URL \|@SHA ' "$out/packages"
+! grep -rIl '@VERSION@\|@URL \|@SHA \|@DESCRIPTION@\|@HEADLINE@\|@READY@\|@TAGS@' "$out/packages"
 python3 -I - "$out/packages/pypi" <<'EOF'
 import sys, zipfile, pathlib
 wheels = sorted(pathlib.Path(sys.argv[1]).glob("*.whl"))

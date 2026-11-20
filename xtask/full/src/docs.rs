@@ -4,6 +4,7 @@
 
 use anyhow::{Context, Result, bail};
 use core_config::{OptionKind, OptionSchema, OptionValue};
+use languages::catalog::Catalog;
 use provider_api::LanguageProvider;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -12,7 +13,8 @@ const END: &str = "<!-- /generated -->";
 
 /// Every doc with generated blocks as (path relative to the repo root, contents).
 pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf, String)>> {
-    let rule_docs = crate::rules::collect(providers);
+    let catalogs = catalogs()?;
+    let rule_docs = crate::rules::collect(providers, &catalogs);
     let schemas = languages::schemas(providers);
     let mut out = vec![
         splice(
@@ -78,6 +80,13 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         include_str!("../support.yaml"),
         &rule_count,
     )?;
+    out.extend(crate::discover::generate(
+        providers,
+        &catalogs,
+        include_str!("../support.yaml"),
+        &support,
+        &rule_count,
+    )?);
     out.push(splice(
         "README.md",
         &[
@@ -105,7 +114,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     )?);
     out.push(splice(
         "docs/ai/parity/README.md",
-        &[("counts", catalog_counts()?)],
+        &[("counts", catalog_counts(catalogs)?)],
     )?);
     out.push(splice(
         "docs/ai/development/parity.md",
@@ -120,8 +129,8 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     Ok(out)
 }
 
-/// One row per catalog (`docs/ai/parity/*.yaml`): the entries by coverage.
-fn catalog_counts() -> Result<String> {
+/// Every catalog (`docs/ai/parity/*.yaml`) by tool name.
+pub(crate) fn catalogs() -> Result<Vec<Catalog>> {
     let mut catalogs = Vec::new();
     for file in std::fs::read_dir(xtask::repo_root().join("docs/ai/parity"))? {
         let path = file?.path();
@@ -134,6 +143,11 @@ fn catalog_counts() -> Result<String> {
         }
     }
     catalogs.sort_by(|a, b| a.tool.cmp(&b.tool));
+    Ok(catalogs)
+}
+
+/// One row per catalog: the entries by coverage.
+fn catalog_counts(catalogs: Vec<Catalog>) -> Result<String> {
     let shares = coverage_shares()?;
     let mut out = String::from(
         "| Tool | Coverage share | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
@@ -169,7 +183,7 @@ fn catalog_counts() -> Result<String> {
 /// The `coverage` ratchet (share of the tool's default-set findings on its corpus that Sudsy also
 /// reports, `scripts/parity.sh coverage <tool>`) and the `target` ratchet (the same share on the
 /// target number of docs/ai/design/parity-target.md) of each lint tool, by catalog name.
-fn coverage_shares() -> Result<BTreeMap<String, (f64, Option<f64>)>> {
+pub(crate) fn coverage_shares() -> Result<BTreeMap<String, (f64, Option<f64>)>> {
     #[derive(serde::Deserialize)]
     struct Ratchets {
         coverage: Option<f64>,

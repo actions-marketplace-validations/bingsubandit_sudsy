@@ -15,8 +15,8 @@ Enable format on save per language, and fix on save:
 ```jsonc
 // .vscode/settings.json
 {
-  "[python]": { "editor.defaultFormatter": "Coox.sudsy" },
-  "[javascript]": { "editor.defaultFormatter": "Coox.sudsy" },
+  "[python]": { "editor.defaultFormatter": "sudsy.sudsy" },
+  "[javascript]": { "editor.defaultFormatter": "sudsy.sudsy" },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": { "source.fixAll.sudsy": "explicit" }
 }

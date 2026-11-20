@@ -166,8 +166,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add manifests
-          git commit -m "New version: Coox.Sudsy version $version"
+          git commit -m "New version: Sudsy.Sudsy version $version"
           git push origin "sudsy-$version"
           gh pr create --repo microsoft/winget-pkgs --head "$owner:sudsy-$version" \
-            --title "New version: Coox.Sudsy version $version" \
+            --title "New version: Sudsy.Sudsy version $version" \
             --body "Sudsy $version, rendered from the release assets by scripts/package-channels.py."

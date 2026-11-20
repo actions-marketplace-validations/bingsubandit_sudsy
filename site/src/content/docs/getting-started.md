@@ -6,7 +6,7 @@ description: Install Sudsy, format and lint a project, and use it in VS Code.
 ## Install
 
 - **CLI**: download the archive for your platform (Linux, Windows or macOS; x64 or arm64) from the GitHub releases page and put the `sudsy` executable on your `PATH`. Keep the `csharp-worker/` directory beside it.
-- **VS Code**: install the extension `Coox.sudsy`. It bundles the CLI and the worker.
+- **VS Code**: install the extension `sudsy.sudsy`. It bundles the CLI and the worker.
 - **C#** needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Every other language works without it.
 
 ## Format and lint
@@ -38,7 +38,7 @@ The extension gives diagnostics, quick fixes, fix all and formatting. Format on 
 
 ```json
 {
-  "[csharp]": { "editor.defaultFormatter": "Coox.sudsy", "editor.formatOnSave": true },
+  "[csharp]": { "editor.defaultFormatter": "sudsy.sudsy", "editor.formatOnSave": true },
   "editor.codeActionsOnSave": { "source.fixAll.sudsy": "explicit" }
 }
 ```

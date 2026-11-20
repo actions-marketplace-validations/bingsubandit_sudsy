@@ -8,6 +8,7 @@ Sudsy is a formatter and linter for 26 languages in one binary. Start with the [
 | [Configuration](configuration.md) | Write `sudsy.yaml`, pick presets, suppress rules, use the CLI. |
 | [Rules](rules.md) | List and explain rules. Write pattern rules and Wasm plugins. |
 | [Performance](performance.md) | See measured speed, memory and binary size against other tools. |
+| [Website](https://bingsubandit.github.io/sudsy/) | Find one page per rule, per language and per compared tool, generated from the same data. |
 | [Editors and CI](editors-and-ci.md) | Set up VS Code, other editors, GitHub Actions and SARIF. |
 
 ## Quick start

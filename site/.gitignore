@@ -2,4 +2,6 @@ dist/
 .astro/
 src/content/docs/generated/
 public/favicon.svg
+public/og.png
+public/robots.txt
 public/rules/

@@ -51,6 +51,11 @@
       ],
       "upstream": [
         {
+          "id": "comment-spacing",
+          "partial": true,
+          "tool": "ktlint"
+        },
+        {
           "id": "SA1005",
           "partial": false,
           "tool": "StyleCop"
@@ -130,7 +135,13 @@
         "java/google",
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "NeedBraces",
+          "partial": true,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "style",
@@ -186,7 +197,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD003",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -302,6 +319,26 @@
       ],
       "upstream": [
         {
+          "id": "LineLength",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "max-line-length",
+          "partial": true,
+          "tool": "ktlint"
+        },
+        {
+          "id": "MD013",
+          "partial": true,
+          "tool": "markdownlint"
+        },
+        {
+          "id": "PSAvoidLongLines",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        },
+        {
           "id": "RCS0056",
           "partial": true,
           "tool": "Roslynator"
@@ -365,7 +402,18 @@
         "java/google",
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ModifierOrder",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "modifier-order",
+          "partial": true,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -438,6 +486,21 @@
           "tool": "eslint-plugin-jsonc"
         },
         {
+          "id": "no-duplicate-attributes",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        },
+        {
+          "id": "no-duplicate-fields",
+          "partial": false,
+          "tool": "graphql-eslint"
+        },
+        {
+          "id": "unique-enum-value-names",
+          "partial": false,
+          "tool": "graphql-eslint"
+        },
+        {
           "id": "no-duplicate-attrs",
           "partial": false,
           "tool": "html-eslint"
@@ -451,6 +514,21 @@
           "id": "attr-no-duplication",
           "partial": false,
           "tool": "htmlhint"
+        },
+        {
+          "id": "F601",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "F602",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "terraform_map_duplicate_keys",
+          "partial": false,
+          "tool": "tflint"
         },
         {
           "id": "key-duplicates",
@@ -808,6 +886,11 @@
           "tool": "eslint-plugin-jsonc"
         },
         {
+          "id": "alphabetize",
+          "partial": true,
+          "tool": "graphql-eslint"
+        },
+        {
           "id": "reorder_keys",
           "partial": true,
           "tool": "taplo"
@@ -855,7 +938,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/CopDirectiveSyntax",
+          "partial": true,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -5301,7 +5390,18 @@
         }
       ],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SimplifyBooleanExpression",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "E712",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -5360,6 +5460,11 @@
           "id": "no-cond-assign",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "Lint/AssignmentInCondition",
+          "partial": true,
+          "tool": "rubocop"
         }
       ]
     },
@@ -5636,9 +5741,29 @@
       ],
       "upstream": [
         {
+          "id": "EmptyCatchBlock",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
           "id": "no-empty",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "PSAvoidUsingEmptyCatchBlock",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "Lint/SuppressedException",
+          "partial": false,
+          "tool": "rubocop"
+        },
+        {
+          "id": "S110",
+          "partial": false,
+          "tool": "ruff"
         }
       ]
     },
@@ -5735,6 +5860,11 @@
           "id": "no-self-assign",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "Lint/SelfAssignment",
+          "partial": true,
+          "tool": "rubocop"
         }
       ]
     },
@@ -5872,7 +6002,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3019",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -5900,7 +6036,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3018",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "performance",
@@ -5958,7 +6100,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3015",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -5996,7 +6144,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3008",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6024,7 +6178,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3014",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6052,7 +6212,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3023",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6085,7 +6251,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3022",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6113,7 +6285,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3020",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6141,7 +6319,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3021",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "performance",
@@ -6179,7 +6363,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3040",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6207,7 +6397,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3038",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6235,7 +6431,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3024",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6263,7 +6465,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3011",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6291,7 +6499,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3061",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6319,7 +6533,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3028",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6352,7 +6572,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3062",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6385,7 +6611,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3025",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6418,7 +6650,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3002",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6446,7 +6684,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3027",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6474,7 +6718,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3067",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6502,7 +6752,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3029",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6530,7 +6786,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3001",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6558,7 +6820,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3007",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -6586,7 +6854,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL4000",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6614,7 +6888,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3043",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -6642,7 +6922,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3065",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6670,7 +6956,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3063",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6713,7 +7005,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3064",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6741,7 +7039,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL4005",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -6789,7 +7093,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3004",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6817,7 +7127,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3016",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6845,7 +7161,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3066",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6878,7 +7200,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3013",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6916,7 +7244,18 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3033",
+          "partial": true,
+          "tool": "hadolint"
+        },
+        {
+          "id": "DL3041",
+          "partial": true,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6944,7 +7283,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL4003",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -6972,7 +7317,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL4004",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -7000,7 +7351,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3012",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -7028,7 +7385,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3006",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -7056,7 +7419,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3003",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -7089,7 +7458,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3047",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -7117,7 +7492,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3000",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "performance",
@@ -7145,7 +7526,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3032",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -7173,7 +7560,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3030",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "performance",
@@ -7206,7 +7599,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3036",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -7234,7 +7633,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3035",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -7267,7 +7672,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3037",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -7295,7 +7706,13 @@
       "presets": [
         "dockerfile/hadolint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "DL3034",
+          "partial": false,
+          "tool": "hadolint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -7770,7 +8187,58 @@
       "presets": [
         "java/google"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PackageName",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "TypeName",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "MethodName",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "MemberName",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "ConstantName",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "ParameterName",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "CatchParameterName",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "LocalVariableName",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "naming-convention",
+          "partial": true,
+          "tool": "graphql-eslint"
+        },
+        {
+          "id": "terraform_naming_convention",
+          "partial": true,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -7806,7 +8274,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-anonymous-operations",
+          "partial": false,
+          "tool": "graphql-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -7837,7 +8311,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-typename-prefix",
+          "partial": false,
+          "tool": "graphql-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -7870,7 +8350,13 @@
         }
       ],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "selection-set-depth",
+          "partial": true,
+          "tool": "graphql-eslint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -7896,7 +8382,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "unique-fragment-name",
+          "partial": true,
+          "tool": "graphql-eslint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -7922,7 +8414,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "unique-operation-name",
+          "partial": true,
+          "tool": "graphql-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -7953,7 +8451,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_comment_syntax",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -7991,7 +8495,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_deprecated_index",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -8046,7 +8556,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_deprecated_interpolation",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -8072,7 +8588,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_documented_outputs",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -8098,7 +8620,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_documented_variables",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8141,7 +8669,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_empty_list_equality",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -8169,7 +8703,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_required_providers",
+          "partial": true,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -8197,7 +8737,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_required_version",
+          "partial": true,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -8225,7 +8771,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_typed_variables",
+          "partial": false,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8263,7 +8815,13 @@
       "presets": [
         "hcl/tflint-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "terraform_unused_declarations",
+          "partial": true,
+          "tool": "tflint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8332,7 +8890,13 @@
       "presets": [
         "java/google"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ArrayTypeStyle",
+          "partial": false,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8358,7 +8922,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "EmptyStatement",
+          "partial": true,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -8384,7 +8954,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "EqualsHashCode",
+          "partial": true,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8410,7 +8986,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MissingSwitchDefault",
+          "partial": false,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8478,7 +9060,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ParameterAssignment",
+          "partial": false,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -8509,7 +9097,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "StringLiteralEquality",
+          "partial": false,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -8545,7 +9139,23 @@
         "kotlin/ktlint",
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UnusedImports",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "no-unused-imports",
+          "partial": false,
+          "tool": "ktlint"
+        },
+        {
+          "id": "F401",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -8589,7 +9199,18 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UnusedLocalVariable",
+          "partial": false,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "Lint/UselessAssignment",
+          "partial": true,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -8615,7 +9236,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UpperEll",
+          "partial": false,
+          "tool": "checkstyle"
+        }
+      ]
     },
     {
       "category": "style",
@@ -9187,6 +9814,11 @@
           "id": "no-debugger",
           "partial": false,
           "tool": "eslint"
+        },
+        {
+          "id": "T100",
+          "partial": false,
+          "tool": "ruff"
         }
       ]
     },
@@ -10802,6 +11434,11 @@
           "tool": "eslint"
         },
         {
+          "id": "B018",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
           "id": "no-unused-expressions",
           "partial": true,
           "tool": "typescript-eslint"
@@ -11129,6 +11766,11 @@
           "tool": "eslint"
         },
         {
+          "id": "F811",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
           "id": "no-redeclare",
           "partial": true,
           "tool": "typescript-eslint"
@@ -11271,6 +11913,16 @@
           "tool": "eslint"
         },
         {
+          "id": "F402",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "PLR1704",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
           "id": "no-shadow",
           "partial": true,
           "tool": "typescript-eslint"
@@ -11374,6 +12026,16 @@
           "id": "no-undef",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "variable.undefined",
+          "partial": true,
+          "tool": "phpstan"
+        },
+        {
+          "id": "F821",
+          "partial": false,
+          "tool": "ruff"
         }
       ]
     },
@@ -11516,6 +12178,11 @@
           "tool": "eslint"
         },
         {
+          "id": "F823",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
           "id": "no-use-before-define",
           "partial": true,
           "tool": "typescript-eslint"
@@ -11655,7 +12322,13 @@
       "presets": [
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "class-naming",
+          "partial": true,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11688,7 +12361,13 @@
       "presets": [
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "enum-entry-name-case",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11726,7 +12405,13 @@
       "presets": [
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty-class-body",
+          "partial": true,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -11754,7 +12439,13 @@
       "presets": [
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-empty-file",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -11792,7 +12483,13 @@
       "presets": [
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unit-return",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -11820,7 +12517,13 @@
       "presets": [
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "package-name",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -11860,7 +12563,13 @@
       "presets": [
         "makefile/checkmake"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "maxbodylength",
+          "partial": true,
+          "tool": "checkmake"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11899,7 +12608,13 @@
       "presets": [
         "makefile/checkmake"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "minphony",
+          "partial": false,
+          "tool": "checkmake"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11942,7 +12657,13 @@
       "presets": [
         "makefile/checkmake"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "phonydeclared",
+          "partial": false,
+          "tool": "checkmake"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -11985,7 +12706,13 @@
       "presets": [
         "makefile/checkmake"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "timestampexpanded",
+          "partial": false,
+          "tool": "checkmake"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12025,7 +12752,13 @@
       "presets": [
         "makefile/checkmake"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "uniquetargets",
+          "partial": false,
+          "tool": "checkmake"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12053,7 +12786,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD014",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12086,7 +12825,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD059",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12114,7 +12859,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD040",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12147,7 +12898,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD001",
+          "partial": false,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12175,7 +12932,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD045",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12203,7 +12966,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD034",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12236,7 +13005,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD024",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12269,7 +13044,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD036",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12302,7 +13083,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD042",
+          "partial": false,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12340,7 +13127,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD033",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12373,7 +13166,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD018",
+          "partial": false,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12401,7 +13200,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD011",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12434,7 +13239,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD038",
+          "partial": false,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12467,7 +13278,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD039",
+          "partial": false,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12505,7 +13322,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD026",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12538,7 +13361,13 @@
       "presets": [
         "markdown/markdownlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MD025",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12571,7 +13400,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSUseApprovedVerbs",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12614,7 +13449,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidAssignmentToAutomaticVariable",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12677,7 +13518,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidUsingCmdletAliases",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12705,7 +13552,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidDefaultValueSwitchParameter",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12750,7 +13603,18 @@
         "powershell/psscriptanalyzer",
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidUsingInvokeExpression",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "S102",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12788,7 +13652,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidGlobalVars",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -12819,7 +13689,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSMisleadingBacktick",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12857,7 +13733,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidUsingPlainTextForPassword",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12895,7 +13777,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidUsingConvertToSecureStringWithPlainText",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "style",
@@ -12955,7 +13843,23 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidUsingWriteHost",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "T201",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "T203",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -12983,7 +13887,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSAvoidUsingWMICmdlet",
+          "partial": false,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -13021,7 +13931,13 @@
       "presets": [
         "powershell/psscriptanalyzer"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PSPossibleIncorrectComparisonWithNull",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -13056,7 +13972,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ENUM_FIRST_VALUE_ZERO",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -13084,7 +14006,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ENUM_NO_ALLOW_ALIAS",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13112,7 +14040,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ENUM_PASCAL_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13140,7 +14074,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ENUM_VALUE_PREFIX",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13168,7 +14108,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ENUM_VALUE_UPPER_SNAKE_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13201,7 +14147,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ENUM_ZERO_VALUE_SUFFIX",
+          "partial": true,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13239,7 +14191,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "FIELD_LOWER_SNAKE_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -13267,7 +14225,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "FIELD_NOT_REQUIRED",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13295,7 +14259,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "FILE_LOWER_SNAKE_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -13323,7 +14293,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "IMPORT_NO_PUBLIC",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13351,7 +14327,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "MESSAGE_PASCAL_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13379,7 +14361,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ONEOF_LOWER_SNAKE_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13407,7 +14395,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PACKAGE_DEFINED",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13435,7 +14429,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PACKAGE_LOWER_SNAKE_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13463,7 +14463,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PACKAGE_VERSION_SUFFIX",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13491,7 +14497,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RPC_PASCAL_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13519,7 +14531,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RPC_REQUEST_STANDARD_NAME",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13547,7 +14565,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RPC_RESPONSE_STANDARD_NAME",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13575,7 +14599,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SERVICE_PASCAL_CASE",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13603,7 +14633,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SERVICE_SUFFIX",
+          "partial": true,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13631,7 +14667,13 @@
       "presets": [
         "protobuf/buf-standard"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SYNTAX_SPECIFIED",
+          "partial": false,
+          "tool": "buf"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13657,7 +14699,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E742",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13683,7 +14731,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E743",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13724,7 +14778,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E741",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13752,7 +14812,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PYI032",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -13783,7 +14849,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B011",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -13811,7 +14883,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F631",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -13839,7 +14917,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PLE0704",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -13867,7 +14951,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F701",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -13895,7 +14985,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B019",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13923,7 +15019,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM102",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -13951,7 +15053,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F702",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -13979,7 +15087,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PYI019",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14007,7 +15121,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP017",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14035,7 +15155,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F707",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14063,7 +15189,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP043",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14101,7 +15233,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP035",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14129,7 +15267,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP006",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14157,7 +15301,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM208",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14185,7 +15335,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RET501",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14213,7 +15369,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP032",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -14246,7 +15408,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F541",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14272,7 +15440,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F722",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -14315,7 +15489,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B008",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14343,7 +15523,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F407",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14371,7 +15557,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP046",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14399,7 +15591,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP047",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14427,7 +15625,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B009",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -14455,7 +15659,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B004",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14483,7 +15693,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM211",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14511,7 +15727,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM210",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14537,7 +15759,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM212",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14570,7 +15798,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F634",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14598,7 +15832,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM114",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -14626,7 +15866,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ISC004",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14669,7 +15915,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM118",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -14737,7 +15989,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "W605",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14765,7 +16023,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F633",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14839,7 +16103,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F632",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14870,7 +16140,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E731",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14898,7 +16174,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F404",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14934,7 +16216,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E402",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -14965,7 +16253,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E401",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -14993,7 +16287,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F622",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15026,7 +16326,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PIE810",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15052,7 +16358,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E701",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15078,7 +16390,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E702",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15131,7 +16449,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B006",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15159,7 +16483,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RUF012",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15187,7 +16517,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM103",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15215,7 +16551,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM201",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15243,7 +16585,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM202",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15271,7 +16619,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM117",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15320,7 +16674,23 @@
         "python/ruff",
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/RescueException",
+          "partial": false,
+          "tool": "rubocop"
+        },
+        {
+          "id": "E722",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "BLE001",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15357,7 +16727,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "TRY002",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15398,7 +16774,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E711",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15429,7 +16811,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E713",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15455,7 +16843,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E714",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15483,7 +16877,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SIM115",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15511,7 +16911,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP045",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15559,7 +16965,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP024",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15587,7 +16999,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP036",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15615,7 +17033,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F502",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15648,7 +17072,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F503",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15676,7 +17106,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F504",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15704,7 +17140,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F501",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15732,7 +17174,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F505",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15760,7 +17208,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F506",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15798,7 +17252,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F507",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15826,7 +17286,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F508",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15854,7 +17320,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F509",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15882,7 +17354,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP031",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -15910,7 +17388,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP037",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -15943,7 +17427,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F901",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -15979,7 +17469,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B904",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16007,7 +17503,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B013",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16035,7 +17537,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "FURB167",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16068,7 +17576,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F706",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16096,7 +17610,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B010",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16124,7 +17644,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "FLY002",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16157,7 +17683,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F522",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16185,7 +17717,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F523",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16228,7 +17766,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F521",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16261,7 +17805,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F524",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16289,7 +17839,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F525",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -16317,7 +17873,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PLW1510",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16345,7 +17907,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP040",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16373,7 +17941,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "TRY004",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -16409,7 +17983,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E721",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16437,7 +18017,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PLC0105",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16465,7 +18051,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F822",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -16501,7 +18093,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F405",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -16529,7 +18127,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F406",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16562,7 +18166,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP025",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16590,7 +18200,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP007",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16633,7 +18249,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "C408",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16676,7 +18298,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PIE790",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16704,7 +18332,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RUF022",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16732,7 +18366,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RUF023",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16800,7 +18440,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "I001",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -16828,7 +18474,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F842",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -16856,7 +18508,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "RUF059",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16884,7 +18542,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "PLC0414",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16917,7 +18581,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "UP004",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16943,7 +18613,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "E703",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -16971,7 +18647,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "TRY201",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -17009,7 +18691,13 @@
       "presets": [
         "python/ruff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "F704",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17035,7 +18723,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "B905",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17063,7 +18757,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/AmbiguousBlockAssociation",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17096,7 +18796,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/BinaryOperatorWithIdenticalOperands",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17129,7 +18835,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/BooleanSymbol",
+          "partial": true,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17157,7 +18869,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/ConstantDefinitionInBlock",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17185,7 +18903,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/EmptyWhen",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17213,7 +18937,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/FloatComparison",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17241,7 +18971,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/HashCompareByIdentity",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -17269,7 +19005,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/IneffectiveAccessModifier",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17297,7 +19039,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/InheritException",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17325,7 +19073,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/InterpolationCheck",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17358,7 +19112,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/LiteralInInterpolation",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17386,7 +19146,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/MissingSuper",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17414,7 +19180,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/MixedRegexpCaptureTypes",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17470,7 +19242,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/ParenthesesAsGroupedExpression",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17498,7 +19276,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/Loop",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17526,7 +19310,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/RaiseException",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17559,7 +19349,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/RedundantStringCoercion",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17587,7 +19383,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/ReturnInVoidContext",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17615,7 +19417,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/StructNewOverride",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "style",
@@ -17643,7 +19451,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/UnderscorePrefixedVariableName",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -17671,7 +19485,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/UnusedBlockArgument",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -17699,7 +19519,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/UnusedMethodArgument",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17737,7 +19563,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/UselessAccessModifier",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17770,7 +19602,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/UselessMethodDefinition",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17798,7 +19636,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "Lint/UselessTimes",
+          "partial": false,
+          "tool": "rubocop"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17826,7 +19670,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2015",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17884,7 +19734,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2164",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17917,7 +19773,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2155",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -17945,7 +19807,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2038",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -17978,7 +19846,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2126",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18006,7 +19880,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2044",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18039,7 +19919,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2045",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18077,7 +19963,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2006",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18110,7 +20002,18 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2196",
+          "partial": false,
+          "tool": "shellcheck"
+        },
+        {
+          "id": "SC2197",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18143,7 +20046,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2010",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18171,7 +20080,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2009",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18204,7 +20119,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2230",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18237,7 +20158,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2059",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -18270,7 +20197,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2068",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18303,7 +20236,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2046",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18336,7 +20275,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2048",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18394,7 +20339,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2086",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18422,7 +20373,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2162",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18450,7 +20407,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2166",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18483,7 +20446,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2181",
+          "partial": true,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18516,7 +20485,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2236",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18544,7 +20519,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2064",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18572,7 +20553,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2002",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18610,7 +20597,13 @@
       "presets": [
         "shell/shellcheck"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "SC2005",
+          "partial": false,
+          "tool": "shellcheck"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18643,7 +20636,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "CV04",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18671,7 +20670,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "AM01",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -18704,7 +20709,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "AL04",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -18732,7 +20743,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ST01",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18765,7 +20782,18 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "AL01",
+          "partial": false,
+          "tool": "sqlfluff"
+        },
+        {
+          "id": "AL02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -18808,7 +20836,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "CV05",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18841,7 +20875,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "CV02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -18869,7 +20909,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "CV08",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "cleanup",
@@ -18897,7 +20943,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "AL09",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18925,7 +20977,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "AM02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -18953,7 +21011,13 @@
       "presets": [
         "sql/sqlfluff"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "ST03",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -19117,7 +21181,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "job-needs/cycle",
+          "partial": false,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -19150,7 +21220,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "deprecated-commands",
+          "partial": false,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -19258,7 +21334,18 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "id/duplicate",
+          "partial": false,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/duplicate-job",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -19384,7 +21471,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "expression/syntax",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -19417,7 +21510,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "id/job",
+          "partial": false,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -19490,7 +21589,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "runner-label/unknown",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -19973,7 +22078,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "expression/untrusted",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -20001,7 +22112,13 @@
       "presets": [
         "github-actions/actionlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "job-needs/unknown",
+          "partial": false,
+          "tool": "actionlint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -20211,6 +22328,16 @@
       ],
       "upstream": [
         {
+          "id": "no-spaces-around-equal-signs-in-attribute",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        },
+        {
+          "id": "no-spaces-around-equal-signs-in-attribute",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        },
+        {
           "id": "attr-delimiter",
           "partial": false,
           "tool": "html-validate"
@@ -20301,6 +22428,16 @@
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
+        {
+          "id": "html-quotes",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        },
+        {
+          "id": "html-quotes",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        },
         {
           "id": "quotes",
           "partial": true,
@@ -20520,7 +22657,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attribute-hyphenation",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -20557,7 +22700,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "attributes-order",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -20586,7 +22735,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "banana-in-box",
+          "partial": false,
+          "tool": "angular-eslint"
+        }
+      ]
     },
     {
       "category": "style",
@@ -21053,7 +23208,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "eqeqeq",
+          "partial": true,
+          "tool": "angular-eslint"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21158,7 +23319,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "html-self-closing",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -21577,7 +23744,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-at-debug-tags",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -21609,7 +23782,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-at-html-tags",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -21676,7 +23855,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-bind-value-on-checkable-inputs",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21708,7 +23893,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-child-content",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -21823,7 +24014,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-functional-template",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21855,7 +24052,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-html-element-is",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21887,7 +24090,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-inline-template",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21919,7 +24128,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-scope-attribute",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21951,7 +24166,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-slot-attribute",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -21983,7 +24204,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-slot-scope-attribute",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22015,7 +24242,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-v-bind-sync",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22047,7 +24280,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-v-is",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22079,7 +24318,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-v-on-native-modifier",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22111,7 +24356,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-deprecated-v-on-number-modifiers",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22148,7 +24399,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-keys",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22185,7 +24442,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-on-directives",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22217,7 +24480,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-style-properties",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22254,7 +24523,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-use-directives",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22286,7 +24561,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-dupe-v-else-if",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -22416,6 +24697,21 @@
         "html/htmlhint"
       ],
       "upstream": [
+        {
+          "id": "button-has-type",
+          "partial": false,
+          "tool": "angular-eslint"
+        },
+        {
+          "id": "button-has-type",
+          "partial": true,
+          "tool": "eslint-plugin-svelte"
+        },
+        {
+          "id": "html-button-has-type",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        },
         {
           "id": "require-button-type",
           "partial": false,
@@ -22558,6 +24854,16 @@
       "upstream": [
         {
           "id": "no-inline-styles",
+          "partial": false,
+          "tool": "angular-eslint"
+        },
+        {
+          "id": "no-inline-styles",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        },
+        {
+          "id": "no-inline-styles",
           "partial": true,
           "tool": "html-eslint"
         },
@@ -22603,7 +24909,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-lone-template",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22718,7 +25030,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-negated-async",
+          "partial": true,
+          "tool": "angular-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -22747,7 +25065,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-nested-style-tag",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -22789,7 +25113,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-object-in-text-mustaches",
+          "partial": true,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -22821,7 +25151,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-raw-special-elements",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "style",
@@ -23030,6 +25366,16 @@
       "upstream": [
         {
           "id": "no-target-blank",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        },
+        {
+          "id": "no-template-target-blank",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        },
+        {
+          "id": "no-target-blank",
           "partial": true,
           "tool": "html-eslint"
         }
@@ -23065,7 +25411,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-textarea-mustache",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23137,7 +25489,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-unknown-style-directive-property",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23166,7 +25524,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-use-v-else-with-v-for",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23198,7 +25562,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-use-v-if-with-v-for",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23230,7 +25600,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-useless-children-snippet",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23277,7 +25653,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-useless-mustaches",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -23309,7 +25691,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-v-for-template-key-on-child",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23341,7 +25729,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-v-html",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -23370,7 +25764,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-v-text",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -23402,7 +25802,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-v-text-v-html-on-component",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -23639,7 +26045,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-component-is",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23686,7 +26098,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-default-prop",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -23718,7 +26136,13 @@
         "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-each-key",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -23794,7 +26218,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-prop-types",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -23873,7 +26303,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "shorthand-attribute",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "style",
@@ -23912,7 +26348,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "shorthand-directive",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "style",
@@ -23941,7 +26383,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "spaced-html-comment",
+          "partial": false,
+          "tool": "eslint-plugin-svelte"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -24147,7 +26595,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "v-bind-style",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24179,7 +26633,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "require-v-for-key",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -24211,7 +26671,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "v-on-event-hyphenation",
+          "partial": true,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -24243,7 +26709,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "v-on-style",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -24275,7 +26747,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "v-slot-style",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -24365,7 +26843,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-bind",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24397,7 +26881,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-cloak",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24434,7 +26924,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-else",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24476,7 +26972,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-else-if",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24508,7 +27010,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-for",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24540,7 +27048,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-html",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24572,7 +27086,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-if",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24604,7 +27124,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-is",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24636,7 +27162,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-memo",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24673,7 +27205,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-model",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24705,7 +27243,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-on",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24737,7 +27281,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-once",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24769,7 +27319,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-pre",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24801,7 +27357,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-show",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24838,7 +27400,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-slot",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "correctness",
@@ -24870,7 +27438,13 @@
         "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "valid-v-text",
+          "partial": false,
+          "tool": "eslint-plugin-vue"
+        }
+      ]
     },
     {
       "category": "style",
@@ -27000,7 +29574,23 @@
         "java/google",
         "kotlin/ktlint"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "AvoidStarImport",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "no-wildcard-imports",
+          "partial": false,
+          "tool": "ktlint"
+        },
+        {
+          "id": "F403",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
     },
     {
       "category": "style",
@@ -27542,6 +30132,11 @@
           "id": "no-unused-vars",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "F841",
+          "partial": false,
+          "tool": "ruff"
         },
         {
           "id": "no-unused-vars",

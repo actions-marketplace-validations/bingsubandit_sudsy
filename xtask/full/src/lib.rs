@@ -6,6 +6,7 @@
 pub mod affected;
 mod beyond;
 mod differences;
+mod discover;
 mod docs;
 pub mod manifests;
 mod queue;

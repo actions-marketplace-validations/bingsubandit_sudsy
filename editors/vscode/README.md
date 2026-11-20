@@ -19,9 +19,9 @@ Choose Sudsy as the formatter of each language in your settings:
 
 ```json
 {
-  "[typescript]": { "editor.defaultFormatter": "Coox.sudsy", "editor.formatOnSave": true },
-  "[python]": { "editor.defaultFormatter": "Coox.sudsy", "editor.formatOnSave": true },
-  "[yaml]": { "editor.defaultFormatter": "Coox.sudsy", "editor.formatOnSave": true },
+  "[typescript]": { "editor.defaultFormatter": "sudsy.sudsy", "editor.formatOnSave": true },
+  "[python]": { "editor.defaultFormatter": "sudsy.sudsy", "editor.formatOnSave": true },
+  "[yaml]": { "editor.defaultFormatter": "sudsy.sudsy", "editor.formatOnSave": true },
   "editor.codeActionsOnSave": { "source.fixAll.sudsy": "explicit" }
 }
 ```

@@ -1,27 +1,20 @@
-PackageIdentifier: Coox.Sudsy
+PackageIdentifier: Sudsy.Sudsy
 PackageVersion: @VERSION@
 PackageLocale: en-US
-Publisher: Coox
+Publisher: Sudsy
 PublisherUrl: https://github.com/bingsubandit
 PackageName: Sudsy
 PackageUrl: https://github.com/bingsubandit/sudsy
 License: MIT
 LicenseUrl: https://github.com/bingsubandit/sudsy/blob/main/LICENSE
-ShortDescription: One formatter and linter for JS/TS, Python, Protobuf, Terraform and more
+ShortDescription: @DESCRIPTION@
 Description: |-
   One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.
-  Ready for JavaScript/TypeScript, Python, Protobuf, Terraform, GraphQL and TOML; 20 more languages are partial or early.
+  @HEADLINE@ @READY@
   Formatting C# needs the .NET 10 runtime.
 Moniker: sudsy
 Tags:
-- formatter
-- linter
-- javascript
-- typescript
-- python
-- terraform
-- protobuf
-- yaml
+@TAGS@
 ReleaseNotesUrl: https://github.com/bingsubandit/sudsy/releases/tag/v@VERSION@
 ManifestType: defaultLocale
 ManifestVersion: 1.6.0
