@@ -18,4 +18,8 @@ options:
       values: ["auto", "off"]
       default: "auto"
       doc: "Format the code of a fenced block with the formatter of the language its info string names (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way."
+  - keep_together_kinds:
+      kind: "words"
+      default: ["LinkDef", "Html"]
+      doc: "Block kinds of which two in a row with no blank line between them in the source stay without one."
 presets: [prettier-compat, markdownlint]

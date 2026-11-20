@@ -40,6 +40,7 @@ impl NodeFormatter for MarkdownFormatter {
         let r = Render {
             src: &src,
             tab: cx.options.int(shared::INDENT_SIZE).max(1) as usize,
+            together: core_format::adjacent::kinds(cx),
         };
         // Line breaks are the printer's: \r stays out of the text.
         let as_written = src.replace('\r', "");
@@ -74,6 +75,8 @@ impl NodeFormatter for MarkdownFormatter {
 struct Render<'a> {
     src: &'a str,
     tab: usize,
+    /// Block kinds that stay together when the source has no blank line between them.
+    together: Vec<SyntaxKind>,
 }
 
 fn is_trivia(kind: SyntaxKind) -> bool {

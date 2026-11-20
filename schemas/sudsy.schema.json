@@ -10368,6 +10368,17 @@
               "maximum": 16,
               "minimum": 1,
               "type": "integer"
+            },
+            "keep_together_kinds": {
+              "default": [
+                "LinkDef",
+                "Html"
+              ],
+              "description": "Block kinds of which two in a row with no blank line between them in the source stay without one.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           "type": "object"
@@ -13683,6 +13694,17 @@
                     "maximum": 16,
                     "minimum": 1,
                     "type": "integer"
+                  },
+                  "keep_together_kinds": {
+                    "default": [
+                      "LinkDef",
+                      "Html"
+                    ],
+                    "description": "Block kinds of which two in a row with no blank line between them in the source stay without one.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   }
                 },
                 "type": "object"

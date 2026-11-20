@@ -10,6 +10,7 @@
 //!
 //! concept: none (glue: crate root and format entry)
 
+pub mod adjacent;
 mod align;
 pub mod blank;
 pub mod calls;
@@ -159,7 +160,11 @@ pub fn format_tree(root: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<String, Form
         comments::align_marked_gaps(
             &mut printed,
             &mut keep,
-            print_options(cx.options).line_width,
+            if cx.comment_style.align_within_width {
+                print_options(cx.options).line_width
+            } else {
+                usize::MAX
+            },
         );
     }
     // A document of ordinary depth drops the usual way; only a pathological one needs this.

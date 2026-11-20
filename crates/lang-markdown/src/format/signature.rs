@@ -8,7 +8,12 @@ use super::*;
 pub(super) fn signature(tree: &SyntaxNode) -> Vec<String> {
     let src = tree.text().to_string();
     let mut out = Vec::new();
-    Render { src: &src, tab: 2 }.sig(&SyntaxElement::Node(tree.clone()), &mut out);
+    Render {
+        src: &src,
+        tab: 2,
+        together: Vec::new(),
+    }
+    .sig(&SyntaxElement::Node(tree.clone()), &mut out);
     out
 }
 
