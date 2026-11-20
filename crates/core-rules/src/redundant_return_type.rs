@@ -39,7 +39,10 @@ rule! {
         _own: &crate::options::RuleOptions,
         format: &core_config::ResolvedOptions,
     ) -> bool {
-        has_typed(text, &format.strings("redundant_return_types"))
+        has_typed(
+            text,
+            format.strings(core_config::opt::REDUNDANT_RETURN_TYPES),
+        )
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
@@ -71,7 +74,7 @@ rule! {
             };
             if colon.text() != ":"
                 || next.as_node() != Some(&body)
-                || !options.list_has("redundant_return_types", ty.text().to_string().trim())
+                || !options.list_has(core_config::opt::REDUNDANT_RETURN_TYPES, ty.text().to_string().trim())
             {
                 continue;
             }
@@ -106,9 +109,9 @@ rule! {
 
 /// Does the text have one of the `words` between a colon and an opening brace (no such type: no
 /// walk of the functions)?
-fn has_typed(text: &str, words: &[String]) -> bool {
-    words.iter().any(|w| {
-        text.match_indices(w.as_str()).any(|(at, _)| {
+fn has_typed<'a>(text: &str, mut words: impl Iterator<Item = &'a str>) -> bool {
+    words.any(|w| {
+        text.match_indices(w).any(|(at, _)| {
             text[at + w.len()..].trim_start().starts_with('{')
                 && text[..at].trim_end_matches([' ', '\t']).ends_with(':')
         })

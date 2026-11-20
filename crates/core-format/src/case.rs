@@ -43,7 +43,7 @@ fn policy_of(name: &str) -> Option<Policy> {
 struct Row {
     kinds: Vec<SyntaxKind>,
     /// The policy, or the option that holds it.
-    policy: Result<Policy, String>,
+    policy: Result<Policy, core_config::OptId>,
     /// The only words the row applies to, lowercase and sorted, one buffer with the ranges of its
     /// words (no `String` per word); no ranges: all words.
     words: Words,
@@ -172,7 +172,7 @@ impl Cases {
                                 .unwrap_or_else(|| panic!("case: unknown kind `{n}`"))
                         })
                         .collect(),
-                    policy: policy_of(policy).ok_or_else(|| policy.to_string()),
+                    policy: policy_of(policy).ok_or_else(|| core_config::opt::must(policy)),
                 }
             })
             .collect(),
@@ -216,7 +216,7 @@ impl Cases {
     pub fn kinds_of(&self, option: &str) -> &[SyntaxKind] {
         self.0
             .iter()
-            .find(|r| matches!(&r.policy, Err(name) if name == option))
+            .find(|r| matches!(&r.policy, Err(id) if id.name() == option))
             .map_or(&[], |r| &r.kinds)
     }
 
@@ -228,7 +228,9 @@ impl Cases {
                 .0
                 .iter()
                 .map(|r| match &r.policy {
-                    Err(name) if name == option => policy_of(policy).unwrap_or(Policy::Consistent),
+                    Err(id) if id.name() == option => {
+                        policy_of(policy).unwrap_or(Policy::Consistent)
+                    }
                     _ => Policy::Consistent,
                 })
                 .collect(),
@@ -245,7 +247,7 @@ impl Cases {
                 .iter()
                 .map(|r| match &r.policy {
                     Ok(p) => *p,
-                    Err(name) => policy_of(options.text(name)).unwrap_or(Policy::Consistent),
+                    Err(id) => policy_of(options.text(*id)).unwrap_or(Policy::Consistent),
                 })
                 .collect(),
             memory: self.0.iter().map(|_| Memory::default()).collect(),

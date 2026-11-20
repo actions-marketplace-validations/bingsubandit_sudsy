@@ -17,15 +17,15 @@ use core_config::ResolvedOptions;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken, TextRange};
 use std::cell::RefCell;
 
-pub const MIN_CALLS: &str = "member_chain_min_calls";
-pub const KEEP_ACCESSES: &str = "member_chain_keep_accesses";
-pub const HEAD_CALLS: &str = "member_chain_head_calls";
-pub const BREAK_ON_BLOCK: &str = "member_chain_break_on_block";
-pub const SHORT_HEAD: &str = "member_chain_short_head";
-pub const INDENT: &str = "member_chain_indent";
-pub const STYLE: &str = "member_chain_style";
-pub const FORCE_LINKS: &str = "member_chain_force_links";
-pub const MIN_GROUPS: &str = "member_chain_min_groups";
+pub const MIN_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_MIN_CALLS;
+pub const KEEP_ACCESSES: core_config::OptId = core_config::opt::MEMBER_CHAIN_KEEP_ACCESSES;
+pub const HEAD_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_HEAD_CALLS;
+pub const BREAK_ON_BLOCK: core_config::OptId = core_config::opt::MEMBER_CHAIN_BREAK_ON_BLOCK;
+pub const SHORT_HEAD: core_config::OptId = core_config::opt::MEMBER_CHAIN_SHORT_HEAD;
+pub const INDENT: core_config::OptId = core_config::opt::MEMBER_CHAIN_INDENT;
+pub const STYLE: core_config::OptId = core_config::opt::MEMBER_CHAIN_STYLE;
+pub const FORCE_LINKS: core_config::OptId = core_config::opt::MEMBER_CHAIN_FORCE_LINKS;
+pub const MIN_GROUPS: core_config::OptId = core_config::opt::MEMBER_CHAIN_MIN_GROUPS;
 #[path = "call_chain_wrapped.rs"]
 mod wrapped;
 /// The label of the document of a chain printed in the `grouped` style.
@@ -89,8 +89,8 @@ impl ChainPolicy {
     /// The policy of the `member_chain_*` options a language declares (the others keep a neutral
     /// value that its style does not read).
     pub fn of(options: &ResolvedOptions) -> Self {
-        let text = |name: &str| options.text(name);
-        let int = |name: &str, default: usize| options.uint(name, default);
+        let text = |name: core_config::OptId| options.text(name);
+        let int = |name: core_config::OptId, default: usize| options.uint(name, default);
         Self {
             style: match text(STYLE) {
                 "grouped" => Style::Grouped,
@@ -101,7 +101,7 @@ impl ChainPolicy {
             force_links: int(FORCE_LINKS, 0),
             min_groups: int(MIN_GROUPS, 0),
             flat_below: if text(STYLE) == "wrapped" {
-                int("line_width", 0) / 3
+                int(core_config::opt::LINE_WIDTH, 0) / 3
             } else {
                 0
             },
@@ -111,7 +111,7 @@ impl ChainPolicy {
                 "always" => KeepAccesses::Always,
                 _ => KeepAccesses::Never,
             },
-            head_calls: options.strings(HEAD_CALLS),
+            head_calls: options.strings(HEAD_CALLS).map(String::from).collect(),
             break_on_block: match text(BREAK_ON_BLOCK) {
                 "inner" => BreakOnBlock::Inner,
                 "any" => BreakOnBlock::Any,

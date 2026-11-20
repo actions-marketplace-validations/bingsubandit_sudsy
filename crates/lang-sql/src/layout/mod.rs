@@ -45,7 +45,7 @@ fn signature(seq: &Seq) -> u64 {
 
 pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -> Doc {
     let mut seq = Seq::build(root, grammar, ROWS.get().space());
-    if options.text("dialect") == "mysql" {
+    if options.text(core_config::opt::DIALECT) == "mysql" {
         blocks::add_indents(&mut seq);
     }
     let mut recase = ROWS.get().cases().recaser(options);
@@ -57,7 +57,7 @@ pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -
     let unit = unit(options);
     let tab = unit.chars().count().max(1);
     let width = options.uint(shared::LINE_WIDTH, 80);
-    let comma = if options.is("comma_position", "leading") {
+    let comma = if options.is(core_config::opt::COMMA_POSITION, "leading") {
         breaks::Pos::Leading
     } else {
         breaks::Pos::Trailing

@@ -152,7 +152,10 @@ pub(super) fn merge(
     options: &ResolvedOptions,
     variants: &mut dyn Variants,
 ) -> Option<(String, Vec<Vec<String>>)> {
-    let explicit = options.string_lists(PREPROCESSOR_SYMBOL_SETS);
+    let explicit: Vec<Vec<String>> = options
+        .string_lists(PREPROCESSOR_SYMBOL_SETS)
+        .map(|set| set.map(String::from).collect())
+        .collect();
     let derive = options.bool(DERIVE_SYMBOL_SETS);
     if (explicit.is_empty() && !derive) || !output.contains('#') {
         return None;

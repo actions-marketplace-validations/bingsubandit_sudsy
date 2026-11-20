@@ -5,7 +5,7 @@ pub fn option_schema() -> core_config::OptionSchema {
     core_config::OptionSchema::lazy(|| {
         core_config::OptionSchema::new(vec![
         core_config::shared::indent_size(4),
-        core_config::OptionDef::choice("indent_style", &["space", "tab"], "space", "Indent with spaces or tabs."),
+        core_config::OptionDef::choice(core_config::opt::INDENT_STYLE, &["space", "tab"], "space", "Indent with spaces or tabs."),
         core_config::shared::final_newline(true),
         shared::end_of_line(),
         core_config::shared::max_blank_lines(10, "Largest number of blank lines kept between statements and comments."),

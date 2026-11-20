@@ -131,7 +131,7 @@ impl RuleFormatter {
         let bindings: Vec<Binding> = option_kinds
             .iter()
             .map(|(option, role, word, names)| Binding {
-                option: option.to_string(),
+                option: core_config::opt::must(option),
                 role: role.to_string(),
                 word: word.to_string(),
                 kinds: names
@@ -307,7 +307,7 @@ pub type OptionKinds = &'static [(
 /// A kind set of an option, with the grammar's kinds resolved.
 #[derive(Clone)]
 pub struct Binding {
-    pub option: String,
+    pub option: core_config::OptId,
     pub role: String,
     pub word: String,
     pub kinds: Vec<SyntaxKind>,
@@ -397,10 +397,13 @@ impl NodeFormatter for LazyRules {
     /// consecutive lines start in one column when the second is true.
     fn comment_style(&self, o: &ResolvedOptions) -> CommentStyle {
         let mut style = self.get().comment_style();
-        if o.get("spaces_before_trailing_comments").is_some() {
-            style.gap = o.uint("spaces_before_trailing_comments", 1);
+        if o.get(core_config::opt::SPACES_BEFORE_TRAILING_COMMENTS)
+            .is_some()
+        {
+            style.gap = o.uint(core_config::opt::SPACES_BEFORE_TRAILING_COMMENTS, 1);
             style.keep_gap = false;
-            style.align_lines = o.flag("align_trailing_comments", false) && style.gap > 0;
+            style.align_lines =
+                o.flag(core_config::opt::ALIGN_TRAILING_COMMENTS, false) && style.gap > 0;
         }
         style
     }

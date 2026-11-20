@@ -188,9 +188,11 @@ fn holds(
 /// language's [`NodeFormatter::blank_between`](crate::NodeFormatter::blank_between).
 pub fn rule(cx: &FormatCtx<'_>) -> Option<crate::shapes::BlankRule> {
     let o = cx.options;
-    let enabled = matches!(o.text("blank_lines_between_members"), "separate" | "always")
-        || o.is("blank_lines_after_block", "require")
-        || o.is("blank_line_before_comment", "require");
+    let enabled = matches!(
+        o.text(core_config::opt::BLANK_LINES_BETWEEN_MEMBERS),
+        "separate" | "always"
+    ) || o.is(core_config::opt::BLANK_LINES_AFTER_BLOCK, "require")
+        || o.is(core_config::opt::BLANK_LINE_BEFORE_COMMENT, "require");
     enabled.then_some(|cx, p, n| cx.blank_between(p, n))
 }
 
@@ -204,34 +206,35 @@ pub fn by_options(cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> b
     let g = cx.grammar;
     let o = cx.options;
     let comments = leading(cx, next);
-    let starts = |c: &comments::Comment, list: &[String]| {
+    let starts = |c: &comments::Comment, list: core_config::OptId| {
         let text = c.text();
-        list.iter()
-            .any(|d| text.trim_start().starts_with(d.as_str()))
+        o.strings(list).any(|d| text.trim_start().starts_with(d))
     };
-    if comments
-        .last()
-        .is_some_and(|c| starts(c, &o.strings("blank_directives_attach")) && c.breaks_after >= 2)
-        && cx
-            .first_token(next)
-            .is_some_and(|t| comments::blank_lines_before(g, &t) == 0)
+    if comments.last().is_some_and(|c| {
+        starts(c, core_config::opt::BLANK_DIRECTIVES_ATTACH) && c.breaks_after >= 2
+    }) && cx
+        .first_token(next)
+        .is_some_and(|t| comments::blank_lines_before(g, &t) == 0)
     {
         return false;
     }
-    let skip = o.strings("blank_directives_skip");
-    if comments.iter().any(|c| starts(c, &skip)) {
+    if comments
+        .iter()
+        .any(|c| starts(c, core_config::opt::BLANK_DIRECTIVES_SKIP))
+    {
         return false;
     }
-    let always = o.is("blank_lines_between_members", "always");
+    let always = o.is(core_config::opt::BLANK_LINES_BETWEEN_MEMBERS, "always");
     let tagged = |n: &SyntaxNode, t: &str| g.has_tag(n.kind(), t);
-    let kind_in = |n: &SyntaxNode, key: &str| o.strings(key).iter().any(|k| g.name(n.kind()) == k);
+    let kind_in =
+        |n: &SyntaxNode, key: core_config::OptId| o.strings(key).any(|k| g.name(n.kind()) == k);
     if cx.last_token(prev).is_some_and(|t| t.text() == "}")
-        && (o.is("blank_lines_after_block", "require")
-            || (always && kind_in(next, "blank_after_block_kinds")))
+        && (o.is(core_config::opt::BLANK_LINES_AFTER_BLOCK, "require")
+            || (always && kind_in(next, core_config::opt::BLANK_AFTER_BLOCK_KINDS)))
     {
         return true;
     }
-    if o.is("blank_line_before_comment", "require")
+    if o.is(core_config::opt::BLANK_LINE_BEFORE_COMMENT, "require")
         && comments
             .first()
             .is_some_and(|c| c.kind == comments::CommentKind::Line && !c.text().starts_with("////"))
@@ -242,8 +245,10 @@ pub fn by_options(cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> b
     let in_members = next.parent().is_some_and(|p| {
         tagged(&p, "namespace") || tagged(&p, "type-declaration") || p.parent().is_none()
     });
-    if !matches!(o.text("blank_lines_between_members"), "separate" | "always")
-        || !(enum_member || in_members)
+    if !matches!(
+        o.text(core_config::opt::BLANK_LINES_BETWEEN_MEMBERS),
+        "separate" | "always"
+    ) || !(enum_member || in_members)
     {
         return false;
     }
@@ -261,7 +266,8 @@ pub fn by_options(cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> b
     (decorated && !imports)
         || (!enum_member
             && if always {
-                !(kind_in(prev, "blank_compact_kinds") && prev.kind() == next.kind())
+                !(kind_in(prev, core_config::opt::BLANK_COMPACT_KINDS)
+                    && prev.kind() == next.kind())
             } else {
                 has_body(prev) || has_body(next)
             })

@@ -107,7 +107,7 @@ pub fn print_options(options: &ResolvedOptions) -> PrintOptions {
         indent_width: int(shared::INDENT_SIZE, default.indent_width),
         use_tabs: options.is(shared::INDENT_STYLE, "tab"),
         align_with_tabs: matches!(
-            options.get("align_with_tabs"),
+            options.get(core_config::opt::ALIGN_WITH_TABS),
             Some(core_config::OptionValue::Bool(true))
         ),
     }

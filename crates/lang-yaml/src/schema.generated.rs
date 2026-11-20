@@ -1,18 +1,18 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const SEQUENCE_INDENT: &str = "sequence_indent";
+pub const SEQUENCE_INDENT: core_config::OptId = core_config::opt::SEQUENCE_INDENT;
 #[allow(dead_code)]
-pub const QUOTE_STYLE: &str = "quote_style";
+pub const QUOTE_STYLE: core_config::OptId = core_config::opt::QUOTE_STYLE;
 #[allow(dead_code)]
-pub const DOCUMENT_START: &str = "document_start";
+pub const DOCUMENT_START: core_config::OptId = core_config::opt::DOCUMENT_START;
 #[allow(dead_code)]
-pub const DOCUMENT_END: &str = "document_end";
+pub const DOCUMENT_END: core_config::OptId = core_config::opt::DOCUMENT_END;
 #[allow(dead_code)]
-pub const BLANK_LINES_AFTER_KEY: &str = "blank_lines_after_key";
+pub const BLANK_LINES_AFTER_KEY: core_config::OptId = core_config::opt::BLANK_LINES_AFTER_KEY;
 #[allow(dead_code)]
-pub const COMMENT_SPACING: &str = "comment_spacing";
+pub const COMMENT_SPACING: core_config::OptId = core_config::opt::COMMENT_SPACING;
 #[allow(dead_code)]
-pub const COMMENT_INDENT: &str = "comment_indent";
+pub const COMMENT_INDENT: core_config::OptId = core_config::opt::COMMENT_INDENT;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SequenceIndent { Preserve, Indented, Flush }
@@ -93,14 +93,14 @@ pub fn option_schema() -> core_config::OptionSchema {
         shared::end_of_line(),
         core_config::shared::bracket_spacing(true),
         core_config::shared::array_bracket_spacing(false),
-        core_config::OptionDef::choice("sequence_indent", &["preserve", "indented", "flush"], "preserve", "A block sequence that is the value of a mapping key: `indented` puts the dashes one level in, `flush` at the key's column, `preserve` keeps each sequence as written."),
-        core_config::OptionDef::choice("quote_style", &["preserve", "single", "double", "prefer_double"], "preserve", "Quote style of quoted scalars. With `single` and `double` a scalar keeps its quotes when the other style would change its value or need more escapes; `prefer_double` uses double quotes, except single quotes for text that contains a `\"` (unless it has other escapes, which keep it as written)."),
-        core_config::OptionDef::choice("document_start", &["preserve", "always", "never"], "preserve", "The `---` marker: `always` starts every document with it, `never` leaves it out of the first document when that is possible, `preserve` keeps what is written."),
-        core_config::OptionDef::choice("document_end", &["preserve", "always", "never"], "preserve", "The `...` marker: `always` ends every document with it, `never` leaves it out unless the next document has a directive or no `---`, or the document is empty, `preserve` keeps what is written."),
+        core_config::OptionDef::choice(core_config::opt::SEQUENCE_INDENT, &["preserve", "indented", "flush"], "preserve", "A block sequence that is the value of a mapping key: `indented` puts the dashes one level in, `flush` at the key's column, `preserve` keeps each sequence as written."),
+        core_config::OptionDef::choice(core_config::opt::QUOTE_STYLE, &["preserve", "single", "double", "prefer_double"], "preserve", "Quote style of quoted scalars. With `single` and `double` a scalar keeps its quotes when the other style would change its value or need more escapes; `prefer_double` uses double quotes, except single quotes for text that contains a `\"` (unless it has other escapes, which keep it as written)."),
+        core_config::OptionDef::choice(core_config::opt::DOCUMENT_START, &["preserve", "always", "never"], "preserve", "The `---` marker: `always` starts every document with it, `never` leaves it out of the first document when that is possible, `preserve` keeps what is written."),
+        core_config::OptionDef::choice(core_config::opt::DOCUMENT_END, &["preserve", "always", "never"], "preserve", "The `...` marker: `always` ends every document with it, `never` leaves it out unless the next document has a directive or no `---`, or the document is empty, `preserve` keeps what is written."),
         core_config::shared::max_blank_lines(1, "Largest number of blank lines kept between entries, comments and documents."),
-        core_config::OptionDef::choice("blank_lines_after_key", &["preserve", "remove"], "preserve", "Blank lines between a key and its block value on the next line: `preserve` keeps \n             them (up to `max_blank_lines`); `remove` drops them."),
-        core_config::OptionDef::int("comment_spacing", 1, (1, 10), "Spaces between a value and a comment after it on the same line."),
-        core_config::OptionDef::choice("comment_indent", &["preserve", "content"], "preserve", "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token)."),
+        core_config::OptionDef::choice(core_config::opt::BLANK_LINES_AFTER_KEY, &["preserve", "remove"], "preserve", "Blank lines between a key and its block value on the next line: `preserve` keeps \n             them (up to `max_blank_lines`); `remove` drops them."),
+        core_config::OptionDef::int(core_config::opt::COMMENT_SPACING, 1, (1, 10), "Spaces between a value and a comment after it on the same line."),
+        core_config::OptionDef::choice(core_config::opt::COMMENT_INDENT, &["preserve", "content"], "preserve", "A comment on its own line after the end of a block collection: `preserve` keeps it with the outermost collection it is indented as deep as, `content` with the innermost one when it is deeper than the next token (so it is indented like the line before it or like the next token)."),
         ])
         .with_presets(vec![
         core_config::Preset::new("yaml/prettier-compat", include_str!("../presets/prettier-compat.yaml")),

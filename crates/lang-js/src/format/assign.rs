@@ -181,7 +181,7 @@ pub(crate) fn assign_like(
             right: right.as_ref(),
             short_key,
         },
-        &AssignPolicy::of(cx.options),
+        cx.assign_policy(),
         &Hooks,
     )
 }
@@ -289,7 +289,7 @@ fn is_lone_short_argument(cx: &FormatCtx<'_>, arg: &SyntaxNode) -> bool {
     if has_comment(cx, arg) {
         return false;
     }
-    let threshold = usize::try_from(cx.options.int("line_width")).unwrap_or(80) / 4;
+    let threshold = usize::try_from(cx.options.int(core_config::opt::LINE_WIDTH)).unwrap_or(80) / 4;
     let len = |n: &SyntaxNode| text_of(cx, n).chars().count();
     match arg.kind() {
         k::THIS_EXPRESSION => true,

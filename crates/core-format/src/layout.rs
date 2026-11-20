@@ -45,6 +45,7 @@ use crate::rules::Binding;
 use crate::seq::{break_after, el, first, kids, last};
 use crate::shapes::flow::Flow;
 use crate::shapes::{self, BlockStyle, ListLayout, ListStyle, TrailingComma};
+use core_config::OptId;
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
 
 type R = Result<Doc, FormatError>;
@@ -70,6 +71,8 @@ pub(crate) struct Row {
     shape: String,
     text: Vec<(String, String)>,
     kind_args: Vec<(String, Vec<SyntaxKind>)>,
+    /// The keys whose value is `option:NAME[=VALUES]`: the key, the option and the values.
+    option_args: Vec<(String, OptId, String)>,
 }
 
 impl Row {
@@ -98,12 +101,20 @@ impl Row {
         }
         let mut words = shape.split_whitespace();
         let shape = words.next().unwrap_or("").to_string();
-        let (mut text, mut kind_args) = (Vec::new(), Vec::new());
+        let (mut text, mut kind_args, mut option_args) = (Vec::new(), Vec::new(), Vec::new());
         for w in words {
             let (k, v) = w.split_once('=').unwrap_or((w, ""));
             if KIND_KEYS.contains(&k) {
                 kind_args.push((k.to_string(), kinds_of(v)));
             } else {
+                if let Some(o) = v.strip_prefix("option:") {
+                    let (name, values) = o.split_once('=').unwrap_or((o, ""));
+                    option_args.push((
+                        k.to_string(),
+                        core_config::opt::must(name),
+                        values.to_string(),
+                    ));
+                }
                 text.push((k.to_string(), v.to_string()));
             }
         }
@@ -114,6 +125,7 @@ impl Row {
             shape,
             text,
             kind_args,
+            option_args,
         }
     }
 
@@ -140,15 +152,22 @@ impl Row {
             .map_or(&[], |(_, v)| v.as_slice())
     }
 
+    /// The option and the values of a key `option:NAME[=VALUES]`.
+    fn option(&self, key: &str) -> Option<(OptId, &str)> {
+        self.option_args
+            .iter()
+            .find(|(k, ..)| k == key)
+            .map(|(_, id, values)| (*id, values.as_str()))
+    }
+
     /// `option:NAME=VALUE`: does the option have the value?
     fn option_is(&self, cx: &FormatCtx<'_>, key: &str) -> bool {
-        self.arg(key)
-            .and_then(|v| v.strip_prefix("option:"))
-            .and_then(|v| v.split_once('='))
-            .is_some_and(|(name, values)| {
-                values.split('|').any(|v| match cx.options.get(name) {
+        self.option(key)
+            .filter(|(_, values)| !values.is_empty())
+            .is_some_and(|(id, values)| {
+                values.split('|').any(|v| match cx.options.get(id) {
                     Some(core_config::OptionValue::Bool(b)) => v == b.to_string(),
-                    _ => cx.options.is(name, v),
+                    _ => cx.options.is(id, v),
                 })
             })
     }
@@ -208,8 +227,8 @@ fn line_break_inside(els: impl Iterator<Item = SyntaxElement>) -> bool {
 
 /// What stands before a `{`: a line break, or a blank when the row's option says `same_line`.
 fn brace_gap(cx: &FormatCtx<'_>, row: &Row) -> Doc {
-    match row.arg("gap").and_then(|g| g.strip_prefix("option:")) {
-        Some(name) if cx.options.str(name) != "same_line" => doc::hardline(),
+    match row.option("gap") {
+        Some((id, _)) if cx.options.str(id) != "same_line" => doc::hardline(),
         _ => doc::lit(" "),
     }
 }
@@ -279,7 +298,7 @@ impl Layout {
     }
 
     /// The kinds of the sets of `role` that belong to `option`.
-    fn bound_kinds(&self, option: &str, role: &str) -> Vec<SyntaxKind> {
+    fn bound_kinds(&self, option: OptId, role: &str) -> Vec<SyntaxKind> {
         (self.bindings.iter())
             .filter(|b| b.role == role && b.option == option)
             .flat_map(|b| b.kinds.iter().copied())
@@ -288,15 +307,15 @@ impl Layout {
 
     /// The option of `role` that governs a node of this kind, when it has the value `none`.
     fn is_none(&self, cx: &FormatCtx<'_>, role: &str, kind: SyntaxKind) -> bool {
-        (self.bound(role, kind)).is_some_and(|b| cx.options.is(&b.option, "none"))
+        (self.bound(role, kind)).is_some_and(|b| cx.options.is(b.option, "none"))
     }
 
     /// `fit`: a bool option that is on, or one of `all` and `inline`.
     fn fits(&self, cx: &FormatCtx<'_>, kind: SyntaxKind) -> bool {
         self.bound("fit", kind)
-            .is_some_and(|b| match cx.options.get(&b.option) {
+            .is_some_and(|b| match cx.options.get(b.option) {
                 Some(core_config::OptionValue::Bool(on)) => *on,
-                _ => cx.options.is(&b.option, "all") || cx.options.is(&b.option, "inline"),
+                _ => cx.options.is(b.option, "all") || cx.options.is(b.option, "inline"),
             })
     }
 
@@ -307,9 +326,9 @@ impl Layout {
             return None;
         }
         let kind = node.kind();
-        let off = |b: &Binding| !cx.options.flag(&b.option, true);
+        let off = |b: &Binding| !cx.options.flag(b.option, true);
         if let Some(b) = self.bound("outdent", kind) {
-            return Some(doc::Outdent::Columns(cx.options.uint(&b.option, 0)));
+            return Some(doc::Outdent::Columns(cx.options.uint(b.option, 0)));
         }
         if self.bound("outdent_unless", kind).is_some_and(off) {
             return Some(doc::Outdent::Columns(
@@ -325,12 +344,12 @@ impl Layout {
     /// `multiline`).
     fn header_break(&self, cx: &FormatCtx<'_>, node: &SyntaxNode, flow: &Flow<'_>) -> Option<R> {
         let b = self.bound("break_after", node.kind())?;
-        let heads = self.bound_kinds(&b.option, "head");
+        let heads = self.bound_kinds(b.option, "head");
         let els = kids(cx, node);
         let head = els
             .iter()
             .position(|e| e.as_node().is_some_and(|n| heads.contains(&n.kind())))?;
-        let mode = cx.options.str(&b.option);
+        let mode = cx.options.str(b.option);
         let commented = crate::seq::last(cx, &els[head])
             .is_some_and(|t| comments::has_trailing_comment(cx.grammar, &t));
         Some(crate::header_break::header_break(
@@ -396,7 +415,10 @@ impl Layout {
             )
             .map(|d| {
                 // The blank lines at the start of the file stay.
-                if !cx.options.flag("keep_leading_blank_lines", false) {
+                if !cx
+                    .options
+                    .flag(core_config::opt::KEEP_LEADING_BLANK_LINES, false)
+                {
                     return d;
                 }
                 let blanks: usize = (node.descendants_with_tokens())
@@ -421,7 +443,7 @@ impl Layout {
                     space_after_separator: true,
                     // (an option of the language, when it has one)
                     align_comments: matches!(
-                        cx.options.get("align_comments"),
+                        cx.options.get(core_config::opt::ALIGN_COMMENTS),
                         Some(core_config::OptionValue::Bool(true))
                     ),
                 },
@@ -444,9 +466,11 @@ impl Layout {
                         // a template header or a constructor's initializers.
                         let option = (node.parent())
                             .and_then(|p| self.bound("fit", p.kind()))
-                            .map_or("", |b| b.option.as_str());
-                        let with = self.bound_kinds(option, "no_fit_with");
-                        let under = self.bound_kinds(option, "no_fit_under");
+                            .map(|b| b.option);
+                        let kinds =
+                            |role| option.map_or_else(Vec::new, |o| self.bound_kinds(o, role));
+                        let with = kinds("no_fit_with");
+                        let under = kinds("no_fit_under");
                         let keeps = node.parent().is_some_and(|p| {
                             let start = node.text_range().start();
                             let header = p
@@ -486,8 +510,8 @@ impl Layout {
             "line_start" => {
                 let relay = self.bound("relay", node.kind()).map(|b| {
                     (
-                        crate::relay::Align::parse(cx.options.str(&b.option)),
-                        cx.options.uint("line_width", 80),
+                        crate::relay::Align::parse(cx.options.str(b.option)),
+                        cx.options.uint(core_config::opt::LINE_WIDTH, 80),
                     )
                 });
                 Ok(line_start(
@@ -553,8 +577,8 @@ fn line_start(
 /// it stay (`all`, `without_else` when there is no `else`, or true).
 fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode, layout: &Layout, flow: &Flow<'_>) -> Option<R> {
     let els = kids(cx, node);
-    let option = layout.bound("join", node.kind()).map(|b| b.option.as_str());
-    let heads = layout.bound_kinds(option.unwrap_or_default(), "head");
+    let option = layout.bound("join", node.kind()).map(|b| b.option);
+    let heads = option.map_or_else(Vec::new, |o| layout.bound_kinds(o, "head"));
     let at = els
         .iter()
         .position(|e| matches!(e, SyntaxElement::Node(n) if !heads.contains(&n.kind())))?;
@@ -563,9 +587,9 @@ fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode, layout: &Layout, flow: &Flow<
         [SyntaxElement::Token(_), SyntaxElement::Node(_)] => true,
         _ => return None,
     };
-    let join = match option.map(|name| (name, cx.options.get(name))) {
+    let join = match option.map(|id| (id, cx.options.get(id))) {
         Some((_, Some(core_config::OptionValue::Bool(true)))) => shapes::Join::Fits,
-        Some((name, Some(core_config::OptionValue::String(_)))) => match cx.options.str(name) {
+        Some((id, Some(core_config::OptionValue::String(_)))) => match cx.options.str(id) {
             "all" => shapes::Join::Fits,
             "without_else" if !has_else => shapes::Join::Fits,
             _ => shapes::Join::Never,
@@ -877,9 +901,8 @@ fn braced_list(cx: &FormatCtx<'_>, node: &SyntaxNode, row: &Row, flow: &Flow<'_>
 
 /// An integer option named by the row's `key=option:NAME`.
 fn option_int(cx: &FormatCtx<'_>, row: &Row, key: &str) -> usize {
-    row.arg(key)
-        .and_then(|v| v.strip_prefix("option:"))
-        .map_or(usize::MAX, |name| cx.options.int(name) as usize)
+    row.option(key)
+        .map_or(usize::MAX, |(id, _)| cx.options.int(id) as usize)
 }
 
 /// `head : A, B body`: the supertypes (`list=K`) one per line from `min=option:NAME` of them on;
@@ -966,7 +989,10 @@ fn ctor_own_line(
             .children()
             .filter(|m| g.has_tag(m.kind(), "modifiers"))
             .flat_map(|m| m.children())
-            .any(|c| cx.options.list_has("ctor_own_line_kinds", g.name(c.kind()))))
+            .any(|c| {
+                cx.options
+                    .list_has(core_config::opt::CTOR_OWN_LINE_KINDS, g.name(c.kind()))
+            }))
     .then_some(())?;
     Some((|| {
         let mut parts = vec![doc::hardline()];
@@ -995,17 +1021,17 @@ fn ctor_own_line(
 /// A member chain `a.b().c()` laid out by its outermost node (`spaced=K`: a link of that kind
 /// follows its call after a blank).
 fn chain(cx: &FormatCtx<'_>, node: &SyntaxNode, row: &Row) -> Option<R> {
-    let policy = shapes::ChainPolicy::of(cx.options);
+    let policy = cx.chain_policy();
     let inner = node
         .parent()
         .is_some_and(|p| row.kinds.contains(&p.kind()) && p.first_child().as_ref() == Some(node));
-    if inner || shapes::flat_chain(cx, node, &policy) {
+    if inner || shapes::flat_chain(cx, node, policy) {
         return None;
     }
     Some(shapes::call_chain(
         cx,
         node,
-        &policy,
+        policy,
         &SpacedLinks(cx, row.kinds_arg("spaced")),
     ))
 }

@@ -69,6 +69,7 @@ pub fn generate() -> Result<Vec<(PathBuf, String)>> {
     ensure!(ids.len() == n, "two grammars share a language id");
     let langs = lang_crate::load(&root)?;
     files.extend(lang_crate::generate(&langs)?);
+    files.push(options::ids(&root, &langs)?);
     files.extend(registry::generate(
         &lang_crate::tree_sitter(&langs),
         &lang_crate::generated(&langs),

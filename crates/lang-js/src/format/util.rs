@@ -30,7 +30,7 @@ pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
         single_quote: super::quote_style(cx.options) == super::QuoteStyle::Single,
         commas: match super::trailing_commas(cx.options) {
             _ if matches!(
-                cx.options.text("embed_mode"),
+                cx.options.text(core_config::opt::EMBED_MODE),
                 super::embed::NG_EXPRESSION | super::embed::NG_NESTED
             ) =>
             {
@@ -40,7 +40,7 @@ pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
             super::TrailingCommas::Es5 => 1,
             super::TrailingCommas::All => 2,
         },
-        bracket_spacing: cx.options.bool("bracket_spacing"),
+        bracket_spacing: cx.options.bool(core_config::opt::BRACKET_SPACING),
         call: core_format::shapes::CallStyle::of(cx.options),
         embedded: super::embed::is_expression(cx.options),
         after_comment: std::sync::OnceLock::new(),

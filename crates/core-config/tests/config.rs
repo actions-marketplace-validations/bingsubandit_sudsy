@@ -261,8 +261,8 @@ fn extends_loads_files_relative_to_the_extending_file() {
         .format_options(&FileInput::language("json"), &schema())
         .unwrap();
     // The extending file's `format` beats the base's; the base's beats the preset.
-    assert_eq!(resolved.options.int("indent_size"), 3);
-    assert_eq!(resolved.options.int("line_width"), 90);
+    assert_eq!(resolved.options.int(core_config::opt::INDENT_SIZE), 3);
+    assert_eq!(resolved.options.int(core_config::opt::LINE_WIDTH), 90);
     assert!(
         matches!(&resolved.sources["line_width"], Source::Config { section, .. } if section == "format")
     );
@@ -297,7 +297,7 @@ lint:
     r1: { level: warn, options: { n: 2 } }
 json:
   format:
-    mode: c
+    embed_mode: c
 overrides:
   - files: [\"tests/**\"]
     lint:
@@ -311,7 +311,7 @@ fn schema() -> OptionSchema {
     OptionSchema::new(vec![
         shared::line_width(80),
         shared::indent_size(2),
-        OptionDef::choice("mode", &["a", "b", "c"], "a", "A mode."),
+        OptionDef::choice("embed_mode", &["a", "b", "c"], "a", "A mode."),
     ])
     .with_presets(vec![
         Preset::new(
@@ -325,7 +325,7 @@ fn schema() -> OptionSchema {
             "json/modal",
             "json:
   format:
-    mode: b
+    embed_mode: b
 ",
         ),
         Preset::new(
@@ -334,7 +334,7 @@ fn schema() -> OptionSchema {
 json:
   format:
     line_width: 70
-    mode: c
+    embed_mode: c
 ",
         ),
         Preset::new(
@@ -372,10 +372,10 @@ fn language_section_beats_shared_beats_preset_beats_default() {
         "extends: [preset:json/narrow, preset:json/modal]\nformat:\n  line_width: 100\n  indent_size: 4\n",
         None,
     );
-    assert_eq!(r.options.int("line_width"), 100);
-    assert_eq!(r.options.int("indent_size"), 4);
-    assert_eq!(r.options.str("mode"), "b");
-    assert_eq!(r.sources["mode"], Source::Preset("json/modal".into()));
+    assert_eq!(r.options.int(core_config::opt::LINE_WIDTH), 100);
+    assert_eq!(r.options.int(core_config::opt::INDENT_SIZE), 4);
+    assert_eq!(r.options.str(core_config::opt::EMBED_MODE), "b");
+    assert_eq!(r.sources["embed_mode"], Source::Preset("json/modal".into()));
 
     // The language section is `x:` for a language called x; csharp/json/yaml are the real ones.
     let chain =
@@ -386,7 +386,7 @@ fn language_section_beats_shared_beats_preset_beats_default() {
             .format_options(&FileInput::language(language), &schema())
             .unwrap()
             .options
-            .int("line_width")
+            .int(core_config::opt::LINE_WIDTH)
     };
     assert_eq!(line_width("json"), 90);
     assert_eq!(line_width("yaml"), 100);
@@ -395,7 +395,7 @@ fn language_section_beats_shared_beats_preset_beats_default() {
 #[test]
 fn presets_of_other_languages_are_ignored_and_the_later_preset_wins() {
     let r = resolve("extends: [preset:csharp/other, preset:json/narrow]\n", None);
-    assert_eq!(r.options.int("line_width"), 60);
+    assert_eq!(r.options.int(core_config::opt::LINE_WIDTH), 60);
 }
 
 #[test]
@@ -414,11 +414,31 @@ fn overrides_apply_by_glob_and_beat_the_language_section() {
             .unwrap()
     };
     // Shared option in an override beats the language section.
-    assert_eq!(at("json", "tests/a.json").options.int("line_width"), 50);
-    assert_eq!(at("json", "src/a.json").options.int("line_width"), 90);
-    assert_eq!(at("json", "src/a.snap.json").options.int("indent_size"), 8);
+    assert_eq!(
+        at("json", "tests/a.json")
+            .options
+            .int(core_config::opt::LINE_WIDTH),
+        50
+    );
+    assert_eq!(
+        at("json", "src/a.json")
+            .options
+            .int(core_config::opt::LINE_WIDTH),
+        90
+    );
+    assert_eq!(
+        at("json", "src/a.snap.json")
+            .options
+            .int(core_config::opt::INDENT_SIZE),
+        8
+    );
     // A language section in an override only applies to that language.
-    assert_eq!(at("yaml", "src/a.snap.json").options.int("indent_size"), 2);
+    assert_eq!(
+        at("yaml", "src/a.snap.json")
+            .options
+            .int(core_config::opt::INDENT_SIZE),
+        2
+    );
     let source = at("json", "tests/a.json").sources["line_width"].to_string();
     assert!(source.contains("overrides[0].format"), "{source}");
 }
@@ -438,13 +458,13 @@ fn editorconfig_sits_below_the_config_chain_and_above_defaults() {
             &schema(),
         )
         .unwrap();
-    assert_eq!(r.options.int("indent_size"), 7);
+    assert_eq!(r.options.int(core_config::opt::INDENT_SIZE), 7);
     assert!(matches!(
         r.sources["indent_size"],
         Source::EditorConfig { .. }
     ));
     // The preset beats .editorconfig.
-    assert_eq!(r.options.int("line_width"), 60);
+    assert_eq!(r.options.int(core_config::opt::LINE_WIDTH), 60);
     // A value the option rejects is ignored.
     let ec =
         core_config::EditorConfig::from_text(dir, "[*]\nmax_line_length = 5\n", &dir.join("a.x"));
@@ -454,7 +474,7 @@ fn editorconfig_sits_below_the_config_chain_and_above_defaults() {
             &schema(),
         )
         .unwrap();
-    assert_eq!(r.options.int("line_width"), 80);
+    assert_eq!(r.options.int(core_config::opt::LINE_WIDTH), 80);
 }
 
 #[test]
@@ -462,7 +482,7 @@ fn validation_checks_presets_and_option_names_and_values() {
     let schemas = [("json", &schema())];
     let check = |config: &str| ConfigChain::parse(config).unwrap().validate(&schemas);
     assert!(check("format: {}\n").is_ok());
-    let e = check("json:\n  format:\n    mode: z\n").unwrap_err();
+    let e = check("json:\n  format:\n    embed_mode: z\n").unwrap_err();
     assert!(e.message.contains("one of: a, b, c"), "{e}");
     assert_eq!(e.line, Some(3));
     let e = check("extends: [preset:json/nope]\n").unwrap_err();
@@ -470,7 +490,7 @@ fn validation_checks_presets_and_option_names_and_values() {
     assert_eq!(e.line, Some(1));
     let e = check("extends: [preset:zzz/nope]\n").unwrap_err();
     assert!(e.message.contains("preset language"), "{e}");
-    let e = check("format:\n  mode: a\n").unwrap_err();
+    let e = check("format:\n  embed_mode: a\n").unwrap_err();
     assert!(
         e.message.contains("not a shared option") || e.message.contains("unknown shared"),
         "{e}"
@@ -551,7 +571,10 @@ fn a_preset_is_a_config_file_of_declared_options() {
         .format_options(&FileInput::language("json"), &schema())
         .unwrap();
     assert_eq!(
-        (r.options.int("line_width"), r.options.str("mode")),
+        (
+            r.options.int(core_config::opt::LINE_WIDTH),
+            r.options.str(core_config::opt::EMBED_MODE)
+        ),
         (70, "c")
     );
     // Values the provider does not declare are an error, not a hidden setting.
@@ -609,10 +632,10 @@ fn a_preset_resolves_exactly_like_the_same_text_in_sudsy_yaml() {
             assert_eq!((rule.level, &rule.options), (rb[id].level, &rb[id].options));
         }
         assert_eq!(
-            a.options.int("line_width"),
+            a.options.int(core_config::opt::LINE_WIDTH),
             if path.starts_with("tests") { 40 } else { 60 }
         );
-        assert_eq!(a.options.str("mode"), "c");
+        assert_eq!(a.options.str(core_config::opt::EMBED_MODE), "c");
     }
     let input = FileInput::language("json").with_path(Path::new("tests/a.json"));
     let rules = preset.rules(&input, &schema()).unwrap();

@@ -201,7 +201,7 @@ impl ConfigChain {
                     continue;
                 };
                 if def.check(&v.value).is_ok() {
-                    options.set(v.option, v.value.clone());
+                    options.set(def.id, v.value.clone());
                     sources.insert(
                         v.option.into(),
                         Source::EditorConfig {

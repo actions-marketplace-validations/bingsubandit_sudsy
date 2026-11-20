@@ -17,7 +17,7 @@ use std::borrow::Cow;
 include!("../schema.generated.rs");
 
 /// Vue and Svelte: indent the content of `<script>` and `<style>`.
-pub const INDENT_SCRIPT_AND_STYLE: &str = "indent_script_and_style";
+pub const INDENT_SCRIPT_AND_STYLE: core_config::OptId = core_config::opt::INDENT_SCRIPT_AND_STYLE;
 
 pub struct HtmlFormatter;
 
@@ -306,8 +306,8 @@ impl NodeFormatter for MarkupFormatter {
                 dialect: self.dialect,
                 indent_blocks: cx.options.flag(INDENT_SCRIPT_AND_STYLE, false),
                 embed: auto.then_some(&embed),
-                width: cx.options.int("line_width") as usize,
-                tab: cx.options.int("indent_size") as usize,
+                width: cx.options.int(core_config::opt::LINE_WIDTH) as usize,
+                tab: cx.options.int(core_config::opt::INDENT_SIZE) as usize,
                 bracket_same_line: bracket_same_line(cx.options),
                 single_attribute_per_line: single_attribute_per_line(cx.options),
             },

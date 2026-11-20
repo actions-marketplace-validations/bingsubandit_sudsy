@@ -94,7 +94,8 @@ pub fn parameter_list(
 /// have an annotation among its modifiers?
 fn wraps_annotated(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
     let g = cx.grammar;
-    cx.options.flag("signature_wrap_annotated", false)
+    cx.options
+        .flag(core_config::opt::SIGNATURE_WRAP_ANNOTATED, false)
         && node.children().any(|p| {
             p.children().any(|m| {
                 g.has_tag(m.kind(), "modifiers")

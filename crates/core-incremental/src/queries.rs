@@ -129,7 +129,11 @@ pub fn options(db: &dyn Db, file: File) -> Result<FileOptions, Failure> {
 pub fn parse_settings(db: &dyn Db, file: File) -> Option<ParseSettings> {
     options(db, file).as_ref().ok().map(|o| ParseSettings {
         language_version: o.language_version.clone(),
-        preprocessor_symbols: o.resolved.strings("preprocessor_symbols"),
+        preprocessor_symbols: o
+            .resolved
+            .strings(core_config::opt::PREPROCESSOR_SYMBOLS)
+            .map(String::from)
+            .collect(),
     })
 }
 

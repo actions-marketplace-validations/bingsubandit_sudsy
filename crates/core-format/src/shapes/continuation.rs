@@ -125,7 +125,7 @@ pub fn heredoc(raw: &str) -> Doc {
 pub fn item_terminator(
     cx: &crate::FormatCtx<'_>,
     existing: Option<Doc>,
-    (option, kind): (&str, core_syntax::SyntaxKind),
+    (option, kind): (core_config::OptId, core_syntax::SyntaxKind),
     own_line: bool,
 ) -> Option<Doc> {
     let end = match existing {
@@ -181,11 +181,11 @@ pub fn heredoc_by_option(
     cx: &crate::FormatCtx<'_>,
     raw: &str,
     (op_text, dash_op): (&str, &str),
-    option: &str,
+    option: core_config::OptId,
 ) -> Doc {
     if op_text == dash_op
         && cx.options.is(option, "reindent")
-        && cx.options.is("indent_style", "tab")
+        && cx.options.is(core_config::opt::INDENT_STYLE, "tab")
     {
         heredoc_reindented(raw)
     } else {

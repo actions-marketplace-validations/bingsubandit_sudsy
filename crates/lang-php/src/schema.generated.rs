@@ -1,8 +1,8 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const TRAILING_COMMAS: &str = "trailing_commas";
+pub const TRAILING_COMMAS: core_config::OptId = core_config::opt::TRAILING_COMMAS;
 #[allow(dead_code)]
-pub const DECLARATION_BRACE: &str = "declaration_brace";
+pub const DECLARATION_BRACE: core_config::OptId = core_config::opt::DECLARATION_BRACE;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TrailingCommas { Never, Multiline }
@@ -33,8 +33,8 @@ pub fn option_schema() -> core_config::OptionSchema {
         shared::indent_style(),
         core_config::shared::final_newline(true),
         shared::end_of_line(),
-        core_config::OptionDef::choice("trailing_commas", &["never", "multiline"], "multiline", "Trailing comma after the last argument, parameter or `match` arm of a list that is laid out on several lines: `multiline` adds one, `never` removes it."),
-        core_config::OptionDef::choice("declaration_brace", &["next_line", "same_line"], "next_line", "Where the `{` of a class, interface, trait, enum, function or method goes (PER Coding Style: its own line). Control structures, closures and anonymous classes keep it on the line."),
+        core_config::OptionDef::choice(core_config::opt::TRAILING_COMMAS, &["never", "multiline"], "multiline", "Trailing comma after the last argument, parameter or `match` arm of a list that is laid out on several lines: `multiline` adds one, `never` removes it."),
+        core_config::OptionDef::choice(core_config::opt::DECLARATION_BRACE, &["next_line", "same_line"], "next_line", "Where the `{` of a class, interface, trait, enum, function or method goes (PER Coding Style: its own line). Control structures, closures and anonymous classes keep it on the line."),
         ])
         .with_presets(vec![
         core_config::Preset::new("php/phpstan", include_str!("../presets/phpstan.yaml")),

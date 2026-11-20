@@ -10,7 +10,7 @@ use super::parens::{Need, needs_parens};
 use super::util::{R, kids, shape_error};
 use crate::generated::kind as k;
 use core_format::doc::{Doc, concat, group, hardline, indent, softline};
-use core_format::shapes::{self, ChainHooks, ChainPolicy};
+use core_format::shapes::{self, ChainHooks};
 use core_format::{FormatCtx, FormatError, comments};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -197,12 +197,7 @@ pub(crate) fn member_chain(cx: &FormatCtx<'_>, call_node: &SyntaxNode) -> R {
     if let Some(t) = &lead {
         cx.hold_leading(t);
     }
-    let chain = shapes::call_chain(
-        cx,
-        call_node,
-        &ChainPolicy::of(cx.options),
-        &Hooks { cx, start },
-    )?;
+    let chain = shapes::call_chain(cx, call_node, cx.chain_policy(), &Hooks { cx, start })?;
     Ok(match &lead {
         Some(t) => concat(vec![cx.held_leading(t), chain]),
         None => chain,

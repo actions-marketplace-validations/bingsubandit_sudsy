@@ -15,20 +15,20 @@ use crate::spacing::{EndSet, Pattern};
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken};
 
 /// The option listing kind pairs: a node of the first kind directly inside one of the second.
-pub const PARENTHESIZE: &str = "rewrite_parenthesize_pairs";
+pub const PARENTHESIZE: core_config::OptId = core_config::opt::REWRITE_PARENTHESIZE_PAIRS;
 
 /// The kind pairs of `rewrite_parenthesize_pairs`, resolved once per file.
 pub struct Parenthesize(Vec<(core_syntax::SyntaxKind, core_syntax::SyntaxKind)>);
 
 impl Parenthesize {
     pub fn new(grammar: &Grammar, options: &core_config::ResolvedOptions) -> Self {
-        let names = options.strings(PARENTHESIZE);
+        let names: Vec<&str> = options.strings(PARENTHESIZE).collect();
         Self(
             names
                 .chunks(2)
                 .filter_map(|p| {
                     Some((
-                        grammar.kind_by_name(&p[0])?,
+                        grammar.kind_by_name(p[0])?,
                         grammar.kind_by_name(p.get(1)?)?,
                     ))
                 })
@@ -317,7 +317,7 @@ pub fn redundant_semicolons(
     grammar: &Grammar,
     tree: &SyntaxNode,
     text: &str,
-    keep: &[String],
+    keep: &[&str],
     edits: &mut Vec<(usize, usize, String)>,
 ) {
     // (a scan of the text finds the candidates; a walk of the tree for all tokens costs more)
@@ -330,7 +330,7 @@ pub fn redundant_semicolons(
         .filter(|t| t.text() == ";" && grammar.name(t.kind()).starts_with("Semi"))
     {
         if t.parent()
-            .is_none_or(|p| keep.iter().any(|k| grammar.name(p.kind()) == k))
+            .is_none_or(|p| keep.contains(&grammar.name(p.kind())))
         {
             continue;
         }
@@ -361,7 +361,9 @@ pub fn trailing_comma_last_entry(
     options: &core_config::ResolvedOptions,
     edits: &mut Vec<(usize, usize, String)>,
 ) {
-    let pairs = options.strings("trailing_comma_last_entry");
+    let pairs: Vec<&str> = options
+        .strings(core_config::opt::TRAILING_COMMA_LAST_ENTRY)
+        .collect();
     let code = |n: &SyntaxNode| {
         n.descendants_with_tokens()
             .filter_map(|e| e.into_token())
@@ -374,11 +376,11 @@ pub fn trailing_comma_last_entry(
         };
         for body in tree
             .descendants()
-            .filter(|n| grammar.name(n.kind()) == body_kind)
+            .filter(|n| grammar.name(n.kind()) == *body_kind)
         {
             let entries: Vec<_> = body
                 .children()
-                .filter(|n| grammar.name(n.kind()) == entry_kind)
+                .filter(|n| grammar.name(n.kind()) == *entry_kind)
                 .collect();
             let Some(entry) = entries.last() else {
                 continue;
@@ -424,17 +426,20 @@ pub fn trailing_commas_before(
     options: &core_config::ResolvedOptions,
     edits: &mut Vec<(usize, usize, String)>,
 ) {
-    for pair in options.strings("trailing_comma_before").chunks(2) {
+    let pairs: Vec<&str> = options
+        .strings(core_config::opt::TRAILING_COMMA_BEFORE)
+        .collect();
+    for pair in pairs.chunks(2) {
         let [kind, end] = pair else { continue };
-        for (at, _) in text.match_indices(end.as_str()) {
+        for (at, _) in text.match_indices(*end) {
             let Some(t) = u32::try_from(at)
                 .ok()
                 .and_then(|at| tree.token_at_offset(at.into()).right_biased())
-                .filter(|t| t.text() == end.as_str())
+                .filter(|t| t.text() == *end)
             else {
                 continue;
             };
-            let Some(node) = t.parent().filter(|n| grammar.name(n.kind()) == kind) else {
+            let Some(node) = t.parent().filter(|n| grammar.name(n.kind()) == *kind) else {
                 continue;
             };
             let first = node
@@ -478,15 +483,15 @@ pub fn trailing_commas_before(
 /// parenthesized head on the same line that does not start a `{` block, and is followed by a
 /// deeper-indented line (a statement the layout wrapped, whose braces a rewrite that depends on
 /// the width decides again)?
-pub fn has_wrapped_statement(text: &str, keywords: &[String]) -> bool {
+pub fn has_wrapped_statement(text: &str, keywords: &[&str]) -> bool {
     let indent = |l: &str| l.len() - l.trim_start().len();
     let mut lines = text.lines().peekable();
     while let Some(l) = lines.next() {
         let t = l.trim_start();
-        let Some(rest) = keywords.iter().find_map(|k| {
-            t.strip_prefix(k.as_str())
-                .filter(|r| r.starts_with([' ', '(']))
-        }) else {
+        let Some(rest) = keywords
+            .iter()
+            .find_map(|k| t.strip_prefix(*k).filter(|r| r.starts_with([' ', '('])))
+        else {
             continue;
         };
         let rest = rest.trim_start();

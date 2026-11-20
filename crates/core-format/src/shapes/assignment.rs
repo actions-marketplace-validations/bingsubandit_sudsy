@@ -18,16 +18,16 @@ use core_config::ResolvedOptions;
 use core_syntax::roles;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
-pub const LAYOUT: &str = "assignment_layout";
-pub const CONDITIONAL: &str = "assignment_conditional";
-pub const INDENT: &str = "assignment_indent";
-pub const LEFT_PARAMS: &str = "assignment_left_min_parameters";
-pub const LEFT_UNLESS: &str = "assignment_left_unless_kinds";
-pub const KEEP_BREAK: &str = "assignment_keep_break_kinds";
-pub const OP_SKIP: &str = "assignment_op_token_skip_kinds";
-pub const DESTRUCTURE: &str = "assignment_destructure_kinds";
-pub const GENERIC_CLOSURE: &str = "assignment_generic_closure_kinds";
-pub const TYPE_ARG_KINDS: &str = "type_argument_complex_kinds";
+pub const LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_LAYOUT;
+pub const CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
+pub const INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
+pub const LEFT_PARAMS: core_config::OptId = core_config::opt::ASSIGNMENT_LEFT_MIN_PARAMETERS;
+pub const LEFT_UNLESS: core_config::OptId = core_config::opt::ASSIGNMENT_LEFT_UNLESS_KINDS;
+pub const KEEP_BREAK: core_config::OptId = core_config::opt::ASSIGNMENT_KEEP_BREAK_KINDS;
+pub const OP_SKIP: core_config::OptId = core_config::opt::ASSIGNMENT_OP_TOKEN_SKIP_KINDS;
+pub const DESTRUCTURE: core_config::OptId = core_config::opt::ASSIGNMENT_DESTRUCTURE_KINDS;
+pub const GENERIC_CLOSURE: core_config::OptId = core_config::opt::ASSIGNMENT_GENERIC_CLOSURE_KINDS;
+pub const TYPE_ARG_KINDS: core_config::OptId = core_config::opt::TYPE_ARGUMENT_COMPLEX_KINDS;
 
 /// How a right side that is not decided by its kind is laid out.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -70,7 +70,7 @@ pub struct AssignPolicy {
 
 impl AssignPolicy {
     pub fn of(options: &ResolvedOptions) -> Self {
-        let text = |name: &str| options.text(name);
+        let text = |name: core_config::OptId| options.text(name);
         Self {
             style: match text(LAYOUT) {
                 "fluid" => AssignStyle::Fluid,

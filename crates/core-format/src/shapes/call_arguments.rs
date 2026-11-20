@@ -56,12 +56,12 @@ impl CallStyle {
     pub fn of(options: &ResolvedOptions) -> CallStyle {
         CallStyle {
             first: options
-                .get("hug_first_argument")
-                .is_some_and(|_| options.bool("hug_first_argument")),
+                .get(core_config::opt::HUG_FIRST_ARGUMENT)
+                .is_some_and(|_| options.bool(core_config::opt::HUG_FIRST_ARGUMENT)),
             body: false,
             last: match options
-                .get("hug_last_argument")
-                .map(|_| options.str("hug_last_argument"))
+                .get(core_config::opt::HUG_LAST_ARGUMENT)
+                .map(|_| options.str(core_config::opt::HUG_LAST_ARGUMENT))
             {
                 Some("last") => HugLast::Last,
                 Some("sole") => HugLast::Sole,

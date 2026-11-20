@@ -15,7 +15,7 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
     if node.kind() != k::CONDITIONAL_EXPRESSION {
         return Ok(None);
     }
-    shapes::conditional(cx, node, &shapes::ConditionalPolicy::of(cx.options), &Hooks).map(Some)
+    shapes::conditional(cx, node, cx.conditional_policy(), &Hooks).map(Some)
 }
 
 fn is_cond(n: &SyntaxNode) -> bool {

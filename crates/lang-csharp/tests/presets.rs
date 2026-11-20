@@ -32,8 +32,8 @@ fn presets_are_resolved_from_extends() {
     )
     .unwrap()
     .options;
-    assert_eq!(options.int("line_width"), 100);
-    assert_eq!(options.str("trailing_commas"), "multiline");
+    assert_eq!(options.int(core_config::opt::LINE_WIDTH), 100);
+    assert_eq!(options.str(core_config::opt::TRAILING_COMMAS), "multiline");
     // The user's sections still win over the preset.
     let options = resolve(
         "extends: [\"preset:csharp/csharpier-compat\"]
@@ -44,7 +44,7 @@ csharp:
     )
     .unwrap()
     .options;
-    assert_eq!(options.int("line_width"), 80);
+    assert_eq!(options.int(core_config::opt::LINE_WIDTH), 80);
     let error = resolve(
         "extends: [\"preset:csharp/nope\"]
 ",

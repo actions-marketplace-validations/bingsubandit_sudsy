@@ -4,7 +4,7 @@
 
 use super::*;
 use core_format::FormatError;
-use core_format::shapes::{self, ChainPolicy, ListLayout, ListStyle, Printer, TrailingComma};
+use core_format::shapes::{self, ListLayout, ListStyle, Printer, TrailingComma};
 
 pub(super) fn rule(
     cx: &FormatCtx<'_>,
@@ -38,12 +38,7 @@ impl shapes::BinaryHooks for BinaryHooks {
 }
 
 fn binary(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::binary_chain(
-        cx,
-        node,
-        &shapes::BinaryPolicy::of(cx.options),
-        &BinaryHooks,
-    )
+    shapes::binary_chain(cx, node, cx.binary_policy(), &BinaryHooks)
 }
 
 /// Tokens and comments print with the rules of the language.
@@ -60,12 +55,7 @@ impl shapes::ConditionalHooks for TernaryHooks {
 }
 
 fn ternary(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    match shapes::conditional(
-        cx,
-        node,
-        &shapes::ConditionalPolicy::of(cx.options),
-        &TernaryHooks,
-    ) {
+    match shapes::conditional(cx, node, cx.conditional_policy(), &TernaryHooks) {
         Err(FormatError::Shape(_)) => generic(cx, node),
         r => r,
     }
@@ -125,7 +115,7 @@ pub(super) fn assign_at(
             right: Some(right),
             short_key: false,
         },
-        &shapes::AssignPolicy::of(cx.options),
+        cx.assign_policy(),
         &AssignHooks,
     )
 }
@@ -212,5 +202,5 @@ fn chain(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             })
         }
     }
-    shapes::call_chain(cx, node, &ChainPolicy::of(cx.options), &Hooks(cx))
+    shapes::call_chain(cx, node, cx.chain_policy(), &Hooks(cx))
 }

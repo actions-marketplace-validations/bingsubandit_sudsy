@@ -36,7 +36,10 @@ impl NodeFormatter for ShellFormatter {
         &self,
         options: &core_config::ResolvedOptions,
     ) -> core_format::comments::CommentStyle {
-        core_format::comments::CommentStyle::column_option(options, "comment_column")
+        core_format::comments::CommentStyle::column_option(
+            options,
+            core_config::opt::COMMENT_COLUMN,
+        )
     }
 
     fn format_node(
@@ -413,7 +416,7 @@ fn heredoc(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> {
         cx,
         &raw,
         (&op, "<<-"),
-        "heredoc_indent",
+        core_config::opt::HEREDOC_INDENT,
     ));
     Ok(doc::concat(parts))
 }
@@ -808,7 +811,7 @@ fn end(cx: &FormatCtx<'_>, term: Option<&E>, own_line: bool) -> Option<Doc> {
     core_format::shapes::continuation::item_terminator(
         cx,
         term.and_then(E::tok).map(|t| kw(cx, t)),
-        ("case_last_terminator", k::CASE_END),
+        (core_config::opt::CASE_LAST_TERMINATOR, k::CASE_END),
         own_line,
     )
 }

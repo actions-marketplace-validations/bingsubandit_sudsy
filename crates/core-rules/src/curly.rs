@@ -51,14 +51,14 @@ rule! {
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let g = file.grammar;
-        let style = match ctx.format.and_then(|f| f.options.get("curly_style")) {
+        let style = match ctx.format.and_then(|f| f.options.get(core_config::opt::CURLY_STYLE)) {
             Some(core_config::OptionValue::String(s)) => s.as_str(),
             _ => ctx.options.string("style"),
         };
         let chain = style == "chain";
         let width = ctx
             .format
-            .map_or(0, |f| usize::try_from(f.options.int("line_width")).unwrap_or(0));
+            .map_or(0, |f| usize::try_from(f.options.int(core_config::opt::LINE_WIDTH)).unwrap_or(0));
         let kinds = self.format_kinds(g);
         for n in ctx.nodes(&kinds) {
             let mut edits = Vec::new();

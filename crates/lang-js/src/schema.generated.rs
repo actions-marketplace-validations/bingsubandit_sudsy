@@ -1,58 +1,58 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const SEMI: &str = "semi";
+pub const SEMI: core_config::OptId = core_config::opt::SEMI;
 #[allow(dead_code)]
-pub const QUOTE_STYLE: &str = "quote_style";
+pub const QUOTE_STYLE: core_config::OptId = core_config::opt::QUOTE_STYLE;
 #[allow(dead_code)]
-pub const QUOTE_PROPS: &str = "quote_props";
+pub const QUOTE_PROPS: core_config::OptId = core_config::opt::QUOTE_PROPS;
 #[allow(dead_code)]
-pub const TRAILING_COMMAS: &str = "trailing_commas";
+pub const TRAILING_COMMAS: core_config::OptId = core_config::opt::TRAILING_COMMAS;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_STYLE: &str = "member_chain_style";
+pub const MEMBER_CHAIN_STYLE: core_config::OptId = core_config::opt::MEMBER_CHAIN_STYLE;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_MIN_CALLS: &str = "member_chain_min_calls";
+pub const MEMBER_CHAIN_MIN_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_MIN_CALLS;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_SHORT_HEAD: &str = "member_chain_short_head";
+pub const MEMBER_CHAIN_SHORT_HEAD: core_config::OptId = core_config::opt::MEMBER_CHAIN_SHORT_HEAD;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_INDENT: &str = "member_chain_indent";
+pub const MEMBER_CHAIN_INDENT: core_config::OptId = core_config::opt::MEMBER_CHAIN_INDENT;
 #[allow(dead_code)]
-pub const BINARY_OPERATOR_LINE: &str = "binary_operator_line";
+pub const BINARY_OPERATOR_LINE: core_config::OptId = core_config::opt::BINARY_OPERATOR_LINE;
 #[allow(dead_code)]
-pub const BINARY_INDENT: &str = "binary_indent";
+pub const BINARY_INDENT: core_config::OptId = core_config::opt::BINARY_INDENT;
 #[allow(dead_code)]
-pub const BINARY_HUG: &str = "binary_hug";
+pub const BINARY_HUG: core_config::OptId = core_config::opt::BINARY_HUG;
 #[allow(dead_code)]
-pub const HUG_FIRST_ARGUMENT: &str = "hug_first_argument";
+pub const HUG_FIRST_ARGUMENT: core_config::OptId = core_config::opt::HUG_FIRST_ARGUMENT;
 #[allow(dead_code)]
-pub const HUG_LAST_ARGUMENT: &str = "hug_last_argument";
+pub const HUG_LAST_ARGUMENT: core_config::OptId = core_config::opt::HUG_LAST_ARGUMENT;
 #[allow(dead_code)]
-pub const INDENT_NESTED_BINARY: &str = "indent_nested_binary";
+pub const INDENT_NESTED_BINARY: core_config::OptId = core_config::opt::INDENT_NESTED_BINARY;
 #[allow(dead_code)]
-pub const ASSIGNMENT_LAYOUT: &str = "assignment_layout";
+pub const ASSIGNMENT_LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_LAYOUT;
 #[allow(dead_code)]
-pub const ASSIGNMENT_CONDITIONAL: &str = "assignment_conditional";
+pub const ASSIGNMENT_CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
 #[allow(dead_code)]
-pub const ASSIGNMENT_INDENT: &str = "assignment_indent";
+pub const ASSIGNMENT_INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
 #[allow(dead_code)]
-pub const ASSIGNMENT_OP_TOKEN_SKIP_KINDS: &str = "assignment_op_token_skip_kinds";
+pub const ASSIGNMENT_OP_TOKEN_SKIP_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_OP_TOKEN_SKIP_KINDS;
 #[allow(dead_code)]
-pub const ASSIGNMENT_DESTRUCTURE_KINDS: &str = "assignment_destructure_kinds";
+pub const ASSIGNMENT_DESTRUCTURE_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_DESTRUCTURE_KINDS;
 #[allow(dead_code)]
-pub const ASSIGNMENT_GENERIC_CLOSURE_KINDS: &str = "assignment_generic_closure_kinds";
+pub const ASSIGNMENT_GENERIC_CLOSURE_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_GENERIC_CLOSURE_KINDS;
 #[allow(dead_code)]
-pub const REWRITE_PARENTHESIZE_PAIRS: &str = "rewrite_parenthesize_pairs";
+pub const REWRITE_PARENTHESIZE_PAIRS: core_config::OptId = core_config::opt::REWRITE_PARENTHESIZE_PAIRS;
 #[allow(dead_code)]
-pub const TYPE_ARGUMENT_COMPLEX_KINDS: &str = "type_argument_complex_kinds";
+pub const TYPE_ARGUMENT_COMPLEX_KINDS: core_config::OptId = core_config::opt::TYPE_ARGUMENT_COMPLEX_KINDS;
 #[allow(dead_code)]
-pub const CONDITIONAL_INDENT: &str = "conditional_indent";
+pub const CONDITIONAL_INDENT: core_config::OptId = core_config::opt::CONDITIONAL_INDENT;
 #[allow(dead_code)]
-pub const CONDITIONAL_LAYOUT: &str = "conditional_layout";
+pub const CONDITIONAL_LAYOUT: core_config::OptId = core_config::opt::CONDITIONAL_LAYOUT;
 #[allow(dead_code)]
-pub const ARROW_PARENS: &str = "arrow_parens";
+pub const ARROW_PARENS: core_config::OptId = core_config::opt::ARROW_PARENS;
 #[allow(dead_code)]
-pub const BRACKET_SAME_LINE: &str = "bracket_same_line";
+pub const BRACKET_SAME_LINE: core_config::OptId = core_config::opt::BRACKET_SAME_LINE;
 #[allow(dead_code)]
-pub const JSX_SINGLE_QUOTE: &str = "jsx_single_quote";
+pub const JSX_SINGLE_QUOTE: core_config::OptId = core_config::opt::JSX_SINGLE_QUOTE;
 #[allow(dead_code)]
 pub fn semi(o: &core_config::ResolvedOptions) -> bool {
     o.flag(SEMI, true)
@@ -117,10 +117,10 @@ pub fn option_schema() -> core_config::OptionSchema {
         shared::indent_style(),
         core_config::shared::final_newline(true),
         shared::end_of_line(),
-        core_config::OptionDef::boolean("semi", true, "End statements with `;`. When false a statement that starts with `(`, `[`, a backtick, `+`, `-`, `/` or `<` gets a `;` in front, as a class property does before a member that starts with `[`, `(` or `*`."),
-        core_config::OptionDef::choice("quote_style", &["double", "single"], "double", "Quotes of strings (not JSX attributes). A string with more of the preferred quote than of the other keeps the other one, to need fewer escapes."),
-        core_config::OptionDef::choice("quote_props", &["as_needed", "consistent", "preserve"], "as_needed", "Quotes around property names of objects and destructuring patterns: `as_needed` removes quotes that are not required (`\"a\": 1` becomes `a: 1`), `consistent` quotes every name of an object when one of its names requires quotes and removes them otherwise, `preserve` keeps what the source has. Numeric names are left as written."),
-        core_config::OptionDef::choice("trailing_commas", &["all", "es5", "none"], "all", "Trailing comma of a list that breaks over several lines: `all` after every list including function parameters and call arguments, `es5` after objects, arrays, destructuring and import/export lists only, `none` never."),
+        core_config::OptionDef::boolean(core_config::opt::SEMI, true, "End statements with `;`. When false a statement that starts with `(`, `[`, a backtick, `+`, `-`, `/` or `<` gets a `;` in front, as a class property does before a member that starts with `[`, `(` or `*`."),
+        core_config::OptionDef::choice(core_config::opt::QUOTE_STYLE, &["double", "single"], "double", "Quotes of strings (not JSX attributes). A string with more of the preferred quote than of the other keeps the other one, to need fewer escapes."),
+        core_config::OptionDef::choice(core_config::opt::QUOTE_PROPS, &["as_needed", "consistent", "preserve"], "as_needed", "Quotes around property names of objects and destructuring patterns: `as_needed` removes quotes that are not required (`\"a\": 1` becomes `a: 1`), `consistent` quotes every name of an object when one of its names requires quotes and removes them otherwise, `preserve` keeps what the source has. Numeric names are left as written."),
+        core_config::OptionDef::choice(core_config::opt::TRAILING_COMMAS, &["all", "es5", "none"], "all", "Trailing comma of a list that breaks over several lines: `all` after every list including function parameters and call arguments, `es5` after objects, arrays, destructuring and import/export lists only, `none` never."),
         core_config::shared::member_chain_style("grouped"),
         core_config::shared::member_chain_min_calls(3),
         core_config::shared::member_chain_short_head(2),
@@ -142,9 +142,9 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::conditional_indent(1),
         core_config::shared::conditional_layout("chained"),
         core_config::shared::bracket_spacing(true),
-        core_config::OptionDef::choice("arrow_parens", &["always", "avoid"], "always", "Parentheses around the lone parameter of an arrow function: `always` writes `(x) => x`, `avoid` writes `x => x` when the parameter is a plain name (no type, default, rest or destructuring)."),
-        core_config::OptionDef::boolean("bracket_same_line", false, "JSX: put the `>` of a multi-line element on the line of its last attribute instead of on a line of its own."),
-        core_config::OptionDef::boolean("jsx_single_quote", false, "Single quotes for JSX attribute strings (a string with more of the preferred quote than of the other keeps the other one)."),
+        core_config::OptionDef::choice(core_config::opt::ARROW_PARENS, &["always", "avoid"], "always", "Parentheses around the lone parameter of an arrow function: `always` writes `(x) => x`, `avoid` writes `x => x` when the parameter is a plain name (no type, default, rest or destructuring)."),
+        core_config::OptionDef::boolean(core_config::opt::BRACKET_SAME_LINE, false, "JSX: put the `>` of a multi-line element on the line of its last attribute instead of on a line of its own."),
+        core_config::OptionDef::boolean(core_config::opt::JSX_SINGLE_QUOTE, false, "Single quotes for JSX attribute strings (a string with more of the preferred quote than of the other keeps the other one)."),
         ])
         .with_presets(vec![
         core_config::Preset::new("js/eslint-recommended", include_str!("../presets/eslint-recommended.yaml")),

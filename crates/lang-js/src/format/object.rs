@@ -223,7 +223,7 @@ fn property(node: &SyntaxNode, cx: &FormatCtx<'_>) -> R {
             .find_map(node_of)
             .is_some_and(|key| {
                 let width = super::ast::text_of(cx, key).chars().count();
-                width < cx.options.uint("indent_size", 2) + 3
+                width < cx.options.uint(core_config::opt::INDENT_SIZE, 2) + 3
             });
     super::assign::assign_like(
         cx,

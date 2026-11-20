@@ -136,7 +136,10 @@ impl Default for CommentStyle {
 impl CommentStyle {
     /// The default style, with the trailing comments aligned in columns when the string option
     /// `option` is `align` and keeping the source's blanks before them otherwise.
-    pub fn column_option(options: &core_config::ResolvedOptions, option: &str) -> Self {
+    pub fn column_option(
+        options: &core_config::ResolvedOptions,
+        option: core_config::OptId,
+    ) -> Self {
         let align = options.is(option, "align");
         CommentStyle {
             keep_gap: !align,
@@ -1058,7 +1061,8 @@ pub fn block_takers(
             break;
         }
         if blocks.contains(&a.kind()) {
-            let content = *content.get_or_insert_with(|| options.is("comment_indent", "content"));
+            let content = *content
+                .get_or_insert_with(|| options.is(core_config::opt::COMMENT_INDENT, "content"));
             let col = if content {
                 1 + if tok.text_range().is_empty() {
                     0

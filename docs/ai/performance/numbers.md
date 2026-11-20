@@ -10,6 +10,7 @@ Machine unless noted: AMD Ryzen 5 3600 (6 cores / 12 threads), 32 GB, Windows 11
 ## Formatting (`perf-bench`, `format_file` = parse, layout, print, re-parse, tree compare, YAML model compare)
 | Path | Number |
 |---|---|
+| Options by id (`ResolvedOptions` a vector indexed by `OptId`, schema built from ids, shared policies cached per file; `scripts/bench.sh` via `finish.sh`, aarch64 Linux CI runner, against the base before the change) | format instructions: c -3.3%, cpp -3.2%, css -1.3%, java -5.1%, js -2.2%, json -1.4%, kt -4.3%, php -1.0%, component.html format-query -9.8% (allocations -9.6%), vue -4.8%, svelte -6.8%, html -1.0%; allocations java -1.9%, cs -1.7%, github-actions -1.3%; startup.format -2.9%, startup.lint -0.6%; no metric regressed. |
 | Copied-through counter (`FormatCtx::note_copied`, a push per `verbatim_node`/`verbatim_range`; `mostly_copied` once per file: sort and merge of the ranges; `scripts/bench.sh` via `finish.sh`, aarch64 Linux CI runner) | every format metric within 0.5% of the base (sh and php, the heaviest users of `verbatim_node`, included) |
 | JSON 11.1 MB phases: parse / layout / print / re-parse / compare | 304 / 1136 / 259 / 408 / 122 ms; whole 5.9 MB/s at 4x |
 | JSON one line 1.1 MB | 386 ms (2.9 MB/s) |

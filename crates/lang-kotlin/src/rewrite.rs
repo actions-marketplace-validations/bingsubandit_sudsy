@@ -98,7 +98,9 @@ pub fn rewrite(
         g,
         tree,
         text,
-        &options.strings("semicolon_keep_parents"),
+        &options
+            .strings(core_config::opt::SEMICOLON_KEEP_PARENTS)
+            .collect::<Vec<_>>(),
         &mut edits,
     );
     if edits.is_empty() {

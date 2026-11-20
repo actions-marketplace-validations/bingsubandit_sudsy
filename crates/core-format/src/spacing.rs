@@ -723,7 +723,7 @@ impl SpaceRules {
     /// The option and the word of the construct an opening brace `{` belongs to: the `{` that
     /// starts the block (child of a construct of an `attach` kind set); of several words for one
     /// kind (`class`, `struct`) the one the construct's own keyword spells.
-    pub fn attach_word(&self, brace: &SyntaxToken) -> Option<(&str, &str)> {
+    pub fn attach_word(&self, brace: &SyntaxToken) -> Option<(core_config::OptId, &str)> {
         if self.attach.is_empty() || brace.text() != "{" {
             return None;
         }
@@ -749,7 +749,7 @@ impl SpaceRules {
             .chain(of)
             .find(|b| spelled(b))
             .unwrap_or(first);
-        Some((chosen.option.as_str(), chosen.word.as_str()))
+        Some((chosen.option, chosen.word.as_str()))
     }
 
     /// `Flow::joined`.

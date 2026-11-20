@@ -43,7 +43,7 @@ pub(crate) fn format(node: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<Option<Doc
     if let Some(t) = &lead {
         cx.hold_leading(t);
     }
-    let doc = shapes::binary_chain(cx, node, &shapes::BinaryPolicy::of(cx.options), &Hooks)?;
+    let doc = shapes::binary_chain(cx, node, cx.binary_policy(), &Hooks)?;
     Ok(Some(match &lead {
         Some(t) => concat(vec![cx.held_leading(t), doc]),
         None => doc,

@@ -106,7 +106,8 @@ pub fn modifiers(
 /// declaration: the file imports its name as one of the option `type_use_annotations`?
 fn is_type_use(cx: &FormatCtx<'_>, annotation: &SyntaxElement, at: &SyntaxNode) -> bool {
     let g = cx.grammar;
-    let Some(OptionValue::List(items)) = cx.options.get("type_use_annotations") else {
+    let Some(OptionValue::List(items)) = cx.options.get(core_config::opt::TYPE_USE_ANNOTATIONS)
+    else {
         return false;
     };
     let Some(a) = annotation.as_node().filter(|a| {
@@ -170,7 +171,9 @@ pub fn lead_annotations(
         .count();
     // With the option `member_attribute_line: keep` an annotation the source leaves on the line
     // of what follows it stays there.
-    let keep = cx.options.is("member_attribute_line", "keep");
+    let keep = cx
+        .options
+        .is(core_config::opt::MEMBER_ATTRIBUTE_LINE, "keep");
     let mut parts = Vec::new();
     for (i, e) in els[..lead].iter().enumerate() {
         let same_line = keep

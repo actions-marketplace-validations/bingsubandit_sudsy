@@ -8,7 +8,7 @@ use super::seq::{R, seq_of};
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc};
 use core_format::seq::children;
-use core_format::shapes::{self, ChainPolicy, ends_in_line_comment};
+use core_format::shapes::{self, ends_in_line_comment};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
@@ -78,7 +78,7 @@ fn with_rhs(
             right: Some(&right),
             short_key: false,
         },
-        &shapes::AssignPolicy::of(cx.options),
+        cx.assign_policy(),
         &AssignHooks,
     )
 }
@@ -167,7 +167,7 @@ pub fn conditional(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     shapes::conditional(
         cx,
         node,
-        &shapes::ConditionalPolicy::of(cx.options),
+        cx.conditional_policy(),
         &shapes::NoConditionalHooks,
     )
 }
@@ -207,12 +207,7 @@ impl shapes::BinaryHooks for BinaryHooks {
 /// `a + b + c`: the shared operator chain (`core_format::shapes::binary_chain`) under the
 /// `binary_*` options.
 pub fn binary_chain(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::binary_chain(
-        cx,
-        node,
-        &shapes::BinaryPolicy::of(cx.options),
-        &BinaryHooks,
-    )
+    shapes::binary_chain(cx, node, cx.binary_policy(), &BinaryHooks)
 }
 
 // ------------------------------------------------------------------- member
@@ -220,5 +215,5 @@ pub fn binary_chain(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 /// `a.B().C().D()`: the shared member chain (`core_format::shapes::call_chain`) under the
 /// `member_chain_*` options.
 pub fn member_chain(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    shapes::call_chain(cx, node, &ChainPolicy::of(cx.options), &shapes::NoHooks)
+    shapes::call_chain(cx, node, cx.chain_policy(), &shapes::NoHooks)
 }

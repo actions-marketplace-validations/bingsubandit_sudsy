@@ -143,7 +143,7 @@ pub(super) fn assign(
                 right: Some(right),
                 short_key: false,
             },
-            &shapes::AssignPolicy::of(cx.options),
+            cx.assign_policy(),
             &KeepOnLine,
         )
     })

@@ -18,10 +18,10 @@ use core_config::ResolvedOptions;
 use core_syntax::roles;
 use core_syntax::{Assoc, Grammar, SyntaxElement, SyntaxNode, SyntaxToken};
 
-pub const OPERATOR_LINE: &str = "binary_operator_line";
-pub const INDENT: &str = "binary_indent";
-pub const INDENT_NESTED: &str = "indent_nested_binary";
-pub const HUG: &str = "binary_hug";
+pub const OPERATOR_LINE: core_config::OptId = core_config::opt::BINARY_OPERATOR_LINE;
+pub const INDENT: core_config::OptId = core_config::opt::BINARY_INDENT;
+pub const INDENT_NESTED: core_config::OptId = core_config::opt::INDENT_NESTED_BINARY;
+pub const HUG: core_config::OptId = core_config::opt::BINARY_HUG;
 
 /// Which end of a broken line the operator is on.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -55,7 +55,7 @@ pub struct BinaryPolicy {
 
 impl BinaryPolicy {
     pub fn of(options: &ResolvedOptions) -> Self {
-        let text = |name: &str| options.text(name);
+        let text = |name: core_config::OptId| options.text(name);
         Self {
             operator_line: if text(OPERATOR_LINE) == "end" {
                 OperatorLine::End

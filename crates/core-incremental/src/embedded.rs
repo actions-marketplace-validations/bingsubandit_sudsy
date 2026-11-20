@@ -20,7 +20,7 @@ use std::rc::Rc;
 
 /// Names the host's option that turns the formatting of embedded code off (Prettier's
 /// `embeddedLanguageFormatting`: `auto` formats what it knows, `off` keeps all as written).
-const FORMATTING: &str = "embedded_language_formatting";
+const FORMATTING: core_config::OptId = core_config::opt::EMBEDDED_LANGUAGE_FORMATTING;
 
 fn lookup<'a>(db: &'a dyn Db, name: &str) -> Resolved<'a> {
     resolve(db.providers().iter().map(|p| p.as_ref()), name)
@@ -271,21 +271,30 @@ fn prepare(
         .options;
     let language_version = resolve_dialect(&mut options, dialect);
     if let Some(w) = width {
-        options.set("line_width", OptionValue::Int(w.max(20) as i64));
+        options.set(
+            core_config::opt::LINE_WIDTH,
+            OptionValue::Int(w.max(20) as i64),
+        );
     }
     if single_quotes {
-        if options.get("quote_style").is_some() {
-            options.set("quote_style", OptionValue::String("single".into()));
+        if options.get(core_config::opt::QUOTE_STYLE).is_some() {
+            options.set(
+                core_config::opt::QUOTE_STYLE,
+                OptionValue::String("single".into()),
+            );
         }
-        if options.get("single_quote").is_some() {
-            options.set("single_quote", OptionValue::Bool(true));
+        if options.get(core_config::opt::SINGLE_QUOTE).is_some() {
+            options.set(core_config::opt::SINGLE_QUOTE, OptionValue::Bool(true));
         }
     }
     let version = if mode == EmbedMode::Program {
         language_version
     } else {
         // The provider's parse and layout read the mode: the code is not a whole file.
-        options.set("embed_mode", OptionValue::String(mode.name().into()));
+        options.set(
+            core_config::opt::EMBED_MODE,
+            OptionValue::String(mode.name().into()),
+        );
         Some(mode.name().into())
     };
     Some(Rc::new((options, version)))

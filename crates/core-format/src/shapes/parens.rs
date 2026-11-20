@@ -258,7 +258,7 @@ pub fn ends_statement_line(cx: &FormatCtx<'_>, paren: &SyntaxNode) -> bool {
     let g = cx.grammar;
     let listed = paren.parent().is_some_and(|p| {
         cx.options
-            .list_has("paren_line_end_parents", g.name(p.kind()))
+            .list_has(core_config::opt::PAREN_LINE_END_PARENTS, g.name(p.kind()))
     });
     listed
         && cx.last_token(paren).is_some_and(|t| {

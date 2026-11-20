@@ -101,7 +101,7 @@ pub fn format_parsed_with(
     // for these files only), it gets one more rewrite round, and a layout when that rewrote
     // something.
     let done = rewritten.as_ref().map_or(file, |(done, _)| done);
-    let keywords = options.strings("settle_keywords");
+    let keywords: Vec<&str> = options.strings(core_config::opt::SETTLE_KEYWORDS).collect();
     if !keywords.is_empty() && core_format::rewrite::has_wrapped_statement(&out, &keywords) {
         let settled = SourceFile {
             version: done.version + 1,
@@ -127,7 +127,7 @@ fn rewrite_loop(
     options: &ResolvedOptions,
 ) -> Result<Option<(SourceFile, ParseResult)>, FileFormatError> {
     let grammar = provider.grammar();
-    let listed = options.strings("format_rules");
+    let listed: Vec<&str> = options.strings(core_config::opt::FORMAT_RULES).collect();
     let mut current: Option<(SourceFile, ParseResult)> = None;
     // The rules that rewrite the source take a round of their own: the language's rewrite follows.
     let rounds = provider.formatter().rewrite_rounds()
@@ -214,7 +214,7 @@ fn rewrite_loop(
 
 /// The shared rules that rewrite the source that the language has rows for, found once per
 /// language (the rows' text is static).
-fn format_rules(rows: &'static str, listed: &[String]) -> std::sync::Arc<Vec<ActiveRule<'static>>> {
+fn format_rules(rows: &'static str, listed: &[&str]) -> std::sync::Arc<Vec<ActiveRule<'static>>> {
     type Store = std::sync::Mutex<
         std::collections::HashMap<(usize, usize, String), std::sync::Arc<Vec<ActiveRule<'static>>>>,
     >;
@@ -232,7 +232,7 @@ fn format_rules(rows: &'static str, listed: &[String]) -> std::sync::Arc<Vec<Act
                 .filter(|r| {
                     r.formats()
                         && (rows.contains(&format!("[{}]", r.meta().id))
-                            || listed.iter().any(|l| l == r.meta().id))
+                            || listed.contains(&r.meta().id))
                 })
                 .filter_map(|rule| {
                     let options =
@@ -431,13 +431,17 @@ pub fn resolve_dialect(
     options: &mut ResolvedOptions,
     matcher_dialect: Option<String>,
 ) -> Option<String> {
-    if let Some(core_config::OptionValue::String(v)) = options.get("target_version") {
+    if let Some(core_config::OptionValue::String(v)) = options.get(core_config::opt::TARGET_VERSION)
+    {
         return Some(v.clone());
     }
-    let chosen = match options.get("dialect")? {
+    let chosen = match options.get(core_config::opt::DIALECT)? {
         core_config::OptionValue::String(s) if s != "auto" => Some(s.clone()),
         _ => matcher_dialect,
     }?;
-    options.set("dialect", core_config::OptionValue::String(chosen.clone()));
+    options.set(
+        core_config::opt::DIALECT,
+        core_config::OptionValue::String(chosen.clone()),
+    );
     Some(chosen)
 }

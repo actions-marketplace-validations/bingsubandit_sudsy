@@ -172,9 +172,9 @@ pub trait NodeFormatter: Send + Sync {
     /// comment after code.
     fn comment_style(&self, options: &ResolvedOptions) -> CommentStyle {
         CommentStyle {
-            trim_lines: options.get("comment_trim_lines")
+            trim_lines: options.get(core_config::opt::COMMENT_TRIM_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
-            reindent: options.get("comment_reindent_lines")
+            reindent: options.get(core_config::opt::COMMENT_REINDENT_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
             ..CommentStyle::default()
         }
@@ -215,6 +215,15 @@ impl NodeFormatter for DefaultFormatter {
 /// Everything a formatting decision may read. Any node of a tree can be formatted with
 /// [`FormatCtx::format`]: nothing depends on the root, so a subtree is formatted in its context
 /// (its comments and neighbours are read from the tree around it).
+/// The policies of the shared shapes, each built from the options the first time a shape asks.
+#[derive(Default)]
+struct Policies {
+    chain: std::sync::OnceLock<crate::shapes::ChainPolicy>,
+    binary: std::sync::OnceLock<crate::shapes::BinaryPolicy>,
+    assign: std::sync::OnceLock<crate::shapes::AssignPolicy>,
+    conditional: std::sync::OnceLock<crate::shapes::ConditionalPolicy>,
+}
+
 pub struct FormatCtx<'a> {
     pub grammar: &'a Grammar,
     pub options: &'a ResolvedOptions,
@@ -239,6 +248,8 @@ pub struct FormatCtx<'a> {
     cache: std::sync::OnceLock<Box<dyn std::any::Any + Send + Sync>>,
     /// The widths for `align_comments` (see [`crate::align`]), measured when first asked for.
     comment_align: std::sync::OnceLock<crate::align::AlignTable>,
+    /// The shared shapes' policies, built from the options on first use ([`FormatCtx::chain_policy`]).
+    policies: Policies,
     /// Documents of nodes formatted for a layout, by node and flags (see [`FormatCtx::layout`]).
     layouts: Mutex<HashMap<(TextRange, u32, u32), Doc>>,
     embedder: Option<&'a dyn Embedder>,
@@ -261,7 +272,7 @@ impl<'a> FormatCtx<'a> {
             directives,
             formatter,
             comment_style: formatter.comment_style(options),
-            max_blank_lines: match options.get("max_blank_lines") {
+            max_blank_lines: match options.get(core_config::opt::MAX_BLANK_LINES) {
                 Some(core_config::OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(usize::MAX),
                 _ => usize::MAX,
             },
@@ -273,6 +284,7 @@ impl<'a> FormatCtx<'a> {
             any_held_leading: std::sync::atomic::AtomicBool::new(false),
             cache: std::sync::OnceLock::new(),
             comment_align: std::sync::OnceLock::new(),
+            policies: Policies::default(),
             layouts: Mutex::new(HashMap::new()),
             embedder: None,
             copied: Mutex::new(Vec::new()),
@@ -322,6 +334,34 @@ impl<'a> FormatCtx<'a> {
     ) -> Option<String> {
         self.embedder?
             .format(language, mode, code, width, single_quotes)
+    }
+
+    /// The member chain policy of the options, built once per file.
+    pub fn chain_policy(&self) -> &crate::shapes::ChainPolicy {
+        self.policies
+            .chain
+            .get_or_init(|| crate::shapes::ChainPolicy::of(self.options))
+    }
+
+    /// The operator chain policy of the options, built once per file.
+    pub fn binary_policy(&self) -> &crate::shapes::BinaryPolicy {
+        self.policies
+            .binary
+            .get_or_init(|| crate::shapes::BinaryPolicy::of(self.options))
+    }
+
+    /// The assignment policy of the options, built once per file.
+    pub fn assign_policy(&self) -> &crate::shapes::AssignPolicy {
+        self.policies
+            .assign
+            .get_or_init(|| crate::shapes::AssignPolicy::of(self.options))
+    }
+
+    /// The conditional policy of the options, built once per file.
+    pub fn conditional_policy(&self) -> &crate::shapes::ConditionalPolicy {
+        self.policies
+            .conditional
+            .get_or_init(|| crate::shapes::ConditionalPolicy::of(self.options))
     }
 
     /// Data the provider derives from the options once per run instead of once per node. A

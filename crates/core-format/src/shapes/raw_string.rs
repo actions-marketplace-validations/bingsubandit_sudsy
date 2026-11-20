@@ -22,7 +22,7 @@ fn target(options: &ResolvedOptions, g: &Grammar, node: &SyntaxNode) -> Option<S
         .filter(|p| g.has_tag(p.kind(), "member-access"))?;
     let member = g.slot(&parent, "member")?;
     let name = member.as_node()?.first_token()?;
-    if !options.list_has("raw_string_calls", name.text())
+    if !options.list_has(core_config::opt::RAW_STRING_CALLS, name.text())
         || parent.first_child().as_ref() != Some(node)
     {
         return None;

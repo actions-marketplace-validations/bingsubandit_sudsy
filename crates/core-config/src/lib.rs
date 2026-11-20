@@ -15,6 +15,7 @@ mod glob;
 mod json_schema;
 mod load;
 mod model;
+pub mod opt;
 mod presets;
 mod resolve;
 mod rule_ids;
@@ -32,6 +33,7 @@ pub use model::{
     Config, Depth, LanguageSection, LanguageSections, Level, LintSection, Need, OptionValue,
     Options, Override, Plugins, RuleConfig, Semantics,
 };
+pub use opt::OptId;
 pub use presets::{PRESET_PREFIX, Preset};
 pub use resolve::{FileInput, Resolved, ResolvedRule, Source};
 pub use schema::{OptionDef, OptionError, OptionKind, OptionSchema, ResolvedOptions, shared};

@@ -169,7 +169,7 @@ fn options_table(out: &mut String, project: &Project, schema: &OptionSchema, res
         .defs()
         .iter()
         .filter_map(|def| {
-            let value = resolved.options.get(def.name)?;
+            let value = resolved.options.get(def.id)?;
             let source = resolved
                 .sources
                 .get(def.name)

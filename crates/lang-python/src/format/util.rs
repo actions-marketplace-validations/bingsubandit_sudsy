@@ -72,8 +72,8 @@ pub(crate) fn style<'a>(cx: &'a FormatCtx<'_>) -> &'a Style {
             super::QuoteStyle::Double => core_format::literals::prefixed::Quote::Double,
         },
         magic_comma: super::magic_trailing_comma(cx.options) == super::MagicTrailingComma::Respect,
-        width: cx.options.int("line_width") as usize,
-        indent: cx.options.int("indent_size") as usize,
+        width: cx.options.int(core_config::opt::LINE_WIDTH) as usize,
+        indent: cx.options.int(core_config::opt::INDENT_SIZE) as usize,
         chain: core_format::shapes::ChainPolicy::of(cx.options),
         chain_flat: {
             let mut p = core_format::shapes::ChainPolicy::of(cx.options);

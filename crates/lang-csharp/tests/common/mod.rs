@@ -195,8 +195,10 @@ impl Subject for CsSubject {
 
     fn keeps_verbatim_trivia(&self) -> bool {
         let options = self.resolved();
-        !options.bool("derive_symbol_sets")
-            && options.string_lists("preprocessor_symbol_sets").is_empty()
+        !options.bool(core_config::opt::DERIVE_SYMBOL_SETS)
+            && options
+                .list(core_config::opt::PREPROCESSOR_SYMBOL_SETS)
+                .is_empty()
     }
 
     fn rewritten(&self, input: &str) -> String {

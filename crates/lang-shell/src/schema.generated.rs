@@ -1,10 +1,10 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const COMMENT_COLUMN: &str = "comment_column";
+pub const COMMENT_COLUMN: core_config::OptId = core_config::opt::COMMENT_COLUMN;
 #[allow(dead_code)]
-pub const HEREDOC_INDENT: &str = "heredoc_indent";
+pub const HEREDOC_INDENT: core_config::OptId = core_config::opt::HEREDOC_INDENT;
 #[allow(dead_code)]
-pub const CASE_LAST_TERMINATOR: &str = "case_last_terminator";
+pub const CASE_LAST_TERMINATOR: core_config::OptId = core_config::opt::CASE_LAST_TERMINATOR;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CommentColumn { Keep, Align }
@@ -41,13 +41,13 @@ pub fn option_schema() -> core_config::OptionSchema {
     core_config::OptionSchema::lazy(|| {
         core_config::OptionSchema::new(vec![
         core_config::shared::indent_size(4),
-        core_config::OptionDef::choice("indent_style", &["space", "tab"], "tab", "Indent with spaces or tabs."),
+        core_config::OptionDef::choice(core_config::opt::INDENT_STYLE, &["space", "tab"], "tab", "Indent with spaces or tabs."),
         core_config::shared::final_newline(true),
         shared::end_of_line(),
         core_config::shared::max_blank_lines(1, "Largest number of blank lines kept between statements and comments."),
-        core_config::OptionDef::choice("comment_column", &["keep", "align"], "keep", "A comment after code: `keep` leaves the blanks before it as written (at least one); `align` writes one blank, or pads it so that the trailing comments of consecutive lines start in one column."),
-        core_config::OptionDef::choice("heredoc_indent", &["keep", "reindent"], "keep", "The body and the delimiter of a `<<-` heredoc: `keep` leaves them as written; `reindent` drops their leading tabs (which `<<-` ignores) and indents the body one level and the delimiter as deep as the command (tab indentation only)."),
-        core_config::OptionDef::choice("case_last_terminator", &["keep", "add"], "keep", "The last arm of a `case` without `;;`: `keep` leaves it as written, `add` ends it with `;;`."),
+        core_config::OptionDef::choice(core_config::opt::COMMENT_COLUMN, &["keep", "align"], "keep", "A comment after code: `keep` leaves the blanks before it as written (at least one); `align` writes one blank, or pads it so that the trailing comments of consecutive lines start in one column."),
+        core_config::OptionDef::choice(core_config::opt::HEREDOC_INDENT, &["keep", "reindent"], "keep", "The body and the delimiter of a `<<-` heredoc: `keep` leaves them as written; `reindent` drops their leading tabs (which `<<-` ignores) and indents the body one level and the delimiter as deep as the command (tab indentation only)."),
+        core_config::OptionDef::choice(core_config::opt::CASE_LAST_TERMINATOR, &["keep", "add"], "keep", "The last arm of a `case` without `;;`: `keep` leaves it as written, `add` ends it with `;;`."),
         ])
         .with_presets(vec![
         core_config::Preset::new("shell/shellcheck", include_str!("../presets/shellcheck.yaml")),

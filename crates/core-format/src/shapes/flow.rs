@@ -150,7 +150,7 @@ impl Flow<'_> {
         {
             return None;
         }
-        Some(!cx.options.strings(name).iter().any(|w| w == word))
+        Some(!cx.options.strings(name).any(|w| w == word))
     }
 
     /// What stands between two neighbouring tokens: a line break the source has, else a blank
@@ -248,7 +248,7 @@ impl Flow<'_> {
         doc: impl Fn(&SyntaxElement) -> Result<Doc, FormatError>,
     ) -> Result<Doc, FormatError> {
         let tab = if self.source_hang {
-            cx.options.int("indent_size") as usize
+            cx.options.int(core_config::opt::INDENT_SIZE) as usize
         } else {
             0
         };

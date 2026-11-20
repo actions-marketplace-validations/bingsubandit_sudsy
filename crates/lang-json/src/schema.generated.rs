@@ -1,10 +1,10 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const COLLAPSE: &str = "collapse";
+pub const COLLAPSE: core_config::OptId = core_config::opt::COLLAPSE;
 #[allow(dead_code)]
-pub const TRAILING_COMMAS: &str = "trailing_commas";
+pub const TRAILING_COMMAS: core_config::OptId = core_config::opt::TRAILING_COMMAS;
 #[allow(dead_code)]
-pub const DIALECT: &str = "dialect";
+pub const DIALECT: core_config::OptId = core_config::opt::DIALECT;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Collapse { Preserve, Always, Never, OpeningBreak }
@@ -50,9 +50,9 @@ pub fn option_schema() -> core_config::OptionSchema {
         shared::end_of_line(),
         core_config::shared::bracket_spacing(true),
         core_config::shared::array_bracket_spacing(false),
-        core_config::OptionDef::choice("collapse", &["preserve", "always", "never", "opening_break"], "preserve", "Objects and arrays on one line: `preserve` keeps one that has a line break between its brackets expanded and puts the others on one line if they fit; `always` puts every one that fits on one line; `never` puts every non-empty one on several lines; `opening_break` keeps an object expanded when a line break follows its opening brace and puts every array that fits on one line."),
-        core_config::OptionDef::choice("trailing_commas", &["never", "multiline"], "never", "Trailing commas after the last item of a multi-line object or array (JSONC only)."),
-        core_config::OptionDef::choice("dialect", &["auto", "json", "jsonc"], "auto", "JSON or JSONC (comments, trailing commas); `auto` decides by file name."),
+        core_config::OptionDef::choice(core_config::opt::COLLAPSE, &["preserve", "always", "never", "opening_break"], "preserve", "Objects and arrays on one line: `preserve` keeps one that has a line break between its brackets expanded and puts the others on one line if they fit; `always` puts every one that fits on one line; `never` puts every non-empty one on several lines; `opening_break` keeps an object expanded when a line break follows its opening brace and puts every array that fits on one line."),
+        core_config::OptionDef::choice(core_config::opt::TRAILING_COMMAS, &["never", "multiline"], "never", "Trailing commas after the last item of a multi-line object or array (JSONC only)."),
+        core_config::OptionDef::choice(core_config::opt::DIALECT, &["auto", "json", "jsonc"], "auto", "JSON or JSONC (comments, trailing commas); `auto` decides by file name."),
         ])
         .with_presets(vec![
         core_config::Preset::new("json/biome", include_str!("../presets/biome.yaml")),

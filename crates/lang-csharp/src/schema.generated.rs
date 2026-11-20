@@ -1,118 +1,118 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const TRAILING_COMMAS: &str = "trailing_commas";
+pub const TRAILING_COMMAS: core_config::OptId = core_config::opt::TRAILING_COMMAS;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_MIN_CALLS: &str = "member_chain_min_calls";
+pub const MEMBER_CHAIN_MIN_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_MIN_CALLS;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_KEEP_ACCESSES: &str = "member_chain_keep_accesses";
+pub const MEMBER_CHAIN_KEEP_ACCESSES: core_config::OptId = core_config::opt::MEMBER_CHAIN_KEEP_ACCESSES;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_BREAK_ON_BLOCK: &str = "member_chain_break_on_block";
+pub const MEMBER_CHAIN_BREAK_ON_BLOCK: core_config::OptId = core_config::opt::MEMBER_CHAIN_BREAK_ON_BLOCK;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_SHORT_HEAD: &str = "member_chain_short_head";
+pub const MEMBER_CHAIN_SHORT_HEAD: core_config::OptId = core_config::opt::MEMBER_CHAIN_SHORT_HEAD;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_INDENT: &str = "member_chain_indent";
+pub const MEMBER_CHAIN_INDENT: core_config::OptId = core_config::opt::MEMBER_CHAIN_INDENT;
 #[allow(dead_code)]
-pub const BINARY_OPERATOR_LINE: &str = "binary_operator_line";
+pub const BINARY_OPERATOR_LINE: core_config::OptId = core_config::opt::BINARY_OPERATOR_LINE;
 #[allow(dead_code)]
-pub const BINARY_INDENT: &str = "binary_indent";
+pub const BINARY_INDENT: core_config::OptId = core_config::opt::BINARY_INDENT;
 #[allow(dead_code)]
-pub const BINARY_HUG: &str = "binary_hug";
+pub const BINARY_HUG: core_config::OptId = core_config::opt::BINARY_HUG;
 #[allow(dead_code)]
-pub const INDENT_NESTED_BINARY: &str = "indent_nested_binary";
+pub const INDENT_NESTED_BINARY: core_config::OptId = core_config::opt::INDENT_NESTED_BINARY;
 #[allow(dead_code)]
-pub const ASSIGNMENT_LAYOUT: &str = "assignment_layout";
+pub const ASSIGNMENT_LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_LAYOUT;
 #[allow(dead_code)]
-pub const ASSIGNMENT_CONDITIONAL: &str = "assignment_conditional";
+pub const ASSIGNMENT_CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
 #[allow(dead_code)]
-pub const ASSIGNMENT_INDENT: &str = "assignment_indent";
+pub const ASSIGNMENT_INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
 #[allow(dead_code)]
-pub const CONDITIONAL_INDENT: &str = "conditional_indent";
+pub const CONDITIONAL_INDENT: core_config::OptId = core_config::opt::CONDITIONAL_INDENT;
 #[allow(dead_code)]
-pub const CONDITIONAL_LAYOUT: &str = "conditional_layout";
+pub const CONDITIONAL_LAYOUT: core_config::OptId = core_config::opt::CONDITIONAL_LAYOUT;
 #[allow(dead_code)]
-pub const PREPROCESSOR_SYMBOLS: &str = "preprocessor_symbols";
+pub const PREPROCESSOR_SYMBOLS: core_config::OptId = core_config::opt::PREPROCESSOR_SYMBOLS;
 #[allow(dead_code)]
-pub const PREPROCESSOR_SYMBOL_SETS: &str = "preprocessor_symbol_sets";
+pub const PREPROCESSOR_SYMBOL_SETS: core_config::OptId = core_config::opt::PREPROCESSOR_SYMBOL_SETS;
 #[allow(dead_code)]
-pub const DERIVE_SYMBOL_SETS: &str = "derive_symbol_sets";
+pub const DERIVE_SYMBOL_SETS: core_config::OptId = core_config::opt::DERIVE_SYMBOL_SETS;
 #[allow(dead_code)]
-pub const BLANK_LINES_BETWEEN_MEMBERS: &str = "blank_lines_between_members";
+pub const BLANK_LINES_BETWEEN_MEMBERS: core_config::OptId = core_config::opt::BLANK_LINES_BETWEEN_MEMBERS;
 #[allow(dead_code)]
-pub const ACCESSOR_BLANK_LINES: &str = "accessor_blank_lines";
+pub const ACCESSOR_BLANK_LINES: core_config::OptId = core_config::opt::ACCESSOR_BLANK_LINES;
 #[allow(dead_code)]
-pub const COLLECTION_BLANK_LINES: &str = "collection_blank_lines";
+pub const COLLECTION_BLANK_LINES: core_config::OptId = core_config::opt::COLLECTION_BLANK_LINES;
 #[allow(dead_code)]
-pub const INLINE_ACCESSOR_BODIES: &str = "inline_accessor_bodies";
+pub const INLINE_ACCESSOR_BODIES: core_config::OptId = core_config::opt::INLINE_ACCESSOR_BODIES;
 #[allow(dead_code)]
-pub const PRESERVE_SINGLE_LINE_BLOCKS: &str = "preserve_single_line_blocks";
+pub const PRESERVE_SINGLE_LINE_BLOCKS: core_config::OptId = core_config::opt::PRESERVE_SINGLE_LINE_BLOCKS;
 #[allow(dead_code)]
-pub const PRESERVE_SINGLE_LINE_STATEMENTS: &str = "preserve_single_line_statements";
+pub const PRESERVE_SINGLE_LINE_STATEMENTS: core_config::OptId = core_config::opt::PRESERVE_SINGLE_LINE_STATEMENTS;
 #[allow(dead_code)]
-pub const INDENT_SWITCH_SECTION_BLOCK: &str = "indent_switch_section_block";
+pub const INDENT_SWITCH_SECTION_BLOCK: core_config::OptId = core_config::opt::INDENT_SWITCH_SECTION_BLOCK;
 #[allow(dead_code)]
-pub const SWITCH_ARM_LAYOUT: &str = "switch_arm_layout";
+pub const SWITCH_ARM_LAYOUT: core_config::OptId = core_config::opt::SWITCH_ARM_LAYOUT;
 #[allow(dead_code)]
-pub const WRAPPED_BRACE_LINE: &str = "wrapped_brace_line";
+pub const WRAPPED_BRACE_LINE: core_config::OptId = core_config::opt::WRAPPED_BRACE_LINE;
 #[allow(dead_code)]
-pub const INITIALIZER_COLLAPSE: &str = "initializer_collapse";
+pub const INITIALIZER_COLLAPSE: core_config::OptId = core_config::opt::INITIALIZER_COLLAPSE;
 #[allow(dead_code)]
-pub const PRESERVE_QUERY_BREAKS: &str = "preserve_query_breaks";
+pub const PRESERVE_QUERY_BREAKS: core_config::OptId = core_config::opt::PRESERVE_QUERY_BREAKS;
 #[allow(dead_code)]
-pub const INITIALIZER_EXPAND: &str = "initializer_expand";
+pub const INITIALIZER_EXPAND: core_config::OptId = core_config::opt::INITIALIZER_EXPAND;
 #[allow(dead_code)]
-pub const LAMBDA_ARGUMENT_HUG: &str = "lambda_argument_hug";
+pub const LAMBDA_ARGUMENT_HUG: core_config::OptId = core_config::opt::LAMBDA_ARGUMENT_HUG;
 #[allow(dead_code)]
-pub const CONSTRUCTOR_INITIALIZER_LINE: &str = "constructor_initializer_line";
+pub const CONSTRUCTOR_INITIALIZER_LINE: core_config::OptId = core_config::opt::CONSTRUCTOR_INITIALIZER_LINE;
 #[allow(dead_code)]
-pub const MEMBER_ATTRIBUTE_LINE: &str = "member_attribute_line";
+pub const MEMBER_ATTRIBUTE_LINE: core_config::OptId = core_config::opt::MEMBER_ATTRIBUTE_LINE;
 #[allow(dead_code)]
-pub const PARAMETER_ATTRIBUTE_LAYOUT: &str = "parameter_attribute_layout";
+pub const PARAMETER_ATTRIBUTE_LAYOUT: core_config::OptId = core_config::opt::PARAMETER_ATTRIBUTE_LAYOUT;
 #[allow(dead_code)]
-pub const BASE_LIST_LAYOUT: &str = "base_list_layout";
+pub const BASE_LIST_LAYOUT: core_config::OptId = core_config::opt::BASE_LIST_LAYOUT;
 #[allow(dead_code)]
-pub const UNBREAKABLE_SINGLE_ITEM_LISTS: &str = "unbreakable_single_item_lists";
+pub const UNBREAKABLE_SINGLE_ITEM_LISTS: core_config::OptId = core_config::opt::UNBREAKABLE_SINGLE_ITEM_LISTS;
 #[allow(dead_code)]
-pub const DO_WHILE_LINE: &str = "do_while_line";
+pub const DO_WHILE_LINE: core_config::OptId = core_config::opt::DO_WHILE_LINE;
 #[allow(dead_code)]
-pub const CLAUSE_KEYWORD_LINE: &str = "clause_keyword_line";
+pub const CLAUSE_KEYWORD_LINE: core_config::OptId = core_config::opt::CLAUSE_KEYWORD_LINE;
 #[allow(dead_code)]
-pub const ELSE_LINE: &str = "else_line";
+pub const ELSE_LINE: core_config::OptId = core_config::opt::ELSE_LINE;
 #[allow(dead_code)]
-pub const CATCH_LINE: &str = "catch_line";
+pub const CATCH_LINE: core_config::OptId = core_config::opt::CATCH_LINE;
 #[allow(dead_code)]
-pub const FINALLY_LINE: &str = "finally_line";
+pub const FINALLY_LINE: core_config::OptId = core_config::opt::FINALLY_LINE;
 #[allow(dead_code)]
-pub const LABEL_INDENT: &str = "label_indent";
+pub const LABEL_INDENT: core_config::OptId = core_config::opt::LABEL_INDENT;
 #[allow(dead_code)]
-pub const EMPTY_BRACES: &str = "empty_braces";
+pub const EMPTY_BRACES: core_config::OptId = core_config::opt::EMPTY_BRACES;
 #[allow(dead_code)]
-pub const CLOSING_PAREN_LINE: &str = "closing_paren_line";
+pub const CLOSING_PAREN_LINE: core_config::OptId = core_config::opt::CLOSING_PAREN_LINE;
 #[allow(dead_code)]
-pub const BLANK_LINES_AFTER_BLOCK: &str = "blank_lines_after_block";
+pub const BLANK_LINES_AFTER_BLOCK: core_config::OptId = core_config::opt::BLANK_LINES_AFTER_BLOCK;
 #[allow(dead_code)]
-pub const BLANK_LINE_BEFORE_COMMENT: &str = "blank_line_before_comment";
+pub const BLANK_LINE_BEFORE_COMMENT: core_config::OptId = core_config::opt::BLANK_LINE_BEFORE_COMMENT;
 #[allow(dead_code)]
-pub const BLANK_LINE_AFTER_COMMENT: &str = "blank_line_after_comment";
+pub const BLANK_LINE_AFTER_COMMENT: core_config::OptId = core_config::opt::BLANK_LINE_AFTER_COMMENT;
 #[allow(dead_code)]
-pub const BLANK_COMPACT_KINDS: &str = "blank_compact_kinds";
+pub const BLANK_COMPACT_KINDS: core_config::OptId = core_config::opt::BLANK_COMPACT_KINDS;
 #[allow(dead_code)]
-pub const BLANK_AFTER_BLOCK_KINDS: &str = "blank_after_block_kinds";
+pub const BLANK_AFTER_BLOCK_KINDS: core_config::OptId = core_config::opt::BLANK_AFTER_BLOCK_KINDS;
 #[allow(dead_code)]
-pub const BLANK_DIRECTIVES_SKIP: &str = "blank_directives_skip";
+pub const BLANK_DIRECTIVES_SKIP: core_config::OptId = core_config::opt::BLANK_DIRECTIVES_SKIP;
 #[allow(dead_code)]
-pub const BLANK_DIRECTIVES_ATTACH: &str = "blank_directives_attach";
+pub const BLANK_DIRECTIVES_ATTACH: core_config::OptId = core_config::opt::BLANK_DIRECTIVES_ATTACH;
 #[allow(dead_code)]
-pub const SPACE_AFTER_DELEGATE: &str = "space_after_delegate";
+pub const SPACE_AFTER_DELEGATE: core_config::OptId = core_config::opt::SPACE_AFTER_DELEGATE;
 #[allow(dead_code)]
-pub const SPACE_BETWEEN_EMPTY_FOR_CLAUSES: &str = "space_between_empty_for_clauses";
+pub const SPACE_BETWEEN_EMPTY_FOR_CLAUSES: core_config::OptId = core_config::opt::SPACE_BETWEEN_EMPTY_FOR_CLAUSES;
 #[allow(dead_code)]
-pub const SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE: &str = "space_after_empty_last_for_clause";
+pub const SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE: core_config::OptId = core_config::opt::SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE;
 #[allow(dead_code)]
-pub const SORT_USINGS: &str = "sort_usings";
+pub const SORT_USINGS: core_config::OptId = core_config::opt::SORT_USINGS;
 #[allow(dead_code)]
-pub const SORT_USINGS_SYSTEM_FIRST: &str = "sort_usings_system_first";
+pub const SORT_USINGS_SYSTEM_FIRST: core_config::OptId = core_config::opt::SORT_USINGS_SYSTEM_FIRST;
 #[allow(dead_code)]
-pub const SEPARATE_USING_GROUPS: &str = "separate_using_groups";
+pub const SEPARATE_USING_GROUPS: core_config::OptId = core_config::opt::SEPARATE_USING_GROUPS;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TrailingCommas { Preserve, Never, Multiline }
@@ -423,9 +423,9 @@ pub fn option_schema() -> core_config::OptionSchema {
         shared::indent_style(),
         core_config::shared::final_newline(true),
         shared::end_of_line(),
-        core_config::OptionDef::choice("brace_newline", &["all", "none"], "all", "Opening braces of types, members, blocks and lambdas: `all` puts each on its own line (Allman); `none` keeps it on the line of the declaration or statement."),
-        core_config::OptionDef::words("brace_same_line", &[], "Elements whose opening brace stays on the line of the declaration or statement although `brace_newline` is `all`: `types`, `methods`, `properties`, `accessors`, `anonymous_methods`, `anonymous_types`, `control_blocks`, `lambdas`, `object_collection_array_initializers` (types include namespaces, methods include constructors, operators and local functions, properties include indexers and events, control blocks include `switch` statements and bare blocks)."),
-        core_config::OptionDef::choice("trailing_commas", &["preserve", "never", "multiline"], "preserve", "Trailing comma after the last element of initializers, collection expressions, enums and switch expressions: `preserve` keeps what the source has; `never` removes it; `multiline` adds one when the list is on several lines and removes it otherwise."),
+        core_config::OptionDef::choice(core_config::opt::BRACE_NEWLINE, &["all", "none"], "all", "Opening braces of types, members, blocks and lambdas: `all` puts each on its own line (Allman); `none` keeps it on the line of the declaration or statement."),
+        core_config::OptionDef::words(core_config::opt::BRACE_SAME_LINE, &[], "Elements whose opening brace stays on the line of the declaration or statement although `brace_newline` is `all`: `types`, `methods`, `properties`, `accessors`, `anonymous_methods`, `anonymous_types`, `control_blocks`, `lambdas`, `object_collection_array_initializers` (types include namespaces, methods include constructors, operators and local functions, properties include indexers and events, control blocks include `switch` statements and bare blocks)."),
+        core_config::OptionDef::choice(core_config::opt::TRAILING_COMMAS, &["preserve", "never", "multiline"], "preserve", "Trailing comma after the last element of initializers, collection expressions, enums and switch expressions: `preserve` keeps what the source has; `never` removes it; `multiline` adds one when the list is on several lines and removes it otherwise."),
         core_config::shared::member_chain_min_calls(3),
         core_config::shared::member_chain_keep_accesses("never"),
         core_config::shared::member_chain_break_on_block("never"),
@@ -440,48 +440,48 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::assignment_indent(1),
         core_config::shared::conditional_indent(1),
         core_config::shared::conditional_layout("indented"),
-        core_config::OptionDef::words("preprocessor_symbols", &[], "Conditional compilation symbols (`DEBUG`, `NET8_0`) defined when parsing, which decide the active branch of `#if`. Branches that are inactive under these symbols stay as they are unless `preprocessor_symbol_sets` or `derive_symbol_sets` format them."),
-        core_config::OptionDef::word_sets("preprocessor_symbol_sets", "Further sets of conditional compilation symbols. The file is also parsed with each set (a set replaces `preprocessor_symbols`), and the `#if` branches that are inactive under `preprocessor_symbols` but active under a set are formatted from that parse. Empty (the default) leaves inactive branches as they are."),
-        core_config::OptionDef::boolean("derive_symbol_sets", false, "Also parse with sets of symbols taken from the `#if` and `#elif` conditions of the file (the empty set, all symbols, then each symbol, then pairs and so on, at most 16 sets, after those of `preprocessor_symbol_sets`) until every branch has been active once, and format the branches that are inactive under `preprocessor_symbols` from those parses. A branch no set activates stays as it is."),
-        core_config::OptionDef::choice("blank_lines_between_members", &["preserve", "separate", "always"], "preserve", "Blank lines between the members of a type, namespace or enum: `preserve` keeps the source's (at most one) and never adds one; `separate` also requires one between two members when either has a body, an attribute or a comment above it; `always` requires one between any two members of a type or namespace and between the `using` directives and what follows them, except between two fields or two `using` directives (enum members as `separate`)."),
-        core_config::OptionDef::choice("accessor_blank_lines", &["preserve", "remove"], "preserve", "Blank lines between the accessors of a property that is laid out on several lines: `preserve` keeps the source's (at most one); `remove` drops them."),
-        core_config::OptionDef::choice("collection_blank_lines", &["preserve", "remove"], "preserve", "Blank lines between the elements of a collection initializer, array initializer or collection expression: `preserve` keeps the source's (at most one); `remove` drops them. The members of an object initializer keep theirs."),
-        core_config::OptionDef::boolean("inline_accessor_bodies", false, "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines."),
-        core_config::OptionDef::boolean("preserve_single_line_blocks", false, "A block written on one line (`void M() { return; }`, `get { return x; }`,              `if (a)` followed by `{ b(); }`) stays on one line, as `{ a; b; }`, when it has no comment and no label in it. Type, namespace, enum and `switch` bodies written on one line stay as well."),
-        core_config::OptionDef::boolean("preserve_single_line_statements", false, "Statements written on one line stay there: `a(); b();` in a sequence, `case 1:              break;`, and a whole `if`, `while`, `for`, `foreach`, `do`, `try`, `using`, `lock`,              `fixed`, `checked` or `unsafe` statement (with its blocks) written on one line,              unless it has a comment, a `switch` or a label in it."),
-        core_config::OptionDef::boolean("indent_switch_section_block", true, "Indent a block that is the only statement of a `case` section below its label; when false the block starts at the label's indentation."),
-        core_config::OptionDef::choice("switch_arm_layout", &["inline", "assignment"], "inline", "Layout of a switch expression arm: `inline` keeps `pattern => value` as one run of tokens; `assignment` lays out the value like the right-hand side of `=` (see `assignment_layout`)."),
-        core_config::OptionDef::choice("wrapped_brace_line", &["creation", "all", "none"], "creation", "Opening brace of an initializer or property pattern that is laid out on several lines: `creation` puts it on its own line for `new T { ... }` only; `all` also for an initializer nested in an assignment (`Prop = { ... }`) and for property patterns; `none` keeps it on the line of the expression."),
-        core_config::OptionDef::choice("initializer_collapse", &["preserve", "always"], "preserve", "Initializers and collection expressions: `preserve` keeps one expanded when the source has a line break in it; `always` puts one on a single line whenever it fits."),
-        core_config::OptionDef::boolean("preserve_query_breaks", false, "A query expression with a line break in the source keeps one clause per line even when it fits on a line."),
-        core_config::OptionDef::choice("initializer_expand", &["fit", "crowded"], "fit", "Initializers (and anonymous types) that fit on a line: `fit` keeps them on it; `crowded` puts one item per line when there are three or more member assignments, or two or more items one of which creates an object with an initializer."),
-        core_config::OptionDef::choice("lambda_argument_hug", &["last", "sole"], "last", "A lambda argument whose body can hang from the call's line: `last` hugs a block lambda that is the last argument; `sole` hugs a lambda (block or expression) only when it is the only argument."),
-        core_config::OptionDef::choice("constructor_initializer_line", &["same_line", "new_line"], "same_line", "The `: base(...)` or `: this(...)` initializer of a constructor: `same_line` keeps it after the parameter list; `new_line` puts it on its own indented line."),
-        core_config::OptionDef::choice("member_attribute_line", &["own_line", "keep"], "own_line", "An attribute list in front of a member, statement or type: `own_line` puts it on a line of its own; `keep` leaves one that the source writes on the same line as what it annotates there (`[SerializeField] private int speed;`)."),
-        core_config::OptionDef::choice("parameter_attribute_layout", &["inline", "hanging"], "inline", "A parameter with attribute lists: `inline` keeps them in front of the parameter;              `hanging` keeps them there when the parameter fits and otherwise puts the rest of              the parameter on an indented line below them."),
-        core_config::OptionDef::choice("base_list_layout", &["inline", "hanging"], "inline", "The base list of a type (`: A, B`): `inline` keeps it on the line of the type name; `hanging` keeps it there when it fits and otherwise starts a line, with one base type per line."),
-        core_config::OptionDef::boolean("unbreakable_single_item_lists", false, "Never break a list that holds one simple item: an attribute list with one attribute, a type argument list with one name, an index that is one name or literal."),
-        core_config::OptionDef::choice("do_while_line", &["new_line", "same_line"], "new_line", "The `while` of a `do` statement: `new_line` starts a line; `same_line` follows the closing brace (`} while (x);`)."),
-        core_config::OptionDef::choice("clause_keyword_line", &["new_line", "same_line"], "new_line", "`else`, `catch` and `finally` after a block: `new_line` starts a line; `same_line` follows the closing brace (`} else {`) unless a comment sits between them."),
-        core_config::OptionDef::choice("else_line", &["inherit", "new_line", "same_line"], "inherit", "`else` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
-        core_config::OptionDef::choice("catch_line", &["inherit", "new_line", "same_line"], "inherit", "`catch` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
-        core_config::OptionDef::choice("finally_line", &["inherit", "new_line", "same_line"], "inherit", "`finally` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
-        core_config::OptionDef::choice("label_indent", &["no_change", "one_less", "flush_left"], "no_change", "Indentation of a `goto` label: `no_change` keeps the indentation of the statements around it; `one_less` indents it one level less; `flush_left` puts it in column 0."),
-        core_config::OptionDef::choice("empty_braces", &["space", "tight", "expanded"], "space", "Braces with nothing between them: `space` prints `{ }`, `tight` prints `{}`, `expanded` puts the closing brace of an empty body on the line after the opening one (initializers, and lambdas and anonymous methods, stay `{ }`)."),
-        core_config::OptionDef::choice("closing_paren_line", &["own_line", "same_line"], "own_line", "The `)` of a parameter, argument or attribute argument list that does not fit on one line: `own_line` puts it on a line of its own after the last item; `same_line` right after the last item."),
-        core_config::OptionDef::choice("blank_lines_after_block", &["preserve", "require"], "preserve", "Blank line after a statement, member or switch section that ends with a closing brace: `preserve` keeps the source's (at most one); `require` adds one before the next statement, member or section."),
-        core_config::OptionDef::choice("blank_line_before_comment", &["preserve", "require"], "preserve", "Blank line between a statement, member or switch section and a `//` comment on the lines before the next one (not `////`): `preserve` keeps the source's; `require` adds one."),
-        core_config::OptionDef::choice("blank_line_after_comment", &["preserve", "remove"], "preserve", "Blank line between the last `//` or `///` comment in front of code and that code: `preserve` keeps the source's (at most one); `remove` drops it. Comments at the start of a file and `////` comments keep theirs."),
-        core_config::OptionDef::words("blank_compact_kinds", &["FieldDeclaration", "UsingDirective", "ExternAliasDirective"], "Node kinds of which two in a row need no blank line between them when `blank_lines_between_members` is `always`."),
-        core_config::OptionDef::words("blank_after_block_kinds", &["GetAccessorDeclaration", "SetAccessorDeclaration", "InitAccessorDeclaration", "AddAccessorDeclaration", "RemoveAccessorDeclaration", "UnknownAccessorDeclaration"], "Node kinds that get a blank line before them after a closing brace when `blank_lines_between_members` is `always`."),
-        core_config::OptionDef::words("blank_directives_skip", &["#if", "#el", "#endif", "#endregion"], "Preprocessor directives (by their first characters) in front of a member or statement after which the blank line before it is the source's: the item may start after the directive, so the blank line options add none."),
-        core_config::OptionDef::words("blank_directives_attach", &["#pragma"], "Preprocessor directives (by their first characters) that follow an item with no blank line between and have a blank line after them (`#pragma warning disable` after a member): they belong to that item, and the blank line options add no blank line before them."),
-        core_config::OptionDef::boolean("space_after_delegate", true, "A space between `delegate` and the parameter list of an anonymous method (`delegate (int x) { }`); when false `delegate(int x) { }`."),
-        core_config::OptionDef::boolean("space_between_empty_for_clauses", false, "A space between the two semicolons of a `for` with an empty condition (`for (; ;)`); when false `for (;;)`."),
-        core_config::OptionDef::boolean("space_after_empty_last_for_clause", false, "A space before the `)` of a `for` whose last clause is empty (`for (int i = 0; i < n; )`); when false `for (int i = 0; i < n;)`."),
-        core_config::OptionDef::boolean("sort_usings", false, "Sort `using` directives like the `using-order` rule with `compare: culture_ignore_case`, `static_position: after` and `alias_position: after` (System first, then the others, `using static`, aliases), and join the groups: blank lines between directives go, comments above a directive move with it. `global using` directives come first, `using global::X` behind the System ones. `#if` regions stay as they are behind the sorted directives; a list with another preprocessor directive is left alone."),
-        core_config::OptionDef::boolean("sort_usings_system_first", true, "With `sort_usings`: `System` namespaces come before the others (`using static System.*` before other `using static`)."),
-        core_config::OptionDef::boolean("separate_using_groups", false, "With `sort_usings`: one blank line between the System usings and the others (only with `sort_usings_system_first`)."),
+        core_config::OptionDef::words(core_config::opt::PREPROCESSOR_SYMBOLS, &[], "Conditional compilation symbols (`DEBUG`, `NET8_0`) defined when parsing, which decide the active branch of `#if`. Branches that are inactive under these symbols stay as they are unless `preprocessor_symbol_sets` or `derive_symbol_sets` format them."),
+        core_config::OptionDef::word_sets(core_config::opt::PREPROCESSOR_SYMBOL_SETS, "Further sets of conditional compilation symbols. The file is also parsed with each set (a set replaces `preprocessor_symbols`), and the `#if` branches that are inactive under `preprocessor_symbols` but active under a set are formatted from that parse. Empty (the default) leaves inactive branches as they are."),
+        core_config::OptionDef::boolean(core_config::opt::DERIVE_SYMBOL_SETS, false, "Also parse with sets of symbols taken from the `#if` and `#elif` conditions of the file (the empty set, all symbols, then each symbol, then pairs and so on, at most 16 sets, after those of `preprocessor_symbol_sets`) until every branch has been active once, and format the branches that are inactive under `preprocessor_symbols` from those parses. A branch no set activates stays as it is."),
+        core_config::OptionDef::choice(core_config::opt::BLANK_LINES_BETWEEN_MEMBERS, &["preserve", "separate", "always"], "preserve", "Blank lines between the members of a type, namespace or enum: `preserve` keeps the source's (at most one) and never adds one; `separate` also requires one between two members when either has a body, an attribute or a comment above it; `always` requires one between any two members of a type or namespace and between the `using` directives and what follows them, except between two fields or two `using` directives (enum members as `separate`)."),
+        core_config::OptionDef::choice(core_config::opt::ACCESSOR_BLANK_LINES, &["preserve", "remove"], "preserve", "Blank lines between the accessors of a property that is laid out on several lines: `preserve` keeps the source's (at most one); `remove` drops them."),
+        core_config::OptionDef::choice(core_config::opt::COLLECTION_BLANK_LINES, &["preserve", "remove"], "preserve", "Blank lines between the elements of a collection initializer, array initializer or collection expression: `preserve` keeps the source's (at most one); `remove` drops them. The members of an object initializer keep theirs."),
+        core_config::OptionDef::boolean(core_config::opt::INLINE_ACCESSOR_BODIES, false, "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines."),
+        core_config::OptionDef::boolean(core_config::opt::PRESERVE_SINGLE_LINE_BLOCKS, false, "A block written on one line (`void M() { return; }`, `get { return x; }`,              `if (a)` followed by `{ b(); }`) stays on one line, as `{ a; b; }`, when it has no comment and no label in it. Type, namespace, enum and `switch` bodies written on one line stay as well."),
+        core_config::OptionDef::boolean(core_config::opt::PRESERVE_SINGLE_LINE_STATEMENTS, false, "Statements written on one line stay there: `a(); b();` in a sequence, `case 1:              break;`, and a whole `if`, `while`, `for`, `foreach`, `do`, `try`, `using`, `lock`,              `fixed`, `checked` or `unsafe` statement (with its blocks) written on one line,              unless it has a comment, a `switch` or a label in it."),
+        core_config::OptionDef::boolean(core_config::opt::INDENT_SWITCH_SECTION_BLOCK, true, "Indent a block that is the only statement of a `case` section below its label; when false the block starts at the label's indentation."),
+        core_config::OptionDef::choice(core_config::opt::SWITCH_ARM_LAYOUT, &["inline", "assignment"], "inline", "Layout of a switch expression arm: `inline` keeps `pattern => value` as one run of tokens; `assignment` lays out the value like the right-hand side of `=` (see `assignment_layout`)."),
+        core_config::OptionDef::choice(core_config::opt::WRAPPED_BRACE_LINE, &["creation", "all", "none"], "creation", "Opening brace of an initializer or property pattern that is laid out on several lines: `creation` puts it on its own line for `new T { ... }` only; `all` also for an initializer nested in an assignment (`Prop = { ... }`) and for property patterns; `none` keeps it on the line of the expression."),
+        core_config::OptionDef::choice(core_config::opt::INITIALIZER_COLLAPSE, &["preserve", "always"], "preserve", "Initializers and collection expressions: `preserve` keeps one expanded when the source has a line break in it; `always` puts one on a single line whenever it fits."),
+        core_config::OptionDef::boolean(core_config::opt::PRESERVE_QUERY_BREAKS, false, "A query expression with a line break in the source keeps one clause per line even when it fits on a line."),
+        core_config::OptionDef::choice(core_config::opt::INITIALIZER_EXPAND, &["fit", "crowded"], "fit", "Initializers (and anonymous types) that fit on a line: `fit` keeps them on it; `crowded` puts one item per line when there are three or more member assignments, or two or more items one of which creates an object with an initializer."),
+        core_config::OptionDef::choice(core_config::opt::LAMBDA_ARGUMENT_HUG, &["last", "sole"], "last", "A lambda argument whose body can hang from the call's line: `last` hugs a block lambda that is the last argument; `sole` hugs a lambda (block or expression) only when it is the only argument."),
+        core_config::OptionDef::choice(core_config::opt::CONSTRUCTOR_INITIALIZER_LINE, &["same_line", "new_line"], "same_line", "The `: base(...)` or `: this(...)` initializer of a constructor: `same_line` keeps it after the parameter list; `new_line` puts it on its own indented line."),
+        core_config::OptionDef::choice(core_config::opt::MEMBER_ATTRIBUTE_LINE, &["own_line", "keep"], "own_line", "An attribute list in front of a member, statement or type: `own_line` puts it on a line of its own; `keep` leaves one that the source writes on the same line as what it annotates there (`[SerializeField] private int speed;`)."),
+        core_config::OptionDef::choice(core_config::opt::PARAMETER_ATTRIBUTE_LAYOUT, &["inline", "hanging"], "inline", "A parameter with attribute lists: `inline` keeps them in front of the parameter;              `hanging` keeps them there when the parameter fits and otherwise puts the rest of              the parameter on an indented line below them."),
+        core_config::OptionDef::choice(core_config::opt::BASE_LIST_LAYOUT, &["inline", "hanging"], "inline", "The base list of a type (`: A, B`): `inline` keeps it on the line of the type name; `hanging` keeps it there when it fits and otherwise starts a line, with one base type per line."),
+        core_config::OptionDef::boolean(core_config::opt::UNBREAKABLE_SINGLE_ITEM_LISTS, false, "Never break a list that holds one simple item: an attribute list with one attribute, a type argument list with one name, an index that is one name or literal."),
+        core_config::OptionDef::choice(core_config::opt::DO_WHILE_LINE, &["new_line", "same_line"], "new_line", "The `while` of a `do` statement: `new_line` starts a line; `same_line` follows the closing brace (`} while (x);`)."),
+        core_config::OptionDef::choice(core_config::opt::CLAUSE_KEYWORD_LINE, &["new_line", "same_line"], "new_line", "`else`, `catch` and `finally` after a block: `new_line` starts a line; `same_line` follows the closing brace (`} else {`) unless a comment sits between them."),
+        core_config::OptionDef::choice(core_config::opt::ELSE_LINE, &["inherit", "new_line", "same_line"], "inherit", "`else` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
+        core_config::OptionDef::choice(core_config::opt::CATCH_LINE, &["inherit", "new_line", "same_line"], "inherit", "`catch` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
+        core_config::OptionDef::choice(core_config::opt::FINALLY_LINE, &["inherit", "new_line", "same_line"], "inherit", "`finally` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
+        core_config::OptionDef::choice(core_config::opt::LABEL_INDENT, &["no_change", "one_less", "flush_left"], "no_change", "Indentation of a `goto` label: `no_change` keeps the indentation of the statements around it; `one_less` indents it one level less; `flush_left` puts it in column 0."),
+        core_config::OptionDef::choice(core_config::opt::EMPTY_BRACES, &["space", "tight", "expanded"], "space", "Braces with nothing between them: `space` prints `{ }`, `tight` prints `{}`, `expanded` puts the closing brace of an empty body on the line after the opening one (initializers, and lambdas and anonymous methods, stay `{ }`)."),
+        core_config::OptionDef::choice(core_config::opt::CLOSING_PAREN_LINE, &["own_line", "same_line"], "own_line", "The `)` of a parameter, argument or attribute argument list that does not fit on one line: `own_line` puts it on a line of its own after the last item; `same_line` right after the last item."),
+        core_config::OptionDef::choice(core_config::opt::BLANK_LINES_AFTER_BLOCK, &["preserve", "require"], "preserve", "Blank line after a statement, member or switch section that ends with a closing brace: `preserve` keeps the source's (at most one); `require` adds one before the next statement, member or section."),
+        core_config::OptionDef::choice(core_config::opt::BLANK_LINE_BEFORE_COMMENT, &["preserve", "require"], "preserve", "Blank line between a statement, member or switch section and a `//` comment on the lines before the next one (not `////`): `preserve` keeps the source's; `require` adds one."),
+        core_config::OptionDef::choice(core_config::opt::BLANK_LINE_AFTER_COMMENT, &["preserve", "remove"], "preserve", "Blank line between the last `//` or `///` comment in front of code and that code: `preserve` keeps the source's (at most one); `remove` drops it. Comments at the start of a file and `////` comments keep theirs."),
+        core_config::OptionDef::words(core_config::opt::BLANK_COMPACT_KINDS, &["FieldDeclaration", "UsingDirective", "ExternAliasDirective"], "Node kinds of which two in a row need no blank line between them when `blank_lines_between_members` is `always`."),
+        core_config::OptionDef::words(core_config::opt::BLANK_AFTER_BLOCK_KINDS, &["GetAccessorDeclaration", "SetAccessorDeclaration", "InitAccessorDeclaration", "AddAccessorDeclaration", "RemoveAccessorDeclaration", "UnknownAccessorDeclaration"], "Node kinds that get a blank line before them after a closing brace when `blank_lines_between_members` is `always`."),
+        core_config::OptionDef::words(core_config::opt::BLANK_DIRECTIVES_SKIP, &["#if", "#el", "#endif", "#endregion"], "Preprocessor directives (by their first characters) in front of a member or statement after which the blank line before it is the source's: the item may start after the directive, so the blank line options add none."),
+        core_config::OptionDef::words(core_config::opt::BLANK_DIRECTIVES_ATTACH, &["#pragma"], "Preprocessor directives (by their first characters) that follow an item with no blank line between and have a blank line after them (`#pragma warning disable` after a member): they belong to that item, and the blank line options add no blank line before them."),
+        core_config::OptionDef::boolean(core_config::opt::SPACE_AFTER_DELEGATE, true, "A space between `delegate` and the parameter list of an anonymous method (`delegate (int x) { }`); when false `delegate(int x) { }`."),
+        core_config::OptionDef::boolean(core_config::opt::SPACE_BETWEEN_EMPTY_FOR_CLAUSES, false, "A space between the two semicolons of a `for` with an empty condition (`for (; ;)`); when false `for (;;)`."),
+        core_config::OptionDef::boolean(core_config::opt::SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE, false, "A space before the `)` of a `for` whose last clause is empty (`for (int i = 0; i < n; )`); when false `for (int i = 0; i < n;)`."),
+        core_config::OptionDef::boolean(core_config::opt::SORT_USINGS, false, "Sort `using` directives like the `using-order` rule with `compare: culture_ignore_case`, `static_position: after` and `alias_position: after` (System first, then the others, `using static`, aliases), and join the groups: blank lines between directives go, comments above a directive move with it. `global using` directives come first, `using global::X` behind the System ones. `#if` regions stay as they are behind the sorted directives; a list with another preprocessor directive is left alone."),
+        core_config::OptionDef::boolean(core_config::opt::SORT_USINGS_SYSTEM_FIRST, true, "With `sort_usings`: `System` namespaces come before the others (`using static System.*` before other `using static`)."),
+        core_config::OptionDef::boolean(core_config::opt::SEPARATE_USING_GROUPS, false, "With `sort_usings`: one blank line between the System usings and the others (only with `sort_usings_system_first`)."),
         ])
         .with_presets(vec![
         core_config::Preset::new("csharp/dotnet-runtime", include_str!("../presets/dotnet-runtime.yaml")),

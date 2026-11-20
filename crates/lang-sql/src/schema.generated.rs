@@ -1,18 +1,18 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const DIALECT: &str = "dialect";
+pub const DIALECT: core_config::OptId = core_config::opt::DIALECT;
 #[allow(dead_code)]
-pub const COMMA_POSITION: &str = "comma_position";
+pub const COMMA_POSITION: core_config::OptId = core_config::opt::COMMA_POSITION;
 #[allow(dead_code)]
-pub const KEYWORD_CASE: &str = "keyword_case";
+pub const KEYWORD_CASE: core_config::OptId = core_config::opt::KEYWORD_CASE;
 #[allow(dead_code)]
-pub const IDENTIFIER_CASE: &str = "identifier_case";
+pub const IDENTIFIER_CASE: core_config::OptId = core_config::opt::IDENTIFIER_CASE;
 #[allow(dead_code)]
-pub const FUNCTION_CASE: &str = "function_case";
+pub const FUNCTION_CASE: core_config::OptId = core_config::opt::FUNCTION_CASE;
 #[allow(dead_code)]
-pub const LITERAL_CASE: &str = "literal_case";
+pub const LITERAL_CASE: core_config::OptId = core_config::opt::LITERAL_CASE;
 #[allow(dead_code)]
-pub const TYPE_CASE: &str = "type_case";
+pub const TYPE_CASE: core_config::OptId = core_config::opt::TYPE_CASE;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Dialect { Ansi, Postgres, Mysql, Tsql }
@@ -100,18 +100,18 @@ pub fn type_case(o: &core_config::ResolvedOptions) -> TypeCase {
 pub fn option_schema() -> core_config::OptionSchema {
     core_config::OptionSchema::lazy(|| {
         core_config::OptionSchema::new(vec![
-        core_config::OptionDef::choice("dialect", &["ansi", "postgres", "mysql", "tsql"], "ansi", "The SQL dialect the file is parsed as."),
+        core_config::OptionDef::choice(core_config::opt::DIALECT, &["ansi", "postgres", "mysql", "tsql"], "ansi", "The SQL dialect the file is parsed as."),
         core_config::shared::line_width(80),
         shared::indent_style(),
         core_config::shared::indent_size(4),
         core_config::shared::final_newline(true),
         shared::end_of_line(),
-        core_config::OptionDef::choice("comma_position", &["trailing", "leading"], "trailing", "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one."),
-        core_config::OptionDef::choice("keyword_case", &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of keywords: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
-        core_config::OptionDef::choice("identifier_case", &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of unquoted identifiers: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
-        core_config::OptionDef::choice("function_case", &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of function names: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
-        core_config::OptionDef::choice("literal_case", &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of `NULL`, `TRUE` and `FALSE`: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
-        core_config::OptionDef::choice("type_case", &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of data types: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
+        core_config::OptionDef::choice(core_config::opt::COMMA_POSITION, &["trailing", "leading"], "trailing", "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one."),
+        core_config::OptionDef::choice(core_config::opt::KEYWORD_CASE, &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of keywords: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
+        core_config::OptionDef::choice(core_config::opt::IDENTIFIER_CASE, &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of unquoted identifiers: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
+        core_config::OptionDef::choice(core_config::opt::FUNCTION_CASE, &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of function names: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
+        core_config::OptionDef::choice(core_config::opt::LITERAL_CASE, &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of `NULL`, `TRUE` and `FALSE`: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
+        core_config::OptionDef::choice(core_config::opt::TYPE_CASE, &["consistent", "upper", "lower", "capitalise"], "consistent", "Case of data types: `consistent` follows the first one written (all that follow are brought to its case once one differs), the others set it."),
         ])
         .with_presets(vec![
         core_config::Preset::new("sql/sqlfluff", include_str!("../presets/sqlfluff.yaml")),

@@ -5,8 +5,8 @@
 
 use crate::error::unknown_name;
 use crate::model::OptionValue;
+use crate::opt::{self, IntoOpt, OptId};
 use crate::presets::Preset;
-use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum OptionKind {
@@ -25,15 +25,18 @@ pub enum OptionKind {
 #[derive(Clone, Debug, PartialEq)]
 pub struct OptionDef {
     pub name: &'static str,
+    pub id: OptId,
     pub kind: OptionKind,
     pub default: OptionValue,
     pub description: &'static str,
 }
 
 impl OptionDef {
-    pub fn boolean(name: &'static str, default: bool, description: &'static str) -> Self {
+    pub fn boolean(name: impl IntoOpt, default: bool, description: &'static str) -> Self {
+        let id = name.id();
         OptionDef {
-            name,
+            name: id.name(),
+            id,
             kind: OptionKind::Bool,
             default: OptionValue::Bool(default),
             description,
@@ -41,13 +44,15 @@ impl OptionDef {
     }
 
     pub fn int(
-        name: &'static str,
+        name: impl IntoOpt,
         default: i64,
         range: (i64, i64),
         description: &'static str,
     ) -> Self {
+        let id = name.id();
         OptionDef {
-            name,
+            name: id.name(),
+            id,
             kind: OptionKind::Int {
                 min: range.0,
                 max: range.1,
@@ -58,9 +63,11 @@ impl OptionDef {
     }
 
     /// A list of words (letters, digits, `_`).
-    pub fn words(name: &'static str, default: &[&str], description: &'static str) -> Self {
+    pub fn words(name: impl IntoOpt, default: &[&str], description: &'static str) -> Self {
+        let id = name.id();
         OptionDef {
-            name,
+            name: id.name(),
+            id,
             kind: OptionKind::Words,
             default: OptionValue::List(
                 default
@@ -73,9 +80,11 @@ impl OptionDef {
     }
 
     /// A list of lists of words, empty by default.
-    pub fn word_sets(name: &'static str, description: &'static str) -> Self {
+    pub fn word_sets(name: impl IntoOpt, description: &'static str) -> Self {
+        let id = name.id();
         OptionDef {
-            name,
+            name: id.name(),
+            id,
             kind: OptionKind::WordSets,
             default: OptionValue::List(Vec::new()),
             description,
@@ -83,14 +92,16 @@ impl OptionDef {
     }
 
     pub fn choice(
-        name: &'static str,
+        name: impl IntoOpt,
         values: &'static [&'static str],
         default: &'static str,
         description: &'static str,
     ) -> Self {
         debug_assert!(values.contains(&default));
+        let id = name.id();
         OptionDef {
-            name,
+            name: id.name(),
+            id,
             kind: OptionKind::Enum(values),
             default: OptionValue::String(default.into()),
             description,
@@ -240,12 +251,11 @@ impl OptionSchema {
     }
 
     pub fn defaults(&self) -> ResolvedOptions {
-        ResolvedOptions(
-            self.defs()
-                .iter()
-                .map(|d| (d.name.to_string(), d.default.clone()))
-                .collect(),
-        )
+        let mut options = ResolvedOptions(vec![None; opt::NAMES.len()]);
+        for d in self.defs() {
+            options.set(d.id, d.default.clone());
+        }
+        options
     }
 
     /// Checks `value` against the declaration of `name` and stores it.
@@ -267,35 +277,40 @@ impl OptionSchema {
             option: name.into(),
             message,
         })?;
-        into.0.insert(name.into(), value.clone());
+        into.set(def.id, value.clone());
         Ok(())
     }
 }
 
-/// Validated option values for one file: every option of the schema has a value.
+/// Validated option values for one file, a vector indexed by [`OptId`]: every option of the
+/// schema has a value, any other slot is empty. Reading is an array access; list values are
+/// borrowed, never copied.
 #[derive(Clone, Debug, Default, PartialEq)]
-pub struct ResolvedOptions(BTreeMap<String, OptionValue>);
+pub struct ResolvedOptions(Vec<Option<OptionValue>>);
 
 impl ResolvedOptions {
-    pub fn set(&mut self, name: &str, value: OptionValue) {
-        self.0.insert(name.into(), value);
+    pub fn set(&mut self, id: OptId, value: OptionValue) {
+        if self.0.len() <= id.index() {
+            self.0.resize(opt::NAMES.len(), None);
+        }
+        self.0[id.index()] = Some(value);
     }
 
-    pub fn get(&self, name: &str) -> Option<&OptionValue> {
-        self.0.get(name)
+    pub fn get(&self, id: OptId) -> Option<&OptionValue> {
+        self.0.get(id.index()).and_then(Option::as_ref)
     }
 
-    pub fn bool(&self, name: &str) -> bool {
-        match self.0.get(name) {
+    pub fn bool(&self, id: OptId) -> bool {
+        match self.get(id) {
             Some(OptionValue::Bool(b)) => *b,
-            other => panic!("option `{name}` is not a boolean: {other:?}"),
+            other => panic!("option `{}` is not a boolean: {other:?}", id.name()),
         }
     }
 
-    pub fn int(&self, name: &str) -> i64 {
-        match self.0.get(name) {
+    pub fn int(&self, id: OptId) -> i64 {
+        match self.get(id) {
             Some(OptionValue::Int(n)) => *n,
-            other => panic!("option `{name}` is not an integer: {other:?}"),
+            other => panic!("option `{}` is not an integer: {other:?}", id.name()),
         }
     }
 
@@ -304,97 +319,88 @@ impl ResolvedOptions {
         self.int(shared::MAX_BLANK_LINES) as usize
     }
 
-    /// The strings of a list option; empty when the option is absent.
-    pub fn strings(&self, name: &str) -> Vec<String> {
-        match self.0.get(name) {
-            Some(OptionValue::List(items)) => items
-                .iter()
-                .filter_map(|i| match i {
-                    OptionValue::String(s) => Some(s.clone()),
-                    _ => None,
-                })
-                .collect(),
-            _ => Vec::new(),
+    /// The items of a list option; empty when the option is absent.
+    pub fn list(&self, id: OptId) -> &[OptionValue] {
+        match self.get(id) {
+            Some(OptionValue::List(items)) => items,
+            _ => &[],
         }
     }
 
-    /// Is `item` one of the strings of a list option (no copy of the list)?
-    pub fn list_has(&self, name: &str, item: &str) -> bool {
-        matches!(self.0.get(name), Some(OptionValue::List(items))
-            if items.iter().any(|i| matches!(i, OptionValue::String(s) if s == item)))
+    /// The strings of a list option; empty when the option is absent.
+    pub fn strings(&self, id: OptId) -> impl Iterator<Item = &str> {
+        self.list(id).iter().filter_map(|i| match i {
+            OptionValue::String(s) => Some(s.as_str()),
+            _ => None,
+        })
     }
 
-    /// Is `(first, second)` a consecutive pair of the strings of a list option (no copy)?
-    pub fn list_has_pair(&self, name: &str, first: &str, second: &str) -> bool {
-        let Some(OptionValue::List(items)) = self.0.get(name) else {
-            return false;
-        };
-        items.chunks(2).any(|p| {
+    /// The lists of strings of a list-of-lists option; empty when the option is absent.
+    pub fn string_lists(&self, id: OptId) -> impl Iterator<Item = impl Iterator<Item = &str>> {
+        self.list(id).iter().map(|set| {
+            let items: &[OptionValue] = match set {
+                OptionValue::List(items) => items,
+                _ => &[],
+            };
+            items.iter().filter_map(|i| match i {
+                OptionValue::String(s) => Some(s.as_str()),
+                _ => None,
+            })
+        })
+    }
+
+    /// Is `item` one of the strings of a list option?
+    pub fn list_has(&self, id: OptId, item: &str) -> bool {
+        self.strings(id).any(|s| s == item)
+    }
+
+    /// Is `(first, second)` a consecutive pair of the strings of a list option?
+    pub fn list_has_pair(&self, id: OptId, first: &str, second: &str) -> bool {
+        self.list(id).chunks(2).any(|p| {
             matches!(&p[0], OptionValue::String(a) if a == first)
                 && matches!(p.get(1), Some(OptionValue::String(b)) if b == second)
         })
     }
 
-    /// The lists of strings of a list-of-lists option; empty when the option is absent.
-    pub fn string_lists(&self, name: &str) -> Vec<Vec<String>> {
-        match self.0.get(name) {
-            Some(OptionValue::List(sets)) => sets
-                .iter()
-                .map(|set| match set {
-                    OptionValue::List(items) => items
-                        .iter()
-                        .filter_map(|i| match i {
-                            OptionValue::String(s) => Some(s.clone()),
-                            _ => None,
-                        })
-                        .collect(),
-                    _ => Vec::new(),
-                })
-                .collect(),
-            _ => Vec::new(),
-        }
-    }
-
-    pub fn str(&self, name: &str) -> &str {
-        match self.0.get(name) {
+    pub fn str(&self, id: OptId) -> &str {
+        match self.get(id) {
             Some(OptionValue::String(s)) => s,
-            other => panic!("option `{name}` is not a string: {other:?}"),
+            other => panic!("option `{}` is not a string: {other:?}", id.name()),
         }
     }
 
     /// The string of an option; empty when the option is absent or not a string.
-    pub fn text(&self, name: &str) -> &str {
-        match self.0.get(name) {
+    pub fn text(&self, id: OptId) -> &str {
+        match self.get(id) {
             Some(OptionValue::String(s)) => s,
             _ => "",
         }
     }
 
     /// Does the string option have this value?
-    pub fn is(&self, name: &str, value: &str) -> bool {
-        self.text(name) == value
+    pub fn is(&self, id: OptId, value: &str) -> bool {
+        self.text(id) == value
     }
 
     /// An integer option as a count; `fallback` when it is absent or negative.
-    pub fn uint(&self, name: &str, fallback: usize) -> usize {
-        match self.0.get(name) {
+    pub fn uint(&self, id: OptId, fallback: usize) -> usize {
+        match self.get(id) {
             Some(OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(fallback),
             _ => fallback,
         }
     }
 
     /// A boolean option; `fallback` when it is absent.
-    pub fn flag(&self, name: &str, fallback: bool) -> bool {
-        match self.0.get(name) {
+    pub fn flag(&self, id: OptId, fallback: bool) -> bool {
+        match self.get(id) {
             Some(OptionValue::Bool(b)) => *b,
             _ => fallback,
         }
     }
 
     /// Does the list option hold this string?
-    pub fn has(&self, name: &str, item: &str) -> bool {
-        matches!(self.0.get(name), Some(OptionValue::List(items))
-            if items.iter().any(|i| matches!(i, OptionValue::String(s) if s == item)))
+    pub fn has(&self, id: OptId, item: &str) -> bool {
+        self.list_has(id, item)
     }
 
     /// Does the opening brace of this element start a line? `brace_newline` says where braces go
@@ -404,35 +410,39 @@ impl ResolvedOptions {
         self.is(shared::BRACE_NEWLINE, "all") && !self.has(shared::BRACE_SAME_LINE, element)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&String, &OptionValue)> {
-        self.0.iter()
+    /// The options that have a value, with their names.
+    pub fn iter(&self) -> impl Iterator<Item = (&'static str, &OptionValue)> {
+        self.0
+            .iter()
+            .enumerate()
+            .filter_map(|(i, v)| v.as_ref().map(|v| (opt::NAMES[i], v)))
     }
 }
 
 /// Definitions of the options every language shares (the top-level `format:` section). A provider
 /// includes the ones it supports, with its own default.
 pub mod shared {
-    use super::OptionDef;
+    use super::{OptId, OptionDef, opt};
 
-    pub const LINE_WIDTH: &str = "line_width";
-    pub const INDENT_SIZE: &str = "indent_size";
-    pub const INDENT_STYLE: &str = "indent_style";
-    pub const FINAL_NEWLINE: &str = "final_newline";
-    pub const END_OF_LINE: &str = "end_of_line";
-    pub const BRACKET_SPACING: &str = "bracket_spacing";
-    pub const ARRAY_BRACKET_SPACING: &str = "array_bracket_spacing";
+    pub const LINE_WIDTH: OptId = opt::LINE_WIDTH;
+    pub const INDENT_SIZE: OptId = opt::INDENT_SIZE;
+    pub const INDENT_STYLE: OptId = opt::INDENT_STYLE;
+    pub const FINAL_NEWLINE: OptId = opt::FINAL_NEWLINE;
+    pub const END_OF_LINE: OptId = opt::END_OF_LINE;
+    pub const BRACKET_SPACING: OptId = opt::BRACKET_SPACING;
+    pub const ARRAY_BRACKET_SPACING: OptId = opt::ARRAY_BRACKET_SPACING;
     /// Not a top-level `format:` option: only providers that list it have it.
-    pub const MAX_BLANK_LINES: &str = "max_blank_lines";
-    pub const BRACE_NEWLINE: &str = "brace_newline";
-    pub const BRACE_SAME_LINE: &str = "brace_same_line";
+    pub const MAX_BLANK_LINES: OptId = opt::MAX_BLANK_LINES;
+    pub const BRACE_NEWLINE: OptId = opt::BRACE_NEWLINE;
+    pub const BRACE_SAME_LINE: OptId = opt::BRACE_SAME_LINE;
     pub const NAMES: [&str; 7] = [
-        LINE_WIDTH,
-        INDENT_SIZE,
-        INDENT_STYLE,
-        FINAL_NEWLINE,
-        END_OF_LINE,
-        BRACKET_SPACING,
-        ARRAY_BRACKET_SPACING,
+        "line_width",
+        "indent_size",
+        "indent_style",
+        "final_newline",
+        "end_of_line",
+        "bracket_spacing",
+        "array_bracket_spacing",
     ];
 
     pub fn line_width(default: i64) -> OptionDef {
@@ -489,7 +499,7 @@ pub mod shared {
 
     pub fn member_chain_style(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "member_chain_style",
+            opt::MEMBER_CHAIN_STYLE,
             &["fluent", "grouped", "wrapped", "soft"],
             default,
             "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
@@ -498,7 +508,7 @@ pub mod shared {
 
     pub fn member_chain_force_links(default: i64) -> OptionDef {
         OptionDef::int(
-            "member_chain_force_links",
+            opt::MEMBER_CHAIN_FORCE_LINKS,
             default,
             (0, 1000),
             "A chain of member accesses and calls with at least this many dots always breaks (`wrapped` style; 0: never).",
@@ -507,7 +517,7 @@ pub mod shared {
 
     pub fn member_chain_min_groups(default: i64) -> OptionDef {
         OptionDef::int(
-            "member_chain_min_groups",
+            opt::MEMBER_CHAIN_MIN_GROUPS,
             default,
             (0, 1000),
             "A chain of member accesses and calls with fewer groups after the one on the head's line is never broken at the dots (`soft` style).",
@@ -516,7 +526,7 @@ pub mod shared {
 
     pub fn member_chain_min_calls(default: i64) -> OptionDef {
         OptionDef::int(
-            "member_chain_min_calls",
+            opt::MEMBER_CHAIN_MIN_CALLS,
             default,
             (1, 1000),
             "A chain of member accesses and calls with at least this many calls is broken one call per line when it does not fit on a line (`fluent` style).",
@@ -525,7 +535,7 @@ pub mod shared {
 
     pub fn member_chain_keep_accesses(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "member_chain_keep_accesses",
+            opt::MEMBER_CHAIN_KEEP_ACCESSES,
             &["never", "head", "always"],
             default,
             "In a broken member chain an access stays on the line of the call after it (`.a.b()` is one group) instead of starting a line of its own: `always`, or `head` in the first group only (which stays on the line of the head when the head name is short or a type name).",
@@ -534,7 +544,7 @@ pub mod shared {
 
     pub fn member_chain_break_on_block(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "member_chain_break_on_block",
+            opt::MEMBER_CHAIN_BREAK_ON_BLOCK,
             &["never", "inner", "any"],
             default,
             "Break a member chain one call per line when it has an argument with a block body (a lambda or an anonymous class) even if the chain would fit: `inner` when a call other than the last has one, `any` when any call has one.",
@@ -543,7 +553,7 @@ pub mod shared {
 
     pub fn type_use_annotations(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "type_use_annotations",
+            opt::TYPE_USE_ANNOTATIONS,
             default,
             "Annotations that belong to the type after them, not to the declaration (`@Nullable String name`): the fully qualified names the file imports them under, `*` standing for any text. They stay on the line of the declaration.",
         )
@@ -551,7 +561,7 @@ pub mod shared {
 
     pub fn signature_wrap_annotated(default: bool) -> OptionDef {
         OptionDef::boolean(
-            "signature_wrap_annotated",
+            opt::SIGNATURE_WRAP_ANNOTATED,
             default,
             "A signature with an annotated parameter puts each parameter on a line of its own, even when it fits.",
         )
@@ -559,7 +569,7 @@ pub mod shared {
 
     pub fn semicolon_keep_parents(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "semicolon_keep_parents",
+            opt::SEMICOLON_KEEP_PARENTS,
             default,
             "`;` between and after statements is redundant: one at the end of a line is removed, one between two statements of a line becomes a line break, except in nodes of these kinds (where it separates other things).",
         )
@@ -567,7 +577,7 @@ pub mod shared {
 
     pub fn single_line_body_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "single_line_body_kinds",
+            opt::SINGLE_LINE_BODY_KINDS,
             default,
             "Node kinds of entries a braced body made only of them keeps on one line when the source has it on one line (`enum class E { A, B }`).",
         )
@@ -575,7 +585,7 @@ pub mod shared {
 
     pub fn trailing_comma_last_entry(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "trailing_comma_last_entry",
+            opt::TRAILING_COMMA_LAST_ENTRY,
             default,
             "Pairs of a body kind and an entry kind (`ClassBody` `EnumEntry`): the last entry gets a trailing comma when the entries are one per line or several over several lines.",
         )
@@ -583,7 +593,7 @@ pub mod shared {
 
     pub fn trailing_comma_before(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "trailing_comma_before",
+            opt::TRAILING_COMMA_BEFORE,
             default,
             "Pairs of a node kind and the token that ends its comma-separated list (`WhenEntry` `->`): a list that spans lines gets a trailing comma and the token goes on a line of its own.",
         )
@@ -591,7 +601,7 @@ pub mod shared {
 
     pub fn raw_string_calls(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "raw_string_calls",
+            opt::RAW_STRING_CALLS,
             default,
             "Names of the calls (`trimIndent`) that strip the common indentation of a multi-line raw string they follow: its lines are written at the indentation of the code around it.",
         )
@@ -599,7 +609,7 @@ pub mod shared {
 
     pub fn ctor_own_line_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "ctor_own_line_kinds",
+            opt::CTOR_OWN_LINE_KINDS,
             default,
             "Node kinds among the modifiers of a primary constructor (annotations) that put the constructor below the type name, one level in, with the supertypes and the body under that level.",
         )
@@ -607,7 +617,7 @@ pub mod shared {
 
     pub fn comment_trim_lines(default: bool) -> OptionDef {
         OptionDef::boolean(
-            "comment_trim_lines",
+            opt::COMMENT_TRIM_LINES,
             default,
             "The lines of a block comment lose their trailing blanks.",
         )
@@ -615,7 +625,7 @@ pub mod shared {
 
     pub fn comment_reindent_lines(default: bool) -> OptionDef {
         OptionDef::boolean(
-            "comment_reindent_lines",
+            opt::COMMENT_REINDENT_LINES,
             default,
             "The lines of a block comment keep their indentation relative to the comment's own line when the comment moves.",
         )
@@ -623,7 +633,7 @@ pub mod shared {
 
     pub fn format_rules(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "format_rules",
+            opt::FORMAT_RULES,
             default,
             "Ids of shared rules that rewrite the source before the layout (their fixes), besides those the language has a section for in `format.rules`.",
         )
@@ -631,7 +641,7 @@ pub mod shared {
 
     pub fn redundant_return_types(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "redundant_return_types",
+            opt::REDUNDANT_RETURN_TYPES,
             default,
             "Return types (`Unit`) that a function with a block body has anyway: the rule `redundant-return-type` leaves them out when the formatter runs it (`format_rules`).",
         )
@@ -639,7 +649,7 @@ pub mod shared {
 
     pub fn curly_style(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "curly_style",
+            opt::CURLY_STYLE,
             &["always", "chain"],
             default,
             "How the `curly` rule braces a body when the formatter runs it: `always` every body, `chain` the branches of a chain where one has braces, spans lines or passes the line width, and a loop body on its own line.",
@@ -648,7 +658,7 @@ pub mod shared {
 
     pub fn settle_keywords(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "settle_keywords",
+            opt::SETTLE_KEYWORDS,
             default,
             "Keywords of statements whose braces depend on the line width. A file whose formatted output has a line that starts with one, has a body after its head on the same line (no `{`) and is followed by a deeper-indented line is rewritten once more, since the layout moved the code.",
         )
@@ -656,7 +666,7 @@ pub mod shared {
 
     pub fn annotation_inline(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "annotation_inline",
+            opt::ANNOTATION_INLINE,
             &["never", "single"],
             default,
             "A declaration whose only annotation has no arguments keeps its declaration on the line of the annotation when the source has it there (`@Test fun f()`); `never`: every annotation of a declaration has a line of its own.",
@@ -665,7 +675,7 @@ pub mod shared {
 
     pub fn annotation_source_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "annotation_source_kinds",
+            opt::ANNOTATION_SOURCE_KINDS,
             default,
             "Node kinds of declarations whose annotations stay on the lines where the source has them.",
         )
@@ -673,7 +683,7 @@ pub mod shared {
 
     pub fn member_chain_head_calls(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "member_chain_head_calls",
+            opt::MEMBER_CHAIN_HEAD_CALLS,
             default,
             "Calls that stay on the line of the head of a broken member chain when they are among its first two groups (`list.stream()`).",
         )
@@ -681,7 +691,7 @@ pub mod shared {
 
     pub fn member_chain_short_head(default: i64) -> OptionDef {
         OptionDef::int(
-            "member_chain_short_head",
+            opt::MEMBER_CHAIN_SHORT_HEAD,
             default,
             (0, 100),
             "A name of at most this many characters at the head of a broken member chain stays on the line of the first call (`x.foo()`); a capitalized name, `this`, `base`, `super` and a keyword type always do.",
@@ -690,7 +700,7 @@ pub mod shared {
 
     pub fn member_chain_indent(default: i64) -> OptionDef {
         OptionDef::int(
-            "member_chain_indent",
+            opt::MEMBER_CHAIN_INDENT,
             default,
             (0, 4),
             "Levels of indentation of the lines of a broken member chain.",
@@ -699,7 +709,7 @@ pub mod shared {
 
     pub fn assignment_layout(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "assignment_layout",
+            opt::ASSIGNMENT_LAYOUT,
             &["compact", "fluid", "break", "multiline"],
             default,
             "Where the value after `=` (or `=>`) goes when the line is too long: `compact` moves a binary expression, a conditional or a query to the next line and leaves any other value on the line; `fluid` also moves strings, collection expressions and property initializers, and any other value whose first line does not fit after the operator (a string that spans lines stays on the operator's line; the body of an expression lambda moves below `=>`; chains `a = b = c` get layouts of their own); `break` moves every value that does not fit; `multiline` does the same except for a value with no place to break a line, which stays.",
@@ -708,7 +718,7 @@ pub mod shared {
 
     pub fn assignment_conditional(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "assignment_conditional",
+            opt::ASSIGNMENT_CONDITIONAL,
             &["always", "binary_test"],
             default,
             "A conditional (`a ? b : c`) as the value of an assignment moves below the operator when it does not fit: `always`, or `binary_test` only when its test is an operator chain.",
@@ -717,7 +727,7 @@ pub mod shared {
 
     pub fn paren_line_end_parents(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "paren_line_end_parents",
+            opt::PAREN_LINE_END_PARENTS,
             default,
             "Node kinds whose parenthesized operand ends the logical line with a comment after the closing parenthesis: the pair goes and the comment is the line's.",
         )
@@ -725,7 +735,7 @@ pub mod shared {
 
     pub fn assignment_keep_break_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "assignment_keep_break_kinds",
+            opt::ASSIGNMENT_KEEP_BREAK_KINDS,
             default,
             "Node kinds of assignments and declarations whose value stays below the operator when the source has it there, whether or not it would fit on the line.",
         )
@@ -733,7 +743,7 @@ pub mod shared {
 
     pub fn assignment_left_min_parameters(default: i64) -> OptionDef {
         OptionDef::int(
-            "assignment_left_min_parameters",
+            opt::ASSIGNMENT_LEFT_MIN_PARAMETERS,
             default,
             (0, 1000),
             "A declaration whose parameter list has at least this many parameters keeps a value that spans lines on the line of the operator (0: off).",
@@ -742,7 +752,7 @@ pub mod shared {
 
     pub fn assignment_left_unless_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "assignment_left_unless_kinds",
+            opt::ASSIGNMENT_LEFT_UNLESS_KINDS,
             default,
             "Node kinds among the children of a declaration (a return type's colon) that turn off `assignment_left_min_parameters`.",
         )
@@ -750,7 +760,7 @@ pub mod shared {
 
     pub fn assignment_op_token_skip_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "assignment_op_token_skip_kinds",
+            opt::ASSIGNMENT_OP_TOKEN_SKIP_KINDS,
             default,
             "Node kinds of assignments whose operator is not searched for a line comment after it (the comment stays where it is); every other assignment keeps its value below the operator when a line comment follows the operator.",
         )
@@ -758,7 +768,7 @@ pub mod shared {
 
     pub fn assignment_destructure_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "assignment_destructure_kinds",
+            opt::ASSIGNMENT_DESTRUCTURE_KINDS,
             default,
             "Node kinds of a destructuring on the left of an assignment: one of more than two entries with a renamed or defaulted entry breaks in preference to the value.",
         )
@@ -766,7 +776,7 @@ pub mod shared {
 
     pub fn assignment_generic_closure_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "assignment_generic_closure_kinds",
+            opt::ASSIGNMENT_GENERIC_CLOSURE_KINDS,
             default,
             "Node kinds of declarations whose generic closure value (`const f = <T>(a: T) => b`) stays on the operator's line while the left side breaks.",
         )
@@ -774,7 +784,7 @@ pub mod shared {
 
     pub fn type_argument_complex_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "type_argument_complex_kinds",
+            opt::TYPE_ARGUMENT_COMPLEX_KINDS,
             default,
             "Node kinds of a lone type argument that make a call chain worth breaking inside (several type arguments always do).",
         )
@@ -782,7 +792,7 @@ pub mod shared {
 
     pub fn rewrite_parenthesize_pairs(default: &[&str]) -> OptionDef {
         OptionDef::words(
-            "rewrite_parenthesize_pairs",
+            opt::REWRITE_PARENTHESIZE_PAIRS,
             default,
             "Pairs of node kinds (child, parent, child, parent, ...): a node of the first kind directly inside one of the second gets parentheses around it.",
         )
@@ -790,7 +800,7 @@ pub mod shared {
 
     pub fn assignment_indent(default: i64) -> OptionDef {
         OptionDef::int(
-            "assignment_indent",
+            opt::ASSIGNMENT_INDENT,
             default,
             (1, 4),
             "Levels of indentation of a value that moves below the operator of an assignment.",
@@ -799,7 +809,7 @@ pub mod shared {
 
     pub fn conditional_layout(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "conditional_layout",
+            opt::CONDITIONAL_LAYOUT,
             &["indented", "chained"],
             default,
             "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
@@ -808,7 +818,7 @@ pub mod shared {
 
     pub fn conditional_indent(default: i64) -> OptionDef {
         OptionDef::int(
-            "conditional_indent",
+            opt::CONDITIONAL_INDENT,
             default,
             (1, 4),
             "Levels of indentation of the branches of a broken conditional in the `indented` layout.",
@@ -817,7 +827,7 @@ pub mod shared {
 
     pub fn binary_operator_line(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "binary_operator_line",
+            opt::BINARY_OPERATOR_LINE,
             &["start", "end"],
             default,
             "Where an operator of a chain (`a + b + c`) that does not fit goes: `start` breaks before it and puts one operand per line; `end` keeps it at the end of the line and moves an operand down only when it does not fit (a chain that mixes node kinds breaks at every operator).",
@@ -826,7 +836,7 @@ pub mod shared {
 
     pub fn binary_indent(default: i64) -> OptionDef {
         OptionDef::int(
-            "binary_indent",
+            opt::BINARY_INDENT,
             default,
             (1, 4),
             "Levels of indentation of the continuation lines of a broken operator chain.",
@@ -835,7 +845,7 @@ pub mod shared {
 
     pub fn binary_hug(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "binary_hug",
+            opt::BINARY_HUG,
             &["never", "assignment", "statement"],
             default,
             "A broken operator chain leaves the indentation of its continuation lines to the layout around it: `assignment` for the value of an assignment, declaration or entry, `statement` also for the value of `return` and `throw`.",
@@ -844,7 +854,7 @@ pub mod shared {
 
     pub fn hug_first_argument(default: bool) -> OptionDef {
         OptionDef::boolean(
-            "hug_first_argument",
+            opt::HUG_FIRST_ARGUMENT,
             default,
             "A function that is the first of two arguments stays on the call's line while its body breaks (`setTimeout(() => {...}, 500)`), when the other argument is short.",
         )
@@ -852,7 +862,7 @@ pub mod shared {
 
     pub fn hug_last_argument(default: &'static str) -> OptionDef {
         OptionDef::choice(
-            "hug_last_argument",
+            opt::HUG_LAST_ARGUMENT,
             &["never", "sole", "last"],
             default,
             "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `never` not at all.",
@@ -861,7 +871,7 @@ pub mod shared {
 
     pub fn initializer_fill_width(default: i64) -> OptionDef {
         OptionDef::int(
-            "initializer_fill_width",
+            opt::INITIALIZER_FILL_WIDTH,
             default,
             (0, 100),
             "The elements of an array initializer are filled (as many as fit on a line) when each is shorter than this many characters in the source; 0: never.",
@@ -870,7 +880,7 @@ pub mod shared {
 
     pub fn indent_nested_binary(default: bool) -> OptionDef {
         OptionDef::boolean(
-            "indent_nested_binary",
+            opt::INDENT_NESTED_BINARY,
             default,
             "Indent the operands of a binary expression that is itself an operand of a binary expression with an operator of another precedence (`a && b || c`).",
         )
@@ -910,7 +920,7 @@ mod tests {
         OptionSchema::new(vec![
             shared::line_width(80),
             shared::indent_size(2),
-            OptionDef::choice("mode", &["a", "b"], "a", "A mode."),
+            OptionDef::choice("embed_mode", &["a", "b"], "a", "A mode."),
         ])
     }
 
@@ -918,10 +928,10 @@ mod tests {
     fn defaults_and_checked_values() {
         let s = schema();
         let mut r = s.defaults();
-        assert_eq!(r.int("line_width"), 80);
-        s.apply(&mut r, "mode", &OptionValue::String("b".into()))
+        assert_eq!(r.int(opt::LINE_WIDTH), 80);
+        s.apply(&mut r, "embed_mode", &OptionValue::String("b".into()))
             .unwrap();
-        assert_eq!(r.str("mode"), "b");
+        assert_eq!(r.str(opt::EMBED_MODE), "b");
         for (name, value, needle) in [
             (
                 "nope",
@@ -933,7 +943,11 @@ mod tests {
                 OptionValue::Int(90),
                 "did you mean `line_width`",
             ),
-            ("mode", OptionValue::String("c".into()), "one of: a, b"),
+            (
+                "embed_mode",
+                OptionValue::String("c".into()),
+                "one of: a, b",
+            ),
             ("line_width", OptionValue::Int(5), "between 20 and 1000"),
             ("line_width", OptionValue::Bool(true), "integer"),
         ] {

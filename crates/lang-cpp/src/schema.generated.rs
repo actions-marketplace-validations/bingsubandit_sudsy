@@ -1,66 +1,66 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const WRAP_LINES: &str = "wrap_lines";
+pub const WRAP_LINES: core_config::OptId = core_config::opt::WRAP_LINES;
 #[allow(dead_code)]
-pub const CONTINUATION_INDENT: &str = "continuation_indent";
+pub const CONTINUATION_INDENT: core_config::OptId = core_config::opt::CONTINUATION_INDENT;
 #[allow(dead_code)]
-pub const ACCESS_MODIFIER_OUTDENT: &str = "access_modifier_outdent";
+pub const ACCESS_MODIFIER_OUTDENT: core_config::OptId = core_config::opt::ACCESS_MODIFIER_OUTDENT;
 #[allow(dead_code)]
-pub const INDENT_CASE_LABELS: &str = "indent_case_labels";
+pub const INDENT_CASE_LABELS: core_config::OptId = core_config::opt::INDENT_CASE_LABELS;
 #[allow(dead_code)]
-pub const INDENT_GOTO_LABELS: &str = "indent_goto_labels";
+pub const INDENT_GOTO_LABELS: core_config::OptId = core_config::opt::INDENT_GOTO_LABELS;
 #[allow(dead_code)]
-pub const KEEP_LEADING_BLANK_LINES: &str = "keep_leading_blank_lines";
+pub const KEEP_LEADING_BLANK_LINES: core_config::OptId = core_config::opt::KEEP_LEADING_BLANK_LINES;
 #[allow(dead_code)]
-pub const INDENT_PP_DIRECTIVES: &str = "indent_pp_directives";
+pub const INDENT_PP_DIRECTIVES: core_config::OptId = core_config::opt::INDENT_PP_DIRECTIVES;
 #[allow(dead_code)]
-pub const NAMESPACE_INDENTATION: &str = "namespace_indentation";
+pub const NAMESPACE_INDENTATION: core_config::OptId = core_config::opt::NAMESPACE_INDENTATION;
 #[allow(dead_code)]
-pub const POINTER_ALIGNMENT: &str = "pointer_alignment";
+pub const POINTER_ALIGNMENT: core_config::OptId = core_config::opt::POINTER_ALIGNMENT;
 #[allow(dead_code)]
-pub const BRACE_WRAPPING: &str = "brace_wrapping";
+pub const BRACE_WRAPPING: core_config::OptId = core_config::opt::BRACE_WRAPPING;
 #[allow(dead_code)]
-pub const ALIGN_WITH_TABS: &str = "align_with_tabs";
+pub const ALIGN_WITH_TABS: core_config::OptId = core_config::opt::ALIGN_WITH_TABS;
 #[allow(dead_code)]
-pub const INDENT_BRACES: &str = "indent_braces";
+pub const INDENT_BRACES: core_config::OptId = core_config::opt::INDENT_BRACES;
 #[allow(dead_code)]
-pub const SHORT_FUNCTIONS: &str = "short_functions";
+pub const SHORT_FUNCTIONS: core_config::OptId = core_config::opt::SHORT_FUNCTIONS;
 #[allow(dead_code)]
-pub const SHORT_IFS: &str = "short_ifs";
+pub const SHORT_IFS: core_config::OptId = core_config::opt::SHORT_IFS;
 #[allow(dead_code)]
-pub const SHORT_LOOPS: &str = "short_loops";
+pub const SHORT_LOOPS: core_config::OptId = core_config::opt::SHORT_LOOPS;
 #[allow(dead_code)]
-pub const SHORT_LAMBDAS: &str = "short_lambdas";
+pub const SHORT_LAMBDAS: core_config::OptId = core_config::opt::SHORT_LAMBDAS;
 #[allow(dead_code)]
-pub const SHORT_CASE_LABELS: &str = "short_case_labels";
+pub const SHORT_CASE_LABELS: core_config::OptId = core_config::opt::SHORT_CASE_LABELS;
 #[allow(dead_code)]
-pub const BIN_PACK_ARGUMENTS: &str = "bin_pack_arguments";
+pub const BIN_PACK_ARGUMENTS: core_config::OptId = core_config::opt::BIN_PACK_ARGUMENTS;
 #[allow(dead_code)]
-pub const BIN_PACK_PARAMETERS: &str = "bin_pack_parameters";
+pub const BIN_PACK_PARAMETERS: core_config::OptId = core_config::opt::BIN_PACK_PARAMETERS;
 #[allow(dead_code)]
-pub const ALIGN_AFTER_OPEN_BRACKET: &str = "align_after_open_bracket";
+pub const ALIGN_AFTER_OPEN_BRACKET: core_config::OptId = core_config::opt::ALIGN_AFTER_OPEN_BRACKET;
 #[allow(dead_code)]
-pub const BREAK_BEFORE_BINARY_OPERATORS: &str = "break_before_binary_operators";
+pub const BREAK_BEFORE_BINARY_OPERATORS: core_config::OptId = core_config::opt::BREAK_BEFORE_BINARY_OPERATORS;
 #[allow(dead_code)]
-pub const BREAK_CONSTRUCTOR_INITIALIZERS: &str = "break_constructor_initializers";
+pub const BREAK_CONSTRUCTOR_INITIALIZERS: core_config::OptId = core_config::opt::BREAK_CONSTRUCTOR_INITIALIZERS;
 #[allow(dead_code)]
-pub const CONSTRUCTOR_INITIALIZER_INDENT: &str = "constructor_initializer_indent";
+pub const CONSTRUCTOR_INITIALIZER_INDENT: core_config::OptId = core_config::opt::CONSTRUCTOR_INITIALIZER_INDENT;
 #[allow(dead_code)]
-pub const BREAK_AFTER_RETURN_TYPE: &str = "break_after_return_type";
+pub const BREAK_AFTER_RETURN_TYPE: core_config::OptId = core_config::opt::BREAK_AFTER_RETURN_TYPE;
 #[allow(dead_code)]
-pub const SHORT_ENUMS: &str = "short_enums";
+pub const SHORT_ENUMS: core_config::OptId = core_config::opt::SHORT_ENUMS;
 #[allow(dead_code)]
-pub const PENALTY_RETURN_TYPE: &str = "penalty_return_type";
+pub const PENALTY_RETURN_TYPE: core_config::OptId = core_config::opt::PENALTY_RETURN_TYPE;
 #[allow(dead_code)]
-pub const SPACE_BEFORE_PARENS: &str = "space_before_parens";
+pub const SPACE_BEFORE_PARENS: core_config::OptId = core_config::opt::SPACE_BEFORE_PARENS;
 #[allow(dead_code)]
-pub const SPACES_BEFORE_TRAILING_COMMENTS: &str = "spaces_before_trailing_comments";
+pub const SPACES_BEFORE_TRAILING_COMMENTS: core_config::OptId = core_config::opt::SPACES_BEFORE_TRAILING_COMMENTS;
 #[allow(dead_code)]
-pub const ALIGN_TRAILING_COMMENTS: &str = "align_trailing_comments";
+pub const ALIGN_TRAILING_COMMENTS: core_config::OptId = core_config::opt::ALIGN_TRAILING_COMMENTS;
 #[allow(dead_code)]
-pub const BREAK_TEMPLATE_DECLARATIONS: &str = "break_template_declarations";
+pub const BREAK_TEMPLATE_DECLARATIONS: core_config::OptId = core_config::opt::BREAK_TEMPLATE_DECLARATIONS;
 #[allow(dead_code)]
-pub const ALIGN_ESCAPED_NEWLINES: &str = "align_escaped_newlines";
+pub const ALIGN_ESCAPED_NEWLINES: core_config::OptId = core_config::opt::ALIGN_ESCAPED_NEWLINES;
 pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("access_modifier_outdent", "outdent", "", &["AccessSpecifier"]),
     ("indent_case_labels", "outdent_unless", "", &["CaseClause"]),
@@ -313,37 +313,37 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::final_newline(true),
         shared::end_of_line(),
         core_config::shared::max_blank_lines(1, "Largest number of blank lines kept between statements and comments."),
-        core_config::OptionDef::boolean("wrap_lines", true, "Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change)."),
-        core_config::OptionDef::int("continuation_indent", 4, (0, 16), "Columns a wrapped line is indented more than the line it continues, where it is not aligned to a bracket."),
-        core_config::OptionDef::int("access_modifier_outdent", 2, (0, 16), "Columns `public:`, `private:` and `protected:` are outdented from the members of their class."),
-        core_config::OptionDef::boolean("indent_case_labels", false, "Indent `case` labels one level inside their `switch`."),
-        core_config::OptionDef::boolean("indent_goto_labels", true, "A goto label stands one indent left of the statements of its block; when false it starts at column 0."),
-        core_config::OptionDef::boolean("keep_leading_blank_lines", true, "Blank lines at the start of the file stay."),
-        core_config::OptionDef::choice("indent_pp_directives", &["none", "keep"], "none", "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."),
-        core_config::OptionDef::choice("namespace_indentation", &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
-        core_config::OptionDef::choice("pointer_alignment", &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
-        core_config::OptionDef::words("brace_wrapping", &[], "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."),
-        core_config::OptionDef::boolean("align_with_tabs", false, "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."),
-        core_config::OptionDef::boolean("indent_braces", false, "Indent a brace that is on its own line together with the block it opens."),
-        core_config::OptionDef::choice("short_functions", &["none", "empty", "inline", "all"], "all", "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."),
-        core_config::OptionDef::choice("short_ifs", &["never", "without_else", "all"], "never", "An `if` with a simple statement is kept on one line when it fits: `never`, without an `else`, or with or without."),
-        core_config::OptionDef::boolean("short_loops", false, "A `for`, `while` or range-for with a simple statement is kept on one line when it fits."),
-        core_config::OptionDef::choice("short_lambdas", &["none", "empty", "inline", "all"], "all", "Lambda bodies kept on the line of the lambda when they fit: `none`, `empty`, `inline` (a lambda that is an argument) or `all`."),
-        core_config::OptionDef::boolean("short_case_labels", false, "A `case` label and its simple statement are kept on one line when they fit."),
-        core_config::OptionDef::boolean("bin_pack_arguments", true, "Call arguments that do not fit on a line are filled; when false they go one per line (or all on one line)."),
-        core_config::OptionDef::boolean("bin_pack_parameters", true, "Function parameters that do not fit on a line are filled; when false they go one per line (or all on one line)."),
-        core_config::OptionDef::choice("align_after_open_bracket", &["align", "dont_align", "always_break"], "align", "Wrapped lines inside brackets line up with the first token after the bracket (`align`), continue with `continuation_indent` (`dont_align`), or always start on a new line after the bracket (`always_break`)."),
-        core_config::OptionDef::choice("break_before_binary_operators", &["none", "non_assignment", "all"], "none", "A wrapped binary expression breaks after the operator (`none`), before it except for assignments (`non_assignment`) or before every operator (`all`)."),
-        core_config::OptionDef::choice("break_constructor_initializers", &["before_colon", "before_comma"], "before_colon", "Constructor initializer lists that do not fit start on a new line before the colon (`before_colon`, one initializer per line when needed), or put a comma before each initializer, one per line (`before_comma`)."),
-        core_config::OptionDef::int("constructor_initializer_indent", 4, (0, 16), "Columns a constructor initializer list is indented more than its constructor."),
-        core_config::OptionDef::choice("break_after_return_type", &["none", "top_level", "all", "top_level_definitions", "all_definitions"], "none", "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`)."),
-        core_config::OptionDef::boolean("short_enums", true, "An enum whose body fits stays on one line."),
-        core_config::OptionDef::int("penalty_return_type", 60, (0, 1000), "What a return type on a line of its own costs the layout; the higher, the longer the parameter list may wrap before the return type moves."),
-        core_config::OptionDef::choice("space_before_parens", &["never", "control_statements", "always"], "control_statements", "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never."),
-        core_config::OptionDef::int("spaces_before_trailing_comments", 1, (0, 16), "Blanks between the code of a line and its `//` comment."),
-        core_config::OptionDef::boolean("align_trailing_comments", true, "Align the trailing comments of consecutive lines."),
-        core_config::OptionDef::choice("break_template_declarations", &["yes", "multiline", "no"], "multiline", "`template <...>` ends its line: always (`yes`), when the declaration is not on one line (`multiline`) or never."),
-        core_config::OptionDef::choice("align_escaped_newlines", &["right", "left", "dont_align"], "right", "The backslashes of a multi-line macro: aligned at `line_width` (`right`), one blank after the longest line (`left`) or one blank after each line."),
+        core_config::OptionDef::boolean(core_config::opt::WRAP_LINES, true, "Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change)."),
+        core_config::OptionDef::int(core_config::opt::CONTINUATION_INDENT, 4, (0, 16), "Columns a wrapped line is indented more than the line it continues, where it is not aligned to a bracket."),
+        core_config::OptionDef::int(core_config::opt::ACCESS_MODIFIER_OUTDENT, 2, (0, 16), "Columns `public:`, `private:` and `protected:` are outdented from the members of their class."),
+        core_config::OptionDef::boolean(core_config::opt::INDENT_CASE_LABELS, false, "Indent `case` labels one level inside their `switch`."),
+        core_config::OptionDef::boolean(core_config::opt::INDENT_GOTO_LABELS, true, "A goto label stands one indent left of the statements of its block; when false it starts at column 0."),
+        core_config::OptionDef::boolean(core_config::opt::KEEP_LEADING_BLANK_LINES, true, "Blank lines at the start of the file stay."),
+        core_config::OptionDef::choice(core_config::opt::INDENT_PP_DIRECTIVES, &["none", "keep"], "none", "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."),
+        core_config::OptionDef::choice(core_config::opt::NAMESPACE_INDENTATION, &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
+        core_config::OptionDef::choice(core_config::opt::POINTER_ALIGNMENT, &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
+        core_config::OptionDef::words(core_config::opt::BRACE_WRAPPING, &[], "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."),
+        core_config::OptionDef::boolean(core_config::opt::ALIGN_WITH_TABS, false, "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."),
+        core_config::OptionDef::boolean(core_config::opt::INDENT_BRACES, false, "Indent a brace that is on its own line together with the block it opens."),
+        core_config::OptionDef::choice(core_config::opt::SHORT_FUNCTIONS, &["none", "empty", "inline", "all"], "all", "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."),
+        core_config::OptionDef::choice(core_config::opt::SHORT_IFS, &["never", "without_else", "all"], "never", "An `if` with a simple statement is kept on one line when it fits: `never`, without an `else`, or with or without."),
+        core_config::OptionDef::boolean(core_config::opt::SHORT_LOOPS, false, "A `for`, `while` or range-for with a simple statement is kept on one line when it fits."),
+        core_config::OptionDef::choice(core_config::opt::SHORT_LAMBDAS, &["none", "empty", "inline", "all"], "all", "Lambda bodies kept on the line of the lambda when they fit: `none`, `empty`, `inline` (a lambda that is an argument) or `all`."),
+        core_config::OptionDef::boolean(core_config::opt::SHORT_CASE_LABELS, false, "A `case` label and its simple statement are kept on one line when they fit."),
+        core_config::OptionDef::boolean(core_config::opt::BIN_PACK_ARGUMENTS, true, "Call arguments that do not fit on a line are filled; when false they go one per line (or all on one line)."),
+        core_config::OptionDef::boolean(core_config::opt::BIN_PACK_PARAMETERS, true, "Function parameters that do not fit on a line are filled; when false they go one per line (or all on one line)."),
+        core_config::OptionDef::choice(core_config::opt::ALIGN_AFTER_OPEN_BRACKET, &["align", "dont_align", "always_break"], "align", "Wrapped lines inside brackets line up with the first token after the bracket (`align`), continue with `continuation_indent` (`dont_align`), or always start on a new line after the bracket (`always_break`)."),
+        core_config::OptionDef::choice(core_config::opt::BREAK_BEFORE_BINARY_OPERATORS, &["none", "non_assignment", "all"], "none", "A wrapped binary expression breaks after the operator (`none`), before it except for assignments (`non_assignment`) or before every operator (`all`)."),
+        core_config::OptionDef::choice(core_config::opt::BREAK_CONSTRUCTOR_INITIALIZERS, &["before_colon", "before_comma"], "before_colon", "Constructor initializer lists that do not fit start on a new line before the colon (`before_colon`, one initializer per line when needed), or put a comma before each initializer, one per line (`before_comma`)."),
+        core_config::OptionDef::int(core_config::opt::CONSTRUCTOR_INITIALIZER_INDENT, 4, (0, 16), "Columns a constructor initializer list is indented more than its constructor."),
+        core_config::OptionDef::choice(core_config::opt::BREAK_AFTER_RETURN_TYPE, &["none", "top_level", "all", "top_level_definitions", "all_definitions"], "none", "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`)."),
+        core_config::OptionDef::boolean(core_config::opt::SHORT_ENUMS, true, "An enum whose body fits stays on one line."),
+        core_config::OptionDef::int(core_config::opt::PENALTY_RETURN_TYPE, 60, (0, 1000), "What a return type on a line of its own costs the layout; the higher, the longer the parameter list may wrap before the return type moves."),
+        core_config::OptionDef::choice(core_config::opt::SPACE_BEFORE_PARENS, &["never", "control_statements", "always"], "control_statements", "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never."),
+        core_config::OptionDef::int(core_config::opt::SPACES_BEFORE_TRAILING_COMMENTS, 1, (0, 16), "Blanks between the code of a line and its `//` comment."),
+        core_config::OptionDef::boolean(core_config::opt::ALIGN_TRAILING_COMMENTS, true, "Align the trailing comments of consecutive lines."),
+        core_config::OptionDef::choice(core_config::opt::BREAK_TEMPLATE_DECLARATIONS, &["yes", "multiline", "no"], "multiline", "`template <...>` ends its line: always (`yes`), when the declaration is not on one line (`multiline`) or never."),
+        core_config::OptionDef::choice(core_config::opt::ALIGN_ESCAPED_NEWLINES, &["right", "left", "dont_align"], "right", "The backslashes of a multi-line macro: aligned at `line_width` (`right`), one blank after the longest line (`left`) or one blank after each line."),
         ])
         .with_presets(vec![
         core_config::Preset::new("cpp/google", include_str!("../presets/google.yaml")),

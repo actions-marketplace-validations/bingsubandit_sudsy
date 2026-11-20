@@ -312,7 +312,7 @@ mod tests {
     fn options_and_presets_come_from_the_declarations() {
         let schema = OptionSchema::new(vec![
             shared::line_width(80),
-            OptionDef::choice("mode", &["a", "b"], "a", "A mode."),
+            OptionDef::choice("embed_mode", &["a", "b"], "a", "A mode."),
         ])
         .with_presets(vec![Preset::new("x/p", "")]);
         let doc = json_schema(&[("x", &schema)], &[]);
@@ -326,7 +326,7 @@ mod tests {
         );
         assert!(
             doc["properties"]["format"]["properties"]
-                .get("mode")
+                .get("embed_mode")
                 .is_none()
         );
     }

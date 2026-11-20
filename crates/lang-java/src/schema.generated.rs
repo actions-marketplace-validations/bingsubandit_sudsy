@@ -1,40 +1,40 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_MIN_CALLS: &str = "member_chain_min_calls";
+pub const MEMBER_CHAIN_MIN_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_MIN_CALLS;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_KEEP_ACCESSES: &str = "member_chain_keep_accesses";
+pub const MEMBER_CHAIN_KEEP_ACCESSES: core_config::OptId = core_config::opt::MEMBER_CHAIN_KEEP_ACCESSES;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_BREAK_ON_BLOCK: &str = "member_chain_break_on_block";
+pub const MEMBER_CHAIN_BREAK_ON_BLOCK: core_config::OptId = core_config::opt::MEMBER_CHAIN_BREAK_ON_BLOCK;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_HEAD_CALLS: &str = "member_chain_head_calls";
+pub const MEMBER_CHAIN_HEAD_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_HEAD_CALLS;
 #[allow(dead_code)]
-pub const TYPE_USE_ANNOTATIONS: &str = "type_use_annotations";
+pub const TYPE_USE_ANNOTATIONS: core_config::OptId = core_config::opt::TYPE_USE_ANNOTATIONS;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_SHORT_HEAD: &str = "member_chain_short_head";
+pub const MEMBER_CHAIN_SHORT_HEAD: core_config::OptId = core_config::opt::MEMBER_CHAIN_SHORT_HEAD;
 #[allow(dead_code)]
-pub const MEMBER_CHAIN_INDENT: &str = "member_chain_indent";
+pub const MEMBER_CHAIN_INDENT: core_config::OptId = core_config::opt::MEMBER_CHAIN_INDENT;
 #[allow(dead_code)]
-pub const BINARY_OPERATOR_LINE: &str = "binary_operator_line";
+pub const BINARY_OPERATOR_LINE: core_config::OptId = core_config::opt::BINARY_OPERATOR_LINE;
 #[allow(dead_code)]
-pub const BINARY_INDENT: &str = "binary_indent";
+pub const BINARY_INDENT: core_config::OptId = core_config::opt::BINARY_INDENT;
 #[allow(dead_code)]
-pub const BINARY_HUG: &str = "binary_hug";
+pub const BINARY_HUG: core_config::OptId = core_config::opt::BINARY_HUG;
 #[allow(dead_code)]
-pub const HUG_FIRST_ARGUMENT: &str = "hug_first_argument";
+pub const HUG_FIRST_ARGUMENT: core_config::OptId = core_config::opt::HUG_FIRST_ARGUMENT;
 #[allow(dead_code)]
-pub const HUG_LAST_ARGUMENT: &str = "hug_last_argument";
+pub const HUG_LAST_ARGUMENT: core_config::OptId = core_config::opt::HUG_LAST_ARGUMENT;
 #[allow(dead_code)]
-pub const INDENT_NESTED_BINARY: &str = "indent_nested_binary";
+pub const INDENT_NESTED_BINARY: core_config::OptId = core_config::opt::INDENT_NESTED_BINARY;
 #[allow(dead_code)]
-pub const ASSIGNMENT_LAYOUT: &str = "assignment_layout";
+pub const ASSIGNMENT_LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_LAYOUT;
 #[allow(dead_code)]
-pub const ASSIGNMENT_CONDITIONAL: &str = "assignment_conditional";
+pub const ASSIGNMENT_CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
 #[allow(dead_code)]
-pub const ASSIGNMENT_INDENT: &str = "assignment_indent";
+pub const ASSIGNMENT_INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
 #[allow(dead_code)]
-pub const CONDITIONAL_INDENT: &str = "conditional_indent";
+pub const CONDITIONAL_INDENT: core_config::OptId = core_config::opt::CONDITIONAL_INDENT;
 #[allow(dead_code)]
-pub const CONDITIONAL_LAYOUT: &str = "conditional_layout";
+pub const CONDITIONAL_LAYOUT: core_config::OptId = core_config::opt::CONDITIONAL_LAYOUT;
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {

@@ -229,7 +229,8 @@ fn list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Result<Doc, FormatError> {
     let style = ListStyle {
         broken_separator: Some(""),
         blank_breaks: true,
-        padding: node.kind() == k::OBJECT_VALUE && cx.options.bool("bracket_spacing"),
+        padding: node.kind() == k::OBJECT_VALUE
+            && cx.options.bool(core_config::opt::BRACKET_SPACING),
         ..ListStyle::default()
     };
     delimited_list(cx, node, &style)

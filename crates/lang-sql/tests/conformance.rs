@@ -141,7 +141,10 @@ fn format_is_stable() {
     });
     let regress = ("postgres", corpus("postgres").join("src/test/regress/sql"));
     for (dialect, dir) in dirs.into_iter().chain([regress]) {
-        options.set("dialect", core_config::OptionValue::String(dialect.into()));
+        options.set(
+            core_config::opt::DIALECT,
+            core_config::OptionValue::String(dialect.into()),
+        );
         let run = |name: &str, text: &str| {
             let mut file = SourceFile::new(name, 1, text);
             file.language_version = Some(dialect.into());

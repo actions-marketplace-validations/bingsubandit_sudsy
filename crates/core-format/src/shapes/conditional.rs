@@ -20,8 +20,8 @@ use core_config::ResolvedOptions;
 use core_syntax::roles;
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
-pub const LAYOUT: &str = "conditional_layout";
-pub const INDENT: &str = "conditional_indent";
+pub const LAYOUT: core_config::OptId = core_config::opt::CONDITIONAL_LAYOUT;
+pub const INDENT: core_config::OptId = core_config::opt::CONDITIONAL_INDENT;
 
 /// The values where reference tools differ; a language declares each as an option.
 pub struct ConditionalPolicy {
@@ -38,7 +38,7 @@ impl ConditionalPolicy {
         Self {
             chained: options.is(LAYOUT, "chained"),
             indent: options.uint(INDENT, 1),
-            tab_width: options.uint("indent_size", 2),
+            tab_width: options.uint(core_config::opt::INDENT_SIZE, 2),
         }
     }
 }

@@ -198,8 +198,10 @@ pub fn single_line_body(
         return None;
     };
     let kinds = |e: &SyntaxElement| {
-        cx.options
-            .list_has("single_line_body_kinds", cx.grammar.name(e.kind()))
+        cx.options.list_has(
+            core_config::opt::SINGLE_LINE_BODY_KINDS,
+            cx.grammar.name(e.kind()),
+        )
     };
     if entries.is_empty() || !entries.iter().all(kinds) || crate::seq::multiline(cx, node) {
         return None;
@@ -569,10 +571,10 @@ pub fn annotation_line(cx: &FormatCtx<'_>, prev: &core_syntax::SyntaxElement) ->
     let inline = |m: &SyntaxNode| {
         let o = cx.options;
         let Some(d) = m.parent() else { return false };
-        if o.list_has("annotation_source_kinds", g.name(d.kind())) {
+        if o.list_has(core_config::opt::ANNOTATION_SOURCE_KINDS, g.name(d.kind())) {
             return true;
         }
-        o.is("annotation_inline", "single") && {
+        o.is(core_config::opt::ANNOTATION_INLINE, "single") && {
             let mut all = m.children_with_tokens().filter(&annotation);
             let first = all.next();
             all.next().is_none() && first.is_some_and(|a| !super::has_arguments(cx, &a))
