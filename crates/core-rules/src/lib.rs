@@ -14,6 +14,7 @@
 pub mod blank_lines;
 pub mod cases;
 pub mod checks;
+pub mod clause_style;
 pub mod commands;
 pub mod comments;
 pub mod configure;

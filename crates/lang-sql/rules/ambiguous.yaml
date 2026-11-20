@@ -1,13 +1,10 @@
 id: group-order-style
-message: this clause mixes column positions with column names
+family: clause-style
+params: { message: "this clause lists columns differently from the other GROUP BY and ORDER BY clauses", clauses: "GroupbyClause,OrderbyClause", explicit: "ObjectReference,Expression", implicit: Number }
 description: >-
   A `GROUP BY` or `ORDER BY` clause that lists both column names or expressions and column
-  positions (`1`, `2`). A clause that contradicts the style of an earlier one is not reported
+  positions (`1`, `2`), or that lists them the other way from the first such clause of the file
   (sqlfluff AM06).
 example: 'select a, b from t group by a, 2'
 severity: off
 category: style
-rule:
-  any: [{ kind: GroupbyClause }, { kind: OrderbyClause }]
-  child-token: [Number]
-  child: { any: [{ kind: ObjectReference }, { kind: Expression }] }

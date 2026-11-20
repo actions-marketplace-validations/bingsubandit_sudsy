@@ -19,12 +19,7 @@ impl P<'_> {
         self.eat("into");
         self.indent();
         self.obj_ref();
-        if self.d == Dialect::Tsql && self.at("with") && self.is_t(1, T::LParen) {
-            self.bump_as(k::KEYWORD);
-            self.bracketed(|p| {
-                p.list(|p| p.table_hint());
-            });
-        }
+        self.table_hints();
         self.alias();
         self.dedent();
         if self.at("using") {

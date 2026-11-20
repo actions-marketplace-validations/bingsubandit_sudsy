@@ -56,6 +56,32 @@ fn probes_in_every_dialect() {
     check("SELECT a::int, $1 FROM t;", "postgres");
 }
 
+/// Constructs the dialect parsers once refused: each parses without errors and round-trips.
+#[test]
+fn dialect_constructs_parse() {
+    let postgres = [
+        "SELECT (@@ f1) AS c FROM t;",
+        "SELECT overlay(B'01' placing '001' from 2 for 3);",
+        "SELECT CAST('42' AS text COLLATE \"C\");",
+        "SELECT concat_ws(',', variadic 10);",
+        "SELECT EXTRACT(MICROSECOND FROM TIME WITH TIME ZONE '2020-05-26 13:30:25-04');",
+        "SELECT * FROM (TABLE t) AS s (a, b);",
+        "TABLE t;",
+        "SELECT (c AT TIME ZONE 'Africa/Cairo')::time FROM t;",
+    ];
+    for text in postgres {
+        check(text, "postgres");
+    }
+    let tsql = [
+        "SELECT CASE WHEN 1 > = 1 THEN 1 WHEN 1 !\n < 1 THEN 2 WHEN 1 ! = 1 THEN 3 END;",
+        "UPDATE p WITH (TABLOCK) SET a = 1 WHERE b = 2;",
+        "EXECUTE dbo.Proc @p2 = 'A' WITH RECOMPILE;",
+    ];
+    for text in tsql {
+        check(text, "tsql");
+    }
+}
+
 #[test]
 fn syntax_errors_are_reported_and_lossless() {
     for text in ["SELEC FROM WHERE ;;", "SELECT (1;", "select 'unterminated"] {

@@ -279,6 +279,10 @@ impl P<'_> {
             }
         });
         self.dedent();
+        if self.at("with") && self.is(1, "recompile") {
+            self.bump_as(k::KEYWORD);
+            self.bump_as(k::KEYWORD);
+        }
     }
 
     /// An argument: an expression, `DEFAULT`, `OUT`, `OUTPUT`.

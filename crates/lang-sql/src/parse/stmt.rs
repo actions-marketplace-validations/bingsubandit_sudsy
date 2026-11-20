@@ -181,12 +181,7 @@ impl P<'_> {
         if !(self.at("default") && self.is(1, "values")) {
             self.alias();
         }
-        if self.d == Dialect::Tsql && self.at("with") && self.is_t(1, T::LParen) {
-            self.bump_as(k::KEYWORD);
-            self.bracketed(|p| {
-                p.list(|p| p.table_hint());
-            });
-        }
+        self.table_hints();
         if self.is_t(0, T::LParen) && !self.at_query_start() {
             self.bracketed(|p| {
                 p.list(|p| p.obj_ref());
@@ -350,6 +345,7 @@ impl P<'_> {
             if !p.at("set") {
                 p.alias();
             }
+            p.table_hints();
             ok
         });
         self.dedent();

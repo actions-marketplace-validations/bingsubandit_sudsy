@@ -22684,7 +22684,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `GROUP BY` or `ORDER BY` clause that lists both column names or expressions and column positions (`1`, `2`). A clause that contradicts the style of an earlier one is not reported (sqlfluff AM06).",
+      "description": "A `GROUP BY` or `ORDER BY` clause that lists both column names or expressions and column positions (`1`, `2`), or that lists them the other way from the first such clause of the file (sqlfluff AM06).",
       "example": {
         "config": null,
         "fixed": null,

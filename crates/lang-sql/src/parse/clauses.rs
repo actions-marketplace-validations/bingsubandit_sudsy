@@ -114,6 +114,15 @@ impl P<'_> {
             if !in_set {
                 self.tail_clauses();
             }
+        } else if self.at("table") && self.starts_name(1) {
+            // `TABLE name`: the whole table, as a query.
+            let m = self.mark();
+            self.bump_as(k::KEYWORD);
+            self.element();
+            self.close(k::SELECT_STATEMENT, m);
+            if !in_set {
+                self.tail_clauses();
+            }
         } else {
             self.select_stmt(in_set);
         }
@@ -588,7 +597,12 @@ impl P<'_> {
                 });
             }
         }
-        if self.at("with") && self.is_t(1, T::LParen) && self.d == Dialect::Tsql {
+        self.table_hints();
+    }
+
+    /// T-SQL `WITH (NOLOCK, INDEX(ix))` after a table.
+    pub fn table_hints(&mut self) {
+        if self.d == Dialect::Tsql && self.at("with") && self.is_t(1, T::LParen) {
             self.bump_as(k::KEYWORD);
             self.bracketed(|p| {
                 p.list(|p| p.table_hint());

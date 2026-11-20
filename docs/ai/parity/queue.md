@@ -347,22 +347,22 @@ Lint: coverage 86.6%, target 86.6%; rules by missed findings:
 
 1. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 2. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: coverage 75%, target 57.3%; rules by missed findings:
-1. `CP02` (1021 missed) Fix: misses are in files with a parse error (geometry, bit, int2, tsql hints); parse gaps first
-2. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-3. `CP01` (324 missed) Fix: misses are in files with a parse error (text, cluster, collate); parse gaps first
-4. `CP05` (317 missed) Fix: misses are in files with a parse error; parse gaps first
-5. `AL01` (292 missed) Fix: misses are in files with a parse error (geometry, int2)
-6. `AL03` (235 missed) Fix: misses are in files with a parse error; parse gaps first
-7. `AM06` (203 missed) Fix: a clause that contradicts the convention of an earlier clause of the file is not reported (the rule keeps no state across clauses); a Rust check in query_scope or a shared clause-style family
-8. `AM04` (162 missed) Fix: the misses are in files with a parse error, and the common table scope of a nested WITH
-9. `CP03` (158 missed) Fix: misses are in files with a parse error; parse gaps first
-10. `LT05` (151 missed) Fix: lines over the width in files where a long token cannot break; same-line check
-11. `RF05` (143 missed) Fix: quoted names in statements the generic parse leaves as plain tokens (no ObjectReference); parse gaps first
-12. `CV06` (126 missed) Fix: a semicolon after whitespace or a newline, and doubled semicolons; needs a token-neighbour check (a shared pattern key or family)
-13. `RF06` (118 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
-14. `RF03` (117 missed) Fix: references of selects over table functions and nested queries; the parse errors of the corpus files
-15. `AL08` (116 missed) Fix: misses are in files with a parse error; parse gaps first
+Lint: coverage 85.5%, target 66.6%; rules by missed findings:
+1. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+2. `CP05` (277 missed) Fix: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (REPACK, tsql XML (DOCUMENT x), EXECUTE WITH RESULT SETS, OPENJSON WITH, JSON_TABLE PATH DEFAULT, RETURNS @t TABLE, mysql json_table)
+3. `CP02` (241 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
+4. `CP01` (154 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
+5. `RF05` (140 missed) Fix: quoted names in statements the generic parse leaves as plain tokens (no ObjectReference)
+6. `CV06` (126 missed) Fix: a semicolon after whitespace or a newline, and doubled semicolons; needs a token-neighbour check, planned until a second language needs it
+7. `LT04` (115 missed)
+8. `RF06` (111 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
+9. `RF03` (109 missed) Fix: references of selects over table functions and nested queries
+10. `AL03` (102 missed)
+11. `LXR` (102 missed)
+12. `RF02` (93 missed)
+13. `AM04` (76 missed)
+14. `ST06` (75 missed)
+15. `AL05` (62 missed)
 
 ## taplo
 

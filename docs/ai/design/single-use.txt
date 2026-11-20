@@ -19,6 +19,7 @@ concept cd-without-exit # users: shell
 concept class-body-checks # users: ruby
 concept clause-checks # users: ruby
 concept clause-line-breaks # users: sql
+concept clause-style # users: sql (shared)
 concept comment-syntax # users: hcl
 concept component-option-checks # users: html
 concept component-props-model # users: html

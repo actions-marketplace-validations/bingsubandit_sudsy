@@ -156,7 +156,9 @@ impl P<'_> {
                 self.bump_as(k::SIGN);
                 return true;
             }
-            if self.at_any_op(&["~", "!!", "@", "|/", "||/", "#"]) && !self.is_t(1, T::Comma) {
+            if self.at_any_op(&["~", "!!", "@", "|/", "||/", "#", "@@", "@-@", "?-", "?|"])
+                && !self.is_t(1, T::Comma)
+            {
                 if self.at_op("~") {
                     self.bump_as(k::PREFIX);
                 } else {
@@ -304,7 +306,11 @@ impl P<'_> {
         while self.is_t(n, T::LParen) {
             n += 1;
         }
-        if !(self.is(n, "select") || self.is(n, "with") || self.is(n, "values")) {
+        if !(self.is(n, "select")
+            || self.is(n, "with")
+            || self.is(n, "values")
+            || (self.is(n, "table") && self.starts_name(n + 1)))
+        {
             return false;
         }
         // `(select ..) = 0 and x`: a bracket that goes on as an expression is not a query.
@@ -633,7 +639,7 @@ impl P<'_> {
             }
             if self.d == super::Dialect::Postgres
                 && self.at("variadic")
-                && matches!(self.t(1), Some(T::Word | T::Str))
+                && matches!(self.t(1), Some(T::Word | T::Str | T::Number))
             {
                 self.bump_as(k::KEYWORD);
             }
@@ -676,6 +682,10 @@ impl P<'_> {
                 } else if !self.type_name() {
                     self.expression();
                 }
+                if self.at("collate") {
+                    self.bump_as(k::KEYWORD);
+                    self.bump_as(k::IDENTIFIER);
+                }
             } else if self.at("order") && self.is(1, "by") {
                 self.order_by();
             } else if self.at_any(&[
@@ -688,10 +698,16 @@ impl P<'_> {
                 "returning",
                 "with",
                 "without",
+                "placing",
             ]) {
                 self.bump_as(k::KEYWORD);
                 if self.at_any(&["unique", "keys", "time"]) {
                     self.bump_as(k::KEYWORD);
+                }
+                if self.at_any(&["with", "without"]) && self.is(1, "time") && self.is(2, "zone") {
+                    for _ in 0..3 {
+                        self.bump_as(k::KEYWORD);
+                    }
                 }
                 if !self.expression() {
                     break;
@@ -741,6 +757,7 @@ impl P<'_> {
                 c.lone = false;
             } else if self.at("at") && self.is(1, "time") && self.is(2, "zone") {
                 self.eat_seq(&["at", "time", "zone"]);
+                self.operand(c);
                 c.lone = false;
             } else {
                 break;
@@ -781,9 +798,17 @@ impl P<'_> {
         match self.t(0) {
             Some(T::Op) => {
                 let text = self.text(0);
-                if COMPARE.contains(&text) {
+                if COMPARE.contains(&text) || (self.d == super::Dialect::Tsql && text == "!") {
                     let m = self.mark();
                     self.bump();
+                    // T-SQL lets blanks sit inside `> =`, `< >` and `! =`.
+                    if self.d == super::Dialect::Tsql
+                        && matches!(text, ">" | "<" | "!")
+                        && self.is_t(0, T::Op)
+                        && matches!(self.text(0), "=" | ">" | "<")
+                    {
+                        self.bump();
+                    }
                     self.close(k::COMPARISON_OPERATOR, m);
                 } else if ARITH.contains(&text)
                     || (self.d == super::Dialect::Postgres && PG_BINARY.contains(&text))
