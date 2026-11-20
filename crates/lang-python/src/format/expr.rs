@@ -429,7 +429,7 @@ fn subscript_tail_inner(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let inner = &ks[2..ks.len() - 1];
     let inner_doc = match inner {
         [SyntaxElement::Node(t)] if t.kind() == k::EXPR_TUPLE && list::is_bare(cx, t) => {
-            list::bare_tuple(cx, t)?
+            list::subscript_tuple(cx, t)?
         }
         _ => concat(
             inner

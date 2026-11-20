@@ -43,7 +43,7 @@ pub use context::{DefaultFormatter, EmbedMode, Embedder, FormatCtx, NodeFormatte
 pub use directives::{DIRECTIVES_VERSION, Directive, DirectiveConflict, DirectiveTable, NodeKey};
 pub use doc::Doc;
 pub use error::FormatError;
-pub use placement::comment_lines;
+pub use placement::{comment_lines, comment_lines_max};
 pub use printer::PrintOptions;
 
 use core_config::ResolvedOptions;

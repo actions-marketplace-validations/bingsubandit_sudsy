@@ -14,3 +14,20 @@
 - head_fits moved shared (python 6555). parity run A: reverts of blank+list+one-item, collapse/await/for_target kept
 - collapse routed via shapes::parenthesized + #parenthesized tag; parity run B
 - yaml fixed (198/117/1055). next: JS/java/kt/cpp parity, gate, finish
+- step1 resume: bare tuple on delimited_list; block blanks on shared. reading shapes
+- inline_list shared; restored tuple items (python 6589, landed 6555). parity
+- ignore-line segment match (shared ignore.rs), mark from all leading comments; parity
+- source_blanks next to kept items; parity
+- fmt skip on one-line compound; parity
+- ty: pragma, await trailing comment strip; looking at comment cluster
+- 1400 (84.1%) stable; next blank-lines/misc small
+- docstring trailing blank collapse, leading quote space, empty; parity
+- chaperone space, fstring nested quote requote in triple; parity
+- decorator parens kept, annotation await parens; parity
+- docstring reindent moved shared (python 6554)
+- 85.0% 1415; docs/yaml updated; gate
+- lead ruling: move body_on_header/is_fmt_skip compound cond to ignore.rs; ends_line kinds to lang.yaml set; paste lead-approved.txt (4 lines)
+- moved header_line_ignored to ignore.rs, paren_line_end_parents option; parity
+- gate ok, JS 3484 held; finish
+- is_fmt_skip approved; land with 5 lines
+- ends_line option check moved to shapes::ends_statement_line (core-format); gate then land.sh again

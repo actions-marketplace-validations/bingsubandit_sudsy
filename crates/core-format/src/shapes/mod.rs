@@ -21,6 +21,7 @@ mod declaration;
 pub mod fill;
 pub mod flow;
 mod heritage;
+mod inline_list;
 mod key_value;
 mod list;
 mod maybe_parenthesize;
@@ -63,6 +64,7 @@ pub use declaration::{
     has_arguments, has_doc_comment, header, lead_annotations, members, modifiers, type_declaration,
 };
 pub use heritage::{ClauseBreak, HeritageLayout, clause_break, clause_list, heritage};
+pub use inline_list::{InlineItem, InlineStyle, inline_list};
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{
     ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, delimited_list,
@@ -72,8 +74,8 @@ pub use maybe_parenthesize::{between, enclosed, head_test, keyword_argument, may
 pub use omit_parens::{OmitHooks, can_omit, head_fits};
 pub use paren_list::paren_list;
 pub use parens::{
-    Need, NoParenHooks, ParenHooks, ParenLayout, ParenPolicy, Unneeded, binary_needs, first_char,
-    is_dropped_close, paren_group, parenthesized, unwrap, wrap,
+    Need, NoParenHooks, ParenHooks, ParenLayout, ParenPolicy, Unneeded, binary_needs,
+    ends_statement_line, first_char, is_dropped_close, paren_group, parenthesized, unwrap, wrap,
 };
 pub use section::section;
 pub use signature::{Signature, parameter_list, signature};

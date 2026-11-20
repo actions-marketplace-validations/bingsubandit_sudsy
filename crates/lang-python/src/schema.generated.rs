@@ -1,5 +1,7 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
+pub const PAREN_LINE_END_PARENTS: &str = "paren_line_end_parents";
+#[allow(dead_code)]
 pub const MEMBER_CHAIN_STYLE: &str = "member_chain_style";
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_MIN_GROUPS: &str = "member_chain_min_groups";
@@ -39,6 +41,7 @@ pub fn magic_trailing_comma(o: &core_config::ResolvedOptions) -> MagicTrailingCo
 pub fn option_schema() -> core_config::OptionSchema {
     core_config::OptionSchema::lazy(|| {
         core_config::OptionSchema::new(vec![
+        core_config::shared::paren_line_end_parents(&["ExprAwait", "StmtDelete", "StmtAssert"]),
         core_config::shared::line_width(88),
         core_config::shared::indent_size(4),
         shared::indent_style(),

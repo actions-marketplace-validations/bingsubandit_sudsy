@@ -683,6 +683,14 @@ pub mod shared {
         )
     }
 
+    pub fn paren_line_end_parents(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "paren_line_end_parents",
+            default,
+            "Node kinds whose parenthesized operand ends the logical line with a comment after the closing parenthesis: the pair goes and the comment is the line's.",
+        )
+    }
+
     pub fn assignment_keep_break_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
             "assignment_keep_break_kinds",

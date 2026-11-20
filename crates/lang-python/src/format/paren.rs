@@ -100,6 +100,9 @@ fn maybe_parenthesize_inner(
         return expr::expr(cx, &inner);
     }
     match inner.kind() {
+        k::EXPR_TUPLE if list::is_bare(cx, &inner) && list::is_one_item_tuple(cx, &inner) => {
+            list::bare_tuple(cx, &inner)
+        }
         k::EXPR_TUPLE if list::is_bare(cx, &inner) => {
             if can_omit(cx, &inner) {
                 list::bare_tuple_flat(cx, &inner)
@@ -180,18 +183,18 @@ fn maybe_parenthesize_inner(
     }
 }
 
-/// Parentheses around an implicit concatenation of strings that end the logical line: a comment
-/// after the closing one is the line's comment, like one after the last string.
+/// Parentheses that end the logical line: a comment after the closing one is the line's comment.
 fn ends_line(cx: &FormatCtx<'_>, paren: &SyntaxNode) -> bool {
     let joins = paren.children().next().is_some_and(|n| {
         n.kind() != k::PARENTHESIZED
             && n.children().count() > 1
             && expr::joined_with(cx, &n, true).is_some()
     });
-    joins
+    (joins
         && cx
             .last_token(paren)
-            .is_some_and(|t| ends_logical_line(cx, &t))
+            .is_some_and(|t| ends_logical_line(cx, &t)))
+        || shapes::ends_statement_line(cx, paren)
 }
 
 /// Is `tok` the last token of its (innermost) statement? A comment after it is the statement's.
@@ -300,6 +303,9 @@ pub(crate) fn rhs(cx: &FormatCtx<'_>, value: &SyntaxNode, prefix: usize) -> R {
 
 /// An assignment target: a tuple without parentheses gets them when it does not fit.
 pub(crate) fn target(cx: &FormatCtx<'_>, n: &SyntaxNode) -> R {
+    if n.kind() == k::EXPR_TUPLE && list::is_bare(cx, n) && list::is_one_item_tuple(cx, n) {
+        return list::bare_tuple(cx, n);
+    }
     if n.kind() == k::EXPR_TUPLE && list::is_bare(cx, n) {
         return with_open(false, || expanded(|| list::bare_tuple_ungrouped(cx, n)));
     }

@@ -4,7 +4,7 @@
 
 <p align="center"><b>One formatter and linter for your whole repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest, measured file by file against each of them.<br>
-<b><!-- generated:support-headline -->Ready for 8 languages, early support for 19 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 9 languages, early support for 18 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -13,7 +13,8 @@ One binary and one config file in place of Prettier, ESLint, ruff, buf, terrafor
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: Python, Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -66,6 +67,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Language | Format | Lint | Status |
 |---|---|---|---|
 | JavaScript / TypeScript | ████████░░ 86% Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | Ready |
+| Python | ████████░░ 86% ruff format | █████████░ 94% ruff | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
 | GraphQL | █████████░ 99% Prettier | 21 rules · reference tool: none found | Ready |
 | TOML | █████████░ 98% taplo | 15 rules · reference tool: none found | Ready |
@@ -73,7 +75,6 @@ Each number is measured on real-world code against the reference tool with its d
 | XML | █████████░ 99% CSharpier XML | 17 rules · reference tool: none found | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | Makefile | Sudsy formatter · reference tool: none found | ██████████ 100% checkmake | Lint only: Ready |
-| Python | ████████░░ 83% ruff format | █████████░ 94% ruff | In progress |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
@@ -109,7 +110,7 @@ Sudsy format options vs other tools:
 | CSS / SCSS / Less | 7 | Prettier | [5](https://prettier.io/docs/options) |
 | YAML | 14 | Prettier | [7](https://prettier.io/docs/options) |
 | GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
-| Python | 12 | ruff format | [9](https://docs.astral.sh/ruff/settings/#format) |
+| Python | 13 | ruff format | [9](https://docs.astral.sh/ruff/settings/#format) |
 | Shell | 8 | shfmt | [6](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd) |
 | Java | 23 | google-java-format | [1](https://github.com/google/google-java-format#using-the-formatter) |
 | Protobuf | 4 | buf format | [0](https://buf.build/docs/format/style) |

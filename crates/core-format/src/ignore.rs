@@ -31,13 +31,19 @@ fn body(g: &Grammar, c: &Comment) -> String {
 }
 
 /// A role may list several markers (`sudsy-ignore` next to `prettier-ignore`); a marker is the
-/// whole comment body or its start, followed by a blank (`fmt: skip # why`).
+/// whole comment body or its start, followed by a blank (`fmt: skip # why`). The marker of a
+/// trailing comment (`ignore-line`) is one whole part of a comment made of parts separated by
+/// the line comment's own prefix (`# why # fmt: skip`).
 fn has_marker(g: &Grammar, role: &str, body: &str) -> bool {
+    let line = g.comments.line.as_deref();
     g.suppressions.iter().any(|s| {
         s.role == role
-            && body
-                .strip_prefix(s.marker.as_str())
-                .is_some_and(|rest| rest.is_empty() || rest.starts_with(char::is_whitespace))
+            && match (role, line) {
+                ("ignore-line", Some(prefix)) => body.split(prefix).any(|p| p.trim() == s.marker),
+                _ => body
+                    .strip_prefix(s.marker.as_str())
+                    .is_some_and(|rest| rest.is_empty() || rest.starts_with(char::is_whitespace)),
+            }
     })
 }
 
@@ -71,6 +77,25 @@ pub fn line_ignored(g: &Grammar, tok: &SyntaxToken) -> bool {
     crate::comments::trailing_comments(g, tok)
         .iter()
         .any(|c| mark_of(g, c) == Some(IgnoreMark::Line))
+}
+
+/// [`line_ignored`] for a compound statement (`if x: y  # fmt: skip`): only when its body stands
+/// on the line of the header's `:` (a `key-separator` token before any line break).
+pub fn header_line_ignored(g: &Grammar, last: &SyntaxToken) -> bool {
+    if !line_ignored(g, last) {
+        return false;
+    }
+    let mut t = last.prev_token();
+    while let Some(tok) = t {
+        if g.has_tag(tok.kind(), "key-separator") {
+            return true;
+        }
+        if g.has_tag(tok.kind(), "newline") {
+            return false;
+        }
+        t = tok.prev_token();
+    }
+    false
 }
 
 /// Does a comment inside `node` (a container that holds nothing else, like JSX `{/* ... */}`)
@@ -111,4 +136,10 @@ pub fn region_end<E>(
         j += 1;
     }
     Ok(j)
+}
+
+/// Blank lines in front of an item next to one kept as written (`kept`): those of the source,
+/// up to `cap`.
+pub fn source_blanks(kept: bool, src: usize, cap: usize) -> Option<usize> {
+    kept.then(|| src.min(cap))
 }

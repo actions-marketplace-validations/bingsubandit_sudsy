@@ -13442,6 +13442,18 @@
                     ],
                     "type": "string"
                   },
+                  "paren_line_end_parents": {
+                    "default": [
+                      "ExprAwait",
+                      "StmtDelete",
+                      "StmtAssert"
+                    ],
+                    "description": "Node kinds whose parenthesized operand ends the logical line with a comment after the closing parenthesis: the pair goes and the comment is the line's.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "quote_style": {
                     "default": "double",
                     "description": "Quotes of strings (and of f-string and t-string literals): `double` or `single` rewrite a string to that quote unless the other one needs fewer escapes, `preserve` keeps what the source has.",
@@ -14812,6 +14824,18 @@
                 "soft"
               ],
               "type": "string"
+            },
+            "paren_line_end_parents": {
+              "default": [
+                "ExprAwait",
+                "StmtDelete",
+                "StmtAssert"
+              ],
+              "description": "Node kinds whose parenthesized operand ends the logical line with a comment after the closing parenthesis: the pair goes and the comment is the line's.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "quote_style": {
               "default": "double",

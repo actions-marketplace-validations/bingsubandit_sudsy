@@ -94,7 +94,7 @@ pub struct ListStyle {
     pub open_comments_own_line: bool,
     /// The items sit in a group of their own, inside the one of the delimiters: when they do not
     /// fit on the opening line they go together onto the next, and only when they do not fit
-    /// there one per line (google-java-format's parameters).
+    /// there one per line (google-java-format's parameters). A single item has no such group.
     pub hang: bool,
     /// The group of the whole list, for a caller that asks later whether it broke.
     pub id: Option<doc::GroupId>,
@@ -460,7 +460,7 @@ fn list_of(
         doc::concat(inner)
     };
     // The items in a group of their own, after the opening delimiter and its line break.
-    let inner = if style.hang || style.inner_id.is_some() {
+    let inner = if (style.hang && c.slots.len() > 1) || style.inner_id.is_some() {
         // (a magic trailing comma puts each item on a line of its own)
         let magic = style.layout == ListLayout::MagicTrailingComma
             && c.slots.last().is_some_and(|s| s.sep.is_some());

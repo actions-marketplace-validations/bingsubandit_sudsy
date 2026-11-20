@@ -185,13 +185,80 @@ pub fn fstring<'a>(syn: &StringSyntax, text: &'a str, quote: Quote) -> Cow<'a, s
             return Cow::Borrowed(text);
         };
         let p = prefix_of(prefix);
-        return if p == prefix {
+        let body = requote_fields(body, q, quote);
+        return if p == prefix && body == split(syn, text).map_or("", |s| s.2) {
             Cow::Borrowed(text)
         } else {
             Cow::Owned(format!("{p}{q}{body}{q}"))
         };
     }
     string(syn, text, quote)
+}
+
+/// The body of an f-string with the quotes inside its replacement fields all spelled `"`, for
+/// comparing values across the nested quote changes of [`fstring`].
+pub fn field_quotes_value(body: &str) -> String {
+    let mut depth = 0usize;
+    body.chars()
+        .map(|c| {
+            match c {
+                '{' => depth += 1,
+                '}' => depth = depth.saturating_sub(1),
+                _ => {}
+            }
+            if depth > 0 && c == '\'' { '"' } else { c }
+        })
+        .collect()
+}
+
+/// The strings in the replacement fields of a triple-quoted f-string that is in the preferred
+/// quote: a string in the other quote that holds no quote itself takes the preferred one.
+fn requote_fields<'a>(body: &'a str, outer: &str, quote: Quote) -> Cow<'a, str> {
+    let (want, other) = match quote {
+        Quote::Double => ('"', '\''),
+        Quote::Single => ('\'', '"'),
+        Quote::Preserve => return Cow::Borrowed(body),
+    };
+    if outer.len() != 3 || !outer.starts_with(want) || body.contains("'''") {
+        return Cow::Borrowed(body);
+    }
+    let chars: Vec<char> = body.chars().collect();
+    let mut out = String::with_capacity(body.len());
+    let (mut i, mut depth) = (0, 0usize);
+    while i < chars.len() {
+        let c = chars[i];
+        if depth == 0 && c == '{' && chars.get(i + 1) == Some(&'{') {
+            out.push_str("{{");
+            i += 2;
+            continue;
+        }
+        match c {
+            '{' => depth += 1,
+            '}' => depth = depth.saturating_sub(1),
+            _ if depth > 0 && c == other => {
+                let end = chars[i + 1..].iter().position(|x| *x == other);
+                if let Some(n) = end.map(|n| i + 1 + n)
+                    && !chars[i + 1..n]
+                        .iter()
+                        .any(|x| matches!(x, '\\' | '"' | '\'' | '{' | '}'))
+                {
+                    out.push(want);
+                    out.extend(&chars[i + 1..n]);
+                    out.push(want);
+                    i = n + 1;
+                    continue;
+                }
+            }
+            _ => {}
+        }
+        out.push(c);
+        i += 1;
+    }
+    if out == body {
+        Cow::Borrowed(body)
+    } else {
+        Cow::Owned(out)
+    }
 }
 
 fn fields_hold_quotes(body: &str) -> bool {

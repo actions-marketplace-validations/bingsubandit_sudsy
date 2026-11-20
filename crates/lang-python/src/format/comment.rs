@@ -24,12 +24,19 @@ pub(crate) fn semicolon(cx: &FormatCtx<'_>, s: &SyntaxNode) -> Option<SyntaxToke
     None
 }
 
-/// A simple statement with a trailing `# fmt: skip` (after its `;` when it has one).
+/// A statement with a trailing `# fmt: skip` (after its `;` when it has one).
 pub(crate) fn is_fmt_skip(cx: &FormatCtx<'_>, s: &SyntaxNode) -> bool {
-    !has_any(s.kind(), COMPOUND)
-        && semicolon(cx, s)
-            .or_else(|| cx.last_token(s))
-            .is_some_and(|l| core_format::ignore::line_ignored(cx.grammar, &l))
+    let compound = has_any(s.kind(), COMPOUND);
+    semicolon(cx, s)
+        .filter(|_| !compound)
+        .or_else(|| cx.last_token(s))
+        .is_some_and(|l| {
+            if compound {
+                core_format::ignore::header_line_ignored(cx.grammar, &l)
+            } else {
+                core_format::ignore::line_ignored(cx.grammar, &l)
+            }
+        })
 }
 
 /// What formatting changes in the text that no layout decision can undo, done before the tree is

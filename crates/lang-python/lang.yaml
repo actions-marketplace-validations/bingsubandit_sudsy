@@ -5,6 +5,7 @@ parse: adapter::parse_file
 families: rules::FAMILIES
 hooks: hooks::PythonHooks
 options:
+  - paren_line_end_parents: [["ExprAwait", "StmtDelete", "StmtAssert"]]
   - line_width: 88
   - indent_size: 4
   - indent_style

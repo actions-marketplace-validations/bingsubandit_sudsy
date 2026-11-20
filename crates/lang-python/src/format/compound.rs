@@ -200,6 +200,10 @@ fn decorator(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     for e in kids(cx, node) {
         match &e {
             SyntaxElement::Token(t) => parts.push(cx.token(t)),
+            // (a decorator keeps its own parentheses: `@(a)`)
+            SyntaxElement::Node(n) if n.kind() == k::PARENTHESIZED => {
+                parts.push(expr::expr(cx, n)?)
+            }
             SyntaxElement::Node(n) => parts.push(paren::maybe_parenthesize(cx, n)?),
         }
     }

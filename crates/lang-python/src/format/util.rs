@@ -157,7 +157,7 @@ pub(crate) fn restyled(cx: &FormatCtx<'_>, t: &SyntaxToken, text: &str) -> Doc {
 pub(crate) fn is_pragma(comment: &str) -> bool {
     let t = comment.trim_start_matches('#').trim_start();
     [
-        "noqa", "type:", "pyright:", "pylint:", "flake8:", "ruff:", "isort:", "nosec",
+        "noqa", "type:", "pyright:", "pylint:", "flake8:", "ruff:", "isort:", "nosec", "ty:",
     ]
     .iter()
     .any(|p| t.to_ascii_lowercase().starts_with(p))

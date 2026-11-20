@@ -5,7 +5,10 @@
 //! what: Quotes, escapes and number notation of literal tokens by a style value.
 //! tools: Prettier strings and numbers, Black string normalization, ruff format
 
+mod docstring;
 pub mod prefixed;
+
+pub use docstring::docstring;
 
 use core_syntax::strings::StringSyntax;
 

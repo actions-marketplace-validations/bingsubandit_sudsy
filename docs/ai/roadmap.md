@@ -32,14 +32,14 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 23 | CSS / SCSS / Less | 92.7% of 533 (Prettier, `--no-config`) | 94.1% (stylelint, `css/stylelint-standard`) | at the bar; `media-feature-range-notation` 415, `value-keyword-case` 127, `no-descending-specificity` 74; SCSS layout and comments |
 | 24 | TOML | 95.3% of 213 (taplo; fixtures) | no reference linter | at the bar; second-format not measured |
 | 25 | JavaScript / TypeScript | 93.2% of 2,456 (Prettier) | 100% (ESLint, typescript-eslint) | at the bar; Prettier options of the projects (168 files) |
-| 26 | Python | 92.7% of 1,085 (ruff format 0.17.4) | 95.6% (ruff, `python/ruff`) | at the bar; `RUF100` 83 |
+| 26 | Python | 97.7% of 1,085 (ruff format 0.17.4) | 95.6% (ruff, `python/ruff`) | at the bar; `RUF100` 83 |
 
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP; recorded and not re-run: C#, PowerShell, Markdown, GraphQL, XML and all lint shares.
 
 ## Small tasks
 - Python paren strip onto shared ParenPolicy/ParenHooks (for_target, await, one-item tuple arms).
-- Python bare tuple and block blank rules onto delimited_list / shared blank rules, then restore the reverted one-item tuple, magic comma and first-comment/match blank fixes (+18 files).
 - Move JS layout functions (assign poorly_breakable, chain member, binary flush, ternary should_extra_indent, TS union/should_hug, parameter patterns) onto core-format shapes (unification).
+- Python block blank rules onto the shared blank rules, then restore the reverted first-comment and `match` blank fixes (+3 files).
 - perf-bench builds the base tree with the candidate's tools/perf-bench, so a `FileContext`/`parse_regions` API change fails the base build; build the base with its own perf-bench.
 - `Flow::seq` wraps only flows with a hung part in the `ALIGN_FROM_LINE` align (php.format +1.43% under `source_hang`); prove it with a cpp parity run.
 - Read shared rule specs once per process, not per embedded language.

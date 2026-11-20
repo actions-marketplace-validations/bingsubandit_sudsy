@@ -250,3 +250,20 @@ pub fn binary_needs(g: &Grammar, parent_op: &str, op: &str, first: bool, clarify
                 || g.operator_kind(parent_op) == Some("bitwise")));
     if yes { Need::Yes } else { Need::No }
 }
+
+/// Does a comment after the closing parenthesis of `paren` belong to its statement's line: the
+/// parent of the pair is a kind of the option `paren_line_end_parents` (`await (x)`, `del (x)`)
+/// and the pair is the last token of its statement.
+pub fn ends_statement_line(cx: &FormatCtx<'_>, paren: &SyntaxNode) -> bool {
+    let g = cx.grammar;
+    let listed = paren.parent().is_some_and(|p| {
+        cx.options
+            .list_has("paren_line_end_parents", g.name(p.kind()))
+    });
+    listed
+        && cx.last_token(paren).is_some_and(|t| {
+            t.parent_ancestors()
+                .find(|a| g.has_tag(a.kind(), "statement"))
+                .is_some_and(|stmt| cx.last_token(&stmt).as_ref() == Some(&t))
+        })
+}

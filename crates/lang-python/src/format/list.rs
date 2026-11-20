@@ -192,19 +192,35 @@ pub(crate) fn is_bare(cx: &FormatCtx<'_>, tuple: &SyntaxNode) -> bool {
     first_kid(cx, tuple).and_then(|e| tok_kind(&e)) != Some(k::LPAR)
 }
 
+/// A tuple of one item (it brings its own parentheses).
+pub(crate) fn is_one_item_tuple(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    split(cx, node).runs.len() == 1
+}
+
+/// The items of a subscript's index: a one-item tuple keeps its comma and no parentheses.
+pub(crate) fn subscript_tuple(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
+    bare_tuple_with(cx, node, true, true, false)
+}
+
 /// The items of a tuple without parentheses, a comma after the last one when broken.
 pub(crate) fn bare_tuple(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    bare_tuple_with(cx, node, true, true)
+    bare_tuple_with(cx, node, true, true, true)
 }
 
 /// [`bare_tuple`] for the caller's own group (the parentheses ruff adds): its items break with it.
 pub(crate) fn bare_tuple_ungrouped(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    bare_tuple_with(cx, node, true, false)
+    bare_tuple_with(cx, node, true, false, true)
 }
 
 /// `breakable`: the items go on lines of their own when they do not fit; otherwise only the
 /// brackets inside them split.
-fn bare_tuple_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool, grouped: bool) -> R {
+fn bare_tuple_with(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    breakable: bool,
+    grouped: bool,
+    single_parens: bool,
+) -> R {
     let ks = kids(cx, node);
     let inner: Vec<SyntaxElement> = if ks.first().and_then(tok_kind) != Some(k::LPAR) {
         ks
@@ -212,31 +228,33 @@ fn bare_tuple_with(cx: &FormatCtx<'_>, node: &SyntaxNode, breakable: bool, group
         ks[1..ks.len() - 1].to_vec()
     };
     let p = from_elements(None, None, inner);
-    let n = p.runs.len();
-    let mut parts = Vec::new();
-    for (i, run) in p.runs.iter().enumerate() {
-        if i > 0 {
-            parts.push(if breakable { ln() } else { sp() });
-        }
-        parts.push(run_doc(cx, run)?);
-        match (&p.commas[i], i + 1 == n) {
-            (Some(c), false) => parts.push(cx.token(c)),
-            (Some(c), true) if has_comments(cx, c) => parts.push(cx.token(c)),
-            (_, true) if n == 1 => parts.push(lit(",")),
-            (_, true) if breakable => parts.push(trailing_comma()),
-            _ => {}
-        }
+    if p.runs.len() == 1 && single_parens {
+        // A one-item tuple is always parenthesized: `(a,)`.
+        let item = concat(vec![with_open(true, || run_doc(cx, &p.runs[0]))?, lit(",")]);
+        return Ok(parenthesized(lit("("), item, lit(")")));
     }
-    Ok(if breakable && grouped {
-        group(concat(parts))
-    } else {
-        concat(parts)
-    })
+    let mut items = Vec::new();
+    for (run, comma) in p.runs.iter().zip(&p.commas) {
+        items.push(shapes::InlineItem {
+            doc: run_doc(cx, run)?,
+            sep: comma.as_ref().map(|c| cx.token(c)),
+            sep_commented: comma.as_ref().is_some_and(|c| has_comments(cx, c)),
+        });
+    }
+    Ok(shapes::inline_list(
+        items,
+        &shapes::InlineStyle {
+            breakable,
+            grouped,
+            magic: has_magic(cx, &p),
+            separator: ",",
+        },
+    ))
 }
 
 /// A tuple that stays on one line (its last or first item is a bracket that splits).
 pub(crate) fn bare_tuple_flat(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
-    bare_tuple_with(cx, node, false, false)
+    bare_tuple_with(cx, node, false, false, true)
 }
 
 pub(crate) fn collection(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {

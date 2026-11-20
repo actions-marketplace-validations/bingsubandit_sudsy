@@ -76,11 +76,16 @@ impl FormatCtx<'_> {
 
 /// Own-line comments one per line (a comment keeps one blank line after it).
 pub fn comment_lines(cs: &[Comment]) -> Doc {
+    comment_lines_max(cs, 1)
+}
+
+/// [`comment_lines`] keeping up to `max` blank lines after a comment.
+pub fn comment_lines_max(cs: &[Comment], max: usize) -> Doc {
     let mut parts = Vec::new();
     for (i, c) in cs.iter().enumerate() {
         if i > 0 {
             parts.push(hardline());
-            if cs[i - 1].breaks_after >= 2 {
+            for _ in 0..cs[i - 1].breaks_after.saturating_sub(1).min(max) {
                 parts.push(hardline());
             }
         }

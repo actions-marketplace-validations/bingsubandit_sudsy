@@ -122,6 +122,7 @@ pub(crate) fn sequence(cx: &FormatCtx<'_>, stmts: &[SyntaxNode], top: bool, seq:
     let cap = if top { 2 } else { 1 };
     let mut parts: Vec<Doc> = Vec::new();
     let mut region = core_format::ignore::IgnoreRun::default();
+    let mut prev_skip = false;
     for (i, s) in stmts.iter().enumerate() {
         let Some(first) = cx.first_token(s) else {
             continue;
@@ -151,7 +152,7 @@ pub(crate) fn sequence(cx: &FormatCtx<'_>, stmts: &[SyntaxNode], top: bool, seq:
                         parts.push(hardline());
                     }
                 }
-                own_doc = core_format::comment_lines(&cs[..=j]);
+                own_doc = core_format::comment_lines_max(&cs[..=j], cap);
                 parts.push(own_doc.clone());
                 cx.consume(&first, j + 1);
                 src = cs[j].breaks_after - 1;
@@ -190,12 +191,21 @@ pub(crate) fn sequence(cx: &FormatCtx<'_>, stmts: &[SyntaxNode], top: bool, seq:
         if i == 0 && src > 0 && comments::starts_file(cx.grammar, &first) && own_doc == Doc::Nil {
             blank = 0;
         }
+        // `# fmt: off` ... `# fmt: on`, `sudsy-ignore`: statements kept as written (ignore rows).
+        let mark = core_format::ignore::mark_in(
+            cx.grammar,
+            &comments::leading_comments(cx.grammar, &first),
+        );
+        let in_region = region.skips(mark);
+        let skip = in_region || is_fmt_skip(cx, s);
+        if i > 0 {
+            blank = core_format::ignore::source_blanks(in_region || prev_skip, src, cap)
+                .unwrap_or(blank);
+        }
+        prev_skip = in_region;
         for _ in 0..blank {
             parts.push(hardline());
         }
-        // `# fmt: off` ... `# fmt: on`, `sudsy-ignore`: statements kept as written (ignore rows).
-        let mark = core_format::ignore::mark_in(cx.grammar, &cx.remaining_comments(&first));
-        let skip = region.skips(mark) || is_fmt_skip(cx, s);
         parts.push(if skip {
             verbatim_item(cx, s)?
         } else {

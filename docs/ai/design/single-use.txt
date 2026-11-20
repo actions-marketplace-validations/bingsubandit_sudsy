@@ -44,7 +44,7 @@ concept doc-partial-required # users: csharp
 concept doc-partial-typeparams # users: csharp
 concept doc-text-ends-with-period # users: csharp
 concept doc-text-not-empty # users: csharp
-concept docstring-reindent # users: python
+concept docstring-reindent # users:  (shared)
 concept document-end # users: yaml
 concept document-start # users: yaml
 concept document-stream-layout # users: yaml

@@ -105,6 +105,8 @@ fn ann_assign(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
                 nodes += 1;
                 parts.push(match nodes {
                     1 => expr_doc(cx, n)?,
+                    // (an `await` in an annotation keeps its parentheses)
+                    2 if paren::strip(cx, n).kind() == k::EXPR_AWAIT => expr_doc(cx, n)?,
                     2 => paren::maybe_parenthesize(cx, n)?,
                     _ => paren::rhs(cx, n, prefix_width(&parts))?,
                 });

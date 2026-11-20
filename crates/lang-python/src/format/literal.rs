@@ -76,7 +76,10 @@ pub(crate) fn node_value(n: &core_syntax::SyntaxNode) -> String {
                 if i == 0 {
                     out.push_str(&prefixed::prefix_value(p));
                 }
-                out.push_str(&literals::unescape_quotes(body, syntax()));
+                out.push_str(&prefixed::field_quotes_value(&literals::unescape_quotes(
+                    body,
+                    syntax(),
+                )));
             }
             None => out.push_str(&text),
         }
