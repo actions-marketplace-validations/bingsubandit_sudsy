@@ -19,5 +19,34 @@ target-files:
   sqlfluff-mysql: 248
   sqlfluff-postgres: 142
   sqlfluff-tsql: 152
-coverage: 4.3  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
-target: 3.3
+coverage: 63.7  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+target: 48.7
+fixes:  # gap name or lint rule -> one line: where and what to change
+  AM04: outermost SELECT with a wildcard whose source is a table; needs query analysis (CTE and subquery resolution) in a shared crate
+  RF06: unnecessary quotes on an identifier; needs dialect casefold and reserved-word sets (lang-sql parse data) read by a shared rule
+  RF02: unqualified column in a multi-table SELECT; needs column-reference analysis (table aliases, select scope)
+  PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+  CP02: misses are in files with a parse error (geometry, bit, int2, tsql hints); parse gaps first
+  CP01: misses are in files with a parse error (text, cluster, collate); parse gaps first
+  AL01: misses are in files with a parse error (geometry, int2)
+  RF03: single-table SELECT with mixed qualified and unqualified references; column-reference analysis
+  RF05: special characters in quoted identifiers; token rule over quoted identifier text
+  AM06: GROUP BY and ORDER BY mixing column numbers and names; clause rule
+  RF04: keywords as identifiers; unreserved keyword set of each dialect from parse data
+  AL08: duplicate column alias in a select list; needs a select-list tag pair (a second language or a Rust rule)
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  AM04: 1121
+  CP02: 1021
+  RF06: 601
+  RF02: 402
+  PRS: 380
+  CP01: 324
+  CP05: 317
+  AL01: 292
+  RF03: 261
+  AL03: 235
+  RF05: 225
+  AM06: 206
+  RF04: 178
+  AL08: 159
+  CP03: 158

@@ -50,7 +50,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | ruff | 94.6% | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
 | shellcheck | 86.6% | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 4.3% | 3.3% | 97 | 35 | 0 | 43 | 0 | 0 | 19 | 43 |
+| sqlfluff | 63.7% | 48.7% | 97 | 37 | 0 | 41 | 0 | 0 | 19 | 41 |
 | stylecop | - | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
 | stylelint | 94.7% | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
 | stylelint-less | - | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
@@ -89,7 +89,7 @@ The share of the findings of each reference tool's default or recommended set on
 | HCL | tflint | `hcl/tflint-recommended` | 58.7% | 0.0% | 58.7% | `terraform_required_providers` 37, `terraform_required_version` 20, `terraform_unused_declarations` 2 |
 | Java | checkstyle | `java/google` | 25.5% | 0.5% | 25.5% | `MissingJavadocMethod` 18283, `MethodName` 7887, `JavadocParagraph` 5301, `SummaryJavadoc` 1527, `TodoFormat` 1498 |
 | PHP | phpstan | `php/phpstan` | 0.0% | 0.0% | 0.0% | `class.notFound` 7407, `variable.undefined` 591, `classConstant.notFound` 511, `staticMethod.notFound` 401, `function.notFound` 323 |
-| SQL | sqlfluff | `sql/sqlfluff` | 4.4% | 0.1% | 4.4% | `CP02` 5770, `CP01` 3992, `LT05` 1368, `AM04` 1121, `AL03` 1061 |
+| SQL | sqlfluff | `sql/sqlfluff` | 63.7% | 0.1% | 63.7% | `AM04` 1121, `CP02` 1021, `RF06` 601, `RF02` 402, `PRS` 380 |
 
 Not measured:
 
@@ -102,7 +102,7 @@ Not measured:
 | stylelint-scss, stylelint-less | plugin rules without a recommended set of their own; need SCSS and Less configs and parsers |
 | angular-eslint, graphql-eslint, biome, taplo, terraform | no coverage entry yet (fixtures only) |
 
-Sets and corpora of each run: [../development/parity.md](../development/parity.md#coverage-mode). Findings of `formatter` entries are left out; a file the tool cannot read is left out and counted by the run. The layout rules that are `planned` in a catalog (html-eslint `indent`, ktlint `function-signature`, sqlfluff `CP01`) count as missing until the catalog says `formatter` ([../roadmap.md](../roadmap.md#small-tasks)).
+Sets and corpora of each run: [../development/parity.md](../development/parity.md#coverage-mode). Findings of `formatter` entries are left out; a file the tool cannot read is left out and counted by the run. The layout rules that are `planned` in a catalog (html-eslint `indent`, ktlint `function-signature`) count as missing until the catalog says `formatter` ([../roadmap.md](../roadmap.md#small-tasks)).
 
 ## Migration
 `sudsy init --from <tool>` ([config/cli.md](../config/cli.md#init---from)) turns a tool's config into a `sudsy.yaml` with this catalog as the source of truth: the catalog files are embedded in the binary, the reason printed for a setting that cannot be migrated is the entry's `gap` (or its status), and the C# `.editorconfig` entries that switch off covered SA rules come from the `covered` StyleCop entries. The option and rule values are mapped in code (`crates/cli/src/init/`); each mapping names its catalog entry and debug builds fail when the entry points elsewhere. A new `rule:` or `option:` status therefore changes what `init` writes for the settings that use it; the fixtures under `tests/fixtures/init/` show the result.

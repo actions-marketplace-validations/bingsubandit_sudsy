@@ -1,0 +1,5 @@
+keyword-case: warn
+identifier-case: warn
+function-case: warn
+literal-case: warn
+type-case: warn

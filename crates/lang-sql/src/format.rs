@@ -13,6 +13,10 @@ include!("schema.generated.rs");
 pub struct SqlFormatter;
 
 impl NodeFormatter for SqlFormatter {
+    fn rows(&self) -> &'static str {
+        crate::layout::ROWS.rows()
+    }
+
     fn format_node(
         &self,
         node: &SyntaxNode,

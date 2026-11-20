@@ -1,0 +1,3 @@
+SELECT a, b, COUNT(c), SUM(d), NULL, TRUE, CAST(e AS INT), CAST(f AS TEXT)
+FROM t
+WHERE a = 1;

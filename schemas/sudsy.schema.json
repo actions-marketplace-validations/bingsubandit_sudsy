@@ -1263,6 +1263,10 @@
               "$ref": "#/definitions/rule",
               "description": "An EXPOSE with a port above 65535."
             },
+            "expression-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "A column of a `SELECT` list that is an expression (a function call, a literal, an operator, a `CASE`) with no alias, so its name is up to the database. A column, `*`, a parenthesised expression and a cast of a column are left alone (sqlfluff AL03)."
+            },
             "expression-context": {
               "$ref": "#/definitions/rule",
               "description": "An expression that reads a context, or calls a special function, that the key it is in does not offer (`env` in the `env` of a job, `runner` in a matrix)."
@@ -1414,6 +1418,43 @@
             "function-call-in-default": {
               "$ref": "#/definitions/rule",
               "description": "A call in the default of a parameter (not in a lambda, not a call of an immutable builtin such as `tuple`)."
+            },
+            "function-case": {
+              "description": "Function names are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP03).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "consistent",
+                          "description": "The case the words must be in: `consistent` follows the first one written.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "function-disallowed-list": {
               "description": "A function that is in the `list` option.",
@@ -1623,6 +1664,43 @@
                 }
               ]
             },
+            "identifier-case": {
+              "description": "Unquoted identifiers are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP02).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "consistent",
+                          "description": "The case the words must be in: `consistent` follows the first one written.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "if-condition": {
               "$ref": "#/definitions/rule",
               "description": "An `if:` that is a constant (`if: false`), or that has text around its `${{ }}` and so is a non-empty string, always true (`if: ${{ a }} && ${{ b }}`)."
@@ -1682,6 +1760,10 @@
             "inline-comment": {
               "$ref": "#/definitions/rule",
               "description": "Gitignore-syntax files have no end-of-line comments: `*.log # logs` is the pattern `*.log # logs`, a file name with spaces and a `#`. No fix: put the comment on its own line."
+            },
+            "inner-join": {
+              "$ref": "#/definitions/rule",
+              "description": "A `JOIN` with no join type, which is an inner join (sqlfluff AM05)."
             },
             "input-missing-label": {
               "$ref": "#/definitions/rule",
@@ -1893,6 +1975,43 @@
                 }
               ]
             },
+            "keyword-case": {
+              "description": "Keywords are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP01).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "consistent",
+                          "description": "The case the words must be in: `consistent` follows the first one written.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "lambda-assignment": {
               "$ref": "#/definitions/rule",
               "description": "A lambda assigned to a single name (an annotated one also in a class body is left alone)."
@@ -1939,6 +2058,43 @@
             "length-zero-no-unit": {
               "$ref": "#/definitions/rule",
               "description": "A zero length written with a unit (`0px`); other dimensions (`0s`, `0deg`) are left alone, and so is what is inside a function."
+            },
+            "literal-case": {
+              "description": "`NULL`, `TRUE` and `FALSE` are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP04).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "consistent",
+                          "description": "The case the words must be in: `consistent` follows the first one written.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "literal-in-interpolation": {
               "$ref": "#/definitions/rule",
@@ -5587,6 +5743,43 @@
             "type-alias-annotation": {
               "$ref": "#/definitions/rule",
               "description": "`X: TypeAlias = ...`, for a target version with the `type` statement (3.12)."
+            },
+            "type-case": {
+              "description": "Data type names are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP05).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "consistent",
+                          "description": "The case the words must be in: `consistent` follows the first one written.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "type-check-without-type-error": {
               "$ref": "#/definitions/rule",

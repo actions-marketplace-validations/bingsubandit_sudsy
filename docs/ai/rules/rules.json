@@ -315,6 +315,7 @@
         "java/google",
         "kotlin/ktlint",
         "markdown/markdownlint",
+        "sql/sqlfluff",
         "yaml/yamllint"
       ],
       "upstream": [
@@ -342,6 +343,11 @@
           "id": "RCS0056",
           "partial": true,
           "tool": "Roslynator"
+        },
+        {
+          "id": "LT05",
+          "partial": false,
+          "tool": "sqlfluff"
         },
         {
           "id": "line-length",
@@ -21268,7 +21274,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
         "language": "sql",
         "spans": [
           {
@@ -21380,7 +21386,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
         "language": "sql",
         "spans": [
           {
@@ -21410,11 +21416,169 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A column of a `SELECT` list that is an expression (a function call, a literal, an operator, a `CASE`) with no alias, so its name is up to the database. A column, `*`, a parenthesised expression and a cast of a column are left alone (sqlfluff AL03).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select 1, sum(a), a + 1, b, t.*, a::int, (a), a & b, case when a then 1 end, count(*) as n from t;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 8,
+            "length": 1,
+            "line": 1
+          },
+          {
+            "column": 11,
+            "length": 6,
+            "line": 1
+          },
+          {
+            "column": 19,
+            "length": 5,
+            "line": 1
+          },
+          {
+            "column": 47,
+            "length": 5,
+            "line": 1
+          },
+          {
+            "column": 54,
+            "length": 22,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "expression-alias",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "AL03",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Function names are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP03).",
+      "example": {
+        "config": null,
+        "fixed": "SELECT a, b, COUNT(c), SUM(d), NULL, TRUE, CAST(e AS INT), CAST(f AS TEXT)\nFROM t\nWHERE a = 1;\n",
+        "input": "SELECT a, B, COUNT(c), sum(d), NULL, true, cast(e as INT), cast(f as text)\nfrom t\nWHERE a = 1;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 24,
+            "length": 3,
+            "line": 1
+          },
+          {
+            "column": 44,
+            "length": 4,
+            "line": 1
+          },
+          {
+            "column": 60,
+            "length": 4,
+            "line": 1
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "function-case",
+      "languages": [
+        "sql"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "upper",
+            "lower",
+            "capitalise"
+          ],
+          "default": "consistent",
+          "description": "The case the words must be in: `consistent` follows the first one written.",
+          "name": "policy",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "CP03",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Unquoted identifiers are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP02).",
+      "example": {
+        "config": null,
+        "fixed": "SELECT a, b, COUNT(c), SUM(d), NULL, TRUE, CAST(e AS INT), CAST(f AS TEXT)\nFROM t\nWHERE a = 1;\n",
+        "input": "SELECT a, B, COUNT(c), sum(d), NULL, true, cast(e as INT), cast(f as text)\nfrom t\nWHERE a = 1;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 11,
+            "length": 1,
+            "line": 1
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "identifier-case",
+      "languages": [
+        "sql"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "upper",
+            "lower",
+            "capitalise"
+          ],
+          "default": "consistent",
+          "description": "The case the words must be in: `consistent` follows the first one written.",
+          "name": "policy",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "CP02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A table or column alias without the `AS` keyword (sqlfluff AL01, AL02).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
         "language": "sql",
         "spans": [
           {
@@ -21446,6 +21610,149 @@
         },
         {
           "id": "AL02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `JOIN` with no join type, which is an inner join (sqlfluff AM05).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 29,
+            "length": 4,
+            "line": 9
+          },
+          {
+            "column": 17,
+            "length": 4,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "inner-join",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "AM05",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Keywords are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP01).",
+      "example": {
+        "config": null,
+        "fixed": "SELECT a, b, COUNT(c), SUM(d), NULL, TRUE, CAST(e AS INT), CAST(f AS TEXT)\nFROM t\nWHERE a = 1;\n",
+        "input": "SELECT a, B, COUNT(c), sum(d), NULL, true, cast(e as INT), cast(f as text)\nfrom t\nWHERE a = 1;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 51,
+            "length": 2,
+            "line": 1
+          },
+          {
+            "column": 67,
+            "length": 2,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 4,
+            "line": 2
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "keyword-case",
+      "languages": [
+        "sql"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "upper",
+            "lower",
+            "capitalise"
+          ],
+          "default": "consistent",
+          "description": "The case the words must be in: `consistent` follows the first one written.",
+          "name": "policy",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "CP01",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`NULL`, `TRUE` and `FALSE` are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP04).",
+      "example": {
+        "config": null,
+        "fixed": "SELECT a, b, COUNT(c), SUM(d), NULL, TRUE, CAST(e AS INT), CAST(f AS TEXT)\nFROM t\nWHERE a = 1;\n",
+        "input": "SELECT a, B, COUNT(c), sum(d), NULL, true, cast(e as INT), cast(f as text)\nfrom t\nWHERE a = 1;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 38,
+            "length": 4,
+            "line": 1
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "literal-case",
+      "languages": [
+        "sql"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "upper",
+            "lower",
+            "capitalise"
+          ],
+          "default": "consistent",
+          "description": "The case the words must be in: `consistent` follows the first one written.",
+          "name": "policy",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "CP04",
           "partial": false,
           "tool": "sqlfluff"
         }
@@ -21507,7 +21814,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
         "language": "sql",
         "spans": [
           {
@@ -21546,7 +21853,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
         "language": "sql",
         "spans": [
           {
@@ -21608,13 +21915,60 @@
       ]
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "Data type names are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP05).",
+      "example": {
+        "config": null,
+        "fixed": "SELECT a, b, COUNT(c), SUM(d), NULL, TRUE, CAST(e AS INT), CAST(f AS TEXT)\nFROM t\nWHERE a = 1;\n",
+        "input": "SELECT a, B, COUNT(c), sum(d), NULL, true, cast(e as INT), cast(f as text)\nfrom t\nWHERE a = 1;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 70,
+            "length": 4,
+            "line": 1
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "type-case",
+      "languages": [
+        "sql"
+      ],
+      "options": [
+        {
+          "choices": [
+            "consistent",
+            "upper",
+            "lower",
+            "capitalise"
+          ],
+          "default": "consistent",
+          "description": "The case the words must be in: `consistent` follows the first one written.",
+          "name": "policy",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "CP05",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
       "category": "suspicious",
       "default_level": "warn",
       "description": "A `UNION` that names neither `DISTINCT` nor `ALL` (sqlfluff AM02).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
         "language": "sql",
         "spans": [
           {

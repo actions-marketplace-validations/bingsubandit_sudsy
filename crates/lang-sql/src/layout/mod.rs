@@ -19,7 +19,8 @@ use core_format::{Doc, doc};
 use core_syntax::{Grammar, SyntaxNode, grammars};
 use seq::Seq;
 
-static ROWS: LazyRules = LazyRules::new(|| grammars::SQL.get(), include_str!("../../format.rules"));
+pub(crate) static ROWS: LazyRules =
+    LazyRules::new(|| grammars::SQL.get(), include_str!("../../format.rules"));
 
 /// One level of indentation.
 fn unit(options: &ResolvedOptions) -> String {

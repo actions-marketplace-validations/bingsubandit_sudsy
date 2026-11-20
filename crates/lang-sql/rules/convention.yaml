@@ -58,3 +58,14 @@ category: style
 rule:
   kind: AliasExpression
   not: { regex: '(?i)^as\b' }
+---
+id: inner-join
+message: write INNER JOIN, not a bare JOIN
+description: A `JOIN` with no join type, which is an inner join (sqlfluff AM05).
+example: 'select a from t join u on t.a = u.a'
+severity: off
+category: style
+rule:
+  kind: JoinClause
+  regex: '(?i)^join\b'
+report-on: first-token

@@ -56,6 +56,7 @@ pub mod slot_path;
 pub mod sorted;
 pub mod sorting;
 pub mod suppress;
+pub mod token_case;
 pub mod tree;
 pub mod unique;
 

@@ -54,6 +54,9 @@ pub struct Spec {
     /// The direct parent / a direct child holds the rule (`inside`/`has` look at every level).
     pub parent: Option<Box<Spec>>,
     pub child: Option<Box<Spec>>,
+    /// A direct child token has one of these kinds (`child` and `has` look at nodes only).
+    #[serde(rename = "child-token")]
+    pub child_token: Option<Names>,
     /// The bool option of this name is true.
     pub option: Option<String>,
     /// The text of the node (a token: its text) is an item of this `list` option.
@@ -89,6 +92,14 @@ pub struct Spec {
     pub bare: Option<bool>,
     /// The node, looked through parentheses and single-child wrappers, holds this rule.
     pub inner: Option<Box<Spec>>,
+}
+
+/// Has `node` a direct child token of one of `kinds`? Kept out of line: `Expr::matches` is on the path of every pattern rule.
+#[inline(never)]
+fn child_token(node: &SyntaxNode, kinds: &[SyntaxKind]) -> Option<Captures> {
+    node.children_with_tokens()
+        .any(|c| c.as_token().is_some_and(|t| kinds.contains(&t.kind())))
+        .then(Captures::new)
 }
 
 /// What an expression is evaluated against.
@@ -128,6 +139,7 @@ pub enum Expr {
     Has(Box<Expr>),
     Parent(Box<Expr>),
     Child(Box<Expr>),
+    ChildToken(Vec<SyntaxKind>),
     Option(String),
     InOption(String),
     Rethrows,
@@ -280,6 +292,17 @@ impl Expr {
         if let Some(s) = &spec.child {
             all.push(Expr::Child(Box::new(sub(s)?)));
         }
+        if let Some(names) = &spec.child_token {
+            let names = names.list();
+            let kinds = names.iter().map(|name| {
+                parser
+                    .grammar()
+                    .kind_by_name(name)
+                    .filter(|k| k.is_token())
+                    .ok_or_else(|| format!("`{name}` is not a token kind of the language"))
+            });
+            all.push(Expr::ChildToken(kinds.collect::<Result<_, _>>()?));
+        }
         if let Some(name) = &spec.option {
             let bool_option = |o: &&OptionDecl| o.name == name && matches!(o.default, Opt::Bool(_));
             if !options.iter().any(|o| bool_option(&o)) {
@@ -417,6 +440,7 @@ impl Expr {
                 .children()
                 .any(|c| cx.spend() && e.matches(&c, cx).is_some())
                 .then(Captures::new),
+            Expr::ChildToken(kinds) => child_token(node, kinds),
             Expr::Option(name) => cx.options.bool(name).then(Captures::new),
             Expr::InOption(name) => {
                 let range = cx.ranges.significant_range(node, cx.grammar);
@@ -557,6 +581,7 @@ impl Expr {
             | Expr::Regex(..)
             | Expr::Path(_)
             | Expr::Nth(_)
+            | Expr::ChildToken(_)
             | Expr::Option(_)
             | Expr::InOption(_)
             | Expr::RegexOption(..)
@@ -612,6 +637,7 @@ impl Expr {
             | Expr::Rethrows
             | Expr::Has(_)
             | Expr::Child(_)
+            | Expr::ChildToken(_)
             | Expr::Not(_)
             | Expr::Role(..)
             | Expr::Operator(_)

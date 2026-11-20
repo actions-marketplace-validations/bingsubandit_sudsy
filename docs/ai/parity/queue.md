@@ -331,6 +331,22 @@ Lint: coverage 86.6%, target 86.6%; rules by missed findings:
 
 1. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 2. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
+Lint: coverage 63.7%, target 48.7%; rules by missed findings:
+1. `AM04` (1121 missed) Fix: outermost SELECT with a wildcard whose source is a table; needs query analysis (CTE and subquery resolution) in a shared crate
+2. `CP02` (1021 missed) Fix: misses are in files with a parse error (geometry, bit, int2, tsql hints); parse gaps first
+3. `RF06` (601 missed) Fix: unnecessary quotes on an identifier; needs dialect casefold and reserved-word sets (lang-sql parse data) read by a shared rule
+4. `RF02` (402 missed) Fix: unqualified column in a multi-table SELECT; needs column-reference analysis (table aliases, select scope)
+5. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+6. `CP01` (324 missed) Fix: misses are in files with a parse error (text, cluster, collate); parse gaps first
+7. `CP05` (317 missed)
+8. `AL01` (292 missed) Fix: misses are in files with a parse error (geometry, int2)
+9. `RF03` (261 missed) Fix: single-table SELECT with mixed qualified and unqualified references; column-reference analysis
+10. `AL03` (235 missed)
+11. `RF05` (225 missed) Fix: special characters in quoted identifiers; token rule over quoted identifier text
+12. `AM06` (206 missed) Fix: GROUP BY and ORDER BY mixing column numbers and names; clause rule
+13. `RF04` (178 missed) Fix: keywords as identifiers; unreserved keyword set of each dialect from parse data
+14. `AL08` (159 missed) Fix: duplicate column alias in a select list; needs a select-list tag pair (a second language or a Rust rule)
+15. `CP03` (158 missed)
 
 ## taplo
 

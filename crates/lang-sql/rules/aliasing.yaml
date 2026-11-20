@@ -1,0 +1,21 @@
+id: expression-alias
+message: give this expression an alias with AS
+description: >-
+  A column of a `SELECT` list that is an expression (a function call, a literal, an operator, a
+  `CASE`) with no alias, so its name is up to the database. A column, `*`, a parenthesised
+  expression and a cast of a column are left alone (sqlfluff AL03).
+example: 'select sum(a), b from t'
+severity: off
+category: style
+rule:
+  kind: SelectClauseElement
+  not:
+    child: { kind: AliasExpression }
+  any:
+    - child-token: [Number, String, WordLiteral]
+    - child: { any: [{ kind: Function }, { kind: CaseExpression }] }
+    - child:
+        kind: Expression
+        any:
+          - child-token: [BinaryOperator, BinaryKeyword, Operator, Sign, Keyword, Number, String, WordLiteral]
+          - child: { any: [{ kind: ComparisonOperator }, { kind: Function }, { kind: CaseExpression }] }

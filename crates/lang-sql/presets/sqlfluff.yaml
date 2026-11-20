@@ -6,10 +6,22 @@ sql:
       distinct-group-by: warn
       duplicate-table-alias: warn
       else-null: warn
+      expression-alias: warn
+      function-case: warn
+      identifier-case: warn
       implicit-alias: warn
+      inner-join: warn
+      keyword-case: warn
+      literal-case: warn
+      max-line-length:
+        level: warn
+        options:
+          max: 80
+          allow_non_breakable_words: false
       null-comparison: warn
       prefer-coalesce: warn
       right-join: warn
       self-alias: warn
+      type-case: warn
       union-distinct: warn
       unused-cte: warn

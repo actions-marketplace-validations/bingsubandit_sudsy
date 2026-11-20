@@ -672,6 +672,8 @@ def coverage(tool, sudsy, version, prefix, exe):
     def run_sudsy(config):  # Sudsy's findings with `config` as the sudsy.yaml of the corpus (None: no file, the default a user gets)
         (work / "sudsy.yaml").unlink(missing_ok=True)
         if config is not None:
+            if (spec or {}).get("overrides"):  # per-folder settings the tool gets from its own flags (sqlfluff: `--dialect`)
+                config = json.dumps({**json.loads(config), "overrides": spec["overrides"]})
             (work / "sudsy.yaml").write_text(config, encoding="utf-8")
         out = subprocess.run([sudsy, "lint", "--format", "json", "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False).stdout
         result = {}  # (file, sudsy rule) -> [(message, line)]

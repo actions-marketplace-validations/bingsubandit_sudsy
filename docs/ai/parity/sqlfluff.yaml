@@ -21,12 +21,12 @@ entries:
   LT14: formatter
   LT15: formatter
   LT04: option sql.format.comma_position
-  LT05: option sql.format.line_width
-  CP01: option sql.format.keyword_case
-  CP02: option sql.format.identifier_case
-  CP03: option sql.format.function_case
-  CP04: option sql.format.literal_case
-  CP05: option sql.format.type_case
+  LT05: rule max-line-length
+  CP01: rule keyword-case
+  CP02: rule identifier-case
+  CP03: rule function-case
+  CP04: rule literal-case
+  CP05: rule type-case
   LT12: option sql.format.final_newline
   AL01: rule implicit-alias
   AL02: rule implicit-alias
@@ -40,14 +40,14 @@ entries:
   CV08: rule right-join
   ST01: rule else-null
   ST03: rule unused-cte
-  AL03: planned
+  AL03: rule expression-alias
   AL05: planned
   AL06: planned
   AL07: planned
   AL08: planned
   AM03: planned
   AM04: planned
-  AM05: planned
+  AM05: rule inner-join
   AM06: planned
   AM07: planned
   CV01: planned

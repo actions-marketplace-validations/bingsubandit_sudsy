@@ -16,3 +16,6 @@ select case when a then 1 else null end, case when a then 1 else 2 end from t;
 select a b, c as d from t u join v as w on u.a = w.a;
 --       ^ implicit-alias
 --                        ^ implicit-alias
+--                          ^^^^ inner-join
+select a from t join u on t.a = u.a inner join v on v.a = t.a;
+--              ^^^^ inner-join
