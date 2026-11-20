@@ -126,6 +126,10 @@ A "Language support" section in `README.md` (user decision 2026-11-19), for user
     - `In progress` below it;
     - `Lint only` for a language Sudsy does not format;
     - `not measured` where no run exists. A cell is never blank.
+- **A leg with no reference tool still has one deciding number** (user decision 2026-11-20):
+  - **Format, no reference formatter:** `stability`, the share of the language's corpus files that are stable: `sudsy format` parses the file, its safety check passes (lossless, meaning kept), a second format changes nothing, and the engine laid the file out instead of copying most of it through (`core_format::copied_through_files`: more than half of the file text copied by `verbatim_node`, `verbatim_range` or a whole-file keep; the CLI summary line says `N copied through`). The cell reads `██████████ 100% stable · no reference tool`, with no file count, and decides `Ready` like a tool's number.
+  - **Measured by** `scripts/parity.sh stability <group>` (`scripts/parity_stability.py`, the `stability` section of `scripts/parity_tools.json`: the corpus folders of the lint coverage runs, no new corpus). The result is the ratchet `ratchet` (least stable files) and `target-files` (corpus files) per group in `tests/parity/stability/differences.yaml`; `support.yaml` names the groups of a row under `stability`. No input is left out: a file that does not parse counts as not stable.
+  - **Lint, no reference linter:** `N rules · no reference tool`, never decides `Ready` (no conformance suite yet). A tool that exists with no catalog (clang-tidy) is listed as a tool and reads `not measured`.
 - **Bars are text characters,** with no image or badge service. No history or change column.
 - **One line under the table** says how each number is reproduced: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). It links to the human page on parity for what the target number leaves out.
 - The top-level `docs/languages.md` points to this table rather than repeating numbers.

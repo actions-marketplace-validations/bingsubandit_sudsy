@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 11 languages, early support for 16 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 12 languages, early support for 15 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -14,7 +14,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Makefile, INI, EditorConfig, .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -59,7 +59,7 @@ A typical repo runs one tool per language. Each tool has its own install, config
 
 ## Language support
 
-Each number is measured on real-world code against the reference tool with its default settings, and counts every difference except the reviewed intentional ones. `Ready` means the first tool of each column is at least 85%; the others are shown for reference.
+Each number is measured on real-world code against the reference tool with its default settings, and counts every difference except the reviewed intentional ones. `Ready` means the first tool of each column is at least 85%; the others are shown for reference. Where no reference formatter exists, `stable` is the share of real-world files that Sudsy formats without error, to the same text on a second run and by its rules rather than copied through.
 
 <!-- generated:support -->
 | Language | Format | Lint | Status |
@@ -67,14 +67,15 @@ Each number is measured on real-world code against the reference tool with its d
 | JavaScript / TypeScript | ████████░░ 86% Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | Ready |
 | Python | ████████░░ 86% ruff format | █████████░ 94% ruff | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
-| GraphQL | █████████░ 99% Prettier | 21 rules · reference tool: none found | Ready |
-| TOML | █████████░ 98% taplo | 15 rules · reference tool: none found | Ready |
-| Angular templates | █████████░ 97% Prettier | 142 rules · reference tool: none found | Ready |
+| GraphQL | █████████░ 99% Prettier | 21 rules · no reference tool | Ready |
+| TOML | █████████░ 98% taplo | 15 rules · no reference tool | Ready |
+| Angular templates | █████████░ 97% Prettier | 142 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | Ready |
 | Java | █████████░ 91% google-java-format | █████████░ 95% Checkstyle | Ready |
-| XML | █████████░ 99% CSharpier XML | 17 rules · reference tool: none found | Ready |
+| XML | █████████░ 99% CSharpier XML | 17 rules · no reference tool | Ready |
+| Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
+| INI, EditorConfig, .gitignore | ██████████ 100% stable · no reference tool | 24 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
-| Makefile | Sudsy formatter · reference tool: none found | ██████████ 100% checkmake | Lint only: Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
@@ -86,11 +87,10 @@ Each number is measured on real-world code against the reference tool with its d
 | Shell | ████████░░ 81% shfmt | ████████░░ 86% ShellCheck | In progress |
 | SQL | ███████░░░ 78% sqlfluff | █████░░░░░ 51% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
-| C / C++ | █░░░░░░░░░ 18% clang-format | 25 rules · reference tool: none found | In progress |
-| Dockerfile | Sudsy formatter · reference tool: none found | ███████░░░ 78% hadolint | Lint only: In progress |
-| GitHub Actions | Sudsy formatter · reference tool: none found | ████████░░ 81% actionlint | Lint only: In progress |
+| C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
+| Dockerfile | ██████████ 100% stable · no reference tool | ███████░░░ 78% hadolint | In progress |
+| GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 81% actionlint | In progress |
 | PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
-| INI, EditorConfig, .gitignore | Sudsy formatter · reference tool: none found | 24 rules · reference tool: none found | not measured |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->

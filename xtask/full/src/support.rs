@@ -1,7 +1,9 @@
 //! The README "Language support" table, generated from the target numbers of the parity runs
 //! (docs/ai/design/parity-target.md, Phase 6). The rows are `support.yaml` (language to reference tools);
 //! the numbers are the ratchets of `tests/parity/<tool>/differences.yaml`: format = `ratchet` (identical
-//! files) over `target-files` (files of the target) summed over the tool's groups, lint = `target`.
+//! files) over `target-files` (files of the target) summed over the tool's groups, lint = `target`. A
+//! language Sudsy formats with no reference formatter has `stability` groups instead: the share of its
+//! corpus files that `scripts/parity.sh stability <group>` finds stable, in `tests/parity/stability`.
 
 use anyhow::{Context, Result};
 use serde::Deserialize;
@@ -11,10 +13,13 @@ use std::path::Path;
 /// The CLAUDE.md usability bar, in percent.
 const BAR: f64 = 85.0;
 
-/// The statuses in the order of the table.
-/// A cell of a language with no reference tool: what Sudsy has.
-const NO_TOOL: &str = "{} · reference tool: none found";
+/// The folder of `tests/parity` that holds the stability ratchets.
+const STABILITY: &str = "stability";
 
+/// The ending of a cell with no reference tool.
+const NO_TOOL: &str = "no reference tool";
+
+/// The statuses in the order of the table.
 const STATUSES: [&str; 5] = [
     "Ready",
     "Lint only: Ready",
@@ -37,9 +42,10 @@ pub(crate) struct Row {
     /// The `language` names of the rows of `bench/speed.json` that belong to this row.
     #[serde(default)]
     pub speed: Vec<String>,
-    /// Sudsy formats the language although no reference formatter was found.
+    /// Sudsy formats the language although no reference formatter was found: the ratchet groups of
+    /// `tests/parity/stability` (the corpus files that are stable) that stand for the format leg.
     #[serde(default)]
-    pub formatter: bool,
+    pub stability: Vec<String>,
 }
 
 /// A reference tool: its `tests/parity` folder, its name in the table and, for a folder that serves
@@ -89,15 +95,13 @@ pub fn render(
         let line = format!(
             "| {} | {} | {} | {status} |\n",
             row.language,
-            cell(&row.format, &m.format).unwrap_or_else(|| {
-                if row.formatter {
-                    NO_TOOL.replace("{}", "Sudsy formatter")
-                } else {
-                    "none".into()
-                }
+            cell(&row.format, &m.format).unwrap_or_else(|| match m.format.first() {
+                Some(p) if !row.stability.is_empty() =>
+                    format!("{} · {NO_TOOL}", share(*p, "stable")),
+                _ => "none".into(),
             }),
             cell(&row.lint, &m.lint).unwrap_or_else(|| match rule_count(&row.ids) {
-                n if n > 0 => NO_TOOL.replace("{}", &format!("{n} rules")),
+                n if n > 0 => format!("{n} rules · {NO_TOOL}"),
                 _ => "none".into(),
             }),
         );
@@ -146,17 +150,26 @@ pub(crate) struct Measured<'a> {
 pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'a>>> {
     rows.iter()
         .map(|row| {
-            let format: Vec<Option<f64>> = row
+            let mut format: Vec<Option<f64>> = row
                 .format
                 .iter()
                 .map(|t| format_share(root, t))
                 .collect::<Result<_>>()?;
+            if !row.stability.is_empty() {
+                let stability = Tool {
+                    tool: STABILITY.into(),
+                    name: String::new(),
+                    groups: row.stability.clone(),
+                };
+                format.push(format_share(root, &stability)?);
+            }
             let lint: Vec<Option<f64>> = row
                 .lint
                 .iter()
                 .map(|t| Ok(ratchets(root, &t.tool)?.target))
                 .collect::<Result<_>>()?;
-            let status = status(row.format.is_empty(), &format, &lint);
+            let no_formatter = row.format.is_empty() && row.stability.is_empty();
+            let status = status(no_formatter, &format, &lint);
             Ok(Measured {
                 row,
                 format,
@@ -197,8 +210,24 @@ fn format_share(root: &Path, tool: &Tool) -> Result<Option<f64>> {
     Ok((files > 0).then(|| same as f64 * 100.0 / files as f64))
 }
 
-/// One line per tool: bar, percent (rounded down, so the text never reads as passing the bar when it
-/// does not) and name; `None` when the language has no reference tool.
+/// Bar, percent (rounded down, so the text never reads as passing the bar when it does not) and
+/// name; `not measured` and the name when there is no number.
+fn share(share: Option<f64>, name: &str) -> String {
+    match share {
+        Some(p) => {
+            let full = ((p / 10.0).floor() as usize).min(10);
+            format!(
+                "{}{} {:.0}% {name}",
+                "█".repeat(full),
+                "░".repeat(10 - full),
+                p.floor()
+            )
+        }
+        None => format!("not measured {name}"),
+    }
+}
+
+/// One line per tool; `None` when the language has no reference tool.
 fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
     if tools.is_empty() {
         return None;
@@ -207,19 +236,7 @@ fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
         tools
             .iter()
             .zip(shares)
-            .map(|(t, s)| match s {
-                Some(p) => {
-                    let full = ((p / 10.0).floor() as usize).min(10);
-                    format!(
-                        "{}{} {:.0}% {}",
-                        "█".repeat(full),
-                        "░".repeat(10 - full),
-                        p.floor(),
-                        t.name
-                    )
-                }
-                None => format!("not measured {}", t.name),
-            })
+            .map(|(t, s)| share(*s, &t.name))
             .collect::<Vec<_>>()
             .join("<br>"),
     )

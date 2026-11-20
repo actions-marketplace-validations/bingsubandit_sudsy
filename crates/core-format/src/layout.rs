@@ -377,7 +377,10 @@ impl Layout {
         let doc = match row.shape.as_str() {
             "verbatim" => Ok(shapes::verbatim(cx, node)),
             "flat" => flow.flat(cx, node),
-            "document" if file.verbatim(node) => Ok(doc::verbatim(node.text().to_string())),
+            "document" if file.verbatim(node) => {
+                cx.note_copied(node.text_range());
+                Ok(doc::verbatim(node.text().to_string()))
+            }
             "document" => shapes::document(
                 cx,
                 node,

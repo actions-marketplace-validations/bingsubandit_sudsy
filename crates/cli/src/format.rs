@@ -100,7 +100,7 @@ fn report(s: &Summary, check: bool) {
         "reformatted"
     };
     eprintln!(
-        "{} file(s) checked, {} {verb}, {} unchanged{}",
+        "{} file(s) checked, {} {verb}, {} unchanged{}{}",
         s.formatted + s.failed,
         s.changed,
         s.formatted - s.changed,
@@ -108,6 +108,10 @@ fn report(s: &Summary, check: bool) {
             format!(", {} failed", s.failed)
         } else {
             String::new()
+        },
+        match core_format::copied_through_files() {
+            0 => String::new(),
+            n => format!(", {n} copied through"),
         }
     );
 }

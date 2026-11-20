@@ -459,6 +459,14 @@
     "sqlfluff": {"preset": "sql/sqlfluff", "catalog": "sqlfluff", "install": "sqlfluff", "fetch": ["tests/conformance/fetch-sql-corpus.sh"], "coverage": {"corpus": [{"dir": "tests/conformance/corpus/sql", "glob": ["*.sql"]}], "group": "(?:dialects/|^sql/)(ansi|postgres|mysql|tsql)/", "command": ["{python}", "-m", "sqlfluff", "lint", "--dialect", "{group}", "--format", "json", "--nocolor", "--processes", "8", "{files}"], "overrides": [{"files": ["**/dialects/postgres/**"], "sql": {"format": {"dialect": "postgres"}}}, {"files": ["sql/postgres/**"], "sql": {"format": {"dialect": "postgres"}}}, {"files": ["**/dialects/mysql/**"], "sql": {"format": {"dialect": "mysql"}}}, {"files": ["**/dialects/tsql/**"], "sql": {"format": {"dialect": "tsql"}}}], "chunk": 100000, "timeout": 7200, "env": {"PYTHONPATH": "{prefix}"}, "parse": {"format": "json", "levels": ["", "violations"], "file": "0.filepath", "rule": "1.code", "message": "1.description", "line": "1.start_line_no"}}},
     "stylecop": {"speed": {"language": "C#", "label": "StyleCop", "corpus": "csharp", "not_measured": {"lint": "the compiler skips analyzers when the compilation has errors, and the C# corpus does not compile on its own"}}, "catalog": "stylecop", "needs": ["worker"]}
   },
+  "stability": {
+    "dockerfile": {"fetch": ["tests/conformance/fetch-dockerfile-corpus.sh"], "corpus": [{"dir": "tests/conformance/corpus/dockerfile", "glob": ["Dockerfile", "Dockerfile.*", "*.Dockerfile", "*.dockerfile"]}]},
+    "makefile": {"fetch": ["tests/conformance/fetch-makefile-corpus.sh"], "corpus": [{"dir": "tests/conformance/corpus/makefile", "glob": ["Makefile", "makefile"]}]},
+    "github-actions": {"fetch": ["tests/conformance/fetch-github-actions-corpus.sh"], "place": ".github/workflows", "corpus": [{"dir": "tests/conformance/corpus/github-actions", "glob": ["*.yml", "*.yaml"]}]},
+    "ini": {"fetch": ["tests/conformance/fetch-ini-corpus.sh"], "corpus": [{"dir": "tests/conformance/corpus/ini", "glob": ["*.ini", "*.cfg"]}]},
+    "editorconfig": {"fetch": ["tests/conformance/fetch-editorconfig-corpus.sh"], "as": ".editorconfig", "corpus": [{"dir": "tests/conformance/corpus/editorconfig", "glob": ["*.editorconfig"]}]},
+    "gitignore": {"fetch": ["tests/conformance/fetch-gitignore-corpus.sh"], "corpus": [{"dir": "tests/conformance/corpus/gitignore", "glob": [".gitignore", ".dockerignore"]}]}
+  },
   "speed": {
     "biome-js": {
       "catalog": "biome",

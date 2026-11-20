@@ -1,0 +1,14 @@
+ratchet:
+  dockerfile: 211
+  makefile: 59
+  github-actions: 393
+  ini: 8
+  editorconfig: 3
+  gitignore: 118
+target-files:
+  dockerfile: 211
+  makefile: 59
+  github-actions: 395
+  ini: 8
+  editorconfig: 3
+  gitignore: 118

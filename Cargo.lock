@@ -396,6 +396,7 @@ dependencies = [
  "anyhow",
  "clap",
  "core-config",
+ "core-format",
  "core-incremental",
  "core-rules",
  "core-syntax",

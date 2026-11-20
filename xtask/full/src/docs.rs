@@ -250,6 +250,10 @@ pub(crate) fn splice_text(
 ) -> Result<(PathBuf, String)> {
     for (name, body) in blocks {
         let start = format!("<!-- generated:{name} -->");
+        // Only the first block would be rewritten: a merge that adds a second, stale one must fail.
+        if text.matches(&start).count() > 1 {
+            bail!("{rel}: `{start}` occurs more than once: delete the stale block");
+        }
         let from = text
             .find(&start)
             .with_context(|| format!("{rel}: no `{start}` marker"))?
@@ -375,4 +379,21 @@ fn shared_options_table(schemas: &[(&str, &OptionSchema)]) -> String {
         out += &format!("| `{name}` | {kind} | {} |\n", defaults.join(", "));
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::splice_text;
+
+    #[test]
+    fn a_block_that_occurs_twice_fails() {
+        let one = "a <!-- generated:x -->old<!-- /generated --> b".to_string();
+        let blocks = [("x", "new".to_string())];
+        assert_eq!(
+            splice_text("f.md", one.clone(), &blocks).unwrap().1,
+            "a <!-- generated:x -->new<!-- /generated --> b"
+        );
+        let err = splice_text("f.md", format!("{one} {one}"), &blocks).unwrap_err();
+        assert!(err.to_string().contains("more than once"), "{err}");
+    }
 }

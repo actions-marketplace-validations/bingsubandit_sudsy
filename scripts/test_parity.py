@@ -10,6 +10,7 @@ from pathlib import Path
 import parity_coverage as pc
 import parity_format as pf
 import parity_lint as pl
+import parity_stability as ps
 import speed
 
 YAML = """differences:
@@ -140,6 +141,30 @@ class SpeedRuns(unittest.TestCase):
     def test_findings_and_differences_are_timings(self):
         speed.check_sudsy_run(["sudsy", "format", "--check", "."], "c", 1, "5 file(s) checked, 2 would reformat, 3 unchanged\n")
         self.assertEqual(speed.files_checked("x\n12 file(s) checked, 0 error(s), 0 warning(s)\n"), 12)
+
+
+class Stability(unittest.TestCase):
+    """`unstable` reads the exit code and the summary line of a fake `sudsy` (a shell script: `$1 format <file>`)."""
+
+    def fake(self, tmp, body):
+        exe = Path(tmp) / "sudsy"
+        exe.write_text("#!/bin/sh\n" + body, encoding="utf-8")
+        exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+        (Path(tmp) / "f.txt").write_text("a\n", encoding="utf-8")
+        return str(exe), Path(tmp) / "f.txt"
+
+    def test_each_reason(self):
+        cases = [
+            ("echo ok >&2", None),
+            ("echo 'error: f.txt: 1:1: bad' >&2; exit 2", "does not parse or format"),
+            ("echo 'error: f.txt: internal error: changed meaning' >&2; exit 2", "refused by the safety check"),
+            ("echo '1 file(s) checked, 0 reformatted, 1 unchanged, 1 copied through' >&2", "copied through"),
+            ("echo $RANDOM >> f.txt", "changes on a second format"),
+        ]
+        for body, why in cases:
+            with tempfile.TemporaryDirectory() as tmp:
+                exe, file = self.fake(tmp, body)
+                self.assertEqual(ps.unstable(exe, file), why, body)
 
 
 if __name__ == "__main__":

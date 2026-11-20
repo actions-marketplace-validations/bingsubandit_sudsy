@@ -10,9 +10,9 @@ root = Path(__file__).resolve().parent.parent
 skip = re.compile(r"measurement|prints timings|flaky")
 include = []
 modes = json.load(open(root / "scripts/parity_tools.json"))
-for mode in ("format", "lint"):  # the other sections (speed-only tools, corpora) have no parity run
+for mode in ("format", "lint", "stability"):  # the other sections (speed-only tools, corpora) have no parity run
     for tool in modes[mode]:
-        cmd = f"scripts/parity.sh {'format ' if mode == 'format' else ''}{tool}"
+        cmd = f"scripts/parity.sh {mode + ' ' if mode != 'lint' else ''}{tool}"
         include.append({"name": f"parity-{mode}-{tool}", "cmd": cmd})
 for crate in sorted((root / "crates").glob("lang-*")):
     files = [*crate.glob("tests/*.rs"), *crate.glob("src/**/*.rs")]

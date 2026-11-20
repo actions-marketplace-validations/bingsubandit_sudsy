@@ -49,6 +49,22 @@ pub use printer::PrintOptions;
 use core_config::ResolvedOptions;
 use core_syntax::SyntaxNode;
 
+/// Files this process formatted that the engine mostly copied through ([`FormatCtx::mostly_copied`]).
+static COPIED_THROUGH: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
+/// Counts the file just formatted with `cx` when the engine mostly copied it through.
+pub fn count_copied_through(cx: &FormatCtx<'_>, root: &SyntaxNode) {
+    if cx.mostly_copied(root) {
+        COPIED_THROUGH.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+/// The files this process formatted that the engine mostly copied through: the parity runner's
+/// stability score counts such a file as unstable (docs/ai/design/parity-target.md).
+pub fn copied_through_files() -> usize {
+    COPIED_THROUGH.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 thread_local! {
     /// Levels of [`deep`] entered on this thread, and the most since the last [`take_peak`].
     static LEVEL: std::cell::Cell<u32> = const { std::cell::Cell::new(0) };

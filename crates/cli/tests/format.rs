@@ -387,3 +387,20 @@ fn vue_and_svelte_rewrites_pass_the_safety_check() {
     assert!(read(t.path(), "a.vue").contains("</docs>\n<docs"));
     assert!(read(t.path(), "a.svelte").contains("as { b, c }}"));
 }
+
+/// The summary counts a file the engine mostly copied through instead of laying out; the parity
+/// runner's stability score reads it.
+#[test]
+fn summary_counts_files_copied_through() {
+    let t = tempfile::tempdir().unwrap();
+    write(t.path(), "html.php", "<p>\n<?php echo 1 ?>\n</p>\n");
+    let out = sudsy(t.path(), &[]);
+    assert!(
+        String::from_utf8_lossy(&out.stderr).contains("1 copied through"),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    write(t.path(), "html.php", "<?php\n$x   = 1;\n");
+    let out = sudsy(t.path(), &[]);
+    assert!(!String::from_utf8_lossy(&out.stderr).contains("copied through"));
+}

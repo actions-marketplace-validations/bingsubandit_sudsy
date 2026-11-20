@@ -242,6 +242,8 @@ pub struct FormatCtx<'a> {
     /// Documents of nodes formatted for a layout, by node and flags (see [`FormatCtx::layout`]).
     layouts: Mutex<HashMap<(TextRange, u32, u32), Doc>>,
     embedder: Option<&'a dyn Embedder>,
+    /// The source ranges copied through as written (start to end), see [`FormatCtx::mostly_copied`].
+    copied: Mutex<Vec<TextRange>>,
     /// The option `max_blank_lines`, read once (all the blank lines of the source without it).
     pub(crate) max_blank_lines: usize,
 }
@@ -273,6 +275,7 @@ impl<'a> FormatCtx<'a> {
             comment_align: std::sync::OnceLock::new(),
             layouts: Mutex::new(HashMap::new()),
             embedder: None,
+            copied: Mutex::new(Vec::new()),
         }
     }
 
@@ -710,6 +713,34 @@ impl<'a> FormatCtx<'a> {
         Ok(doc::concat(vec![doc, self.reattach_trailing(tok)]))
     }
 
+    /// Records that the text of `range` is copied through as written.
+    pub fn note_copied(&self, range: TextRange) {
+        self.copied
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .push(range);
+    }
+
+    /// Is more than half of the text of `root` copied through as written (a file the engine did not
+    /// lay out)? Counted: `verbatim_node`, `verbatim_range`, a file kept as written. Ranges copied
+    /// twice (a retried layout) count once.
+    pub fn mostly_copied(&self, root: &SyntaxNode) -> bool {
+        let mut ranges = self.copied.lock().unwrap_or_else(|e| e.into_inner());
+        if ranges.is_empty() {
+            return false;
+        }
+        ranges.sort_by_key(|r| r.start());
+        let (mut bytes, mut end) = (0, TextSize::from(0));
+        for r in ranges.iter() {
+            let start = r.start().max(end);
+            if r.end() > start {
+                bytes += usize::from(r.end() - start);
+                end = r.end();
+            }
+        }
+        bytes * 2 > usize::from(root.text_range().len())
+    }
+
     /// Source text from the node's first to its last token, plus those tokens' outer comments.
     pub fn verbatim_node(&self, node: &SyntaxNode) -> Doc {
         match (self.first_token(node), self.last_token(node)) {
@@ -723,6 +754,7 @@ impl<'a> FormatCtx<'a> {
     pub fn verbatim_range(&self, first: &SyntaxToken, last: &SyntaxToken) -> Doc {
         // Sliced from the nearest node that holds both tokens: slicing the root walks the file.
         let span = core_syntax::TextRange::new(first.text_range().start(), last.text_range().end());
+        self.note_copied(span);
         let raw = first
             .parent_ancestors()
             .find(|a| a.text_range().contains_range(span))

@@ -299,6 +299,7 @@ fn format_checked(
     let cx =
         FormatCtx::new(grammar, options, directives, provider.formatter()).with_embedder(embedder);
     let output = format_tree(&parsed.tree, &cx)?;
+    core_format::count_copied_through(&cx, &parsed.tree);
     let check = |symbols: &[String], tree: &SyntaxNode, text: &str| {
         let reparse = |text: &str| {
             // Not `..file.clone()`: that would copy the whole source text just to replace it.

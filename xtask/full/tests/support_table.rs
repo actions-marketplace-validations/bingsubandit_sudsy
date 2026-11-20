@@ -13,24 +13,34 @@ fn table_from_fixture_ratchets() {
 - language: Gamma
   lint: [{tool: lint-a, name: LintA}]
 - language: Delta
+- language: Epsilon
+  stability: [one, two]
+  lint: [{tool: lint-a, name: LintA}]
+- language: Zeta
+  stability: [one]
+  lint: [{tool: absent, name: Absent}]
 ";
-    let table = xtask_full::support::render(&root, support, &|_| 0).unwrap();
+    let table = xtask_full::support::render(&root, support, &|_| 7).unwrap();
     let (headline, ready) = (table.headline.clone(), table.ready.clone());
     let table = table.table;
-    let rows: Vec<&str> = table.lines().skip(2).take(4).collect();
+    let rows: Vec<&str> = table.lines().skip(2).take(6).collect();
     assert_eq!(
         rows,
         [
             "| Alpha | ████████░░ 86% FmtA | ████████░░ 85% LintA | Ready |",
             // Only the first tool of each list decides the status: the unmeasured `Gone` does not.
             "| Beta | █████████░ 90% FmtA<br>not measured Gone | ████████░░ 85% LintA | Ready |",
+            // No reference formatter: the stability share of the groups, no file count.
+            "| Epsilon | █████████░ 90% stable · no reference tool | ████████░░ 85% LintA | Ready |",
             "| Gamma | none | ████████░░ 85% LintA | Lint only: Ready |",
-            "| Delta | none | none | not measured |",
+            // An unmeasured lint tool is not a missing one: it does not pass.
+            "| Zeta | █████████░ 90% stable · no reference tool | not measured Absent | In progress |",
+            "| Delta | none | 7 rules · no reference tool | not measured |",
         ]
     );
-    assert_eq!(headline, "Ready for 3 languages, early support for 1 more.");
+    assert_eq!(headline, "Ready for 4 languages, early support for 2 more.");
     assert_eq!(
         ready,
-        "Ready: Alpha, Beta and Gamma. The rest are in progress."
+        "Ready: Alpha, Beta, Epsilon and Gamma. The rest are in progress."
     );
 }

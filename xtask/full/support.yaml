@@ -1,6 +1,7 @@
 # Rows of the README "Language support" table (xtask/full/src/support.rs): the reference tools per
 # language; the first tool of each list is the primary one that decides `Ready`. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
-# to the ratchet groups of this one. No `format` list: Sudsy does not format the language. `ids` are the
+# to the ratchet groups of this one. No `format` list: Sudsy does not format the language, or no reference formatter exists and `stability` names
+# the groups of tests/parity/stability that stand for the format leg (`scripts/parity.sh stability <group>`). `ids` are the
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
 # language names of its rows in bench/speed.json.
 - language: JavaScript / TypeScript
@@ -106,6 +107,7 @@
 - language: C / C++
   ids: [c, cpp]
   format: [{tool: clang-format, name: clang-format}]
+  lint: [{tool: clang-tidy, name: clang-tidy}]
 - language: Ruby
   ids: [ruby]
   speed: [Ruby]
@@ -113,18 +115,18 @@
 - language: Dockerfile
   ids: [dockerfile]
   speed: [Dockerfile]
+  stability: [dockerfile]
   lint: [{tool: hadolint, name: hadolint}]
-  formatter: true
 - language: Makefile
   ids: [makefile]
   speed: [Makefile]
+  stability: [makefile]
   lint: [{tool: checkmake, name: checkmake}]
-  formatter: true
 - language: GitHub Actions
   ids: [github-actions]
   speed: [GitHub Actions]
+  stability: [github-actions]
   lint: [{tool: actionlint, name: actionlint}]
-  formatter: true
 - language: INI, EditorConfig, .gitignore
   ids: [ini, editorconfig, gitignore]
-  formatter: true
+  stability: [ini, editorconfig, gitignore]

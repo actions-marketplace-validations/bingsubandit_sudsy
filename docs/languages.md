@@ -10,9 +10,10 @@ The status and the headline numbers of every language are in the generated table
 - **Lint:** share of the reference linter's findings on the corpus that Sudsy also reports with the named preset, on the same line. This is recall. False positives are not counted.
 - All numbers compare against the reference tool with its default settings, not your project's config. See [keep your current style](configuration.md#keep-your-current-style).
 - With no config, lint reports likely bugs only. Lint numbers need the preset. See [configuration](configuration.md#presets).
-- A language with no reference tool shows the number of rules Sudsy has: every rule available to the language, its own and the shared ones, counted from the rule registry.
+- A lint column with no reference linter shows the number of rules Sudsy has: every rule available to the language, its own and the shared ones, counted from the rule registry. It does not decide `Ready`.
+- A format column with no reference formatter shows `stable`: the share of the language's corpus files that parse, format with the meaning check passing, format to the same text a second time and are laid out by the formatter's rules, not copied through. It decides `Ready` like a reference tool's number (at least 85%).
 - Both numbers leave out only reviewed intentional differences (`tool-wrong`, `invalid-input`, `wontfix`). Raw numbers and the lists are in `tests/parity/<tool>/differences.yaml` and [ai/parity/README.md](ai/parity/README.md).
-- Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint).
+- Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint), `scripts/parity.sh stability <group>` (stable).
 - Every number comes from a pinned tool version. Versions are in the sections below.
 - Language names in `sudsy.yaml` sections match `sudsy languages list`: `js` (JavaScript and TypeScript), `python`, `hcl`, `shell`, and so on.
 
@@ -253,21 +254,21 @@ The status and the headline numbers of every language are in the generated table
 
 ## Dockerfile
 
-- The formatter fixes keyword case and blank lines. No reference formatter was compared.
+- The formatter fixes keyword case and blank lines. No reference formatter exists: the format column is the stable share.
 - **Linter:** hadolint.
 - **Presets:** `dockerfile/hadolint`.
 - **Options:** `max_blank_lines`.
 - **Differences:** a variable as `USER` is accepted whether or not an `ARG` defines it. hadolint reports it.
-- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage hadolint`.
+- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage hadolint` (lint), `scripts/parity.sh stability dockerfile` (stable).
 
 ## Makefile
 
-- The formatter normalizes assignment spacing and blank lines. No reference formatter was compared.
+- The formatter normalizes assignment spacing and blank lines. No reference formatter exists: the format column is the stable share.
 - **Linter:** checkmake.
 - **Presets:** `makefile/checkmake`.
 - **Options:** `space_around_assignment`, `space_before_colon`, `max_blank_lines` (default 2).
 - **Differences:** `A+=b`, `A?=b` and `A!=b` without a blank before the operator are left as written.
-- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage checkmake`.
+- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage checkmake` (lint), `scripts/parity.sh stability makefile` (stable).
 
 ## GitHub Actions
 
@@ -275,7 +276,7 @@ The status and the headline numbers of every language are in the generated table
 - **Linter:** actionlint. Only errors and `script-injection` are on by default.
 - **Presets:** `github-actions/actionlint`.
 - **Options:** the YAML options. Config section: `github-actions`, on top of `yaml`.
-- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage actionlint`.
+- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage actionlint` (lint), `scripts/parity.sh stability github-actions` (stable).
 
 ## C / C++
 
@@ -285,7 +286,7 @@ The status and the headline numbers of every language are in the generated table
 
 ## INI, EditorConfig, .gitignore
 
-- Small formatters and a few rules. No reference tool, so no comparison.
+- Small formatters and a few rules. No reference tool, so no comparison: the format column is the stable share.
 - **Options:** `max_blank_lines`. INI adds `space_around_equals`.
 - **Rules:** invalid or duplicate entries, for example unknown EditorConfig properties and ignored `.gitignore` patterns.
 
