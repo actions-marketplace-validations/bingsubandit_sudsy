@@ -37,6 +37,10 @@ pub struct Scope {
     /// For `Keys`: names that exist besides the ones in the file (of type `item`).
     pub base: &'static [&'static str],
     pub types: &'static [(&'static str, &'static str)],
+    /// For `Keys`: the context is an empty object when the file has no mapping at `source`.
+    pub strict: bool,
+    /// With `strict`: only when the file has a node at this key path (empty: always).
+    pub only_with: &'static str,
 }
 
 impl Scope {
@@ -53,6 +57,8 @@ impl Scope {
         also: "",
         base: &[],
         types: &[],
+        strict: false,
+        only_with: "",
     };
 }
 
@@ -118,17 +124,29 @@ pub fn ty(
             Some(Ty::Obj(ids.collect()))
         }
         ScopeKind::Refs => {
-            let Some(listed) = base.at(&parts(scope.source)) else {
-                return Some(Ty::Obj(Vec::new()));
-            };
             let jobs = root.get(scope.from)?;
+            let all: Vec<String> = match jobs {
+                Tree::Map(m) if scope.source.is_empty() => {
+                    m.iter().map(|(k, _)| k.clone()).collect()
+                }
+                _ => Vec::new(),
+            };
+            let listed = if scope.source.is_empty() {
+                all
+            } else {
+                let Some(listed) = base.at(&parts(scope.source)) else {
+                    return Some(Ty::Obj(Vec::new()));
+                };
+                names(listed)
+            };
             let mut out = Vec::new();
-            for name in names(listed) {
+            for name in listed {
                 let mut p = props(scope.item);
                 let outputs = match jobs.get(&name).and_then(|j| j.get(scope.output)) {
                     Some(Tree::Map(m)) => {
                         Ty::Obj(m.iter().map(|(k, _)| (k.clone(), Ty::Str)).collect())
                     }
+                    _ if jobs.get(&name).is_some() => Ty::Obj(Vec::new()),
                     _ => Ty::Map(Box::new(Ty::Str)),
                 };
                 p.push((scope.output.to_string(), outputs));
@@ -140,10 +158,22 @@ pub fn ty(
             let mut found = false;
             let mut out: Vec<(String, Ty)> = Vec::new();
             for alt in scope.source.split('|') {
-                match base.at(&parts(alt)) {
+                let seq = parts(alt);
+                let inside = path
+                    .get(n..n + seq.len())
+                    .is_some_and(|p| p == seq.as_slice());
+                let before = if inside {
+                    path.get(n + seq.len())
+                } else {
+                    None
+                };
+                match base.at(&seq) {
                     Some(Tree::Map(map)) => {
                         found = true;
                         for (k, v) in map {
+                            if before == Some(k) {
+                                break;
+                            }
                             if scope.skip.contains(&k.as_str()) {
                                 continue;
                             }
@@ -178,6 +208,7 @@ pub fn ty(
                         }
                     }
                     Some(Tree::Scalar(text, _)) if !text.contains(marker) => found = true,
+                    Some(Tree::Null) => found = true,
                     Some(_) => return None,
                     None => {}
                 }
@@ -188,7 +219,10 @@ pub fn ty(
                     .iter()
                     .map(|k| (k.to_string(), Ty::parse(scope.item))),
             );
-            found.then_some(Ty::Obj(out))
+            (found
+                || scope.strict
+                    && (scope.only_with.is_empty() || root.at(&parts(scope.only_with)).is_some()))
+            .then_some(Ty::Obj(out))
         }
     }
 }

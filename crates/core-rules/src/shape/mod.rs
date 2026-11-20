@@ -110,8 +110,8 @@ impl Row {
     };
 }
 
-/// A kind of mapping told apart by which keys it has: the first variant whose keys are all
-/// present and whose `lacks` keys are all absent is the mapping's variant. A row with a `variant`
+/// A kind of mapping told apart by which keys it has: of the variants whose keys are all present
+/// and whose `lacks` keys are all absent, the one whose key comes last in the mapping is its variant. A row with a `variant`
 /// applies to the mappings of that variant only; a row without one applies to any.
 pub struct Variant {
     pub name: &'static str,
@@ -194,6 +194,9 @@ impl Walk<'_> {
                 .into_owned();
             let solid = |t: &core_syntax::SyntaxToken| !self.g.has_tag(t.kind(), "trivia");
             let quoted = raw.starts_with(['\'', '"']) || node.tokens().filter(solid).count() > 1;
+            if !quoted && matches!(text.as_str(), "null" | "~") {
+                return Val::Null;
+            }
             Val::Scalar { text, quoted }
         } else if node.tokens().count() == 0 && node.children().count() == 0 {
             Val::Null
@@ -261,14 +264,27 @@ impl Walk<'_> {
         !self.shape.expression.is_empty() && text.contains(self.shape.expression)
     }
 
-    /// The variant of a mapping: the first whose key conditions hold.
+    /// The variant of a mapping: the matching one whose key comes last.
     fn variant(&self, val: &Val) -> &'static str {
         let Val::Map(map) = val else { return "" };
         let entries = self.entries(map);
         let has = |k: &str| entries.iter().any(|e| e.0 == k);
-        (self.shape.variants.iter())
-            .find(|v| v.has.iter().all(|k| has(k)) && !v.lacks.iter().any(|k| has(k)))
-            .map_or("", |v| v.name)
+        let at = |v: &Variant| {
+            v.has
+                .iter()
+                .filter_map(|k| entries.iter().position(|e| e.0 == *k))
+                .max()
+        };
+        let mut best: Option<(&Variant, Option<usize>)> = None;
+        for v in self.shape.variants.iter() {
+            if v.has.iter().all(|k| has(k)) && !v.lacks.iter().any(|k| has(k)) {
+                let pos = at(v);
+                if best.is_none_or(|(_, p)| pos > p) {
+                    best = Some((v, pos));
+                }
+            }
+        }
+        best.map_or("", |(v, _)| v.name)
     }
 
     /// The row of the node at `path` for its variant.
@@ -351,7 +367,13 @@ impl Walk<'_> {
                 && !matches!(row.kind, Kind::Map | Kind::Seq);
             let message = match (scalar, in_list) {
                 (true, _) => "string should not be empty".to_string(),
-                (_, true) => format!("element of \"{name}\" section should not be empty"),
+                (_, true) => {
+                    let list = path.iter().rev().find(|s| s.parse::<usize>().is_err());
+                    format!(
+                        "element of \"{}\" section should not be empty",
+                        list.map_or("", String::as_str)
+                    )
+                }
                 _ => format!("\"{name}\" section should not be empty"),
             };
             self.report_structure(row, at, message);

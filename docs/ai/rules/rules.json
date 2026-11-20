@@ -23530,7 +23530,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n",
+        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n      - run: echo ${{ inputs.nothing }}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -23567,6 +23567,11 @@
             "column": 23,
             "length": 1,
             "line": 17
+          },
+          {
+            "column": 23,
+            "length": 1,
+            "line": 18
           }
         ]
       },
@@ -24812,6 +24817,11 @@
         },
         {
           "id": "credentials",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "workflow-call",
           "partial": true,
           "tool": "actionlint"
         },

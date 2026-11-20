@@ -59,6 +59,9 @@ impl Place {
         contexts: &[],
         specials: &[],
         implicit: false,
+        typed_by: "",
+        accepts: &[],
+        expects: "",
     };
 }
 
@@ -70,6 +73,13 @@ pub struct Place {
     pub specials: &'static [&'static str],
     /// The whole value is an expression, with no `${{ }}` around it (`if:`).
     pub implicit: bool,
+    /// The key next to the value that declares the type the value must have (`type`): a whole
+    /// expression of another type is reported.
+    pub typed_by: &'static str,
+    /// The types a whole expression at exactly this path may have (empty: any), and how the
+    /// message names them (`string or array`).
+    pub accepts: &'static [&'static str],
+    pub expects: &'static str,
 }
 
 /// The rule ids that report each class of finding.
@@ -234,6 +244,36 @@ fn starred(n: &Node) -> bool {
         Kind::Prop(o, _) | Kind::Index(o, _) => starred(o),
         _ => false,
     }
+}
+
+/// The finding for a value at `path` whose type `t` differs from the type declared by the key
+/// `typed_by` next to it (mapped through the `types` of the spec's scope that has them).
+fn declared_mismatch(
+    spec: &Spec,
+    root: &crate::shape::Tree,
+    path: &[String],
+    typed_by: &str,
+    t: &Ty,
+) -> Option<String> {
+    if matches!(t, Ty::Any) || path.len() < 2 {
+        return None;
+    }
+    let parent = root.at(&path[..path.len() - 1])?;
+    let crate::shape::Tree::Scalar(declared, _) = parent.get(typed_by)? else {
+        return None;
+    };
+    let mapped = spec
+        .scopes
+        .iter()
+        .flat_map(|s| s.types)
+        .find(|(a, _)| a == declared);
+    let expected = mapped.map_or(Ty::Str, |m| Ty::parse(m.1));
+    (expected != *t).then(|| {
+        format!(
+            "type of input \"{}\" must be {expected} but found type {t}",
+            path[path.len() - 2]
+        )
+    })
 }
 
 /// Whether `n` is the property chain `path` (`github.event.inputs`) on a context, ignoring case.
@@ -589,6 +629,35 @@ impl Run<'_, '_> {
             );
             let (from, at) = self.header.map_or((base, node.start), |h| (h, 0));
             conditions.push((from, at, message));
+        }
+        if full
+            && !embedded
+            && let Some(p) = place
+            && !p.typed_by.is_empty()
+            && let Some(message) =
+                declared_mismatch(spec, cell.get_or_init(|| tree(file)), path, p.typed_by, &t)
+        {
+            checker.err(Class::Types, node.start, message);
+        }
+        if full
+            && !embedded
+            && let Some(p) = place
+            && !p.accepts.is_empty()
+            && !matches!(t, Ty::Any)
+            && p.path
+                .split('|')
+                .any(|alt| alt.split('.').count() == path.len())
+            && !p.accepts.iter().any(|a| t.assignable(&Ty::parse(a)))
+        {
+            let key = path.last().map_or("", String::as_str);
+            checker.err(
+                Class::Types,
+                node.start,
+                format!(
+                    "type of expression at \"{key}\" must be {} but found type \"{t}\"",
+                    p.expects
+                ),
+            );
         }
         if embedded && matches!(t, Ty::Arr(_) | Ty::Obj(_) | Ty::Map(_) | Ty::Null) {
             checker.err(

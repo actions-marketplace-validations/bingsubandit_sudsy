@@ -27,6 +27,7 @@ impl fmt::Display for Ty {
             Ty::Num => f.write_str("number"),
             Ty::Str => f.write_str("string"),
             Ty::Arr(t) => write!(f, "array<{t}>"),
+            Ty::Map(t) if **t == Ty::Any => f.write_str("object"),
             Ty::Map(t) => write!(f, "{{string => {t}}}"),
             Ty::Obj(props) => {
                 f.write_str("{")?;

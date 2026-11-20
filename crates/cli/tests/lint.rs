@@ -283,3 +283,11 @@ fn rules_lists_and_explains() {
     let search = out(&sudsy(t.path(), &["rules", "ANCHOR", "--language", "yaml"]));
     assert!(search.contains("no-unused-anchors") && !search.contains("using-order"));
 }
+
+#[test]
+fn yaml_anchor_rules_run_through_the_cli() {
+    let t = tempfile::tempdir().unwrap();
+    write(t.path(), "a.yaml", "a: &x 1\nb: *y\n");
+    let o = sudsy(t.path(), &["lint", "a.yaml"]);
+    assert!(out(&o).contains("no-undefined-alias"), "{}", out(&o));
+}

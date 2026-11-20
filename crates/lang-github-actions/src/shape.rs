@@ -189,6 +189,9 @@ static SHAPE: Shape = Shape {
         row!("jobs", S, Kind::Map, non_empty: true),
         row!("jobs.*", S, Kind::Map, title: "reusable workflow call job", variant: "uses",
             keys: &["name", "uses", "with", "secrets", "needs", "if", "permissions", "strategy", "concurrency"]),
+        row!("jobs.*.uses", S, Kind::Str, non_empty: true, format: Format::Pattern(
+            r"^(?:\./[^@\s]+|[^/@\s.][^/@\s]*/[^/@\s]+/[^@\s]+@\S+)$|\$\{\{",
+            "reusable workflow call \"{text}\" at \"uses\" is not following the format \"owner/repo/path/to/workflow.yml@ref\" nor \"./path/to/workflow.yml\". see https://docs.github.com/en/actions/learn-github-actions/reusing-workflows#calling-a-reusable-workflow")),
         row!("jobs.*", S, Kind::Map, title: "job", required: &["runs-on", "steps"],
             keys: &["name", "needs", "runs-on", "permissions", "environment", "concurrency", "outputs", "env",
                 "defaults", "if", "steps", "timeout-minutes", "strategy", "continue-on-error", "container",

@@ -31,7 +31,7 @@ The `run:` of every step of a workflow's jobs and of a composite action is code 
 | `invalid-permissions` | Off by default: a scope or value `permissions` does not have. |
 | `missing-permissions` | Off by default: a job without `permissions` in a workflow without top-level `permissions`. |
 
-Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: the types of step outputs, the maximum of 25 dispatch inputs, shell names per OS, runner label conflicts. Not done, needing the network or other files: the inputs and outputs of the actions a step uses, local actions and reusable workflows.
+Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: the types of step outputs, the maximum of 25 dispatch inputs, shell names per OS, runner label conflicts. Composite actions (`.github/actions/*/action.yaml`) are not workflows: actionlint's 13 findings when the corpus feeds it those files stay uncovered (`action-files` in `differences.yaml`). Not done, needing the network or other files: the inputs and outputs of the actions a step uses, local actions and reusable workflows.
 
 
 ## Options

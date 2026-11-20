@@ -22,3 +22,5 @@ jobs:
 #                                      ^ expression-types
       - run: echo ${{ github.event.*[github.sha] }}
 #                     ^ expression-types
+      - run: echo ${{ inputs.nothing }}
+#                     ^ expression-types

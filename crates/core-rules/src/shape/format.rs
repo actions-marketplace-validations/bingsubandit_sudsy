@@ -14,6 +14,8 @@ pub enum Format {
     Outdated(&'static str),
     /// The text must be a line of the list; the message takes `{text}`.
     Listed(&'static str, &'static str),
+    /// The text must match the regular expression; the message takes `{text}`.
+    Pattern(&'static str, &'static str),
     /// A filter pattern for branch and tag names, or for paths (the glob syntax of GitHub's filters).
     RefGlob,
     PathGlob,
@@ -114,6 +116,8 @@ impl Format {
     pub fn check(self, text: &str) -> Option<String> {
         match self {
             Format::None => None,
+            Format::Pattern(pattern, message) => (!crate::Re::lazy(pattern).is_ok_and(|r| r.is_match(text)))
+                .then(|| message.replace("{text}", text)),
             Format::Listed(list, message) => (!list.lines().any(|l| l == text))
                 .then(|| message.replace("{text}", text)),
             Format::Outdated(specs) => specs.lines().any(|l| l == text).then(|| {

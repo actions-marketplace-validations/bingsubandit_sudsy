@@ -172,6 +172,14 @@ impl RuleHooks for WithRows {
         self.inner.language_version()
     }
 
+    fn reference(&self, kind: core_syntax::SyntaxKind) -> Option<bool> {
+        self.inner.reference(kind)
+    }
+
+    fn reference_marks(&self) -> &'static [u8] {
+        self.inner.reference_marks()
+    }
+
     fn is_reserved(&self, version: Option<&str>, upper: &str) -> bool {
         self.inner.is_reserved(version, upper)
     }
@@ -222,6 +230,14 @@ impl RuleHooks for WithVersion<'_> {
 
     fn language_version(&self) -> Option<&str> {
         self.version
+    }
+
+    fn reference(&self, kind: core_syntax::SyntaxKind) -> Option<bool> {
+        self.inner.reference(kind)
+    }
+
+    fn reference_marks(&self) -> &'static [u8] {
+        self.inner.reference_marks()
     }
 
     fn is_reserved(&self, version: Option<&str>, upper: &str) -> bool {

@@ -8,6 +8,7 @@ use core_rules::rule;
 use core_rules::{FileContext, RuleContext};
 use std::sync::OnceLock;
 
+const OBJECT: &[&str] = &["{*: any}"];
 const JOB: &[&str] = &["github", "needs", "strategy", "matrix", "vars", "inputs"];
 const STEP: &[&str] = &[
     "github", "needs", "strategy", "matrix", "job", "runner", "env", "vars", "secrets", "steps",
@@ -32,7 +33,7 @@ static SPEC: Spec = Spec {
     open: "${{",
     close: "}}",
     contexts: &[
-        ("github", "{action: string; action_path: string; action_ref: string; action_repository: string; action_status: string; actor: string; actor_id: string; api_url: string; base_ref: string; env: string; event: any; event_name: string; event_path: string; graphql_url: string; head_ref: string; job: string; job_workflow_sha: string; path: string; ref: string; ref_name: string; ref_protected: any; ref_type: string; repository: string; repository_id: string; repository_owner: string; repository_owner_id: string; repositoryurl: string; retention_days: string; run_attempt: string; run_id: string; run_number: string; secret_source: string; server_url: string; sha: string; token: string; triggering_actor: string; workflow: string; workflow_ref: string; workflow_sha: string; workspace: string}"),
+        ("github", "{action: string; action_path: string; action_ref: string; action_repository: string; action_status: string; actor: string; actor_id: string; api_url: string; base_ref: string; env: string; event: {*: any}; event_name: string; event_path: string; graphql_url: string; head_ref: string; job: string; job_workflow_sha: string; path: string; ref: string; ref_name: string; ref_protected: any; ref_type: string; repository: string; repository_id: string; repository_owner: string; repository_owner_id: string; repositoryurl: string; retention_days: string; run_attempt: string; run_id: string; run_number: string; secret_source: string; server_url: string; sha: string; token: string; triggering_actor: string; workflow: string; workflow_ref: string; workflow_sha: string; workspace: string}"),
         ("env", "{*: string}"),
         ("vars", "{*: string}"),
         ("secrets", "{*: string}"),
@@ -61,15 +62,16 @@ static SPEC: Spec = Spec {
     ],
     places: &[
         place!("run-name|concurrency", &["github", "inputs", "vars"]),
-        place!("env", &["github", "secrets", "inputs", "vars"]),
+        place!("env", &["github", "secrets", "inputs", "vars"], accepts: OBJECT, expects: "object"),
         place!("defaults", &[]),
-        place!("on.workflow_call.inputs.*.default", &["github", "inputs", "vars"]),
+        place!("on.workflow_call.inputs.*.default", &["github", "inputs", "vars"], typed_by: "type"),
         place!("on.workflow_call.outputs.*.value", &["github", "jobs", "vars", "inputs"]),
         place!("jobs.*.if", &["github", "needs", "vars", "inputs"],
             specials: &["always", "cancelled", "success", "failure"], implicit: true),
         place!("jobs.*.steps.*.if", &["github", "needs", "strategy", "matrix", "job", "runner", "env", "vars", "steps", "inputs"],
             specials: &["always", "cancelled", "success", "failure", "hashFiles"], implicit: true),
         place!("jobs.*.steps.*.id|jobs.*.steps.*.uses|jobs.*.steps.*.shell", &[]),
+        place!("jobs.*.steps.*.env", STEP, specials: &["hashFiles"], accepts: OBJECT, expects: "object"),
         place!("jobs.*.steps", STEP, specials: &["hashFiles"]),
         place!("jobs.*.strategy", &["github", "needs", "vars", "inputs"]),
         place!("jobs.*.container.credentials|jobs.*.services.*.credentials",
@@ -77,7 +79,9 @@ static SPEC: Spec = Spec {
         place!("jobs.*.container.env|jobs.*.services.*.env",
             &["github", "needs", "strategy", "matrix", "vars", "inputs", "job", "runner", "env", "secrets"]),
         place!("jobs.*.defaults", &["github", "needs", "strategy", "matrix", "vars", "inputs", "env"]),
-        place!("jobs.*.env", &["github", "needs", "strategy", "matrix", "vars", "inputs", "secrets"]),
+        place!("jobs.*.env", &["github", "needs", "strategy", "matrix", "vars", "inputs", "secrets"], accepts: OBJECT, expects: "object"),
+        place!("jobs.*.services", JOB, accepts: OBJECT, expects: "object"),
+        place!("jobs.*.runs-on", JOB, accepts: &["string", "array<any>"], expects: "string or array"),
         place!("jobs.*.environment.url", &["github", "needs", "strategy", "matrix", "vars", "inputs", "job", "runner", "env", "steps"]),
         place!("jobs.*.outputs", &["github", "needs", "strategy", "matrix", "vars", "inputs", "job", "runner", "env", "secrets", "steps"]),
         place!("jobs.*.secrets", &["github", "needs", "strategy", "matrix", "secrets", "inputs", "vars"]),
@@ -89,12 +93,14 @@ static SPEC: Spec = Spec {
             item: "{outputs: {*: string}; conclusion: string; outcome: string}", ..Scope::NONE },
         Scope { context: "needs", kind: ScopeKind::Refs, within: "jobs.*", source: "needs", from: "jobs",
             output: "outputs", item: "{result: string}", ..Scope::NONE },
+        Scope { context: "jobs", kind: ScopeKind::Refs, from: "jobs", output: "outputs", item: "{result: string}", ..Scope::NONE },
         Scope { context: "matrix", within: "jobs.*", source: "strategy.matrix", skip: &["include", "exclude"],
             also: "include", item: "infer", ..Scope::NONE },
         Scope { context: "secrets", source: "on.workflow_call.secrets", item: "string",
-            base: &["github_token", "actions_runner_debug", "actions_step_debug"], ..Scope::NONE },
+            base: &["github_token", "actions_runner_debug", "actions_step_debug"], strict: true,
+            only_with: "on.workflow_call", ..Scope::NONE },
         Scope { context: "inputs", source: "on.workflow_dispatch.inputs|on.workflow_call.inputs", key: "type",
-            item: "string", types: &[("boolean", "bool"), ("number", "number")], ..Scope::NONE },
+            item: "string", types: &[("boolean", "bool"), ("number", "number")], strict: true, ..Scope::NONE },
         Scope { context: "github.event.inputs", source: "on.workflow_dispatch.inputs", item: "string", ..Scope::NONE },
     ],
     rules: Rules { syntax: "invalid-expression", context: "expression-context", types: "expression-types", condition: "if-condition" },

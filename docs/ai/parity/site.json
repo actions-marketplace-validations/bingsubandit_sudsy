@@ -24,11 +24,11 @@
 {"format":[],"ids":["ruby"],"lint":[{"catalog":"rubocop","name":"RuboCop","share":96.2}],"name":"Ruby","presets":["js/biome-recommended","js/eslint-recommended","js/oxlint","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":53,"slug":"ruby","speed":[["Ruby","Lint","RuboCop","88× faster","3.00 s / 264.55 s","1180 / 377 MB"]],"status":"Lint only: Ready"},
 {"format":[],"ids":["dockerfile"],"lint":[{"catalog":"hadolint","name":"hadolint","share":78.2}],"name":"Dockerfile","presets":["dockerfile/hadolint"],"rules":65,"slug":"dockerfile","speed":[["Dockerfile","Lint","hadolint","36× faster","0.071 s / 2.57 s","70 / 74 MB"]],"status":"In progress"},
 {"format":[],"ids":["makefile"],"lint":[{"catalog":"checkmake","name":"checkmake","share":100.0}],"name":"Makefile","presets":["makefile/checkmake"],"rules":20,"slug":"makefile","speed":[["Makefile","Lint","checkmake","3.7× slower","0.059 s / 0.016 s","70 / 28 MB"]],"status":"Ready"},
-{"format":[],"ids":["github-actions"],"lint":[{"catalog":"actionlint","name":"actionlint","share":81.8}],"name":"GitHub Actions","presets":["github-actions/actionlint","yaml/yamllint"],"rules":46,"slug":"github-actions","speed":[["GitHub Actions","Lint","actionlint","2.1× slower","0.14 s / 0.065 s","76 / 71 MB"]],"status":"In progress"},
+{"format":[],"ids":["github-actions"],"lint":[{"catalog":"actionlint","name":"actionlint","share":85.2}],"name":"GitHub Actions","presets":["github-actions/actionlint","yaml/yamllint"],"rules":46,"slug":"github-actions","speed":[["GitHub Actions","Lint","actionlint","2.1× slower","0.14 s / 0.065 s","76 / 71 MB"]],"status":"Ready"},
 {"format":[],"ids":["ini","editorconfig","gitignore"],"lint":[],"name":"INI, EditorConfig, .gitignore","presets":[],"rules":24,"slug":"ini","speed":[],"status":"Ready"}
 ],
 "tools":[
-{"coverage":81.8,"languages":["github-actions"],"target":81.8,"tool":"actionlint","version":"1.7.12","entries":[
+{"coverage":85.2,"languages":["github-actions"],"target":85.2,"tool":"actionlint","version":"1.7.12","entries":[
 ["expression/syntax","partial","rule: invalid-expression","The grammar is not parsed: a misplaced operator or a missing operand is not reported."],
 ["expression/context","partial","rule: expression-context","The contexts and special functions each key offers (table in `lang-github-actions/src/expression.rs`)."],
 ["expression/types","partial","rule: expression-types","Properties of the typed contexts, argument counts and types, `format` placeholders; not the types of `steps`, `needs`, `matrix` and `inputs` (they depend on other keys)."],
@@ -51,6 +51,7 @@
 ["job-needs/unknown","covered","rule: unknown-needs",""],
 ["runner-label/unknown","partial","rule: invalid-runs-on","Sudsy's list is patterns for the hosted images, not the list of one actionlint release; labels with an expression are not checked."],
 ["syntax-check/duplicate-job","partial","rule: duplicate-ids","partial"],
+["workflow-call","partial","rule: workflow-syntax","The format of the `uses` of a reusable workflow call; not its inputs and secrets (they need the called file)."],
 ["syntax-check/unexpected-key","partial","rule: workflow-syntax","An unknown key of a section."],
 ["syntax-check/empty","partial","rule: workflow-syntax","A section or string that is empty."],
 ["syntax-check/missing-key","partial","rule: workflow-syntax","A required key or section that is missing."],
