@@ -368,6 +368,17 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
             return (T::Op, i + n);
         }
     }
+    if d == Dialect::Tsql && matches!(ch, '<' | '>' | '!') {
+        // T-SQL lets blanks sit inside `> =`, `< >` and `! =`: one operator.
+        let b = src.as_bytes();
+        let mut j = i + 1;
+        while j < b.len() && b[j].is_ascii_whitespace() {
+            j += 1;
+        }
+        if j > i + 1 && matches!(b.get(j), Some(b'=' | b'<' | b'>')) {
+            return (T::Op, j + 1);
+        }
+    }
     if OP1.contains(ch) {
         return (T::Op, i + 1);
     }

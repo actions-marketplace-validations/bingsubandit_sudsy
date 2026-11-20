@@ -97,7 +97,10 @@ def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out,
     after = prefix / "proof"
     shutil.rmtree(after, ignore_errors=True)
     shutil.copytree(work, after)
-    (after / "sudsy.yaml").write_text(json.dumps({"extends": [f"preset:{preset}"]}), encoding="utf-8")
+    config = {"extends": [f"preset:{preset}"]}
+    if spec.get("overrides"):  # per-folder settings the tool gets from its own flags (sqlfluff: `--dialect`), as in the lint run
+        config["overrides"] = spec["overrides"]
+    (after / "sudsy.yaml").write_text(json.dumps(config), encoding="utf-8")
     run = subprocess.run([sudsy, "format", "."], cwd=after, capture_output=True, text=True, encoding="utf-8", check=False)
     (after / "sudsy.yaml").unlink()
     found, _ = findings(tool, spec, prefix, after, exe, rules, copy=False)

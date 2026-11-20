@@ -286,21 +286,10 @@ impl P<'_> {
         if !self.is_t(1, T::LParen) {
             return false;
         }
-        let mut depth = 0;
-        let mut n = 1;
-        while let Some(t) = self.t(n) {
-            match t {
-                T::LParen => depth += 1,
-                T::RParen => {
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                }
-                _ => {}
-            }
-            n += 1;
-        }
+        let Some(n) = core_syntax::spans::matching_close(|i| self.t(i), 1, &T::LParen, &T::RParen)
+        else {
+            return false;
+        };
         self.is_t(n + 1, T::Word)
             && !self.at_any_at(
                 n + 1,
@@ -514,6 +503,15 @@ impl P<'_> {
             self.eat_seq(&["with", "ordinality"]);
         }
         self.close(k::TABLE_EXPRESSION, t);
+        // `OPENJSON(@j) WITH (col type '$.path', ..)`
+        if self.d == Dialect::Tsql
+            && self.at("with")
+            && self.is_t(1, T::LParen)
+            && self.prev_is_rparen()
+        {
+            self.bump_as(k::KEYWORD);
+            self.generic_columns_bracket();
+        }
         self.alias_inner(true);
         if self.at("with") && self.is(1, "offset") {
             self.eat_seq(&["with", "offset"]);

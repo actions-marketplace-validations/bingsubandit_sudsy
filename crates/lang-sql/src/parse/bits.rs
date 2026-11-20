@@ -50,7 +50,9 @@ impl P<'_> {
         let m = self.mark();
         let has_as = self.at("as");
         let natural = self.d == Dialect::Tsql && self.at("natural");
-        if !has_as && !natural && !(self.at_name() && !self.at_any(&["window", "limit"])) {
+        let string = self.d == Dialect::Tsql && self.is_t(0, T::Str);
+        if !has_as && !natural && !string && !(self.at_name() && !self.at_any(&["window", "limit"]))
+        {
             return false;
         }
         if has_as && !(self.starts_alias_name(1)) {
@@ -63,7 +65,14 @@ impl P<'_> {
         self.alias_name();
         if columns && self.is_t(0, T::LParen) && !self.paren_query_ahead() {
             self.bracketed(|p| {
-                p.list(|p| p.eat_name());
+                p.list(|p| {
+                    let ok = p.eat_name();
+                    // `AS t (a int, b text)`: a column definition list of a function
+                    if ok && p.is_t(0, T::Word) {
+                        p.type_name();
+                    }
+                    ok
+                });
             });
         }
         self.dedent();

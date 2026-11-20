@@ -261,6 +261,7 @@ impl P<'_> {
             self.bracketed(|p| {
                 p.list(|p| p.element());
             });
+            self.exec_options();
             return;
         }
         if !self.obj_ref() {
@@ -279,9 +280,31 @@ impl P<'_> {
             }
         });
         self.dedent();
+        self.exec_options();
+    }
+
+    /// `AS USER = 'x'`, `WITH RECOMPILE`, `WITH RESULT SETS UNDEFINED | NONE | ((col type, ..))`.
+    fn exec_options(&mut self) {
+        if self.at("as") && self.is(1, "user") {
+            self.bump_as(k::KEYWORD);
+            self.bump_as(k::KEYWORD);
+            if self.at_op("=") {
+                self.bump();
+                self.expression();
+            }
+        }
         if self.at("with") && self.is(1, "recompile") {
             self.bump_as(k::KEYWORD);
             self.bump_as(k::KEYWORD);
+        } else if self.at("with") && self.is(1, "result") && self.is(2, "sets") {
+            for _ in 0..3 {
+                self.bump_as(k::KEYWORD);
+            }
+            if self.is_t(0, T::LParen) {
+                self.generic_bracket_run();
+            } else {
+                self.eat_any(&["none", "undefined"]);
+            }
         }
     }
 
@@ -328,7 +351,9 @@ impl P<'_> {
                 self.bump_as(k::KEYWORD);
                 if self.is_t(0, T::Var) {
                     self.bump();
-                    self.eat("table");
+                    if self.eat("table") {
+                        self.generic_columns_bracket();
+                    }
                 } else if self.at("table") && !self.is_t(1, T::LParen) {
                     self.bump_as(k::TYPE_IDENTIFIER);
                 } else if !self.type_name() {

@@ -96,6 +96,13 @@ const DATE_FUNCTIONS: &[&str] = &[
 ];
 
 const COMPARE: &[&str] = &["=", "<", ">", "<=", ">=", "<>", "!=", "!<", "!>", "<=>"];
+
+/// A comparison operator, also when T-SQL blanks sit inside it (`> =`).
+fn is_compare(text: &str) -> bool {
+    COMPARE.contains(&text)
+        || (text.contains(char::is_whitespace)
+            && COMPARE.contains(&text.replace(char::is_whitespace, "").as_str()))
+}
 const ARITH: &[&str] = &["+", "-", "*", "/", "%"];
 /// Postgres operators the layout treats as arithmetic.
 const PG_BINARY: &[&str] = &[
@@ -314,21 +321,26 @@ impl P<'_> {
             return false;
         }
         // `(select ..) = 0 and x`: a bracket that goes on as an expression is not a query.
-        let (mut depth, mut i) = (0i32, 0);
-        while let Some(t) = self.t(i) {
-            match t {
-                T::LParen => depth += 1,
-                T::RParen => {
-                    depth -= 1;
-                    if depth == 0 {
-                        break;
-                    }
-                }
-                _ => {}
-            }
-            i += 1;
+        // The same for the inner bracket of `((select ..)::int[])`.
+        if n > 1 && self.bracket_end_is_operator(1) {
+            return false;
         }
-        !(self.is_t(i + 1, T::Op) || (self.is_t(i + 1, T::Word) && self.at_op_word(i + 1)))
+        !self.bracket_end_is_operator(0)
+    }
+
+    /// Does an operator follow the bracket that opens at token `from`?
+    fn bracket_end_is_operator(&self, from: usize) -> bool {
+        core_syntax::spans::bracket_followed_by(
+            |i| self.t(i),
+            from,
+            &T::LParen,
+            &T::RParen,
+            |i| {
+                self.is_t(i, T::Op)
+                    || self.is_t(i, T::Cast)
+                    || (self.is_t(i, T::Word) && self.at_op_word(i))
+            },
+        )
     }
 
     fn word_operand(&mut self, c: &mut Chain) -> bool {
@@ -798,17 +810,9 @@ impl P<'_> {
         match self.t(0) {
             Some(T::Op) => {
                 let text = self.text(0);
-                if COMPARE.contains(&text) || (self.d == super::Dialect::Tsql && text == "!") {
+                if is_compare(text) {
                     let m = self.mark();
                     self.bump();
-                    // T-SQL lets blanks sit inside `> =`, `< >` and `! =`.
-                    if self.d == super::Dialect::Tsql
-                        && matches!(text, ">" | "<" | "!")
-                        && self.is_t(0, T::Op)
-                        && matches!(self.text(0), "=" | ">" | "<")
-                    {
-                        self.bump();
-                    }
                     self.close(k::COMPARISON_OPERATOR, m);
                 } else if ARITH.contains(&text)
                     || (self.d == super::Dialect::Postgres && PG_BINARY.contains(&text))
@@ -936,7 +940,7 @@ impl P<'_> {
 
     fn chain_continues(&self) -> bool {
         match self.t(0) {
-            Some(T::Op) => COMPARE.contains(&self.text(0)) || ARITH.contains(&self.text(0)),
+            Some(T::Op) => is_compare(self.text(0)) || ARITH.contains(&self.text(0)),
             Some(T::Word) => self.at_any(&[
                 "and", "or", "is", "not", "in", "like", "between", "ilike", "collate",
             ]),

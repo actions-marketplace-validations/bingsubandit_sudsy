@@ -1,6 +1,7 @@
 differences:
   parse-gap: gap  "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
   layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
+  non-utf8-input: gap  "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 files:
   sqlfluff-ansi: parse-gap, layout-gap
   sqlfluff-mysql: parse-gap, layout-gap
@@ -19,31 +20,30 @@ target-files:
   sqlfluff-mysql: 248
   sqlfluff-postgres: 142
   sqlfluff-tsql: 152
-coverage: 86.1  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
-target: 66.7
+coverage: 87.5  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+target: 81.6
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-  CP05: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (REPACK, tsql XML (DOCUMENT x), EXECUTE WITH RESULT SETS, OPENJSON WITH, JSON_TABLE PATH DEFAULT, RETURNS @t TABLE, mysql json_table)
+  CP05: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
   CP02: misses are in files with a parse error (the constructs listed under CP05)
   CP01: misses are in files with a parse error (the constructs listed under CP05)
   RF05: quoted names in statements the generic parse leaves as plain tokens (no ObjectReference)
   CV06: a semicolon after whitespace or a newline, and doubled semicolons; needs a token-neighbour check, planned until a second language needs it
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-  AM06: clause-style family reports a clause against the first of the file; the rest are clauses sqlfluff checks inside a nested query
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   PRS: 380
-  CP05: 277
-  CP02: 241
-  CP01: 154
-  RF05: 140
+  CP05: 227
+  CP02: 187
+  RF05: 131
   CV06: 126
+  CP01: 116
   RF06: 111
-  RF03: 109
-  AL03: 102
+  RF03: 107
   LXR: 102
-  RF02: 93
-  AM04: 76
   ST06: 75
+  AL03: 72
+  RF02: 68
   AL05: 62
+  AM04: 58
   RF01: 53

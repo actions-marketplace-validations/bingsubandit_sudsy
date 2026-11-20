@@ -267,6 +267,14 @@ impl<'a> P<'a> {
         matches!((at(0), at(1)), (Some(a), Some(b)) if a.end == b.start)
     }
 
+    /// Is the previous token a closing bracket?
+    pub fn prev_is_rparen(&self) -> bool {
+        self.pos
+            .checked_sub(1)
+            .and_then(|i| self.code.get(i))
+            .is_some_and(|&c| self.lex[c as usize].kind == T::RParen)
+    }
+
     /// Is the previous token a word that is no clause word (a name, an alias)?
     pub fn prev_is_plain_word(&self) -> bool {
         let Some(l) = self

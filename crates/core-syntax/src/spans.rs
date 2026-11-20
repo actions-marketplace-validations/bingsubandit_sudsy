@@ -82,6 +82,43 @@ pub fn list_item(first: usize, next: usize, separated: bool) -> Option<(usize, u
     (next > first).then(|| (first, if separated { next } else { next - 1 }))
 }
 
+/// The index of the token that closes the bracket opened at `from`, looking ahead through
+/// `kind_at` (the token kind at an index, `None` past the end); `None` when it is never closed.
+pub fn matching_close<K: PartialEq>(
+    kind_at: impl Fn(usize) -> Option<K>,
+    from: usize,
+    open: &K,
+    close: &K,
+) -> Option<usize> {
+    let mut depth = 0usize;
+    let mut i = from;
+    while let Some(kind) = kind_at(i) {
+        if kind == *open {
+            depth += 1;
+        } else if kind == *close {
+            depth = depth.saturating_sub(1);
+            if depth == 0 {
+                return Some(i);
+            }
+        }
+        i += 1;
+    }
+    None
+}
+
+/// Does `follows` hold for the token after the bracket opened at `from` (see `matching_close`)?
+/// `false` when the bracket is never closed. Tells a bracket that goes on as an operand (`(a) + 1`,
+/// `(x)::t`) from one that ends an expression.
+pub fn bracket_followed_by<K: PartialEq>(
+    kind_at: impl Fn(usize) -> Option<K>,
+    from: usize,
+    open: &K,
+    close: &K,
+    follows: impl Fn(usize) -> bool,
+) -> bool {
+    matching_close(kind_at, from, open, close).is_some_and(|i| follows(i + 1))
+}
+
 /// "No group", "no token": the sentinel of the index tables.
 pub const NONE: u32 = u32::MAX;
 

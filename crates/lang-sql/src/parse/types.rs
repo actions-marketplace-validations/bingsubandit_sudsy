@@ -108,6 +108,10 @@ impl P<'_> {
                 } else if p.is_t(0, T::LParen) {
                     p.generic_bracket_run();
                     true
+                } else if p.at_any(&["document", "content"]) && !p.is_t(1, T::RParen) {
+                    // `XML (DOCUMENT dbo.Schemas)`
+                    p.bump_as(k::KEYWORD);
+                    p.obj_ref()
                 } else if p.is_t(0, T::Word) && p.is_t(1, T::LParen) {
                     p.bump_as(k::TYPE_IDENTIFIER);
                     p.generic_bracket_run();

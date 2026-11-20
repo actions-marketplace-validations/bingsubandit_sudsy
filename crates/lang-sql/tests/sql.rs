@@ -68,6 +68,9 @@ fn dialect_constructs_parse() {
         "SELECT * FROM (TABLE t) AS s (a, b);",
         "TABLE t;",
         "SELECT (c AT TIME ZONE 'Africa/Cairo')::time FROM t;",
+        "REPACK t USING INDEX;",
+        "SELECT * FROM a CROSS JOIN LATERAL f(x) AS t(c1 text, c2 bool);",
+        "SELECT 1 WHERE h = ANY ((SELECT 1)::int[]);",
     ];
     for text in postgres {
         check(text, "postgres");
@@ -76,6 +79,11 @@ fn dialect_constructs_parse() {
         "SELECT CASE WHEN 1 > = 1 THEN 1 WHEN 1 !\n < 1 THEN 2 WHEN 1 ! = 1 THEN 3 END;",
         "UPDATE p WITH (TABLOCK) SET a = 1 WHERE b = 2;",
         "EXECUTE dbo.Proc @p2 = 'A' WITH RECOMPILE;",
+        "EXECUTE ('x') AS USER = 'dbo' WITH RESULT SETS ((a INT NOT NULL, b INT));",
+        "DECLARE @x XML (DOCUMENT dbo.S);",
+        "SELECT * FROM OPENJSON(@j) WITH (m VARCHAR(3), n tinyint '$.n') AS t;",
+        "CREATE FUNCTION f () RETURNS @t TABLE (i int) AS BEGIN RETURN END;",
+        "SELECT 'a' 'b', 'c' AS 'd';",
     ];
     for text in tsql {
         check(text, "tsql");

@@ -16,7 +16,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 7 | Makefile | none (no reference) | 73.5% (checkmake, `makefile/checkmake`) | `uniquetargets` 88, `phonydeclared` 59 |
 | 8 | YAML | ? (no Prettier corpus count) | 99.5% (yamllint, `yaml/yamllint`) | no real-world format corpus; `comments-indentation` 2 after the proof run |
 | 9 | Kotlin | 69.4% of 5,776 (ktlint 1.8.0) | 90.0% (ktlint, `kotlin/ktlint`; 85.8% with the formatter's own findings counted) | layout rules come from the formatter (`format-diff`, `multiline-start`); misses: `wrapping`, `property-naming`, `string-template-indent`, `filename`, `if-else-wrapping`, `annotation`, `function-naming`, `blank-line-between-when-conditions` (264 of 989) |
-| 10 | SQL | 78.2% of 867 (sqlfluff 4.5.0) | 85.5% (sqlfluff, `sql/sqlfluff`) | `PRS` 380, `CP05` 277, `CP02` 241, `CP01` 154, `RF05` 140; 189 parse gaps and 189 layout gaps |
+| 10 | SQL | 78.2% of 867 (sqlfluff 4.5.0) | 87.5% (sqlfluff, `sql/sqlfluff`; target 81.6%) | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126; 189 parse gaps and 189 layout gaps |
 | 11 | PHP | 88.5% of 10,382 (PHP-CS-Fixer 3.95.31) | 0.0% (PHPStan, `php/phpstan`) | type analysis (`class.notFound` 7,407, `variable.undefined` 591); inline-text files (~790) |
 | 12 | Ruby | none (no reference) | 96.2% (RuboCop Lint, `ruby/rubocop`) | no formatter run |
 | 13 | GraphQL | 97.7% of 132 (Prettier) | ? (graphql-eslint, no coverage run) | no coverage run |
@@ -37,6 +37,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP; recorded and not re-run: C#, PowerShell, Markdown, GraphQL, XML and all lint shares.
 
 ## Small tasks
+- Input encoding support: a source in another encoding (the sqlfluff corpus file `collate.windows.win1252.sql`, Windows-1252) is read as UTF-8 only, so sudsy rejects it; gap `non-utf8-input` in `tests/parity/sqlfluff/differences.yaml` (201 layout findings count as missing).
 - `shape::leaves()` and `expr::findings` clone one `String` per key of the walked path: a borrowed path type would cut github-actions.lint allocs (+6.1% over the base before the expression step).
 - Python paren strip onto shared ParenPolicy/ParenHooks (for_target, await, one-item tuple arms).
 - Move JS layout functions (assign poorly_breakable, chain member, binary flush, ternary should_extra_indent, TS union/should_hug, parameter patterns) onto core-format shapes (unification).
