@@ -51,6 +51,14 @@ fn line_indent(t: &SyntaxToken, tab: usize) -> usize {
     let mut cur = t.prev_token();
     while let Some(p) = cur {
         let text = p.text();
+        // A comment of several lines counts from the line it starts on.
+        if text.starts_with("/*")
+            && let Some(i) = text.find('\n')
+        {
+            line.insert_str(0, &text[..i]);
+            cur = p.prev_token();
+            continue;
+        }
         if let Some(i) = text.rfind('\n') {
             line.insert_str(0, &text[i + 1..]);
             break;
@@ -122,13 +130,36 @@ impl Flow<'_> {
         self.closers.contains(&kind) || self.rules.is_some_and(|r| r.closer(kind))
     }
 
-    fn unhangs(&self, kind: SyntaxKind) -> bool {
-        self.unhang.contains(&kind) || self.rules.is_some_and(|r| r.unhangs(kind))
+    fn unhangs(&self, t: &SyntaxToken) -> bool {
+        self.unhang.contains(&t.kind()) || self.rules.is_some_and(|r| r.unhangs(t))
+    }
+
+    /// An opening brace goes on its own line (`Some(false)`) or on the line of its construct
+    /// (`Some(true)`) as the language's option says, whatever the source has; `None` where no
+    /// row decides or a line comment ends the line.
+    pub fn attach(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_attach())?;
+        let (name, word) = rules.attach_word(b)?;
+        if comments::trailing_comments(cx.grammar, a)
+            .iter()
+            .any(|c| c.kind == comments::CommentKind::Line)
+            || !comments::leading_comments(cx.grammar, b).is_empty()
+        {
+            return None;
+        }
+        Some(!cx.options.strings(name).iter().any(|w| w == word))
     }
 
     /// What stands between two neighbouring tokens: a line break the source has, else a blank
     /// where the spacing rule or the source wants one.
     pub fn between(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<Doc> {
+        if let Some(attached) = self.attach(cx, a, b) {
+            return Some(if attached {
+                doc::lit(" ")
+            } else {
+                doc::hardline()
+            });
+        }
         let broken = comments::break_after(cx.grammar, a);
         if broken && self.op_first(a) {
             return Some(doc::lit(" "));
@@ -140,6 +171,23 @@ impl Flow<'_> {
             return Some(self.line_break(cx, b));
         }
         let gap = a.text_range().end() != b.text_range().start();
+        // `f(a, /*name=*/b)`: the blank between a block comment and `b` is as the source has it.
+        if self.exact
+            && gap
+            && let Some(p) = b.prev_token()
+        {
+            let space = p.text().ends_with([' ', '\t']);
+            let comment = if space {
+                p.prev_token()
+            } else {
+                Some(p.clone())
+            };
+            if comment.is_some_and(|c| {
+                c != *a && c.text().starts_with("/*") && cx.grammar.is_trivia(c.kind())
+            }) {
+                return space.then(|| doc::lit(" "));
+            }
+        }
         match self.want(a, b) {
             Some(blank) => blank.then(|| doc::lit(" ")),
             None if broken => Some(doc::lit(" ")),
@@ -242,7 +290,7 @@ impl Flow<'_> {
                     parts.push(doc::hardline());
                     parts.push(cx.token_text(&b));
                     parts.push(cx.trailing_comments_doc(&b));
-                } else if closing || (!hung.is_empty() && self.unhangs(b.kind())) {
+                } else if closing || (!hung.is_empty() && self.unhangs(&b)) {
                     flush(&mut hung, &mut parts);
                     parts.extend(sep);
                     parts.push(d);
@@ -256,6 +304,21 @@ impl Flow<'_> {
                         let delta = self
                             .source_hang
                             .then(|| {
+                                // A directive stands at column 0 whatever it is written at.
+                                if line.as_ref().and_then(|t| t.parent()).is_some_and(|n| {
+                                    n.descendants_with_tokens()
+                                        .filter_map(|e| e.into_token())
+                                        .find(|t| {
+                                            let s = t.text().trim_start();
+                                            !s.is_empty()
+                                                && !s.starts_with("//")
+                                                && !s.starts_with("/*")
+                                        })
+                                        .is_some_and(|f| f.text().starts_with('#'))
+                                        && cx.grammar.has_tag(n.kind(), "directive")
+                                }) {
+                                    return Some(0);
+                                }
                                 let at = line.as_ref().map(|t| line_indent(t, tab))?;
                                 Some(at.saturating_sub(base(&els[0])?))
                             })
@@ -280,7 +343,18 @@ impl Flow<'_> {
             prev = last(cx, e).map(|t| (e, t));
         }
         flush(&mut hung, &mut parts);
-        Ok(doc::concat(parts))
+        // The hangs count from the line the flow starts on, which is not always the indentation
+        // it is laid out in (the arguments of `.f(` on a continuation line).
+        let whole = doc::concat(parts);
+        let bracketed = els
+            .first()
+            .and_then(|e| e.as_token())
+            .is_some_and(|t| matches!(t.text(), "(" | "[" | "{"));
+        Ok(if self.source_hang && bracketed {
+            doc::align(doc::ALIGN_FROM_LINE, whole)
+        } else {
+            whole
+        })
     }
 }
 

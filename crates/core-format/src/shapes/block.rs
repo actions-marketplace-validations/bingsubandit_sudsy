@@ -30,6 +30,10 @@ pub struct BlockStyle {
     /// A blank line before the closing delimiter stays (google-java-format: before the `}` that an
     /// `else` or `catch` follows).
     pub keep_trailing_blank: bool,
+    /// The items are not indented inside the delimiters (a C++ namespace).
+    pub flat: bool,
+    /// A block of one item and no comments stays on one line, `{ item }`, when it fits.
+    pub fit_single: bool,
 }
 
 impl BlockStyle {
@@ -42,6 +46,8 @@ impl BlockStyle {
         keep_same_line: false,
         keep_leading_blank: false,
         keep_trailing_blank: false,
+        flat: false,
+        fit_single: false,
     };
 }
 
@@ -205,6 +211,7 @@ fn block_of(
             .is_some_and(|t| comments::blank_lines_before(g, &t) > 0)
     };
     let ends = ends_of(cx, &c.open, &c.close, &moved);
+    let single = c.slots.len() == 1 && moved.is_empty();
     let items = sequence_items(
         cx,
         render_slots(cx, &c.slots, true)?,
@@ -212,6 +219,19 @@ fn block_of(
         style.force_blank,
         style.keep_same_line,
     );
+    if style.fit_single
+        && single
+        && !lead_blank
+        && comments::leading_comments(g, &c.close).is_empty()
+    {
+        let Ends { opening, closing } = ends;
+        return Ok(doc::group(doc::concat(vec![
+            opening,
+            doc::indent(doc::concat(vec![doc::line(), items])),
+            doc::line(),
+            closing,
+        ])));
+    }
     Ok(braces_of(
         cx,
         ends,
@@ -292,19 +312,24 @@ fn braces_of(
         (Some(_), true) => doc::concat(vec![doc::hardline(), doc::hardline()]),
         (Some(_), false) => doc::hardline(),
     };
+    let inner = doc::concat(vec![
+        dangling_comments(moved, false),
+        first_hardline,
+        body.unwrap_or(Doc::Nil),
+        super::dangling_comments_in(&cx.comment_style, &dangling, blank_before_close),
+        if dangling.is_empty() && blank_before_close {
+            doc::hardline()
+        } else {
+            Doc::Nil
+        },
+    ]);
     doc::concat(vec![
         opening,
-        doc::indent(doc::concat(vec![
-            dangling_comments(moved, false),
-            first_hardline,
-            body.unwrap_or(Doc::Nil),
-            dangling_comments(&dangling, blank_before_close),
-            if dangling.is_empty() && blank_before_close {
-                doc::hardline()
-            } else {
-                Doc::Nil
-            },
-        ])),
+        if style.flat {
+            inner
+        } else {
+            doc::indent(inner)
+        },
         doc::hardline(),
         closing,
     ])

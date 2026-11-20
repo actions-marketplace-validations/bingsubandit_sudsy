@@ -455,7 +455,9 @@ impl Cx<'_> {
             }
             if q > start {
                 if eq != NONE as usize && eq > start {
-                    self.expression(eq - 1, q);
+                    // (an unnamed parameter `T<A> = v` has no name in front of the `=`)
+                    let name = self.c[eq - 1].kind == k::IDENT;
+                    self.expression(if name { eq - 1 } else { eq }, q);
                 }
                 self.emit(start, q - 1, k::PARAMETER);
             }

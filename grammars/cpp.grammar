@@ -110,6 +110,8 @@ node TranslationUnit #block #scope = items:#child* EndOfFile
 // An unwrapped line (a statement or declaration, a control statement with its body) that no construct below claims.
 node Line #child #statement #member #opaque = #child*
 node ParenGroup #child #part #expression #opaque = #child*
+// A parenthesis group that starts with `*`, `&` or `&&`: `void (*f)(int)`.
+node DeclaratorGroup #child #part #expression #opaque = #child*
 node BracketGroup #child #part #expression #opaque = #child*
 // A preprocessor line: `#`, the directive's name and its tokens, with the lines it continues over.
 node Directive #child #part #directive #opaque = #child*
@@ -130,7 +132,8 @@ node Parenthesized #child #part #expression #parenthesized = Lpar expression:#ex
 node Binary #child #part #expression #binary-chain #binary = left:#expression? left_token=left:#operand? operator:#operator right:#expression? right_token=right:#operand? #part*
 node Assignment #child #part #expression #assignment = left:#expression? left_token=left:#operand? operator:#operator right:#expression? right_token=right:#operand? #part*
 node Ternary #child #part #expression #conditional = condition:#expression? condition_token=condition:#operand? Question then:#expression? then_token=then:#operand? Colon else:#expression? else_token=else:#operand? #part*
-node Unary #child #part #expression #unary = prefix=operator:#operator? operand:#expression? operand_token=operand:#operand? postfix=operator:#operator? #part*
+node Unary #child #part #expression #unary = prefix=operator:#operator? operand:#expression? operand_token=operand:#operand? #part*
+node Postfix #child #part #expression #unary = operand:#expression? operand_token=operand:#operand? postfix=operator:#operator? #part*
 node Cast #child #part #expression #hug-wrapper #opaque = #child*
 node Call #child #part #expression #call = callee:#expression? callee_token=callee:#operand? arguments:Arguments? #part*
 node MemberAccess #child #part #expression #member-access = object:#expression? object_token=object:#operand? operator:#operator? member:#expression? member_token=member:#operand? #part*

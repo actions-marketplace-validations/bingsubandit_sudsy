@@ -359,3 +359,47 @@ fn shapes_cpp() {
 fn shapes_c() {
     check_corpus_shapes(provider(Dialect::C), "cpp", &["c", "h"]);
 }
+
+fn fmt(input: &str) -> String {
+    use provider_api::format_testing::Formatting;
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = vec![("indent_goto_labels", core_config::OptionValue::Bool(false))];
+    core_format::testing::assert_formats(&formatting, input)
+}
+
+#[test]
+fn spacing_follows_the_rows_and_the_source_layout_stays() {
+    assert_eq!(
+        fmt("int f(int a,int b){for(int i=0;i<3;i++){g(a ,b);}return a+b;}\n"),
+        "int f(int a, int b) {\n  for (int i = 0; i < 3; i++) {\n    g(a, b);\n  }\n  return a + b;\n}\n"
+    );
+    assert_eq!(
+        fmt("void f() { q = static_cast<int> (x); p = a?b:c; v.operator== (w); }\n"),
+        "void f() {\n  q = static_cast<int>(x);\n  p = a ? b : c;\n  v.operator==(w);\n}\n"
+    );
+}
+
+#[test]
+fn short_bodies_join_the_line_when_they_fit() {
+    let src = "struct S {\n  int f() { return 1; }\n  int g() {\n    return 2;\n  }\n  enum E { A, B };\n};\n";
+    assert_eq!(
+        fmt(src),
+        "struct S {\n  int f() { return 1; }\n  int g() { return 2; }\n  enum E { A, B };\n};\n"
+    );
+}
+
+#[test]
+fn access_specifiers_cases_and_labels_are_outdented() {
+    assert_eq!(
+        fmt(
+            "class A {\n  int x;\n\n  // kept\n\npublic:\n  // moves\nprivate:\n  int y;\n};\nvoid f() {\n  switch (x) {\n  case 1: {\n    break;\n  }\n  }\n  again:\n  g();\n}\n"
+        ),
+        "class A {\n  int x;\n\n  // kept\n\npublic:\n// moves\nprivate:\n  int y;\n};\nvoid f() {\n  switch (x) {\n  case 1: {\n    break;\n  }\n  }\nagain:\n  g();\n}\n"
+    );
+}
+
+#[test]
+fn wrapped_lines_keep_their_hang_under_a_chain() {
+    let src = "void f() {\n  P = U(S)\n          .format(A, false,\n                  0);\n#if X\n  g();\n#endif\n}\n";
+    assert_eq!(fmt(src), src);
+}

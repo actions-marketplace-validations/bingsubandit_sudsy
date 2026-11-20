@@ -630,8 +630,22 @@ pub(crate) fn separator_comments(cx: &FormatCtx<'_>, item: &Rendered) -> Doc {
 /// Comments in front of a closing delimiter, each on its own line inside the container. Blank
 /// lines between them are kept, and one before the first when `blank_before`.
 pub fn dangling_comments(cs: &[Comment], blank_before: bool) -> Doc {
+    dangling_comments_in(&crate::comments::CommentStyle::default(), cs, blank_before)
+}
+
+/// [`dangling_comments`] in a language's comment style: with `keep_gap`, a comment under a
+/// trailing `//` comment, in its column, continues it.
+pub fn dangling_comments_in(
+    st: &crate::comments::CommentStyle,
+    cs: &[Comment],
+    blank_before: bool,
+) -> Doc {
     let mut parts = Vec::new();
     for (i, c) in cs.iter().enumerate() {
+        if i == 0 && !blank_before && st.keep_gap && crate::context::continues_trailing(c) {
+            parts.push(crate::context::continuing_comment_doc(c, st));
+            continue;
+        }
         parts.push(doc::hardline());
         if (i == 0 && blank_before) || (i > 0 && cs[i - 1].breaks_after >= 2) {
             parts.push(doc::hardline());

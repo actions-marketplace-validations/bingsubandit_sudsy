@@ -13,12 +13,24 @@
 //! written, with a trailing comma when its closing bracket is on a line of its own);
 //! `braced_list open=K` (`match (x) { ... }`); `heritage colon=K list=K ctor=K params=K
 //! min=option:N hug_min=option:N` (supertypes one per line); `chain spaced=K` (a member chain);
-//! `cases open=K` (a `when` body, a blank between cases when one spans lines).
+//! `cases open=K` (a `when` body, a blank between cases when one spans lines); `flow` (the tokens
+//! and nodes with the spacing rows); `line_start` (the text as written, at column 0: a preprocessor
+//! directive); `items` (the child nodes one per line at the level of the node).
 //!
 //! Keys: `empty=expand` (an empty block is two lines, else `{}`), `gap=option:NAME|space` (what
 //! stands before a brace: a line break, or a blank when the option is `same_line`),
 //! `trailing=option:NAME=VALUE` (a trailing comma when the option has the value),
 //! `no_trailing_after=K` (none after a last item that starts with that token).
+//!
+//! The kind sets of the language's options (`kinds:` of an option in `lang.yaml`, [`Binding`]) say
+//! which constructs an option governs; the shapes decide: `fit` (a block of that parent stays on
+//! one line when it fits: a bool option that is on, or `all`/`inline`), `no_fit_under` and
+//! `no_fit_with` (a body over several lines stays so under such a grandparent, or beside such a
+//! child), `flat` (the items of the block are not indented when the option is `none`), `join` and
+//! `head` (`compound`), `outdent` (columns of an int option), `outdent_unless` (one indent unless
+//! the bool option is on), `flush_unless` (column 0 unless it is on), `tight` (no blanks after the
+//! `#` of a directive when the option is `none`) and `attach` (words of a `words` option: the `{`
+//! of such a construct goes on its own line).
 //!
 //! concept: node-layout-rows
 //! what: Layout rows name a shape and its details for a kind of node, so a language holds only a table.
@@ -29,6 +41,7 @@ use crate::FormatCtx;
 use crate::comments;
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
+use crate::rules::Binding;
 use crate::seq::{break_after, el, first, kids, last};
 use crate::shapes::flow::Flow;
 use crate::shapes::{self, BlockStyle, ListLayout, ListStyle, TrailingComma};
@@ -132,7 +145,12 @@ impl Row {
         self.arg(key)
             .and_then(|v| v.strip_prefix("option:"))
             .and_then(|v| v.split_once('='))
-            .is_some_and(|(name, value)| cx.options.is(name, value))
+            .is_some_and(|(name, values)| {
+                values.split('|').any(|v| match cx.options.get(name) {
+                    Some(core_config::OptionValue::Bool(b)) => v == b.to_string(),
+                    _ => cx.options.is(name, v),
+                })
+            })
     }
 }
 
@@ -164,9 +182,28 @@ impl File {
 /// The rows of a language.
 pub(crate) struct Layout {
     rows: Vec<Row>,
+    /// The kind sets of the language's options.
+    bindings: Vec<Binding>,
     /// For each node kind (by index) the rows that name it, in order: a node of a kind no row
     /// names is found in one step.
     by_kind: Vec<Vec<usize>>,
+}
+
+/// Is there a line break between the first and the last code token of these elements?
+fn line_break_inside(els: impl Iterator<Item = SyntaxElement>) -> bool {
+    let (mut code, mut pending) = (false, false);
+    for t in els.filter_map(SyntaxElement::into_token) {
+        let text = t.text();
+        if text.trim().is_empty() {
+            pending |= code && text.contains('\n');
+        } else {
+            if pending || text.contains('\n') {
+                return true;
+            }
+            code = true;
+        }
+    }
+    false
 }
 
 /// What stands before a `{`: a line break, or a blank when the row's option says `same_line`.
@@ -177,9 +214,15 @@ fn brace_gap(cx: &FormatCtx<'_>, row: &Row) -> Doc {
     }
 }
 
-fn block_style(row: &Row) -> BlockStyle {
+/// The language's `max_blank_lines` (all the blank lines of the source without the option).
+fn max_blank(cx: &FormatCtx<'_>) -> usize {
+    cx.max_blank_lines
+}
+
+fn block_style(cx: &FormatCtx<'_>, row: &Row) -> BlockStyle {
     BlockStyle {
-        max_blank_lines: usize::MAX,
+        max_blank_lines: max_blank(cx),
+        keep_trailing_blank: true,
         expand_empty: row.arg("empty") == Some("expand"),
         keep_leading_blank: true,
         ..BlockStyle::default()
@@ -204,14 +247,14 @@ fn statements(cx: &FormatCtx<'_>, items: &[SyntaxNode]) -> R {
     shapes::statement_sequence_with(
         cx,
         items,
-        usize::MAX,
+        max_blank(cx),
         Some(|cx, p, n| cx.blank_between(p, n)),
         false,
     )
 }
 
 impl Layout {
-    pub(crate) fn parse(g: &Grammar, lines: &[&str]) -> Layout {
+    pub(crate) fn parse(g: &Grammar, lines: &[&str], bindings: Vec<Binding>) -> Layout {
         let rows: Vec<Row> = lines.iter().map(|l| Row::parse(g, l)).collect();
         let mut by_kind: Vec<Vec<usize>> = Vec::new();
         for (i, r) in rows.iter().enumerate() {
@@ -223,7 +266,58 @@ impl Layout {
                 by_kind[at].push(i);
             }
         }
-        Layout { rows, by_kind }
+        Layout {
+            rows,
+            bindings,
+            by_kind,
+        }
+    }
+
+    /// The kind set of `role` that holds `kind` (the option it belongs to and the set).
+    fn bound(&self, role: &str, kind: SyntaxKind) -> Option<&Binding> {
+        (self.bindings.iter()).find(|b| b.role == role && b.kinds.contains(&kind))
+    }
+
+    /// The kinds of the sets of `role` that belong to `option`.
+    fn bound_kinds(&self, option: &str, role: &str) -> Vec<SyntaxKind> {
+        (self.bindings.iter())
+            .filter(|b| b.role == role && b.option == option)
+            .flat_map(|b| b.kinds.iter().copied())
+            .collect()
+    }
+
+    /// The option of `role` that governs a node of this kind, when it has the value `none`.
+    fn is_none(&self, cx: &FormatCtx<'_>, role: &str, kind: SyntaxKind) -> bool {
+        (self.bound(role, kind)).is_some_and(|b| cx.options.is(&b.option, "none"))
+    }
+
+    /// `fit`: a bool option that is on, or one of `all` and `inline`.
+    fn fits(&self, cx: &FormatCtx<'_>, kind: SyntaxKind) -> bool {
+        self.bound("fit", kind)
+            .is_some_and(|b| match cx.options.get(&b.option) {
+                Some(core_config::OptionValue::Bool(on)) => *on,
+                _ => cx.options.is(&b.option, "all") || cx.options.is(&b.option, "inline"),
+            })
+    }
+
+    /// How far the node moves left: `outdent` (columns of an option), `outdent_unless` (one indent
+    /// unless the bool option is on), `flush_unless` (to column 0 unless it is on).
+    fn outdent(&self, cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<doc::Outdent> {
+        if self.bindings.is_empty() {
+            return None;
+        }
+        let kind = node.kind();
+        let off = |b: &Binding| !cx.options.flag(&b.option, true);
+        if let Some(b) = self.bound("outdent", kind) {
+            return Some(doc::Outdent::Columns(cx.options.uint(&b.option, 0)));
+        }
+        if self.bound("outdent_unless", kind).is_some_and(off) {
+            return Some(doc::Outdent::Columns(
+                cx.options.uint(core_config::shared::INDENT_SIZE, 2),
+            ));
+        }
+        (self.bound("flush_unless", kind).is_some_and(off))
+            .then_some(doc::Outdent::Levels(usize::MAX))
     }
 
     /// The node laid out by the first row that matches it, `None` when no row does.
@@ -242,19 +336,56 @@ impl Layout {
             .find(|r| r.matches(node))?;
         let (flow, level) = flows;
         let generic = || flow.seq(cx, &kids(cx, node));
-        Some(match row.shape.as_str() {
+        // The comments in front of an outdented node go with it, unless a blank line separates
+        // them: then they stay at the indentation of its neighbours.
+        let outdent = self.outdent(cx, node);
+        let lead = if outdent.is_some() {
+            cx.first_token(node).filter(|t| {
+                comments::leading_comments(cx.grammar, t)
+                    .last()
+                    .is_some_and(|c| c.breaks_after > 1)
+            })
+        } else {
+            None
+        };
+        if let Some(t) = &lead {
+            cx.hold_leading(t);
+        }
+        let doc = match row.shape.as_str() {
             "verbatim" => Ok(shapes::verbatim(cx, node)),
             "document" if file.verbatim(node) => Ok(doc::verbatim(node.text().to_string())),
             "document" => shapes::document(
                 cx,
                 node,
-                if row.arg("max_blank") == Some("option") {
-                    cx.options.max_blank_lines()
+                if row
+                    .arg("max_blank")
+                    .is_some_and(|v| v.starts_with("option"))
+                {
+                    max_blank(cx)
                 } else {
                     usize::MAX
                 },
                 Some(|cx, p, n| cx.blank_between(p, n)),
-            ),
+            )
+            .map(|d| {
+                // The blank lines at the start of the file stay.
+                if !cx.options.flag("keep_leading_blank_lines", false) {
+                    return d;
+                }
+                let blanks: usize = (node.descendants_with_tokens())
+                    .filter_map(SyntaxElement::into_token)
+                    .map_while(|t| {
+                        t.text()
+                            .trim()
+                            .is_empty()
+                            .then(|| t.text().matches('\n').count())
+                    })
+                    .sum();
+                match blanks {
+                    0 => d,
+                    n => doc::concat((0..n).map(|_| doc::hardline()).chain([d]).collect()),
+                }
+            }),
             "key_value" => shapes::key_value(
                 cx,
                 node,
@@ -272,7 +403,39 @@ impl Layout {
             "scope" => scope(cx, node, row, flow).unwrap_or_else(generic),
             "braced" => braced(cx, node, row, flow).unwrap_or_else(generic),
             "with_body" => with_body(cx, node, row, flow),
-            "block" => shapes::block(cx, node, &block_style(row)).or_else(|_| generic()),
+            "block" => {
+                let mut style = block_style(cx, row);
+                let parent = node.parent().map(|p| p.kind());
+                style.flat = parent.is_some_and(|p| self.is_none(cx, "flat", p));
+                style.fit_single = parent.is_some_and(|p| self.fits(cx, p));
+                // (`empty=as_written`: an empty body over two lines stays so)
+                let as_written = row.arg("empty") == Some("as_written");
+                if style.fit_single || as_written {
+                    let multiline = line_break_inside(node.descendants_with_tokens());
+                    if style.fit_single && multiline {
+                        // A body over several lines stays so after a signature over several lines,
+                        // a template header or a constructor's initializers.
+                        let option = (node.parent())
+                            .and_then(|p| self.bound("fit", p.kind()))
+                            .map_or("", |b| b.option.as_str());
+                        let with = self.bound_kinds(option, "no_fit_with");
+                        let under = self.bound_kinds(option, "no_fit_under");
+                        let keeps = node.parent().is_some_and(|p| {
+                            let start = node.text_range().start();
+                            let header = p
+                                .descendants_with_tokens()
+                                .take_while(|e| e.text_range().start() < start);
+                            line_break_inside(header)
+                                || p.children().any(|c| with.contains(&c.kind()))
+                                || (p.parent()).is_some_and(|g| under.contains(&g.kind()))
+                        });
+                        style.fit_single &= !keeps;
+                    }
+                    style.expand_empty |= multiline && as_written;
+                }
+                shapes::block(cx, node, &style).or_else(|_| generic())
+            }
+            "compound" => compound(cx, node, self, flow).unwrap_or_else(generic),
             "case" => case(cx, node, row, flow).unwrap_or_else(generic),
             "colon_body" => colon_body(cx, node, row, flow).unwrap_or_else(generic),
             "list" => list(cx, node, row).unwrap_or_else(generic),
@@ -281,9 +444,121 @@ impl Layout {
             "heritage" => heritage(cx, node, row, flow).unwrap_or_else(generic),
             "chain" => chain(cx, node, row).unwrap_or_else(generic),
             "cases" => cases(cx, node, row, flow).unwrap_or_else(generic),
+            "flow" => generic(),
+            // (a token between the nodes, a `,` after an initializer, has no line of its own)
+            "items" if kids(cx, node).iter().any(|e| e.as_token().is_some()) => {
+                Ok(doc::line_start(node.text().to_string().trim()))
+            }
+            "items" => statements(cx, &node.children().collect::<Vec<_>>()),
+            "line_start" => Ok(line_start(cx, node, self.is_none(cx, "tight", node.kind()))),
             other => panic!("layout: unknown shape `{other}`"),
+        };
+        Some(match outdent {
+            Some(by) => doc.map(|d| {
+                let d = Doc::Outdent(by, Box::new(d));
+                match &lead {
+                    Some(t) => doc::concat(vec![cx.held_leading(t), d]),
+                    None => d,
+                }
+            }),
+            None => doc,
         })
     }
+}
+
+/// The node's text from its first token on, at column 0, after its leading comments (a
+/// preprocessor directive).
+fn line_start(cx: &FormatCtx<'_>, node: &SyntaxNode, tight_hash: bool) -> Doc {
+    let text = node.text().to_string();
+    let tight = |t: &str| match t.strip_prefix('#') {
+        Some(rest) if tight_hash => format!("#{}", rest.trim_start_matches([' ', '\t'])),
+        _ => t.to_string(),
+    };
+    let Some(first) = cx.first_token(node) else {
+        return doc::line_start(tight(text.trim()));
+    };
+    let from = usize::from(first.text_range().start() - node.text_range().start());
+    doc::concat(vec![
+        cx.leading_comments_doc(&first),
+        doc::line_start(tight(text[from..].trim())),
+    ])
+}
+
+/// A head (`if (c)`), its body and the `else` that follows: a block stays on the line of the
+/// head, another statement goes on the next line unless the option of `join=option:NAME` lets
+/// it stay (`all`, `without_else` when there is no `else`, or true).
+fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode, layout: &Layout, flow: &Flow<'_>) -> Option<R> {
+    let els = kids(cx, node);
+    let option = layout.bound("join", node.kind()).map(|b| b.option.as_str());
+    let heads = layout.bound_kinds(option.unwrap_or_default(), "head");
+    let at = els
+        .iter()
+        .position(|e| matches!(e, SyntaxElement::Node(n) if !heads.contains(&n.kind())))?;
+    let has_else = match &els[at + 1..] {
+        [] => false,
+        [SyntaxElement::Token(_), SyntaxElement::Node(_)] => true,
+        _ => return None,
+    };
+    let join = match option.map(|name| (name, cx.options.get(name))) {
+        Some((_, Some(core_config::OptionValue::Bool(true)))) => shapes::Join::Fits,
+        Some((name, Some(core_config::OptionValue::String(_)))) => match cx.options.str(name) {
+            "all" => shapes::Join::Fits,
+            "without_else" if !has_else => shapes::Join::Fits,
+            _ => shapes::Join::Never,
+        },
+        _ => shapes::Join::Never,
+    };
+    // (`while (x);`)
+    let empty = |e: &SyntaxElement| match e {
+        SyntaxElement::Token(t) => t.text() == ";",
+        SyntaxElement::Node(n) => n.text().to_string().trim() == ";",
+    };
+    // (a line comment after the head or the `else` ends its line: the body goes below)
+    let ends_line = |before: &SyntaxElement| {
+        crate::seq::last(cx, before).is_some_and(|t| {
+            comments::trailing_comments(cx.grammar, &t)
+                .iter()
+                .any(|c| c.kind == comments::CommentKind::Line)
+        })
+    };
+    let body = |e: &SyntaxElement, before: &SyntaxElement, inline: bool| -> R {
+        let printed = el(cx, e)?;
+        Ok(if empty(e) {
+            printed
+        } else {
+            let apart = || {
+                let (a, b) = (crate::seq::last(cx, before)?, first(cx, e)?);
+                flow.attach(cx, &a, &b).map(|attached| !attached)
+            };
+            if cx.grammar.has_tag(e.kind(), "block") && (ends_line(before) || apart() == Some(true))
+            {
+                doc::concat(vec![doc::hardline(), printed])
+            } else {
+                let join = if ends_line(before) {
+                    shapes::Join::Never
+                } else {
+                    join
+                };
+                shapes::compound_body(cx, e, printed, inline, join)
+            }
+        })
+    };
+    Some((|| {
+        let mut parts = vec![
+            flow.seq(cx, &els[..at])?,
+            body(&els[at], &els[at - 1], false)?,
+        ];
+        if has_else {
+            let SyntaxElement::Token(kw) = &els[at + 1] else {
+                unreachable!("checked above")
+            };
+            parts.push(shapes::compound_continuation(cx, &els[at], kw));
+            parts.push(el(cx, &els[at + 1])?);
+            let chained = els[at + 2].kind() == node.kind();
+            parts.push(body(&els[at + 2], &els[at + 1], chained)?);
+        }
+        Ok(doc::concat(parts))
+    })())
 }
 
 /// `namespace A;` and the statements after it (the body node holds them and the `;`).
@@ -331,7 +606,7 @@ fn braced(cx: &FormatCtx<'_>, node: &SyntaxNode, row: &Row, flow: &Flow<'_>) -> 
         };
         let style = BlockStyle {
             keep_leading_blank: false,
-            ..block_style(row)
+            ..block_style(cx, row)
         };
         let body = shapes::block_between(cx, node, open_tok, close_tok, &style)?;
         Ok(doc::concat(vec![head, gap, body]))
@@ -378,6 +653,16 @@ fn case(cx: &FormatCtx<'_>, node: &SyntaxNode, row: &Row, flow: &Flow<'_>) -> Op
         let head = flow.seq(cx, &els[..=colon])?;
         if items.is_empty() {
             return Ok(head);
+        }
+        // A block as the only body opens on the line of the label.
+        if let [block] = &items[..]
+            && cx.grammar.has_tag(block.kind(), "block")
+        {
+            return Ok(doc::concat(vec![
+                head,
+                doc::lit(" "),
+                statements(cx, &items)?,
+            ]));
         }
         Ok(doc::concat(vec![
             head,

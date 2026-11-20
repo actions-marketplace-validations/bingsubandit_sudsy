@@ -1,0 +1,82 @@
+# C and C++ formatting as data (docs/ai/formatting/cpp.md). Syntax: crates/core-format/src/{rules,spacing,layout,blank}.rs.
+[space]
+# The `{` of a block follows a blank.
+kind=Lpar / kind=Lbrace&parent=Block : no
+* / kind=Lbrace&parent=Block : yes
+# `operator==(`, `operator new`.
+text=operator / kind=Ident|Keyword : yes
+text=operator / * : no
+exact=new|delete&parent=QualifiedName / kind=Lpar : no
+kind!=Keyword&parent=QualifiedName / kind=Lpar : no
+kind=Rpar|Rsqb&parent=ParenGroup|BracketGroup&grand=QualifiedName / kind=Lpar : no
+# Separators and brackets.
+kind=Semi / kind=Semi|Rpar : no
+kind=Semi&parent=ForStatement|Condition / * : yes
+* / kind=Semi|Comma : no
+kind=Comma&parent=InitList / * : keep
+kind=Comma / * : yes
+kind=Lpar|Lsqb / * : no
+* / kind=Rpar|Rsqb : no
+# Member access, scope, pack.
+kind=Arrow&parent=Line / * : keep
+* / kind=Arrow&parent=Line : keep
+kind=Arrow&parent=FunctionDeclaration|Lambda / * : yes
+* / kind=Arrow&parent=FunctionDeclaration|Lambda : yes
+kind=Number / kind=Ellipsis : keep
+kind=Ellipsis / kind=Number : keep
+kind=Ellipsis&parent=TemplateParameters / * : yes
+kind=Ellipsis / kind=Ident : yes
+kind=Ellipsis / * : no
+* / kind=Ellipsis&parent!=TemplateParameters : no
+# Keywords and their parentheses.
+exact=constexpr / kind=Lpar : yes
+exact=if|for|while|switch|catch / kind=Lpar : yes
+exact=return|co_return|co_yield|co_await|throw|case|else|do|new|delete / kind=Lpar : yes
+exact=return|co_return|throw|case|else|do|new|delete / kind=ColonColon : yes
+exact=decltype|sizeof|alignof|typeof|noexcept|static_assert / kind=Lpar : no
+kind=Keyword / kind=Lpar&parent=DeclaratorGroup : yes
+kind=Ident / kind=Lpar&parent=DeclaratorGroup&grand=Parameter : yes
+kind=Keyword|Ident / kind=Lpar : no
+* / kind=Lpar&parent=Arguments : no
+# Templates.
+text=template / kind=Less : yes
+kind=Greater / kind=Greater&parent=TemplateArguments|TemplateParameters : keep
+* / kind=Less|Greater&parent=TemplateArguments|TemplateParameters : no
+kind=Less&parent=TemplateArguments|TemplateParameters / * : no
+kind=Greater&parent=TemplateArguments|TemplateParameters / kind=ColonColon|Lpar|Lbrace : no
+kind=Greater&parent=TemplateArguments|TemplateParameters / * : yes
+# Prefix and postfix operators.
+kind=Bang|Tilde&parent=Unary / * : no
+kind=Star|Amp|Minus|Plus&parent=Unary / * : keep
+kind=PlusPlus|MinusMinus&parent=Unary / * : no
+# `**` stays as written. Binary, assignment and conditional operators have a blank on both sides.
+kind=Star|Amp|AmpAmp / kind=Star|Amp|AmpAmp&parent=Unary : keep
+* / kind=Star|Amp|AmpAmp&parent=Binary : keep
+kind=Star|Amp|AmpAmp&parent=Binary / * : keep
+* / kind=Plus|Minus|Star|Slash|Percent|Caret|Amp|Pipe|LessLess|GreaterGreater|Equal|PlusEq|MinusEq|StarEq|SlashEq|PercentEq|CaretEq|AmpEq|PipeEq|LessLessEq|GreaterGreaterEq|EqEq|BangEq|Less|Greater|LessEq|GreaterEq|Spaceship|AmpAmp|PipePipe&parent=Binary|Assignment : yes
+kind=Plus|Minus|Star|Slash|Percent|Caret|Amp|Pipe|LessLess|GreaterGreater|Equal|PlusEq|MinusEq|StarEq|SlashEq|PercentEq|CaretEq|AmpEq|PipeEq|LessLessEq|GreaterGreaterEq|EqEq|BangEq|Less|Greater|LessEq|GreaterEq|Spaceship|AmpAmp|PipePipe&parent=Binary|Assignment / * : yes
+* / kind=Question|Colon&parent=Ternary : keep
+kind=Question|Colon&parent=Ternary / * : keep
+* / kind=PlusPlus|MinusMinus&parent=Postfix : no
+# Member access and scope.
+kind=Colon|Question|Keyword / kind=ColonColon : yes
+kind=ColonColon|Dot|Arrow|DotStar|ArrowStar / * : no
+* / kind=ColonColon|Dot|Arrow|DotStar|ArrowStar : no
+# Colons: labels, access specifiers and `case x:` stay close to their word.
+* / kind=Colon&parent=CaseClause|AccessSpecifier|LabelStatement : no
+kind=Colon&parent=CaseClause|AccessSpecifier|LabelStatement / * : yes
+* / * : keep
+
+[at_least_one]
+* / kind=Question|Colon&parent=Ternary
+kind=Question|Colon&parent=Ternary / *
+kind=Comma&parent=InitList / *
+
+[layout]
+TranslationUnit : document max_blank=option:max_blank_lines
+Directive : line_start
+PpGroup|PpBranch : items
+IfStatement|ForStatement|WhileStatement : compound
+AccessSpecifier|LabelStatement : flow
+CaseClause : case colon=Colon
+Block : block empty=as_written

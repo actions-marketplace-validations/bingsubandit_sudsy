@@ -5,12 +5,12 @@
 //! `PREV / NEXT : RESULT`. The first row of a section that matches
 //! wins. `RESULT` is `yes` (one blank), `no` or `keep` (as the source has it); the other sections
 //! have no result. A pattern is `*` or conditions joined by `&`: `key=a|b` or `key!=a|b` with
-//! `key` one of `kind` and `parent` and `grand` (names of the grammar's kinds, of the token, of
-//! its parent node and of that node's parent), `end_of` (the token ends a node of one of the kinds)
+//! `key` one of `kind` and `parent` and `grand` and `next` (names of the grammar's kinds, of the
+//! token, of its parent node, of that node's parent and of the token after it), `end_of` (the token ends a node of one of the kinds)
 //! and `text`, `exact`, `sibling` and `before` (texts, case-insensitive except `exact`: of the
 //! token, of any other token of its parent node, of any token of the parent node
 //! before it) and `ends=word` (the token's text
-//! ends like a word or a literal: a letter, digit, `_`, quote or `@`). The result is the text after
+//! ends like a word or a literal: a letter, digit, `_`, quote or `@`). `%amp` in a text stands for `&`. The result is the text after
 //! the last `:` when that is `yes`, `no` or `keep`; the sides are split at the first ` / `. Lines
 //! starting with `#` are comments. [`Pattern`] is also the matcher of `rewrite::RewriteRules`.
 //!
@@ -38,6 +38,7 @@ enum Key {
     Text,
     Sibling,
     Before,
+    Next,
     Ends,
     Exact,
 }
@@ -46,6 +47,14 @@ enum Key {
 pub struct Pattern(Vec<Cond>);
 
 impl Pattern {
+    /// The kinds of a pattern that only names kinds (`kind=A|B`), `None` for any other.
+    fn only_kinds(&self) -> Option<&[SyntaxKind]> {
+        match self.0.as_slice() {
+            [c] if matches!(c.key, Key::Kind) && !c.not => Some(&c.kinds),
+            _ => None,
+        }
+    }
+
     pub fn parse(grammar: &Grammar, text: &str) -> Pattern {
         let conds = text.trim().split('&').filter(|c| *c != "*").map(|c| {
             let (key, not, vals) = match c.split_once("!=") {
@@ -65,6 +74,7 @@ impl Pattern {
                 "text" => Key::Text,
                 "sibling" => Key::Sibling,
                 "before" => Key::Before,
+                "next" => Key::Next,
                 "ends" => Key::Ends,
                 "exact" => Key::Exact,
                 other => panic!("spacing: unknown key `{other}`"),
@@ -75,7 +85,7 @@ impl Pattern {
                 if matches!(key, Key::Exact) {
                     texts.push(v.to_string());
                 } else if matches!(key, Key::Text | Key::Sibling | Key::Before | Key::Ends) {
-                    texts.push(v.to_ascii_lowercase());
+                    texts.push(v.replace("%amp", "&").to_ascii_lowercase());
                 } else {
                     kinds.push(
                         grammar
@@ -178,6 +188,16 @@ impl Pattern {
             let hit =
                 match c.key {
                     Key::Kind => c.kinds.contains(&cx.kind),
+                    Key::Next => {
+                        let mut cur = t.next_token();
+                        while let Some(n) = &cur {
+                            if !n.text().trim().is_empty() {
+                                break;
+                            }
+                            cur = n.next_token();
+                        }
+                        cur.is_some_and(|n| c.kinds.contains(&n.kind()))
+                    }
                     Key::Text => c.texts.iter().any(|x| t.text().eq_ignore_ascii_case(x)),
                     Key::Exact => c.texts.iter().any(|x| t.text() == x),
                     Key::Ends => t.text().chars().next_back().is_some_and(|c| {
@@ -515,7 +535,12 @@ pub struct SpaceRules {
     op_first: Vec<Pattern>,
     flat_after: Vec<SyntaxKind>,
     closers: Vec<SyntaxKind>,
-    unhang: Vec<SyntaxKind>,
+    unhang: Vec<Pattern>,
+    /// The `attach` kind sets of the options: the constructs whose `{` follows the option's words.
+    attach: Vec<crate::rules::Binding>,
+    /// The `tight_after` and `tight_behind` kind sets: no blank after a token of the first when the
+    /// token before it is of the second (`Args &&...rest`).
+    tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
 }
 
 fn row(grammar: &Grammar, line: &str) -> Row {
@@ -561,7 +586,12 @@ pub fn shadowed_rows(grammar: &Grammar, text: &str) -> Vec<String> {
 impl SpaceRules {
     /// The sections `[space]`, `[joined]`, `[at_least_one]`, `[op_first]` and the kind lists
     /// `flat_after` and `closers` of `[flow]`; `unhang` and `op_first` are the language's `RuleFacts`.
-    pub fn parse(grammar: &Grammar, text: &str, facts: &crate::rules::RuleFacts) -> SpaceRules {
+    pub fn parse(
+        grammar: &Grammar,
+        text: &str,
+        facts: &crate::rules::RuleFacts,
+        bindings: &[crate::rules::Binding],
+    ) -> SpaceRules {
         let rows = |name| {
             crate::rules::section(text, name)
                 .map(|l| row(grammar, l))
@@ -580,7 +610,19 @@ impl SpaceRules {
                 .collect()
         };
         let space: Vec<Row> = rows("space");
+        let attach = (bindings.iter())
+            .filter(|b| b.role == "attach")
+            .cloned()
+            .collect();
+        let set = |role: &str| -> Vec<SyntaxKind> {
+            (bindings.iter())
+                .filter(|b| b.role == role)
+                .flat_map(|b| b.kinds.iter().copied())
+                .collect()
+        };
         SpaceRules {
+            attach,
+            tight: (set("tight_after"), set("tight_behind")),
             index: Index::build(&space),
             space,
             joined: rows("joined"),
@@ -595,11 +637,7 @@ impl SpaceRules {
             unhang: facts
                 .unhang
                 .iter()
-                .map(|n| {
-                    grammar
-                        .kind_by_name(n)
-                        .unwrap_or_else(|| panic!("spacing: unknown kind `{n}`"))
-                })
+                .map(|n| Pattern::parse(grammar, n))
                 .collect(),
         }
     }
@@ -615,12 +653,34 @@ impl SpaceRules {
     }
 
     /// `Flow::unhang`.
-    pub fn unhangs(&self, kind: SyntaxKind) -> bool {
-        self.unhang.contains(&kind)
+    pub fn unhangs(&self, t: &SyntaxToken) -> bool {
+        let kind = t.kind();
+        self.unhang.iter().any(|p| match p.only_kinds() {
+            Some(kinds) => kinds.contains(&kind),
+            None => p.matches(t),
+        })
+    }
+
+    /// No blank after `a`: its kind is in `tight_after` and the code token before it is in `tight_behind`.
+    fn tight_gap(&self, a: &SyntaxToken) -> bool {
+        if self.tight.0.is_empty() || !self.tight.0.contains(&a.kind()) {
+            return false;
+        }
+        let mut prev = a.prev_token();
+        while let Some(p) = &prev {
+            if !p.text().trim().is_empty() {
+                break;
+            }
+            prev = p.prev_token();
+        }
+        prev.is_some_and(|p| self.tight.1.contains(&p.kind()))
     }
 
     /// `Flow::want`: a blank between the tokens (`None`: as the source has it).
     pub fn want(&self, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        if self.tight_gap(a) {
+            return Some(false);
+        }
         let (a, b) = (Ctx::new(a), Ctx::new(b));
         let slot = self.index.slot(a.kind);
         self.index
@@ -640,6 +700,7 @@ impl SpaceRules {
         out.extend(cxs.windows(2).map(|w| {
             let (a, b) = (&w[0], &w[1]);
             let slot = self.index.slot(a.kind);
+            let tight = self.tight_gap(a.token);
             let want = self
                 .index
                 .rows(b.token)
@@ -648,9 +709,47 @@ impl SpaceRules {
                 .map(|i| &self.space[*i as usize])
                 .find(|r| r.matches(a, b))
                 .and_then(|r| r.result);
+            let want = if tight { Some(false) } else { want };
             (want, self.joined.iter().any(|r| r.matches(a, b)))
         }));
         out
+    }
+
+    /// Does a language option place braces (an `attach` kind set)?
+    pub fn has_attach(&self) -> bool {
+        !self.attach.is_empty()
+    }
+
+    /// The option and the word of the construct an opening brace `{` belongs to: the `{` that
+    /// starts the block (child of a construct of an `attach` kind set); of several words for one
+    /// kind (`class`, `struct`) the one the construct's own keyword spells.
+    pub fn attach_word(&self, brace: &SyntaxToken) -> Option<(&str, &str)> {
+        if self.attach.is_empty() || brace.text() != "{" {
+            return None;
+        }
+        let block = brace.parent()?;
+        let construct = block.parent()?;
+        let mut tokens = block
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_token());
+        if tokens.find(|t| !t.text().trim().is_empty()).as_ref() != Some(brace) {
+            return None;
+        }
+        let mut of = self
+            .attach
+            .iter()
+            .filter(|b| b.kinds.contains(&construct.kind()));
+        let first = of.next()?;
+        let spelled = |b: &&crate::rules::Binding| {
+            (construct.children_with_tokens())
+                .filter_map(|e| e.into_token())
+                .any(|t| t.text() == b.word)
+        };
+        let chosen = std::iter::once(first)
+            .chain(of)
+            .find(|b| spelled(b))
+            .unwrap_or(first);
+        Some((chosen.option.as_str(), chosen.word.as_str()))
     }
 
     /// `Flow::joined`.

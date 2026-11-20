@@ -60,13 +60,13 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | maybe-parenthesize | core-format/shapes/maybe_parenthesize.rs | Content between delimiters on lines of its own when it does not fit. | ruff maybe_parenthesize, Prettier return (...) | css, js, python |  |
 | member-chain | core-format/shapes/call_chain.rs +1 | Member chains broken by call count, head shape and receiver kind. | Prettier member-chain, google-java-format dot chains | csharp, java, js, kotlin, python |  |
 | member-chain-wrapped | core-format/shapes/call_chain_wrapped.rs | Wrapped style of a member chain: every dot after the head starts a line when the chain breaks. | ktlint chain-method-continuation | js, kotlin, python |  |
-| node-layout-rows | core-format/layout.rs | Layout rows name a shape and its details for a kind of node, so a language holds only a table. | none (each tool layout as options) | editorconfig, ini, kotlin, php, toml |  |
+| node-layout-rows | core-format/layout.rs | Layout rows name a shape and its details for a kind of node, so a language holds only a table. | none (each tool layout as options) | cpp, editorconfig, ini, kotlin, php, toml |  |
 | node-sequence | core-format/seq.rs | The children of a node as a sequence: kids, flat, first, last helpers and the plain layout. | none (internal) | csharp, java, kotlin, python | LOCAL: lang-gitignore/format.rs, lang-js/format/util.rs |
 | parenthesized-expression | core-format/shapes/parens.rs | Needed and unneeded parentheses and the layout of their content. | Prettier needs-parens, ruff parenthesized, ktlint no-unnecessary-parentheses | cpp, csharp, js | LOCAL: lang-python/format/paren.rs |
 | prefixed-string-quotes | core-format/literals/prefixed.rs | Quote choice, prefix spelling and f-string fields of prefixed strings. | Black string prefix normalization, ruff format | python | SINGLE-USE |
 | preprocessor-branches | lang-csharp/format/branches.rs | Formatting the #if branches that the symbols of the file leave inactive. | dotnet-format preprocessor | csharp | SINGLE-USE |
 | raw-string-reindent | core-format/shapes/raw_string.rs | Lines of a raw string followed by a trimIndent-like call at the indent of the code. | ktlint string-template-indent | cpp, csharp, java, js, kotlin, php, python, ruby |  |
-| rules-file-formatter | core-format/rules.rs | A formatter that is only data: one rules file per language parsed against the grammar. | none (internal) | csharp, css, dockerfile, editorconfig, hcl, html, ini, java, js, kotlin, php, powershell, sql, toml |  |
+| rules-file-formatter | core-format/rules.rs | A formatter that is only data: one rules file per language parsed against the grammar. | none (internal) | cpp, csharp, css, dockerfile, editorconfig, hcl, html, ini, java, js, kotlin, php, powershell, sql, toml |  |
 | scalar-layout | lang-yaml/format/scalars.rs | Scalars: flow line layout, quote style and block scalar contents. | Prettier yaml scalars | yaml | SINGLE-USE |
 | section-layout | core-format/shapes/section.rs | A header and the entries under it, one per line with the source's blank lines. | taplo, editorconfig-checker, ini formatters | editorconfig, ini, toml |  |
 | selector-list-layout | lang-css/format/selector.rs | Selector lists printed one selector per line with combinators. | Prettier postcss selectors | css | SINGLE-USE |
@@ -78,13 +78,13 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | template-literal-layout | lang-js/format/template.rs | Template literals with interpolations printed on one line. | Prettier template-literal | js | SINGLE-USE |
 | text-fill | core-format/shapes/fill.rs | Words and separators laid out in a fill: JSX children, inline markup text, prose. | Prettier fill, markdown proseWrap | html, js, markdown |  |
 | token-case | core-format/case.rs | Case of words per token kind (upper, lower, capitalise, consistent) as rows. | sqlfluff CP01-CP05, hadolint instruction case, Prettier lowercase hex and units | css, dockerfile, html, sql |  |
-| token-flow-layout | core-format/shapes/flow.rs | Children one after another with the spacing rows and the line breaks the source has. | none (internal) | csharp, dockerfile, hcl, java, kotlin, php, powershell, sql |  |
+| token-flow-layout | core-format/shapes/flow.rs | Children one after another with the spacing rows and the line breaks the source has. | none (internal) | cpp, csharp, dockerfile, hcl, java, kotlin, php, powershell, sql |  |
 | token-rewrite-rows | core-format/rewrite.rs | Token rewrites (replace, insert) as rows applied to the source before layout. | PHP-CS-Fixer short array syntax and visibility_required | java, js, kotlin, php |  |
-| token-spacing-rows | core-format/spacing.rs | Blanks between neighbouring tokens as ordered rows. | google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01 | csharp, dockerfile, hcl, java, kotlin, php, powershell, sql | LOCAL: lang-shell/format/arith.rs |
+| token-spacing-rows | core-format/spacing.rs | Blanks between neighbouring tokens as ordered rows. | google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01 | cpp, csharp, dockerfile, hcl, java, kotlin, php, powershell, sql | LOCAL: lang-shell/format/arith.rs |
 | trailing-comment-alignment | core-format/align.rs | Trailing comments of consecutive entries start in one column. | taplo align_comments | toml | SINGLE-USE |
 | type-expression-layout | lang-js/format/ts/mod.rs | Type annotations: unions, intersections, generics, function, mapped and tuple types. | Prettier typescript types | js | SINGLE-USE |
 | unary-expression-layout | lang-js/format/unary.rs | Unary, update, await, yield, spread, return and throw expressions. | Prettier unary and keyword expressions | js | SINGLE-USE |
-| verbatim-formatter | lang-cpp/format.rs | A file or node printed as written. |  | cpp, markdown, ruby | LOCAL: lang-cpp/format.rs, lang-markdown/format/keep.rs, lang-ruby/format.rs |
+| verbatim-formatter | lang-markdown/format/keep.rs | A file or node printed as written. |  | markdown, ruby | LOCAL: lang-markdown/format/keep.rs, lang-ruby/format.rs |
 
 ## lint
 

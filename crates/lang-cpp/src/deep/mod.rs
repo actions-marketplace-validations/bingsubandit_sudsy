@@ -83,7 +83,7 @@ impl<'a> Cx<'a> {
         let is_group = |n: &Node| {
             matches!(
                 n.kind,
-                k::PAREN_GROUP | k::BRACKET_GROUP | k::BLOCK | k::INIT_LIST
+                k::PAREN_GROUP | k::DECLARATOR_GROUP | k::BRACKET_GROUP | k::BLOCK | k::INIT_LIST
             )
         };
         let groups = Groups::new(

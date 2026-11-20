@@ -14,12 +14,12 @@ files:
   gnu: layout-gap
   microsoft: layout-gap
 ratchet:
-  llvm: 227
-  fmt: 20
-  range-v3: 49
-  folly: 367
-  linux: 312
-  sqlite: 0
+  llvm: 230
+  fmt: 24
+  range-v3: 70
+  folly: 395
+  linux: 352
+  sqlite: 4
   google: 0
   chromium: 0
   mozilla: 0

@@ -151,6 +151,16 @@ impl CommentStyle {
         }
     }
 
+    /// Is `c` preceded by a blank (or a line start) in the source?
+    fn blank_before(&self, c: &Comment) -> bool {
+        match &c.element {
+            SyntaxElement::Token(t) => t
+                .prev_token()
+                .is_none_or(|p| p.text().ends_with([' ', '\t', '\n', '\r'])),
+            SyntaxElement::Node(_) => true,
+        }
+    }
+
     /// The gap before `c`: `gap`, or the blanks the source has when `keep_gap` and they are more.
     pub fn gap_before(&self, c: &Comment) -> crate::Doc {
         if self.align_lines {
@@ -163,7 +173,10 @@ impl CommentStyle {
                 .map_or(0, |p| p.text().len()),
             _ => 0,
         };
-        if source > self.gap {
+        if self.keep_gap && c.kind == CommentKind::Block && !self.blank_before(c) {
+            // `f(/*name=*/x)`: a block comment written against the code stays against it.
+            crate::doc::Doc::Nil
+        } else if source > self.gap {
             crate::doc::text(" ".repeat(source))
         } else {
             self.gap_doc()

@@ -171,7 +171,6 @@ data grammar-line:container # users: markdown
 data grammar-line:format # users: python
 data grammar-line:hoisted # users: js
 data grammar-line:regex # users: js
-data row-key:at_least_one.parent # users: php
 data row-key:blank.comment_blank # users: kotlin
 data row-key:blank.commented # users: kotlin
 data row-key:blank.doc # users: java
@@ -192,7 +191,6 @@ data row-key:joined.text # users: php
 data row-key:layout.body # users: php
 data row-key:layout.clauses # users: php
 data row-key:layout.ctor # users: kotlin
-data row-key:layout.empty # users: php
 data row-key:layout.gap # users: php
 data row-key:layout.hug_min # users: kotlin
 data row-key:layout.list # users: kotlin
@@ -249,7 +247,6 @@ data tag:tuple # users: python
 data tag:verbatim-trivia # users: csharp
 data tag:with-item # users: python
 data tag:wrapper # users: java
-local lang-cpp/format.rs verbatim-formatter # lang: cpp
 local lang-cpp/lexer.rs source-lexer # lang: cpp
 local lang-csharp/rules/async_suffix.rs naming-convention # lang: csharp
 local lang-csharp/rules/binding.rs unused-import # lang: csharp

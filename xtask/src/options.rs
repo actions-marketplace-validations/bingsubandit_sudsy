@@ -163,6 +163,23 @@ fn getter(name: &str, body: &Value) -> String {
     format!("{allow}pub fn {name}({o}) -> bool {{\n    o.flag({konst}, {default})\n}}\n")
 }
 
+/// The `kinds` of an option (`role: [Kind, ..]`, or `role: {word: [Kind, ..]}`): the constructs
+/// the option governs, as `(option, role, word, kinds)` tuples for the shared shapes.
+fn option_kinds(name: &str, body: &Value) -> String {
+    let roles = body.get("kinds").and_then(Value::as_object);
+    let mut out = String::new();
+    for (role, set) in roles.into_iter().flatten() {
+        let words: Vec<(&str, &Value)> = match set {
+            Value::Object(m) => m.iter().map(|(w, v)| (w.as_str(), v)).collect(),
+            other => vec![("", other)],
+        };
+        for (word, kinds) in words {
+            out += &format!("    ({name:?}, {role:?}, {word:?}, {}),\n", strs(kinds));
+        }
+    }
+    out
+}
+
 /// `src/schema.generated.rs` of a language with an `options` key.
 pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
     let Some(options) = l.yaml.get("options").and_then(Value::as_array) else {
@@ -171,6 +188,7 @@ pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
     let mut consts = String::new();
     let mut defs = String::new();
     let mut getters = String::new();
+    let mut rows = String::new();
     for entry in options {
         let (opt, expr) = def(entry)?;
         if !SHARED_NAMES.contains(&opt.as_str()) {
@@ -180,9 +198,14 @@ pub fn generate(name: &str, l: &Lang) -> Result<Option<String>> {
             );
             if let Some(body) = entry.as_object().and_then(|m| m.values().next()) {
                 getters += &getter(&opt, body);
+                rows += &option_kinds(&opt, body);
             }
         }
         defs += &format!("        {expr},\n");
+    }
+    if !rows.is_empty() {
+        consts +=
+            &format!("pub const OPTION_KINDS: core_format::rules::OptionKinds = &[\n{rows}];\n");
     }
     let presets = l.yaml.get("presets").and_then(Value::as_array);
     let presets = presets.into_iter().flatten().filter_map(Value::as_str);

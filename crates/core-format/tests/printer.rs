@@ -6,6 +6,7 @@ fn opts(width: usize) -> PrintOptions {
         line_width: width,
         indent_width: 2,
         use_tabs: false,
+        align_with_tabs: false,
     }
 }
 
@@ -102,6 +103,7 @@ fn tabs_indent_with_tab_characters() {
         line_width: 80,
         indent_width: 4,
         use_tabs: true,
+        align_with_tabs: false,
     };
     assert_eq!(print(&mut d, &o), "a\n\tb");
 }
@@ -297,4 +299,21 @@ fn contents_aligned_to_a_column_wrap_under_their_start() {
         align(ALIGN_TO_COLUMN, rows()),
     ]));
     assert_eq!(run(d, 80), "\n  x = f(a,\n        b)");
+}
+
+#[test]
+fn a_line_moves_out_by_columns() {
+    let member = |cols| {
+        indent(concat(vec![
+            hardline(),
+            outdent_columns(cols, t("public:")),
+            hardline(),
+            t("int a;"),
+        ]))
+    };
+    assert_eq!(run(member(2), 80), "\npublic:\n  int a;");
+    // a part of a level
+    assert_eq!(run(member(1), 80), "\n public:\n  int a;");
+    // not past column 0
+    assert_eq!(run(member(9), 80), "\npublic:\n  int a;");
 }

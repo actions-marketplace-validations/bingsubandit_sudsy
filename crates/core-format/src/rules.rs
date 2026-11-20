@@ -68,6 +68,8 @@ pub struct RuleFacts {
     pub exact_end: &'static [&'static str],
     /// Most blank lines kept after a comment (`None`: one).
     pub max_blank_after: Option<usize>,
+    /// Blanks before a trailing comment stay when there are more than the style's gap.
+    pub keep_comment_gap: bool,
 }
 
 impl RuleFacts {
@@ -81,6 +83,7 @@ impl RuleFacts {
         verbatim_if: &[],
         exact_end: &[],
         max_blank_after: None,
+        keep_comment_gap: false,
     };
 }
 
@@ -106,10 +109,36 @@ pub struct RuleFormatter {
     source_hang: bool,
     keep_blank_lines: bool,
     max_blank_after: usize,
+    keep_comment_gap: bool,
 }
 
 impl RuleFormatter {
     pub fn parse(g: &Grammar, text: &'static str, facts: &RuleFacts) -> RuleFormatter {
+        RuleFormatter::parse_with(g, text, facts, &[])
+    }
+
+    /// [`RuleFormatter::parse`] with the kind sets of the language's options.
+    pub fn parse_with(
+        g: &Grammar,
+        text: &'static str,
+        facts: &RuleFacts,
+        option_kinds: OptionKinds,
+    ) -> RuleFormatter {
+        let bindings: Vec<Binding> = option_kinds
+            .iter()
+            .map(|(option, role, word, names)| Binding {
+                option: option.to_string(),
+                role: role.to_string(),
+                word: word.to_string(),
+                kinds: names
+                    .iter()
+                    .map(|n| {
+                        g.kind_by_name(n)
+                            .unwrap_or_else(|| panic!("option `{option}`: kind `{n}`"))
+                    })
+                    .collect(),
+            })
+            .collect();
         let kinds = |names: &[&str]| -> Vec<SyntaxKind> {
             names
                 .iter()
@@ -121,13 +150,13 @@ impl RuleFormatter {
         };
         let layout: Vec<&str> = section(text, "layout").collect();
         RuleFormatter {
-            space: SpaceRules::parse(g, text, facts),
+            space: SpaceRules::parse(g, text, facts, &bindings),
             brackets: Brackets::parse(g, text),
             cases: Cases::parse(g, section(text, "case")),
             call_text: text,
             calls: OnceLock::new(),
             rewrite: RewriteRules::parse(g, text),
-            layout: Layout::parse(g, &layout),
+            layout: Layout::parse(g, &layout, bindings),
             blank: Blank::parse(g, section(text, "blank")),
             file: File {
                 one_line: facts.one_line_verbatim,
@@ -138,6 +167,7 @@ impl RuleFormatter {
             source_hang: facts.source_hang,
             keep_blank_lines: facts.keep_blank_lines,
             max_blank_after: facts.max_blank_after.unwrap_or(1),
+            keep_comment_gap: facts.keep_comment_gap,
         }
     }
 
@@ -240,6 +270,7 @@ impl RuleFormatter {
     pub fn comment_style(&self) -> CommentStyle {
         CommentStyle {
             max_blank_after: self.max_blank_after,
+            keep_gap: self.keep_comment_gap,
             ..CommentStyle::default()
         }
     }
@@ -251,7 +282,27 @@ pub struct LazyRules {
     grammar: fn() -> &'static Grammar,
     text: &'static str,
     facts: RuleFacts,
+    option_kinds: OptionKinds,
     cell: OnceLock<RuleFormatter>,
+}
+
+/// The kind sets of the language's options, `(option, role, word, kinds)` (`kinds:` of an option in
+/// `lang.yaml`): the constructs an option governs, which the shared shapes read (the roles are
+/// listed in docs/ai/formatting/engine.md).
+pub type OptionKinds = &'static [(
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static [&'static str],
+)];
+
+/// A kind set of an option, with the grammar's kinds resolved.
+#[derive(Clone)]
+pub struct Binding {
+    pub option: String,
+    pub role: String,
+    pub word: String,
+    pub kinds: Vec<SyntaxKind>,
 }
 
 impl LazyRules {
@@ -260,8 +311,15 @@ impl LazyRules {
             grammar,
             text,
             facts: RuleFacts::DEFAULT,
+            option_kinds: &[],
             cell: OnceLock::new(),
         }
+    }
+
+    /// The kind sets of the language's options.
+    pub const fn option_kinds(mut self, kinds: OptionKinds) -> LazyRules {
+        self.option_kinds = kinds;
+        self
     }
 
     /// The language's [`RuleFacts`].
@@ -271,8 +329,9 @@ impl LazyRules {
     }
 
     pub fn get(&self) -> &RuleFormatter {
-        self.cell
-            .get_or_init(|| RuleFormatter::parse((self.grammar)(), self.text, &self.facts))
+        self.cell.get_or_init(|| {
+            RuleFormatter::parse_with((self.grammar)(), self.text, &self.facts, self.option_kinds)
+        })
     }
 }
 

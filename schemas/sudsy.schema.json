@@ -6513,6 +6513,11 @@
               "description": "Align the trailing comments of consecutive lines.",
               "type": "boolean"
             },
+            "align_with_tabs": {
+              "default": false,
+              "description": "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest.",
+              "type": "boolean"
+            },
             "bin_pack_arguments": {
               "default": true,
               "description": "Call arguments that do not fit on a line are filled; when false they go one per line (or all on one line).",
@@ -6611,6 +6616,20 @@
               "description": "Indent `case` labels one level inside their `switch`.",
               "type": "boolean"
             },
+            "indent_goto_labels": {
+              "default": true,
+              "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+              "type": "boolean"
+            },
+            "indent_pp_directives": {
+              "default": "none",
+              "description": "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`).",
+              "enum": [
+                "none",
+                "keep"
+              ],
+              "type": "string"
+            },
             "indent_size": {
               "default": 2,
               "description": "Columns per indentation level (also the width of a tab).",
@@ -6626,6 +6645,11 @@
                 "tab"
               ],
               "type": "string"
+            },
+            "keep_leading_blank_lines": {
+              "default": true,
+              "description": "Blank lines at the start of the file stay.",
+              "type": "boolean"
             },
             "line_width": {
               "default": 80,
@@ -6805,6 +6829,11 @@
               "description": "Align the trailing comments of consecutive lines.",
               "type": "boolean"
             },
+            "align_with_tabs": {
+              "default": false,
+              "description": "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest.",
+              "type": "boolean"
+            },
             "bin_pack_arguments": {
               "default": true,
               "description": "Call arguments that do not fit on a line are filled; when false they go one per line (or all on one line).",
@@ -6903,6 +6932,20 @@
               "description": "Indent `case` labels one level inside their `switch`.",
               "type": "boolean"
             },
+            "indent_goto_labels": {
+              "default": true,
+              "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+              "type": "boolean"
+            },
+            "indent_pp_directives": {
+              "default": "none",
+              "description": "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`).",
+              "enum": [
+                "none",
+                "keep"
+              ],
+              "type": "string"
+            },
             "indent_size": {
               "default": 2,
               "description": "Columns per indentation level (also the width of a tab).",
@@ -6918,6 +6961,11 @@
                 "tab"
               ],
               "type": "string"
+            },
+            "keep_leading_blank_lines": {
+              "default": true,
+              "description": "Blank lines at the start of the file stay.",
+              "type": "boolean"
             },
             "line_width": {
               "default": 80,
@@ -9800,6 +9848,11 @@
                     "description": "Align the trailing comments of consecutive lines.",
                     "type": "boolean"
                   },
+                  "align_with_tabs": {
+                    "default": false,
+                    "description": "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest.",
+                    "type": "boolean"
+                  },
                   "bin_pack_arguments": {
                     "default": true,
                     "description": "Call arguments that do not fit on a line are filled; when false they go one per line (or all on one line).",
@@ -9898,6 +9951,20 @@
                     "description": "Indent `case` labels one level inside their `switch`.",
                     "type": "boolean"
                   },
+                  "indent_goto_labels": {
+                    "default": true,
+                    "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+                    "type": "boolean"
+                  },
+                  "indent_pp_directives": {
+                    "default": "none",
+                    "description": "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`).",
+                    "enum": [
+                      "none",
+                      "keep"
+                    ],
+                    "type": "string"
+                  },
                   "indent_size": {
                     "default": 2,
                     "description": "Columns per indentation level (also the width of a tab).",
@@ -9913,6 +9980,11 @@
                       "tab"
                     ],
                     "type": "string"
+                  },
+                  "keep_leading_blank_lines": {
+                    "default": true,
+                    "description": "Blank lines at the start of the file stay.",
+                    "type": "boolean"
                   },
                   "line_width": {
                     "default": 80,
@@ -10092,6 +10164,11 @@
                     "description": "Align the trailing comments of consecutive lines.",
                     "type": "boolean"
                   },
+                  "align_with_tabs": {
+                    "default": false,
+                    "description": "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest.",
+                    "type": "boolean"
+                  },
                   "bin_pack_arguments": {
                     "default": true,
                     "description": "Call arguments that do not fit on a line are filled; when false they go one per line (or all on one line).",
@@ -10190,6 +10267,20 @@
                     "description": "Indent `case` labels one level inside their `switch`.",
                     "type": "boolean"
                   },
+                  "indent_goto_labels": {
+                    "default": true,
+                    "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+                    "type": "boolean"
+                  },
+                  "indent_pp_directives": {
+                    "default": "none",
+                    "description": "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`).",
+                    "enum": [
+                      "none",
+                      "keep"
+                    ],
+                    "type": "string"
+                  },
                   "indent_size": {
                     "default": 2,
                     "description": "Columns per indentation level (also the width of a tab).",
@@ -10205,6 +10296,11 @@
                       "tab"
                     ],
                     "type": "string"
+                  },
+                  "keep_leading_blank_lines": {
+                    "default": true,
+                    "description": "Blank lines at the start of the file stay.",
+                    "type": "boolean"
                   },
                   "line_width": {
                     "default": 80,

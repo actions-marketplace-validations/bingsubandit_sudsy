@@ -1,23 +1,27 @@
-//! C and C++ formatting: the file is printed as written.
+//! C and C++ formatting is data: `format.rules` (docs/ai/formatting/cpp.md).
 //!
-//! concept: new verbatim-formatter
-//! what: A file or node printed as written.
+//! concept: rules-file-formatter
 
 use core_config::shared;
-use core_format::context::verbatim_text;
-use core_format::{Doc, FormatCtx, FormatError, NodeFormatter};
-use core_syntax::SyntaxNode;
+use core_format::rules::{LazyRules, RuleFacts};
+use core_syntax::grammars;
 
 include!("schema.generated.rs");
 
-pub struct CppFormatter;
-
-impl NodeFormatter for CppFormatter {
-    fn format_node(
-        &self,
-        node: &SyntaxNode,
-        _cx: &FormatCtx<'_>,
-    ) -> Result<Option<Doc>, FormatError> {
-        Ok(Some(verbatim_text(&node.text().to_string())))
-    }
-}
+#[allow(non_upper_case_globals)]
+pub static CppFormatter: LazyRules =
+    LazyRules::new(|| grammars::CPP.get(), include_str!("../format.rules"))
+        .option_kinds(OPTION_KINDS)
+        .facts(RuleFacts {
+            // Source line breaks and blanks stay where no row decides; the `{` of a block ends a hang.
+            exact: true,
+            source_hang: true,
+            keep_blank_lines: true,
+            unhang: &["kind=Lbrace&parent=Block"],
+            op_first: &[],
+            one_line_verbatim: false,
+            verbatim_if: &[],
+            exact_end: &[],
+            max_blank_after: None,
+            keep_comment_gap: true,
+        });

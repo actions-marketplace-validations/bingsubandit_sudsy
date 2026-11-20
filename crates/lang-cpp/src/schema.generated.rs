@@ -8,11 +8,19 @@ pub const ACCESS_MODIFIER_OUTDENT: &str = "access_modifier_outdent";
 #[allow(dead_code)]
 pub const INDENT_CASE_LABELS: &str = "indent_case_labels";
 #[allow(dead_code)]
+pub const INDENT_GOTO_LABELS: &str = "indent_goto_labels";
+#[allow(dead_code)]
+pub const KEEP_LEADING_BLANK_LINES: &str = "keep_leading_blank_lines";
+#[allow(dead_code)]
+pub const INDENT_PP_DIRECTIVES: &str = "indent_pp_directives";
+#[allow(dead_code)]
 pub const NAMESPACE_INDENTATION: &str = "namespace_indentation";
 #[allow(dead_code)]
 pub const POINTER_ALIGNMENT: &str = "pointer_alignment";
 #[allow(dead_code)]
 pub const BRACE_WRAPPING: &str = "brace_wrapping";
+#[allow(dead_code)]
+pub const ALIGN_WITH_TABS: &str = "align_with_tabs";
 #[allow(dead_code)]
 pub const INDENT_BRACES: &str = "indent_braces";
 #[allow(dead_code)]
@@ -53,6 +61,31 @@ pub const ALIGN_TRAILING_COMMENTS: &str = "align_trailing_comments";
 pub const BREAK_TEMPLATE_DECLARATIONS: &str = "break_template_declarations";
 #[allow(dead_code)]
 pub const ALIGN_ESCAPED_NEWLINES: &str = "align_escaped_newlines";
+pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
+    ("access_modifier_outdent", "outdent", "", &["AccessSpecifier"]),
+    ("indent_case_labels", "outdent_unless", "", &["CaseClause"]),
+    ("indent_goto_labels", "flush_unless", "", &["LabelStatement"]),
+    ("indent_pp_directives", "tight", "", &["Directive"]),
+    ("namespace_indentation", "flat", "", &["NamespaceDeclaration"]),
+    ("pointer_alignment", "tight_after", "", &["Ellipsis"]),
+    ("pointer_alignment", "tight_behind", "", &["Star", "Amp", "AmpAmp"]),
+    ("brace_wrapping", "attach", "class", &["ClassSpecifier"]),
+    ("brace_wrapping", "attach", "control", &["IfStatement", "ForStatement", "WhileStatement", "SwitchStatement", "DoStatement", "TryStatement"]),
+    ("brace_wrapping", "attach", "enum", &["EnumSpecifier"]),
+    ("brace_wrapping", "attach", "function", &["FunctionDeclaration"]),
+    ("brace_wrapping", "attach", "namespace", &["NamespaceDeclaration"]),
+    ("brace_wrapping", "attach", "struct", &["ClassSpecifier"]),
+    ("brace_wrapping", "attach", "union", &["ClassSpecifier"]),
+    ("short_functions", "fit", "", &["FunctionDeclaration"]),
+    ("short_functions", "no_fit_under", "", &["TemplateDeclaration"]),
+    ("short_functions", "no_fit_with", "", &["ConstructorInitializers"]),
+    ("short_ifs", "head", "", &["Condition"]),
+    ("short_ifs", "join", "", &["IfStatement"]),
+    ("short_loops", "head", "", &["Condition"]),
+    ("short_loops", "join", "", &["ForStatement", "WhileStatement"]),
+    ("short_lambdas", "fit", "", &["Lambda"]),
+    ("short_enums", "fit", "", &["EnumSpecifier"]),
+];
 #[allow(dead_code)]
 pub fn wrap_lines(o: &core_config::ResolvedOptions) -> bool {
     o.flag(WRAP_LINES, true)
@@ -68,6 +101,24 @@ pub fn access_modifier_outdent(o: &core_config::ResolvedOptions) -> usize {
 #[allow(dead_code)]
 pub fn indent_case_labels(o: &core_config::ResolvedOptions) -> bool {
     o.flag(INDENT_CASE_LABELS, false)
+}
+#[allow(dead_code)]
+pub fn indent_goto_labels(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(INDENT_GOTO_LABELS, true)
+}
+#[allow(dead_code)]
+pub fn keep_leading_blank_lines(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(KEEP_LEADING_BLANK_LINES, true)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IndentPpDirectives { None, Keep }
+#[allow(dead_code)]
+pub fn indent_pp_directives(o: &core_config::ResolvedOptions) -> IndentPpDirectives {
+    match o.text(INDENT_PP_DIRECTIVES) {
+        "keep" => IndentPpDirectives::Keep,
+        _ => IndentPpDirectives::None,
+    }
 }
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -90,6 +141,10 @@ pub fn pointer_alignment(o: &core_config::ResolvedOptions) -> PointerAlignment {
         "middle" => PointerAlignment::Middle,
         _ => PointerAlignment::Right,
     }
+}
+#[allow(dead_code)]
+pub fn align_with_tabs(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(ALIGN_WITH_TABS, false)
 }
 #[allow(dead_code)]
 pub fn indent_braces(o: &core_config::ResolvedOptions) -> bool {
@@ -259,9 +314,13 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::int("continuation_indent", 4, (0, 16), "Columns a wrapped line is indented more than the line it continues, where it is not aligned to a bracket."),
         core_config::OptionDef::int("access_modifier_outdent", 2, (0, 16), "Columns `public:`, `private:` and `protected:` are outdented from the members of their class."),
         core_config::OptionDef::boolean("indent_case_labels", false, "Indent `case` labels one level inside their `switch`."),
+        core_config::OptionDef::boolean("indent_goto_labels", true, "Indent a goto label like the statements of its block; when false it starts at column 0."),
+        core_config::OptionDef::boolean("keep_leading_blank_lines", true, "Blank lines at the start of the file stay."),
+        core_config::OptionDef::choice("indent_pp_directives", &["none", "keep"], "none", "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."),
         core_config::OptionDef::choice("namespace_indentation", &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
         core_config::OptionDef::choice("pointer_alignment", &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
         core_config::OptionDef::words("brace_wrapping", &[], "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."),
+        core_config::OptionDef::boolean("align_with_tabs", false, "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."),
         core_config::OptionDef::boolean("indent_braces", false, "Indent a brace that is on its own line together with the block it opens."),
         core_config::OptionDef::choice("short_functions", &["none", "empty", "inline", "all"], "all", "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."),
         core_config::OptionDef::choice("short_ifs", &["never", "without_else", "all"], "never", "An `if` with a simple statement is kept on one line when it fits: `never`, without an `else`, or with or without."),

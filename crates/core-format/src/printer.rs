@@ -6,7 +6,7 @@
 //! tools: Prettier printDocToString
 //! reads: grammar:language
 
-use crate::doc::{self, Doc, GroupId};
+use crate::doc::{self, Doc, GroupId, Outdent};
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthChar;
 
@@ -16,6 +16,8 @@ pub struct PrintOptions {
     /// Columns per indentation level.
     pub indent_width: usize,
     pub use_tabs: bool,
+    /// With tabs, an alignment is tabs for each whole indent width and spaces for the rest.
+    pub align_with_tabs: bool,
 }
 
 impl Default for PrintOptions {
@@ -24,6 +26,7 @@ impl Default for PrintOptions {
             line_width: 80,
             indent_width: 2,
             use_tabs: false,
+            align_with_tabs: false,
         }
     }
 }
@@ -59,6 +62,8 @@ struct Level {
     indented: Option<usize>,
     /// The levels `align` made from this one, as `(spaces, level)`.
     aligned: Vec<(usize, usize)>,
+    /// The levels an outdent by columns made from this one, as `(columns, level)`.
+    dedented: Vec<(usize, usize)>,
 }
 
 /// Indentation levels are interned: a command carries an index into this arena, and a level is
@@ -85,6 +90,7 @@ impl Indents {
             width,
             indented: None,
             aligned: Vec::new(),
+            dedented: Vec::new(),
         });
         self.levels.len() - 1
     }
@@ -115,6 +121,29 @@ impl Indents {
         level
     }
 
+    /// The level `columns` columns narrower than `level` (tabs for whole indents when tabs are
+    /// used, spaces for the rest).
+    fn dedent(&mut self, level: usize, columns: usize) -> usize {
+        if let Some((_, i)) = self.levels[level]
+            .dedented
+            .iter()
+            .find(|(n, _)| *n == columns)
+        {
+            return *i;
+        }
+        let width = self.levels[level].width.saturating_sub(columns);
+        let w = self.opts.indent_width.max(1);
+        let text = if self.opts.use_tabs {
+            format!("{}{}", "\t".repeat(width / w), " ".repeat(width % w))
+        } else {
+            " ".repeat(width)
+        };
+        let parent = self.levels[level].parent;
+        let i = self.push(parent, text, width);
+        self.levels[level].dedented.push((columns, i));
+        i
+    }
+
     fn align(&mut self, parent: usize, spaces: usize) -> usize {
         if let Some((_, i)) = self.levels[parent]
             .aligned
@@ -124,7 +153,13 @@ impl Indents {
             return *i;
         }
         let Level { text, width, .. } = &self.levels[parent];
-        let (text, width) = (format!("{text}{}", " ".repeat(spaces)), width + spaces);
+        let width = width + spaces;
+        let w = self.opts.indent_width.max(1);
+        let text = if self.opts.use_tabs && self.opts.align_with_tabs {
+            format!("{}{}", "\t".repeat(width / w), " ".repeat(width % w))
+        } else {
+            format!("{text}{}", " ".repeat(spaces))
+        };
         let i = self.push(parent, text, width);
         self.levels[parent].aligned.push((spaces, i));
         i
@@ -176,6 +211,7 @@ pub fn print_counting(doc: &mut Doc, opts: &PrintOptions) -> (String, usize, Pri
         out: String::new(),
         pos: 0,
         suffixes: Vec::new(),
+        suffix_at: None,
         line_level: 0,
         remeasure: false,
         group_modes: HashMap::new(),
@@ -195,6 +231,8 @@ struct Printer<'a> {
     out: String,
     pos: usize,
     suffixes: Vec<Cmd<'a>>,
+    /// Where the output stood when the last pending comments were queued.
+    suffix_at: Option<usize>,
     /// The indentation level of the current line.
     line_level: usize,
     /// Set after a hard line in flat mode: the next group must be measured again.
@@ -227,6 +265,7 @@ impl<'a> Printer<'a> {
     /// second comment of a line brought along takes the deeper indent of the line it follows and the line break that follows (formatting the
     /// output again reads it as a comment on one of them).
     fn flush_suffixes(&mut self, cmds: &mut Vec<Cmd<'a>>, indent: usize) {
+        self.suffix_at = Some(self.out.len());
         for mut c in self.suffixes.drain(..).rev() {
             if matches!(c.item, Item::Doc(d) if std::ptr::eq(d, &HARD_LINE)) {
                 c.indent = [indent, self.line_level]
@@ -275,6 +314,33 @@ impl<'a> Printer<'a> {
         self.pos = level.width;
     }
 
+    /// The column where the comment that ended the previous line starts (see [`Outdent::Suffix`]).
+    fn suffix_column(&self) -> Option<usize> {
+        let at = self.suffix_at?;
+        let tail = self.out.get(at..)?;
+        if tail.matches('\n').count() != usize::from(self.line_is_blank())
+            || !tail.trim_start().starts_with("//")
+        {
+            return None;
+        }
+        let start = at + (tail.len() - tail.trim_start().len());
+        let line = self.out[..start].rfind('\n').map_or(0, |i| i + 1);
+        Some(str_width(&self.out[line..start], self.opts.indent_width))
+    }
+
+    /// The column of the first `//` on the line above the current blank one (a directive that
+    /// was printed as written has no queued comment).
+    fn previous_line_comment_column(&self) -> Option<usize> {
+        if !self.line_is_blank() {
+            return None;
+        }
+        let end = self.current_line_start().checked_sub(1)?;
+        let start = self.out[..end].rfind('\n').map_or(0, |i| i + 1);
+        let line = &self.out[start..end];
+        let at = line.find("//")?;
+        Some(str_width(&line[..at], self.opts.indent_width))
+    }
+
     fn current_line_start(&self) -> usize {
         self.out.rfind('\n').map_or(0, |i| i + 1).max(self.keep)
     }
@@ -305,6 +371,7 @@ impl<'a> Printer<'a> {
             let level = &self.indents.levels[indent];
             self.out.push_str(&level.text);
             self.pos = level.width;
+            self.line_level = indent;
         } else {
             self.newline(indent);
         }
@@ -424,20 +491,39 @@ impl<'a> Printer<'a> {
                 let i = self.indents.indent(indent);
                 push(cmds, i, mode, d);
             }
-            Doc::Outdent(levels, d) => {
-                let i = self.indents.outdent(indent, *levels);
+            Doc::Outdent(by, d) => {
+                if !self.suffixes.is_empty() {
+                    cmds.push(cmd);
+                    self.flush_suffixes(cmds, indent);
+                    return;
+                }
+                let i = match *by {
+                    Outdent::Levels(levels) => self.indents.outdent(indent, levels),
+                    Outdent::Columns(columns) => self.indents.dedent(indent, columns),
+                    Outdent::Suffix(source) => {
+                        let col = (self.suffix_column())
+                            .or_else(|| self.previous_line_comment_column())
+                            .unwrap_or(source);
+                        self.indents.align(0, col)
+                    }
+                };
                 self.restart_line(i);
                 push(cmds, i, mode, d);
             }
             Doc::Align(n, d) => {
                 // `doc::ALIGN_TO_COLUMN`: the lines of the contents start at the column the
                 // contents start at.
-                let n = if *n == doc::ALIGN_TO_COLUMN {
-                    self.pos.saturating_sub(self.indents.levels[indent].width)
+                let (base, n) = if *n == doc::ALIGN_TO_COLUMN {
+                    (
+                        indent,
+                        self.pos.saturating_sub(self.indents.levels[indent].width),
+                    )
+                } else if *n & doc::ALIGN_FROM_LINE != 0 {
+                    (self.line_level, *n & !doc::ALIGN_FROM_LINE)
                 } else {
-                    *n
+                    (indent, *n)
                 };
-                let i = self.indents.align(indent, n);
+                let i = self.indents.align(base, n);
                 push(cmds, i, mode, d);
             }
             Doc::IfBreak {

@@ -240,6 +240,8 @@ pub struct FormatCtx<'a> {
     /// Documents of nodes formatted for a layout, by node and flags (see [`FormatCtx::layout`]).
     layouts: Mutex<HashMap<(TextRange, u32, u32), Doc>>,
     embedder: Option<&'a dyn Embedder>,
+    /// The option `max_blank_lines`, read once (all the blank lines of the source without it).
+    pub(crate) max_blank_lines: usize,
 }
 
 impl<'a> FormatCtx<'a> {
@@ -255,6 +257,10 @@ impl<'a> FormatCtx<'a> {
             directives,
             formatter,
             comment_style: formatter.comment_style(options),
+            max_blank_lines: match options.get("max_blank_lines") {
+                Some(core_config::OptionValue::Int(n)) => usize::try_from(*n).unwrap_or(usize::MAX),
+                _ => usize::MAX,
+            },
             line_breaks: Mutex::new(None),
             detached: Mutex::new(Vec::new()),
             held: Mutex::new(HashMap::new()),
@@ -804,20 +810,76 @@ pub fn leading_comments_doc_with(cs: &[Comment], st: &CommentStyle) -> Doc {
         // A comment that was on its own line starts one, wherever the formatter put the code
         // before it (a later one is on the line of the comment before it, or that comment ended
         // the line already).
-        if i == 0 && (c.kind != CommentKind::Block || c.breaks_after > 0) {
-            parts.push(doc::newline_if_needed());
+        if i == 0 && st.keep_gap && continues_trailing(c) {
+            // The next line of a comment that began after code stays under it.
+            parts.push(continuing_comment_doc(c, st));
+        } else {
+            if i == 0 && (c.kind != CommentKind::Block || c.breaks_after > 0) {
+                parts.push(doc::newline_if_needed());
+            }
+            parts.push(comment_doc_in(c, st));
         }
-        parts.push(comment_doc_in(c, st));
         if c.kind == CommentKind::Line || c.breaks_after > 0 {
             parts.push(doc::hardline());
             for _ in 0..c.breaks_after.saturating_sub(1).min(max_blank) {
                 parts.push(doc::hardline());
             }
-        } else {
+        } else if !st.keep_gap || gap_follows(c) {
             parts.push(doc::lit(" "));
         }
     }
     doc::concat(parts)
+}
+
+/// The comment on a line of its own, under the trailing comment that ended the line before.
+pub(crate) fn continuing_comment_doc(c: &Comment, st: &CommentStyle) -> Doc {
+    doc::outdent_to_suffix(comment_doc_in(c, st), comments::column(c.token()))
+}
+
+/// Is `c` a line comment on its own line right under a trailing `//` comment, in its column?
+pub(crate) fn continues_trailing(c: &Comment) -> bool {
+    let SyntaxElement::Token(t) = &c.element else {
+        return false;
+    };
+    let ws = |t: &SyntaxToken| {
+        t.text()
+            .bytes()
+            .all(|b| matches!(b, b' ' | b'\t' | b'\n' | b'\r'))
+    };
+    if c.kind != CommentKind::Line {
+        return false;
+    }
+    // the blanks before the comment hold one line break
+    let (mut breaks, mut cur) = (0, t.prev_token());
+    while let Some(w) = cur.as_ref().filter(|w| ws(w)) {
+        breaks += w.text().matches('\n').count();
+        cur = w.prev_token();
+    }
+    let Some(p) = cur.filter(|p| breaks == 1 && p.text().starts_with("//")) else {
+        return false;
+    };
+    let mut before = p.prev_token();
+    while let Some(w) = before
+        .as_ref()
+        .filter(|w| ws(w) && !w.text().contains('\n'))
+    {
+        before = w.prev_token();
+    }
+    let after_code = before.is_some_and(|x| !ws(&x));
+    after_code && comments::column(&p) == comments::column(t)
+}
+
+/// Is the comment followed by a blank in the source (`/*x=*/0` has none)?
+fn gap_follows(c: &Comment) -> bool {
+    match &c.element {
+        SyntaxElement::Token(t) => t
+            .next_token()
+            .is_none_or(|n| n.text().starts_with([' ', '\t', '\n', '\r'])),
+        SyntaxElement::Node(n) => n
+            .last_token()
+            .and_then(|t| t.next_token())
+            .is_none_or(|n| n.text().starts_with([' ', '\t', '\n', '\r'])),
+    }
 }
 
 /// Comments after a token on its line: line comments are deferred to the end of the line and

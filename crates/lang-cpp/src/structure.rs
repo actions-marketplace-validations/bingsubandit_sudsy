@@ -153,6 +153,13 @@ impl Builder<'_> {
             Open::Line => k::LINE,
             Open::Brace if block => k::BLOCK,
             Open::Brace => k::INIT_LIST,
+            Open::Paren
+                if (self.next_code(first)).is_some_and(|j| {
+                    matches!(self.toks[j].kind, k::STAR | k::AMP | k::AMP_AMP)
+                }) =>
+            {
+                k::DECLARATOR_GROUP
+            }
             Open::Paren => k::PAREN_GROUP,
             Open::Bracket => k::BRACKET_GROUP,
         };
@@ -435,12 +442,18 @@ impl Builder<'_> {
         match self.toks[p].kind {
             // `(T){ ... }` after an operator or `return` is a compound literal.
             k::RPAR => !self.prev_code(self.paren_open).is_some_and(|o| {
-                matches!(
+                // (`operator=(T) { ... }` names a function)
+                (matches!(
                     self.toks[o].kind,
                     k::EQUAL | k::QUESTION | k::COMMA | k::LPAR | k::LSQB
-                ) || self.text(o) == "return"
+                ) && !self
+                    .prev_code(o)
+                    .is_some_and(|q| self.text(q) == "operator"))
+                    || self.text(o) == "return"
             }),
             k::SEMI | k::RBRACE | k::LBRACE | k::COLON | k::AMP | k::AMP_AMP => true,
+            // `({ statements })`
+            k::LPAR => self.has_top_level_semi(i),
             // A macro that takes a block: `SCOPE_EXIT {`.
             k::IDENT if count == 1 && self.text(p).len() >= 4 && macro_name(self.text(p)) => true,
             k::IDENT | k::KEYWORD | k::STRING | k::GREATER | k::GREATER_GREATER => {
@@ -459,6 +472,28 @@ impl Builder<'_> {
             }
             _ => false,
         }
+    }
+
+    /// Whether the brace group opened at `i` holds a `;` outside any parentheses: statements,
+    /// not values.
+    fn has_top_level_semi(&self, i: usize) -> bool {
+        let (mut braces, mut parens) = (0usize, 0usize);
+        for t in &self.toks[i..] {
+            match t.kind {
+                k::LBRACE => braces += 1,
+                k::LPAR | k::LSQB => parens += 1,
+                k::RPAR | k::RSQB => parens = parens.saturating_sub(1),
+                k::RBRACE => {
+                    braces = braces.saturating_sub(1);
+                    if braces == 0 {
+                        return false;
+                    }
+                }
+                k::SEMI if parens == 0 && t.dir == 0 => return true,
+                _ => {}
+            }
+        }
+        false
     }
 
     /// The `}` at `i` closed `group`: the line it is on goes on or ends.

@@ -16,20 +16,55 @@ options:
       range: [0, 16]
       default: 2
       doc: "Columns `public:`, `private:` and `protected:` are outdented from the members of their class."
+      kinds:
+        outdent: [AccessSpecifier]
   - indent_case_labels:
       default: false
       doc: "Indent `case` labels one level inside their `switch`."
+      kinds:
+        outdent_unless: [CaseClause]
+  - indent_goto_labels:
+      default: true
+      doc: "Indent a goto label like the statements of its block; when false it starts at column 0."
+      kinds:
+        flush_unless: [LabelStatement]
+  - keep_leading_blank_lines:
+      default: true
+      doc: "Blank lines at the start of the file stay."
+  - indent_pp_directives:
+      values: ["none", "keep"]
+      default: "none"
+      doc: "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."
+      kinds:
+        tight: [Directive]
   - namespace_indentation:
       values: ["none", "inner", "all"]
       default: "none"
       doc: "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."
+      kinds:
+        flat: [NamespaceDeclaration]
   - pointer_alignment:
       values: ["right", "left", "middle"]
       default: "right"
       doc: "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."
+      kinds:
+        tight_after: [Ellipsis]
+        tight_behind: [Star, Amp, AmpAmp]
   - brace_wrapping:
       kind: "words"
       doc: "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."
+      kinds:
+        attach:
+          function: [FunctionDeclaration]
+          control: [IfStatement, ForStatement, WhileStatement, SwitchStatement, DoStatement, TryStatement]
+          class: [ClassSpecifier]
+          struct: [ClassSpecifier]
+          union: [ClassSpecifier]
+          enum: [EnumSpecifier]
+          namespace: [NamespaceDeclaration]
+  - align_with_tabs:
+      default: false
+      doc: "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."
   - indent_braces:
       default: false
       doc: "Indent a brace that is on its own line together with the block it opens."
@@ -37,17 +72,29 @@ options:
       values: ["none", "empty", "inline", "all"]
       default: "all"
       doc: "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."
+      kinds:
+        fit: [FunctionDeclaration]
+        no_fit_under: [TemplateDeclaration]
+        no_fit_with: [ConstructorInitializers]
   - short_ifs:
       values: ["never", "without_else", "all"]
       default: "never"
       doc: "An `if` with a simple statement is kept on one line when it fits: `never`, without an `else`, or with or without."
+      kinds:
+        join: [IfStatement]
+        head: [Condition]
   - short_loops:
       default: false
       doc: "A `for`, `while` or range-for with a simple statement is kept on one line when it fits."
+      kinds:
+        join: [ForStatement, WhileStatement]
+        head: [Condition]
   - short_lambdas:
       values: ["none", "empty", "inline", "all"]
       default: "all"
       doc: "Lambda bodies kept on the line of the lambda when they fit: `none`, `empty`, `inline` (a lambda that is an argument) or `all`."
+      kinds:
+        fit: [Lambda]
   - short_case_labels:
       default: false
       doc: "A `case` label and its simple statement are kept on one line when they fit."
@@ -80,6 +127,8 @@ options:
   - short_enums:
       default: true
       doc: "An enum whose body fits stays on one line."
+      kinds:
+        fit: [EnumSpecifier]
   - penalty_return_type:
       range: [0, 1000]
       default: 60

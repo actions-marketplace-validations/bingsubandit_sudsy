@@ -28,7 +28,6 @@ pub enum Dialect {
 /// The provider of a dialect; `c` takes `cpp` as its config base. `.h` is C: a project whose
 /// headers are C++ writes its `cpp` options where the C ones would apply, or names the files.
 pub fn provider(dialect: Dialect) -> ParserProvider {
-    static FORMATTER: CppFormatter = CppFormatter;
     let spec = ParserSpec {
         crate_name: env!("CARGO_PKG_NAME"),
         grammar: grammars::CPP,
@@ -38,7 +37,7 @@ pub fn provider(dialect: Dialect) -> ParserProvider {
         },
         file_names: &[],
         schema: option_schema(),
-        formatter: &FORMATTER,
+        formatter: &CppFormatter,
         hooks: &core_rules::DEFAULT_HOOKS,
         rules: &[],
         pattern_files: provider_api::pattern_files!(),

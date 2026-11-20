@@ -26,10 +26,10 @@ pub enum Doc {
     /// disabled code): the printer takes back the indentation of a blank line, or first starts a
     /// new line if the current one has content. It breaks the enclosing groups.
     LineStart(String),
-    /// Contents that start their own line indented this many levels less than the current
-    /// indentation (all of it with `usize::MAX`): the printer takes back the indentation of a
-    /// blank line, or first starts a new line. It breaks the enclosing groups.
-    Outdent(usize, Box<Doc>),
+    /// Contents that start their own line indented this many levels (or columns) less than the
+    /// current indentation (all of it with `Levels(usize::MAX)`): the printer takes back the
+    /// indentation of a blank line, or first starts a new line. It breaks the enclosing groups.
+    Outdent(Outdent, Box<Doc>),
     /// A hard line break, unless the current line is empty. Starts an own-line comment that
     /// follows text on the line the formatter chose. It breaks the enclosing groups.
     NewlineIfNeeded,
@@ -79,6 +79,18 @@ pub enum Doc {
     /// A hard line when a line suffix is pending, else nothing: what follows must not move before
     /// the comment (it does not break the enclosing groups).
     LineSuffixBoundary,
+}
+
+/// How far [`Doc::Outdent`] moves a line out.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Outdent {
+    /// Indentation levels.
+    Levels(usize),
+    /// Columns, not rounded to levels; never past column 0.
+    Columns(usize),
+    /// The column of the comment that ended the line before (a comment under it continues it);
+    /// the given one (where the comment stood in the source) when no comment did.
+    Suffix(usize),
 }
 
 /// The parts of [`Doc::FitsBelow`].
@@ -594,11 +606,25 @@ pub fn indent(d: Doc) -> Doc {
 }
 
 pub fn outdent(levels: usize, d: Doc) -> Doc {
-    Doc::Outdent(levels, Box::new(d))
+    Doc::Outdent(Outdent::Levels(levels), Box::new(d))
+}
+
+/// `d` on a line that starts `columns` columns left of the current indentation.
+pub fn outdent_columns(columns: usize, d: Doc) -> Doc {
+    Doc::Outdent(Outdent::Columns(columns), Box::new(d))
+}
+
+/// `d` on a line of its own, under the comment that ended the line before.
+pub fn outdent_to_suffix(d: Doc, source_column: usize) -> Doc {
+    Doc::Outdent(Outdent::Suffix(source_column), Box::new(d))
 }
 
 /// The `spaces` of [`align`] that mean "the column where the contents start".
 pub const ALIGN_TO_COLUMN: usize = usize::MAX;
+
+/// A flag on the `spaces` of [`align`]: they count from the indentation of the line the contents
+/// start on, not from the indentation the contents are in.
+pub const ALIGN_FROM_LINE: usize = 1 << (usize::BITS - 2);
 
 pub fn align(spaces: usize, d: Doc) -> Doc {
     Doc::Align(spaces, Box::new(d))

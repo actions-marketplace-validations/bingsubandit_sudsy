@@ -231,7 +231,12 @@ impl Cx<'_> {
             {
                 self.pos = self.skip(self.pos);
             }
-            self.unary();
+            // `sizeof(T) * n`: the parentheses of a word operator are its operand, no cast.
+            if t.kind == k::KEYWORD && self.is(self.pos, self.lim, k::LPAR) {
+                self.postfix();
+            } else {
+                self.unary();
+            }
             if self.pos > at + 1 {
                 self.emit(at, self.pos - 1, k::UNARY);
             }
@@ -387,7 +392,7 @@ impl Cx<'_> {
                 }
                 k::PLUS_PLUS | k::MINUS_MINUS => {
                     self.pos = p + 1;
-                    self.emit(at, p, k::UNARY);
+                    self.emit(at, p, k::POSTFIX);
                 }
                 _ => return,
             }
@@ -429,7 +434,7 @@ impl Cx<'_> {
             k::IDENT | k::COLON_COLON => self.name(),
             k::KEYWORD => {
                 let w = self.text(at);
-                if OPERAND_WORDS.contains(&w) || is_builtin(w) {
+                if OPERAND_WORDS.contains(&w) || is_builtin(w) || w == "operator" {
                     self.name();
                 }
             }
@@ -593,14 +598,27 @@ impl Cx<'_> {
                 | k::TILDE
                 | k::BANG => {}
                 k::AMP_AMP => {
-                    if !matches!(
-                        self.c.get(q + 1).map(|t| t.kind),
-                        Some(k::GREATER | k::GREATER_GREATER | k::COMMA | k::ELLIPSIS)
-                    ) {
+                    if !lax
+                        && !matches!(
+                            self.c.get(q + 1).map(|t| t.kind),
+                            Some(k::GREATER | k::GREATER_GREATER | k::COMMA | k::ELLIPSIS)
+                        )
+                    {
                         return None;
                     }
                 }
-                k::EQUAL | k::DOT | k::ARROW if lax => {}
+                k::SLASH | k::PERCENT | k::PIPE | k::LESS_LESS => {}
+                k::EQUAL
+                | k::DOT
+                | k::ARROW
+                | k::QUESTION
+                | k::COLON
+                | k::PIPE_PIPE
+                | k::EQ_EQ
+                | k::BANG_EQ
+                    if lax => {}
+                k::DOT | k::ARROW | k::PIPE_PIPE | k::EQ_EQ | k::BANG_EQ
+                    if p >= 2 && self.c[p - 2].kind == k::COLON_COLON => {}
                 k::KEYWORD => {
                     if matches!(
                         self.text(q),

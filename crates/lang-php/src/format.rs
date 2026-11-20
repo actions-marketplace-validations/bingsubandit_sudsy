@@ -15,7 +15,7 @@ pub static PhpFormatter: LazyRules =
         exact: true,
         source_hang: true,
         keep_blank_lines: true,
-        unhang: &["LBrace"],
+        unhang: &["kind=LBrace"],
         // Operators that start a line (`operator_linebreak`).
         op_first: &[
             "kind=Operator&parent=Binary",
@@ -26,4 +26,5 @@ pub static PhpFormatter: LazyRules =
         verbatim_if: &["InlineText", "CloseTag", "ShortOpeningTag", "EchoTag"],
         exact_end: &["InlineText"],
         max_blank_after: Some(usize::MAX),
+        keep_comment_gap: false,
     });

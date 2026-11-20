@@ -7,7 +7,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 
 | # | Language | Format identical (tool) | Lint coverage (tool, preset) | Biggest causes |
 |---|---|---|---|---|
-| 1 | C / C++ | 14.7% (verbatim baseline vs clang-format 20.1.8: 975 of 6,639 files, LLVM 227/420, folly 367/2,299, Linux 312/2,872, range-v3 49/593, fmt 20/70, SQLite 0/325, presets 0/10 each) | none (no clang-tidy catalog) | no layout yet: formatter on shared shapes in progress ([design/cpp-formatter.md](design/cpp-formatter.md)); no lint rules |
+| 1 | C / C++ | 16.2% (statements and blocks landed, vs clang-format 20.1.8: 1,075 of 6,639 files, LLVM 230/420, folly 395/2,299, Linux 352/2,872, range-v3 70/593, fmt 24/70, SQLite 4/325, presets 0/10 each) | none (no clang-tidy catalog) | no layout yet: formatter on shared shapes in progress ([design/cpp-formatter.md](design/cpp-formatter.md)); no lint rules |
 | 2 | JSON | ? (fixtures only, no real-world corpus) | ? (eslint-plugin-jsonc; corpus is JSONTestSuite) | no real-world corpus; no coverage run |
 | 3 | XML | ? (CSharpier XML, 372 project files, count not recorded) | none | no corpus count; no reference linter |
 | 4 | GitHub Actions | none (YAML formatter, no reference) | 5.4% (actionlint, `github-actions/actionlint`) | `syntax-check` 235, `expression/types` 155, `events` 115 findings |
@@ -38,6 +38,7 @@ Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured 
 
 ## Small tasks
 - perf-bench builds the base tree with the candidate's tools/perf-bench, so a `FileContext`/`parse_regions` API change fails the base build; build the base with its own perf-bench.
+- `Flow::seq` wraps only flows with a hung part in the `ALIGN_FROM_LINE` align (php.format +1.43% under `source_hang`); prove it with a cpp parity run.
 - Read shared rule specs once per process, not per embedded language.
 - Human docs (docs/*.md, README.md) carry numbers copied from docs/ai; refresh them when a parity or performance number changes.
 - Format-string family: dispatch once per node instead of 16 `MEMO.names` calls (py.lint +3.6%).

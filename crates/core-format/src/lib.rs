@@ -88,6 +88,10 @@ pub fn print_options(options: &ResolvedOptions) -> PrintOptions {
         line_width: int(shared::LINE_WIDTH, default.line_width),
         indent_width: int(shared::INDENT_SIZE, default.indent_width),
         use_tabs: options.is(shared::INDENT_STYLE, "tab"),
+        align_with_tabs: matches!(
+            options.get("align_with_tabs"),
+            Some(core_config::OptionValue::Bool(true))
+        ),
     }
 }
 
