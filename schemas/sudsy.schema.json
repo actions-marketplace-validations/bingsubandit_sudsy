@@ -2130,6 +2130,10 @@
                 }
               ]
             },
+            "keyword-identifier": {
+              "$ref": "#/definitions/rule",
+              "description": "An unquoted name written like a keyword of the dialect (sqlfluff RF04)."
+            },
             "lambda-assignment": {
               "$ref": "#/definitions/rule",
               "description": "A lambda assigned to a single name (an annotated one also in a class body is left alone)."
@@ -2857,6 +2861,10 @@
             "needless-bool": {
               "$ref": "#/definitions/rule",
               "description": "An `if` that returns `True` (or `False`) and is followed, or continued by `else`, by the opposite boolean."
+            },
+            "needless-quotes": {
+              "$ref": "#/definitions/rule",
+              "description": "A quoted name that is a plain word, not reserved, and already in the case the dialect folds unquoted names to (upper for ansi, lower for postgres), so the quotes change nothing (sqlfluff RF06)."
             },
             "negate-equal-op": {
               "$ref": "#/definitions/rule",

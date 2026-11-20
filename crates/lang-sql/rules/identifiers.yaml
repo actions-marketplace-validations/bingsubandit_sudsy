@@ -13,3 +13,22 @@ rule:
   not:
     parent: { kind: SelectClauseElement, child: { kind: AliasExpression } }
 token: { kind: [QuotedIdentifier], regex: '^.[A-Za-z0-9_]*[^A-Za-z0-9_].' }
+---
+id: keyword-identifier
+family: keyword-name
+params: { kind: Identifier, message: "`{name}` is a keyword: use another name or quote it" }
+description: >-
+  An unquoted name written like a keyword of the dialect (sqlfluff RF04).
+example: "select a as date from t"
+severity: off
+category: style
+---
+id: needless-quotes
+family: needless-quotes
+params: { kind: QuotedIdentifier, message: "`{name}` does not need quotes" }
+description: >-
+  A quoted name that is a plain word, not reserved, and already in the case the dialect folds
+  unquoted names to (upper for ansi, lower for postgres), so the quotes change nothing (sqlfluff RF06).
+example: 'select "A" from t'
+severity: off
+category: style

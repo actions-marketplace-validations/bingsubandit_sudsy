@@ -22256,6 +22256,50 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "An unquoted name written like a keyword of the dialect (sqlfluff RF04).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select \"A\", \"a\", \"ab c\", \"SELECT\", date, name, a as filter from t;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 36,
+            "length": 4,
+            "line": 1
+          },
+          {
+            "column": 42,
+            "length": 4,
+            "line": 1
+          },
+          {
+            "column": 53,
+            "length": 6,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "keyword-identifier",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "RF04",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "`NULL`, `TRUE` and `FALSE` are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP04).",
       "example": {
         "config": null,
@@ -22295,6 +22339,40 @@
       "upstream": [
         {
           "id": "CP04",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A quoted name that is a plain word, not reserved, and already in the case the dialect folds unquoted names to (upper for ansi, lower for postgres), so the quotes change nothing (sqlfluff RF06).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select \"A\", \"a\", \"ab c\", \"SELECT\", date, name, a as filter from t;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 8,
+            "length": 3,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "needless-quotes",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "RF06",
           "partial": false,
           "tool": "sqlfluff"
         }

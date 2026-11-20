@@ -2,7 +2,8 @@ vscode-languages: [sql]
 extensions: [sql]
 formatter: SqlFormatter
 parse: parse::parse_file
-families: "&[core_rules::unique::FAMILY, core_rules::token_case::FAMILY]"
+families: "&[core_rules::unique::FAMILY, core_rules::token_case::FAMILY, core_rules::word_names::KEYWORD_NAME, core_rules::word_names::NEEDLESS_QUOTES]"
+hooks: hooks::SqlHooks
 options:
   - dialect:
       values: ["ansi", "postgres", "mysql", "tsql"]

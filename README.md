@@ -84,7 +84,7 @@ Each number is measured on real-world code against the reference tool with its d
 | PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
 | Kotlin | ████████░░ 82% ktlint | █░░░░░░░░░ 11% ktlint | In progress |
 | Shell | ████████░░ 81% shfmt | ████████░░ 86% ShellCheck | In progress |
-| SQL | ███████░░░ 78% sqlfluff | ████░░░░░░ 48% sqlfluff | In progress |
+| SQL | ███████░░░ 78% sqlfluff | █████░░░░░ 51% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | 25 rules · reference tool: none found | In progress |
 | Dockerfile | Sudsy formatter · reference tool: none found | ███████░░░ 78% hadolint | Lint only: In progress |

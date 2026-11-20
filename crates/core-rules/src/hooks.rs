@@ -20,6 +20,36 @@ pub enum Scalar<'a> {
     Number(f64),
 }
 
+/// What a language's words are, for a word that is written as a name: a plain word, a keyword the
+/// language lets one use as a name, or a reserved word it does not.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Word {
+    Plain,
+    Keyword,
+    Reserved,
+}
+
+impl Word {
+    /// The class of `upper` in `version`: reserved wins over keyword.
+    pub fn of(hooks: &dyn RuleHooks, version: Option<&str>, upper: &str) -> Word {
+        if hooks.is_reserved(version, upper) {
+            Word::Reserved
+        } else if hooks.is_keyword(version, upper) {
+            Word::Keyword
+        } else {
+            Word::Plain
+        }
+    }
+}
+
+/// The case an unquoted name is folded to (`Fold::None`: kept as written).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Fold {
+    Upper,
+    Lower,
+    None,
+}
+
 /// A getter or setter entry of an object: one of each may share a name.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Accessor {
@@ -78,6 +108,27 @@ pub trait RuleHooks: Send + Sync {
         false
     }
 
+    /// The dialect or language version the file is read in (`dialect` for SQL), when it has one.
+    fn language_version(&self) -> Option<&str> {
+        None
+    }
+
+    /// Is `upper` (upper case) a reserved word of the dialect `version` (`None`: the default one)?
+    /// The default has none.
+    fn is_reserved(&self, _version: Option<&str>, _upper: &str) -> bool {
+        false
+    }
+
+    /// Is `upper` (upper case) a keyword of the dialect `version`, reserved or not?
+    fn is_keyword(&self, _version: Option<&str>, _upper: &str) -> bool {
+        false
+    }
+
+    /// The case the dialect `version` folds unquoted names to.
+    fn fold(&self, _version: Option<&str>) -> Fold {
+        Fold::None
+    }
+
     /// Rules the code silences for a range by its own syntax (PowerShell's
     /// `SuppressMessageAttribute`), as `(rule id, range)`. The default has none.
     fn suppressed_ranges(&self, _file: &FileContext<'_>) -> Vec<(String, TextRange)> {
@@ -115,6 +166,74 @@ impl RuleHooks for WithRows {
 
     fn inline_mapping_line(&self, line: &str) -> bool {
         self.inner.inline_mapping_line(line)
+    }
+
+    fn language_version(&self) -> Option<&str> {
+        self.inner.language_version()
+    }
+
+    fn is_reserved(&self, version: Option<&str>, upper: &str) -> bool {
+        self.inner.is_reserved(version, upper)
+    }
+
+    fn is_keyword(&self, version: Option<&str>, upper: &str) -> bool {
+        self.inner.is_keyword(version, upper)
+    }
+
+    fn fold(&self, version: Option<&str>) -> Fold {
+        self.inner.fold(version)
+    }
+
+    fn suppressed_ranges(&self, file: &FileContext<'_>) -> Vec<(String, TextRange)> {
+        self.inner.suppressed_ranges(file)
+    }
+}
+
+/// `inner` for one file read in the dialect or version `version`.
+pub struct WithVersion<'a> {
+    pub inner: &'a dyn RuleHooks,
+    pub version: Option<&'a str>,
+}
+
+impl RuleHooks for WithVersion<'_> {
+    fn flat_keys(&self, mapping: &SyntaxNode) -> Option<Vec<SyntaxElement>> {
+        self.inner.flat_keys(mapping)
+    }
+
+    fn is_name(&self, g: &Grammar, key: &SyntaxElement, text: &str) -> bool {
+        self.inner.is_name(g, key, text)
+    }
+
+    fn key_name<'a>(&self, g: &Grammar, key: &SyntaxElement, text: &'a str) -> Cow<'a, str> {
+        self.inner.key_name(g, key, text)
+    }
+
+    fn scalar<'a>(&self, g: &Grammar, item: &SyntaxNode, text: &'a str) -> Option<Scalar<'a>> {
+        self.inner.scalar(g, item, text)
+    }
+
+    fn rows(&self) -> &'static str {
+        self.inner.rows()
+    }
+
+    fn inline_mapping_line(&self, line: &str) -> bool {
+        self.inner.inline_mapping_line(line)
+    }
+
+    fn language_version(&self) -> Option<&str> {
+        self.version
+    }
+
+    fn is_reserved(&self, version: Option<&str>, upper: &str) -> bool {
+        self.inner.is_reserved(version, upper)
+    }
+
+    fn is_keyword(&self, version: Option<&str>, upper: &str) -> bool {
+        self.inner.is_keyword(version, upper)
+    }
+
+    fn fold(&self, version: Option<&str>) -> Fold {
+        self.inner.fold(version)
     }
 
     fn suppressed_ranges(&self, file: &FileContext<'_>) -> Vec<(String, TextRange)> {

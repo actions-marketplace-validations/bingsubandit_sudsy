@@ -19,8 +19,8 @@ target-files:
   sqlfluff-mysql: 248
   sqlfluff-postgres: 142
   sqlfluff-tsql: 152
-coverage: 63.7  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
-target: 48.7
+coverage: 67.4  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+target: 51.5
 fixes:  # gap name or lint rule -> one line: where and what to change
   AM04: outermost SELECT with a wildcard whose source is a table; needs query analysis (CTE and subquery resolution) in a shared crate
   RF06: unnecessary quotes on an identifier; needs dialect casefold and reserved-word sets (lang-sql parse data) read by a shared rule
@@ -37,7 +37,6 @@ fixes:  # gap name or lint rule -> one line: where and what to change
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   AM04: 1121
   CP02: 1021
-  RF06: 601
   RF02: 402
   PRS: 380
   CP01: 324
@@ -45,8 +44,9 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   AL01: 292
   RF03: 261
   AL03: 235
-  RF05: 225
   AM06: 206
-  RF04: 178
   AL08: 159
   CP03: 158
+  LT05: 151
+  RF05: 143
+  CV06: 126

@@ -1,1 +1,3 @@
 special-chars-in-identifier: warn
+keyword-identifier: warn
+needless-quotes: warn

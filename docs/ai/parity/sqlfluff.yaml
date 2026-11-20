@@ -61,9 +61,9 @@ entries:
   RF01: planned
   RF02: planned
   RF03: planned
-  RF04: planned
+  RF04: rule keyword-identifier
   RF05: rule special-chars-in-identifier
-  RF06: planned
+  RF06: rule needless-quotes
   ST02: planned
   ST04: planned
   ST05: planned

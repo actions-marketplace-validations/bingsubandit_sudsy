@@ -168,6 +168,7 @@ concept unwrapped-line-structure # users: cpp
 concept use-lambda # users: csharp
 concept use-literal-suffix # users: csharp
 concept useless-echo # users: shell
+concept word-names # users: sql (shared)
 concept worker-findings-family # users: csharp
 data grammar-line:case-insensitive # users: powershell
 data grammar-line:container # users: markdown

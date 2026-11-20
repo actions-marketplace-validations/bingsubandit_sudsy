@@ -24,5 +24,7 @@ sql:
       self-alias: warn
       type-case: warn
       special-chars-in-identifier: warn
+      keyword-identifier: warn
+      needless-quotes: warn
       union-distinct: warn
       unused-cte: warn

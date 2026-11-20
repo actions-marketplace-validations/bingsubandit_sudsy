@@ -220,6 +220,11 @@ fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
     let host_reads = active.iter().any(|a| a.rule.reads_embedded());
     let embedded = parse_embedded(db, file, provider, host_reads, &embedded_rules, &root, text);
     let trees = provider_api::embedded::trees(&embedded);
+    let version = parse_settings(db, file).and_then(|s| s.language_version);
+    let hooks = core_rules::WithVersion {
+        inner: provider.rule_hooks(),
+        version: version.as_deref(),
+    };
     let context = FileContext {
         path: file.path(db),
         text,
@@ -227,7 +232,7 @@ fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
         grammar: provider.grammar(),
         lines: &lines,
         body_kinds: provider.body_kinds(),
-        hooks: provider.rule_hooks(),
+        hooks: &hooks,
         embedded: &trees,
         semantics: data.map(|data| SemanticView {
             data,

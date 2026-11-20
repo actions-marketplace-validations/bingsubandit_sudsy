@@ -246,6 +246,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | use-lambda | lang-csharp/rules/expressions.rs | A lambda instead of an anonymous method | stylecop SA1130 | csharp | SINGLE-USE |
 | use-literal-suffix | lang-csharp/rules/expressions.rs | A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L` | stylecop SA1139 | csharp | SINGLE-USE |
 | useless-echo | lang-shell/rules.rs | An `echo` whose only argument is a command substitution | shellcheck SC2005 | shell | SINGLE-USE |
+| word-names | core-rules/word_names.rs | Unquoted names that are keywords and quoted names that need no quotes, from the language's word tables. | sqlfluff RF04, RF06 | sql | SINGLE-USE |
 | worker-findings-family | lang-csharp/rules/finding.rs | A rule family reporting the places one check of the C# worker found. | Roslyn analyzers | csharp | SINGLE-USE |
 
 ## other

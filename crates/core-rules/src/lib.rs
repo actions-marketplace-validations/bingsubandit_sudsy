@@ -66,6 +66,7 @@ pub mod token_case;
 pub mod tree;
 pub mod unicode_escape;
 pub mod unique;
+pub mod word_names;
 
 pub use configure::activate;
 pub use diagnostic::{
@@ -78,7 +79,9 @@ pub use engine::{
 pub use extension::{ALL_LANGUAGES, ExtensionRule, Extensions};
 pub use family::{Checked, Family, Params};
 pub use fixes::{Analysis, FixOutcome, fix_loop};
-pub use hooks::{Accessor, DEFAULT_HOOKS, DefaultHooks, RuleHooks, Scalar};
+pub use hooks::{
+    Accessor, DEFAULT_HOOKS, DefaultHooks, Fold, RuleHooks, Scalar, WithVersion, Word,
+};
 pub use layout::{Attach, LayoutRole, attached, run_layout};
 pub use lines::LineIndex;
 pub use options::{Check, Opt, OptionDecl, RuleOptions};
