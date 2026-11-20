@@ -34,6 +34,8 @@ pub struct Scope {
     pub from: &'static str,
     pub skip: &'static [&'static str],
     pub also: &'static str,
+    /// For `Keys`: names that exist besides the ones in the file (of type `item`).
+    pub base: &'static [&'static str],
     pub types: &'static [(&'static str, &'static str)],
 }
 
@@ -49,6 +51,7 @@ impl Scope {
         from: "",
         skip: &[],
         also: "",
+        base: &[],
         types: &[],
     };
 }
@@ -79,7 +82,13 @@ fn props(item: &str) -> Vec<(String, Ty)> {
 }
 
 /// The type of the scope's context for an expression at `path`; `None`: not known (any).
-pub fn ty(scope: &Scope, root: &Tree, path: &[String], marker: &str) -> Option<Ty> {
+pub fn ty(
+    scope: &Scope,
+    root: &Tree,
+    path: &[String],
+    eval: &dyn Fn(&str) -> Option<Ty>,
+    marker: &str,
+) -> Option<Ty> {
     let n = parts(scope.within).len();
     if path.len() < n {
         return None;
@@ -148,9 +157,9 @@ pub fn ty(scope: &Scope, root: &Tree, path: &[String], marker: &str) -> Option<T
                                 (Some(m), _) => Ty::parse(m.1),
                                 (None, "infer") => match v {
                                     Tree::Seq(items) => {
-                                        unify(items.iter().map(|i| infer(i, marker)))
+                                        unify(items.iter().map(|i| infer(i, eval, marker)))
                                     }
-                                    other => infer(other, marker),
+                                    other => infer(other, eval, marker),
                                 },
                                 (None, text) => Ty::parse(text),
                             };
@@ -171,23 +180,31 @@ pub fn ty(scope: &Scope, root: &Tree, path: &[String], marker: &str) -> Option<T
                     None => {}
                 }
             }
+            out.extend(
+                scope
+                    .base
+                    .iter()
+                    .map(|k| (k.to_string(), Ty::parse(scope.item))),
+            );
             found.then_some(Ty::Obj(out))
         }
     }
 }
 
 /// The type of a value written in the file.
-fn infer(tree: &Tree, marker: &str) -> Ty {
+fn infer(tree: &Tree, eval: &dyn Fn(&str) -> Option<Ty>, marker: &str) -> Ty {
     match tree {
         Tree::Null => Ty::Null,
         Tree::Scalar(t, false) if t == "true" || t == "false" => Ty::Bool,
         Tree::Scalar(t, false) if t.parse::<f64>().is_ok() => Ty::Num,
-        Tree::Scalar(t, _) if t.contains(marker) => Ty::Any,
+        Tree::Scalar(t, _) if t.contains(marker) => eval(t).unwrap_or(Ty::Any),
         Tree::Scalar(..) => Ty::Str,
-        Tree::Seq(items) => Ty::Arr(Box::new(unify(items.iter().map(|i| infer(i, marker))))),
+        Tree::Seq(items) => Ty::Arr(Box::new(unify(
+            items.iter().map(|i| infer(i, eval, marker)),
+        ))),
         Tree::Map(m) => Ty::Obj(
             m.iter()
-                .map(|(k, v)| (k.clone(), infer(v, marker)))
+                .map(|(k, v)| (k.clone(), infer(v, eval, marker)))
                 .collect(),
         ),
     }

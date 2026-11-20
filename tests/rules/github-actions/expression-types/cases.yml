@@ -1,10 +1,22 @@
-on: push
+on:
+  workflow_call:
+    secrets:
+      token: {}
 run-name: ${{ github.events }}
 #             ^ expression-types
 jobs:
   a:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [a, b]
+        v: "${{ fromJSON('[1]') }}"
     steps:
       - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}
 #                                       ^ expression-types
 #                                                            ^ expression-types
+      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}
+#                              ^ expression-types
+#                                                                ^ expression-types
+      - run: echo ${{ matrix.os }} ${{ matrix.arch }}
+#                                      ^ expression-types

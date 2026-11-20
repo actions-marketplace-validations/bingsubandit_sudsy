@@ -7,6 +7,7 @@
 //! what: Syntax, names, availability and types of the expressions inside the scalars of a data file.
 //! tools: actionlint expression
 
+mod json;
 mod parse;
 mod scope;
 mod ty;
@@ -35,6 +36,8 @@ pub struct Func {
     pub special: bool,
     /// The first argument is a format string with `{N}` placeholders.
     pub format: bool,
+    /// The first argument is JSON text: a literal one gives the result its type and must parse.
+    pub json: bool,
 }
 
 impl Func {
@@ -46,6 +49,7 @@ impl Func {
         ret: "any",
         special: false,
         format: false,
+        json: false,
     };
 }
 
@@ -191,6 +195,22 @@ fn constant(n: &Node, spec: &Spec) -> bool {
         }
         _ => false,
     }
+}
+
+/// The type of a scalar that is one whole expression of literals and functions (the value of a
+/// matrix entry written as `${{ fromJSON('...') }}`); `None` when it is not.
+fn literal_ty(spec: &Spec, text: &str) -> Option<Ty> {
+    let (open, close) = (spec.open, spec.close);
+    let body = text.trim().strip_prefix(open)?.strip_suffix(close)?;
+    let node = parse::parse(body).ok()?;
+    let none = |_: &str| None;
+    let mut checker = Checker {
+        spec,
+        scoped: &none,
+        place: None,
+        errors: Vec::new(),
+    };
+    Some(checker.ty(&node))
 }
 
 fn quoted_list(names: impl Iterator<Item = String>) -> String {
@@ -386,6 +406,22 @@ impl Checker<'_> {
         {
             self.format_args(n, f, args.len() - 1);
         }
+        if def.json
+            && let Some(Node {
+                kind: Kind::Lit(Lit::Str(text)),
+                start,
+                ..
+            }) = args.first()
+        {
+            match json::parse(text) {
+                Ok(t) => return t,
+                Err((at, why)) => {
+                    let message =
+                        format!("broken JSON string is passed to {name}() at offset {at}: {why}");
+                    self.err(Class::Types, *start, message);
+                }
+            }
+        }
         ret.clone()
     }
 
@@ -498,7 +534,8 @@ impl Run<'_, '_> {
                 return None;
             }
             let s = spec.scopes.iter().find(|s| s.context == context)?;
-            scope::ty(s, cell.get_or_init(|| tree(file)), path, spec.open)
+            let eval = |text: &str| literal_ty(spec, text);
+            scope::ty(s, cell.get_or_init(|| tree(file)), path, &eval, spec.open)
         };
         let mut checker = Checker {
             spec: self.spec,
@@ -532,6 +569,10 @@ impl Run<'_, '_> {
     }
 
     fn scalar(&mut self, text: &str, start: usize, place: Option<&Place>) {
+        // Escapes shift the text of a double-quoted scalar from its source offsets.
+        if text.starts_with('"') && text.contains('\\') {
+            return;
+        }
         let (open, close) = (self.spec.open, self.spec.close);
         let (mut text, mut start) = (text, start);
         let mut extra = false;
@@ -569,7 +610,11 @@ impl Run<'_, '_> {
                 self.report_len(Class::Syntax, start, i, open.len(), message);
                 break;
             };
-            let embedded = extra || text.trim() != &text[i..end + close.len()];
+            let (lo, hi, _) = value_range(text);
+            let alone = i >= lo
+                && end + close.len() <= hi
+                && text[lo..hi].trim() == &text[i..end + close.len()];
+            let embedded = extra || !alone;
             self.expression(
                 &text[i + open.len()..end],
                 start + i + open.len(),

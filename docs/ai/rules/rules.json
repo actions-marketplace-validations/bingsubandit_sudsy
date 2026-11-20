@@ -22403,23 +22403,38 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on: push\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n",
+        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n",
         "language": "github-actions",
         "spans": [
           {
             "column": 15,
             "length": 1,
-            "line": 2
+            "line": 5
           },
           {
             "column": 41,
             "length": 1,
-            "line": 7
+            "line": 14
           },
           {
             "column": 62,
             "length": 1,
-            "line": 7
+            "line": 14
+          },
+          {
+            "column": 32,
+            "length": 1,
+            "line": 15
+          },
+          {
+            "column": 66,
+            "length": 1,
+            "line": 15
+          },
+          {
+            "column": 40,
+            "length": 1,
+            "line": 16
           }
         ]
       },
