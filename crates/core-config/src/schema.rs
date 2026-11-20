@@ -324,6 +324,17 @@ impl ResolvedOptions {
             if items.iter().any(|i| matches!(i, OptionValue::String(s) if s == item)))
     }
 
+    /// Is `(first, second)` a consecutive pair of the strings of a list option (no copy)?
+    pub fn list_has_pair(&self, name: &str, first: &str, second: &str) -> bool {
+        let Some(OptionValue::List(items)) = self.0.get(name) else {
+            return false;
+        };
+        items.chunks(2).any(|p| {
+            matches!(&p[0], OptionValue::String(a) if a == first)
+                && matches!(p.get(1), Some(OptionValue::String(b)) if b == second)
+        })
+    }
+
     /// The lists of strings of a list-of-lists option; empty when the option is absent.
     pub fn string_lists(&self, name: &str) -> Vec<Vec<String>> {
         match self.0.get(name) {
@@ -694,6 +705,46 @@ pub mod shared {
             "assignment_left_unless_kinds",
             default,
             "Node kinds among the children of a declaration (a return type's colon) that turn off `assignment_left_min_parameters`.",
+        )
+    }
+
+    pub fn assignment_op_token_skip_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "assignment_op_token_skip_kinds",
+            default,
+            "Node kinds of assignments whose operator is not searched for a line comment after it (the comment stays where it is); every other assignment keeps its value below the operator when a line comment follows the operator.",
+        )
+    }
+
+    pub fn assignment_destructure_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "assignment_destructure_kinds",
+            default,
+            "Node kinds of a destructuring on the left of an assignment: one of more than two entries with a renamed or defaulted entry breaks in preference to the value.",
+        )
+    }
+
+    pub fn assignment_generic_closure_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "assignment_generic_closure_kinds",
+            default,
+            "Node kinds of declarations whose generic closure value (`const f = <T>(a: T) => b`) stays on the operator's line while the left side breaks.",
+        )
+    }
+
+    pub fn type_argument_complex_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "type_argument_complex_kinds",
+            default,
+            "Node kinds of a lone type argument that make a call chain worth breaking inside (several type arguments always do).",
+        )
+    }
+
+    pub fn rewrite_parenthesize_pairs(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "rewrite_parenthesize_pairs",
+            default,
+            "Pairs of node kinds (child, parent, child, parent, ...): a node of the first kind directly inside one of the second gets parentheses around it.",
         )
     }
 

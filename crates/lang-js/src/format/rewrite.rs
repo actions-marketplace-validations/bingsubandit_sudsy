@@ -39,6 +39,7 @@ pub(crate) fn rewrite(
     // Text moved from elsewhere: where it goes and what.
     let mut moved: Vec<(usize, String)> = Vec::new();
     let keys = super::object::KeyEdits::new(options);
+    let parens = core_format::rewrite::Parenthesize::new(grammar, options);
     let mut key_edits: Vec<Edit> = Vec::new();
     let mut scan = rows.rewrite_scan();
     for node in tree.descendants() {
@@ -228,6 +229,10 @@ pub(crate) fn rewrite(
                     inserts.push((usize::from(first.text_range().end()), Some(")")));
                 }
             }
+        }
+        if let Some((from, to)) = parens.at(grammar, &node) {
+            inserts.push((from, Some("(")));
+            inserts.push((to, Some(")")));
         }
         match node.kind() {
             k::TS_PARENTHESIZED_TYPE | k::TS_UNION_TYPE | k::TS_INTERSECTION_TYPE => {
