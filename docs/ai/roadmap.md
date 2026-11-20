@@ -14,7 +14,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 5 | Dockerfile | none (no reference) | 27.6% (hadolint, `dockerfile/hadolint`) | `DL4006` 153, `DL3003` 64, `DL3008` 54 |
 | 6 | C# | 72.1% of 7,615 (CSharpier 1.3.0; not re-run, corpus absent on the host) | ? (StyleCop; corpus does not compile) | lists differing by a comma, `#if` comments (252 files), wrapped arguments and chains (299) |
 | 7 | Makefile | none (no reference) | 73.5% (checkmake, `makefile/checkmake`) | `uniquetargets` 88, `phonydeclared` 59 |
-| 8 | YAML | ? (no Prettier corpus count) | 73.8% (yamllint, `yaml/yamllint`) | no real-world format corpus; `comments` 325, `indentation` 160, `syntax` 136 |
+| 8 | YAML | ? (no Prettier corpus count) | 99.5% (yamllint, `yaml/yamllint`) | no real-world format corpus; `comments-indentation` 2 after the proof run |
 | 9 | Kotlin | 69.4% of 5,776 (ktlint 1.8.0) | 90.0% (ktlint, `kotlin/ktlint`; 85.8% with the formatter's own findings counted) | layout rules come from the formatter (`format-diff`, `multiline-start`); misses: `wrapping`, `property-naming`, `string-template-indent`, `filename`, `if-else-wrapping`, `annotation`, `function-naming`, `blank-line-between-when-conditions` (264 of 989) |
 | 10 | SQL | 78.2% of 867 (sqlfluff 4.5.0) | 75.0% (sqlfluff, `sql/sqlfluff`) | `CP02` 1,021 (files with a parse error), `PRS` 380, `CP01` 324, `CP05` 317, `AM06` 203; 189 parse gaps and 189 layout gaps |
 | 11 | PHP | 88.5% of 10,382 (PHP-CS-Fixer 3.95.31) | 0.0% (PHPStan, `php/phpstan`) | type analysis (`class.notFound` 7,407, `variable.undefined` 591); inline-text files (~790) |

@@ -633,7 +633,8 @@ def coverage(tool, sudsy, version, prefix, exe):
             mapping = {**rule_map(other), **mapping}
     # the rules the formatter owns (the `formatter` catalog entries): `sudsy format` does their work, so they are not findings to cover
     rule_prefix = f"{PLUGINS[tool]}/" if tool in PLUGINS else "@typescript-eslint/" if tool == "typescript-eslint" else ""
-    layout = {f"{rule_prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["sudsy"] == "formatter"}
+    owned_by_format = lambda e: e["sudsy"] == "formatter" or bool(spec and spec.get("options_are_layout") and e["sudsy"].startswith("option: "))
+    layout = {f"{rule_prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if owned_by_format(e)}
     if tool in PLUGINS:
         mapping = {f"{PLUGINS[tool]}/{r}": v for r, v in mapping.items()}
     folder = ROOT / "tests/parity" / tool
@@ -655,7 +656,7 @@ def coverage(tool, sudsy, version, prefix, exe):
         found, count = parity_coverage.findings(tool, spec, prefix, work, exe, {"actionlint": actionlint_check})
         names = dict.fromkeys(range(count))
         fatal = set()
-        layout = {e["id"] for e in catalog_entries(tool, sub=True) if e["sudsy"] == "formatter"}  # layout: `sudsy format` does it
+        layout = {e["id"] for e in catalog_entries(tool, sub=True) if owned_by_format(e)}  # layout: `sudsy format` does it
         broken = {f[0] for f in found if f[1] in spec.get("unreadable", [])}  # files the tool cannot read at all (buf: imports the corpus lacks)
         found = [f for f in found if f[0] not in broken]
         fatal = broken

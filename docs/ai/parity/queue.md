@@ -375,3 +375,10 @@ Lint: coverage 75%, target 57.3%; rules by missed findings:
 
 1. `token-rewrite` (3 files): terraform fmt rewrites tokens (it quotes a bare block label, `list` becomes `list(any)`); Sudsy keeps the tokens
 
+## yamllint
+
+Lint: coverage 99.6%, target 99.5%; rules by missed findings:
+1. `document-start` (4 missed)
+2. `comments.require-starting-space` (3 missed)
+3. `truthy` (2 missed)
+

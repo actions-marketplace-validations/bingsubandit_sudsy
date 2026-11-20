@@ -59,7 +59,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | terraform | - | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 58.7% | 58.7% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
 | typescript-eslint | 100.0% | 100.0% | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
-| yamllint | 74.3% | 74.1% | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
+| yamllint | 99.6% | 99.5% | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
 <!-- /generated -->
 
 ## Lint coverage by function

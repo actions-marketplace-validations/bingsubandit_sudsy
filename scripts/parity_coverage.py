@@ -66,7 +66,7 @@ def parse(output, spec, rules):
     `message`, and `line`). `json` and `jsonl`: `levels` name the lists to walk (`""` the report itself; `files*` an object
     whose members are the elements), `file`, `rule` and `message` are `<level>.<keys>` and `rule_fn` names a
     function of `rules` that takes the finding's record, `line` is `<level>.<keys>` too. Both: `rule_prefix` is put before the rule and
-    `rule_sub` is a `[pattern, replacement]` over it, `json_line` reads the report from the last line that starts an object; a finding with no rule (a parse error) is left out."""
+    `rule_sub` is a `[pattern, replacement]` over it, `rule_message` maps a message pattern to the id the finding is reported under, `json_line` reads the report from the last line that starts an object; a finding with no rule (a parse error) is left out."""
     found = []
     if spec["format"] == "regex":
         found = [(m["file"], m["rule"], m.groupdict().get("message") or "", m.groupdict().get("line")) for m in (re.match(spec["pattern"], line) for line in output.splitlines()) if m]
@@ -79,6 +79,9 @@ def parse(output, spec, rules):
             found.append((str(ref(chain, spec["file"])), rule, str(ref(chain, spec["message"]) or ""), ref(chain, spec["line"]) if "line" in spec else None))
     out = []
     for file, rule, message, line in found:
+        for pattern, sub in spec.get("rule_message", {}).items():  # one upstream rule reports as the sub-rule whose message it is
+            if re.search(pattern, message):
+                rule = sub
         if "rule_sub" in spec:
             rule = re.sub(spec["rule_sub"][0], spec["rule_sub"][1], rule)
         if rule != "None":

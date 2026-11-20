@@ -12,5 +12,9 @@ files:
 intentional:
   required-colon-space: tool-wrong
   plain-colon-scalar: tool-wrong
-coverage: 74.3  # share of the default-set findings of yamllint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage yamllint; at least 85% is the bar)
-target: 74.1  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage yamllint
+coverage: 99.6  # share of the default-set findings of yamllint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage yamllint; at least 85% is the bar)
+target: 99.5  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage yamllint
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  document-start: 4
+  comments.require-starting-space: 3
+  truthy: 2
