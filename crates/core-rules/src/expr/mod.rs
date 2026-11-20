@@ -106,11 +106,22 @@ impl Spec {
         })
     }
 
+    /// Whether the key path holds a bare expression (no markers).
+    fn implicit(&self, path: &[String]) -> bool {
+        let last = path.last().map(String::as_str);
+        self.places
+            .iter()
+            .any(|p| p.implicit && p.path.split('|').any(|a| a.rsplit('.').next() == last))
+            && self.place(path).is_some_and(|p| p.implicit)
+    }
+
     fn place(&self, path: &[String]) -> Option<&Place> {
         self.places.iter().find(|place| {
             place.path.split('|').any(|alt| {
-                let pat: Vec<&str> = alt.split('.').filter(|s| !s.is_empty()).collect();
-                pat.len() <= path.len() && pat.iter().zip(path).all(|(a, b)| *a == "*" || a == b)
+                let mut keys = path.iter();
+                alt.split('.')
+                    .filter(|s| !s.is_empty())
+                    .all(|a| keys.next().is_some_and(|b| a == "*" || a == b))
             })
         })
     }
@@ -468,12 +479,11 @@ pub fn findings(spec: &'static Spec, file: &FileContext<'_>) -> Rc<Vec<Finding>>
             spec,
             out: Vec::new(),
         };
-        for leaf in leaves(file) {
+        let want = |path: &[String], text: &str| text.contains(spec.open) || spec.implicit(path);
+        for leaf in leaves(file, &want) {
             let text = &file.text[leaf.range];
             let place = spec.place(&leaf.path);
-            if text.contains(spec.open) || place.is_some_and(|p| p.implicit) {
-                run.scalar(text, usize::from(leaf.range.start()), place);
-            }
+            run.scalar(text, usize::from(leaf.range.start()), place);
         }
         let found = Rc::new(run.out);
         *last = Some((file.root.clone(), key, found.clone()));

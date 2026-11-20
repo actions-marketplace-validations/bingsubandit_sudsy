@@ -538,39 +538,54 @@ static NO_ROWS: Shape = Shape {
 };
 
 impl Walk<'_> {
-    fn collect(&self, node: Option<SyntaxNode>, path: &mut Vec<String>, out: &mut Vec<Leaf>) {
+    fn collect(
+        &self,
+        node: Option<SyntaxNode>,
+        path: &mut Vec<String>,
+        want: &dyn Fn(&[String], &str) -> bool,
+        out: &mut Vec<Leaf>,
+    ) {
         let Some(node) = node else { return };
         let node = self.inner(&node);
-        match self.val(Some(&node)) {
-            Val::Map(map) => {
-                for (name, _, value) in self.entries(&map) {
-                    path.push(name);
-                    self.collect(value, path, out);
-                    path.pop();
-                }
+        let g = self.g;
+        if g.has_tag(node.kind(), "mapping") {
+            for entry in node.children().filter(|c| g.has_tag(c.kind(), "key-value")) {
+                let Some(key) = g.slot(&entry, "key") else {
+                    continue;
+                };
+                path.push(self.hooks.key_name(g, &key, self.text).into_owned());
+                self.collect(
+                    g.slot(&entry, "value").and_then(|v| v.into_node()),
+                    path,
+                    want,
+                    out,
+                );
+                path.pop();
             }
-            Val::Seq(seq) => {
-                for (i, (_, value)) in self.items(&seq).into_iter().enumerate() {
-                    path.push(i.to_string());
-                    self.collect(value, path, out);
-                    path.pop();
-                }
+        } else if g.has_tag(node.kind(), "sequence") {
+            for (i, item) in node.children().enumerate() {
+                let value = if g.has_tag(item.kind(), "value") {
+                    Some(item.clone())
+                } else {
+                    g.slot(&item, "value").and_then(|v| v.into_node())
+                };
+                path.push(i.to_string());
+                self.collect(value, path, want, out);
+                path.pop();
             }
-            Val::Scalar { .. } => {
-                if let Some(token) = node.tokens().find(|t| self.g.has_tag(t.kind(), "string")) {
-                    out.push(Leaf {
-                        path: path.clone(),
-                        range: token.text_range(),
-                    });
-                }
-            }
-            _ => {}
+        } else if let Some(token) = node.tokens().find(|t| g.has_tag(t.kind(), "string"))
+            && want(path, &self.text[token.text_range()])
+        {
+            out.push(Leaf {
+                path: path.clone(),
+                range: token.text_range(),
+            });
         }
     }
 }
 
-/// Every scalar of the file with its key path.
-pub fn leaves(file: &FileContext<'_>) -> Vec<Leaf> {
+/// The scalars of the file with their key path, those `want(path, text)` accepts.
+pub fn leaves(file: &FileContext<'_>, want: &dyn Fn(&[String], &str) -> bool) -> Vec<Leaf> {
     let g = file.grammar;
     let mut body = file.root.clone();
     while !(g.has_tag(body.kind(), "mapping") || g.has_tag(body.kind(), "sequence")) {
@@ -588,6 +603,6 @@ pub fn leaves(file: &FileContext<'_>) -> Vec<Leaf> {
         out: Vec::new(),
     };
     let mut out = Vec::new();
-    walk.collect(Some(body), &mut Vec::new(), &mut out);
+    walk.collect(Some(body), &mut Vec::new(), want, &mut out);
     out
 }
