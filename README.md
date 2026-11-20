@@ -67,15 +67,15 @@ Each number is measured on real-world code against the reference tool with its d
 | JavaScript / TypeScript | ████████░░ 86% Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | Ready |
 | Python | ████████░░ 86% ruff format | █████████░ 94% ruff | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
-| GraphQL | █████████░ 99% Prettier | 21 rules · no reference tool | Ready |
-| TOML | █████████░ 98% taplo | 15 rules · no reference tool | Ready |
-| Angular templates | █████████░ 97% Prettier | 142 rules · no reference tool | Ready |
+| GraphQL | █████████░ 99% Prettier | 22 rules · no reference tool | Ready |
+| TOML | █████████░ 98% taplo | 16 rules · no reference tool | Ready |
+| Angular templates | █████████░ 97% Prettier | 143 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | Ready |
 | Java | █████████░ 91% google-java-format | █████████░ 95% Checkstyle | Ready |
-| XML | █████████░ 99% CSharpier XML | 17 rules · no reference tool | Ready |
+| XML | █████████░ 99% CSharpier XML | 18 rules · no reference tool | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
-| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 24 rules · no reference tool | Ready |
+| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 25 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
@@ -84,7 +84,7 @@ Each number is measured on real-world code against the reference tool with its d
 | YAML | ██████████ 100% Prettier | ███████░░░ 74% yamllint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
-| Kotlin | ████████░░ 82% ktlint | ████████░░ 84% ktlint | In progress |
+| Kotlin | ████████░░ 82% ktlint | ████████░░ 85% ktlint | In progress |
 | Shell | ████████░░ 81% shfmt | ████████░░ 86% ShellCheck | In progress |
 | SQL | ███████░░░ 78% sqlfluff | █████░░░░░ 51% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |

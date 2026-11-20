@@ -13,7 +13,7 @@ entries:
   binary-expression-wrapping: planned
   blank-line-before-declaration: "formatter | Comments between declarations: the blank line goes before a KDoc or the first comment only when no blank follows it."
   block-comment-initial-star-alignment: formatter
-  blank-line-between-when-conditions: planned
+  blank-line-between-when-conditions: rule blank-line-between-when-conditions
   when-entry-bracing: rule when-entry-bracing
   chain-method-continuation: rule chain-method-continuation
   chain-wrapping: planned
@@ -46,7 +46,7 @@ entries:
   function-type-reference-spacing: planned
   if-else-bracing: planned
   if-else-wrapping: planned
-  import-ordering: planned
+  import-ordering: rule import-ordering
   indent: formatter | Continuation lines after the wrapping rules below are not forced; the closing quote of a raw string is not re-indented.
   kdoc: planned
   kdoc-wrapping: planned
@@ -71,7 +71,7 @@ entries:
   no-line-break-before-assignment: planned
   no-multi-spaces: formatter
   no-semi: planned | only a `;` that ends a line; the pattern matcher does not see line ends
-  no-single-line-block-comment: planned
+  no-single-line-block-comment: rule no-single-line-block-comment
   no-trailing-spaces: formatter
   no-unit-return: rule no-unit-return
   no-unused-imports: rule unused-import

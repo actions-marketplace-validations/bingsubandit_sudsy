@@ -1,0 +1,8 @@
+id: import-ordering
+family: format-diff
+params: { kind: ImportList, change: "edit split join", message: "the imports are not in the order the formatter writes them" }
+description: >-
+  An import list the formatter would reorder or rewrite (ktlint import-ordering).
+example: 'import b.B\nimport a.A'
+severity: off
+category: style

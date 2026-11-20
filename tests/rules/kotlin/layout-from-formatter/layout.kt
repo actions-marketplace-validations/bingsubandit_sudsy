@@ -6,7 +6,7 @@ class A(val a: Int,
     fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }
 //          ^ function-signature
 //          ^ parameter-list-wrapping
-//                                                                                                               ^ function-expression-body
+//                                                                                                                 ^ function-expression-body
 
     fun baz() = run {
 //              ^ function-signature
@@ -30,5 +30,5 @@ class A(val a: Int,
     fun ok(a: Int) = a
 
     fun sum(): Int { return 1 }
-//               ^ function-expression-body
+//                 ^ function-expression-body
 }

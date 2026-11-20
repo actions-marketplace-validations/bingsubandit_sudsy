@@ -219,22 +219,22 @@ Lint: coverage 5%, target 5%; rules by missed findings:
 37. `kt-break-after-s` (2 files): Sudsy breaks after `=` where ktlint does not; fix: see break-after-=/->(sudsy)
 38. `kt-closing-paren-line` (1 files): a closing parenthesis is on its own line in one output only; fix: classify further
 39. `kt-ctor-annot-header` (1 files): the annotated constructor header differs; fix: classify further
-Lint: coverage 88.2%, target 84.2%; rules by missed findings:
+Lint: coverage 90%, target 85.8%; rules by missed findings:
 1. `function-signature` (1666 missed)
-2. `blank-line-between-when-conditions` (989 missed)
-3. `no-single-line-block-comment` (952 missed)
-4. `wrapping` (948 missed)
-5. `multiline-expression-wrapping` (904 missed)
-6. `property-naming` (565 missed)
-7. `string-template-indent` (534 missed)
-8. `import-ordering` (528 missed)
-9. `filename` (525 missed)
-10. `modifier-order` (448 missed)
-11. `if-else-wrapping` (419 missed)
-12. `multiline-if-else` (417 missed)
-13. `argument-list-wrapping` (406 missed)
-14. `annotation` (392 missed)
-15. `spacing-between-declarations-with-comments` (388 missed)
+2. `wrapping` (948 missed)
+3. `multiline-expression-wrapping` (904 missed)
+4. `blank-line-between-when-conditions` (725 missed)
+5. `property-naming` (565 missed)
+6. `string-template-indent` (534 missed)
+7. `filename` (525 missed)
+8. `if-else-wrapping` (419 missed)
+9. `multiline-if-else` (417 missed)
+10. `argument-list-wrapping` (406 missed)
+11. `annotation` (392 missed)
+12. `spacing-between-declarations-with-comments` (388 missed)
+13. `trailing-comma-on-declaration-site` (374 missed)
+14. `function-naming` (356 missed)
+15. `spacing-between-declarations-with-annotations` (329 missed)
 
 ## prettier
 

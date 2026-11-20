@@ -6,8 +6,8 @@ second-format:
   real-world: 0
 refused:
   real-world: 0
-coverage: 88.2  # share of the default-set findings of ktlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage ktlint; at least 85% is the bar)
-target: 84.2
+coverage: 90.0  # share of the default-set findings of ktlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage ktlint; at least 85% is the bar)
+target: 85.8
 differences:
   kt-dot-chain-ktlint-breaks: "gap  ktlint breaks a chain below `=` in place (named gap: depends on source-line width after signature wrapping); ktlint breaks a chain at its dots, Sudsy keeps it on a line (or keeps the head with its first accesses); fix: the wrapped chain policy: break property accesses too when the chain breaks"
   kt-comment-indent: "gap  continuation lines of a block comment are aligned differently; fix: align `*` lines of a block comment to the comment's column plus one, as ktlint does, in the cases it does"
@@ -1057,17 +1057,17 @@ files:
   corpus/nowinandroid/sync/work/src/main/kotlin/com/google/samples/apps/nowinandroid/sync/workers/SyncWorker.kt: kt-closing-paren-line
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   function-signature: 1666
-  blank-line-between-when-conditions: 989
-  no-single-line-block-comment: 952
   wrapping: 948
   multiline-expression-wrapping: 904
+  blank-line-between-when-conditions: 725
   property-naming: 565
   string-template-indent: 534
-  import-ordering: 528
   filename: 525
-  modifier-order: 448
   if-else-wrapping: 419
   multiline-if-else: 417
   argument-list-wrapping: 406
   annotation: 392
   spacing-between-declarations-with-comments: 388
+  trailing-comma-on-declaration-site: 374
+  function-naming: 356
+  spacing-between-declarations-with-annotations: 329

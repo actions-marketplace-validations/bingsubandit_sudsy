@@ -13,6 +13,7 @@ fun f(x: Int) {
         1 -> { println(1) }
 //             ^ statement-wrapping
         else -> println(2)
+//      ^ blank-line-between-when-conditions
 //            ^ when-entry-bracing
     }
     foo(); bar()

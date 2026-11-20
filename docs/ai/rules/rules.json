@@ -403,7 +403,18 @@
       "languages": [
         "all"
       ],
-      "options": [],
+      "options": [
+        {
+          "choices": [
+            "keyword",
+            "list"
+          ],
+          "default": "keyword",
+          "description": "Where a finding is reported: on the keyword that is out of place, or on the first token of the modifier list.",
+          "name": "report",
+          "type": "string"
+        }
+      ],
       "presets": [
         "java/google",
         "kotlin/ktlint"
@@ -655,6 +666,40 @@
           "id": "suspicious/noEmptyObjectKeys",
           "partial": false,
           "tool": "Biome"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A block comment that fits on one line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`) and languages with no line comment marker are left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n/* one line */\nval a = 1\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 1,
+            "length": 14,
+            "line": 13
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-single-line-block-comment",
+      "languages": [
+        "all"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "no-single-line-block-comment",
+          "partial": false,
+          "tool": "ktlint"
         }
       ]
     },
@@ -13021,6 +13066,40 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A `when` entry with a blank line the formatter would add or remove before it (ktlint blank-line-between-when-conditions).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(x: Int) {\n    val a = if (x > 0)\n        1\n    else 2\n    val b = when (x) {\n        1 -> { println(1) }\n        else -> println(2)\n    }\n    foo(); bar()\n    val c = someVeryLongReceiverName.firstFunctionCall(argumentNumberOne).secondFunctionCall(argumentNumberTwo).thirdFunctionCall(argumentNumberThree)\n    callTheFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour, argumentNumberFive, argumentNumberSix, argumentNumberSeven)\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "blank-line-between-when-conditions",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "blank-line-between-when-conditions",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A call chain whose lines the formatter would break or join differently (ktlint chain-method-continuation).",
       "example": {
         "config": null,
@@ -13180,12 +13259,12 @@
         "language": "kotlin",
         "spans": [
           {
-            "column": 114,
+            "column": 116,
             "length": 1,
             "line": 3
           },
           {
-            "column": 18,
+            "column": 20,
             "length": 1,
             "line": 21
           }
@@ -13242,6 +13321,45 @@
       "upstream": [
         {
           "id": "function-signature",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An import list the formatter would reorder or rewrite (ktlint import-ordering).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n/* one line */\nval a = 1\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 8,
+            "length": 1,
+            "line": 1
+          },
+          {
+            "column": 8,
+            "length": 1,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "import-ordering",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "import-ordering",
           "partial": false,
           "tool": "ktlint"
         }

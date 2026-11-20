@@ -1,0 +1,9 @@
+id: blank-line-between-when-conditions
+family: format-diff
+params: { kind: WhenEntry, change: blank, at: start, message: "the blank line before the when entry is as the formatter writes it" }
+description: >-
+  A `when` entry with a blank line the formatter would add or remove before it (ktlint
+  blank-line-between-when-conditions).
+example: 'val a = when (b) {\n    1 -> c()\n\n    else -> d()\n}'
+severity: off
+category: style

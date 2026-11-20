@@ -10,3 +10,6 @@ function-expression-body: warn
 multiline-if-else: warn
 when-entry-bracing: warn
 statement-wrapping: warn
+import-ordering: warn
+blank-line-between-when-conditions: warn
+no-single-line-block-comment: warn

@@ -1,9 +1,9 @@
 //! Shared comment rules, written against the grammar's comment syntax: `comment-space` and
 //! `no-empty-comment`. They read comment tokens, so they cost nothing when off.
 //!
-//! concept: comment-space, no-empty-comment
-//! what: Rules on comment tokens: text after the marker, no empty comments.
-//! rules: comment-space, no-empty-comment
+//! concept: comment-space, no-empty-comment, no-single-line-block-comment
+//! what: Rules on comment tokens: text after the marker, no empty comments, no block comment on one line.
+//! rules: comment-space, no-empty-comment, no-single-line-block-comment
 //! reads: rule:comment-space
 
 use crate::diagnostic::Edit;
@@ -241,6 +241,37 @@ fn has_neighbour(token: &SyntaxToken, grammar: &Grammar, forward: bool) -> bool 
         };
     }
     false
+}
+
+rule! {
+    pub NoSingleLineBlockComment {
+        id: "no-single-line-block-comment",
+        category: Style,
+        default: Off,
+        description: "A block comment that fits on one line is written as a line comment (ktlint \
+                  `no-single-line-block-comment`). Documentation comments (`/**`) and languages \
+                  with no line comment marker are left alone.",
+        example: "/* a note */   // write: // a note",
+    }
+
+    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        let comment = &file.grammar.comments;
+        let (Some(_), Some((open, close))) = (comment.line.as_deref(), &comment.block) else {
+            return;
+        };
+        let doc = open.chars().last().unwrap_or(' ');
+        for token in comments(file) {
+            let text = token.text();
+            let single = text.len() >= open.len() + close.len()
+                && text.starts_with(open.as_str())
+                && text.ends_with(close.as_str())
+                && !text.contains(['\n', '\r'])
+                && !text[open.len()..].starts_with(doc);
+            if single {
+                ctx.report(token.text_range(), "a block comment on one line is a line comment");
+            }
+        }
+    }
 }
 
 rule! {

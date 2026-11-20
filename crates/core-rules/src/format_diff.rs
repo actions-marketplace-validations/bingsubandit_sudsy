@@ -8,8 +8,9 @@
 //! - `through` (words, optional): kinds among those of `until` whose region also takes the first
 //!   character after them (the body after `=`);
 //! - `change` (words): `split` (a line break the formatter adds), `join` (one it removes), `edit`
-//!   (code it adds, changes or removes), `comma` (a comma it adds or removes); default `split
-//!   join`;
+//!   (code it adds, changes or removes), `comma` (a comma it adds or removes), `blank` (a blank
+//!   line it adds or removes); default `split join`;
+//! - `at` (`start`): only the changes at the first character of the node;
 //! - `multiline` (`true`): only a node that spans lines in the source;
 //! - `skip` (words): kind names of nested nodes whose inside is not the region's (a lambda body in
 //!   an argument list).
@@ -42,6 +43,9 @@ pub enum Change {
     Edit = 4,
     /// A comma is added or removed right after the code at the offset.
     Comma = 8,
+    /// The number of line breaks before the code at the offset changes (a blank line added or
+    /// removed), both being at least one.
+    Blank = 16,
 }
 
 /// Where formatting changes the code of a file: the byte offset of the character the change
@@ -65,18 +69,27 @@ impl FormatChanges {
                     let (i, j) = (old.start + k, new.start + k);
                     let at = src[i].0;
                     match (src_nl[i], fmt_nl[j]) {
-                        (false, true) => flips.push((at, Change::Split as u8)),
-                        (true, false) => flips.push((at, Change::Join as u8)),
+                        (0, f) if f > 0 => flips.push((at, Change::Split as u8)),
+                        (n, 0) if n > 0 => flips.push((at, Change::Join as u8)),
+                        (n, f) if n.min(2) != f.min(2) => flips.push((at, Change::Blank as u8)),
                         _ => {}
                     }
                 }
-            } else if let Some(prev) = old.start.checked_sub(1).and_then(|p| src.get(p)) {
+            } else {
+                // Code that goes is where the change is; code that comes in follows the code
+                // before it.
+                let at = if old.is_empty() {
+                    old.start.checked_sub(1).and_then(|p| src.get(p))
+                } else {
+                    src.get(old.start)
+                };
+                let Some(at) = at else { continue };
                 let comma = before[old.clone()]
                     .iter()
                     .chain(&after[new.clone()])
                     .all(|&c| c == ',');
                 let kind = if comma { Change::Comma } else { Change::Edit };
-                flips.push((prev.0, kind as u8));
+                flips.push((at.0, kind as u8));
             }
         }
         flips.sort_unstable();
@@ -94,19 +107,19 @@ impl FormatChanges {
     }
 }
 
-/// The non-whitespace characters of a text with their byte offsets, and for each whether
-/// whitespace with a line break stands before it.
-fn code_chars(text: &str) -> (Vec<(u32, char)>, Vec<bool>) {
+/// The non-whitespace characters of a text with their byte offsets, and for each the number of
+/// line breaks in the whitespace before it.
+fn code_chars(text: &str) -> (Vec<(u32, char)>, Vec<u32>) {
     let mut chars = Vec::new();
     let mut breaks = Vec::new();
-    let mut newline = false;
+    let mut newlines = 0;
     for (at, c) in text.char_indices() {
         if c.is_whitespace() {
-            newline |= c == '\n';
+            newlines += u32::from(c == '\n');
         } else {
             chars.push((at as u32, c));
-            breaks.push(newline);
-            newline = false;
+            breaks.push(newlines);
+            newlines = 0;
         }
     }
     (chars, breaks)
@@ -120,6 +133,7 @@ struct FormatDiff {
     through: Vec<String>,
     skip: Vec<String>,
     multiline: bool,
+    at_start: bool,
     mask: u8,
 }
 
@@ -138,6 +152,7 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         through: words(&mut p, "through"),
         skip: words(&mut p, "skip"),
         multiline: p.optional("multiline").is_some_and(|v| v == "true"),
+        at_start: p.optional("at").is_some_and(|v| v == "start"),
         mask: Change::Split as u8 | Change::Join as u8,
     };
     let change = words(&mut p, "change");
@@ -149,6 +164,7 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
                 "join" => Change::Join as u8,
                 "edit" => Change::Edit as u8,
                 "comma" => Change::Comma as u8,
+                "blank" => Change::Blank as u8,
                 _ => return Err(format!("param `change`: unknown word `{w}`")),
             };
         }
@@ -240,6 +256,7 @@ impl Rule for FormatDiff {
                 continue;
             }
             let skipped = self.skipped(&node, file);
+            let end = if self.at_start { start } else { end };
             for at in changes.within(start, end, self.mask) {
                 if skipped.iter().any(|&(s, e)| at > s && at < e) {
                     continue;
