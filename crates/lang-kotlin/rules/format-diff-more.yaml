@@ -1,0 +1,75 @@
+id: trailing-comma-on-call-site
+family: format-diff
+params: { kind: ValueArgumentList, change: comma, multiline: "true", message: "the last argument of a call is followed by a comma as the formatter writes it" }
+description: >-
+  The last line of an argument list that the formatter would change, the trailing comma (ktlint
+  trailing-comma-on-call-site).
+example: 'val a = f(\n    1,\n    2\n)'
+severity: off
+category: style
+---
+id: trailing-comma-on-declaration-site
+family: format-diff
+params: { kind: ValueParameterList, change: comma, multiline: "true", message: "the last parameter is followed by a comma as the formatter writes it" }
+description: >-
+  The last line of a parameter list that the formatter would change, the trailing comma (ktlint
+  trailing-comma-on-declaration-site).
+example: 'fun f(\n    a: Int,\n    b: Int\n) {}'
+severity: off
+category: style
+---
+id: multiline-expression-wrapping
+family: multiline-start
+params: { kind: "Property=Eq Fun=Eq PropertyAccessor=Eq BinaryExpression=OperationReference:= ValueArgument", message: "a multiline expression starts on a line of its own" }
+description: >-
+  An expression that spans lines and starts after code on its line: the value of a property or a
+  function body after `=`, or an argument (ktlint multiline-expression-wrapping).
+example: 'val a = run {\n    1\n}'
+severity: off
+category: style
+---
+id: chain-method-continuation
+family: format-diff
+params: { kind: "DotQualifiedExpression SafeAccessExpression", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the call chain is not broken as the formatter writes it" }
+description: >-
+  A call chain whose lines the formatter would break or join differently (ktlint
+  chain-method-continuation).
+example: 'val a = b.c().d()\n    .e()'
+severity: off
+category: style
+---
+id: function-expression-body
+family: format-diff
+params: { kind: Fun, until: "Block Eq", change: edit, message: "the function body is written as the formatter writes it" }
+description: >-
+  A function whose body the formatter would write differently (ktlint function-expression-body).
+example: 'fun f(): Int { return 1 }'
+severity: off
+category: style
+---
+id: multiline-if-else
+family: format-diff
+params: { kind: If, change: "split join edit", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the if-else is laid out as the formatter writes it" }
+description: >-
+  An `if` whose lines the formatter would change (ktlint multiline-if-else).
+example: 'val a = if (b)\n    1\nelse 2'
+severity: off
+category: style
+---
+id: when-entry-bracing
+family: format-diff
+params: { kind: WhenEntry, change: edit, skip: "Block FunctionLiteral LambdaArgument", message: "the when entry is written as the formatter writes it" }
+description: >-
+  A `when` entry whose first line the formatter would change (ktlint when-entry-bracing).
+example: 'val a = when (b) {\n    1 -> { c() }\n    else -> d()\n}'
+severity: off
+category: style
+---
+id: statement-wrapping
+family: format-diff
+params: { kind: "Block Then Else Body", skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the statements are wrapped as the formatter writes them" }
+description: >-
+  A block whose lines the formatter would change (ktlint statement-wrapping).
+example: 'fun f() { a(); b() }'
+severity: off
+category: style

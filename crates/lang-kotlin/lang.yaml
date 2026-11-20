@@ -1,6 +1,7 @@
 vscode-languages: [kotlin]
 extensions: [kt, kts]
 formatter: KotlinFormatter
+families: "&[core_rules::format_diff::FAMILY, core_rules::multiline_start::FAMILY]"
 parse: adapter::parse_file
 limits: {stack: 256, bytes: 16, depth: 2000, run: "!-+@", tagged: ["@", 12]}
 options:

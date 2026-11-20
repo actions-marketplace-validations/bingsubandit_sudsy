@@ -1,0 +1,37 @@
+id: function-signature
+family: format-diff
+params: { kind: Fun, until: "Block Eq", through: Eq, skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the function signature is not laid out as the formatter writes it" }
+description: >-
+  A function whose signature (up to the body) the formatter would lay out differently: parameters
+  on one line or one per line, the return type and the body start (ktlint function-signature).
+example: 'fun f(a: Int,\n      b: Int) {}'
+severity: off
+category: style
+---
+id: parameter-list-wrapping
+family: format-diff
+params: { kind: ValueParameterList, skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the parameter list is not laid out as the formatter writes it" }
+description: >-
+  A parameter list the formatter would wrap or join differently (ktlint parameter-list-wrapping).
+example: 'fun f(a: Int,\n      b: Int) {}'
+severity: off
+category: style
+---
+id: argument-list-wrapping
+family: format-diff
+params: { kind: ValueArgumentList, skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the argument list is not laid out as the formatter writes it" }
+description: >-
+  An argument list the formatter would wrap or join differently (ktlint argument-list-wrapping).
+example: 'val a = f(1,\n      2)'
+severity: off
+category: style
+---
+id: class-signature
+family: format-diff
+params: { kind: "Class ObjectDeclaration", until: ClassBody, message: "the class signature is not laid out as the formatter writes it" }
+description: >-
+  A class header (name, constructor, supertypes) the formatter would lay out differently (ktlint
+  class-signature).
+example: 'class A(val a: Int,\n        val b: Int)'
+severity: off
+category: style

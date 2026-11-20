@@ -1,0 +1,12 @@
+function-signature: warn
+parameter-list-wrapping: warn
+argument-list-wrapping: warn
+class-signature: warn
+trailing-comma-on-call-site: warn
+trailing-comma-on-declaration-site: warn
+multiline-expression-wrapping: warn
+chain-method-continuation: warn
+function-expression-body: warn
+multiline-if-else: warn
+when-entry-bracing: warn
+statement-wrapping: warn

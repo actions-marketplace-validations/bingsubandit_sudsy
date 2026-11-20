@@ -8,7 +8,7 @@ use crate::provider::{LanguageProvider, SourceFile};
 use core_config::{ConfigChain, FileInput};
 use core_rules::{
     Analysis, Diagnostic, Extensions, FileContext, LineIndex, SYNTAX_ERROR, activate, fix_loop,
-    layers_needed, run_file,
+    layers_needed,
 };
 use core_semantics::SemanticView;
 use std::cell::RefCell;
@@ -141,6 +141,17 @@ fn analyze(
         });
         crate::embedded::trees(&found)
     });
+    // The formatter's output, for the rules that report what it would change.
+    let changes = active.iter().any(|a| a.rule.reads_formatted()).then(|| {
+        let formatted = crate::format::format_file(
+            provider,
+            &SourceFile::new(path, 1, text),
+            &provider.option_schema().defaults(),
+            &core_format::DirectiveTable::default(),
+        )
+        .expect("the test file formats");
+        core_rules::format_diff::FormatChanges::new(text, &formatted)
+    });
     let context = FileContext {
         path: Path::new(path),
         text,
@@ -155,7 +166,7 @@ fn analyze(
             summaries: &summaries,
         }),
     };
-    let report = run_file(&context, &active, false);
+    let report = core_rules::engine::run_file_with(&context, &active, false, changes.as_ref());
     Analysis {
         diagnostics: report.diagnostics,
         parses: true,

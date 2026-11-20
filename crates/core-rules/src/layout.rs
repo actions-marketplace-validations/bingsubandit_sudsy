@@ -86,7 +86,7 @@ impl RuleContext<'_> {
 /// Errors: a rule that failed.
 pub fn attached(file: &FileContext<'_>, active: &[ActiveRule<'_>]) -> Result<Vec<Attach>, String> {
     let mut sink = LayoutSink::default();
-    traverse(file, active, false, Some(&mut sink));
+    traverse(file, active, false, Some(&mut sink), None);
     if sink.errors.is_empty() {
         Ok(sink.attached)
     } else {

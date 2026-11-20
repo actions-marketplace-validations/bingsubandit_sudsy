@@ -163,6 +163,10 @@
               "$ref": "#/definitions/rule",
               "description": "The `alt` of an `<area>` is the name of the link in the image map; without an `href` it names nothing."
             },
+            "argument-list-wrapping": {
+              "$ref": "#/definitions/rule",
+              "description": "An argument list the formatter would wrap or join differently (ktlint argument-list-wrapping)."
+            },
             "aria-hidden-body": {
               "$ref": "#/definitions/rule",
               "description": "`aria-hidden=\"true\"` on `<body>` removes the whole page from the accessibility tree."
@@ -555,6 +559,10 @@
               "$ref": "#/definitions/rule",
               "description": "`cd`, `pushd` or `popd` whose failure is not handled (`cd dir || exit`). Not reported with `set -e`, for `cd ..` or `cd /`, or for `popd -n`."
             },
+            "chain-method-continuation": {
+              "$ref": "#/definitions/rule",
+              "description": "A call chain whose lines the formatter would break or join differently (ktlint chain-method-continuation)."
+            },
             "class-naming": {
               "$ref": "#/definitions/rule",
               "description": "A class, interface or object whose name starts with a lowercase letter or an underscore (ktlint class-naming)."
@@ -589,6 +597,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "class-signature": {
+              "$ref": "#/definitions/rule",
+              "description": "A class header (name, constructor, supertypes) the formatter would lay out differently (ktlint class-signature)."
             },
             "collapsible-if": {
               "$ref": "#/definitions/rule",
@@ -1604,6 +1616,10 @@
                 }
               ]
             },
+            "function-expression-body": {
+              "$ref": "#/definitions/rule",
+              "description": "A function whose body the formatter would write differently (ktlint function-expression-body)."
+            },
             "function-linear-gradient-no-nonstandard-direction": {
               "$ref": "#/definitions/rule",
               "description": "A `linear-gradient()` that starts with a side (`top`) instead of `to top` or an angle."
@@ -1645,6 +1661,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "function-signature": {
+              "$ref": "#/definitions/rule",
+              "description": "A function whose signature (up to the body) the formatter would lay out differently: parameters on one line or one per line, the return type and the body start (ktlint function-signature)."
             },
             "function-url-quotes": {
               "$ref": "#/definitions/rule",
@@ -2668,6 +2688,14 @@
             "module-import-not-at-top-of-file": {
               "$ref": "#/definitions/rule",
               "description": "An import at module level after code (docstrings, `__all__`, blocks, and `sys.path` or `os.environ` setup are not code)."
+            },
+            "multiline-expression-wrapping": {
+              "$ref": "#/definitions/rule",
+              "description": "An expression that spans lines and starts after code on its line: the value of a property or a function body after `=`, or an argument (ktlint multiline-expression-wrapping)."
+            },
+            "multiline-if-else": {
+              "$ref": "#/definitions/rule",
+              "description": "An `if` whose lines the formatter would change (ktlint multiline-if-else)."
             },
             "multiple-imports-on-one-line": {
               "$ref": "#/definitions/rule",
@@ -4175,6 +4203,10 @@
             "parameter-assignment": {
               "$ref": "#/definitions/rule",
               "description": "A parameter is assigned a new value (Checkstyle ParameterAssignment). No fix."
+            },
+            "parameter-list-wrapping": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter list the formatter would wrap or join differently (ktlint parameter-list-wrapping)."
             },
             "parentheses-as-grouped-expression": {
               "$ref": "#/definitions/rule",
@@ -5835,6 +5867,10 @@
               "$ref": "#/definitions/rule",
               "description": "An unquoted `$(...)` among the elements of an array assignment is split into words and globbed."
             },
+            "statement-wrapping": {
+              "$ref": "#/definitions/rule",
+              "description": "A block whose lines the formatter would change (ktlint statement-wrapping)."
+            },
             "static-join": {
               "$ref": "#/definitions/rule",
               "description": "`\"sep\".join([a, b])` of a list or tuple written out in the call, which an f-string says directly."
@@ -5910,6 +5946,14 @@
             "todo-comment": {
               "$ref": "#/definitions/rule",
               "description": "A line of a comment starts with `todo` in any other case, or with `TODO` and no colon (Checkstyle TodoComment with the Google format). Javadoc comments are not read."
+            },
+            "trailing-comma-on-call-site": {
+              "$ref": "#/definitions/rule",
+              "description": "The last line of an argument list that the formatter would change, the trailing comma (ktlint trailing-comma-on-call-site)."
+            },
+            "trailing-comma-on-declaration-site": {
+              "$ref": "#/definitions/rule",
+              "description": "The last line of a parameter list that the formatter would change, the trailing comma (ktlint trailing-comma-on-declaration-site)."
             },
             "trap-expands-now": {
               "$ref": "#/definitions/rule",
@@ -6770,6 +6814,10 @@
             "wget-progress": {
               "$ref": "#/definitions/rule",
               "description": "A wget call with no progress, quiet or log-file flag."
+            },
+            "when-entry-bracing": {
+              "$ref": "#/definitions/rule",
+              "description": "A `when` entry whose first line the formatter would change (ktlint when-entry-bracing)."
             },
             "workdir-absolute": {
               "$ref": "#/definitions/rule",

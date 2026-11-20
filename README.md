@@ -82,7 +82,7 @@ Each number is measured on real-world code against the reference tool with its d
 | YAML | ██████████ 100% Prettier | ███████░░░ 74% yamllint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
-| Kotlin | ████████░░ 82% ktlint | █░░░░░░░░░ 11% ktlint | In progress |
+| Kotlin | ████████░░ 82% ktlint | ████████░░ 84% ktlint | In progress |
 | Shell | ████████░░ 81% shfmt | ████████░░ 86% ShellCheck | In progress |
 | SQL | ███████░░░ 78% sqlfluff | █████░░░░░ 51% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |

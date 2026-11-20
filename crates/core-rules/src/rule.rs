@@ -150,6 +150,9 @@ pub struct RuleContext<'a> {
     pub(crate) ranges: Option<&'a TraversalCache>,
     /// What the formatter hands the rules it runs before layout (`None` in a lint run).
     pub format: Option<FormatInput<'a>>,
+    /// What formatting would change in the file, for rules that say [`Rule::reads_formatted`]; `None`
+    /// when no rule asks or the file does not format.
+    pub format_changes: Option<&'a crate::format_diff::FormatChanges>,
     /// The language's `format.rules` text: a rule that rewrites code reads its rows in the section
     /// named like it.
     pub rows: &'a str,
@@ -186,6 +189,7 @@ impl<'a> RuleContext<'a> {
             layout: None,
             ranges: None,
             format: None,
+            format_changes: None,
             rows: file.hooks.rows(),
         }
     }
@@ -303,6 +307,11 @@ pub trait Rule: Send + Sync {
     /// (`FileContext::embedded`). The code is parsed for the rules of its own language, and for
     /// the host's rules only when one of them says so.
     fn reads_embedded(&self) -> bool {
+        false
+    }
+
+    /// Whether the rule reads the formatter's output (`FileContext::format_changes`).
+    fn reads_formatted(&self) -> bool {
         false
     }
 

@@ -57,7 +57,30 @@ pub fn silence(file: &FileContext<'_>, diagnostics: &mut Vec<Diagnostic>) {
 /// [`run_file`] without the suppressions: for a caller whose own caller applies them to the
 /// result (a plugin, whose host does).
 pub fn run_rules(file: &FileContext<'_>, active: &[ActiveRule<'_>], collect: bool) -> FileReport {
-    traverse(file, active, collect, None)
+    run_rules_with(file, active, collect, None)
+}
+
+/// [`run_rules`] with what formatting would change in the file, for the rules that say
+/// [`Rule::reads_formatted`].
+pub fn run_rules_with(
+    file: &FileContext<'_>,
+    active: &[ActiveRule<'_>],
+    collect: bool,
+    changes: Option<&crate::format_diff::FormatChanges>,
+) -> FileReport {
+    traverse(file, active, collect, None, changes)
+}
+
+/// [`run_file`] with what formatting would change in the file.
+pub fn run_file_with(
+    file: &FileContext<'_>,
+    active: &[ActiveRule<'_>],
+    collect: bool,
+    changes: Option<&crate::format_diff::FormatChanges>,
+) -> FileReport {
+    let mut report = run_rules_with(file, active, collect, changes);
+    silence(file, &mut report.diagnostics);
+    report
 }
 
 /// The diagnostics of the rules' [`Rule::check_file`] alone, with no walk of the nodes for the
@@ -101,6 +124,7 @@ pub(crate) fn traverse(
     active: &[ActiveRule<'_>],
     collect: bool,
     mut layout: Option<&mut LayoutSink>,
+    changes: Option<&crate::format_diff::FormatChanges>,
 ) -> FileReport {
     let mut diagnostics = Vec::new();
     // Sorted by kind: a handful of kinds, looked up once per node, so a binary search beats hashing.
@@ -132,6 +156,7 @@ pub(crate) fn traverse(
         );
         ctx.layout = layout.as_deref_mut();
         ctx.ranges = Some(&ranges);
+        ctx.format_changes = changes;
         f(a.rule, &mut ctx);
     };
     for node in file.root.descendants() {

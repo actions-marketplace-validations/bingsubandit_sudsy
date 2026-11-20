@@ -8,15 +8,17 @@ scope: "ktlint standard rules. Formatting (`ktlint --format`, the ktlint_officia
 entries:
   annotation: planned
   annotation-spacing: planned
-  argument-list-wrapping: planned
+  argument-list-wrapping: rule argument-list-wrapping
   backing-property-naming: planned
   binary-expression-wrapping: planned
   blank-line-before-declaration: "formatter | Comments between declarations: the blank line goes before a KDoc or the first comment only when no blank follows it."
   block-comment-initial-star-alignment: formatter
-  chain-method-continuation: planned
+  blank-line-between-when-conditions: planned
+  when-entry-bracing: rule when-entry-bracing
+  chain-method-continuation: rule chain-method-continuation
   chain-wrapping: planned
   class-naming: rule class-naming | Names in backticks are accepted; no test-file exceptions.
-  class-signature: planned
+  class-signature: rule class-signature
   colon-spacing: formatter
   comma-spacing: formatter
   comment-spacing: rule comment-space | Line comments only.
@@ -34,11 +36,11 @@ entries:
   filename: planned
   final-newline: option kotlin.format.final_newline
   fun-keyword-spacing: planned
-  function-expression-body: planned
+  function-expression-body: rule function-expression-body
   function-literal: planned
   function-naming: planned | exceptions (`@Composable`, factory functions, tests) need annotations and types
   function-return-type-spacing: formatter
-  function-signature: planned
+  function-signature: rule function-signature
   function-start-of-body-spacing: formatter
   function-type-modifier-spacing: planned
   function-type-reference-spacing: planned
@@ -53,8 +55,8 @@ entries:
   mixed-condition-operators: planned
   modifier-list-spacing: formatter
   modifier-order: rule modifier-order | The shared rule over the `#modifiers` node; ktlint's order, annotations stay in place
-  multiline-expression-wrapping: planned
-  multiline-if-else: planned
+  multiline-expression-wrapping: rule multiline-expression-wrapping
+  multiline-if-else: rule multiline-if-else
   multiline-loop: planned
   no-blank-line-before-rbrace: formatter
   no-blank-line-in-list: planned
@@ -78,7 +80,7 @@ entries:
   op-spacing: formatter
   package-name: rule package-name
   parameter-list-spacing: planned
-  parameter-list-wrapping: planned
+  parameter-list-wrapping: rule parameter-list-wrapping
   parameter-wrapping: planned
   paren-spacing: formatter
   property-naming: planned | constants and backing properties need modifiers and a scan of the class
@@ -89,12 +91,12 @@ entries:
   spacing-between-declarations-with-comments: planned
   spacing-between-function-name-and-opening-parenthesis: formatter
   square-brackets-spacing: formatter
-  statement-wrapping: planned
+  statement-wrapping: rule statement-wrapping
   string-template: planned | needs the character after `${x}` (a Rust rule)
   string-template-indent: planned
   then-spacing: formatter
-  trailing-comma-on-call-site: planned
-  trailing-comma-on-declaration-site: planned
+  trailing-comma-on-call-site: rule trailing-comma-on-call-site
+  trailing-comma-on-declaration-site: rule trailing-comma-on-declaration-site
   try-catch-finally-spacing: formatter | Only the blank before `else`, `catch` and `finally`.
   type-argument-comment: planned
   type-argument-list-spacing: formatter

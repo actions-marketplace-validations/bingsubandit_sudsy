@@ -58,6 +58,7 @@ concept file-name-matches-type # users: csharp
 concept flat-block-preservation # users: csharp
 concept float-style # users: yaml
 concept font-family-checks # users: css
+concept format-diff-family # users: kotlin (shared)
 concept format-string-checks # users: python
 concept from-first # users: dockerfile
 concept getter-return # users: js
@@ -90,6 +91,7 @@ concept markup-layout # users: html
 concept member-order # users: csharp
 concept min-phony # users: makefile
 concept missing-permissions # users: github-actions
+concept multiline-start-family # users: kotlin (shared)
 concept multiple-labeled-controls # users: html
 concept negation-of-excluded-parent # users: gitignore
 concept no-comment-before-block # users: csharp

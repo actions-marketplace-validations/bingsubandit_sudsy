@@ -18,6 +18,7 @@ rowan.workspace = true
 rustc-hash.workspace = true
 regex-syntax.workspace = true
 regex-automata.workspace = true
+similar = "3"
 
 [dev-dependencies]
 lang-json.workspace = true

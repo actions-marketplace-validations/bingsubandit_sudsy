@@ -39,7 +39,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | html-eslint | 0.2% | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
 | html-validate | 61.5% | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
 | htmlhint | 5.0% | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
-| ktlint | 13.0% | 11.9% | 97 | 34 | 8 | 55 | 0 | 0 | 0 | 55 |
+| ktlint | 88.2% | 84.2% | 99 | 46 | 8 | 45 | 0 | 0 | 0 | 45 |
 | markdownlint | 83.6% | 83.4% | 53 | 23 | 18 | 0 | 0 | 0 | 12 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | phpstan | 0.0% | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |

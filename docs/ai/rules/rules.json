@@ -12987,6 +12987,74 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "An argument list the formatter would wrap or join differently (ktlint argument-list-wrapping).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(x: Int) {\n    val a = if (x > 0)\n        1\n    else 2\n    val b = when (x) {\n        1 -> { println(1) }\n        else -> println(2)\n    }\n    foo(); bar()\n    val c = someVeryLongReceiverName.firstFunctionCall(argumentNumberOne).secondFunctionCall(argumentNumberTwo).thirdFunctionCall(argumentNumberThree)\n    callTheFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour, argumentNumberFive, argumentNumberSix, argumentNumberSeven)\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 21,
+            "length": 1,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "argument-list-wrapping",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "argument-list-wrapping",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A call chain whose lines the formatter would break or join differently (ktlint chain-method-continuation).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(x: Int) {\n    val a = if (x > 0)\n        1\n    else 2\n    val b = when (x) {\n        1 -> { println(1) }\n        else -> println(2)\n    }\n    foo(); bar()\n    val c = someVeryLongReceiverName.firstFunctionCall(argumentNumberOne).secondFunctionCall(argumentNumberTwo).thirdFunctionCall(argumentNumberThree)\n    callTheFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour, argumentNumberFive, argumentNumberSix, argumentNumberSeven)\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "chain-method-continuation",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "chain-method-continuation",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A class, interface or object whose name starts with a lowercase letter or an underscore (ktlint class-naming).",
       "example": {
         "config": null,
@@ -13031,6 +13099,40 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A class header (name, constructor, supertypes) the formatter would lay out differently (ktlint class-signature).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "class-signature",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "class-signature",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "An enum entry whose name starts with a lowercase letter or an underscore (ktlint enum-entry-name-case).",
       "example": {
         "config": null,
@@ -13062,6 +13164,167 @@
       "upstream": [
         {
           "id": "enum-entry-name-case",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A function whose body the formatter would write differently (ktlint function-expression-body).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 114,
+            "length": 1,
+            "line": 3
+          },
+          {
+            "column": 18,
+            "length": 1,
+            "line": 21
+          }
+        ]
+      },
+      "fix": null,
+      "id": "function-expression-body",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "function-expression-body",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A function whose signature (up to the body) the formatter would lay out differently: parameters on one line or one per line, the return type and the body start (ktlint function-signature).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 3
+          },
+          {
+            "column": 17,
+            "length": 1,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "function-signature",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "function-signature",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An expression that spans lines and starts after code on its line: the value of a property or a function body after `=`, or an argument (ktlint multiline-expression-wrapping).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 17,
+            "length": 5,
+            "line": 5
+          },
+          {
+            "column": 13,
+            "length": 7,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "multiline-expression-wrapping",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "multiline-expression-wrapping",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `if` whose lines the formatter would change (ktlint multiline-if-else).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(x: Int) {\n    val a = if (x > 0)\n        1\n    else 2\n    val b = when (x) {\n        1 -> { println(1) }\n        else -> println(2)\n    }\n    foo(); bar()\n    val c = someVeryLongReceiverName.firstFunctionCall(argumentNumberOne).secondFunctionCall(argumentNumberTwo).thirdFunctionCall(argumentNumberThree)\n    callTheFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour, argumentNumberFive, argumentNumberSix, argumentNumberSeven)\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 2
+          },
+          {
+            "column": 9,
+            "length": 1,
+            "line": 3
+          },
+          {
+            "column": 8,
+            "length": 1,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "multiline-if-else",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "multiline-if-else",
           "partial": false,
           "tool": "ktlint"
         }
@@ -13218,6 +13481,206 @@
       "upstream": [
         {
           "id": "package-name",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A parameter list the formatter would wrap or join differently (ktlint parameter-list-wrapping).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 1
+          },
+          {
+            "column": 13,
+            "length": 1,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "parameter-list-wrapping",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "parameter-list-wrapping",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A block whose lines the formatter would change (ktlint statement-wrapping).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(x: Int) {\n    val a = if (x > 0)\n        1\n    else 2\n    val b = when (x) {\n        1 -> { println(1) }\n        else -> println(2)\n    }\n    foo(); bar()\n    val c = someVeryLongReceiverName.firstFunctionCall(argumentNumberOne).secondFunctionCall(argumentNumberTwo).thirdFunctionCall(argumentNumberThree)\n    callTheFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour, argumentNumberFive, argumentNumberSix, argumentNumberSeven)\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 2
+          },
+          {
+            "column": 13,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 16,
+            "length": 1,
+            "line": 6
+          },
+          {
+            "column": 13,
+            "length": 1,
+            "line": 10
+          },
+          {
+            "column": 21,
+            "length": 1,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "statement-wrapping",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "statement-wrapping",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The last line of an argument list that the formatter would change, the trailing comma (ktlint trailing-comma-on-call-site).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "trailing-comma-on-call-site",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "trailing-comma-on-call-site",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The last line of a parameter list that the formatter would change, the trailing comma (ktlint trailing-comma-on-declaration-site).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class A(val a: Int,\n        val b: Int) {\n    fun foo(a: Int, b: String, c: Long, d: Double, e: Float, f: Short, g: Byte, h: Char, i: Boolean, j: Unit): Int { return 1 }\n\n    fun baz() = run {\n        1\n    }\n\n    val x = listOf(\n        1,\n        2\n    )\n\n    fun bar(\n        a: Int,\n        b: Int\n    ) = a + b\n\n    fun ok(a: Int) = a\n\n    fun sum(): Int { return 1 }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 18,
+            "length": 1,
+            "line": 2
+          },
+          {
+            "column": 14,
+            "length": 1,
+            "line": 16
+          }
+        ]
+      },
+      "fix": null,
+      "id": "trailing-comma-on-declaration-site",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "trailing-comma-on-declaration-site",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `when` entry whose first line the formatter would change (ktlint when-entry-bracing).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(x: Int) {\n    val a = if (x > 0)\n        1\n    else 2\n    val b = when (x) {\n        1 -> { println(1) }\n        else -> println(2)\n    }\n    foo(); bar()\n    val c = someVeryLongReceiverName.firstFunctionCall(argumentNumberOne).secondFunctionCall(argumentNumberTwo).thirdFunctionCall(argumentNumberThree)\n    callTheFunction(argumentNumberOne, argumentNumberTwo, argumentNumberThree, argumentNumberFour, argumentNumberFive, argumentNumberSix, argumentNumberSeven)\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 15,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "when-entry-bracing",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "when-entry-bracing",
           "partial": false,
           "tool": "ktlint"
         }

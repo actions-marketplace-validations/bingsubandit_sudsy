@@ -10,10 +10,10 @@ use crate::inputs::{ExtensionSet, File, WorkspaceRevision};
 use crate::queries::{config, parse, parse_settings, provider_of, selection, source_file};
 use core_config::{Depth, FileInput, ResolvedRule};
 use core_format::DirectiveTable;
-use core_rules::engine::{ActiveRule, FileReport};
+use core_rules::engine::{ActiveRule, FileReport, run_rules_with};
 use core_rules::{
     Category, Diagnostic, FileContext, Layer, LineIndex, ProjectFacts, SYNTAX_ERROR, Severity,
-    activate, layers_needed, run_layout, run_project, run_rules, silence,
+    activate, layers_needed, run_layout, run_project, silence,
 };
 use core_semantics::{BehaviorSummaries, FileSemantics, Layers, SemanticView};
 use core_syntax::{TextRange, TextSize};
@@ -225,6 +225,15 @@ fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
         inner: provider.rule_hooks(),
         version: version.as_deref(),
     };
+    // The lines formatting would change, for the rules that report the formatter's findings.
+    let changes = if active.iter().any(|a| a.rule.reads_formatted()) {
+        crate::queries::format(db, file)
+            .as_ref()
+            .ok()
+            .map(|formatted| core_rules::format_diff::FormatChanges::new(text, formatted))
+    } else {
+        None
+    };
     let context = FileContext {
         path: file.path(db),
         text,
@@ -242,7 +251,7 @@ fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
     let FileReport {
         mut diagnostics,
         facts,
-    } = run_rules(&context, active, depth == Depth::Deep);
+    } = run_rules_with(&context, active, depth == Depth::Deep, changes.as_ref());
     diagnostics.extend(lint_embedded(db, file, &embedded_rules, &embedded)?);
     diagnostics.sort_by(|a, b| {
         (a.range.start(), a.range.end(), &a.rule).cmp(&(b.range.start(), b.range.end(), &b.rule))
