@@ -1,5 +1,5 @@
 coverage: 96.7  # share of the default-set findings of checkstyle on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkstyle; at least 85% is the bar)
-target: 95.0
+target: 88.6
 fixes:  # gap name or lint rule -> one line: where and what to change
   MissingJavadocMethod: "cause: no rule. Shared family `missing-doc-comment` (core-rules): public or protected method and constructor of public types without a `/** */` before it; Java as rows and options (allowed annotations, accessors)"
   MethodName: "cause: preset pattern too loose. Google's check splits camel segments (no single letter, no `aB`, no `getURL`) and allows `_` only in `@Test` methods; naming-convention rows with an annotation condition and a `test_methods` option"

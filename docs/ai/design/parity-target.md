@@ -22,7 +22,7 @@ The target leaves out only reviewed intentional cases. Everything else counts ag
      - When Sudsy's output for the file changes, the file is compared again and reported for review.
   3. **Lint rules where the tool is wrong.** The same entry and flag, pinned per finding (file, line, rule), not per file.
   4. **Out of scope.** `wontfix` catalog entries for removed or deprecated rules and for domains Sudsy does not cover (package manifests, a tool's own config, CLI modes). A `wontfix` that reads as "not built yet" is `planned` or `deferred` instead, and counts.
-- **`formatter` catalog entries need a proof run.** They leave the lint denominator only after a run per tool that:
+- **`formatter` and `option <lang>.format.*` catalog entries need a proof run.** They leave the lint denominator only after a run per tool that:
   - formats the coverage corpus with `sudsy format` (or `sudsy fix`, as above);
   - runs the lint tool on the result.
 

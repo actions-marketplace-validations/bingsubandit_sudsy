@@ -633,7 +633,7 @@ def coverage(tool, sudsy, version, prefix, exe):
             mapping = {**rule_map(other), **mapping}
     # the rules the formatter owns (the `formatter` catalog entries): `sudsy format` does their work, so they are not findings to cover
     rule_prefix = f"{PLUGINS[tool]}/" if tool in PLUGINS else "@typescript-eslint/" if tool == "typescript-eslint" else ""
-    owned_by_format = lambda e: e["sudsy"] == "formatter" or bool(spec and spec.get("options_are_layout") and e["sudsy"].startswith("option: "))
+    owned_by_format = lambda e: e["sudsy"] == "formatter" or e["sudsy"].startswith("option: ")
     layout = {f"{rule_prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if owned_by_format(e)}
     if tool in PLUGINS:
         mapping = {f"{PLUGINS[tool]}/{r}": v for r, v in mapping.items()}

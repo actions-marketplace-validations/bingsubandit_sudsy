@@ -46,7 +46,7 @@ Lint: coverage 60.9%, target 100%; rules by missed findings:
 
 ## checkstyle
 
-Lint: coverage 96.7%, target 95%; rules by missed findings:
+Lint: coverage 96.7%, target 88.6%; rules by missed findings:
 1. `VariableDeclarationUsageDistance` (632 missed) Fix: cause: no rule. Scope family: statements between a local's declaration and its first use
 2. `SingleSpaceSeparator` (239 missed) Fix: cause: no rule. Token pattern rule: one space between tokens on a line
 3. `LineLength` (186 missed)
@@ -219,7 +219,7 @@ Lint: coverage 5%, target 5%; rules by missed findings:
 37. `kt-break-after-s` (2 files): Sudsy breaks after `=` where ktlint does not; fix: see break-after-=/->(sudsy)
 38. `kt-closing-paren-line` (1 files): a closing parenthesis is on its own line in one output only; fix: classify further
 39. `kt-ctor-annot-header` (1 files): the annotated constructor header differs; fix: classify further
-Lint: coverage 90%, target 85.8%; rules by missed findings:
+Lint: coverage 90.2%, target 86%; rules by missed findings:
 1. `function-signature` (1666 missed)
 2. `wrapping` (948 missed)
 3. `multiline-expression-wrapping` (904 missed)
@@ -347,22 +347,22 @@ Lint: coverage 86.6%, target 86.6%; rules by missed findings:
 
 1. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 2. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: coverage 85.5%, target 66.6%; rules by missed findings:
+Lint: coverage 86.1%, target 66.7%; rules by missed findings:
 1. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
 2. `CP05` (277 missed) Fix: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (REPACK, tsql XML (DOCUMENT x), EXECUTE WITH RESULT SETS, OPENJSON WITH, JSON_TABLE PATH DEFAULT, RETURNS @t TABLE, mysql json_table)
 3. `CP02` (241 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
 4. `CP01` (154 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
 5. `RF05` (140 missed) Fix: quoted names in statements the generic parse leaves as plain tokens (no ObjectReference)
 6. `CV06` (126 missed) Fix: a semicolon after whitespace or a newline, and doubled semicolons; needs a token-neighbour check, planned until a second language needs it
-7. `LT04` (115 missed)
-8. `RF06` (111 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
-9. `RF03` (109 missed) Fix: references of selects over table functions and nested queries
-10. `AL03` (102 missed)
-11. `LXR` (102 missed)
-12. `RF02` (93 missed)
-13. `AM04` (76 missed)
-14. `ST06` (75 missed)
-15. `AL05` (62 missed)
+7. `RF06` (111 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
+8. `RF03` (109 missed) Fix: references of selects over table functions and nested queries
+9. `AL03` (102 missed)
+10. `LXR` (102 missed)
+11. `RF02` (93 missed)
+12. `AM04` (76 missed)
+13. `ST06` (75 missed)
+14. `AL05` (62 missed)
+15. `RF01` (53 missed)
 
 ## taplo
 

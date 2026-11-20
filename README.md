@@ -72,7 +72,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Angular templates | █████████░ 97% Prettier | 143 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | Ready |
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
-| Java | █████████░ 91% google-java-format | █████████░ 95% Checkstyle | Ready |
+| Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | XML | █████████░ 99% CSharpier XML | 18 rules · no reference tool | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
@@ -84,7 +84,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Markdown | ████████░░ 89% Prettier | ████████░░ 83% markdownlint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
-| Kotlin | ████████░░ 82% ktlint | ████████░░ 85% ktlint | In progress |
+| Kotlin | ████████░░ 82% ktlint | ████████░░ 86% ktlint | In progress |
 | Shell | ████████░░ 81% shfmt | ████████░░ 86% ShellCheck | In progress |
 | SQL | ███████░░░ 78% sqlfluff | ██████░░░░ 66% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |

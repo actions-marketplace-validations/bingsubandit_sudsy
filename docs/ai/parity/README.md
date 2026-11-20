@@ -25,7 +25,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
 | buf | 85.8% | 85.8% | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
 | checkmake | 60.9% | 100.0% | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
-| checkstyle | 96.7% | 95.0% | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
+| checkstyle | 96.7% | 88.6% | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
 | clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
 | csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
 | dotnet-format-editorconfig | - | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
@@ -39,7 +39,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | html-eslint | 0.2% | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
 | html-validate | 61.5% | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
 | htmlhint | 5.0% | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
-| ktlint | 90.0% | 85.8% | 99 | 49 | 8 | 42 | 0 | 0 | 0 | 42 |
+| ktlint | 90.2% | 86.0% | 99 | 49 | 8 | 42 | 0 | 0 | 0 | 42 |
 | markdownlint | 83.6% | 83.4% | 53 | 23 | 18 | 0 | 0 | 0 | 12 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | phpstan | 0.0% | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
@@ -50,7 +50,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | ruff | 94.6% | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
 | shellcheck | 86.6% | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 85.5% | 66.6% | 97 | 45 | 0 | 33 | 0 | 0 | 19 | 33 |
+| sqlfluff | 86.1% | 66.7% | 97 | 45 | 0 | 33 | 0 | 0 | 19 | 33 |
 | stylecop | - | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
 | stylelint | 94.7% | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
 | stylelint-less | - | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
