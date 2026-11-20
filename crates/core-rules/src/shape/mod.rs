@@ -48,7 +48,7 @@ impl Kind {
             Kind::Str => "string",
             Kind::Bool => "boolean",
             Kind::Int => "integer",
-            Kind::Float => "number",
+            Kind::Float => "float number",
         }
     }
 }
@@ -69,6 +69,8 @@ pub struct Row {
     pub exclusive: &'static [(&'static str, &'static str)],
     /// The scalar value or each scalar item must be one of these (empty: any).
     pub names: &'static [&'static str],
+    /// Names that must be keys of a mapping, not scalar values or items.
+    pub mapped: &'static [&'static str],
     pub format: Format,
     /// The node is a mapping that has (`true`) or lacks (`false`) this key.
     pub variant: &'static str,
@@ -78,6 +80,8 @@ pub struct Row {
     pub unique: bool,
     /// A null, empty string, empty mapping or empty sequence is an error.
     pub non_empty: bool,
+    /// The required keys go together: one finding names them all when any is missing.
+    pub together: bool,
     /// The entries of the mapping declare a type, a default and options.
     pub typed: Option<&'static Typed>,
     /// The mapping lists values per key, with include and exclude entries.
@@ -94,11 +98,13 @@ impl Row {
         required: &[],
         exclusive: &[],
         names: &[],
+        mapped: &[],
         format: Format::None,
         variant: "",
         unique: false,
         empty_map_ok: false,
         non_empty: false,
+        together: false,
         typed: None,
         combos: None,
     };
@@ -121,6 +127,18 @@ pub struct Shape {
     /// The rule that reports the structure of every row (unexpected or missing keys, a wrong kind,
     /// an empty section, a repeated key); empty: the row's own rule.
     pub structure: &'static str,
+    /// Keys that are valid only in some mappings (by the last segment of the mapping's path): in
+    /// any other mapping with a key list the key is reported under the entry's rule.
+    pub scoped: &'static [Scoped],
+}
+
+/// A key valid only within the mappings named in `within`. `message` takes `{key}`, `{parent}`
+/// (the mapping's name) and `{list}` (the names in `within`, comma separated).
+pub struct Scoped {
+    pub key: &'static str,
+    pub within: &'static [&'static str],
+    pub rule: &'static str,
+    pub message: &'static str,
 }
 
 /// One problem found.
@@ -339,7 +357,9 @@ impl Walk<'_> {
             self.report_structure(row, at, message);
             match (row.kind, val) {
                 (Kind::Map, Val::Null) => self.check_map(row, None, key, path, &name),
-                (Kind::Map, Val::Map(m)) => self.check_map(row, Some(m), key, path, &name),
+                (Kind::Map | Kind::Any, Val::Map(m)) => {
+                    self.check_map(row, Some(m), key, path, &name);
+                }
                 _ => {}
             }
             return;
@@ -385,7 +405,42 @@ impl Walk<'_> {
                 Val::Seq(_) => "sequence",
                 _ => "scalar",
             };
-            let message = format!("\"{name}\" must be {} but got {got}", row.kind.word());
+            if let (Kind::Map, Val::Scalar { .. }) = (row.kind, val) {
+                self.check_map(row, None, key, path, &name);
+            }
+            if let (Kind::Bool | Kind::Int | Kind::Float, Val::Scalar { text, quoted }) =
+                (row.kind, val)
+            {
+                let message = match scalar_tag(text, *quoted) {
+                    None => format!(
+                        "expecting a single ${{{{...}}}} expression or {} literal, but found plain text node",
+                        row.kind.word()
+                    ),
+                    Some(tag) => format!(
+                        "expected scalar node for {} value but found scalar node with \"{tag}\" tag",
+                        row.kind.word().trim_end_matches(" number")
+                    ),
+                };
+                return self.report_structure(row, at, message);
+            }
+            let tag = match val {
+                Val::Map(_) => "!!map",
+                Val::Seq(_) => "!!seq",
+                Val::Scalar { text, quoted } => scalar_tag(text, *quoted).unwrap_or("!!str"),
+                _ => "!!null",
+            };
+            let message = match row.kind {
+                Kind::Map => {
+                    format!("\"{name}\" section is {got} node but mapping node is expected")
+                }
+                Kind::Seq => format!(
+                    "\"{name}\" section must be sequence node but got {got} node with \"{tag}\" tag"
+                ),
+                kind => format!(
+                    "expected scalar node for {} value but found {got} node with \"{tag}\" tag",
+                    kind.word().trim_end_matches(" number")
+                ),
+            };
             return self.report_structure(row, at, message);
         }
         match val {
@@ -407,7 +462,7 @@ impl Walk<'_> {
         if let Val::Scalar { text, .. } = val
             && let Some(message) = row.format.check(text)
         {
-            self.report(row, at, message);
+            self.report(row, at, message.replace("{name}", &name));
         }
         if let Val::Scalar { text, .. } = val
             && row.format == Format::Expression
@@ -430,6 +485,10 @@ impl Walk<'_> {
             return;
         }
         for (text, range) in names {
+            if row.mapped.contains(&text) {
+                let message = format!("\"{text}\" must be configured with a mapping");
+                self.report_structure(row, range, message);
+            }
             if !self.is_expression(text) && !row.names.contains(&text) {
                 let message = format!(
                     "unknown name \"{text}\"; expected one of {}",
@@ -452,6 +511,20 @@ impl Walk<'_> {
         if !row.keys.is_empty() {
             for (key, range, _) in &entries {
                 if !row.keys.contains(&key.as_str()) {
+                    if let Some(s) = self.shape.scoped.iter().find(|s| s.key == key) {
+                        let parent = path.last().map_or("", |p| p.as_str());
+                        let message = s
+                            .message
+                            .replace("{key}", key)
+                            .replace("{parent}", parent)
+                            .replace("{list}", &s.within.join(", "));
+                        self.out.push(Finding {
+                            rule: s.rule,
+                            range: *range,
+                            message,
+                        });
+                        continue;
+                    }
                     let message = format!(
                         "unexpected key \"{key}\" for {name} section. expected one of {}",
                         row.keys.join(", ")
@@ -460,13 +533,34 @@ impl Walk<'_> {
                 }
             }
         }
-        for key in row.required {
+        let missing: Vec<&&str> = row
+            .required
+            .iter()
+            .filter(|k| !entries.iter().any(|e| e.0 == **k))
+            .collect();
+        if row.together && !missing.is_empty() {
+            let list = row
+                .required
+                .iter()
+                .map(|k| format!("\"{k}\""))
+                .collect::<Vec<_>>();
+            let message = format!(
+                "both {} must be specified in \"{name}\" section",
+                list.join(" and ")
+            );
+            self.report_structure(row, at, message);
+        }
+        for key in row.required.iter().filter(|_| !row.together) {
             if !entries.iter().any(|e| e.0 == *key) {
                 let at = match map {
                     Some(map) if path.is_empty() => first_line(map, self.g),
                     _ => at,
                 };
-                self.report_structure(row, at, format!("\"{key}\" section is missing in {name}"));
+                self.report_structure(
+                    row,
+                    at,
+                    format!("\"{key}\" is missing in \"{name}\" section"),
+                );
             }
         }
         if row.unique {
@@ -497,6 +591,22 @@ impl Walk<'_> {
                 self.report(row, entries[x.max(y)].1, message);
             }
         }
+    }
+}
+
+/// The YAML tag of a plain scalar that is a boolean, an integer or a float; None for text.
+fn scalar_tag(text: &str, quoted: bool) -> Option<&'static str> {
+    if quoted {
+        return None;
+    }
+    if matches!(text, "true" | "false") {
+        Some("!!bool")
+    } else if text.parse::<i64>().is_ok() {
+        Some("!!int")
+    } else if text.parse::<f64>().is_ok() {
+        Some("!!float")
+    } else {
+        None
     }
 }
 
@@ -580,6 +690,7 @@ static NO_ROWS: Shape = Shape {
     rows: &[],
     expression: "",
     structure: "",
+    scoped: &[],
 };
 
 impl Walk<'_> {

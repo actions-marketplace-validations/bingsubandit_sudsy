@@ -12,6 +12,8 @@ pub enum Format {
     Positive,
     /// A spec (`owner/repo@ref`) of an action listed, one per line, as outdated.
     Outdated(&'static str),
+    /// The text must be a line of the list; the message takes `{text}`.
+    Listed(&'static str, &'static str),
     /// A filter pattern for branch and tag names, or for paths (the glob syntax of GitHub's filters).
     RefGlob,
     PathGlob,
@@ -70,11 +72,50 @@ fn cron_field(
     Ok(())
 }
 
+/// The values a numeric cron field (`*`, `a`, `a-b`, each with `/step`, joined by `,`) selects.
+fn cron_values(field: &str, min: u32, max: u32) -> Vec<u32> {
+    let mut out = Vec::new();
+    for part in field.split(',') {
+        let (range, step) = part.split_once('/').unwrap_or((part, "1"));
+        let step = step.parse::<u32>().unwrap_or(1).max(1);
+        let (lo, hi) = match range.split_once('-') {
+            _ if range == "*" => (min, max),
+            Some((a, b)) => (a.parse().unwrap_or(min), b.parse().unwrap_or(max)),
+            None => {
+                let a = range.parse().unwrap_or(min);
+                (a, if part.contains('/') { max } else { a })
+            }
+        };
+        out.extend((lo..=hi).step_by(step as usize));
+    }
+    out
+}
+
+/// The shortest gap in seconds between two runs of a cron line, from its minute and hour fields.
+fn cron_interval(minutes: &str, hours: &str) -> u32 {
+    let mut runs: Vec<u32> = Vec::new();
+    for h in cron_values(hours, 0, 23) {
+        runs.extend(cron_values(minutes, 0, 59).into_iter().map(|m| h * 60 + m));
+    }
+    runs.sort_unstable();
+    runs.dedup();
+    let wrap = runs.first().map_or(1440, |f| f + 1440);
+    let last = runs.last().copied().unwrap_or(0);
+    runs.windows(2)
+        .map(|w| w[1] - w[0])
+        .chain([wrap - last])
+        .min()
+        .unwrap_or(1440)
+        * 60
+}
+
 impl Format {
     /// The problem of `text`, if it is not of this format.
     pub fn check(self, text: &str) -> Option<String> {
         match self {
             Format::None => None,
+            Format::Listed(list, message) => (!list.lines().any(|l| l == text))
+                .then(|| message.replace("{text}", text)),
             Format::Outdated(specs) => specs.lines().any(|l| l == text).then(|| {
                 format!("the runner of \"{text}\" action is too old to run on GitHub Actions. update the action's version to fix this issue")
             }),
@@ -89,7 +130,7 @@ impl Format {
             Format::RefGlob => glob(text, false),
             Format::PathGlob => glob(text, true),
             Format::Positive => match text.parse::<f64>() {
-                Ok(n) if n <= 0.0 => Some(format!("value must be greater than zero: {text}")),
+                Ok(n) if n <= 0.0 => Some(format!("value at \"{{name}}\" must be greater than zero: {text}")),
                 _ => None,
             },
             Format::Cron => {
@@ -114,7 +155,10 @@ impl Format {
                         ));
                     }
                 }
-                None
+                let seconds = cron_interval(fields[0], fields[1]);
+                (seconds < 300).then(|| {
+                    format!("scheduled job runs too frequently. it runs once per {seconds} seconds. the shortest interval is once every 5 minutes")
+                })
             }
         }
     }

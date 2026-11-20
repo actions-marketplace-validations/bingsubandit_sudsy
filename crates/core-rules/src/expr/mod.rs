@@ -213,11 +213,38 @@ fn literal_ty(spec: &Spec, text: &str) -> Option<Ty> {
     Some(checker.ty(&node))
 }
 
+/// `label "x" is unknown. available labels are "a", "b"`: the message for a `value` of kind `what`
+/// that is not one of `known`.
+pub fn unknown_name(known: &[&str], what: &str, value: &str) -> String {
+    let list = quoted_list(known.iter().map(|k| k.to_string()));
+    format!("{what} \"{value}\" is unknown. available {what}s are {list}")
+}
+
 fn quoted_list(names: impl Iterator<Item = String>) -> String {
     names
         .map(|n| format!("\"{n}\""))
         .collect::<Vec<_>>()
         .join(", ")
+}
+
+/// An object filter (`a.*.b`) is somewhere inside the receiver chain.
+fn starred(n: &Node) -> bool {
+    match &n.kind {
+        Kind::Star(_) => true,
+        Kind::Prop(o, _) | Kind::Index(o, _) => starred(o),
+        _ => false,
+    }
+}
+
+/// Whether `n` is the property chain `path` (`github.event.inputs`) on a context, ignoring case.
+fn chain(n: &Node, path: &str) -> bool {
+    match (&n.kind, path.rsplit_once('.')) {
+        (Kind::Var(name), None) => name.eq_ignore_ascii_case(path),
+        (Kind::Prop(o, name), Some((rest, last))) => {
+            name.eq_ignore_ascii_case(last) && chain(o, rest)
+        }
+        _ => false,
+    }
 }
 
 impl Checker<'_> {
@@ -262,11 +289,21 @@ impl Checker<'_> {
             }
             Kind::Prop(obj, name) => {
                 let t = self.ty(obj);
+                if starred(obj) {
+                    return Ty::Arr(Box::new(Ty::Any));
+                }
+                for sc in self.spec.scopes.iter().filter(|s| s.context.contains('.')) {
+                    if chain(n, sc.context)
+                        && let Some(scoped) = (self.scoped)(sc.context)
+                    {
+                        return scoped;
+                    }
+                }
                 self.property(n, &t, name)
             }
             Kind::Star(obj) => {
                 self.ty(obj);
-                Ty::Any
+                Ty::Arr(Box::new(Ty::Any))
             }
             Kind::Index(obj, index) => {
                 let (t, i) = (self.ty(obj), self.ty(index));
@@ -553,7 +590,7 @@ impl Run<'_, '_> {
             let (from, at) = self.header.map_or((base, node.start), |h| (h, 0));
             conditions.push((from, at, message));
         }
-        if embedded && matches!(t, Ty::Arr(_) | Ty::Obj(_) | Ty::Map(_)) {
+        if embedded && matches!(t, Ty::Arr(_) | Ty::Obj(_) | Ty::Map(_) | Ty::Null) {
             checker.err(
                 Class::Types,
                 node.start,
@@ -593,9 +630,13 @@ impl Run<'_, '_> {
             let whole = end_of(body, first + open.len(), close).map(|e| e + close.len());
             if newline || first != 0 || whole != Some(body.len()) {
                 if self.full {
+                    let shown = if self.header.is_some() {
+                        format!("{}{}", body.trim(), if newline { "\n" } else { "" })
+                    } else {
+                        body.to_string()
+                    };
                     let message = format!(
-                        "`{}` is always true because there is text around the {open} {close} markers",
-                        body.trim()
+                        "if: condition \"{shown}\" is always evaluated to true because extra characters are around {open} {close}"
                     );
                     self.report(Class::Condition, at, 0, message);
                 }

@@ -251,7 +251,7 @@ rule! {
                 continue;
             };
             let Some(runs_on) = runs_on.value else {
-                ctx.report(runs_on.key_range, "`runs-on` has no label");
+                ctx.report(runs_on.key_range, core_rules::expr::unknown_name(&ctx.options.list("labels"), "label", ""));
                 continue;
             };
             // `runs-on: { group: g, labels: [a] }` names labels too.
@@ -272,7 +272,7 @@ rule! {
             }
             for (label, range) in labels {
                 if !label.contains("${{") && !known.iter().any(|k| k.is_match(&label)) {
-                    ctx.report(range, format!("unknown runner label `{label}`"));
+                    ctx.report(range, core_rules::expr::unknown_name(&ctx.options.list("labels"), "label", &label));
                 }
             }
         }

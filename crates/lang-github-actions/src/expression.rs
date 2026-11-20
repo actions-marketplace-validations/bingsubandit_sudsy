@@ -95,6 +95,7 @@ static SPEC: Spec = Spec {
             base: &["github_token", "actions_runner_debug", "actions_step_debug"], ..Scope::NONE },
         Scope { context: "inputs", source: "on.workflow_dispatch.inputs|on.workflow_call.inputs", key: "type",
             item: "string", types: &[("boolean", "bool"), ("number", "number")], ..Scope::NONE },
+        Scope { context: "github.event.inputs", source: "on.workflow_dispatch.inputs", item: "string", ..Scope::NONE },
     ],
     rules: Rules { syntax: "invalid-expression", context: "expression-context", types: "expression-types", condition: "if-condition" },
     compiled: OnceLock::new(),

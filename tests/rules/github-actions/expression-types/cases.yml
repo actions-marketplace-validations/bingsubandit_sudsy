@@ -20,3 +20,5 @@ jobs:
 #                                                                ^ expression-types
       - run: echo ${{ matrix.os }} ${{ matrix.arch }}
 #                                      ^ expression-types
+      - run: echo ${{ github.event.*[github.sha] }}
+#                     ^ expression-types

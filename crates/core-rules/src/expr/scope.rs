@@ -170,7 +170,9 @@ pub fn ty(
                         {
                             for item in items {
                                 if let Tree::Map(m) = item {
-                                    out.extend(m.iter().map(|(k, _)| (k.clone(), Ty::Any)));
+                                    out.extend(
+                                        m.iter().map(|(k, v)| (k.clone(), infer(v, eval, marker))),
+                                    );
                                 }
                             }
                         }

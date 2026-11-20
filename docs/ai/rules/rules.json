@@ -23530,7 +23530,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n",
+        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -23562,6 +23562,11 @@
             "column": 40,
             "length": 1,
             "line": 16
+          },
+          {
+            "column": 23,
+            "length": 1,
+            "line": 17
           }
         ]
       },
@@ -23701,7 +23706,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
+        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  pull_request_review:\n    types: submitted\n    tags: v1\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n    - cron: '*/4 * * * *'\n    - cron: '0 1 * * *'\n      timezone: Europe/Berlin\n    - cron: '0 1 * * *'\n      timezone: UTC\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -23715,34 +23720,49 @@
             "line": 7
           },
           {
+            "column": 5,
+            "length": 4,
+            "line": 10
+          },
+          {
             "column": 13,
             "length": 9,
-            "line": 9
+            "line": 12
           },
           {
             "column": 13,
             "length": 11,
-            "line": 10
+            "line": 13
+          },
+          {
+            "column": 13,
+            "length": 13,
+            "line": 15
+          },
+          {
+            "column": 17,
+            "length": 3,
+            "line": 19
           },
           {
             "column": 7,
             "length": 4,
-            "line": 14
+            "line": 22
           },
           {
             "column": 9,
             "length": 7,
-            "line": 18
+            "line": 26
           },
           {
             "column": 9,
             "length": 7,
-            "line": 27
+            "line": 35
           },
           {
             "column": 9,
             "length": 7,
-            "line": 30
+            "line": 38
           }
         ]
       },

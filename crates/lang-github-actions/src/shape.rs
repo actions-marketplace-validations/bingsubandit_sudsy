@@ -4,11 +4,21 @@
 //! concept: key-shape
 
 use core_rules::rule;
-use core_rules::shape::{Combos, Format, Kind, Row, Shape, Typed, Value, Variant, check};
+use core_rules::shape::{Combos, Format, Kind, Row, Scoped, Shape, Typed, Value, Variant, check};
 use core_rules::{FileContext, RuleContext};
 
 const S: &str = "workflow-syntax";
 const E: &str = "invalid-event";
+const FILTER: &str =
+    "\"{key}\" filter is not available for {parent} event. it is only for {list} events";
+const BRANCHES: &[&str] = &[
+    "merge_group",
+    "push",
+    "pull_request",
+    "pull_request_target",
+    "workflow_run",
+];
+const PATHS: &[&str] = &["push", "pull_request", "pull_request_target"];
 const P: &str = "invalid-permissions";
 const O: &str = "outdated-action";
 const G: &str = "invalid-glob";
@@ -36,6 +46,7 @@ const PR_TYPES: &[&str] = &[
     "auto_merge_enabled", "auto_merge_disabled",
 ];
 /// The specs of popular actions whose runner is retired (actionlint's list of its pinned release).
+const TIMEZONES: &str = include_str!("../data/timezones.txt");
 const OUTDATED: &str = include_str!("../data/outdated-actions.txt");
 static MATRIX: Combos = Combos {
     include: "include",
@@ -80,10 +91,19 @@ static SHAPE: Shape = Shape {
     ],
     expression: "${{",
     structure: S,
+    scoped: &[
+        Scoped { key: "branches", within: BRANCHES, rule: E, message: FILTER },
+        Scoped { key: "branches-ignore", within: BRANCHES, rule: E, message: FILTER },
+        Scoped { key: "paths", within: PATHS, rule: E, message: FILTER },
+        Scoped { key: "paths-ignore", within: PATHS, rule: E, message: FILTER },
+        Scoped { key: "tags", within: &["push"], rule: E, message: FILTER },
+        Scoped { key: "tags-ignore", within: &["push"], rule: E, message: FILTER },
+    ],
     rows: &[
         row!("", S, Kind::Map, title: "workflow", variant: "no-runs", required: &["on", "jobs"],
             keys: &["name", "run-name", "on", "permissions", "env", "defaults", "concurrency", "jobs"]),
-        row!("on", E, Kind::Any, names: EVENTS, keys: EVENTS, non_empty: true),
+        row!("on", E, Kind::Any, names: EVENTS, keys: EVENTS, non_empty: true,
+            mapped: &["schedule"]),
         row!("on.push", E, Kind::Map, exclusive: FILTER_PAIRS,
             keys: &["branches", "branches-ignore", "tags", "tags-ignore", "paths", "paths-ignore"]),
         row!("on.pull_request|on.pull_request_target", E, Kind::Map, exclusive: FILTER_PAIRS,
@@ -130,7 +150,9 @@ static SHAPE: Shape = Shape {
         row!("jobs.*.container.credentials.password|jobs.*.services.*.credentials.password", S, Kind::Str,
             format: Format::Expression),
         row!("jobs.*.steps.*.uses", O, Kind::Str, format: Format::Outdated(OUTDATED)),
-        row!("on.schedule.*.cron", E, Kind::Str, format: Format::Cron),
+        row!("on.schedule.*.cron", E, Kind::Str, format: Format::Cron, non_empty: true),
+        row!("on.schedule.*.timezone", E, Kind::Str, non_empty: true, format: Format::Listed(TIMEZONES,
+            "invalid timezone \"{text}\" in schedule event. it must be a valid IANA timezone name")),
         row!("on.image_version", E, Kind::Map, keys: &["names", "versions"]),
         row!("on.image_version.names|on.image_version.versions", E, Kind::Seq, non_empty: true),
         row!("on.image_version.names.*|on.image_version.versions.*", E, Kind::Str, non_empty: true),
@@ -186,7 +208,7 @@ static SHAPE: Shape = Shape {
         row!("jobs.*.strategy.max-parallel", S, Kind::Int, format: Format::Positive),
         row!("jobs.*.strategy", S, Kind::Map, keys: &["matrix", "fail-fast", "max-parallel"], non_empty: true),
         row!("jobs.*.strategy.matrix", S, Kind::Any, unique: true, combos: Some(&MATRIX)),
-        row!("jobs.*.strategy.matrix.*", S, Kind::Seq, non_empty: true),
+        row!("jobs.*.strategy.matrix.*", S, Kind::Seq, title: "matrix values", non_empty: true),
         row!("jobs.*.outputs", S, Kind::Map, non_empty: true),
         row!("jobs.*.outputs.*", S, Kind::Scalar),
         row!("jobs.*.container|jobs.*.services.*", S, Kind::Any, required: &["image"], non_empty: true,
@@ -196,8 +218,10 @@ static SHAPE: Shape = Shape {
               |jobs.*.services.*.options", S, Kind::Str, non_empty: true),
         row!("jobs.*.container.ports|jobs.*.services.*.ports|jobs.*.container.volumes|jobs.*.services.*.volumes",
             S, Kind::Seq, non_empty: true),
+        row!("jobs.*.container.ports.*|jobs.*.services.*.ports.*|jobs.*.container.volumes.*|jobs.*.services.*.volumes.*",
+            S, Kind::Str, non_empty: true),
         row!("jobs.*.container.credentials|jobs.*.services.*.credentials", S, Kind::Map, non_empty: true,
-            keys: &["username", "password"], required: &["username", "password"]),
+            keys: &["username", "password"], required: &["username", "password"], together: true),
         row!("jobs.*.steps", S, Kind::Seq, non_empty: true),
         row!("jobs.*.steps.*", S, Kind::Map, title: "step to execute action", variant: "uses",
             non_empty: true,

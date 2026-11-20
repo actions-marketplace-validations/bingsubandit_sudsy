@@ -7,12 +7,23 @@ on:
   pull_request:
     types: [opened, created]
 #                   ^^^^^^^ invalid-event
+  pull_request_review:
+    types: submitted
+    tags: v1
+#   ^^^^ invalid-event
   schedule:
     - cron: '0 0 * *'
 #           ^^^^^^^^^ invalid-event
     - cron: '0 0 * * 9'
 #           ^^^^^^^^^^^ invalid-event
     - cron: '*/15 0-5 * * mon'
+    - cron: '*/4 * * * *'
+#           ^^^^^^^^^^^^^ invalid-event
+    - cron: '0 1 * * *'
+      timezone: Europe/Berlin
+    - cron: '0 1 * * *'
+      timezone: UTC
+#               ^^^ invalid-event
   workflow_dispatch:
     inputs:
       kind:
