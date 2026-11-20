@@ -127,6 +127,6 @@
   speed: [GitHub Actions]
   stability: [github-actions]
   lint: [{tool: actionlint, name: actionlint}]
-- language: INI, EditorConfig, .gitignore
+- language: INI / EditorConfig / .gitignore
   ids: [ini, editorconfig, gitignore]
   stability: [ini, editorconfig, gitignore]

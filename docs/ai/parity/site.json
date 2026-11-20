@@ -25,7 +25,7 @@
 {"format":[],"ids":["dockerfile"],"lint":[{"catalog":"hadolint","name":"hadolint","share":78.2}],"name":"Dockerfile","presets":["dockerfile/hadolint"],"rules":65,"slug":"dockerfile","speed":[["Dockerfile","Lint","hadolint","36× faster","0.071 s / 2.57 s","70 / 74 MB"]],"status":"In progress"},
 {"format":[],"ids":["makefile"],"lint":[{"catalog":"checkmake","name":"checkmake","share":100.0}],"name":"Makefile","presets":["makefile/checkmake"],"rules":20,"slug":"makefile","speed":[["Makefile","Lint","checkmake","3.7× slower","0.059 s / 0.016 s","70 / 28 MB"]],"status":"Ready"},
 {"format":[],"ids":["github-actions"],"lint":[{"catalog":"actionlint","name":"actionlint","share":85.2}],"name":"GitHub Actions","presets":["github-actions/actionlint","yaml/yamllint"],"rules":46,"slug":"github-actions","speed":[["GitHub Actions","Lint","actionlint","2.1× slower","0.14 s / 0.065 s","76 / 71 MB"]],"status":"Ready"},
-{"format":[],"ids":["ini","editorconfig","gitignore"],"lint":[],"name":"INI, EditorConfig, .gitignore","presets":[],"rules":24,"slug":"ini","speed":[],"status":"Ready"}
+{"format":[],"ids":["ini","editorconfig","gitignore"],"lint":[],"name":"INI / EditorConfig / .gitignore","presets":[],"rules":24,"slug":"ini","speed":[],"status":"Ready"}
 ],
 "tools":[
 {"coverage":85.2,"languages":["github-actions"],"target":85.2,"tool":"actionlint","version":"1.7.12","entries":[

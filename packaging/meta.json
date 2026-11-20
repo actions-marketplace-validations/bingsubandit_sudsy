@@ -23,5 +23,5 @@
     "tflint",
     "javascript"
   ],
-  "ready": "Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Makefile, GitHub Actions, INI, EditorConfig, .gitignore and Ruby. The rest are in progress."
+  "ready": "Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress."
 }

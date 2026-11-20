@@ -14,7 +14,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Makefile, GitHub Actions, INI, EditorConfig, .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -75,7 +75,7 @@ Each number is measured on real-world code against the reference tool with its d
 | XML | █████████░ 99% CSharpier XML | 17 rules · no reference tool | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
-| INI, EditorConfig, .gitignore | ██████████ 100% stable · no reference tool | 24 rules · no reference tool | Ready |
+| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 24 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
