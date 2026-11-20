@@ -1,6 +1,5 @@
 on:
   pushh: {}
-# ^^^^^ invalid-event
   push:
     branches: [main]
     branches-ignore: [dev]
@@ -34,7 +33,6 @@ on:
         default: x
 #       ^^^^^^^ invalid-event
       r:
-#     ^ invalid-event
         required: true
         default: 1
 #       ^^^^^^^ invalid-event

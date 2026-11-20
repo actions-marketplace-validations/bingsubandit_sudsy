@@ -79,6 +79,7 @@ static SHAPE: Shape = Shape {
         Variant { name: "no-runs", has: &[], lacks: &["runs"] },
     ],
     expression: "${{",
+    structure: S,
     rows: &[
         row!("", S, Kind::Map, title: "workflow", variant: "no-runs", required: &["on", "jobs"],
             keys: &["name", "run-name", "on", "permissions", "env", "defaults", "concurrency", "jobs"]),

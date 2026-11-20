@@ -118,6 +118,9 @@ pub struct Shape {
     pub rows: &'static [Row],
     /// A scalar with this text inside is an expression: not checked.
     pub expression: &'static str,
+    /// The rule that reports the structure of every row (unexpected or missing keys, a wrong kind,
+    /// an empty section, a repeated key); empty: the row's own rule.
+    pub structure: &'static str,
 }
 
 /// One problem found.
@@ -223,6 +226,19 @@ impl Walk<'_> {
         });
     }
 
+    fn report_structure(&mut self, row: &Row, range: TextRange, message: String) {
+        let rule = if self.shape.structure.is_empty() {
+            row.rule
+        } else {
+            self.shape.structure
+        };
+        self.out.push(Finding {
+            rule,
+            range,
+            message,
+        });
+    }
+
     fn is_expression(&self, text: &str) -> bool {
         !self.shape.expression.is_empty() && text.contains(self.shape.expression)
     }
@@ -320,7 +336,7 @@ impl Walk<'_> {
                 (_, true) => format!("element of \"{name}\" section should not be empty"),
                 _ => format!("\"{name}\" section should not be empty"),
             };
-            self.report(row, at, message);
+            self.report_structure(row, at, message);
             if let (Kind::Map, Val::Null) = (row.kind, val) {
                 self.check_map(row, None, key, path, &name);
             }
@@ -368,7 +384,7 @@ impl Walk<'_> {
                 _ => "scalar",
             };
             let message = format!("\"{name}\" must be {} but got {got}", row.kind.word());
-            return self.report(row, at, message);
+            return self.report_structure(row, at, message);
         }
         match val {
             Val::Map(map) => self.check_map(row, Some(map), key, path, &name),
@@ -438,7 +454,7 @@ impl Walk<'_> {
                         "unexpected key \"{key}\" for {name} section. expected one of {}",
                         row.keys.join(", ")
                     );
-                    self.report(row, *range, message);
+                    self.report_structure(row, *range, message);
                 }
             }
         }
@@ -448,7 +464,7 @@ impl Walk<'_> {
                     Some(map) if path.is_empty() => first_line(map, self.g),
                     _ => at,
                 };
-                self.report(row, at, format!("\"{key}\" section is missing in {name}"));
+                self.report_structure(row, at, format!("\"{key}\" section is missing in {name}"));
             }
         }
         if row.unique {
@@ -456,7 +472,7 @@ impl Walk<'_> {
             for (key, range, _) in &entries {
                 let lower = key.to_lowercase();
                 if seen.contains(&lower) {
-                    self.report(
+                    self.report_structure(
                         row,
                         *range,
                         format!("key \"{key}\" is duplicated in \"{name}\" section"),
@@ -561,6 +577,7 @@ static NO_ROWS: Shape = Shape {
     variants: &[],
     rows: &[],
     expression: "",
+    structure: "",
 };
 
 impl Walk<'_> {

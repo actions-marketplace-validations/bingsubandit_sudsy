@@ -1,7 +1,6 @@
 on: push
 permissions:
   content: read
-# ^^^^^^^ invalid-permissions
   id-token: read
 #           ^^^^ invalid-permissions
   contents: write

@@ -366,6 +366,17 @@ def actionlint_check(d):
         return "syntax-check/merge-key"
     if kind == "syntax-check" and re.search(r"anchor|alias|could not parse", message):
         return "syntax-check/yaml"
+    if kind == "syntax-check":
+        for pattern, name in (
+            (r"should not be empty|is empty", "empty"),
+            (r"unexpected key|unexpected alias", "unexpected-key"),
+            (r"is missing|expected \"[^\"]*\" key|both .* must be specified|step must run", "missing-key"),
+            (r"expecting a single", "expression-value"),
+            (r"must be greater than zero", "number"),
+            (r"node|must be (string|sequence|mapping)", "kind"),
+        ):
+            if re.search(pattern, message):
+                return "syntax-check/" + name
     return kind
 
 

@@ -22209,11 +22209,6 @@
         "language": "github-actions",
         "spans": [
           {
-            "column": 3,
-            "length": 5,
-            "line": 2
-          },
-          {
             "column": 5,
             "length": 15,
             "line": 5
@@ -22247,11 +22242,6 @@
             "column": 9,
             "length": 7,
             "line": 27
-          },
-          {
-            "column": 7,
-            "length": 1,
-            "line": 28
           },
           {
             "column": 9,
@@ -22464,11 +22454,6 @@
         "input": "on: push\npermissions:\n  content: read\n  id-token: read\n  contents: write\njobs:\n  a:\n    runs-on: ubuntu-latest\n    permissions: read\n    steps:\n      - run: echo\n",
         "language": "github-actions",
         "spans": [
-          {
-            "column": 3,
-            "length": 7,
-            "line": 3
-          },
           {
             "column": 13,
             "length": 4,
@@ -23246,6 +23231,36 @@
         },
         {
           "id": "credentials",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/unexpected-key",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/empty",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/missing-key",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/kind",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/expression-value",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/number",
           "partial": true,
           "tool": "actionlint"
         },
