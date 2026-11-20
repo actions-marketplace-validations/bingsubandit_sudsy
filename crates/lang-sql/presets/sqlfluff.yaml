@@ -26,5 +26,10 @@ sql:
       special-chars-in-identifier: warn
       keyword-identifier: warn
       needless-quotes: warn
+      unknown-columns: warn
+      unqualified-reference: warn
+      inconsistent-reference: warn
+      duplicate-column-alias: warn
+      group-order-style: warn
       union-distinct: warn
       unused-cte: warn

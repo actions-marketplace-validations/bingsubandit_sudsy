@@ -16,7 +16,7 @@ token: { kind: [QuotedIdentifier], regex: '^.[A-Za-z0-9_]*[^A-Za-z0-9_].' }
 ---
 id: keyword-identifier
 family: keyword-name
-params: { kind: Identifier, message: "`{name}` is a keyword: use another name or quote it" }
+params: { kind: Identifier, parents: "ObjectReference,AliasExpression", message: "`{name}` is a keyword: use another name or quote it" }
 description: >-
   An unquoted name written like a keyword of the dialect (sqlfluff RF04).
 example: "select a as date from t"

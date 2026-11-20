@@ -44,11 +44,11 @@ entries:
   AL05: planned
   AL06: planned
   AL07: planned
-  AL08: planned
+  AL08: rule duplicate-column-alias
   AM03: planned
-  AM04: planned
+  AM04: rule unknown-columns
   AM05: rule inner-join
-  AM06: planned
+  AM06: rule group-order-style
   AM07: planned
   CV01: planned
   CV03: planned
@@ -59,8 +59,8 @@ entries:
   CV11: planned
   CV12: planned
   RF01: planned
-  RF02: planned
-  RF03: planned
+  RF02: rule unqualified-reference
+  RF03: rule inconsistent-reference
   RF04: rule keyword-identifier
   RF05: rule special-chars-in-identifier
   RF06: rule needless-quotes

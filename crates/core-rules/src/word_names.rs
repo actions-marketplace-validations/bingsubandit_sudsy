@@ -34,6 +34,8 @@ struct WordName {
     meta: &'static RuleMeta,
     message: String,
     kind: String,
+    /// The kinds of node a name may sit directly in (empty: anywhere).
+    parents: Vec<String>,
     check: Check,
 }
 
@@ -42,6 +44,13 @@ fn build(meta: &'static RuleMeta, mut p: Params, check: Check) -> Result<Box<dyn
         meta,
         message: p.text("message")?,
         kind: p.text("kind")?,
+        parents: (p
+            .optional("parents")
+            .unwrap_or_default()
+            .split(',')
+            .filter(|s| !s.is_empty())
+            .map(str::to_string)
+            .collect()),
         check,
     };
     p.done()?;
@@ -76,11 +85,18 @@ impl Rule for WordName {
         let Some(kind) = file.grammar.kind_by_name(&self.kind) else {
             return;
         };
+        let parents: Vec<_> = (self.parents.iter())
+            .filter_map(|n| file.grammar.kind_by_name(n))
+            .collect();
         let walk = |c: &FileCache<Vec<TextRange>>| {
             c.get(file, || {
                 (file.root.descendants_with_tokens())
                     .filter_map(|e| e.into_token())
                     .filter(|t| t.kind() == kind)
+                    .filter(|t| {
+                        parents.is_empty()
+                            || t.parent().is_some_and(|p| parents.contains(&p.kind()))
+                    })
                     .map(|t| t.text_range())
                     .collect()
             })

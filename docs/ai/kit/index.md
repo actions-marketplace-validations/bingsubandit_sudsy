@@ -203,6 +203,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | prefer-rest-params | lang-js/rules/binder.rs | Rest parameters instead of arguments. | eslint prefer-rest-params | js | SINGLE-USE |
 | property-summary-matches-accessors | lang-csharp/rules/doc_wording.rs | A property summary starts with "Gets", "Sets" or "Gets or sets" ("Gets a value indicating whether" and so on for `bool`), as the property's accessors reachable from outsi | stylecop SA1623 | csharp | SINGLE-USE |
 | property-summary-omits-restricted-accessor | lang-csharp/rules/doc_wording.rs | A property summary says "Gets or sets" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property) | stylecop SA1624 | csharp | SINGLE-USE |
+| query-scope | core-rules/query_scope.rs | The sources, references and select-element aliases of a select, for rules that need to know which table a column belongs to. | sqlfluff AM04, RF02, RF03 | sql | SINGLE-USE |
 | redeclared-variable | core-rules/scope_rules/ordering.rs | A reference before its declaration, and a name declared again in one scope. | eslint no-redeclare, no-use-before-define; ruff F811, F823; typescript-eslint no-redeclare, no-use-before-define | js, python |  |
 | redundant-pattern | lang-gitignore/rules.rs | A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between) |  | gitignore | SINGLE-USE |
 | redundant-return-type | core-rules/redundant_return_type.rs | The return type a block-body function has by default is left out. | ktlint no-unit-return | cpp, csharp, java, js, json, kotlin, php, python, ruby, yaml |  |
@@ -250,6 +251,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | use-literal-suffix | lang-csharp/rules/expressions.rs | A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L` | stylecop SA1139 | csharp | SINGLE-USE |
 | useless-echo | lang-shell/rules.rs | An `echo` whose only argument is a command substitution | shellcheck SC2005 | shell | SINGLE-USE |
 | word-names | core-rules/word_names.rs | Unquoted names that are keywords and quoted names that need no quotes, from the language's word tables. | sqlfluff RF04, RF06 | sql | SINGLE-USE |
+| word-table | core-rules/word_table.rs | The keyword and reserved words of each dialect of a language, from a text table with a flag letter per dialect. | sqlfluff RF04, RF06 | sql | SINGLE-USE |
 | worker-findings-family | lang-csharp/rules/finding.rs | A rule family reporting the places one check of the C# worker found. | Roslyn analyzers | csharp | SINGLE-USE |
 
 ## other

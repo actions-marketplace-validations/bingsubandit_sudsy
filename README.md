@@ -86,7 +86,7 @@ Each number is measured on real-world code against the reference tool with its d
 | PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
 | Kotlin | ████████░░ 82% ktlint | ████████░░ 85% ktlint | In progress |
 | Shell | ████████░░ 81% shfmt | ████████░░ 86% ShellCheck | In progress |
-| SQL | ███████░░░ 78% sqlfluff | █████░░░░░ 51% sqlfluff | In progress |
+| SQL | ███████░░░ 78% sqlfluff | █████░░░░░ 57% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
 | Dockerfile | ██████████ 100% stable · no reference tool | ███████░░░ 78% hadolint | In progress |

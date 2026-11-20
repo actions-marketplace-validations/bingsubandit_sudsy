@@ -49,6 +49,7 @@ pub mod naming;
 pub mod options;
 pub mod paths;
 pub mod project;
+pub mod query_scope;
 pub mod redundant_return_type;
 pub mod references;
 mod regex;
@@ -69,6 +70,7 @@ pub mod tree;
 pub mod unicode_escape;
 pub mod unique;
 pub mod word_names;
+pub mod word_table;
 
 pub use configure::activate;
 pub use diagnostic::{

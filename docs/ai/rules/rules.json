@@ -22464,6 +22464,40 @@
       ]
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "Two select elements with the same column name: an alias, or the last part of a plain column reference, compared without case and quotes (sqlfluff AL08).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 16,
+            "length": 1,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "duplicate-column-alias",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "AL08",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "Two tables of one `FROM` clause with the same alias (or name when there is no alias) (sqlfluff AL04).",
@@ -22650,6 +22684,40 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A `GROUP BY` or `ORDER BY` clause that lists both column names or expressions and column positions (`1`, `2`). A clause that contradicts the style of an earlier one is not reported (sqlfluff AM06).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 20,
+            "length": 13,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "group-order-style",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "AM06",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "Unquoted identifiers are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP02).",
       "example": {
         "config": null,
@@ -22733,6 +22801,40 @@
         },
         {
           "id": "AL02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "In a select over one table, some column references are qualified (`t.a`) and others are not (sqlfluff RF03).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "inconsistent-reference",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "RF03",
           "partial": false,
           "tool": "sqlfluff"
         }
@@ -23235,6 +23337,79 @@
       "upstream": [
         {
           "id": "AM02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A wildcard of the outermost query that resolves to a table, so the columns of the result change when the table does: a `*` over a table, or over a subquery or common table that has one itself (sqlfluff AM04).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 8,
+            "length": 1,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unknown-columns",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "AM04",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A column reference without a table in a select over more than one table or view; a name that an alias of another select element or a `USING` list gives is left alone (sqlfluff RF02).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 8,
+            "length": 1,
+            "line": 2
+          },
+          {
+            "column": 11,
+            "length": 1,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unqualified-reference",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "RF02",
           "partial": false,
           "tool": "sqlfluff"
         }

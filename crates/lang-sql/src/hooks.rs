@@ -1,23 +1,32 @@
 //! What the shared rules ask of SQL: its words per dialect and the case it folds names to.
 //!
+//! The words are sqlfluff's keyword sets of the dialects (`names.txt`, one flag letter per
+//! dialect: `a` ansi, `p` postgres, `m` mysql, `t` tsql).
+//!
 //! concept: none (glue: rule hooks)
 
-use crate::parse::Dialect;
+use core_rules::word_table::WordTable;
 use core_rules::{Fold, RuleHooks};
 
 pub struct SqlHooks;
 
-fn dialect(version: Option<&str>) -> Dialect {
-    Dialect::from_name(version.unwrap_or("ansi"))
-}
+static NAMES: WordTable = WordTable::new(
+    include_str!("names.txt"),
+    &[
+        ("ansi", 'a'),
+        ("postgres", 'p'),
+        ("mysql", 'm'),
+        ("tsql", 't'),
+    ],
+);
 
 impl RuleHooks for SqlHooks {
     fn is_reserved(&self, version: Option<&str>, upper: &str) -> bool {
-        dialect(version).is_reserved(upper)
+        NAMES.reserved(version, upper)
     }
 
     fn is_keyword(&self, version: Option<&str>, upper: &str) -> bool {
-        dialect(version).is_keyword(upper)
+        NAMES.keyword(version, upper)
     }
 
     fn fold(&self, version: Option<&str>) -> Fold {

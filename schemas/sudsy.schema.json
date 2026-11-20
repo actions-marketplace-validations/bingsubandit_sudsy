@@ -1262,6 +1262,10 @@
               "$ref": "#/definitions/rule",
               "description": "`not` applied to `not`."
             },
+            "duplicate-column-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "Two select elements with the same column name: an alias, or the last part of a plain column reference, compared without case and quotes (sqlfluff AL08)."
+            },
             "duplicate-ids": {
               "$ref": "#/definitions/rule",
               "description": "Job ids that differ only in case (ids are case-insensitive; exact repeats are `no-duplicate-keys`), and step ids repeated within a job."
@@ -1706,6 +1710,10 @@
               "$ref": "#/definitions/rule",
               "description": "A pipeline from `grep` into `wc -l`."
             },
+            "group-order-style": {
+              "$ref": "#/definitions/rule",
+              "description": "A `GROUP BY` or `ORDER BY` clause that lists both column names or expressions and column positions (`1`, `2`). A clause that contradicts the style of an earlier one is not reported (sqlfluff AM06)."
+            },
             "hasattr-call": {
               "$ref": "#/definitions/rule",
               "description": "A call of `hasattr` or `getattr` that asks for `\"__call__\"`."
@@ -1890,6 +1898,10 @@
             "in-dict-keys": {
               "$ref": "#/definitions/rule",
               "description": "A membership test, `for` or comprehension over `.keys()` with no arguments."
+            },
+            "inconsistent-reference": {
+              "$ref": "#/definitions/rule",
+              "description": "In a select over one table, some column references are qualified (`t.a`) and others are not (sqlfluff RF03)."
             },
             "ineffective-access-modifier": {
               "$ref": "#/definitions/rule",
@@ -6281,6 +6293,10 @@
                 }
               ]
             },
+            "unknown-columns": {
+              "$ref": "#/definitions/rule",
+              "description": "A wildcard of the outermost query that resolves to a table, so the columns of the result change when the table does: a `*` over a table, or over a subquery or common table that has one itself (sqlfluff AM04)."
+            },
             "unknown-needs": {
               "$ref": "#/definitions/rule",
               "description": "`needs` names a job that the workflow does not define."
@@ -6327,6 +6343,10 @@
             "unnecessary-placeholder": {
               "$ref": "#/definitions/rule",
               "description": "A `pass` or `...` statement in a body of two statements or more."
+            },
+            "unqualified-reference": {
+              "$ref": "#/definitions/rule",
+              "description": "A column reference without a table in a select over more than one table or view; a name that an alias of another select element or a `USING` list gives is left alone (sqlfluff RF02)."
             },
             "unquoted-pattern": {
               "$ref": "#/definitions/rule",

@@ -50,7 +50,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | ruff | 94.6% | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
 | shellcheck | 86.6% | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 67.4% | 51.5% | 97 | 40 | 0 | 38 | 0 | 0 | 19 | 38 |
+| sqlfluff | 75.0% | 57.3% | 97 | 45 | 0 | 33 | 0 | 0 | 19 | 33 |
 | stylecop | - | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
 | stylelint | 94.7% | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
 | stylelint-less | - | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
@@ -89,7 +89,7 @@ The share of the findings of each reference tool's default or recommended set on
 | HCL | tflint | `hcl/tflint-recommended` | 58.7% | 0.0% | 58.7% | `terraform_required_providers` 37, `terraform_required_version` 20, `terraform_unused_declarations` 2 |
 | Java | checkstyle | `java/google` | 25.5% | 0.5% | 25.5% | `MissingJavadocMethod` 18283, `MethodName` 7887, `JavadocParagraph` 5301, `SummaryJavadoc` 1527, `TodoFormat` 1498 |
 | PHP | phpstan | `php/phpstan` | 0.0% | 0.0% | 0.0% | `class.notFound` 7407, `variable.undefined` 591, `classConstant.notFound` 511, `staticMethod.notFound` 401, `function.notFound` 323 |
-| SQL | sqlfluff | `sql/sqlfluff` | 67.4% | 0.1% | 67.4% | `AM04` 1121, `CP02` 1021, `RF02` 402, `PRS` 380, `CP01` 324 |
+| SQL | sqlfluff | `sql/sqlfluff` | 75.0% | 0.1% | 75.0% | `CP02` 1021, `PRS` 380, `CP01` 324, `CP05` 317, `AL01` 292 |
 
 Not measured:
 

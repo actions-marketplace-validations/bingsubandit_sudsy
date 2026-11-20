@@ -1,0 +1,40 @@
+id: unknown-columns
+family: unknown-columns
+params: { message: "this query produces an unknown number of columns", select: SelectStatement, queries: "SelectStatement,SetExpression,WithCompoundStatement", element: SelectClauseElement, source: FromExpressionElement, alias: AliasExpression, reference: ObjectReference, table: TableExpression, cte: CommonTableExpression, from: FromClause, wildcard: "*" }
+description: >-
+  A wildcard of the outermost query that resolves to a table, so the columns of the result change
+  when the table does: a `*` over a table, or over a subquery or common table that has one itself
+  (sqlfluff AM04).
+example: "select * from t"
+severity: off
+category: style
+---
+id: unqualified-reference
+family: reference-qualification
+params: { message: "unqualified reference `{name}` in a select with more than one table", select: SelectStatement, queries: "SelectStatement,SetExpression,WithCompoundStatement", element: SelectClauseElement, source: FromExpressionElement, alias: AliasExpression, reference: ObjectReference, table: TableExpression, cte: CommonTableExpression, from: FromClause, wildcard: "*" }
+description: >-
+  A column reference without a table in a select over more than one table or view; a name that
+  an alias of another select element or a `USING` list gives is left alone (sqlfluff RF02).
+example: "select a from t1 join t2 on t1.id = t2.id"
+severity: off
+category: style
+---
+id: inconsistent-reference
+family: reference-consistency
+params: { message: "`{name}` is qualified differently from the other references of this single-table select", select: SelectStatement, queries: "SelectStatement,SetExpression,WithCompoundStatement", element: SelectClauseElement, source: FromExpressionElement, alias: AliasExpression, reference: ObjectReference, table: TableExpression, cte: CommonTableExpression, from: FromClause, wildcard: "*" }
+description: >-
+  In a select over one table, some column references are qualified (`t.a`) and others are not
+  (sqlfluff RF03).
+example: "select t.a, b from t"
+severity: off
+category: style
+---
+id: duplicate-column-alias
+family: unique-aliases
+params: { message: "`{name}` is already the name of an earlier column of this select", select: SelectStatement, queries: "SelectStatement,SetExpression,WithCompoundStatement", element: SelectClauseElement, source: FromExpressionElement, alias: AliasExpression, reference: ObjectReference, table: TableExpression, cte: CommonTableExpression, from: FromClause, wildcard: "*" }
+description: >-
+  Two select elements with the same column name: an alias, or the last part of a plain column
+  reference, compared without case and quotes (sqlfluff AL08).
+example: "select a, b as a from t"
+severity: off
+category: style

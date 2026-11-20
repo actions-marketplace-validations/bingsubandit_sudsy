@@ -1,0 +1,5 @@
+unknown-columns: warn
+unqualified-reference: warn
+inconsistent-reference: warn
+duplicate-column-alias: warn
+group-order-style: warn
