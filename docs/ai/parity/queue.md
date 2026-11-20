@@ -271,8 +271,19 @@ Lint: coverage 5%, target 5%; rules by missed findings:
 
 ## prettier-js
 
-Format: unclassified 567 of 567 differing files (100%).
-1. `project-options` (- files): real-world projects run under Prettier's defaults (`--no-config`), not their own Prettier options; the corpus fetches no config files and Sudsy's JS options are not mapped yet
+Format: unclassified 32 of 567 differing files (6%).
+1. `project-options` (99 files): real-world projects run under Prettier's defaults (`--no-config`), not their own Prettier options; the corpus fetches no config files and Sudsy's JS options are not mapped yet
+2. `unsupported-syntax` (95 files): proposal and error-recovery syntax Sudsy rejects or cannot parse (discard bindings `void`, bind and pipeline operators, `do` and module blocks, `?.` assignment, v8 intrinsics, partial application, TS invalid code) Fix: Add the syntax to the oxc adapter where oxc parses it; the rest stays an intentional input filter.
+3. `ts-type-layout` (77 files): TS type layout (union and intersection breaking and parentheses, type parameter and argument lists, `as`/`satisfies`/cast parentheses, interface and property signature, import types) Fix: crates/lang-js format/ts/types.rs - move union and type argument layout onto core-format shapes with Prettier options.
+4. `comment-placement` (72 files): where Prettier attaches and moves comments (before `else`, in arguments and parameters, around type casts, after operators, in class members, in empty bodies) Fix: core-format comments - handle placement by role tags, not per node kind.
+5. `call-layout` (65 files): call, member chain, last-argument expansion, arrow chain, test-call and sequence layout differences Fix: core-format shapes call_arguments, call_chain and arrow.
+6. `misc-statements` (51 files): statement and declaration layout cases - if/else with comments, for heads, labels, exports and imports, ternaries, class members, assignments, embedded languages Fix: one case at a time; see the diffs with PARITY_FILTER.
+7. `prettier-ignore` (17 files): `// prettier-ignore` before a statement, member, property or type - the ignored node is not printed as written in every position Fix: format directive handling in the shared layout for ignored nodes.
+8. `decorators` (16 files): decorator placement - same line or own line from the source, before or after `export`, with comments and parameters Fix: core-format declaration annotations.
+9. `template-literals` (16 files): template literal indentation and expressions, string quote choice and quote-props cases Fix: shared literal rules.
+10. `no-semi` (12 files): `semi=false` cases, the statements that need a leading `;` and class property edge cases Fix: lang-js option `semi` handling in statement printing.
+11. `new-syntax` (10 files): `using` declarations and import attributes / `with` clauses printed differently Fix: add the layout rows for the new nodes.
+12. `jsx-layout` (5 files): JSX layout of comments, spread attributes and text fill Fix: JSX shape.
 
 ## ruff
 

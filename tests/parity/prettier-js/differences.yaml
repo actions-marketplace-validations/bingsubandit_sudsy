@@ -1,14 +1,26 @@
 differences:
   project-options: gap  real-world projects run under Prettier's defaults (`--no-config`), not their own Prettier options; the corpus fetches no config files and Sudsy's JS options are not mapped yet
+  unsupported-syntax: gap  proposal and error-recovery syntax Sudsy rejects or cannot parse (discard bindings `void`, bind and pipeline operators, `do` and module blocks, `?.` assignment, v8 intrinsics, partial application, TS invalid code)
+  ts-type-layout: gap  TS type layout (union and intersection breaking and parentheses, type parameter and argument lists, `as`/`satisfies`/cast parentheses, interface and property signature, import types)
+  comment-placement: gap  where Prettier attaches and moves comments (before `else`, in arguments and parameters, around type casts, after operators, in class members, in empty bodies)
+  call-layout: gap  call, member chain, last-argument expansion, arrow chain, test-call and sequence layout differences
+  misc-statements: gap  statement and declaration layout cases - if/else with comments, for heads, labels, exports and imports, ternaries, class members, assignments, embedded languages
+  prettier-ignore: gap  `// prettier-ignore` before a statement, member, property or type - the ignored node is not printed as written in every position
+  template-literals: gap  template literal indentation and expressions, string quote choice and quote-props cases
+  decorators: gap  decorator placement - same line or own line from the source, before or after `export`, with comments and parameters
+  no-semi: gap  `semi=false` cases, the statements that need a leading `;` and class property edge cases
+  jsx-layout: gap  JSX layout of comments, spread attributes and text fill
+  new-syntax: gap  `using` declarations and import attributes / `with` clauses printed differently
 files:
-  real-world: project-options
+  prettier-tests: unsupported-syntax:95, ts-type-layout:77, comment-placement:72, call-layout:65, misc-statements:51, prettier-ignore:17, template-literals:16, decorators:16, no-semi:12, new-syntax:10, jsx-layout:5
+  real-world: project-options:99
 ratchet:
   prettier-tests: 1127
   real-world: 2357
 target-files:
   prettier-tests: 1595
   real-world: 2456
-unclassified: 567
+unclassified: 32
 second-format:
   prettier-tests: 0
   real-world: 0
@@ -18,3 +30,15 @@ refused:
 flags:
   no-config: the tool runs with `--no-config` (and no editorconfig), so a project's own Prettier options are not applied; Sudsy's JS, CSS and HTML options for them are not mapped yet
   embedded-language-formatting-off: "Prettier runs with `--embedded-language-formatting=off`: the embedded CSS, GraphQL and HTML of JS are formatted by Sudsy's formatters, which differ"
+fixes:
+  unsupported-syntax: Add the syntax to the oxc adapter where oxc parses it; the rest stays an intentional input filter.
+  ts-type-layout: crates/lang-js format/ts/types.rs - move union and type argument layout onto core-format shapes with Prettier options.
+  comment-placement: core-format comments - handle placement by role tags, not per node kind.
+  call-layout: core-format shapes call_arguments, call_chain and arrow.
+  misc-statements: one case at a time; see the diffs with PARITY_FILTER.
+  prettier-ignore: format directive handling in the shared layout for ignored nodes.
+  template-literals: shared literal rules.
+  decorators: core-format declaration annotations.
+  no-semi: lang-js option `semi` handling in statement printing.
+  jsx-layout: JSX shape.
+  new-syntax: add the layout rows for the new nodes.
