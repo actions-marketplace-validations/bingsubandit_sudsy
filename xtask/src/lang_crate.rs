@@ -5,7 +5,7 @@ use anyhow::{Context, Result};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 
-fn list(v: &Value, key: &str) -> Vec<String> {
+pub fn list(v: &Value, key: &str) -> Vec<String> {
     let items = v.get(key).and_then(Value::as_array);
     let items = items.into_iter().flatten();
     items

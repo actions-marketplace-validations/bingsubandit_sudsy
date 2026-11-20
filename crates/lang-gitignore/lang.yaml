@@ -1,3 +1,4 @@
+vscode-languages: [ignore]
 grammar-crate: konomanoasa-tree-sitter-gitignore
 grammar-version: "0.7"
 extensions: [gitignore, dockerignore]

@@ -1,3 +1,4 @@
+vscode-languages: [makefile]
 grammar-crate: tree-sitter-make
 grammar-path: grammars/tree-sitter-make
 extensions: [mk, mak]

@@ -1,3 +1,4 @@
+vscode-languages: [editorconfig]
 grammar-crate: konomanoasa-tree-sitter-editorconfig
 grammar-version: "0.9"
 file-names: [.editorconfig]

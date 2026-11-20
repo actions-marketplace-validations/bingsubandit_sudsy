@@ -1,3 +1,4 @@
+vscode-languages: [yaml]
 extensions: [yaml, yml]
 formatter: YamlFormatter
 hooks: hooks::YamlHooks

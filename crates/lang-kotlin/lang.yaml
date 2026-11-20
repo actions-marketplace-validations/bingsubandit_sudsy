@@ -1,3 +1,4 @@
+vscode-languages: [kotlin]
 extensions: [kt, kts]
 formatter: KotlinFormatter
 parse: adapter::parse_file

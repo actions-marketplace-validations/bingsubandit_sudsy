@@ -1,3 +1,4 @@
+vscode-languages: [python]
 extensions: [py, pyi, pyw]
 formatter: PythonFormatter
 parse: adapter::parse_file

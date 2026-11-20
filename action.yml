@@ -1,4 +1,4 @@
-name: Sudsy
+name: Sudsy Check
 description: Check formatting and lint with Sudsy and annotate the findings in the pull request.
 author: bingsubandit
 branding:

@@ -1,3 +1,4 @@
+vscode-languages: [toml]
 grammar-crate: tree-sitter-toml-ng
 grammar-version: "0.7"
 extensions: [toml]

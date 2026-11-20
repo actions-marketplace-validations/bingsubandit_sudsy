@@ -7,7 +7,7 @@
 mod dupes;
 mod generate;
 pub mod kit;
-mod lang_crate;
+pub mod lang_crate;
 mod mapping;
 mod new_rule;
 mod options;

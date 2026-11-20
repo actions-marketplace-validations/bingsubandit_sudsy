@@ -1,3 +1,4 @@
+vscode-languages: [graphql]
 grammar-crate: tree-sitter-graphql
 grammar-path: grammars/tree-sitter-graphql
 extensions: [graphql, gql]

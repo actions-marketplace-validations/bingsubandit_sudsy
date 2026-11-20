@@ -1,3 +1,4 @@
+vscode-languages: [ini]
 grammar-crate: tree-sitter-ini
 grammar-path: grammars/tree-sitter-ini
 extensions: [ini, cfg]

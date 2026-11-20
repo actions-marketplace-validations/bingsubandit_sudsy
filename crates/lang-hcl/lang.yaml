@@ -1,3 +1,4 @@
+vscode-languages: [terraform, hcl]
 grammar-crate: tree-sitter-hcl
 grammar-version: "1.1"
 extensions: [hcl, tf, tfvars, nomad]

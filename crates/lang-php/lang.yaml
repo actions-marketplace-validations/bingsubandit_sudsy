@@ -1,3 +1,4 @@
+vscode-languages: [php]
 extensions: [php, phtml, inc]
 formatter: PhpFormatter
 parse: adapter::parse_file

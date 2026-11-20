@@ -1,3 +1,4 @@
+vscode-languages: [css, scss, less]
 options:
   - line_width: 80
   - indent_size: 2

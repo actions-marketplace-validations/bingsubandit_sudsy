@@ -1,3 +1,4 @@
+vscode-languages: [markdown]
 grammar-crate: tree-sitter-md
 grammar-version: "0.5"
 grammar-default-features: false

@@ -1,3 +1,4 @@
+vscode-languages: [sql]
 extensions: [sql]
 formatter: SqlFormatter
 parse: parse::parse_file

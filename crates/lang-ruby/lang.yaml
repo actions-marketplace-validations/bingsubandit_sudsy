@@ -1,3 +1,4 @@
+vscode-languages: [ruby]
 extensions: [rb, rake, gemspec, ru]
 file-names: [Gemfile, Rakefile, Guardfile, Capfile]
 formatter: RubyFormatter

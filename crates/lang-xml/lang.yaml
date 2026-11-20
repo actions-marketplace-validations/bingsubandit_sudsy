@@ -1,3 +1,4 @@
+vscode-languages: [xml]
 grammar-crate: tree-sitter-xml
 grammar-version: "0.7"
 language-const: LANGUAGE_XML

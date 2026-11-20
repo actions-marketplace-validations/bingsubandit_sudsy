@@ -1,3 +1,4 @@
+vscode-languages: [javascript, typescript, javascriptreact, typescriptreact]
 extensions: [js, mjs, cjs, jsx, ts, mts, cts, tsx]
 formatter: JsFormatter
 parse: adapter::parse_file

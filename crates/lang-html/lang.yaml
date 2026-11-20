@@ -1,3 +1,4 @@
+vscode-languages: [html, vue, svelte]
 options:
   - line_width: 80
   - indent_size: 2

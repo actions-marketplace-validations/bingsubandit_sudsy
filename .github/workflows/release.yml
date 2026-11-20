@@ -3,7 +3,7 @@ name: Release
 # Pushing a tag vX.Y.Z runs every gate of ci.yml, builds the CLI and the VS Code extension for each
 # platform, and drafts a GitHub release with the archives and checksums. Nothing is published to
 # a registry from here except by the manual `marketplace` and `openvsx` jobs below, which need the
-# VSCE_PAT and OVSX_PAT secrets and a run started by hand on the tag. The package managers have their own hand-started
+# trusted publishing (OIDC; OVSX_PAT only for the first Open VSX publish) and a run started by hand on the tag. The package managers have their own hand-started
 # workflow, publish.yml.
 
 on:
@@ -130,12 +130,15 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.publish_marketplace && github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
+    # Trusted Publishing: the Marketplace policy (publisher sudsy, this repo, release.yml, no environment) trusts the OIDC token; no secret.
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
-      # vsce comes from package-lock.json, never from an unpinned download next to the secret.
+      # vsce comes from package-lock.json, never from an unpinned download.
       - run: npm ci
         working-directory: editors/vscode
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
@@ -143,35 +146,31 @@ jobs:
           path: dist
           merge-multiple: true
       - name: Publish every platform package
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           for vsix in dist/*.vsix; do
-            "$GITHUB_WORKSPACE/editors/vscode/node_modules/.bin/vsce" publish --packagePath "$vsix"
+            "$GITHUB_WORKSPACE/editors/vscode/node_modules/.bin/vsce" publish --oidc --packagePath "$vsix"
           done
 
   openvsx:
     if: github.event_name == 'workflow_dispatch' && inputs.publish_openvsx && github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
-    env:
-      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    # Trusted publishing once a trusted publisher is registered on open-vsx.org; OVSX_PAT is only for the first publish (it takes precedence when set).
+    permissions:
+      id-token: write
     steps:
-      - name: Skip without the secret
-        if: env.OVSX_PAT == ''
-        run: echo "::warning::OVSX_PAT is not set, nothing published to Open VSX"
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        if: env.OVSX_PAT != ''
         with:
           path: dist
           merge-multiple: true
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        if: env.OVSX_PAT != ''
         with:
           node-version: 24
       - name: Publish every platform package (namespace sudsy)
-        if: env.OVSX_PAT != ''
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
+          [ -n "$OVSX_PAT" ] || unset OVSX_PAT
           for vsix in dist/*.vsix; do
-            npx --yes ovsx publish "$vsix" --pat "$OVSX_PAT"
+            npx --yes ovsx@1.4.0 publish --packagePath "$vsix"
           done

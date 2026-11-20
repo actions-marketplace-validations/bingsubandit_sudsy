@@ -1,3 +1,4 @@
+vscode-languages: [proto3, proto]
 grammar-crate: tree-sitter-proto
 grammar-version: "0.6"
 extensions: [proto]

@@ -1,31 +1,105 @@
-//! The VS Code extension's language list, from the providers: the `activationEvents` of
-//! `package.json` and the document selector in `src/selector.generated.ts`.
+//! The VS Code extension's language list, from the providers and the `vscode-languages` fact of
+//! each `lang.yaml`: the `activationEvents`, `keywords` and `description` of `package.json` and
+//! the document selector in `src/selector.generated.ts`.
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use provider_api::{FilePattern, LanguageProvider};
 use std::path::PathBuf;
 
-/// VS Code language ids: a language's dialects (`json`, `jsonc`) or else its own name.
-fn language_ids(provider: &dyn LanguageProvider) -> Vec<String> {
-    let mut ids: Vec<String> = provider
-        .file_matchers()
+/// Marketplace limit on `keywords`.
+const MAX_KEYWORDS: usize = 30;
+/// The languages the description names, in order; the rest follow as "and more".
+const MAIN_LANGUAGES: [&str; 6] = [
+    "C#",
+    "JavaScript/TypeScript",
+    "Python",
+    "Java",
+    "Kotlin",
+    "C/C++",
+];
+
+/// The providers of languages with an id of their own: one that shares another's grammar (GitHub Actions on YAML) has none.
+fn own_language(
+    providers: &[Box<dyn LanguageProvider>],
+) -> impl Iterator<Item = &dyn LanguageProvider> {
+    providers
         .iter()
-        .filter_map(|m| m.dialect.clone())
-        .collect();
-    if ids.is_empty() {
-        ids.push(provider.language().to_string());
+        .map(|p| p.as_ref())
+        .filter(|p| p.grammar().language == p.language())
+}
+
+/// VS Code language ids, in provider order, each once.
+fn language_ids(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
+    let langs = xtask::lang_crate::load(&xtask::repo_root())?;
+    let mut ids: Vec<String> = Vec::new();
+    for p in own_language(providers) {
+        let lang = langs
+            .iter()
+            .find(|l| l.krate == p.crate_name())
+            .with_context(|| format!("{}: no lang.yaml", p.crate_name()))?;
+        let own = xtask::lang_crate::list(&lang.yaml, "vscode-languages");
+        if own.is_empty() {
+            bail!("{}: lang.yaml has no `vscode-languages`", p.crate_name());
+        }
+        for id in own {
+            if !ids.contains(&id) {
+                ids.push(id);
+            }
+        }
     }
-    ids.dedup();
-    ids
+    Ok(ids)
+}
+
+/// Display names of the languages, `C/C++` as `C` and `C++`.
+fn keywords(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
+    let mut words: Vec<String> = Vec::new();
+    for p in own_language(providers) {
+        for part in p.grammar().title.split('/') {
+            if !words.iter().any(|w| w == part) {
+                words.push(part.to_string());
+            }
+        }
+    }
+    words.extend(["formatter".to_string(), "linter".to_string()]);
+    if words.len() > MAX_KEYWORDS {
+        bail!(
+            "{} keywords, VS Code allows {MAX_KEYWORDS}: {words:?}",
+            words.len()
+        );
+    }
+    Ok(words)
+}
+
+fn description(providers: &[Box<dyn LanguageProvider>]) -> Result<String> {
+    for main in MAIN_LANGUAGES {
+        if !own_language(providers).any(|p| p.grammar().title == main) {
+            bail!("vscode description names `{main}`, which is no language");
+        }
+    }
+    Ok(format!(
+        "Formatter and linter for {} and more.",
+        MAIN_LANGUAGES.join(", ")
+    ))
+}
+
+/// Replaces the `"key": [ ... ],` array of the package manifest with `items`.
+fn replace_array(package: &mut String, key: &str, items: &[String]) -> Result<()> {
+    let head = format!("\"{key}\": [");
+    let from = package
+        .find(&head)
+        .with_context(|| format!("package.json: no {key}"))?;
+    let len = package[from..]
+        .find("],")
+        .with_context(|| format!("unterminated {key}"))?
+        + 2;
+    let body: String = items.iter().map(|i| format!("    \"{i}\",\n")).collect();
+    let body = body.trim_end_matches([',', '\n']);
+    package.replace_range(from..from + len, &format!("{head}\n{body}\n  ],"));
+    Ok(())
 }
 
 pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf, String)>> {
-    // A provider that shares another's grammar (GitHub Actions on YAML) has no language id of its own.
-    let ids: Vec<String> = providers
-        .iter()
-        .filter(|p| p.grammar().language == p.language())
-        .flat_map(|p| language_ids(p.as_ref()))
-        .collect();
+    let ids = language_ids(providers)?;
     // By extension as well, so that it works without an extension that names the language.
     let mut extensions: Vec<&str> = providers
         .iter()
@@ -52,25 +126,41 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
 
     let rel = "editors/vscode/package.json";
     let mut package = std::fs::read_to_string(xtask::repo_root().join(rel))?;
+    let mut events: Vec<String> = ids.iter().map(|id| format!("onLanguage:{id}")).collect();
+    events.push("workspaceContains:**/sudsy.{yaml,yml}".into());
+    replace_array(&mut package, "activationEvents", &events)?;
+    replace_array(&mut package, "keywords", &keywords(providers)?)?;
     let from = package
-        .find("\"activationEvents\": [")
-        .with_context(|| format!("{rel}: no activationEvents"))?;
-    let len = package[from..]
-        .find("],")
-        .context("unterminated activationEvents")?
+        .find("\"description\": \"")
+        .with_context(|| format!("{rel}: no description"))?;
+    let end = from
+        + package[from..]
+            .find("\",")
+            .context("unterminated description")?
         + 2;
-    let events: String = ids
-        .iter()
-        .map(|id| format!("    \"onLanguage:{id}\",\n"))
-        .collect();
     package.replace_range(
-        from..from + len,
-        &format!(
-            "\"activationEvents\": [\n{events}    \"workspaceContains:**/sudsy.{{yaml,yml}}\"\n  ],"
-        ),
+        from..end,
+        &format!("\"description\": \"{}\",", description(providers)?),
     );
     Ok(vec![
         (rel.into(), package),
         ("editors/vscode/src/selector.generated.ts".into(), selector),
     ])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Every generated id is a language id VS Code or a common extension registers: an internal id (`js`, `shell`) never leaks.
+    #[test]
+    fn generated_ids_are_real_vscode_ids() {
+        let real: Vec<&str> = include_str!("../data/vscode-language-ids.txt")
+            .lines()
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+            .collect();
+        let ids = language_ids(&languages::providers()).unwrap();
+        let unknown: Vec<&String> = ids.iter().filter(|i| !real.contains(&i.as_str())).collect();
+        assert!(unknown.is_empty(), "not VS Code language ids: {unknown:?}");
+    }
 }

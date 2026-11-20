@@ -1,3 +1,4 @@
+vscode-languages: [dockerfile]
 grammar-crate: tree-sitter-containerfile
 grammar-path: grammars/tree-sitter-containerfile
 extensions: [dockerfile]

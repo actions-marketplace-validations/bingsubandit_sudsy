@@ -1,3 +1,4 @@
+vscode-languages: [shellscript]
 grammar-crate: tree-sitter-bash
 grammar-path: grammars/tree-sitter-bash
 extensions: [sh, bash]
