@@ -7,7 +7,7 @@ files:
   sqlfluff-mysql: parse-gap, layout-gap
   sqlfluff-postgres: parse-gap, layout-gap
   sqlfluff-tsql: parse-gap, layout-gap
-  postgres-regress: parse-gap, layout-gap
+  postgres-regress: parse-gap, layout-gap, non-utf8-input
 ratchet:
   sqlfluff-ansi: 203
   sqlfluff-mysql: 208
@@ -20,8 +20,8 @@ target-files:
   sqlfluff-mysql: 248
   sqlfluff-postgres: 142
   sqlfluff-tsql: 152
-coverage: 87.5  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
-target: 81.6
+coverage: 87.6  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+target: 81.7
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
   CP05: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
@@ -33,11 +33,11 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF03: references of selects over table functions and nested queries
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   PRS: 380
-  CP05: 227
+  CP05: 205
   CP02: 187
   RF05: 131
   CV06: 126
-  CP01: 116
+  CP01: 119
   RF06: 111
   RF03: 107
   LXR: 102

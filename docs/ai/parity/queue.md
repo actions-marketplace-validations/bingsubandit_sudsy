@@ -346,14 +346,15 @@ Lint: coverage 86.6%, target 86.6%; rules by missed findings:
 ## sqlfluff
 
 1. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
-2. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: coverage 87.5%, target 81.6%; rules by missed findings:
+2. `non-utf8-input` (- files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
+3. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
+Lint: coverage 87.6%, target 81.7%; rules by missed findings:
 1. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-2. `CP05` (227 missed) Fix: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
+2. `CP05` (205 missed) Fix: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
 3. `CP02` (187 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
 4. `RF05` (131 missed) Fix: quoted names in statements the generic parse leaves as plain tokens (no ObjectReference)
 5. `CV06` (126 missed) Fix: a semicolon after whitespace or a newline, and doubled semicolons; needs a token-neighbour check, planned until a second language needs it
-6. `CP01` (116 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
+6. `CP01` (119 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
 7. `RF06` (111 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
 8. `RF03` (107 missed) Fix: references of selects over table functions and nested queries
 9. `LXR` (102 missed)

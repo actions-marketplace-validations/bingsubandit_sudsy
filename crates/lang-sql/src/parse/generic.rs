@@ -494,6 +494,36 @@ impl P<'_> {
             .map(|&c| self.lex[c as usize].kind)
     }
 
+    /// The offsets of the column names of an `ADD`/`MODIFY`/`CHANGE` column action whose type
+    /// follows them (`ADD COLUMN c int`); `None` for any other action.
+    fn column_action_names(&self, up: &str) -> Option<Vec<usize>> {
+        if !matches!(up, "ADD" | "MODIFY" | "CHANGE") {
+            return None;
+        }
+        let mut n = 1;
+        if self.is(n, "column") {
+            n += 1;
+        }
+        if self.is(n, "if") {
+            n += 1;
+            if self.is(n, "not") {
+                n += 1;
+            }
+            if self.is(n, "exists") {
+                n += 1;
+            }
+        }
+        let mut names = Vec::new();
+        for _ in 0..(if up == "CHANGE" { 2 } else { 1 }) {
+            if !self.starts_name(n) || self.is_t(n + 1, T::Dot) {
+                return None;
+            }
+            names.push(n);
+            n += 1;
+        }
+        (self.is_t(n, T::Word) && super::types::is_type_word(self.text(n))).then_some(names)
+    }
+
     fn generic_word(&mut self, w: &mut Walk, depth: usize) {
         let mut buf = [0u8; 40];
         let up = super::dialect::upper(self.text(0), &mut buf).to_string();
@@ -519,6 +549,25 @@ impl P<'_> {
             && self.prev_text_is("as")
         {
             self.statement_body();
+            return;
+        }
+        // `ALTER TABLE t ADD [COLUMN] c int`, `MODIFY c int`, `CHANGE [COLUMN] old new int`.
+        if word
+            && !dotted
+            && depth == 0
+            && w.table_stmt
+            && !w.create_table
+            && let Some(names) = self.column_action_names(&up)
+        {
+            self.bump_as(k::KEYWORD);
+            for i in 1..=names.last().copied().unwrap_or(0) {
+                if names.contains(&i) {
+                    self.generic_name(false);
+                } else {
+                    self.bump_as(k::KEYWORD);
+                }
+            }
+            self.type_name();
             return;
         }
         // A value of a setting (`SET x = on, off`) and the key before `=`.

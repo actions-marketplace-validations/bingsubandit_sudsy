@@ -88,6 +88,12 @@ fn dialect_constructs_parse() {
     for text in tsql {
         check(text, "tsql");
     }
+    for text in [
+        "ALTER TABLE t MODIFY COLUMN c varchar(255) NOT NULL;",
+        "ALTER TABLE t CHANGE COLUMN a b INT(11) NULL;",
+    ] {
+        check(text, "mysql");
+    }
 }
 
 #[test]
