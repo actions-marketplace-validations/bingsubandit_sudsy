@@ -3437,6 +3437,10 @@
               "$ref": "#/definitions/rule",
               "description": "A MAINTAINER instruction."
             },
+            "no-merge-keys": {
+              "$ref": "#/definitions/rule",
+              "description": "The merge key (YAML `<<`), which YAML 1.2 dropped and some tools do not support."
+            },
             "no-misleading-backtick": {
               "$ref": "#/definitions/rule",
               "description": "A backtick that is followed by blanks before the end of the line, so it does not continue the line."
@@ -3594,6 +3598,10 @@
             "no-raw-special-elements": {
               "$ref": "#/definitions/rule",
               "description": "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on."
+            },
+            "no-recursive-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "An alias inside the node its own anchor is on, which makes the data refer to itself."
             },
             "no-redundant-for": {
               "$ref": "#/definitions/rule",

@@ -364,6 +364,8 @@ def actionlint_check(d):
         return "syntax-check/unused-anchor"
     if kind == "syntax-check" and "merge key" in message:
         return "syntax-check/merge-key"
+    if kind == "syntax-check" and "recursive alias" in message:
+        return "syntax-check/recursive-alias"
     if kind == "syntax-check" and re.search(r"anchor|alias|could not parse", message):
         return "syntax-check/yaml"
     if kind == "syntax-check":

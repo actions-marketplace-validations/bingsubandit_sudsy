@@ -40,6 +40,18 @@ impl RuleHooks for YamlHooks {
         code_span(node, g).map_or(Cow::Borrowed(""), |r| Cow::Borrowed(&text[r]))
     }
 
+    fn reference(&self, kind: core_syntax::SyntaxKind) -> Option<bool> {
+        match kind {
+            kind::ANCHOR => Some(true),
+            kind::ALIAS => Some(false),
+            _ => None,
+        }
+    }
+
+    fn reference_marks(&self) -> &'static [u8] {
+        b"&*"
+    }
+
     fn inline_mapping_line(&self, line: &str) -> bool {
         let mut body = line.trim_start_matches(' ');
         while let Some(rest) = body.strip_prefix("- ") {

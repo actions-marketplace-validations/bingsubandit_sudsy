@@ -48,6 +48,17 @@ pub trait RuleHooks: Send + Sync {
         names::key_name(g, key, text)
     }
 
+    /// Whether a token kind is an anchor (`Some(true)`), an alias (`Some(false)`) or neither.
+    fn reference(&self, _kind: core_syntax::SyntaxKind) -> Option<bool> {
+        None
+    }
+
+    /// The bytes a reference starts with (YAML `&` and `*`: an anchor and an alias); at most two.
+    /// The reference rules look only at these bytes of the text. Default: no references.
+    fn reference_marks(&self) -> &'static [u8] {
+        &[]
+    }
+
     /// The value of a string or number item of a sequence (`item` is the value node); `None` for
     /// anything else, which `sorted-array-values` leaves alone ([`names::scalar`]).
     fn scalar<'a>(&self, g: &Grammar, item: &SyntaxNode, text: &'a str) -> Option<Scalar<'a>> {

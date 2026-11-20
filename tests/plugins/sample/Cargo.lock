@@ -163,6 +163,7 @@ dependencies = [
  "core-format",
  "core-semantics",
  "core-syntax",
+ "memchr",
  "regex",
  "regex-automata",
  "regex-syntax",

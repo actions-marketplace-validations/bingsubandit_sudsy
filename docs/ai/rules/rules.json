@@ -23180,6 +23180,41 @@
     },
     {
       "category": "suspicious",
+      "default_level": "off",
+      "description": "The merge key (YAML `<<`), which YAML 1.2 dropped and some tools do not support.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "base: &base\n  a: 1\nb:\n  <<: *base\n  c: 2\nd: \"<<\"\n",
+        "language": "yaml",
+        "spans": [
+          {
+            "column": 3,
+            "length": 2,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-merge-keys",
+      "languages": [
+        "github-actions",
+        "yaml"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "syntax-check/merge-key",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
       "default_level": "warn",
       "description": "A plain `0755` (octal to YAML 1.1 parsers, decimal 755 to YAML 1.2) or `0o755` (octal to YAML 1.2, a string to YAML 1.1). Quoted and tagged scalars are not checked. No fix: the intended value is not known.",
       "example": {
@@ -23228,6 +23263,41 @@
           "id": "octal-values.forbid-implicit-octal / forbid-explicit-octal",
           "partial": false,
           "tool": "yamllint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "error",
+      "description": "An alias inside the node its own anchor is on, which makes the data refer to itself.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "a: &x\n  b: *x\nc: &y 1\nd: *y\ne: &z\n  f: 1\ng: *z\n",
+        "language": "yaml",
+        "spans": [
+          {
+            "column": 6,
+            "length": 2,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-recursive-alias",
+      "languages": [
+        "github-actions",
+        "yaml"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "syntax-check/recursive-alias",
+          "partial": true,
+          "tool": "actionlint"
         }
       ]
     },
@@ -23627,11 +23697,6 @@
         "github-actions/actionlint"
       ],
       "upstream": [
-        {
-          "id": "syntax-check/merge-key",
-          "partial": true,
-          "tool": "actionlint"
-        },
         {
           "id": "matrix",
           "partial": true,

@@ -44,6 +44,7 @@ pub mod options;
 pub mod paths;
 pub mod project;
 pub mod redundant_return_type;
+pub mod references;
 mod regex;
 pub mod regex_source;
 pub mod rule;

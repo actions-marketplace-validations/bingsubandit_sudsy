@@ -64,7 +64,7 @@ token Eof
 token Unknown #error
 
 node Stream = documents:Document* Eof
-node Document = directives:Directive* DocStart? body:#value? DocEnd?
+node Document #document = directives:Directive* DocStart? body:#value? DocEnd?
 node BlockMapping #value #block #mapping = entries:BlockMappingEntry*
 node BlockMappingEntry #key-value = Question? key:#value? Colon? value:#value?
 node BlockSequence #value #block #sequence = entries:BlockSequenceEntry*

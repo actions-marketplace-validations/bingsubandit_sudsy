@@ -337,8 +337,10 @@ impl Walk<'_> {
                 _ => format!("\"{name}\" section should not be empty"),
             };
             self.report_structure(row, at, message);
-            if let (Kind::Map, Val::Null) = (row.kind, val) {
-                self.check_map(row, None, key, path, &name);
+            match (row.kind, val) {
+                (Kind::Map, Val::Null) => self.check_map(row, None, key, path, &name),
+                (Kind::Map, Val::Map(m)) => self.check_map(row, Some(m), key, path, &name),
+                _ => {}
             }
             return;
         }

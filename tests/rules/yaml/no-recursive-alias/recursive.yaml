@@ -1,0 +1,8 @@
+a: &x
+  b: *x
+#    ^^ no-recursive-alias
+c: &y 1
+d: *y
+e: &z
+  f: 1
+g: *z

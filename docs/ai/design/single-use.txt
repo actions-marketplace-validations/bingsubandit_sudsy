@@ -97,7 +97,6 @@ concept no-default-summary # users: csharp
 concept no-doc-placeholder # users: csharp
 concept no-doc-slashes-in-plain-comment # users: csharp
 concept no-dupe-else-if # users: js
-concept no-duplicate-anchors # users: yaml
 concept no-duplicate-class # users: html
 concept no-duplicate-doc-text # users: csharp
 concept no-duplicate-id # users: html
@@ -112,10 +111,8 @@ concept no-redundant-for # users: html
 concept no-returns-on-void # users: csharp
 concept no-throw-generic # users: python (shared)
 concept no-typename-prefix # users: graphql
-concept no-undefined-alias # users: yaml
 concept no-unexpected-multiline # users: js
 concept no-unsafe-finally # users: js
-concept no-unused-anchors # users: yaml
 concept null-comparison # users: sql
 concept nullable-shorthand # users: csharp
 concept parser-lookahead # users: java

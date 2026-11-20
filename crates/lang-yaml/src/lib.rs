@@ -3,7 +3,6 @@
 //!
 //! concept: none (glue: provider entry)
 
-mod anchor_rules;
 mod format;
 mod hooks;
 pub mod model;

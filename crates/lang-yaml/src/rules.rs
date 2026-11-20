@@ -1,4 +1,4 @@
-//! YAML rules: `ambiguous-booleans` and `document-start`. Anchor rules are in `anchor_rules`,
+//! YAML rules: `ambiguous-booleans` and `document-start`. Anchor rules are in `core_rules::references`,
 //! rules on values in `value_rules` and `quoted_strings`.
 //!
 //! concept: new ambiguous-booleans, new document-start, new document-end
@@ -7,7 +7,7 @@
 //! what: document-end: A document without the `...` end marker (or, with `present: false`, one that has it)
 
 use crate::generated::{BlockMappingEntry, FlowPair, Scalar, kind};
-use crate::{anchor_rules, quoted_strings, value_rules};
+use crate::{quoted_strings, value_rules};
 use core_rules::rule;
 use core_rules::tree::significant_range;
 use core_rules::{Check, Edit, Opt, OptionDecl, Rule, RuleContext};
@@ -15,9 +15,11 @@ use core_syntax::ast::AstNode;
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, TextSize};
 
 pub static RULES: &[&dyn Rule] = &[
-    &anchor_rules::NoUndefinedAlias,
-    &anchor_rules::NoDuplicateAnchors,
-    &anchor_rules::NoUnusedAnchors,
+    &core_rules::references::NoUndefinedAlias,
+    &core_rules::references::NoDuplicateAnchors,
+    &core_rules::references::NoUnusedAnchors,
+    &core_rules::references::NoRecursiveAlias,
+    &core_rules::references::NoMergeKeys,
     &value_rules::NoEmptyValues,
     &value_rules::FloatStyle,
     &quoted_strings::QuotedStrings,

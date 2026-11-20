@@ -200,6 +200,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | redeclared-variable | core-rules/scope_rules/ordering.rs | A reference before its declaration, and a name declared again in one scope. | eslint no-redeclare, no-use-before-define; ruff F811, F823; typescript-eslint no-redeclare, no-use-before-define | js, python |  |
 | redundant-pattern | lang-gitignore/rules.rs | A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between) |  | gitignore | SINGLE-USE |
 | redundant-return-type | core-rules/redundant_return_type.rs | The return type a block-body function has by default is left out. | ktlint no-unit-return | cpp, csharp, java, js, json, kotlin, php, python, ruby, yaml |  |
+| reference-rules | core-rules/references.rs | Anchors and their aliases, and the merge key: undefined, recursive, repeated and unused references. | yamllint anchors, actionlint anchors | dockerfile, editorconfig, gitignore, graphql, js, json, markdown, yaml |  |
 | regex-source-checks | core-rules/regex_source/flavor.rs +2 | Rules about the source of regular expressions in literals and call arguments, by flavor. | eslint no-control-regex no-regex-spaces no-empty-character-class no-misleading-character-class, ruff regex checks | csharp, java, js, php, python |  |
 | require-yield | lang-js/rules/stmts.rs | A generator function without a yield. | eslint require-yield | js | SINGLE-USE |
 | role-accessors | core-rules/tree.rs | Accessors over the shared tree that several languages rules need: ranges, separators, reordering. | none (internal) | csharp, css, dockerfile, hcl, js, python, ruby, yaml | LOCAL: lang-github-actions/view.rs, lang-html/dom.rs, lang-html/script/js.rs |
@@ -224,7 +225,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | token-case-lint | core-rules/token_case.rs | Words of the token kinds of a `[case]` row are not written in the case the rule asks for. | sqlfluff CP01-CP05 | css, dockerfile, html, sql |  |
 | typescript-type-checks | lang-js/rules/ts.rs | typescript-eslint rules that read the syntax tree: comparisons, counts, names from the parent. | typescript-eslint | js | SINGLE-USE |
 | undefined-variable | core-rules/scope_rules/undefined.rs | A read or write that no scope binds and the globals do not list. | eslint no-undef; phpstan variable.undefined; ruff F821 | js, php, python |  |
-| unique-names | core-rules/unique.rs | Names that must not repeat, reported against the first occurrence. | eslint no-dupe-class-members, hadolint DL3024, checkmake unique-targets, markdownlint MD024, sqlfluff AL04 | css, dockerfile, gitignore, graphql, html, markdown, sql, xml, yaml | LOCAL: lang-js/rules/dupes.rs, lang-js/rules/stmts.rs, lang-makefile/rules.rs |
+| unique-names | core-rules/unique.rs | Names that must not repeat, reported against the first occurrence. | eslint no-dupe-class-members, hadolint DL3024, checkmake unique-targets, markdownlint MD024, sqlfluff AL04 | css, dockerfile, gitignore, graphql, html, markdown, sql, xml | LOCAL: lang-js/rules/dupes.rs, lang-js/rules/stmts.rs, lang-makefile/rules.rs |
 | unique-targets | lang-makefile/rules.rs | A target defined by more than one rule, which merges prerequisites and overrides recipes (checkmake `uniquetargets`) | checkmake uniquetargets | makefile | SINGLE-USE |
 | unknown-property | lang-editorconfig/rules/properties.rs | A property name that is not an EditorConfig or .NET (`dotnet_*`, `csharp_*`, `visual_basic_*`, `dotnet_diagnostic.<ID>.severity`, naming rule) property but is one typo aw |  | editorconfig | SINGLE-USE |
 | unreachable-code | core-rules/flow_rules.rs | Flow family: code no path reaches and switch cases that fall through, on the flow graph. | eslint no-fallthrough, no-unreachable; roslynator RCS1148 | cpp, csharp, java, js, kotlin, php, python, ruby |  |
@@ -262,15 +263,12 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | missing-permissions | lang-github-actions/jobs.rs | A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access |  | github-actions | SINGLE-USE |
 | multiple-labeled-controls | lang-html/document.rs | A `<label>` without `for` that holds more than one control: it labels only the first |  | html | SINGLE-USE |
 | no-conditional-comment | lang-html/document.rs | An Internet Explorer conditional comment (`<!--[if IE]>`) |  | html | SINGLE-USE |
-| no-duplicate-anchors | lang-yaml/anchor_rules.rs | An anchor name is defined again in the same document; an alias refers to the latest definition above it, which is easy to misread |  | yaml | SINGLE-USE |
 | no-duplicate-class | lang-html/document.rs | A class name written twice in one `class` attribute |  | html | SINGLE-USE |
 | no-duplicate-id | lang-html/document.rs | An `id` that an earlier element of the document already has |  | html | SINGLE-USE |
 | no-empty-values | lang-yaml/value_rules.rs | A mapping key or sequence entry without a value (an implicit null) |  | yaml | SINGLE-USE |
 | no-missing-references | lang-html/document.rs | An attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) names an id that no element of the document has |  | html | SINGLE-USE |
 | no-multiple-main | lang-html/document.rs | A second `<main>` element that is not `hidden`: a page has one main landmark |  | html | SINGLE-USE |
 | no-redundant-for | lang-html/document.rs | A `<label>` has a `for` that names a control inside it, which the label already labels |  | html | SINGLE-USE |
-| no-undefined-alias | lang-yaml/anchor_rules.rs | An alias names an anchor that is not defined earlier in the same document |  | yaml | SINGLE-USE |
-| no-unused-anchors | lang-yaml/anchor_rules.rs | An anchor that no alias refers to |  | yaml | SINGLE-USE |
 | parse-validation | lang-toml/validate.rs | Rules the grammar does not express, reported as parse errors. | TOML 1.0 spec, XML well-formedness | toml, xml | LOCAL: lang-toml/validate.rs, lang-xml/validate.rs |
 | quoted-strings | lang-yaml/quoted_strings.rs | Which strings must, may or must not be quoted, and with which quotes. | yamllint quoted-strings, Prettier yaml quotes | yaml | SINGLE-USE |
 | scalar-type-resolution | lang-yaml/resolve.rs | What a plain scalar means: the implicit types of a YAML schema. | yamllint truthy, PyYAML resolver | yaml | SINGLE-USE |

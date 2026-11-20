@@ -15,8 +15,8 @@ files:
   corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml actionlint:unknown-needs 8: needs-location
   corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml sudsy:unknown-needs 9: needs-location
   invalid-runs-on/cases actionlint:invalid-runs-on 7: self-hosted-labels
-coverage: 72.4  # share of the default-set findings of actionlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage actionlint; at least 85% is the bar)
-target: 72.4
+coverage: 73.5  # share of the default-set findings of actionlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage actionlint; at least 85% is the bar)
+target: 73.5
 fixes:  # lint rule -> where and what to change
   syntax-check: "rows in crates/lang-github-actions/src/shape.rs (core_rules::shape): missing messages are one-off sections (snapshot, environment string forms), typed defaults, anchors"
   expression/types: "no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)"
@@ -28,13 +28,13 @@ fixes:  # lint rule -> where and what to change
   events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   expression/types: 40
-  syntax-check/missing-key: 14
   events: 13
   syntax-check/empty: 13
+  syntax-check/missing-key: 13
   action: 12
-  syntax-check/yaml: 12
   syntax-check/kind: 10
   syntax-check/unexpected-key: 10
+  syntax-check/yaml: 7
   events/schedule: 6
   if-cond: 6
   runner-label/conflict: 6

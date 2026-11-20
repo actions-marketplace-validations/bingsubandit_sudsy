@@ -1,15 +1,17 @@
-//! Rules on anchors and aliases: `no-undefined-alias` (correctness) and the opt-in
-//! `no-duplicate-anchors` and `no-unused-anchors`. Anchors do not cross document markers.
+//! Rules on references written as an anchor and its aliases (YAML `&name` and `*name`) and on the
+//! merge key: `no-undefined-alias` (correctness), `no-recursive-alias`, and the opt-in
+//! `no-duplicate-anchors`, `no-unused-anchors` and `no-merge-keys`. The grammar tags the `document`
+//! nodes and gives the merge key on its `keys` line; the hooks say which tokens are references and
+//! the byte each starts with; anchors do not cross documents.
 //!
-//! concept: new no-undefined-alias, new no-duplicate-anchors, new no-unused-anchors
-//! what: no-undefined-alias: An alias names an anchor that is not defined earlier in the same document
-//! what: no-duplicate-anchors: An anchor name is defined again in the same document; an alias refers to the latest definition above it, which is easy to misread
-//! what: no-unused-anchors: An anchor that no alias refers to
+//! concept: reference-rules
+//! what: Anchors and their aliases, and the merge key: undefined, recursive, repeated and unused references.
+//! tools: yamllint anchors, actionlint anchors
+//! reads: grammar:keys, tag:document
 
-use crate::generated::kind;
-use core_rules::rule;
-use core_rules::unique::Repeats;
-use core_rules::{Edit, FileContext, RuleContext};
+use crate::rule;
+use crate::unique::Repeats;
+use crate::{Edit, FileContext, RuleContext};
 use core_syntax::{TextRange, TextSize};
 use std::collections::{HashMap, HashSet};
 
@@ -20,13 +22,21 @@ struct Event<'a> {
     range: TextRange,
     /// The start of the document it is in; names are looked up per document.
     document: Option<TextSize>,
+    /// For an anchor, when asked for: the node it is on.
+    scope: TextRange,
 }
 
-/// The anchors and aliases of the file in order. Looks only at the `&` and `*` bytes of the text
-/// and asks the tree what they are, so a file without anchors costs one scan and no tree walk.
-fn events<'a>(file: &FileContext<'a>) -> Vec<Event<'a>> {
+/// The anchors and aliases of the file in order. Looks only at the bytes the language's
+/// references start with and asks the tree what they are, so a file without references costs one
+/// scan and no tree walk.
+fn events<'a>(file: &FileContext<'a>, scoped: bool) -> Vec<Event<'a>> {
     let mut out = Vec::new();
-    for at in memchr::memchr2_iter(b'&', b'*', file.text.as_bytes()) {
+    let marks = file.hooks.reference_marks();
+    let Some(&first) = marks.first() else {
+        return out;
+    };
+    let g = file.grammar;
+    for at in memchr::memchr2_iter(first, *marks.get(1).unwrap_or(&first), file.text.as_bytes()) {
         let Some(token) = file
             .root
             .token_at_offset(TextSize::new(at as u32))
@@ -35,16 +45,24 @@ fn events<'a>(file: &FileContext<'a>) -> Vec<Event<'a>> {
             continue;
         };
         let (kind, range) = (token.kind(), token.text_range());
-        if !matches!(kind, kind::ANCHOR | kind::ALIAS) || usize::from(range.start()) != at {
+        let Some(anchor) = file.hooks.reference(kind) else {
+            continue;
+        };
+        if usize::from(range.start()) != at {
             continue;
         }
         out.push(Event {
-            anchor: kind == kind::ANCHOR,
+            anchor,
             name: &file.text[at + 1..usize::from(range.end())],
             range,
+            scope: if scoped {
+                token.parent().map_or(range, |n| n.text_range())
+            } else {
+                range
+            },
             document: token
                 .parent_ancestors()
-                .find(|n| n.kind() == kind::DOCUMENT)
+                .find(|n| g.has_tag(n.kind(), "document"))
                 .map(|n| n.text_range().start()),
         });
     }
@@ -63,7 +81,7 @@ rule! {
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let mut anchors: HashSet<&str> = HashSet::new();
         let mut document = None;
-        for e in events(file) {
+        for e in events(file, false) {
             if e.document != document {
                 document = e.document;
                 anchors.clear();
@@ -90,7 +108,7 @@ rule! {
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let mut first = Repeats::default();
         let mut document = None;
-        for e in events(file).into_iter().filter(|e| e.anchor) {
+        for e in events(file, false).into_iter().filter(|e| e.anchor) {
             if e.document != document {
                 document = e.document;
                 first = Repeats::default();
@@ -113,7 +131,7 @@ rule! {
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let events = events(file);
+        let events = events(file, false);
         let mut used = vec![false; events.len()];
         // An alias refers to the latest anchor of its name above it.
         let mut latest: HashMap<&str, usize> = HashMap::new();
@@ -153,4 +171,63 @@ fn removal(text: &str, anchor: TextRange) -> TextRange {
         (start, end + after)
     };
     TextRange::new(TextSize::new(from as u32), TextSize::new(to as u32))
+}
+
+rule! {
+    pub NoRecursiveAlias {
+        id: "no-recursive-alias",
+        category: Correctness,
+        default: Error,
+        description: "An alias inside the node its own anchor is on, which makes the data refer to \
+                  itself.",
+        example: "a: &x\n  b: *x   # reported",
+    }
+
+    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        let mut latest: HashMap<&str, TextRange> = HashMap::new();
+        let mut document = None;
+        for e in events(file, true) {
+            if e.document != document {
+                document = e.document;
+                latest.clear();
+            }
+            if e.anchor {
+                latest.insert(e.name, e.scope);
+            } else if latest.get(e.name).is_some_and(|scope| scope.contains_range(e.range)) {
+                ctx.report(e.range, format!("recursive alias `{}`", e.name));
+            }
+        }
+    }
+}
+
+rule! {
+    pub NoMergeKeys {
+        id: "no-merge-keys",
+        category: Suspicious,
+        default: Off,
+        description: "The merge key (YAML `<<`), which YAML 1.2 dropped and some tools do not support.",
+        example: "a:\n  <<: *base   # reported",
+    }
+
+    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        let g = file.grammar;
+        let Some(merge) = g.keys().merge.as_deref() else {
+            return;
+        };
+        for at in memchr::memmem::find_iter(file.text.as_bytes(), merge.as_bytes()) {
+            let Some(token) = file.root.token_at_offset(TextSize::new(at as u32)).right_biased() else {
+                continue;
+            };
+            let range = token.text_range();
+            let is_key = token
+                .parent()
+                .and_then(|n| n.parent())
+                .and_then(|kv| g.slot(&kv, "key"))
+                .and_then(|k| k.into_node())
+                .is_some_and(|k| token.parent().is_some_and(|n| n == k));
+            if usize::from(range.start()) == at && &file.text[range] == merge && is_key {
+                ctx.report(range, format!("the `{merge}` merge key is not supported"));
+            }
+        }
+    }
 }

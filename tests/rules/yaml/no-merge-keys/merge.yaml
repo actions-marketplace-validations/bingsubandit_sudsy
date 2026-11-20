@@ -1,0 +1,7 @@
+base: &base
+  a: 1
+b:
+  <<: *base
+# ^^ no-merge-keys
+  c: 2
+d: "<<"
