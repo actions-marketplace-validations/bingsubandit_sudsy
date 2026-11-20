@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-11-20
+
 ### Packaging
 * The VS Code publisher is `sudsy` (extension id `sudsy.sudsy`) and the winget id is `Sudsy.Sudsy`.
   The package descriptions and READMEs are generated from the language support data and no longer

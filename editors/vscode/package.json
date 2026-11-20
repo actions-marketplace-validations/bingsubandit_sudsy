@@ -2,7 +2,7 @@
   "name": "sudsy",
   "displayName": "Sudsy",
   "description": "Formatter and linter for C#, JavaScript/TypeScript, Python, Java, Kotlin, C/C++ and more.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "sudsy",
   "icon": "icon.png",
   "license": "MIT",
