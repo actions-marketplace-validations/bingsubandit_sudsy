@@ -1,0 +1,16 @@
+- resumed 2: reset 6f5f27bb, tmp copied; re-run parity (run.sh), then cost.sh --languages
+- parity 83.4% (1387/1664), second 0, refused 0. cost check: lang-python grew 6643->6765. reviewing diff for move to core
+- NOT landing: diff is hand-written mechanisms in lang-python (+122 lines). Reporting table to lead.
+- lead: map onto core-format shapes parens.rs, maybe_parenthesize.rs, assignment.rs, list.rs, paren_list.rs, blank.rs; regenerate queue ranking
+- built shared shapes/omit_parens.rs (can_omit by tags + OmitHooks); next: replace Python Visit in paren.rs with hook
+- python Visit replaced by shared can_omit: python 6610 (<6643). running codegen + parity
+- parity dropped 77.1: any_paren must use bracketed(); fixed, rerun
+- 83.2: try await excluded from comment check
+- yaml regenerated (205/123/1059), queue.md codegen. next: gate -p core-format -p lang-python, check other-lang parity, finish
+- gate passed; finish --start
+- land.sh HARD RULE review rejected 17 findings (kept local commit); reported to lead
+- lead ruling: move blank rules, list opts, parens(policy), head-fit to shared; facts stay (comment |, power kinds, is_primary, pairs fix, assert rhs). start
+- reverted blank rules(block/compound), list one-item/magic/subscript + paren one-item arms; kept hang false. next: collapse via shapes::parenthesized, head_fits shared
+- head_fits moved shared (python 6555). parity run A: reverts of blank+list+one-item, collapse/await/for_target kept
+- collapse routed via shapes::parenthesized + #parenthesized tag; parity run B
+- yaml fixed (198/117/1055). next: JS/java/kt/cpp parity, gate, finish

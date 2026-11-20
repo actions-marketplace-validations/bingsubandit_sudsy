@@ -156,7 +156,7 @@ token EndOfFile
 token Unknown #error
 
 node ModModule #scope #block = items=body:#statement* EndOfFile
-node Parenthesized #expression #pattern #part #opaque #transparent
+node Parenthesized #expression #pattern #part #transparent #parenthesized
 node StmtFunctionDef #statement #declaration #function #scope =
     Decorator* Async? Def name:Identifier TypeParams? parameters:Parameters Rarrow? returns:#expression? Colon body:#statement*
 node StmtClassDef #statement #declaration #type-declaration #scope =

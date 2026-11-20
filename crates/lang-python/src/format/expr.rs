@@ -278,6 +278,27 @@ fn parenthesized_node(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     else {
         return Err(shape_error("Parenthesized"));
     };
+    // `((x))` is `(x)`: the shared pair rule drops a pair inside a pair.
+    let nested = node.parent().is_some_and(|p| p.kind() == k::PARENTHESIZED)
+        || node
+            .children()
+            .next()
+            .is_some_and(|c| c.kind() == k::PARENTHESIZED);
+    if nested
+        && !node
+            .descendants_with_tokens()
+            .any(|e| e.kind() == k::COMMENT)
+    {
+        let policy = shapes::ParenPolicy {
+            layout: shapes::ParenLayout::Flat,
+            unneeded: shapes::Unneeded::Drop,
+        };
+        return with_fluent(true, || {
+            with_open(true, || {
+                shapes::parenthesized(cx, node, &policy, &shapes::NoParenHooks)
+            })
+        });
+    }
     if let [_, SyntaxElement::Node(inner), _] = ks.as_slice()
         && inner.kind() == k::EXPR_TUPLE
         && list::is_bare(cx, inner)

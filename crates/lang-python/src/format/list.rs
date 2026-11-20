@@ -244,8 +244,9 @@ pub(crate) fn collection(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
         return bare_tuple(cx, node);
     }
     let tuple = node.kind() == k::EXPR_TUPLE;
-    bracketed_with(cx, node, |f| {
-        list_style(cx, f, tuple && is_one_item(f), false, false)
+    bracketed_with(cx, node, |f| ListStyle {
+        hang: false,
+        ..list_style(cx, f, tuple && is_one_item(f), false, false)
     })
 }
 
@@ -254,7 +255,10 @@ pub(crate) fn parenthesized_tuple(cx: &FormatCtx<'_>, node: &SyntaxNode, tuple: 
     let (Some(open), Some(close)) = (node.first_token(), node.last_token()) else {
         return Err(shape_error("Parenthesized"));
     };
-    let style = |f: &ListFacts<'_>| list_style(cx, f, is_one_item(f), false, false);
+    let style = |f: &ListFacts<'_>| ListStyle {
+        hang: false,
+        ..list_style(cx, f, is_one_item(f), false, false)
+    };
     with_fluent(true, || {
         with_open(true, || {
             shapes::delimited_list_around(

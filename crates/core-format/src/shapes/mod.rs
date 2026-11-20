@@ -24,6 +24,7 @@ mod heritage;
 mod key_value;
 mod list;
 mod maybe_parenthesize;
+mod omit_parens;
 mod paren_list;
 mod parens;
 pub(crate) mod raw_string;
@@ -68,6 +69,7 @@ pub use list::{
     delimited_list_around, delimited_list_between,
 };
 pub use maybe_parenthesize::{between, enclosed, head_test, keyword_argument, maybe_parenthesize};
+pub use omit_parens::{OmitHooks, can_omit, head_fits};
 pub use paren_list::paren_list;
 pub use parens::{
     Need, NoParenHooks, ParenHooks, ParenLayout, ParenPolicy, Unneeded, binary_needs, first_char,

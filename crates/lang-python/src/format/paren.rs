@@ -81,15 +81,6 @@ pub(crate) fn maybe_parenthesize_test(cx: &FormatCtx<'_>, e: &SyntaxNode) -> R {
     maybe_parenthesize(cx, e)
 }
 
-/// An annotated assignment's target: a name loses its parentheses.
-pub(crate) fn ann_target(cx: &FormatCtx<'_>, n: &SyntaxNode) -> R {
-    let inner = strip(cx, n);
-    if inner.kind() == k::EXPR_NAME {
-        return expr::expr(cx, &inner);
-    }
-    expr::expr(cx, n)
-}
-
 /// The expression inside parentheses that show when it does not fit: operators may break.
 fn expanded(f: impl FnOnce() -> R) -> R {
     Ok(parenthesize_if_expands(with_open(true, f)?))
@@ -113,12 +104,26 @@ fn maybe_parenthesize_inner(
             if can_omit(cx, &inner) {
                 list::bare_tuple_flat(cx, &inner)
             } else {
-                expanded(|| list::bare_tuple(cx, &inner))
+                expanded(|| list::bare_tuple_ungrouped(cx, &inner))
             }
         }
         k::EXPR_BIN_OP | k::EXPR_BOOL_OP | k::EXPR_COMPARE | k::EXPR_UNARY_OP => {
             if can_omit(cx, &inner) {
-                op::binary_like(cx, &inner, false)
+                // The brackets split instead of the operators when the line up to the first one fits
+                //.
+                let d = op::binary_like(cx, &inner, false)?;
+                if shapes::head_fits(
+                    cx,
+                    e,
+                    prefix,
+                    &d,
+                    depth() * style(cx).indent,
+                    style(cx).width,
+                ) {
+                    Ok(d)
+                } else {
+                    expanded(|| expr::expr(cx, &inner))
+                }
             } else {
                 expanded(|| expr::expr(cx, &inner))
             }
@@ -296,7 +301,7 @@ pub(crate) fn rhs(cx: &FormatCtx<'_>, value: &SyntaxNode, prefix: usize) -> R {
 /// An assignment target: a tuple without parentheses gets them when it does not fit.
 pub(crate) fn target(cx: &FormatCtx<'_>, n: &SyntaxNode) -> R {
     if n.kind() == k::EXPR_TUPLE && list::is_bare(cx, n) {
-        return with_open(false, || expanded(|| list::bare_tuple(cx, n)));
+        return with_open(false, || expanded(|| list::bare_tuple_ungrouped(cx, n)));
     }
     expr::expr(cx, n)
 }
@@ -327,7 +332,10 @@ pub(crate) fn for_target(cx: &FormatCtx<'_>, n: &SyntaxNode) -> R {
             }
         });
     }
-    expr::expr(cx, n)
+    if inner.kind() == k::EXPR_TUPLE {
+        return expr::expr(cx, n);
+    }
+    expr::expr(cx, &inner)
 }
 
 /// Comments on the tokens of `n` itself or at the edges of its first and last element.
@@ -346,176 +354,29 @@ fn has_own_comments(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
         })
 }
 
-struct Visit {
-    any_paren: bool,
-    /// A comment between the operands.
-    comments: bool,
-    /// The loosest operator seen (`u8::MAX`: none) and how many of that kind.
-    loosest: u8,
-    count: usize,
-    first: Option<SyntaxNode>,
-    last: Option<SyntaxNode>,
-}
+/// The operator levels of ruff's visitor: `~` binds tightest, a bare tuple loosest.
+struct Levels;
 
-impl Visit {
-    fn update(&mut self, prec: u8, n: usize) {
-        if prec < self.loosest {
-            self.loosest = prec;
-            self.count = n;
-        } else if prec == self.loosest {
-            self.count += n;
-        }
-    }
-
-    /// An operand: the first one visited starts the expression (a call or subscript starts with
-    /// what it is applied to), the last one ends it.
-    fn leaf(&mut self, n: &SyntaxNode) {
-        if self.first.is_none() {
-            let mut f = n.clone();
-            while matches!(
-                f.kind(),
-                k::EXPR_CALL | k::EXPR_ATTRIBUTE | k::EXPR_SUBSCRIPT
-            ) {
-                match f.children().next() {
-                    Some(c) => f = c,
-                    None => break,
-                }
-            }
-            self.first = Some(f);
-        }
-        self.last = Some(n.clone());
-    }
-
-    fn visit(&mut self, cx: &FormatCtx<'_>, n: &SyntaxNode) {
+impl shapes::OmitHooks for Levels {
+    fn level(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> Option<u8> {
         match n.kind() {
-            k::EXPR_BIN_OP | k::EXPR_BOOL_OP | k::EXPR_COMPARE
-                if kids(cx, n).iter().any(|e| match e {
-                    core_syntax::SyntaxElement::Token(t) => has_comments(cx, t),
-                    core_syntax::SyntaxElement::Node(c) => cx.first_token(c).is_some_and(|t| {
-                        !core_format::comments::leading_comments(cx.grammar, &t).is_empty()
-                    }),
-                }) =>
-            {
-                self.comments = true;
-            }
-            k::EXPR_BIN_OP => {
-                let ks = kids(cx, n);
-                if let Some(o) = ks.get(1).and_then(tok_kind) {
-                    self.update(op::precedence(o), 1);
-                }
-                for c in n.children() {
-                    self.visit(cx, &c);
-                }
-            }
-            k::EXPR_BOOL_OP => {
-                let ks = kids(cx, n);
-                let ops = ks.iter().filter(|e| e.as_token().is_some()).count();
-                let prec = ks
-                    .iter()
-                    .find_map(tok_kind)
-                    .map_or(1, |o| if o == k::AND { 2 } else { 1 });
-                self.update(prec, ops);
-                for c in n.children() {
-                    self.visit(cx, &c);
-                }
-            }
-            k::EXPR_COMPARE => {
-                let ops = kids(cx, n)
-                    .iter()
-                    .filter(|e| e.as_token().is_some())
-                    .count();
-                self.update(4, ops.max(1));
-                for c in n.children() {
-                    self.visit(cx, &c);
-                }
-            }
+            k::EXPR_BIN_OP => kids(cx, n).get(1).and_then(tok_kind).map(op::precedence),
+            k::EXPR_BOOL_OP => Some(2),
+            k::EXPR_COMPARE => Some(4),
+            k::EXPR_IF => Some(1),
             k::EXPR_UNARY_OP => {
-                let ks = kids(cx, n);
-                if ks.iter().any(|e| match e {
-                    core_syntax::SyntaxElement::Token(t) => has_comments(cx, t),
-                    core_syntax::SyntaxElement::Node(c) => cx.first_token(c).is_some_and(|t| {
-                        !core_format::comments::leading_comments(cx.grammar, &t).is_empty()
-                    }),
-                }) {
-                    self.comments = true;
-                    return;
-                }
-                let o = ks.first().and_then(tok_kind);
-                self.update(if o == Some(k::NOT) { 3 } else { 11 }, 1);
-                for c in n.children() {
-                    self.visit(cx, &c);
-                }
+                (kids(cx, n).first().and_then(tok_kind) == Some(k::TILDE)).then_some(11)
             }
-            k::EXPR_AWAIT => {
-                for c in n.children() {
-                    self.visit(cx, &c);
-                }
-            }
-            k::EXPR_TUPLE if list::is_bare(cx, n) => {
-                let ops = kids(cx, n)
-                    .iter()
-                    .filter(|e| e.as_token().is_some())
-                    .count();
-                self.update(0, ops.saturating_sub(1).max(1));
-                for c in n.children() {
-                    self.visit(cx, &c);
-                }
-            }
-            _ => {
-                if is_parenthesized(cx, n) || matches!(n.kind(), k::EXPR_CALL | k::EXPR_SUBSCRIPT) {
-                    self.any_paren = true;
-                }
-                self.leaf(n);
-            }
+            k::EXPR_TUPLE if list::is_bare(cx, n) => Some(0),
+            _ => None,
         }
+    }
+
+    fn is_paren(&self, n: &SyntaxNode) -> bool {
+        n.kind() == k::PARENTHESIZED
     }
 }
 
-/// Does the expression end in a bracket pair with something in it?
-fn is_parenthesized(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-    match n.kind() {
-        k::PARENTHESIZED => true,
-        k::EXPR_LIST
-        | k::EXPR_SET
-        | k::EXPR_DICT
-        | k::EXPR_TUPLE
-        | k::EXPR_LIST_COMP
-        | k::EXPR_SET_COMP
-        | k::EXPR_DICT_COMP
-        | k::EXPR_GENERATOR => {
-            let ks = kids(cx, n);
-            ks.len() > 2 && ks.first().and_then(tok_kind).is_some_and(is_open)
-        }
-        k::EXPR_CALL => n
-            .children()
-            .find(|c| c.kind() == k::ARGUMENTS)
-            .is_some_and(|a| kids(cx, &a).len() > 2),
-        k::EXPR_STARRED => n
-            .children()
-            .next()
-            .is_some_and(|c| is_parenthesized(cx, &c)),
-        _ => false,
-    }
-}
-
-/// ruff's `can_omit_optional_parentheses`: the expression ends in a bracket that can split and has
-/// one operator level, so the bracket splits instead of the operators.
 fn can_omit(cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
-    let mut v = Visit {
-        any_paren: false,
-        comments: false,
-        loosest: u8::MAX,
-        count: 0,
-        first: None,
-        last: None,
-    };
-    v.visit(cx, n);
-    if v.comments || !v.any_paren || v.count > 1 {
-        return false;
-    }
-    if v.loosest == u8::MAX {
-        return true;
-    }
-    let p = |x: &Option<SyntaxNode>| x.as_ref().is_some_and(|x| is_parenthesized(cx, x));
-    p(&v.first) || p(&v.last)
+    shapes::can_omit(cx, n, &Levels)
 }

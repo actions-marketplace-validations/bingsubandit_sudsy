@@ -37,6 +37,8 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP; recorded and not re-run: C#, PowerShell, Markdown, GraphQL, XML and all lint shares.
 
 ## Small tasks
+- Python paren strip onto shared ParenPolicy/ParenHooks (for_target, await, one-item tuple arms).
+- Python bare tuple and block blank rules onto delimited_list / shared blank rules, then restore the reverted one-item tuple, magic comma and first-comment/match blank fixes (+18 files).
 - perf-bench builds the base tree with the candidate's tools/perf-bench, so a `FileContext`/`parse_regions` API change fails the base build; build the base with its own perf-bench.
 - `Flow::seq` wraps only flows with a hung part in the `ALIGN_FROM_LINE` align (php.format +1.43% under `source_hang`); prove it with a cpp parity run.
 - Read shared rule specs once per process, not per embedded language.
