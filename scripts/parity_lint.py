@@ -554,11 +554,13 @@ def target_numbers(tool, per, hit, total, owned, prefix="", wrong=0):
 
 
 def instruction_end(path, line, continuation):
-    """The last line of the instruction that starts on `line` of the file: it goes on while a line ends with the continuation character."""
+    """The last line of the instruction that starts on `line` of the file: it goes on while a line ends with the continuation character; comment lines inside it do not end it."""
     lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     end = line
     while end <= len(lines) and lines[end - 1].rstrip().endswith(continuation):
         end += 1
+        while end <= len(lines) and lines[end - 1].lstrip().startswith("#"):
+            end += 1
     return min(end, len(lines))
 
 
@@ -641,9 +643,12 @@ def coverage(tool, sudsy, version, prefix, exe):
     work = prefix / "coverage"
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
-    preset = parity_format.tools()["lint"][tool]["preset"]  # the preset that mirrors the tool's own default set: the headline
+    presets = parity_format.tools()["lint"][tool]["preset"]  # the preset that mirrors the tool's own default set: the headline (a list when the tool runs another tool, as hadolint runs ShellCheck)
+    presets = [presets] if isinstance(presets, str) else presets
+    preset = presets[0]
+    extends = [f"preset:{p}" for p in presets]
     own = sorted({v for v in rule_map(tool).values() if v != "syntax-error"} | set(aliases))  # every Sudsy rule the catalog maps, with default options
-    full = json.dumps({"extends": [f"preset:{preset}"], {"eslint-plugin-vue": "vue", "eslint-plugin-svelte": "svelte"}.get(tool, preset.split("/")[0]): {"lint": {"rules": {r: "warn" for r in own}}}})
+    full = json.dumps({"extends": extends, {"eslint-plugin-vue": "vue", "eslint-plugin-svelte": "svelte"}.get(tool, preset.split("/")[0]): {"lint": {"rules": {r: "warn" for r in own}}}})
     names = {}
     for _, name, source in ([] if spec else corpus_sources(tool, suffixes)):
         if tool == "eslint":  # both tools read a `.js` as a module by default: a file with `import`/`export` is one, the others are scripts
@@ -718,7 +723,7 @@ def coverage(tool, sudsy, version, prefix, exe):
 
     everything = score(run_sudsy(full))[3]  # informational: every mapped rule on
     default = score(run_sudsy(None))[3]  # informational: Sudsy's default config, as a user gets it with no sudsy.yaml
-    ours = run_sudsy(json.dumps({"extends": [f"preset:{preset}"]}))  # the headline: the preset that mirrors the tool's default set
+    ours = run_sudsy(json.dumps({"extends": extends}))  # the headline: the preset that mirrors the tool's default set
     per, hit, total, share, wrong = score(ours)
     extra = {}  # Sudsy rule -> its findings in files where the tool reports its rule nowhere (a false positive, or a suppression comment)
     wanted = {(f, mapping[r]) for f, r, _, _ in found if r in mapping}

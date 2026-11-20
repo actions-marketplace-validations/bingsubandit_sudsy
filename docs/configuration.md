@@ -44,7 +44,7 @@ A preset is an ordinary config file built into the binary. Write its values by h
 |---|---|
 | C# | `csharp/csharpier-compat`, `csharp/dotnet-runtime`, `csharp/google`, `csharp/stylecop`, `csharp/unity` |
 | CSS, SCSS, Less | `css/stylelint-recommended`, `css/stylelint-standard` |
-| Dockerfile | `dockerfile/hadolint` |
+| Dockerfile | `dockerfile/hadolint` (add `shell/shellcheck`: hadolint runs ShellCheck on every `RUN`) |
 | GitHub Actions | `github-actions/actionlint` |
 | HCL (Terraform) | `hcl/tflint-recommended` |
 | HTML, Vue, Svelte | `html/html-validate-recommended`, `html/html-validate-standard`, `html/htmlhint`, `html/html-eslint-recommended`, `html/eslint-plugin-vue-recommended`, `html/eslint-plugin-svelte-recommended` |

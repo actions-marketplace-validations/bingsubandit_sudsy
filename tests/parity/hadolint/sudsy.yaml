@@ -1,1 +1,1 @@
-extends: [preset:dockerfile/hadolint]
+extends: [preset:dockerfile/hadolint, preset:shell/shellcheck]

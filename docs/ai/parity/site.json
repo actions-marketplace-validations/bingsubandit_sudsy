@@ -22,7 +22,7 @@
 {"format":[{"catalog":"csharpier","name":"CSharpier XML","share":99.69135802469135}],"ids":["xml"],"lint":[],"name":"XML","presets":["xml/csharpier-compat"],"rules":18,"slug":"xml","speed":[["XML","Format","CSharpier","4.0× faster","0.11 s / 0.44 s","104 / 97 MB"]],"status":"Ready"},
 {"format":[{"catalog":"clang-format","name":"clang-format","share":18.36119897574936}],"ids":["c","cpp"],"lint":[{"catalog":null,"name":"clang-tidy","share":null}],"name":"C / C++","presets":["cpp/chromium","cpp/gnu","cpp/google","cpp/microsoft","cpp/mozilla","cpp/webkit","js/biome-recommended","js/eslint-recommended","js/oxlint","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":26,"slug":"c","speed":[],"status":"In progress"},
 {"format":[],"ids":["ruby"],"lint":[{"catalog":"rubocop","name":"RuboCop","share":96.2}],"name":"Ruby","presets":["js/biome-recommended","js/eslint-recommended","js/oxlint","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":54,"slug":"ruby","speed":[["Ruby","Lint","RuboCop","88× faster","3.00 s / 264.55 s","1180 / 377 MB"]],"status":"Lint only: Ready"},
-{"format":[],"ids":["dockerfile"],"lint":[{"catalog":"hadolint","name":"hadolint","share":78.2}],"name":"Dockerfile","presets":["dockerfile/hadolint"],"rules":66,"slug":"dockerfile","speed":[["Dockerfile","Lint","hadolint","36× faster","0.071 s / 2.57 s","70 / 74 MB"]],"status":"In progress"},
+{"format":[],"ids":["dockerfile"],"lint":[{"catalog":"hadolint","name":"hadolint","share":86.6}],"name":"Dockerfile","presets":["dockerfile/hadolint"],"rules":66,"slug":"dockerfile","speed":[["Dockerfile","Lint","hadolint","36× faster","0.071 s / 2.57 s","70 / 74 MB"]],"status":"Ready"},
 {"format":[],"ids":["makefile"],"lint":[{"catalog":"checkmake","name":"checkmake","share":100.0}],"name":"Makefile","presets":["makefile/checkmake"],"rules":21,"slug":"makefile","speed":[["Makefile","Lint","checkmake","3.7× slower","0.059 s / 0.016 s","70 / 28 MB"]],"status":"Ready"},
 {"format":[],"ids":["github-actions"],"lint":[{"catalog":"actionlint","name":"actionlint","share":85.2}],"name":"GitHub Actions","presets":["github-actions/actionlint","yaml/yamllint"],"rules":47,"slug":"github-actions","speed":[["GitHub Actions","Lint","actionlint","2.1× slower","0.14 s / 0.065 s","76 / 71 MB"]],"status":"Ready"},
 {"format":[],"ids":["ini","editorconfig","gitignore"],"lint":[],"name":"INI / EditorConfig / .gitignore","presets":[],"rules":25,"slug":"ini","speed":[],"status":"Ready"}
@@ -1186,7 +1186,7 @@
 ["require-selections","deferred","deferred","Needs a schema, the other files of the project or operation usage."],
 ["strict-id-in-types","deferred","deferred","Needs a schema, the other files of the project or operation usage."]
 ]},
-{"coverage":78.2,"languages":["dockerfile"],"target":78.2,"tool":"hadolint","version":"2.15.1","entries":[
+{"coverage":86.6,"languages":["dockerfile"],"target":86.6,"tool":"hadolint","version":"2.15.1","entries":[
 ["DL1001","wontfix","wontfix: Sudsy has its own suppression comments; a rule against inline pragmas is not planned.",""],
 ["DL3000","covered","rule: workdir-absolute",""],
 ["DL3001","covered","rule: no-interactive-commands",""],

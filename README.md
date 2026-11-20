@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 14 languages, early support for 13 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 15 languages, early support for 12 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -14,7 +14,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, YAML, Java, XML, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, YAML, Java, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -74,6 +74,7 @@ Each number is measured on real-world code against the reference tool with its d
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | XML | █████████░ 99% CSharpier XML | 18 rules · no reference tool | Ready |
+| Dockerfile | ██████████ 100% stable · no reference tool | ████████░░ 86% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
 | INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 25 rules · no reference tool | Ready |
@@ -89,7 +90,6 @@ Each number is measured on real-world code against the reference tool with its d
 | SQL | ███████░░░ 78% sqlfluff | ██████░░░░ 66% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
-| Dockerfile | ██████████ 100% stable · no reference tool | ███████░░░ 78% hadolint | In progress |
 | PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).

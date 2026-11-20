@@ -105,22 +105,22 @@ Lint: coverage 87.2%, target 23%; rules by missed findings:
 
 ## hadolint
 
-Lint: coverage 78.2%, target 78.2%; rules by missed findings:
+Lint: coverage 86.6%, target 86.6%; rules by missed findings:
 1. `DL3066` (30 missed) Fix: user-variable gap of numeric-user-id, report a USER with a variable whose ARG default is not numeric (lang-dockerfile rules, stage facts)
-2. `SC2086` (28 missed) Fix: shell rule on embedded RUN code, map to the shared shell quoting rule once the shell preset checks embedded code
-3. `SC2155` (24 missed) Fix: local x=$(cmd) masks the exit status, needs the shell preset rule on embedded RUN code
-4. `SC1065` (14 missed)
-5. `SC2046` (12 missed)
-6. `SC2251` (12 missed)
-7. `SC1072` (9 missed)
-8. `SC1088` (8 missed)
-9. `SC2154` (8 missed)
-10. `DL1000` (5 missed)
-11. `DL3045` (4 missed) Fix: COPY to a relative path needs WORKDIR tracked per stage (deferred in the catalog), stage facts in lang-dockerfile
-12. `DL3059` (4 missed) Fix: crates/lang-dockerfile/rules/run-stage.yaml, 4 consecutive-RUN findings still missed; check against the corpus lines
-13. `SC3040` (4 missed)
-14. `DL3042` (2 missed)
-15. `SC2006` (2 missed)
+2. `SC1065` (14 missed)
+3. `SC2251` (12 missed)
+4. `SC1072` (9 missed)
+5. `SC1088` (8 missed)
+6. `SC2154` (8 missed)
+7. `DL1000` (5 missed)
+8. `DL3045` (4 missed) Fix: COPY to a relative path needs WORKDIR tracked per stage (deferred in the catalog), stage facts in lang-dockerfile
+9. `DL3059` (4 missed) Fix: crates/lang-dockerfile/rules/run-stage.yaml, 4 consecutive-RUN findings still missed; check against the corpus lines
+10. `SC3040` (4 missed)
+11. `DL3042` (2 missed)
+12. `DL3022` (1 missed)
+13. `SC1001` (1 missed)
+14. `SC1083` (1 missed)
+15. `SC2035` (1 missed)
 
 ## html-eslint
 

@@ -35,7 +35,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | eslint-plugin-vue | 87.2% | 23.0% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
 | google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | - | - | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
-| hadolint | 78.2% | 78.2% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
+| hadolint | 86.6% | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
 | html-eslint | 0.2% | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
 | html-validate | 61.5% | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
 | htmlhint | 5.0% | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
