@@ -19,7 +19,6 @@ struct Row {
     tool: String,
     #[serde(default)]
     corpus: String,
-    not_measured: Option<String>,
     sudsy: Option<Run>,
     other: Option<Run>,
 }
@@ -116,14 +115,7 @@ fn cells(row: &Row) -> (String, String, String) {
             format!("{} / {}", seconds(s.s), seconds(o.s)),
             format!("{:.0} / {:.0} MB", s.mb, o.mb),
         ),
-        _ => (
-            format!(
-                "not measured: {}",
-                row.not_measured.as_deref().unwrap_or("no result")
-            ),
-            "-".into(),
-            "-".into(),
-        ),
+        _ => ("not measured".into(), "-".into(), "-".into()),
     }
 }
 

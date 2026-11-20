@@ -1,5 +1,5 @@
 # Rows of the README "Language support" table (xtask/full/src/support.rs): the reference tools per
-# language. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
+# language; the first tool of each list is the primary one that decides `Ready`. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
 # to the ratchet groups of this one. No `format` list: Sudsy does not format the language. `ids` are the
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
 # language names of its rows in bench/speed.json.

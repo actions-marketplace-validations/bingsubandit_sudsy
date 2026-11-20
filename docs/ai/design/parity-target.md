@@ -122,7 +122,7 @@ A "Language support" section in `README.md` (user decision 2026-11-19), for user
   - **Format:** each reference tool on its own line in the cell, `█████████░ 91% google-java-format`;
   - **Lint:** the same, one line per tool (C#: StyleCop and Roslynator; HTML: html-eslint, html-validate and htmlhint);
   - **Status:**
-    - `Ready` when every format and lint number is at or above the CLAUDE.md bar;
+    - `Ready` when the primary (first listed) format and lint tool are at or above the CLAUDE.md bar; further tools are shown only;
     - `In progress` below it;
     - `Lint only` for a language Sudsy does not format;
     - `not measured` where no run exists. A cell is never blank.

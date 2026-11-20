@@ -1,4 +1,4 @@
-# Style options of the reference formatters, for the README "Beyond parity" table (xtask/full/src/beyond.rs).
+# Style options of the reference formatters, for the README "Highly configurable" table (xtask/full/src/beyond.rs).
 # `language` is the Sudsy language id; `options` counts every documented style option of the tool for that
 # language, the shared ones (line width, indent) included, as the Sudsy count does. `source` is where to check it.
 - {language: js, name: JavaScript / TypeScript, tool: Prettier, options: 17, source: "https://prettier.io/docs/options"}

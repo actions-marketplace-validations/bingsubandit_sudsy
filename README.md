@@ -2,9 +2,10 @@
 
 <h1 align="center">Sudsy</h1>
 
-<p align="center"><b>One formatter and linter for your whole repo.</b><br>
-One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest, measured file by file against each of them.<br>
-<b><!-- generated:support-headline -->Ready for 10 languages, early support for 17 more.<!-- /generated --></b></p>
+<p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
+One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
+Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
+<b><!-- generated:support-headline -->Ready for 11 languages, early support for 16 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -13,8 +14,7 @@ One binary and one config file in place of Prettier, ESLint, ruff, buf, terrafor
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, Java, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: Python, Protobuf, GraphQL, TOML, Angular templates, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, Java, XML, Ruby and Makefile. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -41,8 +41,6 @@ b.js:3:18: warning[no-debugger]: Unexpected 'debugger' statement.
 
 With no config, lint reports likely bugs only, never style. `sudsy format` rewrites the files. `sudsy fix` applies safe fixes, then formats.
 
-Some languages are small downloads, fetched once with `sudsy languages add <name>` ([language packs](docs/configuration.md#language-packs)); until then their files are skipped with a warning. `sudsy languages list` shows what is installed. The `sudsy-full` release archives contain every language. Only C# needs more: it uses Roslyn in a worker process that every channel bundles, and the worker needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Every other language works without .NET.
-
 ## Why
 
 A typical repo runs one tool per language. Each tool has its own install, config file, version pins, editor plugin and CI step. Sudsy is one of each:
@@ -57,11 +55,11 @@ A typical repo runs one tool per language. Each tool has its own install, config
 - **Keep your current style.** A preset reproduces each tool's output. The [table below](#language-support) shows how closely, measured on thousands of real-world files per language. Presets are plain config, and every style choice is a named option.
 - **Editor and CI built in.** It includes a language server (with a VS Code extension) and outputs GitHub annotations and SARIF.
 
-**Who it is for:** repos with several languages, where one tool and one config replace five or ten. It fits best today when most of the code is in the ready languages, for example a TypeScript and Python service with Protobuf APIs and Terraform infrastructure. **Who it is not for yet:** a JavaScript-only or Python-only repo already on Biome or ruff. Those tools are faster, and Sudsy adds nothing there except the same config across languages.
+**Who it is for:** repos with several languages, where one tool and one config replace five or ten. It fits best today when most of the code is in the ready languages, for example a TypeScript and Python service with Protobuf APIs and Terraform infrastructure.
 
 ## Language support
 
-Each number is measured on real-world code against the reference tool with its default settings, and counts every difference except the reviewed intentional ones. `Ready` means every number is at least 85%.
+Each number is measured on real-world code against the reference tool with its default settings, and counts every difference except the reviewed intentional ones. `Ready` means the first tool of each column is at least 85%; the others are shown for reference.
 
 <!-- generated:support -->
 | Language | Format | Lint | Status |
@@ -72,6 +70,7 @@ Each number is measured on real-world code against the reference tool with its d
 | GraphQL | █████████░ 99% Prettier | 21 rules · reference tool: none found | Ready |
 | TOML | █████████░ 98% taplo | 15 rules · reference tool: none found | Ready |
 | Angular templates | █████████░ 97% Prettier | 142 rules · reference tool: none found | Ready |
+| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | Ready |
 | Java | █████████░ 91% google-java-format | █████████░ 95% Checkstyle | Ready |
 | XML | █████████░ 99% CSharpier XML | 17 rules · reference tool: none found | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
@@ -79,7 +78,6 @@ Each number is measured on real-world code against the reference tool with its d
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
-| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | In progress |
 | Markdown | ████████░░ 89% Prettier | ████████░░ 83% markdownlint | In progress |
 | YAML | ██████████ 100% Prettier | ███████░░░ 74% yamllint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
@@ -97,12 +95,12 @@ Each number is measured on real-world code against the reference tool with its d
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->
 
-All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorConfig, Gitignore, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->. Some are [language packs](#install). Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
+All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorConfig, Gitignore, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->. Some are [language packs](docs/configuration.md#language-packs). Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
 
-## Beyond parity
+## Highly configurable
 
 <!-- generated:beyond -->
-Sudsy format options vs other tools:
+**Extensive formatting and lint rules.** Sudsy format options vs other tools:
 
 | Language | Sudsy options | Reference tool | Tool options |
 |---|---:|---|---:|
@@ -131,7 +129,7 @@ Sudsy format options vs other tools:
 | JSON | Format | Prettier | 26× faster | 0.009 s / 0.23 s | 43 / 85 MB |
 |  |  | Biome | 4.1× faster | 0.009 s / 0.037 s | 43 / 42 MB |
 |  |  | dprint | 1.7× faster | 0.007 s / 0.012 s | 73 / 73 MB |
-|  | Lint | eslint-plugin-jsonc | not measured: no mirroring preset | - | - |
+|  | Lint | eslint-plugin-jsonc | not measured | - | - |
 | YAML | Format | Prettier | 43× faster | 0.15 s / 6.48 s | 103 / 237 MB |
 |  |  | dprint | 1.4× faster | 0.17 s / 0.23 s | 99 / 73 MB |
 |  | Lint | yamllint | 18× faster | 0.071 s / 1.25 s | 62 / 55 MB |
@@ -147,7 +145,7 @@ Sudsy format options vs other tools:
 |  | Lint | html-validate | 25× faster | 0.090 s / 2.27 s | 104 / 285 MB |
 |  |  | HTMLHint | 4.0× faster | 0.066 s / 0.26 s | 82 / 100 MB |
 |  |  | html-eslint | 2.0× faster | 0.062 s / 0.12 s | 82 / 75 MB |
-| Angular | Format | Prettier | not measured: Prettier picks its Angular parser from the .component.html name, which the corpus files do not carry | - | - |
+| Angular | Format | Prettier | not measured | - | - |
 | TOML | Format | taplo | 1.6× faster | 0.012 s / 0.019 s | 45 / 40 MB |
 | Python | Format | ruff | 4.8× slower | 0.31 s / 0.066 s | 224 / 58 MB |
 |  | Lint | ruff | 2.1× slower | 0.34 s / 0.17 s | 245 / 57 MB |
@@ -160,22 +158,22 @@ Sudsy format options vs other tools:
 | Kotlin | Format | ktlint | 30× faster | 1.61 s / 48.42 s | 501 / 715 MB |
 |  | Lint | ktlint | 42× faster | 1.14 s / 48.01 s | 485 / 683 MB |
 | PHP | Format | PHP-CS-Fixer | 161× faster | 1.77 s / 285.46 s | 1161 / 70 MB |
-|  | Lint | PHPStan | not measured: the analysis runs per project folder, not on a folder of unrelated files | - | - |
-| PowerShell | Format | Invoke-Formatter | not measured: no PowerShell (pwsh) on the host that wrote this table | - | - |
-|  | Lint | PSScriptAnalyzer | not measured: no PowerShell (pwsh) on the host that wrote this table | - | - |
+|  | Lint | PHPStan | not measured | - | - |
+| PowerShell | Format | Invoke-Formatter | not measured | - | - |
+|  | Lint | PSScriptAnalyzer | not measured | - | - |
 | Protobuf | Format | buf | 3.6× faster | 0.069 s / 0.25 s | 118 / 74 MB |
-|  | Lint | buf | not measured: the analysis runs per module, not on a folder of unrelated files | - | - |
+|  | Lint | buf | not measured | - | - |
 | HCL | Format | terraform fmt | 3.5× faster | 0.11 s / 0.40 s | 123 / 87 MB |
 |  | Lint | tflint | 23× faster | 0.20 s / 4.69 s | 120 / 89 MB |
 | C# | Format | CSharpier | 3.3× faster | 4.36 s / 14.38 s | 572 / 456 MB |
-|  | Lint | StyleCop | not measured: the compiler skips analyzers when the compilation has errors, and the C# corpus does not compile on its own | - | - |
+|  | Lint | StyleCop | not measured | - | - |
 | XML | Format | CSharpier | 4.0× faster | 0.11 s / 0.44 s | 104 / 97 MB |
-| C# (.editorconfig) | Format | dotnet format | not measured: its fixtures are small .editorconfig cases, each in a folder of its own, not a corpus | - | - |
+| C# (.editorconfig) | Format | dotnet format | not measured | - | - |
 | Ruby | Lint | RuboCop | 88× faster | 3.00 s / 264.55 s | 1180 / 377 MB |
-| Vue | Lint | eslint-plugin-vue | not measured: no runner yet: the flat config for .vue files needs vue-eslint-parser and a corpus of .vue files | - | - |
-| Svelte | Lint | eslint-plugin-svelte | not measured: no runner yet: the flat config for .svelte files needs svelte-eslint-parser and a corpus of .svelte files | - | - |
-| SCSS | Lint | stylelint-scss | not measured: no mirroring preset | - | - |
-| Less | Lint | stylelint-less | not measured: no mirroring preset | - | - |
+| Vue | Lint | eslint-plugin-vue | not measured | - | - |
+| Svelte | Lint | eslint-plugin-svelte | not measured | - | - |
+| SCSS | Lint | stylelint-scss | not measured | - | - |
+| Less | Lint | stylelint-less | not measured | - | - |
 | Markdown | Lint | markdownlint | 7.5× faster | 0.096 s / 0.72 s | 87 / 198 MB |
 | Dockerfile | Lint | hadolint | 36× faster | 0.071 s / 2.57 s | 70 / 74 MB |
 | GitHub Actions | Lint | actionlint | 2.1× slower | 0.14 s / 0.065 s | 76 / 71 MB |

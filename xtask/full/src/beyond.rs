@@ -1,4 +1,4 @@
-//! The generated part of the README "Beyond parity" section: the languages where Sudsy has more format
+//! The generated part of the README "Highly configurable" section: the languages where Sudsy has more format
 //! options than the reference tool (`tool-options.yaml`). Every number comes from a file of the repository.
 
 use anyhow::Result;
@@ -23,7 +23,7 @@ pub fn render(providers: &[Box<dyn LanguageProvider>], options_yaml: &str) -> Re
 /// The languages where Sudsy declares more format options than the reference tool has.
 fn options_table(providers: &[Box<dyn LanguageProvider>], options: &[Options]) -> String {
     let mut out = String::from(
-        "Sudsy format options vs other tools:\n\n| Language | Sudsy options | Reference tool | Tool options |\n|---|---:|---|---:|\n",
+        "**Extensive formatting and lint rules.** Sudsy format options vs other tools:\n\n| Language | Sudsy options | Reference tool | Tool options |\n|---|---:|---|---:|\n",
     );
     for o in options {
         let sudsy = providers

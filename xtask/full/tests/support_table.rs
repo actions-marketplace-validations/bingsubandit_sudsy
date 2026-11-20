@@ -22,11 +22,15 @@ fn table_from_fixture_ratchets() {
         rows,
         [
             "| Alpha | ████████░░ 86% FmtA | ████████░░ 85% LintA | Ready |",
+            // Only the first tool of each list decides the status: the unmeasured `Gone` does not.
+            "| Beta | █████████░ 90% FmtA<br>not measured Gone | ████████░░ 85% LintA | Ready |",
             "| Gamma | none | ████████░░ 85% LintA | Lint only: Ready |",
-            "| Beta | █████████░ 90% FmtA<br>not measured Gone | ████████░░ 85% LintA | In progress |",
             "| Delta | none | none | not measured |",
         ]
     );
-    assert_eq!(headline, "Ready for 2 languages, early support for 2 more.");
-    assert_eq!(ready, "Ready: Alpha and Gamma. The rest are in progress.");
+    assert_eq!(headline, "Ready for 3 languages, early support for 1 more.");
+    assert_eq!(
+        ready,
+        "Ready: Alpha, Beta and Gamma. The rest are in progress."
+    );
 }

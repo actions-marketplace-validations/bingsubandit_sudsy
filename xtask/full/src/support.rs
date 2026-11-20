@@ -225,9 +225,12 @@ fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
     )
 }
 
+/// `Ready` when the primary (first listed) format and lint tool are both at the bar; further tools
+/// are shown but do not decide the status.
 fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &'static str {
     let all: Vec<Option<f64>> = format.iter().chain(lint).copied().collect();
-    let ready = all.iter().all(|s| s.is_some_and(|p| p >= BAR));
+    let primary = format.first().into_iter().chain(lint.first());
+    let ready = primary.copied().all(|s| s.is_some_and(|p| p >= BAR));
     match (all.iter().all(Option::is_none), no_formatter, ready) {
         (true, ..) => "not measured",
         (_, true, true) => "Lint only: Ready",
