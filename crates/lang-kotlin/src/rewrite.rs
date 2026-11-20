@@ -36,54 +36,6 @@ fn blank_before_kdoc(tree: &SyntaxNode, text: &str, edits: &mut Vec<(usize, usiz
     }
 }
 
-/// The last entry of an enum with one entry per line gets a trailing comma; a `;` after it goes
-/// on a line of its own.
-fn enum_trailing_comma(tree: &SyntaxNode, text: &str, edits: &mut Vec<(usize, usize, String)>) {
-    for body in tree.descendants().filter(|n| n.kind() == k::CLASS_BODY) {
-        let entries: Vec<_> = body
-            .children()
-            .filter(|n| n.kind() == k::ENUM_ENTRY)
-            .collect();
-        let Some(entry) = entries.last() else {
-            continue;
-        };
-        let toks: Vec<_> = entry
-            .children_with_tokens()
-            .filter_map(|e| e.into_token())
-            .collect();
-        if toks.iter().any(|t| t.kind() == k::COMMA) {
-            continue;
-        }
-        let start = code_start(entry);
-        let line_start = text[..start].rfind('\n').map_or(0, |i| i + 1);
-        let indent = &text[line_start..start];
-        let own_line = line_start > 0 && indent.trim().is_empty();
-        if !own_line && entries.len() < 2 {
-            continue;
-        }
-        if let Some(semi) = toks.iter().find(|t| t.kind() == k::SEMICOLON) {
-            let (s, e) = (
-                usize::from(semi.text_range().start()),
-                usize::from(semi.text_range().end()),
-            );
-            if own_line {
-                edits.push((s, e, format!(",\n{indent};")));
-            }
-        } else if let Some(last) = last_code_end(entry) {
-            edits.push((last, last, ",".into()));
-        }
-    }
-}
-
-/// The end of the last token of `node` that is not trivia.
-fn last_code_end(node: &SyntaxNode) -> Option<usize> {
-    node.descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-        .filter(|t| !matches!(t.kind(), k::WHITESPACE | k::NEWLINE | k::COMMENT))
-        .last()
-        .map(|t| usize::from(t.text_range().end()))
-}
-
 /// `fun f(): T { return x }` becomes `fun f(): T = x` (also `throw`): a body that is one `return` or
 /// `throw` without a label and without comments.
 fn expression_body(tree: &SyntaxNode, edits: &mut Vec<(usize, usize, String)>) {
@@ -127,16 +79,6 @@ fn expression_body(tree: &SyntaxNode, edits: &mut Vec<(usize, usize, String)>) {
     }
 }
 
-/// The start of the first token of `n` that is not trivia (a node starts with its leading blanks).
-fn code_start(n: &SyntaxNode) -> usize {
-    n.descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-        .find(|t| !matches!(t.kind(), k::WHITESPACE | k::NEWLINE | k::COMMENT))
-        .map_or(n.text_range().start().into(), |t| {
-            t.text_range().start().into()
-        })
-}
-
 /// The source with the rewrites applied, or `None` when there is nothing to rewrite.
 pub fn rewrite(
     tree: &SyntaxNode,
@@ -149,8 +91,9 @@ pub fn rewrite(
         .map(|(r, new)| (r.start().into(), r.end().into(), new))
         .collect();
     blank_before_kdoc(tree, text, &mut edits);
-    enum_trailing_comma(tree, text, &mut edits);
+    core_format::rewrite::trailing_comma_last_entry(g, tree, text, options, &mut edits);
     expression_body(tree, &mut edits);
+    core_format::rewrite::trailing_commas_before(g, tree, text, options, &mut edits);
     core_format::rewrite::redundant_semicolons(
         g,
         tree,

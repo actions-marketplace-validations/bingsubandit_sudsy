@@ -46,7 +46,17 @@ pub(super) fn wrapped(
 ) -> Result<Doc, FormatError> {
     let cx = w.cx;
     let directives = cx.directives_of(node);
-    let mut head_parts = lead;
+    // The comments in front of the chain print ahead of the layout: their line breaks must not
+    // decide whether the head counts as broken.
+    let mut lead = lead;
+    if let Some(t) = cx
+        .first_token(node)
+        .filter(|t| !cx.is_held_leading(t) && !cx.leading_comments_doc(t).is_nil())
+    {
+        cx.hold_leading(&t);
+        lead.push(cx.held_leading(&t));
+    }
+    let mut head_parts = Vec::new();
     head_parts.push(w.element(head, false)?);
     // The accesses of a plain name path in front of the first dotted call stay with the head
     // (`kotlin.math.f()`); a head that is a call or has no dotted call has none.
@@ -55,7 +65,8 @@ pub(super) fn wrapped(
         Some(call)
             if links[..call]
                 .iter()
-                .all(|l| l.dotted && !l.call && !l.index) =>
+                .all(|l| l.dotted && !l.call && !l.index)
+                && !links[..call].iter().any(|l| break_before(w, l)) =>
         {
             call
         }
@@ -82,7 +93,7 @@ pub(super) fn wrapped(
         }
     }
     if groups.is_empty() {
-        return Ok(doc::concat(head_parts));
+        return Ok(doc::concat(lead.into_iter().chain(head_parts).collect()));
     }
     let ops = links.iter().filter(|l| l.dotted).count();
     let calls = links.iter().filter(|l| l.call).count();
@@ -106,7 +117,8 @@ pub(super) fn wrapped(
             .split_last_mut()
             .is_some_and(|(_, init)| init.iter_mut().any(Doc::propagate_breaks));
     if keep || (!force && calls < policy.min_calls && !inner) {
-        let mut parts = vec![head];
+        let mut parts = lead;
+        parts.push(head);
         parts.extend(groups);
         return Ok(doc::concat(parts));
     }
@@ -117,7 +129,8 @@ pub(super) fn wrapped(
         groups = groups.into_iter().map(doc::shared).collect();
     }
     let flat = width_decides.then(|| {
-        let mut parts = vec![head.clone()];
+        let mut parts = lead.clone();
+        parts.push(head.clone());
         parts.extend(groups.iter().cloned());
         doc::concat(parts)
     });
@@ -126,6 +139,7 @@ pub(super) fn wrapped(
     let mut after = head_ends && hugging;
     let mut prev_id = after.then(doc::new_group_id);
     let mut base = Vec::with_capacity(groups.len() + 1);
+    base.extend(lead);
     base.push(match prev_id {
         Some(id) => doc::group_with_id(id, head),
         None => head,

@@ -92,18 +92,8 @@ fn body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     if let Some(r) = empty_braces(cx, &els) {
         return r;
     }
-    // `enum class E { A }` stays on its line.
-    if let [open, entry, close] = &els[..]
-        && entry.kind() == k::ENUM_ENTRY
-        && !multiline(cx, node)
-    {
-        return Ok(doc::concat(vec![
-            el(cx, open)?,
-            doc::lit(" "),
-            el(cx, entry)?,
-            doc::lit(" "),
-            el(cx, close)?,
-        ]));
+    if let Some(r) = shapes::single_line_body(cx, node, &els) {
+        return r;
     }
     shapes::block_open_inside(cx, node, &body_style()).or_else(|_| generic(cx, node))
 }

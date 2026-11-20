@@ -187,6 +187,27 @@ pub fn block_between(
     )
 }
 
+/// A braced body of entries of the kinds of `single_line_body_kinds` that is on one line in the
+/// source stays on it, its entries a blank apart (`{ A, B }`); `None` for any other body.
+pub fn single_line_body(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    els: &[SyntaxElement],
+) -> Option<Result<Doc, FormatError>> {
+    let [_, entries @ .., _] = els else {
+        return None;
+    };
+    let kinds = |e: &SyntaxElement| {
+        cx.options
+            .list_has("single_line_body_kinds", cx.grammar.name(e.kind()))
+    };
+    if entries.is_empty() || !entries.iter().all(kinds) || crate::seq::multiline(cx, node) {
+        return None;
+    }
+    let all: Result<Vec<_>, _> = els.iter().map(|e| crate::seq::el(cx, e)).collect();
+    Some(all.map(|d| doc::join(&doc::lit(" "), d)))
+}
+
 /// Comments in front of or after an opening delimiter, which move to the first body line
 /// (`if (c) // x` newline `{`).
 pub fn open_comments(cx: &FormatCtx<'_>, open: &SyntaxToken) -> Vec<Comment> {
@@ -217,7 +238,8 @@ pub fn headed_braces(
     } else {
         Vec::new()
     };
-    let broken = source_multiline || body.will_break() || !moved.is_empty();
+    let dangling = comments::leading_comments(cx.grammar, close);
+    let broken = source_multiline || body.will_break() || !moved.is_empty() || !dangling.is_empty();
     let mut parts = vec![if moved.is_empty() {
         cx.token(open)
     } else {
@@ -231,9 +253,11 @@ pub fn headed_braces(
         super::dangling_comments(&moved, false),
         doc::line(),
         body,
+        super::dangling_comments_in(&cx.comment_style, &dangling, false),
     ])));
     parts.push(doc::line());
-    parts.push(cx.token(close));
+    parts.push(cx.token_text(close));
+    parts.push(cx.trailing_comments_doc(close));
     let all = doc::concat(parts);
     if broken {
         doc::group_broken(all)

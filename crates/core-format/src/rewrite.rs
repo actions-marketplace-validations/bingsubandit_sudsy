@@ -351,6 +351,129 @@ pub fn redundant_semicolons(
     }
 }
 
+/// The last entry of a body (`trailing_comma_last_entry`: pairs of a body kind and an entry kind)
+/// with one entry per line, or with several entries over several lines, gets a trailing comma; a
+/// `;` after it goes on a line of its own.
+pub fn trailing_comma_last_entry(
+    grammar: &Grammar,
+    tree: &SyntaxNode,
+    text: &str,
+    options: &core_config::ResolvedOptions,
+    edits: &mut Vec<(usize, usize, String)>,
+) {
+    let pairs = options.strings("trailing_comma_last_entry");
+    let code = |n: &SyntaxNode| {
+        n.descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| !grammar.is_trivia(t.kind()))
+            .collect::<Vec<_>>()
+    };
+    for pair in pairs.chunks(2) {
+        let [body_kind, entry_kind] = pair else {
+            continue;
+        };
+        for body in tree
+            .descendants()
+            .filter(|n| grammar.name(n.kind()) == body_kind)
+        {
+            let entries: Vec<_> = body
+                .children()
+                .filter(|n| grammar.name(n.kind()) == entry_kind)
+                .collect();
+            let Some(entry) = entries.last() else {
+                continue;
+            };
+            let toks = code(entry);
+            let own = entry.children_with_tokens().filter_map(|e| e.into_token());
+            if own.clone().any(|t| t.text() == ",") {
+                continue;
+            }
+            let (Some(first), Some(last)) = (toks.first(), toks.last()) else {
+                continue;
+            };
+            let start = usize::from(first.text_range().start());
+            let line_start = text[..start].rfind('\n').map_or(0, |i| i + 1);
+            let indent = &text[line_start..start];
+            let own_line = line_start > 0 && indent.trim().is_empty();
+            if !own_line && (entries.len() < 2 || !body.text().to_string().trim().contains('\n')) {
+                continue;
+            }
+            if let Some(semi) = own.clone().find(|t| t.text() == ";") {
+                if own_line {
+                    let (s, e) = (
+                        usize::from(semi.text_range().start()),
+                        usize::from(semi.text_range().end()),
+                    );
+                    edits.push((s, e, format!(",\n{indent};")));
+                }
+            } else {
+                let end = usize::from(last.text_range().end());
+                edits.push((end, end, ",".into()));
+            }
+        }
+    }
+}
+
+/// A list that spans lines in front of its ending token (`trailing_comma_before`: pairs of a node
+/// kind and the token text) gets a trailing comma, and the token goes on a line of its own, at the
+/// indentation of the line the node starts on. Only a list with a comma in it counts.
+pub fn trailing_commas_before(
+    grammar: &Grammar,
+    tree: &SyntaxNode,
+    text: &str,
+    options: &core_config::ResolvedOptions,
+    edits: &mut Vec<(usize, usize, String)>,
+) {
+    for pair in options.strings("trailing_comma_before").chunks(2) {
+        let [kind, end] = pair else { continue };
+        for (at, _) in text.match_indices(end.as_str()) {
+            let Some(t) = u32::try_from(at)
+                .ok()
+                .and_then(|at| tree.token_at_offset(at.into()).right_biased())
+                .filter(|t| t.text() == end.as_str())
+            else {
+                continue;
+            };
+            let Some(node) = t.parent().filter(|n| grammar.name(n.kind()) == kind) else {
+                continue;
+            };
+            let first = node
+                .descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .find(|x| !grammar.is_trivia(x.kind()));
+            let mut prev = t.prev_token();
+            while let Some(p) = prev.as_ref().filter(|p| p.text().trim().is_empty()) {
+                prev = p.prev_token();
+            }
+            let (Some(first), Some(prev)) = (first, prev) else {
+                continue;
+            };
+            let (from, to) = (
+                usize::from(prev.text_range().end()),
+                usize::from(t.text_range().start()),
+            );
+            let start = usize::from(first.text_range().start());
+            let has_comma = node
+                .children_with_tokens()
+                .any(|e| e.as_token().is_some_and(|c| c.text() == ","));
+            if !has_comma
+                || prev.text() == ","
+                || grammar.is_trivia(prev.kind())
+                || !text[start..to].contains('\n')
+                || !text[from..to].trim().is_empty()
+            {
+                continue;
+            }
+            let line = text[..start].rfind('\n').map_or(0, |i| i + 1);
+            let indent = &text[line..start];
+            if !indent.trim().is_empty() {
+                continue;
+            }
+            edits.push((from, to, format!(",\n{indent}")));
+        }
+    }
+}
+
 /// Does the text have a line that starts with one of `keywords`, has a body after its
 /// parenthesized head on the same line that does not start a `{` block, and is followed by a
 /// deeper-indented line (a statement the layout wrapped, whose braces a rewrite that depends on

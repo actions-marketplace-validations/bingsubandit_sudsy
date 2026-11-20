@@ -565,6 +565,30 @@ pub mod shared {
         )
     }
 
+    pub fn single_line_body_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "single_line_body_kinds",
+            default,
+            "Node kinds of entries a braced body made only of them keeps on one line when the source has it on one line (`enum class E { A, B }`).",
+        )
+    }
+
+    pub fn trailing_comma_last_entry(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "trailing_comma_last_entry",
+            default,
+            "Pairs of a body kind and an entry kind (`ClassBody` `EnumEntry`): the last entry gets a trailing comma when the entries are one per line or several over several lines.",
+        )
+    }
+
+    pub fn trailing_comma_before(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            "trailing_comma_before",
+            default,
+            "Pairs of a node kind and the token that ends its comma-separated list (`WhenEntry` `->`): a list that spans lines gets a trailing comma and the token goes on a line of its own.",
+        )
+    }
+
     pub fn raw_string_calls(default: &[&str]) -> OptionDef {
         OptionDef::words(
             "raw_string_calls",
