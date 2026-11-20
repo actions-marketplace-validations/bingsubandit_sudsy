@@ -1,6 +1,7 @@
 //! `sudsy init`: writes a starter `sudsy.yaml`, or with `--from <tool>` the equivalent of another
 //! tool's config in the working directory (docs/ai/config/cli.md).
 
+mod agents;
 mod biome;
 mod csharpier;
 mod editorconfig;
@@ -49,9 +50,33 @@ pub struct InitArgs {
     /// With `--from stylecop` or `csharpier`: append the `.editorconfig` entries to the file.
     #[arg(long, requires = "from")]
     write_editorconfig: bool,
+    /// Add a block about `sudsy check` and `sudsy fix` to `AGENTS.md` (`CLAUDE.md` when only that
+    /// exists). Alone it writes nothing else; once only.
+    #[arg(long)]
+    agents: bool,
 }
 
 pub fn run(args: InitArgs) -> Result<()> {
+    let agents = args.agents;
+    if agents && args.presets.is_empty() && args.from.is_none() && !args.force {
+        return add_agents();
+    }
+    init(args)?;
+    if agents {
+        add_agents()?;
+    }
+    Ok(())
+}
+
+fn add_agents() -> Result<()> {
+    match agents::add(Path::new("."))? {
+        (name, true) => eprintln!("added the Sudsy block to {name}"),
+        (name, false) => eprintln!("{name} already has the Sudsy block"),
+    }
+    Ok(())
+}
+
+fn init(args: InitArgs) -> Result<()> {
     let existing = ["sudsy.yaml", "sudsy.yml"]
         .map(PathBuf::from)
         .into_iter()

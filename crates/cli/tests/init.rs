@@ -154,3 +154,35 @@ fn write_editorconfig_appends_once() {
     );
     assert_eq!(out.status.code(), Some(2));
 }
+
+#[test]
+fn agents_adds_one_block_to_the_instruction_file() {
+    let t = tempfile::tempdir().unwrap();
+    let dir = t.path();
+    // Alone: no sudsy.yaml, a new AGENTS.md.
+    assert!(sudsy(dir, &["init", "--agents"]).status.success());
+    assert!(!dir.join("sudsy.yaml").exists());
+    let once = fs::read_to_string(dir.join("AGENTS.md")).unwrap();
+    assert!(once.contains("sudsy check") && once.contains("sudsy fix"));
+    // Again: unchanged.
+    assert!(sudsy(dir, &["init", "--agents"]).status.success());
+    assert_eq!(fs::read_to_string(dir.join("AGENTS.md")).unwrap(), once);
+    // Only CLAUDE.md: that file, its text kept.
+    let t = tempfile::tempdir().unwrap();
+    fs::write(t.path().join("CLAUDE.md"), "# Mine\n").unwrap();
+    assert!(sudsy(t.path(), &["init", "--agents"]).status.success());
+    assert!(!t.path().join("AGENTS.md").exists());
+    let text = fs::read_to_string(t.path().join("CLAUDE.md")).unwrap();
+    assert!(
+        text.starts_with("# Mine\n\n<!-- sudsy:start -->")
+            && text.matches("sudsy:start").count() == 1
+    );
+}
+
+#[test]
+fn init_without_agents_flag_writes_no_instruction_file() {
+    let t = tempfile::tempdir().unwrap();
+    assert!(sudsy(t.path(), &["init"]).status.success());
+    assert!(t.path().join("sudsy.yaml").exists());
+    assert!(!t.path().join("AGENTS.md").exists() && !t.path().join("CLAUDE.md").exists());
+}

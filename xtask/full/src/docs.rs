@@ -75,6 +75,12 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             .filter(|d| d.languages.iter().any(|l| l == "all" || ids.contains(l)))
             .count()
     };
+    // A preset belongs to the languages of the rules it enables.
+    let preset_in = |preset: &str, ids: &[String]| {
+        rule_docs.iter().any(|d| {
+            d.presets.iter().any(|p| p == preset) && d.languages.iter().any(|l| ids.contains(l))
+        })
+    };
     let support = crate::support::render(
         &xtask::repo_root(),
         include_str!("../support.yaml"),
@@ -86,6 +92,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         include_str!("../support.yaml"),
         &support,
         &rule_count,
+        &preset_in,
     )?);
     out.push(splice(
         "README.md",

@@ -204,6 +204,7 @@ sudsy languages remove toml
 | `sudsy rules [term] [--language <lang>]` | List rules, explain one by id, or search. | 2 if nothing matches |
 | `sudsy config print [file]` | Show resolved config and sources. | 0 |
 | `sudsy init [--preset <name>] [--force]` | Write a starter `sudsy.yaml`. | 0 |
+| `sudsy init --agents` | Add a block that says how to run `sudsy check` and `sudsy fix` to `AGENTS.md` (`CLAUDE.md` when only that exists). Never written without the flag; a second run changes nothing. | 0 |
 | `sudsy languages list\|add\|remove\|sync` | Manage language packs. | 2 on failure |
 | `sudsy lsp` | Language server on stdio. | |
 

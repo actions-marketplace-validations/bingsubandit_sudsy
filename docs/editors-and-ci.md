@@ -107,7 +107,11 @@ SARIF is version 2.1.0. It lists results and the rule table. It does not carry f
 
 ## Other output
 
-`--format json` gives `{version, summary, diagnostics}` with byte offsets, line and column ranges and fix edits. Use it in scripts.
+`--format json` gives `{version, summary, diagnostics}` with byte offsets, line and column ranges and fix edits. Use it in scripts. The [site](https://bingsubandit.github.io/sudsy/cli/) documents the shape, and publishes `llms.txt` and a Markdown copy of every page for coding agents.
+
+## Coding agents
+
+`sudsy init --agents` adds a short block to `AGENTS.md` (or to `CLAUDE.md` when only that exists) that tells an agent to run `sudsy check --format json` and `sudsy fix`. It writes nothing without the flag and a second run changes nothing.
 
 ## pre-commit
 

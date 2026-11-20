@@ -5,6 +5,7 @@ import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSy
 import { fileURLToPath } from 'node:url';
 import { base, site, rules } from '../config.mjs';
 import { check, names, pages } from './pages.mjs';
+import { handwritten, twin, write as writeAgentDocs } from './agents.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const out = fileURLToPath(new URL('../src/content/docs/generated/', import.meta.url));
@@ -16,8 +17,10 @@ writeFileSync(pub + 'robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${site}${
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 
-const put = (file, front, body) =>
+const put = (file, front, body) => {
+  twin(front.slug, front, body);
   writeFileSync(out + file, `---\n${Object.entries(front).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('\n')}\n---\n\n${body}\n`);
+};
 // Raw HTML in a description must not open a tag: escape `<` outside code spans; one line for table cells.
 const md = (t) => t.split(/(`[^`]*`)/).map((s, i) => (i % 2 ? s : s.replace(/</g, '&lt;'))).join('').replace(/\s+/g, ' ').trim();
 const cell = (t) => md(String(t)).replace(/\|/g, '\\|');
@@ -151,4 +154,6 @@ put('format-options.md', { title: 'Format options', slug: 'reference/format-opti
           [`\`${n}\``, o.type, fmt(o.default), o.enum ? o.enum.map((c) => `\`${c}\``).join(', ') : o.minimum !== undefined ? `${o.minimum}..${o.maximum ?? ''}` : '', cell(o.description ?? '')]))).join('\n\n'));
 
 check(out, pages({ put, cell, table }));
+handwritten(fileURLToPath(new URL('../src/content/docs/', import.meta.url)));
+writeAgentDocs(pub);
 console.log(`generated ${rules().length} rules, ${stubs.size} upstream stubs, ${presets.length} presets`);

@@ -25,6 +25,7 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/bingsubandit/sudsy' }],
       sidebar: [
         { label: 'Getting started', link: '/getting-started/' },
+        { label: 'Command line', link: '/cli/' },
         { label: 'Rules', link: '/rules/' },
         { label: 'Languages', link: '/languages/' },
         { label: 'Compared tools', link: '/compare/' },

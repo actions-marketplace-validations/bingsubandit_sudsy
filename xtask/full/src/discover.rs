@@ -20,6 +20,7 @@ pub(crate) fn generate(
     support_yaml: &str,
     support: &support::Support,
     rule_count: &dyn Fn(&[String]) -> usize,
+    preset_in: &dyn Fn(&str, &[String]) -> bool,
 ) -> Result<Vec<(PathBuf, String)>> {
     let root = xtask::repo_root();
     let rows = support::rows(support_yaml)?;
@@ -50,7 +51,7 @@ pub(crate) fn generate(
             "format": tool(&row.format, &m.format),
             "lint": tool(&row.lint, &m.lint),
             "rules": rule_count(&row.ids),
-            "presets": presets.iter().filter(|p| row.ids.iter().any(|i| p.starts_with(&format!("{i}/")))).collect::<Vec<_>>(),
+            "presets": presets.iter().filter(|p| row.ids.iter().any(|i| p.starts_with(&format!("{i}/"))) || preset_in(p, &row.ids)).collect::<Vec<_>>(),
             "speed": crate::speed::rows_of(&row.speed)?,
         }));
     }
@@ -83,18 +84,26 @@ pub(crate) fn generate(
         lines(tools)
     );
 
+    // The most-searched terms first: the generic words, the tools a preset reproduces (in the order
+    // of POPULAR), then language names, up to MAX_KEYWORDS.
     let tool_words = reproduced_tools(&rows, &presets);
-    let mut keywords: Vec<String> = ["formatter", "linter", "code-quality", "monorepo"]
+    let mut keywords: Vec<String> = ["formatter", "linter", "code-quality"]
         .map(String::from)
         .into();
+    keywords.extend(
+        POPULAR
+            .iter()
+            .filter(|t| tool_words.iter().any(|w| w == *t))
+            .map(|t| t.to_string()),
+    );
     for row in &rows {
         for part in row.language.split(['/', ',', '(', ')']) {
             keywords.push(part.trim().to_lowercase());
         }
     }
-    keywords.extend(tool_words);
     let mut seen = std::collections::BTreeSet::new();
     keywords.retain(|k| !k.is_empty() && seen.insert(k.clone()));
+    keywords.truncate(MAX_KEYWORDS);
     let meta = json!({
         "description": format!("Formatter and linter for {} languages in one binary and one config file", rows.len()),
         "headline": support.headline,
@@ -117,6 +126,28 @@ pub(crate) fn generate(
     )?);
     Ok(out)
 }
+
+/// npm and PyPI show about this many keywords; more look like spam.
+const MAX_KEYWORDS: usize = 20;
+/// Tools people search for, most searched first. Only those a preset reproduces become keywords.
+const POPULAR: [&str; 16] = [
+    "prettier",
+    "eslint",
+    "ruff",
+    "biome",
+    "stylelint",
+    "shellcheck",
+    "hadolint",
+    "markdownlint",
+    "rubocop",
+    "yamllint",
+    "shfmt",
+    "ktlint",
+    "phpstan",
+    "csharpier",
+    "stylecop",
+    "tflint",
+];
 
 fn catalog_version(tool: &str) -> Result<String> {
     #[derive(serde::Deserialize)]

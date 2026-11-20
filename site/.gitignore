@@ -5,3 +5,9 @@ public/favicon.svg
 public/og.png
 public/robots.txt
 public/rules/
+public/*.md
+public/*.txt
+public/rules.json
+public/languages/
+public/compare/
+public/reference/

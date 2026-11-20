@@ -43,6 +43,8 @@ Built. How it works: [../development/site.md](../development/site.md) (pages, se
 
 ## Phase 2: agents (one agent step)
 
+Built. How it works: [../development/site.md](../development/site.md#agent-docs); `init --agents`: [../config/cli.md](../config/cli.md). Phase 2 also capped the npm and PyPI keywords at 20 and fixed the empty preset list of the Vue/Svelte page. `rules --json` does not exist; `rules.json` on the site serves that purpose.
+
 - `llms.txt` and `llms-full.txt` at the site root, plus a `.md` twin of every page, generated from the same docs.
 - Document the machine-readable CLI output there (`check --format json`, `rules --json`; verify both exist).
 - `sudsy init --agents`, opt-in: add a short "run `sudsy check`; fix with `sudsy fix`" block to the repo's `AGENTS.md` (or `CLAUDE.md`). Never written without the flag.
