@@ -1,7 +1,7 @@
 vscode-languages: [kotlin]
 extensions: [kt, kts]
 formatter: KotlinFormatter
-families: "&[core_rules::format_diff::FAMILY, core_rules::multiline_start::FAMILY]"
+families: "&[core_rules::format_diff::FAMILY, core_rules::multiline_start::FAMILY, core_rules::naming::FAMILY, core_rules::file_name::FAMILY]"
 parse: adapter::parse_file
 limits: {stack: 256, bytes: 16, depth: 2000, run: "!-+@", tagged: ["@", 12]}
 options:
@@ -39,6 +39,7 @@ options:
   - single_line_body_kinds: [["EnumEntry"]]
   - raw_string_calls: [["trimIndent", "trimMargin"]]
   - ctor_own_line_kinds: [["AnnotationEntry"]]
+  - wrapped_body_indent_words: [["constructor"]]
   - comment_trim_lines: [true]
   - comment_reindent_lines: [true]
   - format_rules: [["curly", "redundant-return-type", "comment-space"]]

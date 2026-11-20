@@ -3,6 +3,7 @@ grammar-crate: tree-sitter-proto
 grammar-version: "0.6"
 extensions: [proto]
 formatter: ProtoFormatter
+families: "&[core_rules::file_name::FAMILY]"
 dev-deps: [insta]
 options:
   - indent_size: 2

@@ -31,6 +31,7 @@ pub mod escapes;
 pub mod expr;
 pub mod extension;
 pub mod family;
+pub mod file_name;
 pub mod fixes;
 pub mod flow_rules;
 pub mod format_diff;

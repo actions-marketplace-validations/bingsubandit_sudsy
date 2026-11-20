@@ -95,12 +95,12 @@ node KtFile #scope
 node Class #expression #item #declaration #type-declaration #scope =
     ModifierList? Keyword* name:Identifier? TypeParameterList? PrimaryConstructor? Colon? SuperTypeList? Keyword? TypeConstraintList? members:ClassBody?
 node Fun #expression #item #declaration #function #scope =
-    ModifierList? Keyword TypeParameterList? TypeReference? Dot? TypeParameterList? name:Identifier? TypeParameterList? parameters:ValueParameterList Colon? TypeReference? Keyword? TypeConstraintList? Keyword? ContractEffectList? Keyword? TypeConstraintList? body:Block? Eq? expression_body:#expression?
-node Property #item #declaration =
+    ModifierList? Keyword TypeParameterList? TypeReference? Dot? TypeParameterList? name:Identifier? TypeParameterList? parameters:ValueParameterList Colon? returns:TypeReference? Keyword? TypeConstraintList? Keyword? ContractEffectList? Keyword? TypeConstraintList? body:Block? Eq? expression_body:#expression?
+node Property #item #declaration #property =
     ModifierList? Keyword TypeParameterList? TypeReference? Dot? name:Identifier? Colon? TypeReference? Keyword? TypeConstraintList? Eq? #expression? PropertyDelegate? BackingField? PropertyAccessor*
 node DestructuringDeclaration #item #opaque
 node DestructuringDeclarationEntry #opaque
-node ObjectDeclaration #item #declaration #type-declaration #scope =
+node ObjectDeclaration #item #declaration #type-declaration #object #scope =
     ModifierList? Keyword* name:Identifier? TypeParameterList? PrimaryConstructor? Colon? SuperTypeList? members:ClassBody?
 node Typealias #item #declaration =
     ModifierList? Keyword name:Identifier TypeParameterList? Eq TypeReference

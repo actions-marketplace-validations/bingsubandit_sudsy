@@ -1,8 +1,9 @@
 //! Declaration rows: which declarations a rule of a family looks at. A row is a grammar tag,
-//! optionally `<parent-tag` (the parent has that tag: the node with the modifiers), then `&word`
-//! for each modifier keyword the declaration (the parent, with a parent tag) must have and
-//! `&@name` for each annotation it must carry (`*` matches any run of characters, so `&@*Test`
-//! is `@Test` and `@ParameterizedTest`), then `=path` (a [`SlotPath`] to the name; the node's
+//! optionally `<parent-tag` (the parent has that tag: the node with the modifiers; `<a<b`: the
+//! parent has tag `a` and the grandparent `b`), then `&word` for each modifier keyword the
+//! declaration (the parent, with a parent tag) must have, `&@name` for each annotation it must
+//! carry (`*` matches any run of characters, so `&@*Test` is `@Test` and `@ParameterizedTest`)
+//! and `&+slot` for a slot (a field of the grammar) the declaration must have, then `=path` (a [`SlotPath`] to the name; the node's
 //! `name` slot, or its `key` slot, by default). Rows are `|`-separated.
 //!
 //! concept: declaration-rows
@@ -16,9 +17,11 @@ use core_syntax::{Grammar, SyntaxNode};
 pub struct Row {
     pub option: String,
     pub tag: String,
-    pub parent: Option<String>,
+    /// Tags of the parent, the grandparent and so on.
+    pub parents: Vec<String>,
     pub modifiers: Vec<String>,
     pub annotations: Vec<String>,
+    pub slots: Vec<String>,
     pub path: Option<SlotPath>,
 }
 
@@ -30,41 +33,50 @@ impl Row {
         };
         let mut parts = alt.split('&');
         let head = parts.next().unwrap_or_default();
-        let (tag, parent) = match head.split_once('<') {
-            Some((t, par)) => (t, Some(par.to_string())),
-            None => (head, None),
-        };
-        let (annotations, modifiers): (Vec<&str>, Vec<&str>) =
-            parts.partition(|p| p.starts_with('@'));
+        let mut chain = head.split('<');
+        let tag = chain.next().unwrap_or_default();
+        let parents: Vec<String> = chain.map(str::to_string).collect();
+        let (annotations, rest): (Vec<&str>, Vec<&str>) = parts.partition(|p| p.starts_with('@'));
+        let (slots, modifiers): (Vec<&str>, Vec<&str>) =
+            rest.into_iter().partition(|p| p.starts_with('+'));
         Ok(Row {
             option: option.to_string(),
             tag: tag.to_string(),
-            parent,
+            parents,
             modifiers: modifiers.into_iter().map(str::to_string).collect(),
             annotations: annotations
                 .into_iter()
                 .map(|a| a[1..].to_string())
                 .collect(),
+            slots: slots.into_iter().map(|s| s[1..].to_string()).collect(),
             path,
         })
     }
 
-    /// How specific the row is: rows with more conditions are tried first.
+    /// How specific the row is: rows with more conditions are tried first (a modifier or annotation
+    /// counts twice: a `const` declaration is more specific than one inside an object).
     pub fn conditions(&self) -> usize {
-        usize::from(self.parent.is_some()) + self.modifiers.len() + self.annotations.len()
+        self.parents.len() + 2 * (self.modifiers.len() + self.annotations.len()) + self.slots.len()
     }
 
     pub fn matches(&self, g: &Grammar, node: &SyntaxNode) -> bool {
         if !g.has_tag(node.kind(), &self.tag) {
             return false;
         }
-        let holder = match &self.parent {
-            Some(tag) => match node.parent().filter(|p| g.has_tag(p.kind(), tag)) {
-                Some(p) => p,
-                None => return false,
-            },
-            None => node.clone(),
-        };
+        let mut cursor = node.clone();
+        let mut holder = node.clone();
+        for (i, tag) in self.parents.iter().enumerate() {
+            let Some(up) = cursor.parent().filter(|p| g.has_tag(p.kind(), tag)) else {
+                return false;
+            };
+            if i == 0 {
+                holder = up.clone();
+            }
+            cursor = up;
+        }
+        if !self.slots.iter().all(|s| g.slot(node, s).is_some()) {
+            return false;
+        }
         self.modifiers.iter().all(|m| has_modifier(g, &holder, m))
             && self
                 .annotations

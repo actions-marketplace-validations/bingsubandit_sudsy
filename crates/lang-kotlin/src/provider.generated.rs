@@ -6,7 +6,7 @@ core_syntax::include_generated!();
 
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {
-    ParserProvider::new(ParserSpec { crate_name: env!("CARGO_PKG_NAME"), grammar: grammars::KOTLIN, extensions: &["kt", "kts"], file_names: &[], schema: option_schema(), formatter: &KotlinFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[core_rules::format_diff::FAMILY, core_rules::multiline_start::FAMILY] }, adapter::parse_file)
+    ParserProvider::new(ParserSpec { crate_name: env!("CARGO_PKG_NAME"), grammar: grammars::KOTLIN, extensions: &["kt", "kts"], file_names: &[], schema: option_schema(), formatter: &KotlinFormatter, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[core_rules::format_diff::FAMILY, core_rules::multiline_start::FAMILY, core_rules::naming::FAMILY, core_rules::file_name::FAMILY] }, adapter::parse_file)
 }
 
 pub const LIMITS: core_syntax::scan::Limits = core_syntax::scan::Limits::new(256, 16, 2000, "!-+@", Some((b'@', 12)));

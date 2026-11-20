@@ -1,0 +1,57 @@
+id: property-naming
+family: naming-convention
+params:
+  match: regex
+  constants: property&const
+  overridden: property&override
+  singleton_members: property<block<object
+  top_level: property<scope
+  members: property
+  message: "property name `{name}` must match `{convention}`"
+description: >-
+  A property whose name does not match the expression set for its kind (ktlint property-naming):
+  a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as
+  constants; a backing property may start with `_`; an `override` is left alone.
+example: 'val My_value = 1'
+severity: off
+category: style
+options:
+  - { name: constants, type: regex, default: '^(?:[A-Z][A-Z0-9_]*|serialVersionUID)$', description: "Regular expression the name of a `const val` must match; empty: not checked." }
+  - { name: overridden, type: regex, default: '.*', description: "Regular expression the name of an `override` property must match." }
+  - { name: singleton_members, type: regex, default: '^(?:[a-z][A-Za-z0-9]*|[A-Z][A-Za-z0-9_]*|_[A-Za-z0-9_]*|`.*)$', description: "Regular expression the name of a property of an object must match." }
+  - { name: top_level, type: regex, default: '^(?:[a-z][A-Za-z0-9]*|[A-Z][A-Za-z0-9_]*|_[A-Za-z0-9_]*|`.*)$', description: "Regular expression the name of a top-level property must match." }
+  - { name: members, type: regex, default: '^(?:[a-z][A-Za-z0-9]*|_[A-Za-z0-9_]*|`.*)$', description: "Regular expression the name of any other property (a member of a class, a local) must match." }
+---
+id: function-naming
+family: naming-convention
+params:
+  match: regex
+  composables: function&@Composable
+  overridden: function&override
+  factories: function&+returns
+  functions: function
+  message: "function name `{name}` must match `{convention}`"
+description: >-
+  A function whose name does not match the expression set for its kind (ktlint function-naming):
+  camel case; a function with a declared return type may also be a factory named in Pascal case;
+  an `override` and a `@Composable` function are left alone.
+example: 'fun My_function() {}'
+severity: off
+category: style
+options:
+  - { name: composables, type: regex, default: '.*', description: "Regular expression the name of a `@Composable` function must match." }
+  - { name: overridden, type: regex, default: '.*', description: "Regular expression the name of an `override` function must match." }
+  - { name: factories, type: regex, default: '^(?:[A-Za-z][A-Za-z0-9]*|`.*)$', description: "Regular expression the name of a function with a declared return type must match." }
+  - { name: functions, type: regex, default: '^(?:[a-z][A-Za-z0-9]*|`.*)$', description: "Regular expression the name of any other function must match." }
+---
+id: filename
+family: file-name
+params: { option: pattern, files: '\.kt$', until: ".", message: "the file name {name} should be in PascalCase" }
+description: >-
+  A `.kt` file whose name, up to its first dot, is not in PascalCase (ktlint filename; the
+  check that a file with a single class is named after it is not made).
+example: 'path: my-file.kt'
+severity: off
+category: style
+options:
+  - { name: pattern, type: regex, default: '^[A-Z][A-Za-z0-9]*$', description: "Regular expression the file name up to its first dot must match; empty: not checked." }

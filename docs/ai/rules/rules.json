@@ -13066,6 +13066,45 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A declaration with a blank line the formatter would add or remove before it, among declarations with comments or annotations too (ktlint spacing-between-declarations-with-comments, spacing-between-declarations-with-annotations).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "val a = 1\n// about b\nval b = 2\n\n@Deprecated(\"x\")\nfun c() {}\n\nfun d(x: Int,\n      y: Int) {\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 1,
+            "length": 1,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "blank-line-between-declarations",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "spacing-between-declarations-with-annotations",
+          "partial": false,
+          "tool": "ktlint"
+        },
+        {
+          "id": "spacing-between-declarations-with-comments",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A `when` entry with a blank line the formatter would add or remove before it (ktlint blank-line-between-when-conditions).",
       "example": {
         "config": null,
@@ -13251,6 +13290,47 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A `.kt` file whose name, up to its first dot, is not in PascalCase (ktlint filename; the check that a file with a single class is named after it is not made).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 1,
+            "length": 1,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "filename",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [
+        {
+          "default": "^[A-Z][A-Za-z0-9]*$",
+          "description": "Regular expression the file name up to its first dot must match; empty: not checked.",
+          "name": "pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "filename",
+          "partial": true,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A function whose body the formatter would write differently (ktlint function-expression-body).",
       "example": {
         "config": null,
@@ -13283,6 +13363,70 @@
         {
           "id": "function-expression-body",
           "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A function whose name does not match the expression set for its kind (ktlint function-naming): camel case; a function with a declared return type may also be a factory named in Pascal case; an `override` and a `@Composable` function are left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "const val maxCount = 1\nconst val MAX_COUNT = 1\nconst val serialVersionUID = 1L\nval Default = 1\nval a_b = 1\nvar Global = 1\n\nclass A {\n    val MAX = 1\n    val ok = 1\n    val _backing = 1\n    val trailing_ = 1\n    fun My_fun() {}\n    fun Factory(): A = A()\n    fun my_fun2(): Int = 1\n    fun `a test name`() {}\n    override fun other_name() {}\n}\n\nobject B {\n    val LIMIT = 1\n    val Mixed = 1\n}\n\nfun local() {\n    val LOCAL = 1\n}\n\n@Composable\nfun Screen() {}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 9,
+            "length": 6,
+            "line": 13
+          },
+          {
+            "column": 9,
+            "length": 7,
+            "line": 15
+          }
+        ]
+      },
+      "fix": null,
+      "id": "function-naming",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [
+        {
+          "default": ".*",
+          "description": "Regular expression the name of a `@Composable` function must match.",
+          "name": "composables",
+          "type": "string"
+        },
+        {
+          "default": ".*",
+          "description": "Regular expression the name of an `override` function must match.",
+          "name": "overridden",
+          "type": "string"
+        },
+        {
+          "default": "^(?:[A-Za-z][A-Za-z0-9]*|`.*)$",
+          "description": "Regular expression the name of a function with a declared return type must match.",
+          "name": "factories",
+          "type": "string"
+        },
+        {
+          "default": "^(?:[a-z][A-Za-z0-9]*|`.*)$",
+          "description": "Regular expression the name of any other function must match.",
+          "name": "functions",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "function-naming",
+          "partial": true,
           "tool": "ktlint"
         }
       ]
@@ -13442,7 +13586,51 @@
       ],
       "upstream": [
         {
+          "id": "if-else-wrapping",
+          "partial": false,
+          "tool": "ktlint"
+        },
+        {
           "id": "multiline-if-else",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A bracket, comma or arrow where the formatter would break the line, or add a trailing comma (ktlint wrapping).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "val a = 1\n// about b\nval b = 2\n\n@Deprecated(\"x\")\nfun c() {}\n\nfun d(x: Int,\n      y: Int) {\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 7,
+            "length": 1,
+            "line": 8
+          },
+          {
+            "column": 12,
+            "length": 1,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "newline-wrapping",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "wrapping",
           "partial": false,
           "tool": "ktlint"
         }
@@ -13639,6 +13827,91 @@
         {
           "id": "parameter-list-wrapping",
           "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A property whose name does not match the expression set for its kind (ktlint property-naming): a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as constants; a backing property may start with `_`; an `override` is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "const val maxCount = 1\nconst val MAX_COUNT = 1\nconst val serialVersionUID = 1L\nval Default = 1\nval a_b = 1\nvar Global = 1\n\nclass A {\n    val MAX = 1\n    val ok = 1\n    val _backing = 1\n    val trailing_ = 1\n    fun My_fun() {}\n    fun Factory(): A = A()\n    fun my_fun2(): Int = 1\n    fun `a test name`() {}\n    override fun other_name() {}\n}\n\nobject B {\n    val LIMIT = 1\n    val Mixed = 1\n}\n\nfun local() {\n    val LOCAL = 1\n}\n\n@Composable\nfun Screen() {}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 11,
+            "length": 8,
+            "line": 1
+          },
+          {
+            "column": 5,
+            "length": 3,
+            "line": 5
+          },
+          {
+            "column": 9,
+            "length": 3,
+            "line": 9
+          },
+          {
+            "column": 9,
+            "length": 9,
+            "line": 12
+          },
+          {
+            "column": 9,
+            "length": 5,
+            "line": 26
+          }
+        ]
+      },
+      "fix": null,
+      "id": "property-naming",
+      "languages": [
+        "kotlin"
+      ],
+      "options": [
+        {
+          "default": "^(?:[A-Z][A-Z0-9_]*|serialVersionUID)$",
+          "description": "Regular expression the name of a `const val` must match; empty: not checked.",
+          "name": "constants",
+          "type": "string"
+        },
+        {
+          "default": ".*",
+          "description": "Regular expression the name of an `override` property must match.",
+          "name": "overridden",
+          "type": "string"
+        },
+        {
+          "default": "^(?:[a-z][A-Za-z0-9]*|[A-Z][A-Za-z0-9_]*|_[A-Za-z0-9_]*|`.*)$",
+          "description": "Regular expression the name of a property of an object must match.",
+          "name": "singleton_members",
+          "type": "string"
+        },
+        {
+          "default": "^(?:[a-z][A-Za-z0-9]*|[A-Z][A-Za-z0-9_]*|_[A-Za-z0-9_]*|`.*)$",
+          "description": "Regular expression the name of a top-level property must match.",
+          "name": "top_level",
+          "type": "string"
+        },
+        {
+          "default": "^(?:[a-z][A-Za-z0-9]*|_[A-Za-z0-9_]*|`.*)$",
+          "description": "Regular expression the name of any other property (a member of a class, a local) must match.",
+          "name": "members",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "property-naming",
+          "partial": true,
           "tool": "ktlint"
         }
       ]
@@ -15534,7 +15807,14 @@
       "languages": [
         "protobuf"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": "^[a-z0-9]+(?:_[a-z0-9]+)*$",
+          "description": "Regular expression the file name without its extension must match; empty: not checked.",
+          "name": "pattern",
+          "type": "string"
+        }
+      ],
       "presets": [
         "protobuf/buf-standard"
       ],
