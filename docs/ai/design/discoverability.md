@@ -52,10 +52,31 @@ Built. How it works: [../development/site.md](../development/site.md#agent-docs)
 
 ## Phase 3: integrations (one agent step, plus user actions)
 
-- GitHub Action (`action.yml`: install, `sudsy check --format github`). The GitHub Marketplace listing is a user action.
+Built. How it works: [../development/ci-release.md](../development/ci-release.md#integrations). The Open VSX job is `openvsx` in `release.yml`; it was never run.
+
+- GitHub Action: `action.yml`, tested by the CI job `action`.
 - `.pre-commit-hooks.yaml`.
-- An Open VSX publish job next to the Marketplace job.
-- A SchemaStore pull request for `sudsy.yaml` (user action: a PR to another project).
+- Open VSX publish job next to the Marketplace job.
+
+### User actions
+
+None of these is done by an agent.
+
+1. **VS Code Marketplace:** create the publisher `sudsy` (marketplace.visualstudio.com/manage), make an Azure DevOps PAT with scope Marketplace (Manage), save it as repo secret `VSCE_PAT`. After a release is drafted, start `release.yml` on its tag with `publish_marketplace` ticked.
+2. **Open VSX:** log in at open-vsx.org with GitHub, sign the Eclipse publisher agreement, create the namespace `sudsy` (`npx ovsx create-namespace sudsy -p <token>`), make an access token, save it as repo secret `OVSX_PAT`. Then start `release.yml` on the tag with `publish_openvsx` ticked.
+3. **GitHub Marketplace listing for the Action:** after the first release tag, draft a release from the repo's Releases page with "Publish this Action to the GitHub Marketplace" ticked (needs the repo to be public, `action.yml` at the root, and a unique action name; `Sudsy` may need to change if taken). Also push a moving tag `v0` to the release commit for `uses: bingsubandit/sudsy@v0`.
+4. **SchemaStore:** pull request to `SchemaStore/schemastore`. Add this entry to `src/api/json/catalog.json` (the `schemas` array, kept in alphabetical order by name), and run their `npm run build`/test as their contributing guide says. The schema is referenced by URL, so no file is added to their repo:
+
+```json
+{
+  "name": "Sudsy",
+  "description": "Sudsy formatter and linter configuration",
+  "fileMatch": ["sudsy.yaml", "sudsy.yml"],
+  "url": "https://raw.githubusercontent.com/bingsubandit/sudsy/main/schemas/sudsy.schema.json"
+}
+```
+
+   The schema must be draft-07 (it is) and every URL must stay reachable. Once a release exists, a tag URL (`.../v0.1.0/schemas/sudsy.schema.json`) is more stable than `main`; SchemaStore accepts either.
 
 ## Phase 4: outreach (user, timed)
 

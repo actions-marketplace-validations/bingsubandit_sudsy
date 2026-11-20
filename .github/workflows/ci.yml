@@ -220,11 +220,40 @@ jobs:
           node-version: 24
       - run: scripts/package-dry-run.sh
 
+  # The composite action (action.yml) from the local path, with a debug build of this commit instead
+  # of a release download (`version: local`): passes on a formatted file, fails on an unformatted one.
+  action:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo build -p cli
+      - run: echo "$GITHUB_WORKSPACE/target/debug" >> "$GITHUB_PATH"
+      - uses: ./
+        with:
+          version: local
+          working-directory: tests/fixtures/action
+          args: ok.json
+      - run: printf '{"a":1}' > tests/fixtures/action/bad.json
+      - id: bad
+        uses: ./
+        continue-on-error: true
+        with:
+          version: local
+          working-directory: tests/fixtures/action
+          args: bad.json
+      - run: test "${{ steps.bad.outcome }}" = failure
+
   # The one required check: green when every job that ran passed (skipped jobs are fine).
   ci:
     name: CI ok
     if: always()
-    needs: [changes, dco, cost, rust, windows, bench, dotnet, vscode, package, packages]
+    needs: [changes, dco, cost, rust, windows, bench, dotnet, vscode, package, packages, action]
     runs-on: ubuntu-latest
     steps:
       - run: test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = false

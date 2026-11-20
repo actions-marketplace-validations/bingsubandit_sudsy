@@ -1,0 +1,32 @@
+name: Sudsy
+description: Check formatting and lint with Sudsy and annotate the findings in the pull request.
+author: bingsubandit
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  version:
+    description: "sudsy release to install from npm (`latest`, `0.1.0`), or `local` to use the sudsy already on PATH."
+    default: latest
+  args:
+    description: Arguments after `sudsy check --format github`, for example paths or `--config sudsy.yaml`.
+    default: ""
+  working-directory:
+    description: Directory to run in.
+    default: .
+runs:
+  using: composite
+  steps:
+    - name: Install sudsy
+      if: inputs.version != 'local'
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: npm install --global "@sudsylint/sudsy@$VERSION"
+    - name: sudsy check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        ARGS: ${{ inputs.args }}
+      # ARGS is split on whitespace on purpose: it is the caller's own argument list.
+      run: sudsy check --format github $ARGS

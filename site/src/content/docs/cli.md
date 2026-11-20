@@ -51,3 +51,24 @@ An agent's loop: run `sudsy check --format json`, read `diagnostics`, run `sudsy
 ## For coding agents
 
 `sudsy init --agents` adds a short block to `AGENTS.md` (to `CLAUDE.md` when only that file exists) that tells an agent to run `sudsy check` and `sudsy fix`. It writes nothing without the flag, and running it again leaves the file as it is. This site publishes [`llms.txt`](/sudsy/llms.txt), [`llms-full.txt`](/sudsy/llms-full.txt) and a Markdown copy of every page (add `.md` to the page path).
+
+## In CI and pre-commit
+
+The GitHub Action runs `sudsy check --format github`:
+
+```yaml
+- uses: bingsubandit/sudsy@v0
+  with:
+    version: latest   # or a release; `local` uses the sudsy on PATH
+    args: src         # optional
+```
+
+pre-commit hooks `sudsy-check` and `sudsy-fix` (`language: system`, so `sudsy` must be on PATH):
+
+```yaml
+repos:
+  - repo: https://github.com/bingsubandit/sudsy
+    rev: v0.1.0
+    hooks:
+      - id: sudsy-check
+```

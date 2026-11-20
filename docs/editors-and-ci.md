@@ -73,6 +73,17 @@ jobs:
       - run: npx @sudsylint/sudsy check --format github
 ```
 
+Or use the action of this repository (composite, installs `@sudsylint/sudsy` from npm, which the runner's Node provides):
+
+```yaml
+      - uses: actions/checkout@v4
+      - uses: bingsubandit/sudsy@v0
+        with:
+          version: latest        # or a release such as 0.1.0; `local` uses the sudsy already on PATH
+          args: src              # optional, after `sudsy check --format github`
+          working-directory: .   # optional
+```
+
 `--format github` prints one annotation per finding. The step fails on any error or unformatted file. If the repo has C# files, add `actions/setup-dotnet` with `dotnet-version: 10.0.x`.
 
 ### Language packs in CI
@@ -115,18 +126,13 @@ SARIF is version 2.1.0. It lists results and the rule table. It does not carry f
 
 ## pre-commit
 
-Not documented. No pre-commit hook definition exists in the repository. Call `sudsy` from a local hook yourself:
+The repository provides the hooks `sudsy-check` (`sudsy check`) and `sudsy-fix` (`sudsy fix`). They use `language: system`, so `sudsy` must be on PATH (`npm i -g @sudsylint/sudsy`, `pip install sudsy`, brew, scoop):
 
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: local
+  - repo: https://github.com/bingsubandit/sudsy
+    rev: v0.1.0   # a release tag
     hooks:
-      - id: sudsy
-        name: sudsy
-        entry: sudsy check
-        language: system
-        pass_filenames: true
+      - id: sudsy-check
 ```
-
-This example is not tested.

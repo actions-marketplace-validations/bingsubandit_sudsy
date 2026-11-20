@@ -1,0 +1,15 @@
+# Both hooks run the `sudsy` on PATH (npm i -g @sudsylint/sudsy, pip install sudsy, brew, scoop, ...).
+- id: sudsy-check
+  name: sudsy check
+  description: Check formatting and lint with Sudsy.
+  entry: sudsy check
+  language: system
+  pass_filenames: true
+  require_serial: true
+- id: sudsy-fix
+  name: sudsy fix
+  description: Apply Sudsy fixes, then format.
+  entry: sudsy fix
+  language: system
+  pass_filenames: true
+  require_serial: true
