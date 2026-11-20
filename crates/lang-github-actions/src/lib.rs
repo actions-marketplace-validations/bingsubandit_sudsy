@@ -7,6 +7,7 @@
 mod expression;
 mod jobs;
 mod scripts;
+mod shape;
 mod view;
 
 use core_config::OptionSchema;
@@ -29,6 +30,9 @@ static RULES: &[&dyn Rule] = &[
     &expression::InvalidExpression,
     &scripts::DeprecatedCommands,
     &scripts::ScriptInjection,
+    &shape::WorkflowSyntax,
+    &shape::InvalidEvent,
+    &shape::InvalidPermissions,
 ];
 
 pub struct GithubActionsProvider {

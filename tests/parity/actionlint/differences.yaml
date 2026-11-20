@@ -15,21 +15,30 @@ files:
   corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml actionlint:unknown-needs 8: needs-location
   corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml sudsy:unknown-needs 9: needs-location
   invalid-runs-on/cases actionlint:invalid-runs-on 7: self-hosted-labels
-coverage: 5.1  # share of the default-set findings of actionlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage actionlint; at least 85% is the bar)
-target: 5.1
+coverage: 34.1  # share of the default-set findings of actionlint on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage actionlint; at least 85% is the bar)
+target: 34.1
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
-  syntax-check: 235
-  expression/types: 155
-  events: 115
-  action: 41
+  syntax-check: 107
+  expression/types: 97
+  expression/context: 58
+  action/outdated-runner: 29
+  syntax-check/yaml: 25
   glob: 22
   if-cond: 21
+  events/inputs: 20
   matrix: 19
-  permissions: 19
   syntax-check/duplicate-key: 16
+  action: 12
   credentials: 6
+  events/schedule: 6
   runner-label/conflict: 6
   workflow-call: 6
-  runner-label/unknown: 5
-  expression/untrusted: 4
-  id/step: 4
+fixes:  # lint rule -> where and what to change
+  syntax-check: "rows in crates/lang-github-actions/src/shape.rs (core_rules::shape): missing messages are one-off sections (snapshot, environment string forms), typed defaults, anchors"
+  expression/types: "no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)"
+  expression/context: "which contexts a key allows: a table per key path read by the same expression checker"
+  action/outdated-runner: "a table of popular actions whose major version runs on a retired runner (data read by shared Rust)"
+  syntax-check/yaml: "anchors and aliases: unused anchor, recursive alias, merge key; a YAML-level check, shared with other YAML dialects"
+  glob: "filter patterns of branches, tags and paths: a glob syntax check in a shared crate"
+  if-cond: "an `if:` that is always true: needs the expression parser"
+  events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"

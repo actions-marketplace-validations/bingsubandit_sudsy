@@ -10,7 +10,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 1 | C / C++ | 16.2% (statements and blocks landed, vs clang-format 20.1.8: 1,075 of 6,639 files, LLVM 230/420, folly 395/2,299, Linux 352/2,872, range-v3 70/593, fmt 24/70, SQLite 4/325, presets 0/10 each) | none (no clang-tidy catalog) | no layout yet: formatter on shared shapes in progress ([design/cpp-formatter.md](design/cpp-formatter.md)); no lint rules |
 | 2 | JSON | ? (fixtures only, no real-world corpus) | ? (eslint-plugin-jsonc; corpus is JSONTestSuite) | no real-world corpus; no coverage run |
 | 3 | XML | ? (CSharpier XML, 372 project files, count not recorded) | none | no corpus count; no reference linter |
-| 4 | GitHub Actions | none (YAML formatter, no reference) | 5.4% (actionlint, `github-actions/actionlint`) | `syntax-check` 235, `expression/types` 155, `events` 115 findings |
+| 4 | GitHub Actions | none (YAML formatter, no reference) | 34.1% (actionlint, `github-actions/actionlint`) | `syntax-check` 107, `expression/types` 97, `expression/context` 58 findings |
 | 5 | Dockerfile | none (no reference) | 27.6% (hadolint, `dockerfile/hadolint`) | `DL4006` 153, `DL3003` 64, `DL3008` 54 |
 | 6 | C# | 72.1% of 7,615 (CSharpier 1.3.0; not re-run, corpus absent on the host) | ? (StyleCop; corpus does not compile) | lists differing by a comma, `#if` comments (252 files), wrapped arguments and chains (299) |
 | 7 | Makefile | none (no reference) | 73.5% (checkmake, `makefile/checkmake`) | `uniquetargets` 88, `phonydeclared` 59 |
@@ -86,7 +86,7 @@ Committed work too small for a step of its own: what to do and where, one line e
 - Shell: rules (shellcheck subset); respacing the operators inside `(( ))` and `$(( ))` like shfmt ([formatting/shell.md](formatting/shell.md)).
 - PowerShell: rules (PSScriptAnalyzer subset) ([formatting/powershell.md](formatting/powershell.md)).
 - Makefile: shell code in `$(shell ...)` and `define` bodies; rules beyond checkmake's five.
-- GitHub Actions: the actionlint checks not built ([parity/actionlint.yaml](parity/actionlint.yaml): types of expressions, events, globs, matrix, permission scopes, action metadata); a matcher for `.github/workflows` as a path, not a folder name ([formatting/github-actions.md](formatting/github-actions.md)).
+- GitHub Actions: the actionlint checks not built ([parity/actionlint.yaml](parity/actionlint.yaml): types of expressions, globs, matrix, typed input defaults, anchors, action metadata); a matcher for `.github/workflows` as a path, not a folder name ([formatting/github-actions.md](formatting/github-actions.md)).
 - Protobuf: the cross-file buf lint rules ([parity/buf.yaml](parity/buf.yaml)); the remaining `buf format` differences ([formatting/protobuf.md](formatting/protobuf.md)).
 - GraphQL: the graphql-eslint rules that need no schema and are not built (`docs/ai/parity/graphql-eslint.yaml`), schema-aware rules.
 - HCL: the tflint rules that need the other files of the module or the providers, `terraform_deprecated_lookup` and the module source rules ([parity/tflint.yaml](parity/tflint.yaml)); the rewrites `terraform fmt` does besides layout (quoted block labels, quoted `variable` types), which would be rules ([formatting/hcl.md](formatting/hcl.md)); `sudsy-ignore` in HCL.

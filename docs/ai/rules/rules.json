@@ -22073,6 +22073,70 @@
     },
     {
       "category": "correctness",
+      "default_level": "off",
+      "description": "An event name, activity type, filter or schedule that the `on` section cannot have.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\njobs: {}\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 3,
+            "length": 5,
+            "line": 2
+          },
+          {
+            "column": 5,
+            "length": 15,
+            "line": 5
+          },
+          {
+            "column": 21,
+            "length": 7,
+            "line": 7
+          },
+          {
+            "column": 13,
+            "length": 9,
+            "line": 9
+          },
+          {
+            "column": 13,
+            "length": 11,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "invalid-event",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "events",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "events/schedule",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "events/filters",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
       "default_level": "error",
       "description": "A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quote), or names a context or function that does not exist.",
       "example": {
@@ -22170,6 +22234,50 @@
         {
           "id": "id/job",
           "partial": false,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A permission scope or value that GitHub does not have.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on: push\npermissions:\n  content: read\n  id-token: read\n  contents: write\njobs:\n  a:\n    runs-on: ubuntu-latest\n    permissions: read\n    steps:\n      - run: echo\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 3,
+            "length": 7,
+            "line": 3
+          },
+          {
+            "column": 13,
+            "length": 4,
+            "line": 4
+          },
+          {
+            "column": 18,
+            "length": 4,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "invalid-permissions",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "permissions",
+          "partial": true,
           "tool": "actionlint"
         }
       ]
@@ -22772,6 +22880,85 @@
         {
           "id": "job-needs/unknown",
           "partial": false,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A key a section does not have, a required key or section that is missing, a section of the wrong kind, or an empty one.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on: push\nenv:\n  A: 1\n  a: 2\njobs:\n  build:\n    runs-on: ubuntu-latest\n    stepz: []\n    steps:\n      - run: echo hi\n        uses: actions/checkout@v4\n      - name: nothing\n      - uses: actions/checkout@v4\n        timeout-minutes: 0\n    container:\n      image: ''\n  empty:\n    steps:\n      -\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 3,
+            "length": 1,
+            "line": 4
+          },
+          {
+            "column": 5,
+            "length": 5,
+            "line": 8
+          },
+          {
+            "column": 9,
+            "length": 3,
+            "line": 10
+          },
+          {
+            "column": 9,
+            "length": 13,
+            "line": 12
+          },
+          {
+            "column": 26,
+            "length": 1,
+            "line": 14
+          },
+          {
+            "column": 14,
+            "length": 2,
+            "line": 16
+          },
+          {
+            "column": 3,
+            "length": 5,
+            "line": 17
+          },
+          {
+            "column": 7,
+            "length": 1,
+            "line": 19
+          },
+          {
+            "column": 7,
+            "length": 1,
+            "line": 19
+          }
+        ]
+      },
+      "fix": null,
+      "id": "workflow-syntax",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "syntax-check",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
+          "id": "syntax-check/duplicate-key",
+          "partial": true,
           "tool": "actionlint"
         }
       ]

@@ -337,7 +337,19 @@ def actionlint_check(d):
             return "expression/untrusted"
         if re.match(r"got unexpected|unexpected end|undefined (variable|function)|expected|.*while (lexing|parsing)", message):
             return "expression/syntax"
+        if re.match(r"context .* is not allowed here|calling function .* is not allowed here|.* is only available in", message):
+            return "expression/context"
         return "expression/types"
+    if kind == "events":
+        if re.search(r"CRON|timezone|too frequently", message):
+            return "events/schedule"
+        if "filters cannot be used" in message:
+            return "events/filters"
+        if re.search(r"input|default value", message):
+            return "events/inputs"
+        return "events"
+    if kind == "action" and "runner of" in message:
+        return "action/outdated-runner"
     if kind == "id":
         return "id/duplicate" if "duplicate" in message else "id/job" if "job ID" in message else "id/step"
     if kind == "job-needs":
@@ -346,6 +358,8 @@ def actionlint_check(d):
         return "runner-label/unknown" if "unknown" in message else "runner-label/conflict"
     if kind == "syntax-check" and "is duplicated" in message:
         return "syntax-check/duplicate-job" if 'in "jobs" section' in message else "syntax-check/duplicate-key"
+    if kind == "syntax-check" and re.search(r"anchor|alias|merge key|could not parse", message):
+        return "syntax-check/yaml"
     return kind
 
 

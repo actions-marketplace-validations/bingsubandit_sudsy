@@ -6,7 +6,10 @@ github-actions:
       deprecated-commands: warn
       duplicate-ids: warn
       invalid-expression: warn
+      invalid-event: warn
       invalid-job-id: warn
+      invalid-permissions: warn
       invalid-runs-on: warn
       script-injection: warn
       unknown-needs: warn
+      workflow-syntax: warn

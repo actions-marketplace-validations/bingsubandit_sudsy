@@ -1,0 +1,28 @@
+on: push
+env:
+  A: 1
+  a: 2
+# ^ workflow-syntax
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    stepz: []
+#   ^^^^^ workflow-syntax
+    steps:
+      - run: echo hi
+#       ^^^ workflow-syntax
+        uses: actions/checkout@v4
+      - name: nothing
+#       ^^^^^^^^^^^^^ workflow-syntax
+      - uses: actions/checkout@v4
+        timeout-minutes: 0
+#                        ^ workflow-syntax
+    container:
+      image: ''
+#            ^^ workflow-syntax
+  empty:
+# ^^^^^ workflow-syntax
+    steps:
+      -
+#     ^ workflow-syntax
+#     ^ workflow-syntax

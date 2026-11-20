@@ -48,6 +48,7 @@ pub mod regex_source;
 pub mod rule;
 pub mod scope_rules;
 mod sections;
+pub mod shape;
 pub mod shared;
 pub mod simplify;
 pub mod slot_path;

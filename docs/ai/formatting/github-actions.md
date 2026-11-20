@@ -21,9 +21,12 @@ The `run:` of every step of a workflow's jobs and of a composite action is code 
 | `duplicate-ids` | Job ids that differ only in case, repeated step ids of a job. |
 | `unknown-needs`, `cyclic-needs` | `needs` of an unknown job; one report at the first job of each cycle. |
 | `invalid-runs-on` | A label not matched by the `labels` option (regular expressions; default: the hosted images and `self-hosted`); skipped with `self-hosted`, an expression, or a `group`. |
+| `workflow-syntax` | Off by default (the preset `github-actions/actionlint` turns it on): the structure of a workflow: keys a section does not have, required keys, kinds, empty sections, repeated keys of `env`, `with`, `matrix`, ... Rows in `src/shape.rs` (key paths, facts) read by the shared `core_rules::shape` walk. |
+| `invalid-event` | Off by default: event names, the keys and activity types of each event, a filter with its `-ignore` twin, cron lines of `schedule`, the keys of `workflow_dispatch` and `workflow_call` inputs. |
+| `invalid-permissions` | Off by default: a scope or value `permissions` does not have. |
 | `missing-permissions` | Off by default: a job without `permissions` in a workflow without top-level `permissions`. |
 
-Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: expression types and the contexts allowed per key, `if:` conditions that are always true, event and activity names and their filters, globs, matrix keys, permission scopes, runner label conflicts, the structure of the file (required keys, empty sections). Not done, needing the network or other files: the inputs and outputs of the actions a step uses, outdated runners of an action, local actions and reusable workflows.
+Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: expression types and the contexts allowed per key, `if:` conditions that are always true, globs of filters, time zones and the shortest cron interval, typed defaults of inputs, matrix keys, anchors, runner label conflicts. Not done, needing the network or other files: the inputs and outputs of the actions a step uses, outdated runners of an action, local actions and reusable workflows.
 
 
 ## Options

@@ -1683,6 +1683,10 @@
               "$ref": "#/definitions/rule",
               "description": "A backslash in a string that is not raw and does not start an escape sequence (`\\d`, `\\_`), also in the pieces of an f-string."
             },
+            "invalid-event": {
+              "$ref": "#/definitions/rule",
+              "description": "An event name, activity type, filter or schedule that the `on` section cannot have."
+            },
             "invalid-expression": {
               "$ref": "#/definitions/rule",
               "description": "A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quote), or names a context or function that does not exist."
@@ -1690,6 +1694,10 @@
             "invalid-job-id": {
               "$ref": "#/definitions/rule",
               "description": "A job id must start with a letter or `_` and contain only letters, digits, `-` and `_`."
+            },
+            "invalid-permissions": {
+              "$ref": "#/definitions/rule",
+              "description": "A permission scope or value that GitHub does not have."
             },
             "invalid-print-syntax": {
               "$ref": "#/definitions/rule",
@@ -6370,6 +6378,10 @@
             "workdir-absolute": {
               "$ref": "#/definitions/rule",
               "description": "A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable)."
+            },
+            "workflow-syntax": {
+              "$ref": "#/definitions/rule",
+              "description": "A key a section does not have, a required key or section that is missing, a section of the wrong kind, or an empty one."
             },
             "yield-outside-function": {
               "$ref": "#/definitions/rule",
