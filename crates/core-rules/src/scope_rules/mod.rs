@@ -9,6 +9,7 @@
 //! reads: family:scope
 
 mod cx;
+mod expansions;
 mod ordered;
 mod ordering;
 mod shadowed;
@@ -37,6 +38,11 @@ pub struct ScopeLang {
     skip_unused: Option<fn(&SyntaxNode, SyntaxKind, &str) -> bool>,
     globals: &'static str,
     conditional_globals: &'static [(&'static str, &'static str)],
+    expansions: &'static [&'static str],
+    arithmetic: &'static [&'static str],
+    identifiers: bool,
+    lowercase_undefined: bool,
+    first_undefined: bool,
     spec: OnceLock<Spec>,
     sets: OnceLock<GlobalSets>,
     table: OnceLock<Table>,
@@ -50,6 +56,11 @@ impl ScopeLang {
             skip_unused: None,
             globals: "",
             conditional_globals: &[],
+            expansions: &[],
+            arithmetic: &[],
+            identifiers: false,
+            lowercase_undefined: false,
+            first_undefined: false,
             spec: OnceLock::new(),
             sets: OnceLock::new(),
             table: OnceLock::new(),
@@ -68,12 +79,48 @@ impl ScopeLang {
         self
     }
 
+    /// Tokens of these kinds hold reads in their text: `$x`, `${x:-d}`, `${#x}`, `${!x}`
+    /// (a shell word or heredoc body). A name guarded by a default (`${name:-x}`) only probes.
+    pub const fn expansions(mut self, kinds: &'static [&'static str]) -> Self {
+        self.expansions = kinds;
+        self
+    }
+
+    /// Tokens of these kinds are arithmetic expressions whose bare identifiers are reads.
+    pub const fn arithmetic(mut self, kinds: &'static [&'static str]) -> Self {
+        self.arithmetic = kinds;
+        self
+    }
+
+    /// Name tokens are words: only identifiers, with an optional `[subscript]`, are names.
+    pub const fn identifier_names(mut self) -> Self {
+        self.identifiers = true;
+        self
+    }
+
+    /// Names with an upper case letter are the environment's: `undefined-variable` leaves them.
+    pub const fn lowercase_undefined(mut self) -> Self {
+        self.lowercase_undefined = true;
+        self
+    }
+
+    /// `undefined-variable` reports a name at its first read only.
+    pub const fn first_undefined(mut self) -> Self {
+        self.first_undefined = true;
+        self
+    }
+
     /// `skip` answers for a method or block node (the kinds the `methods` and `blocks` facts
     /// name) whether its parameters are left alone (an empty body, a body that raises, a bare
     /// `super`) in `unused-method-argument` and `unused-block-argument`.
     pub const fn skip_unused(mut self, skip: fn(&SyntaxNode, SyntaxKind, &str) -> bool) -> Self {
         self.skip_unused = Some(skip);
         self
+    }
+
+    /// Has the language an `ordered` row? Read from the text: building a rule must not parse the table.
+    fn is_ordered(&self) -> bool {
+        Spec::is_ordered(self.source)
     }
 
     fn spec(&self) -> &Spec {
@@ -87,6 +134,7 @@ impl ScopeLang {
             Table::new(grammar, s.rows, s.hosts, s.name_tokens)
                 .bare_names(s.bare)
                 .dynamic_names(s.dynamic)
+                .identifier_names(self.identifiers)
                 .label_names(s.labels, grammar)
         })
     }
@@ -183,6 +231,9 @@ pub fn model(lang: &ScopeLang, file: &FileContext<'_>) -> Rc<Model> {
             let mut model = bind(file.root, file.grammar, lang.table(file.grammar));
             if lang.spec().ordered.as_ref().is_some_and(|o| o.quoted) {
                 ordered::quoted::add_reads(&mut model, file.root, file.grammar, lang);
+            }
+            if !lang.expansions.is_empty() {
+                expansions::add_reads(&mut model, file, lang);
             }
             if !lang.spec().interpolated.is_empty() {
                 interpolation_reads(&mut model, file, lang.spec().interpolated);
@@ -297,10 +348,11 @@ pub fn build(
         ("unused-variable", Some("unpacked")) => Check::UnusedUnpacked,
         (_, Some(mode)) => return Err(format!("param `mode`: unknown mode `{mode}`")),
         (name, None) => match name {
-            "unused-import" if lang.spec().ordered.is_some() => Check::UnusedImport,
-            "undefined-export" if lang.spec().ordered.is_some() => Check::UndefinedExport,
+            "unused-import" if lang.is_ordered() => Check::UnusedImport,
+            "undefined-export" if lang.is_ordered() => Check::UndefinedExport,
             "undefined-variable" => Check::UndefinedVariable,
             "unused-variable" => Check::UnusedVariable,
+            "unused-local-variable" => Check::UnusedLocal,
             "unused-parameter" => Check::UnusedParameter,
             "use-before-define" => Check::UseBeforeDefine,
             "redeclared-variable" => Check::RedeclaredVariable,
@@ -308,7 +360,7 @@ pub fn build(
             other => return Err(format!("param `check`: unknown check `{other}`")),
         },
     };
-    if lang.spec().ordered.is_none()
+    if !lang.is_ordered()
         && check.which().is_some_and(|_| {
             matches!(
                 check,
@@ -320,6 +372,10 @@ pub fn build(
     }
     let message = p.text("message")?;
     p.done()?;
+    if meta.default_level != Level::Off {
+        // A rule that is on will run: its table is read with the rule, not in the first file.
+        lang.spec();
+    }
     Ok(Box::new(ScopeRule {
         check,
         lang,
@@ -569,11 +625,13 @@ impl Rule for ScopeRule {
             }
             Check::UnusedLocal => {
                 let skip = Flags::PARAMETER | Flags::IMPORT;
+                let template = self.template("the local variable `{name}` is never read");
                 for id in m.symbol_ids() {
                     let s = m.symbol(id);
                     if !s.flags.contains(Flags::LET)
                         || s.flags.intersects(skip)
                         || &*s.name == "_"
+                        || lang.spec().conventions.contains(&&*s.name)
                         || (!lang.spec().unused_prefix.is_empty()
                             && s.name.starts_with(lang.spec().unused_prefix))
                         || m.refs_of(id).any(|r| r.is_read())
@@ -582,10 +640,7 @@ impl Rule for ScopeRule {
                         continue;
                     }
                     for d in &s.decls {
-                        ctx.report(
-                            d.name,
-                            format!("the local variable `{}` is never read", s.name),
-                        );
+                        ctx.report(d.name, template.replace("{name}", &s.name));
                     }
                 }
             }

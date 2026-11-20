@@ -94,8 +94,8 @@ fn leak<T>(v: Vec<T>) -> &'static [T] {
 }
 
 /// The words of a line: split at spaces outside quotes, quotes kept.
-fn words(line: &'static str) -> Vec<&'static str> {
-    let mut out = Vec::new();
+fn words_into(line: &'static str, out: &mut Vec<&'static str>) {
+    out.clear();
     let (mut start, mut quoted) = (None, false);
     for (i, c) in line.char_indices() {
         match c {
@@ -114,7 +114,6 @@ fn words(line: &'static str) -> Vec<&'static str> {
         }
     }
     out.extend(start.map(|s| &line[s..]));
-    out
 }
 
 /// `word` split at the first `sep` outside quotes.
@@ -248,7 +247,10 @@ fn flow(word: &'static str, sets: &HashMap<&str, Words>) -> Result<Flow, String>
             sets.get(arg)
                 .ok_or_else(|| format!("unknown set `{arg}`"))?,
         ),
-        "callee-is" => Pred::CalleeIs(arg),
+        "callee-is" => Pred::CalleeIs(match sets.get(arg) {
+            Some(set) => set,
+            None => leak(vec![arg]),
+        }),
         other => return Err(format!("unknown predicate `{other}`")),
     };
     let both = |w: &'static str| simple_flow(w).map(|f| &*Box::leak(Box::new(f)));
@@ -278,9 +280,26 @@ fn row(
     let mut row = Row { kind, ..Row::NONE };
     let mut d = Declares::NONE;
     let mut has_declares = false;
-    let (mut children, mut tokens, mut keywords) = (Vec::new(), Vec::new(), Vec::new());
-    let (mut parent_places, mut parent_flags) = (Vec::new(), Vec::new());
-    let (mut names, mut unchecked) = (Vec::new(), Vec::new());
+    // Exact capacities: the lists are leaked as boxed slices, which shrinks any excess.
+    let count = |key: &str| {
+        attrs
+            .iter()
+            .filter(|a| a.split_once('=').is_some_and(|(k, _)| k == key))
+            .count()
+    };
+    let (mut children, mut tokens) = (
+        Vec::with_capacity(count("child")),
+        Vec::with_capacity(count("token")),
+    );
+    let (mut keywords, mut parent_places, mut parent_flags) = (
+        Vec::with_capacity(count("keyword")),
+        Vec::with_capacity(count("parent-place")),
+        Vec::with_capacity(count("parent-flags")),
+    );
+    let (mut names, mut unchecked) = (
+        Vec::with_capacity(count("name")),
+        Vec::with_capacity(count("unchecked")),
+    );
     for attr in attrs {
         let (key, value) = split(attr, '=');
         let v = value.unwrap_or("");
@@ -369,22 +388,36 @@ fn ordered(attrs: &[&'static str]) -> Result<Ordered, String> {
 }
 
 impl Spec {
+    /// Whether a `scope.rows` file has an `ordered` line, read without parsing the file (a rule
+    /// that is built for a language that never lints reads no more than this).
+    pub fn is_ordered(source: &str) -> bool {
+        source.lines().any(|l| {
+            l.split("//")
+                .next()
+                .and_then(|l| l.split_whitespace().next())
+                == Some("ordered")
+        })
+    }
+
     /// Read the text of a `scope.rows` file.
     pub fn parse(source: &'static str) -> Result<Spec, String> {
         let mut spec = Spec::default();
         let mut sets: HashMap<&str, Words> = HashMap::new();
-        let mut lines: Vec<(usize, Vec<&'static str>)> = Vec::new();
-        for (n, line) in source.lines().enumerate() {
-            let line = line.split_once("//").map_or(line, |(l, _)| l);
-            let w = words(line);
+        let mut w = Vec::new();
+        let strip = |line: &'static str| line.split_once("//").map_or(line, |(l, _)| l);
+        for line in source.lines().filter(|l| l.starts_with("set")) {
+            words_into(strip(line), &mut w);
             if w.first() == Some(&"set") {
                 sets.insert(w[1], leak(w[2..].to_vec()));
-            } else if !w.is_empty() {
-                lines.push((n + 1, w));
             }
         }
-        let mut rows = Vec::new();
-        for (n, w) in lines {
+        let mut rows = Vec::with_capacity(source.lines().count());
+        for (n, line) in source.lines().enumerate() {
+            words_into(strip(line), &mut w);
+            if w.is_empty() || w[0] == "set" {
+                continue;
+            }
+            let n = n + 1;
             let at = |e: String| format!("scope.rows line {n}: {e}");
             let (head, rest) = (w[0], &w[1..]);
             let one = || text(rest.first().copied().unwrap_or(""));

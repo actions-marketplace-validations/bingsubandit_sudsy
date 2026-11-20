@@ -39,6 +39,7 @@ use core_rules::{
 };
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, TextRange};
 use serde::Deserialize;
+use std::borrow::Cow;
 use std::cell::Cell;
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex, OnceLock};
@@ -421,9 +422,15 @@ struct Body {
     token: Option<TokenMatch>,
 }
 
+/// The text of a rule, read in full when its patterns compile.
+enum Source {
+    Spec(Box<FileSpec>),
+    Doc(&'static str),
+}
+
 /// A rule whose patterns are not compiled yet.
 struct Pending {
-    spec: FileSpec,
+    source: Source,
     parser: Arc<dyn SnippetParser + Send + Sync>,
 }
 
@@ -432,7 +439,7 @@ struct Pending {
 pub struct PatternRule {
     meta: &'static RuleMeta,
     /// `None`: a layout-only rule.
-    message: Option<String>,
+    message: Option<Cow<'static, str>>,
     has_layout: bool,
     /// The compiled patterns: at once for a rule of a project's pattern file, on first use for
     /// a built-in rule (compiling parses snippets, which for C# starts the worker). A failed
@@ -788,7 +795,7 @@ fn compile_eager(spec: FileSpec, parser: &dyn SnippetParser) -> Result<PatternRu
     let body = compile_body(&spec, parser, meta.options)?;
     Ok(PatternRule {
         meta,
-        message: spec.message,
+        message: spec.message.map(Cow::Owned),
         has_layout: !spec.layout.is_empty(),
         body: OnceLock::from(body),
         failure: Mutex::default(),
@@ -802,6 +809,184 @@ fn compile_eager(spec: FileSpec, parser: &dyn SnippetParser) -> Result<PatternRu
 /// for C# starts the worker, so a run that never lints C# never pays for it. A rule with `family`
 /// is built by that one of `families` instead (it has no patterns).
 pub fn load_lazy(
+    source: &'static str,
+    language: &str,
+    parser: &Arc<dyn SnippetParser + Send + Sync>,
+    families: &[Family],
+) -> Result<Vec<Box<dyn Rule>>, PatternError> {
+    // A default-off rule of plain top-level scalars and a `rule` or `token` body is listed from its
+    // scalars, and read in full when its rule first runs: reading every document of every
+    // language's files costs more than the rules that never run.
+    let mut rules: Vec<Box<dyn Rule>> = Vec::new();
+    let docs = documents(source);
+    let lights: Vec<Option<Light>> = docs.iter().map(|d| light(d, parser.grammar())).collect();
+    let at = |d: &str| d.as_ptr() as usize - source.as_ptr() as usize;
+    let mut lights = lights.into_iter().enumerate().peekable();
+    while let Some((i, light)) = lights.next() {
+        if let Some(light) = light {
+            rules.push(Box::new(PatternRule {
+                meta: light.meta(),
+                message: Some(light.message),
+                has_layout: false,
+                body: OnceLock::new(),
+                failure: Mutex::default(),
+                pending: Some(Pending {
+                    source: Source::Doc(docs[i]),
+                    parser: parser.clone(),
+                }),
+            }));
+            continue;
+        }
+        // The documents that are read in full go through one parse, as a run.
+        let mut last = i;
+        while let Some((j, _)) = lights.next_if(|(_, l)| l.is_none()) {
+            last = j;
+        }
+        let run = &source[at(docs[i])..at(docs[last]) + docs[last].len()];
+        rules.extend(load_full(run, language, parser, families)?);
+    }
+    Ok(rules)
+}
+
+/// The documents of a multi-document file.
+fn documents(source: &'static str) -> Vec<&'static str> {
+    let mut out = Vec::new();
+    let mut start = 0;
+    let mut at = 0;
+    for line in source.split_inclusive('\n') {
+        if line.trim_end() == "---" {
+            out.push(&source[start..at]);
+            start = at + line.len();
+        }
+        at += line.len();
+    }
+    out.push(&source[start..]);
+    out.retain(|d| {
+        d.lines()
+            .any(|l| !l.trim().is_empty() && !l.starts_with('#'))
+    });
+    out
+}
+
+/// The value of a one-line scalar that reads the same in every YAML way of writing it, borrowed
+/// from the text unless a quote is doubled.
+fn scalar(text: &'static str) -> Option<Cow<'static, str>> {
+    let t = text.trim_end();
+    if let Some(inner) = t.strip_prefix('\'').and_then(|t| t.strip_suffix('\'')) {
+        if !inner.contains('\'') {
+            return Some(Cow::Borrowed(inner));
+        }
+        let mut out = String::new();
+        let mut chars = inner.chars();
+        while let Some(c) = chars.next() {
+            if c == '\'' && chars.next() != Some('\'') {
+                return None;
+            }
+            out.push(c);
+        }
+        return Some(Cow::Owned(out));
+    }
+    if let Some(inner) = t.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+        return (!inner.contains(['"', '\\'])).then_some(Cow::Borrowed(inner));
+    }
+    let first = t.chars().next()?;
+    let plain = !"{[&*!|>%@`#'\"-?:,".contains(first)
+        && !t.contains(": ")
+        && !t.contains(" #")
+        && !t.ends_with(':')
+        && !matches!(t, "true" | "false" | "null" | "~" | "yes" | "no");
+    plain.then_some(Cow::Borrowed(t))
+}
+
+/// What the scalars of a default-off rule give: the metadata and the message, borrowed from the
+/// rule file.
+struct Light {
+    id: Cow<'static, str>,
+    message: Cow<'static, str>,
+    description: Option<Cow<'static, str>>,
+    example: Cow<'static, str>,
+    category: Category,
+}
+
+impl Light {
+    fn meta(&self) -> &'static RuleMeta {
+        let leak = |c: &Cow<'static, str>| -> &'static str {
+            match c {
+                Cow::Borrowed(s) => s,
+                Cow::Owned(s) => self::leak(s.clone()),
+            }
+        };
+        Box::leak(Box::new(RuleMeta {
+            id: leak(&self.id),
+            category: self.category,
+            description: leak(self.description.as_ref().unwrap_or(&self.message)),
+            example: leak(&self.example),
+            default_level: Level::Off,
+            fix: None,
+            requires: &[],
+            uses: &[],
+            options: &[],
+        }))
+    }
+}
+
+/// The spec of a document of a rule that is off by default, only plain top-level scalars and a `rule` or `token` body, for
+/// a language that gives its rules no row; `None` for any other document.
+fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
+    if doc.contains("role") {
+        return None;
+    }
+    let (mut id, mut message, mut description, mut example) = (None, None, None, None);
+    let (mut has_rule, mut inside, mut off) = (false, false, false);
+    let mut category = Category::Style;
+    for line in doc.lines() {
+        if line.trim().is_empty() || line.starts_with('#') {
+            continue;
+        }
+        if line.starts_with([' ', '\t']) {
+            if inside {
+                continue;
+            }
+            return None;
+        }
+        let (key, value) = line.split_once(':')?;
+        let value = value.trim_start();
+        inside = false;
+        match key {
+            "rule" => (has_rule, inside) = (true, true),
+            "token" => inside = true,
+            "id" => id = Some(scalar(value)?),
+            "message" => message = Some(scalar(value)?),
+            "description" => description = Some(scalar(value)?),
+            "example" => example = Some(scalar(value)?),
+            "severity" => off = &*scalar(value)? == "off",
+            "category" => {
+                category = match &*scalar(value)? {
+                    "correctness" => Category::Correctness,
+                    "suspicious" => Category::Suspicious,
+                    "style" => Category::Style,
+                    "cleanup" => Category::Cleanup,
+                    "performance" => Category::Performance,
+                    _ => return None,
+                }
+            }
+            _ => return None,
+        }
+    }
+    let id = id?;
+    if !has_rule || !off || grammar.rule_row(&id).is_some() {
+        return None;
+    }
+    Some(Light {
+        id,
+        message: message?,
+        description,
+        example: example?,
+        category,
+    })
+}
+
+fn load_full(
     source: &str,
     language: &str,
     parser: &Arc<dyn SnippetParser + Send + Sync>,
@@ -843,12 +1028,12 @@ pub fn load_lazy(
             }
             Ok(Box::new(PatternRule {
                 meta,
-                message: spec.message.clone(),
+                message: spec.message.clone().map(Cow::Owned),
                 has_layout: !spec.layout.is_empty(),
                 body: OnceLock::new(),
                 failure: Mutex::default(),
                 pending: Some(Pending {
-                    spec,
+                    source: Source::Spec(Box::new(spec)),
                     parser: parser.clone(),
                 }),
             }) as Box<dyn Rule>)
@@ -924,7 +1109,18 @@ impl PatternRule {
             .pending
             .as_ref()
             .expect("an uncompiled rule is pending");
-        let compiled = compile_body(&p.spec, &*p.parser, self.meta.options);
+        let read;
+        let spec = match &p.source {
+            Source::Spec(spec) => &**spec,
+            Source::Doc(doc) => {
+                read = read_specs(doc).map(|mut specs| specs.remove(0));
+                match &read {
+                    Ok(spec) => spec,
+                    Err(e) => return Err(e.0.clone()),
+                }
+            }
+        };
+        let compiled = compile_body(spec, &*p.parser, self.meta.options);
         *self.failure.lock().unwrap() = compiled.as_ref().err().cloned();
         compiled.map(|body| self.body.get_or_init(|| body))
     }
