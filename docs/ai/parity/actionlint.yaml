@@ -6,6 +6,8 @@ sources:
   - "https://github.com/rhysd/actionlint/blob/v1.7.12/docs/checks.md"
 entries:
   "expression/syntax": "rule invalid-expression | The grammar is not parsed: a misplaced operator or a missing operand is not reported."
+  expression/context: rule expression-context | The contexts and special functions each key offers (table in `lang-github-actions/src/expression.rs`).
+  expression/types: rule expression-types | Properties of the typed contexts, argument counts and types, `format` placeholders; not the types of `steps`, `needs`, `matrix` and `inputs` (they depend on other keys).
   expression/untrusted: rule script-injection | The contexts are a fixed list.
   deprecated-commands: rule deprecated-commands
   id/job: rule invalid-job-id
@@ -25,7 +27,7 @@ deferred:
     ids: ["job-needs/duplicate"]
   - gap: "Needs the metadata of the action a step uses (inputs, outputs, runner version), a repository file (a local action, a reusable workflow) or the network."
     ids: ["action", "syntax-check/workflow-call", "syntax-check/local-action"]
-  - gap: "Offline, not built: the types of expressions, the contexts and functions available per key, `if:` conditions that are always true, event and activity names, filters and globs, matrix keys, permission scopes, step id characters, service credentials, runner label conflicts, and the structure checks (a required key missing, a section of the wrong kind or empty)."
-    ids: ["expression/types", "expression/context", "if-cond", "events/inputs", "glob", "matrix", "credentials", "id/step", "runner-label/conflict", "syntax-check/yaml", "action/outdated-runner"]
+  - gap: "Offline, not built: the types of the file-derived contexts (`steps`, `needs`, `matrix`, `inputs`), `if:` conditions that are always true, event and activity names, filters and globs, matrix keys, permission scopes, step id characters, service credentials, runner label conflicts, and the structure checks (a required key missing, a section of the wrong kind or empty)."
+    ids: ["if-cond", "events/inputs", "glob", "matrix", "credentials", "id/step", "runner-label/conflict", "syntax-check/yaml", "action/outdated-runner"]
   - gap: "The checks of the shell and Python of `run:` are Sudsy's Shell and PowerShell rules, run on the embedded script; there is no pyflakes."
     ids: ["shellcheck", "pyflakes"]

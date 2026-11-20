@@ -1,0 +1,17 @@
+on: push
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    env:
+      A: ${{ env.B }}
+#            ^ expression-context
+      C: ${{ github.sha }}
+    steps:
+      - run: echo ${{ env.B }} ${{ runner.os }}
+        if: ${{ always() }}
+  b:
+    runs-on: ubuntu-latest
+    if: ${{ runner.os == 'x' }}
+#           ^ expression-context
+    steps:
+      - run: echo

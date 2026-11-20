@@ -523,3 +523,71 @@ pub fn check(
         ctx.report(finding.range, finding.message.clone());
     }
 }
+
+/// A scalar of the file with its key path (sequence items are their index).
+pub struct Leaf {
+    pub path: Vec<String>,
+    /// The scalar's text token.
+    pub range: TextRange,
+}
+
+static NO_ROWS: Shape = Shape {
+    variants: &[],
+    rows: &[],
+    expression: "",
+};
+
+impl Walk<'_> {
+    fn collect(&self, node: Option<SyntaxNode>, path: &mut Vec<String>, out: &mut Vec<Leaf>) {
+        let Some(node) = node else { return };
+        let node = self.inner(&node);
+        match self.val(Some(&node)) {
+            Val::Map(map) => {
+                for (name, _, value) in self.entries(&map) {
+                    path.push(name);
+                    self.collect(value, path, out);
+                    path.pop();
+                }
+            }
+            Val::Seq(seq) => {
+                for (i, (_, value)) in self.items(&seq).into_iter().enumerate() {
+                    path.push(i.to_string());
+                    self.collect(value, path, out);
+                    path.pop();
+                }
+            }
+            Val::Scalar { .. } => {
+                if let Some(token) = node.tokens().find(|t| self.g.has_tag(t.kind(), "string")) {
+                    out.push(Leaf {
+                        path: path.clone(),
+                        range: token.text_range(),
+                    });
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Every scalar of the file with its key path.
+pub fn leaves(file: &FileContext<'_>) -> Vec<Leaf> {
+    let g = file.grammar;
+    let mut body = file.root.clone();
+    while !(g.has_tag(body.kind(), "mapping") || g.has_tag(body.kind(), "sequence")) {
+        match body.children().next() {
+            Some(n) => body = n,
+            None => return Vec::new(),
+        }
+    }
+    let walk = Walk {
+        g,
+        hooks: file.hooks,
+        text: file.text,
+        shape: &NO_ROWS,
+        patterns: Vec::new(),
+        out: Vec::new(),
+    };
+    let mut out = Vec::new();
+    walk.collect(Some(body), &mut Vec::new(), &mut out);
+    out
+}

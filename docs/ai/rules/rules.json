@@ -22004,6 +22004,89 @@
       ]
     },
     {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An expression that reads a context, or calls a special function, that the key it is in does not offer (`env` in the `env` of a job, `runner` in a matrix).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on: push\njobs:\n  a:\n    runs-on: ubuntu-latest\n    env:\n      A: ${{ env.B }}\n      C: ${{ github.sha }}\n    steps:\n      - run: echo ${{ env.B }} ${{ runner.os }}\n        if: ${{ always() }}\n  b:\n    runs-on: ubuntu-latest\n    if: ${{ runner.os == 'x' }}\n    steps:\n      - run: echo\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 14,
+            "length": 1,
+            "line": 6
+          },
+          {
+            "column": 13,
+            "length": 1,
+            "line": 13
+          }
+        ]
+      },
+      "fix": null,
+      "id": "expression-context",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "expression/context",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An expression whose types do not fit: a property an object does not have, a comparison of values that cannot be compared, a wrong number or type of arguments, an object where text is expected.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on: push\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 15,
+            "length": 1,
+            "line": 2
+          },
+          {
+            "column": 41,
+            "length": 1,
+            "line": 7
+          },
+          {
+            "column": 62,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "expression-types",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "expression/types",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "Restricts how plain floats are written. Every option is off until set: `.5` without a leading digit, `1e3` scientific notation, `.nan` and `.inf`. Quoted and tagged scalars are not checked. The fix for `.5` is `0.5`.",
@@ -22138,7 +22221,7 @@
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quote), or names a context or function that does not exist.",
+      "description": "A `${{ }}` expression that is not closed or empty, does not parse (unbalanced brackets, a string that is not closed, a character expressions do not have such as a double quote), or names a context or function that does not exist.",
       "example": {
         "config": null,
         "fixed": null,

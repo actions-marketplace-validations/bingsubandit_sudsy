@@ -5,6 +5,8 @@ github-actions:
       cyclic-needs: warn
       deprecated-commands: warn
       duplicate-ids: warn
+      expression-context: warn
+      expression-types: warn
       invalid-expression: warn
       invalid-event: warn
       invalid-job-id: warn

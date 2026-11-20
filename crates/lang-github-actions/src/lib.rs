@@ -28,6 +28,8 @@ static RULES: &[&dyn Rule] = &[
     &jobs::InvalidRunsOn,
     &jobs::MissingPermissions,
     &expression::InvalidExpression,
+    &expression::ExpressionContext,
+    &expression::ExpressionTypes,
     &scripts::DeprecatedCommands,
     &scripts::ScriptInjection,
     &shape::WorkflowSyntax,

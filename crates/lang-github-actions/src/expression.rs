@@ -1,177 +1,134 @@
-//! `invalid-expression`: the syntax of `${{ }}` expressions, and names that are no context or
-//! function. Types, and which contexts exist where, are not checked.
+//! The `${{ }}` expressions of a workflow: the contexts and their types, the functions, and the
+//! keys where each context is available, as tables read by the shared `core_rules::expr`.
 //!
-//! concept: new invalid-expression
-//! what: A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quot
+//! concept: expression-language
 
+use core_rules::expr::{Func, Place, Rules, Spec, check};
 use core_rules::rule;
 use core_rules::{FileContext, RuleContext};
-use core_syntax::TextRange;
-use core_syntax::embedded::size;
-use lang_yaml::generated::kind;
+use std::sync::OnceLock;
 
-const CONTEXTS: &[&str] = &[
-    "github", "env", "vars", "job", "jobs", "steps", "runner", "secrets", "strategy", "matrix",
-    "needs", "inputs", // Literals.
-    "true", "false", "null", "nan", "infinity",
-];
-const FUNCTIONS: &[&str] = &[
-    "contains",
-    "startswith",
-    "endswith",
-    "format",
-    "join",
-    "tojson",
-    "fromjson",
-    "hashfiles",
-    "success",
-    "always",
-    "cancelled",
-    "failure",
+const JOB: &[&str] = &["github", "needs", "strategy", "matrix", "vars", "inputs"];
+const STEP: &[&str] = &[
+    "github", "needs", "strategy", "matrix", "job", "runner", "env", "vars", "secrets", "steps",
+    "inputs",
 ];
 
-/// The end of the expression that starts at `from` (after `${{`): the offset of its `}}`.
-fn end_of(body: &str, from: usize) -> Option<usize> {
-    let bytes = body.as_bytes();
-    let mut i = from;
-    while i < bytes.len() {
-        match bytes[i] {
-            b'}' if bytes.get(i + 1) == Some(&b'}') => return Some(i),
-            b'\'' => i = end_of_string(bytes, i)?,
-            _ => i += 1,
-        }
-    }
-    None
+macro_rules! place {
+    ($path:expr, $contexts:expr $(, $field:ident: $value:expr)*) => {
+        Place { path: $path, contexts: $contexts $(, $field: $value)*, ..Place::NONE }
+    };
 }
 
-/// The first problem of the expression `body` as `(offset, message)`.
-fn problem(body: &str) -> Option<(usize, String)> {
-    if body.trim().is_empty() {
-        return Some((0, "empty expression".into()));
-    }
-    let bytes = body.as_bytes();
-    let mut open: Vec<(u8, usize)> = Vec::new();
-    let (mut i, mut after_dot) = (0, false);
-    while i < bytes.len() {
-        let c = bytes[i];
-        let start = i;
-        let word = |i: &mut usize, ok: fn(u8) -> bool| {
-            while *i < bytes.len() && ok(bytes[*i]) {
-                *i += 1;
-            }
-        };
-        match c {
-            b' ' | b'\t' | b'\n' | b'\r' => i += 1,
-            b'\'' => {
-                i = end_of_string(bytes, i)?;
-                after_dot = false;
-            }
-            b'(' | b'[' => {
-                open.push((c, i));
-                i += 1;
-                after_dot = false;
-            }
-            b')' | b']' => {
-                let want = if c == b')' { b'(' } else { b'[' };
-                if open.pop().map(|o| o.0) != Some(want) {
-                    return Some((i, format!("unbalanced `{}`", c as char)));
-                }
-                i += 1;
-                after_dot = false;
-            }
-            b'.' => {
-                after_dot = true;
-                i += 1;
-            }
-            b',' | b'!' | b'<' | b'>' | b'=' | b'&' | b'|' | b'*' => {
-                i += 1;
-                after_dot = false;
-            }
-            b'0'..=b'9' | b'-' if c != b'-' || bytes.get(i + 1).is_some_and(u8::is_ascii_digit) => {
-                i += 1;
-                word(&mut i, |b| {
-                    b.is_ascii_alphanumeric() || b == b'.' || b == b'_'
-                });
-                after_dot = false;
-            }
-            b'A'..=b'Z' | b'a'..=b'z' | b'_' => {
-                word(&mut i, |b| {
-                    b.is_ascii_alphanumeric() || b == b'_' || b == b'-'
-                });
-                let name = body[start..i].to_lowercase();
-                let call = body[i..].trim_start().starts_with('(');
-                if call && !after_dot && !FUNCTIONS.contains(&name.as_str()) {
-                    return Some((start, format!("unknown function `{}`", &body[start..i])));
-                }
-                if !call && !after_dot && !CONTEXTS.contains(&name.as_str()) {
-                    return Some((start, format!("unknown context `{}`", &body[start..i])));
-                }
-                after_dot = false;
-            }
-            _ => return Some((i, format!("unexpected `{}`", body[i..].chars().next()?))),
-        }
-    }
-    if after_dot {
-        return Some((bytes.len(), "the expression ends after `.`".into()));
-    }
-    open.pop()
-        .map(|(c, at)| (at, format!("unclosed `{}`", c as char)))
+macro_rules! func {
+    ($name:expr, $params:expr, $min:expr, $ret:expr $(, $field:ident: $value:expr)*) => {
+        Func { name: $name, params: $params, min: $min, ret: $ret $(, $field: $value)*, ..Func::NONE }
+    };
 }
 
-/// The offset after the string literal that starts at `i`; `None` when it is not closed (the
-/// caller found the expression's end, so that cannot happen).
-fn end_of_string(bytes: &[u8], mut i: usize) -> Option<usize> {
-    i += 1;
-    while i < bytes.len() {
-        if bytes[i] == b'\'' {
-            if bytes.get(i + 1) == Some(&b'\'') {
-                i += 1;
-            } else {
-                return Some(i + 1);
+#[rustfmt::skip]
+#[allow(clippy::needless_update)]
+static SPEC: Spec = Spec {
+    open: "${{",
+    close: "}}",
+    contexts: &[
+        ("github", "{action: string; action_path: string; action_ref: string; action_repository: string; action_status: string; actor: string; actor_id: string; api_url: string; base_ref: string; env: string; event: any; event_name: string; event_path: string; graphql_url: string; head_ref: string; job: string; job_workflow_sha: string; path: string; ref: string; ref_name: string; ref_protected: any; ref_type: string; repository: string; repository_id: string; repository_owner: string; repository_owner_id: string; repositoryurl: string; retention_days: string; run_attempt: string; run_id: string; run_number: string; secret_source: string; server_url: string; sha: string; token: string; triggering_actor: string; workflow: string; workflow_ref: string; workflow_sha: string; workspace: string}"),
+        ("env", "{*: string}"),
+        ("vars", "{*: string}"),
+        ("secrets", "{*: string}"),
+        ("job", "{container: {id: string; network: string}; services: {*: {id: string; network: string; ports: {*: string}}}; status: string; check_run_id: number}"),
+        ("runner", "{name: string; os: string; arch: string; temp: string; tool_cache: string; debug: string; environment: string}"),
+        ("strategy", "{fail-fast: bool; job-index: number; job-total: number; max-parallel: number}"),
+        ("steps", "any"),
+        ("needs", "any"),
+        ("matrix", "any"),
+        ("inputs", "any"),
+        ("jobs", "any"),
+    ],
+    functions: &[
+        func!("contains", &["array<any>|string", "any"], 2, "bool"),
+        func!("startsWith", &["string", "string"], 2, "bool"),
+        func!("endsWith", &["string", "string"], 2, "bool"),
+        func!("format", &["string", "any"], 1, "string", variadic: true, format: true),
+        func!("join", &["array<any>|string", "string"], 1, "string"),
+        func!("toJSON", &["any"], 1, "string"),
+        func!("fromJSON", &["string"], 1, "any"),
+        func!("hashFiles", &["string"], 1, "string", variadic: true, special: true),
+        func!("success", &[], 0, "bool", special: true),
+        func!("always", &[], 0, "bool", special: true),
+        func!("cancelled", &[], 0, "bool", special: true),
+        func!("failure", &[], 0, "bool", special: true),
+    ],
+    places: &[
+        place!("run-name|concurrency", &["github", "inputs", "vars"]),
+        place!("env", &["github", "secrets", "inputs", "vars"]),
+        place!("defaults", &[]),
+        place!("on.workflow_call.inputs.*.default", &["github", "inputs", "vars"]),
+        place!("on.workflow_call.outputs.*.value", &["github", "jobs", "vars", "inputs"]),
+        place!("jobs.*.if", &["github", "needs", "vars", "inputs"],
+            specials: &["always", "cancelled", "success", "failure"], implicit: true),
+        place!("jobs.*.steps.*.if", &["github", "needs", "strategy", "matrix", "job", "runner", "env", "vars", "steps", "inputs"],
+            specials: &["always", "cancelled", "success", "failure", "hashFiles"], implicit: true),
+        place!("jobs.*.steps.*.id|jobs.*.steps.*.uses|jobs.*.steps.*.shell", &[]),
+        place!("jobs.*.steps", STEP, specials: &["hashFiles"]),
+        place!("jobs.*.strategy", &["github", "needs", "vars", "inputs"]),
+        place!("jobs.*.container.credentials|jobs.*.services.*.credentials",
+            &["github", "needs", "strategy", "matrix", "vars", "inputs", "env", "secrets"]),
+        place!("jobs.*.container.env|jobs.*.services.*.env",
+            &["github", "needs", "strategy", "matrix", "vars", "inputs", "job", "runner", "env", "secrets"]),
+        place!("jobs.*.defaults", &["github", "needs", "strategy", "matrix", "vars", "inputs", "env"]),
+        place!("jobs.*.env", &["github", "needs", "strategy", "matrix", "vars", "inputs", "secrets"]),
+        place!("jobs.*.environment.url", &["github", "needs", "strategy", "matrix", "vars", "inputs", "job", "runner", "env", "steps"]),
+        place!("jobs.*.outputs", &["github", "needs", "strategy", "matrix", "vars", "inputs", "job", "runner", "env", "secrets", "steps"]),
+        place!("jobs.*.secrets", &["github", "needs", "strategy", "matrix", "secrets", "inputs", "vars"]),
+        place!("jobs.*.with", &["github", "needs", "strategy", "matrix", "inputs", "vars"]),
+        place!("jobs.*", JOB),
+    ],
+    rules: Rules { syntax: "invalid-expression", context: "expression-context", types: "expression-types" },
+    compiled: OnceLock::new(),
+};
+
+macro_rules! expr_rule {
+    ($name:ident, $id:expr, $default:ident, $description:expr, $example:expr) => {
+        rule! {
+            pub $name {
+                id: $id,
+                category: Correctness,
+                default: $default,
+                description: $description,
+                example: $example,
+            }
+
+            fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+                check(&SPEC, $id, file, ctx);
             }
         }
-        i += 1;
-    }
-    None
+    };
 }
 
-rule! {
-    pub InvalidExpression {
-        id: "invalid-expression",
-        category: Correctness,
-        default: Error,
-        description: "A `${{ }}` expression that is not closed or empty, has unbalanced brackets or \
-                  a string that is not closed, uses a character expressions do not have (such as a \
-                  double quote), or names a context or function that does not exist.",
-        example: "name: ${{ github.sha }\nenv:\n  A: ${{ foo.bar }}   # reported",
-    }
-
-    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        for token in file.root.descendants_with_tokens().filter_map(|e| e.into_token()) {
-            if !matches!(
-                token.kind(),
-                kind::PLAIN | kind::SINGLE_QUOTED | kind::DOUBLE_QUOTED | kind::BLOCK_CONTENT
-            ) {
-                continue;
-            }
-            let (start, body) = (usize::from(token.text_range().start()), &file.text[token.text_range()]);
-            let span = |at: usize, len: usize| {
-                let pos = |i: usize| size(start + i);
-                TextRange::new(pos(at), pos(at + len))
-            };
-            let mut from = 0;
-            while let Some(open) = body[from..].find("${{").map(|i| i + from) {
-                let Some(close) = end_of(body, open + 3) else {
-                    ctx.report(span(open, 3), "the expression is not closed with `}}`");
-                    break;
-                };
-                if let Some((at, message)) = problem(&body[open + 3..close]) {
-                    let at = open + 3 + at;
-                    let len = body[at..].chars().next().map_or(1, char::len_utf8);
-                    ctx.report(span(at, len), message);
-                }
-                from = close + 2;
-            }
-        }
-    }
-}
+expr_rule!(
+    InvalidExpression,
+    "invalid-expression",
+    Error,
+    "A `${{ }}` expression that is not closed or empty, does not parse (unbalanced brackets, a \
+     string that is not closed, a character expressions do not have such as a double quote), or \
+     names a context or function that does not exist.",
+    "name: ${{ github.sha }\nenv:\n  A: ${{ foo.bar }}   # reported"
+);
+expr_rule!(
+    ExpressionContext,
+    "expression-context",
+    Off,
+    "An expression that reads a context, or calls a special function, that the key it is in does \
+     not offer (`env` in the `env` of a job, `runner` in a matrix).",
+    "jobs:\n  a:\n    runs-on: ubuntu-latest\n    env:\n      A: ${{ env.B }}   # reported"
+);
+expr_rule!(
+    ExpressionTypes,
+    "expression-types",
+    Off,
+    "An expression whose types do not fit: a property an object does not have, a comparison of \
+     values that cannot be compared, a wrong number or type of arguments, an object where text is \
+     expected.",
+    "on: push\nrun-name: ${{ github.events }}   # reported"
+);

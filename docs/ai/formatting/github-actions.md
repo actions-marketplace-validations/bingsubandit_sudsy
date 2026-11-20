@@ -14,7 +14,9 @@ The `run:` of every step of a workflow's jobs and of a composite action is code 
 ## Rules
 | Rule | Does |
 |---|---|
-| `invalid-expression` | Syntax of `${{ }}`: unclosed, empty, brackets, strings, stray characters, unknown context or function. No grammar: operators and operands are not checked. |
+| `invalid-expression` | Syntax of `${{ }}`, parsed by the shared `core_rules::expr` (grammar, type language as text, tables of contexts, functions and per-key availability in `src/expression.rs`): unclosed, empty, brackets, strings, stray characters, unknown context or function. |
+| `expression-context` | Off by default (preset `github-actions/actionlint`). A context or special function the key does not offer (`env` in a job `env`, `runner` in a job `if`). |
+| `expression-types` | Off by default (preset). A property a typed context lacks, a wrong number or type of arguments, a `format` placeholder with no argument, an object interpolated into text. `steps`, `needs`, `matrix` and `inputs` are untyped (they depend on other keys). |
 | `script-injection` | An attacker-controlled context (issue and pull request titles and bodies, branch names, commit messages, ...) pasted into `run:` or the `script` of `actions/github-script`. |
 | `deprecated-commands` | `::set-output`, `::save-state`, `::set-env`, `::add-path` in such a script. |
 | `invalid-job-id` | Characters of job ids. |
@@ -26,7 +28,7 @@ The `run:` of every step of a workflow's jobs and of a composite action is code 
 | `invalid-permissions` | Off by default: a scope or value `permissions` does not have. |
 | `missing-permissions` | Off by default: a job without `permissions` in a workflow without top-level `permissions`. |
 
-Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: expression types and the contexts allowed per key, `if:` conditions that are always true, globs of filters, time zones and the shortest cron interval, typed defaults of inputs, matrix keys, anchors, runner label conflicts. Not done, needing the network or other files: the inputs and outputs of the actions a step uses, outdated runners of an action, local actions and reusable workflows.
+Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: the types of file-derived contexts (`steps`, `needs`, `matrix`, `inputs`), `if:` conditions that are always true, globs of filters, time zones and the shortest cron interval, typed defaults of inputs, matrix keys, anchors, runner label conflicts. Not done, needing the network or other files: the inputs and outputs of the actions a step uses, outdated runners of an action, local actions and reusable workflows.
 
 
 ## Options

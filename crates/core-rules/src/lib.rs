@@ -23,6 +23,7 @@ pub mod diagnostic;
 pub mod embed_keys;
 pub mod engine;
 pub mod escapes;
+pub mod expr;
 pub mod extension;
 pub mod family;
 pub mod fixes;

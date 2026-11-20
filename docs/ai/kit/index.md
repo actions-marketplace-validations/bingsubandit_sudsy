@@ -127,6 +127,7 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | document-end | lang-yaml/rules.rs | A document without the `...` end marker (or, with `present: false`, one that has it) | yamllint document-end | yaml | SINGLE-USE |
 | document-start | lang-yaml/rules.rs | The first document does not start with `---` | yamllint document-start | yaml | SINGLE-USE |
 | element-metadata-checks | lang-html/checks.rs | Element names and attributes checked against element metadata. | html-validate element-name, htmlhint | html | SINGLE-USE |
+| expression-language | core-rules/expr/mod.rs | Syntax, names, availability and types of the expressions inside the scalars of a data file. | actionlint expression | github-actions | SINGLE-USE |
 | file-name-matches-type | lang-csharp/rules/file_layout.rs | The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}` | stylecop SA1649 | csharp | SINGLE-USE |
 | font-family-checks | lang-css/rules/font.rs | Font family names and generic families of a font-family declaration. | stylelint font-family-* | css | SINGLE-USE |
 | format-string-checks | core-rules/format_strings/flavor.rs +2 | Format strings that do not fit their arguments, by flavor (percent, brace). | ruff F501-F509 F521-F525, pyupgrade UP031 UP032 | python | SINGLE-USE |
@@ -253,7 +254,6 @@ One row per concept (one behavior). `used by`: languages whose grammar, `format.
 | float-style | lang-yaml/value_rules.rs | Restricts how plain floats are written |  | yaml | SINGLE-USE |
 | heading-level | lang-html/document.rs | Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second |  | html | SINGLE-USE |
 | input-missing-label | lang-html/document.rs | An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria- |  | html | SINGLE-USE |
-| invalid-expression | lang-github-actions/expression.rs | A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quot |  | github-actions | SINGLE-USE |
 | invalid-job-id | lang-github-actions/jobs.rs | A job id must start with a letter or `_` and contain only letters, digits, `-` and `_` |  | github-actions | SINGLE-USE |
 | invalid-runs-on | lang-github-actions/jobs.rs | A `runs-on` label that is not one of the known runner labels |  | github-actions | SINGLE-USE |
 | known-names-table | lang-css/data.rs | Names looked up in a table of known properties, units and elements. | stylelint property-no-unknown unit-no-unknown | css | SINGLE-USE |

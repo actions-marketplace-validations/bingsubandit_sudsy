@@ -51,6 +51,7 @@ concept document-stream-layout # users: yaml
 concept duplicate-ids # users: github-actions
 concept element-metadata-checks # users: html
 concept escaped-newline-lines # users:  (shared)
+concept expression-language # users: github-actions (shared)
 concept file-header-order # users: protobuf
 concept file-name-matches-type # users: csharp
 concept flat-block-preservation # users: csharp
@@ -69,7 +70,6 @@ concept import-usage-checks # users: js
 concept indent-balance-layout # users: sql
 concept input-missing-label # users: html
 concept invalid-escape-sequence # users: python (shared)
-concept invalid-expression # users: github-actions
 concept invalid-job-id # users: github-actions
 concept invalid-property-value # users: editorconfig
 concept invalid-runs-on # users: github-actions

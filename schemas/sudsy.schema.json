@@ -1263,6 +1263,14 @@
               "$ref": "#/definitions/rule",
               "description": "An EXPOSE with a port above 65535."
             },
+            "expression-context": {
+              "$ref": "#/definitions/rule",
+              "description": "An expression that reads a context, or calls a special function, that the key it is in does not offer (`env` in the `env` of a job, `runner` in a matrix)."
+            },
+            "expression-types": {
+              "$ref": "#/definitions/rule",
+              "description": "An expression whose types do not fit: a property an object does not have, a comparison of values that cannot be compared, a wrong number or type of arguments, an object where text is expected."
+            },
             "f-string": {
               "$ref": "#/definitions/rule",
               "description": "A `\"...\".format(...)` on a string literal whose fields all name an argument."
@@ -1689,7 +1697,7 @@
             },
             "invalid-expression": {
               "$ref": "#/definitions/rule",
-              "description": "A `${{ }}` expression that is not closed or empty, has unbalanced brackets or a string that is not closed, uses a character expressions do not have (such as a double quote), or names a context or function that does not exist."
+              "description": "A `${{ }}` expression that is not closed or empty, does not parse (unbalanced brackets, a string that is not closed, a character expressions do not have such as a double quote), or names a context or function that does not exist."
             },
             "invalid-job-id": {
               "$ref": "#/definitions/rule",

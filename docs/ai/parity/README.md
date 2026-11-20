@@ -20,7 +20,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 <!-- generated:counts -->
 | Tool | Coverage share | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| actionlint | 34.1% | 34.1% | 32 | 5 | 10 | 0 | 0 | 0 | 17 | 0 |
+| actionlint | 44.9% | 44.9% | 32 | 5 | 12 | 0 | 0 | 0 | 15 | 0 |
 | angular-eslint | - | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
 | buf | 85.8% | 85.8% | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
