@@ -64,6 +64,12 @@ fn literals_are_restyled_inside_unformatted_expressions() {
 }
 
 #[test]
+fn comment_between_case_label_and_block_is_kept_once() {
+    let out = fmt("switch(x) {\n  default: /* comment */\n    {break;}\n}\n");
+    assert_eq!(out.matches("/* comment */").count(), 1);
+}
+
+#[test]
 fn comments_stay_with_their_tokens() {
     assert_eq!(
         fmt(

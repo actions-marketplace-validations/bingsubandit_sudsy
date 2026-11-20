@@ -10,7 +10,7 @@ use crate::FormatCtx;
 use crate::comments::{self, Comment};
 use crate::doc::{self, Doc};
 use crate::error::FormatError;
-use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Clone, Debug)]
 pub struct BlockStyle {
@@ -189,8 +189,14 @@ pub fn block_between(
 
 /// Comments in front of or after an opening delimiter, which move to the first body line
 /// (`if (c) // x` newline `{`).
-pub fn open_comments(g: &Grammar, open: &SyntaxToken) -> Vec<Comment> {
-    let mut all = comments::leading_comments(g, open);
+pub fn open_comments(cx: &FormatCtx<'_>, open: &SyntaxToken) -> Vec<Comment> {
+    let g = cx.grammar;
+    // Leading comments a shape holds back are printed by that shape.
+    let mut all = if cx.is_held_leading(open) {
+        Vec::new()
+    } else {
+        comments::leading_comments(g, open)
+    };
     all.extend(comments::trailing_comments(g, open));
     all
 }
@@ -207,7 +213,7 @@ pub fn headed_braces(
     source_multiline: bool,
 ) -> Doc {
     let moved = if head.is_none() {
-        open_comments(cx.grammar, open)
+        open_comments(cx, open)
     } else {
         Vec::new()
     };
@@ -244,7 +250,7 @@ fn block_of(
 ) -> Result<Doc, FormatError> {
     let g = cx.grammar;
     let moved: Vec<Comment> = if open_inside {
-        open_comments(g, &c.open)
+        open_comments(cx, &c.open)
     } else {
         Vec::new()
     };
