@@ -22,12 +22,14 @@ pub mod doc;
 pub mod embed;
 mod error;
 pub mod frames;
+mod header_break;
 pub mod ignore;
 mod layout;
 mod lines;
 pub mod literals;
 mod placement;
 pub mod printer;
+mod relay;
 pub mod rewrite;
 pub mod rules;
 pub mod safety;
@@ -138,7 +140,11 @@ pub fn format_tree(root: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<String, Form
     let mut doc = cx.format_unguarded(root)?;
     let (mut printed, mut keep) = printer::print_protected(&mut doc, &print_options(cx.options));
     if cx.comment_style.align_lines {
-        comments::align_marked_gaps(&mut printed, &mut keep);
+        comments::align_marked_gaps(
+            &mut printed,
+            &mut keep,
+            print_options(cx.options).line_width,
+        );
     }
     // A document of ordinary depth drops the usual way; only a pathological one needs this.
     if take_peak() > 64 {

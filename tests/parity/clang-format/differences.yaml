@@ -1,25 +1,39 @@
 differences:
-  layout-gap: gap  "the formatter prints the source as written (no layout yet); a file is identical when clang-format also leaves it unchanged"
+  wrap-misc: "gap  1414 files first differ here: a break or join clang-format decides inside a construct no other cause names (return values, conditions, templates args, casts, string chains) because of the 80 column limit. fix: map onto the shared shapes (binary_chain, call_arguments, signature) with one penalty option per construct; no new engine"
+  wrap-args: "gap  1638 files first differ here: call arguments and parameters: clang-format packs them to the column limit (bin-packing) and breaks all of them or none, where the printer keeps the source breaks. fix: map call and parameter lists onto call_arguments/signature with a bin-packing ListStyle fill"
+  wrap-brace: "gap  743 files first differ here: braced lists and initializer lists are re-broken at the column limit; a list with a trailing comma has one item per line. fix: map onto delimited_list with ListStyle fill and a trailing-comma-breaks option"
+  template-break: "gap  370 files first differ here: BreakTemplateDeclarations of the remaining shapes (a template header before a long declaration, a requires clause, a nested template). fix: extend header_break with the requires clause and the member-template cases"
+  indent: "gap  277 files first differ here: continuation indent of a wrapped line, the `};` of a braced initializer and the indent of a broken condition. fix: read ContinuationIndentWidth in the shared continuation shape; rides on the wrap gaps"
+  content: "gap  107 files first differ here: a hunk that changes tokens or blank lines instead of whitespace within a line (include order, blank lines at block edges, comment text). fix: classify per hunk first; sorted includes are import_order data, blank lines are keep_blank_lines options"
+  define: "gap  97 files first differ here: the body of a `#define` differs: continuation lines re-wrapped or macro arguments broken at the column limit. fix: run the macro body through the expression shapes after the wrap gaps"
+  directive-wrap: "gap  42 files first differ here: a long preprocessor condition (`#if a && b`) clang-format wraps with a continuation. fix: share the binary_chain shape with directives"
+  ws-tab: "gap  34 files first differ here: tabs or blanks inside a line that differ from clang-format (UseTab alignment of continuation lines). fix: AlignWithTabs of the printer for continuation lines"
+  wrap-assign: "gap  96 files first differ here: a long assignment or initializer that clang-format breaks after the `=` or at the operator. fix: map onto the assignment shape with a break-after-operator option"
+  wrap-binary: "gap  119 files first differ here: a binary chain clang-format breaks before or after the operator at the column limit. fix: map onto binary_chain (BreakBeforeBinaryOperators as an option)"
+  ws-other: "gap  19 files first differ here: columns clang-format aligns (AlignArrayOfStructures, aligned macro names, aligned braced-list columns). fix: a table alignment mechanism in the shared crate, read by an option, when a second language needs it"
+  wrap-comment: "gap  20 files first differ here: a comment that clang-format reflows or splits at the column limit (ReflowComments). fix: ReflowComments in the shared comment engine"
+  wrap-ctor-init: "gap  13 files first differ here: constructor initializer list: BreakConstructorInitializers and PackConstructorInitializers choices. fix: map onto delimited_list with a break-before-colon option"
+  ws-comment-gap: "gap  5 files first differ here: the gap before or between trailing comments where clang-format realigns across a blank or code line. fix: extend the run rules of align_marked_gaps"
 files:
-  llvm: layout-gap
-  fmt: layout-gap
-  range-v3: layout-gap
-  folly: layout-gap
-  linux: layout-gap
-  sqlite: layout-gap
-  google: layout-gap
-  chromium: layout-gap
-  mozilla: layout-gap
-  webkit: layout-gap
-  gnu: layout-gap
-  microsoft: layout-gap
+  llvm: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  fmt: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  range-v3: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  folly: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  linux: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  sqlite: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  google: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  chromium: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  mozilla: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  webkit: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  gnu: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  microsoft: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
 ratchet:
-  llvm: 230
-  fmt: 24
-  range-v3: 70
-  folly: 395
-  linux: 352
-  sqlite: 4
+  llvm: 231
+  fmt: 34
+  range-v3: 73
+  folly: 430
+  linux: 443
+  sqlite: 8
   google: 0
   chromium: 0
   mozilla: 0

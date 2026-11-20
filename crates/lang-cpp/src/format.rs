@@ -14,7 +14,7 @@ pub static CppFormatter: LazyRules =
         .option_kinds(OPTION_KINDS)
         .facts(RuleFacts {
             // Source line breaks and blanks stay where no row decides; the `{` of a block ends a hang.
-            exact: true,
+            exact: false,
             source_hang: true,
             keep_blank_lines: true,
             unhang: &["kind=Lbrace&parent=Block"],
@@ -24,4 +24,6 @@ pub static CppFormatter: LazyRules =
             exact_end: &[],
             max_blank_after: None,
             keep_comment_gap: true,
+            // `/*name=*/value`
+            glued_comments: &["=*/"],
         });

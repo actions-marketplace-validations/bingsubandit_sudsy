@@ -403,3 +403,26 @@ fn wrapped_lines_keep_their_hang_under_a_chain() {
     let src = "void f() {\n  P = U(S)\n          .format(A, false,\n                  0);\n#if X\n  g();\n#endif\n}\n";
     assert_eq!(fmt(src), src);
 }
+
+#[test]
+fn trailing_comments_directives_and_template_headers() {
+    // aligned comments end at a code-free line; a continuation stays under its comment
+    assert_eq!(
+        fmt("int a; // x\nint bbb;   // y\n           // z\nint c;\n\nint d;  // w\n"),
+        "int a;   // x\nint bbb; // y\n         // z\nint c;\n\nint d; // w\n"
+    );
+    // a directive's blanks collapse and its backslashes stand at the line width
+    let define = fmt("#define  A(x)   \\\n  foo(x)\n");
+    assert!(define.starts_with("#define A(x)"), "{define}");
+    assert!(define.lines().next().unwrap().ends_with('\\'), "{define}");
+    // a template header joins its declaration when that fits
+    assert_eq!(
+        fmt("template <class T>\nint f(T t);\n"),
+        "template <class T> int f(T t);\n"
+    );
+    // `/*name=*/` stays against the value
+    assert_eq!(
+        fmt("void f() { g(/*a=*/1); }\n"),
+        "void f() { g(/*a=*/1); }\n"
+    );
+}

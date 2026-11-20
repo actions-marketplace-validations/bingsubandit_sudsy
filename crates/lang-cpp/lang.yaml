@@ -25,7 +25,7 @@ options:
         outdent_unless: [CaseClause]
   - indent_goto_labels:
       default: true
-      doc: "Indent a goto label like the statements of its block; when false it starts at column 0."
+      doc: "A goto label stands one indent left of the statements of its block; when false it starts at column 0."
       kinds:
         flush_unless: [LabelStatement]
   - keep_leading_blank_lines:
@@ -148,8 +148,13 @@ options:
       values: ["yes", "multiline", "no"]
       default: "multiline"
       doc: "`template <...>` ends its line: always (`yes`), when the declaration is not on one line (`multiline`) or never."
+      kinds:
+        break_after: [TemplateDeclaration]
+        head: [TemplateParameters]
   - align_escaped_newlines:
       values: ["right", "left", "dont_align"]
       default: "right"
       doc: "The backslashes of a multi-line macro: aligned at `line_width` (`right`), one blank after the longest line (`left`) or one blank after each line."
+      kinds:
+        relay: [Directive]
 presets: [google, chromium, mozilla, webkit, gnu, microsoft]

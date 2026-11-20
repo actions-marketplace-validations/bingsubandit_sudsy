@@ -810,7 +810,7 @@ pub fn leading_comments_doc_with(cs: &[Comment], st: &CommentStyle) -> Doc {
         // A comment that was on its own line starts one, wherever the formatter put the code
         // before it (a later one is on the line of the comment before it, or that comment ended
         // the line already).
-        if i == 0 && st.keep_gap && continues_trailing(c) {
+        if i == 0 && (st.keep_gap || st.align_lines) && continues_trailing(c) {
             // The next line of a comment that began after code stays under it.
             parts.push(continuing_comment_doc(c, st));
         } else {
@@ -824,7 +824,7 @@ pub fn leading_comments_doc_with(cs: &[Comment], st: &CommentStyle) -> Doc {
             for _ in 0..c.breaks_after.saturating_sub(1).min(max_blank) {
                 parts.push(doc::hardline());
             }
-        } else if !st.keep_gap || gap_follows(c) {
+        } else if (!st.keep_gap || gap_follows(c)) && !st.is_glued(&c.text()) {
             parts.push(doc::lit(" "));
         }
     }
@@ -833,6 +833,13 @@ pub fn leading_comments_doc_with(cs: &[Comment], st: &CommentStyle) -> Doc {
 
 /// The comment on a line of its own, under the trailing comment that ended the line before.
 pub(crate) fn continuing_comment_doc(c: &Comment, st: &CommentStyle) -> Doc {
+    if st.align_lines {
+        // (the column is known when the comments of the lines are aligned)
+        return doc::outdent(
+            usize::MAX,
+            doc::concat(vec![doc::lit("\u{2}"), comment_doc_in(c, st)]),
+        );
+    }
     doc::outdent_to_suffix(comment_doc_in(c, st), comments::column(c.token()))
 }
 

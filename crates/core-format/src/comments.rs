@@ -85,6 +85,8 @@ pub struct CommentStyle {
     /// A comment after code keeps the blanks the source has before it when they are more than
     /// `gap` (comments aligned in a column stay aligned).
     pub keep_gap: bool,
+    /// A block comment written against the code before it (`f(/*name=*/x)`) stays against it.
+    pub keep_attached: bool,
     /// A comment after code starts one blank after it, or in the column of the trailing comments
     /// of the lines around it (`comment_column`); the source's blanks do not count.
     pub align_lines: bool,
@@ -98,6 +100,15 @@ pub struct CommentStyle {
     pub trailing_counts_after: &'static [&'static str],
     /// The lines of a block comment lose their trailing blanks (`comment_trim_lines`).
     pub trim_lines: bool,
+    /// Block comments that end with one of these (`=*/`) have no blank before the token after them.
+    pub glued: &'static [&'static str],
+}
+
+impl CommentStyle {
+    /// Is the block comment `text` glued to the token after it?
+    pub fn is_glued(&self, text: &str) -> bool {
+        self.glued.iter().any(|g| text.ends_with(g))
+    }
 }
 
 impl Default for CommentStyle {
@@ -107,11 +118,13 @@ impl Default for CommentStyle {
             attach_comments: false,
             attach_docs: false,
             keep_gap: false,
+            keep_attached: false,
             align_lines: false,
             max_blank_after: 1,
             reflow_width: None,
             trailing_counts_after: &[],
             trim_lines: false,
+            glued: &[],
         }
     }
 }
@@ -163,8 +176,11 @@ impl CommentStyle {
 
     /// The gap before `c`: `gap`, or the blanks the source has when `keep_gap` and they are more.
     pub fn gap_before(&self, c: &Comment) -> crate::Doc {
-        if self.align_lines {
-            return crate::doc::lit(GAP_MARK);
+        if self.align_lines && ends_its_line(c) {
+            return match self.gap {
+                1 => crate::doc::lit(GAP_MARK),
+                n => crate::doc::text(format!("{}\u{1}", " ".repeat(n))),
+            };
         }
         let source = match (&c.element, self.keep_gap) {
             (SyntaxElement::Token(t), true) => t
@@ -173,7 +189,10 @@ impl CommentStyle {
                 .map_or(0, |p| p.text().len()),
             _ => 0,
         };
-        if self.keep_gap && c.kind == CommentKind::Block && !self.blank_before(c) {
+        if (self.keep_gap || self.keep_attached)
+            && c.kind == CommentKind::Block
+            && !self.blank_before(c)
+        {
             // `f(/*name=*/x)`: a block comment written against the code stays against it.
             crate::doc::Doc::Nil
         } else if source > self.gap {
@@ -184,18 +203,47 @@ impl CommentStyle {
     }
 }
 
+/// Does a line break (or the end of the file) follow `c`? A comment with code after it on its line
+/// (`f(a, /* b */ c)`) is not a trailing comment: it stays in its line's text.
+fn ends_its_line(c: &Comment) -> bool {
+    let SyntaxElement::Token(t) = &c.element else {
+        return true;
+    };
+    if t.text().contains(['\n', '\r']) {
+        return false;
+    }
+    let mut next = t.next_token();
+    while let Some(n) = next {
+        let text = n.text();
+        if text.contains(['\n', '\r']) {
+            return true;
+        }
+        if !text.bytes().all(|b| b == b' ' || b == b'\t') {
+            return false;
+        }
+        next = n.next_token();
+    }
+    true
+}
+
 /// Written in place of the blank before a trailing comment under `align_lines`: a blank and a
 /// zero-width mark, which [`align_marked_gaps`] replaces by the blanks that align the comments.
 pub const GAP_MARK: &str = " \u{1}";
 
 /// Pads the [`GAP_MARK`]s of `out` so that the trailing comments of consecutive lines start in one
 /// column, one past the widest text before a comment of the run (characters, a tab counts one); a
-/// line without a trailing comment ends the run. `keep` (the output length up to which trailing
+/// line without a trailing comment ends the run, and so does a line that would push a comment of
+/// the run past `limit` columns, or a change between a preprocessor line (starting with `#`) and a
+/// code line. `keep` (the output length up to which trailing
 /// blanks are significant) follows the padding.
-pub fn align_marked_gaps(out: &mut String, keep: &mut usize) {
+pub fn align_marked_gaps(out: &mut String, keep: &mut usize, limit: usize) {
     const MARK: char = '\u{1}';
-    // (offset of the mark, line number, characters before the mark)
-    let mut cells: Vec<(usize, usize, usize)> = Vec::new();
+    if !out.contains(MARK) && !out.contains(CONTINUATION) {
+        return;
+    }
+    // (offset of the mark, line number, characters before the mark, characters after it,
+    // whether the line is a preprocessor line)
+    let mut cells: Vec<(usize, usize, usize, usize, bool)> = Vec::new();
     let (mut line, mut seen) = (0, 0);
     for (at, _) in out.match_indices(MARK) {
         line += out[seen..at].matches('\n').count();
@@ -204,13 +252,27 @@ pub fn align_marked_gaps(out: &mut String, keep: &mut usize) {
             continue;
         }
         let start = out[..at].rfind('\n').map_or(0, |i| i + 1);
-        cells.push((at, line, out[start..at].chars().count()));
+        let end = out[at..].find('\n').map_or(out.len(), |i| at + i);
+        let directive = out[start..].trim_start().starts_with('#');
+        cells.push((
+            at,
+            line,
+            out[start..at].chars().count(),
+            out[at + MARK.len_utf8()..end].chars().count(),
+            directive,
+        ));
     }
     let mut pads = vec![0usize; cells.len()];
     let mut i = 0;
     while i < cells.len() {
         let mut j = i + 1;
-        while j < cells.len() && cells[j].1 == cells[j - 1].1 + 1 {
+        let mut widest = cells[i].2;
+        while j < cells.len() && cells[j].1 == cells[j - 1].1 + 1 && cells[j].4 == cells[i].4 {
+            let wider = widest.max(cells[j].2);
+            if cells[i..=j].iter().any(|c| wider + c.3 > limit) {
+                break;
+            }
+            widest = wider;
             j += 1;
         }
         let widest = cells[i..j].iter().map(|c| c.2).max().unwrap_or(0);
@@ -238,9 +300,39 @@ pub fn align_marked_gaps(out: &mut String, keep: &mut usize) {
         }
     }
     result.push_str(&out[last..]);
+    // A continuation line starts under the comment of the line above it.
+    if result.contains(CONTINUATION) {
+        let column_of: std::collections::HashMap<usize, usize> = cells
+            .iter()
+            .zip(&pads)
+            .map(|(c, pad)| (c.1, c.2 + pad))
+            .collect();
+        let mut lines: Vec<String> = result.split('\n').map(str::to_string).collect();
+        let (mut at, mut above) = (0, None);
+        for k in 0..lines.len() {
+            let column = column_of.get(&k).copied();
+            if lines[k].starts_with(CONTINUATION) {
+                let col = above.or_else(|| lines[k - 1].find("//")).unwrap_or(0);
+                let pad = " ".repeat(col);
+                if at < *keep {
+                    delta += col as isize - CONTINUATION.len_utf8() as isize;
+                }
+                lines[k].replace_range(..CONTINUATION.len_utf8(), &pad);
+                above = Some(col);
+            } else {
+                above = column;
+            }
+            at += lines[k].len() + 1;
+        }
+        result = lines.join("\n");
+    }
     *keep = keep.saturating_add_signed(delta);
     *out = result;
 }
+
+/// Written at the start of a line that continues the trailing comment above it: replaced by the
+/// blanks that put it in the column of that comment.
+pub const CONTINUATION: char = '\u{2}';
 
 /// Number of line breaks in `text` (`\r\n` counts once).
 pub fn count_breaks(text: &str) -> usize {

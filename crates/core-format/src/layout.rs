@@ -28,7 +28,7 @@
 //! `no_fit_with` (a body over several lines stays so under such a grandparent, or beside such a
 //! child), `flat` (the items of the block are not indented when the option is `none`), `join` and
 //! `head` (`compound`), `outdent` (columns of an int option), `outdent_unless` (one indent unless
-//! the bool option is on), `flush_unless` (column 0 unless it is on), `tight` (no blanks after the
+//! the bool option is on), `flush_unless` (column 0, one indent when it is on), `tight` (no blanks after the
 //! `#` of a directive when the option is `none`) and `attach` (words of a `words` option: the `{`
 //! of such a construct goes on its own line).
 //!
@@ -301,7 +301,7 @@ impl Layout {
     }
 
     /// How far the node moves left: `outdent` (columns of an option), `outdent_unless` (one indent
-    /// unless the bool option is on), `flush_unless` (to column 0 unless it is on).
+    /// unless the bool option is on), `flush_unless` (to column 0, one indent when it is on).
     fn outdent(&self, cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<doc::Outdent> {
         if self.bindings.is_empty() {
             return None;
@@ -316,8 +316,31 @@ impl Layout {
                 cx.options.uint(core_config::shared::INDENT_SIZE, 2),
             ));
         }
-        (self.bound("flush_unless", kind).is_some_and(off))
-            .then_some(doc::Outdent::Levels(usize::MAX))
+        self.bound("flush_unless", kind)
+            .map(|b| doc::Outdent::Levels(if off(b) { usize::MAX } else { 1 }))
+    }
+
+    /// `break_after`: a declaration with a header (`template <...>`, the `head` kind of its option)
+    /// and its declaration; the option says if the header ends its line (`yes`, `no`,
+    /// `multiline`).
+    fn header_break(&self, cx: &FormatCtx<'_>, node: &SyntaxNode, flow: &Flow<'_>) -> Option<R> {
+        let b = self.bound("break_after", node.kind())?;
+        let heads = self.bound_kinds(&b.option, "head");
+        let els = kids(cx, node);
+        let head = els
+            .iter()
+            .position(|e| e.as_node().is_some_and(|n| heads.contains(&n.kind())))?;
+        let mode = cx.options.str(&b.option);
+        let commented = crate::seq::last(cx, &els[head])
+            .is_some_and(|t| comments::has_trailing_comment(cx.grammar, &t));
+        Some(crate::header_break::header_break(
+            node,
+            &els,
+            head,
+            mode,
+            commented,
+            &|run| flow.seq(cx, run),
+        ))
     }
 
     /// The node laid out by the first row that matches it, `None` when no row does.
@@ -444,13 +467,32 @@ impl Layout {
             "heritage" => heritage(cx, node, row, flow).unwrap_or_else(generic),
             "chain" => chain(cx, node, row).unwrap_or_else(generic),
             "cases" => cases(cx, node, row, flow).unwrap_or_else(generic),
-            "flow" => generic(),
-            // (a token between the nodes, a `,` after an initializer, has no line of its own)
+            "flow" => self.header_break(cx, node, flow).unwrap_or_else(generic),
+            // (a token between the nodes, a `,` after an initializer, has no line of its own: the
+            // lines keep their indentation, their blanks collapse)
             "items" if kids(cx, node).iter().any(|e| e.as_token().is_some()) => {
-                Ok(doc::line_start(node.text().to_string().trim()))
+                Ok(doc::line_start(crate::relay::relay(
+                    node.text().to_string().trim(),
+                    crate::relay::Align::None,
+                    0,
+                    None,
+                )))
             }
             "items" => statements(cx, &node.children().collect::<Vec<_>>()),
-            "line_start" => Ok(line_start(cx, node, self.is_none(cx, "tight", node.kind()))),
+            "line_start" => {
+                let relay = self.bound("relay", node.kind()).map(|b| {
+                    (
+                        crate::relay::Align::parse(cx.options.str(&b.option)),
+                        cx.options.uint("line_width", 80),
+                    )
+                });
+                Ok(line_start(
+                    cx,
+                    node,
+                    self.is_none(cx, "tight", node.kind()),
+                    relay,
+                ))
+            }
             other => panic!("layout: unknown shape `{other}`"),
         };
         Some(match outdent {
@@ -468,11 +510,29 @@ impl Layout {
 
 /// The node's text from its first token on, at column 0, after its leading comments (a
 /// preprocessor directive).
-fn line_start(cx: &FormatCtx<'_>, node: &SyntaxNode, tight_hash: bool) -> Doc {
+fn line_start(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    tight_hash: bool,
+    relay: Option<(crate::relay::Align, usize)>,
+) -> Doc {
+    let style = &cx.comment_style;
+    let gap = crate::relay::CommentGap {
+        gap: style.gap,
+        aligned: style.align_lines,
+    };
     let text = node.text().to_string();
-    let tight = |t: &str| match t.strip_prefix('#') {
-        Some(rest) if tight_hash => format!("#{}", rest.trim_start_matches([' ', '\t'])),
-        _ => t.to_string(),
+    let tight = |t: &str| {
+        let t = match t.strip_prefix('#') {
+            Some(rest) if tight_hash => {
+                std::borrow::Cow::Owned(format!("#{}", rest.trim_start_matches([' ', '\t'])))
+            }
+            _ => std::borrow::Cow::Borrowed(t),
+        };
+        match relay {
+            Some((align, width)) => crate::relay::relay(&t, align, width, Some(gap)),
+            None => t.into_owned(),
+        }
     };
     let Some(first) = cx.first_token(node) else {
         return doc::line_start(tight(text.trim()));
@@ -508,10 +568,13 @@ fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode, layout: &Layout, flow: &Flow<
         },
         _ => shapes::Join::Never,
     };
-    // (`while (x);`)
-    let empty = |e: &SyntaxElement| match e {
-        SyntaxElement::Token(t) => t.text() == ";",
-        SyntaxElement::Node(n) => n.text().to_string().trim() == ";",
+    // (`while (x);`; a `;` with a comment before it is a body of its own)
+    let empty = |e: &SyntaxElement| {
+        let semi = match e {
+            SyntaxElement::Token(t) => t.text() == ";",
+            SyntaxElement::Node(n) => n.text().to_string().trim() == ";",
+        };
+        semi && first(cx, e).is_none_or(|t| comments::leading_comments(cx.grammar, &t).is_empty())
     };
     // (a line comment after the head or the `else` ends its line: the body goes below)
     let ends_line = |before: &SyntaxElement| {

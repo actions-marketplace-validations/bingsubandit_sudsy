@@ -80,3 +80,4 @@ IfStatement|ForStatement|WhileStatement : compound
 AccessSpecifier|LabelStatement : flow
 CaseClause : case colon=Colon
 Block : block empty=as_written
+TemplateDeclaration : flow

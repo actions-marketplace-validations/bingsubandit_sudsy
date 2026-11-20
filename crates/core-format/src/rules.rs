@@ -70,6 +70,8 @@ pub struct RuleFacts {
     pub max_blank_after: Option<usize>,
     /// Blanks before a trailing comment stay when there are more than the style's gap.
     pub keep_comment_gap: bool,
+    /// Block comments that end with one of these (`=*/`) have no blank before the token after them.
+    pub glued_comments: &'static [&'static str],
 }
 
 impl RuleFacts {
@@ -84,6 +86,7 @@ impl RuleFacts {
         exact_end: &[],
         max_blank_after: None,
         keep_comment_gap: false,
+        glued_comments: &[],
     };
 }
 
@@ -110,6 +113,7 @@ pub struct RuleFormatter {
     keep_blank_lines: bool,
     max_blank_after: usize,
     keep_comment_gap: bool,
+    glued_comments: &'static [&'static str],
 }
 
 impl RuleFormatter {
@@ -168,6 +172,7 @@ impl RuleFormatter {
             keep_blank_lines: facts.keep_blank_lines,
             max_blank_after: facts.max_blank_after.unwrap_or(1),
             keep_comment_gap: facts.keep_comment_gap,
+            glued_comments: facts.glued_comments,
         }
     }
 
@@ -204,6 +209,7 @@ impl RuleFormatter {
             exact: self.exact,
             source_hang,
             keep_blank_lines: self.keep_blank_lines,
+            keep_comment_gap: self.keep_comment_gap,
             rules: Some(&self.space),
         }
     }
@@ -271,6 +277,8 @@ impl RuleFormatter {
         CommentStyle {
             max_blank_after: self.max_blank_after,
             keep_gap: self.keep_comment_gap,
+            keep_attached: self.keep_comment_gap,
+            glued: self.glued_comments,
             ..CommentStyle::default()
         }
     }
@@ -384,7 +392,16 @@ impl NodeFormatter for LazyRules {
         }
     }
 
-    fn comment_style(&self, _: &ResolvedOptions) -> CommentStyle {
-        self.get().comment_style()
+    /// The facts' style; a language that declares `spaces_before_trailing_comments` and
+    /// `align_trailing_comments` has them: the gap is that many blanks, and the comments of
+    /// consecutive lines start in one column when the second is true.
+    fn comment_style(&self, o: &ResolvedOptions) -> CommentStyle {
+        let mut style = self.get().comment_style();
+        if o.get("spaces_before_trailing_comments").is_some() {
+            style.gap = o.uint("spaces_before_trailing_comments", 1);
+            style.keep_gap = false;
+            style.align_lines = o.flag("align_trailing_comments", false) && style.gap > 0;
+        }
+        style
     }
 }

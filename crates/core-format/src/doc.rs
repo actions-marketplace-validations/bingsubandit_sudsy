@@ -245,6 +245,57 @@ impl Doc {
         w
     }
 
+    /// The width of the document printed on one line up to its first forced line break (the whole
+    /// document when it has none).
+    pub fn width_to_hardline(&self) -> usize {
+        fn walk(d: &Doc, w: &mut usize) -> bool {
+            match d {
+                Doc::Text(s) => *w += s.chars().count(),
+                Doc::Verbatim(s) => *w += s.chars().count(),
+                Doc::Reserve(n) => *w += n,
+                Doc::Line => *w += 1,
+                Doc::HardLine | Doc::LineStart(_) => return true,
+                Doc::Concat(ps) | Doc::Fill(ps) => return ps.iter().any(|p| walk(p, w)),
+                Doc::Group(g) => return walk(&g.contents, w),
+                Doc::Indent(d) | Doc::Align(_, d) | Doc::Label(_, d) | Doc::IndentIfBreak(_, d) => {
+                    return walk(d, w);
+                }
+                Doc::IfBreak { flat, .. } => return walk(flat, w),
+                Doc::Shared(s) => return walk(&s.doc, w),
+                _ => {}
+            }
+            false
+        }
+        let mut w = 0;
+        walk(self, &mut w);
+        w
+    }
+
+    /// The width of the document's last line printed on one line: what follows its last forced
+    /// line break (comments above a header).
+    pub fn tail_width(&self) -> usize {
+        fn walk(d: &Doc, w: &mut usize) {
+            match d {
+                Doc::Text(s) => *w += s.chars().count(),
+                Doc::Verbatim(s) => *w += s.chars().count(),
+                Doc::Reserve(n) => *w += n,
+                Doc::Line => *w += 1,
+                Doc::HardLine | Doc::LineStart(_) => *w = 0,
+                Doc::Concat(ps) | Doc::Fill(ps) => ps.iter().for_each(|p| walk(p, w)),
+                Doc::Group(g) => walk(&g.contents, w),
+                Doc::Indent(d) | Doc::Align(_, d) | Doc::Label(_, d) | Doc::IndentIfBreak(_, d) => {
+                    walk(d, w);
+                }
+                Doc::IfBreak { flat, .. } => walk(flat, w),
+                Doc::Shared(s) => walk(&s.doc, w),
+                _ => {}
+            }
+        }
+        let mut w = 0;
+        walk(self, &mut w);
+        w
+    }
+
     /// The document printed on one line: no group breaks, a line is a blank.
     pub fn flattened(self) -> Doc {
         crate::deep(|| match self {

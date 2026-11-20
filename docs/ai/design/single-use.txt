@@ -50,6 +50,7 @@ concept document-start # users: yaml
 concept document-stream-layout # users: yaml
 concept duplicate-ids # users: github-actions
 concept element-metadata-checks # users: html
+concept escaped-newline-lines # users:  (shared)
 concept file-header-order # users: protobuf
 concept file-name-matches-type # users: csharp
 concept flat-block-preservation # users: csharp
@@ -58,6 +59,7 @@ concept font-family-checks # users: css
 concept format-string-checks # users: python
 concept from-first # users: dockerfile
 concept getter-return # users: js
+concept header-line-break # users:  (shared)
 concept heading-increment # users: markdown
 concept heading-level # users: html
 concept heading-style # users:  (shared)

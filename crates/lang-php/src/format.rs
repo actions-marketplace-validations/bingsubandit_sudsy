@@ -27,4 +27,5 @@ pub static PhpFormatter: LazyRules =
         exact_end: &["InlineText"],
         max_blank_after: Some(usize::MAX),
         keep_comment_gap: false,
+        glued_comments: &[],
     });

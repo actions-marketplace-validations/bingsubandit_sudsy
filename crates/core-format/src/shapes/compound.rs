@@ -36,7 +36,9 @@ pub fn body(
     join: Join,
 ) -> Doc {
     let (g, kind) = (cx.grammar, body.kind());
-    if g.has_tag(kind, "empty-statement") {
+    // (`while (x);`; with a comment before the `;` it is a body like any other)
+    let bare = first(cx, body).is_none_or(|t| comments::leading_comments(g, &t).is_empty());
+    if g.has_tag(kind, "empty-statement") && bare {
         printed
     } else if inline || g.has_tag(kind, "block") {
         doc::concat(vec![gap_before(cx, body), printed])

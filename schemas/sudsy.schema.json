@@ -6618,7 +6618,7 @@
             },
             "indent_goto_labels": {
               "default": true,
-              "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+              "description": "A goto label stands one indent left of the statements of its block; when false it starts at column 0.",
               "type": "boolean"
             },
             "indent_pp_directives": {
@@ -6934,7 +6934,7 @@
             },
             "indent_goto_labels": {
               "default": true,
-              "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+              "description": "A goto label stands one indent left of the statements of its block; when false it starts at column 0.",
               "type": "boolean"
             },
             "indent_pp_directives": {
@@ -9953,7 +9953,7 @@
                   },
                   "indent_goto_labels": {
                     "default": true,
-                    "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+                    "description": "A goto label stands one indent left of the statements of its block; when false it starts at column 0.",
                     "type": "boolean"
                   },
                   "indent_pp_directives": {
@@ -10269,7 +10269,7 @@
                   },
                   "indent_goto_labels": {
                     "default": true,
-                    "description": "Indent a goto label like the statements of its block; when false it starts at column 0.",
+                    "description": "A goto label stands one indent left of the statements of its block; when false it starts at column 0.",
                     "type": "boolean"
                   },
                   "indent_pp_directives": {

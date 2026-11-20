@@ -642,7 +642,11 @@ pub fn dangling_comments_in(
 ) -> Doc {
     let mut parts = Vec::new();
     for (i, c) in cs.iter().enumerate() {
-        if i == 0 && !blank_before && st.keep_gap && crate::context::continues_trailing(c) {
+        if i == 0
+            && !blank_before
+            && (st.keep_gap || st.align_lines)
+            && crate::context::continues_trailing(c)
+        {
             parts.push(crate::context::continuing_comment_doc(c, st));
             continue;
         }

@@ -57,7 +57,21 @@ Lint: coverage 25.2%, target 23.1%; rules by missed findings:
 
 ## clang-format
 
-1. `layout-gap` (- files): "the formatter prints the source as written (no layout yet); a file is identical when clang-format also leaves it unchanged"
+1. `content` (- files): 107 files first differ here: a hunk that changes tokens or blank lines instead of whitespace within a line (include order, blank lines at block edges, comment text). fix: classify per hunk first; sorted includes are import_order data, blank lines are keep_blank_lines options
+2. `define` (- files): 97 files first differ here: the body of a `#define` differs: continuation lines re-wrapped or macro arguments broken at the column limit. fix: run the macro body through the expression shapes after the wrap gaps
+3. `directive-wrap` (- files): 42 files first differ here: a long preprocessor condition (`#if a && b`) clang-format wraps with a continuation. fix: share the binary_chain shape with directives
+4. `indent` (- files): 277 files first differ here: continuation indent of a wrapped line, the `};` of a braced initializer and the indent of a broken condition. fix: read ContinuationIndentWidth in the shared continuation shape; rides on the wrap gaps
+5. `template-break` (- files): 370 files first differ here: BreakTemplateDeclarations of the remaining shapes (a template header before a long declaration, a requires clause, a nested template). fix: extend header_break with the requires clause and the member-template cases
+6. `wrap-args` (- files): 1638 files first differ here: call arguments and parameters: clang-format packs them to the column limit (bin-packing) and breaks all of them or none, where the printer keeps the source breaks. fix: map call and parameter lists onto call_arguments/signature with a bin-packing ListStyle fill
+7. `wrap-assign` (- files): 96 files first differ here: a long assignment or initializer that clang-format breaks after the `=` or at the operator. fix: map onto the assignment shape with a break-after-operator option
+8. `wrap-binary` (- files): 119 files first differ here: a binary chain clang-format breaks before or after the operator at the column limit. fix: map onto binary_chain (BreakBeforeBinaryOperators as an option)
+9. `wrap-brace` (- files): 743 files first differ here: braced lists and initializer lists are re-broken at the column limit; a list with a trailing comma has one item per line. fix: map onto delimited_list with ListStyle fill and a trailing-comma-breaks option
+10. `wrap-comment` (- files): 20 files first differ here: a comment that clang-format reflows or splits at the column limit (ReflowComments). fix: ReflowComments in the shared comment engine
+11. `wrap-ctor-init` (- files): 13 files first differ here: constructor initializer list: BreakConstructorInitializers and PackConstructorInitializers choices. fix: map onto delimited_list with a break-before-colon option
+12. `wrap-misc` (- files): 1414 files first differ here: a break or join clang-format decides inside a construct no other cause names (return values, conditions, templates args, casts, string chains) because of the 80 column limit. fix: map onto the shared shapes (binary_chain, call_arguments, signature) with one penalty option per construct; no new engine
+13. `ws-comment-gap` (- files): 5 files first differ here: the gap before or between trailing comments where clang-format realigns across a blank or code line. fix: extend the run rules of align_marked_gaps
+14. `ws-other` (- files): 19 files first differ here: columns clang-format aligns (AlignArrayOfStructures, aligned macro names, aligned braced-list columns). fix: a table alignment mechanism in the shared crate, read by an option, when a second language needs it
+15. `ws-tab` (- files): 34 files first differ here: tabs or blanks inside a line that differ from clang-format (UseTab alignment of continuation lines). fix: AlignWithTabs of the printer for continuation lines
 
 ## csharpier-xml
 

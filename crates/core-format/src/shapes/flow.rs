@@ -40,6 +40,9 @@ pub struct Flow<'a> {
     pub source_hang: bool,
     /// Blank lines of the source stay.
     pub keep_blank_lines: bool,
+    /// The blank between a block comment and the token after it is as the source has it
+    /// (`f(/*name=*/x)`), also where `exact` is off.
+    pub keep_comment_gap: bool,
     /// Rows that decide `want`, `joined`, `at_least_one`, `op_first`, `flat_after`, `closers`
     /// and `unhang` instead of the fields of those names.
     pub rules: Option<&'a SpaceRules>,
@@ -172,7 +175,7 @@ impl Flow<'_> {
         }
         let gap = a.text_range().end() != b.text_range().start();
         // `f(a, /*name=*/b)`: the blank between a block comment and `b` is as the source has it.
-        if self.exact
+        if (self.exact || self.keep_comment_gap)
             && gap
             && let Some(p) = b.prev_token()
         {
@@ -182,10 +185,11 @@ impl Flow<'_> {
             } else {
                 Some(p.clone())
             };
-            if comment.is_some_and(|c| {
-                c != *a && c.text().starts_with("/*") && cx.grammar.is_trivia(c.kind())
-            }) {
-                return space.then(|| doc::lit(" "));
+            if let Some(c) = comment
+                .filter(|c| c != a && c.text().starts_with("/*") && cx.grammar.is_trivia(c.kind()))
+            {
+                let glued = cx.comment_style.is_glued(c.text().as_ref());
+                return (space && !glued).then(|| doc::lit(" "));
             }
         }
         match self.want(a, b) {

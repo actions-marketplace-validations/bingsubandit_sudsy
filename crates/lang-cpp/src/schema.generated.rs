@@ -85,6 +85,9 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("short_loops", "join", "", &["ForStatement", "WhileStatement"]),
     ("short_lambdas", "fit", "", &["Lambda"]),
     ("short_enums", "fit", "", &["EnumSpecifier"]),
+    ("break_template_declarations", "break_after", "", &["TemplateDeclaration"]),
+    ("break_template_declarations", "head", "", &["TemplateParameters"]),
+    ("align_escaped_newlines", "relay", "", &["Directive"]),
 ];
 #[allow(dead_code)]
 pub fn wrap_lines(o: &core_config::ResolvedOptions) -> bool {
@@ -314,7 +317,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::int("continuation_indent", 4, (0, 16), "Columns a wrapped line is indented more than the line it continues, where it is not aligned to a bracket."),
         core_config::OptionDef::int("access_modifier_outdent", 2, (0, 16), "Columns `public:`, `private:` and `protected:` are outdented from the members of their class."),
         core_config::OptionDef::boolean("indent_case_labels", false, "Indent `case` labels one level inside their `switch`."),
-        core_config::OptionDef::boolean("indent_goto_labels", true, "Indent a goto label like the statements of its block; when false it starts at column 0."),
+        core_config::OptionDef::boolean("indent_goto_labels", true, "A goto label stands one indent left of the statements of its block; when false it starts at column 0."),
         core_config::OptionDef::boolean("keep_leading_blank_lines", true, "Blank lines at the start of the file stay."),
         core_config::OptionDef::choice("indent_pp_directives", &["none", "keep"], "none", "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."),
         core_config::OptionDef::choice("namespace_indentation", &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
