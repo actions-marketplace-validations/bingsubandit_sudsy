@@ -16,6 +16,9 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | `deferred` | Wanted eventually, deliberately not scheduled. | deferred |
 | `wontfix <reason>` | Out of scope. | wontfix |
 
+## Tools and corpora on a fresh host
+`scripts/parity.sh` installs a tool from its `install` key in `scripts/parity_tools.json` (npm, pip, a release file, a PowerShell module with `psmodule`) and runs the `fetch` scripts of its corpus (`tests/conformance/fetch-<language>-corpus.sh`; the corpora are gitignored, so a new checkout fetches them first: a run on an empty corpus prints `0 of 0 findings`, which is a missing corpus, not a result). Two things come from outside the runner: PowerShell (`pwsh` 7.4 or later on `PATH`; on Linux the tarball `powershell-<version>-linux-<x64|arm64>.tar.gz` of the PowerShell GitHub release, unpacked anywhere) for `invoke-formatter` and `psscriptanalyzer`, and the .NET SDK for the C# tools. PHP is not needed: `php-cs-fixer` and `phpstan` unpack a static PHP of dl.static-php.dev into their prefix. The nightly matrix runs the same commands. Hosts used: registry.npmjs.org, pypi.org, github.com releases, dl.static-php.dev, www.powershellgallery.com.
+
 ## Counts
 <!-- generated:counts -->
 | Tool | Coverage share | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
@@ -42,9 +45,9 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | ktlint | 90.2% | 86.0% | 99 | 49 | 8 | 42 | 0 | 0 | 0 | 42 |
 | markdownlint | 83.6% | 83.4% | 53 | 23 | 18 | 0 | 0 | 0 | 12 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| phpstan | 0.0% | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| phpstan | 0.0% | 0.0% | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
-| psscriptanalyzer | 34.4% | - | 75 | 12 | 8 | 1 | 0 | 0 | 54 | 1 |
+| psscriptanalyzer | 34.2% | 33.8% | 75 | 12 | 8 | 1 | 0 | 0 | 54 | 1 |
 | roslynator | - | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |
 | rubocop | 96.2% | 96.2% | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
 | ruff | 94.6% | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |

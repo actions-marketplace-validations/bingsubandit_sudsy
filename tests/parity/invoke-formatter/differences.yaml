@@ -1,3 +1,7 @@
+ratchet:
+  fixtures: 195
+target-files:
+  fixtures: 210
 differences:
   pipeline-indent: gap  the lines after a multi-line pipeline or call are indented as the source has them; Invoke-Formatter derives the indentation from the syntax tree
   backtick-scriptblock: gap  Invoke-Formatter outdents the script block that follows a backtick continuation; Sudsy keeps its indentation
@@ -5,6 +9,7 @@ differences:
   switch-brace: gap  a `{` on its own line after a switch clause that is a string, or after a comment, is joined by Invoke-Formatter and not by Sudsy
   enum-alignment: gap  Invoke-Formatter aligns the `=` of enum members; Sudsy aligns hashtables only
   operator-chain-comments: gap  Invoke-Formatter aligns the comments of an operator chain
+  dsc-configuration-brace: gap  the `{` of a DSC `Configuration` block stays on its line in Invoke-Formatter; Sudsy moves it to its own line like a function body
   not-powershell: "choice  the file is C# source: Sudsy rejects it"
 files:
   corpus/install-scripts/src/dotnet-install.ps1: pipeline-indent
@@ -20,9 +25,11 @@ files:
   corpus/PowerShell/tools/releaseTools.psm1: pipeline-indent
   corpus/PowerShell/tools/ResxGen/ResxGen.psm1: enum-alignment
   corpus/PSScriptAnalyzer/build.psm1: pipeline-indent
+  corpus/PSScriptAnalyzer/Tests/Engine/MissingDSCResource.ps1: dsc-configuration-brace
   corpus/PSScriptAnalyzer/Tests/Engine/CSharp.ps1: not-powershell
   corpus/PSScriptAnalyzer/Tests/Engine/CustomRuleNREAssets/MyCustom.psm1: hashtable-first-entry
 intentional:
   not-powershell: invalid-input
 flags:
   ignore_trailing_blanks: "the trailing blanks of a line are removed from both outputs before comparing: Invoke-Formatter keeps them, Sudsy never does"
+unclassified: 0

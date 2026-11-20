@@ -1,7 +1,7 @@
 {
  "runner": "Linux aarch64, 8 cores",
  "runs": 5,
- "commit": "55e10507",
+ "commit": "2fb54a53",
  "rows": [
   {
    "id": "prettier/JSON/format",
@@ -305,7 +305,17 @@
    "task": "Format",
    "tool": "Invoke-Formatter",
    "version": "1.25.0",
-   "not_measured": "no PowerShell (pwsh) on the host that wrote this table"
+   "corpus": "211 files, without 1 files Sudsy cannot parse",
+   "files": 210,
+   "bytes": 2295175,
+   "sudsy": {
+    "s": 0.114,
+    "mb": 165
+   },
+   "other": {
+    "s": 4.382,
+    "mb": 163
+   }
   },
   {
    "id": "buf/Protobuf/format",
@@ -639,7 +649,17 @@
    "task": "Lint",
    "tool": "PSScriptAnalyzer",
    "version": "1.25.0",
-   "not_measured": "no PowerShell (pwsh) on the host that wrote this table"
+   "corpus": "210 files",
+   "files": 210,
+   "bytes": 2294553,
+   "sudsy": {
+    "s": 0.134,
+    "mb": 136
+   },
+   "other": {
+    "s": 20.171,
+    "mb": 313
+   }
   },
   {
    "id": "tflint/HCL/lint",

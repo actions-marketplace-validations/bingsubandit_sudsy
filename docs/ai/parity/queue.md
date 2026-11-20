@@ -171,12 +171,14 @@ Lint: coverage 5%, target 5%; rules by missed findings:
 
 ## invoke-formatter
 
+Format: unclassified 0 of 15 differing files (0%).
 1. `pipeline-indent` (8 files): the lines after a multi-line pipeline or call are indented as the source has them; Invoke-Formatter derives the indentation from the syntax tree
 2. `enum-alignment` (2 files): Invoke-Formatter aligns the `=` of enum members; Sudsy aligns hashtables only
 3. `hashtable-first-entry` (2 files): a hashtable whose first entry is on the `@{` line is aligned to the column of that entry; Invoke-Formatter lays it out differently
 4. `backtick-scriptblock` (1 files): Invoke-Formatter outdents the script block that follows a backtick continuation; Sudsy keeps its indentation
-5. `switch-brace` (1 files): a `{` on its own line after a switch clause that is a string, or after a comment, is joined by Invoke-Formatter and not by Sudsy
-6. `operator-chain-comments` (- files): Invoke-Formatter aligns the comments of an operator chain
+5. `dsc-configuration-brace` (1 files): the `{` of a DSC `Configuration` block stays on its line in Invoke-Formatter; Sudsy moves it to its own line like a function body
+6. `switch-brace` (1 files): a `{` on its own line after a switch clause that is a string, or after a comment, is joined by Invoke-Formatter and not by Sudsy
+7. `operator-chain-comments` (- files): Invoke-Formatter aligns the comments of an operator chain
 
 ## ktlint
 

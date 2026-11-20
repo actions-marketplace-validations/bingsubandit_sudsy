@@ -26,6 +26,7 @@ Corpus of each row ([docs/languages.md](languages.md) has the sources):
 - Java: the Java corpus (5 projects)
 - Kotlin: the Kotlin corpus
 - PHP: the PHP corpus
+- PowerShell: 211 files, without 1 files Sudsy cannot parse and 210 files
 - Protobuf: the Protobuf corpus
 - HCL: the Terraform corpus
 - C#: dotnet/runtime CoreLib, without 14 files Sudsy cannot parse

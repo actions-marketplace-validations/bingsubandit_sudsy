@@ -110,7 +110,7 @@ def corpus(name, config, speed, work):
     shutil.rmtree(work, ignore_errors=True)
     size, paths = 0, []
     for i in range(copies):
-        for rel, path, _ in found:
+        for rel, path, *_ in found:
             inside = (f"c{i + 1}/" if copies > 1 else "") + rel
             dest = work / "c" / inside
             dest.parent.mkdir(parents=True, exist_ok=True)

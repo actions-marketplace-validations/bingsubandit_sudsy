@@ -85,12 +85,12 @@ Each number is measured on real-world code against the reference tool with its d
 | Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
 | Markdown | █████████░ 91% Prettier | ████████░░ 83% markdownlint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
-| PHP | ████████░░ 88% PHP-CS-Fixer | not measured PHPStan | In progress |
+| PowerShell | █████████░ 92% Invoke-Formatter | ███░░░░░░░ 33% PSScriptAnalyzer | In progress |
+| PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
 | Kotlin | ████████░░ 82% ktlint | ████████░░ 86% ktlint | In progress |
 | SQL | ███████░░░ 78% sqlfluff | ████████░░ 81% sqlfluff | In progress |
 | C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
-| PowerShell | not measured Invoke-Formatter | not measured PSScriptAnalyzer | not measured |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->
@@ -159,8 +159,8 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 |  | Lint | ktlint | 42× faster | 1.14 s / 48.01 s | 485 / 683 MB |
 | PHP | Format | PHP-CS-Fixer | 161× faster | 1.77 s / 285.46 s | 1161 / 70 MB |
 |  | Lint | PHPStan | not measured | - | - |
-| PowerShell | Format | Invoke-Formatter | not measured | - | - |
-|  | Lint | PSScriptAnalyzer | not measured | - | - |
+| PowerShell | Format | Invoke-Formatter | 38× faster | 0.11 s / 4.38 s | 165 / 163 MB |
+|  | Lint | PSScriptAnalyzer | 151× faster | 0.13 s / 20.17 s | 136 / 313 MB |
 | Protobuf | Format | buf | 3.6× faster | 0.069 s / 0.25 s | 118 / 74 MB |
 |  | Lint | buf | not measured | - | - |
 | HCL | Format | terraform fmt | 3.5× faster | 0.11 s / 0.40 s | 123 / 87 MB |
