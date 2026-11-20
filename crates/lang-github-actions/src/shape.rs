@@ -10,6 +10,7 @@ use core_rules::{FileContext, RuleContext};
 const S: &str = "workflow-syntax";
 const E: &str = "invalid-event";
 const P: &str = "invalid-permissions";
+const O: &str = "outdated-action";
 
 #[rustfmt::skip]
 const EVENTS: &[&str] = &[
@@ -32,6 +33,17 @@ const PR_TYPES: &[&str] = &[
     "synchronize", "converted_to_draft", "locked", "unlocked", "enqueued", "dequeued", "milestoned",
     "demilestoned", "ready_for_review", "review_requested", "review_request_removed",
     "auto_merge_enabled", "auto_merge_disabled",
+];
+/// The last major version of each popular action that runs on a runtime GitHub has retired.
+#[rustfmt::skip]
+const OUTDATED: &[(&str, u32)] = &[
+    ("actions/checkout", 3), ("actions/cache", 3), ("actions/setup-node", 3), ("actions/setup-python", 4),
+    ("actions/setup-go", 4), ("actions/setup-java", 3), ("actions/setup-dotnet", 3),
+    ("actions/upload-artifact", 3), ("actions/download-artifact", 3), ("actions/github-script", 6),
+    ("actions/labeler", 4), ("actions/stale", 5), ("azure/login", 1), ("azure/aks-set-context", 3),
+    ("aws-actions/configure-aws-credentials", 3), ("docker/login-action", 2),
+    ("docker/build-push-action", 4), ("docker/metadata-action", 4), ("docker/setup-buildx-action", 2),
+    ("docker/setup-qemu-action", 2), ("codecov/codecov-action", 3),
 ];
 const FILTER_PAIRS: &[(&str, &str)] = &[
     ("branches", "branches-ignore"),
@@ -94,6 +106,7 @@ static SHAPE: Shape = Shape {
         row!("on.merge_group", E, Kind::Map, keys: &["types", "branches", "branches-ignore"], exclusive: FILTER_PAIRS),
         row!("on.schedule", E, Kind::Seq, non_empty: true),
         row!("on.schedule.*", E, Kind::Map, keys: &["cron", "timezone"], required: &["cron"]),
+        row!("jobs.*.steps.*.uses", O, Kind::Str, format: Format::Outdated(OUTDATED)),
         row!("on.schedule.*.cron", E, Kind::Str, format: Format::Cron),
         row!("on.image_version", E, Kind::Map, keys: &["names", "versions"]),
         row!("on.image_version.names|on.image_version.versions", E, Kind::Seq, non_empty: true),
@@ -205,6 +218,12 @@ shape_rule!(
     "invalid-event",
     "An event name, activity type, filter or schedule that the `on` section cannot have.",
     "on:\n  pushh: {}   # reported\njobs: {}"
+);
+shape_rule!(
+    OutdatedAction,
+    "outdated-action",
+    "A step that uses a popular action at a major version that runs on a retired runtime.",
+    "on: push\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v2   # reported"
 );
 shape_rule!(
     InvalidPermissions,

@@ -10,7 +10,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 1 | C / C++ | 16.2% (statements and blocks landed, vs clang-format 20.1.8: 1,075 of 6,639 files, LLVM 230/420, folly 395/2,299, Linux 352/2,872, range-v3 70/593, fmt 24/70, SQLite 4/325, presets 0/10 each) | none (no clang-tidy catalog) | no layout yet: formatter on shared shapes in progress ([design/cpp-formatter.md](design/cpp-formatter.md)); no lint rules |
 | 2 | JSON | ? (fixtures only, no real-world corpus) | ? (eslint-plugin-jsonc; corpus is JSONTestSuite) | no real-world corpus; no coverage run |
 | 3 | XML | ? (CSharpier XML, 372 project files, count not recorded) | none | no corpus count; no reference linter |
-| 4 | GitHub Actions | none (YAML formatter, no reference) | 44.9% (actionlint, `github-actions/actionlint`) | `syntax-check` 107, `expression/types` 84 (file-derived scopes), `action/outdated-runner` 29 findings |
+| 4 | GitHub Actions | none (YAML formatter, no reference) | 56.0% (actionlint, `github-actions/actionlint`) | `syntax-check` 107, `expression/types` 48, `syntax-check/yaml` 25, `glob` 22 findings |
 | 5 | Dockerfile | none (no reference) | 27.6% (hadolint, `dockerfile/hadolint`) | `DL4006` 153, `DL3003` 64, `DL3008` 54 |
 | 6 | C# | 72.1% of 7,615 (CSharpier 1.3.0; not re-run, corpus absent on the host) | ? (StyleCop; corpus does not compile) | lists differing by a comma, `#if` comments (252 files), wrapped arguments and chains (299) |
 | 7 | Makefile | none (no reference) | 73.5% (checkmake, `makefile/checkmake`) | `uniquetargets` 88, `phonydeclared` 59 |
@@ -37,6 +37,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP; recorded and not re-run: C#, PowerShell, Markdown, GraphQL, XML and all lint shares.
 
 ## Small tasks
+- `shape::leaves()` and `expr::findings` clone one `String` per key of the walked path: a borrowed path type would cut github-actions.lint allocs (+6.1% over the base before the expression step).
 - Python paren strip onto shared ParenPolicy/ParenHooks (for_target, await, one-item tuple arms).
 - Move JS layout functions (assign poorly_breakable, chain member, binary flush, ternary should_extra_indent, TS union/should_hug, parameter patterns) onto core-format shapes (unification).
 - Python block blank rules onto the shared blank rules, then restore the reverted first-comment and `match` blank fixes (+3 files).

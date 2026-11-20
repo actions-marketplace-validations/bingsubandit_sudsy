@@ -1,0 +1,18 @@
+on: push
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo
+        if: false
+#           ^ if-condition
+      - run: echo
+        if: ${{ github.ref }} && true
+#           ^ if-condition
+      - run: echo
+        if: "${{ github.ref == 'x' }} "
+#           ^ if-condition
+      - run: echo
+        if: github.ref == 'x' && !cancelled()
+      - run: echo
+        if: ${{ github.ref == 'x' }}

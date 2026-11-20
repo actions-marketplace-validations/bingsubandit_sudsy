@@ -22157,6 +22157,50 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "An `if:` that is a constant (`if: false`), or that has text around its `${{ }}` and so is a non-empty string, always true (`if: ${{ a }} && ${{ b }}`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on: push\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo\n        if: false\n      - run: echo\n        if: ${{ github.ref }} && true\n      - run: echo\n        if: \"${{ github.ref == 'x' }} \"\n      - run: echo\n        if: github.ref == 'x' && !cancelled()\n      - run: echo\n        if: ${{ github.ref == 'x' }}\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 13,
+            "length": 1,
+            "line": 7
+          },
+          {
+            "column": 13,
+            "length": 1,
+            "line": 9
+          },
+          {
+            "column": 13,
+            "length": 1,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "if-condition",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "if-cond",
+          "partial": true,
+          "tool": "actionlint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "An event name, activity type, filter or schedule that the `on` section cannot have.",
       "example": {
         "config": null,
@@ -22770,6 +22814,40 @@
           "id": "anchors.forbid-unused-anchors",
           "partial": false,
           "tool": "yamllint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A step that uses a popular action at a major version that runs on a retired runtime.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "on: push\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v2\n      - uses: actions/checkout@v4\n      - uses: actions/checkout@v3.1.0\n      - uses: ./local\n",
+        "language": "github-actions",
+        "spans": [
+          {
+            "column": 15,
+            "length": 19,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "outdated-action",
+      "languages": [
+        "github-actions"
+      ],
+      "options": [],
+      "presets": [
+        "github-actions/actionlint"
+      ],
+      "upstream": [
+        {
+          "id": "action/outdated-runner",
+          "partial": true,
+          "tool": "actionlint"
         }
       ]
     },

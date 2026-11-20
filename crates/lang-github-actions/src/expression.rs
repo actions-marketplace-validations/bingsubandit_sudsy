@@ -3,7 +3,7 @@
 //!
 //! concept: expression-language
 
-use core_rules::expr::{Func, Place, Rules, Spec, check};
+use core_rules::expr::{Func, Place, Rules, Scope, ScopeKind, Spec, check};
 use core_rules::rule;
 use core_rules::{FileContext, RuleContext};
 use std::sync::OnceLock;
@@ -84,7 +84,17 @@ static SPEC: Spec = Spec {
         place!("jobs.*.with", &["github", "needs", "strategy", "matrix", "inputs", "vars"]),
         place!("jobs.*", JOB),
     ],
-    rules: Rules { syntax: "invalid-expression", context: "expression-context", types: "expression-types" },
+    scopes: &[
+        Scope { context: "steps", kind: ScopeKind::Ids, within: "jobs.*", source: "steps", key: "id",
+            item: "{outputs: {*: string}; conclusion: string; outcome: string}", ..Scope::NONE },
+        Scope { context: "needs", kind: ScopeKind::Refs, within: "jobs.*", source: "needs", from: "jobs",
+            output: "outputs", item: "{result: string}", ..Scope::NONE },
+        Scope { context: "matrix", within: "jobs.*", source: "strategy.matrix", skip: &["include", "exclude"],
+            also: "include", item: "infer", ..Scope::NONE },
+        Scope { context: "inputs", source: "on.workflow_dispatch.inputs|on.workflow_call.inputs", key: "type",
+            item: "string", types: &[("boolean", "bool"), ("number", "number")], ..Scope::NONE },
+    ],
+    rules: Rules { syntax: "invalid-expression", context: "expression-context", types: "expression-types", condition: "if-condition" },
     compiled: OnceLock::new(),
 };
 
@@ -122,6 +132,14 @@ expr_rule!(
     "An expression that reads a context, or calls a special function, that the key it is in does \
      not offer (`env` in the `env` of a job, `runner` in a matrix).",
     "jobs:\n  a:\n    runs-on: ubuntu-latest\n    env:\n      A: ${{ env.B }}   # reported"
+);
+expr_rule!(
+    IfCondition,
+    "if-condition",
+    Off,
+    "An `if:` that is a constant (`if: false`), or that has text around its `${{ }}` and so is a \
+     non-empty string, always true (`if: ${{ a }} && ${{ b }}`).",
+    "on: push\njobs:\n  a:\n    runs-on: ubuntu-latest\n    if: ${{ github.ref }} && true   # reported"
 );
 expr_rule!(
     ExpressionTypes,

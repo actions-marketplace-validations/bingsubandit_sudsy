@@ -8,13 +8,15 @@
 //! tools: actionlint expression
 
 mod parse;
+mod scope;
 mod ty;
 
 use crate::rule::FileContext;
-use crate::shape::{Finding, leaves};
+use crate::shape::{Finding, Tree, leaves, tree};
 use core_syntax::{TextRange, embedded::size};
 use parse::{Kind, Lit, Node};
-use std::cell::RefCell;
+pub use scope::{Scope, ScopeKind};
+use std::cell::{OnceCell, RefCell};
 use std::rc::Rc;
 use std::sync::OnceLock;
 use ty::{Ty, alternatives};
@@ -71,6 +73,8 @@ pub struct Rules {
     pub syntax: &'static str,
     pub context: &'static str,
     pub types: &'static str,
+    /// Conditions that are constant, or that extra text around the markers makes always true.
+    pub condition: &'static str,
 }
 
 pub struct Spec {
@@ -80,6 +84,7 @@ pub struct Spec {
     pub contexts: &'static [(&'static str, &'static str)],
     pub functions: &'static [Func],
     pub places: &'static [Place],
+    pub scopes: &'static [Scope],
     pub rules: Rules,
     pub compiled: OnceLock<Compiled>,
 }
@@ -132,12 +137,60 @@ enum Class {
     Syntax,
     Context,
     Types,
+    Condition,
 }
 
 struct Checker<'a> {
     spec: &'a Spec,
+    scoped: &'a dyn Fn(&str) -> Option<Ty>,
     place: Option<&'a Place>,
     errors: Vec<(Class, usize, String)>,
+}
+
+/// The text of an implicit expression inside its quotes or block header, and whether a block
+/// keeps the final newline.
+fn value_range(text: &str) -> (usize, usize, bool) {
+    let b = text.as_bytes();
+    match b.first() {
+        Some(q @ (b'\'' | b'"')) if b.len() >= 2 && b.last() == Some(q) => (1, b.len() - 1, false),
+        Some(b'|' | b'>') => {
+            let head = text.find('\n').map_or(text.len(), |i| i + 1);
+            let keep = !text[..head].contains('-');
+            (head, text.trim_end().len().max(head), keep)
+        }
+        _ => (0, text.len(), false),
+    }
+}
+
+/// A block scalar whose content starts at `start` has its header (`|`, `>-`) at the end of the
+/// line before: where that header starts, and whether the block keeps its final newline.
+fn block_header(file: &str, start: usize) -> Option<(usize, bool)> {
+    let before = file[..start].trim_end();
+    let from = before.rfind(char::is_whitespace).map_or(0, |i| i + 1);
+    let word = &before[from..];
+    let mut chars = word.chars();
+    let indicator = matches!(chars.next(), Some('|' | '>'));
+    (indicator && chars.all(|c| matches!(c, '+' | '-') || c.is_ascii_digit()))
+        .then(|| (from, !word.contains('-')))
+}
+
+/// Whether the expression reads no context: only literals and the functions of them.
+fn constant(n: &Node, spec: &Spec) -> bool {
+    match &n.kind {
+        Kind::Lit(_) => true,
+        Kind::Not(a) => constant(a, spec),
+        Kind::And(a, b) | Kind::Or(a, b) | Kind::Cmp(_, a, b) => {
+            constant(a, spec) && constant(b, spec)
+        }
+        Kind::Call(name, args) => {
+            let special = spec
+                .functions
+                .iter()
+                .any(|f| f.special && f.name.eq_ignore_ascii_case(name));
+            !special && args.iter().all(|a| constant(a, spec))
+        }
+        _ => false,
+    }
 }
 
 fn quoted_list(names: impl Iterator<Item = String>) -> String {
@@ -185,7 +238,7 @@ impl Checker<'_> {
                         format!("context \"{name}\" is not allowed here. {available}"),
                     );
                 }
-                t.clone()
+                (self.scoped)(&lower).unwrap_or_else(|| t.clone())
             }
             Kind::Prop(obj, name) => {
                 let t = self.ty(obj);
@@ -238,8 +291,21 @@ impl Checker<'_> {
                 let (a, b) = (self.ty(l), self.ty(r));
                 let collection = |t: &Ty| matches!(t, Ty::Arr(_) | Ty::Obj(_) | Ty::Map(_));
                 let ordering = !matches!(*op, "==" | "!=");
-                let bad = |t: &Ty| collection(t) || (ordering && matches!(t, Ty::Bool | Ty::Null));
-                if bad(&a) || bad(&b) {
+                let bad = |t: &Ty| collection(t) || matches!(t, Ty::Bool | Ty::Null);
+                let wrong = if ordering {
+                    (bad(&a) || bad(&b)) && !matches!(a, Ty::Any) && !matches!(b, Ty::Any)
+                        || collection(&a)
+                        || collection(&b)
+                } else if collection(&a) && collection(&b) {
+                    a != b
+                } else if collection(&a) {
+                    !matches!(b, Ty::Any | Ty::Null)
+                } else if collection(&b) {
+                    !matches!(a, Ty::Any | Ty::Null)
+                } else {
+                    false
+                };
+                if wrong {
                     self.err(Class::Types, n.start, format!("\"{a}\" value cannot be compared to \"{b}\" value with \"{op}\" operator"));
                 }
                 Ty::Bool
@@ -386,12 +452,19 @@ fn end_of(body: &str, from: usize, close: &str) -> Option<usize> {
     None
 }
 
-struct Run<'a> {
+struct Run<'a, 'f> {
     spec: &'a Spec,
+    file: &'a FileContext<'f>,
+    tree: OnceCell<Tree>,
+    path: Vec<String>,
+    /// Where the header of the block scalar being read starts.
+    header: Option<usize>,
+    /// Also the classes that need the file's other keys.
+    full: bool,
     out: Vec<Finding>,
 }
 
-impl Run<'_> {
+impl Run<'_, '_> {
     fn report(&mut self, class: Class, base: usize, at: usize, message: String) {
         self.report_len(class, base, at, 1, message);
     }
@@ -401,6 +474,7 @@ impl Run<'_> {
             Class::Syntax => self.spec.rules.syntax,
             Class::Context => self.spec.rules.context,
             Class::Types => self.spec.rules.types,
+            Class::Condition => self.spec.rules.condition,
         };
         let start = base + at;
         let range = TextRange::new(size(start), size(start + len));
@@ -417,12 +491,31 @@ impl Run<'_> {
             Ok(n) => n,
             Err(e) => return self.report(Class::Syntax, base, e.at, e.message),
         };
+        let (spec, file, cell, path) = (self.spec, self.file, &self.tree, &self.path);
+        let full = self.full;
+        let scoped = |context: &str| {
+            if !full {
+                return None;
+            }
+            let s = spec.scopes.iter().find(|s| s.context == context)?;
+            scope::ty(s, cell.get_or_init(|| tree(file)), path, spec.open)
+        };
         let mut checker = Checker {
             spec: self.spec,
+            scoped: &scoped,
             place,
             errors: Vec::new(),
         };
         let t = checker.ty(&node);
+        let mut conditions = Vec::new();
+        if full && place.is_some_and(|p| p.implicit) && !embedded && constant(&node, self.spec) {
+            let message = format!(
+                "constant expression `{}` in condition: remove the condition",
+                body.trim()
+            );
+            let (from, at) = self.header.map_or((base, node.start), |h| (h, 0));
+            conditions.push((from, at, message));
+        }
         if embedded && matches!(t, Ty::Arr(_) | Ty::Obj(_) | Ty::Map(_)) {
             checker.err(
                 Class::Types,
@@ -433,12 +526,41 @@ impl Run<'_> {
         for (class, at, message) in checker.errors {
             self.report(class, base, at, message);
         }
+        for (from, at, message) in conditions {
+            self.report(Class::Condition, from, at, message);
+        }
     }
 
     fn scalar(&mut self, text: &str, start: usize, place: Option<&Place>) {
         let (open, close) = (self.spec.open, self.spec.close);
-        if place.is_some_and(|p| p.implicit) && !text.contains(open) {
-            return self.expression(text, start, place, false);
+        let (mut text, mut start) = (text, start);
+        let mut extra = false;
+        if place.is_some_and(|p| p.implicit) {
+            let (lo, hi, mut newline) = value_range(text);
+            let mut at = start;
+            self.header = None;
+            if let Some((h, keep)) = block_header(self.file.text, start) {
+                (at, newline) = (h, keep);
+                self.header = Some(h);
+            }
+            let body = &text[lo..hi];
+            if !body.contains(open) {
+                let lead = body.len() - body.trim_start().len();
+                return self.expression(body.trim(), start + lo + lead, place, false);
+            }
+            let first = body.find(open).unwrap_or(0);
+            let whole = end_of(body, first + open.len(), close).map(|e| e + close.len());
+            if newline || first != 0 || whole != Some(body.len()) {
+                if self.full {
+                    let message = format!(
+                        "`{}` is always true because there is text around the {open} {close} markers",
+                        body.trim()
+                    );
+                    self.report(Class::Condition, at, 0, message);
+                }
+                extra = true;
+            }
+            (text, start) = (body, start + lo);
         }
         let mut from = 0;
         while let Some(i) = text[from..].find(open).map(|i| i + from) {
@@ -447,7 +569,7 @@ impl Run<'_> {
                 self.report_len(Class::Syntax, start, i, open.len(), message);
                 break;
             };
-            let embedded = text.trim() != &text[i..end + close.len()];
+            let embedded = extra || text.trim() != &text[i..end + close.len()];
             self.expression(
                 &text[i + open.len()..end],
                 start + i + open.len(),
@@ -459,34 +581,43 @@ impl Run<'_> {
     }
 }
 
-type Cached = (core_syntax::SyntaxNode, usize, Rc<Vec<Finding>>);
+/// The file, the spec, whether the findings are the full set (not only the syntax class), the findings.
+type Cached = (core_syntax::SyntaxNode, usize, bool, Rc<Vec<Finding>>);
 
 thread_local! {
     static LAST: RefCell<Option<Cached>> = const { RefCell::new(None) };
 }
 
-/// Every expression problem of the file, found once for the file read last.
-pub fn findings(spec: &'static Spec, file: &FileContext<'_>) -> Rc<Vec<Finding>> {
+/// The expression problems of the file, found once for the file read last: all of them when
+/// `full`, else only the syntax class (no file-derived scopes, no conditions), which is cheaper.
+pub fn findings(spec: &'static Spec, file: &FileContext<'_>, full: bool) -> Rc<Vec<Finding>> {
     let key = std::ptr::from_ref(spec) as usize;
     LAST.with_borrow_mut(|last| {
-        if let Some((root, k, found)) = last
+        if let Some((root, k, was_full, found)) = last
             && *k == key
+            && (*was_full || !full)
             && root == file.root
         {
             return found.clone();
         }
         let mut run = Run {
             spec,
+            file,
+            tree: OnceCell::new(),
+            path: Vec::new(),
+            header: None,
+            full,
             out: Vec::new(),
         };
         let want = |path: &[String], text: &str| text.contains(spec.open) || spec.implicit(path);
         for leaf in leaves(file, &want) {
             let text = &file.text[leaf.range];
             let place = spec.place(&leaf.path);
+            run.path = leaf.path;
             run.scalar(text, usize::from(leaf.range.start()), place);
         }
         let found = Rc::new(run.out);
-        *last = Some((file.root.clone(), key, found.clone()));
+        *last = Some((file.root.clone(), key, full, found.clone()));
         found
     })
 }
@@ -498,7 +629,8 @@ pub fn check(
     file: &FileContext<'_>,
     ctx: &mut crate::RuleContext<'_>,
 ) {
-    for finding in findings(spec, file).iter().filter(|f| f.rule == rule) {
+    let full = rule != spec.rules.syntax;
+    for finding in findings(spec, file, full).iter().filter(|f| f.rule == rule) {
         ctx.report(finding.range, finding.message.clone());
     }
 }

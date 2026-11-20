@@ -28,17 +28,17 @@ fixes:  # lint rule -> where and what to change
   events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   syntax-check: 107
-  expression/types: 84
-  action/outdated-runner: 29
+  expression/types: 48
   syntax-check/yaml: 25
   glob: 22
-  if-cond: 21
   events/inputs: 20
   matrix: 19
   action: 12
   syntax-check/duplicate-key: 7
   credentials: 6
   events/schedule: 6
+  if-cond: 6
   runner-label/conflict: 6
   workflow-call: 6
   runner-label/unknown: 5
+  expression/untrusted: 4

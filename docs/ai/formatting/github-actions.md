@@ -16,7 +16,9 @@ The `run:` of every step of a workflow's jobs and of a composite action is code 
 |---|---|
 | `invalid-expression` | Syntax of `${{ }}`, parsed by the shared `core_rules::expr` (grammar, type language as text, tables of contexts, functions and per-key availability in `src/expression.rs`): unclosed, empty, brackets, strings, stray characters, unknown context or function. |
 | `expression-context` | Off by default (preset `github-actions/actionlint`). A context or special function the key does not offer (`env` in a job `env`, `runner` in a job `if`). |
-| `expression-types` | Off by default (preset). A property a typed context lacks, a wrong number or type of arguments, a `format` placeholder with no argument, an object interpolated into text. `steps`, `needs`, `matrix` and `inputs` are untyped (they depend on other keys). |
+| `expression-types` | Off by default (preset). A property a typed context lacks, a wrong number or type of arguments, a `format` placeholder with no argument, an object interpolated into text. `steps` (ids before the step, outputs untyped), `needs`, `matrix` and `inputs` take their type from the file itself (`Scope` rows: key paths and key names; `core_rules::expr::scope`). |
+| `if-condition` | Off by default (preset). An `if:` that is a constant, or has text (a space, a newline of a `|` block, `&&`) around its `${{ }}` and so is always true. |
+| `outdated-action` | Off by default (preset). `uses: name@vN` of a popular action whose major version runs on a retired runtime (table `OUTDATED` in `src/shape.rs`, read by the shared `Format::Outdated`). |
 | `script-injection` | An attacker-controlled context (issue and pull request titles and bodies, branch names, commit messages, ...) pasted into `run:` or the `script` of `actions/github-script`. |
 | `deprecated-commands` | `::set-output`, `::save-state`, `::set-env`, `::add-path` in such a script. |
 | `invalid-job-id` | Characters of job ids. |
@@ -28,7 +30,7 @@ The `run:` of every step of a workflow's jobs and of a composite action is code 
 | `invalid-permissions` | Off by default: a scope or value `permissions` does not have. |
 | `missing-permissions` | Off by default: a job without `permissions` in a workflow without top-level `permissions`. |
 
-Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: the types of file-derived contexts (`steps`, `needs`, `matrix`, `inputs`), `if:` conditions that are always true, globs of filters, time zones and the shortest cron interval, typed defaults of inputs, matrix keys, anchors, runner label conflicts. Not done, needing the network or other files: the inputs and outputs of the actions a step uses, outdated runners of an action, local actions and reusable workflows.
+Checked against actionlint by `scripts/parity.sh actionlint` ([../development/parity.md](../development/parity.md#actionlint)); the catalog [../parity/actionlint.yaml](../parity/actionlint.yaml) lists what is not done. Not done, offline: the types of step outputs and declared secrets, `fromJSON` literals, globs of filters, time zones and the shortest cron interval, typed defaults of inputs, matrix keys, anchors, runner label conflicts. Not done, needing the network or other files: the inputs and outputs of the actions a step uses, local actions and reusable workflows.
 
 
 ## Options

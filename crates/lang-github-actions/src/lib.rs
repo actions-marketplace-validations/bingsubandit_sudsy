@@ -30,11 +30,13 @@ static RULES: &[&dyn Rule] = &[
     &expression::InvalidExpression,
     &expression::ExpressionContext,
     &expression::ExpressionTypes,
+    &expression::IfCondition,
     &scripts::DeprecatedCommands,
     &scripts::ScriptInjection,
     &shape::WorkflowSyntax,
     &shape::InvalidEvent,
     &shape::InvalidPermissions,
+    &shape::OutdatedAction,
 ];
 
 pub struct GithubActionsProvider {

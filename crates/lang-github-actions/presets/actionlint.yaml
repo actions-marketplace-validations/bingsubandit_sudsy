@@ -7,10 +7,12 @@ github-actions:
       duplicate-ids: warn
       expression-context: warn
       expression-types: warn
+      if-condition: warn
       invalid-expression: warn
       invalid-event: warn
       invalid-job-id: warn
       invalid-permissions: warn
+      outdated-action: warn
       invalid-runs-on: warn
       script-injection: warn
       unknown-needs: warn

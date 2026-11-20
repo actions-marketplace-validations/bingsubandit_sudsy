@@ -1623,6 +1623,10 @@
                 }
               ]
             },
+            "if-condition": {
+              "$ref": "#/definitions/rule",
+              "description": "An `if:` that is a constant (`if: false`), or that has text around its `${{ }}` and so is a non-empty string, always true (`if: ${{ a }} && ${{ b }}`)."
+            },
             "if-expr-with-false-true": {
               "$ref": "#/definitions/rule",
               "description": "A conditional expression with `False` and `True` arms."
@@ -3808,6 +3812,10 @@
             "os-error-alias": {
               "$ref": "#/definitions/rule",
               "description": "`EnvironmentError`, `IOError`, `WindowsError`, `mmap.error`, `os.error`, `select.error` or `socket.error` in an `except` clause or a `raise`."
+            },
+            "outdated-action": {
+              "$ref": "#/definitions/rule",
+              "description": "A step that uses a popular action at a major version that runs on a retired runtime."
             },
             "outdated-version-block": {
               "$ref": "#/definitions/rule",

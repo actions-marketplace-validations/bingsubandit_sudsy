@@ -606,3 +606,74 @@ pub fn leaves(file: &FileContext<'_>, want: &dyn Fn(&[String], &str) -> bool) ->
     walk.collect(Some(body), &mut Vec::new(), want, &mut out);
     out
 }
+
+/// The values of a file read into a tree, for rules that look at other keys than their own.
+pub enum Tree {
+    Null,
+    /// The text, and whether it was quoted.
+    Scalar(String, bool),
+    Map(Vec<(String, Tree)>),
+    Seq(Vec<Tree>),
+}
+
+impl Tree {
+    pub fn get(&self, key: &str) -> Option<&Tree> {
+        match self {
+            Tree::Map(m) => m.iter().find(|(k, _)| k == key).map(|(_, v)| v),
+            _ => None,
+        }
+    }
+
+    /// The value at `path` (keys; sequence items by index).
+    pub fn at<S: AsRef<str>>(&self, path: &[S]) -> Option<&Tree> {
+        let mut node = self;
+        for key in path {
+            let key = key.as_ref();
+            node = match node {
+                Tree::Seq(items) => items.get(key.parse::<usize>().ok()?)?,
+                _ => node.get(key)?,
+            };
+        }
+        Some(node)
+    }
+}
+
+impl Walk<'_> {
+    fn tree(&self, node: Option<SyntaxNode>) -> Tree {
+        match self.val(node.as_ref()) {
+            Val::Map(map) => Tree::Map(
+                (self.entries(&map).into_iter())
+                    .map(|(name, _, value)| (name, self.tree(value)))
+                    .collect(),
+            ),
+            Val::Seq(seq) => Tree::Seq(
+                (self.items(&seq).into_iter())
+                    .map(|(_, value)| self.tree(value))
+                    .collect(),
+            ),
+            Val::Scalar { text, quoted } => Tree::Scalar(text, quoted),
+            _ => Tree::Null,
+        }
+    }
+}
+
+/// The whole file as a tree.
+pub fn tree(file: &FileContext<'_>) -> Tree {
+    let g = file.grammar;
+    let mut body = file.root.clone();
+    while !(g.has_tag(body.kind(), "mapping") || g.has_tag(body.kind(), "sequence")) {
+        match body.children().next() {
+            Some(n) => body = n,
+            None => return Tree::Null,
+        }
+    }
+    let walk = Walk {
+        g,
+        hooks: file.hooks,
+        text: file.text,
+        shape: &NO_ROWS,
+        patterns: Vec::new(),
+        out: Vec::new(),
+    };
+    walk.tree(Some(body))
+}

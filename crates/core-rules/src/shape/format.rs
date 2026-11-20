@@ -10,6 +10,9 @@ pub enum Format {
     Cron,
     /// A number above zero.
     Positive,
+    /// `name@vN` of an action: outdated when the table lists the name with a last outdated
+    /// major version of N or more.
+    Outdated(&'static [(&'static str, u32)]),
 }
 
 const MONTHS: &[&str] = &[
@@ -66,6 +69,14 @@ impl Format {
     pub fn check(self, text: &str) -> Option<String> {
         match self {
             Format::None => None,
+            Format::Outdated(table) => {
+                let (name, version) = text.split_once('@')?;
+                let major = version.strip_prefix('v')?.parse::<u32>().ok()?;
+                let (_, last) = table.iter().find(|(n, _)| n.eq_ignore_ascii_case(name))?;
+                (major <= *last).then(|| {
+                    format!("the runner of \"{text}\" action is too old to run on GitHub Actions. update the action's version to fix this warning")
+                })
+            }
             Format::Positive => match text.parse::<f64>() {
                 Ok(n) if n <= 0.0 => Some(format!("value must be greater than zero: {text}")),
                 _ => None,
