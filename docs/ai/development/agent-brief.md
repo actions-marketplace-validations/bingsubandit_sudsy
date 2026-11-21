@@ -14,6 +14,7 @@ The standard brief of a build agent; a task prompt links it and adds only the ta
 - Two-language rule: rows, row keys, tags and `format.rules` sections need two languages; rows hold facts, decisions stay in shared Rust ([CLAUDE.md](../../../CLAUDE.md)).
 - Hard case: measure once (a prototype, an ablation), record numbers and the missing capability in [hard-cases.md](../design/hard-cases.md), move on. No unmeasured skips.
 - No byte-compare of formatter output against a base build; an escaped regression becomes a test.
+- A shared concept is turned on by the data in its row of [the kit index](../kit/index.md) (column `turned on by`: an option, a tag, a kind set, a rules section): set that data in the language, never write a switch or a second implementation.
 - Performance: check the change against [the checklist](../performance/checklist.md); on an allocation overrun run `perf-bench` there, not valgrind.
 
 ## Checks

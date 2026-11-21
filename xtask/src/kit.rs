@@ -248,6 +248,56 @@ fn default_kind(m: &Module) -> &'static str {
     }
 }
 
+/// The `reads: option:X` entries of a module name an option of the registry that the crate of the
+/// module reads by its id constant (`opt::X`) or by its name (the option may be read by a sibling
+/// module that calls this one), so the "turned on by" column cannot go stale.
+fn check_option_reads(root: &Path, m: &Module, registry: &str) -> Vec<String> {
+    let names: Vec<&str> = m
+        .header
+        .reads
+        .iter()
+        .filter_map(|r| r.strip_prefix("option:"))
+        .collect();
+    if names.is_empty() {
+        return Vec::new();
+    }
+    let source = crate_source(&root.join("crates").join(&m.krate).join("src"));
+    let mut errors = Vec::new();
+    for name in names {
+        if !registry.contains(&format!("    \"{name}\",\n")) {
+            errors.push(format!(
+                "{}: `reads: option:{name}` is not an option of any lang.yaml or options.txt",
+                m.path
+            ));
+        } else if !source.contains(&name.to_uppercase()) && !source.contains(&format!("\"{name}\""))
+        {
+            errors.push(format!(
+                "{}: `reads: option:{name}` but the crate reads no option `{name}` (`opt::{}` or \"{name}\")",
+                m.path,
+                name.to_uppercase()
+            ));
+        }
+    }
+    errors
+}
+
+/// The text of every `.rs` file under `dir`.
+fn crate_source(dir: &Path) -> String {
+    let mut out = String::new();
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return out;
+    };
+    for e in entries.flatten() {
+        let p = e.path();
+        if p.is_dir() {
+            out += &crate_source(&p);
+        } else if p.extension().is_some_and(|x| x == "rs") {
+            out += &std::fs::read_to_string(&p).unwrap_or_default();
+        }
+    }
+    out
+}
+
 /// Builds the index: concepts, their users and the data-item users, plus every error found.
 pub fn build(root: &Path) -> Result<Kit> {
     let modules = modules(root)?;
@@ -255,8 +305,11 @@ pub fn build(root: &Path) -> Result<Kit> {
     let catalogs = data::catalogs(root)?;
     let mut errors = Vec::new();
     let mut concepts: BTreeMap<String, Concept> = BTreeMap::new();
+    let registry =
+        std::fs::read_to_string(root.join("crates/core-config/src/opt_ids.generated.rs"))?;
 
     for m in &modules {
+        errors.extend(check_option_reads(root, m, &registry));
         if !m.header.present {
             errors.push(format!("{}: no `//! concept:` header", m.path));
         } else if m.header.what.is_empty()
