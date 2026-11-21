@@ -1,2 +1,18 @@
 target: 0.0
 
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  class.notFound: 7408
+  variable.undefined: 591
+  classConstant.notFound: 511
+  staticMethod.notFound: 401
+  function.notFound: 384
+  new.static: 317
+  method.notFound: 312
+  interface.notFound: 218
+  attribute.notFound: 183
+  property.notFound: 147
+  class.noParent: 96
+  ignore.unmatchedLine: 62
+  ignore.unmatchedIdentifier: 47
+  method.void: 42
+  method.override: 36

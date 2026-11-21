@@ -5,3 +5,14 @@ files:
   unknown/tailwind stylelint:at-rule-no-unknown 1: tailwind-at-rules
   unknown/tailwind stylelint:color-no-invalid-hex 4: element-id
 target: 94.7
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  media-feature-range-notation: 415
+  value-keyword-case: 127
+  declaration-block-no-redundant-longhand-properties: 57
+  selector-not-notation: 48
+  declaration-property-value-no-unknown: 11
+  comment-empty-line-before: 8
+  custom-property-empty-line-before: 3
+  declaration-property-value-keyword-no-deprecated: 2
+  no-duplicate-selectors: 2
+  no-descending-specificity: 1

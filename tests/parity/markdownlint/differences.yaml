@@ -1,1 +1,9 @@
 target: 83.4  # the same share on the target number (docs/ai/design/parity-target.md); scripts/parity.sh coverage markdownlint
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  MD010: 309
+  MD037: 6
+  MD041: 4
+  MD051: 2
+  MD024: 1
+  MD028: 1
+  MD034: 1

@@ -1,1 +1,17 @@
 target: 96.2
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  Lint/UselessAssignment: 168
+  Lint/AssignmentInCondition: 14
+  Lint/EmptyFile: 7
+  Lint/SelfAssignment: 7
+  Lint/ToJSON: 7
+  Lint/UriRegexp: 7
+  Lint/AmbiguousOperator: 6
+  Lint/AmbiguousRegexpLiteral: 6
+  Lint/DeprecatedOpenSSLConstant: 6
+  Lint/NonLocalExitFromIterator: 6
+  Lint/RedundantSplatExpansion: 6
+  Lint/CopDirectiveSyntax: 5
+  Lint/PercentStringArray: 5
+  Lint/ShadowedException: 5
+  Lint/UnreachableLoop: 5

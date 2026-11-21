@@ -89,6 +89,11 @@ Lint: target 88.6%; rules by missed findings:
 
 1. `initializer-layout` (1 files): a wrapped initializer is laid out by `object_collection_array_initializers` and `anonymous_types`; dotnet format leaves the brace where the source has it
 
+## eslint
+
+Lint: target 100%; rules by missed findings:
+1. `no-unexpected-multiline` (2 missed)
+
 ## eslint-plugin-vue
 
 Lint: target 23%; rules by missed findings:
@@ -237,6 +242,36 @@ Lint: target 92.3%; rules by missed findings:
 14. `if-else-wrapping` (162 missed)
 15. `function-naming` (160 missed)
 
+## markdownlint
+
+Lint: target 83.4%; rules by missed findings:
+1. `MD010` (309 missed)
+2. `MD037` (6 missed)
+3. `MD041` (4 missed)
+4. `MD051` (2 missed)
+5. `MD024` (1 missed)
+6. `MD028` (1 missed)
+7. `MD034` (1 missed)
+
+## phpstan
+
+Lint: target 0%; rules by missed findings:
+1. `class.notFound` (7408 missed)
+2. `variable.undefined` (591 missed)
+3. `classConstant.notFound` (511 missed)
+4. `staticMethod.notFound` (401 missed)
+5. `function.notFound` (384 missed)
+6. `new.static` (317 missed)
+7. `method.notFound` (312 missed)
+8. `interface.notFound` (218 missed)
+9. `attribute.notFound` (183 missed)
+10. `property.notFound` (147 missed)
+11. `class.noParent` (96 missed)
+12. `ignore.unmatchedLine` (62 missed)
+13. `ignore.unmatchedIdentifier` (47 missed)
+14. `method.void` (42 missed)
+15. `method.override` (36 missed)
+
 ## prettier
 
 1. `code-span-backticks` (2 files): a code span with three backticks (tree-sitter-md does not read it as code) is kept; Prettier writes one backtick
@@ -302,6 +337,25 @@ Format: unclassified 32 of 567 differing files (6%).
 11. `new-syntax` (10 files): `using` declarations and import attributes / `with` clauses printed differently Fix: add the layout rows for the new nodes.
 12. `jsx-layout` (5 files): JSX layout of comments, spread attributes and text fill Fix: JSX shape.
 
+## rubocop
+
+Lint: target 96.2%; rules by missed findings:
+1. `Lint/UselessAssignment` (168 missed)
+2. `Lint/AssignmentInCondition` (14 missed)
+3. `Lint/EmptyFile` (7 missed)
+4. `Lint/SelfAssignment` (7 missed)
+5. `Lint/ToJSON` (7 missed)
+6. `Lint/UriRegexp` (7 missed)
+7. `Lint/AmbiguousOperator` (6 missed)
+8. `Lint/AmbiguousRegexpLiteral` (6 missed)
+9. `Lint/DeprecatedOpenSSLConstant` (6 missed)
+10. `Lint/NonLocalExitFromIterator` (6 missed)
+11. `Lint/RedundantSplatExpansion` (6 missed)
+12. `Lint/CopDirectiveSyntax` (5 missed)
+13. `Lint/PercentStringArray` (5 missed)
+14. `Lint/ShadowedException` (5 missed)
+15. `Lint/UnreachableLoop` (5 missed)
+
 ## ruff
 
 Format: unclassified 0 of 226 differing files (0%).
@@ -314,6 +368,22 @@ Format: unclassified 0 of 226 differing files (0%).
 7. `bracket-split` (16 files): 16 files first differ here: which bracket splits first when a call, subscript or collection ends a line (hugging, nested subscripts, first-line width). fix: best-fit layout of the last bracket in the shared delimited_list shape
 8. `docstring` (13 files): 13 files first differ here: docstring edge cases: the closing quotes of a docstring that fills the line, quotes and escapes at the end, code in docstrings. fix: docstring exact-fit rule and a docstring-code option in the shared string layout
 9. `fstring-quotes` (13 files): 13 files first differ here: quotes of strings inside f-string replacement fields and nested f-strings. fix: f-string replacement field normalisation in the shared string literal code
+Lint: target 94.6%; rules by missed findings:
+1. `RUF100` (83 missed)
+2. `SIM114` (20 missed)
+3. `UP031` (11 missed)
+4. `UP046` (9 missed)
+5. `RUF028` (8 missed)
+6. `PYI034` (7 missed)
+7. `PLR1730` (5 missed)
+8. `PYI036` (5 missed)
+9. `UP028` (5 missed)
+10. `B020` (4 missed)
+11. `PLW0127` (4 missed)
+12. `RUF017` (4 missed)
+13. `FURB188` (3 missed)
+14. `G201` (3 missed)
+15. `PLE2502` (3 missed)
 
 ## shellcheck
 
@@ -366,6 +436,20 @@ Lint: target 82.6%; rules by missed findings:
 14. `AM04` (57 missed)
 15. `RF01` (53 missed)
 
+## stylelint
+
+Lint: target 94.7%; rules by missed findings:
+1. `media-feature-range-notation` (415 missed)
+2. `value-keyword-case` (127 missed)
+3. `declaration-block-no-redundant-longhand-properties` (57 missed)
+4. `selector-not-notation` (48 missed)
+5. `declaration-property-value-no-unknown` (11 missed)
+6. `comment-empty-line-before` (8 missed)
+7. `custom-property-empty-line-before` (3 missed)
+8. `declaration-property-value-keyword-no-deprecated` (2 missed)
+9. `no-duplicate-selectors` (2 missed)
+10. `no-descending-specificity` (1 missed)
+
 ## taplo
 
 1. `crlf-in-string` (1 files): taplo keeps CRLF inside a multi-line string and converts the rest; Sudsy writes LF everywhere
@@ -376,6 +460,13 @@ Lint: target 82.6%; rules by missed findings:
 ## terraform
 
 1. `token-rewrite` (3 files): terraform fmt rewrites tokens (it quotes a bare block label, `list` becomes `list(any)`); Sudsy keeps the tokens
+
+## tflint
+
+Lint: target 58.7%; rules by missed findings:
+1. `terraform_required_providers` (37 missed)
+2. `terraform_required_version` (20 missed)
+3. `terraform_unused_declarations` (2 missed)
 
 ## yamllint
 

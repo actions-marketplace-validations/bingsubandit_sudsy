@@ -1,1 +1,5 @@
 target: 58.7
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  terraform_required_providers: 37
+  terraform_required_version: 20
+  terraform_unused_declarations: 2

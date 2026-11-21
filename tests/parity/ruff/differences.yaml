@@ -31,3 +31,19 @@ refused:
 flags:
   skip_with: "a fixture that has an `.options.json` is skipped: its options are not mapped to Sudsy's yet"
 target: 94.6
+missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+  RUF100: 83
+  SIM114: 20
+  UP031: 11
+  UP046: 9
+  RUF028: 8
+  PYI034: 7
+  PLR1730: 5
+  PYI036: 5
+  UP028: 5
+  B020: 4
+  PLW0127: 4
+  RUF017: 4
+  FURB188: 3
+  G201: 3
+  PLE2502: 3
