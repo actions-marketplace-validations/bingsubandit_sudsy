@@ -46,7 +46,7 @@ class Runner(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             bad, diffs, out = run_verdicts(self.folder(tmp, "ours"), [("ok.txt", "x", "x"), ("a.txt", "t", "ours"), ("b.txt", None, "o")])
         self.assertEqual(bad, 0)
-        self.assertIn("raw 33.3% (1 of 3); target 100.0% (1 of 1); intentional: invalid-input 1, tool-wrong 1, REVIEW 0", out)
+        self.assertIn("target 100.0% (1 of 1); intentional: invalid-input 1, tool-wrong 1, REVIEW 0", out)
 
     def test_files_of_the_target_are_counted_per_group_without_the_intentional_ones(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -70,7 +70,7 @@ class Runner(unittest.TestCase):
             bad, diffs, out = run_verdicts(self.folder(tmp, "ours"), [("ok.txt", "x", "x"), ("a.txt", "t", "changed")])
         self.assertEqual(bad, 1)
         self.assertIn("a.txt: REVIEW", out)
-        self.assertIn("raw 50.0% (1 of 2); target 50.0% (1 of 2); intentional: invalid-input 0, tool-wrong 0, REVIEW 1", out)
+        self.assertIn("target 50.0% (1 of 2); intentional: invalid-input 0, tool-wrong 0, REVIEW 1", out)
 
     def test_filters_are_counted(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -112,7 +112,7 @@ class Runner(unittest.TestCase):
             (folder / "differences.yaml").write_text("differences:\n  bad: gap  g\nintentional:\n  bad: invalid-input\nfiles:\n  c.txt: bad\n", encoding="utf-8")
             bad, diffs, out = run_verdicts(folder, [("ok.txt", "x", "x"), ("a.txt", None, "o")])
             self.assertEqual(bad, 0)
-            self.assertIn("raw 50.0% (1 of 2); target 100.0% (1 of 1); intentional: invalid-input 1", out)
+            self.assertIn("target 100.0% (1 of 1); intentional: invalid-input 1", out)
             diffs.refuted.add("c.txt")  # Sudsy rejects it but the reference parser accepts it
             self.assertEqual(diffs.status("c.txt", None), "REVIEW")
 

@@ -37,7 +37,7 @@ pins:                   # file -> pin of Sudsy's output for it, for the tool-wro
 ```
 `choice` is intentional and documented (the `choice` names are the generated block `<!-- generated:differences:<tool> -->` of the language's `docs/ai/formatting` page, written by `cargo xtask codegen`); `gap` is unintended, to fix, and stays out of the user docs. A text with `: ` or ` #` in it is quoted. The run fails on a differing file that is not listed (outside the ratchet groups), a listed file that no longer differs (stale), a name no file uses, a name that is not defined, and a ratchet group below its minimum; above it, the run prints the count to raise the minimum to. Format runs also format Sudsy's own output once more (Prettier is not involved: Sudsy must reach a fixed point on its own output) and count the files that change, per ratchet group (`fixtures` for the ungrouped ones); the run fails above the `second-format` maximum and prints the count to lower it to. A file the safety check refuses is not formatted, so it is in no second-format count: the `refused` maximum counts those files the same way (a bug that the guard caught; the target is 0). The target is 0 for every group, and no input is dropped to lower it. `PARITY_FILTER` lists the files that change. The report ends with the number of files per name, `choice` then `gap`, and the ratchet lines.
 
-Every run (format, lint, coverage) prints two numbers, defined in [../design/parity-target.md](../design/parity-target.md): **raw** (the share measured as before) and **target** (the share a user of the tool can get from Sudsy; 100% means all of it), then the intentional groups with their counts and the count of every input filter (`skip`, `skip_with`, non-UTF-8 files, files the tool rejects or cannot read, findings left out). The target leaves out only the reviewed intentional cases; everything else counts against Sudsy. The `intentional` map gives a name one of two values: `invalid-input` (the file is excluded from the target; the tool rejecting it is the evidence) and `tool-wrong` (the tool's output changes meaning, drops content or is unstable). A `tool-wrong` file is pinned: `pins` holds the first 16 hex digits of the SHA-256 of Sudsy's output for it, so a later change to that output is printed as `REVIEW` and counts against Sudsy until the lead reviews it and pastes the new pin from `scripts/parity.sh --pin <tool>` (a format run that also prints the pins of the `tool-wrong` entries; the runner never writes them). A lint finding is pinned by its key (file, rule, line), so no hash is needed; a finding that moves is unlisted and counts. In a coverage run the target leaves out the findings of `wontfix` catalog entries and counts the findings of `formatter` ids, which the raw share leaves out, as missing until the tool has a proof run. Every coverage run of a tool with `formatter` catalog entries is that run, not an option: it copies the corpus, formats the copy with `sudsy format` under the tool's preset, runs the tool again and prints the findings of `formatter` ids that remain; only those count as missing in the target. A file `sudsy format` rejects stays unformatted, so its findings remain. Two more keys of `differences.yaml` serve the target. A file the tool rejects is always `invalid-input`, with no entry needed: the target leaves it out, the raw share keeps it, and every run prints the group with its count (a ratchet group also counts them as `rejected by <tool>`). When Sudsy rejects a file and the entry is `invalid-input`, the language's reference parser must reject it too: a format entry with `reference_parser` (`npm`, `version`, `script`: a Node script that exits 1 on a syntax error; Prettier's GraphQL files use graphql-js 16) is run on those files, and one it accepts is printed as a Sudsy bug and counts as `REVIEW`. `flags` names each reference-tool flag that turns a feature off (`--no-config`, `--skip-javadoc-formatting`, `ignore_trailing_blanks`, `skip_with`) with its reason; every run prints `flag <name> (gap): N fixtures` for it, N being the fixtures the flag applies to (the files it changed the result of, for `ignore_trailing_blanks`; the files skipped, for `skip_with`). In a lint coverage run the raw share and the target both need the same line (the column is not compared; every `parse` of `scripts/parity_tools.json` has a `line`): a report on another line is missing. The target also leaves out a finding that is a reviewed `tool-wrong` one, listed in `differences.yaml` as `<file> <tool>:<rule> <line>` under an `intentional` name. `scripts/parity.sh --test` runs the runner's tests (`scripts/test_parity.py`: a pinned file whose output changed, the filter counts, the `fix` command), part of the gate.
+Every run (format, lint, coverage) prints one number, defined in [../design/parity-target.md](../design/parity-target.md): the **target** (the share a user of the tool can get from Sudsy; 100% means all of it), then the intentional groups with their counts and the count of every input filter (`skip`, `skip_with`, non-UTF-8 files, files the tool rejects or cannot read, findings left out). The target leaves out only the reviewed intentional cases; everything else counts against Sudsy. The `intentional` map gives a name one of two values: `invalid-input` (the file is excluded from the target; the tool rejecting it is the evidence) and `tool-wrong` (the tool's output changes meaning, drops content or is unstable). A `tool-wrong` file is pinned: `pins` holds the first 16 hex digits of the SHA-256 of Sudsy's output for it, so a later change to that output is printed as `REVIEW` and counts against Sudsy until the lead reviews it and pastes the new pin from `scripts/parity.sh --pin <tool>` (a format run that also prints the pins of the `tool-wrong` entries; the runner never writes them). A lint finding is pinned by its key (file, rule, line), so no hash is needed; a finding that moves is unlisted and counts. In a coverage run the target leaves out the findings of `wontfix` catalog entries and counts the findings of `formatter` ids as missing until the tool has a proof run. Every coverage run of a tool with `formatter` catalog entries is that run, not an option: it copies the corpus, formats the copy with `sudsy format` under the tool's preset, runs the tool again and prints the findings of `formatter` ids that remain; only those count as missing in the target. A file `sudsy format` rejects stays unformatted, so its findings remain. Two more keys of `differences.yaml` serve the target. A file the tool rejects is always `invalid-input`, with no entry needed: the target leaves it out, and every run prints the group with its count (a ratchet group also counts them as `rejected by <tool>`). When Sudsy rejects a file and the entry is `invalid-input`, the language's reference parser must reject it too: a format entry with `reference_parser` (`npm`, `version`, `script`: a Node script that exits 1 on a syntax error; Prettier's GraphQL files use graphql-js 16) is run on those files, and one it accepts is printed as a Sudsy bug and counts as `REVIEW`. `flags` names each reference-tool flag that turns a feature off (`--no-config`, `--skip-javadoc-formatting`, `ignore_trailing_blanks`, `skip_with`) with its reason; every run prints `flag <name> (gap): N fixtures` for it, N being the fixtures the flag applies to (the files it changed the result of, for `ignore_trailing_blanks`; the files skipped, for `skip_with`). In a lint coverage run the target needs the same line (the column is not compared; every `parse` of `scripts/parity_tools.json` has a `line`): a report on another line is missing. The target leaves out a finding that is a reviewed `tool-wrong` one, listed in `differences.yaml` as `<file> <tool>:<rule> <line>` under an `intentional` name. `scripts/parity.sh --test` runs the runner's tests (`scripts/test_parity.py`: a pinned file whose output changed, the filter counts, the `fix` command), part of the gate.
 
 ## The queue
 `docs/ai/parity/queue.md` (generated by `cargo xtask codegen` from every `differences.yaml`, kept current by `codegen --check`) lists per tool the open work: the unclassified count with its share of the differing files, the `gap` names ranked by files, and for lint the rules ranked by missed findings, each with its `fixes:` note. In `files`, a ratchet group's names may end in `:N` (`real-world: scss-layout:300, comments`): N differing files have that name as their first cause, so classifying a group's files is writing those numbers; the files of a ratchet group without `:N` stay unclassified, and the run prints `unclassified: N of D` and fails when N rises above `unclassified:` (a ratchet: lower it when the run says so); a tool without the key only prints the count (set it). A gap that reaches 0 files is removed with its `fixes:` note (the run reports an unused name). A parity step reads the tool's section first, classifies before it fixes, keeps unclassified under 15% of the differing files, takes the items from the top and commits the regenerated queue with each landing.
@@ -73,62 +73,62 @@ The fixtures' `sudsy.yaml` extends `preset:csharp/stylecop`, so the formatter id
 
 ## Numbers
 
-Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.sh coverage <tool>`; definitions in [../design/parity-target.md](../design/parity-target.md)). Format: identical files; coverage: findings the mapped rule reports on the tool's line. The ratchets `coverage:` (raw) and `target:` of `differences.yaml` hold the coverage numbers; `cargo xtask codegen` copies them into [../parity/README.md](../parity/README.md). The README table "Language support" is generated from the same ratchets (`xtask/full/src/support.rs`; the rows, language to reference tools, are `xtask/full/support.yaml`, with the language `ids` and the `speed` names of each row; the same rows feed the site's language pages and the package text, see [site.md](site.md)): format = `ratchet` identical files over `target-files` (the target denominator per group) summed over the tool's groups, lint = `target`; a tool without the numbers shows `not measured`.
+The target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.sh coverage <tool>`; definitions in [../design/parity-target.md](../design/parity-target.md)). Format: identical files; coverage: findings the mapped rule reports on the tool's line. The ratchet `target:` of `differences.yaml` holds the coverage number; `cargo xtask codegen` copies them into [../parity/README.md](../parity/README.md). The README table "Language support" is generated from the same ratchets (`xtask/full/src/support.rs`; the rows, language to reference tools, are `xtask/full/support.yaml`, with the language `ids` and the `speed` names of each row; the same rows feed the site's language pages and the package text, see [site.md](site.md)): format = `ratchet` identical files over `target-files` (the target denominator per group) summed over the tool's groups, lint = `target`; a tool without the numbers shows `not measured`.
 
 `scripts/parity.sh stability <group>` is the format number of a language with no reference formatter (Dockerfile, Makefile, GitHub Actions, INI, EditorConfig, .gitignore): each file of the group's corpus (the `stability` entry of `scripts/parity_tools.json`: `fetch`, `corpus` as a coverage entry, `as`, `place`; the folders of the lint coverage runs) is copied alone into its own folder and formatted twice with `sudsy format` (a debug build, so the safety check runs). It is stable when it parses and formats without a refusal, the second format changes nothing and the summary line of the first has no `copied through` (more than half of the file text copied by `verbatim_node`, `verbatim_range` or a whole-file keep: `core_format::copied_through_files`, counted in `provider-api`'s `format_checked`). The run prints each file that is not stable with its reason, the share, and fails below `ratchet` (the least stable files, raised when the run says so) or when `target-files` is stale; both are per group in `tests/parity/stability/differences.yaml`, which the README table reads. No input is dropped.
 
-| Format run | Raw | Target |
-|---|---:|---:|
-| biome | 100.0% (4 of 4) | 100.0% (4 of 4) |
-| buf | 99.1% (320 of 323) | 99.1% (320 of 323) |
-| clang-format | 14.7% (975 of 6639) | 14.7% (975 of 6639) |
-| csharpier-xml | 86.4% (323 of 374) | 99.7% (323 of 324) |
-| csharpier | 100.0% (9 of 9) | 100.0% (9 of 9) |
-| dotnet-format | 91.7% (11 of 12) | 91.7% (11 of 12) |
-| google-java-format | 91.6% (4889 of 5338) | 91.6% (4889 of 5338) |
-| invoke-formatter | not run here | not run here |
-| ktlint | 68.6% (4009 of 5848) | 69.4% (4009 of 5776) |
-| php-cs-fixer | 88.4% (9189 of 10389) | 88.5% (9189 of 10382) |
-| prettier-angular | 96.0% (1191 of 1241) | 97.7% (1191 of 1219) |
-| prettier-css | 87.2% (714 of 819) | 87.4% (714 of 817) |
-| prettier-html | 84.8% (2185 of 2576) | 86.1% (2185 of 2539) |
-| prettier-js | 83.6% (3484 of 4169) | 86.0% (3484 of 4051) |
-| prettier | 92.1% (223 of 242) | 95.3% (223 of 234) |
-| ruff | 78.3% (1303 of 1664) | 79.4% (1303 of 1641) |
-| shfmt | 86.6% (71 of 82) | 86.6% (71 of 82) |
-| sqlfluff | 60.5% (678 of 1121) | 78.2% (678 of 867) |
-| taplo | 95.3% (203 of 213) | 98.1% (203 of 207) |
-| terraform | 98.7% (314 of 318) | 99.1% (314 of 317) |
+| Format run | Target |
+|---|---:|
+| biome | 100.0% (4 of 4) |
+| buf | 99.1% (320 of 323) |
+| clang-format | 14.7% (975 of 6639) |
+| csharpier-xml | 99.7% (323 of 324) |
+| csharpier | 100.0% (9 of 9) |
+| dotnet-format | 91.7% (11 of 12) |
+| google-java-format | 91.6% (4889 of 5338) |
+| invoke-formatter | not run here |
+| ktlint | 69.4% (4009 of 5776) |
+| php-cs-fixer | 88.5% (9189 of 10382) |
+| prettier-angular | 97.7% (1191 of 1219) |
+| prettier-css | 87.4% (714 of 817) |
+| prettier-html | 86.1% (2185 of 2539) |
+| prettier-js | 86.0% (3484 of 4051) |
+| prettier | 95.3% (223 of 234) |
+| ruff | 79.4% (1303 of 1641) |
+| shfmt | 86.6% (71 of 82) |
+| sqlfluff | 78.2% (678 of 867) |
+| taplo | 98.1% (203 of 207) |
+| terraform | 99.1% (314 of 317) |
 
-| Coverage run | Raw | Target |
-|---|---:|---:|
-| actionlint | 5.1% (37 of 721) | 5.1% (37 of 721) |
-| buf | 85.8% (2027 of 2362) | 85.8% (2027 of 2362) |
-| checkmake | 60.9% (349 of 573) | 100.0% (349 of 349) |
-| checkstyle | 25.2% (13871 of 54940) | 23.1% (13871 of 59978) |
-| eslint-jsonc | not run here (no corpus, or the tool is not installed) | - |
-| eslint-plugin-svelte | 100.0% (67 of 67) | 100.0% (67 of 67) |
-| eslint-plugin-vue | 87.2% (1241 of 1423) | 23.0% (1241 of 5404) |
-| eslint | 100.0% (4411 of 4413) | 100.0% (4411 of 4413) |
-| hadolint | 78.2% (618 of 790) | 78.2% (618 of 790) |
-| html-eslint | 0.2% (37 of 19963) | 0.2% (37 of 19963) |
-| html-validate | 61.5% (616 of 1001) | 62.9% (616 of 980) |
-| htmlhint | 5.0% (65 of 1301) | 5.0% (65 of 1301) |
-| ktlint | 13.0% (15437 of 118565) | 11.9% (15437 of 129297) |
-| markdownlint | 82.6% (1538 of 1862) | 82.4% (1538 of 1867) |
-| phpstan | not run here (no corpus, or the tool is not installed) | - |
-| psscriptanalyzer | not run here (no corpus, or the tool is not installed) | - |
-| rubocop | 96.2% (7717 of 8022) | 96.2% (7717 of 8022) |
-| ruff | 94.6% (4132 of 4367) | 94.6% (4132 of 4367) |
-| shellcheck | 86.6% (201 of 232) | 86.6% (201 of 232) |
-| sqlfluff | 88.0% (16772 of 19055) | 82.6% (16772 of 20300) |
-| stylecop | not run here (no corpus, or the tool is not installed) | - |
-| stylelint-less | not run here (no corpus, or the tool is not installed) | - |
-| stylelint-scss | not run here (no corpus, or the tool is not installed) | - |
-| stylelint | 94.7% (12012 of 12686) | 94.7% (12012 of 12686) |
-| tflint | 58.7% (84 of 143) | 58.7% (84 of 143) |
-| typescript-eslint | 100.0% (3644 of 3644) | 100.0% (3644 of 3644) |
-| yamllint | 99.6% (1993 of 2002) | 99.5% (1993 of 2004) |
+| Coverage run | Target |
+|---|---:|
+| actionlint | 5.1% (37 of 721) |
+| buf | 85.8% (2027 of 2362) |
+| checkmake | 100.0% (349 of 349) |
+| checkstyle | 23.1% (13871 of 59978) |
+| eslint-jsonc | - |
+| eslint-plugin-svelte | 100.0% (67 of 67) |
+| eslint-plugin-vue | 23.0% (1241 of 5404) |
+| eslint | 100.0% (4411 of 4413) |
+| hadolint | 78.2% (618 of 790) |
+| html-eslint | 0.2% (37 of 19963) |
+| html-validate | 62.9% (616 of 980) |
+| htmlhint | 5.0% (65 of 1301) |
+| ktlint | 11.9% (15437 of 129297) |
+| markdownlint | 82.4% (1538 of 1867) |
+| phpstan | - |
+| psscriptanalyzer | - |
+| rubocop | 96.2% (7717 of 8022) |
+| ruff | 94.6% (4132 of 4367) |
+| shellcheck | 86.6% (201 of 232) |
+| sqlfluff | 82.6% (16772 of 20300) |
+| stylecop | - |
+| stylelint-less | - |
+| stylelint-scss | - |
+| stylelint | 94.7% (12012 of 12686) |
+| tflint | 58.7% (84 of 143) |
+| typescript-eslint | 100.0% (3644 of 3644) |
+| yamllint | 99.5% (1993 of 2004) |
 
 ## Nightly
 `.github/workflows/nightly.yml` (daily 02:17 UTC, and `workflow_dispatch`) runs every parity tool of `scripts/parity_tools.json` and every language crate with ignored conformance tests, so a broken ratchet (`ratchet` minima, `second-format` and `refused` maxima, a new mismatch) or a broken corpus test fails without a person. `scripts/ci-nightly-matrix.py` builds the job matrix: one job per tool (`scripts/parity.sh [format] <tool>`) and per crate (`scripts/conformance.sh lang-<x>`: the fetch script, then `cargo test --profile corpus -p lang-<x> -- --ignored` minus the measurements `measure_startup_cost`, `scaling` and `model_cost`; `#[ignore]` reasons with "measurement", "prints timings" or "flaky" do not select a crate). A new tool or crate joins by existing; nothing is listed twice. Jobs do not stop each other and carry the tool's or crate's name. Tools (`target/parity`, keyed on the pins in `parity_tools.json`, `docs/ai/parity/*.yaml`, `jre.sh`, `dotnet-tools.json`) and corpora (`tests/conformance/corpus`, keyed on the fetch scripts, which update a stale cache by commit) are cached per job; the Cargo cache is saved from the default branch only. A cache is saved only by a passing job.
@@ -137,7 +137,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 `scripts/parity_inventory.py <tool>|--all [--write]` compares a lint catalog with the rules of the tool's pinned version (the catalog's `version`): an npm plugin loaded by Node (ESLint and its plugins, stylelint and its plugins, html-validate, htmlhint, markdownlint), `ruff rule --all` from the PyPI wheel, the files of a wheel (yamllint, sqlfluff) or a raw file at the tool's tag (Roslynator's `Analyzers.xml`, tflint's and hadolint's rule lists). It prints the counts and the catalog ids the tool lacks, and with `--write` appends the missing rules to `entries:` as `planned` (deprecated: `wontfix`, ruff preview: `deferred`); `cargo xtask codegen` then regenerates the counts. Sources are the `SOURCES` table of the script; a tool without one (shellcheck, checkstyle, ktlint, StyleCop, actionlint, buf, PSScriptAnalyzer and the formatters) is listed by hand or by its own parity run. It needs Node and network.
 
 ## Coverage mode
-`scripts/parity.sh coverage <tool>` measures what a team that switches would lose: the tool's default or recommended set runs on its real-world corpus and the result is the share of its findings that the mapped Sudsy rule also reports on the same line of the same file (`parity_lint.py <tool> ... --coverage`). A finding counts as covered when `sudsy lint` with the preset that mirrors the tool's default set (the tool entry's `preset` in `scripts/parity_tools.json`: `python/ruff`, `js/eslint-recommended`, `yaml/yamllint`, ...; a pure config file that lists the mapped rules of that set) reports the Sudsy rule the catalog maps its rule to on that line of that file and, when the upstream message quotes a name (`` `os` ``, `'x'`) and the Sudsy rule's messages do too, a message with the same name; the column is not compared. A rule with no mapping is uncovered. The report lists the rules with most uncovered findings (a mapped rule with 0 covered misses it or is not in the preset; one marked `no Sudsy rule` is unmapped) and ends with the preset share, the headline and the usability bar (at least 85%), and, for information only, the share with Sudsy's default config (no `sudsy.yaml`: what a user gets on first run, bug-only rules) and with every mapped rule on; the run fails when the preset share is below `coverage:` in the tool's `differences.yaml` (a ratchet, only raised: the run says when to) and `cargo xtask codegen` copies the number into the table of [../parity/README.md](../parity/README.md). Fixture runs (`scripts/parity.sh <tool>`) compare `(rule, line)`.
+`scripts/parity.sh coverage <tool>` measures what a team that switches would lose: the tool's default or recommended set runs on its real-world corpus and the result is the share of its findings that the mapped Sudsy rule also reports on the same line of the same file (`parity_lint.py <tool> ... --coverage`). A finding counts as covered when `sudsy lint` with the preset that mirrors the tool's default set (the tool entry's `preset` in `scripts/parity_tools.json`: `python/ruff`, `js/eslint-recommended`, `yaml/yamllint`, ...; a pure config file that lists the mapped rules of that set) reports the Sudsy rule the catalog maps its rule to on that line of that file and, when the upstream message quotes a name (`` `os` ``, `'x'`) and the Sudsy rule's messages do too, a message with the same name; the column is not compared. A rule with no mapping is uncovered. The report lists the rules with most uncovered findings (a mapped rule with 0 covered misses it or is not in the preset; one marked `no Sudsy rule` is unmapped) and ends with the target (the usability bar is at least 85%); the run fails when the target is below `target:` in the tool's `differences.yaml` (a ratchet, only raised: the run says when to) and `cargo xtask codegen` copies the number into the table of [../parity/README.md](../parity/README.md). Fixture runs (`scripts/parity.sh <tool>`) compare `(rule, line)`.
 
 | Tool | Set and corpus |
 |---|---|

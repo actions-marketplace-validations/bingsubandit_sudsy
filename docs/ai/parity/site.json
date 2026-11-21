@@ -9,12 +9,12 @@
 {"format":[{"catalog":"prettier","name":"Prettier","share":89.36170212765957}],"ids":["vue","svelte"],"lint":[{"catalog":"eslint-plugin-vue","name":"eslint-plugin-vue","share":23.0},{"catalog":"eslint-plugin-svelte","name":"eslint-plugin-svelte","share":100.0}],"name":"Vue / Svelte","presets":["html/eslint-plugin-svelte-recommended","html/eslint-plugin-vue-recommended","html/html-eslint-recommended","html/html-validate-recommended","html/html-validate-standard","html/htmlhint"],"rules":143,"slug":"vue","speed":[["Vue","Lint","eslint-plugin-vue","not measured","-","-"],["Svelte","Lint","eslint-plugin-svelte","not measured","-","-"]],"status":"In progress"},
 {"format":[{"catalog":"prettier","name":"Prettier","share":97.70303527481542}],"ids":["angular"],"lint":[],"name":"Angular templates","presets":["html/eslint-plugin-svelte-recommended","html/eslint-plugin-vue-recommended","html/html-eslint-recommended","html/html-validate-recommended","html/html-validate-standard","html/htmlhint"],"rules":143,"slug":"angular","speed":[["Angular","Format","Prettier","not measured","-","-"]],"status":"Ready"},
 {"format":[{"catalog":"prettier","name":"Prettier","share":87.39290085679315}],"ids":["css","scss","less"],"lint":[{"catalog":"stylelint","name":"stylelint","share":94.7},{"catalog":"stylelint-scss","name":"stylelint-scss","share":null},{"catalog":"stylelint-less","name":"stylelint-less","share":null}],"name":"CSS / SCSS / Less","presets":["css/stylelint-recommended","css/stylelint-standard"],"rules":113,"slug":"css","speed":[["CSS","Format","Prettier","39× faster","0.14 s / 5.61 s","157 / 392 MB"],["CSS","Lint","stylelint","7.5× faster","0.27 s / 2.04 s","113 / 355 MB"],["SCSS","Lint","stylelint-scss","not measured","-","-"],["Less","Lint","stylelint-less","not measured","-","-"]],"status":"Ready"},
-{"format":[{"catalog":"prettier","name":"Prettier","share":91.34615384615384}],"ids":["markdown"],"lint":[{"catalog":"markdownlint","name":"markdownlint","share":83.4}],"name":"Markdown","presets":["markdown/markdownlint","markdown/prettier-compat"],"rules":32,"slug":"markdown","speed":[["Markdown","Lint","markdownlint","7.5× faster","0.096 s / 0.72 s","87 / 198 MB"]],"status":"In progress"},
+{"format":[{"catalog":"prettier","name":"Prettier","share":92.3076923076923}],"ids":["markdown"],"lint":[{"catalog":"markdownlint","name":"markdownlint","share":83.4}],"name":"Markdown","presets":["markdown/markdownlint","markdown/prettier-compat"],"rules":32,"slug":"markdown","speed":[["Markdown","Lint","markdownlint","7.5× faster","0.096 s / 0.72 s","87 / 198 MB"]],"status":"In progress"},
 {"format":[{"catalog":"prettier","name":"Prettier","share":100.0}],"ids":["yaml"],"lint":[{"catalog":"yamllint","name":"yamllint","share":99.5}],"name":"YAML","presets":["github-actions/actionlint","yaml/prettier-compat","yaml/yamllint"],"rules":30,"slug":"yaml","speed":[["YAML","Format","Prettier","43× faster","0.15 s / 6.48 s","103 / 237 MB"],["YAML","Lint","yamllint","18× faster","0.071 s / 1.25 s","62 / 55 MB"],["YAML","Format","dprint","1.4× faster","0.17 s / 0.23 s","99 / 73 MB"]],"status":"Ready"},
 {"format":[{"catalog":"prettier","name":"Prettier","share":100.0},{"catalog":"biome","name":"Biome","share":100.0}],"ids":["json"],"lint":[{"catalog":"eslint-plugin-jsonc","name":"eslint-plugin-jsonc","share":null}],"name":"JSON / JSONC","presets":["json/biome","json/dprint","json/prettier-compat"],"rules":17,"slug":"json","speed":[["JSON","Format","Prettier","26× faster","0.009 s / 0.23 s","43 / 85 MB"],["JSON","Format","Biome","4.1× faster","0.009 s / 0.037 s","43 / 42 MB"],["JSON","Lint","eslint-plugin-jsonc","not measured","-","-"],["JSON","Format","dprint","1.7× faster","0.007 s / 0.012 s","73 / 73 MB"]],"status":"In progress"},
 {"format":[{"catalog":"psscriptanalyzer","name":"Invoke-Formatter","share":92.85714285714286}],"ids":["powershell"],"lint":[{"catalog":"psscriptanalyzer","name":"PSScriptAnalyzer","share":33.8}],"name":"PowerShell","presets":["js/eslint-recommended","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":29,"slug":"powershell","speed":[["PowerShell","Format","Invoke-Formatter","38× faster","0.11 s / 4.38 s","165 / 163 MB"],["PowerShell","Lint","PSScriptAnalyzer","151× faster","0.13 s / 20.17 s","136 / 313 MB"]],"status":"In progress"},
 {"format":[{"catalog":"php-cs-fixer","name":"PHP-CS-Fixer","share":88.51858986707764}],"ids":["php"],"lint":[{"catalog":"phpstan","name":"PHPStan","share":0.0}],"name":"PHP","presets":["js/biome-recommended","js/eslint-recommended","js/oxlint","php/phpstan","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":31,"slug":"php","speed":[["PHP","Format","PHP-CS-Fixer","161× faster","1.77 s / 285.46 s","1161 / 70 MB"],["PHP","Lint","PHPStan","not measured","-","-"]],"status":"In progress"},
-{"format":[{"catalog":"google-java-format","name":"google-java-format","share":91.62607718246534}],"ids":["java"],"lint":[{"catalog":"checkstyle","name":"Checkstyle","share":88.6}],"name":"Java","presets":["java/google","js/biome-recommended","js/eslint-recommended","js/oxlint","kotlin/ktlint","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":51,"slug":"java","speed":[["Java","Format","google-java-format","19× faster","1.09 s / 20.53 s","646 / 998 MB"],["Java","Lint","Checkstyle","153× faster","0.96 s / 146.16 s","591 / 1173 MB"]],"status":"Ready"},
+{"format":[{"catalog":"google-java-format","name":"google-java-format","share":91.66354439865118}],"ids":["java"],"lint":[{"catalog":"checkstyle","name":"Checkstyle","share":88.6}],"name":"Java","presets":["java/google","js/biome-recommended","js/eslint-recommended","js/oxlint","kotlin/ktlint","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":51,"slug":"java","speed":[["Java","Format","google-java-format","19× faster","1.09 s / 20.53 s","646 / 998 MB"],["Java","Lint","Checkstyle","153× faster","0.96 s / 146.16 s","591 / 1173 MB"]],"status":"Ready"},
 {"format":[{"catalog":"ktlint","name":"ktlint","share":82.82548476454294}],"ids":["kotlin"],"lint":[{"catalog":"ktlint","name":"ktlint","share":92.3}],"name":"Kotlin","presets":["java/google","js/biome-recommended","js/eslint-recommended","js/oxlint","kotlin/ktlint","powershell/psscriptanalyzer","python/ruff","ruby/rubocop"],"rules":52,"slug":"kotlin","speed":[["Kotlin","Format","ktlint","30× faster","1.61 s / 48.42 s","501 / 715 MB"],["Kotlin","Lint","ktlint","42× faster","1.14 s / 48.01 s","485 / 683 MB"]],"status":"In progress"},
 {"format":[{"catalog":"shfmt","name":"shfmt","share":86.58536585365853}],"ids":["shell"],"lint":[{"catalog":"shellcheck","name":"ShellCheck","share":86.6}],"name":"Shell","presets":["js/biome-recommended","js/eslint-recommended","js/oxlint","js/typescript-eslint-recommended","python/ruff","shell/shellcheck","shell/shfmt"],"rules":55,"slug":"shell","speed":[["Shell","Format","shfmt","2.6× slower","0.059 s / 0.023 s","79 / 52 MB"],["Shell","Lint","ShellCheck","1913× faster","0.089 s / 170.25 s","86 / 9735 MB"]],"status":"Ready"},
 {"format":[{"catalog":"sqlfluff","name":"sqlfluff","share":78.20069204152249}],"ids":["sql"],"lint":[{"catalog":"sqlfluff","name":"sqlfluff","share":82.6}],"name":"SQL","presets":["js/biome-recommended","js/eslint-recommended","js/oxlint","sql/sqlfluff"],"rules":43,"slug":"sql","speed":[["SQL","Format","sqlfluff","386× faster","0.012 s / 4.63 s","57 / 52 MB"],["SQL","Lint","sqlfluff","122× faster","0.043 s / 5.27 s","52 / 52 MB"]],"status":"In progress"},
@@ -28,7 +28,7 @@
 {"format":[],"ids":["ini","editorconfig","gitignore"],"lint":[],"name":"INI / EditorConfig / .gitignore","presets":[],"rules":25,"slug":"ini","speed":[],"status":"Ready"}
 ],
 "tools":[
-{"coverage":85.2,"languages":["github-actions"],"target":85.2,"tool":"actionlint","version":"1.7.12","entries":[
+{"languages":["github-actions"],"target":85.2,"tool":"actionlint","version":"1.7.12","entries":[
 ["expression/syntax","partial","rule: invalid-expression","The grammar is not parsed: a misplaced operator or a missing operand is not reported."],
 ["expression/context","partial","rule: expression-context","The contexts and special functions each key offers (table in `lang-github-actions/src/expression.rs`)."],
 ["expression/types","partial","rule: expression-types","Properties of the typed contexts, argument counts and types, `format` placeholders; not the types of `steps`, `needs`, `matrix` and `inputs` (they depend on other keys)."],
@@ -73,7 +73,7 @@
 ["shellcheck","deferred","deferred","The checks of the shell and Python of `run:` are Sudsy's Shell and PowerShell rules, run on the embedded script; there is no pyflakes."],
 ["pyflakes","deferred","deferred","The checks of the shell and Python of `run:` are Sudsy's Shell and PowerShell rules, run on the embedded script; there is no pyflakes."]
 ]},
-{"coverage":null,"languages":["angular"],"target":null,"tool":"angular-eslint","version":"20.7.0","entries":[
+{"languages":["angular"],"target":null,"tool":"angular-eslint","version":"20.7.0","entries":[
 ["alt-text","missing","planned",""],
 ["attributes-order","missing","planned",""],
 ["banana-in-box","covered","rule: banana-in-box",""],
@@ -112,7 +112,7 @@
 ["prefer-at-empty","missing","planned",""],
 ["prefer-built-in-pipes","missing","planned",""]
 ]},
-{"coverage":null,"languages":["json"],"target":null,"tool":"biome","version":"2.6.4 (npm latest; configuration page schema URL)","entries":[
+{"languages":["json"],"target":null,"tool":"biome","version":"2.6.4 (npm latest; configuration page schema URL)","entries":[
 ["json.formatter.enabled","covered","config: overrides / exclude",""],
 ["json.formatter.indentStyle","covered","option: json.format.indent_style",""],
 ["json.formatter.indentWidth","covered","option: json.format.indent_size",""],
@@ -148,7 +148,7 @@
 ["assist/source/useSortedKeys","partial","rule: sorted-keys","no groupByNesting; natural order is not guaranteed identical to Biome's for non-ASCII keys (unverified)"],
 ["assist/source/useSortedPackageJson","wontfix","wontfix: package.json domain rule",""]
 ]},
-{"coverage":85.8,"languages":["protobuf"],"target":85.8,"tool":"buf","version":"1.75.0 (GitHub release; the version `scripts/parity.sh format buf` downloads)","entries":[
+{"languages":["protobuf"],"target":85.8,"tool":"buf","version":"1.75.0 (GitHub release; the version `scripts/parity.sh format buf` downloads)","entries":[
 ["format","partial","formatter","320 of 323 corpus files are identical; the other 3 are listed with their reasons in tests/parity/buf/differences.yaml."],
 ["diff","covered","config: `sudsy format --check`",""],
 ["ENUM_FIRST_VALUE_ZERO","covered","rule: enum-first-value-zero",""],
@@ -197,14 +197,14 @@
 ["RPC_NO_CLIENT_STREAMING","deferred","deferred","Not in the default categories (UNARY_RPC)."],
 ["RPC_NO_SERVER_STREAMING","deferred","deferred","Not in the default categories (UNARY_RPC)."]
 ]},
-{"coverage":60.9,"languages":["makefile"],"target":100.0,"tool":"checkmake","version":"0.3.2","entries":[
+{"languages":["makefile"],"target":100.0,"tool":"checkmake","version":"0.3.2","entries":[
 ["minphony","covered","rule: min-phony",""],
 ["phonydeclared","covered","rule: phony-declared",""],
 ["timestampexpanded","covered","rule: timestamp-expanded",""],
 ["maxbodylength","partial","rule: max-body-length","checkmake ends a recipe at a blank line, a comment line without a tab or a conditional; Sudsy follows make, where they belong to the recipe."],
 ["uniquetargets","covered","rule: unique-targets",""]
 ]},
-{"coverage":96.7,"languages":["java"],"target":88.6,"tool":"checkstyle","version":"google_checks.xml and sun_checks.xml (no differential runner yet: the rules are tested on fixtures under tests/rules/java)","entries":[
+{"languages":["java"],"target":88.6,"tool":"checkstyle","version":"google_checks.xml and sun_checks.xml (no differential runner yet: the rules are tested on fixtures under tests/rules/java)","entries":[
 ["EmptyCatchBlock","covered","rule: no-empty-catch",""],
 ["StringLiteralEquality","covered","rule: string-literal-equality",""],
 ["SimplifyBooleanExpression","partial","rule: boolean-literal-comparison","Only a comparison with a boolean literal, not the double negation or the conditional forms."],
@@ -338,11 +338,11 @@
 ["SuppressionFilter","covered","config: suppression comments and overrides",""],
 ["SuppressWithNearbyCommentFilter","covered","config: suppression comments",""]
 ]},
-{"coverage":null,"languages":["c","cpp"],"target":null,"tool":"clang-format","version":"20.1.8 (PyPI clang-format wheel; the version `scripts/parity.sh format clang-format` installs)","entries":[
+{"languages":["c","cpp"],"target":null,"tool":"clang-format","version":"20.1.8 (PyPI clang-format wheel; the version `scripts/parity.sh format clang-format` installs)","entries":[
 ["IndentWidth","covered","option: cpp.format.indent_size",""],
 ["ColumnLimit","covered","option: cpp.format.line_width",""]
 ]},
-{"coverage":null,"languages":["csharp","xml"],"target":null,"tool":"csharpier","version":"1.3.0 (NuGet latest; also the version pinned by the repo's dotnet-tools.json and used for the differential test)","entries":[
+{"languages":["csharp","xml"],"target":null,"tool":"csharpier","version":"1.3.0 (NuGet latest; also the version pinned by the repo's dotnet-tools.json and used for the differential test)","entries":[
 ["printWidth","covered","option: csharp.format.line_width",""],
 ["useTabs","covered","option: csharp.format.indent_style",""],
 ["indentSize","covered","option: csharp.format.indent_size",""],
@@ -360,7 +360,7 @@
 ["behavior: differential result","partial","config: preset csharp/csharpier-compat","5222 of 7614 compared files (68.6%) identical, 45 of 7659 left alone by CSharpier (aspnetcore 2316/3122, roslyn 1775/2858, runtime 1131/1679), differential test with derive_symbol_sets on"],
 ["behavior: no config for layout choices","covered","config: preset csharp/csharpier-compat (24 named options)",""]
 ]},
-{"coverage":null,"languages":["csharp"],"target":null,"tool":"dotnet-format-editorconfig","version":".NET SDK 10 docs (formatting options pages; IDE index page updated 2026-07)","entries":[
+{"languages":["csharp"],"target":null,"tool":"dotnet-format-editorconfig","version":".NET SDK 10 docs (formatting options pages; IDE index page updated 2026-07)","entries":[
 ["indent_style","covered","option: csharp.format.indent_style",""],
 ["indent_size / tab_width","covered","option: csharp.format.indent_size",""],
 ["max_line_length","covered","option: csharp.format.line_width",""],
@@ -418,7 +418,7 @@
 ["IDE2006","covered","formatter",""],
 ["IDE0161","sdk","sdk: IDE0161",""]
 ]},
-{"coverage":100.0,"languages":["js"],"target":100.0,"tool":"eslint","version":"9.39.5","entries":[
+{"languages":["js"],"target":100.0,"tool":"eslint","version":"9.39.5","entries":[
 ["accessor-pairs","missing","planned",""],
 ["array-bracket-newline","covered","formatter",""],
 ["array-bracket-spacing","covered","formatter",""],
@@ -712,7 +712,7 @@
 ["no-useless-assignment","deferred","deferred","needs scope analysis beyond the scope rules built"],
 ["require-atomic-updates","deferred","deferred","needs scope analysis beyond the scope rules built"]
 ]},
-{"coverage":null,"languages":["json"],"target":null,"tool":"eslint-plugin-jsonc","version":"3.4.2 (npm latest)","entries":[
+{"languages":["json"],"target":null,"tool":"eslint-plugin-jsonc","version":"3.4.2 (npm latest)","entries":[
 ["jsonc/auto","wontfix","wontfix: mirrors ESLint core rules",""],
 ["jsonc/key-name-casing","covered","rule: key-name-casing",""],
 ["jsonc/no-bigint-literals","covered","rule: syntax-error",""],
@@ -758,7 +758,7 @@
 ["jsonc/quotes","covered","rule: syntax-error",""],
 ["jsonc/space-unary-ops","covered","rule: syntax-error",""]
 ]},
-{"coverage":100.0,"languages":["svelte"],"target":100.0,"tool":"eslint-plugin-svelte","version":"3.24.1","entries":[
+{"languages":["svelte"],"target":100.0,"tool":"eslint-plugin-svelte","version":"3.24.1","entries":[
 ["block-lang","missing","planned",""],
 ["button-has-type","partial","rule: no-implicit-button-type","a missing `type` only, not an invalid value"],
 ["html-closing-bracket-new-line","partial","formatter","the formatter owns layout"],
@@ -845,7 +845,7 @@
 ["no-navigation-without-base","wontfix","wontfix: deprecated upstream",""],
 ["system","missing","planned",""]
 ]},
-{"coverage":87.2,"languages":["vue"],"target":23.0,"tool":"eslint-plugin-vue","version":"10.12.1","entries":[
+{"languages":["vue"],"target":23.0,"tool":"eslint-plugin-vue","version":"10.12.1","entries":[
 ["attribute-hyphenation","covered","rule: attribute-hyphenation",""],
 ["attributes-order","partial","rule: attributes-order","the default order, no `alphabetical`, `order` or `sortLineLength` option, no fix"],
 ["component-name-in-template-casing","missing","planned",""],
@@ -1103,7 +1103,7 @@
 ["valid-model-definition","wontfix","wontfix: deprecated upstream",""],
 ["valid-next-tick","missing","planned","needs script analysis (the JS semantic layer)"]
 ]},
-{"coverage":null,"languages":["java"],"target":null,"tool":"google-java-format","version":"2.0.0 (GitHub release latest; the native binary `scripts/parity.sh format google-java-format` downloads, no JVM needed)","entries":[
+{"languages":["java"],"target":null,"tool":"google-java-format","version":"2.0.0 (GitHub release latest; the native binary `scripts/parity.sh format google-java-format` downloads, no JVM needed)","entries":[
 ["indent","covered","option: java.format.indent_size",""],
 ["max-width","covered","option: java.format.line_width",""],
 ["aosp","partial","option: java.format.indent_size","AOSP is an indent_size of 4 (continuation is always two levels); its import grouping (android, com and other groups) is not produced."],
@@ -1119,7 +1119,7 @@
 ["dry-run","wontfix","wontfix: command-line mode",""],
 ["set-exit-if-changed","wontfix","wontfix: command-line mode",""]
 ]},
-{"coverage":null,"languages":["graphql"],"target":null,"tool":"graphql-eslint","version":"4.4.2 (@graphql-eslint/eslint-plugin, commit 0f57486 of graphql-hive/graphql-eslint)","entries":[
+{"languages":["graphql"],"target":null,"tool":"graphql-eslint","version":"4.4.2 (@graphql-eslint/eslint-plugin, commit 0f57486 of graphql-hive/graphql-eslint)","entries":[
 ["naming-convention","partial","rule: naming-convention","No forbiddenPrefixes, forbiddenSuffixes, requiredPrefixes, requiredSuffixes or ignorePattern; no per-kind styles for the root types, interfaces versus objects, or inputs versus objects; `PascalCase` and `camelCase` accept runs of capitals (`HTTPServer`) that change-case rewrites."],
 ["no-anonymous-operations","covered","rule: no-anonymous-operations",""],
 ["no-duplicate-fields","covered","rule: no-duplicate-keys",""],
@@ -1186,7 +1186,7 @@
 ["require-selections","deferred","deferred","Needs a schema, the other files of the project or operation usage."],
 ["strict-id-in-types","deferred","deferred","Needs a schema, the other files of the project or operation usage."]
 ]},
-{"coverage":86.6,"languages":["dockerfile"],"target":86.6,"tool":"hadolint","version":"2.15.1","entries":[
+{"languages":["dockerfile"],"target":86.6,"tool":"hadolint","version":"2.15.1","entries":[
 ["DL1001","wontfix","wontfix: Sudsy has its own suppression comments; a rule against inline pragmas is not planned.",""],
 ["DL3000","covered","rule: workdir-absolute",""],
 ["DL3001","covered","rule: no-interactive-commands",""],
@@ -1259,7 +1259,7 @@
 ["DL3060","deferred","deferred","Needs the yarn commands of a RUN ordered."],
 ["DL4001","deferred","deferred","Needs the commands of all RUNs of a stage compared."]
 ]},
-{"coverage":0.2,"languages":["html"],"target":0.2,"tool":"html-eslint","version":"0.68.0","entries":[
+{"languages":["html"],"target":0.2,"tool":"html-eslint","version":"0.68.0","entries":[
 ["attrs-newline","missing","planned",""],
 ["class-spacing","missing","planned",""],
 ["css-no-empty-blocks","missing","planned",""],
@@ -1327,7 +1327,7 @@
 ["svg-require-viewbox","missing","planned",""],
 ["use-baseline","missing","planned",""]
 ]},
-{"coverage":61.5,"languages":["html"],"target":62.9,"tool":"html-validate","version":"11.21.0","entries":[
+{"languages":["html"],"target":62.9,"tool":"html-validate","version":"11.21.0","entries":[
 ["allowed-links","missing","planned","needs the link-target rules (allowExternal, allowRelative, allowBase) and a URL parse that the tree does not give"],
 ["area-alt","partial","rule: area-alt","each area is checked alone, without the accessible option or the alt of an area with the same target"],
 ["aria-hidden-body","covered","rule: aria-hidden-body",""],
@@ -1426,7 +1426,7 @@
 ["wcag/h67","missing","planned",""],
 ["wcag/h71","missing","planned",""]
 ]},
-{"coverage":5.0,"languages":["html"],"target":5.0,"tool":"htmlhint","version":"1.9.2","entries":[
+{"languages":["html"],"target":5.0,"tool":"htmlhint","version":"1.9.2","entries":[
 ["alt-require","missing","planned",""],
 ["attr-lowercase","covered","rule: attr-case",""],
 ["attr-no-duplication","covered","rule: no-duplicate-keys",""],
@@ -1472,7 +1472,7 @@
 ["spec-char-escape","missing","planned",""],
 ["tagname-specialchars","missing","planned",""]
 ]},
-{"coverage":92.7,"languages":["kotlin"],"target":92.3,"tool":"ktlint","version":"1.8.0 (released 2025-11-14)","entries":[
+{"languages":["kotlin"],"target":92.3,"tool":"ktlint","version":"1.8.0 (released 2025-11-14)","entries":[
 ["annotation","missing","planned",""],
 ["annotation-spacing","missing","planned",""],
 ["argument-list-wrapping","covered","rule: argument-list-wrapping",""],
@@ -1574,7 +1574,7 @@
 ["value-parameter-comment","missing","planned",""],
 ["wrapping","covered","rule: newline-wrapping",""]
 ]},
-{"coverage":83.6,"languages":["markdown"],"target":83.4,"tool":"markdownlint","version":"0.24.0 (markdownlint-cli2; markdownlint 0.42.0)","entries":[
+{"languages":["markdown"],"target":83.4,"tool":"markdownlint","version":"0.24.0 (markdownlint-cli2; markdownlint 0.42.0)","entries":[
 ["MD001","covered","rule: heading-increment",""],
 ["MD003","partial","rule: heading-style","`consistent` only (the first heading's style); the fix writes a setext heading of one line as atx, the other way is not fixed. No `setext_with_atx` styles."],
 ["MD004","partial","formatter","The second of two adjacent lists uses `*` (Prettier's way to keep them apart), which `consistent` reports."],
@@ -1629,13 +1629,13 @@
 ["MD059","partial","rule: descriptive-link-text","No `prohibited_texts` option."],
 ["MD060","covered","formatter",""]
 ]},
-{"coverage":null,"languages":["php"],"target":null,"tool":"php-cs-fixer","version":"3.95.31 (GitHub release; run by the static PHP 8.4.23 build of static-php-cli)","entries":[
+{"languages":["php"],"target":null,"tool":"php-cs-fixer","version":"3.95.31 (GitHub release; run by the static PHP 8.4.23 build of static-php-cli)","entries":[
 ["per-cs","partial","formatter","The whole rule set is the formatter's."]
 ]},
-{"coverage":0.0,"languages":["php"],"target":0.0,"tool":"phpstan","version":"level 0 (no inventory yet: only the identifiers Sudsy reproduces are listed)","entries":[
+{"languages":["php"],"target":0.0,"tool":"phpstan","version":"level 0 (no inventory yet: only the identifiers Sudsy reproduces are listed)","entries":[
 ["variable.undefined","partial","rule: undefined-variable","Only a variable that nothing in its function assigns (PHPStan's level 0 reports exactly those); a variable passed to a call counts as assigned, and a function with `extract`, `parse_str`, `include` or `$$x` is not checked."]
 ]},
-{"coverage":null,"languages":["yaml","json","markdown","graphql","js","css","html","vue","svelte"],"target":null,"tool":"prettier","version":"3.9.10 (npm latest; the options page does not print the version)","entries":[
+{"languages":["yaml","json","markdown","graphql","js","css","html","vue","svelte"],"target":null,"tool":"prettier","version":"3.9.10 (npm latest; the options page does not print the version)","entries":[
 ["printWidth","covered","option: json.format.line_width",""],
 ["tabWidth","covered","option: json.format.indent_size",""],
 ["useTabs","covered","option: json.format.indent_style",""],
@@ -1696,7 +1696,7 @@
 ["css: /* prettier-ignore */","covered","formatter",""],
 ["css: Sass indented syntax","wontfix","wontfix: Prettier does not format it either",""]
 ]},
-{"coverage":34.2,"languages":["powershell"],"target":33.8,"tool":"psscriptanalyzer","version":"1.25.0 (PowerShell Gallery; the version `scripts/parity.sh format invoke-formatter` saves)","entries":[
+{"languages":["powershell"],"target":33.8,"tool":"psscriptanalyzer","version":"1.25.0 (PowerShell Gallery; the version `scripts/parity.sh format invoke-formatter` saves)","entries":[
 ["PSPlaceOpenBrace","partial","formatter","A brace after a command (`ForEach-Object` + line break + `{`) stays: joining it would change the meaning. No Allman option."],
 ["PSPlaceCloseBrace","covered","formatter",""],
 ["PSUseConsistentIndentation","covered","option: powershell.format.indent_size",""],
@@ -1773,7 +1773,7 @@
 ["PSUseProcessBlockForPipelineCommand","deferred","deferred","Syntax only; not built yet."],
 ["PSUseSingularNouns","deferred","deferred","Needs English noun pluralization tables."]
 ]},
-{"coverage":null,"languages":["csharp"],"target":null,"tool":"roslynator","version":"5.0.1 (NuGet Roslynator.Analyzers latest); catalogue from the repo main (clone Oct 31 2026), src/Analyzers.xml has 340 analyzer entries","entries":[
+{"languages":["csharp"],"target":null,"tool":"roslynator","version":"5.0.1 (NuGet Roslynator.Analyzers latest); catalogue from the repo main (clone Oct 31 2026), src/Analyzers.xml has 340 analyzer entries","entries":[
 ["RCS1075","covered","rule: no-empty-block",""],
 ["RCS1046","covered","rule: async-suffix",""],
 ["RCS1047","missing","planned","Non-async method names should not end with Async (on by default in Roslynator). Proposal: option `unnecessary_suffix: true` on async-suffix, or a second rule `no-async-suffix`; low priority."],
@@ -2115,7 +2115,7 @@
 ["RCS9010","missing","planned",""],
 ["RCS9011","missing","planned",""]
 ]},
-{"coverage":96.2,"languages":["ruby"],"target":96.2,"tool":"rubocop","version":"1.92.3","entries":[
+{"languages":["ruby"],"target":96.2,"tool":"rubocop","version":"1.92.3","entries":[
 ["Lint/Syntax","covered","rule: syntax-error",""],
 ["Lint/AmbiguousAssignment","deferred","deferred","disabled or pending by default in RuboCop"],
 ["Lint/AmbiguousBlockAssociation","covered","rule: ambiguous-block-association",""],
@@ -2277,7 +2277,7 @@
 ["Lint/UselessTimes","covered","rule: useless-times",""],
 ["Lint/Void","missing","planned",""]
 ]},
-{"coverage":94.6,"languages":["python"],"target":94.6,"tool":"ruff","version":"0.17.4 (released 2026-11)","entries":[
+{"languages":["python"],"target":94.6,"tool":"ruff","version":"0.17.4 (released 2026-11)","entries":[
 ["line-length","covered","option: python.format.line_width",""],
 ["indent-width","covered","option: python.format.indent_size",""],
 ["indent-style","covered","option: python.format.indent_style",""],
@@ -3259,7 +3259,7 @@
 ["YTT302","missing","planned",""],
 ["YTT303","missing","planned",""]
 ]},
-{"coverage":86.6,"languages":["shell"],"target":86.6,"tool":"shellcheck","version":"0.11.0","entries":[
+{"languages":["shell"],"target":86.6,"tool":"shellcheck","version":"0.11.0","entries":[
 ["SC2002","covered","rule: useless-cat",""],
 ["SC2005","covered","rule: useless-echo",""],
 ["SC2006","covered","rule: no-backticks",""],
@@ -3781,7 +3781,7 @@
 ["SC3067","deferred","deferred","Needs the target dialect (POSIX sh, dash, bash version); Shell has no dialect model."],
 ["SC2148","deferred","deferred","Would flag every sourced library; needs target-shell inference and `# shellcheck shell=` directives."]
 ]},
-{"coverage":null,"languages":["shell"],"target":null,"tool":"shfmt","version":"3.14.1 (GitHub release latest; the version `scripts/parity.sh format shfmt` downloads)","entries":[
+{"languages":["shell"],"target":null,"tool":"shfmt","version":"3.14.1 (GitHub release latest; the version `scripts/parity.sh format shfmt` downloads)","entries":[
 ["indent","covered","option: shell.format.indent_style",""],
 ["binary-next-line","deferred","deferred","No option that moves binary operators to the next line."],
 ["switch-case-indent","deferred","deferred","No option to indent the patterns of a `case`."],
@@ -3792,7 +3792,7 @@
 ["minify","wontfix","wontfix: not a formatter",""],
 ["language-dialect","partial","formatter","No dialect selection."]
 ]},
-{"coverage":88.0,"languages":["sql"],"target":82.6,"tool":"sqlfluff","version":"4.5.0 (released 2026-10-30)","entries":[
+{"languages":["sql"],"target":82.6,"tool":"sqlfluff","version":"4.5.0 (released 2026-10-30)","entries":[
 ["LT01","covered","formatter",""],
 ["LT02","covered","formatter",""],
 ["LT03","covered","formatter",""],
@@ -3891,7 +3891,7 @@
 ["rules.capitalisation.extended_capitalisation_policy","deferred","deferred","Not exposed as an option until a preset needs it."],
 ["core.templater","deferred","deferred","Templated SQL (Jinja, dbt) is not rendered: a file with template tags does not parse and is refused."]
 ]},
-{"coverage":null,"languages":["csharp"],"target":null,"tool":"stylecop","version":"1.2.0-beta.556 (pinned; NuGet StyleCop.Analyzers). Rules only in later master builds are dropped.","entries":[
+{"languages":["csharp"],"target":null,"tool":"stylecop","version":"1.2.0-beta.556 (pinned; NuGet StyleCop.Analyzers). Rules only in later master builds are dropped.","entries":[
 ["SA0001","wontfix","wontfix: analyzer meta diagnostic (XML comment analysis disabled)",""],
 ["SA0002","wontfix","wontfix: analyzer meta diagnostic (invalid stylecop.json); sudsy.yaml errors are config errors",""],
 ["SA1000","covered","formatter",""],
@@ -4090,7 +4090,7 @@
 ["SX1101","sdk","sdk: IDE0003",""],
 ["SX1309","sdk","sdk: IDE1006",""]
 ]},
-{"coverage":94.7,"languages":["css","scss","less"],"target":94.7,"tool":"stylelint","version":"17.16.0","entries":[
+{"languages":["css","scss","less"],"target":94.7,"tool":"stylelint","version":"17.16.0","entries":[
 ["alpha-value-notation","covered","rule: alpha-value-notation",""],
 ["annotation-no-unknown","missing","planned",""],
 ["at-rule-allowed-list","covered","rule: at-rule-allowed-list",""],
@@ -4242,7 +4242,7 @@
 ["declaration-property-value-no-unknown","deferred","deferred","Needs the CSS value-syntax grammar (the property and at-rule syntaxes of mdn-data), which the name tables do not provide."],
 ["media-feature-name-value-no-unknown","deferred","deferred","Needs the CSS value-syntax grammar (the property and at-rule syntaxes of mdn-data), which the name tables do not provide."]
 ]},
-{"coverage":null,"languages":["less"],"target":null,"tool":"stylelint-less","version":"4.2.2","entries":[
+{"languages":["less"],"target":null,"tool":"stylelint-less","version":"4.2.2","entries":[
 ["less/color-hex-case","missing","planned",""],
 ["less/color-no-hex","missing","planned",""],
 ["less/color-no-invalid-hex","missing","planned",""],
@@ -4250,7 +4250,7 @@
 ["less/no-duplicate-variables","missing","planned",""],
 ["less/declaration-property-value-no-unknown","deferred","deferred","Needs the CSS value-syntax grammar (the property and at-rule syntaxes of mdn-data), which the name tables do not provide."]
 ]},
-{"coverage":null,"languages":["scss"],"target":null,"tool":"stylelint-scss","version":"7.4.0","entries":[
+{"languages":["scss"],"target":null,"tool":"stylelint-scss","version":"7.4.0","entries":[
 ["scss/at-each-key-value-single-line","missing","planned",""],
 ["scss/at-else-closing-brace-newline-after","missing","planned",""],
 ["scss/at-else-closing-brace-space-after","missing","planned",""],
@@ -4323,7 +4323,7 @@
 ["scss/selector-no-union-class-name","missing","planned",""],
 ["scss/declaration-property-value-no-unknown","deferred","deferred","Needs the CSS value-syntax grammar (the property and at-rule syntaxes of mdn-data), which the name tables do not provide."]
 ]},
-{"coverage":null,"languages":["toml"],"target":null,"tool":"taplo","version":"0.10.0 (GitHub release latest; the version `scripts/parity.sh format taplo` downloads)","entries":[
+{"languages":["toml"],"target":null,"tool":"taplo","version":"0.10.0 (GitHub release latest; the version `scripts/parity.sh format taplo` downloads)","entries":[
 ["align_entries","deferred","deferred","No `align_entries` option."],
 ["align_comments","partial","option: toml.format.align_comments","Comments after array items and after table headers are not aligned."],
 ["array_trailing_comma","covered","option: toml.format.trailing_commas",""],
@@ -4348,11 +4348,11 @@
 ["rule_overrides","covered","config: overrides",""],
 ["lint.schema","deferred","deferred","No JSON Schema validation of TOML documents."]
 ]},
-{"coverage":null,"languages":["hcl"],"target":null,"tool":"terraform","version":"1.17.1 (releases.hashicorp.com; the version `scripts/parity.sh format terraform` downloads)","entries":[
+{"languages":["hcl"],"target":null,"tool":"terraform","version":"1.17.1 (releases.hashicorp.com; the version `scripts/parity.sh format terraform` downloads)","entries":[
 ["format","partial","formatter","Files with a rewrite of `\"${x}\"` to `x` or of a quoted `variable` type are listed with their reasons in tests/parity/terraform/differences.yaml: the formatter never changes tokens; the rule `deprecated-interpolation` does it as a fix."],
 ["check","covered","config: `sudsy format --check`",""]
 ]},
-{"coverage":58.7,"languages":["hcl"],"target":58.7,"tool":"tflint","version":"0.17.0 (tflint-ruleset-terraform)","entries":[
+{"languages":["hcl"],"target":58.7,"tool":"tflint","version":"0.17.0 (tflint-ruleset-terraform)","entries":[
 ["terraform_comment_syntax","covered","rule: comment-syntax",""],
 ["terraform_deprecated_index","covered","rule: deprecated-index",""],
 ["terraform_deprecated_interpolation","covered","rule: deprecated-interpolation",""],
@@ -4374,7 +4374,7 @@
 ["terraform_unused_required_providers","deferred","deferred","Needs the other files of the module or the providers it uses."],
 ["terraform_workspace_remote","deferred","deferred","Needs the other files of the module or the providers it uses."]
 ]},
-{"coverage":100.0,"languages":["js"],"target":100.0,"tool":"typescript-eslint","version":"8.72.2","entries":[
+{"languages":["js"],"target":100.0,"tool":"typescript-eslint","version":"8.72.2","entries":[
 ["adjacent-overload-signatures","covered","rule: adjacent-overload-signatures",""],
 ["array-type","partial","rule: array-type","only the default `array` style (`default` and `readonly` options); a local type named `Array` is still reported"],
 ["ban-ts-comment","partial","rule: ban-ts-comment","the options (`minimumDescriptionLength`, per-directive settings, `descriptionFormat`) keep their defaults"],
@@ -4512,7 +4512,7 @@
 ["no-unsafe-declaration-merging","deferred","deferred","needs scope analysis beyond the scope rules built"],
 ["no-unused-private-class-members","deferred","deferred","needs scope analysis beyond the scope rules built"]
 ]},
-{"coverage":99.6,"languages":["yaml"],"target":99.5,"tool":"yamllint","version":"1.38.0 (released 2026-01-13)","entries":[
+{"languages":["yaml"],"target":99.5,"tool":"yamllint","version":"1.38.0 (released 2026-01-13)","entries":[
 ["anchors","covered","rule: no-undefined-alias",""],
 ["anchors.forbid-undeclared-aliases","covered","rule: no-undefined-alias",""],
 ["anchors.forbid-duplicated-anchors","covered","rule: no-duplicate-anchors",""],

@@ -14,5 +14,5 @@ files:
   corpus/Pester/src/functions/It.ps1 psscriptanalyzer:no-automatic-variable-assignment 130: parameter-report-line
   corpus/Pester/src/functions/Context.ps1 sudsy:no-automatic-variable-assignment 93: parameter-report-line
   corpus/Pester/src/functions/Describe.ps1 sudsy:no-automatic-variable-assignment 101: parameter-report-line
-coverage: 34.2  # share of the default-set findings of psscriptanalyzer on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage psscriptanalyzer; at least 85% is the bar)
 target: 33.8
+

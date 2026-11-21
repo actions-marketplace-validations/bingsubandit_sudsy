@@ -58,12 +58,10 @@ pub(crate) fn generate(
     // One line per language, per tool and per catalog entry: a diff shows what moved.
     let mut tools = Vec::new();
     for c in catalogs {
-        let (coverage, target) = shares
-            .get(&c.tool)
-            .map_or((None, None), |s| (Some(s.0), s.1));
+        let target = shares.get(&c.tool).copied();
         let head = json!({
             "tool": c.tool, "version": catalog_version(&c.tool)?, "languages": c.languages,
-            "coverage": coverage, "target": target,
+            "target": target,
         })
         .to_string();
         let entries: Vec<String> = c

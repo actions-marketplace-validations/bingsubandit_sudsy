@@ -21,78 +21,78 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 
 ## Counts
 <!-- generated:counts -->
-| Tool | Coverage share | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| actionlint | 85.2% | 85.2% | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
-| angular-eslint | - | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
-| biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
-| buf | 85.8% | 85.8% | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
-| checkmake | 60.9% | 100.0% | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
-| checkstyle | 96.7% | 88.6% | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
-| clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
-| csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
-| dotnet-format-editorconfig | - | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
-| eslint | 100.0% | 100.0% | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |
-| eslint-plugin-jsonc | - | - | 44 | 36 | 6 | 0 | 0 | 2 | 0 | 0 |
-| eslint-plugin-svelte | 100.0% | 100.0% | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
-| eslint-plugin-vue | 87.2% | 23.0% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
-| google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
-| graphql-eslint | - | - | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
-| hadolint | 86.6% | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
-| html-eslint | 0.2% | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
-| html-validate | 61.5% | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
-| htmlhint | 5.0% | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
-| ktlint | 92.7% | 92.3% | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
-| markdownlint | 83.6% | 83.4% | 53 | 23 | 18 | 0 | 0 | 0 | 12 | 0 |
-| php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| phpstan | 0.0% | 0.0% | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
-| psscriptanalyzer | 34.2% | 33.8% | 75 | 12 | 8 | 1 | 0 | 0 | 54 | 1 |
-| roslynator | - | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |
-| rubocop | 96.2% | 96.2% | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
-| ruff | 94.6% | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
-| shellcheck | 86.6% | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
-| shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 88.0% | 82.6% | 97 | 45 | 0 | 33 | 0 | 0 | 19 | 33 |
-| stylecop | - | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
-| stylelint | 94.7% | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
-| stylelint-less | - | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
-| stylelint-scss | - | - | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
-| taplo | - | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
-| terraform | - | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
-| tflint | 58.7% | 58.7% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
-| typescript-eslint | 100.0% | 100.0% | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
-| yamllint | 99.6% | 99.5% | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
+| Tool | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| actionlint | 85.2% | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
+| angular-eslint | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
+| biome | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
+| buf | 85.8% | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
+| checkmake | 100.0% | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
+| checkstyle | 88.6% | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
+| clang-format | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| csharpier | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
+| dotnet-format-editorconfig | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
+| eslint | 100.0% | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |
+| eslint-plugin-jsonc | - | 44 | 36 | 6 | 0 | 0 | 2 | 0 | 0 |
+| eslint-plugin-svelte | 100.0% | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
+| eslint-plugin-vue | 23.0% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
+| google-java-format | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
+| graphql-eslint | - | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
+| hadolint | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
+| html-eslint | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
+| html-validate | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
+| htmlhint | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
+| ktlint | 92.3% | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
+| markdownlint | 83.4% | 53 | 23 | 18 | 0 | 0 | 0 | 12 | 0 |
+| php-cs-fixer | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| phpstan | 0.0% | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| prettier | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
+| psscriptanalyzer | 33.8% | 75 | 12 | 8 | 1 | 0 | 0 | 54 | 1 |
+| roslynator | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |
+| rubocop | 96.2% | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
+| ruff | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
+| shellcheck | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
+| shfmt | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
+| sqlfluff | 82.6% | 97 | 45 | 0 | 33 | 0 | 0 | 19 | 33 |
+| stylecop | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
+| stylelint | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
+| stylelint-less | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
+| stylelint-scss | - | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
+| taplo | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
+| terraform | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| tflint | 58.7% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
+| typescript-eslint | 100.0% | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
+| yamllint | 99.5% | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
 <!-- /generated -->
 
 ## Lint coverage by function
-The share of the findings of each reference tool's default or recommended set on its real-world corpus that Sudsy also reports on the same line, with the Sudsy preset that mirrors that set (`scripts/parity.sh coverage <tool>`, [../development/parity.md](../development/parity.md#coverage-mode); the ratchet is `coverage:` in `tests/parity/<tool>/differences.yaml`). The usability bar is 85%. Sudsy's own defaults keep the bug-only policy ([../config/sudsy-yaml.md](../config/sudsy-yaml.md#zero-config)), so the default-config share is low by design and printed for information; all mapped rules on adds every rule the catalog maps to the preset. Top missing rules: the five with most findings Sudsy does not report (rules with no Sudsy rule yet, or `planned`).
+The rules with most findings that Sudsy does not report, per reference tool, on its real-world corpus with the Sudsy preset that mirrors the tool's default or recommended set (`scripts/parity.sh coverage <tool>`, [../development/parity.md](../development/parity.md#coverage-mode)). The number is the Target column above ([../design/parity-target.md](../design/parity-target.md)); the usability bar is 85%. Sudsy's own defaults keep the bug-only policy ([../config/sudsy-yaml.md](../config/sudsy-yaml.md#zero-config)), so a preset is needed to reproduce a tool's set. Top missing rules: the five with most findings Sudsy does not report (rules with no Sudsy rule yet, or `planned`).
 
-| Language | Tool | Preset | Preset | Default config | All mapped rules on | Top 5 missing rules (findings) |
-|---|---|---|---:|---:|---:|---|
-| Python | ruff | `python/ruff` | 95.6% | 1.4% | 95.6% | `RUF100` 83, `RUF028` 8, `PYI034` 7, `UP028` 5, `PYI036` 5 |
-| Ruby | rubocop | `ruby/rubocop` | 96.2% | 11.9% | 96.2% | `Lint/EmptyFile` 7, `Lint/RedundantSplatExpansion` 6, `Lint/NonLocalExitFromIterator` 6, `Lint/DeprecatedOpenSSLConstant` 6, `Lint/AmbiguousRegexpLiteral` 6 |
-| JavaScript | eslint | `js/eslint-recommended` | 100.0% | 0.8% | 100.0% | - |
-| TypeScript | typescript-eslint | `js/typescript-eslint-recommended` | 100.0% | 0.0% | 100.0% | - |
-| Vue | eslint-plugin-vue | `html/eslint-plugin-vue-recommended` | 87.2% | 87.2% | 99.6% | `vue/attributes-order` 81, `vue/html-self-closing` 71, `vue/no-v-html` 25, `vue/no-template-shadow` 3, `vue/return-in-computed-property` 1 |
-| Svelte | eslint-plugin-svelte | `html/eslint-plugin-svelte-recommended` | 100.0% | 100.0% | 100.0% | - |
-| YAML | yamllint | `yaml/yamllint` | 73.8% | 0.2% | 73.8% | `comments` 325, `indentation` 160, `syntax` 136, `braces` 57, `document-start` 52 |
-| CSS | stylelint | `css/stylelint-standard` | 94.1% | 0.1% | 94.1% | `media-feature-range-notation` 415, `value-keyword-case` 127, `no-descending-specificity` 74 |
-| HTML | html-validate | `html/html-validate-recommended` | 63.7% | 10.4% | 63.7% | `wcag/h63` 48, `wcag/h30` 23, `element-permitted-content` 23, `parser-error` 21, `element-required-content` 20 |
-| HTML | htmlhint | `html/htmlhint` | 5.0% | 0.3% | 5.0% | `spec-char-escape` 1087, `tag-pair` 105, `doctype-first` 36, `src-not-empty` 6, `title-require` 1 |
-| HTML | html-eslint | `html/html-eslint-recommended` | 0.3% | 0.2% | 0.3% | `indent` 16182, `element-newline` 2175, `attrs-newline` 1158, `require-closing-tags` 146, `no-extra-spacing-tags` 132 |
-| Markdown | markdownlint | `markdown/markdownlint` | 82.7% | 0.0% | 82.7% | `MD010` 309, `MD037` 6, `MD041` 4, `MD051` 2, `MD028` 1 |
-| Dockerfile | hadolint | `dockerfile/hadolint` | 78.2% | 24.3% | 78.2% | `DL3066` 30, `SC2086` 28, `SC2155` 24, `SC1065` 14, `SC2046` 12 |
-| Shell | shellcheck | `shell/shellcheck` | 47.0% | 31.0% | 47.0% | `SC2140` 22, `SC2034` 14, `SC1091` 12, `SC2154` 11, `SC2206` 9 |
-| GitHub Actions | actionlint | `github-actions/actionlint` | 5.4% | 5.4% | 5.4% | `syntax-check` 235, `expression/types` 155, `events` 115, `action` 41, `glob` 22 |
-| Makefile | checkmake | `makefile/checkmake` | 73.5% | 0.0% | 73.5% | `uniquetargets` 88, `phonydeclared` 59, `minphony` 5 |
-| Protobuf | buf | `protobuf/buf-standard` | 85.9% | 0.1% | 85.9% | `RPC_REQUEST_RESPONSE_UNIQUE` 117, `PACKAGE_DIRECTORY_MATCH` 98, `RPC_RESPONSE_STANDARD_NAME` 64, `FIELD_NOT_REQUIRED` 39, `RPC_REQUEST_STANDARD_NAME` 9 |
-| PowerShell | psscriptanalyzer | `powershell/psscriptanalyzer` | 34.4% | 3.6% | 34.4% | `PSUseShouldProcessForStateChangingFunctions` 140, `PSUseDeclaredVarsMoreThanAssignments` 130, `PSUseCmdletCorrectly` 123, `PSReviewUnusedParameter` 123, `PSUseSingularNouns` 59 |
-| Kotlin | ktlint | `kotlin/ktlint` | 13.2% | 12.0% | 13.2% | `function-signature` 30800, `argument-list-wrapping` 24113, `multiline-expression-wrapping` 15169, `class-signature` 4591, `trailing-comma-on-call-site` 4162 |
-| HCL | tflint | `hcl/tflint-recommended` | 58.7% | 0.0% | 58.7% | `terraform_required_providers` 37, `terraform_required_version` 20, `terraform_unused_declarations` 2 |
-| Java | checkstyle | `java/google` | 25.5% | 0.5% | 25.5% | `MissingJavadocMethod` 18283, `MethodName` 7887, `JavadocParagraph` 5301, `SummaryJavadoc` 1527, `TodoFormat` 1498 |
-| PHP | phpstan | `php/phpstan` | 0.0% | 0.0% | 0.0% | `class.notFound` 7407, `variable.undefined` 591, `classConstant.notFound` 511, `staticMethod.notFound` 401, `function.notFound` 323 |
-| SQL | sqlfluff | `sql/sqlfluff` | 88.0% | 0.1% | 88.0% | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126 |
+| Language | Tool | Preset | Top 5 missing rules (findings) |
+|---|---|---|---|
+| Python | ruff | `python/ruff` | `RUF100` 83, `RUF028` 8, `PYI034` 7, `UP028` 5, `PYI036` 5 |
+| Ruby | rubocop | `ruby/rubocop` | `Lint/EmptyFile` 7, `Lint/RedundantSplatExpansion` 6, `Lint/NonLocalExitFromIterator` 6, `Lint/DeprecatedOpenSSLConstant` 6, `Lint/AmbiguousRegexpLiteral` 6 |
+| JavaScript | eslint | `js/eslint-recommended` | - |
+| TypeScript | typescript-eslint | `js/typescript-eslint-recommended` | - |
+| Vue | eslint-plugin-vue | `html/eslint-plugin-vue-recommended` | `vue/attributes-order` 81, `vue/html-self-closing` 71, `vue/no-v-html` 25, `vue/no-template-shadow` 3, `vue/return-in-computed-property` 1 |
+| Svelte | eslint-plugin-svelte | `html/eslint-plugin-svelte-recommended` | - |
+| YAML | yamllint | `yaml/yamllint` | `comments` 325, `indentation` 160, `syntax` 136, `braces` 57, `document-start` 52 |
+| CSS | stylelint | `css/stylelint-standard` | `media-feature-range-notation` 415, `value-keyword-case` 127, `no-descending-specificity` 74 |
+| HTML | html-validate | `html/html-validate-recommended` | `wcag/h63` 48, `wcag/h30` 23, `element-permitted-content` 23, `parser-error` 21, `element-required-content` 20 |
+| HTML | htmlhint | `html/htmlhint` | `spec-char-escape` 1087, `tag-pair` 105, `doctype-first` 36, `src-not-empty` 6, `title-require` 1 |
+| HTML | html-eslint | `html/html-eslint-recommended` | `indent` 16182, `element-newline` 2175, `attrs-newline` 1158, `require-closing-tags` 146, `no-extra-spacing-tags` 132 |
+| Markdown | markdownlint | `markdown/markdownlint` | `MD010` 309, `MD037` 6, `MD041` 4, `MD051` 2, `MD028` 1 |
+| Dockerfile | hadolint | `dockerfile/hadolint` | `DL3066` 30, `SC2086` 28, `SC2155` 24, `SC1065` 14, `SC2046` 12 |
+| Shell | shellcheck | `shell/shellcheck` | `SC2140` 22, `SC2034` 14, `SC1091` 12, `SC2154` 11, `SC2206` 9 |
+| GitHub Actions | actionlint | `github-actions/actionlint` | `syntax-check` 235, `expression/types` 155, `events` 115, `action` 41, `glob` 22 |
+| Makefile | checkmake | `makefile/checkmake` | `uniquetargets` 88, `phonydeclared` 59, `minphony` 5 |
+| Protobuf | buf | `protobuf/buf-standard` | `RPC_REQUEST_RESPONSE_UNIQUE` 117, `PACKAGE_DIRECTORY_MATCH` 98, `RPC_RESPONSE_STANDARD_NAME` 64, `FIELD_NOT_REQUIRED` 39, `RPC_REQUEST_STANDARD_NAME` 9 |
+| PowerShell | psscriptanalyzer | `powershell/psscriptanalyzer` | `PSUseShouldProcessForStateChangingFunctions` 140, `PSUseDeclaredVarsMoreThanAssignments` 130, `PSUseCmdletCorrectly` 123, `PSReviewUnusedParameter` 123, `PSUseSingularNouns` 59 |
+| Kotlin | ktlint | `kotlin/ktlint` | `function-signature` 30800, `argument-list-wrapping` 24113, `multiline-expression-wrapping` 15169, `class-signature` 4591, `trailing-comma-on-call-site` 4162 |
+| HCL | tflint | `hcl/tflint-recommended` | `terraform_required_providers` 37, `terraform_required_version` 20, `terraform_unused_declarations` 2 |
+| Java | checkstyle | `java/google` | `MissingJavadocMethod` 18283, `MethodName` 7887, `JavadocParagraph` 5301, `SummaryJavadoc` 1527, `TodoFormat` 1498 |
+| PHP | phpstan | `php/phpstan` | `class.notFound` 7407, `variable.undefined` 591, `classConstant.notFound` 511, `staticMethod.notFound` 401, `function.notFound` 323 |
+| SQL | sqlfluff | `sql/sqlfluff` | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126 |
 
 Not measured:
 

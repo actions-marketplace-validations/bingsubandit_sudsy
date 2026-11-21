@@ -223,7 +223,6 @@ intentional:
   rule-in-variable-value: tool-wrong
   phony-continuation: tool-wrong
   variable-target: tool-wrong
-coverage: 60.9  # share of the default-set findings of checkmake on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage checkmake; at least 85% is the bar)
 target: 100.0
 fixes:  # gap name or lint rule -> one line: where and what to change
   uniquetargets: missed findings are tool-wrong (the target counts only the rest), nothing to fix

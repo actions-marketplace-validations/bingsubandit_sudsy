@@ -12,7 +12,7 @@ The status and the headline numbers of every language are in the generated table
 - With no config, lint reports likely bugs only. Lint numbers need the preset. See [configuration](configuration.md#presets).
 - A lint column with no reference linter shows the number of rules Sudsy has: every rule available to the language, its own and the shared ones, counted from the rule registry. It does not decide `Ready`.
 - A format column with no reference formatter shows `stable`: the share of the language's corpus files that parse, format with the meaning check passing, format to the same text a second time and are laid out by the formatter's rules, not copied through. It decides `Ready` like a reference tool's number (at least 85%).
-- Both numbers leave out only reviewed intentional differences (`tool-wrong`, `invalid-input`, `wontfix`). Raw numbers and the lists are in `tests/parity/<tool>/differences.yaml` and [ai/parity/README.md](ai/parity/README.md).
+- Both numbers leave out only reviewed intentional differences (`tool-wrong`, `invalid-input`, `wontfix`). The lists are in `tests/parity/<tool>/differences.yaml` and [ai/parity/README.md](ai/parity/README.md).
 - Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint), `scripts/parity.sh stability <group>` (stable).
 - Every number comes from a pinned tool version. Versions are in the sections below.
 - Language names in `sudsy.yaml` sections match `sudsy languages list`: `js` (JavaScript and TypeScript), `python`, `hcl`, `shell`, and so on.

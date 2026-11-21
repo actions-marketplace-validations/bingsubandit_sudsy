@@ -1,138 +1,34 @@
-# Parity target number plan
+# Parity target number
 
-Every parity run reports two numbers (user decision 2026-11-19):
-- **raw**: what is measured today;
-- **target**: the number the work aims at, 100% meaning that a user of the reference tool can get its result from Sudsy.
+Every parity run reports one number, the **target**: the share of the reference tool's result that a user of the tool can get from Sudsy. 100% is the goal. Only reviewed intentional cases leave the count; everything else counts against Sudsy, including style choices without an option and every gap. There is no second, unadjusted number.
 
-The target leaves out only reviewed intentional cases. Everything else counts against Sudsy, including style choices without an option and every gap.
-
-## Rules for the target number
+## What counts
 - **A result a user can get counts in Sudsy's favour.**
-  - A token rewrite the formatter leaves to a lint rule's fix is compared as `sudsy fix`, with only the rules that mirror the tool's rewrites on (the terraform run already works this way).
+  - A token rewrite the formatter leaves to a lint rule's fix is compared as `sudsy fix`, with only the rules that mirror the tool's rewrites on (the terraform run works this way).
   - A style difference with a named option is compared with the tool's preset setting that option.
-- **Style choices with no option, and gaps, count against Sudsy.**
-  - No intentional flag exists for these.
-  - They leave the count by getting an option or a fix rule, or by being fixed.
+- **Style choices with no option, and gaps, count against Sudsy.** They leave the count by getting an option or a fix rule, or by being fixed. No intentional flag exists for them.
 - **Only four kinds of case are intentional.** Only the lead or the user adds one; each is pinned so it cannot hide a later change:
-  1. **Invalid input.** The file is excluded from the comparison and printed in its own group with a count.
+  1. **Invalid input.** The file leaves the comparison and is printed in its own group with a count.
      - The tool rejecting the file is evidence enough.
-     - When Sudsy rejects a file, the language's reference parser must reject it too; otherwise it is a Sudsy bug and counts.
+     - When Sudsy rejects a file, the language's reference parser must reject it too (`reference_parser` of the tool's entry); otherwise it is a Sudsy bug, printed as `REVIEW`, and counts.
   2. **The tool is wrong.** Its output changes meaning, drops content or is unstable on its own output.
-     - It is a named entry with `intentional: tool-wrong` and the hash of Sudsy's output for that file, as reviewed.
-     - When Sudsy's output for the file changes, the file is compared again and reported for review.
-  3. **Lint rules where the tool is wrong.** The same entry and flag, pinned per finding (file, line, rule), not per file.
-  4. **Out of scope.** `wontfix` catalog entries for removed or deprecated rules and for domains Sudsy does not cover (package manifests, a tool's own config, CLI modes). A `wontfix` that reads as "not built yet" is `planned` or `deferred` instead, and counts.
-- **`formatter` and `option <lang>.format.*` catalog entries need a proof run.** They leave the lint denominator only after a run per tool that:
-  - formats the coverage corpus with `sudsy format` (or `sudsy fix`, as above);
-  - runs the lint tool on the result.
+     - A named entry with `intentional: tool-wrong` and `pins`, the hash of Sudsy's output for the file as reviewed.
+     - When Sudsy's output for the file changes, the file is compared again and printed as `REVIEW`; it counts until the lead pastes the new pin (`scripts/parity.sh --pin <tool>`).
+  3. **Lint findings where the tool is wrong.** The same entry and flag, pinned per finding (file, line, rule), not per file.
+  4. **Out of scope.** `wontfix` catalog entries for removed or deprecated rules and for domains Sudsy does not cover (package manifests, a tool's own config, CLI modes). A `wontfix` that reads as "not built yet" is `planned` or `deferred` and counts.
+- **`formatter` and `option <lang>.format.*` catalog entries need a proof run.** A coverage run of a tool with such entries formats a copy of the corpus with `sudsy format` (or `sudsy fix`, as above) under the tool's preset and runs the tool again. A finding of a `formatter` id that remains counts as missing. A tool without a corpus keeps its `formatter` entries out of any number (the counts table shows `-`).
+- **No silent filters.** Every input filter (non-UTF-8 files, `skip`, `skip_with`, a tool rejecting a file, flags that turn off features of the reference tool) prints its count in every run. A flag is a named gap (`flags` of `differences.yaml`) with the number of fixtures it applies to, until the feature exists or the project options are mapped.
 
-  A finding of a `formatter` id that remains counts as missing. StyleCop's `layout_*` check is the model. Until a tool has the run, its `formatter` findings stay in the denominator.
-- **No silent filters.** Every input filter (non-UTF-8 files, `skip`, `skip_with`, a tool rejecting a file, flags that turn off features of the reference tool) prints its count in every run.
-- **Every run prints three things:** raw %, target %, and per intentional group its count.
+Lint position: a finding is covered only when the mapped rule reports it on the same line (the column is not compared). In the target, a report on another line that is a reviewed `tool-wrong` entry (pinned per finding) leaves the count.
 
-Lint position (user decision 2026-11-19):
-- **Raw and target both compare lines** (also the CLAUDE.md usability bar). A finding is covered only when the mapped rule reports it on the same line; the column is not compared.
-- **In the target only,** a report on another line that is a reviewed `tool-wrong` entry (pinned per finding) leaves the count.
-- **The old "same rule, same file" share is gone** from raw and target alike.
+## What a run prints
+Per run: the target as `target N% (identical of left)` (format) or `target N% (hit of left, same line)` (coverage), then the intentional groups with their counts (`invalid-input`, `tool-wrong`, `REVIEW`, out of scope, formatter findings counted as missing) and every filter count.
 
-## Phases
+## Where the number is kept
+- **Format:** `ratchet` (least identical files) and `target-files` (the target's files: all minus the intentional ones) per group in `tests/parity/<tool>/differences.yaml`. A run fails below `ratchet` or when `target-files` is stale; the number is `ratchet` over `target-files`. `second-format` (most files that change on a second format) is a separate ratchet, target 0.
+- **Lint:** `target` in the same file, a ratchet that may only go up.
+- **No reference formatter:** `scripts/parity.sh stability <group>` (`scripts/parity_stability.py`, the `stability` section of `scripts/parity_tools.json`) is the number: the share of the corpus files that parse, format with the safety check passing, are unchanged by a second format and are laid out by the engine rather than copied through (`core_format::copied_through_files`). Its ratchets are `ratchet` and `target-files` in `tests/parity/stability/differences.yaml`; no input is left out.
+- **README table "Language support"**, generated by `cargo xtask codegen` from these numbers (`xtask/full/src/support.rs`, rows in `xtask/full/support.yaml`; `codegen --check` fails when it is stale). One row per language; format and lint cells list each reference tool as a bar with its target, `not measured` where no run exists. `Ready` means the primary format and lint tool are at or above the CLAUDE.md bar; `In progress` below it; `Lint only` for a language Sudsy does not format. A lint leg with no reference linter reads `N rules · no reference tool` and never decides `Ready`. Reproduce a number with `scripts/parity.sh <tool>` or `scripts/parity.sh coverage <tool>`.
+- **Counts table and queue:** the Target column of [../parity/README.md](../parity/README.md) and the ranked causes of [../parity/queue.md](../parity/queue.md) are generated from the same files.
 
-### Phase 1: runner and data
-- **The `differences.yaml` entry form gains the `intentional` field.** Allowed values: `invalid-input`, `tool-wrong`; `tool-wrong` entries carry a pinned output hash.
-- **The lint named-difference form gains the same field**, pinned per finding.
-- **`parity_format.py`, `parity_lint.py` and `parity_coverage.py` compute and print raw and target**, the intentional groups and their counts, and every filter count. A pinned entry whose Sudsy output no longer matches its hash is reported as `REVIEW` and counted against Sudsy.
-- **`scripts/parity.sh --pin <tool>`** prints the hashes for the lead to paste after review; the runner never writes them itself.
-- **Docs:** [../development/parity.md](../development/parity.md) and [../parity/README.md](../parity/README.md) describe the two numbers. The generated counts table gains a target column.
-- **Gate:** a fixture test of the runner covers:
-  - a pinned file whose output changed;
-  - a filter count;
-  - a `fix`-mode comparison.
-
-**Checkpoint 1:** report the new output of one format run and one coverage run, before data changes.
-
-### Phase 2: classify today's cases
-Every `choice` in `differences.yaml` and every `wontfix` in the catalog gets one of these outcomes. The inventory of 2026-11-19 is the starting list.
-- **Intentional `invalid-input`:**
-  - files the tool rejects (sqlfluff, php-cs-fixer, ktlint);
-  - taplo `taplo-rejects`;
-  - terraform `semantic-error`;
-  - XML `not-xml`;
-  - PowerShell `not-powershell`;
-  - GraphQL `invalid-graphql`, only after graphql-js confirms each file is invalid.
-- **Intentional `tool-wrong`:**
-  - Markdown `toc-indent`;
-  - taplo `comment-dropped`;
-  - XML `width-accounting`;
-  - prettier-angular `non-idempotent`. Sudsy stops copying Prettier's unstable output: the formatter change, the `second-format` allowance goes to 0.
-- **Intentional lint `tool-wrong`:** the 4 checkmake differences (`empty-recipe`, `target-specific-variable`, `double-colon-rule`, `multi-target-rule`).
-- **`fix`-mode comparison:**
-  - shfmt `backticks` (rule `no-backticks`);
-  - terraform `interpolation-in-list`. This needs a rule option, lists too, that the terraform preset turns off. It is a named option in the rule's schema, not a preset branch.
-- **Counted as gaps** (the entry changes from `choice` to `gap`): the remaining style and token-spelling choices, for example:
-  - shfmt `expr-kept`, `case-last-arm`, `heredoc-tabs`, `comment-column`, `empty-file`;
-  - taplo `multiline-string-array`, `inline-table-array`, `empty-file`, `crlf-in-string`;
-  - Markdown `tab-blocks`, `code-trailing-blanks`;
-  - terraform `token-rewrite`;
-  - XML `text-as-written`;
-  - buf `empty-statements`;
-  - PowerShell `backtick-scriptblock`;
-  - dotnet-format `initializer-layout`;
-  - actionlint `self-hosted-labels`;
-  - hadolint `user-variable`;
-  - stylelint `tailwind-at-rules`, `element-id`.
-
-  An option for one of them is its own later step, ranked by file count.
-- **Relabelled catalog entries:** `wontfix` entries that read as not built become `planned` or `deferred`:
-  - eslint's "deprecated formatting rule with no formatter equivalent";
-  - Prettier `proseWrap`, `rangeStart`/`rangeEnd`;
-  - PSScriptAnalyzer `PSUseCorrectCasing`;
-  - sqlfluff `JJ01`, `TQ01`-`TQ03`.
-- **Reference-tool flags that turn features off** (gjf `--skip-javadoc-formatting --skip-removing-unused-imports --skip-reflowing-long-strings`, Prettier `--no-config`, ruff `skip_with: .options.json`):
-  - keep the flag on the raw run, and record why it is there;
-  - each flag is a named gap with a count, until the feature exists or the project options are mapped.
-- **Check whether `deferred` entries leave the coverage denominator.** If they do, they go back into it for the target number.
-
-**Checkpoint 2:** report the classification as one table (case, outcome, count), before landing data changes.
-
-### Phase 3: `formatter` proof runs
-- **Add the proof run to `parity_coverage.py`** as a mode (`--proof`), for each tool with `formatter` entries and a coverage corpus.
-- **Record per tool** the remaining findings of `formatter` ids, and count them in the target.
-- **Tools without a corpus** keep their `formatter` entries out of any number; their counts table shows `-`.
-
-### Phase 4: numbers
-- Run every format and coverage run.
-- Record raw and target per tool in the counts table and in [../development/parity.md](../development/parity.md).
-- The ratchets of `differences.yaml` stay on raw identical counts.
-
-### Phase 5: fix what the inventory found
-Each item below is its own landing, ranked by the number of files or findings it moves.
-- **Style and token gaps from Phase 2 get options or fix rules** (named, user-settable, set by the tool's preset): shfmt `comment-column`, `heredoc-tabs`, `case-last-arm`, `expr-kept`; taplo `multiline-string-array`, `inline-table-array`; terraform `token-rewrite`; buf `empty-statements`; XML `text-as-written`; Markdown `tab-blocks`, `code-trailing-blanks`; the rest of the Phase 2 gap list. Single-file trivia (an `empty-file` choice) may stay counted when an option costs more than it moves; say so in the commit.
-- **Reference-tool features that are turned off get built:**
-  - gjf Javadoc formatting, unused-import removal and long-string reflow (then the flags go);
-  - mapping the projects' own Prettier options in the real-world JS, CSS and HTML groups (`project-options`), then `--no-config` goes;
-  - ruff fixtures with `.options.json` run with those options.
-- **Unclear items are investigated and resolved:**
-  - the four stylelint rules that "differ from stylelint" (`declaration-block-single-line-max-declarations`, `function-url-quotes`, `selector-max-combinators`, `selector-type-case`): each becomes a fix or a `tool-wrong` entry;
-  - the JS class-header line comment that moves into the body: fix or `tool-wrong`.
-- **Tools with no measured share get a coverage corpus where one can run:** angular-eslint, biome, graphql-eslint, stylelint-scss, stylelint-less, eslint-plugin-jsonc, taplo, terraform, detekt, PMD, PHPCS. C# analyzers and clang-tidy stay unmeasured (no compiling corpus; no C/C++ lint yet), named as such in the README.
-
-### Phase 6: user-facing progress in the README
-A "Language support" section in `README.md` (user decision 2026-11-19), for users choosing whether Sudsy is usable for their language, not for internal tracking. It is generated by `cargo xtask codegen` from the target numbers of Phase 4; `codegen --check` fails when it is stale.
-- **One table, one row per language.** Columns:
-  - **Format:** each reference tool on its own line in the cell, `█████████░ 91% google-java-format`;
-  - **Lint:** the same, one line per tool (C#: StyleCop and Roslynator; HTML: html-eslint, html-validate and htmlhint);
-  - **Status:**
-    - `Ready` when the primary (first listed) format and lint tool are at or above the CLAUDE.md bar; further tools are shown only;
-    - `In progress` below it;
-    - `Lint only` for a language Sudsy does not format;
-    - `not measured` where no run exists. A cell is never blank.
-- **A leg with no reference tool still has one deciding number** (user decision 2026-11-20):
-  - **Format, no reference formatter:** `stability`, the share of the language's corpus files that are stable: `sudsy format` parses the file, its safety check passes (lossless, meaning kept), a second format changes nothing, and the engine laid the file out instead of copying most of it through (`core_format::copied_through_files`: more than half of the file text copied by `verbatim_node`, `verbatim_range` or a whole-file keep; the CLI summary line says `N copied through`). The cell reads `██████████ 100% stable · no reference tool`, with no file count, and decides `Ready` like a tool's number.
-  - **Measured by** `scripts/parity.sh stability <group>` (`scripts/parity_stability.py`, the `stability` section of `scripts/parity_tools.json`: the corpus folders of the lint coverage runs, no new corpus). The result is the ratchet `ratchet` (least stable files) and `target-files` (corpus files) per group in `tests/parity/stability/differences.yaml`; `support.yaml` names the groups of a row under `stability`. No input is left out: a file that does not parse counts as not stable.
-  - **Lint, no reference linter:** `N rules · no reference tool`, never decides `Ready` (no conformance suite yet). A tool that exists with no catalog (clang-tidy) is listed as a tool and reads `not measured`.
-- **Bars are text characters,** with no image or badge service. No history or change column.
-- **One line under the table** says how each number is reproduced: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint). It links to the human page on parity for what the target number leaves out.
-- The top-level `docs/languages.md` points to this table rather than repeating numbers.
-
-## Done when
-Every parity run prints raw, target and the intentional groups with counts. No `choice` entry is left without an `intentional` value or a change to `gap`. Every `formatter` entry with a corpus has a proof result. The counts table shows both numbers. Every Phase 5 item is landed or named as a gap with its count. The README table is generated and current. Docs describe current state.
+Tests: `scripts/parity.sh --test` runs `scripts/test_parity.py` (a pinned file whose output changed, a filter count, a `fix`-mode comparison); it is part of the gate.

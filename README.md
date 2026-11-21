@@ -83,7 +83,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
-| Markdown | █████████░ 91% Prettier | ████████░░ 83% markdownlint | In progress |
+| Markdown | █████████░ 92% Prettier | ████████░░ 83% markdownlint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
 | PowerShell | █████████░ 92% Invoke-Formatter | ███░░░░░░░ 33% PSScriptAnalyzer | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |

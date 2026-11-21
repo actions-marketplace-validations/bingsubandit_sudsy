@@ -22,7 +22,6 @@ struct Tool {
     #[serde(default, rename = "target-files")]
     target_files: BTreeMap<String, u64>,
     unclassified: Option<u64>,
-    coverage: Option<f64>,
     target: Option<f64>,
 }
 
@@ -91,8 +90,7 @@ fn section(name: &str, t: &Tool) -> String {
         let mut rules: Vec<_> = t.missed.iter().collect();
         rules.sort_by(|a, b| b.1.cmp(a.1).then(a.0.cmp(b.0)));
         out += &format!(
-            "Lint: coverage {}%, target {}%; rules by missed findings:\n",
-            t.coverage.map_or("-".into(), |c| c.to_string()),
+            "Lint: target {}%; rules by missed findings:\n",
             t.target.map_or("-".into(), |c| c.to_string())
         );
         for (rank, (rule, n)) in rules.iter().enumerate() {

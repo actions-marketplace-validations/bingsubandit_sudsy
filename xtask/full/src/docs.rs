@@ -157,23 +157,19 @@ pub(crate) fn catalogs() -> Result<Vec<Catalog>> {
 fn catalog_counts(catalogs: Vec<Catalog>) -> Result<String> {
     let shares = coverage_shares()?;
     let mut out = String::from(
-        "| Tool | Coverage share | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+        "| Tool | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 ",
     );
     for c in catalogs {
         let n = |coverage: &str| c.entries.iter().filter(|e| e.coverage == coverage).count();
         let planned = c.entries.iter().filter(|e| e.sudsy == "planned").count();
         out += &format!(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {planned} |
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {planned} |
 ",
             c.tool,
             shares
                 .get(&c.tool)
-                .map_or("-".to_string(), |s| format!("{:.1}%", s.0)),
-            shares
-                .get(&c.tool)
-                .and_then(|s| s.1)
                 .map_or("-".to_string(), |t| format!("{t:.1}%")),
             c.entries.len(),
             n("covered"),
@@ -187,13 +183,12 @@ fn catalog_counts(catalogs: Vec<Catalog>) -> Result<String> {
     Ok(out)
 }
 
-/// The `coverage` ratchet (share of the tool's default-set findings on its corpus that Sudsy also
-/// reports, `scripts/parity.sh coverage <tool>`) and the `target` ratchet (the same share on the
-/// target number of docs/ai/design/parity-target.md) of each lint tool, by catalog name.
-pub(crate) fn coverage_shares() -> Result<BTreeMap<String, (f64, Option<f64>)>> {
+/// The `target` ratchet (the share of the tool's findings on its corpus that Sudsy also reports,
+/// leaving out the reviewed exclusions of docs/ai/design/parity-target.md, `scripts/parity.sh
+/// coverage <tool>`) of each lint tool, by catalog name.
+pub(crate) fn coverage_shares() -> Result<BTreeMap<String, f64>> {
     #[derive(serde::Deserialize)]
     struct Ratchets {
-        coverage: Option<f64>,
         target: Option<f64>,
     }
     let root = xtask::repo_root();
@@ -210,8 +205,8 @@ pub(crate) fn coverage_shares() -> Result<BTreeMap<String, (f64, Option<f64>)>> 
         };
         let r: Ratchets = serde_saphyr::from_str(&text)
             .map_err(|e| anyhow::anyhow!("{}: {e}", path.display()))?;
-        if let (Some(share), Some(catalog)) = (r.coverage, entry["catalog"].as_str()) {
-            shares.insert(catalog.to_string(), (share, r.target));
+        if let (Some(share), Some(catalog)) = (r.target, entry["catalog"].as_str()) {
+            shares.insert(catalog.to_string(), share);
         }
     }
     Ok(shares)

@@ -285,7 +285,7 @@ class Differences:
     `files` (fixture key -> names; a ratchet group's name stands for all its files), `ratchet` (group -> least identical files),
     `intentional` (name -> `invalid-input` or `tool-wrong`) and `pins` (file -> `pin()` of Sudsy's output, for the `tool-wrong` names).
     `lint`: the keys with a space are the lint mode's (a tool's two modes share the file); a lint finding is pinned by its key (file, line, rule).
-    The target number leaves out the intentional files: `status` says which, `tally` counts, `summary` prints raw and target."""
+    The target number leaves out the intentional files: `status` says which, `tally` counts, `summary` prints the target."""
 
     def __init__(self, folder, lint=False):
         path = folder / "differences.yaml"
@@ -340,10 +340,10 @@ class Differences:
             self.groups[status] += count
 
     def summary(self):
-        """raw: identical of all; target: identical of all but the intentional ones (`REVIEW` stays in)."""
+        """The target: identical of all but the intentional ones (`REVIEW` stays in)."""
         left = self.total - sum(n for k, n in self.groups.items() if k != "REVIEW")
         groups = ", ".join(f"{k} {self.groups[k]}" for k in (*INTENTIONAL, "REVIEW"))
-        print(f"raw {percent(self.same, self.total)} ({self.same} of {self.total}); target {percent(self.same, left)} ({self.same} of {left}); intentional: {groups}")
+        print(f"target {percent(self.same, left)} ({self.same} of {left}); intentional: {groups}")
 
     def finish(self, filtered=False):
         """Prints the problems of the lists and the report; returns the number of problems."""
@@ -388,7 +388,7 @@ def verdict(name, theirs, ours, diffs, label, quiet=False, group="fixtures"):
         if not quiet:
             print(f"{name}: ok")
         return 0
-    if theirs is None:  # the tool rejecting a file is the evidence it is invalid input: the target leaves it out, the raw share keeps it
+    if theirs is None:  # the tool rejecting a file is the evidence it is invalid input: the target leaves it out
         diffs.tally(False, "invalid-input", group=group)
         if not quiet:
             print(f"{name}: rejected by the tool, intentional: invalid-input")
