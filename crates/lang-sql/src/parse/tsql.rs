@@ -408,11 +408,15 @@ impl P<'_> {
         self.bump();
         self.eat("as");
         self.type_name();
+        if self.at("not") && self.is(1, "null") {
+            self.bump_as(k::KEYWORD);
+        }
+        self.eat("null");
         if self.at_op("=") {
             self.bump();
             self.expression();
         }
-        self.eat_any(&["output", "out", "readonly"]);
+        while self.eat_any(&["output", "out", "readonly"]) {}
         true
     }
 }

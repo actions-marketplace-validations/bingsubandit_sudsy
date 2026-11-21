@@ -497,7 +497,9 @@ impl P<'_> {
     /// The offsets of the column names of an `ADD`/`MODIFY`/`CHANGE` column action whose type
     /// follows them (`ADD COLUMN c int`); `None` for any other action.
     fn column_action_names(&self, up: &str) -> Option<Vec<usize>> {
-        if !matches!(up, "ADD" | "MODIFY" | "CHANGE") {
+        if !matches!(up, "ADD" | "MODIFY" | "CHANGE" | "ALTER")
+            || (up == "ALTER" && !self.is(1, "column"))
+        {
             return None;
         }
         let mut n = 1;
@@ -549,6 +551,19 @@ impl P<'_> {
             && self.prev_text_is("as")
         {
             self.statement_body();
+            return;
+        }
+        // `ALTER COLUMN c [SET DATA] TYPE varchar(80)`: the type after `TYPE`.
+        if word
+            && up == "TYPE"
+            && depth == 0
+            && w.table_stmt
+            && !w.create_table
+            && self.is_t(1, T::Word)
+            && super::types::is_type_word(self.text(1))
+        {
+            self.bump_as(k::KEYWORD);
+            self.type_name();
             return;
         }
         // `ALTER TABLE t ADD [COLUMN] c int`, `MODIFY c int`, `CHANGE [COLUMN] old new int`.

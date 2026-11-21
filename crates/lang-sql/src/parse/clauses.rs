@@ -382,7 +382,15 @@ impl P<'_> {
         if self.at("lateral") && !self.is_t(1, T::Dot) {
             self.bump_as(k::KEYWORD);
         }
-        if self.is_t(0, T::LParen) {
+        if self.is_t(0, T::LParen) && self.nested_join_bracket() {
+            // `JOIN ((select ..) AS a JOIN b ON ..)`
+            self.bracketed(|p| {
+                p.table_element();
+                while p.at_join() {
+                    p.join();
+                }
+            });
+        } else if self.is_t(0, T::LParen) {
             self.bracketed(|p| {
                 if p.at_query_start() {
                     p.query();
@@ -395,6 +403,7 @@ impl P<'_> {
             });
         } else if self.at("dual")
             || (self.d == Dialect::Ansi && self.at("table") && !self.is_t(1, T::LParen))
+            || (self.d == Dialect::Tsql && self.is_t(0, T::Var))
         {
             let o = self.mark();
             self.bump_as(k::IDENTIFIER);

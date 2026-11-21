@@ -31,6 +31,9 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 
 
+# Names of the files left out for not being UTF-8: they may carry a named gap (`non-utf8-input`).
+NON_UTF8 = set()
+
 def run(cmd, cwd, stdin=None, check=True, env=None):
     data = stdin.encode("utf-8") if stdin is not None else None
     cmd = [shutil.which(cmd[0]) or cmd[0], *map(str, cmd[1:])]
@@ -185,6 +188,7 @@ def fixtures(config, folder, filters):
                 path.read_bytes().decode("utf-8")
             except UnicodeDecodeError:
                 filters["non-UTF-8 files"] += 1
+                NON_UTF8.update({source.get("prefix", "") + rel, path.as_posix().split("tests/conformance/corpus/")[-1]})
                 continue
             out.append((source.get("prefix", "") + rel, path, source.get("ratchet"), source))
     return out
@@ -364,7 +368,7 @@ class Differences:
                 bad += 1
         if not filtered:
             for key in self.files:
-                if (" " in key) == self.lint and key not in self.differing:
+                if (" " in key) == self.lint and key not in self.differing and key not in NON_UTF8:
                     print(f"STALE: {key} is listed but no longer differs")
                     bad += 1
         counts = Counter()

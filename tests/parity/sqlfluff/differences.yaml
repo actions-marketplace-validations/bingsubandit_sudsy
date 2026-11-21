@@ -7,12 +7,13 @@ files:
   sqlfluff-mysql: parse-gap, layout-gap
   sqlfluff-postgres: parse-gap, layout-gap
   sqlfluff-tsql: parse-gap, layout-gap
-  postgres-regress: parse-gap, layout-gap, non-utf8-input
+  postgres-regress: parse-gap, layout-gap
+  sql/postgres/src/test/regress/sql/collate.windows.win1252.sql: non-utf8-input
 ratchet:
-  sqlfluff-ansi: 203
+  sqlfluff-ansi: 204
   sqlfluff-mysql: 208
   sqlfluff-postgres: 122
-  sqlfluff-tsql: 108
+  sqlfluff-tsql: 107
   postgres-regress: 37
 target-files:
   postgres-regress: 115
@@ -20,8 +21,8 @@ target-files:
   sqlfluff-mysql: 248
   sqlfluff-postgres: 142
   sqlfluff-tsql: 152
-coverage: 87.6  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
-target: 81.7
+coverage: 88.0  # share of the default-set findings of sqlfluff on its corpus that Sudsy also reports with the preset that mirrors it (scripts/parity.sh coverage sqlfluff; at least 85% is the bar)
+target: 82.6
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
   CP05: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
@@ -33,17 +34,17 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF03: references of selects over table functions and nested queries
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
   PRS: 380
-  CP05: 205
-  CP02: 187
+  CP05: 199
+  CP02: 180
   RF05: 131
   CV06: 126
-  CP01: 119
-  RF06: 111
   RF03: 107
   LXR: 102
+  RF06: 94
+  CP01: 80
   ST06: 75
   AL03: 72
-  RF02: 68
+  RF02: 67
   AL05: 62
-  AM04: 58
+  AM04: 57
   RF01: 53

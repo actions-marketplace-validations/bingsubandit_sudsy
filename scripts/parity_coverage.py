@@ -89,7 +89,7 @@ def parse(output, spec, rules):
     return out
 
 
-def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out, before, pinned=lambda f: False):
+def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out, before, pinned=lambda f: False, named=None):
     """The proof run of docs/ai/design/parity-target.md (every coverage run of a tool with `formatter` entries): the corpus of `work` is copied, formatted with
     `sudsy format` under the tool's preset and checked by the tool again; returns the findings of `layout` ids (the `formatter`
     catalog entries) that remain. A finding left counts as missing in the target, unless `pinned(finding)` (a reviewed `tool-wrong` one);
@@ -118,7 +118,8 @@ def proof(tool, spec, prefix, work, exe, rules, sudsy, preset, layout, left_out,
     print(f"proof: `sudsy format` exit {run.returncode}; formatter findings {len(before)} before, {len(left)} after in {len({f[0] for f in left})} files: "
           + (", ".join(f"{r} {n}" for r, n in per.most_common(12)) or "none"))
     print(f"proof: `sudsy format` rejects {len(rejected)} files: {len(invalid)} that the corpus marks or the reference parser rejects (invalid-input, left out), "
-          f"{len(rejected) - len(invalid)} that it does not (Sudsy bugs, counted)" + "".join(f"\n  bug: {n}" for n in sorted(rejected - invalid)))
+          f"{len(rejected) - len(invalid)} that it does not (named gaps or Sudsy bugs, counted)"
+          + "".join(f"\n  {'gap ' + ','.join(named[n]) if n in (named or {}) else 'bug'}: {n}" for n in sorted(rejected - invalid)))
     return len(left)
 
 

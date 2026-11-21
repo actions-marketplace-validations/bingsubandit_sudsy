@@ -673,7 +673,7 @@ def coverage(tool, sudsy, version, prefix, exe):
     owned = sum(f[1] in layout for f in found)  # `formatter` ids: `sudsy format` does their work, so they are no findings to cover in the raw share
     if layout:  # the proof run: the formatter findings that remain after `sudsy format` are the ones that count as missing
         before = [f for f in found if f[1] in layout]
-        owned = (parity_coverage.proof(tool, spec, prefix, work, exe, {"actionlint": actionlint_check}, sudsy, preset, layout, fatal, before, pinned) if spec
+        owned = (parity_coverage.proof(tool, spec, prefix, work, exe, {"actionlint": actionlint_check}, sudsy, preset, layout, fatal, before, pinned, reviewed.files) if spec
                  else proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before, pinned))
     found = [f for f in found if f[1] not in layout]
     print(f"input filters: files the tool cannot read {len(fatal)}, formatter-owned findings left out of raw (in the target they count as missing: {owned}{', after the proof run' if layout else ''})")

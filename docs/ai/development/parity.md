@@ -121,7 +121,7 @@ Raw and target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.
 | rubocop | 96.2% (7717 of 8022) | 96.2% (7717 of 8022) |
 | ruff | 94.6% (4132 of 4367) | 94.6% (4132 of 4367) |
 | shellcheck | 86.6% (201 of 232) | 86.6% (201 of 232) |
-| sqlfluff | 87.6% (16692 of 19055) | 81.7% (16692 of 20420) |
+| sqlfluff | 88.0% (16772 of 19055) | 82.6% (16772 of 20300) |
 | stylecop | not run here (no corpus, or the tool is not installed) | - |
 | stylelint-less | not run here (no corpus, or the tool is not installed) | - |
 | stylelint-scss | not run here (no corpus, or the tool is not installed) | - |
