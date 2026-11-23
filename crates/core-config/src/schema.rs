@@ -607,6 +607,22 @@ pub mod shared {
         )
     }
 
+    pub fn open_comment_inside_parents(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::OPEN_COMMENT_INSIDE_PARENTS,
+            default,
+            "Node kinds whose braced body moves a comment after its `{` to the first body line; a body of any other kind keeps the comment on the `{` line. Empty: every body moves it.",
+        )
+    }
+
+    pub fn comment_space_exempt(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::COMMENT_SPACE_EXEMPT,
+            default,
+            "Prefixes of line comments (`//region`) that the rule `comment-space` leaves as they are when the formatter runs it. With the option set, a comment with a repeated marker (`///`) or `--` after it gets its space too.",
+        )
+    }
+
     pub fn ctor_own_line_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
             opt::CTOR_OWN_LINE_KINDS,
@@ -628,6 +644,14 @@ pub mod shared {
             opt::COMMENT_TRIM_LINES,
             default,
             "The lines of a block comment lose their trailing blanks.",
+        )
+    }
+
+    pub fn single_block_comment_as_line(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            opt::SINGLE_BLOCK_COMMENT_AS_LINE,
+            default,
+            "A block comment that sits on one line and ends its line in the output is written as a line comment (`/* note */` becomes `// note`). Documentation comments (`/**`) and empty comments stay.",
         )
     }
 

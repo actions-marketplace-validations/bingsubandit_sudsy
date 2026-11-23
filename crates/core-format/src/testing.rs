@@ -5,7 +5,7 @@
 //!
 //! concept: none (test harness)
 
-use crate::safety::equal_ignoring_trivia;
+use crate::safety::equal_with_line_comments;
 use core_syntax::{Grammar, SyntaxElement, SyntaxNode, print};
 
 /// What a language provides to be tested.
@@ -23,6 +23,11 @@ pub trait Subject {
     /// when an option formats that code from other parses.
     fn keeps_verbatim_trivia(&self) -> bool {
         true
+    }
+    /// Whether a one-line block comment may come out as a line comment
+    /// (`single_block_comment_as_line`).
+    fn block_as_line(&self) -> bool {
+        false
     }
 }
 
@@ -45,6 +50,13 @@ fn comments(subject: &dyn Subject, tree: &SyntaxNode) -> Vec<String> {
             };
             // The printer writes LF only, even inside block comments.
             let text = text.replace("\r\n", "\n");
+            if subject.block_as_line()
+                && !structured
+                && let Some(line) = crate::safety::line_form(g, &text)
+            {
+                out.push(line);
+                continue;
+            }
             out.push(if structured || g.has_tag(e.kind(), "indentable") {
                 text.lines().map(str::trim).collect::<Vec<_>>().join("\n")
             } else {
@@ -79,7 +91,8 @@ pub fn check(subject: &dyn Subject, input: &str) -> Result<String, String> {
             .parse(&text)
             .map_err(|e| format!("rewritten input: {e}"))?,
     };
-    equal_ignoring_trivia(g, &reference, &after).map_err(|e| format!("meaning changed: {e}"))?;
+    equal_with_line_comments(g, &reference, &after, subject.block_as_line())
+        .map_err(|e| format!("meaning changed: {e}"))?;
     if comments(subject, &reference) != comments(subject, &after) {
         return Err(format!(
             "comments changed: {:?} became {:?}",

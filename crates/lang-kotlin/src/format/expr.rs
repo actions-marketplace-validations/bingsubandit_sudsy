@@ -84,7 +84,8 @@ fn lambda(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let inner = &els[1..els.len() - 1];
     let Some(body) = inner.last().filter(|e| e.kind() == k::BLOCK) else {
         if inner.is_empty() {
-            return super::decl::empty_braces(cx, &els).unwrap_or_else(|| generic(cx, node));
+            return core_format::shapes::empty_braces(cx, node, &els)
+                .map_or_else(|| generic(cx, node), Ok);
         }
         return generic(cx, node);
     };

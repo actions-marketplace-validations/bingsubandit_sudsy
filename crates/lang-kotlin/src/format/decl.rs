@@ -67,30 +67,10 @@ fn body_style() -> shapes::BlockStyle {
 }
 
 /// `{}`, `{ }` and `{` newline `}` stay as written when there is nothing between the braces.
-pub(super) fn empty_braces(cx: &FormatCtx<'_>, els: &[SyntaxElement]) -> Option<R> {
-    let [SyntaxElement::Token(open), SyntaxElement::Token(close)] = els else {
-        return None;
-    };
-    if open.kind() != k::LBRACE || close.kind() != k::RBRACE {
-        return None;
-    }
-    if !comments::leading_comments(cx.grammar, close).is_empty() {
-        return None;
-    }
-    let gap = if comments::break_after(cx.grammar, open) {
-        doc::hardline()
-    } else if open.text_range().end() != close.text_range().start() {
-        doc::lit(" ")
-    } else {
-        doc::lit("")
-    };
-    Some(Ok(doc::concat(vec![cx.token(open), gap, cx.token(close)])))
-}
-
 fn body(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let els = kids(cx, node);
-    if let Some(r) = empty_braces(cx, &els) {
-        return r;
+    if let Some(d) = shapes::empty_braces(cx, node, &els) {
+        return Ok(d);
     }
     if let Some(r) = shapes::single_line_body(cx, node, &els) {
         return r;

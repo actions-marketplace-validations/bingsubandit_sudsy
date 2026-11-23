@@ -176,6 +176,8 @@ pub trait NodeFormatter: Send + Sync {
                 == Some(&core_config::OptionValue::Bool(true)),
             reindent: options.get(core_config::opt::COMMENT_REINDENT_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
+            block_as_line: options.get(core_config::opt::SINGLE_BLOCK_COMMENT_AS_LINE)
+                == Some(&core_config::OptionValue::Bool(true)),
             ..CommentStyle::default()
         }
     }
@@ -831,7 +833,7 @@ pub fn comment_doc(c: &Comment) -> Doc {
 }
 
 /// [`comment_doc`] in a comment style.
-fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
+pub(crate) fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
     let text = c.text();
     match c.kind {
         CommentKind::Lines => lines_doc(&text),
@@ -848,7 +850,7 @@ fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
                 .collect::<Vec<_>>()
                 .join("\n"),
         ),
-        CommentKind::Block => verbatim_text(&text),
+        CommentKind::Block => verbatim_text(&st.line_text(c)),
     }
 }
 
