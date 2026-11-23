@@ -14573,6 +14573,16 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "alter_table_indent": {
+                    "default": false,
+                    "description": "Indent the actions of `ALTER TABLE name` one level under the statement.",
+                    "type": "boolean"
+                  },
+                  "block_indent": {
+                    "default": false,
+                    "description": "Indent the bodies of `BEGIN`, `LOOP`, `WHILE`, `REPEAT`, `IF` and `CASE` blocks one level under their opener.",
+                    "type": "boolean"
+                  },
                   "comma_position": {
                     "default": "trailing",
                     "description": "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one.",
@@ -15956,6 +15966,16 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "alter_table_indent": {
+              "default": false,
+              "description": "Indent the actions of `ALTER TABLE name` one level under the statement.",
+              "type": "boolean"
+            },
+            "block_indent": {
+              "default": false,
+              "description": "Indent the bodies of `BEGIN`, `LOOP`, `WHILE`, `REPEAT`, `IF` and `CASE` blocks one level under their opener.",
+              "type": "boolean"
+            },
             "comma_position": {
               "default": "trailing",
               "description": "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one.",
