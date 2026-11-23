@@ -1,5 +1,9 @@
-# eslint-plugin-vue's flat/recommended rules that Sudsy has, at warn.
+# eslint-plugin-vue's flat/recommended rules that Sudsy has, at warn, and the layout of its `max-attributes-per-line`, `html-indent` and `singleline-html-element-content-newline`.
+# `whitespace_sensitivity: ignore` lays out inline elements as blocks, which can change the spaces a browser renders; the default stays `css`.
 vue:
+  format:
+    single_attribute_per_line: true
+    whitespace_sensitivity: ignore
   lint:
     rules:
       attr-delimiter: warn

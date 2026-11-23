@@ -76,7 +76,7 @@ impl GithubActionsProvider {
                 matcher(FilePattern::FileName("action.yml".into())),
                 matcher(FilePattern::FileName("action.yaml".into())),
             ],
-            schema: lang_yaml::option_schema().with_presets(vec![core_config::Preset::new(
+            schema: lang_yaml::option_schema().add_presets(vec![core_config::Preset::new(
                 "github-actions/actionlint",
                 include_str!("../presets/actionlint.yaml"),
             )]),
