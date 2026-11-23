@@ -94,6 +94,11 @@ Lint: target 88.6%; rules by missed findings:
 Lint: target 100%; rules by missed findings:
 1. `no-unexpected-multiline` (2 missed)
 
+## eslint-jsonc
+
+Lint: target 0%; rules by missed findings:
+1. `jsonc/no-useless-escape` (14 missed)
+
 ## eslint-plugin-vue
 
 Lint: target 23%; rules by missed findings:
@@ -273,13 +278,26 @@ Lint: target 0%; rules by missed findings:
 
 ## prettier
 
-1. `code-span-backticks` (2 files): a code span with three backticks (tree-sitter-md does not read it as code) is kept; Prettier writes one backtick
-2. `tab-blocks` (2 files): a block with a tab is kept as written (the width of a tab depends on its column); Prettier re-indents the nested list
-3. `code-span-lines` (1 files): a code span over two lines in a list item keeps the text of the span; Prettier removes the indentation of the second line
-4. `code-trailing-blanks` (1 files): trailing blanks inside a code block are code and stay; Prettier removes them
-5. `graphql-comment-position` (1 files): comments between the interfaces and the `{` stay in front of the `{` where Prettier moves them into the body
-6. `html-after-table` (1 files): an HTML block right after a table gets a blank line in front; Prettier keeps it on the next line (both parse it as HTML)
-7. `list-looseness` (1 files): a list item holding a paragraph, a nested list and an indented continuation keeps the blank lines of the source; Prettier's looseness differs
+Format: unclassified 10 of 84 differing files (12%).
+1. `yaml-comment-indent` (15 files): a comment line before an item of a lower indentation keeps its own column in Prettier; Sudsy aligns it with the next line
+2. `json-nested-arrays` (14 files): an array whose items are all arrays of two or more items; Prettier breaks the outer array and keeps each inner one on a line; Sudsy writes the outer one on a line when it fits
+3. `yaml-flow-trailing-comma` (13 files): a flow sequence broken over lines ends its last item with a comma in Prettier; Sudsy writes none
+4. `json-number-fill` (10 files): an array of numbers that does not fit; Prettier fills the lines, Sudsy writes one number per line
+5. `yaml-blank-line` (5 files): Sudsy adds a blank line that Prettier does not write, or drops the blank line at the end of the file that Prettier keeps
+6. `yaml-comment-position` (5 files): a comment on the line of an anchor or a `-` moves to the next line in Sudsy; Prettier keeps it
+7. `yaml-flow-layout` (5 files): a flow collection after a key with a trailing comment, or one that starts on the key's line; Sudsy moves it to its own line
+8. `json-comment-before-comma` (3 files): a block comment between a value and its comma; Prettier keeps the comma after the comment, Sudsy writes it before
+9. `code-span-backticks` (2 files): a code span with three backticks (tree-sitter-md does not read it as code) is kept; Prettier writes one backtick
+10. `tab-blocks` (2 files): a block with a tab is kept as written (the width of a tab depends on its column); Prettier re-indents the nested list
+11. `yaml-multiline-plain` (2 files): a plain scalar over several lines after a key; Prettier keeps the first line on the key, Sudsy moves it below or joins the lines
+12. `code-span-lines` (1 files): a code span over two lines in a list item keeps the text of the span; Prettier removes the indentation of the second line
+13. `code-trailing-blanks` (1 files): trailing blanks inside a code block are code and stay; Prettier removes them
+14. `emphasis-in-table` (1 files): a table cell with a regular expression that holds `*` and `|` in code spans; Prettier turns the `*` into `_`, Sudsy keeps it
+15. `graphql-comment-position` (1 files): comments between the interfaces and the `{` stay in front of the `{` where Prettier moves them into the body
+16. `html-after-table` (1 files): an HTML block right after a table gets a blank line in front; Prettier keeps it on the next line (both parse it as HTML)
+17. `json-trailing-comma` (1 files): a `.json` file with a trailing comma is refused (the dialect is json, `jsonc` allows it); Prettier's parser accepts it
+18. `list-looseness` (1 files): a list item holding a paragraph, a nested list and an indented continuation keeps the blank lines of the source; Prettier's looseness differs
+19. `yaml-block-indicator` (1 files): a block scalar header with an indent and a chomp indicator (`>2-`) is written in the other order (`>-2`)
 
 ## prettier-angular
 
@@ -435,6 +453,26 @@ Lint: target 83%; rules by missed findings:
 14. `AM04` (57 missed)
 15. `RF01` (53 missed)
 
+## stylecop
+
+1. `error-directive` (4 files): the preprocessor symbols of the platform are not set, so no branch of the `#if` chain is active (an `#error` or a missing value) and Sudsy refuses the file; Roslyn reads it
+Lint: target 23.5%; rules by missed findings:
+1. `SA1101` (108918 missed)
+2. `SA1600` (59930 missed)
+3. `SA1611` (45566 missed)
+4. `SA1200` (25732 missed)
+5. `SX1101` (12181 missed)
+6. `SA1309` (9589 missed)
+7. `SA1633` (7626 missed)
+8. `SA1602` (7380 missed)
+9. `SA1119_p` (6440 missed)
+10. `SA1503` (6318 missed)
+11. `SA1609` (5219 missed)
+12. `SA1623` (3892 missed)
+13. `SA1119` (3220 missed)
+14. `SA1316` (3089 missed)
+15. `SA1305` (1954 missed)
+
 ## stylelint
 
 Lint: target 94.7%; rules by missed findings:
@@ -448,6 +486,44 @@ Lint: target 94.7%; rules by missed findings:
 8. `declaration-property-value-keyword-no-deprecated` (2 missed)
 9. `no-duplicate-selectors` (2 missed)
 10. `no-descending-specificity` (1 missed)
+
+## stylelint-less
+
+Lint: target 78%; rules by missed findings:
+1. `declaration-property-value-no-unknown` (806 missed)
+2. `import-notation` (424 missed)
+3. `selector-pseudo-element-colon-notation` (156 missed)
+4. `media-query-no-invalid` (121 missed)
+5. `no-invalid-position-at-import-rule` (118 missed)
+6. `comment-empty-line-before` (116 missed)
+7. `at-rule-no-unknown` (92 missed)
+8. `declaration-block-no-redundant-longhand-properties` (92 missed)
+9. `selector-not-notation` (76 missed)
+10. `at-rule-prelude-no-invalid` (65 missed)
+11. `no-duplicate-selectors` (44 missed)
+12. `no-descending-specificity` (40 missed)
+13. `less/no-duplicate-variables` (22 missed)
+14. `shorthand-property-no-redundant-values` (11 missed)
+15. `selector-class-pattern` (5 missed)
+
+## stylelint-scss
+
+Lint: target 20.6%; rules by missed findings:
+1. `scss/dollar-variable-colon-space-after` (857 missed)
+2. `scss/no-global-function-names` (289 missed)
+3. `scss/dollar-variable-empty-line-before` (271 missed)
+4. `scss/comment-no-empty` (223 missed)
+5. `scss/double-slash-comment-empty-line-before` (198 missed)
+6. `no-invalid-position-at-import-rule` (70 missed)
+7. `function-name-case` (54 missed)
+8. `scss/at-mixin-argumentless-call-parentheses` (51 missed)
+9. `declaration-block-no-redundant-longhand-properties` (44 missed)
+10. `at-rule-empty-line-before` (30 missed)
+11. `custom-property-empty-line-before` (30 missed)
+12. `scss/at-rule-conditional-no-parentheses` (27 missed)
+13. `selector-not-notation` (20 missed)
+14. `scss/at-extend-no-missing-placeholder` (19 missed)
+15. `scss/at-if-no-null` (18 missed)
 
 ## taplo
 

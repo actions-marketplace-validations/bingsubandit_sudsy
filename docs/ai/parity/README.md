@@ -33,11 +33,11 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | csharpier | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
 | dotnet-format-editorconfig | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
 | eslint | 100.0% | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |
-| eslint-plugin-jsonc | - | 44 | 36 | 6 | 0 | 0 | 2 | 0 | 0 |
+| eslint-plugin-jsonc | 0.0% | 44 | 35 | 6 | 1 | 0 | 2 | 0 | 1 |
 | eslint-plugin-svelte | 100.0% | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
 | eslint-plugin-vue | 23.0% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
 | google-java-format | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
-| graphql-eslint | - | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
+| graphql-eslint | 53.7% | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
 | html-eslint | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
 | html-validate | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
@@ -54,10 +54,10 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | shellcheck | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
 | sqlfluff | 83.0% | 97 | 45 | 0 | 33 | 0 | 0 | 19 | 33 |
-| stylecop | - | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
+| stylecop | 23.5% | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
 | stylelint | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
-| stylelint-less | - | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
-| stylelint-scss | - | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
+| stylelint-less | 78.0% | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
+| stylelint-scss | 20.6% | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
 | taplo | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
 | terraform | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 93.0% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
