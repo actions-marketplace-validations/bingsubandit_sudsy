@@ -962,12 +962,14 @@ files:
   corpus/nowinandroid/feature/search/impl/src/main/kotlin/com/google/samples/apps/nowinandroid/feature/search/impl/SearchViewModel.kt: kt-dot-chain-sudsy
   corpus/nowinandroid/feature/topic/impl/src/main/kotlin/com/google/samples/apps/nowinandroid/feature/topic/impl/TopicScreen.kt: kt-comment-other
   corpus/nowinandroid/lint/src/test/kotlin/com/google/samples/apps/nowinandroid/lint/designsystem/DesignSystemDetectorTest.kt: kt-raw-string-lines
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
-  function-signature: 1666
+measured: {covered: 109563, total: 118835, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  function-signature: 1671
   multiline-expression-wrapping: 904
-  blank-line-between-when-conditions: 725
+  blank-line-between-when-conditions: 726
   string-template-indent: 534
-  multiline-if-else: 417
+  indent: 509
+  multiline-if-else: 419
   argument-list-wrapping: 406
   annotation: 392
   trailing-comma-on-declaration-site: 374
@@ -975,6 +977,53 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   statement-wrapping: 295
   function-literal: 264
   multiline-loop: 211
+  wrapping: 197
   no-unit-return: 188
-  if-else-wrapping: 162
   function-naming: 160
+  if-else-wrapping: 144
+  kdoc: 130
+  comment-wrapping: 122
+  if-else-bracing: 116
+  chain-wrapping: 110
+  no-blank-line-in-list: 100
+  backing-property-naming: 98
+  filename: 96
+  when-entry-bracing: 89
+  import-ordering: 80
+  binary-expression-wrapping: 70
+  parameter-list-wrapping: 61
+  spacing-between-declarations-with-comments: 55
+  mixed-condition-operators: 52
+  chain-method-continuation: 42
+  no-semi: 39
+  comment-spacing: 36
+  function-expression-body: 36
+  class-signature: 34
+  value-parameter-comment: 34
+  string-template: 26
+  spacing-between-declarations-with-annotations: 20
+  enum-wrapping: 17
+  no-empty-file: 11
+  property-naming: 9
+  property-wrapping: 8
+  unnecessary-parentheses-before-trailing-lambda: 7
+  no-line-break-before-assignment: 6
+  no-multi-spaces: 6
+  trailing-comma-on-call-site: 6
+  annotation-spacing: 5
+  enum-entry-name-case: 5
+  no-empty-class-body: 5
+  parameter-list-spacing: 5
+  blank-line-before-declaration: 3
+  max-line-length: 3
+  comma-spacing: 2
+  curly-spacing: 2
+  function-return-type-spacing: 2
+  modifier-order: 2
+  no-single-line-block-comment: 2
+  try-catch-finally-spacing: 2
+  class-naming: 1
+  context-receiver-list-wrapping: 1
+  keyword-spacing: 1
+  modifier-list-spacing: 1
+  paren-spacing: 1

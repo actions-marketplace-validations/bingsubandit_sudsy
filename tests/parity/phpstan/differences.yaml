@@ -1,6 +1,7 @@
 target: 0.0
 
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 0, total: 10961, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   class.notFound: 7408
   variable.undefined: 591
   classConstant.notFound: 511
@@ -16,3 +17,22 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   ignore.unmatchedIdentifier: 47
   method.void: 42
   method.override: 36
+  unset.possiblyHookedProperty: 34
+  trait.notFound: 29
+  return.missing: 26
+  parameter.implicitlyNullable: 18
+  return.never: 16
+  function.inner: 15
+  staticProperty.notFound: 14
+  property.uninitializedReadonly: 10
+  new.noConstructor: 9
+  arguments.count: 8
+  method.childReturnType: 7
+  method.templateTypeNotInParameter: 7
+  staticMethod.void: 4
+  function.void: 2
+  method.finalPrivate: 2
+  unset.variable: 2
+  class.extendsFinalByPhpDoc: 1
+  unset.offset: 1
+  unset.readOnlyProperty: 1

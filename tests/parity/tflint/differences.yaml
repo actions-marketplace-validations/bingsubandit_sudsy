@@ -2,6 +2,7 @@ target: 93.0
 fixes:  # lint rule -> where and what to change
   terraform_required_version: "named gap: 9 findings sit at a terraform.tf line 0 that the module does not have (a module without main.tf and without a terraform block); Sudsy reports no finding on a file that does not exist; the lead decides on an exclusion"
   terraform_required_providers: "named gap: a required_providers entry in the legacy string form (aws = \"~> 1\") that tflint reports as a legacy constraint in one corpus file (the rule of tflint is not clear from one case)"
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 133, total: 143, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   terraform_required_version: 9
   terraform_required_providers: 1

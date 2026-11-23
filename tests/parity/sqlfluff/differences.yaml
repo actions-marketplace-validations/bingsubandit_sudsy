@@ -31,10 +31,15 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 17297, total: 20182, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  LT02: 528
   PRS: 380
+  LT01: 285
+  LT09: 149
   CP02: 122
   RF03: 105
+  LT14: 103
   LXR: 102
   CP01: 79
   ST06: 75
@@ -46,4 +51,46 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   AM09: 52
   AM04: 50
   CV10: 49
+  LT06: 44
   AM06: 39
+  CP05: 33
+  LT05: 31
+  ST11: 25
+  AL02: 24
+  AL09: 24
+  CP03: 24
+  ST09: 21
+  ST12: 21
+  ST05: 17
+  CV11: 15
+  AL01: 13
+  CP04: 13
+  ST10: 13
+  AL08: 12
+  ST07: 12
+  AM08: 11
+  LT11: 11
+  RF04: 11
+  AL04: 10
+  AL10: 8
+  AM03: 7
+  CV01: 7
+  CV08: 5
+  LT03: 5
+  CV06: 4
+  CV07: 4
+  TQ02: 4
+  TQ03: 4
+  AL05: 3
+  AM05: 3
+  CV05: 3
+  ST02: 3
+  ST03: 2
+  CV03: 1
+  CV12: 1
+  LT07: 1
+  LT08: 1
+  ST01: 1
+  ST08: 1
+  TMP: 1
+  TQ01: 1

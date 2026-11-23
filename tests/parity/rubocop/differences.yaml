@@ -1,5 +1,6 @@
 target: 96.2
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 7717, total: 8022, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   Lint/UselessAssignment: 168
   Lint/AssignmentInCondition: 14
   Lint/EmptyFile: 7
@@ -15,3 +16,24 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   Lint/PercentStringArray: 5
   Lint/ShadowedException: 5
   Lint/UnreachableLoop: 5
+  Lint/DisjunctiveAssignmentInConstructor: 4
+  Lint/LiteralAsCondition: 4
+  Lint/RedundantCopEnableDirective: 4
+  Lint/UnreachableCode: 4
+  Lint/RedundantRequireStatement: 3
+  Lint/ScriptPermission: 3
+  Lint/ShadowedArgument: 3
+  Lint/EmptyConditionalBody: 2
+  Lint/EmptyInterpolation: 2
+  Lint/MissingCopEnableDirective: 2
+  Lint/NestedPercentLiteral: 2
+  Lint/SafeNavigationWithEmpty: 2
+  Lint/UselessTimes: 2
+  Lint/DuplicateMethods: 1
+  Lint/InterpolationCheck: 1
+  Lint/NestedMethodDefinition: 1
+  Lint/OrderedMagicComments: 1
+  Lint/OutOfRangeRegexpRef: 1
+  Lint/RedundantWithIndex: 1
+  Lint/SendWithMixinArgument: 1
+  Lint/Void: 1
