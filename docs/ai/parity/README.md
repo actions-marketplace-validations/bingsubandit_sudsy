@@ -40,7 +40,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | graphql-eslint | 53.7% | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
 | html-eslint | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
-| html-validate | 62.9% | 97 | 34 | 30 | 26 | 0 | 1 | 6 | 26 |
+| html-validate | 86.5% | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
 | htmlhint | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
 | ktlint | 92.3% | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
 | markdownlint | 99.0% | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |

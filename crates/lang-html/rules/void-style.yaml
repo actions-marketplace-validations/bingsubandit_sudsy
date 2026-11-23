@@ -6,4 +6,5 @@ severity: off
 category: style
 rule:
   kind: StartTag
-  regex: '(?i)^<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b.*/>$'
+  regex: '(?is)^<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b.*(?<END>/>)\s*$'
+report-on: $END

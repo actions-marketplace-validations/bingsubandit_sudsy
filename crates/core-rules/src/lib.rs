@@ -11,6 +11,7 @@
 //!
 //! concept: none (glue: crate root)
 
+pub mod allowed_values;
 pub mod blank_lines;
 pub mod cases;
 pub mod checks;
@@ -18,6 +19,7 @@ pub mod clause_style;
 pub mod commands;
 pub mod comments;
 pub mod configure;
+pub mod content_model;
 pub mod curly;
 pub mod decl_rows;
 mod declare;
@@ -46,6 +48,8 @@ pub mod keys;
 pub mod layout;
 pub mod lines;
 pub mod listed;
+pub mod markup;
+pub mod markup_checks;
 pub mod max;
 pub mod modifiers;
 pub mod module_names;

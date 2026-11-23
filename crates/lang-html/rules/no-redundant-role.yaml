@@ -27,4 +27,5 @@ rule:
     - { regex: '(?is)^role\s*=\s*["'']?\s*dialog\b', parent: { regex: '(?i)^<dialog\b' } }
     - { regex: '(?is)^role\s*=\s*["'']?\s*progressbar\b', parent: { regex: '(?i)^<progress\b' } }
     - { regex: '(?is)^role\s*=\s*["'']?\s*option\b', parent: { regex: '(?i)^<option\b' } }
+    - { regex: '(?is)^role\s*=\s*["'']?\s*img\b', parent: { regex: '(?i)^<img\b', has: { kind: Attribute, regex: '(?is)^alt\s*=\s*["'']?[^"''\s]' } } }
     - { regex: '(?is)^role\s*=\s*["'']?\s*link\b', parent: { regex: '(?i)^<a\b', has: { kind: Attribute, regex: '(?i)^href\b' } } }

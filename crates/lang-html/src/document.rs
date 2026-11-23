@@ -35,6 +35,14 @@ pub static RULES: &[&dyn Rule] = &[
     &UniqueLandmark,
     &MapDupName,
     &UnrecognizedCharRef,
+    &crate::content::PERMITTED_CONTENT,
+    &crate::content::PERMITTED_ORDER,
+    &crate::content::PERMITTED_OCCURRENCES,
+    &crate::content::REQUIRED_CONTENT,
+    &crate::access::LINK_TEXT,
+    &crate::access::FORM_SUBMIT,
+    &crate::access::HEADER_SCOPE,
+    &crate::access::HIDDEN_FOCUSABLE,
 ];
 
 rule! {

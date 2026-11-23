@@ -1,0 +1,12 @@
+id: script-type
+message: the `type` attribute is unnecessary for JavaScript
+description: >-
+  A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`,
+  ...) or empty says what the browser assumes (html-validate script-type).
+example: '<script type="text/javascript"></script>   <script></script>'
+severity: off
+category: style
+rule:
+  kind: Attribute
+  regex: '(?is)^type\s*=\s*["'']?\s*((application|text)/(x-)?(java|ecma|j|live)script(1\.[0-5])?|text/ecmascript)?\s*["'']?$'
+  parent: { kind: StartTag, regex: '(?i)^<script\b' }

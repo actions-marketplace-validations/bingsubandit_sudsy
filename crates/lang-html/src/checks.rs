@@ -127,9 +127,13 @@ impl Rule for Meta {
                                 && meta::flagged("omit", &name, &a.name)
                         }
                         _ => meta::allowed(&name, &a.name).is_some_and(|allowed| {
-                            a.value.is_some()
-                                && !value.is_empty()
-                                && !allowed.split('|').any(|v| v.eq_ignore_ascii_case(value))
+                            core_rules::allowed_values::wrong(
+                                allowed,
+                                a.value,
+                                (&text[..a.key.start().into()], &text[a.key.end().into()..]),
+                                || meta::flagged("omit", &name, &a.name),
+                                || meta::flagged("list", &name, &a.name),
+                            )
                         }),
                     };
                     if wrong {

@@ -10,6 +10,10 @@ html:
       deprecated: error
       doctype-html: error
       element-name: error
+      element-permitted-content: error
+      element-permitted-occurrences: error
+      element-permitted-order: error
+      element-required-content: error
       element-required-attributes: error
       map-dup-name: error
       multiple-labeled-controls: error

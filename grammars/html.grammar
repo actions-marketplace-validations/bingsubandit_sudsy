@@ -78,7 +78,7 @@ node Chunk #content #opaque = value:#chunk
 embed Element language "js" dialect "vue" root named TagName "script" content Chunk attr "lang" "js" "ts" "tsx" "jsx" join no-lint
 node Element #content #opaque = start:#start-tag content:#content* end:EndTag?
 // `>` or `/>`: `<br>` and `<br />` are the same node.
-node StartTag #start-tag #mapping #opaque = Lt TagName entries:Attribute* #tag-end
+node StartTag #start-tag #mapping #opaque = Lt name:TagName entries:Attribute* #tag-end
 // `#transparent`: the formatter writes the end tag of an element that has none, and an element that is
 // closed implicitly stays so in the safety check.
 node EndTag #transparent #opaque = LtSlash TagName Gt

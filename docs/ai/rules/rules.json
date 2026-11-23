@@ -26482,6 +26482,130 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "An element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), or one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block in `<p>`'s `<button>`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 15,
+            "length": 5,
+            "line": 5
+          },
+          {
+            "column": 16,
+            "length": 12,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 6,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-permitted-content",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard",
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-permitted-content",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An element the parent allows at most once (`<head>`, `<body>`, `<title>`, `<caption>`) that appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 23,
+            "length": 7,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-permitted-occurrences",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard",
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-permitted-occurrences",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "Children out of the order the parent requires (`<tbody>` before `<tfoot>`, `<head>` before `<body>`, `<summary>` first in `<details>`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 23,
+            "length": 7,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-permitted-order",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard",
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-permitted-order",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...).",
       "example": {
         "config": null,
@@ -26548,6 +26672,44 @@
           "id": "html-lang-require",
           "partial": true,
           "tool": "htmlhint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An element that lacks a child it requires (`<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 9,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-required-content",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard",
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-required-content",
+          "partial": true,
+          "tool": "html-validate"
         }
       ]
     },
@@ -26680,6 +26842,87 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 6,
+            "line": 14
+          }
+        ]
+      },
+      "fix": null,
+      "id": "form-submit",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h32",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is not a simple one (one row or one column of headers) (WCAG H63).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 12,
+            "length": 4,
+            "line": 18
+          },
+          {
+            "column": 52,
+            "length": 4,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "header-scope",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h63",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`.",
       "example": {
         "config": null,
@@ -26730,6 +26973,44 @@
         },
         {
           "id": "heading-level",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 25,
+            "length": 8,
+            "line": 19
+          }
+        ]
+      },
+      "fix": null,
+      "id": "hidden-focusable",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "hidden-focusable",
           "partial": true,
           "tool": "html-validate"
         }
@@ -26843,6 +27124,44 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "An `<img>` with no `alt` has no text alternative (WCAG H37; html-validate wcag/h37). One hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<script type=\"text/javascript\"></script>\n<script type=\"module\"></script>\n<script></script>\n<img src=\"a.png\">\n<img src=\"a.png\" alt=\"\">\n<img src=\"a.png\" role=\"presentation\">\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 17,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "img-alt",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h37",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`.",
       "example": {
         "config": null,
@@ -26885,6 +27204,44 @@
           "id": "input-requires-label",
           "partial": false,
           "tool": "htmlhint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 12,
+            "line": 13
+          }
+        ]
+      },
+      "fix": null,
+      "id": "link-text",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h30",
+          "partial": true,
+          "tool": "html-validate"
         }
       ]
     },
@@ -29411,7 +29768,7 @@
         "language": "html",
         "spans": [
           {
-            "column": 1,
+            "column": 8,
             "length": 1,
             "line": 3
           }
@@ -29732,6 +30089,44 @@
       "upstream": [
         {
           "id": "require-sri",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty says what the browser assumes (html-validate script-type).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<script type=\"text/javascript\"></script>\n<script type=\"module\"></script>\n<script></script>\n<img src=\"a.png\">\n<img src=\"a.png\" alt=\"\">\n<img src=\"a.png\" role=\"presentation\">\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 9,
+            "length": 22,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "script-type",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended",
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "script-type",
           "partial": true,
           "tool": "html-validate"
         }
@@ -30918,8 +31313,8 @@
         "language": "html",
         "spans": [
           {
-            "column": 1,
-            "length": 5,
+            "column": 4,
+            "length": 2,
             "line": 9
           }
         ]

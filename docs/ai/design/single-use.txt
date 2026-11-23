@@ -5,6 +5,7 @@
 # a second language adopts the shared form (docs/ai/architecture/adding-a-language.md). The one exception is a concept
 # of a shared module that reads no data (`reads:` only `option:`, `rule:`, `path:`): codegen adds it, marked `(shared)`.
 concept accessor-order # users: csharp
+concept allowed-values # users: html (shared)
 concept ambiguous-booleans # users: yaml
 concept angular-expression-pipes # users: html
 concept angular-microsyntax # users: html
@@ -26,6 +27,7 @@ concept component-props-model # users: html
 concept component-value-layout # users: css
 concept constructor-summary-standard-text # users: csharp
 concept container-rows # users: markdown
+concept content-model # users: html (shared)
 concept copy-from-own-stage # users: dockerfile
 concept copy-from-unknown-stage # users: dockerfile
 concept cyclic-needs # users: github-actions
@@ -94,6 +96,7 @@ concept linq-query-layout # users: csharp
 concept literal-checks # users: ruby
 concept map-dup-name # users: html
 concept markdown-block-layout # users: markdown
+concept markup-checks # users: html (shared)
 concept markup-layout # users: html
 concept member-order # users: csharp
 concept min-phony # users: makefile

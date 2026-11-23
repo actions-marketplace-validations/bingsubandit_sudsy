@@ -1298,9 +1298,25 @@
               "$ref": "#/definitions/rule",
               "description": "A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone."
             },
+            "element-permitted-content": {
+              "$ref": "#/definitions/rule",
+              "description": "An element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), or one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block in `<p>`'s `<button>`)."
+            },
+            "element-permitted-occurrences": {
+              "$ref": "#/definitions/rule",
+              "description": "An element the parent allows at most once (`<head>`, `<body>`, `<title>`, `<caption>`) that appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`."
+            },
+            "element-permitted-order": {
+              "$ref": "#/definitions/rule",
+              "description": "Children out of the order the parent requires (`<tbody>` before `<tfoot>`, `<head>` before `<body>`, `<summary>` first in `<details>`)."
+            },
             "element-required-attributes": {
               "$ref": "#/definitions/rule",
               "description": "An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...)."
+            },
+            "element-required-content": {
+              "$ref": "#/definitions/rule",
+              "description": "An element that lacks a child it requires (`<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`)."
             },
             "else-null": {
               "$ref": "#/definitions/rule",
@@ -1569,6 +1585,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `font-family` (or `font`) list with no generic family (`serif`, `sans-serif`, ...) to fall back on. `@font-face` is left out."
             },
+            "form-submit": {
+              "$ref": "#/definitions/rule",
+              "description": "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32)."
+            },
             "forward-annotation-syntax-error": {
               "$ref": "#/definitions/rule",
               "description": "A quoted annotation that is not an expression."
@@ -1834,6 +1854,10 @@
               "$ref": "#/definitions/rule",
               "description": "A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity)."
             },
+            "header-scope": {
+              "$ref": "#/definitions/rule",
+              "description": "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is not a simple one (one row or one column of headers) (WCAG H63)."
+            },
             "heading-increment": {
               "$ref": "#/definitions/rule",
               "description": "A heading is more than one level deeper than the heading before it (an `h4` right after an `h2`). Going back up by any number of levels is fine (markdownlint MD001)."
@@ -1882,6 +1906,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "hidden-focusable": {
+              "$ref": "#/definitions/rule",
+              "description": "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not."
             },
             "html-self-closing": {
               "$ref": "#/definitions/rule",
@@ -1986,6 +2014,10 @@
             "illegal-escape-text": {
               "$ref": "#/definitions/rule",
               "description": "A string or character literal writes backspace, tab, line feed, form feed, carriage return, a quote or a backslash as an octal or unicode escape (Checkstyle IllegalTokenText)."
+            },
+            "img-alt": {
+              "$ref": "#/definitions/rule",
+              "description": "An `<img>` with no `alt` has no text alternative (WCAG H37; html-validate wcag/h37). One hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is left alone."
             },
             "implicit-alias": {
               "$ref": "#/definitions/rule",
@@ -2332,6 +2364,10 @@
             "length-zero-no-unit": {
               "$ref": "#/definitions/rule",
               "description": "A zero length written with a unit (`0px`); other dimensions (`0s`, `0deg`) are left alone, and so is what is inside a function."
+            },
+            "link-text": {
+              "$ref": "#/definitions/rule",
+              "description": "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone."
             },
             "literal-case": {
               "description": "`NULL`, `TRUE` and `FALSE` are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP04).",
@@ -4970,6 +5006,10 @@
             "script-injection": {
               "$ref": "#/definitions/rule",
               "description": "An expression in a `run` script reads text that an attacker can choose (an issue or pull request title, a branch name, a commit message): it is pasted into the script before the shell runs, so it can inject commands. Pass it through an environment variable (`env:`) and read `\"$VAR\"` instead."
+            },
+            "script-type": {
+              "$ref": "#/definitions/rule",
+              "description": "A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty says what the browser assumes (html-validate script-type)."
             },
             "selection-set-depth": {
               "description": "An operation or fragment nests selection sets deeper than allowed, which makes a query expensive to execute. Fragments that are spread are not followed.",

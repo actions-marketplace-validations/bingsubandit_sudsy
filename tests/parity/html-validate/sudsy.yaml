@@ -62,3 +62,13 @@ html:
       unrecognized-char-ref: warn
       valid-id: warn
       void-style: warn
+      element-permitted-content: warn
+      element-permitted-occurrences: warn
+      element-permitted-order: warn
+      element-required-content: warn
+      form-submit: warn
+      header-scope: warn
+      hidden-focusable: warn
+      img-alt: warn
+      link-text: warn
+      script-type: warn

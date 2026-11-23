@@ -70,7 +70,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
 | GraphQL | █████████░ 99% Prettier | 23 rules · no reference tool | Ready |
 | TOML | █████████░ 98% taplo | 17 rules · no reference tool | Ready |
-| Angular templates | █████████░ 97% Prettier | 144 rules · no reference tool | Ready |
+| Angular templates | █████████░ 97% Prettier | 154 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>██░░░░░░░░ 20% stylelint-scss<br>███████░░░ 78% stylelint-less | Ready |
 | Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
@@ -82,7 +82,7 @@ Each number is measured on real-world code against the reference tool with its d
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
 | INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 26 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
-| HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
+| HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>████████░░ 86% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | ░░░░░░░░░░ 0% eslint-plugin-jsonc | In progress |
 | PowerShell | █████████░ 92% Invoke-Formatter | ███░░░░░░░ 33% PSScriptAnalyzer | In progress |

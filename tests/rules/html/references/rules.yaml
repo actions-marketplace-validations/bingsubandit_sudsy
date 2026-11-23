@@ -1,3 +1,4 @@
 valid-id: warn
 no-missing-references: warn
 no-redundant-for: warn
+attribute-allowed-values: off

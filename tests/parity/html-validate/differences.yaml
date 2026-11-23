@@ -1,28 +1,25 @@
 differences:
   script-self-closed: "gap  `<script />` does not parse (the element swallows the rest of the file): the parser's `syntax-error` is the only finding, html-validate also reports `no-self-closing` and `require-sri`"
-  id-pattern-values: "gap  `attribute-allowed-values` does not check values that the metadata gives as a pattern (`id`), only listed values; `valid-id` reports an invalid id"
   aria-hidden: "gap  html-validate skips what is inside an `aria-hidden` element; `input-missing-label` does not"
 files:
   syntax-error/script-self-closed html-validate:no-self-closing 3: script-self-closed
   syntax-error/script-self-closed html-validate:require-sri 3: script-self-closed
-  references/ids html-validate:attribute-allowed-values 4: id-pattern-values
-  references/ids html-validate:attribute-allowed-values 6: id-pattern-values
   accessibility/elements sudsy:input-missing-label 14: aria-hidden
   accessibility/elements sudsy:input-missing-label 15: aria-hidden
-target: 62.9
+target: 86.5
 missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
-  wcag/h63: 48
-  element-permitted-content: 23
-  wcag/h30: 23
   parser-error: 21
-  attribute-allowed-values: 20
-  element-required-content: 20
-  element-permitted-order: 19
   no-implicit-close: 19
-  element-permitted-occurrences: 18
-  hidden-focusable: 16
   no-inline-style: 15
-  wcag/h32: 15
   attr-spacing: 14
   no-dup-attr: 14
-  void-style: 13
+  wcag/h30: 11
+  input-attributes: 10
+  valid-autocomplete: 8
+  unique-landmark: 7
+  text-content: 6
+  wcag/h63: 4
+  attr-case: 3
+  autocomplete-password: 3
+  no-dup-class: 3
+  no-raw-characters: 3

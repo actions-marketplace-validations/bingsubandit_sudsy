@@ -1,0 +1,9 @@
+element-permitted-content: warn
+element-permitted-order: warn
+element-permitted-occurrences: warn
+element-required-content: warn
+link-text: warn
+form-submit: warn
+header-scope: warn
+hidden-focusable: warn
+deprecated: off

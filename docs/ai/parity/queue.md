@@ -152,22 +152,22 @@ Lint: target 0.2%; rules by missed findings:
 
 ## html-validate
 
-Lint: target 62.9%; rules by missed findings:
-1. `wcag/h63` (48 missed)
-2. `element-permitted-content` (23 missed)
-3. `wcag/h30` (23 missed)
-4. `parser-error` (21 missed)
-5. `attribute-allowed-values` (20 missed)
-6. `element-required-content` (20 missed)
-7. `element-permitted-order` (19 missed)
-8. `no-implicit-close` (19 missed)
-9. `element-permitted-occurrences` (18 missed)
-10. `hidden-focusable` (16 missed)
-11. `no-inline-style` (15 missed)
-12. `wcag/h32` (15 missed)
-13. `attr-spacing` (14 missed)
-14. `no-dup-attr` (14 missed)
-15. `void-style` (13 missed)
+Lint: target 86.5%; rules by missed findings:
+1. `parser-error` (21 missed)
+2. `no-implicit-close` (19 missed)
+3. `no-inline-style` (15 missed)
+4. `attr-spacing` (14 missed)
+5. `no-dup-attr` (14 missed)
+6. `wcag/h30` (11 missed)
+7. `input-attributes` (10 missed)
+8. `valid-autocomplete` (8 missed)
+9. `unique-landmark` (7 missed)
+10. `text-content` (6 missed)
+11. `wcag/h63` (4 missed)
+12. `attr-case` (3 missed)
+13. `autocomplete-password` (3 missed)
+14. `no-dup-class` (3 missed)
+15. `no-raw-characters` (3 missed)
 
 ## htmlhint
 

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>x</title><title>y</title></head>
+//                    ^^^^^^^ element-permitted-occurrences
+<body>
+<ul><li>a</li><div></div></ul>
+//            ^^^^^ element-permitted-content
+<p><a href="x"><a href="y">z</a></a></p>
+//             ^^^^^^^^^^^^ element-permitted-content
+<font>old</font>
+^^^^^^ element-permitted-content
+<table><tbody></tbody><thead></thead></table>
+//                    ^^^^^^^ element-permitted-order
+<details><div></div></details>
+^^^^^^^^^ element-required-content
+<a href="x"><img alt="logo" src="a"></a>
+<a href="x">text</a>
+<a href="x" aria-label="n"><i></i></a>
+<a href="x"><i></i></a>
+^^^^^^^^^^^^ link-text
+<form><input name="q"></form>
+^^^^^^ form-submit
+<form><button>go</button></form>
+<form id="f"></form><button form="f">go</button>
+<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>
+<table><tr><th></th><th scope="col">b</th></tr><tr><th>c</th><td>2</td></tr></table>
+//         ^^^^ header-scope
+//                                                 ^^^^ header-scope
+<div aria-hidden="true"><button>x</button></div>
+//                      ^^^^^^^^ hidden-focusable
+<div aria-hidden="true"><button tabindex="-1">x</button></div>
+</body>
+</html>
