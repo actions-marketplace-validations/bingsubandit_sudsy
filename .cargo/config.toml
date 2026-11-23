@@ -6,6 +6,10 @@ xtask = "run --quiet --package xtask --"
 [target.x86_64-pc-windows-msvc]
 linker = "rust-lld.exe"
 
+# The C runtime is linked in: a clean Windows lacks vcruntime140.dll (scripts/check-windows-crt.sh).
+[target.'cfg(all(windows, target_env = "msvc"))']
+rustflags = ["-C", "target-feature=+crt-static"]
+
 # Tests create their temp dirs here, so a stray sudsy.yaml in the system temp dir is not their parent config.
 [env]
 TEMP = { value = ".cargo/tmp", relative = true, force = true }

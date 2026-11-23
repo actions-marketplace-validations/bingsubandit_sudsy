@@ -185,6 +185,10 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: cargo build --release -p cli
+      - if: runner.os == 'Windows'
+        run: |
+          scripts/pack.sh "$RUNNER_TEMP/packs" ini shell
+          scripts/check-windows-crt.sh target/release/sudsy.exe "$RUNNER_TEMP"/packs/*.dll
       - run: dotnet publish workers/csharp/Sudsy.Worker -c Release -o "$RUNNER_TEMP/worker"
       - run: npm ci
         working-directory: editors/vscode

@@ -76,6 +76,8 @@ jobs:
       - run: cargo build --release --locked -p cli --no-default-features
         env:
           SUDSY_PACK_MANIFEST: ${{ runner.temp }}/packs/manifest.txt
+      - if: runner.os == 'Windows'
+        run: scripts/check-windows-crt.sh target/release/sudsy.exe "$RUNNER_TEMP"/packs/*.dll
       - run: dotnet publish workers/csharp/Sudsy.Worker -c Release -o "$RUNNER_TEMP/worker"
       - name: The CLI archive
         run: |
