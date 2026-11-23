@@ -1,0 +1,22 @@
+id: required-version
+family: module-names
+params:
+  block: Block
+  body: Body
+  head: type
+  labels: labels
+  members: ".tf"
+  opaque: ".tf.json"
+  merged: "override.tf"
+  check: missing-setting
+  setting_head: terraform
+  setting: required_version
+  anchor: main.tf
+message: "the module's `terraform` blocks have no `required_version`"
+description: >-
+  A module none of whose `terraform` blocks sets `required_version` (tflint
+  terraform_required_version), reported on the `terraform` block, or on the start of `main.tf`
+  when the module has no such block. Override files do not count.
+example: 'terraform { backend "s3" {} }'
+severity: off
+category: style

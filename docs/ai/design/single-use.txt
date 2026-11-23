@@ -38,6 +38,7 @@ concept deprecated-interpolation # users: hcl
 concept destructor-summary-standard-text # users: csharp
 concept dialect-keyword-tables # users: sql
 concept directive-keyword-space # users: csharp
+concept directory-facts # users:  (shared)
 concept distinct-group-by # users: sql
 concept doc-comment-model # users: csharp
 concept doc-comment-space # users: csharp
@@ -95,6 +96,7 @@ concept markup-layout # users: html
 concept member-order # users: csharp
 concept min-phony # users: makefile
 concept missing-permissions # users: github-actions
+concept module-names # users: hcl (shared)
 concept multiline-start-family # users: kotlin (shared)
 concept multiple-labeled-controls # users: html
 concept negation-of-excluded-parent # users: gitignore
@@ -169,7 +171,6 @@ concept unsafe-numbers # users: json
 concept untagged-base-image # users: dockerfile
 concept unused-assignment # users: csharp
 concept unused-cte # users: sql
-concept unused-declarations # users: hcl
 concept unused-private-member # users: csharp
 concept unwrapped-line-structure # users: cpp
 concept use-lambda # users: csharp

@@ -22,6 +22,7 @@ pub mod curly;
 pub mod decl_rows;
 mod declare;
 pub mod diagnostic;
+pub mod directory_facts;
 pub mod doc_comments;
 pub mod doc_lines;
 pub mod doc_style;
@@ -45,6 +46,7 @@ pub mod lines;
 pub mod listed;
 pub mod max;
 pub mod modifiers;
+pub mod module_names;
 pub mod multiline_start;
 pub mod names;
 pub mod naming;
@@ -79,8 +81,8 @@ pub use diagnostic::{
     Category, Diagnostic, Edit, FORMAT, Fix, FixKind, Related, SYNTAX_ERROR, Severity,
 };
 pub use engine::{
-    ActiveRule, FileReport, layers_needed, run_file, run_file_rules, run_project, run_rules,
-    silence,
+    ActiveRule, FileReport, collect_directory, directory_rules, layers_needed, run_directory,
+    run_file, run_file_rules, run_project, run_rules, silence,
 };
 pub use extension::{ALL_LANGUAGES, ExtensionRule, Extensions};
 pub use family::{Checked, Family, Params};
@@ -91,7 +93,7 @@ pub use hooks::{
 pub use layout::{Attach, LayoutRole, attached, run_layout};
 pub use lines::LineIndex;
 pub use options::{Check, Opt, OptionDecl, RuleOptions};
-pub use project::{Fact, ProjectContext, ProjectFacts};
+pub use project::{DirectoryScope, Fact, ProjectContext, ProjectFacts, Scope};
 pub use regex::{Meta, Re, RegexCache, meta_regex};
 pub use rule::{BodyContext, EmbeddedTree, FileContext, Layer, Rule, RuleContext, RuleMeta};
 pub use scope_rules::{ScopeLang, ScopeRule};

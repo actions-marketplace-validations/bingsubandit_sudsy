@@ -126,7 +126,7 @@ The target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.sh c
 | stylelint-less | - |
 | stylelint-scss | - |
 | stylelint | 94.7% (12012 of 12686) |
-| tflint | 58.7% (84 of 143) |
+| tflint | 93.0% (133 of 143) |
 | typescript-eslint | 100.0% (3644 of 3644) |
 | yamllint | 99.5% (1993 of 2004) |
 

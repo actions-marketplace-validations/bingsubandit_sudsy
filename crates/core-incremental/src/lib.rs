@@ -17,6 +17,7 @@ mod embedded;
 mod failure;
 mod fixing;
 mod inputs;
+mod module;
 mod queries;
 mod rules;
 
@@ -24,6 +25,7 @@ pub use db::{Database, Db, EventHook, Providers};
 pub use failure::{Failure, Stage};
 pub use fixing::{fix_text, transient};
 pub use inputs::{ConfigFile, ExtensionSet, File, WorkspaceRevision};
+pub use module::{Siblings, Unit, directory_scope, module_diagnostics, module_facts};
 pub use queries::{
     FileOptions, Parsed, Selection, config, format, options, parse, parse_settings, selection,
 };

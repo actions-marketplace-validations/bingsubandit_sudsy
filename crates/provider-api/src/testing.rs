@@ -167,8 +167,18 @@ fn analyze(
         }),
     };
     let report = core_rules::engine::run_file_with(&context, &active, false, changes.as_ref());
+    // The directory rules see a unit of this one file.
+    let mut diagnostics = report.diagnostics;
+    let facts = core_rules::collect_directory(&context, &active);
+    let unit = [Path::new(path).to_path_buf()];
+    diagnostics.extend(
+        core_rules::run_directory(&active, &facts, &unit, false)
+            .into_iter()
+            .map(|(_, d)| d),
+    );
+    diagnostics.sort_by_key(|d| (d.range.start(), d.range.end()));
     Analysis {
-        diagnostics: report.diagnostics,
+        diagnostics,
         parses: true,
     }
 }

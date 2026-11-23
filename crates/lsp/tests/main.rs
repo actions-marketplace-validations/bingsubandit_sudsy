@@ -2,6 +2,7 @@
 
 mod common;
 mod csharp;
+mod directory;
 mod languages;
 mod responsiveness;
 mod session;

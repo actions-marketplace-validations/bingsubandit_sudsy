@@ -12,3 +12,13 @@ data "aws_ami" "unused" {}
 output "x" {
   value = "${local.used_local}-${data.aws_ami.used.id}"
 }
+provider "aws" {
+^^^^^^^^ unused-declarations
+  alias = "west"
+}
+provider "aws" {
+  alias = "east"
+}
+resource "aws_instance" "a" {
+  provider = aws.east
+}

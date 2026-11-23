@@ -4,7 +4,7 @@
 
 use crate::position::apply_change;
 use core_config::{ConfigError, EditorConfig, Need};
-use core_incremental::{Database, Db, File};
+use core_incremental::{Database, Db, File, Siblings};
 use languages::{Project, installed::Checker};
 use lsp_types::TextDocumentContentChangeEvent;
 use provider_api::LanguageProvider;
@@ -33,6 +33,9 @@ pub struct Workspace {
     /// (`None` before that). They give the project-scope rules every file; an edit in the editor
     /// takes a file out of here and into `docs`.
     background: Option<Arc<HashMap<PathBuf, File>>>,
+    /// The files of a directory rule's unit that are not open, read from disk and kept while
+    /// their modification time and size stay the same.
+    pub(crate) siblings: Arc<Siblings>,
 }
 
 impl Workspace {
@@ -48,6 +51,7 @@ impl Workspace {
             project: None,
             docs: HashMap::new(),
             background: None,
+            siblings: Arc::default(),
         };
         workspace.db.prestart();
         let error = workspace.reload_config();
@@ -267,6 +271,15 @@ impl Workspace {
             .filter(|d| !d.skipped)
             .map(|d| d.file)
             .chain(self.background.iter().flat_map(|b| b.values().copied()))
+            .collect()
+    }
+
+    /// The open documents directly in `dir`.
+    pub(crate) fn project_open_in(&self, dir: &Path) -> Vec<File> {
+        self.docs
+            .iter()
+            .filter(|(p, d)| !d.skipped && p.parent() == Some(dir))
+            .map(|(_, d)| d.file)
             .collect()
     }
 

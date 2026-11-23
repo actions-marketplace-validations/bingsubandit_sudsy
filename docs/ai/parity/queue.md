@@ -463,10 +463,9 @@ Lint: target 94.7%; rules by missed findings:
 
 ## tflint
 
-Lint: target 58.7%; rules by missed findings:
-1. `terraform_required_providers` (37 missed)
-2. `terraform_required_version` (20 missed)
-3. `terraform_unused_declarations` (2 missed)
+Lint: target 93%; rules by missed findings:
+1. `terraform_required_version` (9 missed) Fix: named gap: 9 findings sit at a terraform.tf line 0 that the module does not have (a module without main.tf and without a terraform block); Sudsy reports no finding on a file that does not exist; the lead decides on an exclusion
+2. `terraform_required_providers` (1 missed) Fix: named gap: a required_providers entry in the legacy string form (aws = "~> 1") that tflint reports as a legacy constraint in one corpus file (the rule of tflint is not clear from one case)
 
 ## yamllint
 

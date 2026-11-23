@@ -16,8 +16,10 @@ provider-api.workspace = true
 salsa.workspace = true
 
 [dev-dependencies]
+tempfile.workspace = true
 lang-dockerfile = { workspace = true, features = ["static-grammars"] }
 lang-css.workspace = true
+lang-hcl = { workspace = true, features = ["static-grammars"] }
 lang-html.workspace = true
 lang-js.workspace = true
 lang-json.workspace = true

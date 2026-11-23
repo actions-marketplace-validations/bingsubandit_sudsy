@@ -4887,11 +4887,11 @@
             },
             "required-providers": {
               "$ref": "#/definitions/rule",
-              "description": "A `terraform` block with no `required_providers` block (tflint terraform_required_providers, in the file that has the block: the rule does not know the other files of the module)."
+              "description": "A provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, reported on the last such block of the provider, and a `required_providers` entry without a `version` (tflint terraform_required_providers). The built-in `terraform` provider is exempt; override files do not count."
             },
             "required-version": {
               "$ref": "#/definitions/rule",
-              "description": "A `terraform` block with no `required_version` argument (tflint terraform_required_version, in the file that has the block: the rule does not know the other files of the module)."
+              "description": "A module none of whose `terraform` blocks sets `required_version` (tflint terraform_required_version), reported on the `terraform` block, or on the start of `main.tf` when the module has no such block. Override files do not count."
             },
             "return-in-void-context": {
               "$ref": "#/definitions/rule",
@@ -6638,7 +6638,7 @@
             },
             "unused-declarations": {
               "$ref": "#/definitions/rule",
-              "description": "A variable, local value or data source that nothing in the same file refers to (tflint terraform_unused_declarations, within one file: a module that uses its variables in other files needs the rule off or those files in one)."
+              "description": "A variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to (tflint terraform_unused_declarations). Override files declare nothing of their own; a module with `.tf.json` files, a file that does not parse or one that cannot be read is not judged."
             },
             "unused-import": {
               "$ref": "#/definitions/rule",

@@ -5,7 +5,9 @@ use crate::notifier::Notifier;
 use crate::position::Positions;
 use crate::server::path_of;
 use crate::workspace::Workspace;
-use core_incremental::{Failure, Stage, lint, project_diagnostics};
+use core_incremental::{
+    Failure, Stage, directory_scope, lint, module_diagnostics, project_diagnostics,
+};
 use core_rules::{Diagnostic, Severity};
 use lsp_types::{
     DiagnosticRelatedInformation, DiagnosticSeverity, DocumentDiagnosticParams,
@@ -77,6 +79,23 @@ impl Workspace {
             .iter()
             .map(|d| to_lsp(d, &positions, uri))
             .collect();
+        // The directory rules judge the unit of the file's folder: its other files are the open
+        // documents and what the disk holds.
+        if let Some(scope) = directory_scope(&self.db, file)
+            && let Some(dir) = path.parent()
+        {
+            let open: Vec<_> = self.project_open_in(dir);
+            let unit = self.siblings.unit(&self.db, dir, &scope, &open);
+            let found = module_diagnostics(&self.db, unit)
+                .as_ref()
+                .map_err(Clone::clone)?;
+            items.extend(
+                found
+                    .iter()
+                    .filter(|(p, _)| p == path)
+                    .map(|(_, d)| to_lsp(d, &positions, uri)),
+            );
+        }
         // `analysis: deep`: what the project-scope rules found in this file.
         if self.is_deep() {
             let files = self.project_files();
