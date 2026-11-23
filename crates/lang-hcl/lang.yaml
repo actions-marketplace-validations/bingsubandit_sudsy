@@ -10,7 +10,6 @@ options:
   - final_newline: true
   - end_of_line
 presets: [tflint-recommended]
-families: "&[core_rules::module_names::FAMILY]"
 mapping:
   same: 'body attribute block variable_expr get_attr new_index function_call conditional tuple object object_elem quoted_template template_directive comment legacy_index'
   Document: config_file

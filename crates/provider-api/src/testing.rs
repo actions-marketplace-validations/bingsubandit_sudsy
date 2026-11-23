@@ -171,11 +171,12 @@ fn analyze(
     let mut diagnostics = report.diagnostics;
     let facts = core_rules::collect_directory(&context, &active);
     let unit = [Path::new(path).to_path_buf()];
-    diagnostics.extend(
-        core_rules::run_directory(&active, &facts, &unit, false)
-            .into_iter()
-            .map(|(_, d)| d),
-    );
+    let mut unit_findings: Vec<_> = core_rules::run_directory(&active, &facts, &unit, false)
+        .into_iter()
+        .map(|(_, d)| d)
+        .collect();
+    core_rules::silence(&context, &mut unit_findings);
+    diagnostics.extend(unit_findings);
     diagnostics.sort_by_key(|d| (d.range.start(), d.range.end()));
     Analysis {
         diagnostics,

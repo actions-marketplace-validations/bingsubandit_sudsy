@@ -4,6 +4,7 @@
 //! concept: none (glue: provider entry)
 
 mod format;
+mod modules;
 mod rules;
 
 pub use format::{HclFormatter, option_schema};

@@ -98,6 +98,24 @@ fn a_sibling_that_is_edited_added_or_deleted_changes_the_findings() {
 }
 
 #[test]
+fn a_suppression_comment_silences_a_directory_finding_in_its_file() {
+    let t = tempfile::tempdir().unwrap();
+    let db = db(CONFIG);
+    let siblings = Siblings::default();
+    write(
+        t.path(),
+        "main.tf",
+        "# sudsy-disable-next-line unused-declarations\nvariable \"a\" {}\nvariable \"b\" {}\n",
+    );
+    let found = findings(&db, &siblings, t.path(), &[]);
+    assert_eq!(found.len(), 1, "{found:?}");
+    assert!(found[0].1.contains("`var.b`"), "{found:?}");
+    // The comment belongs to the file the finding is reported in: another file's does not apply.
+    write(t.path(), "other.tf", "# sudsy-disable-file\n");
+    assert_eq!(findings(&db, &siblings, t.path(), &[]).len(), 1);
+}
+
+#[test]
 fn an_unsaved_edit_of_the_open_file_changes_the_findings() {
     let t = tempfile::tempdir().unwrap();
     let mut db = db(CONFIG);

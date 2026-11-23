@@ -19,6 +19,9 @@ pub static RULES: &[&dyn Rule] = &[
     &DeprecatedIndex,
     &CommentSyntax,
     &NamingConvention,
+    &crate::modules::UNUSED_DECLARATIONS,
+    &crate::modules::REQUIRED_PROVIDERS,
+    &crate::modules::REQUIRED_VERSION,
 ];
 
 /// The labels of a block (`resource "a" "b"`: `a`, `b`) as written between the quotes, and the

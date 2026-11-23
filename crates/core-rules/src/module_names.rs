@@ -1,88 +1,154 @@
-//! The `module-names` family: directory rules about the names a unit of files (the files of one
-//! directory, [`crate::DirectoryScope`]) declares, uses, needs and provides, over a grammar of
-//! blocks (a head word, labels, a body of `#key-value` members). The language supplies the words
-//! as params; the checks and the facts are written once. Common params: `block` (kind of the
-//! declaring nodes, top-level ones only), `body` (kind of the block's body), `head` and `labels`
-//! (the slots of the head word and of the labels), `members`, `opaque` and `merged` (the
-//! directory scope: suffixes of the unit's files, of files not read, of files merged into the
-//! others, which give uses but no declarations and no needs), and `check`:
-//! - `unused`: a declared name no file uses. `declare_labels`: heads whose labels name the
-//!   declaration (`head.label.label`), `declare_members`: heads whose members do (`head.key`),
-//!   `declare_alias` with `alias_member`: heads whose block with a member `alias_member` declares
-//!   `label.value`, `rename`: `head=prefix` pairs for the first part of the address, `reference`
-//!   and `reference_member`: kinds of a name and of the accesses after it (the address is the name
-//!   and the next access, `two_parts` heads take two).
-//! - `missing-provider`: a name used by a block that no member of a nested block provides.
-//!   `use_heads`: heads whose first label gives the name up to the first `separator`, unless the
-//!   member `use_member` names it; `name_heads`: heads whose first label is the name;
-//!   `provide_head` and `provide_block`: the head of the block and of the block inside it whose
-//!   members provide names; `exempt`: names nothing provides; `entry_key`: a provided entry that
-//!   is a mapping must have this key (reported in its own file).
-//! - `missing-setting`: no block with head `setting_head` has the member `setting`; reported on
-//!   each such block, or at the start of the file called `anchor` when the unit has none.
+//! Directory rules about the names a unit of files (the files of one directory,
+//! [`crate::DirectoryScope`]) declares, uses, needs and provides, over a grammar of blocks (a head
+//! word, labels, a body of `#key-value` members). The language fills a [`Names`] with its words
+//! and declares its rules with [`names_rule!`]; the checks and the facts are written once.
+//! - `Unused`: a declared name no file uses ([`Declare`]). `labels`: heads whose labels name the
+//!   declaration (`head.label.label`), `members`: heads whose members do (`head.key`), `alias`
+//!   with `alias_member`: heads whose block with that member declares `label.value`, `rename`:
+//!   `(head, prefix)` for the first part of the address, `reference` and `reference_member` of
+//!   [`Names`]: kinds of a name and of the accesses after it (the address is the name and the next
+//!   access, `two_parts` heads take two).
+//! - `MissingProvider`: a name used by a block that no member of a nested block provides
+//!   ([`Provider`]). `use_heads`: heads whose first label gives the name up to the first
+//!   `separator`, unless the member `use_member` names it; `name_heads`: heads whose first label
+//!   is the name; `provide_head` and `provide_block`: the head of the block and of the block inside
+//!   it whose members provide names; `exempt`: names nothing provides; `entry_key`: a provided
+//!   entry that is a mapping must have this key (reported in its own file).
+//! - `MissingSetting`: no block with head `Setting::head` has the member `Setting::name`;
+//!   reported on each such block, or at the start of the file called `anchor` when the unit has
+//!   none.
 //!
 //! The message has `{name}`.
 //!
 //! concept: module-names
 //! what: Names a directory's files declare, use, need and provide: unused declarations, unprovided names, a missing setting.
 //! tools: tflint terraform_unused_declarations, terraform_required_providers, terraform_required_version
+//! reads: path:module_names::Names
 
 use crate::directory_facts::{ANCHOR, DECLARED, NEEDED, PROVIDED, USED, missing, unused};
 use crate::{
-    DirectoryScope, Family, Params, ProjectContext, ProjectFacts, Rule, RuleContext, RuleMeta,
-    Scope, rule::FileContext,
+    DirectoryScope, ProjectContext, ProjectFacts, Rule, RuleContext, RuleMeta, Scope,
+    rule::FileContext,
 };
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, TextRange};
 use std::collections::BTreeSet;
 use std::sync::OnceLock;
 
-pub const FAMILY: Family = Family {
-    name: "module-names",
-    build,
-};
-
 #[derive(Clone, Copy, PartialEq)]
-enum Check {
+pub enum Check {
     Unused,
     MissingProvider,
     MissingSetting,
 }
 
-/// The params as sets of words, read once.
-#[derive(Default)]
-struct Words {
-    block: String,
-    body: String,
-    head: String,
-    labels: String,
-    declare_labels: Vec<String>,
-    declare_members: Vec<String>,
-    declare_alias: Vec<String>,
-    alias_member: String,
-    rename: Vec<(String, String)>,
-    reference: String,
-    reference_member: String,
-    two_parts: Vec<String>,
-    use_heads: Vec<String>,
-    name_heads: Vec<String>,
-    use_member: String,
-    separator: String,
-    provide_head: String,
-    provide_block: String,
-    exempt: Vec<String>,
-    entry_key: String,
-    setting_head: String,
-    setting: String,
-    anchor: String,
+/// What names a declaration.
+pub struct Declare {
+    pub labels: &'static [&'static str],
+    pub members: &'static [&'static str],
+    pub alias: &'static [&'static str],
+    pub alias_member: &'static str,
+    pub rename: &'static [(&'static str, &'static str)],
+    pub two_parts: &'static [&'static str],
 }
 
-struct ModuleNames {
+/// What a block uses and what provides it.
+pub struct Provider {
+    pub use_heads: &'static [&'static str],
+    pub name_heads: &'static [&'static str],
+    pub use_member: &'static str,
+    pub separator: &'static str,
+    pub provide_head: &'static str,
+    pub provide_block: &'static str,
+    pub exempt: &'static [&'static str],
+    pub entry_key: &'static str,
+}
+
+/// A setting some block of the unit must have.
+pub struct Setting {
+    pub head: &'static str,
+    pub name: &'static str,
+    pub anchor: &'static str,
+}
+
+/// The words of a language for the three checks, as plain data.
+pub struct Names {
+    pub scope: DirectoryScope,
+    /// Kind of the declaring nodes (top-level ones only) and of the block's body.
+    pub block: &'static str,
+    pub body: &'static str,
+    /// The slots of the head word and of the labels.
+    pub head: &'static str,
+    pub labels: &'static str,
+    pub reference: &'static str,
+    pub reference_member: &'static str,
+    pub declare: Declare,
+    pub provider: Provider,
+    pub setting: Setting,
+}
+
+/// A directory rule over [`Names`].
+pub struct ModuleNames {
     meta: &'static RuleMeta,
     check: Check,
-    message: String,
-    scope: DirectoryScope,
-    words: Words,
+    message: &'static str,
+    words: &'static Names,
     kinds: OnceLock<Option<Kinds>>,
+}
+
+impl ModuleNames {
+    pub const fn new(
+        meta: &'static RuleMeta,
+        check: Check,
+        message: &'static str,
+        words: &'static Names,
+    ) -> Self {
+        ModuleNames {
+            meta,
+            check,
+            message,
+            words,
+            kinds: OnceLock::new(),
+        }
+    }
+}
+
+/// Declares a static directory rule: the metadata like `rule!`, the check, the message and the
+/// [`Names`] it reads.
+#[macro_export]
+macro_rules! names_rule {
+    (
+        $vis:vis $name:ident {
+            id: $id:expr,
+            category: $category:ident,
+            default: $level:ident,
+            description: $description:expr,
+            example: $example:expr,
+            check: $check:ident,
+            message: $message:expr,
+            names: $names:expr,
+        }
+    ) => {
+        $vis static $name: $crate::module_names::ModuleNames =
+            $crate::module_names::ModuleNames::new(
+                {
+                    static META: $crate::RuleMeta = $crate::RuleMeta {
+                        id: $id,
+                        category: $crate::Category::$category,
+                        description: $description,
+                        example: $example,
+                        default_level: $crate::rule::Level::$level,
+                        fix: None,
+                        requires: &[],
+                        uses: &[],
+                        options: &[],
+                    };
+                    &META
+                },
+                $crate::module_names::Check::$check,
+                $message,
+                $names,
+            );
+    };
 }
 
 /// The grammar's kinds the words name.
@@ -91,81 +157,6 @@ struct Kinds {
     body: SyntaxKind,
     reference: Option<SyntaxKind>,
     reference_member: Option<SyntaxKind>,
-}
-
-fn set(p: &mut Params, key: &str) -> Vec<String> {
-    p.optional(key)
-        .map(|v| v.split_whitespace().map(str::to_string).collect())
-        .unwrap_or_default()
-}
-
-fn text(p: &mut Params, key: &str) -> String {
-    p.optional(key).unwrap_or_default()
-}
-
-fn leaked(words: Vec<String>) -> &'static [&'static str] {
-    let words: Vec<&'static str> = words
-        .into_iter()
-        .map(|w| &*Box::leak(w.into_boxed_str()))
-        .collect();
-    Box::leak(words.into_boxed_slice())
-}
-
-fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
-    let check = p.choice(
-        "check",
-        true,
-        &[
-            ("unused", Check::Unused),
-            ("missing-provider", Check::MissingProvider),
-            ("missing-setting", Check::MissingSetting),
-        ],
-    )?;
-    let scope = DirectoryScope {
-        members: leaked(set(&mut p, "members")),
-        opaque: leaked(set(&mut p, "opaque")),
-        merged: leaked(set(&mut p, "merged")),
-    };
-    let rename = set(&mut p, "rename")
-        .iter()
-        .filter_map(|pair| pair.split_once('='))
-        .map(|(a, b)| (a.to_string(), b.to_string()))
-        .collect();
-    let words = Words {
-        block: p.text("block")?,
-        body: p.text("body")?,
-        head: p.text("head")?,
-        labels: p.text("labels")?,
-        declare_labels: set(&mut p, "declare_labels"),
-        declare_members: set(&mut p, "declare_members"),
-        declare_alias: set(&mut p, "declare_alias"),
-        alias_member: text(&mut p, "alias_member"),
-        rename,
-        reference: text(&mut p, "reference"),
-        reference_member: text(&mut p, "reference_member"),
-        two_parts: set(&mut p, "two_parts"),
-        use_heads: set(&mut p, "use_heads"),
-        name_heads: set(&mut p, "name_heads"),
-        use_member: text(&mut p, "use_member"),
-        separator: text(&mut p, "separator"),
-        provide_head: text(&mut p, "provide_head"),
-        provide_block: text(&mut p, "provide_block"),
-        exempt: set(&mut p, "exempt"),
-        entry_key: text(&mut p, "entry_key"),
-        setting_head: text(&mut p, "setting_head"),
-        setting: text(&mut p, "setting"),
-        anchor: text(&mut p, "anchor"),
-    };
-    let message = p.text("message")?;
-    p.done()?;
-    Ok(Box::new(ModuleNames {
-        meta,
-        check,
-        message,
-        scope,
-        words,
-        kinds: OnceLock::new(),
-    }))
 }
 
 fn element_text(e: &SyntaxElement) -> String {
@@ -194,12 +185,12 @@ impl ModuleNames {
     fn kinds(&self, grammar: &Grammar) -> Option<&Kinds> {
         self.kinds
             .get_or_init(|| {
-                let w = &self.words;
+                let w = self.words;
                 Some(Kinds {
-                    block: grammar.kind_by_name(&w.block)?,
-                    body: grammar.kind_by_name(&w.body)?,
-                    reference: grammar.kind_by_name(&w.reference),
-                    reference_member: grammar.kind_by_name(&w.reference_member),
+                    block: grammar.kind_by_name(w.block)?,
+                    body: grammar.kind_by_name(w.body)?,
+                    reference: grammar.kind_by_name(w.reference),
+                    reference_member: grammar.kind_by_name(w.reference_member),
                 })
             })
             .as_ref()
@@ -217,7 +208,7 @@ impl ModuleNames {
 
     /// The head word of a block and where it is.
     fn head(&self, grammar: &Grammar, block: &SyntaxNode) -> Option<(String, TextRange)> {
-        let e = grammar.slot(block, &self.words.head)?;
+        let e = grammar.slot(block, self.words.head)?;
         Some((element_text(&e), element_range(&e)))
     }
 
@@ -266,7 +257,7 @@ impl ModuleNames {
                         .trim()
                         .to_string()
                 });
-            let take = if self.words.two_parts.contains(&head) {
+            let take = if self.words.declare.two_parts.contains(&head.as_str()) {
                 2
             } else {
                 1
@@ -285,26 +276,27 @@ impl ModuleNames {
 
     fn rename<'a>(&'a self, head: &'a str) -> &'a str {
         self.words
+            .declare
             .rename
             .iter()
-            .find(|(h, _)| h == head)
-            .map_or(head, |(_, p)| p.as_str())
+            .find(|(h, _)| *h == head)
+            .map_or(head, |(_, p)| p)
     }
 
     fn collect_unused(&self, file: &FileContext<'_>, kinds: &Kinds, facts: &mut ProjectFacts) {
         for name in self.references(file.root, kinds) {
             facts.add(TextRange::default(), name, USED);
         }
-        if self.scope.is_merged(file.path) {
+        if self.words.scope.is_merged(file.path) {
             return;
         }
-        let (w, grammar) = (&self.words, file.grammar);
+        let (w, grammar) = (&self.words.declare, file.grammar);
         for block in self.top_blocks(file.root, kinds) {
             let Some((head, head_range)) = self.head(grammar, &block) else {
                 continue;
             };
-            let labels = labels(grammar, &block, &w.labels);
-            if w.declare_labels.contains(&head)
+            let labels = labels(grammar, &block, self.words.labels);
+            if w.labels.contains(&head.as_str())
                 && let Some((_, last)) = labels.last()
             {
                 let address = labels
@@ -315,7 +307,7 @@ impl ModuleNames {
                 facts.add(*last, format!("{}.{address}", self.rename(&head)), DECLARED);
             }
             let members = self.members(grammar, &block, kinds);
-            if w.declare_members.contains(&head) {
+            if w.members.contains(&head.as_str()) {
                 for (name, member) in &members {
                     let at = grammar
                         .slot(member, "key")
@@ -323,8 +315,8 @@ impl ModuleNames {
                     facts.add(at, format!("{}.{name}", self.rename(&head)), DECLARED);
                 }
             }
-            if w.declare_alias.contains(&head)
-                && let Some(alias) = self.member_value(grammar, &members, &w.alias_member)
+            if w.alias.contains(&head.as_str())
+                && let Some(alias) = self.member_value(grammar, &members, w.alias_member)
                 && let Some((name, _)) = labels.first()
             {
                 facts.add(
@@ -344,18 +336,18 @@ impl ModuleNames {
         block: &SyntaxNode,
         head: &str,
     ) -> Option<String> {
-        let (w, grammar) = (&self.words, file.grammar);
-        let labels = labels(grammar, block, &w.labels);
+        let (w, grammar) = (&self.words.provider, file.grammar);
+        let labels = labels(grammar, block, self.words.labels);
         let (first, _) = labels.first()?;
-        if w.name_heads.iter().any(|h| h == head) {
+        if w.name_heads.contains(&head) {
             return Some(first.clone());
         }
-        if !w.use_heads.iter().any(|h| h == head) {
+        if !w.use_heads.contains(&head) {
             return None;
         }
         let members = self.members(grammar, block, kinds);
         let given = self
-            .member_value(grammar, &members, &w.use_member)
+            .member_value(grammar, &members, w.use_member)
             .and_then(|v| match v {
                 SyntaxElement::Node(n) => {
                     n.descendants().find(|d| Some(d.kind()) == kinds.reference)
@@ -364,7 +356,7 @@ impl ModuleNames {
             });
         match given {
             Some(reference) => Some(reference.text().to_string().trim().to_string()),
-            None => first.split(w.separator.as_str()).next().map(str::to_string),
+            None => first.split(w.separator).next().map(str::to_string),
         }
     }
 
@@ -385,17 +377,17 @@ impl ModuleNames {
                 n.kind() == kinds.block
                     && self
                         .head(grammar, n)
-                        .is_some_and(|h| h.0 == self.words.provide_block)
+                        .is_some_and(|h| h.0 == self.words.provider.provide_block)
             })
             .flat_map(|inner| self.members(grammar, &inner, kinds))
             .collect()
     }
 
     fn collect_provider(&self, file: &FileContext<'_>, kinds: &Kinds, facts: &mut ProjectFacts) {
-        if self.scope.is_merged(file.path) {
+        if self.words.scope.is_merged(file.path) {
             return;
         }
-        let w = &self.words;
+        let w = &self.words.provider;
         for block in self.top_blocks(file.root, kinds) {
             let Some((head, at)) = self.head(file.grammar, &block) else {
                 continue;
@@ -406,7 +398,7 @@ impl ModuleNames {
                 }
             } else if let Some(name) = self
                 .used_name(file, kinds, &block, &head)
-                .filter(|n| !w.exempt.contains(n))
+                .filter(|n| !w.exempt.contains(&n.as_str()))
             {
                 facts.add(at, name, NEEDED);
             }
@@ -414,27 +406,27 @@ impl ModuleNames {
     }
 
     fn collect_setting(&self, file: &FileContext<'_>, kinds: &Kinds, facts: &mut ProjectFacts) {
-        let w = &self.words;
-        if self.scope.is_merged(file.path) {
+        let w = &self.words.setting;
+        if self.words.scope.is_merged(file.path) {
             return;
         }
         if file
             .path
             .file_name()
-            .is_some_and(|n| n.to_str() == Some(w.anchor.as_str()))
+            .is_some_and(|n| n.to_str() == Some(w.anchor))
         {
-            facts.add(TextRange::default(), &w.setting, ANCHOR);
+            facts.add(TextRange::default(), w.name, ANCHOR);
         }
         for block in self.top_blocks(file.root, kinds) {
             let Some((head, at)) = self.head(file.grammar, &block) else {
                 continue;
             };
-            if head == w.setting_head {
+            if head == w.head {
                 let has = self
                     .members(file.grammar, &block, kinds)
                     .iter()
-                    .any(|(n, _)| *n == w.setting);
-                facts.add(at, &w.setting, if has { PROVIDED } else { NEEDED });
+                    .any(|(n, _)| n == w.name);
+                facts.add(at, w.name, if has { PROVIDED } else { NEEDED });
             }
         }
     }
@@ -450,15 +442,15 @@ impl Rule for ModuleNames {
     }
 
     fn scope(&self) -> Scope {
-        Scope::Directory(self.scope)
+        Scope::Directory(self.words.scope)
     }
 
     /// A provided entry that is a mapping without the key `entry_key`, in its own file.
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let w = &self.words;
+        let w = &self.words.provider;
         if self.check != Check::MissingProvider
             || w.entry_key.is_empty()
-            || self.scope.is_merged(file.path)
+            || self.words.scope.is_merged(file.path)
         {
             return;
         }
@@ -509,8 +501,8 @@ impl Rule for ModuleNames {
 
     fn finish(&self, facts: &ProjectFacts, ctx: &mut ProjectContext<'_>) {
         match self.check {
-            Check::Unused => unused(facts, ctx, &self.message),
-            Check::MissingProvider | Check::MissingSetting => missing(facts, ctx, &self.message),
+            Check::Unused => unused(facts, ctx, self.message),
+            Check::MissingProvider | Check::MissingSetting => missing(facts, ctx, self.message),
         }
     }
 }

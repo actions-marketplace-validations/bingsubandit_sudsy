@@ -11,6 +11,7 @@ use crate::failure::{Failure, Stage, guarded};
 use crate::inputs::File;
 use crate::queries::{parse, provider_of};
 use crate::rules::active_rules;
+use core_rules::suppress::Suppressions;
 use core_rules::{Diagnostic, DirectoryScope, FileContext, LineIndex, ProjectFacts};
 use core_rules::{collect_directory, directory_rules, run_directory};
 use std::collections::HashMap;
@@ -38,6 +39,35 @@ pub fn directory_scope(db: &dyn Db, file: File) -> Option<DirectoryScope> {
         .find(|scope| scope.is_member(path))
 }
 
+/// Runs `f` on the file's tree, the way the project phase sees it; `None` when the file has
+/// syntax errors.
+fn with_context<R>(
+    db: &dyn Db,
+    file: File,
+    f: impl FnOnce(&FileContext<'_>) -> R,
+) -> Result<Option<R>, Failure> {
+    let provider = provider_of(db, file)?;
+    let parsed = parse(db, file).as_ref().map_err(Clone::clone)?;
+    if !parsed.errors.is_empty() {
+        return Ok(None);
+    }
+    let text = file.text(db);
+    let root = parsed.root();
+    let lines = LineIndex::new(text);
+    let context = FileContext {
+        path: file.path(db),
+        text,
+        root: &root,
+        grammar: provider.grammar(),
+        lines: &lines,
+        body_kinds: provider.body_kinds(),
+        hooks: provider.rule_hooks(),
+        embedded: &[],
+        semantics: None,
+    };
+    Ok(Some(f(&context)))
+}
+
 /// What the directory rules collect from one file. Empty (and so "not collected") when the file
 /// has syntax errors.
 #[salsa::tracked(returns(ref))]
@@ -47,27 +77,43 @@ pub fn module_facts(db: &dyn Db, file: File) -> Result<ProjectFacts, Failure> {
         if directory_rules(active).next().is_none() {
             return Ok(ProjectFacts::default());
         }
-        let provider = provider_of(db, file)?;
-        let parsed = parse(db, file).as_ref().map_err(Clone::clone)?;
-        if !parsed.errors.is_empty() {
-            return Ok(ProjectFacts::default());
-        }
-        let text = file.text(db);
-        let root = parsed.root();
-        let lines = LineIndex::new(text);
-        let context = FileContext {
-            path: file.path(db),
-            text,
-            root: &root,
-            grammar: provider.grammar(),
-            lines: &lines,
-            body_kinds: provider.body_kinds(),
-            hooks: provider.rule_hooks(),
-            embedded: &[],
-            semantics: None,
-        };
-        Ok(collect_directory(&context, active))
+        let facts = with_context(db, file, |context| collect_directory(context, active))?;
+        Ok(facts.unwrap_or_default())
     })
+}
+
+/// Drops the findings that a suppression comment of the file they are reported in silences: the
+/// project and directory phases report on files other than the one whose rules ran.
+pub(crate) fn silenced(
+    db: &dyn Db,
+    found: Vec<(PathBuf, Diagnostic)>,
+    files: &[File],
+) -> Result<Vec<(PathBuf, Diagnostic)>, Failure> {
+    let mut keep = vec![true; found.len()];
+    let mut done: Vec<&PathBuf> = Vec::new();
+    for (path, _) in &found {
+        if done.contains(&path) {
+            continue;
+        }
+        done.push(path);
+        let Some(&file) = files.iter().find(|f| f.path(db) == path) else {
+            continue;
+        };
+        let silenced = with_context(db, file, |context| {
+            let suppressions = Suppressions::scan(context);
+            found
+                .iter()
+                .map(|(p, d)| p == path && suppressions.suppresses(context, d))
+                .collect::<Vec<_>>()
+        })?;
+        for (k, silenced) in keep.iter_mut().zip(silenced.unwrap_or_default()) {
+            *k &= !silenced;
+        }
+    }
+    let mut keep = keep.into_iter();
+    let mut found = found;
+    found.retain(|_| keep.next().unwrap_or(true));
+    Ok(found)
 }
 
 /// What the directory rules find in a unit, on any of its files; the caller keeps the files it
@@ -90,7 +136,11 @@ pub fn module_diagnostics<'db>(
             }
         }
         let paths: Vec<PathBuf> = files.iter().map(|f| f.path(db).clone()).collect();
-        Ok(run_directory(active, &facts, &paths, unit.opaque(db)))
+        silenced(
+            db,
+            run_directory(active, &facts, &paths, unit.opaque(db)),
+            files,
+        )
     })
 }
 

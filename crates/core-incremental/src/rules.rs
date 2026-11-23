@@ -300,5 +300,5 @@ pub fn project_diagnostics(
         }
         out.extend(run_project(active, &facts));
     }
-    Ok(out)
+    crate::module::silenced(db, out, files)
 }
