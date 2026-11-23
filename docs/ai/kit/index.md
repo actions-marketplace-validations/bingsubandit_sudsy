@@ -141,6 +141,7 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 | format-string-checks | core-rules/format_strings/flavor.rs +2 | Format strings that do not fit their arguments, by flavor (percent, brace). | ruff F501-F509 F521-F525, pyupgrade UP031 UP032 | grammar:format | python | SINGLE-USE |
 | from-first | lang-dockerfile/rules/stages.rs | An instruction other than ARG before the first FROM | hadolint DL3061 |  | dockerfile | SINGLE-USE |
 | getter-return | lang-js/rules/reach.rs | A getter whose end can be reached without a return. | eslint getter-return |  | js | SINGLE-USE |
+| hard-tabs | core-rules/hard_tabs.rs | Tab characters in the text of a file, except inside tokens of named kinds. | markdownlint MD010 |  |  | SINGLE-USE |
 | heading-increment | lang-markdown/rules.rs | A heading is more than one level deeper than the heading before it (an `h4` right after an `h2`) | markdownlint MD001 |  | markdown | SINGLE-USE |
 | heading-style | core-rules/heading_style.rs | Headings written in one style, ATX or setext, with a fix both ways for one-line headings. | markdownlint MD003 |  |  | SINGLE-USE |
 | implicit-string-concat | lang-python/rules/literal.rs | Implicit concatenation of adjacent string literals. | ruff ISC |  | python | SINGLE-USE |

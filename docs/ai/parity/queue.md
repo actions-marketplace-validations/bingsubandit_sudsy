@@ -244,14 +244,13 @@ Lint: target 92.3%; rules by missed findings:
 
 ## markdownlint
 
-Lint: target 83.4%; rules by missed findings:
-1. `MD010` (309 missed)
-2. `MD037` (6 missed)
-3. `MD041` (4 missed)
-4. `MD051` (2 missed)
-5. `MD024` (1 missed)
-6. `MD028` (1 missed)
-7. `MD034` (1 missed)
+Lint: target 99%; rules by missed findings:
+1. `MD037` (6 missed)
+2. `MD041` (4 missed)
+3. `MD051` (2 missed)
+4. `MD024` (1 missed)
+5. `MD028` (1 missed)
+6. `MD034` (1 missed)
 
 ## phpstan
 

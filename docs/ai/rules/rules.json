@@ -672,6 +672,52 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A tab character in a line. Each run of tabs is one report.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "---\ntitle:\tx\n---\n\nA\ttab in text.\n\n```\n\tcode\n```\n\nNo tab here.\n",
+        "language": "markdown",
+        "spans": [
+          {
+            "column": 2,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-hard-tabs",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
+          "name": "ignore_kinds",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "markdown/markdownlint"
+      ],
+      "upstream": [
+        {
+          "id": "MD010",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A block comment that fits on one line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`) and languages with no line comment marker are left alone.",
       "example": {
         "config": null,

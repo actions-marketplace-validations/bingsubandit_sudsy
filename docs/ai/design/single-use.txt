@@ -64,6 +64,7 @@ concept format-diff-family # users: kotlin (shared)
 concept format-string-checks # users: python
 concept from-first # users: dockerfile
 concept getter-return # users: js
+concept hard-tabs # users:  (shared)
 concept header-line-break # users:  (shared)
 concept heading-increment # users: markdown
 concept heading-level # users: html

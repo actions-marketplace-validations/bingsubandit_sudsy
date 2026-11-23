@@ -3723,6 +3723,40 @@
               "$ref": "#/definitions/rule",
               "description": "A variable in the `global:` scope, other than the special variables PSScriptAnalyzer exempts (`$global:LASTEXITCODE`, `$global:ErrorActionPreference`, `$global:PSDefaultParameterValues`, ...)."
             },
+            "no-hard-tabs": {
+              "description": "A tab character in a line. Each run of tabs is one report.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "ignore_kinds": {
+                          "default": [],
+                          "description": "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "no-implicit-button-type": {
               "$ref": "#/definitions/rule",
               "description": "A `<button>` without a `type` is a submit button, which is rarely meant outside a form. A Svelte spread (`{...props}`) may carry the `type`."
