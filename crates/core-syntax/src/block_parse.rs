@@ -96,6 +96,23 @@ impl Blocks {
     }
 }
 
+/// How many bracketed statement lists the parse is inside, kept by [`statement_list`]; a
+/// statement reads it to know it ends at the bracket that closes its list.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Nesting(usize);
+
+impl Nesting {
+    /// Inside the brackets of a statement list.
+    pub fn bracketed(self) -> bool {
+        self.0 > 0
+    }
+
+    /// The number of lists the parse is inside.
+    pub fn depth(self) -> usize {
+        self.0
+    }
+}
+
 /// The parser of a language as the shared block parse needs it.
 pub trait Cursor {
     /// The text of the token `n` ahead (empty at the end).
@@ -103,6 +120,8 @@ pub trait Cursor {
     fn at_end(&self) -> bool;
     /// The token `n` ahead ends a statement (`;`).
     fn separator_at(&self, n: usize) -> bool;
+    /// The token at the cursor closes the bracket the statements stand in (`)`).
+    fn at_close(&self) -> bool;
     /// A label (`name:`) is at the cursor.
     fn at_label(&self) -> bool;
     /// Takes the label and its colon.
@@ -114,6 +133,8 @@ pub trait Cursor {
     fn expression(&mut self);
     /// One statement, as a node of its own.
     fn statement(&mut self);
+    /// The nesting [`statement_list`] keeps.
+    fn nesting(&mut self) -> &mut Nesting;
     /// How far the cursor is, to see whether a statement took anything.
     fn position(&self) -> usize;
 }
@@ -132,12 +153,10 @@ fn condition<C: Cursor + ?Sized>(c: &mut C, body_after: Option<&str>) {
     }
 }
 
-/// Statements up to the next arm word of `f` or its closer `end <open>`.
-fn body<C: Cursor + ?Sized>(c: &mut C, f: &Frame, end: &str) {
-    while !c.at_end()
-        && !f.arms.iter().any(|a| at(c, 0, a.word))
-        && !(at(c, 0, end) && at(c, 1, f.open))
-    {
+/// Statements up to the `stop` condition or the end; a bracketed list stops at the bracket that
+/// closes it.
+fn statements<C: Cursor + ?Sized>(c: &mut C, stop: impl Fn(&C) -> bool) {
+    while !c.at_end() && !stop(c) {
         if c.separator_at(0) {
             c.bump_any();
             continue;
@@ -148,6 +167,20 @@ fn body<C: Cursor + ?Sized>(c: &mut C, f: &Frame, end: &str) {
             c.bump_any();
         }
     }
+}
+
+/// Statements up to the next arm word of `f` or its closer `end <open>`.
+fn body<C: Cursor + ?Sized>(c: &mut C, f: &Frame, end: &str) {
+    statements(c, |c| {
+        f.arms.iter().any(|a| at(c, 0, a.word)) || (at(c, 0, end) && at(c, 1, f.open))
+    });
+}
+
+/// The statements of a bracket (`DO INSTEAD (a; b)`), up to its closing bracket or the end.
+pub fn statement_list<C: Cursor + ?Sized>(c: &mut C) {
+    c.nesting().0 += 1;
+    statements(c, |c| c.at_close());
+    c.nesting().0 -= 1;
 }
 
 /// A statement with arms: the opener, its condition or subject, the arms with their bodies and

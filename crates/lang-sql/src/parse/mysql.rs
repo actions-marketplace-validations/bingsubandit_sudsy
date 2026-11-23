@@ -22,6 +22,10 @@ impl Cursor for P<'_> {
         self.is_t(n, T::Semi)
     }
 
+    fn at_close(&self) -> bool {
+        self.is_t(0, T::RParen)
+    }
+
     fn at_label(&self) -> bool {
         self.is_t(1, T::Colon)
     }
@@ -51,6 +55,10 @@ impl Cursor for P<'_> {
             self.statement_body();
         }
         self.close(k::STATEMENT, m);
+    }
+
+    fn nesting(&mut self) -> &mut block_parse::Nesting {
+        &mut self.nesting
     }
 
     fn position(&self) -> usize {
