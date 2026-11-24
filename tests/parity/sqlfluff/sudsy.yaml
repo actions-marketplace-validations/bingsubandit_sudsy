@@ -1,5 +1,7 @@
 # The Sudsy side of the comparison with `sqlfluff fix --rules layout,capitalisation`: Sudsy's own
 # defaults, and the dialect a fixture's name starts with.
+# sqlfluff `fix` writes every file with LF, whatever the file had.
+sql: { format: { end_of_line: lf } }
 overrides:
   - files: ["postgres__*"]
     sql: { format: { dialect: postgres } }

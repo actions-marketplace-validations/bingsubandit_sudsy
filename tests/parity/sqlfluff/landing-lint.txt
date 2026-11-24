@@ -47,7 +47,6 @@ ca48bfc0820544e8 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/r
 e3b0c44298fc1c14 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.3.2_schema/mysql/dolphinscheduler_dml.sql
 e88e71d8744882c5 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.4.1_schema/mysql/dolphinscheduler_ddl.sql
 e3b0c44298fc1c14 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.4.1_schema/mysql/dolphinscheduler_dml.sql
-e3b0c44298fc1c14 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.4.3_schema/mysql/dolphinscheduler_dml.sql
 cc27ced009c700d6 sql-real/mysql/kestra/jdbc-mysql/src/main/resources/migrations/2.0.02-queue-drop-legacy-mysql.sql
 28790b9ae0e3a3f4 sql-real/mysql/kestra/jdbc-mysql/src/main/resources/migrations/2.1.04-notification-items-mysql.sql
 910e4b799cbd101d sql-real/mysql/kestra/jdbc-mysql/src/main/resources/migrations/2.1.06-searchable-data-mysql.sql
@@ -148,4 +147,5 @@ ac0bd6e7f511dcb4 sql-real/tsql/hive/standalone-metastore/metastore-server/src/ma
 8d6e1a0bdb5dcf35 sql-real/tsql/hive/standalone-metastore/metastore-server/src/main/sql/mssql/upgrade-4.2.0-to-4.3.0.mssql.sql
 09163bc27aa2a424 sql-real/tsql/sqlserver-kit/Stored_Procedure/dbo.usp_LogError.sql
 6852bffb8e5c9d74 sql-real/tsql/sqlserver-kit/User_Defined_Function/udf_CalculateDistanceBetween2Coordinates.sql
+0a4d3c2c10aa58be sql-real/tsql/sqlserver-kit/User_Defined_Function/udf_RenderXMLToString.sql
 a551c3ac4e8fde9c sql-real/tsql/tigertoolbox/Sessions/PASS-Modern-Migration-Tour/LabFiles/AdventureWorks_PASSModernMigrationTour/Cleanup.sql

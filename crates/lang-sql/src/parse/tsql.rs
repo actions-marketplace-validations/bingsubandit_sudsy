@@ -148,7 +148,9 @@ impl P<'_> {
                 p.type_name();
             }
             if p.at_op("=") {
+                let m = p.mark();
                 p.bump();
+                p.close(k::COMPARISON_OPERATOR, m);
                 p.expression();
             }
             true
@@ -186,7 +188,12 @@ impl P<'_> {
         }
         if self.at("else") {
             self.bump_as(k::KEYWORD);
-            self.indented(false, |p| p.nested_statement());
+            // `ELSE IF`: the chained `IF` is the clause itself, not a body one level in.
+            if self.at("if") {
+                self.nested_statement();
+            } else {
+                self.indented(false, |p| p.nested_statement());
+            }
         }
     }
 

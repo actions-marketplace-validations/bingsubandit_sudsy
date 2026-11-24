@@ -188,6 +188,39 @@ fn mysql_delimiter_may_be_a_word() {
 }
 
 #[test]
+fn tsql_else_if_chains_stay_at_the_level_of_the_first_if() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "IF @a = 1\nSELECT 1\nELSE IF @a = 2\nBEGIN\nSELECT 2\nEND\nELSE\nIF @a = 3\nSELECT 3\n"
+        ),
+        "IF @a = 1\n    SELECT 1\nELSE IF @a = 2\n    BEGIN\n        SELECT 2\n    END\nELSE\nIF @a = 3\n    SELECT 3\n"
+    );
+}
+
+#[test]
+fn tsql_drop_and_create_table_end_at_the_next_statement() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "IF 1 = 1\nDROP TABLE #E\nCREATE TABLE t (a int) WITH (x = 1)\nWHILE 1 = 1\nBEGIN\nSELECT 1\nEND\n"
+        ),
+        "IF 1 = 1\n    DROP TABLE #E\nCREATE TABLE t (a int) WITH (x = 1)\nWHILE 1 = 1\n    BEGIN\n        SELECT 1\n    END\n"
+    );
+}
+
+#[test]
+fn tsql_declare_breaks_before_the_equals_of_a_long_value() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "DECLARE @EditionOfTheServer NVARCHAR(MAX) = CAST(SERVERPROPERTY('Edition') AS NVARCHAR(128)), @e int;\n"
+        ),
+        "DECLARE\n    @EditionOfTheServer NVARCHAR(MAX)\n    = CAST(SERVERPROPERTY('Edition') AS NVARCHAR(128)),\n    @e INT;\n"
+    );
+}
+
+#[test]
 fn tsql_go_ends_a_set_option_and_end_semicolon_may_precede_else() {
     assert_eq!(
         formats_as("tsql", "SET ANSI_NULLS ON\nGO\nBEGIN\nSELECT 1\nEND\n"),

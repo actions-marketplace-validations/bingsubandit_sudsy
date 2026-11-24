@@ -174,6 +174,8 @@ struct Walk {
     plain_name: bool,
     /// The statement is a `CREATE TABLE`.
     create_table: bool,
+    /// The statement is a `DROP`, `TRUNCATE` or a cursor statement: only names follow.
+    drop: bool,
     /// An expression may follow.
     expr: bool,
     /// The statement alters or creates a table.
@@ -277,6 +279,7 @@ impl P<'_> {
             self.nesting.depth(),
             Walk {
                 create_table,
+                drop: self.at_any(&["drop", "truncate", "fetch", "open", "close", "deallocate"]),
                 table_stmt,
                 grant,
                 perms: grant && self.d == super::Dialect::Tsql,
@@ -375,6 +378,18 @@ impl P<'_> {
                     if depth == 0
                         && self.d == super::Dialect::Tsql
                         && (self.at("go") || w.cases.closes_statement(self.text(0), "END")) =>
+                {
+                    break;
+                }
+                // T-SQL has no terminator: the next statement's first word ends a `DROP` after its names and a
+                // `CREATE TABLE` after its columns (`WITH` may still follow).
+                T::Word
+                    if depth == 0
+                        && self.d == super::Dialect::Tsql
+                        && self.pos > first
+                        && (w.drop || (w.create_table && w.options))
+                        && !self.at_any(&["if", "exists", "with"])
+                        && self.at_statement_start() =>
                 {
                     break;
                 }

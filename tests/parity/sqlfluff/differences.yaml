@@ -2,7 +2,7 @@ differences:
   parse-gap: gap  "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
   layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
   non-utf8-input: gap  "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
-  if-condition-wrap: gap  "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (the nesting of `ELSE IF`, a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`)"
+  if-condition-wrap: gap  "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`, a statement after a comment in a body)"
   identifier-case: gap  "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
   tsql-block-indent: gap  "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
   fix-loop-limit: gap  "sqlfluff `fix` is not at its own fixed point on the file, a second run changes it (`LT05` wraps one more nesting level per run; 5 files of the real-world corpus), so the reference output is one pass of it"
@@ -12,7 +12,7 @@ files:
   sqlfluff-postgres: parse-gap, layout-gap
   sqlfluff-tsql: parse-gap, layout-gap
   postgres-regress: parse-gap, layout-gap
-  real-world: if-condition-wrap:128, fix-loop-limit:5, layout-gap:77, identifier-case:44, tsql-block-indent:22
+  real-world: if-condition-wrap:44, fix-loop-limit:5, layout-gap:24, identifier-case:103, tsql-block-indent:3
   sql/postgres/src/test/regress/sql/collate.windows.win1252.sql: non-utf8-input
 ratchet:
   sqlfluff-ansi: 205
@@ -20,7 +20,7 @@ ratchet:
   sqlfluff-postgres: 143
   sqlfluff-tsql: 153
   postgres-regress: 51
-  real-world: 608
+  real-world: 646
 target-files:
   postgres-regress: 79
   sqlfluff-ansi: 212
@@ -33,11 +33,11 @@ second-format:
 refused:
   real-world: 0
 unclassified: 110
-target: 75.6
+target: 79.7
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-  LT02: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
+  LT02: indentation findings left after `sudsy format` on real-world code (in the formatted files, 15 of 87 hold 80%, almost all T-SQL; `sp_RestoreGene` 2,190, `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies); the rest of the 13,017 sits in the files Sudsy refuses (8) or cannot read (18, not UTF-8) and keeps as written
   LT01: spacing findings left after `sudsy format` (6,332); not yet split by construct
   CP02: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
   CP01: "3,033 keyword-case findings left after format; 2,791 are in two T-SQL files our parser refuses (tigertoolbox setup.sql, `CROSS apply ::fn_trace_geteventinfo(t .id)` after a long `case` select list; sqlserver-kit Recover_Deleted_Data_Proc.sql 693:22, `STUFF((select ... for xml path('')), 1, 1, '')` after a `case` with `0x,` hex literals), so the file keeps its case; parse fixes first"
@@ -45,23 +45,23 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 95291, total: 126114, main: 'a1c31cbc'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 95303, total: 119582, main: '1456737e'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 17613
+  LT02: 11125
   CP01: 3033
   CP02: 1455
   CV06: 1452
-  LT01: 1233
-  CP04: 1123
+  LT01: 1208
+  CP04: 1122
   RF02: 594
   LT05: 501
   CV11: 320
   PRS: 263
   LT04: 216
-  LT03: 214
+  LT03: 211
   RF01: 206
-  LT15: 202
-  LT06: 195
+  LT15: 204
+  LT06: 180
   ST06: 179
   CV10: 174
   CP03: 166
@@ -70,10 +70,10 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   AL08: 135
   AL01: 106
   LT08: 106
-  CP05: 105
   ST12: 100
+  CP05: 94
   ST09: 94
-  LT09: 91
+  LT09: 88
   AL03: 73
   TQ02: 54
   TQ03: 51
