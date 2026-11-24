@@ -49,7 +49,7 @@ kind=Greater&parent=TemplateArguments|TemplateParameters / * : yes
 kind=Bang|Tilde&parent=Unary / * : no
 kind=Star|Amp|Minus|Plus&parent=Unary / * : keep
 kind=PlusPlus|MinusMinus&parent=Unary / * : no
-# `**` stays as written. Binary, assignment and conditional operators have a blank on both sides.
+# `**` stays as written; a `*`, `&`, `&&` of a Binary the parse may have taken for a declarator stays as written (`operator_gap` decides). Binary and assignment operators have a blank on both sides.
 kind=Star|Amp|AmpAmp / kind=Star|Amp|AmpAmp&parent=Unary : keep
 * / kind=Star|Amp|AmpAmp&parent=Binary : keep
 kind=Star|Amp|AmpAmp&parent=Binary / * : keep

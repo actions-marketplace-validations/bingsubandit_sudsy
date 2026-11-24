@@ -352,6 +352,18 @@ class Wrap(unittest.TestCase):
         self.assertEqual(self.literal_score(two, 'x = "ab"\n    "cd" "e";\n', 'x = "ab" "cd" "e";\n'), (True, []))
         self.assertEqual(self.literal_score(two, 'x = "a"\n    "b"\n    "cd";\n', two), (True, []))  # the tool split further
 
+    def test_the_string_controls_are_differences(self):
+        src = 'x = "abcd";\n'
+        tree = wrap_tree(src, self.STMT)
+        c = pw.controls(None, tree, src, ".c", "x")
+        self.assertEqual(c["damage-string"], 'x = "Xbcd";\n')
+        self.assertEqual(c["split-string"], 'x = "ab" "cd";\n')
+        self.assertTrue(self.literal_score(src, src, src)[0])
+        self.assertFalse(self.literal_score(src, src, c["damage-string"])[0])
+        self.assertFalse(self.literal_score(src, src, c["split-string"])[0])  # the source kept one literal: Sudsy splitting is a difference
+        directive = 'x = 1;\n'
+        self.assertEqual(pw.controls(None, wrap_tree(directive, self.STMT), directive, ".c", "x")["damage-string"], directive)
+
     def test_no_literal_is_joined_in_a_directive_or_under_clang_format_off(self):
         directive = [("Directive", "#", ";")]
         theirs, ours = '#define X "ab"\n  "cd";\n', '#define X "abcd";\n'

@@ -19,7 +19,7 @@
 //! tools: google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01
 //! reads: rules:space, rules:joined, rules:at_least_one
 
-use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxToken};
+use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 /// A condition on a token: the token's value is (or, with `not`, is not) one of `any`.
 struct Cond {
@@ -543,12 +543,28 @@ pub struct SpaceRules {
     tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
     /// The declarator marks (`*`, `&`) of the `pointer_alignment` kind sets.
     pointer: Pointer,
+    /// The braces of the `braced_list_padding` kind sets.
+    pad: Pad,
+    /// The `binary_node` and `binary_clear` kind sets: the nodes of binary operations, and the parents
+    /// that prove a name `*` name (`T *x`, `a * b`) is a product.
+    binary: (Vec<SyntaxKind>, Vec<SyntaxKind>),
+}
+
+/// The kind sets of padded braces: `pad_list` (the nodes whose braces are padded), `pad_open` and
+/// `pad_close` (their brace tokens), `pad_except` (a token that makes the list a block the parse took
+/// for a list: its braces stay as written).
+#[derive(Default)]
+struct Pad {
+    except: Vec<SyntaxKind>,
+    lists: Vec<SyntaxKind>,
+    open: Vec<SyntaxKind>,
+    close: Vec<SyntaxKind>,
 }
 
 /// The kind sets of the declarator marks: `pointer` (the marks), `pointer_in` (their parents) and
 /// `pointer_in_under` (the grandparents of marks in a parenthesized type), `pointer_type` (what
 /// stands before the first mark: a type), `pointer_name` (what a name behind the last mark is),
-/// `pointer_bare` (parents that hold types only, where a mark needs a `pointer_end` token behind it
+/// `pointer_bare` (parents that hold types only, and what `pointer_in_under` names, where a mark needs a `pointer_end` token behind it
 /// to be no multiplication).
 #[derive(Default)]
 struct Pointer {
@@ -674,6 +690,13 @@ impl SpaceRules {
                 bare: set("pointer_bare"),
                 end: set("pointer_end"),
             },
+            binary: (set("binary_node"), set("binary_clear")),
+            pad: Pad {
+                except: set("pad_except"),
+                lists: set("pad_list"),
+                open: set("pad_open"),
+                close: set("pad_close"),
+            },
             index: Index::build(&space),
             space,
             joined: rows("joined"),
@@ -755,7 +778,9 @@ impl SpaceRules {
         if !prev.is_some_and(|x| p.types.contains(&x.kind()) && x.text() != "operator") {
             return false;
         }
-        if p.bare.contains(&parent.kind()) {
+        if p.bare.contains(&parent.kind())
+            || parent.parent().is_some_and(|g| p.under.contains(&g.kind()))
+        {
             let mut next = next_code(t);
             while let Some(x) = next.as_ref().filter(|x| p.marks.contains(&x.kind())) {
                 next = next_code(x);
@@ -781,6 +806,65 @@ impl SpaceRules {
             return Some(if self.is_mark(a) { false } else { before });
         }
         (self.pointer.names.contains(&b.kind()) && self.is_mark(a)).then_some(after)
+    }
+
+    /// The blank around a `*`, `&` or `&&` of a binary operation: one, unless the operation may be a
+    /// declaration the parse took for one (a type or mark before, a name, mark or end of a type behind, in a parent that does not
+    /// prove an expression): then `None`, the source stays. `None` for other pairs.
+    pub fn operator_gap(&self, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let p = &self.pointer;
+        let binary = |t: &SyntaxToken| {
+            p.marks.contains(&t.kind())
+                && t.parent()
+                    .is_some_and(|n| self.binary.0.contains(&n.kind()))
+        };
+        let mark = match (binary(a), binary(b)) {
+            (true, false) => a,
+            (false, true) => b,
+            _ => return None,
+        };
+        let (left, right) = (prev_code(mark)?, next_code(mark)?);
+        let clear = mark
+            .parent()
+            .and_then(|n| n.parent())
+            .is_some_and(|n| self.binary.1.contains(&n.kind()));
+        let (l, r) = (left.kind(), right.kind());
+        let declaration = (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
+            && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));
+        (clear || !declaration).then_some(true)
+    }
+
+    /// Does the language pad braces (`pad_list` kind set)?
+    pub fn has_pad(&self) -> bool {
+        !self.pad.lists.is_empty()
+    }
+
+    /// The blank inside the braces of a padded list: `padded` stands for the blank behind the opening
+    /// and before the closing brace; the braces of an empty list touch. `None` for other pairs.
+    pub fn pad_gap(&self, a: &SyntaxToken, b: &SyntaxToken, padded: bool) -> Option<bool> {
+        let brace = |t: &SyntaxToken, set: &[SyntaxKind]| {
+            set.contains(&t.kind())
+                && t.parent()
+                    .is_some_and(|p| self.pad.lists.contains(&p.kind()))
+        };
+        let list = if brace(a, &self.pad.open) {
+            a.parent()
+        } else {
+            b.parent()
+        };
+        let block = |n: SyntaxNode| {
+            n.descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .any(|t| self.pad.except.contains(&t.kind()))
+        };
+        if (brace(a, &self.pad.open) || brace(b, &self.pad.close)) && list.is_some_and(block) {
+            return None;
+        }
+        let closes = brace(b, &self.pad.close);
+        if brace(a, &self.pad.open) {
+            return Some(padded && !closes);
+        }
+        closes.then_some(padded)
     }
 
     /// Right-aligned marks (a blank before, none behind) minus left-aligned ones (none before, a

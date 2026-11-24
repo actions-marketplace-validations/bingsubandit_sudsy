@@ -108,7 +108,7 @@
 - language: C / C++
   ids: [c, cpp]
   format: [{tool: clang-format, name: clang-format, note: "line wrapping is not compared"}]
-  lint: [{tool: clang-tidy, name: clang-tidy, blocked: "C/C++ is paused until the clang-format comparison is decided"}]
+  lint: [{tool: clang-tidy, name: clang-tidy, blocked: "no clang-tidy catalog and no measured target yet"}]
 - language: Ruby
   ids: [ruby]
   speed: [Ruby]

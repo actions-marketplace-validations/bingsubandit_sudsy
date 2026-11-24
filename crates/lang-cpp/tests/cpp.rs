@@ -511,7 +511,7 @@ fn pointers_and_references_follow_pointer_alignment() {
 
 #[test]
 fn a_multiplication_or_bitwise_and_keeps_its_blanks() {
-    let src = "void f() {\n  x = a * b;\n  y = a * b & c;\n  Foo<N * 2> w;\n  Foo<N * M> z;\n  int n = k * 2;\n}\nT operator*(T a);\nT operator&(T a, T b);\n";
+    let src = "void f() {\n  y = (a & MASK) * b;\n  x = a * b;\n  y = a * b & c;\n  Foo<N * 2> w;\n  Foo<N * M> z;\n  int n = k * 2;\n}\nT operator*(T a);\nT operator&(T a, T b);\n";
     for side in ["right", "left"] {
         assert_eq!(fmt_pointers(side, false, src), src, "{side}");
     }

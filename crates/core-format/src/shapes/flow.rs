@@ -179,6 +179,12 @@ impl Flow<'_> {
         rules.pointer_gap(a, b, before, after)
     }
 
+    /// The blank inside the braces of a list (`braced_list_padding`), `None` for other pairs.
+    fn pad_blank(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_pad())?;
+        rules.pad_gap(a, b, cx.options.bool(core_config::opt::BRACED_LIST_PADDING))
+    }
+
     /// What stands between two neighbouring tokens: a line break the source has, else a blank
     /// where the spacing rule or the source wants one.
     pub fn between(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<Doc> {
@@ -218,7 +224,12 @@ impl Flow<'_> {
                 return (space && !glued).then(|| doc::lit(" "));
             }
         }
-        match self.pointer_blank(cx, a, b).or_else(|| self.want(a, b)) {
+        match self
+            .pointer_blank(cx, a, b)
+            .or_else(|| self.pad_blank(cx, a, b))
+            .or_else(|| self.rules.and_then(|r| r.operator_gap(a, b)))
+            .or_else(|| self.want(a, b))
+        {
             Some(blank) => blank.then(|| doc::lit(" ")),
             None if broken => Some(doc::lit(" ")),
             None if !gap => self.at_least_one(a, b).then(|| doc::lit(" ")),

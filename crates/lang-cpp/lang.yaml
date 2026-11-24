@@ -59,9 +59,19 @@ options:
         pointer_name: [Ident, Keyword]
         pointer_bare: [TemplateArguments]
         pointer_end: [Greater, Comma, Rpar, Ellipsis]
+        binary_node: [Binary]
+        binary_clear: [Assignment, ReturnStatement, Binary, Ternary, Index, Unary]
   - derive_pointer_alignment:
       default: false
       doc: "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."
+  - braced_list_padding:
+      default: false
+      doc: "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`."
+      kinds:
+        pad_list: [InitList]
+        pad_open: [Lbrace]
+        pad_close: [Rbrace]
+        pad_except: [Semi]
   - brace_wrapping:
       kind: "words"
       doc: "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."

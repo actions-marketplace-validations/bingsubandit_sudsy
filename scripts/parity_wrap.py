@@ -401,6 +401,21 @@ def controls(chk, ref, theirs, suffix, name):
             return join(i, g, line)
         return g if c < 0.67 else brk(i, rnd.randrange(0, 40))
 
+    def strings(damage):
+        """The reference text with the contents of its first plain string literal (outside a directive and
+        `clang-format off`) damaged: one byte changed, or the literal split in two. The text is unchanged without one."""
+        for i in range(ref.n):
+            m = STRING.match(src[ref.start[i] : ref.end[i]]) if ref.kind[i] == ref.string and not ref.dr[i] and not ref.off[i] else None
+            if m and len(m.group(2)) > 1 and b"\\" not in m.group(2) and m.group(2).isascii():
+                a, b = ref.start[i] + len(m.group(1) or b"") + 1, ref.end[i] - 1
+                mid = (a + b) // 2
+                if damage:
+                    new = src[:a] + (b"Y" if src[a : a + 1] == b"X" else b"X") + src[a + 1 :]
+                else:
+                    new = src[:mid] + b'" "' + src[mid:]
+                return new.decode("utf-8")
+        return theirs
+
     lines = theirs.split("\n")
     blanks = [k for k, l in enumerate(lines) if not l.strip()]
     drop = set(k for k in blanks if rnd.random() < 0.05)
@@ -408,6 +423,8 @@ def controls(chk, ref, theirs, suffix, name):
         "join-all": rebuild(join),
         "split-all": rebuild(split),
         "random": rebuild(rand),
+        "damage-string": strings(True),
+        "split-string": strings(False),
         "drop-blank-5pct": "\n".join(l for k, l in enumerate(lines) if k not in drop),
     }
 

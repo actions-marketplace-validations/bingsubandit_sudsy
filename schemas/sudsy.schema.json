@@ -7793,6 +7793,11 @@
               },
               "type": "array"
             },
+            "braced_list_padding": {
+              "default": false,
+              "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+              "type": "boolean"
+            },
             "break_after_return_type": {
               "default": "none",
               "description": "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`).",
@@ -8118,6 +8123,11 @@
                 "type": "string"
               },
               "type": "array"
+            },
+            "braced_list_padding": {
+              "default": false,
+              "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+              "type": "boolean"
             },
             "break_after_return_type": {
               "default": "none",
@@ -11684,6 +11694,11 @@
                     },
                     "type": "array"
                   },
+                  "braced_list_padding": {
+                    "default": false,
+                    "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+                    "type": "boolean"
+                  },
                   "break_after_return_type": {
                     "default": "none",
                     "description": "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`).",
@@ -12009,6 +12024,11 @@
                       "type": "string"
                     },
                     "type": "array"
+                  },
+                  "braced_list_padding": {
+                    "default": false,
+                    "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+                    "type": "boolean"
                   },
                   "break_after_return_type": {
                     "default": "none",

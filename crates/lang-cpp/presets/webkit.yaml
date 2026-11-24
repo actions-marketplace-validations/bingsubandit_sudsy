@@ -10,3 +10,4 @@ cpp:
     indent_size: 4
     namespace_indentation: inner
     pointer_alignment: left
+    braced_list_padding: true

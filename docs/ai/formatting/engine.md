@@ -49,6 +49,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `binary_operator_line` | `start`, `end` | java `start`, js `end`, csharp `start` |
 | `blank_lines_after_key` | `preserve`, `remove` | yaml `preserve`, github-actions `preserve` |
 | `brace_wrapping` | list of words | cpp `[]`, c `[]` |
+| `braced_list_padding` | bool | cpp `false`, c `false` |
 | `bracket_same_line` | bool | html `false`, js `false`, angular `false`, vue `false`, svelte `false` |
 | `bracket_spacing` | bool | json `true`, graphql `true`, js `true`, toml `true`, yaml `true`, github-actions `true` |
 | `break_after_return_type` | `none`, `top_level`, `all`, `top_level_definitions`, `all_definitions` | cpp `none`, c `none` |
