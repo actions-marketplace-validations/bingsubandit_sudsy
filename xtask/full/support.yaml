@@ -8,12 +8,12 @@
 - language: JavaScript / TypeScript
   ids: [js]
   speed: [JS/TS]
-  format: [{tool: prettier-js, name: Prettier}]
+  format: [{tool: prettier-js, name: Prettier, groups: [real-world]}]
   lint: [{tool: eslint, name: ESLint}, {tool: typescript-eslint, name: typescript-eslint}]
 - language: Python
   ids: [python]
   speed: [Python]
-  format: [{tool: ruff, name: ruff format}]
+  format: [{tool: ruff, name: ruff format, groups: [real-world]}]
   lint: [{tool: ruff, name: ruff}]
 - language: Protobuf
   ids: [protobuf]
@@ -35,21 +35,21 @@
 - language: HTML
   ids: [html]
   speed: [HTML]
-  format: [{tool: prettier-html, name: Prettier, groups: [prettier-html, real-world]}]
+  format: [{tool: prettier-html, name: Prettier, groups: [real-world]}]
   lint: [{tool: html-eslint, name: html-eslint, popular: true}, {tool: html-validate, name: html-validate, primary: true}, {tool: htmlhint, name: htmlhint}]
 - language: Vue / Svelte
   ids: [vue, svelte]
   speed: [Vue, Svelte]
-  format: [{tool: prettier-html, name: Prettier, groups: [prettier-vue, prettier-vue-html, real-world-vue, prettier-svelte, real-world-svelte]}]
+  format: [{tool: prettier-html, name: Prettier, groups: [real-world-vue, real-world-svelte]}]
   lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
 - language: Angular templates
   ids: [angular]
   speed: [Angular]
-  format: [{tool: prettier-angular, name: Prettier}]
+  format: [{tool: prettier-angular, name: Prettier, groups: [components, angular, realworld-app]}]
 - language: CSS / SCSS / Less
   ids: [css, scss, less]
   speed: [CSS, SCSS, Less]
-  format: [{tool: prettier-css, name: Prettier}]
+  format: [{tool: prettier-css, name: Prettier, groups: [real-world]}]
   lint: [{tool: stylelint, name: stylelint}, {tool: stylelint-scss, name: stylelint-scss}, {tool: stylelint-less, name: stylelint-less}]
 - language: Markdown
   ids: [markdown]
@@ -94,7 +94,7 @@
 - language: SQL
   ids: [sql]
   speed: [SQL]
-  format: [{tool: sqlfluff, name: sqlfluff}]
+  format: [{tool: sqlfluff, name: sqlfluff, groups: [real-world]}]
   lint: [{tool: sqlfluff, name: sqlfluff}]
 - language: C#
   ids: [csharp]

@@ -3,7 +3,12 @@ differences:
   glued-inline-unit: gap  text, an inline element and text written without blanks between (`a"<b>x</b>".`) are not kept together on one line when they are too wide; the element's tags break inside
   conditional-comments: gap  IE conditional comments are comments, not parsed as markup
   syntax-errors: gap  files the grammar rejects (unclosed tags, `<!- ->` comments, `{{ }}` with `>` in text, cursor markers, `<plaintext>`)
-  project-options: gap  real-world pages run under Prettier's defaults (`--no-config`), not their own Prettier options
+  hugo-shortcodes: gap  Hugo pages (front matter, `{{< shortcode >}}` in text) are refused with `raw character in text`; Prettier prints them as text
+  raw-gt-in-text: gap  a `>` written in text (`<strong>></strong>`) is refused as a raw character; Prettier keeps it
+  doctype-case: gap  `<!DOCTYPE html>` is printed `<!doctype html>` where Prettier keeps `<!DOCTYPE html>` (4 files; what makes Prettier keep it is not narrowed)
+  leading-blank-line: gap  a file that starts with a blank line keeps it in Prettier's output; Sudsy drops it
+  doctype-after-blank: gap  a doctype that follows a self-closing tag in the middle of a file is printed glued to it (`/><!doctype html>`); Prettier puts it on its own line
+  style-attribute-quotes: gap  `url(&quot;x&quot;)` in a `style` attribute is printed with single quotes; Prettier keeps the entities
   vue-filters: gap  Vue filters (`value | filter(arg)`) are printed as bitwise or, with the operator at the end of the line
   vue-patterns: gap  `v-for`, `v-slot`, `slot-scope` and `generic` values with destructuring or TypeScript annotations are not formatted as parameter lists (`v-for` loop variables are only joined), and `script setup="..."` / `style vars="..."` values are kept
   vue-blocks: gap  custom blocks of formats Sudsy does not format, `<template lang>` of other languages, a self-closing `<style />` and several root templates are not as Prettier prints them
@@ -16,7 +21,7 @@ differences:
 files:
   prettier-html: embedded-code, glued-inline-unit, conditional-comments, syntax-errors
   prettier-vue: embedded-code, vue-filters, vue-patterns, vue-blocks, vue-js-layout
-  real-world: embedded-code, glued-inline-unit, project-options
+  real-world: hugo-shortcodes:13, embedded-code:5, doctype-case:4, leading-blank-line:2, raw-gt-in-text:1, doctype-after-blank:1, style-attribute-quotes:1
   real-world-vue: vue-js-layout
   prettier-svelte: svelte-blocks, svelte-attributes, svelte-ignore, svelte-syntax, svelte-inline
   real-world-svelte: svelte-attributes, svelte-inline
@@ -25,7 +30,7 @@ ratchet:
   prettier-vue: 56
   prettier-svelte: 51
   prettier-vue-html: 10
-  real-world: 216
+  real-world: 505
   real-world-svelte: 941
   real-world-vue: 874
 target-files:
@@ -33,8 +38,13 @@ target-files:
   prettier-svelte: 76
   prettier-vue: 80
   prettier-vue-html: 10
-  real-world: 233
+  real-world: 532
   real-world-svelte: 1055
   real-world-vue: 941
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
+unclassified: 245
 flags:
   no-config: the tool runs with `--no-config` (and no editorconfig), so a project's own Prettier options are not applied; Sudsy's JS, CSS and HTML options for them are not mapped yet

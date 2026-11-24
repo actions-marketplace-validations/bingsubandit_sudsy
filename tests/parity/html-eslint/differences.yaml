@@ -346,15 +346,21 @@ intentional:
   front-matter: tool-wrong
   textarea-value: tool-wrong
   end-tag-in-base: tool-wrong
-target: 86.2
+target: 50.9
 fixes:  # lint rule -> one line: where and what to change
-  indent: 5 are the text of multi-line comments (youtube, carousel; comments stay as written), 3 are in `render-heading.html`, refused for an action in an end tag name (`</h{{ .Level }}>`)
+  indent: 138 findings left after `sudsy format` in 28 files of the corpus; not yet split by construct (e.g. Web-Dev-For-Beginners 9-chat-project frontend/index.html:125)
+  use-baseline: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
   require-closing-tags: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
   no-duplicate-id: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
-measured: {covered: 106, total: 123, main: 'd178d21b'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 223, total: 438, main: '66718389'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  indent: 8
-  use-baseline: 4
+  indent: 138
+  use-baseline: 58
+  require-closing-tags: 6
+  no-extra-spacing-tags: 4
+  no-duplicate-id: 3
   attrs-newline: 2
-  no-duplicate-id: 2
-  require-closing-tags: 1
+  no-duplicate-in-head: 1
+  require-doctype: 1
+  require-lang: 1
+  require-title: 1

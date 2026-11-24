@@ -8,7 +8,10 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
+| SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
+| HTML | lint html-eslint | 2 | 50.9% | 34.1 | 150 findings | `indent` 138, `use-baseline` 58 | 6 | 11.37 | 66718389 |
 | PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1395 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `staticMethod.notFound` 90 +4 more | 24 | 10.62 | d3ae913f |
+| SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
 
 Blocked on a decision:
 
@@ -18,7 +21,7 @@ Blocked on a decision:
 
 Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 1: PHP lint PHPStan.
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff.
 
 ## actionlint
 
@@ -181,43 +184,48 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 7514c1f3); rules by misse
 
 ## html-eslint
 
-Lint: target 86.2% (106 of 123, 17 missed, measured on d178d21b); rules by missed findings:
-1. `indent` (8 missed) Fix: 5 are the text of multi-line comments (youtube, carousel; comments stay as written), 3 are in `render-heading.html`, refused for an action in an end tag name (`</h{{ .Level }}>`)
-2. `use-baseline` (4 missed)
-3. `attrs-newline` (2 missed)
-4. `no-duplicate-id` (2 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
-5. `require-closing-tags` (1 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
+Lint: target 50.9% (223 of 438, 215 missed, measured on 66718389); rules by missed findings:
+1. `indent` (138 missed) Fix: 138 findings left after `sudsy format` in 28 files of the corpus; not yet split by construct (e.g. Web-Dev-For-Beginners 9-chat-project frontend/index.html:125)
+2. `use-baseline` (58 missed) Fix: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
+3. `require-closing-tags` (6 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
+4. `no-extra-spacing-tags` (4 missed)
+5. `no-duplicate-id` (3 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
+6. `attrs-newline` (2 missed)
+7. `no-duplicate-in-head` (1 missed)
+8. `require-doctype` (1 missed)
+9. `require-lang` (1 missed)
+10. `require-title` (1 missed)
 
 ## html-validate
 
-Lint: target 86.9% (852 of 980, 128 missed, measured on 7514c1f3); rules by missed findings:
-1. `no-implicit-close` (19 missed)
-2. `no-inline-style` (15 missed)
-3. `attr-spacing` (14 missed)
-4. `no-dup-attr` (14 missed)
-5. `wcag/h30` (11 missed)
-6. `input-attributes` (10 missed)
-7. `valid-autocomplete` (8 missed)
-8. `unique-landmark` (7 missed)
-9. `wcag/h63` (4 missed)
-10. `attr-case` (3 missed)
-11. `autocomplete-password` (3 missed)
-12. `no-dup-class` (3 missed)
-13. `no-raw-characters` (3 missed)
-14. `prefer-native-element` (3 missed)
-15. `valid-id` (3 missed)
+Lint: target 92.5% (2245 of 2428, 183 missed, measured on 66718389); rules by missed findings:
+1. `no-implicit-close` (30 missed)
+2. `no-raw-characters` (16 missed)
+3. `no-inline-style` (15 missed)
+4. `attr-spacing` (14 missed)
+5. `no-dup-attr` (14 missed)
+6. `form-dup-name` (13 missed)
+7. `wcag/h30` (11 missed)
+8. `input-attributes` (10 missed)
+9. `valid-autocomplete` (8 missed)
+10. `unique-landmark` (7 missed)
+11. `valid-id` (4 missed)
+12. `void-style` (4 missed)
+13. `wcag/h63` (4 missed)
+14. `attr-case` (3 missed)
+15. `autocomplete-password` (3 missed)
 
-7 more rules: 8 missed.
+15 more rules: 27 missed.
 
 ## htmlhint
 
-Lint: target 93% (1210 of 1301, 91 missed, measured on 7514c1f3); rules by missed findings:
-1. `doctype-first` (36 missed)
+Lint: target 91.6% (1244 of 1358, 114 missed, measured on 66718389); rules by missed findings:
+1. `doctype-first` (38 missed)
 2. `spec-char-escape` (31 missed)
-3. `tag-pair` (16 missed)
-4. `src-not-empty` (6 missed)
-5. `attr-value-double-quotes` (1 missed)
-6. `title-require` (1 missed)
+3. `src-not-empty` (19 missed)
+4. `tag-pair` (17 missed)
+5. `title-require` (8 missed)
+6. `attr-value-double-quotes` (1 missed)
 
 ## invoke-formatter
 
@@ -368,20 +376,26 @@ Format: unclassified 9 of 83 differing files (11%).
 
 ## prettier-html
 
-1. `conditional-comments` (- files): IE conditional comments are comments, not parsed as markup
-2. `embedded-code` (- files): embedded code the JS and CSS formatters print differently from Prettier (directive quotes, `<!--` comments, line breaks of call chains and templates), `<html:script>` and `<style type="text/less">`, which Sudsy reads as other languages
-3. `glued-inline-unit` (- files): text, an inline element and text written without blanks between (`a"<b>x</b>".`) are not kept together on one line when they are too wide; the element's tags break inside
-4. `project-options` (- files): real-world pages run under Prettier's defaults (`--no-config`), not their own Prettier options
-5. `svelte-attributes` (- files): mustache tags inside quoted attribute values are not broken up, and long `class:`/`on:` expressions break differently
-6. `svelte-blocks` (- files): a block written without blanks around its tags (`{#if a}<p></p>{/if}`) is always broken onto lines, and a `<script>` or `<style>` that is empty or invalid is not kept as written
-7. `svelte-ignore` (- files): `<!-- prettier-ignore-start -->` / `-end` ranges are not kept
-8. `svelte-inline` (- files): where the tags of inline elements and mustache tags break in a long line differs from the plugin's printer
-9. `svelte-syntax` (- files): `{@attach}` and `{#each x as { a, b = "" }}` are rejected by the grammar
-10. `syntax-errors` (- files): files the grammar rejects (unclosed tags, `<!- ->` comments, `{{ }}` with `>` in text, cursor markers, `<plaintext>`)
-11. `vue-blocks` (- files): custom blocks of formats Sudsy does not format, `<template lang>` of other languages, a self-closing `<style />` and several root templates are not as Prettier prints them
-12. `vue-filters` (- files): Vue filters (`value | filter(arg)`) are printed as bitwise or, with the operator at the end of the line
-13. `vue-js-layout` (- files): JS layout differences in `<script>` and expressions (assignment of a generic call, comments inside expressions, `z && (a && b)` is refused by the JS safety check)
-14. `vue-patterns` (- files): `v-for`, `v-slot`, `slot-scope` and `generic` values with destructuring or TypeScript annotations are not formatted as parameter lists (`v-for` loop variables are only joined), and `script setup="..."` / `style vars="..."` values are kept
+Format: unclassified 245 of 272 differing files (90%).
+1. `hugo-shortcodes` (13 files): Hugo pages (front matter, `{{< shortcode >}}` in text) are refused with `raw character in text`; Prettier prints them as text
+2. `embedded-code` (5 files): embedded code the JS and CSS formatters print differently from Prettier (directive quotes, `<!--` comments, line breaks of call chains and templates), `<html:script>` and `<style type="text/less">`, which Sudsy reads as other languages
+3. `doctype-case` (4 files): `<!DOCTYPE html>` is printed `<!doctype html>` where Prettier keeps `<!DOCTYPE html>` (4 files; what makes Prettier keep it is not narrowed)
+4. `leading-blank-line` (2 files): a file that starts with a blank line keeps it in Prettier's output; Sudsy drops it
+5. `doctype-after-blank` (1 files): a doctype that follows a self-closing tag in the middle of a file is printed glued to it (`/><!doctype html>`); Prettier puts it on its own line
+6. `raw-gt-in-text` (1 files): a `>` written in text (`<strong>></strong>`) is refused as a raw character; Prettier keeps it
+7. `style-attribute-quotes` (1 files): `url(&quot;x&quot;)` in a `style` attribute is printed with single quotes; Prettier keeps the entities
+8. `conditional-comments` (- files): IE conditional comments are comments, not parsed as markup
+9. `glued-inline-unit` (- files): text, an inline element and text written without blanks between (`a"<b>x</b>".`) are not kept together on one line when they are too wide; the element's tags break inside
+10. `svelte-attributes` (- files): mustache tags inside quoted attribute values are not broken up, and long `class:`/`on:` expressions break differently
+11. `svelte-blocks` (- files): a block written without blanks around its tags (`{#if a}<p></p>{/if}`) is always broken onto lines, and a `<script>` or `<style>` that is empty or invalid is not kept as written
+12. `svelte-ignore` (- files): `<!-- prettier-ignore-start -->` / `-end` ranges are not kept
+13. `svelte-inline` (- files): where the tags of inline elements and mustache tags break in a long line differs from the plugin's printer
+14. `svelte-syntax` (- files): `{@attach}` and `{#each x as { a, b = "" }}` are rejected by the grammar
+15. `syntax-errors` (- files): files the grammar rejects (unclosed tags, `<!- ->` comments, `{{ }}` with `>` in text, cursor markers, `<plaintext>`)
+16. `vue-blocks` (- files): custom blocks of formats Sudsy does not format, `<template lang>` of other languages, a self-closing `<style />` and several root templates are not as Prettier prints them
+17. `vue-filters` (- files): Vue filters (`value | filter(arg)`) are printed as bitwise or, with the operator at the end of the line
+18. `vue-js-layout` (- files): JS layout differences in `<script>` and expressions (assignment of a generic call, comments inside expressions, `z && (a && b)` is refused by the JS safety check)
+19. `vue-patterns` (- files): `v-for`, `v-slot`, `slot-scope` and `generic` values with destructuring or TypeScript annotations are not formatted as parameter lists (`v-for` loop variables are only joined), and `script setup="..."` / `style vars="..."` values are kept
 
 ## prettier-js
 
@@ -506,27 +520,47 @@ Format: unclassified 0 of 11 differing files (0%).
 
 ## sqlfluff
 
-1. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
-2. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
-3. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 86.6% (17329 of 20007, 2678 missed, measured on 7514c1f3); rules by missed findings:
-1. `LT02` (442 missed)
-2. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-3. `LT01` (215 missed)
-4. `LT09` (148 missed)
-5. `CP02` (120 missed) Fix: misses are in files with a parse error
-6. `RF03` (105 missed) Fix: references of selects over table functions and nested queries
-7. `LXR` (102 missed)
-8. `LT14` (91 missed)
-9. `ST06` (75 missed)
-10. `AL03` (72 missed)
-11. `RF02` (66 missed)
-12. `CP01` (65 missed) Fix: misses are in files with a parse error
-13. `RF06` (61 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
-14. `RF05` (59 missed) Fix: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
-15. `RF01` (53 missed)
+Format: unclassified 132 of 376 differing files (35%).
+1. `if-condition-wrap` (50 files): "an `IF` / `WHEN` condition is laid out on its own lines where sqlfluff keeps `IF cond` on one line (tsql `IF OBJECT_ID(..) IS NULL EXEC(..)`), and mysql `if exists (` is kept together where sqlfluff breaks after `if`"
+2. `type-args-split` (31 files): "a data type length in a column with a `CHARACTER SET` / `COLLATE` suffix is printed on three lines (`varchar(` / `256` / `)`, mysql); sqlfluff keeps `varchar(256)`"
+3. `index-on-wrap` (28 files): "`CREATE INDEX name ON t (cols)` keeps `ON` on the line of the name and breaks inside the column list; sqlfluff puts `ON t (cols)` on its own indented line"
+4. `identifier-case` (26 files): "the case of identifiers, keywords and type names that sqlfluff leaves as written (`VALUE`, `x::REGCLASS`, `ENGINE innodb`, parameter names) differs"
+5. `tsql-block-end` (22 files): tsql parse error at the `END` of a `BEGIN` block in a procedure or function body; the opening construct is not narrowed (smallest input: bugs.md)
+6. `datatype-case` (14 files): "the case of data type names (`BIGINT`, `varchar`) is changed where sqlfluff keeps it"
+7. `tsql-end-semicolon-else` (13 files): tsql parse error: `END;` followed by `ELSE`
+8. `indent-and-alignment` (12 files): "the indentation and column alignment of lines sqlfluff leaves as written (column definitions, aligned types) is re-indented"
+9. `comment-layout` (7 files): "a block comment or a comment after a clause is moved or re-indented"
+10. `language-name-case` (7 files): "`LANGUAGE C` / `LANGUAGE SQL` is lower-cased as an identifier"
+11. `mysql-delimiter` (6 files): mysql `DELIMITER` scripts: the file is refused (`DELIMITER d//` is an internal error of the meaning check, see bugs.md)
+12. `cast-spacing` (5 files): "`cast(` becomes `CAST (`"
+13. `tsql-set-option-before-go` (5 files): tsql parse error: `SET <option> ON` without a semicolon before `GO` swallows the next `BEGIN` block
+14. `tsql-xml-methods` (5 files): tsql parse error: `WITH XMLNAMESPACES` and the `.query()` / `.value()` methods of the xml type
+15. `insert-values-wrap` (4 files): "`INSERT INTO t (cols) VALUES (...)` is broken over many lines; sqlfluff keeps the statement on one line"
+16. `alter-table-wrap` (3 files): "`ALTER TABLE t ADD ...` actions are not put on their own indented line as sqlfluff does"
+17. `tsql-other-syntax` (3 files): tsql parse errors: `CREATE PROCEDURE n(@p ...)`, `#temp.[col]` references, `(NOLOCK)` on a function-like source
+18. `trailing-blanks` (2 files): "trailing blanks of lines in comments and strings are kept; sqlfluff removes them"
+19. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
+20. `table-option-spacing` (1 files): "`ENGINE=InnoDB` is printed `ENGINE = InnoDB`"
+21. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
+22. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
+Lint: target 38.2% (16030 of 41963, 25933 missed, measured on 66718389); rules by missed findings:
+1. `LT02` (8585 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
+2. `LT01` (6332 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
+3. `CP02` (3270 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
+4. `CP01` (2630 missed) Fix: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
+5. `LT05` (1538 missed) Fix: line-length findings (1,538); not yet split by file
+6. `RF06` (430 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
+7. `CP05` (293 missed)
+8. `LT09` (247 missed)
+9. `CP03` (234 missed)
+10. `AL03` (190 missed)
+11. `LT14` (187 missed)
+12. `AL01` (184 missed)
+13. `RF02` (182 missed)
+14. `RF03` (143 missed) Fix: references of selects over table functions and nested queries
+15. `LT04` (136 missed)
 
-46 more rules: 624 missed.
+43 more rules: 1352 missed.
 
 ## stylecop
 

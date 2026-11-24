@@ -99,7 +99,7 @@ The status and the headline numbers of every language are in the generated table
 - One parser serves all four. Config sections: `html`, `vue`, `svelte`, `angular`.
 - **Formatter:** Prettier 3.9.10 (Svelte: with prettier-plugin-svelte 3.5.2).
 
-- **Corpora:** real-world files and Prettier's own tests for HTML, Vue and Svelte; the prettier-plugin-svelte samples; Angular components and Prettier's Angular tests (`--parser angular`).
+- **Corpora:** real-world files (the HTML group adds the demo pages of mdn's dom, webaudio, web-components, pwa, js, html and webgl examples, Web-Dev-For-Beginners and html5-boilerplate) and Prettier's own tests for HTML, Vue and Svelte; the prettier-plugin-svelte samples; Angular components and Prettier's Angular tests (`--parser angular`).
 - **Linters:** html-validate, htmlhint, html-eslint, eslint-plugin-vue, eslint-plugin-svelte. Angular: a few angular-eslint rules, no coverage run.
 - **Presets:** `html/html-validate-recommended`, `html/html-validate-standard`, `html/htmlhint`, `html/html-eslint-recommended`, `html/eslint-plugin-vue-recommended`, `html/eslint-plugin-svelte-recommended`.
 - **Options:** `whitespace_sensitivity`, `bracket_same_line`, `single_attribute_per_line`, `embedded_language_formatting`. Vue and Svelte add `indent_script_and_style`. Default `line_width` is 80.
@@ -168,8 +168,8 @@ The status and the headline numbers of every language are in the generated table
 ## SQL
 
 - Dialects: `ansi`, `postgres`, `mysql`, `tsql` (option `dialect`).
-- **Formatter:** sqlfluff 4.5.0 (`fix --rules layout,capitalisation`).
-- **Linter:** sqlfluff.
+- **Formatter:** sqlfluff 4.5.0 (`fix --rules layout,capitalisation`). Corpus: 971 real files of 18 permissively licensed projects (Hive, Ranger, Kestra, Temporal, OpenFGA, DolphinScheduler, Spring, pgvector, Pagila, BenchBase, DataFusion, SQL Server DBA scripts), the dialect set per project folder; sqlfluff's own dialect fixtures and PostgreSQL's regression inputs are measured and ratcheted, not in the README number.
+- **Linter:** sqlfluff on the same corpus.
 - **Presets:** `sql/sqlfluff`.
 - **Options:** `dialect`, `comma_position`, `keyword_case`, `identifier_case`, `function_case`, `literal_case`, `type_case`. Default `line_width` is 80.
 - **Differences:**
