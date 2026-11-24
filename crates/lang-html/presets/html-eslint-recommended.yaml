@@ -25,3 +25,4 @@ html:
       no-duplicate-keys: warn
       no-implicit-close: warn
       require-li-container: warn
+      use-baseline: warn

@@ -61,6 +61,7 @@ concept duplicate-ids # users: github-actions
 concept element-metadata-checks # users: html
 concept escaped-newline-lines # users:  (shared)
 concept expression-language # users: github-actions (shared)
+concept feature-support # users: html (shared)
 concept file-header-order # users: protobuf
 concept file-name-matches-type # users: csharp
 concept flat-block-preservation # users: csharp

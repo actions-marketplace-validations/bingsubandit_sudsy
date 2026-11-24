@@ -12,7 +12,6 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 | SQL | format sqlfluff | 4 | 73.7% | 11.3 | 94 files | `if-condition-wrap` 128 | 3 | 15.07 | - |
 | PHP | lint PHPStan | 4 | 31.0% | 54.0 | 594 findings | `class.notFound` 254, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 11.37 | 9de1e355 |
 | C / C++ | format clang-format | 4 | 45.8% | 39.2 | 2604 files | `brace-own-line-in-source` 484, `reference-align` 439, `brace-own-line-in-reference` 318, `pointer-align` 301 +6 more | 30 | 5.23 | - |
-| HTML | lint html-eslint | 1 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 5.03 | 9de1e355 |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -171,17 +170,16 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 7514c1f3); rules by misse
 
 ## html-eslint
 
-Lint: target 69.9% (223 of 319, 96 missed, measured on 9de1e355); rules by missed findings:
-1. `use-baseline` (58 missed) Fix: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
-2. `indent` (19 missed) Fix: 19 findings in the 2 files `sudsy format` rejects, so they stay as written, `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
-3. `require-closing-tags` (6 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
-4. `no-extra-spacing-tags` (4 missed)
-5. `no-duplicate-id` (3 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
-6. `attrs-newline` (2 missed)
-7. `no-duplicate-in-head` (1 missed)
-8. `require-doctype` (1 missed)
-9. `require-lang` (1 missed)
-10. `require-title` (1 missed)
+Lint: target 88.1% (281 of 319, 38 missed, measured on 916059a8); rules by missed findings:
+1. `indent` (19 missed) Fix: 19 findings in the 2 files `sudsy format` rejects, so they stay as written, `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
+2. `require-closing-tags` (6 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
+3. `no-extra-spacing-tags` (4 missed)
+4. `no-duplicate-id` (3 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
+5. `attrs-newline` (2 missed)
+6. `no-duplicate-in-head` (1 missed)
+7. `require-doctype` (1 missed)
+8. `require-lang` (1 missed)
+9. `require-title` (1 missed)
 
 ## html-validate
 

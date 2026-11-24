@@ -144,6 +144,7 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 | document-start | lang-yaml/rules.rs | The first document does not start with `---` | yamllint document-start |  | yaml | SINGLE-USE |
 | element-metadata-checks | lang-html/checks.rs | Element names and attributes checked against element metadata. | html-validate element-name, htmlhint |  | html | SINGLE-USE |
 | expression-language | core-rules/expr/mod.rs | Syntax, names, availability and types of the expressions inside the scalars of a data file. | actionlint expression |  | github-actions | SINGLE-USE |
+| feature-support | core-rules/feature_support.rs | An element, attribute or attribute value that browsers do not all support at the wanted level (widely, newly or since a year). | html-eslint use-baseline | rule:use-baseline | html | SINGLE-USE |
 | file-name | core-rules/file_name.rs | The base name of a file matches a regex option. |  | family:file-name | kotlin, protobuf |  |
 | file-name-matches-type | lang-csharp/rules/file_layout.rs | The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}` | stylecop SA1649 |  | csharp | SINGLE-USE |
 | font-family-checks | lang-css/rules/font.rs | Font family names and generic families of a font-family declaration. | stylelint font-family-* |  | css | SINGLE-USE |

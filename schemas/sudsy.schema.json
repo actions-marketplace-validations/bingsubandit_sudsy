@@ -7205,6 +7205,37 @@
               "$ref": "#/definitions/rule",
               "description": "An integer literal that ends in a lower case `l` (Checkstyle UpperEll)."
             },
+            "use-baseline": {
+              "description": "An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "available": {
+                          "default": "widely",
+                          "description": "How widely a feature must be available: `widely` (in all major browsers for 30 months), `newly` (in all of them), or a year (baseline since that year or before).",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "use-before-define": {
               "description": "A reference that comes before the declaration of what it names in the source (function declarations included), or runs while the variable is being initialized. References in types are left alone.",
               "oneOf": [

@@ -31318,6 +31318,75 @@
       ]
     },
     {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<a href=\"x\" download>x</a>\n<button interestfor=\"x\">x</button>\n<link rel=\"manifest\" href=\"m\">\n<link rel=\"stylesheet\" href=\"s\">\n<geolocation></geolocation>\n<p foo=\"bar\" popover=\"hint\">x</p>\n<my-element interestfor=\"x\"></my-element>\n<datalist id=\"l\"></datalist>\n<p autocorrect=\"on\">x</p>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 9,
+            "length": 11,
+            "line": 2
+          },
+          {
+            "column": 12,
+            "length": 8,
+            "line": 3
+          },
+          {
+            "column": 2,
+            "length": 11,
+            "line": 5
+          },
+          {
+            "column": 23,
+            "length": 4,
+            "line": 6
+          },
+          {
+            "column": 2,
+            "length": 8,
+            "line": 8
+          },
+          {
+            "column": 4,
+            "length": 11,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "use-baseline",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [
+        {
+          "default": "widely",
+          "description": "How widely a feature must be available: `widely` (in all major browsers for 30 months), `newly` (in all of them), or a year (baseline since that year or before).",
+          "name": "available",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "html/html-eslint-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "use-baseline",
+          "partial": true,
+          "tool": "html-eslint"
+        }
+      ]
+    },
+    {
       "category": "style",
       "default_level": "warn",
       "description": "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form.",

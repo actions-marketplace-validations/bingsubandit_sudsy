@@ -70,9 +70,9 @@ Each number is measured on real-world code against the reference tool with its d
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
 | GraphQL | █████████░ 99% Prettier | 25 rules · no reference tool | Ready |
 | TOML | █████████░ 98% taplo | 18 rules · no reference tool | Ready |
-| HTML | █████████░ 95% Prettier | █████████░ 92% html-validate<br>██████░░░░ 69% html-eslint<br>█████████░ 91% htmlhint | Ready |
+| HTML | █████████░ 95% Prettier | █████████░ 92% html-validate<br>████████░░ 88% html-eslint<br>█████████░ 91% htmlhint | Ready |
 | Vue / Svelte | █████████░ 91% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
-| Angular templates | █████████░ 99% Prettier | 158 rules · no reference tool | Ready |
+| Angular templates | █████████░ 99% Prettier | 159 rules · no reference tool | Ready |
 | CSS / SCSS / Less | █████████░ 92% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 85% stylelint-less | Ready |
 | Markdown | █████████░ 92% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | █████████░ 94% Prettier | █████████░ 98% yamllint | Ready |

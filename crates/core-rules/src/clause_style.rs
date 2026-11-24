@@ -25,17 +25,13 @@ struct ClauseStyle {
     implicit: Vec<String>,
 }
 
-fn list(p: &mut Params, key: &str) -> Result<Vec<String>, String> {
-    Ok(p.text(key)?.split(',').map(str::to_string).collect())
-}
-
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
     let rule = ClauseStyle {
         meta,
         message: p.text("message")?,
-        clauses: list(&mut p, "clauses")?,
-        explicit: list(&mut p, "explicit")?,
-        implicit: list(&mut p, "implicit")?,
+        clauses: p.list("clauses")?,
+        explicit: p.list("explicit")?,
+        implicit: p.list("implicit")?,
     };
     p.done()?;
     Ok(Box::new(rule))

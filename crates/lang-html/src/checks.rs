@@ -7,9 +7,10 @@
 //! - `required-attr`: an attribute the element must have;
 //! - `boolean-style`: a boolean attribute written with a value (`checked="checked"`);
 //! - `empty-style`: an attribute that may be empty (`hidden`, `crossorigin`) written as `=""`;
-//! - `allowed-values`: a value that is not one of those the attribute is limited to.
+//! - `allowed-values`: a value that is not one of those the attribute is limited to;
+//! - `unsupported-feature`: an element, attribute or value that browsers do not all support at the `available` level (`baseline.txt`, `core_rules::feature_support`).
 //!
-//! The message has `{name}` (the element), `{attr}` and `{value}`.
+//! The message has `{name}` (the element), `{attr}` and `{value}`; `unsupported-feature` has `{feature}` and `{available}`.
 //!
 //! concept: new element-metadata-checks
 //! what: Element names and attributes checked against element metadata.
@@ -18,8 +19,11 @@
 use crate::dom;
 use crate::generated::kind as k;
 use crate::meta;
+use crate::template;
+use core_rules::family::comma_list;
+use core_rules::feature_support::{AttrRef, Availability, SupportTable};
 use core_rules::{Family, Params, Rule, RuleContext, RuleMeta};
-use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt};
+use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, TextRange};
 
 pub const FAMILY: Family = Family {
     name: "meta",
@@ -36,12 +40,16 @@ enum Check {
     BooleanStyle,
     EmptyStyle,
     AllowedValues,
+    UnsupportedFeature,
 }
 
 struct Meta {
     meta: &'static RuleMeta,
     check: Check,
     message: String,
+    /// Attributes a framework owns, not judged in files with a suffix of `owned_in`.
+    owned: Vec<String>,
+    owned_in: Vec<String>,
 }
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
@@ -58,12 +66,19 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
             ("boolean-style", BooleanStyle),
             ("empty-style", EmptyStyle),
             ("allowed-values", AllowedValues),
+            ("unsupported-feature", UnsupportedFeature),
         ],
     )?;
     let rule = Meta {
         meta,
         check,
         message: p.text("message")?,
+        owned: p
+            .optional("owned")
+            .map_or_else(Vec::new, |l| comma_list(&l)),
+        owned_in: p
+            .optional("owned-in")
+            .map_or_else(Vec::new, |l| comma_list(&l)),
     };
     p.done()?;
     Ok(Box::new(rule))
@@ -113,6 +128,7 @@ impl Rule for Meta {
                     }
                 }
             }
+            Check::UnsupportedFeature => self.unsupported(&name, name_range, tag, ctx),
             _ => {
                 for a in dom::attrs(tag, text) {
                     let value = a.value.unwrap_or("");
@@ -141,6 +157,44 @@ impl Rule for Meta {
                     }
                 }
             }
+        }
+    }
+}
+
+impl Meta {
+    /// The unsupported features of an element and its attributes (`core_rules::feature_support`).
+    fn unsupported(
+        &self,
+        name: &str,
+        name_range: TextRange,
+        tag: &SyntaxNode,
+        ctx: &mut RuleContext<'_>,
+    ) {
+        static TABLE: SupportTable = SupportTable::new(include_str!("../data/baseline.txt"));
+        let available = ctx.options.string("available").to_string();
+        let attrs = dom::attrs(tag, ctx.file.text);
+        let in_framework = self
+            .owned_in
+            .iter()
+            .any(|f| template::path_has_suffix(ctx.file.path, f));
+        let found = TABLE.features(
+            Availability::parse(&available),
+            name,
+            name_range,
+            attrs.iter().map(|a| AttrRef {
+                name: &a.name,
+                name_range: a.key,
+                value: a.value,
+                value_range: a.value_range,
+            }),
+            if in_framework { &self.owned } else { &[] },
+        );
+        for (range, feature) in found {
+            let message = self
+                .message
+                .replace("{feature}", &feature)
+                .replace("{available}", &available);
+            ctx.report(range, message);
         }
     }
 }

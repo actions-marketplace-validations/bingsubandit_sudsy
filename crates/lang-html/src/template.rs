@@ -374,6 +374,14 @@ fn attrs<'a>(tag: &SyntaxNode, text: &'a str) -> Vec<Attr<'a>> {
         .collect()
 }
 
+/// Does the file name end in `.suffix` (an extension, or `component.html`)?
+pub(crate) fn path_has_suffix(path: &std::path::Path, suffix: &str) -> bool {
+    path.to_str().is_some_and(|p| {
+        p.strip_suffix(suffix)
+            .is_some_and(|rest| rest.ends_with('.'))
+    })
+}
+
 fn has(attrs: &[Attr<'_>], names: &[String]) -> bool {
     attrs.iter().any(|a| names.iter().any(|n| n == a.name))
 }
@@ -496,10 +504,7 @@ impl Rule for Template {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         if let Some(only) = &self.only
-            && !ctx.file.path.to_str().is_some_and(|p| {
-                p.strip_suffix(only.as_str())
-                    .is_some_and(|r| r.ends_with('.'))
-            })
+            && !path_has_suffix(ctx.file.path, only)
         {
             return;
         }
