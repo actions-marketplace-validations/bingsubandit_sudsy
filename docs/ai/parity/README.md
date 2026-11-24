@@ -24,7 +24,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 ## Counts
 <!-- generated:counts -->
 | Tool | Target | Measured on | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---|---:|---:|---:|---:|---:|---:|---:|
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
 | actionlint | 85.3% | `7514c1f3` | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
 | angular-eslint | - | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |

@@ -146,6 +146,26 @@ fn repo_docs_render_the_same_and_are_idempotent() {
     assert_files_ok(&files);
 }
 
+/// A table whose delimiter row has fewer cells than its header is no table in GFM (Prettier reads a paragraph):
+/// the generated tables of the docs must be tables.
+#[test]
+fn repo_docs_tables_have_as_many_delimiter_cells_as_header_cells() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let cells = |l: &str| l.trim().trim_matches('|').split('|').count();
+    let mut bad = Vec::new();
+    for f in md_files(root.join("docs")) {
+        let text = std::fs::read_to_string(&f).unwrap();
+        let lines: Vec<&str> = text.lines().collect();
+        for (i, l) in lines.iter().enumerate().skip(1) {
+            let delimiter = l.starts_with("|-") || l.starts_with("|:-");
+            if delimiter && lines[i - 1].starts_with('|') && cells(l) != cells(lines[i - 1]) {
+                bad.push(format!("{}:{}", f.display(), i + 1));
+            }
+        }
+    }
+    assert!(bad.is_empty(), "{}", bad.join("\n"));
+}
+
 #[test]
 #[ignore = "needs tests/conformance/fetch-markdown-corpus.sh"]
 fn runtime_docs_render_the_same_and_are_idempotent() {
@@ -183,6 +203,14 @@ fn commonmark_examples_render_the_same_and_are_idempotent() {
 fn keeps_a_table_whose_row_has_more_cells_than_its_header() {
     let md = "| A | B |\n|---|---|\n| x | `a|b` |\n";
     assert_eq!(fmt(md), md);
+}
+
+#[test]
+fn an_html_block_right_after_a_paragraph_stays_on_the_next_line() {
+    assert_eq!(
+        fmt("text\n<!-- a -->\n\n# h\n<!-- b -->\n"),
+        "text\n<!-- a -->\n\n# h\n\n<!-- b -->\n"
+    );
 }
 
 #[test]

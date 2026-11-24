@@ -74,7 +74,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Vue / Svelte | ████████░░ 89% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
 | Angular templates | █████████░ 97% Prettier | 156 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 85% stylelint-less | Ready |
-| Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
+| Markdown | █████████░ 92% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | █████████░ 94% Prettier | █████████░ 99% yamllint | Ready |
 | JSON / JSONC | █████████░ 99% Prettier<br>█████████░ 99% Biome | ██████████ 100% eslint-plugin-jsonc | Ready |
 | PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |

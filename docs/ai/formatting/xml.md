@@ -28,13 +28,11 @@ Whitespace in text is content, so the formatter lays out structure only.
 <!-- /generated -->
 
 ## Presets
-`xml/csharpier-compat` is CSharpier 1.x's XML defaults (100 columns, two spaces, line endings kept); `scripts/parity.sh format csharpier-xml` compares the two on `tests/fixtures/xml` and 372 project files of dotnet/aspnetcore v10.0.0 (`tests/conformance/fetch-xml-projects.sh`).
+`xml/csharpier-compat` is CSharpier 1.x's XML defaults (100 columns, two spaces, line endings kept); `scripts/parity.sh format csharpier-xml` compares the two on `tests/fixtures/xml` and the 322 project files of dotnet/aspnetcore v10.0.0 (`tests/conformance/fetch-xml-projects.sh`) that CSharpier formats: it leaves `.resx` untouched (those are not compared) and skips files named `*.Designer.*` unless `--include-generated` is given (the run gives it).
 
 The differences are named in `tests/parity/csharpier-xml/differences.yaml`; where Sudsy differs from CSharpier by design:
 
 <!-- generated:differences:csharpier-xml -->
-
-- `width-accounting`: CSharpier's width accounting keeps a tag on one line after a long multi-line header comment (.resx) or below a tag far longer than the width; Sudsy breaks the attributes
 <!-- /generated -->
 
 ## Rules

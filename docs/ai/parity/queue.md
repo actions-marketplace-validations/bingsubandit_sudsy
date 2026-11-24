@@ -324,7 +324,7 @@ Lint: target 0% (0 of 1641, 1641 missed, measured on d3ae913f); rules by missed 
 
 ## prettier
 
-Format: unclassified 10 of 84 differing files (12%).
+Format: unclassified 9 of 83 differing files (11%).
 1. `yaml-comment-indent` (15 files): a comment line before an item of a lower indentation keeps its own column in Prettier; Sudsy aligns it with the next line
 2. `json-nested-arrays` (14 files): an array whose items are all arrays of two or more items; Prettier breaks the outer array and keeps each inner one on a line; Sudsy writes the outer one on a line when it fits
 3. `yaml-flow-trailing-comma` (13 files): a flow sequence broken over lines ends its last item with a comma in Prettier; Sudsy writes none
@@ -340,10 +340,9 @@ Format: unclassified 10 of 84 differing files (12%).
 13. `code-trailing-blanks` (1 files): trailing blanks inside a code block are code and stay; Prettier removes them
 14. `emphasis-in-table` (1 files): a table cell with a regular expression that holds `*` and `|` in code spans; Prettier turns the `*` into `_`, Sudsy keeps it
 15. `graphql-comment-position` (1 files): comments between the interfaces and the `{` stay in front of the `{` where Prettier moves them into the body
-16. `html-after-table` (1 files): an HTML block right after a table gets a blank line in front; Prettier keeps it on the next line (both parse it as HTML)
-17. `json-trailing-comma` (1 files): a `.json` file with a trailing comma is refused (the dialect is json, `jsonc` allows it); Prettier's parser accepts it
-18. `list-looseness` (1 files): a list item holding a paragraph, a nested list and an indented continuation keeps the blank lines of the source; Prettier's looseness differs
-19. `yaml-block-indicator` (1 files): a block scalar header with an indent and a chomp indicator (`>2-`) is written in the other order (`>-2`)
+16. `json-trailing-comma` (1 files): a `.json` file with a trailing comma is refused (the dialect is json, `jsonc` allows it); Prettier's parser accepts it
+17. `list-looseness` (1 files): a list item holding a paragraph, a nested list and an indented continuation keeps the blank lines of the source; Prettier's looseness differs
+18. `yaml-block-indicator` (1 files): a block scalar header with an indent and a chomp indicator (`>2-`) is written in the other order (`>-2`)
 
 ## prettier-angular
 

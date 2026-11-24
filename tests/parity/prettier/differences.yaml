@@ -1,11 +1,25 @@
 ratchet:
   graphql: 123
   json: 4
-  markdown: 95
+  markdown: 96
   real-world-json: 3184
   real-world-yaml: 803
   yaml: 5
-unclassified: 10
+unclassified: 9
+second-format:
+  graphql: 0
+  json: 0
+  markdown: 0
+  real-world-json: 0
+  real-world-yaml: 0
+  yaml: 0
+refused:
+  graphql: 0
+  json: 0
+  markdown: 0
+  real-world-json: 0
+  real-world-yaml: 0
+  yaml: 0
 target-files:
   graphql: 124
   json: 4
@@ -19,7 +33,6 @@ differences:
   tab-blocks: gap  a block with a tab is kept as written (the width of a tab depends on its column); Prettier re-indents the nested list
   code-span-lines: gap  a code span over two lines in a list item keeps the text of the span; Prettier removes the indentation of the second line
   code-trailing-blanks: gap  trailing blanks inside a code block are code and stay; Prettier removes them
-  html-after-table: gap  an HTML block right after a table gets a blank line in front; Prettier keeps it on the next line (both parse it as HTML)
   graphql-comment-position: gap  comments between the interfaces and the `{` stay in front of the `{` where Prettier moves them into the body
   emphasis-in-table: gap  a table cell with a regular expression that holds `*` and `|` in code spans; Prettier turns the `*` into `_`, Sudsy keeps it
   json-number-fill: gap  an array of numbers that does not fit; Prettier fills the lines, Sudsy writes one number per line
@@ -41,7 +54,6 @@ files:
   runtime-docs/coding-guidelines/EventLogging.md: tab-blocks
   runtime-docs/coding-guidelines/mono-code-guide.md: code-span-lines
   runtime-docs/coding-guidelines/vectorization-guidelines.md: code-trailing-blanks
-  docs/ai/formatting/csharp.md: html-after-table
   graphql/prettier/tests/format/graphql/interface/separator-detection.graphql: graphql-comment-position
   docs/ai/rules/builtin.md: emphasis-in-table
   real-world-json: json-number-fill:10, json-nested-arrays:14, json-comment-before-comma:3, json-trailing-comma:1

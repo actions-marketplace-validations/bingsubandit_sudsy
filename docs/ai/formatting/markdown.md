@@ -36,7 +36,7 @@ Line oriented, prose kept as written (Prettier's `proseWrap: preserve`, checked 
 | `final_newline` | bool | `true` | End the file with a newline. |
 | `end_of_line` | `auto`, `lf`, `crlf` | `auto` | Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first line break. |
 | `embedded_language_formatting` | `auto`, `off` | `auto` | Format the code of a fenced block with the formatter of the language its info string names (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way. |
-| `keep_together_kinds` | list of words | `[LinkDef, Html]` | Block kinds of which two in a row with no blank line between them in the source stay without one. |
+| `keep_together_kinds` | list of words | `[LinkDef, Html, Inline>Html]` | Block kinds of which two in a row with no blank line between them in the source stay without one; `A>B` is a block of kind B right after one of kind A (an HTML block after a paragraph). |
 <!-- /generated -->
 
 ## Presets

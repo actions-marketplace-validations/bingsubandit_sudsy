@@ -30,7 +30,7 @@ Files: `*.toml`. `Cargo.lock` (generated, cargo's own layout) is not claimed, so
 <!-- /generated -->
 
 ## Presets
-`toml/taplo-compat` reproduces taplo 0.10's defaults (`collapse: always`, `max_blank_lines: 2`, `align_comments: true`, LF); `scripts/parity.sh format taplo` compares the two on `tests/fixtures/toml` and the toml-test valid files (203 of 213 identical, the other 10 named in `tests/parity/taplo/differences.yaml`).
+`toml/taplo-compat` reproduces taplo 0.10's defaults (`collapse: always`, `max_blank_lines: 2`, `align_comments: true`, LF); `scripts/parity.sh format taplo` compares the two on `tests/fixtures/toml` and the toml-test valid files (203 of 207 identical, the 5 files taplo rejects and one tool-wrong case are left out; the 4 differing ones are named in `tests/parity/taplo/differences.yaml`), and on the real-world corpus (1,282 of 1,307 identical; the whole target is 1,485 of 1,514 files: 25 real-world and 4 local differ).
 
 Where Sudsy differs from taplo by design:
 

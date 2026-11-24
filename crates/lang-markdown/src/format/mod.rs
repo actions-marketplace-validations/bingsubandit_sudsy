@@ -76,7 +76,7 @@ struct Render<'a> {
     src: &'a str,
     tab: usize,
     /// Block kinds that stay together when the source has no blank line between them.
-    together: Vec<SyntaxKind>,
+    together: Vec<(SyntaxKind, SyntaxKind)>,
 }
 
 fn is_trivia(kind: SyntaxKind) -> bool {

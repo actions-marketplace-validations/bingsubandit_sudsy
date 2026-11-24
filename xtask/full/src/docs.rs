@@ -158,7 +158,7 @@ fn catalog_counts(catalogs: Vec<Catalog>) -> Result<String> {
     let ratchets = lint_ratchets()?;
     let mut out = String::from(
         "| Tool | Target | Measured on | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---|---:|---:|---:|---:|---:|---:|---:|
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
 ",
     );
     for c in catalogs {

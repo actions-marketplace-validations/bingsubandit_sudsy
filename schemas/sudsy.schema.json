@@ -11365,9 +11365,10 @@
             "keep_together_kinds": {
               "default": [
                 "LinkDef",
-                "Html"
+                "Html",
+                "Inline>Html"
               ],
-              "description": "Block kinds of which two in a row with no blank line between them in the source stay without one.",
+              "description": "Block kinds of which two in a row with no blank line between them in the source stay without one; `A>B` is a block of kind B right after one of kind A (an HTML block after a paragraph).",
               "items": {
                 "type": "string"
               },
@@ -15101,9 +15102,10 @@
                   "keep_together_kinds": {
                     "default": [
                       "LinkDef",
-                      "Html"
+                      "Html",
+                      "Inline>Html"
                     ],
-                    "description": "Block kinds of which two in a row with no blank line between them in the source stay without one.",
+                    "description": "Block kinds of which two in a row with no blank line between them in the source stay without one; `A>B` is a block of kind B right after one of kind A (an HTML block after a paragraph).",
                     "items": {
                       "type": "string"
                     },
