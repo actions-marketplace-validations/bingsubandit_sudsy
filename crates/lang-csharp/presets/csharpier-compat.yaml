@@ -36,6 +36,8 @@ csharp:
     declarator_own_line_kinds: [VariableDeclaration]
     stacked_flush_kinds: [UsingStatement, FixedStatement]
     hanging_clause_kinds: [WhenClause, CatchFilterClause]
+    hang_operand_kinds: [CastExpression]
+    paren_condition_kinds: [IfStatement, WhileStatement, DoStatement, LockStatement, SwitchStatement, UsingStatement, FixedStatement]
     assignment_inline_test_kinds: [IsPatternExpression]
     member_chain_hold_comments: true
     do_while_line: same_line

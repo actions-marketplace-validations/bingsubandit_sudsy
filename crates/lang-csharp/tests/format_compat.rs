@@ -104,6 +104,7 @@ fn a_creation_and_its_initializer_break_together_and_crowded_ones_expand() {
 fn a_cast_operand_that_does_not_fit_hangs_below_the_cast() {
     let input = "class C { void M() { var c = (VeryLongTypeName)someVeryLongFunctionNameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.Property.Other; } }";
     assert!(compat(input).contains("(VeryLongTypeName)\n            someVery"));
+    assert!(!fmt(input, &[]).contains("(VeryLongTypeName)\n"));
 }
 
 #[test]
@@ -137,4 +138,18 @@ fn the_resource_of_a_using_breaks_inside_its_parentheses() {
     );
     assert!(out.contains("using (\n            var xxxx"));
     assert!(out.contains("\n        ) { }"));
+}
+
+#[test]
+fn a_using_head_that_does_not_fit_breaks_inside_its_parentheses_only_in_the_preset() {
+    let input = "class C { void M() { using (var logger = new FileLoggerProcessor(optionsWrapperMonitor, hostingEnvironment, nullLoggerFactoryInstance)) { x(); } } }";
+    assert!(compat(input).contains("using (\n            var logger"));
+    assert!(!fmt(input, &[]).contains("using (\n"));
+}
+
+#[test]
+fn accessors_with_a_directive_between_them_keep_their_lines() {
+    let out = compat("interface I {\n int P\n {\n#if A\n [X]\n#endif\n get;\n set;\n }\n}");
+    assert!(out.contains("    int P\n    {\n#if A\n"), "{out}");
+    assert!(out.contains("get;\n"), "{out}");
 }

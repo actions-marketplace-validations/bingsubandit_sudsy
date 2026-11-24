@@ -135,7 +135,7 @@ Format: unclassified 0 of 4560 differing files (0%).
 
 ## csharpier
 
-Format: unclassified 1103 of 1103 differing files (100%).
+Format: unclassified 1099 of 1099 differing files (100%).
 
 ## csharpier-xml
 

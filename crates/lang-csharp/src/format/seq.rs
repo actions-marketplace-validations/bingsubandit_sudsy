@@ -341,20 +341,6 @@ const FOR_TOKENS: core_format::shapes::ForTokens = core_format::shapes::ForToken
     close: k::CLOSE_PAREN_TOKEN,
 };
 
-/// Statements whose parenthesized condition may break after `(` and before `)`.
-fn has_paren_condition(kind: SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::IF_STATEMENT
-            | k::WHILE_STATEMENT
-            | k::DO_STATEMENT
-            | k::LOCK_STATEMENT
-            | k::SWITCH_STATEMENT
-            | k::USING_STATEMENT
-            | k::FIXED_STATEMENT
-    )
-}
-
 /// `label:` moved out by `label_indent`, then the labeled statement on the next line.
 pub fn labeled_statement(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let style = core_format::shapes::LabelStyle {
@@ -385,7 +371,9 @@ pub fn seq_of(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R
             return Ok(doc::concat(vec![lead, seq_of(cx, node, &els[n..])?]));
         }
     }
-    let paren_condition = has_paren_condition(pk);
+    let paren_condition = cx
+        .options
+        .list_has(core_config::opt::PAREN_CONDITION_KINDS, cx.grammar.name(pk));
     let mut parts = Vec::with_capacity(els.len() * 2);
     let mut i = 0;
     while i < els.len() {

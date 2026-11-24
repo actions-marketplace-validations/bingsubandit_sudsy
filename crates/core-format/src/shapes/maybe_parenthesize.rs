@@ -5,7 +5,7 @@
 //! concept: maybe-parenthesize
 //! what: Content between delimiters on lines of its own when it does not fit.
 //! tools: ruff maybe_parenthesize, Prettier return (...)
-//! reads: option:hanging_clause_kinds
+//! reads: option:hanging_clause_kinds, option:hang_operand_kinds
 
 use crate::FormatCtx;
 use crate::doc::{self, Doc};
@@ -50,7 +50,7 @@ pub struct HangPolicy {
 
 /// The children of `node`: a head and its operand (the last child). The operand moves indented
 /// onto a line of its own when the whole does not fit, unless it is one of the attached kinds of
-/// the policy. `seq` prints the head's elements.
+/// the policy; only for the kinds of `hang_operand_kinds`. `seq` prints the head's elements.
 pub fn hang_operand(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
@@ -58,6 +58,12 @@ pub fn hang_operand(
     seq: &dyn Fn(&[SyntaxElement]) -> Result<Doc, FormatError>,
 ) -> Result<Doc, FormatError> {
     let els = children(cx, node);
+    if !cx.options.list_has(
+        core_config::opt::HANG_OPERAND_KINDS,
+        cx.grammar.name(node.kind()),
+    ) {
+        return seq(&els);
+    }
     let (Some(head_kind), Some(SyntaxElement::Node(operand))) =
         (node.children().next().map(|c| c.kind()), els.last())
     else {

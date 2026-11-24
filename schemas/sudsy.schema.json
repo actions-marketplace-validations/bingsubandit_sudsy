@@ -8830,6 +8830,14 @@
               },
               "type": "array"
             },
+            "hang_operand_kinds": {
+              "default": [],
+              "description": "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "hanging_clause_inline_after": {
               "default": [
                 "SwitchExpressionArm",
@@ -9031,6 +9039,20 @@
                 "hanging"
               ],
               "type": "string"
+            },
+            "paren_condition_kinds": {
+              "default": [
+                "IfStatement",
+                "WhileStatement",
+                "DoStatement",
+                "LockStatement",
+                "SwitchStatement"
+              ],
+              "description": "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "preprocessor_symbol_sets": {
               "default": [],
@@ -12689,6 +12711,14 @@
                     },
                     "type": "array"
                   },
+                  "hang_operand_kinds": {
+                    "default": [],
+                    "description": "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "hanging_clause_inline_after": {
                     "default": [
                       "SwitchExpressionArm",
@@ -12890,6 +12920,20 @@
                       "hanging"
                     ],
                     "type": "string"
+                  },
+                  "paren_condition_kinds": {
+                    "default": [
+                      "IfStatement",
+                      "WhileStatement",
+                      "DoStatement",
+                      "LockStatement",
+                      "SwitchStatement"
+                    ],
+                    "description": "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "preprocessor_symbol_sets": {
                     "default": [],

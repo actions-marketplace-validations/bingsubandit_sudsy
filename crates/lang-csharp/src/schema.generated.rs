@@ -110,6 +110,10 @@ pub const STACKED_FLUSH_KINDS: core_config::OptId = core_config::opt::STACKED_FL
 #[allow(dead_code)]
 pub const HANGING_CLAUSE_KINDS: core_config::OptId = core_config::opt::HANGING_CLAUSE_KINDS;
 #[allow(dead_code)]
+pub const PAREN_CONDITION_KINDS: core_config::OptId = core_config::opt::PAREN_CONDITION_KINDS;
+#[allow(dead_code)]
+pub const HANG_OPERAND_KINDS: core_config::OptId = core_config::opt::HANG_OPERAND_KINDS;
+#[allow(dead_code)]
 pub const HANGING_CLAUSE_INLINE_AFTER: core_config::OptId = core_config::opt::HANGING_CLAUSE_INLINE_AFTER;
 #[allow(dead_code)]
 pub const ATTACHED_VALUE_KINDS: core_config::OptId = core_config::opt::ATTACHED_VALUE_KINDS;
@@ -538,6 +542,8 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::words(core_config::opt::DECLARATOR_OWN_LINE_EXCEPT_KINDS, &["ForStatement"], "Kinds of parent in which the declarators of `declarator_own_line_kinds` stay on one line (the header of a `for`)."),
         core_config::OptionDef::words(core_config::opt::STACKED_FLUSH_KINDS, &[], "Kinds of statement (`using`, `fixed`) whose body is another statement of the same kind: it goes on the next line at the same level, so that a stack of them reads like a list. Empty indents it like any embedded statement."),
         core_config::OptionDef::words(core_config::opt::HANGING_CLAUSE_KINDS, &[], "Kinds of clause (`when` of a `catch` filter or a `case` guard) that move to an indented line of their own when the whole does not fit; a condition in parentheses hugs them. Empty keeps them on the line of what precedes them."),
+        core_config::OptionDef::words(core_config::opt::PAREN_CONDITION_KINDS, &["IfStatement", "WhileStatement", "DoStatement", "LockStatement", "SwitchStatement"], "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content."),
+        core_config::OptionDef::words(core_config::opt::HANG_OPERAND_KINDS, &[], "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head."),
         core_config::OptionDef::words(core_config::opt::HANGING_CLAUSE_INLINE_AFTER, &["SwitchExpressionArm", "DiscardPattern"], "Pairs of a parent kind and the kind of its first child: a hanging clause of such a parent stays on the line (`_ when x`)."),
         core_config::OptionDef::words(core_config::opt::ATTACHED_VALUE_KINDS, &["ObjectInitializerExpression", "CollectionInitializerExpression", "ArrayInitializerExpression", "ComplexElementInitializerExpression", "WithInitializerExpression", "CollectionExpression"], "With `wrapped_brace_line: all`: kinds of the value of an assignment whose braces or brackets start on the operator's line when the value breaks."),
         core_config::OptionDef::words(core_config::opt::ATTACHED_PARENT_KINDS, &["SimpleAssignmentExpression", "EqualsValueClause"], "Kinds of assignment whose value is attached (`attached_value_kinds`)."),

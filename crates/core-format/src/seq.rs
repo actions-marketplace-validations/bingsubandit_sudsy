@@ -92,6 +92,14 @@ pub fn own_line_declarator(cx: &FormatCtx<'_>, decl: &SyntaxNode, prev: &SyntaxE
         })
 }
 
+/// Does a comment or a preprocessor directive (tag `directive`) stand anywhere in `node`?
+pub fn has_comment_or_directive(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    node.descendants_with_tokens().any(|e| match e {
+        SyntaxElement::Token(t) => cx.grammar.has_tag(t.kind(), "comment"),
+        SyntaxElement::Node(n) => cx.grammar.has_tag(n.kind(), "directive"),
+    })
+}
+
 /// Does the source have a line break after the element?
 pub fn break_after(cx: &FormatCtx<'_>, e: &SyntaxElement) -> bool {
     last(cx, e).is_some_and(|t| comments::break_after(cx.grammar, &t))

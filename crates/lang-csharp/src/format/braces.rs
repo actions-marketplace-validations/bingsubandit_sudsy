@@ -168,10 +168,7 @@ pub fn accessors_inline(cx: &FormatCtx<'_>, list: &SyntaxNode) -> bool {
                 _ => true,
             })
     });
-    let has_comment = list
-        .descendants_with_tokens()
-        .filter_map(SyntaxElement::into_token)
-        .any(|t| g.has_tag(t.kind(), "comment"));
+    let has_comment = core_format::seq::has_comment_or_directive(cx, list);
     let has_body = list
         .children()
         .any(|a| a.children().any(|c| c.kind() == k::BLOCK));

@@ -136,6 +136,14 @@ options:
       kind: "words"
       default: []
       doc: "Kinds of clause (`when` of a `catch` filter or a `case` guard) that move to an indented line of their own when the whole does not fit; a condition in parentheses hugs them. Empty keeps them on the line of what precedes them."
+  - paren_condition_kinds:
+      kind: "words"
+      default: [IfStatement, WhileStatement, DoStatement, LockStatement, SwitchStatement]
+      doc: "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content."
+  - hang_operand_kinds:
+      kind: "words"
+      default: []
+      doc: "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head."
   - hanging_clause_inline_after:
       kind: "words"
       default: [SwitchExpressionArm, DiscardPattern]
