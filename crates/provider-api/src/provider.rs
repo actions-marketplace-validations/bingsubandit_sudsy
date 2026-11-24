@@ -225,14 +225,19 @@ impl SourceFile {
         }
     }
 
-    /// Decodes UTF-8 and strips a leading BOM (remembered in `had_bom` so writers can restore it).
+    /// Decodes UTF-8 (or UTF-16 with a mark, or Windows-1252: `encoding`) and strips a leading BOM (remembered in
+    /// `had_bom` so writers can restore it).
     pub fn from_bytes(
         id: impl Into<String>,
         version: u64,
         bytes: Vec<u8>,
     ) -> Result<Self, SourceError> {
         let id = id.into();
-        let mut text = String::from_utf8(bytes).map_err(|_| SourceError { id: id.clone() })?;
+        let mut text = match String::from_utf8(bytes) {
+            Ok(text) => text,
+            Err(e) => crate::encoding::decode(e.as_bytes())
+                .ok_or_else(|| SourceError { id: id.clone() })?,
+        };
         let had_bom = text.starts_with('\u{feff}');
         if had_bom {
             text.remove(0);
@@ -287,7 +292,13 @@ mod tests {
         let f = SourceFile::from_bytes("a", 1, b"\xef\xbb\xbfclass A {}".to_vec()).unwrap();
         assert!(f.had_bom);
         assert_eq!(f.text, "class A {}");
-        assert!(SourceFile::from_bytes("a", 1, vec![0xff]).is_err());
+        assert!(SourceFile::from_bytes("a", 1, vec![0xff, 0xfe, 0, 0xd8]).is_err());
+        assert_eq!(
+            SourceFile::from_bytes("a", 1, vec![b'a', 0xe9])
+                .unwrap()
+                .text,
+            "a\u{e9}"
+        );
     }
 
     #[test]

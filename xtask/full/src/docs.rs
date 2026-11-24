@@ -81,6 +81,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             d.presets.iter().any(|p| p == preset) && d.languages.iter().any(|l| ids.contains(l))
         })
     };
+    crate::support::check_measured(&xtask::repo_root(), include_str!("../support.yaml"))?;
     let support = crate::support::render(
         &xtask::repo_root(),
         include_str!("../support.yaml"),

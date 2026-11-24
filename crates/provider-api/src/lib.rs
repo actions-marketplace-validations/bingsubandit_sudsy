@@ -5,6 +5,7 @@
 
 pub mod adapter;
 pub mod embedded;
+pub mod encoding;
 pub mod fixtures;
 pub mod format;
 pub mod format_testing;

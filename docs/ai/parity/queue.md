@@ -8,8 +8,8 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| SQL | lint sqlfluff | 4 | 70.7% | 14.3 | 18612 findings | `LT02` 19005 | 3 | 19.07 | 3cdf2fac |
 | SQL | format sqlfluff | 4 | 73.7% | 11.3 | 94 files | `if-condition-wrap` 128 | 3 | 15.07 | - |
+| SQL | lint sqlfluff | 4 | 75.6% | 9.4 | 11906 findings | `LT02` 17613 | 3 | 12.53 | a1c31cbc |
 | C / C++ | format clang-format | 4 | 47.6% | 37.4 | 2485 files | `reference-align` 467, `brace-own-line-in-source` 327, `pointer-align` 326, `cast-space` 316 +6 more | 30 | 4.99 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
@@ -553,24 +553,24 @@ Format: unclassified 110 of 327 differing files (34%).
 5. `fix-loop-limit` (5 files): "sqlfluff `fix` is not at its own fixed point on the file, a second run changes it (`LT05` wraps one more nesting level per run; 5 files of the real-world corpus), so the reference output is one pass of it"
 6. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 7. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 70.7% (92222 of 130392, 38170 missed, measured on 3cdf2fac); rules by missed findings:
-1. `LT02` (19005 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
-2. `LT01` (3269 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
-3. `CP01` (3216 missed) Fix: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
-4. `CP02` (2275 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
-5. `CV06` (1454 missed)
-6. `LT05` (1422 missed) Fix: line-length findings (1,538); not yet split by file
-7. `CP04` (1154 missed)
-8. `AL03` (793 missed)
-9. `RF02` (636 missed)
-10. `LT04` (584 missed)
-11. `LT09` (324 missed)
-12. `CV11` (320 missed)
-13. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-14. `LT15` (243 missed)
-15. `LT03` (240 missed)
+Lint: target 75.6% (95291 of 126114, 30823 missed, measured on a1c31cbc); rules by missed findings:
+1. `LT02` (17613 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
+2. `CP01` (3033 missed) Fix: 3,033 keyword-case findings left after format; 2,791 are in two T-SQL files our parser refuses (tigertoolbox setup.sql, `CROSS apply ::fn_trace_geteventinfo(t .id)` after a long `case` select list; sqlserver-kit Recover_Deleted_Data_Proc.sql 693:22, `STUFF((select ... for xml path('')), 1, 1, '')` after a `case` with `0x,` hex literals), so the file keeps its case; parse fixes first
+3. `CP02` (1455 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
+4. `CV06` (1452 missed)
+5. `LT01` (1233 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
+6. `CP04` (1123 missed)
+7. `RF02` (594 missed)
+8. `LT05` (501 missed) Fix: line-length findings (1,538); not yet split by file
+9. `CV11` (320 missed)
+10. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+11. `LT04` (216 missed)
+12. `LT03` (214 missed)
+13. `RF01` (206 missed)
+14. `LT15` (202 missed)
+15. `LT06` (195 missed)
 
-43 more rules: 2972 missed.
+42 more rules: 2203 missed.
 
 ## sqlfluff-fixtures
 

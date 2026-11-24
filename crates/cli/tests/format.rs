@@ -509,3 +509,28 @@ fn summary_counts_files_copied_through() {
     let out = sudsy(t.path(), &[]);
     assert!(!String::from_utf8_lossy(&out.stderr).contains("copied through"));
 }
+
+#[test]
+fn a_file_in_another_encoding_is_formatted_and_written_back_in_it() {
+    let t = tempfile::tempdir().unwrap();
+    fs::write(t.path().join("latin.json"), b"{\"a\":   \"caf\xe9\"}").unwrap();
+    let utf16: Vec<u8> = std::iter::once(0xfeffu16)
+        .chain("{\"a\":   1}".encode_utf16())
+        .flat_map(u16::to_le_bytes)
+        .collect();
+    fs::write(t.path().join("wide.json"), &utf16).unwrap();
+    let out = sudsy(t.path(), &[]);
+    assert_eq!(
+        out.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(
+        fs::read(t.path().join("latin.json")).unwrap(),
+        b"{ \"a\": \"caf\xe9\" }\n"
+    );
+    let wide = fs::read(t.path().join("wide.json")).unwrap();
+    assert_eq!(wide[..4], [0xff, 0xfe, b'{', 0]);
+    assert_eq!(wide.len(), 2 * ("{ \"a\": 1 }\n".len() + 1));
+}

@@ -81,11 +81,8 @@ fn finish(db: &Database, file: Result<File>, check: bool) -> Result<bool, Failed
         return Ok(false);
     }
     if !check {
-        let mut bytes = Vec::with_capacity(output.len() + 3);
-        if file.had_bom(db) {
-            bytes.extend_from_slice("\u{feff}".as_bytes());
-        }
-        bytes.extend_from_slice(output.as_bytes());
+        let bytes = crate::atomic::encode_like_file(file.path(db), output, file.had_bom(db))
+            .map_err(Failed::File)?;
         crate::atomic::write(file.path(db), &bytes)
             .context("writing the file")
             .map_err(Failed::File)?;

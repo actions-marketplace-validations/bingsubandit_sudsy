@@ -33,75 +33,74 @@ second-format:
 refused:
   real-world: 0
 unclassified: 110
-target: 70.7
+target: 75.6
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
   LT02: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
   LT01: spacing findings left after `sudsy format` (6,332); not yet split by construct
   CP02: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
-  CP01: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
+  CP01: "3,033 keyword-case findings left after format; 2,791 are in two T-SQL files our parser refuses (tigertoolbox setup.sql, `CROSS apply ::fn_trace_geteventinfo(t .id)` after a long `case` select list; sqlserver-kit Recover_Deleted_Data_Proc.sql 693:22, `STUFF((select ... for xml path('')), 1, 1, '')` after a `case` with `0x,` hex literals), so the file keeps its case; parse fixes first"
   LT05: line-length findings (1,538); not yet split by file
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 92222, total: 130392, main: '3cdf2fac'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 95291, total: 126114, main: 'a1c31cbc'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 19005
-  LT01: 3269
-  CP01: 3216
-  CP02: 2275
-  CV06: 1454
-  LT05: 1422
-  CP04: 1154
-  AL03: 793
-  RF02: 636
-  LT04: 584
-  LT09: 324
+  LT02: 17613
+  CP01: 3033
+  CP02: 1455
+  CV06: 1452
+  LT01: 1233
+  CP04: 1123
+  RF02: 594
+  LT05: 501
   CV11: 320
   PRS: 263
-  LT15: 243
-  LT03: 240
-  CP03: 218
-  AL01: 208
+  LT04: 216
+  LT03: 214
   RF01: 206
-  LT11: 193
-  RF03: 183
+  LT15: 202
+  LT06: 195
   ST06: 179
   CV10: 174
+  CP03: 166
   AL09: 165
-  LT06: 150
-  CP05: 143
-  AL08: 136
-  LT08: 116
-  RF06: 102
+  RF03: 156
+  AL08: 135
+  AL01: 106
+  LT08: 106
+  CP05: 105
   ST12: 100
   ST09: 94
-  RF05: 76
+  LT09: 91
+  AL03: 73
   TQ02: 54
   TQ03: 51
   AM03: 50
-  LT14: 49
+  RF06: 45
   ST05: 42
   TQ01: 42
-  AL02: 40
-  RF04: 31
+  RF05: 36
+  AL02: 35
   AL04: 27
   ST01: 25
+  RF04: 23
   AM05: 22
-  AM01: 19
+  LT14: 17
+  LT11: 16
   LXR: 15
   ST10: 15
-  AM04: 11
-  LT12: 9
+  AM04: 6
+  AM01: 5
   ST08: 5
   AM02: 4
   JJ01: 4
   ST04: 4
   AL05: 3
   CV01: 2
-  AM06: 1
   LT07: 1
+  LT12: 1
   ST02: 1
   ST11: 1
   TMP: 1

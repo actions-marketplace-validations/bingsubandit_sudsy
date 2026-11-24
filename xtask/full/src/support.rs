@@ -5,7 +5,7 @@
 //! language Sudsy formats with no reference formatter has `stability` groups instead: the share of its
 //! corpus files that `scripts/parity.sh stability <group>` finds stable, in `tests/parity/stability`.
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -169,6 +169,39 @@ pub fn render(
         headline,
         ready,
     })
+}
+
+/// Every leg of `support.yaml` that is not `blocked` must have a number: a `target:` (lint) or a
+/// `ratchet:` of its groups (format) in its `differences.yaml`; a leg that lost it fails with the tool's name.
+pub fn check_measured(root: &Path, support_yaml: &str) -> Result<()> {
+    for row in rows(support_yaml)? {
+        for t in row.lint.iter().filter(|t| t.blocked.is_none()) {
+            if ratchets(root, &t.tool)?.target.is_none() {
+                bail!(
+                    "support.yaml: lint tool `{}` ({}) has no `target:` in tests/parity/{}/differences.yaml (measure it, or mark it `blocked`)",
+                    t.name,
+                    row.language,
+                    t.tool
+                );
+            }
+        }
+        for t in row.format.iter().filter(|t| t.blocked.is_none()) {
+            let r = ratchets(root, &t.tool)?;
+            if !r
+                .ratchet
+                .keys()
+                .any(|g| t.groups.is_empty() || t.groups.contains(g))
+            {
+                bail!(
+                    "support.yaml: format tool `{}` ({}) has no `ratchet:` in tests/parity/{}/differences.yaml (measure it, or mark it `blocked`)",
+                    t.name,
+                    row.language,
+                    t.tool
+                );
+            }
+        }
+    }
+    Ok(())
 }
 
 /// A row with its measured shares: format and lint per tool, and the status.

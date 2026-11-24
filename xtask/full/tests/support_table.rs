@@ -117,3 +117,18 @@ fn no_format_leg_of_support_yaml_is_fixtures_only() {
         "format legs without a number: {unmeasured:?}"
     );
 }
+
+/// A leg that is not `blocked` and has no `target:` or `ratchet:` fails with the tool's name.
+#[test]
+fn a_leg_without_a_number_fails_unless_blocked() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
+    let check = |s| xtask_full::support::check_measured(&root, s);
+    assert!(check("\n- language: A\n  format: [{tool: fmt-a, name: FmtA, groups: [real-world]}]\n  lint: [{tool: lint-a, name: LintA}]\n").is_ok());
+    let e = check("\n- language: A\n  lint: [{tool: absent, name: Absent}]\n").unwrap_err();
+    assert!(e.to_string().contains("`Absent`"), "{e}");
+    let e = check("\n- language: A\n  format: [{tool: missing, name: Gone}]\n").unwrap_err();
+    assert!(e.to_string().contains("`Gone`"), "{e}");
+    assert!(
+        check("\n- language: A\n  lint: [{tool: absent, name: Absent, blocked: waits}]\n").is_ok()
+    );
+}
