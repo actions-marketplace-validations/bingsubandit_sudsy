@@ -65,6 +65,9 @@ pub(crate) struct Tool {
     /// Why the leg waits on a user decision; the priority table lists it apart.
     #[serde(default)]
     pub blocked: Option<String>,
+    /// A short caveat of the number, printed under the table (what the comparison leaves out).
+    #[serde(default)]
+    pub note: Option<String>,
 }
 
 /// The rows of `support.yaml`.
@@ -130,6 +133,21 @@ pub fn render(
         .map(|(_, language, _)| *language)
         .collect();
     out += &measured.iter().map(|m| m.2.as_str()).collect::<String>();
+    let notes: Vec<String> = rows
+        .iter()
+        .flat_map(|r| r.format.iter().chain(&r.lint).map(move |t| (r, t)))
+        .filter_map(|(r, t)| {
+            Some(format!(
+                "{} ({}): {}.",
+                t.name,
+                r.language,
+                t.note.as_ref()?
+            ))
+        })
+        .collect();
+    if !notes.is_empty() {
+        out += &format!("\nNotes: {}\n", notes.join(" "));
+    }
     out += "\nHow to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).\n";
     let (n, rest) = (ready.len(), rows.len() - ready.len());
     let headline = match n {

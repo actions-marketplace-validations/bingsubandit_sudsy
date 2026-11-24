@@ -287,7 +287,7 @@ The status and the headline numbers of every language are in the generated table
 
 ## C / C++
 
-- Files are kept as written. There are no lint rules.
+- Layout by `format.rules` (indent, blanks, braces, keyword and operator spacing, comments); source line breaks and `*`/`&` spacing stay as written. There are no lint rules.
 - **Parser:** a lexer with a token-level structure. There is no full grammar.
 - **Not done:** a clang-format compatible layout. The format number ignores line wrapping (where a statement, a list or an enum breaks, and the indent of the continuation lines); the rest is compared exactly, and the byte-identical share is printed next to it.
 

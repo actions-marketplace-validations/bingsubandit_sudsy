@@ -45,6 +45,28 @@ fn table_from_fixture_ratchets() {
     );
 }
 
+/// A tool with a `note` gets a line under the table naming the tool, its language and the note.
+#[test]
+fn a_tool_note_is_printed_under_the_table() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
+    let support = "\n- language: Eta\n  format: [{tool: fmt-a, name: FmtA, note: wraps are not compared}]\n- language: Iota\n  format: [{tool: fmt-a, name: FmtB}]\n";
+    let table = xtask_full::support::render(&root, support, &|_| 7).unwrap();
+    assert!(
+        table
+            .table
+            .contains("\nNotes: FmtA (Eta): wraps are not compared.\n"),
+        "{}",
+        table.table
+    );
+    let plain = xtask_full::support::render(
+        &root,
+        "\n- language: Iota\n  format: [{tool: fmt-a, name: FmtB}]\n",
+        &|_| 7,
+    )
+    .unwrap();
+    assert!(!plain.table.contains("Notes:"), "{}", plain.table);
+}
+
 /// A tool with a corpus group named in `support.yaml` shows `not measured` until that group has a
 /// ratchet: the numbers of its other groups (a few local fixtures) never stand for the language.
 #[test]

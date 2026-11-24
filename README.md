@@ -92,6 +92,8 @@ Each number is measured on real-world code against the reference tool with its d
 | C# | ███████░░░ 78% CSharpier | ████████░░ 87% StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | ███░░░░░░░ 31% clang-format | not measured clang-tidy | In progress |
 
+Notes: clang-format (C / C++): line wrapping is not compared.
+
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->
 

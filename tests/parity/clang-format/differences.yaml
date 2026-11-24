@@ -1,32 +1,99 @@
 differences:
-  wrap-misc: "gap  1414 files first differ here: a break or join clang-format decides inside a construct no other cause names (return values, conditions, templates args, casts, string chains) because of the 80 column limit. fix: map onto the shared shapes (binary_chain, call_arguments, signature) with one penalty option per construct; no new engine"
-  wrap-args: "gap  1638 files first differ here: call arguments and parameters: clang-format packs them to the column limit (bin-packing) and breaks all of them or none, where the printer keeps the source breaks. fix: map call and parameter lists onto call_arguments/signature with a bin-packing ListStyle fill"
-  wrap-brace: "gap  743 files first differ here: braced lists and initializer lists are re-broken at the column limit; a list with a trailing comma has one item per line. fix: map onto delimited_list with ListStyle fill and a trailing-comma-breaks option"
-  template-break: "gap  370 files first differ here: BreakTemplateDeclarations of the remaining shapes (a template header before a long declaration, a requires clause, a nested template). fix: extend header_break with the requires clause and the member-template cases"
-  indent: "gap  277 files first differ here: continuation indent of a wrapped line, the `};` of a braced initializer and the indent of a broken condition. fix: read ContinuationIndentWidth in the shared continuation shape; rides on the wrap gaps"
-  content: "gap  107 files first differ here: a hunk that changes tokens or blank lines instead of whitespace within a line (include order, blank lines at block edges, comment text). fix: classify per hunk first; sorted includes are import_order data, blank lines are keep_blank_lines options"
-  define: "gap  97 files first differ here: the body of a `#define` differs: continuation lines re-wrapped or macro arguments broken at the column limit. fix: run the macro body through the expression shapes after the wrap gaps"
-  directive-wrap: "gap  42 files first differ here: a long preprocessor condition (`#if a && b`) clang-format wraps with a continuation. fix: share the binary_chain shape with directives"
-  ws-tab: "gap  34 files first differ here: tabs or blanks inside a line that differ from clang-format (UseTab alignment of continuation lines). fix: AlignWithTabs of the printer for continuation lines"
-  wrap-assign: "gap  96 files first differ here: a long assignment or initializer that clang-format breaks after the `=` or at the operator. fix: map onto the assignment shape with a break-after-operator option"
-  wrap-binary: "gap  119 files first differ here: a binary chain clang-format breaks before or after the operator at the column limit. fix: map onto binary_chain (BreakBeforeBinaryOperators as an option)"
-  ws-other: "gap  19 files first differ here: columns clang-format aligns (AlignArrayOfStructures, aligned macro names, aligned braced-list columns). fix: a table alignment mechanism in the shared crate, read by an option, when a second language needs it"
-  wrap-comment: "gap  20 files first differ here: a comment that clang-format reflows or splits at the column limit (ReflowComments). fix: ReflowComments in the shared comment engine"
-  wrap-ctor-init: "gap  13 files first differ here: constructor initializer list: BreakConstructorInitializers and PackConstructorInitializers choices. fix: map onto delimited_list with a break-before-colon option"
-  ws-comment-gap: "gap  5 files first differ here: the gap before or between trailing comments where clang-format realigns across a blank or code line. fix: extend the run rules of align_marked_gaps"
+  pointer-align: "gap  `*` of a pointer declarator: clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing (`*` is `keep`)"
+  reference-align: "gap  `&` and `&&` of a reference declarator, the same as pointer-align"
+  binary-op-space: "gap  blanks around a binary operator (`a*b`, `x+1`, `0 ... N-1`, in a `#if` condition too): clang-format writes one blank on each side, Sudsy keeps the source"
+  braced-list-padding: "gap  blanks inside braces of an initializer list (`{ 1, 2 }` against `{1, 2}`, `{ }` against `{}`; Cpp11BracedListStyle)"
+  cast-space: "gap  blank after a C cast (`(T) x`): clang-format writes `(T)x` (SpaceAfterCStyleCast false)"
+  brace-own-line-in-reference: "gap  a `{` clang-format puts on its own line (BraceWrapping of the style, also after a statement macro such as `for_each_cpu(i)`), Sudsy keeps it on the line"
+  angle-space: "gap  blanks next to `<` and `>`: template brackets (`F<int>`, `template <typename...>`) and comparisons in `#if` conditions"
+  short-body-joined-by-reference: "gap  a lambda or enum body that clang-format joins onto the line when it fits (AllowShortLambdasOnASingleLine, AllowShortEnumsOnASingleLine) where the source breaks it"
+  macro-body-indent: "gap  continuation lines of a `#define` body: clang-format indents the nested `do {` bodies and aligns the `\\`, Sudsy keeps the source indent"
+  break-string-literals: "gap  a string literal that clang-format splits in two at the column limit (BreakStringLiterals; a token change and a wrap)"
+  line-after-comment-indent-or-join: "gap  the line after a comment (a parameter, a declarator, an initializer item) that clang-format re-indents or joins"
+  comment-line-indent-or-join: "gap  a comment on its own line (or right after `{`) whose indent or place differs: clang-format aligns it with the code it belongs to, Sudsy keeps the source indent"
+  empty-body-braces: "gap  an empty function body: clang-format keeps `{` and `}` on two lines when the `{` is on its own line (SplitEmptyFunction), Sudsy joins them to `{}`"
+  trailing-comment-spacing: "gap  blanks before a trailing comment (SpacesBeforeTrailingComments) and the alignment of consecutive trailing comments"
+  continuation-indent-of-non-wrap-line: "gap  indent of a line that is not a wrap point: a label (`put:`) clang-format indents with its block, the body after a loop macro, the items of a macro argument list"
+  column-align: "gap  blanks that clang-format pads between the items of a braced list laid out in columns (`{\"LLVM\",   \"Google\"}`, tabs in tables), Sudsy writes one blank"
+  angle-brackets-merged-by-reference: "gap  `> >` that clang-format writes `>>` (Standard: Latest; a token change)"
+  space-before-paren: "gap  blank before `(`: `if(` and `for(`, `sizeof (`, `decltype (`, `foreach (`, macro names (SpaceBeforeParens)"
+  statement-joined-by-reference: "gap  the body after a loop-macro head (`for_each_vma(vmi, vma) stmt;`): clang-format keeps it on the line, Sudsy breaks it"
+  ternary-colon-space: "gap  GNU `a ?: b`: clang-format writes `?:`, Sudsy `? :`"
+  asm-operand-space: "gap  `\"r\" (x)` in asm operands: clang-format writes `\"r\"(x)`"
+  brace-own-line-in-source: "gap  a `{` on its own line in the source that clang-format attaches (a member function body, `extern \"C\"`, a lambda): the construct is not one of the `brace_wrapping` words"
+  macro-body-statement-join: "gap  statements of a `#define` body that clang-format puts on one line or splits (`do { } while (0)`, `union { ... }`), Sudsy keeps the source breaks"
+  comma-space: "gap  blanks around `,` in macro parameter lists and in lists inside directives"
+  spacing-rare: "gap  blanks next to `[` `]`, `.`, `->`, `::`, padding inside `( )`, unary operators, `;` and `...`"
+  block-first-line-indent: "gap  the first line of a block body: the body of an `extern \"C\"` function definition starts at column 0 (a Sudsy bug, bugs.md), lambda bodies inside call chains and namespace bodies differ in indent"
+  call-after-paren-space: "gap  `(*fp) (args)` and `) (` of a call through a parenthesised name: clang-format writes `)(`"
+  statement-split-by-reference: "gap  a statement or declarator part that clang-format puts on its own line (`) ;` after a macro call, attribute macros after `)`), Sudsy joins it"
+  blank-before-close-brace: "gap  a blank line before a `}`: clang-format removes it (KeepEmptyLinesAtTheEndOfBlocks off), Sudsy keeps up to max_blank_lines"
+  space-before-brace: "gap  `){` against `) {`: the blank before the `{` of a block"
+  preprocessor-token-space: "gap  blanks around `#` and `##` in a macro body"
+  format-off: "gap  text under `clang-format off`: clang-format keeps it as written, Sudsy formats it"
+  assignment-space: "gap  blanks around `=` and compound assignments the parse does not see as an Assignment (designated initializers `.f=1`, default arguments)"
+  c-string-suffix-lexed-as-one-token: "gap  `\"text\"IDENT` in a C file (a string and a macro): the lexer reads IDENT as a user-defined-literal suffix, so the one token has no blank before IDENT; clang-format writes one"
+  short-body-split-by-reference: "gap  a lambda or enum body Sudsy keeps on one line that clang-format breaks (it does not fit the context or the style has no short form)"
+  blank-lines-other: "gap  other blank-line cases: after `{` of a block, before an access specifier (EmptyLineBeforeAccessModifier)"
+  sort-using-declarations: "gap  `using` declarations that clang-format sorts (SortUsingDeclarations; a reorder of tokens)"
+  brace-other: "gap  other brace placements (a `}` that is joined or split)"
+  line-comment-trailing-blanks: "gap  trailing blanks inside a `//` comment: Sudsy removes them, clang-format keeps them in these files (also a no-break space, a Sudsy bug listed in bugs.md)"
+  wrap-blank-lines: "gap  blank lines at a wrap point: more than one blank line where clang-format keeps one"
 files:
-  llvm: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  fmt: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  range-v3: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  folly: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  linux: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  sqlite: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  google: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  chromium: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  mozilla: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  webkit: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  gnu: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
-  microsoft: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
+  llvm: pointer-align:28, short-body-joined-by-reference:16, column-align:13, reference-align:13, binary-op-space:10, comment-line-indent-or-join:6, angle-brackets-merged-by-reference:6, space-before-paren:6, trailing-comment-spacing:5, spacing-rare:5, empty-body-braces:4, block-first-line-indent:3, angle-space:3, statement-split-by-reference:3, blank-lines-other:3, cast-space:3, sort-using-declarations:3, brace-own-line-in-source:2, line-after-comment-indent-or-join:2, short-body-split-by-reference:2, space-before-brace:2, braced-list-padding:2, comma-space:1, assignment-space:1, brace-other:1, ternary-colon-space:1, break-string-literals:1, format-off:1, statement-joined-by-reference:1
+  fmt: angle-space:7, block-first-line-indent:6, binary-op-space:5, macro-body-indent:3, comment-line-indent-or-join:3, short-body-split-by-reference:2, trailing-comment-spacing:2, angle-brackets-merged-by-reference:2, short-body-joined-by-reference:1, assignment-space:1, pointer-align:1, ternary-colon-space:1, statement-joined-by-reference:1, continuation-indent-of-non-wrap-line:1
+  range-v3: angle-space:100, reference-align:75, angle-brackets-merged-by-reference:54, binary-op-space:48, pointer-align:45, break-string-literals:43, brace-own-line-in-source:35, short-body-joined-by-reference:22, sort-using-declarations:11, space-before-brace:9, line-after-comment-indent-or-join:8, format-off:6, blank-lines-other:6, braced-list-padding:5, trailing-comment-spacing:5, block-first-line-indent:5, spacing-rare:4, cast-space:4, macro-body-indent:3, brace-other:3, comment-line-indent-or-join:2, continuation-indent-of-non-wrap-line:1, space-before-paren:1, statement-split-by-reference:1, short-body-split-by-reference:1, column-align:1
+  folly: reference-align:818, pointer-align:677, short-body-joined-by-reference:60, break-string-literals:45, binary-op-space:34, angle-space:19, block-first-line-indent:19, comment-line-indent-or-join:17, format-off:14, assignment-space:12, line-after-comment-indent-or-join:9, macro-body-indent:7, space-before-paren:6, short-body-split-by-reference:4, trailing-comment-spacing:4, macro-body-statement-join:4, continuation-indent-of-non-wrap-line:3, column-align:2, cast-space:2, wrap-blank-lines:1, ternary-colon-space:1, statement-split-by-reference:1, braced-list-padding:1, space-before-brace:1
+  linux: cast-space:209, braced-list-padding:208, binary-op-space:205, brace-own-line-in-reference:203, pointer-align:132, macro-body-indent:103, empty-body-braces:62, continuation-indent-of-non-wrap-line:54, statement-joined-by-reference:53, asm-operand-space:50, ternary-colon-space:48, macro-body-statement-join:44, column-align:42, comment-line-indent-or-join:40, call-after-paren-space:35, blank-before-close-brace:32, space-before-paren:32, statement-split-by-reference:29, spacing-rare:25, line-after-comment-indent-or-join:23, preprocessor-token-space:23, comma-space:22, trailing-comment-spacing:18, c-string-suffix-lexed-as-one-token:17, short-body-joined-by-reference:16, brace-own-line-in-source:10, space-before-brace:7, short-body-split-by-reference:7, blank-lines-other:5, line-comment-trailing-blanks:3, block-first-line-indent:2, assignment-space:2
+  sqlite: pointer-align:76, binary-op-space:65, line-after-comment-indent-or-join:36, trailing-comment-spacing:24, comma-space:18, break-string-literals:14, braced-list-padding:13, space-before-brace:8, angle-space:8, spacing-rare:7, space-before-paren:6, column-align:5, short-body-joined-by-reference:5, comment-line-indent-or-join:5, continuation-indent-of-non-wrap-line:5, ternary-colon-space:3, assignment-space:3, c-string-suffix-lexed-as-one-token:2, cast-space:2, brace-other:1, statement-split-by-reference:1, block-first-line-indent:1, macro-body-indent:1, empty-body-braces:1
+  google: trailing-comment-spacing:4, brace-own-line-in-source:1, binary-op-space:1, statement-split-by-reference:1, reference-align:1
+  chromium: pointer-align:4, trailing-comment-spacing:3, comment-line-indent-or-join:1, reference-align:1
+  mozilla: pointer-align:5, angle-space:3, comma-space:1, preprocessor-token-space:1
+  webkit: pointer-align:5, block-first-line-indent:3, trailing-comment-spacing:1, comment-line-indent-or-join:1
+  gnu: space-before-paren:5, call-after-paren-space:2, comma-space:1, short-body-split-by-reference:1, empty-body-braces:1
+  microsoft: brace-own-line-in-reference:5, brace-other:2, line-after-comment-indent-or-join:1, pointer-align:1, continuation-indent-of-non-wrap-line:1
+fixes:
+  pointer-align: "pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator"
+  reference-align: "the same rows as pointer-align for `&` and `&&`"
+  binary-op-space: "[space] rows for the operators of Binary nodes; directive conditions need the expression parse of `#if` lines"
+  braced-list-padding: "[space] rows after `{` and before `}` of InitList nodes, one padding option"
+  cast-space: "[space] row after the `)` of a Cast; Cast is opaque in the deep parse, so give it its parts"
+  brace-own-line-in-reference: "brace_wrapping words exist; the macro head (`MacroStatement` with a block) needs a word list of loop macros in lang.yaml (ForEachMacros) read by the shared role pass"
+  angle-space: "[space] rows by node (TemplateArguments, TemplateParameters, Binary); directive conditions as in binary-op-space"
+  short-body-joined-by-reference: "short_lambdas and short_enums keep the source's choice when short; join a body that fits (the `join` policy of the shared block shape)"
+  macro-body-indent: "lay out the body with the statement rows when it parses (`do { } while (0)`, blocks); align_escaped_newlines columns"
+  break-string-literals: "none in the formatter: Sudsy never splits strings; decide whether the comparison reads two adjacent strings as one, or BreakStringLiterals is turned off in the styles"
+  line-after-comment-indent-or-join: "rides on parameter and initializer layout"
+  comment-line-indent-or-join: "comment_gap rows: a comment takes the indent of the next line of code in the shared comment engine"
+  empty-body-braces: "an option split_empty_body read by the shared block shape"
+  trailing-comment-spacing: "align_trailing_comments run rules: where a run ends and how wide the pad is"
+  continuation-indent-of-non-wrap-line: "ForEachMacros and StatementMacros as lang.yaml word lists read by the shared role pass; labels by the indent_goto_labels rows"
+  column-align: "a column alignment mechanism in the shared crate (the column layout of delimited_list), read by an option"
+  angle-brackets-merged-by-reference: "decide: join `> >` of closing template brackets (C++11 and later) in the printer, or let the comparison read both as equal"
+  space-before-paren: "space_before_parens exists; add the keyword and macro word lists as rows (sizeof, alignof, decltype, co_await, ForEachMacros)"
+  statement-joined-by-reference: "treat a MacroStatement from the ForEachMacros list as a loop head"
+  ternary-colon-space: "[space] row Question-Colon: no blank when adjacent"
+  asm-operand-space: "[space] row String-Lpar for the operand lists of asm statements"
+  brace-own-line-in-source: "check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque"
+  macro-body-statement-join: "the same body layout as macro-body-indent"
+  comma-space: "[space] Comma rows inside Directive nodes"
+  spacing-rare: "one [space] row each"
+  block-first-line-indent: "extern \"C\" function: the linkage specification must not make the function a flat body; lambdas ride on call layout"
+  call-after-paren-space: "[space] row Rpar-Lpar of a Call"
+  statement-split-by-reference: "StatementMacros and attribute macros as word lists; no rule needed for the others"
+  blank-before-close-brace: "[blank] row: none before a `}` of a Block"
+  space-before-brace: "[space] row for the `{` of a Block"
+  preprocessor-token-space: "[space] rows for Hash and HashHash inside Directive nodes"
+  format-off: "read `clang-format off` and `on` as the ranges of the shared ignore mechanism (core-format ignore.rs foreign markers)"
+  assignment-space: "[space] rows for the initializer parts of Declarator and Parameter"
+  c-string-suffix-lexed-as-one-token: "lexer: no literal suffix in C (it is a C++ feature); the [space] row String-Ident then applies"
+  short-body-split-by-reference: "the same join policy, read the other way: break a body whose line is over the limit"
+  blank-lines-other: "[blank] rows, one option each"
+  sort-using-declarations: "an option in shared Rust next to import ordering, or turn it off in the styles like SortIncludes"
+  brace-other: "per case once the brace words above are done"
+  line-comment-trailing-blanks: "keep U+00A0 and other non-ASCII blanks at the end of a comment; the ASCII blanks are the comment engine's choice"
+  wrap-blank-lines: "max_blank_lines at a wrap point"
+unclassified: 0
 ratchet:
   llvm: 273
   fmt: 34
