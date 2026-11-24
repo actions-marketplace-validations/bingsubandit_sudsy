@@ -1,9 +1,9 @@
 //! Shared comment rules, written against the grammar's comment syntax: `comment-space` and
 //! `no-empty-comment`. They read comment tokens, so they cost nothing when off.
 //!
-//! concept: comment-space, no-empty-comment, no-single-line-block-comment
-//! what: Rules on comment tokens: text after the marker, no empty comments, no block comment on one line.
-//! rules: comment-space, no-empty-comment, no-single-line-block-comment
+//! concept: comment-space, no-empty-comment, no-single-line-block-comment, block-comment-after-open
+//! what: Rules on comment tokens: text after the marker, no empty comments, no block comment on one line, none after an opening brace.
+//! rules: comment-space, no-empty-comment, no-single-line-block-comment, block-comment-after-open
 //! reads: rule:comment-space
 
 use crate::diagnostic::Edit;
@@ -303,6 +303,63 @@ rule! {
                         vec![Edit::replace(token.text_range(), format!("{line} {}", inner.trim()))],
                     ),
                 );
+            }
+        }
+    }
+}
+
+rule! {
+    pub BlockCommentAfterOpen {
+        id: "block-comment-after-open",
+        category: Style,
+        default: Off,
+        description: "A block comment that follows an opening token on its line and ends the line \
+                  (`if (a) {    /* note */`): the code after the token starts on a line of its own \
+                  (ktlint `wrapping`). A line comment there is left alone.",
+        example: "if (a) { /* note */   // write the note on its own line",
+        options: [OptionDecl {
+            name: "after",
+            default: Opt::List(&["{"]),
+            check: Check::Any,
+            description: "The tokens a block comment must not follow on their line.",
+        }],
+    }
+
+    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        let Some((open, _)) = &file.grammar.comments.block else {
+            return;
+        };
+        let after = ctx.options.list("after");
+        for token in comments(file) {
+            if !token.text().starts_with(open.as_str()) {
+                continue;
+            }
+            let Some(prev) = token
+                .prev_token()
+                .filter(|t| !file.grammar.has_tag(t.kind(), "comment"))
+                .and_then(|t| {
+                    if file.grammar.is_trivia(t.kind()) {
+                        t.prev_token()
+                    } else {
+                        Some(t)
+                    }
+                })
+            else {
+                continue;
+            };
+            let between = &file.text[usize::from(prev.text_range().end())
+                ..usize::from(token.text_range().start())];
+            let rest = &file.text[usize::from(token.text_range().end())..];
+            let ends_line = rest
+                .split(['\n', '\r'])
+                .next()
+                .is_some_and(|r| r.trim_matches([' ', '\t']).is_empty());
+            if after.contains(&prev.text())
+                && is_code(&prev, file.grammar)
+                && !between.contains(['\n', '\r'])
+                && ends_line
+            {
+                ctx.report(token.text_range(), "a block comment after an opening token");
             }
         }
     }

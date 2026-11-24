@@ -3,6 +3,49 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A block comment that follows an opening token on its line and ends the line (`if (a) {    /* note */`): the code after the token starts on a line of its own (ktlint `wrapping`). A line comment there is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "fun f(a: Int) {\n    if (a > 1) {    /* big */\n        g()\n    }\n    if (a > 2) { // line comment\n        g()\n    }\n    if (a > 3) { /* inline */ g() }\n}\n",
+        "language": "kotlin",
+        "spans": [
+          {
+            "column": 21,
+            "length": 9,
+            "line": 2
+          }
+        ]
+      },
+      "fix": null,
+      "id": "block-comment-after-open",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [
+            "{"
+          ],
+          "description": "The tokens a block comment must not follow on their line.",
+          "name": "after",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "kotlin/ktlint"
+      ],
+      "upstream": [
+        {
+          "id": "wrapping",
+          "partial": false,
+          "tool": "ktlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A line comment has text right after its marker. Exempt: nothing but whitespace after the marker, a marker repeated (`////`, `##`), `--` separator lines, and a `#!` shebang on the first line. The fix inserts the space.",
       "example": {
         "config": null,
