@@ -225,10 +225,15 @@ fn ratchets(root: &Path, tool: &str) -> Result<Ratchets> {
     serde_saphyr::from_str(&text).map_err(|e| anyhow::anyhow!("{}: {e}", path.display()))
 }
 
-/// Identical over target files across the groups of the tool; `None` until `target-files` exists.
+/// The ratchet group of the local fixture files of a tool folder: a few files, never the README number.
+const FIXTURES: &str = "fixtures";
+
+/// Identical over target files across the groups of the tool, never the local `fixtures` group; `None`
+/// (`not measured`) until another group has `target-files`.
 fn format_share(root: &Path, tool: &Tool) -> Result<Option<f64>> {
     let r = ratchets(root, &tool.tool)?;
-    let wanted = |g: &&String| tool.groups.is_empty() || tool.groups.contains(g);
+    let wanted =
+        |g: &&String| g.as_str() != FIXTURES && (tool.groups.is_empty() || tool.groups.contains(g));
     let files: u64 = r
         .target_files
         .keys()

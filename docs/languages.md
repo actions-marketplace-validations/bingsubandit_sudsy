@@ -84,7 +84,7 @@ The status and the headline numbers of every language are in the generated table
 
 ## TOML
 
-- **Formatter:** taplo 0.10. Corpus: toml-test valid files and fixtures.
+- **Formatter:** taplo 0.10. Corpus: the .toml files of rust-analyzer, Bevy, Tokio, clap, serde, uv and Cargo (1,310 files); toml-test and the repository fixtures are listed apart.
 - **Linter:** none from a reference tool. Duplicate keys are reported.
 - **Presets:** `toml/taplo-compat` (`collapse: always`, `max_blank_lines: 2`, `align_comments: true`).
 - **Options:** `collapse`, `trailing_commas`, `align_comments`, `max_blank_lines`, `bracket_spacing`, `array_bracket_spacing`.
@@ -219,7 +219,7 @@ The status and the headline numbers of every language are in the generated table
 ## JSON
 
 - Covers JSONC. Config section: `json`.
-- **Formatter:** Prettier 3.9.10 on 3,212 JSON files (SchemaStore, VS Code extension samples): 3,184 identical (99.1%). Biome on fixtures.
+- **Formatter:** Prettier 3.9.10 on 3,212 JSON files (SchemaStore, VS Code extension samples): 3,184 identical (99.1%). Biome on the same files.
 - **Linter:** eslint-plugin-jsonc recommended: on the corpus only `no-useless-escape` fires (14 findings) and Sudsy does not check string escapes yet, so 0.0%.
 - **Presets:** `json/prettier-compat`, `json/biome`, `json/dprint`, `json/eslint-plugin-jsonc-recommended`.
 - **Options:** `collapse` (`preserve`, `always`, `never`, `opening_break`), `trailing_commas` (JSONC), `dialect` (`auto`, `json`, `jsonc`), `bracket_spacing`. Default `line_width` is 80.
@@ -245,7 +245,7 @@ The status and the headline numbers of every language are in the generated table
 ## XML
 
 - Covers `.csproj`, `.props`, `.config`.
-- **Formatter:** CSharpier XML on aspnetcore project files and fixtures.
+- **Formatter:** CSharpier XML on the aspnetcore project files (372 files, 49 of them reviewed as CSharpier width accounting and left out of the share).
 - **Linter:** none.
 - **Presets:** `xml/csharpier-compat`.
 - **Options:** `max_blank_lines`. Default `line_width` is 100.

@@ -80,3 +80,40 @@ fn a_missing_corpus_ratchet_is_not_measured() {
         table.table
     );
 }
+
+/// The local `fixtures` group never stands for a format leg: a tool whose only ratchet group is
+/// `fixtures` shows `not measured`, with or without `groups` in `support.yaml`.
+#[test]
+fn a_fixtures_only_leg_is_not_measured() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
+    let support = "\n- language: Kappa\n  format: [{tool: fmt-fixtures, name: FmtF}]\n- language: Lambda\n  format: [{tool: fmt-fixtures, name: FmtG, groups: [fixtures]}]\n";
+    let table = xtask_full::support::render(&root, support, &|_| 7).unwrap();
+    for row in [
+        "| Kappa | not measured FmtF |",
+        "| Lambda | not measured FmtG |",
+    ] {
+        assert!(table.table.contains(row), "{}", table.table);
+    }
+}
+
+/// Every format leg of the real `support.yaml` has a number from real code: the README states that
+/// each number is measured on real-world code.
+#[test]
+fn no_format_leg_of_support_yaml_is_fixtures_only() {
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let support = std::fs::read_to_string(dir.join("support.yaml")).unwrap();
+    let table = xtask_full::support::render(&dir.join("../.."), &support, &|_| 7).unwrap();
+    let unmeasured: Vec<&str> = table
+        .table
+        .lines()
+        .filter(|l| {
+            l.split('|')
+                .nth(2)
+                .is_some_and(|f| f.contains("not measured"))
+        })
+        .collect();
+    assert!(
+        unmeasured.is_empty(),
+        "format legs without a number: {unmeasured:?}"
+    );
+}

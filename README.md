@@ -75,15 +75,15 @@ Each number is measured on real-world code against the reference tool with its d
 | Angular templates | █████████░ 97% Prettier | 156 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 85% stylelint-less | Ready |
 | Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
-| YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
-| JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | ██████████ 100% eslint-plugin-jsonc | Ready |
+| YAML | █████████░ 94% Prettier | █████████░ 99% yamllint | Ready |
+| JSON / JSONC | █████████░ 99% Prettier<br>█████████░ 99% Biome | ██████████ 100% eslint-plugin-jsonc | Ready |
 | PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
 | SQL | ████████░░ 85% sqlfluff | ████████░░ 86% sqlfluff | Ready |
 | C# | ████████░░ 85% CSharpier | ████████░░ 87% StyleCop<br>not measured Roslynator | Ready |
-| XML | █████████░ 99% CSharpier XML | 20 rules · no reference tool | Ready |
+| XML | ██████████ 100% CSharpier XML | 20 rules · no reference tool | Ready |
 | Dockerfile | ██████████ 100% stable · no reference tool | █████████░ 91% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |

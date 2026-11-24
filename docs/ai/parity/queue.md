@@ -41,12 +41,20 @@ Lint: target 85.3% (615 of 721, 106 missed, measured on 7514c1f3); rules by miss
 
 8 more rules: 15 missed.
 
+## biome
+
+Format: unclassified 0 of 24 differing files (0%).
+1. `number-array-fill` (12 files): Biome fills an array of numbers, many to a line up to the width; Sudsy puts one number on each line
+2. `lockfile-ignored` (9 files): Biome leaves package-lock.json as it is (a default ignore); Sudsy formats it
+3. `comment-before-comma` (3 files): Biome puts a block comment after a value in front of the comma (`true /* c */,`); Sudsy writes it after the comma
+
 ## buf
 
+Format: unclassified 0 of 3 differing files (0%).
 1. `empty-statements` (1 files): empty statements (`;`) are kept; buf drops them
 2. `option-comments` (1 files): comments separated by blank lines between the file options travel with the next statement; buf keeps them where they stand
 3. `statement-comments` (1 files): comments inside a statement before its `;` stay line comments on their own lines; buf joins them into block comments on the statement's line
-4. `literal-field-blank` (- files): a blank line before a comment between the fields of a message literal is dropped; buf keeps it
+4. `literal-field-blank` (0 files): a blank line before a comment between the fields of a message literal is dropped; buf keeps it
 Lint: target 85.8% (2027 of 2362, 335 missed, measured on 7514c1f3); rules by missed findings:
 1. `RPC_REQUEST_RESPONSE_UNIQUE` (117 missed)
 2. `PACKAGE_DIRECTORY_MATCH` (98 missed)
@@ -127,6 +135,7 @@ Format: unclassified 1103 of 1103 differing files (100%).
 
 ## csharpier-xml
 
+Format: unclassified 0 of 1 differing files (0%).
 1. `text-as-written` (1 files): text content and attribute values stay as written; CSharpier writes a double quote in a value as `&quot;`, puts CDATA and `xml:space="preserve"` content on lines of their own and trims its whitespace
 
 ## dotnet-format
@@ -219,7 +228,7 @@ Format: unclassified 0 of 15 differing files (0%).
 4. `backtick-scriptblock` (1 files): Invoke-Formatter outdents the script block that follows a backtick continuation; Sudsy keeps its indentation
 5. `dsc-configuration-brace` (1 files): the `{` of a DSC `Configuration` block stays on its line in Invoke-Formatter; Sudsy moves it to its own line like a function body
 6. `switch-brace` (1 files): a `{` on its own line after a switch clause that is a string, or after a comment, is joined by Invoke-Formatter and not by Sudsy
-7. `operator-chain-comments` (- files): Invoke-Formatter aligns the comments of an operator chain
+7. `operator-chain-comments` (0 files): Invoke-Formatter aligns the comments of an operator chain
 
 ## ktlint
 
@@ -487,13 +496,14 @@ Lint: target 86.6% (201 of 232, 31 missed, measured on 7514c1f3); rules by misse
 
 ## shfmt
 
+Format: unclassified 0 of 11 differing files (0%).
 1. `arith-spacing` (3 files): `i++ ))` (a blank before `))` after `++`, which tree-sitter-bash lexes as one word) and the subscripts `${a[i+1]}` are kept as written; shfmt writes `i++))` and `${a[i + 1]}`
 2. `case-in-if-indent` (3 files): the arms of a `case` used as an `if` condition are not indented a level further
 3. `continued-conditions` (2 files): an `if`/`elif` condition, a `case` arm or pattern, or a list or pipeline in `$(...)` continued with `\` (or over several lines with comments) is kept as written; shfmt breaks it after the operator
 4. `array-pipeline` (1 files): an array whose elements are a backslash-continued pipeline is kept as written
 5. `brace-group-layout` (1 files): a `{ ...; }` group that is a whole `else` body or the head of a pipeline is laid out as a block; shfmt keeps `else {` and `}; fi`
 6. `empty-file` (1 files): a file of one empty line becomes an empty file; shfmt keeps the line
-7. `expr-kept` (- files): `${v//x}` is kept (the formatter never adds tokens); shfmt writes `${v//x/}`
+7. `expr-kept` (0 files): `${v//x}` is kept (the formatter never adds tokens); shfmt writes `${v//x/}`
 
 ## sqlfluff
 
@@ -597,13 +607,19 @@ Lint: target 89.9% (1818 of 2022, 204 missed, measured on 7514c1f3); rules by mi
 
 ## taplo
 
-1. `crlf-in-string` (1 files): taplo keeps CRLF inside a multi-line string and converts the rest; Sudsy writes LF everywhere
-2. `empty-file` (1 files): taplo writes a newline for an empty file; Sudsy keeps it empty
-3. `inline-table-array` (1 files): taplo expands an array inside a long inline table even when it fits after the break; Sudsy breaks only what does not fit
-4. `multiline-string-array` (1 files): taplo keeps an array with a multi-line string on one line; Sudsy expands it
+Format: unclassified 0 of 29 differing files (0%).
+1. `array-comment-align` (15 files): taplo aligns the trailing comments of the items of a multi-line array into a column; Sudsy leaves one space before each
+2. `trailing-comment-width` (5 files): taplo counts a trailing comment in the width of the line and breaks the array or inline table before it; Sudsy measures the code only
+3. `inline-table-array` (2 files): taplo expands an array inside a long inline table even when it fits after the break; Sudsy breaks only what does not fit
+4. `blank-lines-collapsed` (1 files): taplo keeps two blank lines between comments; Sudsy keeps one
+5. `crlf-in-string` (1 files): taplo keeps CRLF inside a multi-line string and converts the rest; Sudsy writes LF everywhere
+6. `empty-file` (1 files): taplo writes a newline for an empty file; Sudsy keeps it empty
+7. `header-blank-line` (1 files): taplo keeps a blank line after a table header; Sudsy removes it
+8. `multiline-string-array` (1 files): taplo keeps an array with a multi-line string on one line; Sudsy expands it
 
 ## terraform
 
+Format: unclassified 0 of 3 differing files (0%).
 1. `token-rewrite` (3 files): terraform fmt rewrites tokens (it quotes a bare block label, `list` becomes `list(any)`); Sudsy keeps the tokens
 
 ## tflint

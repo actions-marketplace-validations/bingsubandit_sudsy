@@ -1,11 +1,16 @@
 ratchet:
-  fixtures: 314
+  fixtures: 1
+  real-world: 313
 target-files:
-  fixtures: 317
+  fixtures: 1
+  real-world: 316
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
 differences:
   token-rewrite: gap  terraform fmt rewrites tokens (it quotes a bare block label, `list` becomes `list(any)`); Sudsy keeps the tokens
 files:
-  corpus/terraform/internal/command/testdata/fmt/general_in.tf: token-rewrite
-  corpus/terraform/internal/command/testdata/fmt/variable_type_in.tf: token-rewrite
-  corpus/terraform/internal/configs/testdata/valid-files/variables.tf: token-rewrite
+  real-world: token-rewrite:3
+unclassified: 0
 intentional:

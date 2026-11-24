@@ -18,12 +18,12 @@
 - language: Protobuf
   ids: [protobuf]
   speed: [Protobuf]
-  format: [{tool: buf, name: buf format}]
+  format: [{tool: buf, name: buf format, groups: [real-world]}]
   lint: [{tool: buf, name: buf}]
 - language: Terraform (HCL)
   ids: [hcl]
   speed: [HCL]
-  format: [{tool: terraform, name: terraform fmt}]
+  format: [{tool: terraform, name: terraform fmt, groups: [real-world]}]
   lint: [{tool: tflint, name: tflint}]
 - language: GraphQL
   ids: [graphql]
@@ -31,7 +31,7 @@
 - language: TOML
   ids: [toml]
   speed: [TOML]
-  format: [{tool: taplo, name: taplo}]
+  format: [{tool: taplo, name: taplo, groups: [real-world]}]
 - language: HTML
   ids: [html]
   speed: [HTML]
@@ -59,17 +59,17 @@
 - language: YAML
   ids: [yaml]
   speed: [YAML]
-  format: [{tool: prettier, name: Prettier, groups: [yaml]}]
+  format: [{tool: prettier, name: Prettier, groups: [yaml, real-world-yaml]}]
   lint: [{tool: yamllint, name: yamllint}]
 - language: JSON / JSONC
   ids: [json]
   speed: [JSON]
-  format: [{tool: prettier, name: Prettier, groups: [json]}, {tool: biome, name: Biome}]
+  format: [{tool: prettier, name: Prettier, groups: [json, real-world-json]}, {tool: biome, name: Biome, groups: [real-world]}]
   lint: [{tool: eslint-jsonc, name: eslint-plugin-jsonc}]
 - language: PowerShell
   ids: [powershell]
   speed: [PowerShell]
-  format: [{tool: invoke-formatter, name: Invoke-Formatter}]
+  format: [{tool: invoke-formatter, name: Invoke-Formatter, groups: [real-world]}]
   lint: [{tool: psscriptanalyzer, name: PSScriptAnalyzer}]
 - language: PHP
   ids: [php]
@@ -89,7 +89,7 @@
 - language: Shell
   ids: [shell]
   speed: [Shell]
-  format: [{tool: shfmt, name: shfmt}]
+  format: [{tool: shfmt, name: shfmt, groups: [real-world]}]
   lint: [{tool: shellcheck, name: ShellCheck}]
 - language: SQL
   ids: [sql]
@@ -104,7 +104,7 @@
 - language: XML
   ids: [xml]
   speed: [XML]
-  format: [{tool: csharpier-xml, name: CSharpier XML}]
+  format: [{tool: csharpier-xml, name: CSharpier XML, groups: [real-world]}]
 - language: C / C++
   ids: [c, cpp]
   format: [{tool: clang-format, name: clang-format, note: "line wrapping is not compared", blocked: "bar for the new comparison"}]

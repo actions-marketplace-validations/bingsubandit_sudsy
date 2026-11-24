@@ -37,6 +37,7 @@ Where Sudsy differs from taplo by design:
 <!-- generated:differences:taplo -->
 
 - `comment-dropped`: taplo drops the comment after an array item that is followed by a comma on the next line; Sudsy keeps it
+- `comment-trailing-space`: taplo keeps the trailing blanks of a comment; Sudsy trims them
 <!-- /generated -->
 
 ## Rules
