@@ -628,9 +628,133 @@ fn a_cast_has_a_blank_after_it_by_option() {
 fn spacing_of_declarators_in_conditions_templates_and_small_forms() {
     use provider_api::format_testing::Formatting;
     let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
-    let src = "template <typename... >\nvoid g(Ts &&...args);\ntemplate <typename T>\nvoid h(T&& rng, T&b);\nvoid f() {\n  x = a ? : b;\n  asm(\"x\" : \"r\" (v));\n  do {\n    y++;\n  }while (z);\n  for (auto&x : v) {\n  }\n  for (i = 0; i < n && ok; ++i) {\n  }\n  for (auto it = e; it && *it; ++it) {\n  }\n  try {\n  } catch (E &e) {\n  }\n  f(Size *x);\n}\n";
+    let src = "template <typename... >\nvoid g(Ts &&...args);\ntemplate <typename T>\nvoid h(T&& rng, T&b);\nvoid k(void (*cb)(int* a, char&b), int&c);\nvoid f() {\n  x = a ? : b;\n  asm(\"x\" : \"r\" (v));\n  asm volatile(\"\" : \"=r\" (x) : \"r\" (y));\n  do {\n    y++;\n  }while (z);\n  for (auto&x : v) {\n  }\n  for (i = 0; i < n && ok; ++i) {\n  }\n  for (auto it = e; it && *it; ++it) {\n  }\n  try {\n  } catch (E &e) {\n  }\n  f(Size *x);\n}\n";
     assert_eq!(
         core_format::testing::assert_formats(&formatting, src),
-        "template <typename...> void g(Ts &&...args);\ntemplate <typename T> void h(T &&rng, T &b);\nvoid f() {\n  x = a ?: b;\n  asm(\"x\" : \"r\"(v));\n  do {\n    y++;\n  } while (z);\n  for (auto &x : v) {\n  }\n  for (i = 0; i < n && ok; ++i) {\n  }\n  for (auto it = e; it && *it; ++it) {\n  }\n  try {\n  } catch (E &e) {\n  }\n  f(Size * x);\n}\n"
+        "template <typename...> void g(Ts &&...args);\ntemplate <typename T> void h(T &&rng, T &b);\nvoid k(void (*cb)(int *a, char &b), int &c);\nvoid f() {\n  x = a ?: b;\n  asm(\"x\" : \"r\"(v));\n  asm volatile(\"\" : \"=r\"(x) : \"r\"(y));\n  do {\n    y++;\n  } while (z);\n  for (auto &x : v) {\n  }\n  for (i = 0; i < n && ok; ++i) {\n  }\n  for (auto it = e; it && *it; ++it) {\n  }\n  try {\n  } catch (E &e) {\n  }\n  f(Size * x);\n}\n"
     );
+}
+
+#[test]
+fn closing_template_brackets_join_by_option_and_comparisons_stay_apart() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let src = "std::map<int, std::vector<std::pair<int, int> > > m;\ntemplate <class T = std::vector<int> >\nstruct S {};\nbool b = a < b > > c;\nint x = a > > 1;\n";
+    let run = |join: bool| {
+        let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+        formatting.options = vec![("join_closing_angles", V::Bool(join))];
+        core_format::testing::assert_formats(&formatting, src)
+    };
+    assert_eq!(
+        run(true),
+        "std::map<int, std::vector<std::pair<int, int>>> m;\ntemplate <class T = std::vector<int>> struct S {};\nbool b = a<b> > c;\nint x = a > > 1;\n"
+    );
+    assert_eq!(
+        run(false),
+        "std::map<int, std::vector<std::pair<int, int> > > m;\ntemplate <class T = std::vector<int> > struct S {};\nbool b = a<b> > c;\nint x = a > > 1;\n"
+    );
+}
+
+#[test]
+fn a_comment_before_a_function_does_not_keep_its_body_expanded() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    assert_eq!(
+        core_format::testing::assert_formats(
+            &formatting,
+            "/*\n * c\n */\nint f() {\n  return 1;\n}\n"
+        ),
+        "/*\n * c\n */\nint f() { return 1; }\n"
+    );
+}
+
+#[test]
+fn a_macro_call_statement_in_a_body_has_its_arguments_read() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    assert_eq!(
+        core_format::testing::assert_formats(
+            &formatting,
+            "void f() {\n  CHECK(g(x, (BYTE*)d));\n  CHECK_EQ(a<int*>(b), 1);\n}\n"
+        ),
+        "void f() {\n  CHECK(g(x, (BYTE *)d));\n  CHECK_EQ(a<int *>(b), 1);\n}\n"
+    );
+}
+
+#[test]
+fn a_mark_that_ends_a_type_is_a_declarator_in_any_group() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    assert_eq!(
+        core_format::testing::assert_formats(
+            &formatting,
+            "void f() {\n  CPP_ret(S*)(requires X<T&>) g(int*, A&);\n  y = a*b;\n  z = f(a *b, c);\n}\n"
+        ),
+        "void f() {\n  CPP_ret(S *)(requires X<T &>) g(int *, A &);\n  y = a * b;\n  z = f(a * b, c);\n}\n"
+    );
+}
+
+#[test]
+fn an_operator_behind_a_cast_touches_it_and_one_behind_an_operand_does_not() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    assert_eq!(
+        core_format::testing::assert_formats(
+            &formatting,
+            "void f() {\n  x = (char *) &b;\n  y = (a) * b;\n  z = sizeof(T)*n + h()*k() + (a + b)*c;\n}\n"
+        ),
+        "void f() {\n  x = (char *)&b;\n  y = (a)*b;\n  z = sizeof(T) * n + h() * k() + (a + b) * c;\n}\n"
+    );
+}
+
+#[test]
+fn a_brace_of_an_unknown_construct_stays_on_its_line_unless_a_construct_wraps_its_brace() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let src = "template <class T> CPP_ret(int)(requires X<T> AND Y<T>) f(T a)\n{\n  return 1;\n}\n";
+    let run = |wrap: bool| {
+        let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+        if wrap {
+            formatting.options = vec![(
+                "brace_wrapping",
+                V::List(vec![V::String("function".into())]),
+            )];
+        }
+        core_format::testing::assert_formats(&formatting, src)
+    };
+    assert_eq!(
+        run(false),
+        "template <class T> CPP_ret(int)(requires X<T> AND Y<T>) f(T a) {\n  return 1;\n}\n"
+    );
+    assert_eq!(run(true), src);
+}
+
+#[test]
+fn a_brace_after_a_directive_line_stays_on_its_own_line() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let src = "void f()\n#if defined(X)\n{\n  y;\n}\n#else\n{\n  z;\n}\n#endif\n";
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), src);
+}
+
+#[test]
+fn an_empty_block_with_a_comment_is_stable_when_empty_blocks_collapse() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = vec![("collapse_empty_blocks", V::Bool(true))];
+    // (formatting twice gives the same text: `assert_formats` checks it)
+    core_format::testing::assert_formats(
+        &formatting,
+        "void f() {\n  if (t) {/*unused*/}\n  if (t) {}\n}\n",
+    );
+}
+
+#[test]
+fn clang_format_off_and_on_keep_a_region_as_written() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let src = "int  a;\n// clang-format off\nint   b  =  1;\n// clang-format on\nint   c;\n";
+    let want = "int a;\n// clang-format off\nint   b  =  1;\n// clang-format on\nint c;\n";
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
 }

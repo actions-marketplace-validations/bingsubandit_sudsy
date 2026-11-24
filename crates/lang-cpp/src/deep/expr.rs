@@ -554,7 +554,7 @@ impl Cx<'_> {
             | k::STAR
             | k::ELLIPSIS
             | k::EQUAL => true,
-            k::IDENT | k::KEYWORD => decl,
+            k::IDENT | k::KEYWORD => decl || crate::structure::macro_name(self.text(e)),
             _ => false,
         }
     }

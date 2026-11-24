@@ -38,7 +38,7 @@ exact=return|co_return|co_yield|co_await|throw|case|else|do|new|delete / kind=Lp
 exact=return|co_return|throw|case|else|do|new|delete / kind=ColonColon : yes
 exact=decltype|sizeof|alignof|typeof|noexcept|static_assert / kind=Lpar : no
 kind=Keyword / kind=Lpar&parent=DeclaratorGroup : yes
-kind=Ident / kind=Lpar&parent=DeclaratorGroup&grand=Parameter : yes
+kind=Ident / kind=Lpar&parent=DeclaratorGroup : yes
 kind=Keyword|Ident / kind=Lpar : no
 * / kind=Lpar&parent=Arguments : no
 # Templates.

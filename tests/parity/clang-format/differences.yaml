@@ -97,14 +97,14 @@ sets:
   - "spacing Keyword|Star in Line (e.g. `char *`): +11 files, 472 equal after it"
   - "spacing Comma|Number in InitList (e.g. `, 53`): +10 files, 482 equal after it"
   - "spacing Star|Ident in Binary (e.g. `* Token`): +9 files, 491 equal after it"
-unclassified: 3
+unclassified: 0
 ratchet:
-  llvm: 295
-  fmt: 39
-  range-v3: 168
-  folly: 1423
-  linux: 1580
-  sqlite: 29
+  llvm: 316
+  fmt: 40
+  range-v3: 257
+  folly: 1601
+  linux: 1844
+  sqlite: 34
   google: 2
   chromium: 2
   mozilla: 0

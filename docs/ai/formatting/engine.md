@@ -57,6 +57,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `break_constructor_initializers` | `before_colon`, `before_comma` | cpp `before_colon`, c `before_colon` |
 | `break_template_declarations` | `yes`, `multiline`, `no` | cpp `multiline`, c `multiline` |
 | `collapse` | json: `preserve`, `always`, `never`, `opening_break`; toml: `preserve`, `always`, `never` | json `preserve`, toml `preserve` |
+| `collapse_empty_blocks` | bool | cpp `false`, c `false` |
 | `comment_indent` | `preserve`, `content` | yaml `preserve`, github-actions `preserve` |
 | `comment_keep_unicode_blanks` | bool | cpp `true`, c `true` |
 | `comment_spacing` | int 1-10 | yaml `1`, github-actions `1` |
@@ -71,6 +72,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `document_end` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `document_start` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `embedded_language_formatting` | `auto`, `off` | html `auto`, markdown `auto`, angular `auto`, vue `auto`, svelte `auto` |
+| `empty_body_own_line` | bool | cpp `false`, c `false` |
 | `end_of_line` | `auto`, `lf`, `crlf` | json `auto`, css `auto`, scss `auto`, less `auto`, html `auto`, cpp `auto`, c `auto`, dockerfile `auto`, editorconfig `auto`, gitignore `auto`, go `auto`, graphql `auto`, hcl `auto`, ini `auto`, java `auto`, js `auto`, kotlin `auto`, makefile `auto`, markdown `auto`, php `auto`, powershell `auto`, protobuf `auto`, python `auto`, ruby `auto`, shell `auto`, sql `auto`, toml `auto`, xml `auto`, yaml `auto`, github-actions `auto`, angular `auto`, vue `auto`, svelte `auto`, csharp `auto` |
 | `final_newline` | bool | json `true`, css `true`, scss `true`, less `true`, html `true`, cpp `true`, c `true`, dockerfile `true`, editorconfig `true`, gitignore `true`, go `true`, graphql `true`, hcl `true`, ini `true`, java `true`, js `true`, kotlin `true`, makefile `true`, markdown `true`, php `true`, powershell `true`, protobuf `true`, python `true`, ruby `true`, shell `true`, sql `true`, toml `true`, xml `true`, yaml `true`, github-actions `true`, angular `true`, vue `true`, svelte `true`, csharp `true` |
 | `for_each_macros` | list of words | cpp `[foreach, Q_FOREACH, BOOST_FOREACH]`, c `[foreach, Q_FOREACH, BOOST_FOREACH]` |
@@ -86,6 +88,8 @@ Options declared by more than one language, generated from the option schemas; p
 | `indent_script_and_style` | bool | vue `false`, svelte `true` |
 | `indent_size` | int 1-16 | json `2`, css `2`, scss `2`, less `2`, html `2`, cpp `2`, c `2`, dockerfile `4`, graphql `2`, hcl `2`, java `2`, js `2`, kotlin `4`, makefile `2`, markdown `2`, php `4`, powershell `4`, protobuf `2`, python `4`, ruby `2`, shell `4`, sql `4`, toml `2`, xml `2`, yaml `2`, github-actions `2`, angular `2`, vue `2`, svelte `2`, csharp `4` |
 | `indent_style` | `space`, `tab` | json `space`, css `space`, scss `space`, less `space`, html `space`, cpp `space`, c `space`, dockerfile `space`, go `space`, graphql `space`, java `space`, js `space`, kotlin `space`, makefile `space`, php `space`, powershell `space`, protobuf `space`, python `space`, ruby `space`, shell `tab`, sql `space`, toml `space`, xml `space`, angular `space`, vue `space`, svelte `space`, csharp `space` |
+| `join_closing_angles` | bool | cpp `false`, c `false` |
+| `keep_blank_lines_at_end_of_blocks` | bool | cpp `false`, c `false` |
 | `keep_leading_blank_lines` | bool | cpp `true`, c `true` |
 | `line_width` | int 20-1000 | json `80`, css `80`, scss `80`, less `80`, html `80`, cpp `80`, c `80`, graphql `80`, java `100`, js `80`, kotlin `140`, php `120`, python `88`, ruby `120`, sql `80`, toml `80`, xml `100`, yaml `80`, github-actions `80`, angular `80`, vue `80`, svelte `80`, csharp `120` |
 | `max_attributes_per_line` | int 0-100 | html `0`, angular `0`, vue `0`, svelte `0` |

@@ -1,6 +1,9 @@
 # Mozilla's C++ style as clang-format's Mozilla style: return type on its own line, braces of classes and functions on their own line, comma-first initializers.
 cpp:
   format:
+    join_closing_angles: true
+    empty_body_own_line: true
+    collapse_empty_blocks: true
     indent_pp_directives: keep
     short_functions: inline
     bin_pack_arguments: false

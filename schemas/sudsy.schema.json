@@ -7870,6 +7870,11 @@
               ],
               "type": "string"
             },
+            "collapse_empty_blocks": {
+              "default": false,
+              "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+              "type": "boolean"
+            },
             "comment_keep_unicode_blanks": {
               "default": true,
               "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
@@ -7892,6 +7897,11 @@
             "derive_pointer_alignment": {
               "default": false,
               "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+              "type": "boolean"
+            },
+            "empty_body_own_line": {
+              "default": false,
+              "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
               "type": "boolean"
             },
             "end_of_line": {
@@ -7960,6 +7970,16 @@
                 "tab"
               ],
               "type": "string"
+            },
+            "join_closing_angles": {
+              "default": false,
+              "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+              "type": "boolean"
+            },
+            "keep_blank_lines_at_end_of_blocks": {
+              "default": false,
+              "description": "A blank line before the closing brace of a block stays.",
+              "type": "boolean"
             },
             "keep_leading_blank_lines": {
               "default": true,
@@ -8226,6 +8246,11 @@
               ],
               "type": "string"
             },
+            "collapse_empty_blocks": {
+              "default": false,
+              "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+              "type": "boolean"
+            },
             "comment_keep_unicode_blanks": {
               "default": true,
               "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
@@ -8248,6 +8273,11 @@
             "derive_pointer_alignment": {
               "default": false,
               "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+              "type": "boolean"
+            },
+            "empty_body_own_line": {
+              "default": false,
+              "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
               "type": "boolean"
             },
             "end_of_line": {
@@ -8316,6 +8346,16 @@
                 "tab"
               ],
               "type": "string"
+            },
+            "join_closing_angles": {
+              "default": false,
+              "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+              "type": "boolean"
+            },
+            "keep_blank_lines_at_end_of_blocks": {
+              "default": false,
+              "description": "A blank line before the closing brace of a block stays.",
+              "type": "boolean"
             },
             "keep_leading_blank_lines": {
               "default": true,
@@ -11883,6 +11923,11 @@
                     ],
                     "type": "string"
                   },
+                  "collapse_empty_blocks": {
+                    "default": false,
+                    "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+                    "type": "boolean"
+                  },
                   "comment_keep_unicode_blanks": {
                     "default": true,
                     "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
@@ -11905,6 +11950,11 @@
                   "derive_pointer_alignment": {
                     "default": false,
                     "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+                    "type": "boolean"
+                  },
+                  "empty_body_own_line": {
+                    "default": false,
+                    "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
                     "type": "boolean"
                   },
                   "end_of_line": {
@@ -11973,6 +12023,16 @@
                       "tab"
                     ],
                     "type": "string"
+                  },
+                  "join_closing_angles": {
+                    "default": false,
+                    "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+                    "type": "boolean"
+                  },
+                  "keep_blank_lines_at_end_of_blocks": {
+                    "default": false,
+                    "description": "A blank line before the closing brace of a block stays.",
+                    "type": "boolean"
                   },
                   "keep_leading_blank_lines": {
                     "default": true,
@@ -12239,6 +12299,11 @@
                     ],
                     "type": "string"
                   },
+                  "collapse_empty_blocks": {
+                    "default": false,
+                    "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+                    "type": "boolean"
+                  },
                   "comment_keep_unicode_blanks": {
                     "default": true,
                     "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
@@ -12261,6 +12326,11 @@
                   "derive_pointer_alignment": {
                     "default": false,
                     "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+                    "type": "boolean"
+                  },
+                  "empty_body_own_line": {
+                    "default": false,
+                    "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
                     "type": "boolean"
                   },
                   "end_of_line": {
@@ -12329,6 +12399,16 @@
                       "tab"
                     ],
                     "type": "string"
+                  },
+                  "join_closing_angles": {
+                    "default": false,
+                    "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+                    "type": "boolean"
+                  },
+                  "keep_blank_lines_at_end_of_blocks": {
+                    "default": false,
+                    "description": "A blank line before the closing brace of a block stays.",
+                    "type": "boolean"
                   },
                   "keep_leading_blank_lines": {
                     "default": true,

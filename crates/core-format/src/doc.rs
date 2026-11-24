@@ -257,6 +257,10 @@ impl Doc {
                 Doc::HardLine | Doc::LineStart(_) => return true,
                 Doc::Concat(ps) | Doc::Fill(ps) => return ps.iter().any(|p| walk(p, w)),
                 Doc::Group(g) => return walk(&g.contents, w),
+                Doc::Label(SHORT_BODY, _) => {
+                    *w += 1;
+                    return true;
+                }
                 Doc::Indent(d) | Doc::Align(_, d) | Doc::Label(_, d) | Doc::IndentIfBreak(_, d) => {
                     return walk(d, w);
                 }
@@ -697,6 +701,10 @@ pub fn if_break_in(id: GroupId, broken: Doc, flat: Doc) -> Doc {
         group: Some(id),
     }
 }
+
+/// The label of a block body that stays on the line of its head when it fits (`{ return x; }`):
+/// [`Doc::width_to_hardline`] ends at its `{`.
+pub const SHORT_BODY: &str = "short-body";
 
 /// See [`Doc::Label`].
 pub fn label(tag: &'static str, d: Doc) -> Doc {

@@ -297,6 +297,14 @@ impl Layout {
         (self.bindings.iter()).find(|b| b.role == role && b.kinds.contains(&kind))
     }
 
+    /// The kinds of the sets of `role` whose bool option is on.
+    pub(crate) fn on_kinds(&self, o: &core_config::ResolvedOptions, role: &str) -> Vec<SyntaxKind> {
+        (self.bindings.iter())
+            .filter(|b| b.role == role && o.flag(b.option, false))
+            .flat_map(|b| b.kinds.iter().copied())
+            .collect()
+    }
+
     /// The kinds of the sets of `role` that belong to `option`.
     fn bound_kinds(&self, option: OptId, role: &str) -> Vec<SyntaxKind> {
         (self.bindings.iter())
@@ -457,8 +465,49 @@ impl Layout {
                 let parent = node.parent().map(|p| p.kind());
                 style.flat = parent.is_some_and(|p| self.is_none(cx, "flat", p));
                 style.fit_single = parent.is_some_and(|p| self.fits(cx, p));
+                // (`keep_end`: a bool option that is off removes the blank line before the `}`,
+                // except of a block in a `keep_end_under` parent or before a `keep_end_before` sibling)
+                style.keep_trailing_blank = self.bound("keep_end", node.kind()).is_none_or(|b| {
+                    cx.options.flag(b.option, true)
+                        || node.parent().is_some_and(|p| {
+                            self.bound_kinds(b.option, "keep_end_under").contains(&p.kind())
+                        })
+                        || node.next_sibling_or_token().is_some_and(|n| {
+                            let kinds = self.bound_kinds(b.option, "keep_end_before");
+                            let mut next = Some(n);
+                            while let Some(e) = &next {
+                                if !matches!(e, SyntaxElement::Token(t) if cx.grammar.is_trivia(t.kind())) {
+                                    break;
+                                }
+                                next = e.next_sibling_or_token();
+                            }
+                            next.is_some_and(|e| kinds.contains(&e.kind()))
+                        })
+                });
                 // (`empty=as_written`: an empty body over two lines stays so)
-                let as_written = row.arg("empty") == Some("as_written");
+                // (`collapse_empty_blocks`: an empty block of a `split_in` parent has two lines, any other
+                // is `{}` when its line fits)
+                // (only an empty block, or a row that keeps an empty body as written, needs it)
+                let empty_block = node.children().next().is_none();
+                let rule = (empty_block || row.arg("empty") == Some("as_written"))
+                    .then(|| {
+                        (self.bindings.iter())
+                            .find(|b| b.role == "split_in" && cx.options.flag(b.option, false))
+                    })
+                    .flatten();
+                // (a comment in the block keeps it as written)
+                let commented = rule.is_some()
+                    && empty_block
+                    && (node.descendants_with_tokens())
+                        .filter_map(|e| e.into_token())
+                        .any(|t| cx.grammar.is_trivia(t.kind()) && !t.text().trim().is_empty());
+                let split = !commented
+                    && rule.is_some_and(|b| {
+                        node.parent().is_some_and(|p| b.kinds.contains(&p.kind()))
+                    });
+                let as_written = row.arg("empty") == Some("as_written") && rule.is_none();
+                style.empty_fits = rule.is_some() && !split && !commented;
+                style.expand_empty |= split;
                 if style.fit_single || as_written {
                     let multiline = line_break_inside(node.descendants_with_tokens());
                     if style.fit_single && multiline {
@@ -473,9 +522,17 @@ impl Layout {
                         let under = kinds("no_fit_under");
                         let keeps = node.parent().is_some_and(|p| {
                             let start = node.text_range().start();
+                            // (comments before the signature are not part of it)
+                            let mut code = false;
                             let header = p
                                 .descendants_with_tokens()
-                                .take_while(|e| e.text_range().start() < start);
+                                .take_while(|e| e.text_range().start() < start)
+                                .filter(|e| {
+                                    let lead =
+                                        e.as_token().is_some() && cx.grammar.is_trivia(e.kind());
+                                    code |= e.as_token().is_some() && !lead;
+                                    code || !lead
+                                });
                             line_break_inside(header)
                                 || p.children().any(|c| with.contains(&c.kind()))
                                 || (p.parent()).is_some_and(|g| under.contains(&g.kind()))
@@ -609,6 +666,11 @@ fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode, layout: &Layout, flow: &Flow<
         };
         semi && first(cx, e).is_none_or(|t| comments::leading_comments(cx.grammar, &t).is_empty())
     };
+    let own_empty = || {
+        layout
+            .on_kinds(cx.options, "own_empty")
+            .contains(&node.kind())
+    };
     // (a line comment after the head or the `else` ends its line: the body goes below)
     let ends_line = |before: &SyntaxElement| {
         crate::seq::last(cx, before).is_some_and(|t| {
@@ -620,7 +682,11 @@ fn compound(cx: &FormatCtx<'_>, node: &SyntaxNode, layout: &Layout, flow: &Flow<
     let body = |e: &SyntaxElement, before: &SyntaxElement, inline: bool| -> R {
         let printed = el(cx, e)?;
         Ok(if empty(e) {
-            printed
+            if own_empty() {
+                doc::indent(doc::concat(vec![doc::hardline(), printed]))
+            } else {
+                printed
+            }
         } else {
             let apart = || {
                 let (a, b) = (crate::seq::last(cx, before)?, first(cx, e)?);

@@ -54,13 +54,13 @@ options:
         tight_behind: [Star, Amp, AmpAmp]
         pointer: [Star, Amp, AmpAmp]
         pointer_in: [Parameter, FunctionDeclaration, SimpleDeclaration, TemplateArguments]
-        pointer_in_under: [Cast, Parameter]
-        pointer_in_loose: [ForStatement, CatchClause]
+        pointer_in_under: [Cast]
+        pointer_in_loose: [ForStatement, CatchClause, Parameter]
         pointer_ref: [Amp, AmpAmp]
-        pointer_type: [Ident, Keyword, Greater]
-        pointer_name: [Ident, Keyword]
+        pointer_type: [Ident, Keyword, Greater, GreaterGreater]
+        pointer_name: [Ident, Keyword, Lsqb]
         pointer_bare: [TemplateArguments]
-        pointer_end: [Greater, Comma, Rpar, Ellipsis, Lsqb]
+        pointer_end: [Greater, GreaterGreater, Comma, Rpar, Ellipsis, Lsqb]
         binary_node: [Binary]
         binary_clear: [Assignment, ReturnStatement, Binary, Ternary, Index, Unary, Arguments]
         binary_cast: [Rpar]
@@ -72,9 +72,33 @@ options:
       doc: "A blank after the `)` of a C cast (`(int) x` against `(int)x`)."
       kinds:
         cast_node: [Cast]
-        cast_group: [ParenGroup]
+        cast_group: [ParenGroup, Parenthesized]
         cast_close: [Rpar]
-        cast_keep: [Star, Amp, AmpAmp, Plus, Minus]
+        cast_keep: [AmpAmp, Plus]
+        cast_tight: [Star, Amp, Minus]
+  - keep_blank_lines_at_end_of_blocks:
+      default: false
+      doc: "A blank line before the closing brace of a block stays."
+      kinds:
+        keep_end: [Block]
+        keep_end_under: [NamespaceDeclaration, EnumSpecifier]
+        keep_end_before: [Keyword, CatchClause]
+  - join_closing_angles:
+      default: false
+      doc: "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart."
+      kinds:
+        close_join: [Greater]
+        close_join_in: [TemplateArguments, TemplateParameters]
+  - empty_body_own_line:
+      default: false
+      doc: "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`)."
+      kinds:
+        own_empty: [IfStatement, ForStatement, WhileStatement]
+  - collapse_empty_blocks:
+      default: false
+      doc: "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`)."
+      kinds:
+        split_in: [IfStatement, ForStatement, WhileStatement, DoStatement, TryStatement, CatchClause, Block]
   - braced_list_padding:
       default: false
       doc: "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`."
@@ -97,6 +121,9 @@ options:
           namespace: [NamespaceDeclaration]
         attach_call:
           function: [Call]
+        attach_after: [Rpar, Rsqb, Ident, Keyword, Greater]
+        attach_in: [Block]
+        attach_apart: [Directive]
   - split_empty_braces:
       kind: "words"
       default: []

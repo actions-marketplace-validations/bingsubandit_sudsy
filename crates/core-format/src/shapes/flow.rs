@@ -142,7 +142,10 @@ impl Flow<'_> {
     /// row decides or a line comment ends the line.
     pub fn attach(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
         let rules = self.rules.filter(|r| r.has_attach())?;
-        let (name, word) = rules.attach_word(b, cx.options)?;
+        let known = rules.attach_word(b, cx.options);
+        if known.is_none() && !rules.attach_unknown(b, a, cx.options) {
+            return None;
+        }
         if comments::trailing_comments(cx.grammar, a)
             .iter()
             .any(|c| c.kind == comments::CommentKind::Line)
@@ -150,6 +153,9 @@ impl Flow<'_> {
         {
             return None;
         }
+        let Some((name, word)) = known else {
+            return Some(true);
+        };
         Some(!cx.options.strings(name).any(|w| w == word))
     }
 

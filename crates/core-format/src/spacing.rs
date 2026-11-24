@@ -542,6 +542,12 @@ pub struct SpaceRules {
     /// head, `list_for_each(x) {`) belongs to the construct of the `attach_call` word, or to the
     /// word of the `loop_call` set when the head's name is among the words of that option.
     attach_call: (Vec<crate::rules::Binding>, Vec<crate::rules::Binding>),
+    /// The `attach_after` kinds: a `{` of no known construct behind such a token is on its line.
+    attach_after: Vec<SyntaxKind>,
+    /// The `attach_in` kinds: the nodes that are blocks of statements.
+    attach_in: Vec<SyntaxKind>,
+    /// The `attach_apart` kinds: a token inside such a node (a directive) ends its line.
+    attach_apart: Vec<SyntaxKind>,
     /// The `tight_after` and `tight_behind` kind sets: no blank after a token of the first when the
     /// token before it is of the second (`Args &&...rest`).
     tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
@@ -549,9 +555,9 @@ pub struct SpaceRules {
     pointer: Pointer,
     /// The braces of the `braced_list_padding` kind sets.
     pad: Pad,
-    /// The `cast_node`, `cast_group`, `cast_close` and `cast_keep` kind sets: a cast node, its type group, the token that closes
-    /// it, and the tokens that may be an operator behind it (`(a) * b` the parse took for a cast: the blank stays).
-    cast: [Vec<SyntaxKind>; 4],
+    /// The `cast_node`, `cast_group`, `cast_close`, `cast_keep` and `cast_tight` kind sets: a cast node, its type group, the token
+    /// that closes it, the tokens that may be an operator behind it (the blank stays) and those that touch the `)` (`(a)*b`).
+    cast: [Vec<SyntaxKind>; 5],
     /// The `binary_node`, `binary_clear` and `binary_cast` kind sets: the nodes of binary operations, the parents
     /// that prove a name `*` name (`T *x`, `a * b`) is a product, and the tokens that may close a cast type
     /// (`(T)*p`, `(T)&x`: a mark between it and a name stays as written).
@@ -698,6 +704,9 @@ impl SpaceRules {
         SpaceRules {
             attach,
             attach_call,
+            attach_after: set("attach_after"),
+            attach_in: set("attach_in"),
+            attach_apart: set("attach_apart"),
             tight: (set("tight_after"), set("tight_behind")),
             pointer: Pointer {
                 marks: set("pointer"),
@@ -711,7 +720,14 @@ impl SpaceRules {
                 end: set("pointer_end"),
             },
             binary: (set("binary_node"), set("binary_clear"), set("binary_cast")),
-            cast: ["cast_node", "cast_group", "cast_close", "cast_keep"].map(set),
+            cast: [
+                "cast_node",
+                "cast_group",
+                "cast_close",
+                "cast_keep",
+                "cast_tight",
+            ]
+            .map(set),
             pad: Pad {
                 except: set("pad_except"),
                 lists: set("pad_list"),
@@ -787,11 +803,19 @@ impl SpaceRules {
         let Some(parent) = t.parent() else {
             return false;
         };
-        if !(p.within.contains(&parent.kind())
+        // (in a parent that is no declaration part the end of a type behind the mark proves it)
+        let known = p.within.contains(&parent.kind())
             || parent
                 .parent()
-                .is_some_and(|g| p.under.contains(&g.kind()) || p.loose.contains(&g.kind())))
-        {
+                .is_some_and(|g| p.under.contains(&g.kind()) || p.loose.contains(&g.kind()));
+        let ends_type = || {
+            let mut next = next_code(t);
+            while let Some(x) = next.as_ref().filter(|x| p.marks.contains(&x.kind())) {
+                next = next_code(x);
+            }
+            next.is_some_and(|x| p.end.contains(&x.kind()))
+        };
+        if !known && !ends_type() {
             return false;
         }
         let mut prev = prev_code(t);
@@ -807,11 +831,7 @@ impl SpaceRules {
         if p.bare.contains(&parent.kind())
             || parent.parent().is_some_and(|g| p.under.contains(&g.kind()))
         {
-            let mut next = next_code(t);
-            while let Some(x) = next.as_ref().filter(|x| p.marks.contains(&x.kind())) {
-                next = next_code(x);
-            }
-            return next.is_some_and(|x| p.end.contains(&x.kind()));
+            return ends_type();
         }
         true
     }
@@ -855,12 +875,48 @@ impl SpaceRules {
             .and_then(|n| n.parent())
             .is_some_and(|n| self.binary.1.contains(&n.kind()));
         let (l, r) = (left.kind(), right.kind());
+        // (the `)` of a group of only a type's tokens before a name ends a cast and the operator
+        // touches it; the `)` of any other group, a call or `sizeof(T)`, ends an operand)
         if self.binary.2.contains(&l) && p.names.contains(&r) {
-            return None;
+            return Some(!left.parent().is_some_and(|g| self.cast_like(&g)));
         }
         let declaration = (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
             && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));
         (clear || !declaration).then_some(true)
+    }
+
+    /// Is the group a cast's type: of a kind of `cast_group`, only the tokens of a type (a mark only at
+    /// its end) and no name or call in front of it (`sizeof(T)`, `f(T)`)?
+    fn cast_like(&self, group: &SyntaxNode) -> bool {
+        let p = &self.pointer;
+        if !self.cast[1].contains(&group.kind()) {
+            return false;
+        }
+        let inner: Vec<_> = (group.children_with_tokens())
+            .filter(|e| e.as_token().is_none_or(|t| !t.text().trim().is_empty()))
+            .skip(1)
+            .collect();
+        let typed = inner.iter().enumerate().all(|(i, e)| match e.as_token() {
+            Some(t) if p.marks.contains(&t.kind()) => inner.get(i + 1).is_none_or(|n| {
+                n.as_token().is_some_and(|n| {
+                    p.marks.contains(&n.kind()) || self.cast[2].contains(&n.kind())
+                })
+            }),
+            Some(t) => self.cast[2].contains(&t.kind()) || p.types.contains(&t.kind()),
+            None => false,
+        });
+        // (a group that starts its node, `return (T)&x`, is no argument of a name in front of it)
+        let leads = group.parent().is_none_or(|n| {
+            (n.children_with_tokens())
+                .find(|e| e.as_token().is_none_or(|t| !t.text().trim().is_empty()))
+                .and_then(|e| e.into_node())
+                .is_some_and(|f| f == *group)
+        });
+        typed
+            && (leads
+                || (group.first_token())
+                    .and_then(|t| prev_code(&t))
+                    .is_none_or(|t| !p.types.contains(&t.kind())))
     }
 
     /// Does the language have casts (`cast_node` kind set)?
@@ -878,9 +934,16 @@ impl SpaceRules {
         let node = group
             .parent()
             .filter(|n| self.cast[0].contains(&n.kind()))?;
+        // (a group that is no type, `(a & MASK) * b`, is an operand: the operator has its blanks)
+        let tight = self.cast[4].contains(&b.kind());
+        let blank = if tight {
+            !self.cast_like(&group)
+        } else {
+            spaced
+        };
         node.text_range()
             .contains_range(b.text_range())
-            .then_some(spaced)
+            .then_some(blank)
     }
 
     /// Does the language pad braces (`pad_list` kind set)?
@@ -1033,6 +1096,34 @@ impl SpaceRules {
             .find(|b| spelled(b))
             .unwrap_or(first);
         Some((chosen.option, chosen.word.as_str()))
+    }
+
+    /// Does a `{` that belongs to no known construct (`attach_word` is none) follow a token of the
+    /// `attach_after` kinds, with no construct wrapping its brace: the block of a declaration the
+    /// parse did not recognise, a lambda; it stays on its line.
+    pub fn attach_unknown(
+        &self,
+        brace: &SyntaxToken,
+        a: &SyntaxToken,
+        options: &core_config::ResolvedOptions,
+    ) -> bool {
+        // (where no construct wraps its brace, every brace is on its line)
+        if !self.attach_after.contains(&a.kind())
+            || brace.text() != "{"
+            || (self.attach.iter()).any(|b| options.strings(b.option).next().is_some())
+            || a.parent_ancestors()
+                .any(|n| self.attach_apart.contains(&n.kind()))
+        {
+            return false;
+        }
+        let Some(block) = brace
+            .parent()
+            .filter(|b| self.attach_in.contains(&b.kind()))
+        else {
+            return false;
+        };
+        let mut tokens = (block.descendants_with_tokens()).filter_map(|e| e.into_token());
+        tokens.find(|t| !t.text().trim().is_empty()).as_ref() == Some(brace)
     }
 
     /// `Flow::joined`.

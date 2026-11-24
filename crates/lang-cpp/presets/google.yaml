@@ -1,6 +1,9 @@
 # Google's C++ style guide as clang-format's Google style: two spaces, 80 columns, pointer next to the type, indented case labels.
 cpp:
   format:
+    join_closing_angles: true
+    empty_body_own_line: true
+    collapse_empty_blocks: true
     access_modifier_outdent: 1
     align_escaped_newlines: left
     short_ifs: without_else

@@ -196,6 +196,14 @@ impl Cx<'_> {
                 || self.word(q, b, "__restrict")
             {
                 q += 1;
+            } else if q > a
+                && matches!(self.c[q - 1].kind, k::STAR | k::AMP)
+                && self.is(q, b, k::IDENT)
+                && self.text(q).starts_with("__")
+                && self.is(q + 1, b, k::IDENT)
+            {
+                // (`void *__init name(`: an attribute macro behind the mark)
+                q += 1;
             } else {
                 return Some(q);
             }
@@ -212,6 +220,10 @@ impl Cx<'_> {
                     return Some(self.skip(e));
                 }
                 return None;
+            }
+            // `int(name)(params)`: the name is in parentheses.
+            if hi == lo + 1 && self.c[lo].kind == k::IDENT && self.open(self.skip(q), b, k::LPAR) {
+                return Some(self.skip(q));
             }
             return None;
         }
@@ -240,7 +252,19 @@ impl Cx<'_> {
             {
                 q += 1;
             }
-            let e = self.expression(q, b);
+            // `Ret (*f)(int* a)`: the group after a declarator group lists parameters.
+            let fp = self.open(q, b, k::LPAR) && self.group_kind(q) == Some(k::DECLARATOR_GROUP);
+            let after = if fp { self.skip(q) } else { q };
+            if fp && self.open(after, b, k::LPAR) && self.closed(after) && !self.crosses_in(after) {
+                self.retag(after, k::PARAMETER_LIST);
+                self.parameters(after);
+                q = self.skip(after);
+            }
+            let e = if fp && q > after {
+                q
+            } else {
+                self.expression(q, b)
+            };
             q = if e > q {
                 e
             } else {
@@ -552,7 +576,7 @@ impl Cx<'_> {
                 k::LPAR => {
                     let attr = q > 0 && matches!(self.c[q - 1].kind, k::KEYWORD | k::IDENT) && {
                         let w = self.text(q - 1);
-                        ATTRIBUTES.contains(&w) || w.starts_with("__")
+                        ATTRIBUTES.contains(&w) || (w.starts_with("__") && w.ends_with("__"))
                     };
                     if !attr && base.is_none() {
                         return None;
