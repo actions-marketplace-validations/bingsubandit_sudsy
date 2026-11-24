@@ -4,7 +4,7 @@ obj/
 node_modules/
 *.vsix
 .vs/
-tests/conformance/corpus/
+tests/conformance/corpus
 tests/conformance/php-deps/symfony/monorepo/
 .claude/worktrees/
 

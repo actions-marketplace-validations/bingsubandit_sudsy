@@ -45,6 +45,7 @@ pub mod spacing;
 pub mod tabs;
 pub mod tag_layout;
 pub mod testing;
+pub mod verbatim;
 
 pub use context::{DefaultFormatter, EmbedMode, Embedder, FormatCtx, NodeFormatter, Variants};
 pub use directives::{DIRECTIVES_VERSION, Directive, DirectiveConflict, DirectiveTable, NodeKey};
@@ -52,6 +53,7 @@ pub use doc::Doc;
 pub use error::FormatError;
 pub use placement::{comment_lines, comment_lines_max};
 pub use printer::PrintOptions;
+pub use verbatim::VerbatimFormatter;
 
 use core_config::ResolvedOptions;
 use core_syntax::SyntaxNode;

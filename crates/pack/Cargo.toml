@@ -14,6 +14,7 @@ crate-type = ["cdylib"]
 tree-sitter-containerfile = { workspace = true, optional = true }
 konomanoasa-tree-sitter-editorconfig = { workspace = true, optional = true }
 konomanoasa-tree-sitter-gitignore = { workspace = true, optional = true }
+tree-sitter-go = { workspace = true, optional = true }
 tree-sitter-graphql = { workspace = true, optional = true }
 tree-sitter-hcl = { workspace = true, optional = true }
 tree-sitter-ini = { workspace = true, optional = true }
@@ -31,6 +32,7 @@ tree-sitter-xml = { workspace = true, optional = true }
 dockerfile = ["dep:tree-sitter-containerfile"]
 editorconfig = ["dep:konomanoasa-tree-sitter-editorconfig"]
 gitignore = ["dep:konomanoasa-tree-sitter-gitignore"]
+go = ["dep:tree-sitter-go"]
 graphql = ["dep:tree-sitter-graphql"]
 hcl = ["dep:tree-sitter-hcl"]
 ini = ["dep:tree-sitter-ini"]

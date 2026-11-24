@@ -1,0 +1,150 @@
+// Go (1.26, and generic methods), parsed by tree-sitter (the fork grammars/tree-sitter-go of tree-sitter-go 0.25.0) and mapped by the mapping of crates/lang-go/lang.yaml.
+// A node kind is a row named like tree-sitter's node in Pascal case; the keywords and operators are grouped into a few tokens.
+// Format: see crates/core-syntax/src/grammar/mod.rs.
+
+language go 28 "Go"
+comments line "//" block "/*" "*/"
+suppress disable-next-line "sudsy-disable-next-line"
+suppress disable-line "sudsy-disable-line"
+suppress disable "sudsy-disable"
+suppress enable "sudsy-enable"
+suppress disable-file "sudsy-disable-file"
+suppress ignore "sudsy-ignore"
+
+token Whitespace #trivia #whitespace
+token Newline #trivia #newline
+// `// text` and `/* text */`.
+token Comment #trivia #comment
+
+// A name: a variable, a function, a parameter.
+token Ident
+// The name of a field or method after a `.` or in a declaration.
+token FieldIdent
+// The name of a type.
+token TypeIdent
+// The name of a package: in `package p`, `p.T` and an import alias.
+token PackageIdent
+// The name of a label: `break L`, `L:`.
+token LabelName
+// `_`.
+token BlankIdent
+// The `.` of `import . "p"`.
+token DotImport
+// Reserved words (`func`, `type`, `range`, ...).
+token Keyword
+// `fallthrough`, wrapped in a statement node of its own.
+token Fallthrough
+// A lone `;`, wrapped in a statement node of its own.
+token EmptySemi
+// The operators of expressions and of a constraint (`~`).
+token Op #operator
+// `=` and the compound assignments `+=`, `<<=`, ...
+token Assign #operator
+// `:=`
+token Define #operator
+// `, ; : . ...`
+token Punct #punctuation
+// `( [ {` and their closers.
+token Open #punctuation
+token Close #punctuation
+token Int #literal
+token Float #literal
+token Imaginary #literal
+token Rune #literal
+// An interpreted string and a raw string, quotes included.
+token String #literal #string
+token Nil #literal
+token True #literal
+token False #literal
+token Iota #literal
+
+token Eof
+token Unknown #error
+
+node SourceFile
+node PackageClause
+node ImportDeclaration
+node ImportSpec
+node ImportSpecList
+node FunctionDeclaration
+node MethodDeclaration
+node TypeParameterList
+node TypeParameterDeclaration
+node ParameterList
+node ParameterDeclaration
+node VariadicParameterDeclaration
+node ConstDeclaration
+node ConstSpec
+node VarDeclaration
+node VarSpec
+node VarSpecList
+node TypeDeclaration
+node TypeSpec
+node TypeAlias
+node TypeArguments
+node TypeElem
+node TypeConstraint
+node ArrayType
+node ImplicitLengthArrayType
+node SliceType
+node StructType
+node FieldDeclarationList
+node FieldDeclaration
+node PointerType
+node FunctionType
+node InterfaceType
+node MethodElem
+node MapType
+node ChannelType
+node QualifiedType
+node GenericType
+node NegatedType
+node ParenthesizedType
+node Block
+node StatementList
+node EmptyStatement
+node ExpressionStatement
+node LabeledStatement
+node EmptyLabeledStatement
+node FallthroughStatement
+node BreakStatement
+node ContinueStatement
+node GotoStatement
+node ReturnStatement
+node GoStatement
+node DeferStatement
+node IfStatement
+node ExpressionSwitchStatement
+node TypeSwitchStatement
+node ExpressionCase
+node TypeCase
+node DefaultCase
+node SelectStatement
+node CommunicationCase
+node ForStatement
+node ForClause
+node RangeClause
+node SendStatement
+node ReceiveStatement
+node IncStatement
+node DecStatement
+node AssignmentStatement
+node ShortVarDeclaration
+node ExpressionList
+node ParenthesizedExpression
+node CallExpression
+node ArgumentList
+node VariadicArgument
+node SelectorExpression
+node IndexExpression
+node SliceExpression
+node TypeAssertionExpression
+node TypeConversionExpression
+node TypeInstantiationExpression
+node BinaryExpression
+node UnaryExpression
+node CompositeLiteral
+node LiteralValue
+node LiteralElement
+node KeyedElement
+node FuncLiteral

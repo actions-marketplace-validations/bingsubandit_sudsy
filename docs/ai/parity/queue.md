@@ -8,6 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
+| Go | lint revive | 4 | 0.0% | 85.0 | 40341 findings | `exported` 15691, `unused-parameter` 14178, `var-naming` 10923 | 9 | 37.78 | 1456737e |
 | SQL | format sqlfluff | 4 | 78.3% | 6.7 | 56 files | `identifier-case` 103 | 3 | 8.93 | - |
 | SQL | lint sqlfluff | 4 | 79.7% | 5.3 | 6342 findings | `LT02` 11125 | 3 | 7.07 | 1456737e |
 | C / C++ | format clang-format | 4 | 53.3% | 31.7 | 2106 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +6 more | 30 | 4.23 | - |
@@ -22,7 +23,7 @@ Blocked on a decision:
 
 Not measured: C / C++ lint clang-tidy (no target, blocked).
 
-New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format.
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format; Go lint revive.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
@@ -40,7 +41,6 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | LaTeX | 0.29~ | ~1.2 | 0.77~ | 1.04~ | 1.22~ | both: lint ChkTeX + format latexindent | cannot reach the bar: format latexindent reach ~0.75; estimate: pick only to measure it |
 | Hack | 0.20~ | ~1.2 | 0.94~ | 0.83~ | 1.18~ | both: lint hhast + format hackfmt | grammar archived; estimate: pick only to measure it |
 | R | 0.20 | ~1.2 | 0.91~ | 0.80~ | 1.15~ | both: lint lintr + format styler | estimate: pick only to measure it |
-| Go | 0.37 | 1.2 | 1.14~ | 0.26~ | 0.94~ | lint: lint revive defaults | estimate: pick only to measure it |
 | Procfile | 0.26~ | ~1.5 | 0.79~ | 0.79~ | 1.08~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
 | Perl | 0.19 | ~1.2 | 0.88~ | 0.68~ | 1.04~ | both: lint perlcritic + format perltidy | cannot reach the bar: format perltidy reach ~0.75; Perl parses only at runtime in full: the grammar is partial; estimate: pick only to measure it |
 | GraphQL | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint graphql-eslint | estimate: pick only to measure it |
@@ -51,8 +51,9 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | Helm templates | 0.28~ | ~1.2 | 0.11~ | 0.96~ | 0.67~ | format: format none found | cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
 | GDScript | 0.17 | ~1.2 | 0.76~ | 0.67~ | 0.96~ | both: lint gdlint + format gdformat | estimate: pick only to measure it |
 | Rust | 0.38 | ~1 | 0.96~ | 0.25~ | 0.83~ | lint: lint clippy with types | estimate: pick only to measure it |
+| EJS | 0.16~ | ~1.2 | 0.89~ | 0.54~ | 0.95~ | both: lint ejs-lint + format none found | cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
 
-The other 148 entries of the file, each with the score of its best plan: EJS 0.95~; OpenAPI 0.95~; Mako 0.93~; MATLAB 0.93~; XSLT 0.90~; Astro 0.88~; Groovy 0.87~; ARM templates 0.84~; Docker Compose 0.84~; Assembly 0.83~; Roff 0.82~; Ninja 0.82~; Vim Script 0.81~; CloudFormation 0.79~; Cython 0.78~; Gherkin 0.78~; Nix 0.78~; Linker Script 0.77~; Elixir 0.74~; ShaderLab 0.72~; Smarty 0.68~; Snakemake 0.67~; Tcl 0.66~; Yacc / Lex 0.65~; Twig 0.65~; Mermaid 0.64~; Scala 0.62~; JSON5 0.61~; MDX 0.61~; TOML 0.58~; Apex 0.58~; ERB 0.58~; Erlang 0.58~; F# 0.58~; Liquid 0.58~; Racket 0.58~; reStructuredText 0.58~; Solidity 0.58~; VBA / VB6 0.57~; Visual Basic .NET 0.57~; M4 0.57~; EDN 0.57~; Emacs Lisp 0.56~; Prisma 0.56~; Meson 0.56~; Elm 0.55~; Grain 0.55~; BrightScript / BrighterScript 0.54~; Robot Framework 0.54~; VHDL 0.54~; Puppet 0.54~; BitBake 0.53~; Julia 0.53~; Nextflow 0.53~; Fortran 0.52~; Clojure 0.52~; NSIS 0.51~; Mojo 0.51~; Stylus 0.50~; Rich Text Format 0.50~; CoffeeScript 0.49~; Fennel / Janet 0.49~; PureScript 0.49~; CSV / TSV 0.49~; Sass (indented) 0.49~; INI / EditorConfig / .gitignore 0.49~; Inno Setup 0.49~; KDL 0.48~; RON 0.47~; TypeSpec 0.47~; dotenv 0.47~; BibTeX 0.46~; Common Lisp / Scheme 0.46~; Haskell 0.45~; Liquidsoap 0.45~; Marko 0.45~; Beancount / hledger 0.45~; AsciiDoc 0.45~; ASP.NET (Razor, Web Forms) 0.45~; Cap'n Proto 0.45~; COBOL 0.45~; Java properties 0.45~; Prolog 0.45~; Thrift 0.45~; VBScript 0.45~; WebAssembly text 0.44~; Awk 0.43~; Verilog / SystemVerilog 0.43~; ANTLR 0.42~; Smithy 0.42~; Nim 0.42~; ReScript / Reason 0.42~; Avro IDL 0.41~; FlatBuffers 0.41~; GDB script 0.41~; Pawn 0.41~; QMake 0.41~; Raku 0.41~; RenderScript 0.41~; sed 0.41~; SWIG 0.41~; Pascal / Delphi 0.40~; Typst 0.40~; jq 0.38~; Standard ML 0.38~; Nginx config 0.37~; Odin 0.36~; Quarto / R Markdown 0.35~; CodeQL 0.34~; D2 0.34~; Gleam 0.34~; GN 0.34~; HTTP files / Hurl 0.34~; Just 0.34~; Metal 0.34~; Nickel 0.34~; Nushell 0.34~; OCaml 0.34~; Pkl 0.34~; Roc 0.34~; templ 0.34~; Zig 0.33~; D 0.33~; Inko 0.30~; Protocol Buffer text format 0.30~; Soong (Android.bp) 0.30~; Ziggy 0.30~; Ada 0.27~; Crystal 0.26~; Rego (Open Policy Agent) 0.26~; WGSL 0.23~; Dart 0.16~; Objective-C 0.14~; Starlark / Bazel 0.13~; Fish 0.12~; Dhall 0.11~; V 0.11~; CUDA 0.10~; HLSL 0.10~; XML 0.10~; GLSL 0.10~; Caddyfile 0.08~; Bicep 0.08~; KCL 0.08~; CUE 0.07~; Jsonnet 0.07~; QML 0.07~; Cedar 0.06~.
+The other 148 entries of the file, each with the score of its best plan: OpenAPI 0.95~; Mako 0.93~; MATLAB 0.93~; XSLT 0.90~; Astro 0.88~; Groovy 0.87~; ARM templates 0.84~; Docker Compose 0.84~; Assembly 0.83~; Roff 0.82~; Ninja 0.82~; Vim Script 0.81~; CloudFormation 0.79~; Cython 0.78~; Gherkin 0.78~; Nix 0.78~; Linker Script 0.77~; Elixir 0.74~; ShaderLab 0.72~; Smarty 0.68~; Snakemake 0.67~; Tcl 0.66~; Yacc / Lex 0.65~; Twig 0.65~; Mermaid 0.64~; Scala 0.62~; JSON5 0.61~; MDX 0.61~; TOML 0.58~; Apex 0.58~; ERB 0.58~; Erlang 0.58~; F# 0.58~; Liquid 0.58~; Racket 0.58~; reStructuredText 0.58~; Solidity 0.58~; VBA / VB6 0.57~; Visual Basic .NET 0.57~; M4 0.57~; EDN 0.57~; Emacs Lisp 0.56~; Prisma 0.56~; Meson 0.56~; Elm 0.55~; Grain 0.55~; Go 0.55~; BrightScript / BrighterScript 0.54~; Robot Framework 0.54~; VHDL 0.54~; Puppet 0.54~; BitBake 0.53~; Julia 0.53~; Nextflow 0.53~; Fortran 0.52~; Clojure 0.52~; NSIS 0.51~; Mojo 0.51~; Stylus 0.50~; Rich Text Format 0.50~; CoffeeScript 0.49~; Fennel / Janet 0.49~; PureScript 0.49~; CSV / TSV 0.49~; Sass (indented) 0.49~; INI / EditorConfig / .gitignore 0.49~; Inno Setup 0.49~; KDL 0.48~; RON 0.47~; TypeSpec 0.47~; dotenv 0.47~; BibTeX 0.46~; Common Lisp / Scheme 0.46~; Haskell 0.45~; Liquidsoap 0.45~; Marko 0.45~; Beancount / hledger 0.45~; AsciiDoc 0.45~; ASP.NET (Razor, Web Forms) 0.45~; Cap'n Proto 0.45~; COBOL 0.45~; Java properties 0.45~; Prolog 0.45~; Thrift 0.45~; VBScript 0.45~; WebAssembly text 0.44~; Awk 0.43~; Verilog / SystemVerilog 0.43~; ANTLR 0.42~; Smithy 0.42~; Nim 0.42~; ReScript / Reason 0.42~; Avro IDL 0.41~; FlatBuffers 0.41~; GDB script 0.41~; Pawn 0.41~; QMake 0.41~; Raku 0.41~; RenderScript 0.41~; sed 0.41~; SWIG 0.41~; Pascal / Delphi 0.40~; Typst 0.40~; jq 0.38~; Standard ML 0.38~; Nginx config 0.37~; Odin 0.36~; Quarto / R Markdown 0.35~; CodeQL 0.34~; D2 0.34~; Gleam 0.34~; GN 0.34~; HTTP files / Hurl 0.34~; Just 0.34~; Metal 0.34~; Nickel 0.34~; Nushell 0.34~; OCaml 0.34~; Pkl 0.34~; Roc 0.34~; templ 0.34~; Zig 0.33~; D 0.33~; Inko 0.30~; Protocol Buffer text format 0.30~; Soong (Android.bp) 0.30~; Ziggy 0.30~; Ada 0.27~; Crystal 0.26~; Rego (Open Policy Agent) 0.26~; WGSL 0.23~; Dart 0.16~; Objective-C 0.14~; Starlark / Bazel 0.13~; Fish 0.12~; Dhall 0.11~; V 0.11~; CUDA 0.10~; HLSL 0.10~; XML 0.10~; GLSL 0.10~; Caddyfile 0.08~; Bicep 0.08~; KCL 0.08~; CUE 0.07~; Jsonnet 0.07~; QML 0.07~; Cedar 0.06~.
 
 ## actionlint
 
@@ -467,6 +468,27 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 15. `MissingLoopStatement` (1 missed)
 
 7 more rules: 7 missed.
+
+## revive
+
+Lint: target 0% (0 of 47459, 47459 missed, measured on 1456737e); rules by missed findings:
+1. `exported` (15691 missed)
+2. `unused-parameter` (14178 missed)
+3. `var-naming` (10923 missed)
+4. `package-comments` (2355 missed)
+5. `redefines-builtin-id` (1042 missed)
+6. `receiver-naming` (899 missed)
+7. `indent-error-flow` (472 missed)
+8. `empty-block` (320 missed)
+9. `dot-imports` (297 missed)
+10. `var-declaration` (238 missed)
+11. `context-as-argument` (237 missed)
+12. `increment-decrement` (189 missed)
+13. `error-strings` (183 missed)
+14. `unexported-return` (138 missed)
+15. `blank-imports` (82 missed)
+
+7 more rules: 215 missed.
 
 ## roslynator
 

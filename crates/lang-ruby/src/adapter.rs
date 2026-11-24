@@ -3,7 +3,7 @@
 //! `ffi` parses once and returns the tokens of the lex callback and the node spans (the C visitor).
 //! Newlines, comments and the separators of `%w[]` are not tokens here: they are the text between
 //! tokens, which `replay` splits (the grammar's `trivia` rows know `#` and `=begin` blocks and `\` line
-//! continuations). The text after `__END__` is one `Data` token. A node kind of Prism
+//! continuations). The `__END__` line and the text after it are one `Data` token. A node kind of Prism
 //! (`PM_CALL_NODE`) is the row `Call` of `grammars/ruby.grammar`. A heredoc's body is lexed after
 //! the rest of its opening line and Prism ends the nodes of that line before it: the body (text,
 //! interpolations, label) is one `HeredocBody` token, without nodes of its own, and the nodes that
@@ -70,7 +70,7 @@ fn node_kind_name(kind: u16) -> String {
 }
 
 /// Our tokens of the lexer's: the ones that are real text, in source order, and the data after
-/// `__END__`.
+/// `__END__` (with it).
 fn tokens(src: &str, raw: &[ffi::Token]) -> (Vec<Tok>, Vec<Heredoc>) {
     let mut kinds: Vec<Option<Option<SyntaxKind>>> = vec![None; 512];
     let mut out: Vec<Tok> = Vec::with_capacity(raw.len());
@@ -101,8 +101,10 @@ fn tokens(src: &str, raw: &[ffi::Token]) -> (Vec<Tok>, Vec<Heredoc>) {
                 line_end: end,
             });
         }
+        // `__END__` and the text after it are one `Data` token.
         if kind == k::KEYWORD && src[t.start as usize..].starts_with("__END__") {
-            data_from = Some(t.end);
+            data_from = Some(t.start);
+            continue;
         }
         out.push(Tok {
             kind,
@@ -130,7 +132,7 @@ fn tokens(src: &str, raw: &[ffi::Token]) -> (Vec<Tok>, Vec<Heredoc>) {
     if !out.is_sorted_by_key(|t| t.start) {
         out.sort_by_key(|t| t.start);
     }
-    if let Some(from) = data_from.filter(|&f| (f as usize) < src.len()) {
+    if let Some(from) = data_from {
         out.push(Tok {
             kind: k::DATA,
             start: from,

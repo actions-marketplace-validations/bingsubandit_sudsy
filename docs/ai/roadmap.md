@@ -34,6 +34,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 24 | TOML | at the bar; second-format not measured |
 | 25 | JavaScript / TypeScript | at the bar; Prettier options of the projects (168 files) |
 | 26 | Python | at the bar; `RUF100` 83 |
+| 27 | Go | lint only (gofmt formats): revive's 22 default rules are mapped to shared rules in batches, `exported` 15,691, `unused-parameter` 14,178, `var-naming` 10,923 first; needs types: `var-declaration`, `unexported-return`, `context-keys-type`, `time-naming`, `errorf` |
 
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP, JSON, YAML, XML, PowerShell, Markdown and the lint shares of JSON, YAML, GraphQL, StyleCop, PSScriptAnalyzer, SCSS and Less; recorded and not re-run: the C# format share (the corpus differential needs the CSharpier baseline) and the other lint shares.
 

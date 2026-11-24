@@ -113,6 +113,9 @@
   ids: [ruby]
   speed: [Ruby]
   lint: [{tool: rubocop, name: RuboCop}]
+- language: Go
+  ids: [go]
+  lint: [{tool: revive, name: revive}]
 - language: Dockerfile
   ids: [dockerfile]
   speed: [Dockerfile]

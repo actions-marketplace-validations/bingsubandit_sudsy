@@ -1,13 +1,12 @@
-//! Ruby: Prism parses behind `adapter`, which builds the lossless tree; `format.rs` lays the code
-//! out.
+//! Ruby: Prism parses behind `adapter`, which builds the lossless tree; the file is kept as written.
 //!
 //! concept: none (glue: provider entry)
 
 mod adapter;
-mod format;
 mod rules;
 
 pub use adapter::parse;
-pub use format::{RubyFormatter, option_schema};
+use core_config::shared;
 
+include!("schema.generated.rs");
 include!("provider.generated.rs");

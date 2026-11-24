@@ -33,13 +33,8 @@
 - language: Go
   gh: 440791
   so: 16.7
-  parser: 1.2 # tree-sitter-go (user decision): 19,644 of 19,887 files parse, 236 of 243 failures are Go 1.26 `new(expr)`
   format:
     - {tool: gofmt, gain: ~0.1, reach: ~0.95, cost: ~1.1, why: "official, ships with Go; whitespace only 0.7 + 0.1 x 4 missing parts (column cells, operator-precedence spacing, doc comments, //go:build pairs)"}
-  lint:
-    - {tool: revive defaults, gain: 0.4, reach: 0.99, cost: ~1.0, why: "primary lint tool (user decision), good fast third party; reach measured on 54,598 findings, rules judged by revive's behaviour"}
-    - {tool: golangci-lint defaults without types, gain: 0.4, reach: 0.07, cost: ~1.0, why: "reach measured, 126 of 1,915 findings"}
-    - {tool: golangci-lint defaults with go/types worker, gain: 0.4, reach: ~0.95, cost: ~1.3, why: "needs a go/types worker"}
 - language: CMake
   gh: 608541
   so: 11.7

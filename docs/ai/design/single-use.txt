@@ -308,7 +308,6 @@ local lang-kotlin/format/expr.rs binary-chain-layout # lang: kotlin
 local lang-kotlin/rewrite.rs source-rewrite # lang: kotlin
 local lang-makefile/format.rs key-value-layout # lang: makefile
 local lang-makefile/rules.rs unique-names # lang: makefile
-local lang-markdown/format/keep.rs verbatim-formatter # lang: markdown
 local lang-powershell/format.rs block-and-statements # lang: powershell
 local lang-protobuf/format.rs key-value-layout # lang: protobuf
 local lang-python/format/block.rs blank-lines-between-members # lang: python
@@ -317,7 +316,6 @@ local lang-python/format/op.rs binary-chain-layout # lang: python
 local lang-python/rules/lints.rs call-shape-checks # lang: python
 local lang-python/rules/misc.rs call-shape-checks # lang: python
 local lang-python/rules/stmts.rs statement-shape-checks # lang: python
-local lang-ruby/format.rs verbatim-formatter # lang: ruby
 local lang-ruby/rules/calls.rs call-shape-checks # lang: ruby
 local lang-shell/format.rs block-and-statements # lang: shell
 local lang-shell/format/arith.rs token-spacing-rows # lang: shell

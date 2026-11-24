@@ -50,6 +50,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | phpstan | 36.1% | `362a7f17` | 18 | 0 | 6 | 10 | 0 | 2 | 0 | 10 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
 | psscriptanalyzer | 87.1% | `7514c1f3` | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
+| revive | 0.0% | `1456737e` | 105 | 0 | 0 | 23 | 0 | 0 | 82 | 23 |
 | roslynator | 0.4% | `66718389` | 340 | 28 | 7 | 286 | 18 | 1 | 0 | 286 |
 | rubocop | 96.2% | `7514c1f3` | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
 | ruff | 94.6% | `7514c1f3` | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |

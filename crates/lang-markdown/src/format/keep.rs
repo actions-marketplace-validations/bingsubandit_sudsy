@@ -1,7 +1,6 @@
 //! Blocks and files kept as written.
 //!
-//! concept: new verbatim-formatter
-//! what: A file or node printed as written.
+//! concept: verbatim-file
 
 use super::*;
 

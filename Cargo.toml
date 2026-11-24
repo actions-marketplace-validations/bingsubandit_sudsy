@@ -64,6 +64,7 @@ pulldown-cmark = { version = "0.13", default-features = false, features = ["html
 tree-sitter-containerfile = { path = "grammars/tree-sitter-containerfile" }
 konomanoasa-tree-sitter-editorconfig = "0.9"
 konomanoasa-tree-sitter-gitignore = "0.7"
+tree-sitter-go = { path = "grammars/tree-sitter-go" }
 tree-sitter-graphql = { path = "grammars/tree-sitter-graphql" }
 tree-sitter-hcl = "1.1"
 tree-sitter-ini = { path = "grammars/tree-sitter-ini" }
@@ -104,6 +105,7 @@ lang-github-actions = { path = "crates/lang-github-actions" }
 lang-dockerfile = { path = "crates/lang-dockerfile", default-features = false }
 lang-editorconfig = { path = "crates/lang-editorconfig", default-features = false }
 lang-gitignore = { path = "crates/lang-gitignore", default-features = false }
+lang-go = { path = "crates/lang-go", default-features = false }
 lang-graphql = { path = "crates/lang-graphql", default-features = false }
 lang-hcl = { path = "crates/lang-hcl", default-features = false }
 lang-ini = { path = "crates/lang-ini", default-features = false }

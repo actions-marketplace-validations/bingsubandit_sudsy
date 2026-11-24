@@ -41,7 +41,7 @@ token DocEnd #delim
 // `#{` (the closing `}` is an RBrace) and the `#` of `#@a`.
 token EmbBegin #punctuation
 token EmbVar #punctuation
-// Text after `__END__`.
+// The `__END__` line and the text after it.
 token Data
 // The body of a heredoc with its closing label; it comes after the end of the line that opens it, so it is a child of the node that holds the opener (the rest of the line is before it).
 token HeredocBody #optional

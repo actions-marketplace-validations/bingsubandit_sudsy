@@ -125,6 +125,7 @@ fn data_after_end_is_kept() {
     for s in [
         "puts 1\n__END__\nraw # data\n\n",
         "puts 1\n__END__",
+        "puts 1\n__END__\n",
         "puts 1\n__END__\n\n\n",
     ] {
         assert_eq!(fmt(s), s);

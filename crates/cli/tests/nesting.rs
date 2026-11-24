@@ -18,6 +18,7 @@ const NESTED: &[(&str, &str, &str, &str, &str)] = &[
     ("dockerfile", "Dockerfile", "RUN ", "$(", ")"),
     ("editorconfig", ".editorconfig", "a = ", "[", "]"),
     ("gitignore", ".gitignore", "", "[", "]"),
+    ("go", "a.go", "package a; var x = ", "(", ")"),
     ("graphql", "a.graphql", "query ", "{", "}"),
     ("hcl", "a.tf", "a = ", "[", "]"),
     ("html", "a.html", "<p>", "(", ")"),
