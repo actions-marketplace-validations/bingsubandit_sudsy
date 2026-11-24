@@ -11,6 +11,7 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [design/unification.md](design/unification.md) | Plan: moving the older languages onto the shared core, rule clusters, ordered steps |
 | [design/discoverability.md](design/discoverability.md) | Plan: how people and agents find Sudsy (site pages, registry metadata, agents, integrations); phase 1 built |
 | [design/hard-cases.md](design/hard-cases.md) | Hard cases left open by unification steps, each with its numbers and missing capability |
+| [development/no-reference-tool.md](development/no-reference-tool.md) | Planning a language or leg that has no reference tool to compare with: corpus, decision table, checklist, numbers |
 | [design/symbol-index.md](design/symbol-index.md) | Plan: names across files and dependencies for lint rules (types, functions, members), phases and checkpoints |
 | [design/go.md](design/go.md) | Plan: Go, parser and revive lint, phases and checkpoints |
 | [design/cmake.md](design/cmake.md) | Plan: CMake, hand-written parser, cmake-lint and gersemi, phases and checkpoints |

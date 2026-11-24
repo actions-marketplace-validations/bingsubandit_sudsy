@@ -35,6 +35,8 @@ Which language is next comes from the new-language rows of [../parity/queue.md](
 Name what was not measured ("adapter itself", "memory"). The note ends with the recommendation, its exact pin and the costs accepted; it is deleted when the language's step 1 lands, the decision going into the language's formatting doc. Example: the PHP comparison, `git show e93070f:docs/ai/design/php.md`.
 
 ## First deliverable of a language step: the mapping table
+A leg with no reference tool is planned by [../development/no-reference-tool.md](../development/no-reference-tool.md): its decision table and checklist take the place of the tool's rows here.
+
 Before code, write a table (in the step's notes) with one row per reference-tool rule or style option and its entry in [../kit/index.md](../kit/index.md) (generated, one row per concept; search it by tool name and by behavior words):
 - **index entry** `<id>`: the behavior exists; the language reads its data or uses its module.
 - **adopt** `<id>`: the entry is SINGLE-USE or LOCAL (`docs/ai/design/single-use.txt`). The step moves both languages onto the shared form and proves the first language byte-identical (corpus before/after), so the entry leaves the list.
