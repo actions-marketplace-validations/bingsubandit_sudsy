@@ -677,6 +677,7 @@ def coverage(tool, sudsy, version, prefix, exe):
     require_corpus(tool, names)
     found = [f for f in found if f[0] not in fatal]
     reviewed = parity_format.Differences(folder, lint=True)  # `<file> <tool>:<rule> <line>`: a finding where the tool is wrong, pinned per finding
+    found = leave_out_not_comparable(found, reviewed)
     pinned = lambda f: reviewed.status(f"{f[0]} {tool}:{f[1]} {f[3]}") == "tool-wrong"  # a pinned finding leaves the proof run's count too
     left = [f for f in found if f[1] in layout]  # the layout findings; the proof run below replaces them by those `sudsy format` leaves
     if layout:  # the proof run: the formatter findings that remain after `sudsy format` are the ones that count as missing
@@ -777,6 +778,17 @@ def coverage(tool, sudsy, version, prefix, exe):
     print(f"{tool} {version}: {len(per)} rules in {len(names) - len(fatal)} files, preset:{preset}")
     target = target_numbers(tool, per, hit, total, owned, prefixed, sum(wrong.values()))
     return ratchet(tool, folder, target[0]) | missed_check(tool, folder, per, hit, target[1], leftover, wrong, prefixed)
+
+
+def leave_out_not_comparable(found, reviewed):
+    """`(findings, left out)`: the findings without those of the rules listed under `not-comparable` in differences.yaml (the corpus lacks what
+    they need: semantics of code outside it; the evidence per rule is the value), and the line every run prints for them."""
+    kept = [f for f in found if f[1] not in reviewed.not_comparable]
+    if reviewed.not_comparable:
+        count = collections.Counter(f[1] for f in found if f[1] in reviewed.not_comparable)
+        print(f"input filters: not comparable on this corpus {len(found) - len(kept)} findings of {len(count)} of {len(reviewed.not_comparable)} listed rules: "
+              + ", ".join(f"{r} {n}" for r, n in count.most_common()))
+    return kept
 
 
 def missed_rules(tool, per, leftover=None, wrong=None, prefix=""):

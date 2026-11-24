@@ -132,7 +132,7 @@ def install(spec, catalog, version, prefix):
     elif "dotnet-project" in spec:  # a .NET project of this repository, built into prefix at the tool's version
         stamp = hashlib.sha256(b"".join(f.read_bytes() for f in sorted((ROOT / spec["dotnet-project"]).glob("*.cs*")))).hexdigest()  # a changed source rebuilds
         if not (prefix / spec["dll"]).exists() or not (prefix / ".source-hash").exists() or (prefix / ".source-hash").read_text() != stamp:
-            run(["dotnet", "build", "-c", "Release", "--nologo", "-v:q", f"-p:StyleCopVersion={version}", "-o", prefix, spec["dotnet-project"]], ROOT)
+            run(["dotnet", "build", "-c", "Release", "--nologo", "-v:q", f"-p:AnalyzerPackage={spec['package']}", f"-p:AnalyzerVersion={version}", "-o", prefix, spec["dotnet-project"]], ROOT)
             (prefix / ".source-hash").write_text(stamp)
     elif "dotnet-tool" in spec:
         if not executable(prefix, spec["exe"]).exists():
@@ -402,6 +402,7 @@ class Differences:
         self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
         self.intentional = data.get("intentional") or {}
         self.pins = data.get("pins") or {}
+        self.not_comparable = data.get("not-comparable") or {}  # lint coverage: rule -> the evidence that its findings need what the corpus lacks (left out of the target, counted in every run)
         self.flags = data.get("flags") or {}  # reference-tool flag that turns a feature off -> why it is there (a named gap, printed with its count)
         self.refuted = set()  # `invalid-input` files that the reference parser accepts: Sudsy's rejection is a bug
         self.lint = lint

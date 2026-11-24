@@ -81,7 +81,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
-| C# | ████████░░ 85% CSharpier | ████████░░ 87% StyleCop<br>not measured Roslynator | Ready |
+| C# | ████████░░ 85% CSharpier | ████████░░ 87% StyleCop<br>░░░░░░░░░░ 0% Roslynator | Ready |
 | XML | ██████████ 100% CSharpier XML | 20 rules · no reference tool | Ready |
 | Dockerfile | ██████████ 100% stable · no reference tool | █████████░ 91% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |

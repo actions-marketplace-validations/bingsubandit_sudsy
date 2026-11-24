@@ -573,6 +573,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::Preset::new("csharp/google", include_str!("../presets/google.yaml")),
         core_config::Preset::new("csharp/csharpier-compat", include_str!("../presets/csharpier-compat.yaml")),
         core_config::Preset::new("csharp/stylecop", include_str!("../presets/stylecop.yaml")),
+        core_config::Preset::new("csharp/roslynator", include_str!("../presets/roslynator.yaml")),
         core_config::Preset::new("csharp/unity", include_str!("../presets/unity.yaml")),
         ])
     })

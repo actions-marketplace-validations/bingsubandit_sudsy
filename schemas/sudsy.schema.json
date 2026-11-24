@@ -9403,6 +9403,7 @@
           "preset:csharp/csharpier-compat",
           "preset:csharp/dotnet-runtime",
           "preset:csharp/google",
+          "preset:csharp/roslynator",
           "preset:csharp/stylecop",
           "preset:csharp/unity",
           "preset:css/stylelint-recommended",

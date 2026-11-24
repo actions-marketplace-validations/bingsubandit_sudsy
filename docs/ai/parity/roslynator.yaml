@@ -5,9 +5,9 @@ sources:
   - "https://www.nuget.org/packages/Roslynator.Analyzers"
   - "https://github.com/dotnet/roslynator (src/Analyzers.xml: id, title, default severity, IsEnabledByDefault)"
   - "https://josefpihrt.github.io/docs/roslynator/analyzers"
-scope: "NOT a full catalogue: only analyzers that overlap Sudsy's existing rules or the planned StyleCop rules (plus the formatting analyzers RCS0xxx that match SA layout rules). The remaining ~280 are intentionally not listed."
+scope: "All 340 analyzers of Analyzers.xml (RCS0xxx formatting analyzers included). The default set is the 120 RCS1xxx ids that Roslynator.Analyzers turns on (`scripts/parity.sh coverage roslynator`, docs/ai/development/parity.md)."
 entries:
-  RCS1075: rule no-empty-block
+  RCS1075: rule no-empty-catch
   RCS1046: rule async-suffix
   "RCS1047": "planned | Non-async method names should not end with Async (on by default in Roslynator). Proposal: option `unnecessary_suffix: true` on async-suffix, or a second rule `no-async-suffix`; low priority."
   RCS1084: sdk IDE0029
@@ -33,8 +33,8 @@ entries:
   "RCS1078": "planned | Use \"\" or string.Empty (off, default prefers \"\"; option roslynator_empty_string_style = literal|field). SA1122 requires string.Empty. Merged: one rule `empty-string-style` with option `style`."
   RCS1032: sdk IDE0047
   RCS1123: sdk IDE0048
-  RCS1048: planned | Use lambda expression instead of anonymous method (on). Same check as SA1130 (default-on there).
-  RCS1098: planned | Constant values should be placed on right side of comparisons (on). Same direction as SA1131.
+  RCS1048: rule use-lambda
+  RCS1098: rule constant-on-right
   "RCS1081": "planned | Split variable declaration (off): `int a, b;`. SA1132 is on by default and also covers fields (RCS1081 locals only: unverified)."
   RCS1052: planned | Declare each attribute separately (off).
   RCS0016: formatter
@@ -47,7 +47,7 @@ entries:
   RCS1026: formatter
   RCS1027: formatter
   RCS1091: planned | Remove empty region (off). SA1124 forbids all regions.
-  RCS1020: planned | Simplify Nullable<T> to T? (on). Same check as SA1125.
+  RCS1020: rule nullable-shorthand
   RCS1018: sdk IDE0040
   RCS1019: sdk IDE0036
   RCS1060: planned | Declare each type in separate file (off). Same check as SA1402 (on there).
@@ -65,8 +65,8 @@ entries:
   RCS0058: option csharp.format.final_newline
   RCS0057: formatter
   RCS1137: sdk CS1591
-  RCS1138: deferred | Add summary to documentation comment (Warning, on).
-  RCS1139: deferred | Add summary element to documentation comment (Warning, on).
+  RCS1138: rule doc-summary-text
+  RCS1139: rule doc-summary-required
   RCS1141: sdk CS1573
   RCS1142: sdk CS1712
   RCS1045: sdk IDE1006

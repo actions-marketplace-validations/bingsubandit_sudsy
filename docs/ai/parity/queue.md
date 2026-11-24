@@ -12,6 +12,7 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | PHP | lint PHPStan | 3 | 20.7% | 64.3 | 1055 findings | `method.notFound` 384, `class.notFound` 381, `staticMethod.notFound` 90, `function.notFound` 80 +3 more | 19 | 10.15 | 9632a5ce |
 | HTML | lint html-eslint | 2 | 63.5% | 21.5 | 76 findings | `use-baseline` 58, `indent` 51 | 6 | 7.17 | 0c8a3dcc |
 | SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
+| C# | lint Roslynator | 1 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 1.13 | 66718389 |
 
 Blocked on a decision:
 
@@ -19,7 +20,7 @@ Blocked on a decision:
 |---|---|---|---|---|
 | C / C++ | format clang-format | 31.3% | 53.7 | bar for the new comparison |
 
-Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target, blocked).
+Not measured: C / C++ lint clang-tidy (no target, blocked).
 
 New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff.
 
@@ -433,6 +434,28 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 15. `MissingLoopStatement` (1 missed)
 
 7 more rules: 7 missed.
+
+## roslynator
+
+1. `error-directive` (4 files): the preprocessor symbols of the platform are not set, so no branch of the `#if` chain is active (an `#error` or a missing value) and Sudsy refuses the file; Roslyn reads it
+Lint: target 0.4% (40 of 11111, 11071 missed, measured on 66718389); rules by missed findings:
+1. `RCS1157` (1714 missed) Fix: worker check, constant values of the members of a Flags enum (Values layer)
+2. `RCS1118` (1422 missed) Fix: worker check, a local assigned once with a constant initializer (flow and constant values)
+3. `RCS1123` (827 missed) Fix: pattern rule, mixed operators without parentheses (syntax only)
+4. `RCS1085` (760 missed) Fix: worker check, a property whose backing field no other member uses (binding)
+5. `RCS1021` (739 missed) Fix: pattern rule, a lambda with a block of one `return`
+6. `RCS1226` (664 missed) Fix: a doc-comment rule in the shared doc-comment module (paragraphs of long text), not a pattern
+7. `RCS1146` (657 missed) Fix: pattern rule, `$X != null && $X.$M` to `$X?.$M`
+8. `RCS1139` (374 missed) Fix: mapped to doc-summary-required, which reports on the declaration; Roslynator reports on the first line of the comment (a report-position option of the rule)
+9. `RCS1251` (357 missed) Fix: pattern rule, a record declaration with an empty body
+10. `RCS1001` (211 missed) Fix: pattern rule, a multi-line embedded statement without braces
+11. `RCS1032` (182 missed) Fix: pattern rule, parentheses around an expression that needs none
+12. `RCS1205` (170 missed) Fix: worker check, named arguments against the order of the parameters (binding)
+13. `RCS1058` (163 missed) Fix: pattern rule, `$X = $X + $Y`
+14. `RCS1242` (134 missed) Fix: worker check, a non-readonly struct passed by `in` (types)
+15. `RCS1214` (117 missed) Fix: pattern rule, an interpolated string with no interpolation
+
+81 more rules: 2580 missed.
 
 ## rubocop
 

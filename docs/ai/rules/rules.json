@@ -6299,11 +6299,6 @@
           "id": "no-empty",
           "partial": true,
           "tool": "eslint"
-        },
-        {
-          "id": "RCS1075",
-          "partial": false,
-          "tool": "Roslynator"
         }
       ]
     },
@@ -6362,7 +6357,8 @@
         "js/eslint-recommended",
         "powershell/psscriptanalyzer",
         "python/ruff",
-        "ruby/rubocop"
+        "ruby/rubocop",
+        "csharp/roslynator"
       ],
       "upstream": [
         {
@@ -6379,6 +6375,11 @@
           "id": "PSAvoidUsingEmptyCatchBlock",
           "partial": false,
           "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "RCS1075",
+          "partial": false,
+          "tool": "Roslynator"
         },
         {
           "id": "Lint/SuppressedException",
@@ -32229,9 +32230,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1098",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1131",
           "partial": false,
@@ -33024,9 +33031,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1139",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1604",
           "partial": false,
@@ -33083,9 +33096,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1138",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1606",
           "partial": false,
@@ -34416,9 +34435,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1020",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1125",
           "partial": false,
@@ -34436,7 +34461,9 @@
         "csharp"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "csharp/roslynator"
+      ],
       "upstream": [
         {
           "id": "RCS1202",
@@ -34881,7 +34908,9 @@
         "csharp"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "csharp/roslynator"
+      ],
       "upstream": [
         {
           "id": "RCS1179",
@@ -34919,6 +34948,7 @@
         }
       ],
       "presets": [
+        "csharp/roslynator",
         "csharp/unity"
       ],
       "upstream": [
@@ -35022,9 +35052,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1048",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1130",
           "partial": false,

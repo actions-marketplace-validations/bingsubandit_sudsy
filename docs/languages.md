@@ -181,8 +181,8 @@ The status and the headline numbers of every language are in the generated table
 
 - Needs the .NET 10 runtime. Config section: `csharp`.
 - **Formatter:** CSharpier 1.3.0. Corpus: aspnetcore, Roslyn and runtime; the files CSharpier leaves alone are not compared.
-- **Linter:** StyleCop and Roslynator rules. StyleCop (1.2.0-beta.556, run as an analyzer driver over the corpus) is covered at 24.6% of its findings (100,884 of 409,320), for the rules it ships on: `SA1101`, `SA1600`, `SA1611`, `SA1200` are not rules yet. Roslynator has no findings run.
-- **Presets:** `csharp/csharpier-compat`, `csharp/stylecop`, `csharp/dotnet-runtime`, `csharp/google`, `csharp/unity`.
+- **Linter:** StyleCop and Roslynator rules. StyleCop (1.2.0-beta.556, run as an analyzer driver over the corpus) is covered at 87.3% of its findings (357,012 of 409,179), for the rules it ships on. Roslynator (Roslynator.Analyzers 5.0.1, the same driver with the framework references) is covered at 0.4% (40 of 11,111): few of its default rules have a Sudsy equivalent yet; 2,605 findings of 8 rules that change without the references of the projects are left out.
+- **Presets:** `csharp/csharpier-compat`, `csharp/stylecop`, `csharp/roslynator`, `csharp/dotnet-runtime`, `csharp/google`, `csharp/unity`.
 - **Options:** `brace_newline`, `brace_same_line`, `trailing_commas`, `sort_usings`, `member_chain_*`, `preprocessor_symbols`, `derive_symbol_sets`, `blank_lines_between_members`, `empty_braces`. Default `line_width` is 120.
 - **Differences:**
   - Lists that differ by a comma, mostly initializers after wrapped arguments.

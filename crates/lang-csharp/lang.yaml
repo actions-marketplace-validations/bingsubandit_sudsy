@@ -245,4 +245,4 @@ options:
   - separate_using_groups:
       default: false
       doc: "With `sort_usings`: one blank line between the System usings and the others (only with `sort_usings_system_first`)."
-presets: [dotnet-runtime, google, csharpier-compat, stylecop, unity]
+presets: [dotnet-runtime, google, csharpier-compat, stylecop, roslynator, unity]

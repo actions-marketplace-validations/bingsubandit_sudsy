@@ -170,6 +170,12 @@ Agent host types (2026-11-14, agent-host `hostbench.sh`: cold test build, then `
 
 Slot size: 240-266 GB before pruning the outputs of earlier worktrees, 56-70 GB after; the WSL bench cache 33 GB, 16 GB without its dead directories.
 
+## C# lint parity runs (`scripts/parity.sh coverage stylecop|roslynator`, 7,659 files of the C# corpus)
+| Path | Number |
+|---|---|
+| `scripts/analyzer-driver` on the corpus (one compilation, `/usr/bin/time -v`; Linux arm64, 8 cores, 15 GB, one run) | StyleCop (no references): 212 s, peak 3.3 GB; Roslynator (`--framework --implicit-usings`): 137 s, peak 3.1 GB (the same run without them: 125 s, 3.1 GB) |
+| `sudsy lint` of the same files (debug CLI with worker, same machine) | `csharp/roslynator`: 335 s, peak 1.2 GB; `csharp/stylecop`: 337 s, peak 5.7 GB |
+
 ## Documentation site (`scripts/site.sh scale-test`, [development/site.md](../development/site.md))
 Astro 7.4.7 + Starlight 0.42.9, same machine, Node 24, one run, 10 000 synthetic rules (copies of the 101 real ones with unique ids): 14 891 pages (10 000 rule pages at a median 27 KB, 4 887 upstream-id redirect stubs of about 0.3 KB, fixed pages), full build 310 s, output 336 MB apparent size (about 33 KB per rule including its stubs and search index; GitHub Pages allows 1 GB, the workflow guard is 800 MB), Pagefind index 35 MB. Upstream-id stubs are plain files in `public/` (as Starlight pages they were 19 KB each: 21 986 pages, 690 MB). The real 101 rules: 9.5 MB, 9 s with `npm ci` cached.
 

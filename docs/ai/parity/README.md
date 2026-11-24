@@ -50,7 +50,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | phpstan | 20.7% | `9632a5ce` | 18 | 0 | 6 | 12 | 0 | 0 | 0 | 12 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
 | psscriptanalyzer | 87.1% | `7514c1f3` | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
-| roslynator | - | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |
+| roslynator | 0.4% | `66718389` | 340 | 28 | 7 | 286 | 18 | 1 | 0 | 286 |
 | rubocop | 96.2% | `7514c1f3` | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
 | ruff | 94.6% | `7514c1f3` | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
 | shellcheck | 86.6% | `7514c1f3` | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
@@ -100,7 +100,6 @@ Not measured:
 
 | Tool | Reason |
 |---|---|
-| Roslynator | the compiler skips analyzers when a compilation has errors and the C# corpus does not compile on its own (118,604 compiler errors); needs an analyzer driver that tolerates errors, as `scripts/stylecop-driver` does for StyleCop |
 | clang-tidy | no catalog, and Sudsy has no C or C++ lint rules; a share would be 0 by construction |
 | detekt, PMD, PHPCS | not catalogued |
 | eslint-plugin-jsonc | the JSON corpus is a parser test suite (JSONTestSuite), no real-world files |

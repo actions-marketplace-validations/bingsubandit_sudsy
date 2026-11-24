@@ -128,6 +128,18 @@ class Runner(unittest.TestCase):
             self.assertIsNone(reviewed.status("a.mk checkmake:r1 5"))
 
 
+class NotComparable(unittest.TestCase):
+    def test_listed_rules_leave_the_findings_and_are_counted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            (folder / "differences.yaml").write_text("not-comparable:\n  R2: the tool needs types the corpus lacks\n", encoding="utf-8")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                kept = pl.leave_out_not_comparable([("a", "R1", "", 1), ("a", "R2", "", 2), ("b", "R2", "", 3)], pf.Differences(folder, lint=True))
+        self.assertEqual(kept, [("a", "R1", "", 1)])
+        self.assertIn("not comparable on this corpus 2 findings of 1 of 1 listed rules: R2 2", out.getvalue())
+
+
 class Missed(unittest.TestCase):
     def check(self, hit, total, text=""):
         with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):
