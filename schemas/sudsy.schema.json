@@ -8054,6 +8054,11 @@
               "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
               "type": "boolean"
             },
+            "space_after_cast": {
+              "default": false,
+              "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
+              "type": "boolean"
+            },
             "space_before_parens": {
               "default": "control_statements",
               "description": "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never.",
@@ -8403,6 +8408,11 @@
             "short_loops": {
               "default": false,
               "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
+              "type": "boolean"
+            },
+            "space_after_cast": {
+              "default": false,
+              "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
               "type": "boolean"
             },
             "space_before_parens": {
@@ -11995,6 +12005,11 @@
                     "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
                     "type": "boolean"
                   },
+                  "space_after_cast": {
+                    "default": false,
+                    "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
+                    "type": "boolean"
+                  },
                   "space_before_parens": {
                     "default": "control_statements",
                     "description": "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never.",
@@ -12344,6 +12359,11 @@
                   "short_loops": {
                     "default": false,
                     "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
+                    "type": "boolean"
+                  },
+                  "space_after_cast": {
+                    "default": false,
+                    "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
                     "type": "boolean"
                   },
                   "space_before_parens": {

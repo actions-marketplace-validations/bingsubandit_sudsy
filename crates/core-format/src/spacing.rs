@@ -549,6 +549,9 @@ pub struct SpaceRules {
     pointer: Pointer,
     /// The braces of the `braced_list_padding` kind sets.
     pad: Pad,
+    /// The `cast_node`, `cast_group`, `cast_close` and `cast_keep` kind sets: a cast node, its type group, the token that closes
+    /// it, and the tokens that may be an operator behind it (`(a) * b` the parse took for a cast: the blank stays).
+    cast: [Vec<SyntaxKind>; 4],
     /// The `binary_node`, `binary_clear` and `binary_cast` kind sets: the nodes of binary operations, the parents
     /// that prove a name `*` name (`T *x`, `a * b`) is a product, and the tokens that may close a cast type
     /// (`(T)*p`, `(T)&x`: a mark between it and a name stays as written).
@@ -567,7 +570,7 @@ struct Pad {
 }
 
 /// The kind sets of the declarator marks: `pointer` (the marks), `pointer_in` (their parents) and
-/// `pointer_in_under` (the grandparents of marks in a parenthesized type), `pointer_type` (what
+/// `pointer_in_under` (the grandparents of marks in a parenthesized type), `pointer_in_loose` (grandparents of marks that need no `pointer_end` behind them: the declaration of a range `for` or a `catch`), `pointer_ref` (marks no other mark follows), `pointer_type` (what
 /// stands before the first mark: a type), `pointer_name` (what a name behind the last mark is),
 /// `pointer_bare` (parents that hold types only, and what `pointer_in_under` names, where a mark needs a `pointer_end` token behind it
 /// to be no multiplication).
@@ -576,6 +579,8 @@ struct Pointer {
     marks: Vec<SyntaxKind>,
     within: Vec<SyntaxKind>,
     under: Vec<SyntaxKind>,
+    loose: Vec<SyntaxKind>,
+    refs: Vec<SyntaxKind>,
     types: Vec<SyntaxKind>,
     names: Vec<SyntaxKind>,
     bare: Vec<SyntaxKind>,
@@ -698,12 +703,15 @@ impl SpaceRules {
                 marks: set("pointer"),
                 within: set("pointer_in"),
                 under: set("pointer_in_under"),
+                loose: set("pointer_in_loose"),
+                refs: set("pointer_ref"),
                 types: set("pointer_type"),
                 names: set("pointer_name"),
                 bare: set("pointer_bare"),
                 end: set("pointer_end"),
             },
             binary: (set("binary_node"), set("binary_clear"), set("binary_cast")),
+            cast: ["cast_node", "cast_group", "cast_close", "cast_keep"].map(set),
             pad: Pad {
                 except: set("pad_except"),
                 lists: set("pad_list"),
@@ -780,7 +788,9 @@ impl SpaceRules {
             return false;
         };
         if !(p.within.contains(&parent.kind())
-            || parent.parent().is_some_and(|g| p.under.contains(&g.kind())))
+            || parent
+                .parent()
+                .is_some_and(|g| p.under.contains(&g.kind()) || p.loose.contains(&g.kind())))
         {
             return false;
         }
@@ -790,6 +800,9 @@ impl SpaceRules {
         }
         if !prev.is_some_and(|x| p.types.contains(&x.kind()) && x.text() != "operator") {
             return false;
+        }
+        if p.refs.contains(&t.kind()) && next_code(t).is_some_and(|x| p.marks.contains(&x.kind())) {
+            return false; // `it && *it`: no pointer or reference follows a reference
         }
         if p.bare.contains(&parent.kind())
             || parent.parent().is_some_and(|g| p.under.contains(&g.kind()))
@@ -848,6 +861,26 @@ impl SpaceRules {
         let declaration = (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
             && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));
         (clear || !declaration).then_some(true)
+    }
+
+    /// Does the language have casts (`cast_node` kind set)?
+    pub fn has_cast(&self) -> bool {
+        !self.cast[0].is_empty()
+    }
+
+    /// The blank between the closing token of a cast's type group and its operand: `spaced` stands for
+    /// one (`(int) x`). `None` for other pairs.
+    pub fn cast_gap(&self, a: &SyntaxToken, b: &SyntaxToken, spaced: bool) -> Option<bool> {
+        if !self.cast[2].contains(&a.kind()) || self.cast[3].contains(&b.kind()) {
+            return None;
+        }
+        let group = a.parent().filter(|g| self.cast[1].contains(&g.kind()))?;
+        let node = group
+            .parent()
+            .filter(|n| self.cast[0].contains(&n.kind()))?;
+        node.text_range()
+            .contains_range(b.text_range())
+            .then_some(spaced)
     }
 
     /// Does the language pad braces (`pad_list` kind set)?

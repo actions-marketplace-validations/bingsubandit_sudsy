@@ -24,11 +24,14 @@ kind=Arrow&parent=FunctionDeclaration|Lambda / * : yes
 * / kind=Arrow&parent=FunctionDeclaration|Lambda : yes
 kind=Number / kind=Ellipsis : keep
 kind=Ellipsis / kind=Number : keep
+kind=Ellipsis / kind=Greater&parent=TemplateParameters : no
 kind=Ellipsis&parent=TemplateParameters / * : yes
 kind=Ellipsis / kind=Ident : yes
 kind=Ellipsis / * : no
 * / kind=Ellipsis&parent!=TemplateParameters : no
 # Keywords and their parentheses.
+kind=String / kind=Lpar : no
+kind=Rbrace&parent=Block / exact=while&parent=DoStatement : yes
 exact=constexpr / kind=Lpar : yes
 exact=if|for|while|switch|catch / kind=Lpar : yes
 exact=return|co_return|co_yield|co_await|throw|case|else|do|new|delete / kind=Lpar : yes
@@ -55,6 +58,7 @@ kind=Star|Amp|AmpAmp / kind=Star|Amp|AmpAmp&parent=Unary : keep
 kind=Star|Amp|AmpAmp&parent=Binary / * : keep
 * / kind=Plus|Minus|Star|Slash|Percent|Caret|Amp|Pipe|LessLess|GreaterGreater|Equal|PlusEq|MinusEq|StarEq|SlashEq|PercentEq|CaretEq|AmpEq|PipeEq|LessLessEq|GreaterGreaterEq|EqEq|BangEq|Less|Greater|LessEq|GreaterEq|Spaceship|AmpAmp|PipePipe&parent=Binary|Assignment : yes
 kind=Plus|Minus|Star|Slash|Percent|Caret|Amp|Pipe|LessLess|GreaterGreater|Equal|PlusEq|MinusEq|StarEq|SlashEq|PercentEq|CaretEq|AmpEq|PipeEq|LessLessEq|GreaterGreaterEq|EqEq|BangEq|Less|Greater|LessEq|GreaterEq|Spaceship|AmpAmp|PipePipe&parent=Binary|Assignment / * : yes
+kind=Question&parent=Ternary / kind=Colon : no
 * / kind=Question|Colon&parent=Ternary : keep
 kind=Question|Colon&parent=Ternary / * : keep
 * / kind=PlusPlus|MinusMinus&parent=Postfix : no

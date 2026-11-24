@@ -22,6 +22,8 @@ pub const POINTER_ALIGNMENT: core_config::OptId = core_config::opt::POINTER_ALIG
 #[allow(dead_code)]
 pub const DERIVE_POINTER_ALIGNMENT: core_config::OptId = core_config::opt::DERIVE_POINTER_ALIGNMENT;
 #[allow(dead_code)]
+pub const SPACE_AFTER_CAST: core_config::OptId = core_config::opt::SPACE_AFTER_CAST;
+#[allow(dead_code)]
 pub const BRACED_LIST_PADDING: core_config::OptId = core_config::opt::BRACED_LIST_PADDING;
 #[allow(dead_code)]
 pub const BRACE_WRAPPING: core_config::OptId = core_config::opt::BRACE_WRAPPING;
@@ -78,17 +80,23 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("indent_pp_directives", "tight", "", &["Directive"]),
     ("namespace_indentation", "flat", "", &["NamespaceDeclaration"]),
     ("pointer_alignment", "binary_cast", "", &["Rpar"]),
-    ("pointer_alignment", "binary_clear", "", &["Assignment", "ReturnStatement", "Binary", "Ternary", "Index", "Unary"]),
+    ("pointer_alignment", "binary_clear", "", &["Assignment", "ReturnStatement", "Binary", "Ternary", "Index", "Unary", "Arguments"]),
     ("pointer_alignment", "binary_node", "", &["Binary"]),
     ("pointer_alignment", "pointer", "", &["Star", "Amp", "AmpAmp"]),
     ("pointer_alignment", "pointer_bare", "", &["TemplateArguments"]),
     ("pointer_alignment", "pointer_end", "", &["Greater", "Comma", "Rpar", "Ellipsis", "Lsqb"]),
     ("pointer_alignment", "pointer_in", "", &["Parameter", "FunctionDeclaration", "SimpleDeclaration", "TemplateArguments"]),
-    ("pointer_alignment", "pointer_in_under", "", &["Cast"]),
+    ("pointer_alignment", "pointer_in_loose", "", &["ForStatement", "CatchClause"]),
+    ("pointer_alignment", "pointer_in_under", "", &["Cast", "Parameter"]),
     ("pointer_alignment", "pointer_name", "", &["Ident", "Keyword"]),
+    ("pointer_alignment", "pointer_ref", "", &["Amp", "AmpAmp"]),
     ("pointer_alignment", "pointer_type", "", &["Ident", "Keyword", "Greater"]),
     ("pointer_alignment", "tight_after", "", &["Ellipsis"]),
     ("pointer_alignment", "tight_behind", "", &["Star", "Amp", "AmpAmp"]),
+    ("space_after_cast", "cast_close", "", &["Rpar"]),
+    ("space_after_cast", "cast_group", "", &["ParenGroup"]),
+    ("space_after_cast", "cast_keep", "", &["Star", "Amp", "AmpAmp", "Plus", "Minus"]),
+    ("space_after_cast", "cast_node", "", &["Cast"]),
     ("braced_list_padding", "pad_close", "", &["Rbrace"]),
     ("braced_list_padding", "pad_except", "", &["Semi"]),
     ("braced_list_padding", "pad_list", "", &["InitList"]),
@@ -174,6 +182,10 @@ pub fn pointer_alignment(o: &core_config::ResolvedOptions) -> PointerAlignment {
 #[allow(dead_code)]
 pub fn derive_pointer_alignment(o: &core_config::ResolvedOptions) -> bool {
     o.flag(DERIVE_POINTER_ALIGNMENT, false)
+}
+#[allow(dead_code)]
+pub fn space_after_cast(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(SPACE_AFTER_CAST, false)
 }
 #[allow(dead_code)]
 pub fn braced_list_padding(o: &core_config::ResolvedOptions) -> bool {
@@ -358,6 +370,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::NAMESPACE_INDENTATION, &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
         core_config::OptionDef::choice(core_config::opt::POINTER_ALIGNMENT, &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
         core_config::OptionDef::boolean(core_config::opt::DERIVE_POINTER_ALIGNMENT, false, "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."),
+        core_config::OptionDef::boolean(core_config::opt::SPACE_AFTER_CAST, false, "A blank after the `)` of a C cast (`(int) x` against `(int)x`)."),
         core_config::OptionDef::boolean(core_config::opt::BRACED_LIST_PADDING, false, "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`."),
         core_config::OptionDef::words(core_config::opt::BRACE_WRAPPING, &[], "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."),
         core_config::OptionDef::words(core_config::opt::SPLIT_EMPTY_BRACES, &[], "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`."),

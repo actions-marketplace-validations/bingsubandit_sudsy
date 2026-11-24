@@ -110,6 +110,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `short_loops` | bool | cpp `false`, c `false` |
 | `single_attribute_per_line` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `single_quote` | bool | css `false`, scss `false`, less `false` |
+| `space_after_cast` | bool | cpp `false`, c `false` |
 | `space_before_parens` | `never`, `control_statements`, `always` | cpp `control_statements`, c `control_statements` |
 | `spaces_before_trailing_comments` | int 0-16 | cpp `1`, c `1` |
 | `split_empty_braces` | list of words | cpp `[]`, c `[]` |

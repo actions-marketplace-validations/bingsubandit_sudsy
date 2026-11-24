@@ -602,3 +602,35 @@ fn a_call_with_a_block_is_a_function_unless_it_is_a_loop_macro() {
         "void f() {\n  list_for_each(a, b) {\n    x();\n  }\n  my_loop(a) {\n    x();\n  }\n}\n"
     );
 }
+
+#[test]
+fn a_cast_has_a_blank_after_it_by_option() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let src = "void f() {\n  x = (int) a.b;\n  char *p = (char *) q;\n}\n";
+    for (spaced, want) in [
+        (
+            false,
+            "void f() {\n  x = (int)a.b;\n  char *p = (char *)q;\n}\n",
+        ),
+        (
+            true,
+            "void f() {\n  x = (int) a.b;\n  char *p = (char *) q;\n}\n",
+        ),
+    ] {
+        let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+        formatting.options = vec![("space_after_cast", V::Bool(spaced))];
+        assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+    }
+}
+
+#[test]
+fn spacing_of_declarators_in_conditions_templates_and_small_forms() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let src = "template <typename... >\nvoid g(Ts &&...args);\ntemplate <typename T>\nvoid h(T&& rng, T&b);\nvoid f() {\n  x = a ? : b;\n  asm(\"x\" : \"r\" (v));\n  do {\n    y++;\n  }while (z);\n  for (auto&x : v) {\n  }\n  for (i = 0; i < n && ok; ++i) {\n  }\n  for (auto it = e; it && *it; ++it) {\n  }\n  try {\n  } catch (E &e) {\n  }\n  f(Size *x);\n}\n";
+    assert_eq!(
+        core_format::testing::assert_formats(&formatting, src),
+        "template <typename...> void g(Ts &&...args);\ntemplate <typename T> void h(T &&rng, T &b);\nvoid f() {\n  x = a ?: b;\n  asm(\"x\" : \"r\"(v));\n  do {\n    y++;\n  } while (z);\n  for (auto &x : v) {\n  }\n  for (i = 0; i < n && ok; ++i) {\n  }\n  for (auto it = e; it && *it; ++it) {\n  }\n  try {\n  } catch (E &e) {\n  }\n  f(Size * x);\n}\n"
+    );
+}

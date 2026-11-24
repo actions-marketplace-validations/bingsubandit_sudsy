@@ -194,33 +194,34 @@ pub const SINGLE_QUOTE: OptId = OptId(191);
 pub const SKIP_GENERATED: OptId = OptId(192);
 pub const SORT_USINGS: OptId = OptId(193);
 pub const SORT_USINGS_SYSTEM_FIRST: OptId = OptId(194);
-pub const SPACE_AFTER_DELEGATE: OptId = OptId(195);
-pub const SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE: OptId = OptId(196);
-pub const SPACE_AROUND_ASSIGNMENT: OptId = OptId(197);
-pub const SPACE_AROUND_EQUALS: OptId = OptId(198);
-pub const SPACE_BEFORE_COLON: OptId = OptId(199);
-pub const SPACE_BEFORE_PARENS: OptId = OptId(200);
-pub const SPACE_BETWEEN_EMPTY_FOR_CLAUSES: OptId = OptId(201);
-pub const SPACES_BEFORE_TRAILING_COMMENTS: OptId = OptId(202);
-pub const SPLIT_EMPTY_BRACES: OptId = OptId(203);
-pub const STACKED_FLUSH_KINDS: OptId = OptId(204);
-pub const SWITCH_ARM_LAYOUT: OptId = OptId(205);
-pub const TARGET_VERSION: OptId = OptId(206);
-pub const TRAILING_COMMA_BEFORE: OptId = OptId(207);
-pub const TRAILING_COMMA_LAST_ENTRY: OptId = OptId(208);
-pub const TRAILING_COMMAS: OptId = OptId(209);
-pub const TYPE_ARGUMENT_COMPLEX_KINDS: OptId = OptId(210);
-pub const TYPE_CASE: OptId = OptId(211);
-pub const TYPE_USE_ANNOTATIONS: OptId = OptId(212);
-pub const UNBREAKABLE_SINGLE_ITEM_LISTS: OptId = OptId(213);
-pub const VOID_ELEMENT_STYLE: OptId = OptId(214);
-pub const WHITESPACE_SENSITIVITY: OptId = OptId(215);
-pub const WRAP_LINES: OptId = OptId(216);
-pub const WRAPPED_BODY_INDENT_WORDS: OptId = OptId(217);
-pub const WRAPPED_BRACE_LINE: OptId = OptId(218);
+pub const SPACE_AFTER_CAST: OptId = OptId(195);
+pub const SPACE_AFTER_DELEGATE: OptId = OptId(196);
+pub const SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE: OptId = OptId(197);
+pub const SPACE_AROUND_ASSIGNMENT: OptId = OptId(198);
+pub const SPACE_AROUND_EQUALS: OptId = OptId(199);
+pub const SPACE_BEFORE_COLON: OptId = OptId(200);
+pub const SPACE_BEFORE_PARENS: OptId = OptId(201);
+pub const SPACE_BETWEEN_EMPTY_FOR_CLAUSES: OptId = OptId(202);
+pub const SPACES_BEFORE_TRAILING_COMMENTS: OptId = OptId(203);
+pub const SPLIT_EMPTY_BRACES: OptId = OptId(204);
+pub const STACKED_FLUSH_KINDS: OptId = OptId(205);
+pub const SWITCH_ARM_LAYOUT: OptId = OptId(206);
+pub const TARGET_VERSION: OptId = OptId(207);
+pub const TRAILING_COMMA_BEFORE: OptId = OptId(208);
+pub const TRAILING_COMMA_LAST_ENTRY: OptId = OptId(209);
+pub const TRAILING_COMMAS: OptId = OptId(210);
+pub const TYPE_ARGUMENT_COMPLEX_KINDS: OptId = OptId(211);
+pub const TYPE_CASE: OptId = OptId(212);
+pub const TYPE_USE_ANNOTATIONS: OptId = OptId(213);
+pub const UNBREAKABLE_SINGLE_ITEM_LISTS: OptId = OptId(214);
+pub const VOID_ELEMENT_STYLE: OptId = OptId(215);
+pub const WHITESPACE_SENSITIVITY: OptId = OptId(216);
+pub const WRAP_LINES: OptId = OptId(217);
+pub const WRAPPED_BODY_INDENT_WORDS: OptId = OptId(218);
+pub const WRAPPED_BRACE_LINE: OptId = OptId(219);
 
 /// Option names sorted; an id is the index.
-pub static NAMES: [&str; 219] = [
+pub static NAMES: [&str; 220] = [
     "access_modifier_outdent",
     "accessor_blank_lines",
     "align_after_open_bracket",
@@ -416,6 +417,7 @@ pub static NAMES: [&str; 219] = [
     "skip_generated",
     "sort_usings",
     "sort_usings_system_first",
+    "space_after_cast",
     "space_after_delegate",
     "space_after_empty_last_for_clause",
     "space_around_assignment",

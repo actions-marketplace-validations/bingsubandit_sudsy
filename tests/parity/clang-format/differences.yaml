@@ -25,22 +25,24 @@ differences:
   assignment-space: "gap  blanks around `=` and compound assignments the parse does not see as an Assignment (designated initializers `.f=1`, default arguments)"
   string-macro-space: "gap  blank between a string literal and a macro name after it in C (`\"a\"B`, `\"%\"PRIx64`): clang-format writes one blank, Sudsy keeps the source"
   blank-lines-other: "gap  other blank-line cases: after `{` of a block, before an access specifier (EmptyLineBeforeAccessModifier)"
+  sort-using-declarations: "gap  `using` declarations that clang-format sorts (SortUsingDeclarations; a reorder of tokens)"
   token-change: "gap  a token that differs between the outputs: a string literal clang-format splits where the comparison cannot join it, or a comment with trailing blanks (the tool's own artifacts; no token of Sudsy is changed or lost)"
   escaped-newline-align: "gap  the `\\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy pads at line_width and keeps the lines"
 files:
-  llvm: brace-own-line-in-source:27, comment-line-indent-or-join:12, comma-space:11, binary-op-space:9, pointer-align:8, cast-space:7, angle-brackets-merged-by-reference:6, spacing-rare:6, space-before-paren:6, braced-list-padding:5, empty-body-braces:5, trailing-comment-spacing:4, statement-joined-by-reference:3, continuation-indent-of-non-wrap-line:3, angle-space:3, blank-lines-other:3, token-change:3, brace-own-line-in-reference:2, ternary-colon-space:2, assignment-space:1, call-after-paren-space:1, format-off:1, statement-split-by-reference:1
-  fmt: spacing-rare:8, escaped-newline-align:4, brace-own-line-in-reference:3, comment-line-indent-or-join:3, trailing-comment-spacing:2, pointer-align:1, angle-space:1, brace-own-line-in-source:1, ternary-colon-space:1, statement-split-by-reference:1, continuation-indent-of-non-wrap-line:1, assignment-space:1, angle-brackets-merged-by-reference:1
-  range-v3: angle-space:121, brace-own-line-in-source:85, angle-brackets-merged-by-reference:54, reference-align:37, comment-line-indent-or-join:20, binary-op-space:15, braced-list-padding:14, token-change:12, pointer-align:12, trailing-comment-spacing:10, spacing-rare:10, cast-space:9, continuation-indent-of-non-wrap-line:9, format-off:6, blank-lines-other:6, escaped-newline-align:3, space-before-paren:2, statement-joined-by-reference:1, empty-body-braces:1, blank-before-close-brace:1, brace-own-line-in-reference:1, comma-space:1
-  folly: reference-align:401, pointer-align:197, brace-own-line-in-source:172, comment-line-indent-or-join:58, angle-space:39, space-before-paren:21, trailing-comment-spacing:19, binary-op-space:18, continuation-indent-of-non-wrap-line:17, format-off:15, assignment-space:14, escaped-newline-align:12, cast-space:11, brace-own-line-in-reference:10, braced-list-padding:7, statement-joined-by-reference:6, spacing-rare:5, statement-split-by-reference:5, comma-space:4, empty-body-braces:2, ternary-colon-space:2
-  linux: cast-space:273, brace-own-line-in-reference:241, escaped-newline-align:113, comment-line-indent-or-join:89, binary-op-space:87, spacing-rare:87, statement-joined-by-reference:79, pointer-align:73, comma-space:73, continuation-indent-of-non-wrap-line:68, empty-body-braces:64, statement-split-by-reference:61, ternary-colon-space:56, call-after-paren-space:38, blank-before-close-brace:37, space-before-paren:32, braced-list-padding:30, brace-own-line-in-source:29, reference-align:24, preprocessor-token-space:23, trailing-comment-spacing:18, string-macro-space:7, blank-lines-other:5, assignment-space:3, token-change:2, angle-space:1
-  sqlite: comment-line-indent-or-join:74, comma-space:32, pointer-align:31, binary-op-space:31, braced-list-padding:25, trailing-comment-spacing:18, cast-space:16, space-before-paren:15, brace-own-line-in-source:12, spacing-rare:10, angle-space:9, continuation-indent-of-non-wrap-line:7, reference-align:5, statement-joined-by-reference:3, assignment-space:3, empty-body-braces:2, ternary-colon-space:2, brace-own-line-in-reference:1, blank-before-close-brace:1, token-change:1, escaped-newline-align:1, statement-split-by-reference:1
-  google: trailing-comment-spacing:4, angle-space:2, statement-joined-by-reference:1, brace-own-line-in-source:1
+  llvm: brace-own-line-in-source:27, comment-line-indent-or-join:12, comma-space:11, binary-op-space:8, space-before-paren:8, pointer-align:8, spacing-rare:7, angle-brackets-merged-by-reference:6, braced-list-padding:5, empty-body-braces:5, cast-space:4, trailing-comment-spacing:4, continuation-indent-of-non-wrap-line:3, statement-joined-by-reference:3, blank-lines-other:3, sort-using-declarations:3, brace-own-line-in-reference:2, ternary-colon-space:2, angle-space:1, assignment-space:1, format-off:1, statement-split-by-reference:1
+  fmt: spacing-rare:7, brace-own-line-in-reference:3, binary-op-space:3, escaped-newline-align:3, comment-line-indent-or-join:3, trailing-comment-spacing:2, pointer-align:2, angle-brackets-merged-by-reference:2, statement-joined-by-reference:1, ternary-colon-space:1, brace-own-line-in-source:1, statement-split-by-reference:1, assignment-space:1, continuation-indent-of-non-wrap-line:1
+  range-v3: angle-space:115, brace-own-line-in-source:86, angle-brackets-merged-by-reference:54, reference-align:37, comment-line-indent-or-join:20, binary-op-space:15, braced-list-padding:14, pointer-align:12, sort-using-declarations:11, trailing-comment-spacing:10, spacing-rare:10, continuation-indent-of-non-wrap-line:10, cast-space:8, format-off:6, blank-lines-other:6, escaped-newline-align:3, space-before-paren:2, token-change:1, statement-joined-by-reference:1, empty-body-braces:1, blank-before-close-brace:1, brace-own-line-in-reference:1, comma-space:1
+  folly: reference-align:208, brace-own-line-in-source:201, pointer-align:191, comment-line-indent-or-join:66, space-before-paren:24, trailing-comment-spacing:22, binary-op-space:21, angle-space:21, continuation-indent-of-non-wrap-line:18, assignment-space:16, format-off:15, cast-space:12, escaped-newline-align:12, brace-own-line-in-reference:11, braced-list-padding:8, spacing-rare:7, statement-joined-by-reference:7, comma-space:6, statement-split-by-reference:5, empty-body-braces:3, ternary-colon-space:1
+  linux: continuation-indent-of-non-wrap-line:132, escaped-newline-align:125, comment-line-indent-or-join:111, statement-split-by-reference:98, binary-op-space:97, statement-joined-by-reference:89, pointer-align:84, comma-space:80, cast-space:61, brace-own-line-in-reference:57, blank-before-close-brace:56, reference-align:50, spacing-rare:45, space-before-paren:35, brace-own-line-in-source:33, ternary-colon-space:33, preprocessor-token-space:25, trailing-comment-spacing:20, braced-list-padding:20, call-after-paren-space:13, string-macro-space:7, blank-lines-other:7, empty-body-braces:5, assignment-space:4, token-change:2, angle-space:1
+  sqlite: comment-line-indent-or-join:83, comma-space:32, binary-op-space:28, pointer-align:27, trailing-comment-spacing:19, braced-list-padding:19, space-before-paren:17, brace-own-line-in-source:12, cast-space:11, spacing-rare:11, angle-space:9, continuation-indent-of-non-wrap-line:7, reference-align:5, statement-joined-by-reference:3, empty-body-braces:3, assignment-space:3, ternary-colon-space:2, brace-own-line-in-reference:1, blank-before-close-brace:1, token-change:1, escaped-newline-align:1, statement-split-by-reference:1
+  google: trailing-comment-spacing:4, statement-joined-by-reference:2, angle-space:1, brace-own-line-in-source:1
   chromium: trailing-comment-spacing:4, pointer-align:2, comment-line-indent-or-join:1, angle-space:1
-  mozilla: angle-space:3, brace-own-line-in-reference:2, preprocessor-token-space:1, continuation-indent-of-non-wrap-line:1, comment-line-indent-or-join:1, pointer-align:1, comma-space:1
-  webkit: continuation-indent-of-non-wrap-line:4, brace-own-line-in-reference:2, trailing-comment-spacing:2, comment-line-indent-or-join:1, pointer-align:1
-  gnu: space-before-paren:5, call-after-paren-space:2, empty-body-braces:1, brace-own-line-in-reference:1, comma-space:1
+  mozilla: angle-space:3, brace-own-line-in-reference:2, continuation-indent-of-non-wrap-line:1, preprocessor-token-space:1, comment-line-indent-or-join:1, pointer-align:1, comma-space:1
+  webkit: continuation-indent-of-non-wrap-line:4, brace-own-line-in-reference:2, trailing-comment-spacing:2, pointer-align:1, comment-line-indent-or-join:1
+  gnu: space-before-paren:5, call-after-paren-space:2, brace-own-line-in-reference:2, comma-space:1
   microsoft: brace-own-line-in-reference:8, continuation-indent-of-non-wrap-line:1, comment-line-indent-or-join:1
 fixes:
+  sort-using-declarations: "an option in shared Rust next to import ordering, or turn it off in the styles like SortIncludes"
   pointer-align: "pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator"
   reference-align: "the same rows as pointer-align for `&` and `&&`"
   binary-op-space: "[space] rows for the operators of Binary nodes; directive conditions need the expression parse of `#if` lines"
@@ -70,39 +72,39 @@ fixes:
   token-change: "none: the pairs are listed (62 `> >` as `>>` are their own gap, 14 are the using sort, the rest are two split strings and two comments); no meaning bug"
   escaped-newline-align: "align_escaped_newlines per style (Linux: Left) and the macro body wrap of the shared macro layout"
 sets:
-  - "brace-placement Rpar|Lbrace in Block (e.g. `) {`): +100 files, 100 equal after it"
-  - "spacing Rpar|Ident in Cast (e.g. `) isRawLex`): +63 files, 163 equal after it"
-  - "tokens GreaterGreater|Greater in TemplateArguments (e.g. `bool`): +57 files, 220 equal after it"
-  - "brace-placement Lbrace|Rbrace in Block (e.g. `{ }`): +53 files, 273 equal after it"
-  - "spacing Rpar|Ident in MemberAccess (e.g. `) A`): +39 files, 312 equal after it"
-  - "blank-lines Semi|Rbrace in Block (e.g. `; }`): +29 files, 341 equal after it"
-  - "spacing Rpar|Ident in Call (e.g. `) find`): +28 files, 369 equal after it"
-  - "spacing Ident|Star in ParenGroup (e.g. `S *`): +26 files, 395 equal after it"
-  - "statement-join Rpar|Semi in EmptyStatement (e.g. `) ;`): +27 files, 422 equal after it"
-  - "spacing Rpar|Lpar in Parenthesized (e.g. `) (`): +23 files, 445 equal after it"
-  - "spacing Rpar|Amp in Unary (e.g. `) &`): +25 files, 470 equal after it"
-  - "spacing Question|Colon in Ternary (e.g. `? :`): +24 files, 494 equal after it"
-  - "spacing Keyword|Star in ParenGroup (e.g. `void *`): +22 files, 516 equal after it"
-  - "spacing String|Lpar in ParenGroup (e.g. `r (`): +22 files, 538 equal after it"
-  - "indent Rpar|Ident in Call (e.g. `) makeProgress`): +22 files, 560 equal after it"
-  - "statement-join Rpar|Ident in Call (e.g. `) seq_printf`): +21 files, 581 equal after it"
-  - "spacing Star|Ident in ParenGroup (e.g. `* buf`): +21 files, 602 equal after it"
-  - "spacing Ident|Amp in ParenGroup (e.g. `V &`): +18 files, 620 equal after it"
-  - "spacing Star|Ident in Line (e.g. `* __folly_memcpy`): +18 files, 638 equal after it"
-  - "spacing Rpar|Lbrace in Block (e.g. `) {`): +18 files, 656 equal after it"
-  - "statement-join Lbrace|Rbrace in Directive (e.g. `{ }`): +15 files, 671 equal after it"
-  - "tokens Ident|Ident in SimpleDeclaration (e.g. `::`): +14 files, 685 equal after it"
-  - "spacing String|Lpar in Parenthesized (e.g. `r (`): +13 files, 698 equal after it"
-  - "spacing Ident|Lpar in DeclaratorGroup (e.g. `ReturnT (`): +13 files, 711 equal after it"
-  - "comment-gap Lbrace|Comment in InitList (e.g. `{ /* 0 */`): +12 files, 723 equal after it"
-unclassified: 1
+  - "tokens GreaterGreater|Greater in TemplateArguments (e.g. `bool`): +58 files, 58 equal after it"
+  - "blank-lines Semi|Rbrace in Block (e.g. `; }`): +33 files, 91 equal after it"
+  - "spacing Rpar|Amp in Unary (e.g. `) &`): +30 files, 121 equal after it"
+  - "statement-join Rpar|Semi in EmptyStatement (e.g. `) ;`): +25 files, 146 equal after it"
+  - "spacing Ident|Star in ParenGroup (e.g. `S *`): +25 files, 171 equal after it"
+  - "brace-placement Rpar|Lbrace in Block (e.g. `) {`): +23 files, 194 equal after it"
+  - "indent Rpar|Ident in Call (e.g. `) makeProgress`): +21 files, 215 equal after it"
+  - "statement-join Rpar|Ident in Call (e.g. `) seq_printf`): +21 files, 236 equal after it"
+  - "brace-placement Lbrace|Rbrace in Block (e.g. `{ }`): +22 files, 258 equal after it"
+  - "spacing Star|Ident in Line (e.g. `* __folly_memcpy`): +21 files, 279 equal after it"
+  - "spacing Keyword|Star in ParenGroup (e.g. `int *`): +20 files, 299 equal after it"
+  - "spacing Star|Ident in ParenGroup (e.g. `* buf`): +22 files, 321 equal after it"
+  - "spacing Rpar|Lbrace in Block (e.g. `) {`): +20 files, 341 equal after it"
+  - "spacing Ident|Amp in ParenGroup (e.g. `A &`): +16 files, 357 equal after it"
+  - "spacing Ident|Lpar in DeclaratorGroup (e.g. `ReturnT (`): +15 files, 372 equal after it"
+  - "statement-join Lbrace|Rbrace in Directive (e.g. `{ }`): +15 files, 387 equal after it"
+  - "tokens-reorder Ident|Ident in SimpleDeclaration (e.g. `::`): +14 files, 401 equal after it"
+  - "blank-lines Rbrace|Rbrace in Block (e.g. `} }`): +12 files, 413 equal after it"
+  - "comment-gap Lbrace|Comment in InitList (e.g. `{ /* 0 */`): +13 files, 426 equal after it"
+  - "spacing Comma|String in InitList (e.g. `, //:`): +12 files, 438 equal after it"
+  - "indent HeaderName|Tilde in Unary (e.g. `<asm-generic/audit_dir_write.h> ~`): +12 files, 450 equal after it"
+  - "indent Semi|Ident in LabelStatement (e.g. `; reloc_overflow`): +11 files, 461 equal after it"
+  - "spacing Keyword|Star in Line (e.g. `char *`): +11 files, 472 equal after it"
+  - "spacing Comma|Number in InitList (e.g. `, 53`): +10 files, 482 equal after it"
+  - "spacing Star|Ident in Binary (e.g. `* Token`): +9 files, 491 equal after it"
+unclassified: 3
 ratchet:
-  llvm: 291
-  fmt: 41
-  range-v3: 164
-  folly: 1263
-  linux: 1371
-  sqlite: 25
+  llvm: 295
+  fmt: 39
+  range-v3: 168
+  folly: 1423
+  linux: 1580
+  sqlite: 29
   google: 2
   chromium: 2
   mozilla: 0

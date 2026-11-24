@@ -54,17 +54,27 @@ options:
         tight_behind: [Star, Amp, AmpAmp]
         pointer: [Star, Amp, AmpAmp]
         pointer_in: [Parameter, FunctionDeclaration, SimpleDeclaration, TemplateArguments]
-        pointer_in_under: [Cast]
+        pointer_in_under: [Cast, Parameter]
+        pointer_in_loose: [ForStatement, CatchClause]
+        pointer_ref: [Amp, AmpAmp]
         pointer_type: [Ident, Keyword, Greater]
         pointer_name: [Ident, Keyword]
         pointer_bare: [TemplateArguments]
         pointer_end: [Greater, Comma, Rpar, Ellipsis, Lsqb]
         binary_node: [Binary]
-        binary_clear: [Assignment, ReturnStatement, Binary, Ternary, Index, Unary]
+        binary_clear: [Assignment, ReturnStatement, Binary, Ternary, Index, Unary, Arguments]
         binary_cast: [Rpar]
   - derive_pointer_alignment:
       default: false
       doc: "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."
+  - space_after_cast:
+      default: false
+      doc: "A blank after the `)` of a C cast (`(int) x` against `(int)x`)."
+      kinds:
+        cast_node: [Cast]
+        cast_group: [ParenGroup]
+        cast_close: [Rpar]
+        cast_keep: [Star, Amp, AmpAmp, Plus, Minus]
   - braced_list_padding:
       default: false
       doc: "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`."

@@ -205,6 +205,12 @@ impl Flow<'_> {
         rules.pad_gap(a, b, cx.options.bool(core_config::opt::BRACED_LIST_PADDING))
     }
 
+    /// The blank after the closing parenthesis of a cast (`space_after_cast`), `None` for other pairs.
+    fn cast_blank(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_cast())?;
+        rules.cast_gap(a, b, cx.options.bool(core_config::opt::SPACE_AFTER_CAST))
+    }
+
     /// What stands between two neighbouring tokens: a line break the source has, else a blank
     /// where the spacing rule or the source wants one.
     pub fn between(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<Doc> {
@@ -247,6 +253,7 @@ impl Flow<'_> {
         match self
             .pointer_blank(cx, a, b)
             .or_else(|| self.pad_blank(cx, a, b))
+            .or_else(|| self.cast_blank(cx, a, b))
             .or_else(|| self.rules.and_then(|r| r.operator_gap(a, b)))
             .or_else(|| self.want(a, b))
         {

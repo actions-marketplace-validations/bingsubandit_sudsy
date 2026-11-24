@@ -9,3 +9,4 @@ cpp:
     line_width: 79
     space_before_parens: always
     braced_list_padding: true
+    space_after_cast: true
