@@ -6404,48 +6404,48 @@
         "language": "js",
         "spans": [
           {
-            "column": 1,
-            "length": 5,
+            "column": 5,
+            "length": 1,
             "line": 1
           },
           {
-            "column": 8,
+            "column": 14,
+            "length": 3,
+            "line": 1
+          },
+          {
+            "column": 40,
+            "length": 4,
+            "line": 1
+          },
+          {
+            "column": 55,
+            "length": 6,
+            "line": 1
+          },
+          {
+            "column": 87,
+            "length": 1,
+            "line": 1
+          },
+          {
+            "column": 10,
+            "length": 6,
+            "line": 2
+          },
+          {
+            "column": 30,
             "length": 9,
-            "line": 1
-          },
-          {
-            "column": 33,
-            "length": 11,
-            "line": 1
-          },
-          {
-            "column": 46,
-            "length": 15,
-            "line": 1
-          },
-          {
-            "column": 81,
-            "length": 7,
-            "line": 1
-          },
-          {
-            "column": 1,
-            "length": 15,
             "line": 2
           },
           {
-            "column": 18,
-            "length": 21,
+            "column": 67,
+            "length": 5,
             "line": 2
           },
           {
-            "column": 59,
-            "length": 13,
-            "line": 2
-          },
-          {
-            "column": 76,
-            "length": 19,
+            "column": 87,
+            "length": 8,
             "line": 2
           }
         ]
@@ -12744,7 +12744,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
@@ -12905,7 +12905,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
@@ -12916,7 +12916,7 @@
           {
             "column": 3,
             "length": 1,
-            "line": 12
+            "line": 13
           }
         ]
       },
@@ -12945,7 +12945,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
@@ -12980,13 +12980,18 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
             "column": 1,
             "length": 21,
             "line": 8
+          },
+          {
+            "column": 1,
+            "length": 16,
+            "line": 10
           }
         ]
       },
@@ -28375,7 +28380,13 @@
       "presets": [
         "html/html-validate-recommended"
       ],
-      "upstream": []
+      "upstream": [
+        {
+          "id": "no-raw-characters",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
     },
     {
       "category": "suspicious",

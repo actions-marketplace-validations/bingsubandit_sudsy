@@ -2,6 +2,11 @@ differences:
   script-line: gap  a script rule is reported at the line of the text of a block scalar; actionlint reports it at the line of the `|`
   action-files: gap  the corpus feeds composite actions (`.github/actions/*/action.yaml`) to actionlint as workflows (13 structure findings); Sudsy lints workflows only
   self-hosted-labels: gap  a job with `self-hosted` is not checked for custom runner labels; actionlint wants them in its config
+  syntax-check-messages: gap  actionlint's structure messages that Sudsy's syntax-check rows lack, and findings Sudsy reports under another syntax-check message on the same line (expression-valued keys, empty sections, duplicate keys, runs-on forms); not yet split per message
+  expression-checker: gap  no expression parser with types (type, context-availability and condition findings of an expression are missing), and a few are reported in the wrong place
+  event-permission-ids: gap  actionlint reports an unknown event or permission scope under its own id; Sudsy reports the same line as a syntax-check finding, or not at all
+  yaml-anchors: gap  anchors and aliases (unused, undefined, recursive and merge-key findings) differ in id or line
+  glob-check: gap  no glob syntax check of branch, tag and path filters
 files:
   deprecated-commands/cases actionlint:deprecated-commands 5: script-line
   deprecated-commands/cases sudsy:deprecated-commands 6: script-line
@@ -11,6 +16,97 @@ files:
   corpus/actionlint/testdata/err/github_script_untrusted_input.yaml actionlint:script-injection 11: script-line
   corpus/actionlint/testdata/err/github_script_untrusted_input.yaml sudsy:script-injection 16: script-line
   invalid-runs-on/cases actionlint:invalid-runs-on 7: self-hosted-labels
+  duplicate-ids/cases sudsy:workflow-syntax 11: syntax-check-messages
+  invalid-event/cases actionlint:invalid-event 2: event-permission-ids
+  invalid-event/cases sudsy:workflow-syntax 2: syntax-check-messages
+  invalid-expression/cases actionlint:expression-context 1: expression-checker
+  invalid-permissions/cases actionlint:invalid-permissions 3: event-permission-ids
+  invalid-permissions/cases sudsy:workflow-syntax 3: syntax-check-messages
+  invalid-runs-on/cases actionlint:workflow-syntax 23: syntax-check-messages
+  corpus/actionlint/testdata/err/assign_expression.yaml actionlint:workflow-syntax 11: syntax-check-messages
+  corpus/actionlint/testdata/err/case_sensitive_keys.yaml actionlint:invalid-event 5: event-permission-ids
+  corpus/actionlint/testdata/err/case_sensitive_keys.yaml sudsy:workflow-syntax 5: syntax-check-messages
+  corpus/actionlint/testdata/err/context_availability.yaml sudsy:expression-types 8: expression-checker
+  corpus/actionlint/testdata/err/context_availability.yaml sudsy:expression-types 93: expression-checker
+  corpus/actionlint/testdata/err/context_availability.yaml sudsy:expression-types 160: expression-checker
+  corpus/actionlint/testdata/err/context_availability.yaml sudsy:expression-types 228: expression-checker
+  corpus/actionlint/testdata/err/duplicate_keys.yaml actionlint:workflow-syntax 12: syntax-check-messages
+  corpus/actionlint/testdata/err/empty.yaml actionlint:workflow-syntax 1: syntax-check-messages
+  corpus/actionlint/testdata/err/empty_sequence_or_string.yaml sudsy:invalid-event 5: event-permission-ids
+  corpus/actionlint/testdata/err/errors_in_anchor.yaml actionlint:invalid-event 4: event-permission-ids
+  corpus/actionlint/testdata/err/errors_in_anchor.yaml actionlint:workflow-syntax 28: syntax-check-messages
+  corpus/actionlint/testdata/err/expr_check_in_credentials.yaml actionlint:expression-types 22: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_credentials.yaml actionlint:expression-types 46: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-context 4: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-context 14: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-types 12: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-types 14: expression-checker
+  corpus/actionlint/testdata/err/glob_more.yaml actionlint:invalid-glob 20: glob-check
+  corpus/actionlint/testdata/err/glob_more.yaml actionlint:invalid-glob 34: glob-check
+  corpus/actionlint/testdata/err/glob_more.yaml actionlint:workflow-syntax 14: syntax-check-messages
+  corpus/actionlint/testdata/err/if_cond_constants.yaml actionlint:if-condition 31: expression-checker
+  corpus/actionlint/testdata/err/invalid_image_version_event.yaml actionlint:workflow-syntax 6: syntax-check-messages
+  corpus/actionlint/testdata/err/invalid_permissions.yaml actionlint:invalid-permissions 9: event-permission-ids
+  corpus/actionlint/testdata/err/invalid_permissions.yaml actionlint:invalid-permissions 20: event-permission-ids
+  corpus/actionlint/testdata/err/invalid_permissions.yaml sudsy:workflow-syntax 5: syntax-check-messages
+  corpus/actionlint/testdata/err/invalid_permissions.yaml sudsy:workflow-syntax 9: syntax-check-messages
+  corpus/actionlint/testdata/err/invalid_permissions.yaml sudsy:workflow-syntax 16: syntax-check-messages
+  corpus/actionlint/testdata/err/invalid_permissions.yaml sudsy:workflow-syntax 20: syntax-check-messages
+  corpus/actionlint/testdata/err/invalid_snapshot.yaml actionlint:workflow-syntax 20: syntax-check-messages
+  corpus/actionlint/testdata/err/invalid_steps.yaml actionlint:workflow-syntax 18: syntax-check-messages
+  corpus/actionlint/testdata/err/issue170_empty_permissions.yaml actionlint:invalid-permissions 12: event-permission-ids
+  corpus/actionlint/testdata/err/issue280_runs_on.yaml actionlint:workflow-syntax 71: syntax-check-messages
+  corpus/actionlint/testdata/err/merge_key_unsupported.yaml sudsy:workflow-syntax 27: syntax-check-messages
+  corpus/actionlint/testdata/err/outputs_of_action_skipping_inputs_check.yaml actionlint:expression-types 16: expression-checker
+  corpus/actionlint/testdata/err/recursive_anchors.yaml actionlint:workflow-syntax 15: syntax-check-messages
+  corpus/actionlint/testdata/err/undefined_anchor.yaml actionlint:no-undefined-alias 0: yaml-anchors
+  corpus/actionlint/testdata/err/undefined_anchor.yaml sudsy:no-undefined-alias 8: yaml-anchors
+  corpus/actionlint/testdata/err/undefined_anchor.yaml sudsy:no-undefined-alias 14: yaml-anchors
+  corpus/actionlint/testdata/err/undefined_anchor.yaml sudsy:no-unused-anchors 10: yaml-anchors
+  corpus/actionlint/testdata/err/unused_anchors.yaml actionlint:workflow-syntax 24: syntax-check-messages
+  corpus/actionlint/testdata/err/upper_case_duplicate_keys.yaml actionlint:workflow-syntax 6: syntax-check-messages
+  corpus/actionlint/testdata/err/workflow_call_event.yaml actionlint:workflow-syntax 13: syntax-check-messages
+  corpus/actionlint/testdata/err/workflow_call_event.yaml actionlint:workflow-syntax 16: syntax-check-messages
+  corpus/actionlint/testdata/err/workflow_call_event.yaml actionlint:workflow-syntax 21: syntax-check-messages
+  corpus/actionlint/testdata/err/workflow_call_event.yaml sudsy:invalid-event 13: event-permission-ids
+  corpus/actionlint/testdata/err/workflow_call_outputs_syntax.yaml sudsy:expression-types 18: expression-checker
+  corpus/actionlint/testdata/err/workflow_dispatch_input_types.yaml actionlint:workflow-syntax 47: syntax-check-messages
+  corpus/actionlint/testdata/err/workflow_dispatch_input_types.yaml sudsy:invalid-event 47: event-permission-ids
+  corpus/actionlint/testdata/err/workflow_dispatch_more_than_25_inputs.yaml actionlint:invalid-event 3: event-permission-ids
+  corpus/actionlint/testdata/examples/.github/actions/my-action/action.yaml actionlint:workflow-syntax 1: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action/action.yaml actionlint:workflow-syntax 2: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action/action.yaml actionlint:workflow-syntax 3: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action/action.yaml actionlint:workflow-syntax 5: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action/action.yaml actionlint:workflow-syntax 16: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action/action.yaml actionlint:workflow-syntax 20: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action-with-output/action.yaml actionlint:workflow-syntax 1: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action-with-output/action.yaml actionlint:workflow-syntax 2: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action-with-output/action.yaml actionlint:workflow-syntax 3: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action-with-output/action.yaml actionlint:workflow-syntax 5: action-files
+  corpus/actionlint/testdata/examples/.github/actions/my-action-with-output/action.yaml actionlint:workflow-syntax 9: action-files
+  corpus/actionlint/testdata/examples/contextual_matrix_values.yaml actionlint:expression-types 34: expression-checker
+  corpus/actionlint/testdata/examples/dangling_alias.yaml actionlint:no-undefined-alias 0: yaml-anchors
+  corpus/actionlint/testdata/examples/dangling_alias.yaml sudsy:no-undefined-alias 9: yaml-anchors
+  corpus/actionlint/testdata/examples/not_persistent_matrix_values.yaml actionlint:expression-types 22: expression-checker
+  corpus/actionlint/testdata/examples/permissions.yaml actionlint:invalid-permissions 11: event-permission-ids
+  corpus/actionlint/testdata/examples/permissions.yaml sudsy:workflow-syntax 11: syntax-check-messages
+  corpus/actionlint/testdata/examples/popular_action_outputs.yaml actionlint:expression-types 18: expression-checker
+  corpus/actionlint/testdata/examples/webhook_checks.yaml actionlint:invalid-event 15: event-permission-ids
+  corpus/actionlint/testdata/examples/webhook_checks.yaml sudsy:workflow-syntax 15: syntax-check-messages
+  corpus/actionlint/testdata/examples/workflow_call_definitions.yaml actionlint:workflow-syntax 20: syntax-check-messages
+  corpus/actionlint/testdata/examples/workflow_call_definitions.yaml sudsy:invalid-event 20: event-permission-ids
+  corpus/actionlint/testdata/examples/workflow_dispatch_input_types.yaml actionlint:workflow-syntax 6: syntax-check-messages
+  corpus/actionlint/testdata/examples/workflow_dispatch_input_types.yaml sudsy:invalid-event 6: event-permission-ids
+  corpus/actionlint/testdata/examples/yaml_anchor_usage.yaml actionlint:workflow-syntax 18: syntax-check-messages
+  corpus/actionlint/testdata/ok/container_syntax.yaml sudsy:workflow-syntax 11: syntax-check-messages
+  corpus/actionlint/testdata/ok/issue-294_matrix_row_array_expression.yaml sudsy:expression-types 10: expression-checker
+  corpus/actionlint/testdata/ok/reusable_workflow_inherit_secrets.yaml sudsy:expression-types 10: expression-checker
+  corpus/actionlint/testdata/ok/using_reusable_workflow_call_outputs.yaml sudsy:expression-types 14: expression-checker
+  corpus/starter-workflows/code-scanning/codeql.yml actionlint:workflow-syntax 45: syntax-check-messages
+  corpus/starter-workflows/deployments/google-cloudrun-docker.yml actionlint:expression-types 93: expression-checker
+  corpus/starter-workflows/deployments/google-cloudrun-docker.yml sudsy:expression-types 95: expression-checker
+  corpus/starter-workflows/deployments/google-cloudrun-source.yml actionlint:expression-types 74: expression-checker
+  corpus/starter-workflows/deployments/google-cloudrun-source.yml sudsy:expression-types 75: expression-checker
 target: 85.3
 fixes:  # lint rule -> where and what to change
   syntax-check: "rows in crates/lang-github-actions/src/shape.rs (core_rules::shape): missing messages are one-off sections (snapshot, environment string forms), typed defaults, anchors"

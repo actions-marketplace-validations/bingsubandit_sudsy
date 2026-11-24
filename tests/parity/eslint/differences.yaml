@@ -2,12 +2,59 @@ differences:
   cond-parens: gap  an assignment in the one pair of parentheses of a ternary test is not reported; ESLint's except-parens mode wants a second pair there
   constant-comparison-scope: gap  `no-constant-comparison` reports two literals compared anywhere; ESLint reports them only as a condition (`no-constant-condition`) and its `no-constant-binary-expression` reports other always-same results (`typeof a === undefined`)
   switch-block: gap  `no-empty-block` does not see the empty body of a `switch`
+  regex-location: gap  a regex finding points at the whole literal or `new RegExp(...)`; ESLint points at the string argument (`no-control-regex`) or at the character class (`no-misleading-character-class`)
+  self-assign-destructuring: gap  `[a, b] = [a, b]` and `({ a } = { a })` are reported once on the right side; ESLint reports each element that is assigned to itself
+  self-assign-bracket-key: gap  `a["b"] = a.b` is not a self assignment for Sudsy (the tokens differ); ESLint compares a string key with the member name
+  else-return-chain: "gap  an `else` that ends a chain of `else if` branches after a nested `if`/`else` that returns in every branch is reported; ESLint (`allowElseIf: true`) does not (three.js OperatorNode.js 344)"
+  empty-catch-position: gap  an empty `catch` is reported at the `catch` clause; ESLint `no-empty` reports its block (PSScriptAnalyzer and Checkstyle report the clause, so the position is not changed)
 files:
   comparisons/assign eslint:no-assignment-in-condition 4: cond-parens
   comparisons/compare eslint:no-constant-comparison 3: constant-comparison-scope
   comparisons/constant eslint:no-constant-condition 2: constant-comparison-scope
   comparisons/constant sudsy:no-constant-comparison 2: constant-comparison-scope
   empty/blocks eslint:no-empty-block 6: switch-block
+  checks-js/regex eslint:no-control-regex 2: regex-location
+  checks-js/regex sudsy:no-control-regex 2: regex-location
+  checks-js/regex eslint:no-misleading-character-class 3: regex-location
+  checks-js/regex sudsy:no-misleading-character-class 3: regex-location
+  corpus/lodash/lodash.js eslint:no-misleading-character-class 290: regex-location
+  corpus/lodash/lodash.js sudsy:no-misleading-character-class 290: regex-location
+  corpus/lodash/dist/lodash.js eslint:no-misleading-character-class 290: regex-location
+  corpus/lodash/dist/lodash.js sudsy:no-misleading-character-class 290: regex-location
+  comparisons/assign eslint:no-self-assign 1: self-assign-bracket-key
+  comparisons/assign eslint:no-self-assign 2: self-assign-destructuring
+  comparisons/assign sudsy:no-self-assign 2: self-assign-destructuring
+  corpus/three.js/src/nodes/math/OperatorNode.js sudsy:no-else-return 344: else-return-chain
+  empty/blocks eslint:no-empty-block 2: empty-catch-position
+  empty/blocks sudsy:no-empty-block 2: empty-catch-position
+  flow/unreachable eslint:no-empty-block 11: empty-catch-position
+  flow/unreachable sudsy:no-empty-block 11: empty-catch-position
+  scope-unused/unused eslint:no-empty-block 12: empty-catch-position
+  scope-unused/unused sudsy:no-empty-block 12: empty-catch-position
+  statements/debugger eslint:no-empty-block 7: empty-catch-position
+  statements/debugger sudsy:no-empty-block 7: empty-catch-position
+  corpus/lodash/dist/lodash.js eslint:no-empty-block 462: empty-catch-position
+  corpus/lodash/dist/lodash.js sudsy:no-empty-block 462: empty-catch-position
+  corpus/lodash/dist/lodash.js eslint:no-empty-block 1522: empty-catch-position
+  corpus/lodash/dist/lodash.js sudsy:no-empty-block 1522: empty-catch-position
+  corpus/lodash/dist/lodash.js eslint:no-empty-block 6055: empty-catch-position
+  corpus/lodash/dist/lodash.js sudsy:no-empty-block 6055: empty-catch-position
+  corpus/lodash/dist/lodash.js eslint:no-empty-block 6836: empty-catch-position
+  corpus/lodash/dist/lodash.js sudsy:no-empty-block 6836: empty-catch-position
+  corpus/lodash/dist/lodash.js eslint:no-empty-block 6839: empty-catch-position
+  corpus/lodash/dist/lodash.js sudsy:no-empty-block 6839: empty-catch-position
+  corpus/lodash/lodash.js eslint:no-empty-block 462: empty-catch-position
+  corpus/lodash/lodash.js sudsy:no-empty-block 462: empty-catch-position
+  corpus/lodash/lodash.js eslint:no-empty-block 1522: empty-catch-position
+  corpus/lodash/lodash.js sudsy:no-empty-block 1522: empty-catch-position
+  corpus/lodash/lodash.js eslint:no-empty-block 6055: empty-catch-position
+  corpus/lodash/lodash.js sudsy:no-empty-block 6055: empty-catch-position
+  corpus/lodash/lodash.js eslint:no-empty-block 6836: empty-catch-position
+  corpus/lodash/lodash.js sudsy:no-empty-block 6836: empty-catch-position
+  corpus/lodash/lodash.js eslint:no-empty-block 6839: empty-catch-position
+  corpus/lodash/lodash.js sudsy:no-empty-block 6839: empty-catch-position
+  corpus/three.js/src/renderers/webgpu/utils/WebGPUTextureUtils.js eslint:no-empty-block 1032: empty-catch-position
+  corpus/three.js/src/renderers/webgpu/utils/WebGPUTextureUtils.js sudsy:no-empty-block 1032: empty-catch-position
 target: 100.0
 measured: {covered: 4413, total: 4413, main: '7514c1f3'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed: {}  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)

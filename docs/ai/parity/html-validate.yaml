@@ -65,7 +65,7 @@ entries:
   no-inline-style: rule no-inline-style | a style that sets only display is allowed; the allowedProperties and allowVariables options are not available
   no-missing-references: rule no-missing-references | no include and exclude options
   no-multiple-main: rule no-multiple-main
-  no-raw-characters: rule syntax-error | a raw `<` is the parser's error, a lone `&` the rule `no-ambiguous-ampersand`; html-validate does not report a `>`; the relaxed option is not available
+  no-raw-characters: rule syntax-error, no-ambiguous-ampersand | a lone `&` is `no-ambiguous-ampersand`, a raw `<` the parser's `syntax-error`; html-validate does not report a `>`; the relaxed option is not available
   no-redundant-aria-label: planned | needs the accessible text of the element, which compares the label with the content
   no-redundant-for: rule no-redundant-for
   no-redundant-role: rule no-redundant-role | the roles of 19 elements that always have the role, and img with a non-empty alt; the conditional implicit roles (`<input>` by type, `<select>`, `<li>`, `<section>`) are not checked
