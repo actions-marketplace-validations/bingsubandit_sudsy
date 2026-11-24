@@ -11,9 +11,9 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 var root = Path.GetFullPath(args[0]);
 var files = Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories).Order(StringComparer.Ordinal).ToList();
-// A build without GenerateDocumentationFile parses with DocumentationMode.None and StyleCop then reports SA0001 and runs none of the
-// documentation rules (SA1600, SA1602, SA1611, SA1623, ...): the default project of docs/ai/development/parity.md.
-var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.None);
+// Documentation comments are parsed and checked as in a build with GenerateDocumentationFile on (csc /doc: DocumentationMode.Diagnose);
+// with it off StyleCop reports SA0001 and the `///` lines are plain comments (docs/ai/development/parity.md).
+var parse = new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Diagnose);
 var trees = files.AsParallel().AsOrdered().Select(f => CSharpSyntaxTree.ParseText(File.ReadAllText(f), parse, f)).ToList();
 
 var assembly = Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, "StyleCop.Analyzers.dll"));

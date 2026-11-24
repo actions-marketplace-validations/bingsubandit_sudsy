@@ -180,7 +180,7 @@ The status and the headline numbers of every language are in the generated table
 
 - Needs the .NET 10 runtime. Config section: `csharp`.
 - **Formatter:** CSharpier 1.3.0. Corpus: aspnetcore, Roslyn and runtime; the files CSharpier leaves alone are not compared.
-- **Linter:** StyleCop and Roslynator rules. StyleCop (1.2.0-beta.556, run as an analyzer driver over the corpus) is covered at 14.8% of its findings (33,061 of 222,762), for the rules it ships on and a project that does not generate documentation (the documentation rules do not run there): `SA1101`, `SA1200`, `SA1309`, `SA1633` are not rules yet. Roslynator has no findings run.
+- **Linter:** StyleCop and Roslynator rules. StyleCop (1.2.0-beta.556, run as an analyzer driver over the corpus) is covered at 24.6% of its findings (100,884 of 409,320), for the rules it ships on: `SA1101`, `SA1600`, `SA1611`, `SA1200` are not rules yet. Roslynator has no findings run.
 - **Presets:** `csharp/csharpier-compat`, `csharp/stylecop`, `csharp/dotnet-runtime`, `csharp/google`, `csharp/unity`.
 - **Options:** `brace_newline`, `brace_same_line`, `trailing_commas`, `sort_usings`, `member_chain_*`, `preprocessor_symbols`, `derive_symbol_sets`, `blank_lines_between_members`, `empty_braces`. Default `line_width` is 120.
 - **Differences:**
