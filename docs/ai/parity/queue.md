@@ -9,7 +9,7 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.60 | 7514c1f3 |
-| PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1446 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `function.notFound` 140 +4 more | 24 | 10.62 | 9e31c610 |
+| PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1395 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `staticMethod.notFound` 90 +4 more | 24 | 10.62 | d3ae913f |
 | C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
 
 Blocked on a decision:
@@ -276,12 +276,12 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 
 ## phpstan
 
-Lint: target 0% (0 of 1701, 1701 missed, measured on 9e31c610); rules by missed findings:
+Lint: target 0% (0 of 1641, 1641 missed, measured on d3ae913f); rules by missed findings:
 1. `method.notFound` (384 missed)
 2. `class.notFound` (381 missed)
 3. `new.static` (317 missed)
-4. `function.notFound` (140 missed)
-5. `staticMethod.notFound` (90 missed)
+4. `staticMethod.notFound` (90 missed)
+5. `function.notFound` (80 missed)
 6. `ignore.unmatchedLine` (62 missed)
 7. `ignore.unmatchedIdentifier` (49 missed)
 8. `method.void` (42 missed)

@@ -4,7 +4,7 @@ A tool entry of parity_tools.json has a `coverage` object (docs/ai/development/p
 `corpus` (sources: `dir` below the repo root, `glob` patterns, `skip` substrings of the path inside `dir`, `esm` `[module, script]` suffixes by content (ESLint), `invalid_marker` (the file name next to an input that marks it invalid: the proof run leaves those out when Sudsy rejects them), `reference_parser` (a command with `{file}` that exits non-zero on a syntax error: a file Sudsy rejects and it rejects too is invalid, as a marked one), `as` the folder `dir` is copied to (default: its own name), `into` a folder the files are copied into flat: the one a language is found by), `command`
 (`{exe}`, `{prefix}`, `{group}` and `{files}`), `group` (a regex over the file's path: files of one group run in one
 command; `cwd: group` runs it in the folder `group` names), `chunk` (files per command), `ok_codes` (exit codes with an empty report meaning no findings), `timeout` (seconds) and `memory_gb` (address space) per command, `env`, `stream` (`stdout` or `stderr`: where the report is), `files` (config files
-written next to the corpus), `parse` (how the report turns into findings) and `sudsy` (the Sudsy side's config).
+written next to the corpus), `group_files` (config files written into the folder of each group, `{group}` and `{prefix}` replaced: a project's own config), `parse` (how the report turns into findings) and `sudsy` (the Sudsy side's config).
 """
 import json
 import os
@@ -73,6 +73,8 @@ def parse(output, spec, rules):
     else:
         if spec.get("json_line"):  # a report after text the tool prints around it: the last line that starts an object
             output = next((line for line in reversed(output.splitlines()) if line.startswith("{")), "")
+            if not output:
+                raise ValueError("no JSON object in the report")
         data = [json.loads(line) for line in output.splitlines() if line.startswith("{")] if spec["format"] == "jsonl" else json.loads(output) if output.strip() else []
         for chain in walk(data, spec["levels"], []):
             rule = rules[spec["rule_fn"]](chain[-1]) if "rule_fn" in spec else str(ref(chain, spec["rule"]))
@@ -143,6 +145,9 @@ def findings(tool, spec, prefix, work, exe, rules, copy=True):
     for inside, _ in files:
         m = re.search(spec["group"], inside) if "group" in spec else None
         groups.setdefault(m.group(1) if m else "", []).append(inside)
+    for group in groups if copy else []:
+        for name, text in spec.get("group_files", {}).items():
+            (work / group / name).write_text(text.replace("{prefix}", str(prefix)).replace("{group}", group), encoding="utf-8")
     limit = (lambda: resource.setrlimit(resource.RLIMIT_AS, (spec["memory_gb"] << 30,) * 2)) if "memory_gb" in spec else None
     found, skipped = [], []
     size = spec.get("chunk", 200)

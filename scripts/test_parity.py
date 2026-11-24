@@ -163,6 +163,25 @@ class CorpusAbsent(unittest.TestCase):
         self.assertIn("fetch-t-corpus.sh", out.getvalue())
 
 
+class GroupFiles(unittest.TestCase):
+    def test_each_group_gets_its_own_config_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            (base / "x.txt").write_text("", encoding="utf-8")
+            spec = {"group": "^([^/]+)/", "cwd": "group", "group_files": {"c.neon": "p: x.txt {group}-{prefix}"}, "command": ["cat", "c.neon"],
+                    "parse": {"format": "regex", "pattern": "p: (?P<file>\\S+) (?P<rule>.*)"}}
+            with unittest.mock.patch.object(pc, "corpus_files", lambda s, f: [("a/x.txt", base / "x.txt"), ("b/x.txt", base / "x.txt")]):
+                found, _ = pc.findings("t", spec, "pre", base / "work", "", {})
+        self.assertEqual(sorted((f[0], f[1]) for f in found), [("a/x.txt", "a-pre"), ("b/x.txt", "b-pre")])
+
+
+class ReportParsing(unittest.TestCase):
+    def test_a_report_with_no_json_object_is_a_clear_error(self):
+        spec = {"format": "json", "json_line": True, "levels": ["files*", "messages"], "file": "0._key", "rule": "1.identifier", "message": "1.message"}
+        with self.assertRaises(ValueError):
+            pc.parse("Warning: require failed\n", spec, {})
+
+
 class SpeedRuns(unittest.TestCase):
     def test_a_sudsy_run_that_checks_no_file_fails_the_row(self):
         with self.assertRaises(SystemExit) as e:

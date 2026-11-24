@@ -187,10 +187,12 @@ def install(spec, catalog, version, prefix):
 def composer_vendors(spec, prefix):
     """The dependencies of the corpus projects (`composer`: project -> the folder of its composer.json, and its composer.lock
     when it has one: composer installs from it, else resolves the exact versions the file pins), installed with the pinned
-    composer.phar into prefix/vendor/<project>: outside the corpus, so no vendor file is a corpus file."""
+    composer.phar into prefix/vendor/<project>/vendor (the project's own `vendor/` below a folder of its own, with an empty `composer.json`): outside the corpus, so no vendor file is a corpus file."""
     php = executable(prefix, spec["exe"])
     for project, manifest in spec["composer"].items():
-        vendor = prefix / "vendor" / project
+        vendor = prefix / "vendor" / project / "vendor"
+        (vendor.parent / "composer.json").parent.mkdir(parents=True, exist_ok=True)
+        (vendor.parent / "composer.json").write_text("{}\n", encoding="utf-8")  # tools find a project's vendor/ by its composer.json (PHPStan: composerAutoloaderProjectPaths); an empty one declares no php version
         if (vendor / "autoload.php").exists():
             continue
         work = prefix / "deps" / project
