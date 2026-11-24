@@ -98,7 +98,7 @@
 - language: C#
   ids: [csharp]
   speed: [C#, C# (.editorconfig)]
-  format: [{tool: csharpier, name: CSharpier}]
+  format: [{tool: csharpier, name: CSharpier, groups: [real-world]}]
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]
 - language: XML
   ids: [xml]

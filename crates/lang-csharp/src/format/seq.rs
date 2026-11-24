@@ -23,6 +23,8 @@ pub type R = Result<Doc, FormatError>;
 pub enum Sep {
     None,
     Space,
+    /// A space, or a line break when the group around it breaks (the parts of a `for` header).
+    Line,
     Hard,
     /// A hard line break, one indentation level deeper.
     HardIndented,
@@ -290,6 +292,11 @@ fn separator_raw(
     {
         return Sep::Space;
     }
+    if pk == k::FOR_STATEMENT
+        && core_format::shapes::for_header_breaks(&children(cx, parent), prev, next, FOR_TOKENS)
+    {
+        return Sep::Line;
+    }
     match (last(cx, prev), first(cx, next)) {
         (Some(a), Some(b)) => {
             if super::spaced(&a, &b) {
@@ -306,6 +313,7 @@ pub fn sep_doc(cx: &FormatCtx<'_>, sep: Sep) -> Doc {
     match sep {
         Sep::None => Doc::Nil,
         Sep::Space => doc::lit(" "),
+        Sep::Line => doc::line(),
         Sep::Hard | Sep::Embedded => doc::hardline(),
         Sep::HardIndented => doc::indent(doc::hardline()),
         Sep::Brace(element) => {
@@ -317,6 +325,12 @@ pub fn sep_doc(cx: &FormatCtx<'_>, sep: Sep) -> Doc {
         }
     }
 }
+
+const FOR_TOKENS: core_format::shapes::ForTokens = core_format::shapes::ForTokens {
+    open: k::OPEN_PAREN_TOKEN,
+    semi: k::SEMICOLON_TOKEN,
+    close: k::CLOSE_PAREN_TOKEN,
+};
 
 /// Statements whose parenthesized condition may break after `(` and before `)`.
 fn has_paren_condition(kind: SyntaxKind) -> bool {
@@ -335,6 +349,7 @@ pub fn labeled_statement(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let style = core_format::shapes::LabelStyle {
         body_on_next_line: true,
         outdent: label_outdent(cx.options),
+        keep_blank: cx.options.flag(core_config::opt::LABEL_BLANK_LINE, false),
     };
     core_format::shapes::labeled_statement(cx, node, style, &|els| seq_of(cx, node, els))
         .or_else(|_| seq(cx, node))
@@ -390,6 +405,9 @@ pub fn seq_of(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R
                 els[i..].iter().position(
                     |x| matches!(x, SyntaxElement::Token(t) if t.kind() == k::CLOSE_PAREN_TOKEN),
                 )
+            }
+            _ if pk == k::FOR_STATEMENT => {
+                core_format::shapes::for_header_close(els, i, FOR_TOKENS)
             }
             _ => None,
         };

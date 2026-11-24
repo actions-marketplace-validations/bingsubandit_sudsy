@@ -88,7 +88,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `member_chain_keep_accesses` | `never`, `head`, `always` | java `head`, python `always`, csharp `never` |
 | `member_chain_min_calls` | int 1-1000 | java `2`, js `3`, kotlin `2`, csharp `3` |
 | `member_chain_short_head` | int 0-100 | java `4`, js `2`, csharp `4` |
-| `member_chain_style` | `fluent`, `grouped`, `wrapped`, `soft` | js `grouped`, kotlin `wrapped`, python `soft` |
+| `member_chain_style` | `fluent`, `grouped`, `wrapped`, `soft` | js `grouped`, kotlin `wrapped`, python `soft`, csharp `fluent` |
 | `namespace_indentation` | `none`, `inner`, `all` | cpp `none`, c `none` |
 | `penalty_return_type` | int 0-1000 | cpp `60`, c `60` |
 | `pointer_alignment` | `right`, `left`, `middle` | cpp `right`, c `right` |

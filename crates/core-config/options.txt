@@ -5,6 +5,7 @@ annotation_inline
 annotation_source_kinds
 array_bracket_spacing
 assignment_conditional
+assignment_conditional_test_kinds
 assignment_destructure_kinds
 assignment_generic_closure_kinds
 assignment_hug_except_kinds
@@ -15,8 +16,11 @@ assignment_layout
 assignment_left_min_parameters
 assignment_left_unless_kinds
 assignment_op_token_skip_kinds
+binary_group_single
 binary_hug
 binary_indent
+binary_inline_right_kinds
+binary_open_kinds
 binary_operator_line
 block_comment_keep_tight
 brace_newline
@@ -33,6 +37,9 @@ embed_mode
 end_of_line
 final_newline
 format_rules
+generated_header_markers
+generated_header_skip
+generated_names
 hug_first_argument
 hug_last_argument
 indent_nested_binary
@@ -40,12 +47,16 @@ indent_size
 indent_style
 indent_script_and_style
 initializer_fill_width
+label_blank_line
 line_width
 max_blank_lines
 member_chain_break_on_block
+member_chain_factory_heads
 member_chain_force_links
 member_chain_head_calls
+member_chain_hug_calls
 member_chain_indent
+member_chain_indent_head
 member_chain_keep_accesses
 member_chain_min_calls
 member_chain_min_groups
@@ -62,6 +73,7 @@ settle_keywords
 signature_wrap_annotated
 single_block_comment_as_line
 single_line_body_kinds
+skip_generated
 trailing_comma_before
 trailing_comma_last_entry
 type_argument_complex_kinds

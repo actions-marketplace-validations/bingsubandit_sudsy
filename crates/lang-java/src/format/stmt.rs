@@ -73,6 +73,7 @@ fn labeled(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let style = shapes::LabelStyle {
         body_on_next_line: true,
         outdent: 0,
+        keep_blank: false,
     };
     shapes::labeled_statement(cx, node, style, &|els| seq(cx, els)).or_else(|_| generic(cx, node))
 }

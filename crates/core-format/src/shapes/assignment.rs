@@ -66,6 +66,8 @@ pub struct AssignPolicy {
     /// A conditional on the right moves below the operator; else only one whose test is an
     /// operator chain does.
     pub conditional_always: bool,
+    /// Kinds besides operator chains that count as one in the test of a conditional.
+    pub conditional_test_kinds: Vec<String>,
     /// Levels of indentation of the right side below the operator.
     pub indent: usize,
 }
@@ -81,6 +83,10 @@ impl AssignPolicy {
                 _ => AssignStyle::Compact,
             },
             conditional_always: text(CONDITIONAL) == "always",
+            conditional_test_kinds: options
+                .strings(core_config::opt::ASSIGNMENT_CONDITIONAL_TEST_KINDS)
+                .map(String::from)
+                .collect(),
             indent: options.uint(INDENT, 1),
         }
     }
@@ -395,7 +401,11 @@ fn choose(
                 || g.slot(r, "condition")
                     .and_then(|e| e.as_node().map(roles::un))
                     .is_some_and(|t| {
-                        g.has_tag(t.kind(), "binary-chain") && !hooks.inline_binary(cx, &t)
+                        (g.has_tag(t.kind(), "binary-chain") && !hooks.inline_binary(cx, &t))
+                            || policy
+                                .conditional_test_kinds
+                                .iter()
+                                .any(|k| k == g.name(t.kind()))
                     }))
         {
             return BreakAfterOperator;

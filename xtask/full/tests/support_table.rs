@@ -44,3 +44,17 @@ fn table_from_fixture_ratchets() {
         "Ready: Alpha, Beta, Epsilon and Gamma. The rest are in progress."
     );
 }
+
+/// A tool with a corpus group named in `support.yaml` shows `not measured` until that group has a
+/// ratchet: the numbers of its other groups (a few local fixtures) never stand for the language.
+#[test]
+fn a_missing_corpus_ratchet_is_not_measured() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
+    let support = "\n- language: Theta\n  format: [{tool: fmt-a, name: FmtA, groups: [corpus]}]\n";
+    let table = xtask_full::support::render(&root, support, &|_| 7).unwrap();
+    assert!(
+        table.table.contains("| Theta | not measured FmtA |"),
+        "{}",
+        table.table
+    );
+}

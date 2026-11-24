@@ -187,6 +187,16 @@ pub fn parenthesized(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
 struct BinaryHooks;
 
 impl shapes::BinaryHooks for BinaryHooks {
+    /// The braces of a property pattern that follows `is` start on a line of their own
+    /// (`wrapped_brace_line: all`).
+    fn starts_with_line(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+        n.kind() == k::RECURSIVE_PATTERN
+            && super::options::nested_brace_on_new_line(cx.options)
+            && n.children()
+                .next()
+                .is_some_and(|c| c.kind() == k::PROPERTY_PATTERN_CLAUSE)
+    }
+
     fn place(&self, _cx: &FormatCtx<'_>, node: &SyntaxNode) -> Option<shapes::Place> {
         let kind = node.parent()?.kind();
         matches!(

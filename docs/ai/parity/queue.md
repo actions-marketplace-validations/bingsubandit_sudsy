@@ -69,6 +69,10 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 4aebdcad); rules by
 14. `ws-other` (- files): 19 files first differ here: columns clang-format aligns (AlignArrayOfStructures, aligned macro names, aligned braced-list columns). fix: a table alignment mechanism in the shared crate, read by an option, when a second language needs it
 15. `ws-tab` (- files): 34 files first differ here: tabs or blanks inside a line that differ from clang-format (UseTab alignment of continuation lines). fix: AlignWithTabs of the printer for continuation lines
 
+## csharpier
+
+Format: unclassified 1602 of 1602 differing files (100%).
+
 ## csharpier-xml
 
 1. `text-as-written` (1 files): text content and attribute values stay as written; CSharpier writes a double quote in a value as `&quot;`, puts CDATA and `xml:space="preserve"` content on lines of their own and trims its whitespace

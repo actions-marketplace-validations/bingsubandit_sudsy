@@ -342,10 +342,19 @@
       "catalog": "csharpier",
       "install": {"dotnet-tool": "csharpier", "exe": "csharpier"},
       "needs": ["worker"],
-      "command": ["{exe}", "format", "{file}"],
-      "input": "in-place",
+      "fetch": ["tests/conformance/fetch-corpus.sh"],
+      "command": ["{exe}", "format", "--no-cache"],
+      "args": ["."],
+      "input": "batch",
+      "reject": "^Error .*/([^/]+) - ",
+      "generated": {"lang": "lang-csharp"},
       "tool_may_reject": true,
-      "fixtures": [{"suffixes": [".cs"]}]
+      "parallel": true,
+      "quiet": true,
+      "fixtures": [
+        {"suffixes": [".cs"]},
+        {"dir": "tests/conformance/corpus", "suffixes": [".cs"], "prefix": "corpus/", "ratchet": "real-world", "recursive": true}
+      ]
     },
     "csharpier-xml": {"speed": {"language": "XML", "label": "CSharpier", "corpus": {"group": "fixtures", "text": "the XML fixtures and the project files of dotnet/aspnetcore"}, "format": ["{exe}", "check", ".", "--no-cache"]}, 
       "catalog": "csharpier",

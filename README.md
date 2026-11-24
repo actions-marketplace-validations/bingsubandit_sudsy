@@ -89,7 +89,7 @@ Each number is measured on real-world code against the reference tool with its d
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>████████░░ 86% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | ░░░░░░░░░░ 0% eslint-plugin-jsonc | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
-| C# | ██████████ 100% CSharpier | ██░░░░░░░░ 24% StyleCop<br>not measured Roslynator | In progress |
+| C# | ███████░░░ 78% CSharpier | ██░░░░░░░░ 24% StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
@@ -114,7 +114,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 | Java | 23 | google-java-format | [1](https://github.com/google/google-java-format#using-the-formatter) |
 | Protobuf | 4 | buf format | [0](https://buf.build/docs/format/style) |
 | Terraform (HCL) | 3 | terraform fmt | [0](https://developer.hashicorp.com/terraform/cli/commands/fmt) |
-| C# | 64 | CSharpier | [5](https://csharpier.com/docs/Options) |
+| C# | 77 | CSharpier | [5](https://csharpier.com/docs/Options) |
 <!-- /generated -->
 
 - **Your own rules:** [YAML patterns](docs/rules.md#pattern-rules) with fixes, and sandboxed [Wasm plugins](docs/rules.md#wasm-plugins).

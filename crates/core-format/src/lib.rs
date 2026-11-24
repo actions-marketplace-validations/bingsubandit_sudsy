@@ -26,6 +26,7 @@ pub mod doc;
 pub mod embed;
 mod error;
 pub mod frames;
+pub mod generated;
 mod header_break;
 pub mod ignore;
 mod layout;

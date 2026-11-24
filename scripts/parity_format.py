@@ -222,26 +222,32 @@ def fixtures(config, folder, filters):
 
 
 def generated(spec, path):
-    """A file the tool leaves alone because it documents it as generated code: `names` (regexes on the file name) or
-    `header` (a regex on the comments before the first token, preprocessor lines and blanks skipped)."""
-    if any(re.search(n, path.name, re.I) for n in spec.get("names", [])):
-        return True
-    if "header" not in spec:
-        return False
-    head, rest = [], path.read_text(encoding="utf-8").lstrip("\ufeff")
+    """A file the tool leaves alone because it documents it as generated code. `spec` is `{"lang": <crate dir>}`: the
+    list is the one Sudsy skips by (`generated_names`, `generated_header_markers`, `generated_header_skip` of the
+    language's lang.yaml), so the filter and the formatter share one source."""
+    options = {}
+    for line in (ROOT / "crates" / spec["lang"] / "lang.yaml").read_text(encoding="utf-8").splitlines():
+        m = re.match(r"\s*- (generated_\w+): (.*)$", line)
+        if m:
+            options[m.group(1)] = json.loads(m.group(2))[0]
+    stem = path.name.rsplit(".", 1)[0].lower()
+    for g in map(str.lower, options["generated_names"]):
+        if (g.startswith("*") and stem.endswith(g[1:])) or (g.endswith("*") and stem.startswith(g[:-1])) or stem == g:
+            return True
+    head, rest = "", path.read_text(encoding="utf-8").lstrip("\ufeff")
     while True:
         rest = rest.lstrip()
         if rest.startswith("//"):
             line, _, rest = rest.partition("\n")
-            head.append(line)
+            head += line[2:] + "\n"
         elif rest.startswith("/*"):
             comment, _, rest = rest.partition("*/")
-            head.append(comment)
-        elif rest.startswith("#"):
+            head += comment[2:] + "\n"
+        elif any(rest.startswith(p) for p in options["generated_header_skip"]):
             rest = rest.partition("\n")[2]
         else:
             break
-    return re.search(spec["header"], "\n".join(head)) is not None
+    return any(m.lower() in head.lower() for m in options["generated_header_markers"])
 
 
 def placed(folder, name, source):

@@ -9,10 +9,19 @@ csharp:
     inline_accessor_bodies: true
     indent_switch_section_block: false
     assignment_layout: fluid
+    assignment_conditional: binary_test
+    assignment_conditional_test_kinds: [ParenthesizedExpression]
     switch_arm_layout: assignment
     indent_nested_binary: true
+    binary_group_single: true
+    binary_open_kinds: [OrPattern, AndPattern]
+    member_chain_style: grouped
     member_chain_keep_accesses: always
+    member_chain_factory_heads: false
+    member_chain_hug_calls: 1
+    member_chain_indent_head: true
     member_chain_break_on_block: "inner"
+    label_blank_line: true
     wrapped_brace_line: all
     initializer_collapse: always
     initializer_expand: crowded

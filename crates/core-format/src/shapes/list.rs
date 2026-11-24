@@ -414,6 +414,12 @@ fn list_of(
                 style.force_blank,
                 style.blank_breaks,
             );
+            // (an empty item, as in `A<,>`, follows its separator directly)
+            let between = if !items[i].hole && items[i].last.text_range().is_empty() {
+                Doc::Nil
+            } else {
+                between
+            };
             if fill {
                 fill_parts.push(doc::concat(std::mem::take(&mut inner)));
                 fill_parts.push(between);
@@ -480,7 +486,18 @@ fn list_of(
     let inner = doc::concat(lead);
     let mut body_parts = Vec::new();
     if style.leading_line {
-        body_parts.push(doc::line());
+        // (a line comment ends the line before it)
+        let mut before = c.open.prev_token();
+        while let Some(t) = before.as_ref().filter(|t| cx.grammar.is_trivia(t.kind())) {
+            before = t.prev_token();
+        }
+        body_parts.push(
+            if before.is_some_and(|t| super::ends_in_line_comment(cx, &t)) {
+                doc::hardline()
+            } else {
+                doc::line()
+            },
+        );
     }
     let close_pad = if style.hug_close && dangling.is_empty() {
         Doc::Nil

@@ -18,11 +18,14 @@ precedence 3 left "&&"
 precedence 4 left "|"
 precedence 5 left "^"
 precedence 6 left "&"
-precedence 7 left "==" "!="
+precedence 7 none "==" "!="
 precedence 8 left "<" ">" "<=" ">=" "is" "as"
-precedence 9 left "<<" ">>" ">>>"
+precedence 9 none "<<" ">>" ">>>"
 precedence 10 left "+" "-"
-precedence 11 left "*" "/" "%"
+precedence 11 same "*" "/"
+precedence 11 none "%"
+precedence 12 left "or"
+precedence 13 left "and"
 comments line "//" block "/*" "*/"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
@@ -584,8 +587,8 @@ node OmittedArraySizeExpression #expression #opaque =
     omitted_array_size_expression:OmittedArraySizeExpressionToken
 node InterpolatedStringExpression #expression #string #opaque =
     string_start:#interpolated-string-string-start contents:#interpolated-string-content* string_end:#interpolated-string-string-end
-node IsPatternExpression #expression #opaque =
-    expression:#expression is_keyword:IsKeyword pattern:#pattern
+node IsPatternExpression #expression #binary-chain #binary =
+    expression=left:#expression is_keyword=operator:IsKeyword pattern=right:#pattern
 node ThrowExpression #expression #throw =
     throw_keyword:ThrowKeyword expression=value:#expression
 node WhenClause #opaque =

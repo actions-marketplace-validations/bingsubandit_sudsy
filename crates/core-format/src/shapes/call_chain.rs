@@ -76,6 +76,13 @@ pub struct ChainPolicy {
     pub short_head: usize,
     /// Levels of indentation of the broken groups.
     pub indent: usize,
+    /// A capitalized head or `this` stays on the line of the first call (`grouped`).
+    pub factory_heads: bool,
+    /// A chain with at most this many calls hugs the last call's arguments, a longer one that does
+    /// not fit breaks at the dots (`grouped`; 0: Prettier's group count decides).
+    pub hug_calls: usize,
+    /// The first group of a broken chain is indented like the later ones (`grouped`).
+    pub indent_head: bool,
     /// A chain with at least this many dots always breaks (`wrapped`; 0: never).
     pub force_links: usize,
     /// A chain with fewer groups after the first is never broken at the dots (`soft`).
@@ -119,6 +126,9 @@ impl ChainPolicy {
             },
             short_head: int(SHORT_HEAD, 0),
             indent: int(INDENT, 1),
+            factory_heads: options.flag(core_config::opt::MEMBER_CHAIN_FACTORY_HEADS, true),
+            hug_calls: int(core_config::opt::MEMBER_CHAIN_HUG_CALLS, 0),
+            indent_head: options.flag(core_config::opt::MEMBER_CHAIN_INDENT_HEAD, false),
         }
     }
 }
@@ -273,20 +283,9 @@ impl<'a> Walk<'a> {
         let unary = self.tag(node, "unary");
         let all = self.significant(node);
         let field = |name: &str| g.slot_in(node.kind(), &all, name);
-        let receiver = match field("object") {
-            Some(o) => Some(o),
-            None if call => field("callee"),
-            None if unary => field("operand"),
-            None => None,
-        };
-        if call && self.call_heads {
-            let plain = match &receiver {
-                Some(SyntaxElement::Node(n)) => !self.is_link(&self.unwrap(n, false)),
-                _ => true,
-            };
-            if plain {
-                return Some(SyntaxElement::Node(node.clone()));
-            }
+        let receiver = self.receiver(node, &all);
+        if call && self.call_heads && self.plain_receiver(&receiver) {
+            return Some(SyntaxElement::Node(node.clone()));
         }
         // A member whose name is itself a chain (`a?.b.c()`: the `?` and then the chain) continues it.
         // A member that is a call on a plain name (`a.b(c)` as `a`, `.`, `b(c)`) is the call link itself.
@@ -334,9 +333,48 @@ impl<'a> Walk<'a> {
         head
     }
 
+    /// What the link `node` is called on: its object, else the callee of a call, else the operand.
+    fn receiver(&self, node: &SyntaxNode, all: &[SyntaxElement]) -> Option<SyntaxElement> {
+        let g = self.cx.grammar;
+        let field = |name: &str| g.slot_in(node.kind(), all, name);
+        match field("object") {
+            Some(o) => Some(o),
+            None if self.tag(node, "call") => field("callee"),
+            None if self.tag(node, "unary") => field("operand"),
+            None => None,
+        }
+    }
+
+    /// Is the receiver no link of a chain (a plain name)?
+    fn plain_receiver(&self, receiver: &Option<SyntaxElement>) -> bool {
+        match receiver {
+            Some(SyntaxElement::Node(n)) => !self.is_link(&self.unwrap(n, false)),
+            _ => true,
+        }
+    }
+
     fn element(&self, e: &SyntaxElement, in_head: bool) -> Result<Doc, FormatError> {
         if let Some(d) = self.hooks.element(e, in_head) {
             return d;
+        }
+        // A call on a plain name (`W(a.B())`) at the head of a `grouped` chain is printed as its
+        // callee and arguments: formatting it as a chain again would not end.
+        if let SyntaxElement::Node(n) = e
+            && self.call_heads
+            && self.tag(n, "call")
+            && !self.is_new(Some(n))
+        {
+            let all = self.significant(n);
+            if self.plain_receiver(&self.receiver(n, &all)) {
+                let parts = all
+                    .iter()
+                    .map(|c| match c {
+                        SyntaxElement::Node(c) => self.cx.format(c),
+                        SyntaxElement::Token(t) => Ok(self.cx.token(t)),
+                    })
+                    .collect::<Result<Vec<_>, _>>()?;
+                return Ok(doc::concat(parts));
+            }
         }
         match e {
             SyntaxElement::Node(n) => self.cx.format(n),
@@ -795,7 +833,7 @@ fn prettier(
         cur.push(i);
         i += 1;
     }
-    if !head_call {
+    if !head_call && policy.keep_accesses != KeepAccesses::Always {
         while i + 1 < n && memberish(i) && memberish(i + 1) {
             cur.push(i);
             i += 1;
@@ -837,14 +875,15 @@ fn prettier(
             let plain = head.as_node().is_some_and(|h| w.tag(h, "reference"));
             return keyword
                 || (plain
-                    && (is_factory(&text)
+                    && ((policy.factory_heads && is_factory(&text))
                         || (in_statement && text.chars().count() <= policy.short_head)
                         || has_computed));
         }
         let last = *groups[0].last().unwrap_or(&0);
         memberish(last)
             && !links[last].index
-            && link_name(cx, &links[last]).is_some_and(|name| is_factory(&name) || has_computed)
+            && link_name(cx, &links[last])
+                .is_some_and(|name| (policy.factory_heads && is_factory(&name)) || has_computed)
     };
     let should_merge = groups.len() >= 2 && !groups[1].is_empty() && should_not_wrap();
 
@@ -872,7 +911,19 @@ fn prettier(
             .get(cutoff)
             .and_then(|g| g.first())
             .is_some_and(|&i| commented[i]);
-    if groups.len() <= cutoff
+    // A call at the head counts as one.
+    let calls: Vec<&SyntaxNode> = links
+        .iter()
+        .filter(|l| l.call)
+        .map(|l| &l.node)
+        .chain(head.as_node().filter(|_| head_call))
+        .collect();
+    let short = if policy.hug_calls > 0 {
+        calls.len() <= policy.hug_calls
+    } else {
+        groups.len() <= cutoff
+    };
+    if short
         && !any_commented
         && !printed[cutoff.min(printed.len())..]
             .iter()
@@ -881,7 +932,7 @@ fn prettier(
         return Ok(doc::group(one_line));
     }
     let rest_from = if should_merge { 2 } else { 1 };
-    let expanded = doc::concat(vec![
+    let mut expanded = doc::concat(vec![
         printed[0].clone(),
         if should_merge {
             printed[1].clone()
@@ -893,24 +944,24 @@ fn prettier(
                 doc::hardline(),
                 doc::join(&doc::hardline(), printed[rest_from..].iter().cloned()),
             ]);
-            for _ in 0..policy.indent {
-                rest = doc::indent(rest);
+            if !policy.indent_head {
+                for _ in 0..policy.indent {
+                    rest = doc::indent(rest);
+                }
             }
             rest
         } else {
             Doc::Nil
         },
     ]);
+    if policy.indent_head {
+        for _ in 0..policy.indent {
+            expanded = doc::indent(expanded);
+        }
+    }
     if any_commented || break_all {
         return Ok(doc::group(expanded));
     }
-    // A call at the head counts as one.
-    let calls: Vec<&SyntaxNode> = links
-        .iter()
-        .filter(|l| l.call)
-        .map(|l| &l.node)
-        .chain(head.as_node().filter(|_| head_call))
-        .collect();
     let args_of = |c: &SyntaxNode| {
         cx.grammar
             .slots(c, "arguments")

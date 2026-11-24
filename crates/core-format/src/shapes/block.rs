@@ -112,6 +112,8 @@ pub struct LabelStyle {
     pub body_on_next_line: bool,
     /// Levels the label moves out of the statement's indentation.
     pub outdent: usize,
+    /// A blank line after the label in the source stays.
+    pub keep_blank: bool,
 }
 
 /// A labeled statement: the `head` (`label:`), then the `body`. A `bare` body (an empty
@@ -147,7 +149,23 @@ pub fn labeled_statement(
     let bare = els[2]
         .as_node()
         .is_some_and(|b| cx.grammar.has_tag(b.kind(), "empty-statement"));
-    Ok(labeled(print(&els[..2])?, print(&els[2..])?, style, bare))
+    let body = print(&els[2..])?;
+    let blank = style.keep_blank
+        && !bare
+        && style.body_on_next_line
+        && cx
+            .first_token(node)
+            .and_then(|_| match &els[2] {
+                SyntaxElement::Node(n) => cx.first_token(n),
+                SyntaxElement::Token(t) => Some(t.clone()),
+            })
+            .is_some_and(|t| comments::blank_lines_before(cx.grammar, &t) > 0);
+    let body = if blank {
+        doc::concat(vec![doc::hardline(), body])
+    } else {
+        body
+    };
+    Ok(labeled(print(&els[..2])?, body, style, bare))
 }
 
 /// `open`, the items one per line and indented, `close`. An empty block is `open close`. Separator

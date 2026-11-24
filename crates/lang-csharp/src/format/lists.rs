@@ -21,12 +21,15 @@ use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 /// `x is { A: 1 }` and `x is T { A: 1 }`: the braces of a property pattern start on their own
 /// line when the pattern breaks, but not in `{ A: 1 } => ...`, where nothing precedes them.
-fn property_pattern_follows_something(clause: &SyntaxNode) -> bool {
+fn property_pattern_follows_something(cx: &FormatCtx<'_>, clause: &SyntaxNode) -> bool {
     let Some(pattern) = clause.parent() else {
         return false;
     };
     clause.prev_sibling().is_some()
-        || pattern.parent().map(|p| p.kind()) == Some(k::IS_PATTERN_EXPRESSION)
+        || pattern.parent().is_some_and(|p| {
+            p.kind() == k::IS_PATTERN_EXPRESSION
+                && shapes::hugs_right(cx, &shapes::BinaryPolicy::of(cx.options), &p)
+        })
 }
 
 /// Parameters, arguments, type arguments, attributes, tuples, patterns: one line if it fits,
@@ -37,7 +40,7 @@ pub fn plain_list(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
             padding: true,
             empty: empty_body_text(cx.options),
             leading_line: nested_brace_on_new_line(cx.options)
-                && property_pattern_follows_something(node),
+                && property_pattern_follows_something(cx, node),
             ..ListStyle::default()
         },
         _ => call_style(cx, node),
