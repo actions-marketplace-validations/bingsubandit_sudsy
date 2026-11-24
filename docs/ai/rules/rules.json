@@ -527,6 +527,11 @@
       ],
       "upstream": [
         {
+          "id": "syntax-check/duplicate-key",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
           "id": "suspicious/noDuplicateObjectKeys",
           "partial": false,
           "tool": "Biome"
@@ -25096,7 +25101,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n      - run: echo ${{ inputs.nothing }}\n",
+        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n      - run: echo ${{ inputs.nothing }}\n      - run: echo ${{ matrix.v }}\n  caller:\n    uses: owner/repo/.github/workflows/w.yml@v1\n  after:\n    needs: caller\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ needs.caller.outputs.anything }}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -25280,6 +25285,11 @@
         "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  pull_request_review:\n    types: submitted\n    tags: v1\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n    - cron: '*/4 * * * *'\n    - cron: '0 1 * * *'\n      timezone: Europe/Berlin\n    - cron: '0 1 * * *'\n      timezone: UTC\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
         "language": "github-actions",
         "spans": [
+          {
+            "column": 3,
+            "length": 5,
+            "line": 2
+          },
           {
             "column": 5,
             "length": 15,
@@ -25541,6 +25551,11 @@
         "input": "on: push\npermissions:\n  content: read\n  id-token: read\n  contents: write\njobs:\n  a:\n    runs-on: ubuntu-latest\n    permissions: read\n    steps:\n      - run: echo\n",
         "language": "github-actions",
         "spans": [
+          {
+            "column": 3,
+            "length": 7,
+            "line": 3
+          },
           {
             "column": 13,
             "length": 4,

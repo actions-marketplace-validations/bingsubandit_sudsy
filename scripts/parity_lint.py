@@ -301,10 +301,16 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
     for label, name, source in sources:
         name, text = read(name, source)
         fixture = where / name
+        action = tool == "actionlint" and "/.github/actions/" in f"/{label}"  # a composite action is no workflow: actionlint finds none in its project, and Sudsy lints workflows only
+        if action:
+            fixture = work / ".github" / "actions" / "x" / "action.yaml"
+            fixture.parent.mkdir(parents=True, exist_ok=True)
         if batch is None:
             fixture.write_text(text, encoding="utf-8", newline="")
-            run = subprocess.run(command + [fixture.relative_to(work).as_posix()], cwd=work, capture_output=True, text=True, check=False)
+            run = subprocess.run(command + ([] if action else [fixture.relative_to(work).as_posix()]), cwd=work, capture_output=True, text=True, check=False)
             out = run.stdout or run.stderr  # stylelint reports on stderr
+            if action and not out.strip().startswith("["):
+                out = "[]"
         elif name in unparsed:
             continue
         # checkmake runs every rule on every file: a fixture is compared on the rule of its folder, and
@@ -366,6 +372,8 @@ def actionlint_check(d):
         return "runner-label/unknown" if "unknown" in message else "runner-label/conflict"
     if kind == "syntax-check" and "is duplicated" in message:
         return "syntax-check/duplicate-job" if 'in "jobs" section' in message else "syntax-check/duplicate-key"
+    if kind == "syntax-check" and re.search(r"for input type of|input type of workflow_dispatch", message):
+        return "events/inputs"
     if kind == "syntax-check" and "unknown anchor" in message:
         return "syntax-check/undefined-alias"
     if kind == "syntax-check" and "is defined but not used" in message:

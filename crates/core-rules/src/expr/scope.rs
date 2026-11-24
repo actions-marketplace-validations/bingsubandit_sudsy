@@ -39,8 +39,8 @@ pub struct Scope {
     pub types: &'static [(&'static str, &'static str)],
     /// For `Keys`: the context is an empty object when the file has no mapping at `source`.
     pub strict: bool,
-    /// With `strict`: only when the file has a node at this key path (empty: always).
-    pub only_with: &'static str,
+    /// For `Refs`: a job with this key has outputs of unknown names (a called workflow's).
+    pub open_with: &'static str,
 }
 
 impl Scope {
@@ -58,7 +58,7 @@ impl Scope {
         base: &[],
         types: &[],
         strict: false,
-        only_with: "",
+        open_with: "",
     };
 }
 
@@ -146,7 +146,12 @@ pub fn ty(
                     Some(Tree::Map(m)) => {
                         Ty::Obj(m.iter().map(|(k, _)| (k.clone(), Ty::Str)).collect())
                     }
-                    _ if jobs.get(&name).is_some() => Ty::Obj(Vec::new()),
+                    _ if jobs.get(&name).is_some_and(|j| {
+                        scope.open_with.is_empty() || j.get(scope.open_with).is_none()
+                    }) =>
+                    {
+                        Ty::Obj(Vec::new())
+                    }
                     _ => Ty::Map(Box::new(Ty::Str)),
                 };
                 p.push((scope.output.to_string(), outputs));
@@ -189,6 +194,7 @@ pub fn ty(
                                     Tree::Seq(items) => {
                                         unify(items.iter().map(|i| infer(i, eval, marker)))
                                     }
+                                    Tree::Scalar(t, _) if t.contains(marker) => Ty::Any,
                                     other => infer(other, eval, marker),
                                 },
                                 (None, text) => Ty::parse(text),
@@ -219,10 +225,7 @@ pub fn ty(
                     .iter()
                     .map(|k| (k.to_string(), Ty::parse(scope.item))),
             );
-            (found
-                || scope.strict
-                    && (scope.only_with.is_empty() || root.at(&parts(scope.only_with)).is_some()))
-            .then_some(Ty::Obj(out))
+            (found || scope.strict).then_some(Ty::Obj(out))
         }
     }
 }

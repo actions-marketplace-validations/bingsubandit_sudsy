@@ -59,7 +59,7 @@ pub(crate) struct Tool {
     /// The tool that decides `Ready` and is listed first; without one, the first of the list.
     #[serde(default)]
     pub primary: bool,
-    /// A widely used secondary tool: weight 2 in the priority table (docs/ai/parity/queue.md).
+    /// A widely used secondary tool: weight 1 in the priority table (docs/ai/parity/queue.md).
     #[serde(default)]
     pub popular: bool,
     /// Why the leg waits on a user decision; the priority table lists it apart.

@@ -3,7 +3,7 @@
 //! exists: `measured`, `missed`, `ratchet`, `target-files` and the `files` causes of the `differences.yaml`, the
 //! catalogs and `support.yaml` (`primary`, `popular`, `blocked`). A format leg's number is the one of the README
 //! table (the groups of `support.yaml`), so the two never disagree; a lint tool with a `measured` share that
-//! `support.yaml` does not list is a leg of weight 1.
+//! `support.yaml` does not list is a leg of the lowest weight.
 
 use crate::queue::{Tool as Parity, gap_counts};
 use crate::support::{Row, Tool as Ref};
@@ -14,6 +14,16 @@ use std::collections::BTreeMap;
 const BAR: u64 = 85;
 /// Difficulty of a cause with no existing mapped rule (a new rule, a format gap, files no cause names).
 const NEW: u64 = 3;
+/// Weight of the primary tool of a language's leg.
+const W_PRIMARY: f64 = 4.0;
+/// Weight of a popular secondary tool (`popular: true` in support.yaml).
+const W_POPULAR: f64 = 1.0;
+/// Weight of any other tool.
+const W_OTHER: f64 = 0.25;
+/// Legs of a new language: its format and its lint tool, each from 0 to the bar.
+const NEW_LANGUAGE_LEGS: u64 = 2;
+/// Difficulty of a new language, an estimate: about ten format causes and ten new rules at `NEW` each.
+const NEW_LANGUAGE_DIFFICULTY: u64 = 60;
 /// Causes named in a cell before "+N more".
 const SHOWN: usize = 4;
 
@@ -37,7 +47,7 @@ struct Leg<'a> {
     kind: &'static str,
     name: String,
     primary: bool,
-    weight: u64,
+    weight: f64,
     blocked: Option<&'a str>,
     outcome: Outcome,
 }
@@ -158,9 +168,9 @@ fn legs<'a>(
 ) -> Vec<Leg<'a>> {
     let mut out = Vec::new();
     let weight = |i: usize, t: &Ref| match (i, t.popular) {
-        (0, _) => 3,
-        (_, true) => 2,
-        _ => 1,
+        (0, _) => W_PRIMARY,
+        (_, true) => W_POPULAR,
+        _ => W_OTHER,
     };
     for row in rows {
         for (i, t) in row.format.iter().enumerate() {
@@ -186,7 +196,7 @@ fn legs<'a>(
                 kind: "format",
                 name: t.name.clone(),
                 primary: true,
-                weight: 3,
+                weight: W_PRIMARY,
                 blocked: None,
                 outcome: format_leg(&t, tools.get("stability")),
             });
@@ -203,7 +213,7 @@ fn legs<'a>(
             });
         }
     }
-    // A tool with a measured share that no row lists is a leg of weight 1.
+    // A tool with a measured share that no row lists is a leg of the lowest weight.
     let listed: Vec<&str> = rows
         .iter()
         .flat_map(|r| r.lint.iter().map(|t| t.tool.as_str()))
@@ -220,7 +230,7 @@ fn legs<'a>(
                 kind: "lint",
                 name: folder.clone(),
                 primary: false,
-                weight: 1,
+                weight: W_OTHER,
                 blocked: None,
                 outcome: lint_leg(&tool, Some(t), catalogs),
             });
@@ -252,7 +262,7 @@ pub(crate) fn table(
     catalogs: &[Catalog],
 ) -> String {
     let legs = legs(rows, tools, catalogs);
-    let mut open: Vec<(f64, String)> = Vec::new();
+    let mut open: Vec<(bool, f64, String)> = Vec::new();
     let mut blocked = String::new();
     let mut unmeasured = Vec::new();
     for l in &legs {
@@ -273,8 +283,9 @@ pub(crate) fn table(
                     );
                     continue;
                 }
-                let score = l.weight as f64 * points / o.difficulty as f64;
+                let score = l.weight * points / o.difficulty as f64;
                 open.push((
+                    l.weight < W_PRIMARY,
                     score,
                     format!(
                         "| {} | {leg} | {} | {:.1}% | {points:.1} | {} {} | {} | {} | {score:.2} | {} |\n",
@@ -291,11 +302,28 @@ pub(crate) fn table(
             }
         }
     }
-    open.sort_by(|a, b| b.0.total_cmp(&a.0));
+    let holding: Vec<String> = legs
+        .iter()
+        .filter(|l| l.primary && l.blocked.is_none())
+        .filter(|l| !matches!(l.outcome, Outcome::AtBar))
+        .map(|l| format!("{} {} {}", l.language, l.kind, l.name))
+        .collect();
+    let new_points = (BAR * NEW_LANGUAGE_LEGS) as f64;
+    let new_score = W_PRIMARY * new_points / NEW_LANGUAGE_DIFFICULTY as f64;
+    if holding.is_empty() {
+        open.push((
+            false,
+            new_score,
+            format!(
+                "| (new language) | format + lint from 0 | {W_PRIMARY} | 0% | {new_points:.1} | - | estimate | {NEW_LANGUAGE_DIFFICULTY} | {new_score:.2} | - |\n"
+            ),
+        ));
+    }
+    open.sort_by(|a, b| a.0.cmp(&b.0).then(b.1.total_cmp(&a.1)));
     let mut out = String::from(
-        "## Priority\n\nWeight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.\n\n| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |\n|---|---|---|---|---|---|---|---|---|---|\n",
+        "## Priority\n\nWeight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Order: primary legs under the bar and, when the lock is open, the new language come before any secondary leg whatever the score says; the score orders inside each group. The new language is a row of two primary legs from 0 (weight 4, points 170 = 2 x 85, difficulty 60, an estimate: about ten format causes and ten new rules at 3 each), listed only when the lock is open. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.\n\n| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |\n|---|---|---|---|---|---|---|---|---|---|\n",
     );
-    for (_, row) in &open {
+    for (_, _, row) in &open {
         out += row;
     }
     if !blocked.is_empty() {
@@ -306,17 +334,11 @@ pub(crate) fn table(
     if !unmeasured.is_empty() {
         out += &format!("\nNot measured: {}.\n", unmeasured.join("; "));
     }
-    let holding: Vec<String> = legs
-        .iter()
-        .filter(|l| l.primary && l.blocked.is_none())
-        .filter(|l| !matches!(l.outcome, Outcome::AtBar))
-        .map(|l| format!("{} {} {}", l.language, l.kind, l.name))
-        .collect();
     out += &if holding.is_empty() {
         "\nNew language: open, every primary leg is at the bar or blocked.\n\n".to_string()
     } else {
         format!(
-            "\nNew language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by {}: {}.\n\n",
+            "\nNew language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by {}: {}. Score when open: {new_score:.2} ({W_PRIMARY} x {new_points:.0} points / difficulty {NEW_LANGUAGE_DIFFICULTY}).\n\n",
             holding.len(),
             holding.join("; ")
         )

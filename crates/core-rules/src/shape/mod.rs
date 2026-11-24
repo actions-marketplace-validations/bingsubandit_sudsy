@@ -532,7 +532,7 @@ impl Walk<'_> {
         let entries = map.map(|m| self.entries(m)).unwrap_or_default();
         if !row.keys.is_empty() {
             for (key, range, _) in &entries {
-                if !row.keys.contains(&key.as_str()) {
+                if !row.keys.contains(&key.as_str()) && key != "<<" {
                     if let Some(s) = self.shape.scoped.iter().find(|s| s.key == key) {
                         let parent = path.last().map_or("", |p| p.as_str());
                         let message = s
@@ -551,7 +551,11 @@ impl Walk<'_> {
                         "unexpected key \"{key}\" for {name} section. expected one of {}",
                         row.keys.join(", ")
                     );
-                    self.report_structure(row, *range, message);
+                    if row.names.is_empty() {
+                        self.report_structure(row, *range, message);
+                    } else {
+                        self.report(row, *range, message); // the keys are the section's names: an unknown name
+                    }
                 }
             }
         }
