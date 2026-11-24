@@ -33,11 +33,8 @@ pub fn source_type(path: &str) -> SourceType {
 /// A file of the provider; an embedded expression (`EmbedMode::Expression`) is the only element
 /// of an array.
 pub fn parse_file(file: &SourceFile) -> ParseResult {
-    let text = match file.language_version.as_deref() {
-        Some("expression" | "ng-expression" | "ng-nested") => &format!("[\n{}\n]", file.text),
-        _ => &file.text,
-    };
-    parse(text, source_type(&file.id))
+    let text = core_format::EmbedMode::source(file.language_version.as_deref(), &file.text);
+    parse(&text, source_type(&file.id))
 }
 
 /// Runs `attempt` (it returns its result and whether it had syntax errors) as a module first,

@@ -91,6 +91,13 @@ pub enum Place {
     Indented,
 }
 
+/// Does the chain stand bare (its operands not indented) because it is the root of an embedded
+/// expression? `mode`: the embed mode the host set; `is_root`: the language says the node is the
+/// expression itself. Angular's nested expressions and the indented mode indent the operands.
+pub fn unindented_root(mode: Option<crate::EmbedMode>, is_root: bool) -> bool {
+    is_root && !mode.is_some_and(crate::EmbedMode::indents_operands)
+}
+
 /// What the language prints or judges itself; every method has a default.
 pub trait BinaryHooks {
     /// An operator or an operand that is a token.
@@ -373,4 +380,20 @@ fn default_place(cx: &FormatCtx<'_>, policy: &BinaryPolicy, parent: Option<&Synt
         return Place::Assigned;
     }
     Place::Indented
+}
+
+#[cfg(test)]
+mod root_tests {
+    use super::unindented_root;
+    use crate::EmbedMode;
+
+    #[test]
+    fn only_a_root_of_a_plain_expression_is_unindented() {
+        assert!(unindented_root(Some(EmbedMode::Expression), true));
+        assert!(unindented_root(Some(EmbedMode::NgExpression), true));
+        assert!(!unindented_root(Some(EmbedMode::NgNested), true));
+        assert!(!unindented_root(Some(EmbedMode::ExpressionIndented), true));
+        assert!(!unindented_root(Some(EmbedMode::Expression), false));
+        assert!(!unindented_root(None, false));
+    }
 }

@@ -61,6 +61,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `conditional_indent` | int 1-4 | java `2`, js `1`, csharp `1` |
 | `conditional_layout` | `indented`, `chained` | java `indented`, js `chained`, csharp `indented` |
 | `constructor_initializer_indent` | int 0-16 | cpp `4`, c `4` |
+| `content_newline_with_attributes` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `continuation_indent` | int 0-16 | cpp `4`, c `4` |
 | `dialect` | json: `auto`, `json`, `jsonc`; sql: `ansi`, `postgres`, `mysql`, `tsql` | json `auto`, sql `ansi` |
 | `document_end` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
@@ -72,6 +73,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `hug_last_argument` | `never`, `sole`, `last` | java `sole`, js `last` |
 | `indent_braces` | bool | cpp `false`, c `false` |
 | `indent_case_labels` | bool | cpp `false`, c `false` |
+| `indent_expression_operands` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `indent_goto_labels` | bool | cpp `true`, c `true` |
 | `indent_nested_binary` | bool | java `true`, js `true`, csharp `false` |
 | `indent_pp_directives` | `none`, `keep` | cpp `none`, c `none` |

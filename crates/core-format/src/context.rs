@@ -22,6 +22,9 @@ pub enum EmbedMode {
     Program,
     /// One expression (a Vue directive, `{{ }}`, a Svelte `{...}`).
     Expression,
+    /// One expression as `Expression`, and the operands of a binary that continues on following
+    /// lines are indented (`vue/html-indent`).
+    ExpressionIndented,
     /// One expression of an Angular template: as `Expression`, and call arguments take no trailing
     /// comma (Angular's expression syntax has none).
     NgExpression,
@@ -33,15 +36,83 @@ pub enum EmbedMode {
 }
 
 impl EmbedMode {
+    const ALL: [EmbedMode; 6] = [
+        EmbedMode::Program,
+        EmbedMode::Expression,
+        EmbedMode::ExpressionIndented,
+        EmbedMode::NgExpression,
+        EmbedMode::NgNested,
+        EmbedMode::Declarations,
+    ];
+
     /// The name the other language's provider reads in its `embed_mode` option.
     pub fn name(self) -> &'static str {
         match self {
             EmbedMode::Program => "program",
             EmbedMode::Expression => "expression",
+            EmbedMode::ExpressionIndented => "expression-indented",
             EmbedMode::NgExpression => "ng-expression",
             EmbedMode::NgNested => "ng-nested",
             EmbedMode::Declarations => "declarations",
         }
+    }
+
+    /// The mode of the expressions a host embeds: `ExpressionIndented` when its
+    /// `indent_expression_operands` option is on.
+    pub fn expression_of(options: &core_config::ResolvedOptions) -> EmbedMode {
+        if options.bool(core_config::opt::INDENT_EXPRESSION_OPERANDS) {
+            EmbedMode::ExpressionIndented
+        } else {
+            EmbedMode::Expression
+        }
+    }
+
+    /// The mode of an `embed_mode` option value.
+    pub fn from_name(name: &str) -> Option<EmbedMode> {
+        Self::ALL.into_iter().find(|m| m.name() == name)
+    }
+
+    /// The mode the host's engine set in the `embed_mode` option; `None` for a whole file.
+    pub fn of(options: &core_config::ResolvedOptions) -> Option<EmbedMode> {
+        Self::from_name(options.text(core_config::opt::EMBED_MODE))
+    }
+
+    /// The text a provider parses for code of the mode `version` names: an expression is the
+    /// only element of an array (`[\n expression \n]`), anything else is the text itself.
+    pub fn source<'a>(version: Option<&str>, text: &'a str) -> std::borrow::Cow<'a, str> {
+        if version
+            .and_then(Self::from_name)
+            .is_some_and(Self::is_expression)
+        {
+            std::borrow::Cow::Owned(format!("[\n{text}\n]"))
+        } else {
+            std::borrow::Cow::Borrowed(text)
+        }
+    }
+
+    /// The trailing comma style to use (0 none, 1 es5, 2 all) when the option says `commas`:
+    /// an Angular expression takes one trailing comma at most (its syntax has none).
+    pub fn trailing_commas(mode: Option<EmbedMode>, commas: u8) -> u8 {
+        if mode.is_some_and(Self::is_angular) {
+            1
+        } else {
+            commas
+        }
+    }
+
+    /// Is the code one expression (not a program or declarations)?
+    pub fn is_expression(self) -> bool {
+        !matches!(self, EmbedMode::Program | EmbedMode::Declarations)
+    }
+
+    /// Does a binary's continuation indent its operands?
+    pub fn indents_operands(self) -> bool {
+        matches!(self, EmbedMode::NgNested | EmbedMode::ExpressionIndented)
+    }
+
+    /// An Angular template expression: its syntax has no trailing commas.
+    pub fn is_angular(self) -> bool {
+        matches!(self, EmbedMode::NgExpression | EmbedMode::NgNested)
     }
 }
 
@@ -1067,5 +1138,38 @@ mod tests {
         assert_eq!(runs.get(), 1);
         cx.layout(&root, 1, make).unwrap();
         assert_eq!(runs.get(), 2);
+    }
+}
+
+#[cfg(test)]
+mod embed_mode_tests {
+    use super::EmbedMode;
+
+    #[test]
+    fn source_wraps_only_expressions() {
+        for (version, wrapped) in [
+            (Some("expression"), true),
+            (Some("expression-indented"), true),
+            (Some("ng-nested"), true),
+            (Some("program"), false),
+            (Some("declarations"), false),
+            (Some("es2020"), false),
+            (None, false),
+        ] {
+            let out = EmbedMode::source(version, "a");
+            assert_eq!(out, if wrapped { "[\na\n]" } else { "a" }, "{version:?}");
+        }
+    }
+
+    #[test]
+    fn angular_modes_cap_the_comma_style() {
+        for mode in [EmbedMode::NgExpression, EmbedMode::NgNested] {
+            assert_eq!(EmbedMode::trailing_commas(Some(mode), 2), 1);
+            assert_eq!(EmbedMode::trailing_commas(Some(mode), 0), 1);
+        }
+        for mode in [None, Some(EmbedMode::Expression), Some(EmbedMode::Program)] {
+            assert_eq!(EmbedMode::trailing_commas(mode, 2), 2);
+            assert_eq!(EmbedMode::trailing_commas(mode, 0), 0);
+        }
     }
 }

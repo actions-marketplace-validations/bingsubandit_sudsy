@@ -18,6 +18,7 @@ pub mod calls;
 pub mod case;
 pub mod columns;
 pub mod comments;
+pub mod content_lines;
 pub mod context;
 pub mod directives;
 pub mod doc;

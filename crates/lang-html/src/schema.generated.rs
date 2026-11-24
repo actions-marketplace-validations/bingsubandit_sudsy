@@ -8,6 +8,10 @@ pub const BRACKET_SAME_LINE: core_config::OptId = core_config::opt::BRACKET_SAME
 #[allow(dead_code)]
 pub const SINGLE_ATTRIBUTE_PER_LINE: core_config::OptId = core_config::opt::SINGLE_ATTRIBUTE_PER_LINE;
 #[allow(dead_code)]
+pub const CONTENT_NEWLINE_WITH_ATTRIBUTES: core_config::OptId = core_config::opt::CONTENT_NEWLINE_WITH_ATTRIBUTES;
+#[allow(dead_code)]
+pub const INDENT_EXPRESSION_OPERANDS: core_config::OptId = core_config::opt::INDENT_EXPRESSION_OPERANDS;
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EmbeddedLanguageFormatting { Auto, Off }
 #[allow(dead_code)]
@@ -36,6 +40,14 @@ pub fn bracket_same_line(o: &core_config::ResolvedOptions) -> bool {
 pub fn single_attribute_per_line(o: &core_config::ResolvedOptions) -> bool {
     o.flag(SINGLE_ATTRIBUTE_PER_LINE, false)
 }
+#[allow(dead_code)]
+pub fn content_newline_with_attributes(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(CONTENT_NEWLINE_WITH_ATTRIBUTES, false)
+}
+#[allow(dead_code)]
+pub fn indent_expression_operands(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(INDENT_EXPRESSION_OPERANDS, false)
+}
 
 #[rustfmt::skip]
 pub fn option_schema() -> core_config::OptionSchema {
@@ -50,6 +62,8 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::WHITESPACE_SENSITIVITY, &["css", "strict", "ignore"], "css", "Whether whitespace between inline elements and text is significant: `css` follows each element's CSS display, `strict` treats every element as inline, `ignore` as block."),
         core_config::OptionDef::boolean(core_config::opt::BRACKET_SAME_LINE, false, "Put the `>` of a multi-line start tag at the end of the last attribute's line."),
         core_config::OptionDef::boolean(core_config::opt::SINGLE_ATTRIBUTE_PER_LINE, false, "Put every attribute of a tag that has several on its own line."),
+        core_config::OptionDef::boolean(core_config::opt::CONTENT_NEWLINE_WITH_ATTRIBUTES, false, "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults)."),
+        core_config::OptionDef::boolean(core_config::opt::INDENT_EXPRESSION_OPERANDS, false, "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand."),
         ])
         .with_presets(vec![
         core_config::Preset::new("html/html-validate-standard", include_str!("../presets/html-validate-standard.yaml")),

@@ -30,6 +30,9 @@ pub struct Opts<'a> {
     pub tab: usize,
     pub bracket_same_line: bool,
     pub single_attribute_per_line: bool,
+    /// The mode of embedded expressions: `Expression`, or `ExpressionIndented` (`indent_expression_operands`).
+    pub expression_mode: EmbedMode,
+    pub content_lines: core_format::content_lines::ContentLines,
 }
 
 pub struct P<'a> {
@@ -785,6 +788,10 @@ impl P<'_> {
             && !f.lead_sp
             && l.trail_ss
             && !l.trail_sp;
+        let (hug, force_break) =
+            self.o
+                .content_lines
+                .decide(&n.name, n.attrs.len(), hug, self.force_break_content(id));
         let before = if hug {
             doc::if_break_in(attrs, doc::softline(), doc::nil())
         } else if f.lead_sp && f.lead_ss {
@@ -816,7 +823,7 @@ impl P<'_> {
             doc::softline()
         };
         elem(doc::concat(vec![
-            if self.force_break_content(id) {
+            if force_break {
                 doc::break_parent()
             } else {
                 doc::nil()

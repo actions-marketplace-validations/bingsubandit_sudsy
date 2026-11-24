@@ -7235,6 +7235,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -7257,6 +7262,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_size": {
@@ -9214,6 +9224,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -9236,6 +9251,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_size": {
@@ -10713,6 +10733,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -10735,6 +10760,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_size": {
@@ -12635,6 +12665,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -12657,6 +12692,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_size": {
@@ -14883,6 +14923,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -14905,6 +14950,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_script_and_style": {
@@ -15106,6 +15156,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -15128,6 +15183,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_script_and_style": {
@@ -16276,6 +16336,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16298,6 +16363,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_script_and_style": {
@@ -16499,6 +16569,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16521,6 +16596,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_script_and_style": {

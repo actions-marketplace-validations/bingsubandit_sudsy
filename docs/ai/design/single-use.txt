@@ -12,6 +12,7 @@ concept angular-microsyntax # users: html
 concept angular-template-layout # users: html
 concept arrow-function-layout # users: js
 concept async-suffix # users: csharp
+concept attribute-content-lines # users: html (shared)
 concept behavior-summaries # users: csharp (shared)
 concept block-collection-layout # users: yaml
 concept build-stage-checks # users: dockerfile

@@ -64,8 +64,14 @@ pub(super) fn lines(code: &str) -> Doc {
 /// An event handler: an expression when it parses as one (`f();` is the expression `f()` too), else
 /// statements; statements that format to one expression (`fn => x` gets its parentheses) are one,
 /// so that formatting again gives the same text.
-fn handler(embed: Embed, language: &str, value: &str, width: usize) -> Option<(String, bool)> {
-    let expr = |code: &str| embed(language, EmbedMode::Expression, code, width, true);
+fn handler(
+    embed: Embed,
+    language: &str,
+    mode: EmbedMode,
+    value: &str,
+    width: usize,
+) -> Option<(String, bool)> {
+    let expr = |code: &str| embed(language, mode, code, width, true);
     if let Some(out) = expr(value.trim_end().trim_end_matches(';')) {
         return Some((out, false));
     }
@@ -229,7 +235,7 @@ impl P<'_> {
             _ => return None,
         };
         let (out, mode) = if mode == EmbedMode::Program {
-            let (out, statements) = handler(embed, language, &value, width)?;
+            let (out, statements) = handler(embed, language, EmbedMode::Expression, &value, width)?;
             (
                 out,
                 if statements {
@@ -298,7 +304,7 @@ impl P<'_> {
             self.o.embed.and_then(|e| {
                 e(
                     self.expression_language(),
-                    EmbedMode::Expression,
+                    self.o.expression_mode,
                     code,
                     width,
                     false,
@@ -356,12 +362,12 @@ impl P<'_> {
         }
         // The formatted value for a width, and whether it is statements.
         let run = |width: usize| -> Option<(String, bool)> {
-            let expr = |code: &str| embed(language, EmbedMode::Expression, code, width, true);
+            let expr = |code: &str| embed(language, self.o.expression_mode, code, width, true);
             if key == "v-for" {
                 return v_for(value, expr).map(|o| (o, false));
             }
             if lower.starts_with('@') || key == "v-on" {
-                return handler(embed, language, value, width);
+                return handler(embed, language, self.o.expression_mode, value, width);
             }
             expr(value).map(|o| (o, false))
         };
@@ -451,7 +457,7 @@ impl P<'_> {
         let embed = self.o.embed?;
         embed(
             self.expression_language(),
-            EmbedMode::Expression,
+            self.o.expression_mode,
             code,
             width,
             false,
@@ -537,7 +543,7 @@ impl P<'_> {
         let code = value.strip_prefix('{')?.strip_suffix('}')?.trim();
         let language = self.expression_language();
         let run = |width: usize| {
-            embed(language, EmbedMode::Expression, code, width, false).map(|o| (o, false))
+            embed(language, self.o.expression_mode, code, width, false).map(|o| (o, false))
         };
         self.attr_expression(id, &format!("{name}={{"), "}", &|o| o, &run)
     }

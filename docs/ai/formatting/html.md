@@ -12,6 +12,7 @@ Files: `.html`, `.htm` (`*.component.html` is Angular, below).
 
 ## Vue
 `.vue` files are the `vue` language (`crates/lang-html/src/dialect.rs`): the HTML tree read in `Mode::Vue` (entities stay in the text, `{{ }}` is an `Interpolation` of `{{`, a `Chunk` and `}}`, a directive name is several `AttrName` tokens: `:`, the name, `.`, a modifier; void elements need their exact lowercase name; root elements other than `template`, `script` and `style` are raw custom blocks unless the file is an HTML page), the config section `vue` on top of `html`, and the formatter above with these additions:
+- `content_newline_with_attributes` and `indent_expression_operands` lay out like eslint-plugin-vue (`singleline-html-element-content-newline` with its default `ignores`: `INLINE` in `format/model.rs`; `html-indent`: embedded expressions get `EmbedMode::ExpressionIndented`, the JS binary chain then indents its operands). With `single_attribute_per_line` and `whitespace_sensitivity: ignore` on the Vue corpus they clear the 360 `singleline-html-element-content-newline` findings and 383 of 527 `html-indent` ones; 144 remain: object and ternary continuation lines inside an expression (Prettier's `? ` alignment and nested object indent differ from the rule's offsets).
 - Element names and attribute names keep their case. Root elements are blocks; a root block other than `template`, `script` and `style` (and a `template` with a `lang` other than `html`) is a custom block: formatted as JSON, YAML, GraphQL, Markdown, JS or TS by its `lang` (or `type="application/json"`), else kept.
 - The content of a root `<script>` and `<style>` starts at the margin unless `indent_script_and_style` (below). TypeScript expressions when a root script has `lang="ts"`.
 - `{{ expression }}` is formatted as an expression (`{{ a + b }}`, the expression on lines of its own when too wide, a lone interpolation hugs its tags); an expression that does not parse is kept (its lines without the indentation they share).
@@ -49,6 +50,8 @@ Prettier's printer-html is the reference (`format/model.rs` builds the nodes and
 | `whitespace_sensitivity` | `css`, `strict`, `ignore` | `css` | Whether whitespace between inline elements and text is significant: `css` follows each element's CSS display, `strict` treats every element as inline, `ignore` as block. |
 | `bracket_same_line` | bool | `false` | Put the `>` of a multi-line start tag at the end of the last attribute's line. |
 | `single_attribute_per_line` | bool | `false` | Put every attribute of a tag that has several on its own line. |
+| `content_newline_with_attributes` | bool | `false` | Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults). |
+| `indent_expression_operands` | bool | `false` | Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand. |
 <!-- /generated -->
 
 ## Conformance

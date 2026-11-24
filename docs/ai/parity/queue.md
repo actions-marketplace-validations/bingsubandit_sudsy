@@ -89,14 +89,13 @@ Lint: target 0% (0 of 14, 14 missed, measured on f4e9edb2); rules by missed find
 
 ## eslint-plugin-vue
 
-Lint: target 60.3% (1392 of 2310, 918 missed, measured on f4e9edb2); rules by missed findings:
-1. `vue/html-indent` (527 missed)
-2. `vue/singleline-html-element-content-newline` (360 missed)
-3. `vue/html-self-closing` (24 missed)
-4. `vue/no-template-shadow` (3 missed)
-5. `vue/no-v-html` (2 missed)
-6. `vue/multi-word-component-names` (1 missed)
-7. `vue/return-in-computed-property` (1 missed)
+Lint: target 88.8% (1392 of 1567, 175 missed, measured on f4e9edb2); rules by missed findings:
+1. `vue/html-indent` (144 missed)
+2. `vue/html-self-closing` (24 missed)
+3. `vue/no-template-shadow` (3 missed)
+4. `vue/no-v-html` (2 missed)
+5. `vue/multi-word-component-names` (1 missed)
+6. `vue/return-in-computed-property` (1 missed)
 
 ## google-java-format
 

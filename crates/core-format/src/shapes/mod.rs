@@ -40,6 +40,7 @@ pub use assignment::{
 };
 pub use binary_chain::{
     BinaryHooks, BinaryPolicy, Hug, NoBinaryHooks, OperatorLine, Place, binary_chain, flattens,
+    unindented_root,
 };
 pub use block::{
     BlockStyle, Continuations, LabelStyle, annotation_line, blank_before, block, block_between,

@@ -135,6 +135,15 @@ const VOID: &[&str] = &[
     "track", "wbr",
 ];
 
+/// The elements that stay on their line with their content, and `pre`-like ones: the default
+/// `ignores` of `vue/singleline-html-element-content-newline`.
+pub const INLINE: &[&str] = &[
+    "a", "abbr", "audio", "b", "bdi", "bdo", "canvas", "cite", "code", "data", "del", "dfn", "em",
+    "i", "iframe", "ins", "kbd", "label", "map", "mark", "noscript", "object", "output", "picture",
+    "q", "ruby", "s", "samp", "small", "span", "strong", "sub", "sup", "svg", "time", "u", "var",
+    "video",
+];
+
 pub fn is_void(name: &str) -> bool {
     VOID.contains(&name)
 }
