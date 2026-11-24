@@ -1,5 +1,6 @@
 # Corpus files equal to the reference output when written: <hash of the output> <path below tests/conformance/corpus>. PARITY_WRITE=1 scripts/parity.sh format <tool> rewrites it.
 3bdb003f99ebf6a4 xml-projects/eng/AfterSolutionBuild.targets
+629df9a8db708d33 xml-projects/eng/Baseline.Designer.props
 c133047023c3e06a xml-projects/eng/Baseline.xml
 dd5e98835069b3a4 xml-projects/eng/Build.props
 c13977bd843fda9f xml-projects/eng/Common.props
@@ -295,8 +296,6 @@ fa4edb38c4c9232f xml-projects/src/Mvc/test/WebSites/RazorBuildWebSite.Precompile
 fa4edb38c4c9232f xml-projects/src/Mvc/test/WebSites/RazorBuildWebSite.Views/RazorBuildWebSite.Views.csproj
 f1683025b885d17b xml-projects/src/Mvc/test/WebSites/RazorBuildWebSite/RazorBuildWebSite.csproj
 a04dd8787ad23d0a xml-projects/src/Mvc/test/WebSites/RazorPagesClassLibrary/RazorPagesClassLibrary.csproj
-20bf3b79cfbb2349 xml-projects/src/Mvc/test/WebSites/RazorPagesWebSite/Pages/Localized/Page.fr-FR.resx
-6c0c90d80283be1f xml-projects/src/Mvc/test/WebSites/RazorPagesWebSite/Pages/Localized/PageWithModel.fr-FR.resx
 f9cfb6b8aa9d1b87 xml-projects/src/Mvc/test/WebSites/RazorPagesWebSite/RazorPagesWebSite.csproj
 4f6c7a130a30758b xml-projects/src/Mvc/test/WebSites/RazorWebSite/RazorWebSite.csproj
 51a3721eb46a1af8 xml-projects/src/Mvc/test/WebSites/RoutingWebSite/Mvc.RoutingWebSite.csproj
