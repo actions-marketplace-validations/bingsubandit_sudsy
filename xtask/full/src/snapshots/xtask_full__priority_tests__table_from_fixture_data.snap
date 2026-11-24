@@ -4,20 +4,21 @@ expression: "table(&rows, &tools, &catalogs)"
 ---
 ## Priority
 
-Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points: to the 85% bar. Needs: the findings (lint) or files (format, real-world corpus groups only) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.
+Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | Alpha | lint Lint | 3 | 50.0% | 35.0 | 35 findings | `mapped-rule` 30, `unmapped-rule` 15 | 4 | 26.25 | abc123 |
-| Alpha | format Fmt | 3 | 60.0% | 25.0 | 25 files | `big` 30 | 3 | 25.00 | - |
+| (not in support.yaml) | lint unlisted | 1 | 10.0% | 75.0 | 75 findings | `y` 90 | 3 | 25.00 | abc123 |
+| Alpha | format Fmt | 3 | 55.9% | 29.1 | 33 files | `big` 30, `small` 5 | 6 | 14.57 | - |
 | Alpha | lint Pop | 2 | 70.0% | 15.0 | 15 findings | `x` 30 | 3 | 10.00 | abc123 |
 
 Blocked on a decision:
 
 | Language | Leg | Now | Points | Reason |
 |---|---|---|---|---|
-| Gamma | format Held | 55.5% | 29.5 | waits on a decision |
+| Gamma | format Held | 10.0% | 75.0 | waits on a decision |
 
-Not measured: Beta format OnlyFixtures (no real-world group).
+Not measured: Beta format OnlyFixtures (no differences.yaml).
 
-New language: locked until every primary leg is at the bar or blocked. Held by 3: Alpha format Fmt; Alpha lint Lint; Beta format OnlyFixtures.
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: Alpha format Fmt; Alpha lint Lint; Beta format OnlyFixtures.

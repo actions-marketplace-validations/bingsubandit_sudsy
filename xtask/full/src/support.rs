@@ -65,9 +65,6 @@ pub(crate) struct Tool {
     /// Why the leg waits on a user decision; the priority table lists it apart.
     #[serde(default)]
     pub blocked: Option<String>,
-    /// Ratchet groups that are real-world corpora although their name has no `real` in it.
-    #[serde(default)]
-    pub corpus: Vec<String>,
 }
 
 /// The rows of `support.yaml`.

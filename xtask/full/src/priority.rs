@@ -1,9 +1,9 @@
 //! The priority table of docs/ai/parity/queue.md: one row per leg (format or lint of a language's reference
 //! tool) under the 85% bar, ranked by weight x points to the bar / difficulty. Everything is read from data that
 //! exists: `measured`, `missed`, `ratchet`, `target-files` and the `files` causes of the `differences.yaml`, the
-//! catalogs and `support.yaml` (`primary`, `popular`, `blocked`, `corpus`). Format legs count only real-world corpus
-//! groups (a name with `real` in it, or listed in the leg's `corpus`; stability groups are all corpora): a leg with
-//! only fixtures is not measured, never at the bar.
+//! catalogs and `support.yaml` (`primary`, `popular`, `blocked`). A format leg's number is the one of the README
+//! table (the groups of `support.yaml`), so the two never disagree; a lint tool with a `measured` share that
+//! `support.yaml` does not list is a leg of weight 1.
 
 use crate::queue::{Tool as Parity, gap_counts};
 use crate::support::{Row, Tool as Ref};
@@ -70,18 +70,15 @@ fn pick(
     (out, difficulty)
 }
 
-fn format_leg(tool: &Ref, parity: Option<&Parity>, stability: bool) -> Outcome {
+fn format_leg(tool: &Ref, parity: Option<&Parity>) -> Outcome {
     let Some(t) = parity else {
         return Outcome::NotMeasured("no differences.yaml");
     };
-    let real = |g: &str| {
-        (tool.groups.is_empty() || tool.groups.iter().any(|x| x == g))
-            && (stability || g.contains("real") || tool.corpus.iter().any(|x| x == g))
-    };
+    let real = |g: &str| tool.groups.is_empty() || tool.groups.iter().any(|x| x == g);
     let groups: Vec<&String> = t.target_files.keys().filter(|g| real(g)).collect();
     let files: u64 = groups.iter().map(|g| t.target_files[*g]).sum();
     if files == 0 {
-        return Outcome::NotMeasured("no real-world group");
+        return Outcome::NotMeasured("no target files");
     }
     let same: u64 = groups
         .iter()
@@ -109,16 +106,25 @@ fn format_leg(tool: &Ref, parity: Option<&Parity>, stability: bool) -> Outcome {
 }
 
 fn lint_leg(tool: &Ref, parity: Option<&Parity>, catalogs: &[Catalog]) -> Outcome {
-    let Some(m) = parity.and_then(|t| t.measured.as_ref().map(|m| (t, m))) else {
-        return Outcome::NotMeasured("no `measured` coverage run");
+    // The bar is read on the README number (`target`), the counts on `measured`.
+    let Some(t) = parity.filter(|t| t.target.is_some() || t.measured.is_some()) else {
+        return Outcome::NotMeasured("no target");
     };
-    let (t, m) = m;
-    if m.total == 0 {
+    let share = t.target.or_else(|| {
+        t.measured
+            .as_ref()
+            .filter(|m| m.total > 0)
+            .map(|m| m.covered as f64 * 100.0 / m.total as f64)
+    });
+    let Some(share) = share else {
         return Outcome::NotMeasured("no findings in the corpus");
-    }
-    if need(m.covered, m.total) == 0 {
+    };
+    if share >= BAR as f64 {
         return Outcome::AtBar;
     }
+    let Some(m) = t.measured.as_ref() else {
+        return Outcome::NotMeasured("no `measured` counts");
+    };
     let catalog = catalogs
         .iter()
         .find(|c| c.tool.replace("plugin-", "") == tool.tool);
@@ -136,7 +142,7 @@ fn lint_leg(tool: &Ref, parity: Option<&Parity>, catalogs: &[Catalog]) -> Outcom
     let missed = t.missed.iter().map(|(r, n)| (r.clone(), *n)).collect();
     let (causes, difficulty) = pick(missed, need, &cost);
     Outcome::Open(Open {
-        pct: m.covered as f64 * 100.0 / m.total as f64,
+        pct: share,
         need,
         unit: "findings",
         causes,
@@ -165,7 +171,7 @@ fn legs<'a>(
                 primary: i == 0,
                 weight: weight(i, t),
                 blocked: t.blocked.as_deref(),
-                outcome: format_leg(t, tools.get(&t.tool), false),
+                outcome: format_leg(t, tools.get(&t.tool)),
             });
         }
         if !row.stability.is_empty() {
@@ -182,7 +188,7 @@ fn legs<'a>(
                 primary: true,
                 weight: 3,
                 blocked: None,
-                outcome: format_leg(&t, tools.get("stability"), true),
+                outcome: format_leg(&t, tools.get("stability")),
             });
         }
         for (i, t) in row.lint.iter().enumerate() {
@@ -194,6 +200,29 @@ fn legs<'a>(
                 weight: weight(i, t),
                 blocked: t.blocked.as_deref(),
                 outcome: lint_leg(t, tools.get(&t.tool), catalogs),
+            });
+        }
+    }
+    // A tool with a measured share that no row lists is a leg of weight 1.
+    let listed: Vec<&str> = rows
+        .iter()
+        .flat_map(|r| r.lint.iter().map(|t| t.tool.as_str()))
+        .collect();
+    for (folder, t) in tools {
+        if t.measured.is_some() && !listed.contains(&folder.as_str()) {
+            let tool = Ref {
+                tool: folder.clone(),
+                name: folder.clone(),
+                ..Ref::default()
+            };
+            out.push(Leg {
+                language: "(not in support.yaml)",
+                kind: "lint",
+                name: folder.clone(),
+                primary: false,
+                weight: 1,
+                blocked: None,
+                outcome: lint_leg(&tool, Some(t), catalogs),
             });
         }
     }
@@ -264,7 +293,7 @@ pub(crate) fn table(
     }
     open.sort_by(|a, b| b.0.total_cmp(&a.0));
     let mut out = String::from(
-        "## Priority\n\nWeight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points: to the 85% bar. Needs: the findings (lint) or files (format, real-world corpus groups only) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.\n\n| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |\n|---|---|---|---|---|---|---|---|---|---|\n",
+        "## Priority\n\nWeight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.\n\n| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |\n|---|---|---|---|---|---|---|---|---|---|\n",
     );
     for (_, row) in &open {
         out += row;
@@ -287,7 +316,7 @@ pub(crate) fn table(
         "\nNew language: open, every primary leg is at the bar or blocked.\n\n".to_string()
     } else {
         format!(
-            "\nNew language: locked until every primary leg is at the bar or blocked. Held by {}: {}.\n\n",
+            "\nNew language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by {}: {}.\n\n",
             holding.len(),
             holding.join("; ")
         )

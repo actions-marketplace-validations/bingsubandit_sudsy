@@ -3,7 +3,8 @@
 # to the ratchet groups of this one. No `format` list: Sudsy does not format the language, or no reference formatter exists and `stability` names
 # the groups of tests/parity/stability that stand for the format leg (`scripts/parity.sh stability <group>`). `ids` are the
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
-# language names of its rows in bench/speed.json.# `popular: true` (a widely used secondary tool, weight 2), `blocked: <reason>` (the leg waits on a user decision) and `corpus: [groups]` (real-world corpora whose group name has no `real` in it) feed the priority table of docs/ai/parity/queue.md.
+# language names of its rows in bench/speed.json.
+# `popular: true` (a widely used secondary tool, weight 2) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
   ids: [js]
   speed: [JS/TS]
@@ -106,7 +107,7 @@
   format: [{tool: csharpier-xml, name: CSharpier XML}]
 - language: C / C++
   ids: [c, cpp]
-  format: [{tool: clang-format, name: clang-format, corpus: [llvm, fmt, range-v3, folly, linux, sqlite], blocked: "a cost-based choice in the Doc printer (bin-packing, break after `=`) waits on the lead and user decision of docs/ai/design/cpp-formatter.md"}]
+  format: [{tool: clang-format, name: clang-format, blocked: "a cost-based choice in the Doc printer (bin-packing, break after `=`) waits on the lead and user decision of docs/ai/design/cpp-formatter.md"}]
   lint: [{tool: clang-tidy, name: clang-tidy}]
 - language: Ruby
   ids: [ruby]
