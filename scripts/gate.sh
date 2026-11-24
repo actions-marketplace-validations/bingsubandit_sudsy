@@ -18,24 +18,33 @@ while [ $# -gt 0 ]; do
     *) echo "usage: gate.sh [--rust-only] [--affected [--base REV]] [-p <crate>]..." >&2; exit 2 ;;
   esac; shift
 done
+# A step's output goes to the log, not to the caller: a pass prints nothing, a failure the summary of
+# scripts/lib/failsum.sh (failing file:line and test names) and the log's path.
+. scripts/lib/failsum.sh
+glog=$PWD/.cargo/tmp/gate.log
 gate() {
-  local name=$1 t=$SECONDS; shift; echo "== $name"
-  timeout -k 15 "${GATE_TIMEOUT:-1800}" "$@"; local rc=$?
-  [ $rc -eq 0 ] || { [ $rc -eq 124 ] && echo "GATE TIMED OUT after ${GATE_TIMEOUT:-1800}s (GATE_TIMEOUT): $name" >&2; echo "GATE FAILED: $name" >&2; exit 1; }
-  echo "   ($name: $((SECONDS - t))s)"
+  local name=$1 t=$SECONDS from; shift; from=$(wc -l <"$glog")
+  echo "== $name" >>"$glog"
+  timeout -k 15 "${GATE_TIMEOUT:-1800}" "$@" >>"$glog" 2>&1; local rc=$?
+  [ $rc -eq 0 ] && return 0
+  [ $rc -eq 124 ] && echo "GATE TIMED OUT after ${GATE_TIMEOUT:-1800}s (GATE_TIMEOUT): $name" >&2
+  echo "GATE FAILED: $name ($((SECONDS - t))s)" >&2
+  tail -n +$((from + 2)) "$glog" >"$glog.step"; fail_summary "$glog.step" "$glog" >&2
+  exit 1
 }
 
 # .cargo/config.toml points TEMP/TMP/TMPDIR at .cargo/tmp; without the tracked directory a fresh
 # checkout's C compiler (MSVC D8050) and temp-dir tests fail.
 git ls-files --error-unmatch .cargo/tmp/.gitkeep >/dev/null 2>&1 && [ -e .cargo/tmp/.gitkeep ] ||
   { echo "GATE FAILED: .cargo/tmp/.gitkeep is gone (restore: git checkout origin/main -- .cargo/tmp/.gitkeep)" >&2; exit 1; }
+: >"$glog"
 . scripts/slot-run.sh; claim_slot; touch_changed; sweep_slot || exit 1
 
 # What runs: crates for clippy and tests (ws) and the other steps.
 if [ ${#pkg[@]} -gt 0 ]; then
   ws=("${pkg[@]}") steps=
 elif [ $affected = 1 ]; then
-  sel=$(cargo xtask affected "${base[@]}") || { echo "GATE FAILED: cargo xtask affected" >&2; exit 1; }
+  sel=$(cargo xtask affected "${base[@]}" 2>>"$glog") || { tail -n 15 "$glog"; echo "GATE FAILED: cargo xtask affected (log $glog)" >&2; exit 1; }
   grep -v '^bench ' <<<"$sel"
   crates=$(sed -n 's/^crates //p' <<<"$sel") steps=$(sed -n 's/^steps //p' <<<"$sel")
   ws=(); if [ "$crates" = all ]; then ws=(--workspace); else for c in $crates; do ws+=(-p "$c"); done; fi
@@ -90,9 +99,7 @@ if [ $rust_only -eq 0 ]; then
   done
   if has vscode; then
     if [ -n "$npm_pid" ]; then
-      echo "== npm ci (started with the gate)"; t=$SECONDS
-      wait $npm_pid || { cat .cargo/tmp/npm-ci.log; echo "GATE FAILED: npm ci" >&2; exit 1; }
-      echo "   (npm ci: $((SECONDS - t))s waited)"
+      wait $npm_pid || { tail -n 15 .cargo/tmp/npm-ci.log; echo "GATE FAILED: npm ci (log .cargo/tmp/npm-ci.log)" >&2; exit 1; }
     fi
     gate "vscode typecheck" npm --prefix editors/vscode run typecheck
     gate "vscode lint" npm --prefix editors/vscode run lint
@@ -100,7 +107,7 @@ if [ $rust_only -eq 0 ]; then
     gate "vscode build" npm --prefix editors/vscode run build
   fi
 fi
-echo "ALL GATES PASSED (${SECONDS}s)"
+echo "ALL GATES PASSED (${SECONDS}s)"; rm -f "$glog.step"
 # Build caches only grow; warn before the disk fills (it has, mid-build).
 free_gb=$(df -BG --output=avail "${CARGO_TARGET_DIR:-target}" 2>/dev/null | tail -1 | tr -dc 0-9)
 [ -n "$free_gb" ] && [ "$free_gb" -lt 30 ] && echo "warning: ${free_gb} GB free on the build disk; run scripts/clean-slots.sh" >&2

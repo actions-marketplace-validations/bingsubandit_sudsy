@@ -10,8 +10,8 @@
 # folders instead of the selection), except -p CRATE (repeatable), which the gate checks instead
 # of the selection. SUDSY_FINISH_REF: the ref whose finish.yml is dispatched (default main; a
 # branch to try a changed workflow). `finish.sh --stop` cancels this slot's run.
-# Agents: `finish.sh --start [args]` dispatches the run and returns; `finish.sh --wait` then waits at
-# most 4 minutes (under the 5-minute prompt cache) and either prints the result as above
+# Agents: `finish.sh --start [args]` dispatches the run and waits as `--wait` does; `finish.sh --wait` waits at
+# most 4 minutes (under the 5-minute prompt cache) and either prints the result as above (both calls: Bash timeout 600000)
 # or ends in `FINISH RUNNING` with exit 3: call --wait again. No background job, Monitor or sleep.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -29,12 +29,12 @@ fi
 if [ "${1:-}" = --stop ]; then
   for r in $(slot_runs); do gh run cancel "$r"; done; rm -f "$state"; echo "finish stopped"; exit 0
 fi
-mode=all deadline=
+mode=all deadline= t0=$(date +%s)
 case "${1:-}" in
   --start) mode=start; shift ;;
   --wait)
     [ -f "$state" ] || { echo "FINISH FAILED: no started run (scripts/finish.sh --start first)"; exit 1; }
-    read -r id branch <"$state"; mode=wait; deadline=$(( $(date +%s) + 240 )) ;;
+    read -r id branch <"$state"; mode=wait; deadline=$(( t0 + 235 )) ;;
 esac
 if [ $mode != wait ]; then
 gate=--affected bench=() pkg= base_rev=
@@ -82,7 +82,8 @@ done
 [ -n "$id" ] || { echo "FINISH FAILED: bench (no run found for $token)"; exit 1; }
 echo "finish: $(gh run view "$id" --json url --jq .url)"
 if [ $mode = start ]; then
-  echo "$id $branch" >"$state"; echo "FINISH STARTED: now scripts/finish.sh --wait"; exit 0
+  # The state is written before the wait: an interrupted --start leaves the run going, --wait picks it up.
+  echo "$id $branch" >"$state"; mode=wait; deadline=$(( t0 + 235 ))
 fi
 fi
 # The snapshot branch (the run checks out its commit) and the state go once the run has ended; an
