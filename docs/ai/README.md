@@ -53,7 +53,7 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [editor/vscode.md](editor/vscode.md) | VS Code extension, packaging, dogfooding |
 | [performance/numbers.md](performance/numbers.md) | Current numbers per hot path |
 | [performance/tooling.md](performance/tooling.md) | How to measure: bench.sh, perf-bench, speed scripts |
-| [performance/checklist.md](performance/checklist.md) | Six patterns that overran the bench, and the local allocation check |
+| [performance/checklist.md](performance/checklist.md) | The patterns that overran the bench, and the local allocation check |
 | [development/agent-brief.md](development/agent-brief.md) | The standard brief of a build agent: working files, checks, finish, landing, report |
 | [development/dev-loop.md](development/dev-loop.md) | Build, gate, scripts, Windows/Git Bash/WSL notes |
 | [development/parity.md](development/parity.md) | `parity.sh`: differential tests against upstream tools |
