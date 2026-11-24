@@ -215,6 +215,80 @@
               "$ref": "#/definitions/rule",
               "description": "An async method returning Task or ValueTask has a name that does not end in `Async`. Overrides, explicit interface implementations and `Main` are left alone (their names are not the method's to choose). Renaming needs the binding layer, so there is no fix."
             },
+            "at-extend-no-missing-placeholder": {
+              "$ref": "#/definitions/rule",
+              "description": "An `@extend` of anything but a placeholder selector; a selector with interpolation is left alone."
+            },
+            "at-function-pattern": {
+              "description": "A `@function` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "default": "",
+                          "description": "The regex a function name must match.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "at-if-no-null": {
+              "$ref": "#/definitions/rule",
+              "description": "An `@if` that compares with `null` (`== null`, `!= null`): write `not $a` or `$a`."
+            },
+            "at-mixin-argumentless-call-parentheses": {
+              "$ref": "#/definitions/rule",
+              "description": "An `@include` of a mixin with empty parentheses (`@include foo()`); a `using (...)` clause after them is left alone."
+            },
+            "at-mixin-pattern": {
+              "description": "A `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "default": "",
+                          "description": "The regex a mixin name must match.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "at-rule-allowed-list": {
               "description": "An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything.",
               "oneOf": [
@@ -248,6 +322,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "at-rule-conditional-no-parentheses": {
+              "$ref": "#/definitions/rule",
+              "description": "The condition of `@if`, `@else if` and `@while` written in parentheses (`@if ($a == 1)`)."
             },
             "at-rule-disallowed-list": {
               "description": "An at-rule (vendor prefix left out) that is in the `list` option.",
@@ -886,6 +964,10 @@
                 }
               ]
             },
+            "custom-property-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A custom property needs a blank line before it, unless a comment is right before it or another custom property is; the first declaration of a block and those in a single-line block take none."
+            },
             "custom-property-no-missing-var-function": {
               "$ref": "#/definitions/rule",
               "description": "A custom property that the file declares, used in a value without `var()`. Properties that take names (`transition`, `will-change`, ...) are left out."
@@ -1302,9 +1384,48 @@
               "$ref": "#/definitions/rule",
               "description": "A `variable` block with no `description` argument (tflint terraform_documented_variables)."
             },
+            "dollar-variable-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A `$` variable declaration needs a blank line before it, unless a comment is right before it or another `$` variable is; the first statement of a block and those in a single-line block take none."
+            },
+            "dollar-variable-pattern": {
+              "description": "A `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "default": "",
+                          "description": "The regex a variable name, without its `$`, must match.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "double-negation": {
               "$ref": "#/definitions/rule",
               "description": "`not` applied to `not`."
+            },
+            "double-slash-comment-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A `//` comment on a line of its own needs a blank line before it, unless a comment is right before it, it comes first in a block, or it is a `stylelint-` directive."
             },
             "duplicate-column-alias": {
               "$ref": "#/definitions/rule",
@@ -2473,6 +2594,10 @@
               "$ref": "#/definitions/rule",
               "description": "A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation)."
             },
+            "load-no-partial-leading-underscore": {
+              "$ref": "#/definitions/rule",
+              "description": "A `@use`, `@forward` or `@import` of a partial named with a leading underscore (`@use 'a/_b'`); CSS imports are left alone."
+            },
             "long-title": {
               "$ref": "#/definitions/rule",
               "description": "Search engines cut a title off after about 70 characters."
@@ -3623,8 +3748,35 @@
               "description": "A class or interface with `{ }` and nothing in it (ktlint no-empty-class-body)."
             },
             "no-empty-comment": {
-              "$ref": "#/definitions/rule",
-              "description": "A comment has no text. A block comment is reported wherever it is; an empty line comment only when it begins or ends a run of comments, because a bare `//` between two comment lines separates paragraphs."
+              "description": "A comment has no text. A block comment is reported wherever it is; an empty line comment only when it begins or ends a run of comments, because a bare `//` between two comment lines separates paragraphs.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "separators": {
+                          "default": false,
+                          "description": "Also report an empty line comment between two comments.",
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-empty-delegate-parens": {
               "$ref": "#/definitions/rule",
@@ -3825,6 +3977,109 @@
             "no-func-assign": {
               "$ref": "#/definitions/rule",
               "description": "A function declared by name that is assigned to."
+            },
+            "no-global-function-names": {
+              "description": "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "list": {
+                          "default": [
+                            "red=color.red",
+                            "blue=color.blue",
+                            "green=color.green",
+                            "mix=color.mix",
+                            "hue=color.hue",
+                            "saturation=color.saturation",
+                            "lightness=color.lightness",
+                            "complement=color.complement",
+                            "adjust-color=color.adjust",
+                            "scale-color=color.scale",
+                            "change-color=color.change",
+                            "ie-hex-str=color.ie-hex-str",
+                            "map-get=map.get",
+                            "map-merge=map.merge",
+                            "map-remove=map.remove",
+                            "map-keys=map.keys",
+                            "map-values=map.values",
+                            "map-has-key=map.has-key",
+                            "unquote=string.unquote",
+                            "quote=string.quote",
+                            "str-length=string.length",
+                            "str-insert=string.insert",
+                            "str-index=string.index",
+                            "str-slice=string.slice",
+                            "to-upper-case=string.to-upper-case",
+                            "to-lower-case=string.to-lower-case",
+                            "unique-id=string.unique-id",
+                            "percentage=math.percentage",
+                            "ceil=math.ceil",
+                            "floor=math.floor",
+                            "abs=math.abs",
+                            "random=math.random",
+                            "unit=math.unit",
+                            "unitless=math.is-unitless",
+                            "comparable=math.compatible",
+                            "length=list.length",
+                            "nth=list.nth",
+                            "set-nth=list.set-nth",
+                            "join=list.join",
+                            "append=list.append",
+                            "zip=list.zip",
+                            "index=list.index",
+                            "list-separator=list.separator",
+                            "feature-exists=meta.feature-exists",
+                            "variable-exists=meta.variable-exists",
+                            "global-variable-exists=meta.global-variable-exists",
+                            "function-exists=meta.function-exists",
+                            "mixin-exists=meta.mixin-exists",
+                            "inspect=meta.inspect",
+                            "get-function=meta.get-function",
+                            "type-of=meta.type-of",
+                            "call=meta.call",
+                            "content-exists=meta.content-exists",
+                            "keywords=meta.keywords",
+                            "selector-nest=selector.nest",
+                            "selector-append=selector.append",
+                            "selector-replace=selector.replace",
+                            "selector-unify=selector.unify",
+                            "is-superselector=selector.is-superselector",
+                            "simple-selectors=selector.simple-selectors",
+                            "selector-parse=selector.parse",
+                            "selector-extend=selector.extend",
+                            "lighten=color.adjust",
+                            "adjust-hue=color.adjust",
+                            "darken=color.adjust",
+                            "desaturate=color.adjust",
+                            "opacify=color.adjust",
+                            "transparentize=color.adjust"
+                          ],
+                          "description": "`name=replacement` entries: a global function and the module function that replaces it.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-global-vars": {
               "$ref": "#/definitions/rule",

@@ -72,7 +72,7 @@ Each number is measured on real-world code against the reference tool with its d
 | TOML | █████████░ 98% taplo | 18 rules · no reference tool | Ready |
 | Vue / Svelte | ████████░░ 89% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
 | Angular templates | █████████░ 97% Prettier | 155 rules · no reference tool | Ready |
-| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>██░░░░░░░░ 23% stylelint-scss<br>████████░░ 84% stylelint-less | Ready |
+| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 84% stylelint-less | Ready |
 | Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
 | PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |

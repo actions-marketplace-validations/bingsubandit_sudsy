@@ -32,7 +32,7 @@ entries:
   comment-word-disallowed-list: planned
   container-name-pattern: rule container-name-pattern
   custom-media-pattern: rule custom-media-pattern
-  custom-property-empty-line-before: planned | Needs the `except` and `ignore` secondary options (`first-nested`, `after-comment`, ...), which the rule options do not express yet.
+  custom-property-empty-line-before: rule custom-property-empty-line-before
   custom-property-no-missing-var-function: rule custom-property-no-missing-var-function
   custom-property-pattern: rule custom-property-pattern
   declaration-block-no-duplicate-custom-properties: rule declaration-block-no-duplicate-custom-properties

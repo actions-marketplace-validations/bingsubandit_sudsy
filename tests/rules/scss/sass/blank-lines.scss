@@ -1,0 +1,23 @@
+$a: 1;
+$b: 2;
+// note
+^^^^^^^ double-slash-comment-empty-line-before
+$c: 3;
+.x {
+  $d: 4;
+  color: red;
+  $e: 5;
+//^^ dollar-variable-empty-line-before
+  --f: 6;
+//^^^ custom-property-empty-line-before
+  --g: 7;
+  // one
+//^^^^^^ double-slash-comment-empty-line-before
+
+  // two
+  top: 0; // inline
+  // stylelint-disable
+  //
+//^^ no-empty-comment
+  // text
+}

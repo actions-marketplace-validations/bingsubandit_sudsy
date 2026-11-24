@@ -374,6 +374,12 @@ rule! {
                   comment only when it begins or ends a run of comments, because a bare `//` \
                   between two comment lines separates paragraphs.",
         example: "// ----\n//\nint x;   // the empty comment above is reported",
+        options: [OptionDecl {
+            name: "separators",
+            default: Opt::Bool(false),
+            check: Check::Any,
+            description: "Also report an empty line comment between two comments.",
+        }],
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
@@ -400,6 +406,7 @@ rule! {
                 continue;
             }
             if block
+                || ctx.options.bool("separators")
                 || !(has_neighbour(&token, file.grammar, false)
                     && has_neighbour(&token, file.grammar, true))
             {

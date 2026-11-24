@@ -10,6 +10,31 @@ css:
       color-function-alias-notation: error
       color-function-notation: error
       color-hex-length: error
+      at-extend-no-missing-placeholder: error
+      at-function-pattern:
+        level: error
+        options:
+          pattern: "^(-?[a-z][a-z0-9]*)(-[a-z0-9]+)*$"
+      at-if-no-null: error
+      at-mixin-argumentless-call-parentheses: error
+      at-mixin-pattern:
+        level: error
+        options:
+          pattern: "^(-?[a-z][a-z0-9]*)(-[a-z0-9]+)*$"
+      at-rule-conditional-no-parentheses: error
+      dollar-variable-pattern:
+        level: error
+        options:
+          pattern: "^(-?[a-z][a-z0-9]*)(-[a-z0-9]+)*$"
+      load-no-partial-leading-underscore: error
+      no-global-function-names: error
+      custom-property-empty-line-before: error
+      dollar-variable-empty-line-before: error
+      double-slash-comment-empty-line-before: error
+      no-empty-comment:
+        level: error
+        options:
+          separators: true
       comment-space:
         level: error
         options:

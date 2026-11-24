@@ -1,0 +1,4 @@
+dollar-variable-empty-line-before: warn
+custom-property-empty-line-before: warn
+double-slash-comment-empty-line-before: warn
+no-empty-comment: { level: warn, options: { separators: true } }

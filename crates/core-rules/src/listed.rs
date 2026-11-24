@@ -4,9 +4,10 @@
 //! - `target`: what the names are, one of the language's targets;
 //! - `mode`: `allowed` and `disallowed` (option `list`: names, or `/regex/`), `pattern` (each
 //!   name must match option `pattern`), `lower` (each name is written in lowercase), `unique`
-//!   (a name repeats within the node).
+//!   (a name repeats within the node), `renamed` (option `list` holds `name=replacement` entries:
+//!   a name that has one is reported).
 //!
-//! The message has `{name}`.
+//! The message has `{name}` and, for `renamed`, `{replacement}`.
 //!
 //! concept: names-family
 //! what: Allowed, disallowed, pattern and case checks on the names of one kind of thing.
@@ -26,6 +27,7 @@ pub enum Mode {
     Pattern,
     Lower,
     Unique,
+    Renamed,
 }
 
 /// The kinds of thing a language's `names` rules can check.
@@ -81,6 +83,7 @@ fn build<T: Targets>(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn R
             ("pattern", Mode::Pattern),
             ("lower", Mode::Lower),
             ("unique", Mode::Unique),
+            ("renamed", Mode::Renamed),
         ],
     )?;
     let rule = Names::<T> {
@@ -150,6 +153,18 @@ impl<T: Targets> Rule for Names<T> {
                 Mode::Lower => {
                     name.chars().any(|c| c.is_uppercase())
                         && !T::keep_case(self.target).contains(&name.as_str())
+                }
+                Mode::Renamed => {
+                    let replacement = list.iter().find_map(|e| {
+                        e.split_once('=')
+                            .filter(|(from, _)| selects(from, &name, insensitive))
+                            .map(|(_, to)| to)
+                    });
+                    if let Some(to) = replacement {
+                        let message = self.message.replace("{name}", &name);
+                        ctx.report(range, message.replace("{replacement}", to));
+                    }
+                    continue;
                 }
                 Mode::Unique => {
                     let message = || self.message.replace("{name}", &name);

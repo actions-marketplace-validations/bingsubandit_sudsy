@@ -478,17 +478,16 @@ Lint: target 24.6% (100884 of 409320, 308436 missed, measured on a6a124c7); rule
 
 ## stylelint
 
-Lint: target 94.7% (12012 of 12686, 674 missed, measured on 4aebdcad); rules by missed findings:
+Lint: target 94.7% (12015 of 12686, 671 missed, measured on 3f07cafc); rules by missed findings:
 1. `media-feature-range-notation` (415 missed)
 2. `value-keyword-case` (127 missed)
 3. `declaration-block-no-redundant-longhand-properties` (57 missed)
 4. `selector-not-notation` (48 missed)
 5. `declaration-property-value-no-unknown` (11 missed)
 6. `comment-empty-line-before` (8 missed)
-7. `custom-property-empty-line-before` (3 missed)
-8. `declaration-property-value-keyword-no-deprecated` (2 missed)
-9. `no-duplicate-selectors` (2 missed)
-10. `no-descending-specificity` (1 missed)
+7. `declaration-property-value-keyword-no-deprecated` (2 missed)
+8. `no-duplicate-selectors` (2 missed)
+9. `no-descending-specificity` (1 missed)
 
 ## stylelint-less
 
@@ -513,24 +512,24 @@ Lint: target 84.2% (8378 of 9947, 1569 missed, measured on 2ad6316d); rules by m
 
 ## stylelint-scss
 
-Lint: target 23% (667 of 2904, 2237 missed, measured on 4aebdcad); rules by missed findings:
-1. `scss/dollar-variable-colon-space-after` (857 missed)
-2. `scss/no-global-function-names` (289 missed)
-3. `scss/dollar-variable-empty-line-before` (271 missed)
-4. `scss/comment-no-empty` (223 missed)
-5. `scss/double-slash-comment-empty-line-before` (198 missed)
-6. `function-name-case` (54 missed)
-7. `scss/at-mixin-argumentless-call-parentheses` (51 missed)
-8. `declaration-block-no-redundant-longhand-properties` (44 missed)
-9. `at-rule-empty-line-before` (30 missed)
-10. `custom-property-empty-line-before` (30 missed)
-11. `scss/at-rule-conditional-no-parentheses` (27 missed)
-12. `selector-not-notation` (20 missed)
-13. `scss/at-extend-no-missing-placeholder` (19 missed)
-14. `scss/at-if-no-null` (18 missed)
-15. `scss/at-function-pattern` (17 missed)
+Lint: target 89.9% (1817 of 2022, 205 missed, measured on 3f07cafc); rules by missed findings:
+1. `function-name-case` (54 missed)
+2. `declaration-block-no-redundant-longhand-properties` (44 missed)
+3. `at-rule-empty-line-before` (30 missed)
+4. `selector-not-notation` (20 missed)
+5. `value-keyword-case` (16 missed)
+6. `scss/operator-no-newline-after` (12 missed)
+7. `scss/no-global-function-names` (7 missed)
+8. `alpha-value-notation` (2 missed)
+9. `color-function-alias-notation` (2 missed)
+10. `container-name-pattern` (2 missed)
+11. `declaration-empty-line-before` (2 missed)
+12. `declaration-property-value-keyword-no-deprecated` (2 missed)
+13. `length-zero-no-unit` (2 missed)
+14. `media-feature-range-notation` (2 missed)
+15. `block-no-redundant-nested-style-rules` (1 missed)
 
-21 more rules: 89 missed.
+7 more rules: 7 missed.
 
 ## taplo
 

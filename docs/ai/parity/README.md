@@ -55,9 +55,9 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | shfmt | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
 | sqlfluff | 86.6% | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
 | stylecop | 24.6% | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
-| stylelint | 94.7% | 150 | 89 | 10 | 47 | 0 | 0 | 4 | 47 |
+| stylelint | 94.7% | 150 | 90 | 10 | 46 | 0 | 0 | 4 | 46 |
 | stylelint-less | 84.2% | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
-| stylelint-scss | 23.0% | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
+| stylelint-scss | 89.9% | 71 | 16 | 2 | 52 | 0 | 0 | 1 | 52 |
 | taplo | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
 | terraform | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 93.0% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |

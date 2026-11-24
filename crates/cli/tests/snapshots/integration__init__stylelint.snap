@@ -38,13 +38,16 @@ css:
         options:
           list: [px]
 exclude: ["**/*.min.css", dist/, "src/vendor/**/*.css"]
+scss:
+  lint:
+    rules:
+      at-extend-no-missing-placeholder: warn
 ---
 migrated .stylelintrc.json
 extends: preset:css/stylelint-standard
 not migrated: stylelint-config-prettier (a shared config is not followed; its rules are not migrated)
 not migrated: ./local.json (a shared config is not followed; its rules are not migrated)
 not migrated: order/properties-order (not a stylelint rule Sudsy knows)
-not migrated: scss/at-extend-no-missing-placeholder (planned)
 not migrated: selector-type-case options (Sudsy's rule has no option for them; set them by hand)
 not migrated: unit-allowed-list options (Sudsy's rule has no option for them; set them by hand)
 not migrated: overrides (per-file overrides are not supported; set the rules by hand)

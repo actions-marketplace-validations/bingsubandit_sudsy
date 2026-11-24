@@ -21,3 +21,27 @@ description: "A declaration right after a rule or at-rule needs a blank line bef
 example: "a {\n  top: 0;\n\n  left: 0;\n}   # reported"
 severity: off
 category: style
+---
+id: custom-property-empty-line-before
+family: blank-line-before
+params: { tag: item, kind: Declaration, block: declaration-block, only: "--*", always: "true", except: "first-nested after-same-kind", ignore: "after-comment inside-single-line-block", message: "expected {blank} before the custom property" }
+description: "A custom property needs a blank line before it, unless a comment is right before it or another custom property is; the first declaration of a block and those in a single-line block take none."
+example: "a {\n  top: 0;\n  --x: 1;\n}   # reported"
+severity: off
+category: style
+---
+id: dollar-variable-empty-line-before
+family: blank-line-before
+params: { tag: item, kind: Declaration, block: declaration-block, only: "$*", always: "true", except: "first-nested after-same-kind", ignore: "after-comment inside-single-line-block", message: "expected {blank} before the $-variable" }
+description: "A `$` variable declaration needs a blank line before it, unless a comment is right before it or another `$` variable is; the first statement of a block and those in a single-line block take none."
+example: "a {\n  top: 0;\n  $x: 1;\n}   # reported"
+severity: off
+category: style
+---
+id: double-slash-comment-empty-line-before
+family: blank-line-before
+params: { token: LineComment, block: declaration-block, always: "true", except: first-nested, ignore: "after-comment inline directive", directive: "stylelint-", message: "expected {blank} before the comment" }
+description: "A `//` comment on a line of its own needs a blank line before it, unless a comment is right before it, it comes first in a block, or it is a `stylelint-` directive."
+example: "$a: 1;\n// note   # reported"
+severity: off
+category: style
