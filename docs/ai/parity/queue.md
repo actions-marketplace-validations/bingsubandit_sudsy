@@ -10,7 +10,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 4 | 70.7% | 14.3 | 18612 findings | `LT02` 19005 | 3 | 19.07 | 3cdf2fac |
 | SQL | format sqlfluff | 4 | 73.7% | 11.3 | 94 files | `if-condition-wrap` 128 | 3 | 15.07 | - |
-| PHP | lint PHPStan | 4 | 31.0% | 54.0 | 594 findings | `class.notFound` 254, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 11.37 | 9de1e355 |
+| PHP | lint PHPStan | 4 | 32.3% | 52.7 | 556 findings | `class.notFound` 209, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 11.09 | b8d37c38 |
 | C / C++ | format clang-format | 4 | 45.8% | 39.2 | 2604 files | `brace-own-line-in-source` 484, `reference-align` 439, `brace-own-line-in-reference` 318, `pointer-align` 301 +6 more | 30 | 5.23 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
@@ -296,8 +296,8 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 
 ## phpstan
 
-Lint: target 31% (340 of 1098, 758 missed, measured on 9de1e355); rules by missed findings:
-1. `class.notFound` (254 missed)
+Lint: target 32.3% (340 of 1053, 713 missed, measured on b8d37c38); rules by missed findings:
+1. `class.notFound` (209 missed)
 2. `method.notFound` (94 missed)
 3. `function.notFound` (80 missed)
 4. `ignore.unmatchedLine` (62 missed)
