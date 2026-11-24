@@ -3,7 +3,7 @@
 //! concept: recursive-descent-parser
 
 use super::lexer::T;
-use super::{Dialect, P};
+use super::{Dialect, P, list};
 use crate::generated::kind as k;
 
 const SET_OPS: &[&str] = &["union", "intersect", "except", "minus"];
@@ -282,6 +282,7 @@ impl P<'_> {
             return false;
         }
         self.dedent();
+        self.pivot();
         while self.at_join() {
             self.join();
         }
@@ -328,7 +329,7 @@ impl P<'_> {
             if self.is(n, "outer") {
                 n += 1;
             }
-            if self.is_t(n, T::Word) && ["semi", "anti", "asof"].iter().any(|w| self.is(n, w)) {
+            if self.is_t(n, T::Word) && self.at_any_at(n, list("join_hints")) {
                 n += 1;
             }
         }
@@ -346,8 +347,9 @@ impl P<'_> {
         let mut unconditional =
             self.at_any(&["cross", "natural"]) || self.at("straight_join") && false;
         while self.at_any(&[
-            "natural", "inner", "left", "right", "full", "cross", "outer", "semi", "anti", "asof",
-        ]) {
+            "natural", "inner", "left", "right", "full", "cross", "outer",
+        ]) || self.at_list("join_hints")
+        {
             self.bump_as(k::KEYWORD);
         }
         if self.at("apply") {
@@ -421,7 +423,13 @@ impl P<'_> {
             || (self.d == Dialect::Tsql && self.is_t(0, T::Var))
         {
             let o = self.mark();
-            self.bump_as(k::IDENTIFIER);
+            // A `#temp` table keeps its case.
+            let kind = if self.text(0).starts_with('#') {
+                k::WORD
+            } else {
+                k::IDENTIFIER
+            };
+            self.bump_as(kind);
             self.close(k::OBJECT_REFERENCE, o);
         } else if self.at_table_function() {
             self.keyword_table_function();
@@ -551,7 +559,14 @@ impl P<'_> {
         while self.starts_name(n) && self.is_t(n + 1, T::Dot) {
             n += 2;
         }
-        self.starts_name(n) && self.is_t(n + 1, T::LParen)
+        self.starts_name(n) && self.is_t(n + 1, T::LParen) && !self.bare_hints_at(n + 1)
+    }
+
+    /// T-SQL `t (NOLOCK)`: a bracket of table hints without `WITH` at `n`.
+    fn bare_hints_at(&self, n: usize) -> bool {
+        self.d == Dialect::Tsql
+            && self.is_t(n, T::LParen)
+            && self.at_any_at(n + 1, list("table_hints"))
     }
 
     fn expression_call(&mut self) {
@@ -580,13 +595,11 @@ impl P<'_> {
                 self.bracketed(|p| {
                     p.list(|p| p.obj_ref());
                 });
-            } else if !self.eat_t(T::Number) {
+            } else if !(self.eat_t(T::Number) || self.eat_t(T::Str)) {
                 self.obj_ref();
             }
-        } else if self.is_t(0, T::LParen) {
-            self.bracketed(|p| {
-                p.list(|p| p.element());
-            });
+        } else {
+            self.generic_bracket_run();
         }
         true
     }
@@ -623,10 +636,23 @@ impl P<'_> {
         self.table_hints();
     }
 
+    /// `PIVOT (..) AS p`, `UNPIVOT (..) AS u` after a table: stands beside it, not inside it.
+    fn pivot(&mut self) {
+        if self.at_any(&["pivot", "unpivot"]) && self.is_t(1, T::LParen) {
+            self.bump_as(k::KEYWORD);
+            self.generic_bracket_run();
+            self.alias();
+        }
+    }
+
     /// T-SQL `WITH (NOLOCK, INDEX(ix))` after a table.
     pub fn table_hints(&mut self) {
-        if self.d == Dialect::Tsql && self.at("with") && self.is_t(1, T::LParen) {
-            self.bump_as(k::KEYWORD);
+        if self.d == Dialect::Tsql
+            && (self.bare_hints_at(0) || (self.at("with") && self.is_t(1, T::LParen)))
+        {
+            if self.at("with") {
+                self.bump_as(k::KEYWORD);
+            }
             self.bracketed(|p| {
                 p.list(|p| p.table_hint());
             });
@@ -659,23 +685,31 @@ impl P<'_> {
             let m = self.mark();
             self.eat_seq(&["group", "by"]);
             self.indent();
-            if self.at("all") {
+            if self.at_any(&["all", "distinct"]) {
                 self.bump_as(k::KEYWORD);
-            } else {
-                self.list(|p| {
-                    if p.at("grouping") && p.is(1, "sets") {
-                        p.bump_as(k::KEYWORD);
-                        p.bump_as(k::KEYWORD);
-                        return p.bracketed(|p| {
-                            p.list(|p| p.element());
-                        });
-                    }
-                    p.element()
-                });
-                if self.at("with") && self.at_any_at(1, &["rollup", "cube"]) {
-                    self.bump_as(k::KEYWORD);
-                    self.bump_as(k::KEYWORD);
+            }
+            self.list(|p| {
+                let words = if p.at("grouping") && p.is(1, "sets") {
+                    2
+                } else {
+                    usize::from(p.at_any(&["rollup", "cube"]) && p.is_t(1, T::LParen))
+                };
+                if words > 0 {
+                    let kind = if words == 1 {
+                        k::FUNCTION_IDENTIFIER
+                    } else {
+                        k::KEYWORD
+                    };
+                    (0..words).for_each(|_| p.bump_as(kind));
+                    return p.bracketed(|p| {
+                        p.list(|p| p.element());
+                    });
                 }
+                p.element()
+            });
+            if self.at("with") && self.at_any_at(1, &["rollup", "cube"]) {
+                self.bump_as(k::KEYWORD);
+                self.bump_as(k::KEYWORD);
             }
             self.dedent();
             self.close(k::GROUPBY_CLAUSE, m);
@@ -745,7 +779,7 @@ impl P<'_> {
             {
                 if self.is_t(0, T::Comma) {
                     self.bump();
-                    while self.is_t(0, T::Word) {
+                    while self.is_t(0, T::Word) && !self.at_statement_start() {
                         self.bump_as(k::KEYWORD);
                     }
                 }
@@ -756,6 +790,23 @@ impl P<'_> {
                 }
             }
         }
+        if self.d == Dialect::Tsql && self.at("option") && self.is_t(1, T::LParen) {
+            self.query_hints();
+        }
+    }
+
+    /// `OPTION (MAXDOP 1, HASH GROUP, USE HINT ('x'))`: every word of a query hint is a keyword.
+    fn query_hints(&mut self) {
+        self.bump_as(k::KEYWORD);
+        self.bracketed(|p| {
+            p.list(|p| {
+                let mut any = false;
+                while p.table_hint() || p.eat_t(T::Number) {
+                    any = true;
+                }
+                any
+            });
+        });
     }
 
     /// `OFFSET n ROWS FETCH NEXT n ROWS ONLY`.

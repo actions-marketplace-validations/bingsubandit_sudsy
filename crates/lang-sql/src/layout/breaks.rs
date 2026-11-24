@@ -9,6 +9,7 @@
 use super::seq::{NONE, Seq};
 use super::space::respace_point;
 use crate::generated::kind as k;
+use core_format::ancestry;
 use std::borrow::Cow;
 
 /// The indentation of the line that holds block `i`.
@@ -149,12 +150,13 @@ pub fn keywords(seq: &mut Seq) {
         if b.kind != k::KEYWORD || !clause || node.first != i as u32 {
             continue;
         }
-        let mut n = node.parent;
-        let mut excluded = false;
-        while n != NONE {
-            excluded |= seq.nodes[n as usize].kind == k::WINDOW_SPECIFICATION;
-            n = seq.nodes[n as usize].parent;
-        }
+        let excluded = ancestry::under(
+            Some(node.parent).filter(|&p| p != NONE),
+            |n| Some(seq.nodes[n as usize].parent).filter(|&p| p != NONE),
+            |n| seq.nodes[n as usize].kind,
+            &[k::WINDOW_SPECIFICATION, k::FUNCTION],
+            &[k::SELECT_STATEMENT],
+        );
         if excluded {
             continue;
         }

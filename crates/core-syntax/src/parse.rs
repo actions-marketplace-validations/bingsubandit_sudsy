@@ -398,3 +398,46 @@ pub fn climb<P: Pratt>(p: &mut P, min: u8) {
         p.infix(at, op);
     }
 }
+
+/// Is the sign token ending at `sign_end` the sign of the number starting at `number_start`? The
+/// number touches the sign, and the sign starts an operand: a blank comes before it, or an
+/// opening token (`(`, `,`: `f(-1)`, `(1, -2)`).
+pub fn is_signed_number(
+    sign_end: u32,
+    number_start: u32,
+    blank_before: bool,
+    after_opener: bool,
+) -> bool {
+    sign_end == number_start && (blank_before || after_opener)
+}
+
+/// Does only a block comment (`open` .. `close`) stand before `offset` on its line?
+pub fn only_block_comment_before(src: &str, offset: usize, open: &str, close: &str) -> bool {
+    let line = src[..offset].rsplit('\n').next().unwrap_or("").trim();
+    line.starts_with(open) && line.ends_with(close)
+}
+
+#[cfg(test)]
+mod helper_tests {
+    use super::*;
+
+    #[test]
+    fn a_sign_touches_its_number_after_a_blank_or_an_opener() {
+        assert!(is_signed_number(5, 5, true, false));
+        assert!(is_signed_number(5, 5, false, true));
+        assert!(!is_signed_number(5, 5, false, false));
+        assert!(!is_signed_number(5, 6, true, true));
+    }
+
+    #[test]
+    fn only_a_block_comment_may_precede_on_the_line() {
+        let src = "x\n/* c */ delimiter\n a /* c */ delimiter";
+        let (a, b) = (
+            src.find("delimiter").unwrap(),
+            src.rfind("delimiter").unwrap(),
+        );
+        assert!(only_block_comment_before(src, a, "/*", "*/"));
+        assert!(!only_block_comment_before(src, b, "/*", "*/"));
+        assert!(!only_block_comment_before("x delimiter", 2, "/*", "*/"));
+    }
+}

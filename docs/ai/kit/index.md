@@ -13,6 +13,7 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 
 | id | module | what | tools | turned on by | used by | flags |
 |---|---|---|---|---|---|---|
+| ancestor-kind-test | core-format/ancestry.rs | Whether a node has an ancestor of given kinds below a boundary kind. | sqlfluff LT14 |  | sql | SINGLE-USE |
 | angular-expression-pipes | lang-html/format/print/angular/pipes.rs | Angular expressions as TypeScript plus pipes. | Prettier angular pipes |  | html | SINGLE-USE |
 | angular-microsyntax | lang-html/format/print/microsyntax.rs | Angular microsyntax (*ngFor) split as the compiler reads it. | Prettier angular microsyntax |  | html | SINGLE-USE |
 | angular-template-layout | lang-html/format/print/angular.rs | Angular template syntax: control flow blocks, @let, ICU, bindings. | Prettier angular |  | html | SINGLE-USE |
@@ -330,6 +331,7 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 | tree-sitter-adapter | core-treesitter/lib.rs +1 | A language-neutral adapter from tree-sitter to the lossless tree through a node-name mapping. | tree-sitter | path:core_treesitter | dockerfile, editorconfig, gitignore, graphql, hcl, ini, makefile, markdown, powershell, protobuf, shell, toml, xml, yaml |  |
 | trivia-attachment | core-syntax/trivia.rs | The single rule that attaches comments and whitespace to tokens as leading or trailing trivia. | none (internal) | grammar:language | cpp, csharp, css, dockerfile, editorconfig, gitignore, graphql, hcl, html, ini, java, js, json, kotlin, makefile, markdown, php, powershell, protobuf, python, ruby, shell, sql, toml, xml, yaml |  |
 | trivia-rows | core-syntax/scan.rs | Comments and line continuations that adapters of external parsers read from the grammar, and the size limits of their parsers. | none (adapter data as rows) | grammar:trivia | cpp, html, java, js, kotlin, php, python, ruby |  |
+| word-table-rows | core-syntax/words.rs | Rows of `key/words` in a data file, read once into lists by key. | none (parser data) |  | sql | SINGLE-USE |
 
 ## semantics
 

@@ -6,64 +6,6 @@ use super::lexer::T;
 use super::{Dialect, P};
 use crate::generated::kind as k;
 
-/// Words that start a statement in T-SQL, where statements need no terminator.
-pub(super) const TSQL_STARTS: &[&str] = &[
-    "select",
-    "insert",
-    "update",
-    "delete",
-    "merge",
-    "with",
-    "declare",
-    "set",
-    "if",
-    "while",
-    "begin",
-    "end",
-    "exec",
-    "execute",
-    "print",
-    "return",
-    "create",
-    "alter",
-    "drop",
-    "truncate",
-    "use",
-    "go",
-    "break",
-    "continue",
-    "goto",
-    "throw",
-    "raiserror",
-    "open",
-    "close",
-    "fetch",
-    "deallocate",
-    "commit",
-    "rollback",
-    "save",
-    "grant",
-    "revoke",
-    "deny",
-    "backup",
-    "restore",
-    "dbcc",
-    "waitfor",
-    "else",
-    "readtext",
-    "writetext",
-    "updatetext",
-    "bulk",
-    "enable",
-    "disable",
-    "kill",
-    "checkpoint",
-    "reconfigure",
-    "shutdown",
-    "setuser",
-    "sp_executesql",
-];
-
 pub(super) fn file(p: &mut P) {
     while !p.eof() {
         if p.is_t(0, T::Semi) {
@@ -112,7 +54,7 @@ fn end_statement(p: &mut P) {
     if p.eof() || p.is_t(0, T::Semi) {
         return;
     }
-    if p.d == Dialect::Tsql && p.at_any(TSQL_STARTS) {
+    if p.d == Dialect::Tsql && p.at_list("tsql_starts") {
         return;
     }
     // What is left is taken as the rest of the statement, by the place of its words.
@@ -133,11 +75,24 @@ impl P<'_> {
             "update" => self.update(),
             "delete" => self.delete(),
             "merge" => self.merge(),
+            "explain" if self.d != Dialect::Tsql => self.explain(),
             "set" if self.d == Dialect::Mysql && self.is_assignment() => self.set_assign(),
             _ if self.is_t(0, T::Word) && !self.keyword_like(0) && !self.is_t(1, T::Colon) => {
                 self.skip_statement()
             }
             _ => self.generic(),
+        }
+    }
+
+    /// `EXPLAIN [ANALYZE] [VERBOSE] [(options)] statement`.
+    fn explain(&mut self) {
+        self.bump_as(k::KEYWORD);
+        while self.eat_any(&["analyze", "analyse", "verbose"]) {}
+        self.generic_bracket_run();
+        if self.at_query_start() {
+            self.query();
+        } else if self.at_any(&["insert", "replace", "update", "delete", "merge"]) {
+            self.statement_body();
         }
     }
 
@@ -152,6 +107,10 @@ impl P<'_> {
         self.list(|p| {
             if p.is_t(0, T::Var) {
                 p.bump();
+            } else if p.at_any(&["new", "old"]) && p.is_t(1, T::Dot) {
+                p.bump_as(k::KEYWORD);
+                p.bump();
+                p.bump_as(k::IDENTIFIER);
             } else if p.is_t(1, T::Dot) {
                 p.obj_ref();
             } else {
@@ -205,6 +164,16 @@ impl P<'_> {
             self.query();
         } else if self.at("default") {
             self.eat_seq(&["default", "values"]);
+        } else if self.at("set") {
+            self.set_clause();
+        } else if self.at("table") && self.d == Dialect::Mysql {
+            // `INSERT INTO a TABLE b`
+            self.bump_as(k::KEYWORD);
+            self.obj_ref();
+        }
+        if self.d == Dialect::Mysql && self.at("as") {
+            // `VALUES (..) AS new (a, b)`: the alias of the new row.
+            self.alias_inner(true);
         }
         self.dml_tail();
         let _ = m;
@@ -224,7 +193,10 @@ impl P<'_> {
                     self.bump_as(k::KEYWORD);
                     self.bracketed(|p| {
                         p.list(|p| {
-                            let ok = p.eat_name();
+                            let ok = p.at_any(&["old", "new"]);
+                            if ok {
+                                p.bump_as(k::KEYWORD);
+                            }
                             p.alias();
                             ok
                         });
@@ -391,7 +363,8 @@ impl P<'_> {
     fn delete(&mut self) {
         self.bump_as(k::KEYWORD);
         // MySQL: `DELETE a, b FROM a JOIN b ...`.
-        if self.d == Dialect::Mysql && !self.at_any(&["from", "low_priority", "quick", "ignore"]) {
+        while self.d == Dialect::Mysql && self.eat_any(&["low_priority", "quick", "ignore"]) {}
+        if self.d == Dialect::Mysql && !self.at("from") {
             self.list(|p| p.obj_ref());
         }
         if self.at_table_function() {
@@ -407,10 +380,8 @@ impl P<'_> {
             }
         }
         if self.at("from") {
-            let m = self.mark();
             self.bump_as(k::KEYWORD);
             self.list(|p| p.table_expression());
-            self.close(k::FROM_CLAUSE, m);
         }
         if self.at("using") {
             self.bump_as(k::KEYWORD);

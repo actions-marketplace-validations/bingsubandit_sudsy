@@ -135,3 +135,42 @@ fn tsql_indents_if_else_and_while_bodies() {
         "IF @a = 1\n    SELECT 1\nELSE\n    SELECT 2;\nWHILE @a < 3\n    SET @a = @a + 1;\n"
     );
 }
+
+fn formats_as(dialect: &str, input: &str) -> String {
+    let mut subject = Formatting::new(lang_sql::provider(), "a.sql");
+    subject
+        .options
+        .push(("dialect", core_config::OptionValue::String(dialect.into())));
+    assert_formats(&subject, input)
+}
+
+#[test]
+fn tsql_end_closes_a_block_but_not_a_case() {
+    let input = "BEGIN\nSELECT CASE WHEN @a = 1 THEN 1 ELSE 2 END AS x\nBEGIN\nSELECT 3\nEND\nSELECT 4\nEND\nSELECT 5\n";
+    assert_eq!(
+        formats_as("tsql", input),
+        "BEGIN\n    SELECT CASE WHEN @a = 1 THEN 1 ELSE 2 END AS x\n    BEGIN\n        SELECT 3\n    END\n    SELECT 4\nEND\nSELECT 5\n"
+    );
+}
+
+#[test]
+fn join_hint_words_stay_names_when_no_join_follows() {
+    for dialect in ["tsql", "postgres", "mysql"] {
+        assert_eq!(
+            formats_as(dialect, "select * from t hash where hash.a = 1;\n"),
+            "select * from t hash\nwhere hash.a = 1;\n",
+            "{dialect}"
+        );
+        assert_eq!(
+            formats_as(dialect, "select * from t as loop join u on loop.a = u.a;\n"),
+            "select * from t as loop join u on loop.a = u.a;\n",
+            "{dialect}"
+        );
+    }
+}
+
+#[test]
+fn copy_rows_without_a_terminator_are_not_data() {
+    let input = "copy t from stdin;\nselect 1;\n";
+    assert_eq!(formats_as("postgres", input), input);
+}

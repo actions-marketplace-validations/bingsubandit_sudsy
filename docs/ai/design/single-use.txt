@@ -7,6 +7,7 @@
 concept accessor-order # users: csharp
 concept allowed-values # users: html (shared)
 concept ambiguous-booleans # users: yaml
+concept ancestor-kind-test # users: sql (shared)
 concept angular-expression-pipes # users: html
 concept angular-microsyntax # users: html
 concept angular-template-layout # users: html
@@ -185,6 +186,7 @@ concept use-literal-suffix # users: csharp
 concept useless-echo # users: shell
 concept word-names # users: sql (shared)
 concept word-table # users: sql (shared)
+concept word-table-rows # users: sql (shared)
 concept worker-findings-family # users: csharp
 data grammar-line:case-insensitive # users: powershell
 data grammar-line:container # users: markdown
@@ -207,7 +209,6 @@ data row-key:call.line # users: js
 data row-key:call.node # users: js
 data row-key:call.params # users: js
 data row-key:call.parent # users: js
-data row-key:joined.text # users: php
 data row-key:layout.body # users: php
 data row-key:layout.clauses # users: php
 data row-key:layout.ctor # users: kotlin

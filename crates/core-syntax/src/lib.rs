@@ -12,6 +12,7 @@
 //! * [`scan`]: the `trivia` and `limits` rows adapters of external parsers read.
 //! * [`strings`]: the string-literal model every language's `string` rows describe.
 //! * [`wire`]: the versioned tree encoding used across process boundaries.
+//! * [`words`]: the `key|words` tables of the data files.
 //!
 //! concept: none (glue: crate root)
 
@@ -35,6 +36,7 @@ pub mod strings;
 pub mod tree;
 pub mod trivia;
 pub mod wire;
+pub mod words;
 
 pub use embedded::Embedded;
 pub use grammar::{

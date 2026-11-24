@@ -447,24 +447,24 @@ Lint: target 94.6% (4132 of 4367, 235 missed, measured on f4e9edb2); rules by mi
 1. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 2. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 3. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 85.7% (17297 of 20182, 2885 missed, measured on f4e9edb2); rules by missed findings:
-1. `LT02` (528 missed)
+Lint: target 86.6% (17329 of 20007, 2678 missed, measured on 3d6ef290); rules by missed findings:
+1. `LT02` (442 missed)
 2. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-3. `LT01` (285 missed)
-4. `LT09` (149 missed)
-5. `CP02` (122 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
+3. `LT01` (215 missed)
+4. `LT09` (148 missed)
+5. `CP02` (120 missed) Fix: misses are in files with a parse error
 6. `RF03` (105 missed) Fix: references of selects over table functions and nested queries
-7. `LT14` (103 missed)
-8. `LXR` (102 missed)
-9. `CP01` (79 missed) Fix: misses are in files with a parse error (the constructs listed under CP05)
-10. `ST06` (75 missed)
-11. `AL03` (72 missed)
-12. `RF02` (67 missed)
+7. `LXR` (102 missed)
+8. `LT14` (91 missed)
+9. `ST06` (75 missed)
+10. `AL03` (72 missed)
+11. `RF02` (66 missed)
+12. `CP01` (65 missed) Fix: misses are in files with a parse error
 13. `RF06` (61 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
 14. `RF05` (59 missed) Fix: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
 15. `RF01` (53 missed)
 
-46 more rules: 645 missed.
+46 more rules: 624 missed.
 
 ## stylecop
 

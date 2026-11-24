@@ -12,6 +12,7 @@
 
 pub mod adjacent;
 mod align;
+pub mod ancestry;
 pub mod blank;
 pub mod block_frames;
 pub mod calls;

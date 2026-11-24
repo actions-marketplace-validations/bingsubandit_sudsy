@@ -197,7 +197,10 @@ impl core_syntax::access::Access for P<'_> {
         self.array_accessor();
     }
     fn at_member(&self) -> bool {
-        self.is_t(0, T::Dot) && self.starts_name(1)
+        // T-SQL leaves a part out: `db..table`.
+        self.is_t(0, T::Dot)
+            && (self.starts_name(1)
+                || (self.d == Dialect::Tsql && self.is_t(1, T::Dot) && self.starts_name(2)))
     }
     fn bump_dot(&mut self) {
         self.bump();
@@ -209,6 +212,9 @@ impl core_syntax::access::Access for P<'_> {
         self.bump();
     }
     fn name(&mut self) {
+        if self.is_t(0, T::Dot) {
+            self.bump();
+        }
         self.eat_name();
     }
 }

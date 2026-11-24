@@ -11,56 +11,55 @@ files:
   sql/postgres/src/test/regress/sql/collate.windows.win1252.sql: non-utf8-input
 ratchet:
   sqlfluff-ansi: 204
-  sqlfluff-mysql: 216
-  sqlfluff-postgres: 122
-  sqlfluff-tsql: 108
-  postgres-regress: 38
+  sqlfluff-mysql: 230
+  sqlfluff-postgres: 132
+  sqlfluff-tsql: 131
+  postgres-regress: 41
 target-files:
   postgres-regress: 115
   sqlfluff-ansi: 210
   sqlfluff-mysql: 248
   sqlfluff-postgres: 142
   sqlfluff-tsql: 152
-target: 85.7
+target: 86.6
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-  CP05: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
-  CP02: misses are in files with a parse error (the constructs listed under CP05)
-  CP01: misses are in files with a parse error (the constructs listed under CP05)
+  CP02: misses are in files with a parse error
+  CP01: misses are in files with a parse error
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 17297, total: 20182, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 17329, total: 20007, main: '3d6ef290'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 528
+  LT02: 442
   PRS: 380
-  LT01: 285
-  LT09: 149
-  CP02: 122
+  LT01: 215
+  LT09: 148
+  CP02: 120
   RF03: 105
-  LT14: 103
   LXR: 102
-  CP01: 79
+  LT14: 91
   ST06: 75
   AL03: 72
-  RF02: 67
+  RF02: 66
+  CP01: 65
   RF06: 61
   RF05: 59
   RF01: 53
   AM09: 52
-  AM04: 50
   CV10: 49
-  LT06: 44
+  AM04: 48
   AM06: 39
-  CP05: 33
+  LT06: 38
   LT05: 31
+  CP05: 30
   ST11: 25
-  AL02: 24
   AL09: 24
-  CP03: 24
+  AL02: 23
   ST09: 21
   ST12: 21
+  CP03: 20
   ST05: 17
   CV11: 15
   AL01: 13
@@ -70,21 +69,21 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   ST07: 12
   AM08: 11
   LT11: 11
-  RF04: 11
   AL04: 10
   AL10: 8
+  RF04: 8
   AM03: 7
   CV01: 7
-  CV08: 5
   LT03: 5
   CV06: 4
   CV07: 4
+  CV08: 4
   TQ02: 4
   TQ03: 4
   AL05: 3
-  AM05: 3
   CV05: 3
   ST02: 3
+  AM05: 2
   ST03: 2
   CV03: 1
   CV12: 1

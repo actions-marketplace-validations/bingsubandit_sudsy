@@ -4,6 +4,7 @@
 
 use super::dialect::Dialect;
 use crate::generated::kind as k;
+use core_syntax::parse::only_block_comment_before;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum T {
@@ -80,7 +81,7 @@ fn is_word_char(c: char, d: Dialect) -> bool {
 /// at the end of the file (strings, quoted names, comments).
 pub fn lex(src: &str, d: Dialect) -> (Vec<Lex>, Vec<u32>) {
     let b = src.as_bytes();
-    let mut out = Vec::with_capacity(src.len() / 4 + 8);
+    let mut out: Vec<Lex> = Vec::with_capacity(src.len() / 4 + 8);
     let mut open = Vec::new();
     let mut i = 0;
     // mysql `DELIMITER ~`: the delimiter token ends statements, `DELIMITER ;` restores `;`.
@@ -104,8 +105,8 @@ pub fn lex(src: &str, d: Dialect) -> (Vec<Lex>, Vec<u32>) {
         };
         if d == Dialect::Mysql
             && kind == T::Word
-            && stmt_start == out.len()
             && src[i..end].eq_ignore_ascii_case("delimiter")
+            && (stmt_start == out.len() || only_block_comment_before(src, i, "/*", "*/"))
         {
             let rest = &src[end..end + rest_line_end(&src[end..])];
             let skip = rest.len() - rest.trim_start_matches([' ', '\t']).len();
@@ -166,6 +167,7 @@ fn is_copy_stdin(src: &str, toks: &[Lex]) -> bool {
 }
 
 /// The data rows from the line after `from`: start and end, the end before the `\\.` line's newline.
+/// Rows without a `\\.` line are no data.
 fn copy_data(src: &str, from: usize) -> (usize, usize) {
     let Some(nl) = src[from..].find('\n') else {
         return (usize::MAX, 0);
@@ -179,7 +181,7 @@ fn copy_data(src: &str, from: usize) -> (usize, usize) {
         }
         pos = end + 1;
     }
-    (start, src.len())
+    (usize::MAX, 0)
 }
 
 /// A psql meta-command runs to the end of its line, or past it while a `(` is open.
@@ -301,6 +303,18 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         b':' if next == Some(b':') => return (T::Cast, i + 2),
         b':' if d == Dialect::Postgres && matches!(next, Some(b'\'' | b'"')) => {
             return (T::Var, quoted(src, i + 1, false, open));
+        }
+        // `FROM :name`: a psql variable, unless it follows a name, a closing bracket or a slice bound.
+        b':' if d == Dialect::Postgres
+            && next.is_some_and(|n| n.is_ascii_alphabetic() || n == b'_')
+            && i > 0
+            && !(b[i - 1].is_ascii_alphanumeric() || b"_)]\"':[".contains(&b[i - 1])) =>
+        {
+            let mut j = i + 1;
+            while j < b.len() && (b[j].is_ascii_alphanumeric() || b[j] == b'_') {
+                j += 1;
+            }
+            return (T::Var, j);
         }
         b'U' | b'u'
             if d == Dialect::Postgres
