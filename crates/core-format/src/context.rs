@@ -991,6 +991,33 @@ fn reindented_doc(c: &Comment, text: &str, st: &CommentStyle) -> Doc {
     doc::concat(parts)
 }
 
+/// A comment `text` as written, or with `indented` (a multi-line one) every line after the first one level deeper than the
+/// comment and re-indented to it, a line that holds only the closing `closer` at the comment's
+/// own level; blank lines stay empty.
+pub fn comment_text(text: &str, indented: bool, closer: &str) -> Doc {
+    if !indented || !text.contains('\n') {
+        return verbatim_text(text);
+    }
+    let mut lines = text.lines();
+    let first = lines.next().unwrap_or_default();
+    let rest: Vec<&str> = lines.collect();
+    let (body, last) = match rest.split_last() {
+        Some((l, b)) if l.trim() == closer => (b, Some(closer)),
+        _ => (&rest[..], None),
+    };
+    let mut inner = Vec::new();
+    for line in body {
+        inner.push(doc::hardline());
+        inner.push(doc::text(line.trim()));
+    }
+    let mut parts = vec![doc::text(first.trim_end()), doc::indent(doc::concat(inner))];
+    if let Some(l) = last {
+        parts.push(doc::hardline());
+        parts.push(doc::text(l));
+    }
+    doc::concat(parts)
+}
+
 /// The lines of `text` with their indentation replaced by the current one.
 fn lines_doc(text: &str) -> Doc {
     let mut parts = Vec::with_capacity(2 * text.lines().count());

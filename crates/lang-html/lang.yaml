@@ -36,6 +36,9 @@ options:
   - content_newline_with_elements:
       default: false
       doc: "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`)."
+  - indent_comment_lines:
+      default: false
+      doc: "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written."
   - indent_expression_operands:
       default: false
       doc: "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand."

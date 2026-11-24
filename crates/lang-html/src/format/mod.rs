@@ -362,6 +362,7 @@ impl NodeFormatter for MarkupFormatter {
                     cx.options,
                     model::INLINE,
                 ),
+                indent_comment_lines: cx.options.flag(INDENT_COMMENT_LINES, false),
             },
         )))
     }

@@ -9,8 +9,8 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
-| HTML | lint html-eslint | 2 | 50.9% | 34.1 | 150 findings | `indent` 138, `use-baseline` 58 | 6 | 11.37 | 66718389 |
 | PHP | lint PHPStan | 3 | 20.7% | 64.3 | 1055 findings | `method.notFound` 384, `class.notFound` 381, `staticMethod.notFound` 90, `function.notFound` 80 +3 more | 19 | 10.15 | 9632a5ce |
+| HTML | lint html-eslint | 2 | 63.5% | 21.5 | 76 findings | `use-baseline` 58, `indent` 51 | 6 | 7.17 | 0c8a3dcc |
 | SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
 
 Blocked on a decision:
@@ -184,9 +184,9 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 7514c1f3); rules by misse
 
 ## html-eslint
 
-Lint: target 50.9% (223 of 438, 215 missed, measured on 66718389); rules by missed findings:
-1. `indent` (138 missed) Fix: 138 findings left after `sudsy format` in 28 files of the corpus; not yet split by construct (e.g. Web-Dev-For-Beginners 9-chat-project frontend/index.html:125)
-2. `use-baseline` (58 missed) Fix: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
+Lint: target 63.5% (223 of 351, 128 missed, measured on 0c8a3dcc); rules by missed findings:
+1. `use-baseline` (58 missed) Fix: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
+2. `indent` (51 missed) Fix: 51 findings in the 3 files `sudsy format` rejects, so they stay as written, `nested-popovers/index.html` (32; a raw `>` in text, `<strong>></strong>`), `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
 3. `require-closing-tags` (6 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
 4. `no-extra-spacing-tags` (4 missed)
 5. `no-duplicate-id` (3 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second

@@ -5,6 +5,7 @@ html:
   format:
     whitespace_sensitivity: ignore
     content_newline_with_elements: true
+    indent_comment_lines: true
     dialect: template-open
     indent_size: 4
     max_attributes_per_line: 2

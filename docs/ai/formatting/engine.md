@@ -75,6 +75,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `hug_last_argument` | `never`, `sole`, `sole_bare`, `last` | java `sole`, js `last`, csharp `last` |
 | `indent_braces` | bool | cpp `false`, c `false` |
 | `indent_case_labels` | bool | cpp `false`, c `false` |
+| `indent_comment_lines` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `indent_expression_operands` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `indent_goto_labels` | bool | cpp `true`, c `true` |
 | `indent_nested_binary` | bool | java `true`, js `true`, csharp `false` |

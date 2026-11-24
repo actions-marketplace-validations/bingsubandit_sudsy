@@ -7625,6 +7625,11 @@
               "description": "End the file with a newline.",
               "type": "boolean"
             },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
+              "type": "boolean"
+            },
             "indent_expression_operands": {
               "default": false,
               "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
@@ -9896,6 +9901,11 @@
               "description": "End the file with a newline.",
               "type": "boolean"
             },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
+              "type": "boolean"
+            },
             "indent_expression_operands": {
               "default": false,
               "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
@@ -11471,6 +11481,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -13685,6 +13700,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -16013,6 +16033,11 @@
                     "description": "End the file with a newline.",
                     "type": "boolean"
                   },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
+                    "type": "boolean"
+                  },
                   "indent_expression_operands": {
                     "default": false,
                     "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
@@ -16270,6 +16295,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -17478,6 +17508,11 @@
               "description": "End the file with a newline.",
               "type": "boolean"
             },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
+              "type": "boolean"
+            },
             "indent_expression_operands": {
               "default": false,
               "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
@@ -17735,6 +17770,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
               "type": "boolean"
             },
             "indent_expression_operands": {

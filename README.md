@@ -70,7 +70,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
 | GraphQL | █████████░ 99% Prettier | 25 rules · no reference tool | Ready |
 | TOML | █████████░ 98% taplo | 18 rules · no reference tool | Ready |
-| HTML | █████████░ 94% Prettier | █████████░ 92% html-validate<br>█████░░░░░ 50% html-eslint<br>█████████░ 91% htmlhint | Ready |
+| HTML | █████████░ 94% Prettier | █████████░ 92% html-validate<br>██████░░░░ 63% html-eslint<br>█████████░ 91% htmlhint | Ready |
 | Vue / Svelte | █████████░ 90% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
 | Angular templates | █████████░ 99% Prettier | 156 rules · no reference tool | Ready |
 | CSS / SCSS / Less | █████████░ 92% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 85% stylelint-less | Ready |
@@ -108,7 +108,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 |---|---:|---|---:|
 | JavaScript / TypeScript | 33 | Prettier | [17](https://prettier.io/docs/options) |
 | CSS / SCSS / Less | 7 | Prettier | [5](https://prettier.io/docs/options) |
-| HTML | 16 | Prettier | [9](https://prettier.io/docs/options) |
+| HTML | 17 | Prettier | [9](https://prettier.io/docs/options) |
 | YAML | 14 | Prettier | [7](https://prettier.io/docs/options) |
 | GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
 | Python | 13 | ruff format | [9](https://docs.astral.sh/ruff/settings/#format) |

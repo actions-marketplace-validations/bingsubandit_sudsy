@@ -8,7 +8,7 @@
 use super::model::{Dialect, N, T, Tree, is_ws, pre_like};
 use crate::go_template::ACTIONS;
 use core_format::EmbedMode;
-use core_format::context::verbatim_text;
+use core_format::context::{comment_text, verbatim_text};
 use core_format::doc::{self, Doc, GroupId};
 use core_format::embed as embed_text;
 use core_format::requote::{Entities, requote};
@@ -51,6 +51,7 @@ pub struct Opts<'a> {
     /// The mode of embedded expressions: `Expression`, or `ExpressionIndented` (`indent_expression_operands`).
     pub expression_mode: EmbedMode,
     pub content_lines: core_format::content_lines::ContentLines,
+    pub indent_comment_lines: bool,
 }
 
 pub struct P<'a> {
@@ -515,7 +516,11 @@ impl P<'_> {
             T::Text => self.text(id),
             T::Comment => doc::concat(vec![
                 s(self.open_prefix(id)),
-                verbatim_text(&self.t.src[self.n(id).start..self.n(id).end]),
+                comment_text(
+                    &self.t.src[self.n(id).start..self.n(id).end],
+                    self.o.indent_comment_lines && !self.n(self.n(id).parent).indent_sens,
+                    "-->",
+                ),
                 s(self.close_suffix(id)),
             ]),
             T::Doctype => {

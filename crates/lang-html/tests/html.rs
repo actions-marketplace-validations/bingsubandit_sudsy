@@ -153,6 +153,27 @@ fn attributes_and_options() {
     );
 }
 
+/// `indent_comment_lines` re-indents the lines of a multi-line comment with the markup; `pre` keeps its own.
+#[test]
+fn indent_comment_lines_option() {
+    let mut subject = Formatting::new(lang_html::provider(), "a.html");
+    subject.options = vec![("indent_comment_lines", OptionValue::Bool(true))];
+    // (the harness compares comments as written; the safety check of `format` ignores their indentation)
+    let out = core_format::testing::Subject::format(
+        &subject,
+        "<div>\n<!-- a\n      b\n\n  c\n  -->\n<pre>\n<!--\n  x\n-->\n</pre>\n</div>\n",
+    )
+    .unwrap();
+    assert_eq!(
+        out,
+        "<div>\n  <!-- a\n    b\n\n    c\n  -->\n  <pre>\n<!--\n  x\n-->\n</pre>\n</div>\n"
+    );
+    assert_eq!(
+        core_format::testing::Subject::format(&subject, &out).unwrap(),
+        out
+    );
+}
+
 #[test]
 fn file_names() {
     assert_file_names(

@@ -18,6 +18,8 @@ pub const CONTENT_NEWLINE_WITH_ATTRIBUTES: core_config::OptId = core_config::opt
 #[allow(dead_code)]
 pub const CONTENT_NEWLINE_WITH_ELEMENTS: core_config::OptId = core_config::opt::CONTENT_NEWLINE_WITH_ELEMENTS;
 #[allow(dead_code)]
+pub const INDENT_COMMENT_LINES: core_config::OptId = core_config::opt::INDENT_COMMENT_LINES;
+#[allow(dead_code)]
 pub const INDENT_EXPRESSION_OPERANDS: core_config::OptId = core_config::opt::INDENT_EXPRESSION_OPERANDS;
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -75,6 +77,10 @@ pub fn content_newline_with_elements(o: &core_config::ResolvedOptions) -> bool {
     o.flag(CONTENT_NEWLINE_WITH_ELEMENTS, false)
 }
 #[allow(dead_code)]
+pub fn indent_comment_lines(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(INDENT_COMMENT_LINES, false)
+}
+#[allow(dead_code)]
 pub fn indent_expression_operands(o: &core_config::ResolvedOptions) -> bool {
     o.flag(INDENT_EXPRESSION_OPERANDS, false)
 }
@@ -97,6 +103,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::VOID_ELEMENT_STYLE, &["selfclose", "omit"], "selfclose", "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`)."),
         core_config::OptionDef::boolean(core_config::opt::CONTENT_NEWLINE_WITH_ATTRIBUTES, false, "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults)."),
         core_config::OptionDef::boolean(core_config::opt::CONTENT_NEWLINE_WITH_ELEMENTS, false, "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`)."),
+        core_config::OptionDef::boolean(core_config::opt::INDENT_COMMENT_LINES, false, "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written."),
         core_config::OptionDef::boolean(core_config::opt::INDENT_EXPRESSION_OPERANDS, false, "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand."),
         ])
         .with_presets(vec![
