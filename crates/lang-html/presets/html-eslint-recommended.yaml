@@ -5,7 +5,7 @@ html:
   format:
     whitespace_sensitivity: ignore
     content_newline_with_elements: true
-    dialect: template
+    dialect: template-open
     indent_size: 4
     max_attributes_per_line: 2
     void_element_style: omit
@@ -23,3 +23,4 @@ html:
       no-duplicate-id: warn
       no-duplicate-keys: warn
       no-implicit-close: warn
+      require-li-container: warn

@@ -8,7 +8,6 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.60 | 7514c1f3 |
 | PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1395 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `staticMethod.notFound` 90 +4 more | 24 | 10.62 | d3ae913f |
 | C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
 
@@ -174,18 +173,12 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 7514c1f3); rules by misse
 
 ## html-eslint
 
-Lint: target 33.5% (82 of 245, 163 missed, measured on 7514c1f3); rules by missed findings:
-1. `indent` (97 missed) Fix: 4 files are refused (a block that spans elements, `</h{{ .Level }}>`) and hold most of what is left; formatting the unbalanced region as written (parser records the span, printer copies the element) is about 60 shared lines and clears under half of them, not built
-2. `no-duplicate-id` (20 missed)
-3. `no-obsolete-attrs` (12 missed)
-4. `require-closing-tags` (11 missed)
-5. `attrs-newline` (7 missed)
-6. `element-newline` (7 missed)
-7. `use-baseline` (4 missed)
-8. `quotes` (2 missed)
-9. `require-img-alt` (1 missed)
-10. `require-li-container` (1 missed)
-11. `require-title` (1 missed)
+Lint: target 86.2% (106 of 123, 17 missed, measured on d178d21b); rules by missed findings:
+1. `indent` (8 missed) Fix: 5 are the text of multi-line comments (youtube, carousel; comments stay as written), 3 are in `render-heading.html`, refused for an action in an end tag name (`</h{{ .Level }}>`)
+2. `use-baseline` (4 missed)
+3. `attrs-newline` (2 missed)
+4. `no-duplicate-id` (2 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
+5. `require-closing-tags` (1 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
 
 ## html-validate
 

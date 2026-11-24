@@ -435,6 +435,37 @@ fn html_template_actions_and_tag_options() {
     );
 }
 
+/// `dialect: template-open` formats a file whose blocks span elements by its tree and writes no
+/// end tag the source lacks: an element open at the end of the file, or in a block's branch, stays so.
+#[test]
+fn html_template_open_blocks_keep_open_elements() {
+    let t = tempfile::tempdir().unwrap();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "html:\n  format:\n    dialect: template-open\n    whitespace_sensitivity: ignore\n",
+    );
+    write(
+        t.path(),
+        "a.html",
+        "{{ define \"x\" }}<body>{{ end }}\n{{ define \"y\" }}<p>a</p>{{ end }}\n",
+    );
+    write(
+        t.path(),
+        "b.html",
+        "{{ if .A }}<div class=\"a\">{{ else }}<div class=\"b\">{{ end }}\n<p>text</p>\n</div>\n",
+    );
+    assert_eq!(sudsy(t.path(), &[]).status.code(), Some(0));
+    let html = read(t.path(), "a.html");
+    assert!(!html.contains("</body>"), "{html}");
+    assert!(html.contains("<body>\n  {{ end }}"), "{html}");
+    let html = read(t.path(), "b.html");
+    assert_eq!(html.matches("</div>").count(), 1, "{html}");
+    for f in ["a.html", "b.html"] {
+        assert_eq!(sudsy(t.path(), &["--check", f]).status.code(), Some(0));
+    }
+}
+
 /// The safety check accepts what the formatter rewrites in Vue and Svelte: the values of `.prop` and
 /// `slot-scope` attributes, root custom blocks without blanks between them, and a destructuring
 /// pattern in a block tag (`}}`).

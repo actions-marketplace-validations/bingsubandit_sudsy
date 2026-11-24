@@ -3,6 +3,7 @@ differences:
   action-text: choice  the tool reads the text of a `{{ }}` action as markup (a tag or comment inside a string) and its words as elements; the action is one piece of text and stays as written
   action-attribute: choice  the tool counts the words of a `{{ if }}` action among the attributes of a tag as attributes; Sudsy keeps the action as one attribute
   front-matter: choice  the tool reads the front matter between the two `---` lines as text to indent; it is data of the page generator and stays as written
+  end-tag-in-base: choice  the tool reports a start tag whose end tag is in another file of the project (the `<body>` of a `{{ define }}` that `baseof.html` closes); each file of a template project is a part of the page
   textarea-value: choice  the tool indents the text of a `<textarea>` (its ignore list names `pre` and `xmp` only); the text is the value of the field, so reindenting changes it
 files:
   html/bootstrap/site/content/docs/5.3/examples/cheatsheet-rtl/index.html html-eslint:no-duplicate-attrs 713: hugo-template-tokens
@@ -307,25 +308,53 @@ files:
   html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 27: textarea-value
   html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 29: textarea-value
   html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 30: textarea-value
+  # components-utilities.html: the ids pillNav2, home-tab2, profile-tab2, contact-tab2 of lines 31-39 repeat only in the `{{ highlight (printf `...`) }}` string of lines 43-54, which the tool reads as markup
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 31: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 33: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 36: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 39: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 43: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 45: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 48: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:no-duplicate-id 51: action-text
+  # get-started.html 36, 37: `integrity=%q` is the verb of a `printf` format inside a `{{ highlight }}` string, not an attribute
+  html/bootstrap/site/layouts/partials/home/get-started.html html-eslint:quotes 36: action-text
+  html/bootstrap/site/layouts/partials/home/get-started.html html-eslint:quotes 37: action-text
+  # example.html 45: the `<img ... >` of a `replaceRE` pattern string has no alt: it is a regular expression
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:require-img-alt 45: action-text
+  # table.html: the `printf "<table%s>\n%s</table>"` string of line 21 opens a `<table%s>` element for the tool, which shifts the indent it expects below it
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 25: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 26: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 30: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 32: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 33: action-text
+  # docs.html 2: `<body{{ if ... }}`: the tool counts the words of the action as attributes of the tag
+  html/bootstrap/site/layouts/_default/docs.html html-eslint:attrs-newline 2: action-attribute
+  # a start tag or element name that is in a string or an action: not an element of the page
+  html/bootstrap/site/layouts/_default/_markup/render-heading.html html-eslint:require-closing-tags 1: action-text
+  html/bootstrap/site/layouts/shortcodes/bs-table.html html-eslint:require-closing-tags 7: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:require-closing-tags 68: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:require-closing-tags 69: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:require-closing-tags 23: action-text
+  # the `<body>` of a `define "body_override"` is closed by the `</body>` of layouts/_default/baseof.html (line 20)
+  html/bootstrap/site/layouts/_default/404.html html-eslint:require-closing-tags 2: end-tag-in-base
+  html/bootstrap/site/layouts/_default/docs.html html-eslint:require-closing-tags 2: end-tag-in-base
 intentional:
   hugo-template-tokens: tool-wrong
   action-text: tool-wrong
   action-attribute: tool-wrong
   front-matter: tool-wrong
   textarea-value: tool-wrong
-target: 33.5
+  end-tag-in-base: tool-wrong
+target: 86.2
 fixes:  # lint rule -> one line: where and what to change
-  indent: 4 files are refused (a block that spans elements, `</h{{ .Level }}>`) and hold most of what is left; formatting the unbalanced region as written (parser records the span, printer copies the element) is about 60 shared lines and clears under half of them, not built
-measured: {covered: 82, total: 245, main: '7514c1f3'}  # of the target; `main`: the origin/main commit the measured tree is based on
+  indent: 5 are the text of multi-line comments (youtube, carousel; comments stay as written), 3 are in `render-heading.html`, refused for an action in an end tag name (`</h{{ .Level }}>`)
+  require-closing-tags: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
+  no-duplicate-id: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
+measured: {covered: 106, total: 123, main: 'd178d21b'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  indent: 97
-  no-duplicate-id: 20
-  no-obsolete-attrs: 12
-  require-closing-tags: 11
-  attrs-newline: 7
-  element-newline: 7
+  indent: 8
   use-baseline: 4
-  quotes: 2
-  require-img-alt: 1
-  require-li-container: 1
-  require-title: 1
+  attrs-newline: 2
+  no-duplicate-id: 2
+  require-closing-tags: 1

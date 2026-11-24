@@ -22,6 +22,17 @@ mod microsyntax;
 /// `core_format::Embedder`); `None` when embedded formatting is off.
 pub type Embed<'a> = &'a dyn Fn(&str, EmbedMode, &str, usize, bool) -> Option<String>;
 
+/// `dialect: template-open`: a template block may end an element elsewhere, so an end tag the
+/// source lacks is not written: `All` in a file that has actions, `AtEof` (the element runs to the
+/// end of the file, a template includes it in another) in one that has none. `No`: every
+/// omitted end tag is written.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum KeepEnds {
+    No,
+    AtEof,
+    All,
+}
+
 pub struct Opts<'a> {
     pub grammar: &'a core_syntax::Grammar,
     pub dialect: Dialect,
@@ -35,6 +46,8 @@ pub struct Opts<'a> {
     pub tags: core_format::tag_layout::TagLayout,
     /// `{{ }}` actions are kept as written (`dialect: template`).
     pub template_actions: bool,
+    /// Which omitted end tags stay omitted.
+    pub keep_ends: KeepEnds,
     /// The mode of embedded expressions: `Expression`, or `ExpressionIndented` (`indent_expression_operands`).
     pub expression_mode: EmbedMode,
     pub content_lines: core_format::content_lines::ContentLines,
@@ -98,6 +111,11 @@ impl P<'_> {
         matches!(self.n(id).t, T::Text | T::Comment)
     }
 
+    /// A template action, which is written as it stands: no marker of it moves to a neighbor.
+    fn kept_action(&self, id: usize) -> bool {
+        self.o.template_actions && self.n(id).t == T::Interp
+    }
+
     /// Does the last descendant of `id` count as text? (An interpolation's content does.)
     fn ends_in_text(&self, id: usize) -> bool {
         let last = self.last_descendant(id);
@@ -133,9 +151,9 @@ impl P<'_> {
     // The five ways a tag borrows a marker of its neighbor.
     fn borrow_prev_close_end(&self, id: usize) -> bool {
         let n = self.n(id);
-        n.prev
-            .is_some_and(|p| self.n(p).t != T::Doctype && !self.text_like(p))
-            && n.lead_ss
+        n.prev.is_some_and(|p| {
+            self.n(p).t != T::Doctype && !self.text_like(p) && !self.kept_action(p)
+        }) && n.lead_ss
             && !n.lead_sp
     }
 
@@ -154,7 +172,8 @@ impl P<'_> {
 
     fn borrow_next_open_start(&self, id: usize) -> bool {
         let n = self.n(id);
-        n.next.is_some_and(|x| !self.text_like(x))
+        n.next
+            .is_some_and(|x| !self.text_like(x) && !self.kept_action(x))
             && self.text_like(id)
             && n.trail_ss
             && !n.trail_sp
@@ -169,7 +188,15 @@ impl P<'_> {
         let n = self.n(id);
         !n.self_closing
             && !self.explicit_close(id)
-            && (self.has_ignore(id) || self.preserve(n.parent))
+            && (self.has_ignore(id)
+                || self.preserve(n.parent)
+                || (n.t == T::Element
+                    && !n.void
+                    && match self.o.keep_ends {
+                        KeepEnds::No => false,
+                        KeepEnds::AtEof => n.end >= self.t.src.trim_end().len(),
+                        KeepEnds::All => true,
+                    }))
     }
 
     fn open_start_marker(&self, id: usize) -> String {

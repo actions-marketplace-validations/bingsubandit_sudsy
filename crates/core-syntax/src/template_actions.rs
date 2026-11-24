@@ -32,6 +32,11 @@ pub struct Actions {
 }
 
 impl Actions {
+    /// Does `src` have an action (its opening delimiter)?
+    pub fn occurs_in(&self, src: &str) -> bool {
+        src.contains(self.open)
+    }
+
     /// The end of the action that starts at `at` (after its closing delimiter), when it closes.
     pub fn end(&self, src: &str, at: usize) -> Option<usize> {
         let rest = src.get(at..)?.strip_prefix(self.open)?;

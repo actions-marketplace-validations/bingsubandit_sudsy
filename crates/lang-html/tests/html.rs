@@ -1,4 +1,5 @@
 use core_config::OptionValue;
+use core_format::NodeFormatter;
 use core_syntax::print;
 use lang_html::generated::kind as k;
 use provider_api::format_testing::{Formatting, assert_file_names, assert_formats, check_corpus};
@@ -175,4 +176,92 @@ fn conformance() {
         let (n, _) = check_corpus(lang_html::provider(), "a.html", &corpus, &["html", "htm"]);
         assert!(n > 0, "{repo}");
     }
+}
+
+fn open_subject() -> Formatting {
+    let mut subject = Formatting::new(lang_html::provider(), "a.html");
+    subject.options = vec![
+        ("dialect", OptionValue::String("template-open".into())),
+        (
+            "whitespace_sensitivity",
+            OptionValue::String("ignore".into()),
+        ),
+    ];
+    subject
+}
+
+/// The start and end tags of `text` in order (`<div`, `</div`).
+fn tags(text: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut rest = text;
+    while let Some(i) = rest.find('<') {
+        let tag: String = rest[i..]
+            .chars()
+            .take_while(|&c| c != '>' && c != ' ' && c != '\n')
+            .collect();
+        out.push(tag);
+        rest = &rest[i + 1..];
+    }
+    out
+}
+
+/// `dialect: template-open` writes no end tag the source lacks and drops none of the source:
+/// elements opened in the branches of a block, an `<a>` opened and closed in two blocks, an
+/// end tag followed by a start tag inside one block, and omitted `</li>` in a file with actions.
+#[test]
+fn template_open_keeps_the_end_tags_of_the_source() {
+    for input in [
+        "{{ if .A }}<div class=\"a\">{{ else }}<div class=\"b\">{{ end }}\n<p>text</p>\n</div>\n",
+        "{{ if .A }}<a href=\"x\">{{ end }}\ntext\n{{ if .A }}</a>{{ end }}\n",
+        "<div>\n{{ if .A }}</div><div>{{ end }}\n<p>x</p>\n</div>\n",
+        "<ul>\n<li>a\n<li>b{{ . }}\n</ul>\n",
+    ] {
+        let out = core_format::testing::assert_formats(&open_subject(), input);
+        assert_eq!(tags(&out), tags(input), "{out}");
+    }
+}
+
+/// The safety check of `template-open` compares the start and end tags: the generic check skips
+/// `EndTag`, so a tree with an added or a dropped end tag is refused here.
+#[test]
+fn template_open_refuses_added_and_dropped_end_tags() {
+    let mut options = core_config::ResolvedOptions::default();
+    options.set(
+        core_config::opt::DIALECT,
+        OptionValue::String("template-open".into()),
+    );
+    let check = |before: &str, after: &str| {
+        lang_html::HtmlFormatter.extra_check_with(&parse(before).tree, &parse(after).tree, &options)
+    };
+    assert!(check("<div><p>{{ . }}</div>", "<div>\n  <p>{{ . }}</div>\n").is_ok());
+    assert!(check("<div><div>{{ . }}</div>", "<div><div>{{ . }}</div></div>").is_err());
+    assert!(check("<div><p>{{ . }}</p></div>", "<div><p>{{ . }}</div>").is_err());
+    // no action: a block cannot end the element elsewhere, so the end tag may be added
+    assert!(check("<div><p>a</div>", "<div><p>a</p></div>").is_ok());
+}
+
+/// A file without actions has no block that could end an element elsewhere: its omitted end tags
+/// are written (`</li>`), except the one of an element that runs to the end of the file.
+#[test]
+fn template_open_writes_omitted_end_tags_of_a_file_without_actions() {
+    let out =
+        core_format::testing::assert_formats(&open_subject(), "<ul>\n<li>a\n<li>b\n</ul>\n<p>x\n");
+    assert_eq!(out.matches("</li>").count(), 2, "{out}");
+    assert!(!out.contains("</p>"), "{out}");
+}
+
+/// A `{{ }}` action that spans lines stays as written, with its line break: the markers of
+/// adjacent actions do not move to a neighbor, which gave more blank lines on each format.
+#[test]
+fn a_multi_line_action_stays_as_written() {
+    let out = core_format::testing::assert_formats(
+        &open_subject(),
+        "<p>\n{{ if .A }}{{ .\n}}{{ else\n}}x{{ end }}\n</p>\n",
+    );
+    assert!(
+        out.contains("{{ .\n}}") && out.contains("{{ else\n}}"),
+        "{out}"
+    );
+    // text right before an action does not take its `{{`
+    core_format::testing::assert_formats(&open_subject(), "<div>Fuga.{{\n\n\nx\n}} Magni.</div>\n");
 }

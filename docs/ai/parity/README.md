@@ -41,7 +41,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | 88.1% | `7514c1f3` | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | 91.2% | `7514c1f3` | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
-| html-eslint | 33.5% | `7514c1f3` | 66 | 14 | 17 | 35 | 0 | 0 | 0 | 35 |
+| html-eslint | 86.2% | `d178d21b` | 66 | 15 | 17 | 34 | 0 | 0 | 0 | 34 |
 | html-validate | 86.9% | `7514c1f3` | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
 | htmlhint | 93.0% | `7514c1f3` | 44 | 10 | 7 | 27 | 0 | 0 | 0 | 27 |
 | ktlint | 92.3% | `7514c1f3` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |

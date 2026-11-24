@@ -150,6 +150,17 @@ pub trait NodeFormatter: Send + Sync {
         Ok(())
     }
 
+    /// [`NodeFormatter::extra_check`] for a check that reads an option (HTML's `dialect`); the
+    /// safety check calls this one.
+    fn extra_check_with(
+        &self,
+        before: &SyntaxNode,
+        after: &SyntaxNode,
+        _options: &core_config::ResolvedOptions,
+    ) -> Result<(), String> {
+        self.extra_check(before, after)
+    }
+
     /// What the safety check compares of a `#restyle` token or node of the input and of the
     /// output: the text without what formatting may change (quotes, case, number spelling, blanks).
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
