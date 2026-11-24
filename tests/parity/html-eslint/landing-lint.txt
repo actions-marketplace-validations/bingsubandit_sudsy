@@ -34,6 +34,7 @@ e3b0c44298fc1c14 html/dom-examples/notifications/persistent/actions/donut.html
 062abbef26dd45df html/dom-examples/pointerevents/Using_Pointer_Events.html
 e3b0c44298fc1c14 html/dom-examples/popover-api/basic-declarative/index.html
 e3b0c44298fc1c14 html/dom-examples/popover-api/multiple-manual/index.html
+e3b0c44298fc1c14 html/dom-examples/popover-api/nested-popovers/index.html
 e3b0c44298fc1c14 html/dom-examples/popover-api/toast-popovers/index.html
 e3b0c44298fc1c14 html/dom-examples/prompt-api-web-storage/index.html
 e3b0c44298fc1c14 html/dom-examples/screen-capture-api/basic-screen-capture/index.html
@@ -43,7 +44,6 @@ e3b0c44298fc1c14 html/dom-examples/screenleft-screentop/index.html
 e3b0c44298fc1c14 html/dom-examples/scroll-promises/window-methods/index.html
 e3b0c44298fc1c14 html/dom-examples/shadow-dom/shadowrootmode/scoping.html
 0ea1ef8a9faec715 html/dom-examples/streams/grayscale-png/index.html
-e3b0c44298fc1c14 html/dom-examples/streams/simple-pump/index.html
 e3b0c44298fc1c14 html/dom-examples/streams/simple-random-stream/index.html
 e3b0c44298fc1c14 html/dom-examples/streams/simple-writer/index.html
 08d0fdd3f95fb334 html/dom-examples/to-do-notifications/index.html

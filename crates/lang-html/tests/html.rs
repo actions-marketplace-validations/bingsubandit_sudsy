@@ -60,6 +60,28 @@ fn syntax_errors_are_reported() {
     assert_eq!(print(&r.tree), "<div <p>");
 }
 
+/// A `>` in text is text in HTML, Svelte, Vue and Angular; a `<` or `&` stays an error.
+#[test]
+fn a_raw_gt_in_text_is_text() {
+    assert_eq!(
+        fmt("<p><strong>></strong> a > b & c</p>\n"),
+        "<p><strong>></strong> a > b & c</p>\n"
+    );
+    for (name, src) in [
+        ("a.svelte", "<p><b>></b> a > b & c</p>\n"),
+        (
+            "a.vue",
+            "<template>\n  <p><b>></b> a > b & c</p>\n</template>\n",
+        ),
+    ] {
+        let r = lang_html::provider()
+            .parse(&SourceFile::new(name, 1, src))
+            .unwrap();
+        assert!(r.errors.is_empty(), "{name}: {:?}", r.errors);
+    }
+    assert!(!parse("<p>a < b</p>").errors.is_empty());
+}
+
 #[test]
 fn a_component_end_tag_is_not_the_end_of_a_self_closing_slot() {
     let out = assert_formats(

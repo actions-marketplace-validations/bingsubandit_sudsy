@@ -1,0 +1,16 @@
+id: no-raw-gt
+message: write `&gt;` for a `>` in text
+description: >-
+  A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`.
+  A raw `<` is a syntax error.
+example: '<p>a > b</p>   <p>a &gt; b</p>'
+severity: off
+category: style
+rule:
+  kind: Chunk
+  regex: '(?<C>>)'
+  not-inside:
+    any:
+      - { kind: Element, regex: '(?i)^<(script|style|textarea|title)\b' }
+      - kind: Interpolation
+report-on: $C

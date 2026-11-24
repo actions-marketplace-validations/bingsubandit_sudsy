@@ -41,9 +41,9 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | 88.1% | `7514c1f3` | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | 91.2% | `7514c1f3` | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
-| html-eslint | 63.5% | `0c8a3dcc` | 66 | 15 | 17 | 34 | 0 | 0 | 0 | 34 |
-| html-validate | 92.5% | `66718389` | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
-| htmlhint | 91.6% | `66718389` | 44 | 10 | 7 | 27 | 0 | 0 | 0 | 27 |
+| html-eslint | 69.9% | `9de1e355` | 66 | 15 | 17 | 34 | 0 | 0 | 0 | 34 |
+| html-validate | 92.5% | `0c8a3dcc` | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
+| htmlhint | 91.6% | `0c8a3dcc` | 44 | 10 | 7 | 27 | 0 | 0 | 0 | 27 |
 | ktlint | 92.3% | `7514c1f3` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
 | markdownlint | 99.0% | `7514c1f3` | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |

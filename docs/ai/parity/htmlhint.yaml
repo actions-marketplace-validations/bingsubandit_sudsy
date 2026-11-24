@@ -48,5 +48,5 @@ entries:
   tagname-lowercase: rule element-case
   tags-check: planned
   title-require: planned
-  spec-char-escape: rule syntax-error | a raw `<` or `>` in text is the parser's error
+  spec-char-escape: rule syntax-error, no-raw-gt | a raw `<` in text is the parser's error, a `>` the rule `no-raw-gt`
   tagname-specialchars: planned

@@ -3323,6 +3323,10 @@
               "$ref": "#/definitions/rule",
               "description": "An image with empty alternate text, `![](url)` (markdownlint MD045)."
             },
+            "no-ambiguous-ampersand": {
+              "$ref": "#/definitions/rule",
+              "description": "An `&` that starts no entity is valid HTML and renders as written; html-validate's `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`."
+            },
             "no-anonymous-operations": {
               "$ref": "#/definitions/rule",
               "description": "An operation without a name (`{ a }`, `query { a }`), which tools that log, trace or cache by operation name cannot tell apart. Equivalent - graphql-eslint no-anonymous-operations."
@@ -4366,6 +4370,10 @@
             "no-ps-grep": {
               "$ref": "#/definitions/rule",
               "description": "A pipeline from `ps` into `grep`."
+            },
+            "no-raw-gt": {
+              "$ref": "#/definitions/rule",
+              "description": "A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`. A raw `<` is a syntax error."
             },
             "no-raw-special-elements": {
               "$ref": "#/definitions/rule",

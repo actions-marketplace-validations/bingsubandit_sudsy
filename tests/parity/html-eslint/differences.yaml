@@ -346,16 +346,16 @@ intentional:
   front-matter: tool-wrong
   textarea-value: tool-wrong
   end-tag-in-base: tool-wrong
-target: 63.5
+target: 69.9
 fixes:  # lint rule -> one line: where and what to change
-  indent: 51 findings in the 3 files `sudsy format` rejects, so they stay as written, `nested-popovers/index.html` (32; a raw `>` in text, `<strong>></strong>`), `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
+  indent: 19 findings in the 2 files `sudsy format` rejects, so they stay as written, `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
   use-baseline: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
   require-closing-tags: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
   no-duplicate-id: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
-measured: {covered: 223, total: 351, main: '0c8a3dcc'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 223, total: 319, main: '9de1e355'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   use-baseline: 58
-  indent: 51
+  indent: 19
   require-closing-tags: 6
   no-extra-spacing-tags: 4
   no-duplicate-id: 3

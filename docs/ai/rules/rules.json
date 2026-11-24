@@ -28347,6 +28347,37 @@
       ]
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `&` that starts no entity is valid HTML and renders as written; html-validate's `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!doctype html>\n<title>t</title>\n<p><strong>></strong></p>\n<p>a &gt; b &amp; &#38;</p>\n<p>Ham & Shroom</p>\n<p>one\ntwo > three</p>\n<script>if (a > b) {}</script>\n<style>a > b {}</style>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 8,
+            "length": 1,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-ambiguous-ampersand",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": []
+    },
+    {
       "category": "suspicious",
       "default_level": "warn",
       "description": "Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change.",
@@ -29712,6 +29743,48 @@
           "id": "no-object-in-text-mustaches",
           "partial": true,
           "tool": "eslint-plugin-svelte"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`. A raw `<` is a syntax error.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!doctype html>\n<title>t</title>\n<p><strong>></strong></p>\n<p>a &gt; b &amp; &#38;</p>\n<p>Ham & Shroom</p>\n<p>one\ntwo > three</p>\n<script>if (a > b) {}</script>\n<style>a > b {}</style>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 12,
+            "length": 1,
+            "line": 3
+          },
+          {
+            "column": 5,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-raw-gt",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/htmlhint"
+      ],
+      "upstream": [
+        {
+          "id": "spec-char-escape",
+          "partial": true,
+          "tool": "htmlhint"
         }
       ]
     },

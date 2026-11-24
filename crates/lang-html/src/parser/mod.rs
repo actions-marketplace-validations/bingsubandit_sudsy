@@ -262,7 +262,7 @@ impl<'a> P<'a> {
         matches!(self.mode, Mode::Html | Mode::Svelte)
     }
 
-    /// A raw `<`, `>` or `&` in text is an error (HTML and Svelte).
+    /// A raw `<` in text is an error (HTML and Svelte); a `>` or an `&` that starts no entity is text.
     fn strict(&self) -> bool {
         self.entities()
     }
@@ -321,7 +321,7 @@ impl<'a> P<'a> {
             match self.b[i] {
                 b'<' if !lead && self.tag_start(i) => break,
                 b'&' if !lead && self.entities() && self.entity(i).is_some() => break,
-                b'<' | b'>' | b'&' if self.strict() => {
+                b'<' if self.strict() => {
                     self.error(i, i + 1, "raw character in text");
                 }
                 b'{' | b'}' if !lead && self.mode == Mode::Svelte => break,

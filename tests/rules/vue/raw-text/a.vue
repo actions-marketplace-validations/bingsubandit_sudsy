@@ -1,0 +1,3 @@
+<template>
+  <p>{{ a > b & c }}</p>
+</template>

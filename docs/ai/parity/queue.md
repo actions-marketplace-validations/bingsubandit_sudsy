@@ -10,7 +10,7 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
 | PHP | lint PHPStan | 3 | 20.7% | 64.3 | 1055 findings | `method.notFound` 384, `class.notFound` 381, `staticMethod.notFound` 90, `function.notFound` 80 +3 more | 19 | 10.15 | 9632a5ce |
-| HTML | lint html-eslint | 2 | 63.5% | 21.5 | 76 findings | `use-baseline` 58, `indent` 51 | 6 | 7.17 | 0c8a3dcc |
+| HTML | lint html-eslint | 2 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 10.07 | 9de1e355 |
 | SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
 | C# | lint Roslynator | 1 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 1.13 | 66718389 |
 
@@ -185,9 +185,9 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 7514c1f3); rules by misse
 
 ## html-eslint
 
-Lint: target 63.5% (223 of 351, 128 missed, measured on 0c8a3dcc); rules by missed findings:
+Lint: target 69.9% (223 of 319, 96 missed, measured on 9de1e355); rules by missed findings:
 1. `use-baseline` (58 missed) Fix: no Sudsy rule (58 findings, e.g. Web-Dev-For-Beginners 6-space-game/solution/index.html:8)
-2. `indent` (51 missed) Fix: 51 findings in the 3 files `sudsy format` rejects, so they stay as written, `nested-popovers/index.html` (32; a raw `>` in text, `<strong>></strong>`), `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
+2. `indent` (19 missed) Fix: 19 findings in the 2 files `sudsy format` rejects, so they stay as written, `holy-space-cow/index.html` (16; a second `</button>`), `_markup/render-heading.html` (3; `<h{{ .Level }}`, a template action as tag name)
 3. `require-closing-tags` (6 missed) Fix: the `<div>` of `shortcodes/example.html` is closed in the file; the tool loses it to the `<svg>` and `<img>` strings of the `replaceRE` lines
 4. `no-extra-spacing-tags` (4 missed)
 5. `no-duplicate-id` (3 missed) Fix: 2 are the first of two empty ids, which the tool reports at both places and Sudsy at the second
@@ -199,9 +199,9 @@ Lint: target 63.5% (223 of 351, 128 missed, measured on 0c8a3dcc); rules by miss
 
 ## html-validate
 
-Lint: target 92.5% (2245 of 2428, 183 missed, measured on 66718389); rules by missed findings:
+Lint: target 92.5% (2245 of 2428, 183 missed, measured on 0c8a3dcc); rules by missed findings:
 1. `no-implicit-close` (30 missed)
-2. `no-raw-characters` (16 missed)
+2. `no-raw-characters` (17 missed)
 3. `no-inline-style` (15 missed)
 4. `attr-spacing` (14 missed)
 5. `no-dup-attr` (14 missed)
@@ -216,11 +216,11 @@ Lint: target 92.5% (2245 of 2428, 183 missed, measured on 66718389); rules by mi
 14. `attr-case` (3 missed)
 15. `autocomplete-password` (3 missed)
 
-15 more rules: 27 missed.
+15 more rules: 26 missed.
 
 ## htmlhint
 
-Lint: target 91.6% (1244 of 1358, 114 missed, measured on 66718389); rules by missed findings:
+Lint: target 91.6% (1244 of 1358, 114 missed, measured on 0c8a3dcc); rules by missed findings:
 1. `doctype-first` (38 missed)
 2. `spec-char-escape` (31 missed)
 3. `src-not-empty` (19 missed)
@@ -377,26 +377,25 @@ Format: unclassified 9 of 83 differing files (11%).
 
 ## prettier-html
 
-Format: unclassified 245 of 272 differing files (90%).
+Format: unclassified 245 of 267 differing files (92%).
 1. `hugo-shortcodes` (13 files): Hugo pages (front matter, `{{< shortcode >}}` in text) are refused with `raw character in text`; Prettier prints them as text
 2. `embedded-code` (5 files): embedded code the JS and CSS formatters print differently from Prettier (directive quotes, `<!--` comments, line breaks of call chains and templates), `<html:script>` and `<style type="text/less">`, which Sudsy reads as other languages
 3. `doctype-case` (4 files): `<!DOCTYPE html>` is printed `<!doctype html>` where Prettier keeps `<!DOCTYPE html>` (4 files; what makes Prettier keep it is not narrowed)
 4. `leading-blank-line` (2 files): a file that starts with a blank line keeps it in Prettier's output; Sudsy drops it
 5. `doctype-after-blank` (1 files): a doctype that follows a self-closing tag in the middle of a file is printed glued to it (`/><!doctype html>`); Prettier puts it on its own line
-6. `raw-gt-in-text` (1 files): a `>` written in text (`<strong>></strong>`) is refused as a raw character; Prettier keeps it
-7. `style-attribute-quotes` (1 files): `url(&quot;x&quot;)` in a `style` attribute is printed with single quotes; Prettier keeps the entities
-8. `conditional-comments` (- files): IE conditional comments are comments, not parsed as markup
-9. `glued-inline-unit` (- files): text, an inline element and text written without blanks between (`a"<b>x</b>".`) are not kept together on one line when they are too wide; the element's tags break inside
-10. `svelte-attributes` (- files): mustache tags inside quoted attribute values are not broken up, and long `class:`/`on:` expressions break differently
-11. `svelte-blocks` (- files): a block written without blanks around its tags (`{#if a}<p></p>{/if}`) is always broken onto lines, and a `<script>` or `<style>` that is empty or invalid is not kept as written
-12. `svelte-ignore` (- files): `<!-- prettier-ignore-start -->` / `-end` ranges are not kept
-13. `svelte-inline` (- files): where the tags of inline elements and mustache tags break in a long line differs from the plugin's printer
-14. `svelte-syntax` (- files): `{@attach}` and `{#each x as { a, b = "" }}` are rejected by the grammar
-15. `syntax-errors` (- files): files the grammar rejects (unclosed tags, `<!- ->` comments, `{{ }}` with `>` in text, cursor markers, `<plaintext>`)
-16. `vue-blocks` (- files): custom blocks of formats Sudsy does not format, `<template lang>` of other languages, a self-closing `<style />` and several root templates are not as Prettier prints them
-17. `vue-filters` (- files): Vue filters (`value | filter(arg)`) are printed as bitwise or, with the operator at the end of the line
-18. `vue-js-layout` (- files): JS layout differences in `<script>` and expressions (assignment of a generic call, comments inside expressions, `z && (a && b)` is refused by the JS safety check)
-19. `vue-patterns` (- files): `v-for`, `v-slot`, `slot-scope` and `generic` values with destructuring or TypeScript annotations are not formatted as parameter lists (`v-for` loop variables are only joined), and `script setup="..."` / `style vars="..."` values are kept
+6. `style-attribute-quotes` (1 files): `url(&quot;x&quot;)` in a `style` attribute is printed with single quotes; Prettier keeps the entities
+7. `conditional-comments` (- files): IE conditional comments are comments, not parsed as markup
+8. `glued-inline-unit` (- files): text, an inline element and text written without blanks between (`a"<b>x</b>".`) are not kept together on one line when they are too wide; the element's tags break inside
+9. `svelte-attributes` (- files): mustache tags inside quoted attribute values are not broken up, and long `class:`/`on:` expressions break differently
+10. `svelte-blocks` (- files): a block written without blanks around its tags (`{#if a}<p></p>{/if}`) is always broken onto lines, and a `<script>` or `<style>` that is empty or invalid is not kept as written
+11. `svelte-ignore` (- files): `<!-- prettier-ignore-start -->` / `-end` ranges are not kept
+12. `svelte-inline` (- files): where the tags of inline elements and mustache tags break in a long line differs from the plugin's printer
+13. `svelte-syntax` (- files): `{@attach}` and `{#each x as { a, b = "" }}` are rejected by the grammar
+14. `syntax-errors` (- files): files the grammar rejects (unclosed tags, `<!- ->` comments, `{{ }}` with `>` in text, cursor markers, `<plaintext>`)
+15. `vue-blocks` (- files): custom blocks of formats Sudsy does not format, `<template lang>` of other languages, a self-closing `<style />` and several root templates are not as Prettier prints them
+16. `vue-filters` (- files): Vue filters (`value | filter(arg)`) are printed as bitwise or, with the operator at the end of the line
+17. `vue-js-layout` (- files): JS layout differences in `<script>` and expressions (assignment of a generic call, comments inside expressions, `z && (a && b)` is refused by the JS safety check)
+18. `vue-patterns` (- files): `v-for`, `v-slot`, `slot-scope` and `generic` values with destructuring or TypeScript annotations are not formatted as parameter lists (`v-for` loop variables are only joined), and `script setup="..."` / `style vars="..."` values are kept
 
 ## prettier-js
 

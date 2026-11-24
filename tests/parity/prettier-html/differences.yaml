@@ -4,7 +4,6 @@ differences:
   conditional-comments: gap  IE conditional comments are comments, not parsed as markup
   syntax-errors: gap  files the grammar rejects (unclosed tags, `<!- ->` comments, `{{ }}` with `>` in text, cursor markers, `<plaintext>`)
   hugo-shortcodes: gap  Hugo pages (front matter, `{{< shortcode >}}` in text) are refused with `raw character in text`; Prettier prints them as text
-  raw-gt-in-text: gap  a `>` written in text (`<strong>></strong>`) is refused as a raw character; Prettier keeps it
   doctype-case: gap  `<!DOCTYPE html>` is printed `<!doctype html>` where Prettier keeps `<!DOCTYPE html>` (4 files; what makes Prettier keep it is not narrowed)
   leading-blank-line: gap  a file that starts with a blank line keeps it in Prettier's output; Sudsy drops it
   doctype-after-blank: gap  a doctype that follows a self-closing tag in the middle of a file is printed glued to it (`/><!doctype html>`); Prettier puts it on its own line
@@ -21,17 +20,17 @@ differences:
 files:
   prettier-html: embedded-code, glued-inline-unit, conditional-comments, syntax-errors
   prettier-vue: embedded-code, vue-filters, vue-patterns, vue-blocks, vue-js-layout
-  real-world: hugo-shortcodes:13, embedded-code:5, doctype-case:4, leading-blank-line:2, raw-gt-in-text:1, doctype-after-blank:1, style-attribute-quotes:1
+  real-world: hugo-shortcodes:13, embedded-code:5, doctype-case:4, leading-blank-line:2, doctype-after-blank:1, style-attribute-quotes:1
   real-world-vue: vue-js-layout
   prettier-svelte: svelte-blocks, svelte-attributes, svelte-ignore, svelte-syntax, svelte-inline
   real-world-svelte: svelte-attributes, svelte-inline
 ratchet:
-  prettier-html: 129
+  prettier-html: 131
   prettier-vue: 56
   prettier-svelte: 51
   prettier-vue-html: 10
-  real-world: 505
-  real-world-svelte: 941
+  real-world: 506
+  real-world-svelte: 943
   real-world-vue: 874
 target-files:
   prettier-html: 144
