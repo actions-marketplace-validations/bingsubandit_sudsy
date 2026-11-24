@@ -1,5 +1,5 @@
 //! The priority table of docs/ai/parity/queue.md: one row per leg (format or lint of a language's reference
-//! tool) under the 85% bar, ranked by weight x points to the bar / difficulty. Everything is read from data that
+//! tool) under the 85% bar, ranked by weight x points to the bar / difficulty, then the new-language rows (`newlang`). Everything is read from data that
 //! exists: `measured`, `missed`, `ratchet`, `target-files` and the `files` causes of the `differences.yaml`, the
 //! catalogs and `support.yaml` (`primary`, `popular`, `blocked`). A format leg's number is the one of the README
 //! table (the groups of `support.yaml`), so the two never disagree; a lint tool with a `measured` share that
@@ -20,10 +20,6 @@ const W_PRIMARY: f64 = 4.0;
 const W_POPULAR: f64 = 1.0;
 /// Weight of any other tool.
 const W_OTHER: f64 = 0.25;
-/// Legs of a new language: its format and its lint tool, each from 0 to the bar.
-const NEW_LANGUAGE_LEGS: u64 = 2;
-/// Difficulty of a new language, an estimate: about ten format causes and ten new rules at `NEW` each.
-const NEW_LANGUAGE_DIFFICULTY: u64 = 60;
 /// Causes named in a cell before "+N more".
 const SHOWN: usize = 4;
 
@@ -260,6 +256,7 @@ pub(crate) fn table(
     rows: &[Row],
     tools: &BTreeMap<String, Parity>,
     catalogs: &[Catalog],
+    languages: &[crate::newlang::Entry],
 ) -> String {
     let legs = legs(rows, tools, catalogs);
     let mut open: Vec<(bool, f64, String)> = Vec::new();
@@ -308,20 +305,9 @@ pub(crate) fn table(
         .filter(|l| !matches!(l.outcome, Outcome::AtBar))
         .map(|l| format!("{} {} {}", l.language, l.kind, l.name))
         .collect();
-    let new_points = (BAR * NEW_LANGUAGE_LEGS) as f64;
-    let new_score = W_PRIMARY * new_points / NEW_LANGUAGE_DIFFICULTY as f64;
-    if holding.is_empty() {
-        open.push((
-            false,
-            new_score,
-            format!(
-                "| (new language) | format + lint from 0 | {W_PRIMARY} | 0% | {new_points:.1} | - | estimate | {NEW_LANGUAGE_DIFFICULTY} | {new_score:.2} | - |\n"
-            ),
-        ));
-    }
     open.sort_by(|a, b| a.0.cmp(&b.0).then(b.1.total_cmp(&a.1)));
     let mut out = String::from(
-        "## Priority\n\nWeight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Order: primary legs under the bar and, when the lock is open, the new language come before any secondary leg whatever the score says; the score orders inside each group. The new language is a row of two primary legs from 0 (weight 4, points 170 = 2 x 85, difficulty 60, an estimate: about ten format causes and ten new rules at 3 each), listed only when the lock is open. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.\n\n| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |\n|---|---|---|---|---|---|---|---|---|---|\n",
+        "## Priority\n\nWeight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Order: primary legs under the bar come before any secondary leg whatever the score says; the score orders inside each group. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.\n\n| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |\n|---|---|---|---|---|---|---|---|---|---|\n",
     );
     for (_, _, row) in &open {
         out += row;
@@ -334,14 +320,6 @@ pub(crate) fn table(
     if !unmeasured.is_empty() {
         out += &format!("\nNot measured: {}.\n", unmeasured.join("; "));
     }
-    out += &if holding.is_empty() {
-        "\nNew language: open, every primary leg is at the bar or blocked.\n\n".to_string()
-    } else {
-        format!(
-            "\nNew language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by {}: {}. Score when open: {new_score:.2} ({W_PRIMARY} x {new_points:.0} points / difficulty {NEW_LANGUAGE_DIFFICULTY}).\n\n",
-            holding.len(),
-            holding.join("; ")
-        )
-    };
+    out += &crate::newlang::section(languages, &holding);
     out
 }

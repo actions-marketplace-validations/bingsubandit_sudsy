@@ -1,10 +1,10 @@
 ---
 source: xtask/full/src/priority_tests.rs
-expression: "table(&rows, &tools, &catalogs)"
+expression: "table(&rows, &tools, &catalogs, &[])"
 ---
 ## Priority
 
-Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Order: primary legs under the bar and, when the lock is open, the new language come before any secondary leg whatever the score says; the score orders inside each group. The new language is a row of two primary legs from 0 (weight 4, points 170 = 2 x 85, difficulty 60, an estimate: about ten format causes and ten new rules at 3 each), listed only when the lock is open. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.
+Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Order: primary legs under the bar come before any secondary leg whatever the score says; the score orders inside each group. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
@@ -21,4 +21,7 @@ Blocked on a decision:
 
 Not measured: Beta format OnlyFixtures (no differences.yaml).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: Alpha format Fmt; Alpha lint Lint; Beta format OnlyFixtures. Score when open: 11.33 (4 x 170 points / difficulty 60).
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: Alpha format Fmt; Alpha lint Lint; Beta format OnlyFixtures.
+
+| Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
+|---|---|---|---|---|---|---|---|

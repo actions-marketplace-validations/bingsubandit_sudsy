@@ -1,0 +1,77 @@
+# Languages Sudsy does not support yet, or supports with one leg missing: the data of the new-language rows of
+# docs/ai/parity/queue.md (xtask/full/src/newlang.rs). A language with a row in support.yaml takes only its missing leg
+# and no `parser` (paid). `deferred: [format|lint]` drops a leg the user put off.
+#
+# A number written "~0.6" is an estimate (the first measuring replaces it); a plain number is measured.
+# Score of a plan (lint, format, both) = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)); the best
+# alternative of each leg wins. An entry with an estimate may only be picked to measure it.
+#   Gain: 0.1 official, fast, ships with the language, nearly everyone uses it; 0.4 good and fast third party;
+#         0.7 slow or needs its own runtime; 1.0 none or poor.
+#   Cost of a leg: 1.0; layout -0.3 whitespace only, +0.2 width-based; +0.1 per missing shared part.
+#   Parser: 1.0 good Rust crate, +0.2 tree-sitter, +0.5 hand-written; 0 when paid.
+#   Reach: share of the reference tool's findings (lint) or files (format) the plan can match, 0-1.
+#   Demand 0.1-1, measured: mean over the sources that list the language of log10(x) / log10(top), floor 0.1, 2 places.
+#     gh = GitHub Innovation Graph languages.csv (github/innovationgraph, data/languages.csv), pushers of 2026 Q2 summed over
+#          economies, top HTML 8,329,335. so = Stack Overflow Developer Survey 2025, "Programming, scripting, and markup
+#          languages" (survey.stackoverflow.co/2025/technology), % of respondents x 10, top JavaScript 66.0 (660).
+#     One source: that source. None: 0.1 (marked "~").
+
+- language: Go
+  demand: 0.80
+  source: gh 440791 -> 0.82; so 16.4 -> 0.79
+  parser: 1.2 # tree-sitter-go (user decision): 19,644 of 19,887 files parse, 236 of 243 failures are Go 1.26 `new(expr)`
+  format:
+    - {tool: gofmt, gain: ~0.1, reach: ~0.95, cost: ~1.1, why: "official, ships with Go; whitespace only 0.7 + 0.1 x 4 missing parts (column cells, operator-precedence spacing, doc comments, //go:build pairs)"}
+  lint:
+    - {tool: revive defaults, gain: 0.4, reach: 0.99, cost: ~1.0, why: "primary lint tool (user decision), good fast third party; reach measured on 54,598 findings, rules judged by revive's behaviour"}
+    - {tool: golangci-lint defaults without types, gain: 0.4, reach: 0.07, cost: ~1.0, why: "reach measured, 126 of 1,915 findings"}
+    - {tool: golangci-lint defaults with go/types worker, gain: 0.4, reach: ~0.95, cost: ~1.3, why: "needs a go/types worker"}
+- language: CMake
+  demand: 0.84
+  source: gh 608541 -> 0.84; so not listed
+  parser: 1.2 # tree-sitter-cmake: 9,034 of 9,035 real-code files parse
+  format:
+    - {tool: gersemi, gain: 0.7, reach: ~0.86, cost: 1.4, why: "slow, own runtime (Python); reach is the ceiling of a model with the keyword-section layout (0.61 without, 0.99 with every piece)"}
+  lint:
+    - {tool: cmake-lint, gain: 0.7, reach: 1.0, cost: 1.3, why: "own runtime (Python); reach measured on its source for the rules that fired, 128,509 findings"}
+- language: Swift
+  demand: 0.72
+  source: gh 449944 -> 0.82; so 5.4 -> 0.61
+  parser: ~1.2 # tree-sitter-swift
+  format:
+    - {tool: swift-format, gain: ~0.7, reach: ~0.9, cost: ~1.2, why: "official but needs the Swift toolchain; width-based"}
+  lint:
+    - {tool: SwiftLint defaults, gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "needs the Swift toolchain and its own runtime"}
+- language: Rust
+  demand: 0.79
+  source: gh 401012 -> 0.81; so 14.8 -> 0.77
+  parser: ~1.0 # syn
+  format:
+    - {tool: rustfmt, gain: ~0.1, reach: ~0.9, cost: ~1.3, why: "official, ships with Rust; width-based, a few shared parts missing"}
+  lint:
+    - {tool: clippy without types, gain: ~0.7, reach: ~0.3, cost: ~1.0, why: "needs a build; most lints read types"}
+    - {tool: clippy with types, gain: ~0.7, reach: ~0.85, cost: ~3.0, why: "needs a type checker for the language"}
+- language: Scala
+  demand: 0.57
+  source: gh 28505 -> 0.64; so 2.6 -> 0.50
+  parser: ~1.2 # tree-sitter-scala
+  format:
+    - {tool: scalafmt, gain: ~0.7, reach: ~0.85, cost: ~1.2, why: "good tool but runs on the JVM; width-based"}
+  lint:
+    - {tool: scalafix syntactic, gain: ~0.7, reach: ~0.6, cost: ~1.0, why: "JVM; the useful rules need the compiler"}
+- language: Dart
+  demand: 0.71
+  source: gh 258967 -> 0.78; so 5.9 -> 0.63
+  parser: ~1.2 # tree-sitter-dart
+  format:
+    - {tool: dart format, gain: ~0.1, reach: ~0.9, cost: ~1.2, why: "official, ships with the SDK; width-based"}
+  lint:
+    - {tool: dart analyze, gain: ~0.1, reach: ~0.5, cost: ~1.0, why: "official, ships with the SDK; many lints read types"}
+- language: Lua
+  demand: 0.74
+  source: gh 269867 -> 0.78; so 9.2 -> 0.70
+  parser: ~1.0 # full_moon
+  format:
+    - {tool: StyLua, gain: ~0.4, reach: ~0.9, cost: ~1.2, why: "good and fast third party; width-based"}
+  lint:
+    - {tool: selene, gain: ~0.4, reach: ~0.7, cost: ~1.0, why: "fast third party; standard-library definitions needed"}

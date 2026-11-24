@@ -16,7 +16,7 @@ Test helpers: `format_testing::assert_parses` (round trip, attachment, no errors
 - A zero-width `Eof` token ends the root; it owns the comments at the end of the file.
 
 ## Parser comparison (before step 1)
-The first step of a language measures the candidate parsers and stops with a recommendation (CLAUDE.md); the user decides. One table, one column per candidate, on one named machine (CPU, cores, rustc, release with LTO): whole files parsed from memory, warm, best of 5, no adapter, on a pinned corpus of real files (commit SHAs) plus hand-written probes of the newest syntax. Rows, all measured unless marked:
+Which language is next comes from the new-language rows of [../parity/queue.md](../parity/queue.md) (data: `xtask/full/languages.yaml`; a row with estimates is picked only to measure it, and a measured language replaces its estimates there). The first step of a language measures the candidate parsers and stops with a recommendation (CLAUDE.md); the user decides. One table, one column per candidate, on one named machine (CPU, cores, rustc, release with LTO): whole files parsed from memory, warm, best of 5, no adapter, on a pinned corpus of real files (commit SHAs) plus hand-written probes of the newest syntax. Rows, all measured unless marked:
 
 | Row | What it says |
 |---|---|

@@ -1,5 +1,5 @@
 //! The priority table from fixture data: weights, the groups of the README table, mapped and unmapped causes, a blocked leg,
-//! a leg with no differences.yaml (not measured), a tool support.yaml does not list and the New language lock.
+//! a leg with no differences.yaml (not measured), a tool support.yaml does not list and the list of legs under the bar.
 
 use crate::priority::table;
 use crate::queue::Tool as Parity;
@@ -47,42 +47,31 @@ fn table_from_fixture_data() {
         ("unlisted".to_string(), parse(UNLISTED)),
     ]);
     let catalogs = [languages::catalog::parse(CATALOG).unwrap()];
-    insta::assert_snapshot!(table(&rows, &tools, &catalogs));
+    insta::assert_snapshot!(table(&rows, &tools, &catalogs, &[]));
 }
 
-/// Weights 4, 1 and 0.25; the open lock lists the new language; secondary legs come last whatever the score.
+/// Weights 4, 1 and 0.25; secondary legs come last whatever the score; the new-language section names the legs under the bar.
 #[test]
-fn weights_new_language_and_order() {
+fn weights_order_and_new_language_section() {
     let parse = |t: &str| serde_saphyr::from_str::<Parity>(t).unwrap();
     let tools = BTreeMap::from([
         ("lint".to_string(), parse(LINT)),
         ("pop".to_string(), parse(POP)),
-        (
-            "ok".to_string(),
-            parse("measured: {covered: 90, total: 100, main: abc123}\n"),
-        ),
+        ("fmt".to_string(), parse(FMT)),
         ("unlisted".to_string(), parse(UNLISTED)),
     ]);
     let catalogs = [languages::catalog::parse(CATALOG).unwrap()];
     let rows = crate::support::rows(ROWS).unwrap();
-    let locked = table(&rows, &tools, &catalogs);
-    assert!(locked.contains("| 4 |") && locked.contains("| 1 |") && locked.contains("| 0.25 |"));
-    assert!(!locked.contains("(new language)"));
-    assert!(locked.contains("Score when open: 11.33"));
-    let (primary, popular, other) = (
-        locked.find("| 4 |"),
-        locked.find("| 1 |"),
-        locked.find("| 0.25 |"),
-    );
-    assert!(primary.is_some() && primary < popular && primary < other);
+    let text = table(&rows, &tools, &catalogs, &[]);
+    assert!(text.contains("| 4 |") && text.contains("| 1 |") && text.contains("| 0.25 |"));
+    assert!(!text.contains("(new language)"));
+    assert!(text.contains("Primary legs under the bar now: Alpha format Fmt; Alpha lint Lint;"));
+    let (primary, popular) = (text.find("| 4 |"), text.find("| 1 |"));
+    assert!(primary.is_some() && primary < popular);
     let rows = crate::support::rows(
-        "- language: Alpha\n  lint: [{tool: ok, name: Ok}, {tool: pop, name: Pop, popular: true}]\n",
+        "- language: Alpha\n  lint: [{tool: pop, name: Pop, popular: true}]\n",
     )
     .unwrap();
-    let open = table(&rows, &tools, &catalogs);
-    assert!(open.contains(
-        "| (new language) | format + lint from 0 | 4 | 0% | 170.0 | - | estimate | 60 | 11.33 | - |"
-    ));
-    assert!(open.contains("New language: open"));
-    assert!(open.find("(new language)") < open.find("| Alpha |"));
+    let text = table(&rows, &tools, &catalogs, &[]);
+    assert!(text.contains("Primary legs under the bar now: Alpha lint Pop."));
 }
