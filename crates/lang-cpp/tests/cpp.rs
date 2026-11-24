@@ -426,3 +426,56 @@ fn trailing_comments_directives_and_template_headers() {
         "void f() { g(/*a=*/1); }\n"
     );
 }
+
+#[test]
+fn extern_c_function_body_is_indented_and_a_no_break_space_ends_a_comment() {
+    // a linkage specification in front of a function does not make its body a scope
+    let src = "extern \"C\" int f(int a) {\n  return 1;\n}\n";
+    assert_eq!(fmt(src), src);
+    // a no-break space is text, not trailing whitespace
+    let src = "int a; // x\u{a0}\n";
+    assert_eq!(fmt(src), src);
+}
+
+/// The string and char tokens of `src` parsed as the file `id` (the dialect follows the path).
+fn strings(id: &str, src: &str) -> Vec<String> {
+    let parsed = provider(Dialect::C)
+        .parse(&SourceFile::new(id, 1, src))
+        .unwrap();
+    (parsed.tree.descendants_with_tokens())
+        .filter_map(|e| e.into_token())
+        .filter(|t| t.kind() == kind::STRING || t.kind() == kind::CHAR)
+        .map(|t| t.text().to_string())
+        .collect()
+}
+
+#[test]
+fn a_c_file_has_no_literal_suffix_but_a_header_may_be_cpp() {
+    let src = "char *s = \"a\"B; char c = 'x'Y; auto t = \"a\"_sv;";
+    assert_eq!(strings("a.c", src), ["\"a\"", "'x'", "\"a\""]);
+    assert_eq!(strings("a.h", src), ["\"a\"B", "'x'Y", "\"a\"_sv"]);
+}
+
+#[test]
+fn a_raw_string_is_one_token_in_every_file() {
+    let raw = "R\"d(a \" b  ;  { c\n x)d\"";
+    let src = format!("const char *r = {raw}; int R = 1; char *q = R\"x\";");
+    for id in ["a.c", "a.h", "a.cc"] {
+        assert_eq!(strings(id, &src)[0], raw, "{id}");
+    }
+}
+
+#[test]
+fn a_header_keeps_the_text_of_cpp_strings() {
+    let src = "class A {\n  auto s = \"a\"_sv;\n  const char *r = R\"(a \" b  ;  { c\n     x)\";\n  int  y;\n};\n";
+    for (id, file) in [("a.h", "a.h"), ("a.hpp", "a.hpp")] {
+        let out = if id == "a.h" {
+            provider_api::format_testing::assert_formats(provider(Dialect::C), file, src)
+        } else {
+            provider_api::format_testing::assert_formats(provider(Dialect::Cpp), file, src)
+        };
+        assert!(out.contains("\"a\"_sv;"), "{id}: {out}");
+        assert!(out.contains("R\"(a \" b  ;  { c\n     x)\""), "{id}: {out}");
+        assert!(out.contains("  int y;"), "{id}: {out}");
+    }
+}

@@ -53,7 +53,9 @@ impl Cx<'_> {
             return Some(self.template(s, b, scope));
         }
         if (self.word(s, b, "namespace")
-            || (self.word(s, b, "extern") && self.is(s + 1, b, k::STRING)))
+            || (self.word(s, b, "extern")
+                && self.is(s + 1, b, k::STRING)
+                && self.is(s + 2, b, k::LBRACE)))
             && let Some(r) = self.namespace(s, b)
         {
             return Some(r);

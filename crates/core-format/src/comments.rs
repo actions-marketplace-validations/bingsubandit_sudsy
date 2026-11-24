@@ -53,6 +53,20 @@ impl Comment {
     /// The comment as written, without trailing whitespace. For [`CommentKind::Directive`] only
     /// the line break that ends it is removed: the lines of disabled code are exact.
     pub fn text(&self) -> Cow<'_, str> {
+        self.text_trimmed(char::is_whitespace)
+    }
+
+    /// [`Comment::text`] as `st` writes it: with `keep_unicode_blanks` only ASCII whitespace ends
+    /// the text.
+    pub fn text_in(&self, st: &CommentStyle) -> Cow<'_, str> {
+        if st.keep_unicode_blanks {
+            self.text_trimmed(|c| c.is_ascii_whitespace() || c == '\x0b')
+        } else {
+            self.text()
+        }
+    }
+
+    fn text_trimmed(&self, blank: fn(char) -> bool) -> Cow<'_, str> {
         let raw = element_text(&self.element);
         let strip = |t: &str| -> String {
             if self.kind == CommentKind::Directive {
@@ -61,11 +75,13 @@ impl Comment {
                     .unwrap_or(t)
                     .to_string()
             } else {
-                t.trim_end().to_string()
+                t.trim_end_matches(blank).to_string()
             }
         };
         match raw {
-            Cow::Borrowed(t) if self.kind != CommentKind::Directive => Cow::Borrowed(t.trim_end()),
+            Cow::Borrowed(t) if self.kind != CommentKind::Directive => {
+                Cow::Borrowed(t.trim_end_matches(blank))
+            }
             other => Cow::Owned(strip(&other)),
         }
     }
@@ -103,6 +119,9 @@ pub struct CommentStyle {
     pub trailing_counts_after: &'static [&'static str],
     /// The lines of a block comment lose their trailing blanks (`comment_trim_lines`).
     pub trim_lines: bool,
+    /// A comment loses only trailing ASCII whitespace; a no-break space stays
+    /// (`comment_keep_unicode_blanks`).
+    pub keep_unicode_blanks: bool,
     /// The lines of a block comment keep their indentation relative to the comment's own line
     /// (`comment_reindent_lines`).
     pub reindent: bool,
@@ -137,6 +156,7 @@ impl Default for CommentStyle {
             reflow_width: None,
             trailing_counts_after: &[],
             trim_lines: false,
+            keep_unicode_blanks: false,
             reindent: false,
             block_as_line: false,
             keep_tight: false,
@@ -169,7 +189,7 @@ impl CommentStyle {
 
     /// The text of the line comment `c` as the style writes it.
     pub fn line_text<'a>(&self, c: &'a Comment) -> Cow<'a, str> {
-        let text = c.text();
+        let text = c.text_in(self);
         if self.block_as_line && c.kind == CommentKind::Block && !text.contains(['\n', '\r']) {
             return Cow::Owned(format!("{BLOCK_START}{text}{BLOCK_END}"));
         }

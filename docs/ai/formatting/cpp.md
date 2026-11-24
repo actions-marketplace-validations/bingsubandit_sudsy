@@ -5,7 +5,7 @@ Two languages, `c` and `cpp`, one crate (`lang-cpp`) with one hand-written lexer
 Files: `.c` and `.h` are `c`; `.cc .cpp .cxx .hpp .hh .hxx .ipp` are `cpp`. A `.h` is C because the extension does not say, and the lexer differs only in keywords (C++ keywords are identifiers in C); C++ projects that use `.h` select `cpp` with a `files` override.
 
 ## Lexer (`lexer.rs`)
-Lossless tokens: identifiers, keywords (by dialect), numbers (digit separators, hex floats, suffixes), strings and chars with encoding prefixes and raw strings, header names after `#include`/`#include_next`/`#import`, maximal-munch punctuators, and `Other` for a stray byte. Comments and backslash-newline continuations are trivia. A `#` that starts a line begins a directive; the directive's tokens carry its id. The only errors are an unterminated block comment or raw string.
+Lossless tokens: identifiers, keywords (by dialect), numbers (digit separators, hex floats, suffixes), strings and chars with encoding prefixes, raw strings and literal suffixes (`"a"_sv`; in a `.c` file a name after a string is a separate token, in a `.h` it may be C++), header names after `#include`/`#include_next`/`#import`, maximal-munch punctuators, and `Other` for a stray byte. Comments and backslash-newline continuations are trivia. A `#` that starts a line begins a directive; the directive's tokens carry its id. The only errors are an unterminated block comment or raw string.
 
 ## Structure (`structure.rs`)
 One pass over the tokens builds nodes over them:
@@ -45,6 +45,7 @@ Trailing comments follow `spaces_before_trailing_comments` and, with `align_trai
 | `final_newline` | bool | `true` | End the file with a newline. |
 | `end_of_line` | `auto`, `lf`, `crlf` | `auto` | Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first line break. |
 | `max_blank_lines` | int 0-10 | `1` | Largest number of blank lines kept between statements and comments. |
+| `comment_keep_unicode_blanks` | bool | `true` | A comment loses only trailing ASCII whitespace; a no-break space at its end stays. |
 | `wrap_lines` | bool | `true` | Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change). |
 | `continuation_indent` | int 0-16 | `4` | Columns a wrapped line is indented more than the line it continues, where it is not aligned to a bracket. |
 | `access_modifier_outdent` | int 0-16 | `2` | Columns `public:`, `private:` and `protected:` are outdented from the members of their class. |

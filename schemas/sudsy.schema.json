@@ -7801,6 +7801,11 @@
               ],
               "type": "string"
             },
+            "comment_keep_unicode_blanks": {
+              "default": true,
+              "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+              "type": "boolean"
+            },
             "constructor_initializer_indent": {
               "default": 4,
               "description": "Columns a constructor initializer list is indented more than its constructor.",
@@ -8116,6 +8121,11 @@
                 "no"
               ],
               "type": "string"
+            },
+            "comment_keep_unicode_blanks": {
+              "default": true,
+              "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+              "type": "boolean"
             },
             "constructor_initializer_indent": {
               "default": 4,
@@ -11638,6 +11648,11 @@
                     ],
                     "type": "string"
                   },
+                  "comment_keep_unicode_blanks": {
+                    "default": true,
+                    "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+                    "type": "boolean"
+                  },
                   "constructor_initializer_indent": {
                     "default": 4,
                     "description": "Columns a constructor initializer list is indented more than its constructor.",
@@ -11953,6 +11968,11 @@
                       "no"
                     ],
                     "type": "string"
+                  },
+                  "comment_keep_unicode_blanks": {
+                    "default": true,
+                    "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+                    "type": "boolean"
                   },
                   "constructor_initializer_indent": {
                     "default": 4,

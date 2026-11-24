@@ -1,5 +1,7 @@
 // Generated from lang.yaml by `cargo xtask codegen`.
 #[allow(dead_code)]
+pub const COMMENT_KEEP_UNICODE_BLANKS: core_config::OptId = core_config::opt::COMMENT_KEEP_UNICODE_BLANKS;
+#[allow(dead_code)]
 pub const WRAP_LINES: core_config::OptId = core_config::opt::WRAP_LINES;
 #[allow(dead_code)]
 pub const CONTINUATION_INDENT: core_config::OptId = core_config::opt::CONTINUATION_INDENT;
@@ -313,6 +315,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::final_newline(true),
         shared::end_of_line(),
         core_config::shared::max_blank_lines(1, "Largest number of blank lines kept between statements and comments."),
+        core_config::shared::comment_keep_unicode_blanks(true),
         core_config::OptionDef::boolean(core_config::opt::WRAP_LINES, true, "Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change)."),
         core_config::OptionDef::int(core_config::opt::CONTINUATION_INDENT, 4, (0, 16), "Columns a wrapped line is indented more than the line it continues, where it is not aligned to a bracket."),
         core_config::OptionDef::int(core_config::opt::ACCESS_MODIFIER_OUTDENT, 2, (0, 16), "Columns `public:`, `private:` and `protected:` are outdented from the members of their class."),

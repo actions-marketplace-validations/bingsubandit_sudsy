@@ -6,6 +6,7 @@ options:
   - final_newline: true
   - end_of_line
   - max_blank_lines: [1, "Largest number of blank lines kept between statements and comments."]
+  - comment_keep_unicode_blanks: [true]
   - wrap_lines:
       default: true
       doc: "Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change)."

@@ -19,9 +19,12 @@ use provider_api::adapter::{Tok, replay_with};
 use provider_api::{ParseError, ParseResult, ParserProvider, ParserSpec, SourceFile};
 
 /// The keywords a file is lexed with: C++ words such as `class`, `new` and `this` are names in C.
+/// `CFile` is a `.c` file, which is certainly C (no literal suffix after a string); `C` may be a
+/// header of C++.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Dialect {
     C,
+    CFile,
     Cpp,
 }
 
@@ -32,7 +35,7 @@ pub fn provider(dialect: Dialect) -> ParserProvider {
         crate_name: env!("CARGO_PKG_NAME"),
         grammar: grammars::CPP,
         extensions: match dialect {
-            Dialect::C => &["c", "h"],
+            Dialect::C | Dialect::CFile => &["c", "h"],
             Dialect::Cpp => &["cc", "cpp", "cxx", "hpp", "hh", "hxx", "ipp"],
         },
         file_names: &[],
@@ -46,12 +49,13 @@ pub fn provider(dialect: Dialect) -> ParserProvider {
     let provider = ParserProvider::new(spec, move |file| parse_file(file, dialect));
     match dialect {
         Dialect::Cpp => provider,
-        Dialect::C => provider.with_dialect("c", "cpp"),
+        Dialect::C | Dialect::CFile => provider.with_dialect("c", "cpp"),
     }
 }
 
 fn parse_file(file: &SourceFile, dialect: Dialect) -> ParseResult {
-    parse(&file.text, dialect)
+    let certain = dialect == Dialect::C && file.id.ends_with(".c");
+    parse(&file.text, if certain { Dialect::CFile } else { dialect })
 }
 
 pub fn parse(src: &str, dialect: Dialect) -> ParseResult {

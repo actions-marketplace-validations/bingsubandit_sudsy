@@ -689,6 +689,14 @@ pub mod shared {
         )
     }
 
+    pub fn comment_keep_unicode_blanks(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            opt::COMMENT_KEEP_UNICODE_BLANKS,
+            default,
+            "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+        )
+    }
+
     pub fn block_comment_keep_tight(default: bool) -> OptionDef {
         OptionDef::boolean(
             opt::BLOCK_COMMENT_KEEP_TIGHT,

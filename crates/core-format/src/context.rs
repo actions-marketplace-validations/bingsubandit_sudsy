@@ -256,6 +256,8 @@ pub trait NodeFormatter: Send + Sync {
         CommentStyle {
             trim_lines: options.get(core_config::opt::COMMENT_TRIM_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
+            keep_unicode_blanks: options.get(core_config::opt::COMMENT_KEEP_UNICODE_BLANKS)
+                == Some(&core_config::OptionValue::Bool(true)),
             reindent: options.get(core_config::opt::COMMENT_REINDENT_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
             block_as_line: options.get(core_config::opt::SINGLE_BLOCK_COMMENT_AS_LINE)
@@ -918,7 +920,7 @@ pub fn comment_doc(c: &Comment) -> Doc {
 
 /// [`comment_doc`] in a comment style.
 pub fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
-    let text = c.text();
+    let text = c.text_in(st);
     match c.kind {
         CommentKind::Lines => lines_doc(&text),
         CommentKind::Directive => doc::concat(vec![doc::line_start(text), doc::break_parent()]),

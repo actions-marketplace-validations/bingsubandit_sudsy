@@ -229,7 +229,7 @@ WRAP_TAGS = {"Stmt": {"statement"}, "Directive": {"directive"}}
 WRAP_TOKENS = [("Comment", r"//[^\n]*"), ("Continuation", r"\\\n"), ("Ident", r"\w+"), ("Semi", ";"), ("Lbrace", "{"), ("Rbrace", "}"), ("Lpar", r"\("), ("Rpar", r"\)"), ("Equal", "="), ("Plus", r"\+"), ("Hash", "#")]
 
 
-def wrap_tree(src, nodes):
+def wrap_tree(src, nodes, bom=False):
     """A Tree of `src` whose depth-1 nodes are `nodes` (kind, first, last token text); the tokens come from a small lexer."""
     import re
 
@@ -242,19 +242,48 @@ def wrap_tree(src, nodes):
         lines += [f"    {k} {s}..{e} {src[s:e]!r}" for k, s, e in toks[a : b + 1]]
         i = b + 1
     lines.append(f"  EndOfFile {len(src)}..{len(src)} \"\"")
-    return pw.Tree(WRAP_CFG, WRAP_TAGS, "\n".join(lines), src.encode())
+    return pw.Tree(WRAP_CFG, WRAP_TAGS, "\n".join(lines), (b"\xef\xbb\xbf" if bom else b"") + src.encode())
 
 
 def wrap_equal(theirs, ours, nodes):
     return pw.compare(wrap_tree(theirs, nodes), wrap_tree(ours, nodes))
 
 
+def block_tree(src):
+    """A Tree of `src` (one statement holding a hugging block from its first `{` to its last `}`)."""
+    import re
+
+    toks = [(m.lastgroup, m.start(), m.end()) for m in re.finditer("|".join(f"(?P<{k}>{r})" for k, r in WRAP_TOKENS), src)]
+    a, b = (next(j for j, t in enumerate(toks) if t[0] == "Lbrace"), max(j for j, t in enumerate(toks) if t[0] == "Rbrace"))
+    lines = [f"Unit 0..{len(src)}", f"  Stmt {toks[0][1]}..{toks[-1][2]}"]
+    for j, (k, s, e) in enumerate(toks):
+        if j == a:
+            lines.append(f"    Block {s}..{toks[b][2]}")
+        lines.append(f"{'      ' if a <= j <= b else '    '}{k} {s}..{e} {src[s:e]!r}")
+    lines.append(f"  EndOfFile {len(src)}..{len(src)} \"\"")
+    return pw.Tree(WRAP_CFG, {**WRAP_TAGS, "Block": {"block", "huggable"}}, "\n".join(lines), src.encode())
+
+
 class Wrap(unittest.TestCase):
+    def test_a_control_never_moves_a_block_left_of_column_zero(self):
+        src = "x =\n      a + {\n  b;\n};\n"
+        tree = block_tree(src)
+        self.assertTrue(pw.compare(tree, tree)[0])
+        for name, damaged in pw.controls(None, tree, src, ".c", "x").items():
+            if isinstance(damaged, pw.Tree):
+                self.assertTrue(pw.compare(tree, damaged, tree)[0], name)
+
     STMT = [("Stmt", "x", ";")]
 
     def test_a_wrap_point_is_a_space_or_a_newline_at_any_indent(self):
         self.assertTrue(wrap_equal("x = a +\n    b;\n", "x = a + b;\n", self.STMT)[0])
         self.assertTrue(wrap_equal("x = a +\n    b;\n", "x = a +\n  b;\n", self.STMT)[0])
+
+    def test_a_byte_order_mark_is_not_part_of_the_dumped_text(self):
+        src = "x = a +\n    b;\n"
+        plain, marked = wrap_tree(src, self.STMT), wrap_tree(src, self.STMT, bom=True)
+        self.assertEqual([marked.gap(i) for i in range(marked.n)], [plain.gap(i) for i in range(plain.n)])
+        self.assertTrue(pw.compare(marked, plain)[0])
 
     def test_a_changed_token_or_spacing_is_a_difference(self):
         self.assertEqual(wrap_equal("x = a + b;\n", "x = a - b;\n", self.STMT)[1], ["tokens-other"])

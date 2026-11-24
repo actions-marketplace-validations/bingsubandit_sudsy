@@ -397,6 +397,7 @@ impl NodeFormatter for LazyRules {
     /// consecutive lines start in one column when the second is true.
     fn comment_style(&self, o: &ResolvedOptions) -> CommentStyle {
         let mut style = self.get().comment_style();
+        style.keep_unicode_blanks = o.flag(core_config::opt::COMMENT_KEEP_UNICODE_BLANKS, false);
         if o.get(core_config::opt::SPACES_BEFORE_TRAILING_COMMENTS)
             .is_some()
         {

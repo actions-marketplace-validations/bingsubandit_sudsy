@@ -20,6 +20,7 @@ import zlib
 from pathlib import Path
 
 TAB = 8
+BOM = b"\xef\xbb\xbf"
 
 
 def grammar_tags(path):
@@ -38,6 +39,8 @@ class Tree:
     def __init__(self, cfg, tags, dump, src):
         gap, com, eof, braces = set(cfg["gap_kinds"]), cfg["comment_kind"], cfg["eof_kind"], set(cfg["brace_kinds"])
         bound, cont_tags, inside = set(cfg["boundary"]), set(cfg["container"]), set(cfg["wrap_inside"])
+        if src.startswith(BOM):  # the dump is of the text without its byte order mark
+            src = src[len(BOM):]
         self.src, self.string = src, cfg["string_kind"]
         self.kind, self.start, self.end = [], [], []
         self.sb, self.eb, self.br, self.dr, self.cm, self.frame = [], [], [], [], [], []
@@ -277,19 +280,39 @@ def controls(chk, ref, theirs, suffix, name):
 
     def rebuild(pick):
         """The reference text with its wrap gaps replaced by `pick(i, gap)`; the lines of a block that is anchored to a
-        moved line (a lambda body, an initializer) move with it, as a formatter would indent them."""
-        out, cur, line = [], [], 0
+        moved line (a lambda body, an initializer) move with it, as a formatter would indent them. When a block would
+        have to move left of column 0 (its anchor line was joined to a less indented one), the wrap gaps of the anchor's
+        line stay as they are: no output can have that block at its reference offset from the anchor."""
+        pinned, state = set(), rnd.getstate()
+        while True:
+            rnd.setstate(state)
+            view, clamped = rebuild_once(pick, pinned)
+            if not clamped:
+                return view
+            before = len(pinned)
+            for a in clamped:
+                s = a
+                while s and b"\n" not in ref.gap(s):
+                    s -= 1
+                pinned.update(j for j in range(s, a + 1) if j in wrapset)
+            if len(pinned) == before:
+                return view
+
+    def rebuild_once(pick, pinned):
+        out, cur, line, clamped = [], [], 0, set()
         base[0] = 0
         starts, ends, pos = [], [], 0
         for i in range(ref.n):
             g = ref.gap(i)
-            if i in wrapset:
+            if i in wrapset and i not in pinned:
                 g = pick(i, g, line)
             elif g.count(b"\n"):
                 a = ref.anchor(i)
                 delta = cur[a] - ref.indent(a) if 0 <= a < len(cur) else 0
                 if delta:
                     head, last = g.rsplit(b"\n", 1)
+                    if width(last) + delta < 0:
+                        clamped.add(a)
                     g = head + b"\n" + b" " * max(0, width(last) + delta)
             if b"\n" in g:
                 line = width(g.rsplit(b"\n", 1)[1])
@@ -304,7 +327,7 @@ def controls(chk, ref, theirs, suffix, name):
             ends.append(pos)
         view = copy.copy(ref)
         view.src, view.start, view.end = b"".join(out), starts, ends
-        return view
+        return view, clamped
 
     def brk(i, indent):
         return (b" \\\n" if ref.dr[i] else b"\n") + b" " * indent

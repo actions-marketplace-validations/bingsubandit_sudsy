@@ -30,7 +30,7 @@ pub struct Lexed {
 
 fn is_keyword(dialect: Dialect, s: &str) -> bool {
     match dialect {
-        Dialect::C => matches!(
+        Dialect::C | Dialect::CFile => matches!(
             s,
             "alignas"
                 | "alignof"
@@ -287,15 +287,16 @@ pub fn block_comment_len(b: &[u8]) -> (usize, bool) {
 }
 
 /// The length of the string or character literal that starts at `src[i]` (a quote), a suffix
-/// included; it ends at the line's end when the closing quote is missing.
-fn quoted_len(src: &str, i: usize) -> usize {
+/// included unless the file is C (`"a"B` is a string and a macro); it ends at the line's end when
+/// the closing quote is missing.
+fn quoted_len(src: &str, i: usize, dialect: Dialect) -> usize {
     let row = (core_syntax::grammars::CPP.get())
         .string_rows(k::STRING)
         .next()
         .expect("the C++ grammar has a string row");
     let (end, closed) = row.scan(src, i, false);
     let b = src.as_bytes();
-    let suffix = if closed {
+    let suffix = if closed && dialect != Dialect::CFile {
         b[end..].iter().take_while(|&&c| ident_byte(c)).count()
     } else {
         0
@@ -455,14 +456,14 @@ pub fn lex(src: &str, dialect: Dialect) -> Lexed {
                 }
             } else {
                 let kind = if b[i + p] == b'"' { k::STRING } else { k::CHAR };
-                tok!(kind, p + quoted_len(src, i + p));
+                tok!(kind, p + quoted_len(src, i + p, dialect));
                 continue;
             }
         }
         if c == b'"' || c == b'\'' {
             tok!(
                 if c == b'"' { k::STRING } else { k::CHAR },
-                quoted_len(src, i)
+                quoted_len(src, i, dialect)
             );
         } else if ident_byte(c) && !c.is_ascii_digit() {
             let len = b[i..].iter().take_while(|&&c| ident_byte(c)).count();

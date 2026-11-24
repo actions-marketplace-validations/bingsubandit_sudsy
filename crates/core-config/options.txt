@@ -27,6 +27,7 @@ block_comment_keep_tight
 brace_newline
 brace_same_line
 bracket_spacing
+comment_keep_unicode_blanks
 comment_reindent_lines
 comment_space_exempt
 comment_trim_lines
