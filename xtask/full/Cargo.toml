@@ -19,3 +19,6 @@ xtask = { path = ".." }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+insta.workspace = true

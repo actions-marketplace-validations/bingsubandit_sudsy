@@ -50,17 +50,35 @@ pub(crate) struct Row {
 
 /// A reference tool: its `tests/parity` folder, its name in the table and, for a folder that serves
 /// several languages, the ratchet groups of this language.
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub(crate) struct Tool {
     pub tool: String,
     pub name: String,
     #[serde(default)]
-    groups: Vec<String>,
+    pub groups: Vec<String>,
+    /// The tool that decides `Ready` and is listed first; without one, the first of the list.
+    #[serde(default)]
+    pub primary: bool,
+    /// A widely used secondary tool: weight 2 in the priority table (docs/ai/parity/queue.md).
+    #[serde(default)]
+    pub popular: bool,
+    /// Why the leg waits on a user decision; the priority table lists it apart.
+    #[serde(default)]
+    pub blocked: Option<String>,
+    /// Ratchet groups that are real-world corpora although their name has no `real` in it.
+    #[serde(default)]
+    pub corpus: Vec<String>,
 }
 
 /// The rows of `support.yaml`.
 pub(crate) fn rows(support_yaml: &str) -> Result<Vec<Row>> {
-    serde_saphyr::from_str(support_yaml).context("parsing support.yaml")
+    let mut rows: Vec<Row> =
+        serde_saphyr::from_str(support_yaml).context("parsing support.yaml")?;
+    for row in &mut rows {
+        row.format.sort_by_key(|t| !t.primary); // stable: the primary first, the others as listed
+        row.lint.sort_by_key(|t| !t.primary);
+    }
+    Ok(rows)
 }
 
 /// The keys of a `differences.yaml` the table reads.
@@ -160,6 +178,7 @@ pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'
                     tool: STABILITY.into(),
                     name: String::new(),
                     groups: row.stability.clone(),
+                    ..Tool::default()
                 };
                 format.push(format_share(root, &stability)?);
             }
@@ -242,7 +261,7 @@ fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
     )
 }
 
-/// `Ready` when the primary (first listed) format and lint tool are both at the bar; further tools
+/// `Ready` when the primary (`primary: true`, else the first listed) format and lint tool are both at the bar; further tools
 /// are shown but do not decide the status.
 fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &'static str {
     let all: Vec<Option<f64>> = format.iter().chain(lint).copied().collect();

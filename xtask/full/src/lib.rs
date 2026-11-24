@@ -9,6 +9,9 @@ mod differences;
 mod discover;
 mod docs;
 pub mod manifests;
+mod priority;
+#[cfg(test)]
+mod priority_tests;
 mod queue;
 mod rules;
 mod speed;
