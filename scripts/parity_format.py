@@ -162,6 +162,25 @@ def install(spec, catalog, version, prefix):
                 target = prefix / (spec["exe"] + (".exe" if asset.endswith(".exe") else ""))
                 archive.replace(target)
                 target.chmod(0o755)
+        if "composer" in spec:
+            composer_vendors(spec, prefix)
+
+
+def composer_vendors(spec, prefix):
+    """The dependencies of the corpus projects (`composer`: project -> the folder of its composer.json, and its composer.lock
+    when it has one: composer installs from it, else resolves the exact versions the file pins), installed with the pinned
+    composer.phar into prefix/vendor/<project>: outside the corpus, so no vendor file is a corpus file."""
+    php = executable(prefix, spec["exe"])
+    for project, manifest in spec["composer"].items():
+        vendor = prefix / "vendor" / project
+        if (vendor / "autoload.php").exists():
+            continue
+        work = prefix / "deps" / project
+        shutil.rmtree(work, ignore_errors=True)
+        shutil.copytree(ROOT / manifest, work)
+        env = {**os.environ, "COMPOSER_VENDOR_DIR": str(vendor), "COMPOSER_HOME": str(prefix / "composer-home"), "COMPOSER_NO_INTERACTION": "1"}
+        command = "install" if (work / "composer.lock").exists() else "update"
+        run([php, prefix / "composer.phar", command, "--no-scripts", "--no-plugins", "--no-interaction", "--ignore-platform-reqs", "--no-progress", *(["--no-audit"] if command == "update" else [])], work, env=env)
 
 
 def fixtures(config, folder, filters):

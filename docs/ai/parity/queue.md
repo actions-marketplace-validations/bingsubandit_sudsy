@@ -262,24 +262,24 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on f4e9edb2); rules by misse
 
 ## phpstan
 
-Lint: target 0% (0 of 10961, 10961 missed, measured on f4e9edb2); rules by missed findings:
-1. `class.notFound` (7408 missed)
-2. `variable.undefined` (591 missed)
-3. `classConstant.notFound` (511 missed)
-4. `staticMethod.notFound` (401 missed)
-5. `function.notFound` (384 missed)
-6. `new.static` (317 missed)
-7. `method.notFound` (312 missed)
-8. `interface.notFound` (218 missed)
-9. `attribute.notFound` (183 missed)
-10. `property.notFound` (147 missed)
-11. `class.noParent` (96 missed)
-12. `ignore.unmatchedLine` (62 missed)
-13. `ignore.unmatchedIdentifier` (47 missed)
-14. `method.void` (42 missed)
-15. `method.override` (36 missed)
+Lint: target 0% (0 of 2533, 2533 missed, measured on 1f4c633b); rules by missed findings:
+1. `class.notFound` (1322 missed)
+2. `new.static` (317 missed)
+3. `method.notFound` (171 missed)
+4. `function.notFound` (140 missed)
+5. `classConstant.notFound` (92 missed)
+6. `staticMethod.notFound` (91 missed)
+7. `ignore.unmatchedLine` (62 missed)
+8. `ignore.unmatchedIdentifier` (49 missed)
+9. `method.void` (42 missed)
+10. `interface.notFound` (38 missed)
+11. `unset.possiblyHookedProperty` (34 missed)
+12. `return.missing` (24 missed)
+13. `variable.undefined` (21 missed)
+14. `parameter.implicitlyNullable` (18 missed)
+15. `attribute.notFound` (16 missed)
 
-19 more rules: 206 missed.
+16 more rules: 96 missed.
 
 ## prettier
 

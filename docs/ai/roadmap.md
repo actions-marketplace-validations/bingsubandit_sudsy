@@ -18,7 +18,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 8 | YAML | flow sequences without a trailing comma (13 files), comment indentation (15); `comments-indentation` 2 after the proof run |
 | 9 | Kotlin | layout rules come from the formatter (`format-diff`, `multiline-start`); misses: `string-template-indent`, `annotation`, `no-consecutive-comments`, `function-literal`, `multiline-loop`, `blank-line-between-when-conditions` (264 of 989), `filename` (single-class check) |
 | 10 | SQL | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126; 189 parse gaps and 189 layout gaps |
-| 11 | PHP | type analysis (`class.notFound` 7,407, `variable.undefined` 591); inline-text files (~790) |
+| 11 | PHP | type analysis (with the corpus dependencies installed: `class.notFound` 1,322 of 2,533 PHPStan findings, `new.static` 317); inline-text files (~790) |
 | 12 | Ruby | no formatter run |
 | 13 | GraphQL | `naming-convention` 80 of 149 missed, `description-style` 11, `require-deprecation-reason` 10; the schema-bound rules cannot run |
 | 14 | Terraform (HCL) | module-level rules: `terraform_required_providers` 37, `unused_declarations` 31, `typed_variables` 27 |

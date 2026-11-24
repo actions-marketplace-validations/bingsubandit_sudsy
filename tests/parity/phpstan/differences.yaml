@@ -1,38 +1,35 @@
 target: 0.0
 
-measured: {covered: 0, total: 10961, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 0, total: 2533, main: '1f4c633b'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  class.notFound: 7408
-  variable.undefined: 591
-  classConstant.notFound: 511
-  staticMethod.notFound: 401
-  function.notFound: 384
+  class.notFound: 1322
   new.static: 317
-  method.notFound: 312
-  interface.notFound: 218
-  attribute.notFound: 183
-  property.notFound: 147
-  class.noParent: 96
+  method.notFound: 171
+  function.notFound: 140
+  classConstant.notFound: 92
+  staticMethod.notFound: 91
   ignore.unmatchedLine: 62
-  ignore.unmatchedIdentifier: 47
+  ignore.unmatchedIdentifier: 49
   method.void: 42
-  method.override: 36
+  interface.notFound: 38
   unset.possiblyHookedProperty: 34
-  trait.notFound: 29
-  return.missing: 26
+  return.missing: 24
+  variable.undefined: 21
   parameter.implicitlyNullable: 18
-  return.never: 16
+  attribute.notFound: 16
   function.inner: 15
-  staticProperty.notFound: 14
+  property.notFound: 12
+  trait.notFound: 12
   property.uninitializedReadonly: 10
-  new.noConstructor: 9
+  staticProperty.notFound: 9
   arguments.count: 8
-  method.childReturnType: 7
+  method.childReturnType: 8
   method.templateTypeNotInParameter: 7
   staticMethod.void: 4
+  class.noParent: 2
   function.void: 2
   method.finalPrivate: 2
-  unset.variable: 2
+  unset.offset: 2
   class.extendsFinalByPhpDoc: 1
-  unset.offset: 1
   unset.readOnlyProperty: 1
+  unset.variable: 1
