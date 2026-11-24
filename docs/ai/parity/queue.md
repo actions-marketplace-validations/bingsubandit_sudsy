@@ -15,9 +15,30 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 | HTML | lint html-eslint | 1 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 5.03 | 9de1e355 |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
-Not measured: C / C++ lint clang-tidy (no target, blocked); GitHub Actions lint actionlint (no target).
+Not measured: C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 5: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format; GitHub Actions lint actionlint. Score when open: 11.33 (4 x 170 points / difficulty 60).
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 4: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format. Score when open: 11.33 (4 x 170 points / difficulty 60).
+
+## actionlint
+
+Lint: target 87% (627 of 721, 94 missed, measured on cbdd3e85); rules by missed findings:
+1. `expression/types` (14 missed) Fix: no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)
+2. `action` (12 missed)
+3. `syntax-check/unexpected-key` (9 missed)
+4. `syntax-check/yaml` (7 missed) Fix: anchors and aliases: unused anchor, recursive alias, merge key; a YAML-level check, shared with other YAML dialects
+5. `runner-label/conflict` (6 missed)
+6. `syntax-check/empty` (6 missed)
+7. `syntax-check/expression-value` (6 missed)
+8. `syntax-check/missing-key` (6 missed)
+9. `expression/untrusted` (4 missed)
+10. `shell-name` (4 missed)
+11. `if-cond` (3 missed) Fix: an `if:` that is always true: needs the expression parser
+12. `syntax-check/kind` (3 missed)
+13. `env-var` (2 missed)
+14. `expression/context` (2 missed) Fix: which contexts a key allows: a table per key path read by the same expression checker
+15. `expression/syntax` (2 missed)
+
+6 more rules: 8 missed.
 
 ## biome
 
