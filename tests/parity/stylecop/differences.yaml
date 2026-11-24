@@ -5,20 +5,87 @@ files:
   runtime/src/libraries/System.Private.CoreLib/src/System/Threading/PortableThreadPool.cs: error-directive
   runtime/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/RuntimeInformation.cs: error-directive
   runtime/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/RuntimeInformation.Browser.cs: error-directive
-target: 23.5
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+target: 14.8
+measured: {covered: 33061, total: 222762, main: '4aebdcad'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   SA1101: 108918
-  SA1600: 59930
-  SA1611: 45566
   SA1200: 25732
-  SX1101: 12181
   SA1309: 9589
   SA1633: 7626
-  SA1602: 7380
-  SA1119_p: 6440
+  SA1009: 6636
   SA1503: 6318
-  SA1609: 5219
-  SA1623: 3892
   SA1119: 3220
   SA1316: 3089
-  SA1305: 1954
+  SA1128: 2321
+  SA1300: 1604
+  SA1401: 1594
+  SA1000: 1328
+  SA1010: 1231
+  SA1515: 1222
+  SA1308: 1218
+  SA1118: 844
+  SA1311: 730
+  SA1407: 688
+  SA1313: 626
+  SA1516: 573
+  SA1307: 515
+  SA1312: 478
+  SA1310: 420
+  SA1513: 385
+  SA1005: 247
+  SA1137: 202
+  SA1408: 171
+  SA1500: 167
+  SA1008: 160
+  SA1011: 151
+  SA1111: 142
+  SA1400: 136
+  SA1512: 125
+  SA1304: 105
+  SA1013: 79
+  SA1114: 78
+  SA1519: 76
+  SA1303: 75
+  SA1306: 74
+  SA1520: 68
+  SA1206: 58
+  SA1131: 56
+  SA1023: 50
+  SA1314: 48
+  SA1205: 41
+  SA1414: 40
+  SA1012: 38
+  SA1027: 37
+  SA1402: 36
+  SA1015: 35
+  SA1502: 29
+  SA1649: 29
+  SA1129: 24
+  SA1115: 21
+  SA1116: 20
+  SA1107: 19
+  SA1501: 19
+  SA1106: 17
+  SA1509: 17
+  SA1028: 13
+  SA1134: 12
+  SA1142: 10
+  SA1117: 9
+  SA1122: 9
+  SA1127: 9
+  SA1003: 7
+  SA1201: 6
+  SA1001: 5
+  SA1202: 5
+  SA1120: 4
+  SA1014: 2
+  SA1135: 2
+  SA1214: 2
+  SA1405: 2
+  SA1413: 2
+  SA1508: 2
+  SA1112: 1
+  SA1113: 1
+  SA1139: 1
+  SA1141: 1
+  SA1302: 1

@@ -469,22 +469,24 @@ Lint: target 85.7% (17297 of 20182, 2885 missed, measured on f4e9edb2); rules by
 ## stylecop
 
 1. `error-directive` (4 files): the preprocessor symbols of the platform are not set, so no branch of the `#if` chain is active (an `#error` or a missing value) and Sudsy refuses the file; Roslyn reads it
-Lint: target 23.5%; rules by missed findings (an incomplete list: not re-measured with the layout findings):
+Lint: target 14.8% (33061 of 222762, 189701 missed, measured on 4aebdcad); rules by missed findings:
 1. `SA1101` (108918 missed)
-2. `SA1600` (59930 missed)
-3. `SA1611` (45566 missed)
-4. `SA1200` (25732 missed)
-5. `SX1101` (12181 missed)
-6. `SA1309` (9589 missed)
-7. `SA1633` (7626 missed)
-8. `SA1602` (7380 missed)
-9. `SA1119_p` (6440 missed)
-10. `SA1503` (6318 missed)
-11. `SA1609` (5219 missed)
-12. `SA1623` (3892 missed)
-13. `SA1119` (3220 missed)
-14. `SA1316` (3089 missed)
-15. `SA1305` (1954 missed)
+2. `SA1200` (25732 missed)
+3. `SA1309` (9589 missed)
+4. `SA1633` (7626 missed)
+5. `SA1009` (6636 missed)
+6. `SA1503` (6318 missed)
+7. `SA1119` (3220 missed)
+8. `SA1316` (3089 missed)
+9. `SA1128` (2321 missed)
+10. `SA1300` (1604 missed)
+11. `SA1401` (1594 missed)
+12. `SA1000` (1328 missed)
+13. `SA1010` (1231 missed)
+14. `SA1515` (1222 missed)
+15. `SA1308` (1218 missed)
+
+66 more rules: 8055 missed.
 
 ## stylelint
 
