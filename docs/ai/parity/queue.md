@@ -10,7 +10,7 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
 | HTML | lint html-eslint | 2 | 50.9% | 34.1 | 150 findings | `indent` 138, `use-baseline` 58 | 6 | 11.37 | 66718389 |
-| PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1395 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `staticMethod.notFound` 90 +4 more | 24 | 10.62 | d3ae913f |
+| PHP | lint PHPStan | 3 | 20.7% | 64.3 | 1055 findings | `method.notFound` 384, `class.notFound` 381, `staticMethod.notFound` 90, `function.notFound` 80 +3 more | 19 | 10.15 | 9632a5ce |
 | SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
 
 Blocked on a decision:
@@ -311,24 +311,24 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 
 ## phpstan
 
-Lint: target 0% (0 of 1641, 1641 missed, measured on d3ae913f); rules by missed findings:
+Lint: target 20.7% (340 of 1641, 1301 missed, measured on 9632a5ce); rules by missed findings:
 1. `method.notFound` (384 missed)
 2. `class.notFound` (381 missed)
-3. `new.static` (317 missed)
-4. `staticMethod.notFound` (90 missed)
-5. `function.notFound` (80 missed)
-6. `ignore.unmatchedLine` (62 missed)
-7. `ignore.unmatchedIdentifier` (49 missed)
+3. `staticMethod.notFound` (90 missed)
+4. `function.notFound` (80 missed)
+5. `ignore.unmatchedLine` (62 missed)
+6. `ignore.unmatchedIdentifier` (49 missed)
+7. `new.static` (43 missed)
 8. `method.void` (42 missed)
 9. `attribute.notFound` (35 missed)
-10. `unset.possiblyHookedProperty` (34 missed)
-11. `return.missing` (24 missed)
-12. `property.uninitializedReadonly` (20 missed)
-13. `variable.undefined` (20 missed)
-14. `parameter.implicitlyNullable` (18 missed)
-15. `function.inner` (15 missed)
+10. `return.missing` (24 missed)
+11. `property.uninitializedReadonly` (20 missed)
+12. `variable.undefined` (20 missed)
+13. `property.notFound` (11 missed)
+14. `staticProperty.notFound` (9 missed)
+15. `arguments.count` (8 missed)
 
-16 more rules: 70 missed.
+14 more rules: 43 missed.
 
 ## prettier
 

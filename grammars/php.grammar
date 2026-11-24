@@ -127,7 +127,7 @@ node Extends #opaque
 node Implements #opaque
 node ClassLikeMemberExpressionSelector #member-name #opaque
 node Method #member #declaration #function #scope =
-    AttributeList* Keyword* Operator? name:#member-name? parameters:FunctionLikeParameterList FunctionLikeReturnTypeHint? body:Block? MethodAbstractBody?
+    AttributeList* Keyword* Operator? name:#member-name? parameters:FunctionLikeParameterList return_type:FunctionLikeReturnTypeHint? body:Block? MethodAbstractBody?
 node MethodAbstractBody #opaque
 node HookedProperty #member #opaque
 node PlainProperty #member #opaque
@@ -157,10 +157,10 @@ node Trait #stmt #declaration #type-declaration #scope =
 node Clone #expression #opaque
 node Constant #stmt #opaque
 node ConstantItem #opaque
-node DieConstruct #expression #opaque
+node DieConstruct #expression #return = Keyword value:ArgumentList?
 node EmptyConstruct #expression #opaque
 node EvalConstruct #expression #opaque
-node ExitConstruct #expression #opaque
+node ExitConstruct #expression #return = Keyword value:ArgumentList?
 node IncludeConstruct #expression #opaque
 node IncludeOnceConstruct #expression #opaque
 node IssetConstruct #expression #opaque
@@ -168,12 +168,12 @@ node PrintConstruct #expression #opaque
 node RequireConstruct #expression #opaque
 node RequireOnceConstruct #expression #opaque
 node If #stmt #conditional = Keyword LParen condition:#expression RParen then=body:#if-body
-node IfColonDelimitedBody #if-body #opaque
-node IfColonDelimitedBodyElseClause #opaque
-node IfColonDelimitedBodyElseIfClause #conditional = Keyword LParen condition:#expression RParen Colon then:#stmt*
-node IfStatementBody #if-body #opaque
-node IfStatementBodyElseClause #opaque
-node IfStatementBodyElseIfClause #conditional = Keyword LParen condition:#expression RParen then:#stmt
+node IfColonDelimitedBody #if-body #statements = Colon then=items:#stmt* else:#else-branch* Keyword? Semi?
+node IfColonDelimitedBodyElseClause #statements #else-branch = Keyword Colon then=items:#stmt*
+node IfColonDelimitedBodyElseIfClause #conditional #else-branch = Keyword LParen condition:#expression RParen Colon then:#stmt*
+node IfStatementBody #if-body #statements = then=items:#stmt else:#else-branch*
+node IfStatementBodyElseClause #statements #else-branch = Keyword then=items:#stmt
+node IfStatementBodyElseIfClause #conditional #else-branch = Keyword LParen condition:#expression RParen then:#stmt
 node Match #expression #switch = Keyword LParen subject:#expression RParen LBrace cases:#match-arm* RBrace
 node MatchDefaultArm #case #match-arm = Keyword test:#expression* DoubleArrow body:#expression
 node MatchExpressionArm #case #match-arm = test:#expression* DoubleArrow body:#expression
@@ -195,13 +195,13 @@ node UnaryPostfix #expression #unary =
     operand:#expression operator:#operator
 node Parenthesized #expression #opaque
 node ArrowFunction #expression #function #scope =
-    AttributeList* Keyword* Operator? parameters:FunctionLikeParameterList FunctionLikeReturnTypeHint? DoubleArrow expression_body:#expression
+    AttributeList* Keyword* Operator? parameters:FunctionLikeParameterList return_type:FunctionLikeReturnTypeHint? DoubleArrow expression_body:#expression
 node Closure #expression #function #scope =
-    AttributeList* Keyword* Operator? parameters:FunctionLikeParameterList ClosureUseClause? FunctionLikeReturnTypeHint? body:Block
+    AttributeList* Keyword* Operator? parameters:FunctionLikeParameterList ClosureUseClause? return_type:FunctionLikeReturnTypeHint? body:Block
 node ClosureUseClause #opaque
 node ClosureUseClauseVariable #opaque
 node Function #stmt #declaration #function #scope =
-    AttributeList* Keyword* Operator? name:#member-name? parameters:FunctionLikeParameterList FunctionLikeReturnTypeHint? body:Block
+    AttributeList* Keyword* Operator? name:#member-name? parameters:FunctionLikeParameterList return_type:FunctionLikeReturnTypeHint? body:Block
 node FunctionLikeParameter #declaration =
     AttributeList* #operand-hint* name:DirectVariable FunctionLikeParameterDefaultValue? PropertyHookList?
 node FunctionLikeParameterDefaultValue #opaque
@@ -253,9 +253,9 @@ node Use #stmt #opaque
 node UseItem #opaque
 node UseItemAlias #opaque
 node UseItemSequence #opaque
-node YieldFrom #expression #opaque
-node YieldPair #expression #opaque
-node YieldValue #expression #opaque
+node YieldFrom #expression #yield #opaque
+node YieldPair #expression #yield #opaque
+node YieldValue #expression #yield #opaque
 node ExpressionStatement #stmt #expression-statement
 node BracedExpressionStringPart #opaque
 node DocumentString #expression #opaque

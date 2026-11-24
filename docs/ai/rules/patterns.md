@@ -98,13 +98,15 @@ rule:
 - Cost bound: a rule gets 1,000,000 match steps per node (its `inside`/`has` walks included), because several `$$$` in one pattern are O(n^k). Past that the rule reports "the pattern took too many steps" once and is off for the rest of that file.
 - A pattern is a snippet of the language, parsed by its own provider. Metavariables are first written as identifiers (`__SUDSY_S_X__`, `__SUDSY_M_X__`), or as strings when that does not parse (JSON). The snippet is tried as is, with a `;` after it, and inside `{ }` (a JSON member); the node spanning all of it is the pattern.
 - `$X` matches one node or token; `$$$ARGS` any run of siblings (also none, separators included, by backtracking); the same name twice must capture equal text; `$_X` captures nothing. In statement position write `$$$BODY;`.
-- `rule` keys: `pattern`, `kind` (node kinds of the language's grammar), `regex` (node text without trivia), `path` (regex on the file path, `/` as separator: `'\.nomad$'`), `nth: N` (the node is the Nth, from 1, of its parent's children of its kind: `{ kind: EnumField, nth: 1 }`), `inside`, `not-inside`, `has`, `not-has`, `parent`, `child` (nested rules), `option`, `all`, `any`, `not`. Keys at one level all must hold. `has`, `child` and the negations drop their captures; `inside` (the nearest ancestor that holds) and `parent` keep them, so a node can use a name from its surroundings. A `regex` captures its named groups (`(?<NAME>\w+)`; unnamed groups capture nothing) like a pattern its metavariables:
+- `rule` keys: `pattern`, `kind` (node kinds of the language's grammar), `regex` (node text without trivia), `doc` (regex on the `/** */` doc comment before the node: `doc: '@phpstan-consistent-constructor'`), `path` (regex on the file path, `/` as separator: `'\.nomad$'`), `nth: N` (the node is the Nth, from 1, of its parent's children of its kind: `{ kind: EnumField, nth: 1 }`), `inside`, `not-inside`, `has`, `not-has`, `parent`, `child` (nested rules), `option`, `all`, `any`, `not`. Keys at one level all must hold. `has`, `child` and the negations drop their captures; `inside` (the nearest ancestor that holds) and `parent` keep them, so a node can use a name from its surroundings. A `regex` captures its named groups (`(?<NAME>\w+)`; unnamed groups capture nothing) like a pattern its metavariables:
 
 ```yaml
 rule:
   kind: MessageType
   parent: { kind: Rpc, regex: '^rpc\s+(?<RPC>\w+)' }
 ```
+
+A `regex` in a rule may hold `${NAME}`, a capture of an atom before it in the same `all` (also inside `inside`, `has`, `child`), inserted escaped and built for each match: `has: { kind: PlainProperty, regex: '[$]${NAME}\b' }` under a `PropertyAccess` that captured `NAME`.
 - `parent` (the direct parent holds the rule) and `child` (some direct child does) are the one-level forms of `inside` and `has`, which look at every level. `option: NAME` holds when that `bool` option is true; `in-option: NAME` holds when the text of the node (or token) is an item of that `list` option. `regex-option: NAME` holds when the text of the node matches that `regex` option (compiled once per value). `rethrows: true` holds on a `#catch` whose body (nested `try`, functions and classes left out) has a `#throw` with no `value`, or whose `value` or `cause` is the catch's `binding`. Write a negation with `not`:
 
 ```yaml

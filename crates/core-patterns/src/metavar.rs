@@ -119,6 +119,15 @@ fn rewrite_in(text: &str, templates: bool, mut f: impl FnMut(&Meta) -> String) -
 }
 
 /// The names of the metavariables in `text`, a pattern or (`templates`) a message, fix or regex.
+/// What a metavariable of a template stands for in `text`: the capture, transformed.
+pub fn captured(meta: &Meta, captures: &crate::matcher::Captures, text: &str) -> String {
+    let text = captures.get(&meta.name).map_or("", |c| c.text(text));
+    match meta.transform.as_deref() {
+        Some(t) => transform(t, text).unwrap_or_else(|| text.to_string()),
+        None => text.to_string(),
+    }
+}
+
 pub fn names(text: &str, templates: bool) -> Vec<Meta> {
     let mut found = Vec::new();
     if !text.contains('$') {

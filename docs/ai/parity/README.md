@@ -47,7 +47,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | ktlint | 92.3% | `7514c1f3` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
 | markdownlint | 99.0% | `7514c1f3` | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| phpstan | 0.0% | `d3ae913f` | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| phpstan | 20.7% | `9632a5ce` | 18 | 0 | 6 | 12 | 0 | 0 | 0 | 12 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
 | psscriptanalyzer | 87.1% | `7514c1f3` | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
 | roslynator | - | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |

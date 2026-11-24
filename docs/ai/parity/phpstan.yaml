@@ -7,3 +7,20 @@ sources:
 scope: "Level 0 checks that need no type information or autoloading. The type-aware ones (unknown classes, functions and methods, argument counts) wait for a PHP analysis worker."
 entries:
   variable.undefined: rule undefined-variable | Only a variable that nothing in its function assigns (PHPStan's level 0 reports exactly those); a variable passed to a call counts as assigned, and a function with `extract`, `parse_str`, `include` or `$$x` is not checked.
+  new.static: rule unsafe-new-static | A class without a final class or final or abstract constructor of its own; a constructor or final parent in another file, and a `@phpstan-ignore` comment, cannot be seen (about 17 findings of the 317).
+  function.inner: rule no-inner-function | A named function declared in a function, method or closure.
+  parameter.implicitlyNullable: rule implicit-nullable-parameter | A typed parameter with a `null` default and no `?` or `null` in its type.
+  unset.possiblyHookedProperty: rule no-unset-hookable-property | `unset($this->p)` of a property the class declares; a property declared in a parent in another file is not seen.
+  property.uninitializedReadonly: planned | core-flow definite assignment, also C#, Java and Kotlin; a readonly property that no path of the constructor assigns.
+  return.missing: rule missing-return | A native or `@return` type that is not void, never, mixed or null and a reachable end of the body; `exit` and `die` end a path; a call of a `@return never` function in another file (`bail()`, `abort()`), a type narrowed to every case, and a loop with an inner `break` are not seen (27 extra against 19 covered, so the rule is not in the preset).
+  method.void: planned | needs-project-index, the result of a call is used and the method is void; the callee is a method of the class in most cases but also one in another file.
+  staticMethod.void: planned | needs-project-index, as method.void, for a static call.
+  function.void: planned | needs-project-index, as method.void, for a function.
+  method.finalPrivate: planned | needs-project-index, a `final` private method comes from a trait alias in the using class, in another file.
+  arguments.count: planned | needs-project-index, the parameters of the constructor or function called live in another file.
+  unset.offset: planned | needs-project-index, needs the type of the unset operand.
+  unset.variable: planned | needs-project-index, needs a scope pass for the variable unset (one finding).
+  unset.readOnlyProperty: planned | needs-project-index, a readonly property inherited from another class (one finding).
+  method.templateTypeNotInParameter: planned | needs-project-index, needs the `@template` tags and the parameter types of the phpdoc.
+  ignore.unmatchedLine: planned | needs-project-index, a `@phpstan-ignore` line whose identifier PHPStan never reports on that line; it depends on all other identifiers.
+  ignore.unmatchedIdentifier: planned | needs-project-index, as ignore.unmatchedLine.

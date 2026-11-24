@@ -175,7 +175,7 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
 }
 
 /// The node with the modifiers of a declaration: `node`, or its parent when the parent holds them.
-pub(crate) fn holder(g: &Grammar, node: &SyntaxNode) -> SyntaxNode {
+pub fn holder(g: &Grammar, node: &SyntaxNode) -> SyntaxNode {
     match node.parent() {
         Some(p) if p.children().any(|c| g.has_tag(c.kind(), "modifiers")) => p,
         _ => node.clone(),

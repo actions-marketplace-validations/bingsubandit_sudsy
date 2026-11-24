@@ -29,7 +29,7 @@
 
 use crate::expr::{Ctx, Expr, STEP_BUDGET, Spec};
 use crate::matcher::{Capture, Captures, SnippetParser};
-use crate::metavar::{Meta, names, template, transform};
+use crate::metavar::{Meta, captured, names, template, transform};
 use core_config::Level;
 use core_format::Directive;
 use core_rules::tree::{TraversalCache, significant_range};
@@ -173,15 +173,6 @@ struct TokenMatch {
 enum Rx {
     Fixed(Re),
     Template(String, RegexCache),
-}
-
-/// What a metavariable of a template stands for in `text`: the capture, transformed.
-fn captured(meta: &Meta, captures: &Captures, text: &str) -> String {
-    let text = captures.get(&meta.name).map_or("", |c| c.text(text));
-    match meta.transform.as_deref() {
-        Some(t) => transform(t, text).unwrap_or_else(|| text.to_string()),
-        None => text.to_string(),
-    }
 }
 
 impl Rx {
@@ -415,6 +406,8 @@ struct Body {
     expr: Expr,
     /// Can matching cost more than linear (see [`STEP_BUDGET`])? Only then is it metered.
     metered: bool,
+    /// Does a `regex` read `${NAME}`? Only then do the atoms of an `all` record what they captured.
+    templated: bool,
     constraints: BTreeMap<String, CompiledConstraint>,
     fix: Option<FixTemplate>,
     layout: Vec<LayoutEntry>,
@@ -634,6 +627,7 @@ fn compile_body(
     Ok(Body {
         kinds,
         metered: expr.superlinear(),
+        templated: expr.templated(),
         expr,
         constraints,
         fix,
@@ -1384,6 +1378,7 @@ impl Rule for PatternRule {
             options: ctx.options,
             budget: Cell::new(STEP_BUDGET),
             ranges,
+            env: body.templated.then(Default::default),
         };
         let found = body.expr.matches(node, &cx);
         if body.metered && cx.budget.get() == 0 {

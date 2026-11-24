@@ -54,6 +54,7 @@ pub mod markup;
 pub mod markup_checks;
 pub mod max;
 pub mod missing_arguments;
+pub mod missing_return;
 pub mod modifiers;
 pub mod module_names;
 pub mod multiline_start;

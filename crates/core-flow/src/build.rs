@@ -104,6 +104,12 @@ pub fn build(grammar: &Grammar, text: &str, root: &SyntaxNode) -> Option<Flow> {
         frames: Vec::new(),
         guards: 0,
         case_ends: Vec::new(),
+        wrapped_jump: ["throw", "return"].iter().any(|t| {
+            grammar
+                .nodes_with_tag(t)
+                .iter()
+                .any(|&k| grammar.has_tag(k, "expression"))
+        }),
     };
     if role(grammar, root) == Role::Function {
         let body = b.nodes(root, "body");
@@ -137,6 +143,8 @@ enum Role {
     Continue,
     Labeled,
     Function,
+    /// A statement that holds one expression (a `throw` in it ends the path).
+    ExprStmt,
     /// Reads or calls something that can fail.
     Fallible,
     Other,
@@ -161,6 +169,7 @@ fn role(g: &Grammar, n: &SyntaxNode) -> Role {
                 "continue" => Role::Continue,
                 "labeled" => Role::Labeled,
                 "function" => Role::Function,
+                "expression-statement" => Role::ExprStmt,
                 "call" | "member-access" | "index" | "reference" => Role::Fallible,
                 _ => return None,
             })
@@ -203,6 +212,8 @@ struct Builder<'a> {
     /// `Catch` and `Finally` frames open: only then can a statement lead to a handler.
     guards: usize,
     case_ends: Vec<(u32, usize)>,
+    /// Does the grammar have a `throw` or `return` that is an expression (PHP's `throw`, `exit`)? Only then is an expression statement looked into.
+    wrapped_jump: bool,
 }
 
 /// Is the loop test constant in the way that keeps the loop going (`true`; for a `#negated` loop,
@@ -314,15 +325,30 @@ impl<'a> Builder<'a> {
         false
     }
 
-    /// Is there a `break` in `n` (outside nested functions)?
+    /// Is there a `break` in `n` (outside nested functions) that can leave the loop around `n`? A
+    /// plain `break` of a nested loop or switch leaves that one; a `break` with a label or a level
+    /// (any node after the keyword) is counted wherever it is.
     fn breaks(&self, n: &SyntaxNode) -> bool {
         let mut walk = n.preorder();
+        let mut nested = 0usize;
         while let Some(event) = walk.next() {
-            if let WalkEvent::Enter(c) = event {
-                match role(self.g, &c) {
+            match event {
+                WalkEvent::Enter(c) => match role(self.g, &c) {
                     Role::Function => walk.skip_subtree(),
-                    Role::Break => return true,
+                    Role::Break
+                        if nested == 0
+                            || self.label(&c).is_some()
+                            || c.children().next().is_some() =>
+                    {
+                        return true;
+                    }
+                    Role::Loop | Role::Switch => nested += 1,
                     _ => {}
+                },
+                WalkEvent::Leave(c) => {
+                    if matches!(role(self.g, &c), Role::Loop | Role::Switch) {
+                        nested -= 1;
+                    }
                 }
             }
         }
@@ -454,14 +480,21 @@ impl<'a> Builder<'a> {
                 self.always(self.cur, after);
                 self.cur = after;
             }
-            Role::Function | Role::Fallible | Role::Other => self.parts(&[Some(n.clone())]),
+            // an expression statement that is a `throw` or an `exit`
+            Role::ExprStmt if self.wrapped_jump => match n.children().next() {
+                Some(c) if matches!(role(self.g, &c), Role::Throw | Role::Return) => self.walk(&c),
+                _ => self.parts(&[Some(n.clone())]),
+            },
+            Role::Function | Role::Fallible | Role::ExprStmt | Role::Other => {
+                self.parts(&[Some(n.clone())])
+            }
         }
     }
 
     /// `n` with the clauses after it (Python's `elif` and `else` are siblings in the `else` field of
     /// the `if`): they are its else branch.
     fn conditional(&mut self, n: &SyntaxNode, rest: &[SyntaxNode]) {
-        let then = self.nodes(n, "then");
+        let (then, mut other) = self.branches(n);
         // an `else` clause has no condition: its body runs
         let Some(cond) = self.node(n, "condition") else {
             self.stmts(&then);
@@ -475,7 +508,6 @@ impl<'a> Builder<'a> {
         self.stmts(&then);
         let then_end = self.cur;
         self.cur = else_b;
-        let mut other = self.nodes(n, "else");
         other.extend_from_slice(rest);
         match other.split_first() {
             Some((first, rest)) if role(self.g, first) == Role::Conditional => {
@@ -485,6 +517,18 @@ impl<'a> Builder<'a> {
             _ => self.stmts(&other),
         }
         self.cur = self.join(&[then_end, self.cur]);
+    }
+
+    /// The `then` and `else` statements of `n`; a `then` that is one node with a `then` of its own
+    /// (PHP's `IfStatementBody`) holds them itself: its `then` and its `else` clauses.
+    fn branches(&self, n: &SyntaxNode) -> (Vec<SyntaxNode>, Vec<SyntaxNode>) {
+        let then = self.nodes(n, "then");
+        match then.as_slice() {
+            [chain] if self.g.slot(chain, "then").is_some() => {
+                (self.nodes(chain, "then"), self.nodes(chain, "else"))
+            }
+            _ => (then, self.nodes(n, "else")),
+        }
     }
 
     fn looping(&mut self, n: &SyntaxNode) {

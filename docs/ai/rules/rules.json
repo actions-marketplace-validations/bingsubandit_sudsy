@@ -15487,6 +15487,194 @@
       ]
     },
     {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nfunction a(int $a = null, ?int $b = null, int|null $c = null, $d = null, mixed $e = null) {}\nclass P { function __construct(public $x = null, public string $y = null) {} }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 12,
+            "length": 13,
+            "line": 2
+          },
+          {
+            "column": 50,
+            "length": 23,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "implicit-nullable-parameter",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "parameter.implicitlyNullable",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nfunction a($x): int { if ($x) { return 1; } }\nfunction b($x): int { if ($x) { return 1; } elseif ($x > 1) { return 2; } else { return 3; } }\nfunction c($x): int { if ($x): return 1; else: throw new E(); endif; }\nfunction d($x): int { if ($x) { return 1; } exit; }\nfunction d2($x): int { if ($x) { return 1; } die(1); }\nfunction e($x): void { if ($x) { return; } }\nfunction f($x): iterable { if ($x) { yield 1; } }\n/** @return int */\nfunction g($x) { if ($x) { return 1; } }\n/** @return int|null */\nfunction h($x) { if ($x) { return 1; } }\nclass K { function __construct() { } }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 23,
+            "length": 21,
+            "line": 2
+          },
+          {
+            "column": 18,
+            "length": 21,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-return",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": [
+        {
+          "id": "return.missing",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nfunction a() { function b() {} }\nfunction c() { $f = function () {}; }\nclass D { function m() { function n() {} } }\nfunction e() {}\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 16,
+            "length": 8,
+            "line": 2
+          },
+          {
+            "column": 26,
+            "length": 8,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-inner-function",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "function.inner",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nclass A { public $a; private $b; public readonly int $c;\n    function f() { unset($this->a); unset($this->b); unset($this->c); unset($this->z); }\n}\nfinal class B { public $a; function f() { unset($this->a); } }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 26,
+            "length": 8,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-unset-hookable-property",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "unset.possiblyHookedProperty",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nclass A { function make() { return new static(); } }\nfinal class B { function make() { return new static(); } }\nclass C { final public function __construct() {} function make() { return new static(); } }\ntrait T { function make() { return new static; } }\nclass D { function make() { return new self(); } }\n/** @phpstan-consistent-constructor */\nclass E { function make() { return new static(); } }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 36,
+            "length": 3,
+            "line": 2
+          },
+          {
+            "column": 36,
+            "length": 3,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unsafe-new-static",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "new.static",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "A function named `Verb-Noun` whose verb is not in the list `Get-Verb` returns. Names without a dash are not checked.",

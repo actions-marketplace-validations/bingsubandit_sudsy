@@ -2223,6 +2223,10 @@
               "$ref": "#/definitions/rule",
               "description": "An element of a list, tuple or set that is several string literals one after the other, without parentheses."
             },
+            "implicit-nullable-parameter": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable)."
+            },
             "import-no-public": {
               "$ref": "#/definitions/rule",
               "description": "`import public` (buf lint IMPORT_NO_PUBLIC)."
@@ -3030,6 +3034,10 @@
             "missing-permissions": {
               "$ref": "#/definitions/rule",
               "description": "A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access."
+            },
+            "missing-return": {
+              "$ref": "#/definitions/rule",
+              "description": "A function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen."
             },
             "missing-super": {
               "$ref": "#/definitions/rule",
@@ -4149,6 +4157,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it. A Svelte `style:property` directive is one too."
             },
+            "no-inner-function": {
+              "$ref": "#/definitions/rule",
+              "description": "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner)."
+            },
             "no-interactive-commands": {
               "$ref": "#/definitions/rule",
               "description": "A RUN that calls ssh, vim, shutdown, service, ps, free, top, kill or mount."
@@ -4589,6 +4601,10 @@
             "no-unsafe-negation": {
               "$ref": "#/definitions/rule",
               "description": "`!a in b` and `!a instanceof B` negate `a`, not the test."
+            },
+            "no-unset-hookable-property": {
+              "$ref": "#/definitions/rule",
+              "description": "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty)."
             },
             "no-unused-anchors": {
               "$ref": "#/definitions/rule",
@@ -6975,6 +6991,10 @@
             "unrecognized-char-ref": {
               "$ref": "#/definitions/rule",
               "description": "A named character reference in text (`&name;`) that HTML does not define. Numeric references and references in attribute values are not checked."
+            },
+            "unsafe-new-static": {
+              "$ref": "#/definitions/rule",
+              "description": "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is."
             },
             "unsafe-numbers": {
               "$ref": "#/definitions/rule",
