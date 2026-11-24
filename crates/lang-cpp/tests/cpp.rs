@@ -536,3 +536,36 @@ fn the_file_gives_the_pointer_alignment_when_asked() {
         "int* a;\nint* b;\nint* c;\n"
     );
 }
+
+#[test]
+fn binary_operators_get_a_blank_on_both_sides() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let src = "void f() {\n  x = a*b+1;\n  y = a&&b || c&d;\n  T *p = q;\n  z = (a & MASK) * b;\n  n = sizeof(T **) + f((U)&v);\n}\nvoid (*fp)(const Foo *Self, Node *N);\n";
+    let out = core_format::testing::assert_formats(&formatting, src);
+    assert_eq!(
+        out,
+        "void f() {\n  x = a * b + 1;\n  y = a && b || c & d;\n  T *p = q;\n  z = (a & MASK) * b;\n  n = sizeof(T **) + f((U)&v);\n}\nvoid (*fp)(const Foo *Self, Node *N);\n"
+    );
+}
+
+#[test]
+fn braced_lists_are_padded_by_option() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let src = "S s = {1,2};\nS t = { };\nint y[] = {{1},{ 2 }};\nauto l = f([&] { x += 2; });\n";
+    for (padded, want) in [
+        (
+            false,
+            "S s = {1, 2};\nS t = {};\nint y[] = {{1}, {2}};\nauto l = f([&] { x += 2; });\n",
+        ),
+        (
+            true,
+            "S s = { 1, 2 };\nS t = {};\nint y[] = { { 1 }, { 2 } };\nauto l = f([&] { x += 2; });\n",
+        ),
+    ] {
+        let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+        formatting.options = vec![("braced_list_padding", V::Bool(padded))];
+        assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+    }
+}
