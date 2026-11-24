@@ -8,8 +8,8 @@ The standard brief of a build agent; a task prompt links it and adds only the ta
 - Commit WIP often (`WIP: <what>`); `land.sh` squashes before the push.
 - Multi-step commands (loops, heredocs, several git calls) go in `.cargo/tmp/*.sh`, written with Write, run with `bash`.
 - PATH is set for agents: no PATH prefixes. No wait loops, `sleep`, `pgrep` or Monitor: `scripts/long.sh` and the finish rule in CLAUDE.md; never let a wait pass 5 minutes.
-- Every turn rereads the whole context, so a turn with one `grep` is the most expensive way to learn one thing. Before each turn list what you need next and send all of it: several tool calls, or one Bash call with one read command per line (`grep` here, `sed -n` there, `git show` as its own tool call in the same turn). Read by line range, not whole files. Go alone only when the next command depends on this result. An edit script runs its check (`cargo check`, the fixture) in the same script.
-- Refused forms, each a wasted call: git together with other commands, `cd`, `$(...)`, loops or heredocs (one plain git command per tool call, several calls per turn are fine; the rest in a script file); `cargo` without `CARGO_TARGET_DIR=<slot>` in front, also in a command that only mentions cargo; `finish.sh --wait` piped.
+- Every turn rereads the whole context, so a turn with one `grep` is the most expensive way to learn one thing. Before each turn list what you need next and send all of it: several tool calls, or one Bash call with one read command per line (`grep` here, `sed -n` there, `git show` next to them). Read by line range, not whole files. Go alone only when the next command depends on this result. An edit script runs its check (`cargo check`, the fixture) in the same script.
+- Refused forms, each a wasted call: git inside `$(...)`, loops, heredocs or a long mixed command (plain git commands may be chained; the rest goes in a script file); `cargo` without `CARGO_TARGET_DIR=<slot>` in front, also in a command that only mentions cargo; `finish.sh --wait` piped.
 
 ## Rules in one line each
 - HARD RULE: nothing is done in a language that can be generic ([CLAUDE.md](../../../CLAUDE.md)).
