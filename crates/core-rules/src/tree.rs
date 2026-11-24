@@ -14,6 +14,15 @@ pub fn significant_range(node: &SyntaxNode, grammar: &Grammar) -> TextRange {
     core_syntax::code_span(node, grammar).unwrap_or_else(|| node.text_range())
 }
 
+/// `name` in ASCII lowercase; no copy when it already is.
+pub fn lower_ascii(name: &str) -> std::borrow::Cow<'_, str> {
+    if name.bytes().any(|b| b.is_ascii_uppercase()) {
+        name.to_ascii_lowercase().into()
+    } else {
+        name.into()
+    }
+}
+
 /// What the rules run on one file share: the last [`significant_range`] computed (the rules a
 /// node is dispatched to ask for it one after the other; it depends on the node's range only, so
 /// equal ranges share the answer) and whether the file text is ASCII.

@@ -17,6 +17,7 @@
 use crate::dom;
 use crate::generated::kind as k;
 use crate::meta;
+use core_rules::heading_outline::{self, Outline, Several};
 use core_rules::unique::Repeats;
 use core_rules::{FileContext, Rule, RuleContext, rule};
 use core_syntax::{SyntaxNode, SyntaxNodeExt, TextRange, TextSize};
@@ -134,6 +135,15 @@ rule! {
     }
 }
 
+/// What `heading-level` checks, and how HTML names a heading.
+const OUTLINE: Outline = Outline {
+    first_is_top: true,
+    skips: true,
+    several: Several::All,
+    label: |n| format!("<h{n}>"),
+    many: "more than one `<h1></h1>` on the page",
+};
+
 rule! {
     HeadingLevel {
         id: "heading-level",
@@ -141,30 +151,18 @@ rule! {
         default: Off,
         description: "Headings do not follow the document outline: the first heading is not an \
                   `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the \
-                  page has a second `<h1>`.",
+                  page has more than one `<h1>` (each one is reported).",
         example: "<h1>A</h1><h3>B</h3>   // reported at the `<h3>`",
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let (mut previous, mut h1) = (0, false);
-        for tag in dom::start_tags(file.root) {
-            let Some((name, range)) = dom::tag_name(&tag, file.text) else {
-                continue;
-            };
-            let level = match name.as_bytes() {
-                [b'h', d @ b'1'..=b'6'] => d - b'0',
-                _ => continue,
-            };
-            if previous == 0 && level != 1 {
-                ctx.report(range, format!("the first heading is `<{name}>`, not `<h1>`"));
-            } else if previous != 0 && level > previous + 1 {
-                ctx.report(range, format!("`<{name}>` skips from `<h{previous}>`: a level goes down one at a time"));
-            }
-            if level == 1 && std::mem::replace(&mut h1, true) {
-                ctx.report(range, "the page has more than one `<h1>`");
-            }
-            previous = level;
-        }
+        let headings = dom::start_tags(file.root)
+            .filter_map(|tag| dom::tag_name(&tag, file.text))
+            .filter_map(|(name, range)| match name.as_bytes() {
+                [b'h', d @ b'1'..=b'6'] => Some(((d - b'0') as usize, range)),
+                _ => None,
+            });
+        heading_outline::check(headings, &OUTLINE, ctx);
     }
 }
 

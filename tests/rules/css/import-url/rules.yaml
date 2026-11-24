@@ -1,0 +1,1 @@
+import-notation: { level: warn, options: { url: true } }

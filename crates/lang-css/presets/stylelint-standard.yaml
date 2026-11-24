@@ -36,7 +36,10 @@ css:
       function-name-case: error
       function-url-quotes: error
       hue-degree-notation: error
-      import-notation: error
+      import-notation:
+        level: error
+        options:
+          url: true
       keyframe-selector-notation: error
       keyframes-name-pattern:
         level: error

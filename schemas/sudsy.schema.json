@@ -1384,7 +1384,7 @@
             },
             "enum-entry-name-case": {
               "$ref": "#/definitions/rule",
-              "description": "An enum entry whose name starts with a lowercase letter or an underscore (ktlint enum-entry-name-case)."
+              "description": "An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint enum-entry-name-case)."
             },
             "enum-first-value-zero": {
               "description": "The first value of an enum is not 0 (buf lint ENUM_FIRST_VALUE_ZERO). Proto3 and editions with open enums require it; proto2 files (also those with no `syntax`) are checked only with the `proto2` option.",
@@ -1900,7 +1900,7 @@
             },
             "heading-level": {
               "$ref": "#/definitions/rule",
-              "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`."
+              "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported)."
             },
             "heading-style": {
               "description": "Headings are written in more than one style: `#` in front of the text (atx) or text over `===` or `---` (setext). Style `consistent` takes the first heading's. The fix rewrites a heading of one line, level 1 or 2.",
@@ -2068,8 +2068,35 @@
               "description": "`import public` (buf lint IMPORT_NO_PUBLIC)."
             },
             "import-notation": {
-              "$ref": "#/definitions/rule",
-              "description": "An `@import` of `url(...)`: write the string."
+              "description": "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "url": {
+                          "default": false,
+                          "description": "Ask for url() instead of a string.",
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "import-ordering": {
               "$ref": "#/definitions/rule",
@@ -6285,7 +6312,7 @@
             },
             "text-content": {
               "$ref": "#/definitions/rule",
-              "description": "A `<button>` with no text, no image with an `alt`, no `<svg>` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count."
+              "description": "A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count."
             },
             "timestamp-expanded": {
               "$ref": "#/definitions/rule",

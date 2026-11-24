@@ -2646,17 +2646,22 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `@import` of `url(...)`: write the string.",
+      "description": "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "@import url(\"a.css\");\n@import \"b.css\";\na {\n  margin: 0px 0.0em 0;\n  transition: 0s;\n  width: calc(0px + 1px);\n  --x: 0px;\n  background: url(a.png), url(\"b.png\");\n  color: #aabbcc;\n  color: #abc;\n  border-color: #ab #abcde #abcdef;\n  padding: 1px 1px;\n  padding: 1px 2px 1px 2px;\n  padding: 1px 2px 3px 2px;\n  font-family: \"Arial\", 'Lucida Grande', \"Font 2\", sans-serif;\n}\n",
+        "input": "@import url(\"a.css\");\n@import \"b.css\";\n@import 'c.css' screen;\n",
         "language": "css",
         "spans": [
           {
             "column": 1,
-            "length": 21,
-            "line": 1
+            "length": 16,
+            "line": 2
+          },
+          {
+            "column": 1,
+            "length": 23,
+            "line": 3
           }
         ]
       },
@@ -2667,7 +2672,14 @@
         "less",
         "scss"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": false,
+          "description": "Ask for url() instead of a string.",
+          "name": "url",
+          "type": "bool"
+        }
+      ],
       "presets": [
         "css/stylelint-standard"
       ],
@@ -3441,13 +3453,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "@charset \"utf-8\";\n@import \"a.css\";\n@import url(a.css);\n@import \"a.css\" screen;\n@layer base;\n@import \"b.css\";\na { color: red }\n@import \"c.css\";\n",
+        "input": ".a { color: red }\n@import \"a\";\n",
         "language": "css",
         "spans": [
           {
             "column": 1,
-            "length": 16,
-            "line": 8
+            "length": 12,
+            "line": 2
           }
         ]
       },
@@ -3554,7 +3566,7 @@
       "upstream": [
         {
           "id": "number-max-precision",
-          "partial": false,
+          "partial": true,
           "tool": "stylelint"
         }
       ]
@@ -11801,13 +11813,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "const a = b\n(c || d).e();\n",
+        "input": "const a = b\n  (c || d).e();\n",
         "language": "js",
         "spans": [
           {
-            "column": 12,
+            "column": 3,
             "length": 1,
-            "line": 1
+            "line": 2
           }
         ]
       },
@@ -13229,11 +13241,11 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum entry whose name starts with a lowercase letter or an underscore (ktlint enum-entry-name-case).",
+      "description": "An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint enum-entry-name-case).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "enum class E { a, B, C_D, _e, FooBar }\n",
+        "input": "enum class E { a, B, C_D, _e, FooBar }\nenum class F { `1x flows`, G_1, _2BIG }\n",
         "language": "kotlin",
         "spans": [
           {
@@ -13245,6 +13257,16 @@
             "column": 27,
             "length": 2,
             "line": 1
+          },
+          {
+            "column": 16,
+            "length": 10,
+            "line": 2
+          },
+          {
+            "column": 33,
+            "length": 5,
+            "line": 2
           }
         ]
       },
@@ -25485,9 +25507,9 @@
         "language": "github-actions",
         "spans": [
           {
-            "column": 26,
-            "length": 4,
-            "line": 8
+            "column": 3,
+            "length": 6,
+            "line": 7
           }
         ]
       },
@@ -25659,7 +25681,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -25743,7 +25765,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -26957,7 +26979,7 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`.",
+      "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported).",
       "example": {
         "config": null,
         "fixed": null,
@@ -26968,6 +26990,11 @@
             "column": 2,
             "length": 2,
             "line": 9
+          },
+          {
+            "column": 2,
+            "length": 2,
+            "line": 10
           },
           {
             "column": 2,
@@ -27196,7 +27223,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -27317,7 +27344,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -27439,7 +27466,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -29679,7 +29706,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -30214,7 +30241,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -30245,17 +30272,27 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A `<button>` with no text, no image with an `alt`, no `<svg>` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count.",
+      "description": "A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
             "column": 1,
             "length": 1,
             "line": 25
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 29
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 30
           }
         ]
       },
@@ -30286,7 +30323,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {

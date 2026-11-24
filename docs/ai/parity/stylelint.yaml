@@ -95,7 +95,7 @@ entries:
   no-unknown-animations: planned
   no-unknown-custom-media: planned
   no-unknown-custom-properties: planned
-  number-max-precision: rule number-max-precision
+  number-max-precision: rule number-max-precision | numbers in a Less variable declaration (an at-rule prelude) are not checked, named gap
   property-allowed-list: rule property-allowed-list
   property-disallowed-list: rule property-disallowed-list
   property-layout-mappings: planned | The option maps a property to its values or units, and rule options are not maps.

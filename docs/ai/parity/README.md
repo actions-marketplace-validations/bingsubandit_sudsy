@@ -23,7 +23,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 <!-- generated:counts -->
 | Tool | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| actionlint | 85.2% | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
+| actionlint | 85.3% | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
 | angular-eslint | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
 | biome | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
 | buf | 85.8% | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
@@ -38,9 +38,9 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | eslint-plugin-vue | 88.8% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
 | google-java-format | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | 53.7% | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
-| hadolint | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
-| html-eslint | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
-| html-validate | 86.5% | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
+| hadolint | 91.2% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
+| html-eslint | 0.3% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
+| html-validate | 86.9% | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
 | htmlhint | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
 | ktlint | 92.3% | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
 | markdownlint | 99.0% | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
@@ -55,9 +55,9 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | shfmt | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
 | sqlfluff | 86.6% | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
 | stylecop | 24.6% | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
-| stylelint | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
-| stylelint-less | 78.0% | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
-| stylelint-scss | 20.6% | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
+| stylelint | 94.7% | 150 | 89 | 10 | 47 | 0 | 0 | 4 | 47 |
+| stylelint-less | 84.2% | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
+| stylelint-scss | 23.0% | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
 | taplo | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
 | terraform | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 93.0% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |

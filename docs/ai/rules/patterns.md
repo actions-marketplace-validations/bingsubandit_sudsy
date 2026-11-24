@@ -47,6 +47,7 @@ fix-kind: safe
 - `fix-on: $NAME` makes the fix replace what the metavariable captured instead of the matched node; `fix-trim-before: true` extends the replaced range back over the spaces and tabs before it. `fix: ""` deletes. A hit that did not capture a metavariable the `fix` names (a `regex` group in an optional part, as shell's `no-backticks`, which fixes only a body without a backslash) is reported without the fix. Both need a `fix`; `$NAME` must be captured by a pattern outside `has`/`child`/`not`.
 - `options` declares typed options with a default, validated and shown in the schema and `sudsy rules <id>` like a Rust rule's: `{ name, type, default, choices, description }`, `type` being `bool`, `int`, `string`, `list` (of strings) or `regex` (a string that must compile); `choices` limits a `string` or each item of a `list`. A user sets them under the rule in `lint.rules` (`options:`).
 - A constraint can read an option: `in-option: NAME` (the captured text is an item of the `list` option, or equals the `string` option) and `regex-option: NAME` (it matches the `regex` option, compiled once per value).
+- Option-gated alternatives: `any` of rows that each carry `option: NAME` (or `not: { option: NAME }`) next to their test, so one option value chooses which spelling is reported (YAML `no-octal-values`, Protobuf `enum-first-value-zero`, CSS `import-notation`).
 
 ```yaml
 options:

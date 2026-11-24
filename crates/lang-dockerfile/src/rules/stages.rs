@@ -11,6 +11,7 @@
 
 use crate::generated::kind as k;
 use core_rules::tree::significant_range;
+use core_rules::unknown_reference::{self, Item, Scope};
 use core_rules::{Family, Params, Rule, RuleContext, RuleMeta, rule};
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, TextRange};
 
@@ -163,22 +164,18 @@ rule! {
     }
 
     fn check(&self, doc: &SyntaxNode, ctx: &mut RuleContext<'_>) {
-        let mut names: Vec<String> = Vec::new();
-        let mut count = 0usize;
-        for i in instructions(doc) {
+        let (all, grammar) = (instructions(doc), ctx.file.grammar);
+        let mut items = Vec::with_capacity(all.len());
+        for (tag, i) in all.iter().enumerate() {
             if i.name == "FROM" {
-                count += 1;
-                names.extend(i.from().1);
+                items.push(Item::Declare(i.from().1.unwrap_or_default()));
             } else if i.name == "COPY" {
-                let Some(from) = i.option("from") else { continue };
-                let known = from.contains(':')
-                    || names.contains(&from)
-                    || from.parse::<usize>().is_ok_and(|n| n < count);
-                if !known {
-                    ctx.report(i.range(ctx), format!("`--from={from}` is not an earlier stage"));
-                }
+                items.extend(i.option("from").map(|name| Item::Use { name, tag }));
             }
         }
+        // An image (`name:tag`) and the index of an earlier stage need no stage name.
+        let exempt = |from: &str, count: usize| from.contains(':') || from.parse::<usize>().is_ok_and(|n| n < count);
+        unknown_reference::check(&items, &Scope { earlier_only: true, ignore_case: false }, exempt, |tag, from| (significant_range(&all[tag].node, grammar), format!("`COPY --from` names no earlier stage: `{from}`")), ctx);
     }
 }
 

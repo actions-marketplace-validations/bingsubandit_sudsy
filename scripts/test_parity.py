@@ -150,6 +150,19 @@ class Missed(unittest.TestCase):
         self.assertEqual(self.check(6, 14, "missed:\n  a: 3\n"), 0)
 
 
+class CorpusAbsent(unittest.TestCase):
+    def test_no_corpus_file_exits_1_and_names_the_fetch_script(self):
+        tools = {"lint": {"t": {"fetch": ["tests/conformance/fetch-t-corpus.sh"]}}}
+        out = io.StringIO()
+        with unittest.mock.patch.object(pf, "tools", lambda: tools), contextlib.redirect_stdout(out):
+            pl.require_corpus("t", {"a": 1})
+            with self.assertRaises(SystemExit) as e:
+                pl.require_corpus("t", {})
+        self.assertEqual(e.exception.code, 1)
+        self.assertIn("corpus absent", out.getvalue())
+        self.assertIn("fetch-t-corpus.sh", out.getvalue())
+
+
 class SpeedRuns(unittest.TestCase):
     def test_a_sudsy_run_that_checks_no_file_fails_the_row(self):
         with self.assertRaises(SystemExit) as e:

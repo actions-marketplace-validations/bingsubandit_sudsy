@@ -1,26 +1,67 @@
 differences:
+  windows-run-busybox: "choice  the base image is `mcr.microsoft.com/windows/servercore` and the RUN line is `RUN powershell ...`: hadolint parses it as sh"
+  windows-run-escape: "choice  the file has `# escape=` followed by a backtick, a Windows base image and no `SHELL`: its RUN lines run under cmd.exe, hadolint parses them as sh"
+  windows-run-powershell: "choice  the file has a `SHELL` line that starts powershell on a Windows base image: its RUN lines run under PowerShell, hadolint parses them as sh"
   user-variable: gap  a variable as the user is accepted whether or not an ARG defines it (hadolint reports it)
 files:
+  dockerfile/dotnet-docker/samples/AspNetCoreRazorApp/Dockerfile.windowsservercore-iis hadolint:SC1072 7: windows-run-escape
+  dockerfile/dotnet-docker/src/aspnet/10.0/nanoserver-ltsc2022/amd64/Dockerfile hadolint:SC1072 9: windows-run-escape
+  dockerfile/dotnet-docker/src/aspnet/10.0/nanoserver-ltsc2025/amd64/Dockerfile hadolint:SC1072 9: windows-run-escape
+  dockerfile/dotnet-docker/src/aspnet/10.0/windowsservercore-ltsc2022/amd64/Dockerfile hadolint:SC1072 9: windows-run-escape
+  dockerfile/dotnet-docker/src/aspnet/10.0/windowsservercore-ltsc2025/amd64/Dockerfile hadolint:SC1072 9: windows-run-escape
+  dockerfile/dotnet-docker/src/runtime/10.0/nanoserver-ltsc2022/amd64/Dockerfile hadolint:SC1072 7: windows-run-escape
+  dockerfile/dotnet-docker/src/runtime/10.0/nanoserver-ltsc2025/amd64/Dockerfile hadolint:SC1072 7: windows-run-escape
+  dockerfile/dotnet-docker/src/runtime/10.0/windowsservercore-ltsc2022/amd64/Dockerfile hadolint:SC1072 7: windows-run-escape
+  dockerfile/dotnet-docker/src/runtime/10.0/windowsservercore-ltsc2025/amd64/Dockerfile hadolint:SC1072 7: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/nanoserver-ltsc2022/amd64/Dockerfile hadolint:SC2154 23: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/nanoserver-ltsc2022/amd64/Dockerfile hadolint:SC2154 9: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/nanoserver-ltsc2025/amd64/Dockerfile hadolint:SC2154 23: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/nanoserver-ltsc2025/amd64/Dockerfile hadolint:SC2154 9: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/windowsservercore-ltsc2022/amd64/Dockerfile hadolint:SC2154 23: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/windowsservercore-ltsc2022/amd64/Dockerfile hadolint:SC2154 9: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/windowsservercore-ltsc2025/amd64/Dockerfile hadolint:SC2154 23: windows-run-escape
+  dockerfile/dotnet-docker/src/sdk/10.0/windowsservercore-ltsc2025/amd64/Dockerfile hadolint:SC2154 9: windows-run-escape
+  dockerfile/golang/1.26/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 22: windows-run-powershell
+  dockerfile/golang/1.26/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 62: windows-run-powershell
+  dockerfile/golang/1.26/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1088 55: windows-run-powershell
+  dockerfile/golang/1.26/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 22: windows-run-powershell
+  dockerfile/golang/1.26/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 62: windows-run-powershell
+  dockerfile/golang/1.26/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1088 55: windows-run-powershell
+  dockerfile/golang/1.27/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 22: windows-run-powershell
+  dockerfile/golang/1.27/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 62: windows-run-powershell
+  dockerfile/golang/1.27/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1088 55: windows-run-powershell
+  dockerfile/golang/1.27/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 22: windows-run-powershell
+  dockerfile/golang/1.27/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 62: windows-run-powershell
+  dockerfile/golang/1.27/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1088 55: windows-run-powershell
+  dockerfile/moby/Dockerfile.windows hadolint:SC1088 188: windows-run-powershell
+  dockerfile/moby/Dockerfile.windows hadolint:SC1088 276: windows-run-powershell
+  dockerfile/moby/Dockerfile.windows hadolint:SC1088 290: windows-run-powershell
+  dockerfile/moby/contrib/busybox/Dockerfile hadolint:SC1088 23: windows-run-busybox
+  dockerfile/python/3.14/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 17: windows-run-powershell
+  dockerfile/python/3.14/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 17: windows-run-powershell
+  dockerfile/python/3.15/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 17: windows-run-powershell
+  dockerfile/python/3.15/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 17: windows-run-powershell
+  dockerfile/python/3.16-rc/windows/windowsservercore-ltsc2022/Dockerfile hadolint:SC1065 21: windows-run-powershell
+  dockerfile/python/3.16-rc/windows/windowsservercore-ltsc2025/Dockerfile hadolint:SC1065 21: windows-run-powershell
   instructions/cases hadolint:numeric-user-id 26: user-variable
-target: 86.6
+intentional:
+  windows-run-busybox: tool-wrong
+  windows-run-escape: tool-wrong
+  windows-run-powershell: tool-wrong
+target: 91.2
 fixes:  # gap name or lint rule -> one line: where and what to change
   DL3066: user-variable gap of numeric-user-id, report a USER with a variable whose ARG default is not numeric (lang-dockerfile rules, stage facts)
   DL3059: crates/lang-dockerfile/rules/run-stage.yaml, 4 consecutive-RUN findings still missed; check against the corpus lines
   DL3045: COPY to a relative path needs WORKDIR tracked per stage (deferred in the catalog), stage facts in lang-dockerfile
-measured: {covered: 684, total: 790, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 685, total: 751, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   DL3066: 30
-  SC1065: 14
   SC2251: 12
-  SC1072: 9
-  SC1088: 8
-  SC2154: 8
   DL1000: 5
   DL3045: 4
   DL3059: 4
   SC3040: 4
   DL3042: 2
-  DL3022: 1
   SC1001: 1
   SC1083: 1
   SC2035: 1

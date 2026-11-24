@@ -6,8 +6,8 @@ files:
   syntax-error/script-self-closed html-validate:require-sri 3: script-self-closed
   accessibility/elements sudsy:input-missing-label 14: aria-hidden
   accessibility/elements sudsy:input-missing-label 15: aria-hidden
-target: 86.5
-measured: {covered: 848, total: 980, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+target: 86.9
+measured: {covered: 852, total: 980, main: '1f4c633b'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   no-implicit-close: 19
   no-inline-style: 15
@@ -17,7 +17,6 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   input-attributes: 10
   valid-autocomplete: 8
   unique-landmark: 7
-  text-content: 6
   wcag/h63: 4
   attr-case: 3
   autocomplete-password: 3
@@ -25,6 +24,7 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   no-raw-characters: 3
   prefer-native-element: 3
   valid-id: 3
+  text-content: 2
   close-order: 1
   doctype-style: 1
   element-name: 1

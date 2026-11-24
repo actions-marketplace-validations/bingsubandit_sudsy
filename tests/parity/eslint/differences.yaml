@@ -9,6 +9,5 @@ files:
   comparisons/constant sudsy:no-constant-comparison 2: constant-comparison-scope
   empty/blocks eslint:no-empty-block 6: switch-block
 target: 100.0
-measured: {covered: 4411, total: 4413, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
-missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  no-unexpected-multiline: 2
+measured: {covered: 4413, total: 4413, main: '4aebdcad'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed: {}  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)

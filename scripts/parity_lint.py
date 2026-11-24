@@ -614,6 +614,15 @@ def proof_plain(tool, prefix, work, sudsy, preset, layout, fatal, before, pinned
     return left
 
 
+def require_corpus(tool, names):
+    """Exits 1 with `corpus absent` when the run read no corpus file: a share of 0 of 0 is not a measurement, and the target stays."""
+    if names:
+        return
+    fetch = " ".join(parity_format.tools()["lint"][tool].get("fetch", []))
+    print(f"{tool}: corpus absent: no corpus file on this host, nothing measured; target and measured are left as they are" + (f" (fetch it with {fetch})" if fetch else ""))
+    raise SystemExit(1)
+
+
 def coverage(tool, sudsy, version, prefix, exe):
     """The share of the findings of `tool`'s default (ruff) or recommended (ESLint, typescript-eslint) set on its
     real-world corpus that the mapped Sudsy rule also reports on the same line of the same file (the column is not
@@ -665,6 +674,7 @@ def coverage(tool, sudsy, version, prefix, exe):
         fatal = broken
     else:
         found, fatal = run_plain(tool, prefix, work)
+    require_corpus(tool, names)
     found = [f for f in found if f[0] not in fatal]
     reviewed = parity_format.Differences(folder, lint=True)  # `<file> <tool>:<rule> <line>`: a finding where the tool is wrong, pinned per finding
     pinned = lambda f: reviewed.status(f"{f[0]} {tool}:{f[1]} {f[3]}") == "tool-wrong"  # a pinned finding leaves the proof run's count too
@@ -687,10 +697,14 @@ def coverage(tool, sudsy, version, prefix, exe):
         out = subprocess.run([sudsy, "lint", "--format", "json", "."], cwd=work, capture_output=True, text=True, encoding="utf-8", check=False).stdout
         result = {}  # (file, sudsy rule) -> [(message, line)]
         for d in json.loads(out)["diagnostics"]:
-            result.setdefault((parity_coverage.norm(d["path"], work) if spec else Path(d["path"]).name, aliases.get(d["rule"], d["rule"])), []).append((d["message"], d["range"]["start"]["line"]))
+            at = result.setdefault((parity_coverage.norm(d["path"], work) if spec else Path(d["path"]).name, aliases.get(d["rule"], d["rule"])), [])
+            at.append((d["message"], d["range"]["start"]["line"]))
+            if d["range"]["start"]["offset"] == 0:
+                at.append((d["message"], 0))  # a file-level report (it starts at the first character) is also a report at line 0, where a tool that has no line puts its finding
         return result
 
     examples = {}
+    zero = [0, 0, 0]  # findings the tool reports at line 0 (no line): all, those a file-level report covers, those any report in the file has
     filehits = [0]  # the audit: findings with a report of the mapped rule anywhere in the file
     offsets = {}  # upstream rule -> Counter(Sudsy line minus tool line) of the findings reported on another line
 
@@ -702,6 +716,7 @@ def coverage(tool, sudsy, version, prefix, exe):
         instruction = (spec or {}).get("instruction")  # `{"rule_prefix", "continuation"}`: those codes are covered on any line of the instruction the tool's line starts
         offsets.clear()
         filehits[0] = 0
+        zero[:] = [0, 0, 0]
         places.clear()
         for file, rule, _, line in left:
             places.setdefault(rule, []).append(f"{file}:{line}")
@@ -714,13 +729,16 @@ def coverage(tool, sudsy, version, prefix, exe):
             n = message_name(message)
             reports = [(m, l) for m, l in ours.get((file, target), []) if target not in named or n is None or n in m] if target else []
             last = instruction_end(work / file, line, instruction["continuation"]) if instruction and rule.startswith(instruction["rule_prefix"]) and line else line
-            on_line = any(line <= l <= last for _, l in reports) if line is not None else any(l == line for _, l in reports)
+            on_line = any(line <= l <= last for _, l in reports) if line is not None else False  # a finding at line 0 is a file-level one: only a file-level report of the mapped rule covers it
             row[1] += on_line
+            zero[0] += line == 0
+            zero[1] += line == 0 and on_line
+            zero[2] += line == 0 and any(l for _, l in reports)
             filehits[0] += bool(reports)
             if not on_line and os.environ.get("COVERAGE_MISSES"):  # every finding Sudsy does not report on the tool's line: `file rule line`
                 print(f"MISS {file} {tool}:{rule} {line}")
             if reports and not on_line and line is not None:  # a report in the file on another line: the offset of the nearest one
-                off = min((l - line for _, l in reports), key=abs)
+                off = min((l - line for _, l in reports if l), key=abs, default=0)
                 offsets.setdefault(rule, collections.Counter())[off] += 1
                 examples.setdefault((rule, off), f"{file}:{line}")
             is_wrong = not on_line and reviewed.status(f"{file} {tool}:{rule} {line}") == "tool-wrong"
@@ -732,6 +750,8 @@ def coverage(tool, sudsy, version, prefix, exe):
 
     ours = run_sudsy(json.dumps({"extends": extends}))  # the headline: the preset that mirrors the tool's default set
     per, hit, total, wrong = score(ours)
+    if zero[0]:
+        print(f"findings at line 0 (no line): {zero[0]}, covered by a file-level report: {zero[1]}, by any report in the file: {zero[2]}")
     extra = {}  # Sudsy rule -> its findings in files where the tool reports its rule nowhere (a false positive, or a suppression comment)
     wanted = {(f, mapping[r]) for f, r, _, _ in found if r in mapping}
     on = set()  # the Sudsy rules of the rules that the tool's set turns on

@@ -10,6 +10,7 @@
 
 use crate::view::{Entry, entries, get, items, root_mapping, scalar, scalar_list};
 use core_rules::rule;
+use core_rules::unknown_reference::{self, Item, Scope};
 use core_rules::{Check, FileContext, Meta, Opt, OptionDecl, Re, RuleContext, meta_regex};
 use core_syntax::{SyntaxNode, TextRange};
 use std::collections::HashMap;
@@ -116,13 +117,11 @@ rule! {
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
         let all = needs(file);
-        for (job, list) in &all {
-            for (name, range) in list {
-                if !all.iter().any(|(j, _)| j.eq_ignore_ascii_case(name)) {
-                    ctx.report(*range, format!("job `{job}` needs unknown job `{name}`"));
-                }
-            }
-        }
+        let uses = all.iter().enumerate().flat_map(|(at, (_, l))| l.iter().map(move |(name, _)| Item::Use { name: name.clone(), tag: at }));
+        let items: Vec<Item> = all.iter().map(|(job, _)| Item::Declare(job.clone())).chain(uses).collect();
+        let report = |at: usize, name: &str| (jobs(file)[at].key_range, format!("job `{}` needs unknown job `{name}`", all[at].0));
+        let scope = Scope { earlier_only: false, ignore_case: true };
+        unknown_reference::check(&items, &scope, |_, _| false, report, ctx);
     }
 }
 

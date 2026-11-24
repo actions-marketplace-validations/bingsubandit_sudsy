@@ -7,11 +7,21 @@
 
 use crate::format::{heading_level, heading_range};
 use crate::generated::kind;
+use core_rules::heading_outline::{self, Outline, Several};
 use core_rules::rule::FileContext;
 use core_rules::{Rule, RuleContext, rule};
 use core_syntax::{SyntaxNode, TextRange};
 
 pub static RULES: &[&dyn Rule] = &[&HeadingIncrement, &SingleTitle];
+
+/// The outline checks of Markdown, each rule turns one on.
+const OUTLINE: Outline = Outline {
+    first_is_top: false,
+    skips: false,
+    several: Several::Off,
+    label: |n| format!("h{n}"),
+    many: "the document has more than one top-level heading",
+};
 
 /// Every heading with its level and the range of its text.
 fn headings(file: &FileContext<'_>) -> Vec<(usize, TextRange)> {
@@ -34,16 +44,7 @@ rule! {
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let mut previous = 0;
-        for (level, range) in headings(file) {
-            if previous > 0 && level > previous + 1 {
-                ctx.report(
-                    range,
-                    format!("heading level should be {} (it follows level {previous})", previous + 1),
-                );
-            }
-            previous = level;
-        }
+        heading_outline::check(headings(file).into_iter(), &Outline { skips: true, ..OUTLINE }, ctx);
     }
 }
 
@@ -58,8 +59,6 @@ rule! {
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        for (_, range) in headings(file).into_iter().filter(|h| h.0 == 1).skip(1) {
-            ctx.report(range, "the document has more than one top-level heading");
-        }
+        heading_outline::check(headings(file).into_iter(), &Outline { several: Several::Later, ..OUTLINE }, ctx);
     }
 }

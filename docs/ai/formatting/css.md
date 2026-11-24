@@ -50,3 +50,10 @@ Checked against stylelint by `scripts/parity.sh stylelint` ([../development/pari
 
 ## Conformance
 The real projects of `tests/conformance/fetch-css-corpus.sh` (Bootstrap, Bulma, ant-design, Semantic UI, normalize.css, docusaurus; its Prettier fixtures belong to the parity harness and hold deliberate errors): every file parses without errors and formats with the shared checks (round trip, meaning, idempotency, comments kept). `cargo test --profile corpus -p lang-css --test integration -- --ignored --nocapture conformance` after `bash tests/conformance/fetch-css-corpus.sh`.
+
+Where Sudsy differs from stylelint-less by design:
+
+<!-- generated:differences:stylelint-less -->
+
+- `less-spaced-variable`: the tool reads `@name : value` (a space before the colon) as an unknown at-rule, it is a variable; lessc 4.9 compiles all 46 files (Semantic-UI definitions: only the import of theme.config fails to resolve)
+<!-- /generated -->

@@ -1,15 +1,107 @@
-differences: {}
-files: {}
-target: 78.0
-measured: {covered: 7834, total: 10039, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+differences:
+  less-spaced-variable: "choice  the tool reads `@name : value` (a space before the colon) as an unknown at-rule, it is a variable; lessc 4.9 compiles all 46 files (Semantic-UI definitions: only the import of theme.config fails to resolve)"
+files:
+  css/Semantic-UI/src/definitions/collections/breadcrumb.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/breadcrumb.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/form.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/form.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/grid.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/grid.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/menu.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/menu.less stylelint-less:at-rule-no-unknown 18: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/message.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/message.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/table.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/collections/table.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/button.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/button.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/container.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/container.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/divider.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/divider.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/flag.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/flag.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/header.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/header.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/icon.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/icon.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/image.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/image.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/input.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/input.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/label.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/label.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/list.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/list.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/loader.less stylelint-less:at-rule-no-unknown 14: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/loader.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/placeholder.less stylelint-less:at-rule-no-unknown 14: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/placeholder.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/rail.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/rail.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/reveal.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/reveal.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/segment.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/segment.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/step.less stylelint-less:at-rule-no-unknown 20: less-spaced-variable
+  css/Semantic-UI/src/definitions/elements/step.less stylelint-less:at-rule-no-unknown 21: less-spaced-variable
+  css/Semantic-UI/src/definitions/globals/reset.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/globals/reset.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/globals/site.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/globals/site.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/accordion.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/accordion.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/checkbox.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/checkbox.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/dimmer.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/dimmer.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/dropdown.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/dropdown.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/embed.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/embed.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/modal.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/modal.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/nag.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/nag.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/popup.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/popup.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/progress.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/progress.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/rating.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/rating.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/search.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/search.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/shape.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/shape.less stylelint-less:at-rule-no-unknown 18: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/sidebar.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/sidebar.less stylelint-less:at-rule-no-unknown 18: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/sticky.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/sticky.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/tab.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/tab.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/transition.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/modules/transition.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/ad.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/ad.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/card.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/card.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/comment.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/comment.less stylelint-less:at-rule-no-unknown 17: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/feed.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/feed.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/item.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/item.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/statistic.less stylelint-less:at-rule-no-unknown 15: less-spaced-variable
+  css/Semantic-UI/src/definitions/views/statistic.less stylelint-less:at-rule-no-unknown 16: less-spaced-variable
+intentional:
+  less-spaced-variable: tool-wrong
+target: 84.2
+measured: {covered: 8378, total: 9947, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   declaration-property-value-no-unknown: 806
-  import-notation: 424
   selector-pseudo-element-colon-notation: 156
   media-query-no-invalid: 121
-  no-invalid-position-at-import-rule: 118
   comment-empty-line-before: 116
-  at-rule-no-unknown: 92
   declaration-block-no-redundant-longhand-properties: 92
   selector-not-notation: 76
   at-rule-prelude-no-invalid: 65
@@ -23,5 +115,4 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   at-rule-descriptor-value-no-unknown: 3
   CssSyntaxError: 2
   number-max-precision: 2
-  selector-pseudo-class-no-unknown: 2
   length-zero-no-unit: 1

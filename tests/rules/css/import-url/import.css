@@ -1,0 +1,5 @@
+@import url("a.css");
+@import "b.css";
+^^^^^^^^^^^^^^^^ import-notation
+@import 'c.css' screen;
+^^^^^^^^^^^^^^^^^^^^^^^ import-notation

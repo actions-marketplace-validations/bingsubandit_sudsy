@@ -226,5 +226,5 @@ intentional:
 target: 100.0
 fixes:  # gap name or lint rule -> one line: where and what to change
   uniquetargets: missed findings are tool-wrong (the target counts only the rest), nothing to fix
-measured: {covered: 349, total: 349, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 349, total: 349, main: '4aebdcad'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed: {}  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)

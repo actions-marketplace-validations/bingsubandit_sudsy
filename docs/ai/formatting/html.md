@@ -108,3 +108,15 @@ Where Sudsy differs from Prettier's Angular output by design:
 
 ## Licenses
 `bench/inputs/html`: the five `bootstrap-*` pages are Bootstrap 5.3.3's `js/tests/visual` (MIT, Copyright 2011-2024 The Bootstrap Authors); `mdn-accessibility-assessment.html` is from mdn/learning-area (CC0 1.0). `bench/inputs/vue`: three files of vuejs/core's `sfc-playground` (MIT, Copyright 2018-present Yuxi (Evan) You and Vue contributors); `bench/inputs/svelte`: three files of sveltejs/realworld (MIT, Copyright 2020 Svelte contributors); `bench/inputs/component.html`: two templates of gothinkster/angular-realworld-example-app (MIT, Copyright 2021 Thinkster) and four of angular/components and angular/angular (MIT, Copyright Google LLC).
+
+Where Sudsy differs from html-eslint by design:
+
+<!-- generated:differences:html-eslint -->
+
+- `hugo-template-tokens`: the tool reads the text of a Hugo template inside a tag (`{{`, `}}`, `end`, `with`, `.Level`, `(eq`) as attribute, class or element names; the file is a template, not HTML, and no real attribute is repeated outside a template action
+<!-- /generated -->
+
+Where Sudsy differs from html-validate by design:
+
+<!-- generated:differences:html-validate -->
+<!-- /generated -->

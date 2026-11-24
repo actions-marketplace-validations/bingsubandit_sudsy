@@ -23,6 +23,9 @@ gdir=$(git rev-parse --git-dir)
 slot_runs() { gh run list --workflow finish.yml --limit 30 --json databaseId,displayTitle,status \
   --jq ".[] | select(.displayTitle | startswith(\"finish $slot-\")) | select(.status != \"completed\") | .databaseId"; }
 state=$gdir/finish-run   # `<run id> <branch>` of a run started with --start
+if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then
+  sed -n '2,/^set -/{/^set -/d;s/^# \{0,1\}//;p}' "$0"; exit 0   # the header above, nothing started
+fi
 if [ "${1:-}" = --stop ]; then
   for r in $(slot_runs); do gh run cancel "$r"; done; rm -f "$state"; echo "finish stopped"; exit 0
 fi

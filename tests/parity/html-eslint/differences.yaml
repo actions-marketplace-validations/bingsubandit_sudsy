@@ -1,17 +1,35 @@
-target: 0.2
-measured: {covered: 37, total: 19963, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+differences:
+  hugo-template-tokens: "choice  the tool reads the text of a Hugo template inside a tag (`{{`, `}}`, `end`, `with`, `.Level`, `(eq`) as attribute, class or element names; the file is a template, not HTML, and no real attribute is repeated outside a template action"
+files:
+  html/bootstrap/site/content/docs/5.3/examples/cheatsheet-rtl/index.html html-eslint:no-duplicate-attrs 713: hugo-template-tokens
+  html/bootstrap/site/content/docs/5.3/examples/cheatsheet/index.html html-eslint:no-duplicate-attrs 712: hugo-template-tokens
+  html/bootstrap/site/layouts/_default/docs.html html-eslint:no-duplicate-attrs 1: hugo-template-tokens
+  html/bootstrap/site/layouts/_default/docs.html html-eslint:no-duplicate-attrs 69: hugo-template-tokens
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:no-duplicate-attrs 107: hugo-template-tokens
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:no-duplicate-attrs 168: hugo-template-tokens
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:no-duplicate-attrs 2: hugo-template-tokens
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:require-lang 2: hugo-template-tokens
+  html/bootstrap/site/layouts/partials/docs-sidebar.html html-eslint:no-duplicate-attrs 22: hugo-template-tokens
+  html/bootstrap/site/layouts/partials/docs-sidebar.html html-eslint:no-duplicate-attrs 32: hugo-template-tokens
+  html/bootstrap/site/layouts/partials/docs-sidebar.html html-eslint:no-duplicate-attrs 39: hugo-template-tokens
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:no-duplicate-attrs 24: hugo-template-tokens
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:no-duplicate-attrs 34: hugo-template-tokens
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:no-duplicate-attrs 39: hugo-template-tokens
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:no-duplicate-attrs 26: hugo-template-tokens
+intentional:
+  hugo-template-tokens: tool-wrong
+target: 0.3
+measured: {covered: 62, total: 19925, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   indent: 16182
   element-newline: 2175
   attrs-newline: 1158
   require-closing-tags: 153
   no-extra-spacing-tags: 132
-  no-multiple-h1: 45
-  no-duplicate-attrs: 37
+  no-multiple-h1: 20
   no-duplicate-id: 16
   no-obsolete-attrs: 12
   require-img-alt: 9
   use-baseline: 4
-  require-lang: 1
   require-li-container: 1
   require-title: 1

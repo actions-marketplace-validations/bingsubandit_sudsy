@@ -877,7 +877,7 @@ files:
   corpus/nowinandroid/feature/search/impl/src/main/kotlin/com/google/samples/apps/nowinandroid/feature/search/impl/SearchViewModel.kt: kt-dot-chain-sudsy
   corpus/nowinandroid/feature/topic/impl/src/main/kotlin/com/google/samples/apps/nowinandroid/feature/topic/impl/TopicScreen.kt: kt-comment-other
   corpus/nowinandroid/lint/src/test/kotlin/com/google/samples/apps/nowinandroid/lint/designsystem/DesignSystemDetectorTest.kt: kt-raw-string-lines
-measured: {covered: 109698, total: 118836, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 109702, total: 118836, main: '1f4c633b'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   function-signature: 1660
   multiline-expression-wrapping: 904
@@ -892,7 +892,6 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   statement-wrapping: 295
   function-literal: 264
   multiline-loop: 211
-  wrapping: 73
   no-unit-return: 188
   function-naming: 160
   if-else-wrapping: 144
@@ -905,6 +904,7 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   filename: 96
   when-entry-bracing: 89
   import-ordering: 80
+  wrapping: 73
   binary-expression-wrapping: 70
   parameter-list-wrapping: 61
   spacing-between-declarations-with-comments: 55
@@ -926,19 +926,19 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   no-multi-spaces: 6
   trailing-comma-on-call-site: 6
   annotation-spacing: 5
-  enum-entry-name-case: 5
   no-empty-class-body: 5
   parameter-list-spacing: 5
   blank-line-before-declaration: 3
+  function-return-type-spacing: 3
   max-line-length: 3
   comma-spacing: 2
   curly-spacing: 2
-  function-return-type-spacing: 3
   modifier-order: 2
   no-single-line-block-comment: 2
   try-catch-finally-spacing: 2
   class-naming: 1
   context-receiver-list-wrapping: 1
+  enum-entry-name-case: 1
   keyword-spacing: 1
   modifier-list-spacing: 1
   paren-spacing: 1

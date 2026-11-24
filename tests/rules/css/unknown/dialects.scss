@@ -2,5 +2,7 @@
 @apply a;
 @media (max-width: (iv.$tablet - 1px)) {}
 @import "a";
+^^^^^^^^^^^^ no-invalid-position-at-import-rule
 a { color: red }
 @import "b";
+^^^^^^^^^^^^ no-invalid-position-at-import-rule

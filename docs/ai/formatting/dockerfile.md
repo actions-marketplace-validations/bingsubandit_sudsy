@@ -45,3 +45,12 @@ Shared: suppression comments (`# sudsy-disable-next-line <rule>`), `no-empty-com
 
 ## Conformance
 `tests/conformance/fetch-dockerfile-corpus.sh` fetches the Dockerfiles of dotnet/dotnet-docker (samples and the 10.0 runtime, aspnet and sdk images), docker-library (golang, python, nginx, postgres), moby and buildx at pinned commits; `cargo test --profile corpus -p lang-dockerfile --test integration -- --ignored --nocapture conformance` checks that each file parses (but for the gap above), round-trips, keeps its instructions and arguments (the safety check, with comments compared as well) and formats idempotently.
+
+Where Sudsy differs from hadolint by design:
+
+<!-- generated:differences:hadolint -->
+
+- `windows-run-busybox`: the base image is `mcr.microsoft.com/windows/servercore` and the RUN line is `RUN powershell ...`: hadolint parses it as sh
+- `windows-run-escape`: the file has `# escape=` followed by a backtick, a Windows base image and no `SHELL`: its RUN lines run under cmd.exe, hadolint parses them as sh
+- `windows-run-powershell`: the file has a `SHELL` line that starts powershell on a Windows base image: its RUN lines run under PowerShell, hadolint parses them as sh
+<!-- /generated -->

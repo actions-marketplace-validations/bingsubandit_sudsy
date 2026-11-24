@@ -19,12 +19,19 @@ rule: { any: [{ kind: Value }, { kind: Prelude }] }
 token: { kind: [Url] }
 ---
 id: import-notation
-message: "write the @import with a string, not url()"
-description: "An `@import` of `url(...)`: write the string."
-example: "@import url(a.css);   # reported"
+message: "write the @import in the other notation (a string or url())"
+description: "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported)."
+example: "@import url(a.css);   # reported; with url: true, @import 'a.css'; is"
 severity: off
 category: style
-rule: { kind: AtRule, regex: '^@(?i:import)\s*(?i:url)\(' }
+options:
+  - { name: url, type: bool, default: false, description: Ask for url() instead of a string. }
+rule:
+  kind: AtRule
+  regex: '^@(?i:import)\b'
+  any:
+    - { not: { option: url }, regex: '^@(?i:import)\s*(?i:url)\(' }
+    - { option: url, not: { regex: '^@(?i:import)\s*(?i:url)\(' } }
 ---
 id: no-invalid-double-slash-comments
 message: "`//` does not start a comment in CSS"

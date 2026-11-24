@@ -41,6 +41,7 @@ pub mod flow_rules;
 pub mod format_diff;
 pub mod format_strings;
 pub mod hard_tabs;
+pub mod heading_outline;
 pub mod heading_style;
 pub mod hooks;
 pub mod imports;
@@ -80,6 +81,7 @@ pub mod token_case;
 pub mod tree;
 pub mod unicode_escape;
 pub mod unique;
+pub mod unknown_reference;
 pub mod word_names;
 pub mod word_table;
 

@@ -30,7 +30,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 20 | Vue | `vue-js-layout` 183 files; `vue/attributes-order` 81 |
 | 21 | Svelte | `svelte-attributes` 139 files; second-format not measured |
 | 22 | Protobuf | at the bar; `RPC_REQUEST_RESPONSE_UNIQUE` 117 (cross-file) |
-| 23 | CSS / SCSS / Less | CSS at the bar; SCSS `scss/` plugin rules (`dollar-variable-colon-space-after` 857, `no-global-function-names` 289) have no rules; Less `declaration-property-value-no-unknown` 806, `import-notation` 424; SCSS layout and comments |
+| 23 | CSS / SCSS / Less | CSS at the bar; SCSS `scss/` plugin rules (`dollar-variable-colon-space-after` 857, `no-global-function-names` 289) have no rules; Less `declaration-property-value-no-unknown` 806; SCSS layout and comments |
 | 24 | TOML | at the bar; second-format not measured |
 | 25 | JavaScript / TypeScript | at the bar; Prettier options of the projects (168 files) |
 | 26 | Python | at the bar; `RUF100` 83 |
@@ -40,6 +40,7 @@ Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured 
 ## Small tasks
 - Family rule documents of off-by-default rules are read in full at registration (PowerShell `scope.yaml` and `missing-mandatory-parameter.yaml` cost github-actions.lint-query about +120 allocations in a workflow with a PowerShell script): measure and load them lazily.
 - Speed row of StyleCop (`scripts/speed.sh stylecop`, the analyzer driver over the C# corpus; the run did not finish in 40 minutes on the agent host, so `bench/speed.json` still says not measured).
+- sqlfluff AL04 (`duplicate-table-alias`: a subquery's table alias against the enclosing select's, reported at the outer table; 10 findings missed): a `unique-names` option `outer` covered all 10 but cost sql.lint +39% instructions (a check per container, walking the select) and +24% with a first-container prefix walk and a green-tree probe; a cheaper bound is not found. Needs a per-scope memo (one pass per select) before it can land.
 - Input encoding support: a source in another encoding (the sqlfluff corpus file `collate.windows.win1252.sql`, Windows-1252) is read as UTF-8 only, so sudsy rejects it; gap `non-utf8-input` in `tests/parity/sqlfluff/differences.yaml` (201 layout findings count as missing).
 - `shape::leaves()` and `expr::findings` clone one `String` per key of the walked path: a borrowed path type would cut github-actions.lint allocs (+6.1% over the base before the expression step).
 - Python paren strip onto shared ParenPolicy/ParenHooks (for_target, await, one-item tuple arms).

@@ -1,6 +1,5 @@
 differences:
   script-line: gap  a script rule is reported at the line of the text of a block scalar; actionlint reports it at the line of the `|`
-  needs-location: gap  an unknown `needs` entry is reported at the entry; actionlint reports it at the job
   action-files: gap  the corpus feeds composite actions (`.github/actions/*/action.yaml`) to actionlint as workflows (13 structure findings); Sudsy lints workflows only
   self-hosted-labels: gap  a job with `self-hosted` is not checked for custom runner labels; actionlint wants them in its config
 files:
@@ -11,12 +10,8 @@ files:
   script-injection/cases sudsy:script-injection 7: script-line
   corpus/actionlint/testdata/err/github_script_untrusted_input.yaml actionlint:script-injection 11: script-line
   corpus/actionlint/testdata/err/github_script_untrusted_input.yaml sudsy:script-injection 16: script-line
-  unknown-needs/cases actionlint:unknown-needs 7: needs-location
-  unknown-needs/cases sudsy:unknown-needs 8: needs-location
-  corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml actionlint:unknown-needs 8: needs-location
-  corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml sudsy:unknown-needs 9: needs-location
   invalid-runs-on/cases actionlint:invalid-runs-on 7: self-hosted-labels
-target: 85.2
+target: 85.3
 fixes:  # lint rule -> where and what to change
   syntax-check: "rows in crates/lang-github-actions/src/shape.rs (core_rules::shape): missing messages are one-off sections (snapshot, environment string forms), typed defaults, anchors"
   expression/types: "no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)"
@@ -26,7 +21,7 @@ fixes:  # lint rule -> where and what to change
   glob: "filter patterns of branches, tags and paths: a glob syntax check in a shared crate"
   if-cond: "an `if:` that is always true: needs the expression parser"
   events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"
-measured: {covered: 614, total: 721, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 615, total: 721, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   expression/types: 14
   action: 12
@@ -51,4 +46,3 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   syntax-check/undefined-alias: 2
   events/inputs: 1
   job-needs/duplicate: 1
-  job-needs/unknown: 1
