@@ -5,7 +5,9 @@
 //!
 //! concept: none (glue: registration of the shared rules)
 
-use crate::comments::{CommentSpace, NoEmptyComment, NoSingleLineBlockComment};
+use crate::comments::{
+    BlockCommentAfterOpen, CommentSpace, NoEmptyComment, NoSingleLineBlockComment,
+};
 use crate::keys::{KeyNameCasing, NoDuplicateKeys, NoEmptyKeys};
 use crate::options::{Check, Opt, OptionDecl};
 use crate::rule;
@@ -20,6 +22,7 @@ pub static RULES: &[&dyn Rule] = &[
     &CommentSpace,
     &NoEmptyComment,
     &NoSingleLineBlockComment,
+    &BlockCommentAfterOpen,
     &NoDuplicateKeys,
     &NoEmptyKeys,
     &NoDuplicateSections,

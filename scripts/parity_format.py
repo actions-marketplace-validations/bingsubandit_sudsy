@@ -110,8 +110,10 @@ def install(spec, catalog, version, prefix):
             exe.write_text(f'#!/bin/sh\n{env}export GEM_HOME="{gems}"\nexec "{ruby}" "{gems}/bin/{spec["gem"]}" "$@"\n')
             exe.chmod(0o755)
     elif "dotnet-project" in spec:  # a .NET project of this repository, built into prefix at the tool's version
-        if not (prefix / spec["dll"]).exists():
+        stamp = hashlib.sha256(b"".join(f.read_bytes() for f in sorted((ROOT / spec["dotnet-project"]).glob("*.cs*")))).hexdigest()  # a changed source rebuilds
+        if not (prefix / spec["dll"]).exists() or not (prefix / ".source-hash").exists() or (prefix / ".source-hash").read_text() != stamp:
             run(["dotnet", "build", "-c", "Release", "--nologo", "-v:q", f"-p:StyleCopVersion={version}", "-o", prefix, spec["dotnet-project"]], ROOT)
+            (prefix / ".source-hash").write_text(stamp)
     elif "dotnet-tool" in spec:
         if not executable(prefix, spec["exe"]).exists():
             run(["dotnet", "tool", "install", spec["dotnet-tool"], "--version", version, "--tool-path", prefix], ROOT)

@@ -229,8 +229,8 @@ Format: unclassified 0 of 15 differing files (0%).
 36. `kt-array-hug` (1 files): an annotation argument array stays on the `=` line in ktlint (`foo = [`); fix: a shared option: keep `name = [` on the `=` line in annotation arguments
 37. `kt-ctor-annot-header` (1 files): the annotated constructor header differs; fix: classify further
 38. `kt-template-braces` (1 files): `${name}` is written as `$name` by ktlint; fix: a shared rule: `${name}` to `$name` when no identifier char follows
-Lint: target 92.3% (109563 of 118835, 9272 missed, measured on f4e9edb2); rules by missed findings:
-1. `function-signature` (1671 missed)
+Lint: target 92.3% (109698 of 118836, 9138 missed, measured on 2ad6316d); rules by missed findings:
+1. `function-signature` (1660 missed)
 2. `multiline-expression-wrapping` (904 missed)
 3. `blank-line-between-when-conditions` (726 missed)
 4. `string-template-indent` (534 missed)
@@ -243,10 +243,10 @@ Lint: target 92.3% (109563 of 118835, 9272 missed, measured on f4e9edb2); rules 
 11. `statement-wrapping` (295 missed)
 12. `function-literal` (264 missed)
 13. `multiline-loop` (211 missed)
-14. `wrapping` (197 missed)
-15. `no-unit-return` (188 missed)
+14. `no-unit-return` (188 missed)
+15. `function-naming` (160 missed)
 
-48 more rules: 1863 missed.
+48 more rules: 1777 missed.
 
 ## markdownlint
 
@@ -469,22 +469,24 @@ Lint: target 85.7% (17297 of 20182, 2885 missed, measured on f4e9edb2); rules by
 ## stylecop
 
 1. `error-directive` (4 files): the preprocessor symbols of the platform are not set, so no branch of the `#if` chain is active (an `#error` or a missing value) and Sudsy refuses the file; Roslyn reads it
-Lint: target 23.5%; rules by missed findings (an incomplete list: not re-measured with the layout findings):
+Lint: target 24.6% (100884 of 409320, 308436 missed, measured on a6a124c7); rules by missed findings:
 1. `SA1101` (108918 missed)
 2. `SA1600` (59930 missed)
 3. `SA1611` (45566 missed)
 4. `SA1200` (25732 missed)
-5. `SX1101` (12181 missed)
-6. `SA1309` (9589 missed)
-7. `SA1633` (7626 missed)
-8. `SA1602` (7380 missed)
-9. `SA1119_p` (6440 missed)
-10. `SA1503` (6318 missed)
-11. `SA1609` (5219 missed)
-12. `SA1623` (3892 missed)
-13. `SA1119` (3220 missed)
-14. `SA1316` (3089 missed)
-15. `SA1305` (1954 missed)
+5. `SA1309` (9589 missed)
+6. `SA1633` (7626 missed)
+7. `SA1602` (7380 missed)
+8. `SA1009` (6637 missed)
+9. `SA1503` (6318 missed)
+10. `SA1623` (3892 missed)
+11. `SA1119` (3220 missed)
+12. `SA1316` (3089 missed)
+13. `SA1128` (2321 missed)
+14. `SA1300` (1604 missed)
+15. `SA1401` (1594 missed)
+
+79 more rules: 15020 missed.
 
 ## stylelint
 

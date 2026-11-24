@@ -17,6 +17,7 @@ kotlin:
       newline-wrapping: warn
       import-ordering: warn
       no-single-line-block-comment: warn
+      block-comment-after-open: warn
       blank-line-between-when-conditions: warn
       blank-line-between-declarations: warn
       class-naming: warn

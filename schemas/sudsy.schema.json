@@ -500,6 +500,42 @@
               "$ref": "#/definitions/rule",
               "description": "A `when` entry with a blank line the formatter would add or remove before it (ktlint blank-line-between-when-conditions)."
             },
+            "block-comment-after-open": {
+              "description": "A block comment that follows an opening token on its line and ends the line (`if (a) {    /* note */`): the code after the token starts on a line of its own (ktlint `wrapping`). A line comment there is left alone.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "after": {
+                          "default": [
+                            "{"
+                          ],
+                          "description": "The tokens a block comment must not follow on their line.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "block-no-empty": {
               "$ref": "#/definitions/rule",
               "description": "A rule or at-rule block with nothing in it, comments included."

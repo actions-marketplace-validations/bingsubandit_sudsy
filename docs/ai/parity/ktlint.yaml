@@ -105,4 +105,4 @@ entries:
   unary-op-spacing: formatter
   value-argument-comment: planned
   value-parameter-comment: planned
-  wrapping: rule newline-wrapping
+  wrapping: rule newline-wrapping, block-comment-after-open

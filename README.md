@@ -68,10 +68,10 @@ Each number is measured on real-world code against the reference tool with its d
 | Python | ████████░░ 86% ruff format | █████████░ 94% ruff | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
-| GraphQL | █████████░ 99% Prettier | 23 rules · no reference tool | Ready |
-| TOML | █████████░ 98% taplo | 17 rules · no reference tool | Ready |
+| GraphQL | █████████░ 99% Prettier | 24 rules · no reference tool | Ready |
+| TOML | █████████░ 98% taplo | 18 rules · no reference tool | Ready |
 | Vue / Svelte | ████████░░ 89% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
-| Angular templates | █████████░ 97% Prettier | 154 rules · no reference tool | Ready |
+| Angular templates | █████████░ 97% Prettier | 155 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>██░░░░░░░░ 20% stylelint-scss<br>███████░░░ 78% stylelint-less | Ready |
 | Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
@@ -79,17 +79,17 @@ Each number is measured on real-world code against the reference tool with its d
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
-| XML | █████████░ 99% CSharpier XML | 19 rules · no reference tool | Ready |
+| XML | █████████░ 99% CSharpier XML | 20 rules · no reference tool | Ready |
 | Dockerfile | ██████████ 100% stable · no reference tool | ████████░░ 86% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
-| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 26 rules · no reference tool | Ready |
+| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 27 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>████████░░ 86% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | ░░░░░░░░░░ 0% eslint-plugin-jsonc | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
 | SQL | ███████░░░ 79% sqlfluff | ████████░░ 85% sqlfluff | In progress |
-| C# | ██████████ 100% CSharpier | ██░░░░░░░░ 23% StyleCop<br>not measured Roslynator | In progress |
+| C# | ██████████ 100% CSharpier | ██░░░░░░░░ 24% StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
