@@ -1,4 +1,6 @@
 # The rules of revive's default set that Sudsy has, at warn (the rest are in docs/ai/parity/revive.yaml).
 go:
   lint:
-    rules: {}
+    rules:
+      redefines-builtin-id: warn
+      unused-parameter: warn

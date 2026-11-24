@@ -246,6 +246,7 @@ pub struct Table {
     hosts: Vec<bool>,
     name_tokens: Vec<SyntaxKind>,
     labels: Vec<SyntaxKind>,
+    late: Vec<SyntaxKind>,
     operators: Vec<bool>,
     params: Vec<bool>,
     bare: bool,
@@ -284,6 +285,7 @@ impl Table {
             hosts: vec![false; size(false)],
             name_tokens: name_tokens.iter().map(|n| kind(n)).collect(),
             labels: Vec::new(),
+            late: Vec::new(),
             operators: vec![false; size(true)],
             params: vec![false; size(false)],
             bare: false,
@@ -377,6 +379,21 @@ impl Table {
             .map(|k| grammar.kind_by_name(k).expect("scope table: label kind"))
             .collect();
         self
+    }
+
+    /// Declarations of these kinds in a function or block take effect after their own statement: a
+    /// read before its end sees the name of the scope around (Go `ctx := ctx.With()`, Kotlin
+    /// `val x = x.trim()`).
+    pub fn late_declares(mut self, kinds: &[&str], grammar: &Grammar) -> Table {
+        self.late = kinds
+            .iter()
+            .map(|k| grammar.kind_by_name(k).expect("scope table: late kind"))
+            .collect();
+        self
+    }
+
+    pub(crate) fn is_late(&self, kind: SyntaxKind) -> bool {
+        self.late.contains(&kind)
     }
 
     pub(crate) fn has_labels(&self) -> bool {

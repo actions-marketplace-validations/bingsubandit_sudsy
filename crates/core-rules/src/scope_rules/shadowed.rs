@@ -76,7 +76,7 @@ fn is_expression_name(s: &Symbol) -> bool {
 }
 
 /// Is a declaration with these flags one of the `kinds`?
-fn of_kind(flags: Flags, kinds: &[&str]) -> bool {
+pub(super) fn of_kind(flags: Flags, kinds: &[&str]) -> bool {
     kinds.is_empty()
         || kinds.iter().any(|k| match *k {
             "parameter" => flags.contains(Flags::PARAMETER),

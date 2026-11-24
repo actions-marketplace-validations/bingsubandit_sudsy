@@ -101,8 +101,8 @@ entries:
   UP024: rule os-error-alias
   UP025: rule unicode-literal
   W605: rule invalid-escape-sequence
-  A001: planned
-  A002: planned
+  A001: rule redefines-builtin-id
+  A002: rule redefines-builtin-id
   A003: planned
   A004: planned
   A005: planned

@@ -478,6 +478,11 @@ impl Binder<'_> {
         if let Some(target) = self.model.redirect(scope, &name) {
             scope = target;
         }
+        // A late declaration lives in a function or block, not in the file or a type body.
+        let late = self.table.is_late(node.1) && {
+            let s = self.model.scope(scope);
+            s.parent.is_some() && !self.grammar.has_tag(s.node.kind(), "type-declaration")
+        };
         let decl = Decl {
             name: range,
             node_range: node.0,
@@ -485,6 +490,7 @@ impl Binder<'_> {
             binding_range: binding.text_range(),
             binding_kind: binding.kind(),
             flags,
+            late,
             from: self.current(),
         };
         let scope_ref = &mut self.model.scopes[scope.0 as usize];
@@ -655,6 +661,12 @@ impl Binder<'_> {
             let access = match hit.map(|(_, f)| settle(*f, node, table)) {
                 Some(Flow::Skip) => continue,
                 Some(Flow::Declare) => {
+                    let name = self.intern(text);
+                    self.declare(name, range, node);
+                    continue;
+                }
+                // The node around declares: its names are bare tokens (Go `a, b := ...`).
+                None if state.contains(Access::DECLARE) => {
                     let name = self.intern(text);
                     self.declare(name, range, node);
                     continue;

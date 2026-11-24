@@ -8783,6 +8783,222 @@
       "upstream": []
     },
     {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nvar len = 1\n\nconst iota = 2\n\nfunc new() {}\n\nfunc f(copy int, s string) (error int) {\n\tmax := 1\n\tmin = 2\n\t_, print := 1, 2\n\treturn\n}\n\nfunc (string T) method() {}\n\nfunc g[any int]() {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 5,
+            "length": 3,
+            "line": 3
+          },
+          {
+            "column": 7,
+            "length": 4,
+            "line": 5
+          },
+          {
+            "column": 6,
+            "length": 3,
+            "line": 7
+          },
+          {
+            "column": 8,
+            "length": 4,
+            "line": 9
+          },
+          {
+            "column": 29,
+            "length": 5,
+            "line": 9
+          },
+          {
+            "column": 2,
+            "length": 3,
+            "line": 10
+          },
+          {
+            "column": 2,
+            "length": 3,
+            "line": 11
+          },
+          {
+            "column": 5,
+            "length": 5,
+            "line": 12
+          },
+          {
+            "column": 8,
+            "length": 3,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "redefines-builtin-id",
+      "languages": [
+        "go",
+        "python"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "Names that may be declared.",
+          "name": "allow",
+          "type": "list"
+        },
+        {
+          "choices": [
+            "variable",
+            "parameter",
+            "function",
+            "class",
+            "import",
+            "type"
+          ],
+          "default": [],
+          "description": "The declarations that are checked (empty: all).",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [
+            "ReceiverList"
+          ],
+          "description": "Grammar kinds whose direct declarations are left out (a receiver).",
+          "name": "except_parents",
+          "type": "list"
+        },
+        {
+          "default": [
+            "AssignmentStatement"
+          ],
+          "description": "Grammar kinds of statements whose left-side names are reported too (`len = 1`, `max += 1`).",
+          "name": "assigned_by",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "redefines-builtin-id",
+          "partial": false,
+          "tool": "revive"
+        },
+        {
+          "id": "A001",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "A002",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc used(a, b int) int { return a + b }\n\nfunc unused(a, b int) int {\n\treturn a\n}\n\nfunc assigned(a int) { a = 1 }\nfunc blank(_ int, _x string) {}\n\nfunc lit() func(int) int {\n\treturn func(n int) int { return 1 }\n}\n\nfunc (r *T) method(x int) (n int, err error) {\n\treturn\n}\n\nfunc shadowed(a int) {\n\tif true {\n\t\ta := 1\n\t\t_ = a\n\t}\n}\n\ntype F func(a int)\nfunc noBody(a int)\n\nfunc initReads(ctx int) {\n\tctx, c := wrap(ctx)\n\t_, _ = ctx, c\n\tif true {\n\t\tctx := ctx + 1\n\t\t_ = ctx\n\t}\n}\n\nfunc readBefore(err error) {\n\tif err != nil {\n\t\treturn\n\t}\n\tx, err := wrap(2)\n\t_, _ = x, err\n}\n\nfunc redeclared(ml int) {\n\tml, err := wrap(1)\n\t_, _ = ml, err\n}\n\nfunc newBool(pos int, true bool) bool {\n\treturn true\n}\n\nfunc deferred() {\n\tdefer func(iota int) { sink = iota }(1)\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 16,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 14,
+            "length": 1,
+            "line": 13
+          },
+          {
+            "column": 20,
+            "length": 1,
+            "line": 16
+          },
+          {
+            "column": 15,
+            "length": 1,
+            "line": 20
+          },
+          {
+            "column": 14,
+            "length": 3,
+            "line": 52
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unused-parameter",
+      "languages": [
+        "go",
+        "js",
+        "powershell"
+      ],
+      "options": [
+        {
+          "choices": [
+            "after-used",
+            "all",
+            "none"
+          ],
+          "default": "all",
+          "description": "Which parameters are checked: those after the last one that is read, all of them, or none.",
+          "name": "args",
+          "type": "string"
+        },
+        {
+          "default": "^_",
+          "description": "A regex for the names that are not checked (revive's `allowRegex`).",
+          "name": "ignore_pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "go/revive",
+        "js/eslint-recommended",
+        "js/typescript-eslint-recommended",
+        "js/biome-recommended",
+        "js/oxlint",
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "no-unused-vars",
+          "partial": true,
+          "tool": "eslint"
+        },
+        {
+          "id": "PSReviewUnusedParameter",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "unused-parameter",
+          "partial": false,
+          "tool": "revive"
+        },
+        {
+          "id": "no-unused-vars",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
+    },
+    {
       "category": "style",
       "default_level": "off",
       "description": "A name does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it. Equivalent: graphql-eslint naming-convention (styles only, no prefix or suffix lists).",
@@ -13338,73 +13554,6 @@
           "id": "F821",
           "partial": false,
           "tool": "ruff"
-        }
-      ]
-    },
-    {
-      "category": "suspicious",
-      "default_level": "off",
-      "description": "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "function F {\n    param([Parameter(Mandatory = $true)]$Unused, $Used)\n    $Used\n}\nfunction G {\n    param($a, $b)\n    $a | ForEach-Object { $b }\n    { $a }\n}\n",
-        "language": "powershell",
-        "spans": [
-          {
-            "column": 41,
-            "length": 7,
-            "line": 2
-          }
-        ]
-      },
-      "fix": null,
-      "id": "unused-parameter",
-      "languages": [
-        "js",
-        "powershell"
-      ],
-      "options": [
-        {
-          "choices": [
-            "after-used",
-            "all",
-            "none"
-          ],
-          "default": "after-used",
-          "description": "Which parameters are checked: those after the last one that is read, all of them, or none.",
-          "name": "args",
-          "type": "string"
-        },
-        {
-          "default": "",
-          "description": "A regex for the names that are not checked (ESLint's `argsIgnorePattern`).",
-          "name": "ignore_pattern",
-          "type": "string"
-        }
-      ],
-      "presets": [
-        "js/eslint-recommended",
-        "js/typescript-eslint-recommended",
-        "js/biome-recommended",
-        "js/oxlint",
-        "powershell/psscriptanalyzer"
-      ],
-      "upstream": [
-        {
-          "id": "no-unused-vars",
-          "partial": true,
-          "tool": "eslint"
-        },
-        {
-          "id": "PSReviewUnusedParameter",
-          "partial": true,
-          "tool": "psscriptanalyzer"
-        },
-        {
-          "id": "no-unused-vars",
-          "partial": true,
-          "tool": "typescript-eslint"
         }
       ]
     },

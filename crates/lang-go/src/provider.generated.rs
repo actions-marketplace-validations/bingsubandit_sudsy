@@ -7,7 +7,7 @@ core_syntax::include_generated!();
 
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {
-    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("go", tree_sitter_go::LANGUAGE), grammar: grammars::GO, mapping: &MAPPING, extensions: &["go"], file_names: &[], schema: option_schema(), formatter: &core_format::VerbatimFormatter { exact_end: &[] }, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: None })
+    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("go", tree_sitter_go::LANGUAGE), grammar: grammars::GO, mapping: &MAPPING, extensions: &["go"], file_names: &[], schema: option_schema(), formatter: &core_format::VerbatimFormatter { exact_end: &[] }, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: scope::FAMILIES, validate: None })
 }
 
 pub const MAPPING: Mapping = Mapping {
@@ -124,6 +124,8 @@ pub const MAPPING: Mapping = Mapping {
         ("type_parameter_list", "TypeParameterList"),
         ("type_parameter_declaration", "TypeParameterDeclaration"),
         ("parameter_list", "ParameterList"),
+        ("result_list", "ResultList"),
+        ("receiver_list", "ReceiverList"),
         ("parameter_declaration", "ParameterDeclaration"),
         ("variadic_parameter_declaration", "VariadicParameterDeclaration"),
         ("const_declaration", "ConstDeclaration"),

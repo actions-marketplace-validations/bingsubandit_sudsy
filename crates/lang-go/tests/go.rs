@@ -66,6 +66,22 @@ fn methods_take_type_parameters() {
     );
 }
 
+/// A receiver and the results of a function are lists of their own kinds, not parameter lists:
+/// the scope rows and `redefines-builtin-id` tell them apart from parameters by the parent.
+#[test]
+fn receiver_and_results_have_kinds_of_their_own() {
+    let provider = lang_go::provider();
+    let src = "package a\n\nfunc (r T) m(a int) (n int, err error) {}\n";
+    let parsed = provider.parse(&SourceFile::new("a.go", 1, src)).unwrap();
+    let grammar = provider.grammar();
+    let kinds: Vec<_> = (parsed.tree.descendants())
+        .map(|n| grammar.name(n.kind()))
+        .collect();
+    let count = |k: &str| kinds.iter().filter(|n| **n == k).count();
+    assert_eq!((count("ReceiverList"), count("ResultList")), (1, 1));
+    assert_eq!(count("ParameterList"), 1);
+}
+
 /// Go syntax the grammar must take: generics, select, labels, goto, struct tags, raw strings,
 /// composite literals, channels, closures, iota, type switches, all numeric literals.
 #[test]

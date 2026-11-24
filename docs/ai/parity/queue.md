@@ -8,7 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| Go | lint revive | 4 | 0.0% | 85.0 | 40341 findings | `exported` 15691, `unused-parameter` 14178, `var-naming` 10923 | 9 | 37.78 | 1456737e |
+| Go | lint revive | 4 | 32.0% | 53.0 | 25183 findings | `exported` 15691, `var-naming` 10923 | 6 | 35.33 | a7429532 |
 | SQL | format sqlfluff | 4 | 78.3% | 6.7 | 56 files | `identifier-case` 103 | 3 | 8.93 | - |
 | SQL | lint sqlfluff | 4 | 79.7% | 5.3 | 6342 findings | `LT02` 11125 | 3 | 7.07 | 1456737e |
 | C / C++ | format clang-format | 4 | 61.7% | 23.3 | 1548 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +2 more | 18 | 5.18 | - |
@@ -471,24 +471,24 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 
 ## revive
 
-Lint: target 0% (0 of 47459, 47459 missed, measured on 1456737e); rules by missed findings:
+Lint: target 32% (15180 of 47485, 32305 missed, measured on a7429532); rules by missed findings:
 1. `exported` (15691 missed)
-2. `unused-parameter` (14178 missed)
-3. `var-naming` (10923 missed)
-4. `package-comments` (2355 missed)
-5. `redefines-builtin-id` (1042 missed)
-6. `receiver-naming` (899 missed)
-7. `indent-error-flow` (472 missed)
-8. `empty-block` (320 missed)
-9. `dot-imports` (297 missed)
-10. `var-declaration` (238 missed)
-11. `context-as-argument` (237 missed)
-12. `increment-decrement` (189 missed)
-13. `error-strings` (183 missed)
-14. `unexported-return` (138 missed)
-15. `blank-imports` (82 missed)
+2. `var-naming` (10923 missed)
+3. `package-comments` (2355 missed)
+4. `receiver-naming` (899 missed)
+5. `indent-error-flow` (472 missed)
+6. `empty-block` (320 missed)
+7. `dot-imports` (297 missed)
+8. `var-declaration` (254 missed)
+9. `context-as-argument` (237 missed)
+10. `increment-decrement` (189 missed)
+11. `error-strings` (183 missed)
+12. `unexported-return` (141 missed)
+13. `blank-imports` (82 missed)
+14. `error-naming` (79 missed)
+15. `superfluous-else` (75 missed)
 
-7 more rules: 215 missed.
+8 more rules: 108 missed.
 
 ## roslynator
 

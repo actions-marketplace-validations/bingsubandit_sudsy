@@ -61,46 +61,48 @@ token Iota #literal
 token Eof
 token Unknown #error
 
-node SourceFile
+node SourceFile #scope
 node PackageClause
 node ImportDeclaration
 node ImportSpec
 node ImportSpecList
-node FunctionDeclaration
-node MethodDeclaration
+node FunctionDeclaration #scope #function = Keyword name:Ident TypeParameterList? parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?
+node MethodDeclaration #scope #function = Keyword receiver:ReceiverList name:FieldIdent TypeParameterList? parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?
 node TypeParameterList
 node TypeParameterDeclaration
-node ParameterList
-node ParameterDeclaration
-node VariadicParameterDeclaration
+node ParameterList #parameter-list
+node ResultList #parameter-list
+node ReceiverList #parameter-list
+node ParameterDeclaration #parameter
+node VariadicParameterDeclaration #parameter
 node ConstDeclaration
 node ConstSpec
 node VarDeclaration
 node VarSpec
 node VarSpecList
 node TypeDeclaration
-node TypeSpec
-node TypeAlias
+node TypeSpec #scope
+node TypeAlias #scope
 node TypeArguments
 node TypeElem
 node TypeConstraint
-node ArrayType
-node ImplicitLengthArrayType
-node SliceType
-node StructType
+node ArrayType #type
+node ImplicitLengthArrayType #type
+node SliceType #type
+node StructType #type
 node FieldDeclarationList
 node FieldDeclaration
-node PointerType
-node FunctionType
-node InterfaceType
-node MethodElem
-node MapType
-node ChannelType
-node QualifiedType
-node GenericType
-node NegatedType
-node ParenthesizedType
-node Block
+node PointerType #type
+node FunctionType #scope #signature #type
+node InterfaceType #type
+node MethodElem #scope #signature
+node MapType #type
+node ChannelType #type
+node QualifiedType #type
+node GenericType #type
+node NegatedType #type
+node ParenthesizedType #type
+node Block #block
 node StatementList
 node EmptyStatement
 node ExpressionStatement
@@ -113,15 +115,15 @@ node GotoStatement
 node ReturnStatement
 node GoStatement
 node DeferStatement
-node IfStatement
-node ExpressionSwitchStatement
-node TypeSwitchStatement
-node ExpressionCase
-node TypeCase
-node DefaultCase
-node SelectStatement
-node CommunicationCase
-node ForStatement
+node IfStatement #scope
+node ExpressionSwitchStatement #scope
+node TypeSwitchStatement #scope
+node ExpressionCase #scope
+node TypeCase #scope
+node DefaultCase #scope
+node SelectStatement #scope
+node CommunicationCase #scope
+node ForStatement #scope
 node ForClause
 node RangeClause
 node SendStatement
@@ -147,4 +149,4 @@ node CompositeLiteral
 node LiteralValue
 node LiteralElement
 node KeyedElement
-node FuncLiteral
+node FuncLiteral #scope #function = Keyword parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?

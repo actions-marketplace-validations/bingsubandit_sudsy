@@ -4,7 +4,7 @@ languages: ["go"]
 sources:
   - "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md"
   - "https://github.com/mgechev/revive/blob/v1.17.1/defaults.toml"
-scope: "The 23 rules of revive's default configuration (no config file: `defaults.toml`, confidence 0.8, generated files linted); the other rules need a configuration file that turns them on and are `deferred`. revive reads each file of a package with the package's other files (`package-comments`) and, for four rules, go/types (`var-declaration`, `unexported-return`, `context-keys-type`, `time-naming`); Sudsy reads one file at a time."
+scope: "The 23 rules of revive's default configuration (no config file: `defaults.toml`, confidence 0.8, files with the `Code generated ... DO NOT EDIT.` header skipped); the other rules need a configuration file that turns them on and are `deferred`. revive reads each file of a package with the package's other files (`package-comments`) and, for four rules, go/types (`var-declaration`, `unexported-return`, `context-keys-type`, `time-naming`); Sudsy reads one file at a time."
 entries:
   add-constant: deferred | not in the default configuration of revive
   argument-limit: deferred | not in the default configuration of revive
@@ -77,7 +77,7 @@ entries:
   range-val-address: deferred | not in the default configuration of revive
   range-val-in-closure: deferred | not in the default configuration of revive
   receiver-naming: planned
-  redefines-builtin-id: planned
+  redefines-builtin-id: rule redefines-builtin-id
   redundant-build-tag: deferred | not in the default configuration of revive
   redundant-import-alias: deferred | not in the default configuration of revive
   redundant-test-main-exit: deferred | not in the default configuration of revive
@@ -98,7 +98,7 @@ entries:
   unnecessary-stmt: deferred | not in the default configuration of revive
   unreachable-code: planned
   unsecure-url-scheme: deferred | not in the default configuration of revive
-  unused-parameter: planned
+  unused-parameter: rule unused-parameter
   unused-receiver: deferred | not in the default configuration of revive
   use-any: deferred | not in the default configuration of revive
   use-errors-new: deferred | not in the default configuration of revive

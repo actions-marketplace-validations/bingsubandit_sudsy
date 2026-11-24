@@ -91,7 +91,7 @@ Each number is measured on real-world code against the reference tool with its d
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 | SQL | ███████░░░ 78% sqlfluff | ███████░░░ 79% sqlfluff | In progress |
 | C / C++ | ██████░░░░ 61% clang-format | not measured clang-tidy | In progress |
-| Go | none | ░░░░░░░░░░ 0% revive | Lint only: In progress |
+| Go | none | ███░░░░░░░ 32% revive | Lint only: In progress |
 
 Notes: clang-format (C / C++): line wrapping is not compared.
 

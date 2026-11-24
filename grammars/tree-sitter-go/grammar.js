@@ -224,17 +224,17 @@ module.exports = grammar({
       field('name', $.identifier),
       field('type_parameters', optional($.type_parameter_list)),
       field('parameters', $.parameter_list),
-      field('result', optional(choice($.parameter_list, $._simple_type))),
+      field('result', optional(choice(alias($.parameter_list, $.result_list), $._simple_type))),
       field('body', optional($.block)),
     )),
 
     method_declaration: $ => prec.right(1, seq(
       'func',
-      field('receiver', $.parameter_list),
+      field('receiver', alias($.parameter_list, $.receiver_list)),
       field('name', $._field_identifier),
       field('type_parameters', optional($.type_parameter_list)),
       field('parameters', $.parameter_list),
-      field('result', optional(choice($.parameter_list, $._simple_type))),
+      field('result', optional(choice(alias($.parameter_list, $.result_list), $._simple_type))),
       field('body', optional($.block)),
     )),
 
@@ -413,7 +413,7 @@ module.exports = grammar({
     method_elem: $ => seq(
       field('name', $._field_identifier),
       field('parameters', $.parameter_list),
-      field('result', optional(choice($.parameter_list, $._simple_type))),
+      field('result', optional(choice(alias($.parameter_list, $.result_list), $._simple_type))),
     ),
 
     type_elem: $ => sep1($._type, '|'),
@@ -435,7 +435,7 @@ module.exports = grammar({
     function_type: $ => prec.right(seq(
       'func',
       field('parameters', $.parameter_list),
-      field('result', optional(choice($.parameter_list, $._simple_type))),
+      field('result', optional(choice(alias($.parameter_list, $.result_list), $._simple_type))),
     )),
 
     block: $ => seq(
@@ -824,7 +824,7 @@ module.exports = grammar({
     func_literal: $ => seq(
       'func',
       field('parameters', $.parameter_list),
-      field('result', optional(choice($.parameter_list, $._simple_type))),
+      field('result', optional(choice(alias($.parameter_list, $.result_list), $._simple_type))),
       field('body', $.block),
     ),
 

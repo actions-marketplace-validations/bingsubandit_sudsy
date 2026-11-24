@@ -5267,6 +5267,76 @@
               "$ref": "#/definitions/rule",
               "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked."
             },
+            "redefines-builtin-id": {
+              "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allow": {
+                          "default": [],
+                          "description": "Names that may be declared.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "assigned_by": {
+                          "default": [
+                            "AssignmentStatement"
+                          ],
+                          "description": "Grammar kinds of statements whose left-side names are reported too (`len = 1`, `max += 1`).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "except_parents": {
+                          "default": [
+                            "ReceiverList"
+                          ],
+                          "description": "Grammar kinds whose direct declarations are left out (a receiver).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The declarations that are checked (empty: all).",
+                          "items": {
+                            "enum": [
+                              "variable",
+                              "parameter",
+                              "function",
+                              "class",
+                              "import",
+                              "type"
+                            ],
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "redundant-pattern": {
               "$ref": "#/definitions/rule",
               "description": "A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)."
@@ -7111,7 +7181,7 @@
               "description": "A method parameter that the method never reads (RuboCop Lint/UnusedMethodArgument). Names that start with `_`, empty methods and methods that only raise NotImplementedError are left alone. No fix."
             },
             "unused-parameter": {
-              "description": "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used.",
+              "description": "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7126,7 +7196,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "args": {
-                          "default": "after-used",
+                          "default": "all",
                           "description": "Which parameters are checked: those after the last one that is read, all of them, or none.",
                           "enum": [
                             "after-used",
@@ -7136,8 +7206,8 @@
                           "type": "string"
                         },
                         "ignore_pattern": {
-                          "default": "",
-                          "description": "A regex for the names that are not checked (ESLint's `argsIgnorePattern`).",
+                          "default": "^_",
+                          "description": "A regex for the names that are not checked (revive's `allowRegex`).",
                           "type": "string"
                         }
                       },

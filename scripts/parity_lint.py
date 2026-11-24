@@ -834,6 +834,21 @@ def coverage(tool, sudsy, version, prefix, exe):
         if r in on and (f, r) not in wanted and f not in fatal:
             extra[r] = extra.get(r, 0) + len(ms)
     print("only Sudsy (files the tool reports the rule in nowhere): " + (", ".join(f"{r} {n}" for r, n in sorted(extra.items(), key=lambda kv: -kv[1])[:12]) or "none"))
+    tool_lines = {(f, mapping[r], line) for f, r, _, line in found if r in mapping}  # a finding of Sudsy on a line where the tool reports the mapped rule is no extra
+    sudsy_total, sudsy_extra = collections.Counter(), collections.Counter()
+    extra_at = collections.defaultdict(list)
+    for (f, r), ms in ours.items():
+        if r in set(mapping.values()) and f not in fatal:
+            for _, line in ms:
+                sudsy_total[r] += 1
+                sudsy_extra[r] += (f, r, line) not in tool_lines
+                if (f, r, line) not in tool_lines:
+                    extra_at[r].append(f"{f}:{line}")
+    print("only Sudsy on the line (extra findings of the mapped rules): " + (", ".join(f"{r} {n} of {sudsy_total[r]} ({100 * n / sudsy_total[r]:.1f}%)" for r, n in sorted(sudsy_extra.items(), key=lambda kv: -kv[1]) if n) or "none"))
+    if os.environ.get("COVERAGE_EXTRAS"):
+        Path(os.environ["COVERAGE_EXTRAS"]).write_text(json.dumps(extra_at), encoding="utf-8")
+    for r, at in extra_at.items():
+        print(f"  extra {r} e.g. " + ", ".join(at[:: max(1, len(at) // 6)][:6]))
     if os.environ.get("COVERAGE_OFFSETS"):
         print(f"  audit: {filehits[0]} of {total} findings have a report of the mapped rule in the file ({round(1000 * filehits[0] / total) / 10 if total else 100.0}%), {hit} of them on the line")  # the line audit: where Sudsy reports a finding the tool puts on another line
         for rule, c in sorted(offsets.items()):

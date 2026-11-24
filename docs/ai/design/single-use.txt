@@ -264,7 +264,6 @@ data tag:named-type # users: js
 data tag:negated # users: ruby
 data tag:raw-strings # users: js
 data tag:regex # users: js
-data tag:signature # users: js
 data tag:string-escapes # users: python
 data tag:string-literal # users: python
 data tag:tuple # users: python

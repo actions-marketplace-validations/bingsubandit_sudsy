@@ -8,6 +8,7 @@
 //! rules: unused-variable, unused-parameter, unused-import, undefined-variable, shadowed-variable, redeclared-variable, use-before-define, ambiguous-name
 //! reads: family:scope
 
+mod builtins;
 mod cx;
 mod expansions;
 mod ordered;
@@ -44,6 +45,7 @@ pub struct ScopeLang {
     sigils: &'static str,
     fold: bool,
     element_writes: &'static [&'static str],
+    late: &'static [&'static str],
     argument_blocks: &'static [&'static str],
     escape: &'static str,
     lowercase_undefined: bool,
@@ -67,6 +69,7 @@ impl ScopeLang {
             sigils: "",
             fold: false,
             element_writes: &[],
+            late: &[],
             argument_blocks: &[],
             escape: "\\",
             lowercase_undefined: false,
@@ -119,6 +122,13 @@ impl ScopeLang {
     /// something that is no name reads the name instead of writing it.
     pub const fn element_writes(mut self, tokens: &'static [&'static str]) -> Self {
         self.element_writes = tokens;
+        self
+    }
+
+    /// Declarations of these kinds in a function or block take effect after their statement: a read
+    /// written before its end sees the name of the scope around (Go `ctx := ctx.With()`).
+    pub const fn late_declares(mut self, kinds: &'static [&'static str]) -> Self {
+        self.late = kinds;
         self
     }
 
@@ -183,6 +193,7 @@ impl ScopeLang {
                 .fold_case(self.fold)
                 .element_writes(self.element_writes)
                 .label_names(s.labels, grammar)
+                .late_declares(self.late, grammar)
         })
     }
 }
@@ -313,6 +324,8 @@ enum Check {
     UndefinedExport,
     /// A declaration of the given names (`names`: look-alike letters) of the given kind.
     AmbiguousName(Declared, &'static [&'static str]),
+    /// A declaration named like a predeclared identifier (`globals`).
+    RedefinesBuiltin,
 }
 
 /// What an `ambiguous-name` check looks at: functions, classes, or the other declarations that
@@ -406,6 +419,7 @@ pub fn build(
             "use-before-define" => Check::UseBeforeDefine,
             "redeclared-variable" => Check::RedeclaredVariable,
             "shadowed-variable" => Check::ShadowedVariable,
+            "redefines-builtin" => Check::RedefinesBuiltin,
             other => return Err(format!("param `check`: unknown check `{other}`")),
         },
     };
@@ -577,6 +591,7 @@ impl Rule for ScopeRule {
             | Check::UnusedUnpacked
             | Check::StarUsage
             | Check::UndefinedExport
+            | Check::RedefinesBuiltin
             | Check::AmbiguousName(..) => {
                 unreachable!("a row of the rule files gives its metadata")
             }
@@ -811,6 +826,19 @@ impl Rule for ScopeRule {
                 hits.dedup();
                 for (range, text) in hits {
                     ctx.report(range, text);
+                }
+            }
+            Check::RedefinesBuiltin => {
+                let o = &ctx.options;
+                let opts = builtins::Opts {
+                    allow: o.list("allow"),
+                    kinds: o.list("kinds"),
+                    except_parents: o.list("except_parents"),
+                    assigned_by: o.list("assigned_by"),
+                };
+                let template = self.template("redefinition of the built-in identifier `{name}`");
+                for (range, name) in builtins::run(&Cx::new(&m, file, lang), &opts) {
+                    ctx.report(range, template.replace("{name}", &name));
                 }
             }
             Check::UndefinedVariable => {
