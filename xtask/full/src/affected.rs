@@ -38,8 +38,14 @@ const FULL: &[&str] = &[
     "scripts/bench.sh",
     "scripts/bench-measure.sh",
 ];
-/// Shared crates whose change selects the landing check, besides every language crate.
-const LANDING: &[&str] = &["core-format", "core-syntax"];
+/// Shared crates whose change selects the landing check (formatting and lint code), besides every language crate.
+const LANDING: &[&str] = &[
+    "core-format",
+    "core-syntax",
+    "core-rules",
+    "core-patterns",
+    "core-flow",
+];
 /// Read by no test or benchmark (unless a crate claims a path in them).
 const NO_CHECK: &[&str] = &[
     "docs/",
@@ -198,7 +204,7 @@ pub fn select(ws: &Workspace, changed: &[String]) -> Affected {
     if !changed.is_empty() {
         out.steps.insert("codegen".into());
     }
-    // The landing check (scripts/parity_landing.py) formats corpus files: any formatting code can change them.
+    // The landing check (scripts/parity_landing.py) formats and lints corpus files: any formatting or lint code can change them.
     if set
         .iter()
         .any(|c| LANDING.contains(&c.as_str()) || c.starts_with("lang-"))
@@ -611,9 +617,10 @@ mod tests {
     }
 
     #[test]
-    fn formatting_code_selects_the_landing_check() {
+    fn formatting_and_lint_code_select_the_landing_check() {
         for (path, landing) in [
             ("crates/core-syntax/src/a.rs", true),
+            ("crates/core-rules/src/a.rs", true),
             ("crates/lang-shell/src/a.rs", true),
             ("crates/cli/src/main.rs", false),
             ("docs/ai/roadmap.md", false),

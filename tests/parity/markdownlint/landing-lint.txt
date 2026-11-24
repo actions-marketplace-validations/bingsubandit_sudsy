@@ -1,0 +1,24 @@
+# Corpus files: <hash of Sudsy's sorted (rule, line) findings of the mapped rules> <path below tests/conformance/corpus>. COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> rewrites it.
+4ad944390fdbbb61 runtime-docs/docs/coding-guidelines/EventLogging.md
+4fd8e71bb2e4771d runtime-docs/docs/coding-guidelines/adding-api-guidelines.md
+e3b0c44298fc1c14 runtime-docs/docs/coding-guidelines/api-guidelines/README.md
+8b3e3cb6641b7a33 runtime-docs/docs/coding-guidelines/api-guidelines/System.Memory.md
+ca1c4b662ae1668b runtime-docs/docs/coding-guidelines/api-guidelines/nullability.md
+7758e997dac05e96 runtime-docs/docs/coding-guidelines/breaking-change-definitions.md
+c6eba8a95f01392e runtime-docs/docs/coding-guidelines/breaking-change-rules.md
+6717e99e0e8967b9 runtime-docs/docs/coding-guidelines/breaking-changes.md
+e5d0d91d7d3de423 runtime-docs/docs/coding-guidelines/clr-code-guide.md
+22c85e35327f58ab runtime-docs/docs/coding-guidelines/clr-jit-coding-conventions.md
+50960e5c53d6e20d runtime-docs/docs/coding-guidelines/code-formatting-tools.md
+0be48e09e1262e8a runtime-docs/docs/coding-guidelines/coding-style.md
+be731b56c84ddcff runtime-docs/docs/coding-guidelines/cross-platform-guidelines.md
+c94473b3d43abb1a runtime-docs/docs/coding-guidelines/cross-platform-performance-and-eventing.md
+c1020035ba0b4447 runtime-docs/docs/coding-guidelines/framework-design-guidelines-digest.md
+30624d8590f0b46f runtime-docs/docs/coding-guidelines/interop-guidelines.md
+289f7df9be060eae runtime-docs/docs/coding-guidelines/libraries-packaging.md
+89e6d1381ecec3d4 runtime-docs/docs/coding-guidelines/mono-code-guide.md
+43451117c4e69c6f runtime-docs/docs/coding-guidelines/performance-guidelines.md
+8ecfbb6a5cf164b1 runtime-docs/docs/coding-guidelines/project-guidelines.md
+e95af46544b6c676 runtime-docs/docs/coding-guidelines/source-generator-guidelines.md
+83c32b536bcd6500 runtime-docs/docs/coding-guidelines/updating-ref-source.md
+30cf3fc35eb197c3 runtime-docs/docs/coding-guidelines/vectorization-guidelines.md

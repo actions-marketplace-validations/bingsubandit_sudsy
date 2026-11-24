@@ -434,5 +434,77 @@ class Landing(unittest.TestCase):
         self.assertEqual(entries[0][0], pld.digest(equal[corpus / entries[0][1]]))
 
 
+class LintLanding(unittest.TestCase):
+    """The lint landing check on a throwaway corpus and a fake `sudsy` that reports `r1` on line 3 of a.txt."""
+
+    REPORT = '{"diagnostics":[{"path":"a.txt","rule":"r1","range":{"start":{"line":3}}},{"path":"b.txt","rule":"other","range":{"start":{"line":1}}}]}'
+
+    def check(self, tmp, sample, files=("a.txt", "b.txt"), report=REPORT, ci=False):
+        tmp = Path(tmp)
+        corpus, folder = tmp / "corpus", tmp / "leg"
+        corpus.mkdir()
+        folder.mkdir()
+        for name in files:
+            (corpus / name).write_text("x\n", encoding="utf-8")
+        exe = tmp / "sudsy"
+        exe.write_text(f"#!/bin/sh\ncat <<'EOF'\n{report}\nEOF\n", encoding="utf-8")
+        exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+        if sample is not None:
+            (folder / pld.LINT_FILE).write_text(pld.LINT_HEADER + sample, encoding="utf-8")
+        names = {corpus / n: n for n in ("a.txt", "b.txt")}
+        with unittest.mock.patch.multiple(pl, work_names=lambda t, s: names, sudsy_rules=lambda t: ({"r1"}, {}), sudsy_config=lambda t, s: {}):
+            return pld.check_lint("leg", {}, folder, str(exe), tmp / "work", ci, corpus)
+
+    GOOD = f"{pld.lint_digest({('r1', 3)})} a.txt\n{pld.lint_digest(set())} b.txt\n"
+
+    def test_the_recorded_findings_of_the_mapped_rules_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self.check(tmp, self.GOOD), ([], None))
+
+    def test_a_wrong_hash_fails_and_names_the_file_and_the_way_to_record_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems, _ = self.check(tmp, f"{'0' * 16} a.txt\n{pld.lint_digest(set())} b.txt\n")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("1 of 2", problems[0])
+        self.assertIn("  a.txt", problems[0])
+        self.assertIn("COVERAGE_WRITE=1 scripts/parity.sh coverage leg", problems[0])
+
+    def test_a_rule_turned_off_and_a_rule_reporting_more_both_fail(self):
+        off = '{"diagnostics":[]}'
+        more = '{"diagnostics":[{"path":"a.txt","rule":"r1","range":{"start":{"line":3}}},{"path":"a.txt","rule":"r1","range":{"start":{"line":9}}}]}'
+        for report in (off, more):
+            with tempfile.TemporaryDirectory() as tmp:
+                problems, _ = self.check(tmp, self.GOOD, report=report)
+            self.assertEqual(len(problems), 1, report)
+
+    def test_an_empty_or_missing_sample_fails(self):
+        for sample in ("", None):
+            with tempfile.TemporaryDirectory() as tmp:
+                self.assertEqual(len(self.check(tmp, sample)[0]), 1)
+
+    def test_a_missing_corpus_file_fails_in_ci_and_is_skipped_elsewhere(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems, note = self.check(tmp, self.GOOD, files=("a.txt",), ci=True)
+            self.assertEqual((len(problems), note), (1, None))
+        with tempfile.TemporaryDirectory() as tmp:
+            problems, note = self.check(tmp, self.GOOD, files=("a.txt",))
+            self.assertEqual(problems, [])
+            self.assertIn("skipped", note)
+
+    def test_the_selection_takes_files_per_rule_zero_finding_files_and_prefers_agreeing_ones(self):
+        states = {f"z{i}.txt": set() for i in range(200)}
+        states.update({f"r{i}.txt": {(f"rule{i % 4}", 1)} for i in range(40)})
+        chosen, filled = pld.select_lint(states, set(states))
+        self.assertFalse(filled)
+        self.assertEqual(len(chosen), pld.LINT_FILES)
+        for rule in range(4):
+            self.assertGreaterEqual(sum((f"rule{rule}", 1) in states[p] for p in chosen), pld.LINT_PER_RULE)
+        self.assertGreaterEqual(sum(not states[p] for p in chosen), round(pld.LINT_FILES * pld.LINT_ZERO))
+        self.assertEqual(chosen, pld.select_lint(states, set(states))[0])  # deterministic
+        few, filled = pld.select_lint(states, {"r0.txt"})
+        self.assertTrue(filled)
+        self.assertIn("r0.txt", few)
+
+
 if __name__ == "__main__":
     unittest.main()
