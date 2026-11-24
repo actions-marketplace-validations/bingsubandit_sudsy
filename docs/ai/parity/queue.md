@@ -9,8 +9,8 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
-| PHP | lint PHPStan | 3 | 20.7% | 64.3 | 1055 findings | `method.notFound` 384, `class.notFound` 381, `staticMethod.notFound` 90, `function.notFound` 80 +3 more | 19 | 10.15 | 9632a5ce |
 | HTML | lint html-eslint | 2 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 10.07 | 9de1e355 |
+| PHP | lint PHPStan | 3 | 31.0% | 54.0 | 594 findings | `class.notFound` 254, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 8.53 | 9de1e355 |
 | SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
 | C# | lint Roslynator | 1 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 1.13 | 66718389 |
 
@@ -312,24 +312,24 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 
 ## phpstan
 
-Lint: target 20.7% (340 of 1641, 1301 missed, measured on 9632a5ce); rules by missed findings:
-1. `method.notFound` (384 missed)
-2. `class.notFound` (381 missed)
-3. `staticMethod.notFound` (90 missed)
-4. `function.notFound` (80 missed)
-5. `ignore.unmatchedLine` (62 missed)
-6. `ignore.unmatchedIdentifier` (49 missed)
-7. `new.static` (43 missed)
-8. `method.void` (42 missed)
-9. `attribute.notFound` (35 missed)
-10. `return.missing` (24 missed)
-11. `property.uninitializedReadonly` (20 missed)
-12. `variable.undefined` (20 missed)
-13. `property.notFound` (11 missed)
-14. `staticProperty.notFound` (9 missed)
-15. `arguments.count` (8 missed)
+Lint: target 31% (340 of 1098, 758 missed, measured on 9de1e355); rules by missed findings:
+1. `class.notFound` (254 missed)
+2. `method.notFound` (94 missed)
+3. `function.notFound` (80 missed)
+4. `ignore.unmatchedLine` (62 missed)
+5. `ignore.unmatchedIdentifier` (49 missed)
+6. `new.static` (43 missed)
+7. `method.void` (42 missed)
+8. `return.missing` (22 missed)
+9. `property.uninitializedReadonly` (20 missed)
+10. `variable.undefined` (20 missed)
+11. `property.notFound` (11 missed)
+12. `staticProperty.notFound` (9 missed)
+13. `arguments.count` (8 missed)
+14. `method.childReturnType` (7 missed)
+15. `method.templateTypeNotInParameter` (7 missed)
 
-14 more rules: 43 missed.
+13 more rules: 30 missed.
 
 ## prettier
 

@@ -204,6 +204,8 @@ def composer_vendors(spec, prefix):
         env = {**os.environ, "COMPOSER_VENDOR_DIR": str(vendor), "COMPOSER_HOME": str(prefix / "composer-home"), "COMPOSER_NO_INTERACTION": "1"}
         command = "install" if (work / "composer.lock").exists() else "update"
         run([php, prefix / "composer.phar", command, "--no-scripts", "--no-plugins", "--no-interaction", "--ignore-platform-reqs", "--no-progress", *(["--no-audit"] if command == "update" else [])], work, env=env)
+        for package in spec.get("composer_require", {}).get(project, []):  # what the project's test runner installs on its own (Composer: simple-phpunit installs PHPUnit 9.6 into vendor/bin/.phpunit, where PHPStan never looks), pinned
+            run([php, prefix / "composer.phar", "require", "--dev", package, "--update-with-dependencies", "--no-scripts", "--no-plugins", "--no-interaction", "--ignore-platform-reqs", "--no-progress", "--no-audit"], work, env=env)
 
 
 def fixtures(config, folder, filters):

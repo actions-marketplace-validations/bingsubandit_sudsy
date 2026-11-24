@@ -1,17 +1,15 @@
-target: 20.7
+target: 31.0
 
-measured: {covered: 340, total: 1641, main: '9632a5ce'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 340, total: 1098, main: '9de1e355'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  method.notFound: 384
-  class.notFound: 381
-  staticMethod.notFound: 90
+  class.notFound: 254
+  method.notFound: 94
   function.notFound: 80
   ignore.unmatchedLine: 62
   ignore.unmatchedIdentifier: 49
   new.static: 43
   method.void: 42
-  attribute.notFound: 35
-  return.missing: 24
+  return.missing: 22
   property.uninitializedReadonly: 20
   variable.undefined: 20
   property.notFound: 11
@@ -28,6 +26,7 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   trait.notFound: 2
   unset.offset: 2
   class.extendsFinalByPhpDoc: 1
+  staticMethod.notFound: 1
   unset.possiblyHookedProperty: 1
   unset.readOnlyProperty: 1
   unset.variable: 1

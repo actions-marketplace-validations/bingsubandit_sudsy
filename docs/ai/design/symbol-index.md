@@ -45,3 +45,58 @@ Protobuf is the second user and proves that the parts are not shaped like PHP. I
 4. **Built-ins**: generator, license, size in the pack.
 5. **Rules**: in order of findings, each with covered and extra counts. Extra reports on the corpus are explained one by one; a rule with more extra than covered stays out of the preset.
 6. **Protobuf rules**, then the generalization review: what did the second language change, which facts become rows.
+
+
+## Phase 1 result
+Measured on 2026-11-24 (PHPStan 2.3.6, level 0, static PHP 8.4.23; every number below comes from one scripted run over all findings).
+
+### Corpus and re-measure
+PHPUnit is now in the corpus dependencies: Laravel already pinned `phpunit/phpunit` 13.4.8; the Symfony manifest gets 13.4.8 (its `phpunit` script sets `SYMFONY_PHPUNIT_VERSION=13`, the bridge's own install goes to `vendor/bin/.phpunit`, where PHPStan never looks, so a real checkout run of PHPStan sees no PHPUnit either); Composer gets 9.6.39 through `composer_require` in `scripts/parity_tools.json` (the bridge default, 9.6; Composer's `composer.lock` has no PHPUnit); WordPress has no test code. PHPStan went from 1,641 to 1,098 findings; the 543 that went are all `method.notFound` (-290), `class.notFound` (-127), `staticMethod.notFound` (-89), `attribute.notFound` (-35) and `return.missing` (-2). No finding appears that was not there before (multiset compare of file, line, identifier, message), so no finding comes from a wrong version. Covered stays 340, so the share is 340 of 1,098 = 31.0%. Left open: the transitive packages of PHPUnit (sebastian/*) float to the newest release in Symfony and Composer; Laravel pins them.
+
+### Classification (all 1,098 findings)
+Scripted over a token-based declaration scan of the project files and the installed dependencies (38,000 declarations), the reflection of the static PHP, the PHPStan message, the source line and the receiver shape; 10 to 12 findings of every class read by hand. A name that no source declares is classed by who owns its namespace prefix (the project, an installed package, nobody). A member is classed by the furthest place the class or one of its ancestors and traits is declared. Columns: own = the finding's file; project / dep / builtin = a name or the ancestors of a written class there; unowned = a name no manifest owns (optional packages, extensions the static PHP lacks); type = needs the type of an expression; PHPStan = a PHPStan-only fact.
+
+| identifier | total | own | name project | member own | member project | name dep | member dep | member builtin | name unowned | type | PHPStan |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| new.static | 317 | 275 | | | 26 | | 5 | 11 | | | |
+| class.notFound | 254 | | 99 | | | 26 | | | 129 | | |
+| method.notFound | 94 | | | 65 | 15 | | 10 | 1 | | 3 | |
+| function.notFound | 80 | | 14 | | | | | | 4 | | 62 |
+| ignore.unmatchedLine / Identifier | 111 | | | | | | | | | | 111 |
+| method.void, staticMethod.void, function.void | 48 | | 2 | 9 | 30 | | 5 | 2 | | | |
+| unset.possiblyHookedProperty | 34 | 34 | | | | | | | | | |
+| return.missing | 22 | 22 | | | | | | | | | |
+| property.uninitializedReadonly | 20 | 20 | | | | | | | | | |
+| variable.undefined | 20 | 19 | | | | | | | | 1 | |
+| parameter.implicitlyNullable | 18 | 18 | | | | | | | | | |
+| function.inner | 15 | 15 | | | | | | | | | |
+| property, staticProperty, classConstant .notFound | 26 | | | 4 | 17 | | 5 | | | | |
+| arguments.count | 8 | | | | | | 7 | 1 | | | |
+| method.childReturnType | 7 | 2 | | | | | | 5 | | | |
+| method.templateTypeNotInParameter | 7 | 7 | | | | | | | | | |
+| interface.notFound, trait.notFound | 7 | | 2 | | | | | | 3 | | 2 |
+| the other 7 identifiers (class.noParent, method.finalPrivate, unset.offset, unset.readOnlyProperty, unset.variable, class.extendsFinalByPhpDoc, staticMethod.notFound) | 10 | 6 | | | 1 | | | | | 2 | 1 |
+| **total** | **1,098** | **418** | **117** | **78** | **89** | **26** | **32** | **20** | **136** | **6** | **176** |
+
+Reach, as shares of 1,098: phase 2 (project files) 702 (63.9%); phase 3 (dependencies on demand) 760 (69.2%); phase 4 (built-ins) 780 (71.0%). The 340 covered findings are all in the own column (`new.static` 274, `unset.possiblyHookedProperty` 33, `parameter.implicitlyNullable` 18, `function.inner` 15), so of the 758 missed, the index reaches 362 in phase 2, 420 in phase 3 and 440 (58.0%) in phase 4. The 136 unowned names (`MongoDB\Client`, `Pusher\Pusher`, `Composer\Composer`, `ParaTest\...`, `Psr\Log\LoggerInterface` in WordPress) are optional packages or extensions that are not installed: they are reachable only if `Absent` may rest on a closed world (every project file and every autoload file read, no manifest owns the prefix), which the design rules forbid today; with it the ceiling is 916 (83.4%), and that is still under 85%. Out of reach, 182 (16.6%): 111 ignore comments (they depend on every other identifier), 62 `function.notFound` of functions that the project declares inside another function or condition (`wxr_cdata` in WordPress `export_wp()`, PHPStan does not see them; the index says `Unknown`), 2 `trait.notFound`, 1 `staticMethod.notFound` (PHPStan's own phar classes), 6 that need an expression type (`$this->$method()`, a by-reference closure argument, `unset` on an array shape). `return.missing` is classed own by default (22): a body that ends in a call of a `never` function of another file would move it to project; not split.
+
+### Absent against Unknown
+Of the 780 findings the index can reach, 161 (20.6%) sit in a chain that holds a conditional declaration (140: `if (!class_exists(...)) { class ... }` in Symfony's cache proxies, `rector`, polyfills, `ParallelRunner` declared twice), a trait with `insteadof` or `as` (19), a `__call` / `__get` (6) or an unresolved ancestor (3; the figures overlap). There the index must answer `Unknown`, not `Absent`: 132 are `new.static` (of which most are covered today by a rule that ignores the question), 8 `method.notFound`, 6 `method.childReturnType`, 15 others. Plus the 136 unowned names (`Unknown` by design) and 62 conditional functions. With them left out the rules reach 619 findings (56.4%) with proof. The conditional count comes from a token scanner (any `{` block around the declaration), not from the Sudsy tree; the real figure is read in phase 2.
+
+### Protobuf
+`RPC_REQUEST_RESPONSE_UNIQUE` (117, the corpus files that compile alone: googleapis 94, grpc 19, protobuf 4) needs only the names written in the RPCs: 36 distinct (package, type) groups, 35 of them inside one file, 1 across two files of one package (`google.longrunning.Operation` in google.cloud.vision.v1). 106 of the 117 write a bare name and 11 a qualified one, so the resolver must turn the bare name into a full name: 48 resolve to a message of the same file, 69 to a message of an imported file (`google.longrunning.Operation` from `google/longrunning/operations.proto`, `google.protobuf.Empty` from `google/protobuf/empty.proto`, `google.pubsub.v1.*`). `IMPORT_USED` (5) needs the names an imported file declares to see that none is used: `google/protobuf/empty.proto` (`Empty`, 3 files of googleapis), `google/api/field_behavior.proto` (`google.api.field_behavior`, `FieldBehavior`) in serviceusage.proto, and `google/protobuf/cpp_features.proto` (the `pb.cpp` feature) in `repeated_ptr_field_test.proto`. Both are answered from the import path list alone; none needs the type of an expression.
+
+### Candidates for PHP built-ins
+Sizes of the first row are measured (`builtins.json` of the static PHP 8.4.23 of the corpus: 268 classes, 1,512 functions, 4,339 methods, 356 KB as JSON); the others are from the projects' own descriptions and have to be measured when phase 4 starts.
+
+| Source | License | Size (order) | Names, parents, members, parameters | Version ranges |
+|---|---|---|---|---|
+| Reflection of the pinned static PHP (`dl.static-php.dev`, 8.1 to 8.5) | facts of a run, no text copied | 356 KB JSON for 8.4, about 100 KB packed | all: parent, interfaces, methods with static flag, parameter and required counts, return type, properties, constants | one build per minor version, merged by a script into ranges; only the extensions of that build (no `mongodb`, `ftp` classes of PECL, `sodium` functions missing in the static build) |
+| php-src `*.stub.php` | PHP License 3.01 (OSI) | about 150 files, a few MB of source | complete for the bundled extensions, with types and defaults | one tag per branch, ranges by diffing branches; `#[Deprecated(since:)]` only |
+| JetBrains phpstorm-stubs | Apache-2.0 | about 10 MB source, bundled and PECL extensions | complete, with docblocks | `#[PhpStormStubsElementAvailable(from, to)]`, `@since`, `@removed`: ranges in the file |
+| PHPStan phar (`functionMap`, deltas, its stubs) | MIT, built on the JetBrains stubs (Apache-2.0) | part of the 30 MB phar | the exact view PHPStan has (its report is the measure) | `functionMap_php8x_delta` files per version |
+
+Recommendation: generate from reflection of the pinned static PHP per minor version (exact, no license question, the data is parsed and merged by a script that is in the repository), and take the extension classes that the static build lacks from phpstorm-stubs only for the extensions a project names as `ext-*` in its manifest; an extension that is not named gives `Unknown`. Built-ins decide only 20 findings of 1,098 (1.8%) in this corpus, so phase 4 follows phase 3 and is the smallest.
+
+### Reading
+The share the index can reach with proof is 71.0% of PHPStan level 0 on this corpus (83.4% with closed-world `Absent`, 56.4% when every chain with a conditional or dynamic part answers `Unknown`), below the 85% line of phase 1; 16.6% is out of reach by nature (ignore comments, conditional declarations PHPStan misses, expression types). Brought to the lead before phase 2.
