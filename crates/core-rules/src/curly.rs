@@ -75,9 +75,10 @@ rule! {
             if edits.is_empty() {
                 continue;
             }
-            if let Some(at) = code_start(g, &n) {
+            // the keyword (`if`, `for`, `while`, `do`) is the reported span
+            if let Some(keyword) = code_tokens(g, &n).next() {
                 ctx.report_fix(
-                    TextRange::empty(TextSize::from(at as u32)),
+                    keyword.text_range(),
                     "the body is not in braces",
                     ("Add the braces", edits),
                 );

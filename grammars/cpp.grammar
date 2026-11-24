@@ -3,6 +3,7 @@
 // Format: see crates/core-syntax/src/grammar/mod.rs.
 
 language cpp 21 "C/C++"
+rule unreachable-code case_label_calls "true"
 roles
 // Binary operators, loosest first: `precedence <level> <assoc> "op"...` (core_syntax::Assoc). Assignment, `?:` and `,` are not binary operators.
 precedence 1 left "||"

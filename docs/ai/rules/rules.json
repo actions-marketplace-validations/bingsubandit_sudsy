@@ -125,32 +125,32 @@
         "spans": [
           {
             "column": 5,
-            "length": 1,
+            "length": 2,
             "line": 3
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 2,
             "line": 4
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 3,
             "line": 14
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 3,
             "line": 15
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 5,
             "line": 16
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 2,
             "line": 17
           }
         ]

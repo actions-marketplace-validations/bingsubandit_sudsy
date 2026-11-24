@@ -33,3 +33,17 @@ int e(int x) {
   return x;
   FOO_POP();
 }
+int f(int x) {
+  switch (x) {
+  case 1:
+    return 1;
+  read_sysreg_case(X);
+    x = 2;
+    break;
+  case 2:
+    break;
+    x = 3;
+//  ^^^^^^ unreachable-code
+  }
+  return x;
+}

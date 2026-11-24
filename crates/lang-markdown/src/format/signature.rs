@@ -19,7 +19,7 @@ pub(super) fn signature(tree: &SyntaxNode) -> Vec<String> {
 
 impl Render<'_> {
     /// What formatting must not change, one entry per element: structure, levels, list kinds,
-    /// prose with escapes undone and blanks collapsed, and raw text without container prefixes.
+    /// prose with its escapes (the formatter keeps them) and blanks collapsed, and raw text without container prefixes.
     pub(super) fn sig(&self, elem: &SyntaxElement, out: &mut Vec<String>) {
         let all: Vec<SyntaxElement> = match elem {
             SyntaxElement::Node(n) => n.descendants_with_tokens().collect(),
@@ -59,7 +59,7 @@ impl Render<'_> {
             } else {
                 text
             };
-            out.push(words(&text.replace("\\*", "*").replace("\\_", "_")));
+            out.push(words(&text));
         } else if kind == k::TASK_MARKER {
             out.push(text.to_lowercase());
         } else if kind == k::THEMATIC_BREAK {

@@ -2,7 +2,9 @@
 //! `core_flow::build` makes from the statement roles of the grammar (`#block`, `#loop`, `#switch`,
 //! `#case`, `#try`, `#break`, ...); a grammar tag says what data cannot: `#inert` (a statement that
 //! is never reported as unreachable: empty, hoisted, a guard the compiler leaves alone) and
-//! `#fallthrough` (a `switch` whose arms run into the next one). A provider whose semantic model
+//! `#fallthrough` (a `switch` whose arms run into the next one); the language's `rule` row
+//! `case_label_calls "true"` leaves a call statement after a jump in a case body alone (a macro that
+//! expands to a label). A provider whose semantic model
 //! has flow graphs (C#) gets constant conditions and calls that never return on top.
 //!
 //! concept: unreachable-code, no-fallthrough
@@ -45,6 +47,9 @@ fn walk(n: &SyntaxNode, ctx: &mut RuleContext<'_>, dead: &[u32]) {
     let start = |c: &SyntaxNode| u32::from(code_start(c, g));
     let is_dead = |s: u32| dead.binary_search(&s).is_ok();
     let mut reported = false;
+    // a call statement in a case body may be a macro that expands to a label: the code after it runs
+    let labels = case_label_calls(g) && g.has_tag(n.kind(), "case");
+    let mut label = false;
     for child in n.children() {
         let range = child.text_range();
         let at = dead.partition_point(|&s| s < u32::from(range.start()));
@@ -63,6 +68,11 @@ fn walk(n: &SyntaxNode, ctx: &mut RuleContext<'_>, dead: &[u32]) {
             continue;
         }
         if is_dead(start(&child)) {
+            label |= labels && is_call_statement(&child, g);
+            if label {
+                reported = false;
+                continue;
+            }
             // a run of unreachable statements is one report; a statement that is not reported ends it
             let target = !inert(&child, g);
             if target && !reported {
@@ -78,6 +88,23 @@ fn walk(n: &SyntaxNode, ctx: &mut RuleContext<'_>, dead: &[u32]) {
         }
         walk(&child, ctx, dead);
     }
+}
+
+/// Does the language's `rule` row read a call statement in a case body as a possible label?
+fn case_label_calls(g: &Grammar) -> bool {
+    g.rule_row("unreachable-code").is_some_and(|r| {
+        r.options
+            .iter()
+            .any(|(n, v)| n == "case_label_calls" && v.first().is_some_and(|v| v == "true"))
+    })
+}
+
+/// Is `s` a statement that is one call (`name(args);`)?
+fn is_call_statement(s: &SyntaxNode, g: &Grammar) -> bool {
+    g.has_tag(s.kind(), "expression-statement")
+        && g.slot(s, "expression")
+            .and_then(|e| e.into_node())
+            .is_some_and(|e| g.has_tag(e.kind(), "call"))
 }
 
 /// Is the statement left alone: `#inert`, or `#inert-bare` with a `hoisted` keyword and no declarator

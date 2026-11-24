@@ -19,9 +19,8 @@ use core_syntax::{SyntaxKind, grammars};
 use provider_api::adapter::{KindNames, Node, Tok, replay_grammar};
 use provider_api::{ParseError, ParseResult, SourceFile};
 
-/// Prism node types with no row: the root (`replay` makes it), and the implicit parameters of a
-/// block (`it`, `_1`), which Prism spans over the whole block.
-const EXEMPT: &[&str] = &["Program", "ItParameters", "NumberedParameters"];
+/// Prism node types with no row: the implicit parameters of a block (`it`, `_1`).
+const EXEMPT: &[&str] = &["ItParameters", "NumberedParameters"];
 
 pub fn parse_file(file: &SourceFile) -> ParseResult {
     parse(&file.text)
@@ -37,7 +36,7 @@ pub fn parse(src: &str) -> ParseResult {
         .filter(|n| !in_bodies(&heredocs, n.start))
         .filter_map(|n| {
             let kind = names.get(n.kind as usize, false, || node_kind_name(n.kind))?;
-            Some(Node {
+            (kind != k::PROGRAM).then_some(Node {
                 start: n.start,
                 end: n.end,
                 kind,

@@ -5,7 +5,7 @@ tree-sitter-containerfile 0.9.2 (MIT, WharfLab's maintained fork of tree-sitter-
 
 Files: `Dockerfile`, `Containerfile`, `Dockerfile.*`, `Containerfile.*` (`Dockerfile.dev`) and `*.dockerfile`. A `file_names` entry ending in `*` matches by prefix.
 
-Known gaps: the grammar reads `#` after a variable expansion as a comment, so `ARG X=${V#pattern}` (moby `Dockerfile`) and `ADD ${A}#${B} /` (buildx's `jaeger-ui-rest`) give the tree-sitter tree an `ERROR` node. These are the 2 files of the pinned corpus where the tree has one; Sudsy still formats and lints them, with the text after the `#` read as a comment.
+A `#` is a comment at the start of a line or after a blank, not after other text (`ADD ${A}#${B} /`), and `${V#pattern}` is an expansion (`#`, `##`, `%`, `%%`); both are changes of the vendored grammar ([FORK.md](../../../grammars/tree-sitter-containerfile/FORK.md)). No file of the pinned corpus has an `ERROR` node in its tree.
 
 ## Formatting
 - The instruction name and `AS` are upper case (`from x as y` is `FROM x AS y`).

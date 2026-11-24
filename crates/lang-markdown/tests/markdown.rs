@@ -220,3 +220,16 @@ fn html_blocks_on_consecutive_lines_stay_together() {
         "<!-- a -->\n<!-- /a -->\n\ntext\n"
     );
 }
+
+/// A dropped `\_` or `\*` changes what a later delimiter run means: the meaning check sees it.
+#[test]
+fn the_meaning_check_sees_a_dropped_escape() {
+    use core_format::NodeFormatter;
+    let s = subject();
+    let check = |a: &str, b: &str| {
+        lang_markdown::MarkdownFormatter.extra_check(&s.parse(a).unwrap(), &s.parse(b).unwrap())
+    };
+    assert!(check("**\\_a.**\n", "**_a.**\n").is_err());
+    assert!(check("a\\*b\n", "a*b\n").is_err());
+    assert!(check("a\\_b\n", "a\\_b\n").is_ok());
+}
