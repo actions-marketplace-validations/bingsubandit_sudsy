@@ -197,7 +197,7 @@ The status and the headline numbers of every language are in the generated table
 - **Presets:** `kotlin/ktlint`.
 - **Options:** `trailing_commas`, `function_signature_wrap_min_parameters`, `class_signature_wrap_min_parameters`, `member_chain_style`. Default `line_width` is 140.
 - **Differences:**
-  - ktlint rewrites are not done: `: Unit`, `;`, modifier order, `//x` to `// x`.
+  - ktlint rewrites not done: modifier order and comments in the modifier list.
   - Operator chains follow the source breaks.
   - Values ktlint moves below `=` differ in some cases.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format ktlint`, `scripts/parity.sh coverage ktlint`.

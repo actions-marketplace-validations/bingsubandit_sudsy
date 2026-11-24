@@ -12,6 +12,10 @@ pub const ASSIGNMENT_LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_L
 #[allow(dead_code)]
 pub const ASSIGNMENT_CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
 #[allow(dead_code)]
+pub const ASSIGNMENT_HUG_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_HUG_KINDS;
+#[allow(dead_code)]
+pub const ASSIGNMENT_HUG_EXCEPT_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_HUG_EXCEPT_KINDS;
+#[allow(dead_code)]
 pub const ASSIGNMENT_INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
 #[allow(dead_code)]
 pub const ASSIGNMENT_LEFT_MIN_PARAMETERS: core_config::OptId = core_config::opt::ASSIGNMENT_LEFT_MIN_PARAMETERS;
@@ -21,6 +25,8 @@ pub const ASSIGNMENT_LEFT_UNLESS_KINDS: core_config::OptId = core_config::opt::A
 pub const ASSIGNMENT_KEEP_BREAK_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_KEEP_BREAK_KINDS;
 #[allow(dead_code)]
 pub const ANNOTATION_INLINE: core_config::OptId = core_config::opt::ANNOTATION_INLINE;
+#[allow(dead_code)]
+pub const REDUNDANT_TEMPLATE_BRACES: core_config::OptId = core_config::opt::REDUNDANT_TEMPLATE_BRACES;
 #[allow(dead_code)]
 pub const SEMICOLON_KEEP_PARENTS: core_config::OptId = core_config::opt::SEMICOLON_KEEP_PARENTS;
 #[allow(dead_code)]
@@ -41,6 +47,8 @@ pub const WRAPPED_BODY_INDENT_WORDS: core_config::OptId = core_config::opt::WRAP
 pub const COMMENT_TRIM_LINES: core_config::OptId = core_config::opt::COMMENT_TRIM_LINES;
 #[allow(dead_code)]
 pub const SINGLE_BLOCK_COMMENT_AS_LINE: core_config::OptId = core_config::opt::SINGLE_BLOCK_COMMENT_AS_LINE;
+#[allow(dead_code)]
+pub const BLOCK_COMMENT_KEEP_TIGHT: core_config::OptId = core_config::opt::BLOCK_COMMENT_KEEP_TIGHT;
 #[allow(dead_code)]
 pub const COMMENT_REINDENT_LINES: core_config::OptId = core_config::opt::COMMENT_REINDENT_LINES;
 #[allow(dead_code)]
@@ -103,11 +111,14 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::int(core_config::opt::CLASS_SIGNATURE_WRAP_MIN_SUPERTYPES, 2, (1, 1000), "A class or object with at least this many supertypes puts each on a line of its own."),
         core_config::shared::assignment_layout("multiline"),
         core_config::shared::assignment_conditional("always"),
+        core_config::shared::assignment_hug_kinds(&["CollectionLiteralExpression", "LabeledExpression", "LambdaExpression"]),
+        core_config::shared::assignment_hug_except_kinds(&["Fun"]),
         core_config::shared::assignment_indent(1),
         core_config::shared::assignment_left_min_parameters(2),
         core_config::shared::assignment_left_unless_kinds(&["Colon"]),
         core_config::shared::assignment_keep_break_kinds(&["Property", "BinaryExpression", "PropertyAccessor"]),
         core_config::shared::annotation_inline("single"),
+        core_config::shared::redundant_template_braces(&["LongStringTemplateEntry"]),
         core_config::shared::semicolon_keep_parents(&["ClassBody", "EnumEntry"]),
         core_config::shared::trailing_comma_before(&["WhenEntry", "->"]),
         core_config::shared::trailing_comma_last_entry(&["ClassBody", "EnumEntry"]),
@@ -118,6 +129,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::wrapped_body_indent_words(&["constructor"]),
         core_config::shared::comment_trim_lines(true),
         core_config::shared::single_block_comment_as_line(true),
+        core_config::shared::block_comment_keep_tight(true),
         core_config::shared::comment_reindent_lines(true),
         core_config::shared::comment_space_exempt(&["//region", "//endregion", "//noinspection", "//language="]),
         core_config::shared::format_rules(&["curly", "redundant-return-type", "comment-space"]),

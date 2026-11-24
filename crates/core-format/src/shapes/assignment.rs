@@ -20,6 +20,8 @@ use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
 
 pub const LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_LAYOUT;
 pub const CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
+pub const HUG: core_config::OptId = core_config::opt::ASSIGNMENT_HUG_KINDS;
+const HUG_EXCEPT: core_config::OptId = core_config::opt::ASSIGNMENT_HUG_EXCEPT_KINDS;
 pub const INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
 pub const LEFT_PARAMS: core_config::OptId = core_config::opt::ASSIGNMENT_LEFT_MIN_PARAMETERS;
 pub const LEFT_UNLESS: core_config::OptId = core_config::opt::ASSIGNMENT_LEFT_UNLESS_KINDS;
@@ -398,6 +400,13 @@ fn choose(
         {
             return BreakAfterOperator;
         }
+    }
+    if right_inner
+        .as_ref()
+        .is_some_and(|r| cx.options.list_has(HUG, g.name(r.kind())))
+        && !cx.options.list_has(HUG_EXCEPT, g.name(a.node.kind()))
+    {
+        return NeverBreakAfterOperator;
     }
     if let Some(l) = hooks.layout(cx, a, right, policy) {
         return l;

@@ -555,7 +555,10 @@ fn open_comments_doc(
             parts.push(crate::context::verbatim_text(
                 &cx.comment_style.line_text(c),
             ));
-            if items_follow && !padded {
+            if items_follow
+                && !padded
+                && !(cx.comment_style.keep_tight && !crate::context::gap_follows(c))
+            {
                 parts.push(doc::if_break(Doc::Nil, doc::lit(" ")));
             }
         } else {

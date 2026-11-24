@@ -249,6 +249,8 @@ pub trait NodeFormatter: Send + Sync {
                 == Some(&core_config::OptionValue::Bool(true)),
             block_as_line: options.get(core_config::opt::SINGLE_BLOCK_COMMENT_AS_LINE)
                 == Some(&core_config::OptionValue::Bool(true)),
+            keep_tight: options.get(core_config::opt::BLOCK_COMMENT_KEEP_TIGHT)
+                == Some(&core_config::OptionValue::Bool(true)),
             ..CommentStyle::default()
         }
     }
@@ -1023,7 +1025,10 @@ pub fn leading_comments_doc_with(cs: &[Comment], st: &CommentStyle) -> Doc {
             for _ in 0..c.breaks_after.saturating_sub(1).min(max_blank) {
                 parts.push(doc::hardline());
             }
-        } else if (!st.keep_gap || gap_follows(c)) && !st.is_glued(&c.text()) {
+        } else if (!st.keep_gap || gap_follows(c))
+            && !st.is_glued(&c.text())
+            && !(st.keep_tight && !gap_follows(c))
+        {
             parts.push(doc::lit(" "));
         }
     }
@@ -1076,7 +1081,7 @@ pub(crate) fn continues_trailing(c: &Comment) -> bool {
 }
 
 /// Is the comment followed by a blank in the source (`/*x=*/0` has none)?
-fn gap_follows(c: &Comment) -> bool {
+pub(crate) fn gap_follows(c: &Comment) -> bool {
     match &c.element {
         SyntaxElement::Token(t) => t
             .next_token()

@@ -1,5 +1,5 @@
 ratchet:
-  real-world: 4859
+  real-world: 4924
 target-files:
   real-world: 5776
 second-format:
@@ -61,7 +61,6 @@ files:
   corpus/kotlin/libraries/stdlib/jdk7/src/kotlin/internal/jdk7/JDK7PlatformImplementations.kt: kt-break-after-sudsy
   corpus/kotlin/libraries/stdlib/jdk7/src/kotlin/io/path/PathReadWrite.kt: kt-comment-placement
   corpus/kotlin/libraries/stdlib/jdk7/src/kotlin/io/path/PathRecursiveFunctions.kt: kt-expr-vs-block-body
-  corpus/kotlin/libraries/stdlib/jdk7/src/kotlin/io/path/PathTreeWalk.kt: kt-comment-placement
   corpus/kotlin/libraries/stdlib/jdk7/src/kotlin/io/path/PathUtils.kt: kt-binary-chain
   corpus/kotlin/libraries/stdlib/jdk7/test/PathRecursiveCopyBetweenIncompatibleFileSystemsTest.kt: kt-other
   corpus/kotlin/libraries/stdlib/jdk7/test/PathRecursiveFunctionsZipTest.kt: kt-other
@@ -71,8 +70,6 @@ files:
   corpus/kotlin/libraries/stdlib/js/builtins/Collections.kt: kt-blank-sudsy-extra
   corpus/kotlin/libraries/stdlib/js/builtins/Throwable.kt: kt-comment-indent
   corpus/kotlin/libraries/stdlib/js/runtime/boxedLong.kt: kt-break-after-sudsy
-  corpus/kotlin/libraries/stdlib/js/runtime/collectionsInterop.kt: kt-unit
-  corpus/kotlin/libraries/stdlib/js/runtime/dceUtils.kt: kt-unit
   corpus/kotlin/libraries/stdlib/js/runtime/primitiveCompanionObjects.kt: kt-empty-braces
   corpus/kotlin/libraries/stdlib/js/runtime/reflectRuntime.kt: kt-if-else-braced
   corpus/kotlin/libraries/stdlib/js/runtime/typeCheckUtils.kt: kt-comment-placement
@@ -84,11 +81,9 @@ files:
   corpus/kotlin/libraries/stdlib/js/src/kotlin/annotationsJs.kt: kt-parens
   corpus/kotlin/libraries/stdlib/js/src/kotlin/collections/HashMapEntry.kt: kt-other
   corpus/kotlin/libraries/stdlib/js/src/kotlin/collections/InternalHashMap.kt: kt-indent-other
-  corpus/kotlin/libraries/stdlib/js/src/kotlin/collections/InternalMap.kt: kt-expr-vs-block-body
   corpus/kotlin/libraries/stdlib/js/src/kotlin/collections/InternalStringLinkedMap.kt: kt-other
   corpus/kotlin/libraries/stdlib/js/src/kotlin/coroutines/SafeContinuationJs.kt: kt-declaration-body-nesting
   corpus/kotlin/libraries/stdlib/js/src/kotlin/coroutines/intrinsics/IntrinsicsJs.kt: kt-if-else-other
-  corpus/kotlin/libraries/stdlib/js/src/kotlin/exceptionUtils.kt: kt-unit
   corpus/kotlin/libraries/stdlib/js/src/kotlin/exceptions.kt: kt-blank-ktlint-extra
   corpus/kotlin/libraries/stdlib/js/src/kotlin/js/math.polyfills.kt: kt-blank-sudsy-extra
   corpus/kotlin/libraries/stdlib/js/src/kotlin/reflect/KClassImpl.kt: kt-expr-vs-block-body
@@ -97,7 +92,6 @@ files:
   corpus/kotlin/libraries/stdlib/js/src/kotlin/text/StringBuilderJs.kt: kt-comment-indent
   corpus/kotlin/libraries/stdlib/js/src/kotlin/text/numberConversions.kt: kt-blank-ktlint-extra
   corpus/kotlin/libraries/stdlib/js/src/kotlin/text/regex.kt: kt-dot-chain-ktlint-breaks
-  corpus/kotlin/libraries/stdlib/js/src/kotlin/time/DurationUnitJs.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/js/src/kotlin/uuid/UuidJs.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/js/src/org.w3c/org.w3c.dom.encryptedmedia.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/js/src/org.w3c/org.w3c.dom.kt: kt-block-comment-to-line
@@ -126,23 +120,18 @@ files:
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/collections/builders/SetBuilder.kt: kt-other
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/coroutines/SafeContinuationJvm.kt: kt-declaration-body-nesting
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/coroutines/jvm/internal/RunSuspend.kt: kt-annotation-line
-  corpus/kotlin/libraries/stdlib/jvm/src/kotlin/coroutines/jvm/internal/TailCallAsyncStackTraceEntry.kt: kt-template-braces
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/coroutines/jvm/internal/boxing.kt: kt-blank-ktlint-extra
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/io/FileReadWrite.kt: kt-comment-placement
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/io/ReadWrite.kt: kt-class-header
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/io/encoding/Base64JVM.kt: kt-expr-vs-block-body
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/io/files/Utils.kt: kt-if-add-braces
-  corpus/kotlin/libraries/stdlib/jvm/src/kotlin/text/StringNumberConversionsJVM.kt: kt-expr-vs-block-body
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/text/StringsJVM.kt: kt-if-else-braced
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/text/regex/Regex.kt: kt-comment-indent
-  corpus/kotlin/libraries/stdlib/jvm/src/kotlin/time/DurationUnitJvm.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/util/LazyJVM.kt: kt-annotation-line
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/util/MathJVM.kt: kt-blank-sudsy-extra
   corpus/kotlin/libraries/stdlib/jvm/src/kotlin/util/UnsignedJVM.kt: kt-comment-placement
-  corpus/kotlin/libraries/stdlib/jvm/test/collections/CollectionJVMTest.kt: kt-template-braces
   corpus/kotlin/libraries/stdlib/jvm/test/collections/UArrayJVMTest.kt: kt-blank-sudsy-extra
   corpus/kotlin/libraries/stdlib/jvm/test/enums/EnumEntriesJvmTest.kt: kt-other
-  corpus/kotlin/libraries/stdlib/jvm/test/io/Console.kt: kt-template-braces
   corpus/kotlin/libraries/stdlib/jvm/test/io/Files.kt: kt-break-after-sudsy
   corpus/kotlin/libraries/stdlib/jvm/test/io/ReadWrite.kt: kt-comment-indent
   corpus/kotlin/libraries/stdlib/jvm/test/io/UseCloseableResourceTest.kt: kt-if-else-other
@@ -207,9 +196,7 @@ files:
   corpus/kotlin/libraries/stdlib/src/kotlin/text/unicode/CodePointIteration.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/src/kotlin/text/unicode/CodePointRange.kt: kt-break-after-k
   corpus/kotlin/libraries/stdlib/src/kotlin/time/Duration.kt: kt-comment-indent
-  corpus/kotlin/libraries/stdlib/src/kotlin/time/DurationUnit.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/src/kotlin/time/Instant.kt: kt-comment-placement
-  corpus/kotlin/libraries/stdlib/src/kotlin/time/TimeSources.kt: kt-unit
   corpus/kotlin/libraries/stdlib/src/kotlin/util/KotlinVersion.kt: kt-break-after-ktlint
   corpus/kotlin/libraries/stdlib/src/kotlin/util/Result.kt: kt-comment-placement
   corpus/kotlin/libraries/stdlib/src/kotlin/uuid/Uuid.kt: kt-other
@@ -238,7 +225,6 @@ files:
   corpus/kotlin/libraries/stdlib/test/properties/delegation/DelegationTest.kt: kt-parens
   corpus/kotlin/libraries/stdlib/test/ranges/URangeTest.kt: kt-comment-indent
   corpus/kotlin/libraries/stdlib/test/text/BytesHexFormatTest.kt: kt-comment-indent
-  corpus/kotlin/libraries/stdlib/test/text/NumberHexFormatTest.kt: kt-template-braces
   corpus/kotlin/libraries/stdlib/test/text/StringBuilderTest.kt: kt-lambda-other
   corpus/kotlin/libraries/stdlib/test/text/StringEncodingTest.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/test/time/TimeMarkTest.kt: kt-comment-indent
@@ -246,7 +232,6 @@ files:
   corpus/kotlin/libraries/stdlib/test/unsigned/ULongTest.kt: kt-other
   corpus/kotlin/libraries/stdlib/test/utils/DeepRecursiveTest.kt: kt-blank-ktlint-extra
   corpus/kotlin/libraries/stdlib/test/utils/PreconditionsTest.kt: kt-parens
-  corpus/kotlin/libraries/stdlib/test/uuid/UuidTest.kt: kt-template-braces
   corpus/kotlin/libraries/stdlib/unsigned/src/kotlin/UByte.kt: kt-annotation-line
   corpus/kotlin/libraries/stdlib/unsigned/src/kotlin/UInt.kt: kt-annotation-line
   corpus/kotlin/libraries/stdlib/unsigned/src/kotlin/UIntRange.kt: kt-break-after-k
@@ -254,7 +239,6 @@ files:
   corpus/kotlin/libraries/stdlib/unsigned/src/kotlin/ULongRange.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/unsigned/src/kotlin/UShort.kt: kt-annotation-line
   corpus/kotlin/libraries/stdlib/wasm/internal/KFunctionImpl.kt: kt-other
-  corpus/kotlin/libraries/stdlib/wasm/internal/kotlin/wasm/internal/KPropertyImpl.kt: kt-unit
   corpus/kotlin/libraries/stdlib/wasm/js/builtins/kotlin/String.kt: kt-other
   corpus/kotlin/libraries/stdlib/wasm/js/builtins/kotlin/Throwable.kt: kt-blank-ktlint-extra
   corpus/kotlin/libraries/stdlib/wasm/js/src/kotlin/js/annotations.kt: kt-parens
@@ -272,7 +256,6 @@ files:
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_atanh.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_exp.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_fmod.kt: kt-block-comment-to-line
-  corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_fmodf.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_hypot.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_log.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/e_pow.kt: kt-block-comment-to-line
@@ -289,13 +272,11 @@ files:
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_log1p.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_nextafter.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_rint.kt: kt-block-comment-to-line
-  corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_scalbn.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_sin.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_tan.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_tanh.kt: kt-block-comment-to-line
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/reflect/KProperty.kt: kt-class-header
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/text/CharWasm.kt: kt-blank-ktlint-extra
-  corpus/kotlin/libraries/stdlib/wasm/src/kotlin/time/DurationUnit.kt: kt-semi-or-comma
   corpus/kotlin/libraries/stdlib/wasm/src/kotlin/wasm/unsafe/MemoryAllocation.kt: kt-comment-placement
   corpus/kotlin/libraries/stdlib/wasm/wasi/builtins/kotlin/String.kt: kt-other
   corpus/kotlinx.coroutines/benchmarks/src/jmh/kotlin/benchmarks/akka/PingPongAkkaBenchmark.kt: kt-comment-indent
@@ -335,7 +316,6 @@ files:
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/CoroutineStart.kt: kt-blank-ktlint-extra
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/EventLoop.common.kt: kt-if-else-other
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/JobSupport.kt: kt-blank-ktlint-extra
-  corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/NonCancellable.kt: kt-unit
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/channels/BroadcastChannel.kt: kt-comment-placement
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/channels/BufferedChannel.kt: kt-block-comment-to-line
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/channels/Channel.kt: kt-comment-other
@@ -360,7 +340,6 @@ files:
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/selects/Select.kt: kt-semi-or-comma
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/sync/Mutex.kt: kt-break-after-ktlint
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/src/sync/Semaphore.kt: kt-comment-indent
-  corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/test/CoroutinesTest.kt: kt-comment-indent
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/test/JobTest.kt: kt-other
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/test/SupervisorTest.kt: kt-break-after-ktlint
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/common/test/channels/ChannelUndeliveredElementFailureTest.kt: kt-other
@@ -392,7 +371,6 @@ files:
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/AbstractTimeSource.kt: kt-semi-or-comma
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/CoroutineContext.kt: kt-ctor-annot-header
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/DebugStrings.kt: kt-blank-ktlint-extra
-  corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/DefaultExecutor.kt: kt-unit
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/Exceptions.kt: kt-comment-indent
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/Executors.kt: kt-class-header
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/Interruptible.kt: kt-comment-indent
@@ -411,7 +389,6 @@ files:
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/scheduling/WorkQueue.kt: kt-comment-placement
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/src/time/Time.kt: kt-if-else-other
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/DispatcherKeyTest.kt: kt-class-header
-  corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/FailingCoroutinesMachineryTest.kt: kt-unit
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/JobChildStressTest.kt: kt-blank-ktlint-extra
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/LimitedParallelismStressTest.kt: kt-comment-indent
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/LimitedParallelismUnhandledExceptionTest.kt: kt-comment-indent
@@ -424,7 +401,6 @@ files:
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/channels/DoubleChannelCloseStressTest.kt: kt-dot-chain-sudsy
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/channels/TickerChannelCommonTest.kt: kt-ws-other
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/exceptions/CoroutineExceptionHandlerJvmTest.kt: kt-lambda-arg-hug
-  corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/exceptions/StackTraceRecoverySelectTest.kt: kt-unit
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/exceptions/StackTraceRecoveryStdlibInterfaceWithTypeBoundsTest.kt: kt-brace-placement
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/exceptions/WithContextExceptionHandlingTest.kt: kt-semi-or-comma
   corpus/kotlinx.coroutines/kotlinx-coroutines-core/jvm/test/flow/FirstJvmTest.kt: kt-comment-indent
@@ -485,7 +461,6 @@ files:
   corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactive/test/PublishTest.kt: kt-comment-indent
   corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactive/test/PublisherAsFlowTest.kt: kt-dot-chain-sudsy
   corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactive/test/PublisherSubscriptionSelectTest.kt: kt-ws-other
-  corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactive/test/ReactiveStreamTckTest.kt: kt-unit
   corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactor/src/Flux.kt: kt-break-after-ktlint
   corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactor/src/Scheduler.kt: kt-unit
   corpus/kotlinx.coroutines/reactive/kotlinx-coroutines-reactor/test/FluxTest.kt: kt-lambda-arg-hug
@@ -529,9 +504,6 @@ files:
   corpus/ktlint/build-logic/src/main/kotlin/KotlinCommonPlugin.kt: kt-closer-indent
   corpus/ktlint/ktlint-cli/src/main/kotlin/io/github/ktlint/core/cli/internal/LintAndFormatProcessor.kt: kt-dot-chain-ktlint-breaks
   corpus/ktlint/ktlint-cli/src/main/kotlin/io/github/ktlint/core/cli/internal/LoadReporterProviders.kt: kt-dot-chain-sudsy
-  corpus/ktlint/ktlint-cli/src/test/kotlin/io/github/ktlint/core/cli/EditorConfigDefaultsLoaderCLITest.kt: kt-parens
-  corpus/ktlint/ktlint-cli/src/test/kotlin/io/github/ktlint/core/cli/SimpleCLITest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-cli/src/test/kotlin/io/github/ktlint/core/cli/internal/FileUtilsTest.kt: kt-array-hug
   corpus/ktlint/ktlint-com-pinterest-backward-compatibility/src/main/kotlin/com/pinterest/ktlint/rule/engine/core/api/Rule.kt: kt-break-after-ktlint
   corpus/ktlint/ktlint-com-pinterest-backward-compatibility/src/main/kotlin/com/pinterest/ktlint/rule/engine/core/api/editorconfig/EditorConfig.kt: kt-dot-chain-ktlint-breaks
   corpus/ktlint/ktlint-com-pinterest-backward-compatibility/src/test/kotlin/com/pinterest/ktlint/rule/engine/core/api/ASTNodeExtensionTest.kt: kt-comment-other
@@ -540,22 +512,13 @@ files:
   corpus/ktlint/ktlint-rule-engine-core/src/main/kotlin/io/github/ktlint/core/rule/engine/core/api/editorconfig/EditorConfig.kt: kt-dot-chain-ktlint-breaks
   corpus/ktlint/ktlint-rule-engine-core/src/test/kotlin/io/github/ktlint/core/rule/engine/core/api/ASTNodeExtensionTest.kt: kt-comment-other
   corpus/ktlint/ktlint-rule-engine-core/src/test/kotlin/io/github/ktlint/core/rule/engine/core/api/RuleKtTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-rule-engine-core/src/test/kotlin/io/github/ktlint/core/rule/engine/core/api/editorconfig/CodeStyleEditorConfigPropertyTest.kt: kt-array-hug
-  corpus/ktlint/ktlint-rule-engine-core/src/test/kotlin/io/github/ktlint/core/rule/engine/core/api/editorconfig/EditorConfigTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-rule-engine-core/src/test/kotlin/io/github/ktlint/core/rule/engine/core/api/editorconfig/MaxLineLengthEditorConfigPropertyTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-rule-engine-core/src/test/kotlin/io/github/ktlint/core/rule/engine/core/api/editorconfig/RuleExecutionEditorConfigPropertyTest.kt: kt-array-hug
   corpus/ktlint/ktlint-rule-engine/src/main/kotlin/io/github/ktlint/core/rule/engine/internal/EditorConfigLoader.kt: kt-dot-chain-ktlint-breaks
   corpus/ktlint/ktlint-rule-engine/src/main/kotlin/io/github/ktlint/core/rule/engine/internal/KtlintSuppression.kt: kt-comment-indent
   corpus/ktlint/ktlint-rule-engine/src/main/kotlin/io/github/ktlint/core/rule/engine/internal/RuleExecutionContext.kt: kt-semi-or-comma
   corpus/ktlint/ktlint-rule-engine/src/main/kotlin/io/github/ktlint/core/rule/engine/internal/RuleProviderSorter.kt: kt-dot-chain-ktlint-breaks
   corpus/ktlint/ktlint-rule-engine/src/main/kotlin/io/github/ktlint/core/rule/engine/internal/SuppressionLocator.kt: kt-dot-chain-ktlint-breaks
-  corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/api/DisabledRulesTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/api/KtlintRuleEngineSuppressionKtTest.kt: kt-array-hug
-  corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/internal/EditorConfigDefaultsLoaderTest.kt: kt-break-after-sudsy
   corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/internal/EditorConfigGeneratorTest.kt: kt-comment-placement
-  corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/internal/EditorConfigLoaderTest.kt: kt-break-after-sudsy
   corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/internal/RuleExecutionContextTest.kt: kt-class-header
-  corpus/ktlint/ktlint-rule-engine/src/test/kotlin/io/github/ktlint/core/rule/engine/internal/rules/KtlintSuppressionRuleTest.kt: kt-array-hug
   corpus/ktlint/ktlint-rule-engine/src/test/resources/spec/do-not-format-unicode-bom-when-not-at-start-of-file--before-ktlint-format.kt: kt-comment-other
   corpus/ktlint/ktlint-ruleset-standard/src/main/kotlin/io/github/ktlint/core/ruleset/standard/rules/ArgumentListWrappingRule.kt: kt-comment-indent
   corpus/ktlint/ktlint-ruleset-standard/src/main/kotlin/io/github/ktlint/core/ruleset/standard/rules/BlankLineBeforeImports.kt: kt-comment-indent
@@ -571,39 +534,23 @@ files:
   corpus/ktlint/ktlint-ruleset-standard/src/main/kotlin/io/github/ktlint/core/ruleset/standard/rules/TrailingCommaOnDeclarationSiteRule.kt: kt-comment-other
   corpus/ktlint/ktlint-ruleset-standard/src/main/kotlin/io/github/ktlint/core/ruleset/standard/rules/WrappingRule.kt: kt-dot-chain-ktlint-breaks
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/ArgumentListWrappingRuleTest.kt: kt-dot-chain-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/BackingPropertyNamingRuleTest.kt: kt-break-after-sudsy
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/BinaryExpressionWrappingRuleTest.kt: kt-dot-chain-sudsy
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/BlankLineBeforeDeclarationRuleTest.kt: kt-semi-or-comma
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/ChainMethodContinuationRuleTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/ClassNamingRuleTest.kt: kt-break-after-sudsy
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/ClassSignatureRuleTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/FilenameRuleTest.kt: kt-array-hug
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/FunctionExpressionBodyRuleTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/FunctionNamingRuleTest.kt: kt-parens
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/FunctionSignatureRuleTest.kt: kt-break-after-sudsy
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/IndentationRuleTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/KdocRuleTest.kt: kt-array-hug
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/PackageNameRuleTest.kt: kt-parens
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/PropertyNamingRuleTest.kt: kt-parens
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/SpacingAroundOperatorsRuleTest.kt: kt-array-hug
   corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/SpacingAroundUnaryOperatorRuleTest.kt: kt-dot-chain-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/importordering/ImportLayoutParserTest.kt: kt-break-after-sudsy
-  corpus/ktlint/ktlint-ruleset-standard/src/test/kotlin/io/github/ktlint/core/ruleset/standard/rules/internal/RemoveDiacriticsFromLettersTest.kt: kt-array-hug
-  corpus/ktlint/ktlint-test/src/main/kotlin/io/github/ktlint/core/test/KtLintAssertThat.kt: kt-parens
   corpus/ktor/build-logic/kdoc-annotator/src/test/test-data/LockFreeLinkedList.raw.kt: kt-semi-or-comma
   corpus/ktor/build-logic/src/main/kotlin/ktorbuild.optional.android-library.gradle.kts: kt-annotation-line
   corpus/ktor/build-logic/src/main/kotlin/ktorbuild.optional.cocoapods.gradle.kts: kt-annotation-line
   corpus/ktor/build-logic/src/main/kotlin/ktorbuild/internal/gradle/ProjectTargetDirectories.kt: kt-brace-placement
   corpus/ktor/build-logic/src/main/kotlin/ktorbuild/internal/publish/ValidatePublishedArtifactsTask.kt: kt-break-after-ktlint
-  corpus/ktor/build-logic/src/main/kotlin/ktorbuild/targets/JsConfig.kt: kt-template-braces
   corpus/ktor/build-settings-logic/src/main/kotlin/ktorsettings.cache-redirector.settings.gradle.kts: kt-comment-placement
   corpus/ktor/ktor-client/ktor-client-apache5/jvm/src/io/ktor/client/engine/apache5/ApacheRequestProducer.kt: kt-blank-ktlint-extra
-  corpus/ktor/ktor-client/ktor-client-cio/common/src/io/ktor/client/engine/cio/CioDnsResolver.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-cio/common/src/io/ktor/client/engine/cio/ConnectionFactory.kt: kt-semi-or-comma
   corpus/ktor/ktor-client/ktor-client-cio/common/src/io/ktor/client/engine/cio/utils.kt: kt-dot-chain-sudsy
   corpus/ktor/ktor-client/ktor-client-cio/common/test/ConnectionFactoryTest.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-client/ktor-client-cio/jvm/src/io/ktor/client/engine/cio/ConnectionPipeline.kt: kt-comment-indent
-  corpus/ktor/ktor-client/ktor-client-cio/jvm/src/io/ktor/client/engine/cio/JvmDnsResolver.kt: kt-lambda-other
   corpus/ktor/ktor-client/ktor-client-cio/jvm/test/io/ktor/client/engine/cio/CIOSpecificHttpsTest.kt: kt-comment-indent
   corpus/ktor/ktor-client/ktor-client-core/common/src/io/ktor/client/call/HttpClientCall.kt: kt-indent-other
   corpus/ktor/ktor-client/ktor-client-core/common/src/io/ktor/client/plugins/BodyProgress.kt: kt-blank-ktlint-extra
@@ -634,15 +581,12 @@ files:
   corpus/ktor/ktor-client/ktor-client-darwin/darwin/src/io/ktor/client/engine/darwin/DarwinClientEngineConfig.kt: kt-semi-or-comma
   corpus/ktor/ktor-client/ktor-client-darwin/darwin/src/io/ktor/client/engine/darwin/DarwinUtils.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-client/ktor-client-darwin/darwin/src/io/ktor/client/engine/darwin/certificates/CertificatePinner.kt: kt-break-after-sudsy
-  corpus/ktor/ktor-client/ktor-client-darwin/darwin/src/io/ktor/client/engine/darwin/internal/DarwinSession.kt: kt-if-else-other
   corpus/ktor/ktor-client/ktor-client-darwin/darwin/src/io/ktor/client/engine/darwin/internal/DarwinWebsocketSession.kt: kt-comment-indent
   corpus/ktor/ktor-client/ktor-client-java/jvm/src/io/ktor/client/engine/java/JavaHttpEngine.kt: kt-unit
   corpus/ktor/ktor-client/ktor-client-java/jvm/src/io/ktor/client/engine/java/JavaHttpWebSocket.kt: kt-other
-  corpus/ktor/ktor-client/ktor-client-java/jvm/test/io/ktor/client/engine/java/CancellationTest.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-client/ktor-client-mock/common/src/io/ktor/client/engine/mock/MockEngine.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-mock/jvm/test/io/ktor/client/tests/mock/MockEngineExtendedTests.kt: kt-comment-indent
   corpus/ktor/ktor-client/ktor-client-okhttp/jvm/src/io/ktor/client/engine/okhttp/OkHttpWebsocketSession.kt: kt-other
-  corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-auth/common/src/io/ktor/client/plugins/auth/Auth.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-auth/common/test/io/ktor/client/plugins/auth/AuthTokenHolderTest.kt: kt-semi-or-comma
   corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-auth/common/test/io/ktor/client/plugins/auth/BasicProviderTest.kt: kt-semi-or-comma
   corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-call-id/common/src/io/ktor/client/plugins/callid/CallId.kt: kt-blank-ktlint-extra
@@ -652,7 +596,6 @@ files:
   corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-logging/jvm/test/io/ktor/client/plugins/logging/OkHttpFormatTest.kt: kt-semi-or-comma
   corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-tracing/jvm/test/TracingWrapperTest.kt: kt-import
   corpus/ktor/ktor-client/ktor-client-plugins/ktor-client-tracing/ktor-client-tracing-stetho/android/test/io/ktor/client/features/tracing/StethoTracerTest.kt: kt-break-after-ktlint
-  corpus/ktor/ktor-client/ktor-client-test-base/common/src/io/ktor/client/test/base/ClientLoader.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-test-base/jvm/src/io/ktor/client/test/base/ClientLoader.jvm.kt: kt-other
   corpus/ktor/ktor-client/ktor-client-test-base/posix/src/io/ktor/client/test/base/ClientLoader.posix.kt: kt-binary-chain
   corpus/ktor/ktor-client/ktor-client-tests/common/test/io/ktor/client/tests/HttpRequestRetryTest.kt: kt-comment-indent
@@ -665,9 +608,7 @@ files:
   corpus/ktor/ktor-client/ktor-client-webrtc/android/src/io/ktor/client/webrtc/Engine.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-webrtc/android/src/io/ktor/client/webrtc/PeerConnection.kt: kt-break-after-sudsy
   corpus/ktor/ktor-client/ktor-client-webrtc/android/src/io/ktor/client/webrtc/media/MediaTrack.kt: kt-other
-  corpus/ktor/ktor-client/ktor-client-webrtc/androidDevice/test/io/ktor/client/webrtc/utils/ConnectionUtils.android.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-client/ktor-client-webrtc/common/test/io/ktor/client/webrtc/WebRtcEngineTest.kt: kt-blank-ktlint-extra
-  corpus/ktor/ktor-client/ktor-client-webrtc/ios/src/io/ktor/client/webrtc/Utils.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-webrtc/ios/src/io/ktor/client/webrtc/media/MediaTrack.kt: kt-other
   corpus/ktor/ktor-client/ktor-client-webrtc/ios/test/io/ktor/client/webrtc/VideoCapturerTest.kt: kt-other
   corpus/ktor/ktor-client/ktor-client-webrtc/jvm/src/io/ktor/client/webrtc/JvmUtils.kt: kt-class-header
@@ -675,7 +616,6 @@ files:
   corpus/ktor/ktor-client/ktor-client-webrtc/ktor-client-webrtc-rs/build.gradle.kts: kt-import
   corpus/ktor/ktor-client/ktor-client-webrtc/ktor-client-webrtc-rs/common/src/io/ktor/client/webrtc/rs/Engine.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-webrtc/ktor-client-webrtc-rs/common/src/io/ktor/client/webrtc/rs/MediaTrack.kt: kt-other
-  corpus/ktor/ktor-client/ktor-client-webrtc/ktor-client-webrtc-rs/common/src/io/ktor/client/webrtc/rs/Senders.kt: kt-unit
   corpus/ktor/ktor-client/ktor-client-webrtc/web/src/io/ktor/client/webrtc/MediaDevices.kt: kt-other
   corpus/ktor/ktor-client/ktor-client-webrtc/web/src/io/ktor/client/webrtc/Utils.kt: kt-break-after-ktlint
   corpus/ktor/ktor-client/ktor-client-winhttp/windows/src/io/ktor/client/engine/winhttp/internal/WinHttpRequest.kt: kt-break-after-sudsy
@@ -683,7 +623,6 @@ files:
   corpus/ktor/ktor-client/ktor-client-winhttp/windows/src/io/ktor/client/engine/winhttp/internal/WinHttpWebSocket.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-compiler-plugin/build.gradle.kts: kt-dot-chain-ktlint-breaks
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/fir/OpenApiCommentParser.kt: kt-if-else-other
-  corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/CallDescribeTransformer.kt: kt-break-after-ktlint
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/IrCodeGenUtils.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/generators/MediaTypeContentGenerator.kt: kt-dot-chain-ktlint-breaks
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/generators/ResponsesGenerator.kt: kt-dot-chain-ktlint-breaks
@@ -692,7 +631,6 @@ files:
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/inference/RequestHeaderInference.kt: kt-other
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/inference/ResourceRouteCallInference.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-compiler-plugin/src/io/ktor/openapi/ir/inference/ResponseHeaderInference.kt: kt-other
-  corpus/ktor/ktor-compiler-plugin/test-fixtures/io/ktor/compiler/services/KtorOpenApiTestAdditionalSources.kt: kt-template-braces
   corpus/ktor/ktor-compiler-plugin/test/io/ktor/openapi/fir/OpenApiMarkdownParametersParserTest.kt: kt-indent-other
   corpus/ktor/ktor-compiler-plugin/testData/openapi/KDocOptions.kt: kt-binary-chain
   corpus/ktor/ktor-compiler-plugin/testData/openapi/Parameters.kt: kt-block-comment-to-line
@@ -701,7 +639,6 @@ files:
   corpus/ktor/ktor-http/common/src/io/ktor/http/FileContentType.kt: kt-other
   corpus/ktor/ktor-http/common/src/io/ktor/http/Headers.kt: kt-other
   corpus/ktor/ktor-http/common/src/io/ktor/http/HttpHeaderValueParser.kt: kt-ws-other
-  corpus/ktor/ktor-http/common/src/io/ktor/http/HttpProtocolVersion.kt: kt-break-after-k
   corpus/ktor/ktor-http/common/src/io/ktor/http/Mimes.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-http/common/src/io/ktor/http/Parameters.kt: kt-other
   corpus/ktor/ktor-http/common/src/io/ktor/http/URLParser.kt: kt-ws-other
@@ -711,9 +648,6 @@ files:
   corpus/ktor/ktor-http/common/test/io/ktor/tests/http/UrlTest.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-http/ktor-http-cio/common/src/io/ktor/http/cio/HttpParser.kt: kt-other
   corpus/ktor/ktor-http/ktor-http-cio/common/src/io/ktor/http/cio/Multipart.kt: kt-ws-other
-  corpus/ktor/ktor-http/ktor-http-cio/common/src/io/ktor/http/cio/internals/Chars.kt: kt-unit
-  corpus/ktor/ktor-http/ktor-http-cio/common/test/io/ktor/tests/http/cio/CharArrayBuilderTest.kt: kt-unit
-  corpus/ktor/ktor-http/ktor-http-cio/jvm/test/io/ktor/tests/http/cio/ChunkedTest.kt: kt-unit
   corpus/ktor/ktor-http/ktor-http-cio/jvm/test/io/ktor/tests/http/cio/MultipartTest.kt: kt-dot-chain-sudsy
   corpus/ktor/ktor-io/common/src/io/ktor/utils/io/ByteReadChannelOperations.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-io/js/src/io/ktor/utils/io/charsets/Charset.js.kt: kt-other
@@ -737,7 +671,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-cio/common/test/io/ktor/tests/server/cio/CIOEngineTest.kt: kt-lambda-arg-hug
   corpus/ktor/ktor-server/ktor-server-cio/common/test/io/ktor/tests/server/cio/TestConnectorInterfaceUsed.kt: kt-other
   corpus/ktor/ktor-server/ktor-server-cio/jvm/test/io/ktor/tests/server/cio/CIOHttpClientTest.kt: kt-dot-chain-sudsy
-  corpus/ktor/ktor-server/ktor-server-cio/jvm/test/io/ktor/tests/server/cio/IntegrationTest.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-cio/jvm/test/io/ktor/tests/server/cio/TestHttpServer.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-server/ktor-server-config-yaml/jvm/test/YamlConfigTestJvm.kt: kt-raw-string-lines
   corpus/ktor/ktor-server/ktor-server-config-yaml/jvmAndPosix/src/io/ktor/server/config/yaml/YamlConfig.kt: kt-blank-sudsy-extra
@@ -756,7 +689,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-core/common/src/io/ktor/server/response/ResponseType.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-core/common/src/io/ktor/server/routing/HostsRoutingBuilder.kt: kt-if-else-braced
   corpus/ktor/ktor-server/ktor-server-core/common/src/io/ktor/server/routing/RoutePathFormat.kt: kt-other
-  corpus/ktor/ktor-server/ktor-server-core/common/src/io/ktor/server/routing/RouteSelector.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-server/ktor-server-core/common/src/io/ktor/server/routing/RoutingPathTree.kt: kt-comment-placement
   corpus/ktor/ktor-server/ktor-server-core/common/src/io/ktor/server/routing/RoutingResolveTrace.kt: kt-other
   corpus/ktor/ktor-server/ktor-server-core/common/test/io/ktor/server/routing/RouteTest.kt: kt-blank-sudsy-extra
@@ -766,13 +698,11 @@ files:
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/engine/EmbeddedServerJvm.kt: kt-semi-or-comma
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/engine/EnvironmentUtilsJvm.kt: kt-break-after-sudsy
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/engine/internal/CallableUtils.kt: kt-blank-sudsy-extra
-  corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/http/content/ETagProvider.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/http/content/PreCompressed.kt: kt-closer-indent
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/http/content/SinglePageApplication.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/http/content/StaticContent.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-core/jvm/src/io/ktor/server/http/content/StaticContentResolution.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-server/ktor-server-core/jvm/test/io/ktor/tests/config/HoconConfigTest.kt: kt-ws-other
-  corpus/ktor/ktor-server/ktor-server-core/jvm/test/io/ktor/tests/hosts/CommandLineTest.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-core/jvm/test/io/ktor/tests/hosts/EmbeddedServerReloadingTests.kt: kt-ws-other
   corpus/ktor/ktor-server/ktor-server-core/jvm/test/io/ktor/tests/server/engine/OverridingClassLoaderTest.kt: kt-dot-chain-sudsy
   corpus/ktor/ktor-server/ktor-server-core/posix/src/io/ktor/server/engine/EmbeddedServer.posix.kt: kt-semi-or-comma
@@ -790,16 +720,12 @@ files:
   corpus/ktor/ktor-server/ktor-server-jetty/ktor-server-jetty-test-http2/jvm/test/io/ktor/tests/server/jetty/http2/JettyEngineTest.kt: kt-class-header
   corpus/ktor/ktor-server/ktor-server-jetty/ktor-server-jetty-test-http2/jvm/test/io/ktor/tests/server/jetty/http2/MultipleDispatchOnTimeout.kt: kt-dot-chain-ktlint-breaks
   corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/EngineMain.kt: kt-other
-  corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/NettyApplicationCall.kt: kt-unit
   corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/NettyApplicationEngine.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/NettyChannelInitializer.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/http1/NettyHttp1ApplicationResponse.kt: kt-break-after-sudsy
-  corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/http2/NettyHttp2ApplicationResponse.kt: kt-unit
   corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/http2/NettyHttp2Handler.kt: kt-dot-chain-ktlint-breaks
-  corpus/ktor/ktor-server/ktor-server-netty/jvm/src/io/ktor/server/netty/http3/NettyHttp3ApplicationResponse.kt: kt-unit
   corpus/ktor/ktor-server/ktor-server-netty/jvm/test/io/ktor/tests/server/netty/NettyConfigurationTest.kt: kt-ws-other
   corpus/ktor/ktor-server/ktor-server-netty/jvm/test/io/ktor/tests/server/netty/NettySpecificTest.kt: kt-other
-  corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth-api-key/common/test/io/ktor/server/auth/apikey/ApplicationTest.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth-jwt/jvm/test/io/ktor/server/auth/jwt/JWTAuthTest.kt: kt-dot-chain-ktlint-breaks
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth-jwt/jvm/test/io/ktor/server/auth/jwt/TypedJwtAuthTest.kt: kt-dot-chain-ktlint-breaks
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth-ldap/jvm/src/io/ktor/server/auth/ldap/Ldap.kt: kt-blank-ktlint-extra
@@ -812,7 +738,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth-oidc/jvm/test/io/ktor/server/auth/oidc/utils/OidcSessionTestUtils.kt: kt-ws-other
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth/common/src/io/ktor/server/auth/AuthenticationScheme.kt: kt-line-added-removed
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth/common/src/io/ktor/server/auth/AuthenticationSchemeWithRoles.kt: kt-break-after-ktlint
-  corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth/common/src/io/ktor/server/auth/OAuth2.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth/common/src/io/ktor/server/auth/OAuthCommon.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth/common/src/io/ktor/server/auth/OAuthFlow.kt: kt-indent-other
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-auth/common/src/io/ktor/server/auth/PrincipalContext.kt: kt-comment-indent
@@ -825,7 +750,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-body-limit/common/src/io/ktor/server/plugins/bodylimit/RequestBodyLimit.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-caching-headers/common/src/io/ktor/server/plugins/cachingheaders/CachingHeaders.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-content-negotiation/common/src/io/ktor/server/plugins/contentnegotiation/ContentNegotiation.kt: kt-semi-or-comma
-  corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-cors/common/src/io/ktor/server/plugins/cors/CORSUtils.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-cors/common/src/io/ktor/server/plugins/cors/routing/CORS.kt: kt-dot-chain-sudsy
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-csrf/common/src/io/ktor/server/plugins/csrf/CSRFConfig.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-data-conversion/common/src/io/ktor/server/plugins/dataconversion/DataConversion.kt: kt-ws-other
@@ -837,7 +761,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-forwarded-header/common/src/io/ktor/server/plugins/forwardedheaders/ForwardedHeaders.kt: kt-closer-indent
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-forwarded-header/common/src/io/ktor/server/plugins/forwardedheaders/Utils.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-forwarded-header/common/src/io/ktor/server/plugins/forwardedheaders/XForwardedHeaders.kt: kt-closer-indent
-  corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-i18n/jvm/test/io/ktor/tests/i18n/TranslationTest.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-jte/jvm/src/io/ktor/server/jte/Jte.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-method-override/common/src/io/ktor/server/plugins/methodoverride/XHttpMethodOverride.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-metrics-micrometer/jvm/src/io/ktor/server/metrics/micrometer/MicrometerMetrics.kt: kt-blank-ktlint-extra
@@ -845,14 +768,12 @@ files:
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-mustache/jvm/test/io/ktor/server/mustache/MustacheTest.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-openapi/jvm/test/io/ktor/server/plugins/openapi/OpenAPITest.kt: kt-dot-chain-ktlint-breaks
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-partial-content/common/src/io/ktor/server/plugins/partialcontent/BodyTransformedHook.kt: kt-class-header
-  corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-partial-content/common/test/io/ktor/tests/ByteRangesChannelTest.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-pebble/jvm/src/io/ktor/server/pebble/RespondTemplate.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-pebble/jvm/test/io/ktor/server/pebble/PebbleTest.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-request-validation/common/src/io/ktor/server/plugins/requestvalidation/RequestValidation.kt: kt-blank-ktlint-extra
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/common/src/io/ktor/server/routing/openapi/OpenApiDocUtils.kt: kt-binary-chain
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/common/src/io/ktor/server/routing/openapi/OpenApiRoutes.kt: kt-comment-other
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/common/src/io/ktor/server/routing/openapi/SecuritySchemeAnnotation.kt: kt-chain-lambda-continuation
-  corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/jvm/src/io/ktor/server/routing/openapi/SecuritySchemeAnnotation.jvm.kt: kt-expr-vs-block-body
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/jvm/test/io/ktor/server/routing/openapi/CollectSchemaReferencesTest.kt: kt-other
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/jvm/test/io/ktor/server/routing/openapi/DescribeRouteTest.kt: kt-line-added-removed
   corpus/ktor/ktor-server/ktor-server-plugins/ktor-server-routing-openapi/jvm/test/io/ktor/server/routing/openapi/SecuritySchemeInferenceTest.kt: kt-dot-chain-ktlint-breaks
@@ -878,8 +799,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-test-base/jvm/src/io/ktor/server/test/base/HighLoadHttpGenerator.kt: kt-comment-indent
   corpus/ktor/ktor-server/ktor-server-test-base/posix/src/io/ktor/server/test/base/EngineTestBaseNix.kt: kt-semi-or-comma
   corpus/ktor/ktor-server/ktor-server-test-base/web/src/io/ktor/server/test/base/EngineTestBase.web.kt: kt-semi-or-comma
-  corpus/ktor/ktor-server/ktor-server-test-host/common/src/io/ktor/server/testing/client/TestHttpClientEngine.kt: kt-break-after-ktlint
-  corpus/ktor/ktor-server/ktor-server-test-host/jvm/src/io/ktor/server/testing/client/TestEngineWebsocketSession.kt: kt-unit
   corpus/ktor/ktor-server/ktor-server-test-suites/common/src/io/ktor/server/testing/suites/HttpServerCommonTestSuite.kt: kt-semi-or-comma
   corpus/ktor/ktor-server/ktor-server-test-suites/common/src/io/ktor/server/testing/suites/SustainabilityCommonTestSuite.kt: kt-semi-or-comma
   corpus/ktor/ktor-server/ktor-server-test-suites/common/src/io/ktor/server/testing/suites/WebSocketEngineSuite.kt: kt-dot-chain-sudsy
@@ -893,7 +812,6 @@ files:
   corpus/ktor/ktor-server/ktor-server-tests/common/test/io/ktor/tests/server/routing/RoutingResolveTest.kt: kt-break-after-sudsy
   corpus/ktor/ktor-server/ktor-server-tests/common/test/io/ktor/tests/server/routing/RoutingTracingTest.kt: kt-raw-string-lines
   corpus/ktor/ktor-server/ktor-server-tests/jvm/test/io/ktor/server/plugins/CookiesTest.kt: kt-semi-or-comma
-  corpus/ktor/ktor-server/ktor-server-tests/jvm/test/io/ktor/server/plugins/PartialContentTest.kt: kt-break-after-ktlint
   corpus/ktor/ktor-server/ktor-server-tests/jvm/test/io/ktor/server/plugins/StaticContentTest.kt: kt-break-after-s
   corpus/ktor/ktor-server/ktor-server-tomcat-jakarta/jvm/src/io/ktor/server/tomcat/jakarta/TomcatApplicationEngine.kt: kt-comment-indent
   corpus/ktor/ktor-server/ktor-server-tomcat/jvm/src/io/ktor/server/tomcat/TomcatApplicationEngine.kt: kt-comment-indent
@@ -925,7 +843,6 @@ files:
   corpus/ktor/ktor-utils/common/src/io/ktor/util/internal/LockFreeLinkedList.kt: kt-semi-or-comma
   corpus/ktor/ktor-utils/js/src/io/ktor/util/date/DateJs.kt: kt-blank-sudsy-extra
   corpus/ktor/ktor-utils/jvm/src/io/ktor/util/Cache.kt: kt-expr-vs-block-body
-  corpus/ktor/ktor-utils/jvm/src/io/ktor/util/CryptoJvm.kt: kt-break-after-ktlint
   corpus/ktor/ktor-utils/jvm/src/io/ktor/util/Nonce.kt: kt-comment-indent
   corpus/ktor/ktor-utils/jvm/test/io/ktor/tests/utils/DeflaterReadChannelTest.kt: kt-closer-indent
   corpus/ktor/ktor-utils/jvm/test/io/ktor/tests/utils/EncodersJvmTest.kt: kt-comment-placement
@@ -945,9 +862,7 @@ files:
   corpus/nowinandroid/core/data/src/main/kotlin/com/google/samples/apps/nowinandroid/core/data/repository/NewsRepository.kt: kt-break-after-ktlint
   corpus/nowinandroid/core/data/src/main/kotlin/com/google/samples/apps/nowinandroid/core/data/repository/UserNewsResourceRepository.kt: kt-break-after-ktlint
   corpus/nowinandroid/core/data/src/test/kotlin/com/google/samples/apps/nowinandroid/core/data/testdoubles/TestNiaNetworkDataSource.kt: kt-dot-chain-ktlint-breaks
-  corpus/nowinandroid/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/NiaDatabase.kt: kt-array-hug
   corpus/nowinandroid/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model/NewsResourceFtsEntity.kt: kt-blank-sudsy-extra
-  corpus/nowinandroid/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model/NewsResourceTopicCrossRef.kt: kt-array-hug
   corpus/nowinandroid/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model/TopicFtsEntity.kt: kt-blank-sudsy-extra
   corpus/nowinandroid/core/datastore/src/main/kotlin/com/google/samples/apps/nowinandroid/core/datastore/NiaPreferencesDataSource.kt: kt-other
   corpus/nowinandroid/core/datastore/src/test/kotlin/com/google/samples/apps/nowinandroid/core/datastore/UserPreferencesSerializerTest.kt: kt-comment-indent

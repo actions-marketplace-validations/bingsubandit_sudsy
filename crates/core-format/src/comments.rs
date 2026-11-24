@@ -109,6 +109,9 @@ pub struct CommentStyle {
     /// A one-line block comment that ends a line of the output is written as a line comment
     /// (`single_block_comment_as_line`).
     pub block_as_line: bool,
+    /// A block comment written tight against the token after it stays tight
+    /// (`block_comment_keep_tight`: `f(/*name=*/x)`).
+    pub keep_tight: bool,
     /// Block comments that end with one of these (`=*/`) have no blank before the token after them.
     pub glued: &'static [&'static str],
 }
@@ -136,6 +139,7 @@ impl Default for CommentStyle {
             trim_lines: false,
             reindent: false,
             block_as_line: false,
+            keep_tight: false,
             glued: &[],
         }
     }

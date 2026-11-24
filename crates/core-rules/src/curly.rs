@@ -169,7 +169,15 @@ fn wrap(g: &Grammar, n: &SyntaxNode, text: &str, edits: &mut Vec<Edit>) {
     let range =
         |a: usize, b: usize| TextRange::new(TextSize::from(a as u32), TextSize::from(b as u32));
     match break_before(g, n, text) {
-        Some((at, _, true)) => edits.push(Edit::insert(TextSize::from(at as u32), " {")),
+        // (a comment on its own line or ending the line goes inside, below the brace)
+        Some((at, from, true)) => {
+            let brace = if text[at..from].contains('\n') {
+                " {\n"
+            } else {
+                " {"
+            };
+            edits.push(Edit::insert(TextSize::from(at as u32), brace));
+        }
         Some((at, _, false)) => edits.push(Edit::replace(range(at, start), " { ")),
         None => edits.push(Edit::insert(TextSize::from(start as u32), "{ ")),
     }

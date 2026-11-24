@@ -323,3 +323,39 @@ fn single_line_block_comments_and_braced_bodies() {
         "fun f() {\n    if (a) {\n        w()\n    } else if (b) {\n        y = 2 // c\n    } else {\n        z = 3 // d\n    }\n}\n"
     );
 }
+
+#[test]
+fn unit_body_template_braces_tight_comments_and_enum_semicolon() {
+    assert_eq!(
+        fmt("fun f() {\n    throw E()\n}\n"),
+        "fun f(): Unit = throw E()\n"
+    );
+    assert_eq!(
+        fmt("fun f(): T {\n    throw E()\n}\n"),
+        "fun f(): T = throw E()\n"
+    );
+    assert_eq!(
+        fmt("val s = \"${a}/${b}x ${c}${d}$e ${f}\"\n"),
+        "val s = \"$a/${b}x ${c}${d}$e $f\"\n"
+    );
+    assert_eq!(
+        fmt("val s = \"${a.b} ${1}\"\n"),
+        "val s = \"${a.b} ${1}\"\n"
+    );
+    assert_eq!(
+        fmt("fun f() = g(/*x=*/true, /*y=*/ false)\n"),
+        "fun f() = g(/*x=*/true, /*y=*/ false)\n"
+    );
+    assert_eq!(
+        fmt("fun f() {\n    if (a) // c\n        g()\n}\n"),
+        "fun f() {\n    if (a) {\n        // c\n        g()\n    }\n}\n"
+    );
+    assert_eq!(
+        fmt("val a = f(entries = [\n    A::class,\n    B::class,\n], v = 1)\n"),
+        "val a =\n    f(\n        entries = [\n            A::class,\n            B::class,\n        ],\n        v = 1,\n    )\n"
+    );
+    assert_eq!(
+        fmt("enum class E {\n    A,\n    B;\n}\n"),
+        "enum class E {\n    A,\n    B,\n}\n"
+    );
+}

@@ -10080,6 +10080,28 @@
               ],
               "type": "string"
             },
+            "assignment_hug_except_kinds": {
+              "default": [
+                "Fun"
+              ],
+              "description": "Kinds of assignment (a declaration) whose value does not stay on the operator's line when its kind is in `assignment_hug_kinds`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "assignment_hug_kinds": {
+              "default": [
+                "CollectionLiteralExpression",
+                "LabeledExpression",
+                "LambdaExpression"
+              ],
+              "description": "Node kinds of a value that stays on the operator's line and breaks inside (an array literal: `entries = [`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "assignment_indent": {
               "default": 1,
               "description": "Levels of indentation of a value that moves below the operator of an assignment.",
@@ -10126,6 +10148,11 @@
                 "type": "string"
               },
               "type": "array"
+            },
+            "block_comment_keep_tight": {
+              "default": true,
+              "description": "A block comment written against the token after it (`f(/*name=*/x)`) stays against it; otherwise one blank follows the comment.",
+              "type": "boolean"
             },
             "class_signature_wrap_min_parameters": {
               "default": 1,
@@ -10300,6 +10327,16 @@
                 "Unit"
               ],
               "description": "Return types (`Unit`) that a function with a block body has anyway: the rule `redundant-return-type` leaves them out when the formatter runs it (`format_rules`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "redundant_template_braces": {
+              "default": [
+                "LongStringTemplateEntry"
+              ],
+              "description": "String template entries of these kinds (`${name}`) lose their braces when they hold one plain name and the text after them cannot continue it.",
               "items": {
                 "type": "string"
               },
@@ -13514,6 +13551,28 @@
                     ],
                     "type": "string"
                   },
+                  "assignment_hug_except_kinds": {
+                    "default": [
+                      "Fun"
+                    ],
+                    "description": "Kinds of assignment (a declaration) whose value does not stay on the operator's line when its kind is in `assignment_hug_kinds`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "assignment_hug_kinds": {
+                    "default": [
+                      "CollectionLiteralExpression",
+                      "LabeledExpression",
+                      "LambdaExpression"
+                    ],
+                    "description": "Node kinds of a value that stays on the operator's line and breaks inside (an array literal: `entries = [`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "assignment_indent": {
                     "default": 1,
                     "description": "Levels of indentation of a value that moves below the operator of an assignment.",
@@ -13560,6 +13619,11 @@
                       "type": "string"
                     },
                     "type": "array"
+                  },
+                  "block_comment_keep_tight": {
+                    "default": true,
+                    "description": "A block comment written against the token after it (`f(/*name=*/x)`) stays against it; otherwise one blank follows the comment.",
+                    "type": "boolean"
                   },
                   "class_signature_wrap_min_parameters": {
                     "default": 1,
@@ -13734,6 +13798,16 @@
                       "Unit"
                     ],
                     "description": "Return types (`Unit`) that a function with a block body has anyway: the rule `redundant-return-type` leaves them out when the formatter runs it (`format_rules`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "redundant_template_braces": {
+                    "default": [
+                      "LongStringTemplateEntry"
+                    ],
+                    "description": "String template entries of these kinds (`${name}`) lose their braces when they hold one plain name and the text after them cannot continue it.",
                     "items": {
                       "type": "string"
                     },

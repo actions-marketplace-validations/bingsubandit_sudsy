@@ -586,6 +586,14 @@ pub mod shared {
         )
     }
 
+    pub fn redundant_template_braces(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::REDUNDANT_TEMPLATE_BRACES,
+            default,
+            "String template entries of these kinds (`${name}`) lose their braces when they hold one plain name and the text after them cannot continue it.",
+        )
+    }
+
     pub fn semicolon_keep_parents(default: &[&str]) -> OptionDef {
         OptionDef::words(
             opt::SEMICOLON_KEEP_PARENTS,
@@ -663,6 +671,14 @@ pub mod shared {
             opt::COMMENT_TRIM_LINES,
             default,
             "The lines of a block comment lose their trailing blanks.",
+        )
+    }
+
+    pub fn block_comment_keep_tight(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            opt::BLOCK_COMMENT_KEEP_TIGHT,
+            default,
+            "A block comment written against the token after it (`f(/*name=*/x)`) stays against it; otherwise one blank follows the comment.",
         )
     }
 
@@ -846,6 +862,22 @@ pub mod shared {
             opt::REWRITE_PARENTHESIZE_PAIRS,
             default,
             "Pairs of node kinds (child, parent, child, parent, ...): a node of the first kind directly inside one of the second gets parentheses around it.",
+        )
+    }
+
+    pub fn assignment_hug_except_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::ASSIGNMENT_HUG_EXCEPT_KINDS,
+            default,
+            "Kinds of assignment (a declaration) whose value does not stay on the operator's line when its kind is in `assignment_hug_kinds`.",
+        )
+    }
+
+    pub fn assignment_hug_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::ASSIGNMENT_HUG_KINDS,
+            default,
+            "Node kinds of a value that stays on the operator's line and breaks inside (an array literal: `entries = [`).",
         )
     }
 
