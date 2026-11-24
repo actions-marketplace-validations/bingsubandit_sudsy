@@ -8,11 +8,11 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
 | HTML | lint html-eslint | 2 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 10.07 | 9de1e355 |
 | PHP | lint PHPStan | 3 | 31.0% | 54.0 | 594 findings | `class.notFound` 254, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 8.53 | 9de1e355 |
 | C / C++ | format clang-format | 3 | 44.1% | 40.9 | 2714 files | `pointer-align` 983, `reference-align` 910, `binary-op-space` 370, `braced-list-padding` 230 +1 more | 15 | 8.17 | - |
-| SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
+| SQL | format sqlfluff | 3 | 69.3% | 15.7 | 134 files | `if-condition-wrap` 82, `layout-gap` 77 | 6 | 7.87 | - |
+| SQL | lint sqlfluff | 3 | 77.4% | 7.6 | 2328 findings | `LT02` 3541 | 3 | 7.60 | bc4843a8 |
 | C# | lint Roslynator | 1 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 1.13 | 66718389 |
 
 Not measured: C / C++ lint clang-tidy (no target, blocked).
@@ -537,47 +537,53 @@ Format: unclassified 0 of 11 differing files (0%).
 
 ## sqlfluff
 
-Format: unclassified 132 of 376 differing files (35%).
-1. `if-condition-wrap` (50 files): "an `IF` / `WHEN` condition is laid out on its own lines where sqlfluff keeps `IF cond` on one line (tsql `IF OBJECT_ID(..) IS NULL EXEC(..)`), and mysql `if exists (` is kept together where sqlfluff breaks after `if`"
-2. `type-args-split` (31 files): "a data type length in a column with a `CHARACTER SET` / `COLLATE` suffix is printed on three lines (`varchar(` / `256` / `)`, mysql); sqlfluff keeps `varchar(256)`"
-3. `index-on-wrap` (28 files): "`CREATE INDEX name ON t (cols)` keeps `ON` on the line of the name and breaks inside the column list; sqlfluff puts `ON t (cols)` on its own indented line"
-4. `identifier-case` (26 files): "the case of identifiers, keywords and type names that sqlfluff leaves as written (`VALUE`, `x::REGCLASS`, `ENGINE innodb`, parameter names) differs"
-5. `tsql-block-end` (22 files): tsql parse error at the `END` of a `BEGIN` block in a procedure or function body; the opening construct is not narrowed (smallest input: bugs.md)
-6. `datatype-case` (14 files): "the case of data type names (`BIGINT`, `varchar`) is changed where sqlfluff keeps it"
-7. `tsql-end-semicolon-else` (13 files): tsql parse error: `END;` followed by `ELSE`
-8. `indent-and-alignment` (12 files): "the indentation and column alignment of lines sqlfluff leaves as written (column definitions, aligned types) is re-indented"
-9. `comment-layout` (7 files): "a block comment or a comment after a clause is moved or re-indented"
-10. `language-name-case` (7 files): "`LANGUAGE C` / `LANGUAGE SQL` is lower-cased as an identifier"
-11. `mysql-delimiter` (6 files): mysql `DELIMITER` scripts: the file is refused (`DELIMITER d//` is an internal error of the meaning check, see bugs.md)
-12. `cast-spacing` (5 files): "`cast(` becomes `CAST (`"
-13. `tsql-set-option-before-go` (5 files): tsql parse error: `SET <option> ON` without a semicolon before `GO` swallows the next `BEGIN` block
-14. `tsql-xml-methods` (5 files): tsql parse error: `WITH XMLNAMESPACES` and the `.query()` / `.value()` methods of the xml type
-15. `insert-values-wrap` (4 files): "`INSERT INTO t (cols) VALUES (...)` is broken over many lines; sqlfluff keeps the statement on one line"
-16. `alter-table-wrap` (3 files): "`ALTER TABLE t ADD ...` actions are not put on their own indented line as sqlfluff does"
-17. `tsql-other-syntax` (3 files): tsql parse errors: `CREATE PROCEDURE n(@p ...)`, `#temp.[col]` references, `(NOLOCK)` on a function-like source
-18. `trailing-blanks` (2 files): "trailing blanks of lines in comments and strings are kept; sqlfluff removes them"
-19. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
-20. `table-option-spacing` (1 files): "`ENGINE=InnoDB` is printed `ENGINE = InnoDB`"
-21. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
-22. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 38.2% (16030 of 41963, 25933 missed, measured on 66718389); rules by missed findings:
-1. `LT02` (8585 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
-2. `LT01` (6332 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
-3. `CP02` (3270 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
-4. `CP01` (2630 missed) Fix: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
-5. `LT05` (1538 missed) Fix: line-length findings (1,538); not yet split by file
-6. `RF06` (430 missed) Fix: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
-7. `CP05` (293 missed)
-8. `LT09` (247 missed)
-9. `CP03` (234 missed)
-10. `AL03` (190 missed)
-11. `LT14` (187 missed)
-12. `AL01` (184 missed)
-13. `RF02` (182 missed)
-14. `RF03` (143 missed) Fix: references of selects over table functions and nested queries
-15. `LT04` (136 missed)
+Format: unclassified 174 of 435 differing files (40%).
+1. `if-condition-wrap` (82 files): "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (the nesting of `ELSE IF`, a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`)"
+2. `layout-gap` (77 files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
+3. `fix-loop-limit` (50 files): "the reference run leaves a large file as written or stops fixing it early (its run sets neither `large_file_skip_byte_limit` nor `runaway_limit`); not measured which, so the file is not a result of Sudsy"
+4. `identifier-case` (30 files): "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
+5. `tsql-block-indent` (22 files): "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
+6. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
+7. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
+Lint: target 77.4% (23804 of 30743, 6939 missed, measured on bc4843a8); rules by missed findings:
+1. `LT02` (3541 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
+2. `LT01` (907 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
+3. `CP02` (617 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
+4. `CP01` (299 missed) Fix: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
+5. `LT05` (242 missed) Fix: line-length findings (1,538); not yet split by file
+6. `RF02` (127 missed)
+7. `PRS` (114 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+8. `CV11` (109 missed)
+9. `CP05` (77 missed)
+10. `RF03` (64 missed) Fix: references of selects over table functions and nested queries
+11. `ST06` (60 missed)
+12. `CV10` (58 missed)
+13. `AL09` (57 missed)
+14. `LT06` (52 missed)
+15. `LT09` (47 missed)
 
-43 more rules: 1352 missed.
+37 more rules: 568 missed.
+
+## sqlfluff-fixtures
+
+Lint: target 86.8% (17313 of 19955, 2642 missed, measured on c2644b20); rules by missed findings:
+1. `LT02` (392 missed)
+2. `PRS` (380 missed)
+3. `LT01` (219 missed)
+4. `CP02` (148 missed)
+5. `LT09` (148 missed)
+6. `RF03` (105 missed)
+7. `LXR` (102 missed)
+8. `LT14` (90 missed)
+9. `ST06` (75 missed)
+10. `AL03` (72 missed)
+11. `RF02` (66 missed)
+12. `CP01` (62 missed)
+13. `RF06` (61 missed)
+14. `RF05` (59 missed)
+15. `RF01` (53 missed)
+
+46 more rules: 610 missed.
 
 ## stylecop
 

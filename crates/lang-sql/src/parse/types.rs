@@ -41,7 +41,15 @@ impl P<'_> {
             self.generic_bracket_run();
             return true;
         }
-        self.bump_as(k::TYPE_IDENTIFIER);
+        // sqlfluff reads these MySQL types as keywords, so they follow the keyword case.
+        let kind = if self.d == super::Dialect::Mysql
+            && matches!(head.as_str(), "DATETIME" | "TIMESTAMP")
+        {
+            k::KEYWORD
+        } else {
+            k::TYPE_IDENTIFIER
+        };
+        self.bump_as(kind);
         if let Some((_, more)) = MORE.iter().find(|(w, _)| *w == head) {
             while self.at_any(more) {
                 self.bump_as(k::TYPE_IDENTIFIER);

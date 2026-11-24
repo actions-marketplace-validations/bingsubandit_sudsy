@@ -92,7 +92,14 @@ fn print(seq: &Seq) -> Doc {
             parts.extend((0..point.newlines).map(|_| doc::hardline()));
         }
         parts.push(doc::text(point.ws.to_string()));
-        parts.push(core_format::context::verbatim_text(&block.text));
+        // sqlfluff keeps the blanks at the end of a line comment and strips those of a block comment's lines.
+        if block.kind == crate::generated::kind::LINE_COMMENT {
+            parts.push(doc::verbatim(block.text.as_str()));
+        } else if block.kind == crate::generated::kind::BLOCK_COMMENT {
+            parts.push(core_format::context::trimmed_lines_doc(&block.text));
+        } else {
+            parts.push(core_format::context::verbatim_text(&block.text));
+        }
     }
     doc::concat(parts)
 }

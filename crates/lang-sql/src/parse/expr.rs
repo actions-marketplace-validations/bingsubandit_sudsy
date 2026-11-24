@@ -207,6 +207,7 @@ impl P<'_> {
 
     fn operand(&mut self, c: &mut Chain) -> bool {
         match self.t(0) {
+            Some(T::Var) if self.starts_name(0) && self.is_t(1, T::Dot) => self.name_or_call(c),
             Some(T::Number | T::Str | T::Var) => {
                 let string = self.is_t(0, T::Str);
                 self.bump();
@@ -354,6 +355,7 @@ impl P<'_> {
             |i| {
                 self.is_t(i, T::Op)
                     || self.is_t(i, T::Cast)
+                    || self.is_t(i, T::Dot)
                     || (self.is_t(i, T::Word) && self.at_op_word(i))
             },
         )
@@ -776,7 +778,14 @@ impl P<'_> {
         loop {
             if self.is_t(0, T::Cast) {
                 self.bump();
-                if !self.type_name() {
+                // T-SQL `geometry::Parse(x)`: a static method, not a type.
+                if self.d == super::Dialect::Tsql
+                    && self.is_t(0, T::Word)
+                    && self.is_t(1, T::LParen)
+                    && !super::types::is_type_word(self.text(0))
+                {
+                    self.function(c);
+                } else if !self.type_name() {
                     self.chain(true);
                 }
                 c.lone = false;
@@ -786,7 +795,13 @@ impl P<'_> {
             } else if self.is_t(0, T::Dot) && self.pos > 0 && self.kinds[self.pos - 1] == k::R_PAREN
             {
                 self.bump();
-                if self.is_t(0, T::Word) || self.is_t(0, T::Quoted) {
+                if self.d == super::Dialect::Tsql
+                    && self.is_t(0, T::Word)
+                    && self.is_t(1, T::LParen)
+                {
+                    // `(subquery).value(..)`, `x.query(..).query(..)`: a method of the xml type.
+                    self.function(c);
+                } else if self.is_t(0, T::Word) || self.is_t(0, T::Quoted) {
                     self.eat_name();
                 } else if self.at_op("*") {
                     self.bump();

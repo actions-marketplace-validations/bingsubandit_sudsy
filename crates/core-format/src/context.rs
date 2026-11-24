@@ -921,6 +921,17 @@ pub fn verbatim_text(s: &str) -> Doc {
     }
 }
 
+/// A multi-line comment text with the blanks at the end of each line removed.
+pub fn trimmed_lines_doc(text: &str) -> Doc {
+    verbatim_text(
+        &text
+            .lines()
+            .map(str::trim_end)
+            .collect::<Vec<_>>()
+            .join("\n"),
+    )
+}
+
 /// One own-line comment (or kept-as-written text) as a document, without the break after it.
 pub fn comment_doc(c: &Comment) -> Doc {
     comment_doc_in(c, &CommentStyle::default())
@@ -937,13 +948,7 @@ pub fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
             None => verbatim_text(&text),
         },
         CommentKind::Block if st.reindent && text.contains('\n') => reindented_doc(c, &text, st),
-        CommentKind::Block if st.trim_lines && text.contains('\n') => verbatim_text(
-            &text
-                .lines()
-                .map(str::trim_end)
-                .collect::<Vec<_>>()
-                .join("\n"),
-        ),
+        CommentKind::Block if st.trim_lines && text.contains('\n') => trimmed_lines_doc(&text),
         CommentKind::Block => verbatim_text(&st.line_text(c)),
     }
 }

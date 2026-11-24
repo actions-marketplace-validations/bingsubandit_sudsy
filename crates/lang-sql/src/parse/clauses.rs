@@ -21,8 +21,19 @@ impl P<'_> {
     fn with_query(&mut self) {
         let m = self.mark();
         self.bump_as(k::KEYWORD);
-        self.eat("recursive");
-        self.list(|p| p.cte());
+        // T-SQL `WITH XMLNAMESPACES (DEFAULT 'uri', 'uri' AS p)`, alone or before the CTEs.
+        let namespaces = self.d == Dialect::Tsql && self.at("xmlnamespaces");
+        if namespaces {
+            self.bump_as(k::KEYWORD);
+            self.generic_bracket_run();
+        }
+        if !namespaces || self.is_t(0, T::Comma) {
+            if namespaces {
+                self.bump();
+            }
+            self.eat("recursive");
+            self.list(|p| p.cte());
+        }
         if self.at_any(&["insert", "update", "delete", "merge", "replace"]) {
             self.statement_body();
         } else {
@@ -163,7 +174,15 @@ impl P<'_> {
             // `SELECT .. INTO [TEMP] tbl`, `INTO @var, @var`
             self.bump_as(k::KEYWORD);
             self.eat_any(&["temp", "temporary", "unlogged", "table"]);
-            self.list(|p| p.element());
+            // The variables of a MySQL routine keep their case.
+            self.list(|p| {
+                if p.d == Dialect::Mysql && p.is_t(0, T::Word) && !p.is_t(1, T::Dot) {
+                    p.bump_as(k::WORD);
+                    true
+                } else {
+                    p.element()
+                }
+            });
         }
         if self.at("from") {
             self.table_clause();
@@ -230,8 +249,19 @@ impl P<'_> {
         if self.d == Dialect::Tsql && (self.is_t(0, T::Var) || self.at_name()) && self.is_op(1, "=")
         {
             // `@v = expr`, `alias = expr`
-            self.bump();
-            self.bump();
+            let var = self.is_t(0, T::Var);
+            if var {
+                self.bump();
+            } else {
+                self.bump_as(k::IDENTIFIER);
+            }
+            if var {
+                let o = self.mark();
+                self.bump();
+                self.close(k::COMPARISON_OPERATOR, o);
+            } else {
+                self.bump();
+            }
             self.expression();
             self.close(k::SELECT_CLAUSE_ELEMENT, m);
             return true;
@@ -420,17 +450,9 @@ impl P<'_> {
             });
         } else if self.at("dual")
             || (self.d == Dialect::Ansi && self.at("table") && !self.is_t(1, T::LParen))
-            || (self.d == Dialect::Tsql && self.is_t(0, T::Var))
+            || (self.d == Dialect::Tsql && self.is_t(0, T::Var) && !self.var_dotted(0))
         {
-            let o = self.mark();
-            // A `#temp` table keeps its case.
-            let kind = if self.text(0).starts_with('#') {
-                k::WORD
-            } else {
-                k::IDENTIFIER
-            };
-            self.bump_as(kind);
-            self.close(k::OBJECT_REFERENCE, o);
+            self.var_table();
         } else if self.at_table_function() {
             self.keyword_table_function();
         } else if self.starts_name(0) {
@@ -443,6 +465,19 @@ impl P<'_> {
             return false;
         }
         self.table_element_rest(m, t)
+    }
+
+    /// `@t`, `#temp`: a table named by a variable or a temp name.
+    pub(super) fn var_table(&mut self) {
+        let o = self.mark();
+        // A `#temp` table keeps its case.
+        let kind = if self.text(0).starts_with('#') {
+            k::WORD
+        } else {
+            k::IDENTIFIER
+        };
+        self.bump_as(kind);
+        self.close(k::OBJECT_REFERENCE, o);
     }
 
     pub(super) fn at_table_function(&self) -> bool {
@@ -543,6 +578,10 @@ impl P<'_> {
         {
             self.bump_as(k::KEYWORD);
             self.generic_columns_bracket();
+        }
+        // T-SQL `t (NOLOCK) alias`.
+        if self.bare_hints_at(0) {
+            self.table_hints();
         }
         self.alias_inner(true);
         if self.at("with") && self.is(1, "offset") {

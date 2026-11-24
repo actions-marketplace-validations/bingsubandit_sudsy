@@ -152,6 +152,10 @@ pub trait Cursor {
     /// Takes the token at the cursor, whatever it is.
     fn bump_any(&mut self);
     fn expression(&mut self);
+    /// The condition of an opener or an arm; a language may indent it when it is too long.
+    fn condition(&mut self) {
+        self.expression();
+    }
     /// One statement, as a node of its own.
     fn statement(&mut self);
     /// The nesting [`statement_list`] keeps.
@@ -172,7 +176,7 @@ pub fn word_ahead<C: Cursor + ?Sized>(c: &C, words: &[&str], distance: usize) ->
 /// A condition when the arm or opener has one, and the word that starts the body.
 fn condition<C: Cursor + ?Sized>(c: &mut C, body_after: Option<&str>) {
     if let Some(word) = body_after {
-        c.expression();
+        c.condition();
         if at(c, 0, word) {
             c.bump_keyword();
         }

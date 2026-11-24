@@ -266,9 +266,14 @@ impl<'a> P<'a> {
         match self.t(0) {
             Some(T::Quoted) => true,
             Some(T::Word) => !self.reserved(0),
-            Some(T::Var) => self.text(0).starts_with('#'),
+            Some(T::Var) => self.text(0).starts_with('#') || self.var_dotted(0),
             _ => false,
         }
+    }
+
+    /// `@x.value(..)`, `@t.col`: a T-SQL variable that starts a dotted name.
+    pub fn var_dotted(&self, n: usize) -> bool {
+        self.d == Dialect::Tsql && self.is_t(n, T::Var) && self.is_t(n + 1, T::Dot)
     }
 
     pub fn reserved(&self, n: usize) -> bool {

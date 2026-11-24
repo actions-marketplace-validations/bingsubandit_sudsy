@@ -911,3 +911,47 @@ impl SpaceRules {
         self.op_first.iter().any(|p| p.matches(t))
     }
 }
+
+/// The characters a language's tokens can fuse through (see [`fuses`]).
+pub struct Fusion {
+    /// Characters of operators.
+    pub operators: &'static str,
+    /// Characters that start a variable or a name after an operator (`@`, `#`).
+    pub sigils: &'static str,
+    /// The opener of a line comment: two characters (`--`).
+    pub line_comment: [char; 2],
+}
+
+/// Would the text of two neighbouring tokens read as other tokens with nothing between them: a
+/// line comment opener, two words, an operator that follows a prefix operator (`prev_is_prefix`)
+/// or a sigil that follows an operator?
+pub fn fuses(prev: &str, next: &str, prev_is_prefix: bool, f: &Fusion) -> bool {
+    let (a, b) = (prev.chars().next_back(), next.chars().next());
+    let word = |c: Option<char>| c.is_some_and(|c| c.is_alphanumeric() || c == '_');
+    let operator = |c: Option<char>| c.is_some_and(|c| f.operators.contains(c));
+    (a == Some(f.line_comment[0]) && b == Some(f.line_comment[1]))
+        || (word(a) && word(b))
+        || (prev_is_prefix && operator(b))
+        || (operator(a) && b.is_some_and(|c| f.sigils.contains(c)))
+}
+
+#[cfg(test)]
+mod fusion_tests {
+    use super::*;
+
+    const F: Fusion = Fusion {
+        operators: "+-<>=",
+        sigils: "@#",
+        line_comment: ['-', '-'],
+    };
+
+    #[test]
+    fn tokens_that_would_read_as_others_fuse() {
+        assert!(fuses("-", "-", false, &F));
+        assert!(fuses("a", "b", false, &F));
+        assert!(fuses("-", "+", true, &F));
+        assert!(fuses("<", "@y", false, &F));
+        assert!(!fuses("<", "y", false, &F));
+        assert!(!fuses(",", "@y", false, &F));
+    }
+}

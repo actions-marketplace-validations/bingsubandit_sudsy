@@ -30,14 +30,25 @@ impl P<'_> {
             }
             "raiserror" => self.raiserror(),
             "go" | "break" | "continue" => self.bump_as(k::KEYWORD),
+            "use" if self.starts_name(1) => {
+                self.bump_as(k::KEYWORD);
+                self.obj_ref();
+            }
             "create" | "alter" if self.routine_ahead() => self.routine(),
+            // `sp_configure 'x', 1`: a procedure called without `EXEC`.
+            _ if matches!(self.t(1), Some(T::Str | T::Number | T::Var))
+                && self.is_t(0, T::Word)
+                && !self.keyword_like(0) =>
+            {
+                self.exec_body()
+            }
             _ => return false,
         }
         true
     }
 
     /// `PRINT expr`, `RETURN expr`, `THROW a, b, c`.
-    fn keyword_expr(&mut self) {
+    pub(super) fn keyword_expr(&mut self) {
         self.bump_as(k::KEYWORD);
         if self.expression() {
             while self.is_t(0, T::Comma) {
@@ -118,6 +129,12 @@ impl P<'_> {
             }
             return;
         }
+        self.indented(false, |p| {
+            p.declare_items();
+        });
+    }
+
+    fn declare_items(&mut self) {
         self.list(|p| {
             if !p.is_t(0, T::Var) {
                 return false;
@@ -149,7 +166,9 @@ impl P<'_> {
         self.bump();
         if self.is_t(0, T::Op) {
             // `+=`, `=`: an assignment.
+            let m = self.mark();
             self.bump();
+            self.close(k::COMPARISON_OPERATOR, m);
         }
         self.expression();
         self.dedent();
@@ -161,6 +180,10 @@ impl P<'_> {
             p.expression();
         });
         self.indented(false, |p| p.nested_statement());
+        // `IF c BEGIN .. END; ELSE ..`: the `;` before `ELSE` ends nothing.
+        if self.is_t(0, T::Semi) && self.is(1, "else") {
+            self.bump();
+        }
         if self.at("else") {
             self.bump_as(k::KEYWORD);
             self.indented(false, |p| p.nested_statement());
@@ -169,9 +192,7 @@ impl P<'_> {
 
     fn while_stmt(&mut self) {
         self.bump_as(k::KEYWORD);
-        self.indented(true, |p| {
-            p.expression();
-        });
+        self.expression();
         self.indented(false, |p| p.nested_statement());
     }
 
@@ -260,6 +281,10 @@ impl P<'_> {
 
     fn exec_stmt(&mut self) {
         self.bump_as(k::KEYWORD);
+        self.exec_body();
+    }
+
+    fn exec_body(&mut self) {
         if self.is_t(0, T::Var) && self.is_op(1, "=") {
             self.bump();
             self.bump();

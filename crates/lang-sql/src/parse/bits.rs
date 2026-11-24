@@ -29,11 +29,20 @@ impl P<'_> {
         true
     }
 
+    /// A reserved word that stands alone in a list is a name (`INSERT t (a, precision)`).
+    pub fn eat_lone_word(&mut self) -> bool {
+        let hit = self.is_t(0, T::Word) && matches!(self.t(1), Some(T::Comma | T::RParen));
+        if hit {
+            self.bump_as(k::IDENTIFIER);
+        }
+        hit
+    }
+
     /// Does a name (or `*`) start `n` tokens ahead?
     pub fn starts_name(&self, n: usize) -> bool {
         match self.t(n) {
             Some(T::Quoted) => true,
-            Some(T::Var) => self.text(n).starts_with('#'),
+            Some(T::Var) => self.text(n).starts_with('#') || self.var_dotted(n),
             Some(T::Word) => {
                 !self.reserved(n) || self.is_t(n + 1, T::Dot) || self.is_t(n + 1, T::LParen)
             }
@@ -66,6 +75,8 @@ impl P<'_> {
         }
         self.alias_name();
         if columns && self.is_t(0, T::LParen) && !self.paren_query_ahead() {
+            // sqlfluff keeps the T-SQL column list against the alias, like the arguments of a function.
+            let list = self.mark();
             self.bracketed(|p| {
                 p.list(|p| {
                     let ok = p.eat_name();
@@ -76,6 +87,9 @@ impl P<'_> {
                     ok
                 });
             });
+            if self.d == Dialect::Tsql {
+                self.close(k::BRACKETED_ARGUMENTS, list);
+            }
         }
         self.dedent();
         self.close(k::ALIAS_EXPRESSION, m);
@@ -198,8 +212,10 @@ impl core_syntax::access::Access for P<'_> {
     }
     fn at_member(&self) -> bool {
         // T-SQL leaves a part out: `db..table`.
+        // A word after a dot is a name, reserved or not (`m.definition`).
         self.is_t(0, T::Dot)
             && (self.starts_name(1)
+                || self.is_t(1, T::Word)
                 || (self.d == Dialect::Tsql && self.is_t(1, T::Dot) && self.starts_name(2)))
     }
     fn bump_dot(&mut self) {
@@ -214,6 +230,10 @@ impl core_syntax::access::Access for P<'_> {
     fn name(&mut self) {
         if self.is_t(0, T::Dot) {
             self.bump();
+        }
+        if self.is_t(0, T::Word) && self.reserved(0) {
+            self.bump_as(k::IDENTIFIER);
+            return;
         }
         self.eat_name();
     }

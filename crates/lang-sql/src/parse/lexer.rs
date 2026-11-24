@@ -106,7 +106,8 @@ pub fn lex(src: &str, d: Dialect) -> (Vec<Lex>, Vec<u32>) {
         if d == Dialect::Mysql
             && kind == T::Word
             && src[i..end].eq_ignore_ascii_case("delimiter")
-            && (stmt_start == out.len() || only_block_comment_before(src, i, "/*", "*/"))
+            && (out[stmt_start..].iter().all(|t| t.kind.is_trivia())
+                || only_block_comment_before(src, i, "/*", "*/"))
         {
             let rest = &src[end..end + rest_line_end(&src[end..])];
             let skip = rest.len() - rest.trim_start_matches([' ', '\t']).len();
@@ -378,6 +379,11 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         }
     }
     let ch = src[i..].chars().next().unwrap_or(' ');
+    if ch.is_whitespace() {
+        // Other blanks (a no-break space) are whitespace too.
+        let run = src[i..].find(|c: char| !c.is_whitespace() || c == '\n' || c == '\r');
+        return (T::Ws, run.map_or(src.len(), |n| i + n));
+    }
     if is_word_start(ch) || (ch.is_ascii_digit()) {
         return word(src, i, ch, d, open);
     }
@@ -411,6 +417,10 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
 
 /// Operators only some dialects have; the other ones lex as their single characters.
 fn op_allowed(op: &str, d: Dialect) -> bool {
+    // `@` and `#` start a variable or a comment there, so `x<@y` is `<` and `@y`.
+    if d == Dialect::Mysql && (op.starts_with('#') || op[1..].contains(['@', '#'])) {
+        return false;
+    }
     match op {
         "&&" | "||" | "!!" | "->" | "->>" | "#>" | "#>>" | "@>" | "<@" | "?|" | "?&" | "<->"
         | "<#>" | "<=>" | "@@" | "~=" | "#-" | "&&&" | "|>>" | "<<|" | "&<|" | "|&>" | "!~~"

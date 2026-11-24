@@ -2,53 +2,38 @@ differences:
   parse-gap: gap  "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
   layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
   non-utf8-input: gap  "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
-  if-condition-wrap: gap  "an `IF` / `WHEN` condition is laid out on its own lines where sqlfluff keeps `IF cond` on one line (tsql `IF OBJECT_ID(..) IS NULL EXEC(..)`), and mysql `if exists (` is kept together where sqlfluff breaks after `if`"
-  type-args-split: gap  "a data type length in a column with a `CHARACTER SET` / `COLLATE` suffix is printed on three lines (`varchar(` / `256` / `)`, mysql); sqlfluff keeps `varchar(256)`"
-  index-on-wrap: gap  "`CREATE INDEX name ON t (cols)` keeps `ON` on the line of the name and breaks inside the column list; sqlfluff puts `ON t (cols)` on its own indented line"
-  identifier-case: gap  "the case of identifiers, keywords and type names that sqlfluff leaves as written (`VALUE`, `x::REGCLASS`, `ENGINE innodb`, parameter names) differs"
-  tsql-block-end: "gap  tsql parse error at the `END` of a `BEGIN` block in a procedure or function body; the opening construct is not narrowed (smallest input: bugs.md)"
-  datatype-case: gap  "the case of data type names (`BIGINT`, `varchar`) is changed where sqlfluff keeps it"
-  tsql-end-semicolon-else: "gap  tsql parse error: `END;` followed by `ELSE`"
-  indent-and-alignment: gap  "the indentation and column alignment of lines sqlfluff leaves as written (column definitions, aligned types) is re-indented"
-  comment-layout: gap  "a block comment or a comment after a clause is moved or re-indented"
-  language-name-case: gap  "`LANGUAGE C` / `LANGUAGE SQL` is lower-cased as an identifier"
-  mysql-delimiter: "gap  mysql `DELIMITER` scripts: the file is refused (`DELIMITER d//` is an internal error of the meaning check, see bugs.md)"
-  cast-spacing: gap  "`cast(` becomes `CAST (`"
-  tsql-xml-methods: "gap  tsql parse error: `WITH XMLNAMESPACES` and the `.query()` / `.value()` methods of the xml type"
-  tsql-set-option-before-go: "gap  tsql parse error: `SET <option> ON` without a semicolon before `GO` swallows the next `BEGIN` block"
-  insert-values-wrap: gap  "`INSERT INTO t (cols) VALUES (...)` is broken over many lines; sqlfluff keeps the statement on one line"
-  alter-table-wrap: gap  "`ALTER TABLE t ADD ...` actions are not put on their own indented line as sqlfluff does"
-  tsql-other-syntax: "gap  tsql parse errors: `CREATE PROCEDURE n(@p ...)`, `#temp.[col]` references, `(NOLOCK)` on a function-like source"
-  trailing-blanks: gap  "trailing blanks of lines in comments and strings are kept; sqlfluff removes them"
-  table-option-spacing: gap  "`ENGINE=InnoDB` is printed `ENGINE = InnoDB`"
+  if-condition-wrap: gap  "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (the nesting of `ELSE IF`, a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`)"
+  identifier-case: gap  "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
+  tsql-block-indent: gap  "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
+  fix-loop-limit: gap  "the reference run leaves a large file as written or stops fixing it early (its run sets neither `large_file_skip_byte_limit` nor `runaway_limit`); not measured which, so the file is not a result of Sudsy"
 files:
   sqlfluff-ansi: parse-gap, layout-gap
   sqlfluff-mysql: parse-gap, layout-gap
   sqlfluff-postgres: parse-gap, layout-gap
   sqlfluff-tsql: parse-gap, layout-gap
   postgres-regress: parse-gap, layout-gap
-  real-world: if-condition-wrap:50, type-args-split:31, index-on-wrap:28, identifier-case:26, tsql-block-end:22, datatype-case:14, tsql-end-semicolon-else:13, indent-and-alignment:12, comment-layout:7, language-name-case:7, mysql-delimiter:6, cast-spacing:5, tsql-xml-methods:5, tsql-set-option-before-go:5, insert-values-wrap:4, alter-table-wrap:3, tsql-other-syntax:3, trailing-blanks:2, table-option-spacing:1
+  real-world: if-condition-wrap:82, fix-loop-limit:50, layout-gap:77, identifier-case:30, tsql-block-indent:22
   sql/postgres/src/test/regress/sql/collate.windows.win1252.sql: non-utf8-input
 ratchet:
-  sqlfluff-ansi: 204
-  sqlfluff-mysql: 230
-  sqlfluff-postgres: 132
-  sqlfluff-tsql: 131
-  postgres-regress: 41
-  real-world: 426
+  sqlfluff-ansi: 205
+  sqlfluff-mysql: 235
+  sqlfluff-postgres: 143
+  sqlfluff-tsql: 153
+  postgres-regress: 49
+  real-world: 588
 target-files:
-  postgres-regress: 115
-  sqlfluff-ansi: 210
-  sqlfluff-mysql: 248
-  sqlfluff-postgres: 142
-  sqlfluff-tsql: 152
-  real-world: 673
+  postgres-regress: 141
+  sqlfluff-ansi: 212
+  sqlfluff-mysql: 254
+  sqlfluff-postgres: 162
+  sqlfluff-tsql: 190
+  real-world: 849
 second-format:
   real-world: 0
 refused:
   real-world: 0
-unclassified: 132
-target: 38.2
+unclassified: 174
+target: 77.4
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
@@ -60,63 +45,57 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 16030, total: 41963, main: '66718389'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 23804, total: 30743, main: 'bc4843a8'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 8585
-  LT01: 6332
-  CP02: 3270
-  CP01: 2630
-  LT05: 1538
-  RF06: 430
-  CP05: 293
-  LT09: 247
-  CP03: 234
-  AL03: 190
-  LT14: 187
-  AL01: 184
-  RF02: 182
-  RF03: 143
-  LT04: 136
-  LT03: 123
+  LT02: 3541
+  LT01: 907
+  CP02: 617
+  CP01: 299
+  LT05: 242
+  RF02: 127
   PRS: 114
   CV11: 109
-  LT06: 103
-  RF05: 99
-  AM04: 85
+  CP05: 77
+  RF03: 64
   ST06: 60
   CV10: 58
   AL09: 57
-  LT15: 53
-  LT11: 43
+  LT06: 52
+  LT09: 47
+  AL01: 44
+  RF05: 43
   ST09: 41
   TQ03: 41
-  RF04: 34
-  LT12: 32
+  CP03: 37
+  LT04: 31
   ST12: 30
-  AM05: 29
   RF01: 25
-  LT08: 22
+  LT15: 22
+  AL03: 21
   AL04: 21
+  LT03: 20
   TQ02: 19
-  CV06: 17
-  CP04: 16
   TQ01: 16
-  AL02: 15
+  CV06: 15
   LXR: 15
   ST05: 14
+  AM05: 13
+  LT14: 12
+  RF04: 12
+  LT08: 8
+  RF06: 8
   AM03: 7
+  LT12: 7
   AM01: 6
-  LT07: 6
   ST01: 6
-  CV04: 5
+  AL02: 5
+  CP04: 5
   ST08: 5
-  AL08: 4
   JJ01: 4
+  LT11: 4
   ST04: 4
-  AL05: 3
-  AM06: 3
   AM02: 2
   CV01: 2
-  LT13: 2
+  AM04: 1
   ST10: 1
   ST11: 1

@@ -304,7 +304,8 @@ def upstream(config, prefix, version, copy, work, style=None, folder=None):
     group = re.search(config["group"], copy.name) if "group" in config else None  # `{group}`: the first group of the fixture name (sqlfluff: its dialect)
     command, env = tool_command(config, prefix, exe=exe, file=(copy.name if mode == "in-place" else copy.relative_to(work).as_posix()), group=group.group(1) if group else "", style=style, folder=folder or ROOT / "tests/parity" / config.get("folder", ""))
     r = run(command, copy.parent if mode == "in-place" else work, text if mode == "stdin" else None, check=False, env=env)
-    if r.returncode != 0:
+    # `reject_output`: a regex over the output; the tool exits non-zero for other reasons too (sqlfluff: unfixable findings left after a fix), and only a match is a rejection
+    if r.returncode != 0 and not ("reject_output" in config and mode == "in-place" and r.returncode == 1 and not re.search(config["reject_output"], (r.stdout + r.stderr).decode("utf-8", "replace"))):
         if config.get("tool_may_reject"):
             return None
         raise SystemExit(f"{' '.join(command)} failed:\n{r.stderr.decode()}{r.stdout.decode()}")

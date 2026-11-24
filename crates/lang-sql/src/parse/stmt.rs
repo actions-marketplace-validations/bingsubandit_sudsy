@@ -21,10 +21,14 @@ pub(super) fn file(p: &mut P) {
             // `DELIMITER ~`: the new delimiter stands outside the statement.
             let m = p.mark();
             p.bump_as(k::KEYWORD);
-            p.close(k::STATEMENT, m);
             if p.is_t(0, T::Op) {
                 p.bump();
+                // `DELIMITER // ;`: the client ignores the rest of the line.
+                while !p.eof() && !p.newline_before() {
+                    p.bump_as(k::WORD);
+                }
             }
+            p.close(k::STATEMENT, m);
             continue;
         }
         statement(p);
@@ -54,6 +58,10 @@ fn end_statement(p: &mut P) {
     if p.eof() || p.is_t(0, T::Semi) {
         return;
     }
+    // The first statement of a `BEGIN` body follows the `BEGIN` of the statement before it.
+    if p.d == Dialect::Mysql && p.prev_text_is("begin") {
+        return;
+    }
     if p.d == Dialect::Tsql && p.at_list("tsql_starts") {
         return;
     }
@@ -75,6 +83,7 @@ impl P<'_> {
             "update" => self.update(),
             "delete" => self.delete(),
             "merge" => self.merge(),
+            "return" if self.d == Dialect::Mysql => self.keyword_expr(),
             "explain" if self.d != Dialect::Tsql => self.explain(),
             "set" if self.d == Dialect::Mysql && self.is_assignment() => self.set_assign(),
             _ if self.is_t(0, T::Word) && !self.keyword_like(0) && !self.is_t(1, T::Colon) => {
@@ -136,6 +145,8 @@ impl P<'_> {
         self.eat("table");
         if self.at_table_function() {
             self.keyword_table_function();
+        } else if self.d == Dialect::Tsql && self.is_t(0, T::Var) && !self.var_dotted(0) {
+            self.var_table();
         } else {
             self.obj_ref();
         }
@@ -147,7 +158,7 @@ impl P<'_> {
         self.table_hints();
         if self.is_t(0, T::LParen) && !self.at_query_start() {
             self.bracketed(|p| {
-                p.list(|p| p.assign_target());
+                p.list(|p| p.assign_target() || p.eat_lone_word());
             });
         }
         if self.at("overriding") {

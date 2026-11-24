@@ -218,6 +218,10 @@ fn lint_ratchets() -> Result<BTreeMap<String, Ratchets>> {
     let modes: BTreeMap<String, BTreeMap<String, serde_json::Value>> = serde_json::from_str(&text)?;
     let mut out = BTreeMap::new();
     for (tool, entry) in &modes["lint"] {
+        // A tool entry with `"readme": false` is a ratchet of its own that the tables leave out.
+        if entry["readme"].as_bool() == Some(false) {
+            continue;
+        }
         let path = root
             .join("tests/parity")
             .join(tool)
