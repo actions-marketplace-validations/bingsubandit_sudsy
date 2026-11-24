@@ -10,14 +10,19 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 4 | 70.7% | 14.3 | 18612 findings | `LT02` 19005 | 3 | 19.07 | 3cdf2fac |
 | SQL | format sqlfluff | 4 | 73.7% | 11.3 | 94 files | `if-condition-wrap` 128 | 3 | 15.07 | - |
-| PHP | lint PHPStan | 4 | 32.3% | 52.7 | 556 findings | `class.notFound` 209, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 11.09 | b8d37c38 |
 | C / C++ | format clang-format | 4 | 45.9% | 39.1 | 2598 files | `reference-align` 467, `brace-own-line-in-source` 327, `pointer-align` 326, `cast-space` 316 +7 more | 33 | 4.74 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
+Blocked on a decision:
+
+| Language | Leg | Now | Points | Reason |
+|---|---|---|---|---|
+| PHP | lint PHPStan | 36.1% | 48.9 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
+
 Not measured: C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 4: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format. Score when open: 11.33 (4 x 170 points / difficulty 60).
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format. Score when open: 11.33 (4 x 170 points / difficulty 60).
 
 ## actionlint
 
@@ -310,24 +315,24 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 
 ## phpstan
 
-Lint: target 32.3% (340 of 1053, 713 missed, measured on b8d37c38); rules by missed findings:
+Lint: target 36.1% (340 of 942, 602 missed, measured on 362a7f17); rules by missed findings:
 1. `class.notFound` (209 missed)
 2. `method.notFound` (94 missed)
 3. `function.notFound` (80 missed)
-4. `ignore.unmatchedLine` (62 missed)
-5. `ignore.unmatchedIdentifier` (49 missed)
-6. `new.static` (43 missed)
-7. `method.void` (42 missed)
-8. `return.missing` (22 missed)
-9. `property.uninitializedReadonly` (20 missed)
-10. `variable.undefined` (20 missed)
-11. `property.notFound` (11 missed)
-12. `staticProperty.notFound` (9 missed)
-13. `arguments.count` (8 missed)
-14. `method.childReturnType` (7 missed)
-15. `method.templateTypeNotInParameter` (7 missed)
+4. `new.static` (43 missed)
+5. `method.void` (42 missed)
+6. `return.missing` (22 missed)
+7. `property.uninitializedReadonly` (20 missed)
+8. `variable.undefined` (20 missed)
+9. `property.notFound` (11 missed)
+10. `staticProperty.notFound` (9 missed)
+11. `arguments.count` (8 missed)
+12. `method.childReturnType` (7 missed)
+13. `method.templateTypeNotInParameter` (7 missed)
+14. `classConstant.notFound` (6 missed)
+15. `interface.notFound` (5 missed)
 
-13 more rules: 30 missed.
+11 more rules: 19 missed.
 
 ## prettier
 

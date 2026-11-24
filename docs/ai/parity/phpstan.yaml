@@ -22,5 +22,5 @@ entries:
   unset.variable: planned | needs-project-index, needs a scope pass for the variable unset (one finding).
   unset.readOnlyProperty: planned | needs-project-index, a readonly property inherited from another class (one finding).
   method.templateTypeNotInParameter: planned | needs-project-index, needs the `@template` tags and the parameter types of the phpdoc.
-  ignore.unmatchedLine: planned | needs-project-index, a `@phpstan-ignore` line whose identifier PHPStan never reports on that line; it depends on all other identifiers.
-  ignore.unmatchedIdentifier: planned | needs-project-index, as ignore.unmatchedLine.
+  ignore.unmatchedLine: wontfix a complaint about PHPStan's own `@phpstan-ignore` comment, which Sudsy does not read; not a finding about the code (user decision)
+  ignore.unmatchedIdentifier: wontfix as ignore.unmatchedLine

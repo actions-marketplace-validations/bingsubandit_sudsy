@@ -75,7 +75,7 @@
   ids: [php]
   speed: [PHP]
   format: [{tool: php-cs-fixer, name: PHP-CS-Fixer}]
-  lint: [{tool: phpstan, name: PHPStan}]
+  lint: [{tool: phpstan, name: PHPStan, blocked: "needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision)"}]
 - language: Java
   ids: [java]
   speed: [Java]
