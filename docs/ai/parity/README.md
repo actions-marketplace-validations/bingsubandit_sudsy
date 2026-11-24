@@ -91,7 +91,7 @@ The rules with most findings that Sudsy does not report, per reference tool, on 
 | Kotlin | ktlint | `kotlin/ktlint` | `function-signature` 30800, `argument-list-wrapping` 24113, `multiline-expression-wrapping` 15169, `class-signature` 4591, `trailing-comma-on-call-site` 4162 |
 | HCL | tflint | `hcl/tflint-recommended` | `terraform_required_providers` 37, `terraform_required_version` 20, `terraform_unused_declarations` 2 |
 | Java | checkstyle | `java/google` | `MissingJavadocMethod` 18283, `MethodName` 7887, `JavadocParagraph` 5301, `SummaryJavadoc` 1527, `TodoFormat` 1498 |
-| PHP | phpstan | `php/phpstan` | `class.notFound` 7407, `variable.undefined` 591, `classConstant.notFound` 511, `staticMethod.notFound` 401, `function.notFound` 323 |
+| PHP | phpstan | `php/phpstan` | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `function.notFound` 140, `staticMethod.notFound` 90 |
 | SQL | sqlfluff | `sql/sqlfluff` | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126 |
 
 Not measured:

@@ -77,8 +77,7 @@
         "psr/link": "dev-master#5b8d54ad01c46baa3bb13388640a62fdb34461a5",
         "psr/log": "dev-master#f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
         "spomky-labs/pki-framework": "1.7.x-dev#e6c52057637c771edba3607f9d91a6d1db4f9f2d",
-        "symfony/deprecation-contracts": "dev-main#feb1edf4e546af3b85c5caebe8359a20db230ca3",
-        "symfony/http-client-contracts": "dev-main#e221106e1a274d1002e526cf987eac508b6d4a8d",
+        "symfony/contracts": "3.8.x-dev",
         "symfony/mercure": "0.8.0",
         "symfony/polyfill-ctype": "1.x-dev#141046a8f9477948ff284fa65be2095baafb94f2",
         "symfony/polyfill-deepclone": "1.x-dev#096ec106d0e7f069d8fdb5db29d31a06bca15143",
@@ -93,7 +92,6 @@
         "symfony/polyfill-php85": "1.x-dev#94c794cb5ba51784bc259f11e9f128593297d8dc",
         "symfony/polyfill-php86": "1.x-dev#8840df45b24f33a49dc419fa18dc0057231ae1d8",
         "symfony/polyfill-uuid": "1.x-dev#b23ff8245cc5c4479ea2be3d0132d2e6dd433993",
-        "symfony/service-contracts": "dev-main#052852a96fd5e5ebdb617dba22031e41a3300fb5",
         "tijsverkoyen/css-to-inline-styles": "dev-master#a0aef6022b3d84b8c72855ded8581458d82d5013",
         "twig/twig": "4.x-dev#586dee42d7769471ea2005f331fd103352480e73",
         "web-token/jwt-rsa15": "4.3.x-dev#a5b6ab912f9d9d775a09612e504a9d97c98bb644",
@@ -193,6 +191,7 @@
         "fabpot/amphp-sqlite3": "1.1.0",
         "guzzlehttp/guzzle": "8.7.x-dev#5a11ef9b9b05dc2feaea2d27833c2a7a509f4cfa",
         "jolicode/jolinotif": "dev-main#01d8f8490206458fc5b153003602e2fd4c8575ab",
+        "jsonpath-standard/jsonpath-compliance-test-suite": "2026.09.17",
         "league/commonmark": "dev-main#3164fa3d41d78857384a29e1c606c456cbab9600",
         "league/flysystem": "3.x-dev#12930254888f54a48ea9d8ac04c2f73a0e3b09f1",
         "league/html-to-markdown": "dev-master#4ed9b2258a481d690152c180e97a90738a216c6d",
@@ -200,6 +199,7 @@
         "masterminds/html5": "2.12.0",
         "monolog/monolog": "dev-main#6d4cf3a1199b8fa9e38fdb540569579354242fc7",
         "nikic/php-parser": "dev-master#24c72b4d84130ea4ae01b926631faf53f6aea7e0",
+        "nst/json-test-suite": "2024.12.14",
         "nyholm/psr7": "dev-master#2cadf40a0619c6087da9039b9b7cfc8846457966",
         "opis/json-schema": "dev-master#b99e6ec2ebeb3ffb009fca781876b62db47bb841",
         "pda/pheanstalk": "8.0.2",
@@ -214,13 +214,15 @@
         "seld/jsonlint": "1.12.2",
         "symfony/mercure-bundle": "0.5.0",
         "symfony/phpunit-bridge": "8.2.x-dev#f688991d2c450c6f5ba2fa1d156f6db2ded11ce0",
+        "symfony/runtime": "8.2.0",
         "symfony/security-acl": "dev-main#f018dae2da1c8274dce68202d43bca8db212dfa9",
         "symfony/webpack-encore-bundle": "2.x-dev#1ee41bc5bf67fd89215aedebc66a6f151098c288",
         "tempest/highlight": "2.x-dev#f0d415eab9b129abf60a68dfb6e26da7c28c025d",
         "twig/cssinliner-extra": "3.x-dev#bfe1c66c728ee5339c41ad7e2f5dc2d2d538c935",
         "twig/inky-extra": "3.x-dev#80fb767b35df96bba8c445c6a03cbec0d5b78fc6",
         "twig/markdown-extra": "3.x-dev#1cd3fd7620888da91cf4f016e3b28d0f0f4e9e04",
-        "web-token/jwt-library": "4.3.x-dev#e2fb882fd0710ad73c63d6f936765aeceb6c17a5"
+        "web-token/jwt-library": "4.3.x-dev#e2fb882fd0710ad73c63d6f936765aeceb6c17a5",
+        "yaml/yaml-test-suite": "2022.01.17"
     },
     "conflict": {
         "ext-psr": "<1.1|>=2",
@@ -254,6 +256,62 @@
         "symfony/ux-typed": "<3.5",
         "symfony/ux-vue": "<3.5"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "monorepo/src/Symfony/Contracts",
+            "options": {
+                "versions": {
+                    "symfony/contracts": "3.8.x-dev"
+                }
+            }
+        },
+        {
+            "type": "path",
+            "url": "monorepo/src/Symfony/Component/Runtime",
+            "options": {
+                "versions": {
+                    "symfony/runtime": "8.2.0"
+                }
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "jsonpath-standard/jsonpath-compliance-test-suite",
+                "version": "2026.09.17",
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/jsonpath-standard/jsonpath-compliance-test-suite.git",
+                    "reference": "9d1a415a53f5dfb291bc874823892e49174e38eb"
+                }
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "nst/json-test-suite",
+                "version": "2024.12.14",
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/nst/JSONTestSuite.git",
+                    "reference": "1ef36fa01286573e846ac449e8683f8833c5b26a"
+                }
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "yaml/yaml-test-suite",
+                "version": "2022.01.17",
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/yaml/yaml-test-suite.git",
+                    "reference": "6ad3d2c62885d82fc349026c136ef560838fdf3d"
+                }
+            }
+        }
+    ],
     "config": {
         "allow-plugins": {
             "php-http/discovery": false,

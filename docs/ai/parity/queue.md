@@ -9,8 +9,8 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.60 | 3f07cafc |
-| PHP | lint PHPStan | 3 | 0.0% | 85.0 | 2154 findings | `class.notFound` 1322, `new.static` 317, `method.notFound` 171, `function.notFound` 140 +3 more | 21 | 12.14 | 1f4c633b |
 | C# | lint StyleCop | 3 | 24.6% | 60.4 | 247038 findings | `SA1101` 108918, `SA1600` 59930, `SA1611` 45566, `SA1200` 25732 +1 more | 15 | 12.08 | a6a124c7 |
+| PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1446 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `function.notFound` 140 +4 more | 24 | 10.62 | 9e31c610 |
 | C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
 
 Blocked on a decision:
@@ -19,9 +19,9 @@ Blocked on a decision:
 |---|---|---|---|---|
 | C / C++ | format clang-format | 18.4% | 66.6 | a cost-based choice in the Doc printer (bin-packing, break after `=`) waits on the lead and user decision of docs/ai/design/cpp-formatter.md |
 
-Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target).
+Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 4: PHP lint PHPStan; C# format CSharpier; C# lint StyleCop; C / C++ lint clang-tidy.
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: PHP lint PHPStan; C# format CSharpier; C# lint StyleCop.
 
 ## actionlint
 
@@ -269,24 +269,24 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 2ad6316d); rules by misse
 
 ## phpstan
 
-Lint: target 0% (0 of 2533, 2533 missed, measured on 1f4c633b); rules by missed findings:
-1. `class.notFound` (1322 missed)
-2. `new.static` (317 missed)
-3. `method.notFound` (171 missed)
+Lint: target 0% (0 of 1701, 1701 missed, measured on 9e31c610); rules by missed findings:
+1. `method.notFound` (384 missed)
+2. `class.notFound` (381 missed)
+3. `new.static` (317 missed)
 4. `function.notFound` (140 missed)
-5. `classConstant.notFound` (92 missed)
-6. `staticMethod.notFound` (91 missed)
-7. `ignore.unmatchedLine` (62 missed)
-8. `ignore.unmatchedIdentifier` (49 missed)
-9. `method.void` (42 missed)
-10. `interface.notFound` (38 missed)
-11. `unset.possiblyHookedProperty` (34 missed)
-12. `return.missing` (24 missed)
-13. `variable.undefined` (21 missed)
+5. `staticMethod.notFound` (90 missed)
+6. `ignore.unmatchedLine` (62 missed)
+7. `ignore.unmatchedIdentifier` (49 missed)
+8. `method.void` (42 missed)
+9. `attribute.notFound` (35 missed)
+10. `unset.possiblyHookedProperty` (34 missed)
+11. `return.missing` (24 missed)
+12. `property.uninitializedReadonly` (20 missed)
+13. `variable.undefined` (20 missed)
 14. `parameter.implicitlyNullable` (18 missed)
-15. `attribute.notFound` (16 missed)
+15. `function.inner` (15 missed)
 
-16 more rules: 96 missed.
+16 more rules: 70 missed.
 
 ## prettier
 
