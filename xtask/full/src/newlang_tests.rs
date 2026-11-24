@@ -1,12 +1,13 @@
 //! New-language rows: the formula by hand, the best alternative, a paid parser, `~` and rejected values.
 
-use crate::newlang::{entries, plans, section};
+use crate::newlang::{demand, entries, plans, section};
 use crate::support::rows;
 
+/// Pushers and survey share that make demand exactly 0.8: sqrt(0.64) = 0.8 in both sources.
 const GO: &str = r"
 - language: Go
-  demand: 0.8
-  source: s
+  gh: 5330774.4
+  so: 40.192
   parser: ~1.0
   format: [{tool: gofmt, gain: 0.1, reach: 0.95, cost: 0.6, why: w}]
   lint: [{tool: lint, gain: 0.4, reach: 0.85, cost: 1.0, why: w}]
@@ -41,8 +42,8 @@ fn formula_by_hand() {
 fn best_alternative_wins() {
     let yaml = r"
 - language: Rs
-  demand: 1
-  source: s
+  gh: 8329335
+  so: 62.8
   parser: 1.0
   lint:
     - {tool: no-types, gain: 0.7, reach: ~0.3, cost: 1.0, why: w}
@@ -72,8 +73,8 @@ fn paid_parser_and_deferred_leg() {
     let support = "- language: Ruby\n  lint: [{tool: rubocop, name: RuboCop}]\n";
     let yaml = r"
 - language: Ruby
-  demand: 0.5
-  source: s
+  gh: 2082333.75
+  so: 15.7
   format: [{tool: rubyfmt, gain: 0.4, reach: 0.9, cost: 1.0, why: w}]
 ";
     let list = one(yaml, support).unwrap();
@@ -92,8 +93,8 @@ fn bad_values_are_rejected() {
     let with = |from: &str, to: &str| GO.replace(from, to);
     assert!(err(&with("gain: 0.4", "gain: 0.5"), "").contains("gain 0.5"));
     assert!(err(&with("reach: 0.85", "reach: 1.5"), "").contains("reach 1.5"));
-    assert!(err(&with("demand: 0.8", "demand: 0.05"), "").contains("demand 0.05"));
-    assert!(err(&with("source: s", "source: ''"), "").contains("no demand source"));
+    assert!(err(&with("gh: 5330774.4", "gh: 9000000"), "").contains("gh Some(9000000.0)"));
+    assert!(err(&with("so: 40.192", "so: 0"), "").contains("so Some(0.0)"));
     assert!(err(&with("why: w}]\n  lint", "why: ''}]\n  lint"), "").contains("why are required"));
     assert!(
         err(&with("parser: ~1.0", "parser: ~1.0\n  speed: 1"), "")
@@ -112,7 +113,7 @@ fn bad_values_are_rejected() {
 fn estimates_print_a_tilde() {
     let yaml = GO
         .replace("gain: 0.4", "gain: ~0.4")
-        .replace("  source: s\n", "  source: s\n  note: open\n");
+        .replace("  parser: ~1.0\n", "  parser: ~1.0\n  note: open\n");
     let list = one(&yaml, "").unwrap();
     let text = section(&list, &["Alpha lint X".into()]);
     assert!(
@@ -121,5 +122,72 @@ fn estimates_print_a_tilde() {
     );
     assert!(text.contains("Primary legs under the bar now: Alpha lint X."));
     assert!(text.contains("| open; estimate"), "{text}");
-    assert!(text.contains("| Go | 0.8 | ~1 |"));
+    assert!(text.contains("| Go | 0.80 | ~1 |"));
+}
+
+/// Per source `sqrt(x / top)`: a quarter of the top is 0.5. One source: the other is estimated by the median ratio 2.27
+/// (the survey level over the pusher level), the demand is an estimate. Floor 0.1, cap 1.
+#[test]
+fn demand_scale_by_hand() {
+    let near = |a: f64, b: f64| assert!((a - b).abs() < 1e-9, "{a} != {b}");
+    let both = demand(Some(8_329_335.0 / 4.0), Some(62.8 / 4.0));
+    near(both.v, 0.5);
+    assert!(!both.est);
+    // gh only: (0.5 + 0.5 x 2.27) / 2
+    let gh = demand(Some(8_329_335.0 / 4.0), None);
+    near(gh.v, 0.8175);
+    assert!(gh.est);
+    // so only: (0.5 / 2.27 + 0.5) / 2
+    let so = demand(None, Some(62.8 / 4.0));
+    near(so.v, (0.5 / 2.27 + 0.5) / 2.0);
+    assert!(so.est);
+    // 28,505 pushers and 608,541 pushers stay far apart (the log scale gave 0.57 and 0.84)
+    let (a, b) = (
+        demand(Some(28_505.0), Some(2.2)),
+        demand(Some(608_541.0), Some(11.7)),
+    );
+    assert!(a.v < 0.15 && b.v > 0.3, "{a:?} {b:?}");
+}
+
+/// The mean under 0.1 is lifted to 0.1; a language in no source is 0.1 and an estimate; the top of one source caps at 1.
+#[test]
+fn demand_floor_and_cap() {
+    assert_eq!(
+        demand(Some(1_000.0), Some(0.1)),
+        crate::newlang::V { v: 0.1, est: false }
+    );
+    assert_eq!(demand(None, None), crate::newlang::V { v: 0.1, est: true });
+    assert_eq!(demand(Some(8_329_335.0), None).v, 1.0);
+    let list = one(
+        "- language: X\n  parser: 1.0\n  lint: [{tool: t, gain: 0.1, reach: 1, cost: 1, why: w}]\n",
+        "",
+    )
+    .unwrap();
+    assert_eq!(list[0].demand.v, 0.1);
+}
+
+/// Only the 25 best rows are table rows; the others are named with their score in one line, none dropped.
+#[test]
+fn table_shows_the_top_rows() {
+    let yaml: String = (0..27)
+        .map(|i| {
+            format!(
+                "- language: L{i}\n  parser: 1.0\n  lint: [{{tool: t, gain: 0.1, reach: 1, cost: 1, why: w}}]\n  gh: {}\n",
+                100_000 * (i + 1)
+            )
+        })
+        .collect();
+    let text = section(&one(&yaml, "").unwrap(), &[]);
+    assert_eq!(
+        text.matches("\n| L").count(),
+        26,
+        "25 rows and the header: {text}"
+    );
+    assert!(text.contains("\n| L26 |"), "{text}");
+    assert!(!text.contains("\n| L1 |"), "{text}");
+    assert!(
+        text.contains("The other 2 entries of the file, each with the score of its best plan: L1 "),
+        "{text}"
+    );
+    assert!(text.contains("~; L0 "), "{text}");
 }

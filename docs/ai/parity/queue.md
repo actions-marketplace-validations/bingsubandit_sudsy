@@ -26,13 +26,33 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
-| CMake | 0.84 | 1.2 | 4.00 | 3.31~ | 4.77~ | both: lint cmake-lint + format gersemi | estimate: pick only to measure it |
-| Swift | 0.72 | ~1.2 | 3.51~ | 3.21~ | 4.54~ | both: lint SwiftLint defaults + format swift-format | estimate: pick only to measure it |
-| Scala | 0.57 | ~1.2 | 1.85~ | 2.40~ | 2.89~ | both: lint scalafix syntactic + format scalafmt | cannot reach the bar: lint scalafix syntactic reach ~0.6; estimate: pick only to measure it |
-| Lua | 0.74 | ~1 | 1.76~ | 2.06~ | 2.52~ | both: lint selene + format StyLua | cannot reach the bar: lint selene reach ~0.7; estimate: pick only to measure it |
-| Go | 0.8 | 1.2 | 2.45~ | 0.56~ | 2.02~ | lint: lint revive defaults | estimate: pick only to measure it |
-| Rust | 0.79 | ~1 | 2.00~ | 0.53~ | 1.74~ | lint: lint clippy with types | estimate: pick only to measure it |
-| Dart | 0.71 | ~1.2 | 0.27~ | 0.45~ | 0.50~ | both: lint dart analyze + format dart format | cannot reach the bar: lint dart analyze reach ~0.5; estimate: pick only to measure it |
+| Ruby | 0.27 | 0 (paid) | - | 2.89~ | - | format: format rufo | estimate: pick only to measure it |
+| Batchfile | 0.51~ | ~1.2 | 1.74~ | 1.74~ | 2.29~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
+| Kubernetes manifests | 0.41~ | ~0.2 | 2.28~ | - | - | lint: lint kubeconform | estimate: pick only to measure it |
+| Jupyter Notebook | 0.57~ | ~1 | 1.65~ | 1.75~ | 2.27~ | both: lint ruff check on cells + format ruff format on cells | JSON file with Python cells: the Python leg does the work; estimate: pick only to measure it |
+| CMake | 0.35 | 1.2 | 1.67 | 1.38~ | 1.99~ | both: lint cmake-lint + format gersemi | estimate: pick only to measure it |
+| Gradle | 0.31~ | ~0.2 | 1.75~ | 1.84~ | 1.93~ | both: lint none found + format npm-groovy-lint | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format npm-groovy-lint reach ~0.75; build.gradle (Groovy DSL); build.gradle.kts is Kotlin; estimate: pick only to measure it |
+| Swift | 0.27 | ~1.2 | 1.31~ | 1.20~ | 1.70~ | both: lint SwiftLint defaults + format swift-format | estimate: pick only to measure it |
+| package.json | 0.10~ | ~0.2 | 0.84~ | 1.61~ | 1.26~ | format: format sort-package-json | estimate: pick only to measure it |
+| Blade | 0.25~ | ~1.2 | 1.39~ | 0.88~ | 1.51~ | both: lint tlint + format blade-formatter | cannot reach the bar: format blade-formatter reach ~0.75; estimate: pick only to measure it |
+| Ansible | 0.28~ | ~0.2 | 1.42~ | - | - | lint: lint ansible-lint | cannot reach the bar: lint ansible-lint reach ~0.6; YAML with playbook semantics; estimate: pick only to measure it |
+| Jinja | 0.23~ | ~1.2 | 1.05~ | 0.81~ | 1.24~ | both: lint djlint lint + format djlint format | cannot reach the bar: format djlint format reach ~0.75; Jinja, Nunjucks; estimate: pick only to measure it |
+| LaTeX | 0.29~ | ~1.2 | 0.77~ | 1.04~ | 1.22~ | both: lint ChkTeX + format latexindent | cannot reach the bar: format latexindent reach ~0.75; estimate: pick only to measure it |
+| Hack | 0.20~ | ~1.2 | 0.94~ | 0.83~ | 1.18~ | both: lint hhast + format hackfmt | grammar archived; estimate: pick only to measure it |
+| R | 0.20 | ~1.2 | 0.91~ | 0.80~ | 1.15~ | both: lint lintr + format styler | estimate: pick only to measure it |
+| Go | 0.37 | 1.2 | 1.14~ | 0.26~ | 0.94~ | lint: lint revive defaults | estimate: pick only to measure it |
+| Procfile | 0.26~ | ~1.5 | 0.79~ | 0.79~ | 1.08~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
+| Perl | 0.19 | ~1.2 | 0.88~ | 0.68~ | 1.04~ | both: lint perlcritic + format perltidy | cannot reach the bar: format perltidy reach ~0.75; Perl parses only at runtime in full: the grammar is partial; estimate: pick only to measure it |
+| GraphQL | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint graphql-eslint | estimate: pick only to measure it |
+| Angular templates | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint angular-eslint template rules | estimate: pick only to measure it |
+| Handlebars | 0.18~ | ~1.5 | 0.75~ | 0.67~ | 0.98~ | both: lint ember-template-lint + format prettier glimmer | Handlebars, Mustache; estimate: pick only to measure it |
+| Tekton pipelines | 0.10~ | ~0.2 | 0.97~ | - | - | lint: lint tekton-lint | estimate: pick only to measure it |
+| Lua | 0.28 | ~1 | 0.68~ | 0.79~ | 0.97~ | both: lint selene + format StyLua | cannot reach the bar: lint selene reach ~0.7; estimate: pick only to measure it |
+| Helm templates | 0.28~ | ~1.2 | 0.11~ | 0.96~ | 0.67~ | format: format none found | cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
+| GDScript | 0.17 | ~1.2 | 0.76~ | 0.67~ | 0.96~ | both: lint gdlint + format gdformat | estimate: pick only to measure it |
+| Rust | 0.38 | ~1 | 0.96~ | 0.25~ | 0.83~ | lint: lint clippy with types | estimate: pick only to measure it |
+
+The other 148 entries of the file, each with the score of its best plan: EJS 0.95~; OpenAPI 0.95~; Mako 0.93~; MATLAB 0.93~; XSLT 0.90~; Astro 0.88~; Groovy 0.87~; ARM templates 0.84~; Docker Compose 0.84~; Assembly 0.83~; Roff 0.82~; Ninja 0.82~; Vim Script 0.81~; CloudFormation 0.79~; Cython 0.78~; Gherkin 0.78~; Nix 0.78~; Linker Script 0.77~; Elixir 0.74~; ShaderLab 0.72~; Smarty 0.68~; Snakemake 0.67~; Tcl 0.66~; Yacc / Lex 0.65~; Twig 0.65~; Mermaid 0.64~; Scala 0.62~; JSON5 0.61~; MDX 0.61~; TOML 0.58~; Apex 0.58~; ERB 0.58~; Erlang 0.58~; F# 0.58~; Liquid 0.58~; Racket 0.58~; reStructuredText 0.58~; Solidity 0.58~; VBA / VB6 0.57~; Visual Basic .NET 0.57~; M4 0.57~; EDN 0.57~; Emacs Lisp 0.56~; Prisma 0.56~; Meson 0.56~; Elm 0.55~; Grain 0.55~; BrightScript / BrighterScript 0.54~; Robot Framework 0.54~; VHDL 0.54~; Puppet 0.54~; BitBake 0.53~; Julia 0.53~; Nextflow 0.53~; Fortran 0.52~; Clojure 0.52~; NSIS 0.51~; Mojo 0.51~; Stylus 0.50~; Rich Text Format 0.50~; CoffeeScript 0.49~; Fennel / Janet 0.49~; PureScript 0.49~; CSV / TSV 0.49~; Sass (indented) 0.49~; INI / EditorConfig / .gitignore 0.49~; Inno Setup 0.49~; KDL 0.48~; RON 0.47~; TypeSpec 0.47~; dotenv 0.47~; BibTeX 0.46~; Common Lisp / Scheme 0.46~; Haskell 0.45~; Liquidsoap 0.45~; Marko 0.45~; Beancount / hledger 0.45~; AsciiDoc 0.45~; ASP.NET (Razor, Web Forms) 0.45~; Cap'n Proto 0.45~; COBOL 0.45~; Java properties 0.45~; Prolog 0.45~; Thrift 0.45~; VBScript 0.45~; WebAssembly text 0.44~; Awk 0.43~; Verilog / SystemVerilog 0.43~; ANTLR 0.42~; Smithy 0.42~; Nim 0.42~; ReScript / Reason 0.42~; Avro IDL 0.41~; FlatBuffers 0.41~; GDB script 0.41~; Pawn 0.41~; QMake 0.41~; Raku 0.41~; RenderScript 0.41~; sed 0.41~; SWIG 0.41~; Pascal / Delphi 0.40~; Typst 0.40~; jq 0.38~; Standard ML 0.38~; Nginx config 0.37~; Odin 0.36~; Quarto / R Markdown 0.35~; CodeQL 0.34~; D2 0.34~; Gleam 0.34~; GN 0.34~; HTTP files / Hurl 0.34~; Just 0.34~; Metal 0.34~; Nickel 0.34~; Nushell 0.34~; OCaml 0.34~; Pkl 0.34~; Roc 0.34~; templ 0.34~; Zig 0.33~; D 0.33~; Inko 0.30~; Protocol Buffer text format 0.30~; Soong (Android.bp) 0.30~; Ziggy 0.30~; Ada 0.27~; Crystal 0.26~; Rego (Open Policy Agent) 0.26~; WGSL 0.23~; Dart 0.16~; Objective-C 0.14~; Starlark / Bazel 0.13~; Fish 0.12~; Dhall 0.11~; V 0.11~; CUDA 0.10~; HLSL 0.10~; XML 0.10~; GLSL 0.10~; Caddyfile 0.08~; Bicep 0.08~; KCL 0.08~; CUE 0.07~; Jsonnet 0.07~; QML 0.07~; Cedar 0.06~.
 
 ## actionlint
 

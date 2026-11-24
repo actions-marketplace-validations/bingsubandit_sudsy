@@ -14,11 +14,22 @@ const WEIGHT: f64 = 4.0;
 const BAR: f64 = 85.0;
 /// Scale of the formula: the cost of a leg of cost 1 and parser 1 at gain x reach 1 scores `WEIGHT x BAR / 20 / 2`.
 const NORM: f64 = 20.0;
+/// Pushers of the top language of the GitHub Innovation Graph (HTML, 2026 Q2, summed over economies).
+const GH_TOP: f64 = 8_329_335.0;
+/// Share (%) of respondents of the Stack Overflow Developer Survey 2026 who worked with the top language (JavaScript).
+const SO_TOP: f64 = 62.8;
+/// Median over the 42 languages both sources list of `sqrt(so / SO_TOP) / sqrt(gh / GH_TOP)`: how much higher the survey
+/// level is than the pusher level. Stands in for the source that does not list a language.
+const SO_PER_GH: f64 = 2.27;
+/// Rows of the table; the other entries follow as one line of names and scores.
+const TOP: usize = 25;
+/// Lowest demand.
+const FLOOR: f64 = 0.1;
 /// The values `gain` takes (docs/ai/parity/queue.md: official, third party, slow or own runtime, none).
 const GAINS: [f64; 4] = [0.1, 0.4, 0.7, 1.0];
 
 /// A number of the file; `"~0.6"` marks an estimate.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub(crate) struct V {
     pub v: f64,
     pub est: bool,
@@ -51,6 +62,29 @@ impl V {
     }
 }
 
+/// Demand 0.1-1 from the raw values of the two sources: per source `sqrt(x / top)`, a missing source estimated from the
+/// listed one by `SO_PER_GH` (the demand is then an estimate), the mean of the two, floored at `FLOOR`. A language in no
+/// source is `FLOOR`, an estimate.
+pub(crate) fn demand(gh: Option<f64>, so: Option<f64>) -> V {
+    let g = gh.map(|x| (x / GH_TOP).sqrt());
+    let s = so.map(|x| (x / SO_TOP).sqrt());
+    let (g, s, est) = match (g, s) {
+        (Some(g), Some(s)) => (g, s, false),
+        (Some(g), None) => (g, g * SO_PER_GH, true),
+        (None, Some(s)) => (s / SO_PER_GH, s, true),
+        (None, None) => {
+            return V {
+                v: FLOOR,
+                est: true,
+            };
+        }
+    };
+    V {
+        v: ((g + s) / 2.0).clamp(FLOOR, 1.0),
+        est,
+    }
+}
+
 /// One way to cover a leg: a reference tool with its gain, reach and cost.
 #[derive(Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
@@ -67,9 +101,12 @@ pub(crate) struct Alt {
 #[serde(deny_unknown_fields)]
 pub(crate) struct Entry {
     pub language: String,
+    /// Pushers of the GitHub Innovation Graph (2026 Q2, summed over economies), when it lists the language.
+    pub gh: Option<f64>,
+    /// Share (%) of the Stack Overflow survey respondents who worked with it, when the survey lists it.
+    pub so: Option<f64>,
+    #[serde(skip)]
     pub demand: V,
-    /// The raw source values of the demand.
-    pub source: String,
     /// Absent for a language that is supported with a leg missing (the parser is paid).
     pub parser: Option<V>,
     #[serde(default)]
@@ -95,15 +132,13 @@ pub(crate) fn entries(yaml: &str, support: &[Row]) -> Result<Vec<Entry>> {
         let name = e.language.clone();
         ensure!(!seen.contains(&name), "languages.yaml: `{name}` twice");
         seen.push(name.clone());
-        ensure!(
-            !e.source.trim().is_empty(),
-            "languages.yaml: `{name}` has no demand source"
-        );
-        ensure!(
-            (0.1..=1.0).contains(&e.demand.v),
-            "languages.yaml: `{name}` demand {} is not 0.1-1",
-            e.demand.v
-        );
+        for (src, v, top) in [("gh", e.gh, GH_TOP), ("so", e.so, SO_TOP)] {
+            ensure!(
+                v.is_none_or(|v| v > 0.0 && v <= top),
+                "languages.yaml: `{name}` {src} {v:?} is not above 0 and at most {top}"
+            );
+        }
+        e.demand = demand(e.gh, e.so);
         for leg in &e.deferred {
             ensure!(
                 leg == "format" || leg == "lint",
@@ -252,7 +287,7 @@ fn best<'a, 'b>(plans: &'b [Plan<'a>]) -> Option<&'b Plan<'a>> {
 /// The section of the priority table: the rule for a free slot, the primary legs still under the bar and one row
 /// per language, the best suggestion first.
 pub(crate) fn section(list: &[Entry], holding: &[String]) -> String {
-    let mut rows: Vec<(f64, String)> = Vec::new();
+    let mut rows: Vec<(f64, String, String)> = Vec::new();
     for e in list {
         let plans = plans(e);
         let by = |n: &str| plans.iter().find(|p| p.name == n);
@@ -294,13 +329,15 @@ pub(crate) fn section(list: &[Entry], holding: &[String]) -> String {
         rows.push((
             best(&plans).map_or(-1.0, |b| b.score),
             format!(
-                "| {} | {} | {parser} | {} | {} | {} | {suggestion} | {notes} |\n",
+                "| {} | {}{} | {parser} | {} | {} | {} | {suggestion} | {notes} |\n",
                 e.language,
-                e.demand.show(),
+                format_args!("{:.2}", e.demand.v),
+                if e.demand.est { "~" } else { "" },
                 cell(by("lint")),
                 cell(by("format")),
                 cell(by("both")),
             ),
+            format!("{} {}", e.language, cell(best(&plans))),
         ));
     }
     rows.sort_by(|a, b| b.0.total_cmp(&a.0));
@@ -312,8 +349,16 @@ pub(crate) fn section(list: &[Entry], holding: &[String]) -> String {
             holding.join("; ")
         }
     );
-    for (_, row) in rows {
-        out += &row;
+    for (_, row, _) in rows.iter().take(TOP) {
+        out += row;
+    }
+    if rows.len() > TOP {
+        let rest: Vec<&str> = rows[TOP..].iter().map(|r| r.2.as_str()).collect();
+        out += &format!(
+            "\nThe other {} entries of the file, each with the score of its best plan: {}.\n",
+            rest.len(),
+            rest.join("; ")
+        );
     }
     out + "\n"
 }
