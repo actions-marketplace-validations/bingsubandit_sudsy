@@ -12,6 +12,8 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [design/discoverability.md](design/discoverability.md) | Plan: how people and agents find Sudsy (site pages, registry metadata, agents, integrations); phase 1 built |
 | [design/hard-cases.md](design/hard-cases.md) | Hard cases left open by unification steps, each with its numbers and missing capability |
 | [design/symbol-index.md](design/symbol-index.md) | Plan: names across files and dependencies for lint rules (types, functions, members), phases and checkpoints |
+| [design/go.md](design/go.md) | Plan: Go, parser and revive lint, phases and checkpoints |
+| [design/cmake.md](design/cmake.md) | Plan: CMake, hand-written parser, cmake-lint and gersemi, phases and checkpoints |
 | [architecture/language-packs.md](architecture/language-packs.md) | Languages as installable packs: format, manifest, cache, ABI check, missing language |
 | [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |
 | [formatting/engine.md](formatting/engine.md) | Layout doc, printer, shapes, directives, comments, safety check |
