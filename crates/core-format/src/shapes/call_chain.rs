@@ -202,6 +202,11 @@ struct Link {
     marker: bool,
 }
 
+thread_local! {
+    /// The call at the head of a `grouped` chain whose formatting the language is asked for.
+    static HEAD_CALL: std::cell::Cell<Option<TextRange>> = const { std::cell::Cell::new(None) };
+}
+
 struct Walk<'a> {
     cx: &'a FormatCtx<'a>,
     hooks: &'a dyn ChainHooks,
@@ -353,12 +358,26 @@ impl<'a> Walk<'a> {
         }
     }
 
+    /// The call `n` on a plain name as its callee and arguments, each formatted on its own.
+    fn plain_call_text(&self, n: &SyntaxNode) -> Result<Doc, FormatError> {
+        let parts = self
+            .significant(n)
+            .iter()
+            .map(|c| match c {
+                SyntaxElement::Node(c) => self.cx.format(c),
+                SyntaxElement::Token(t) => Ok(self.cx.token(t)),
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(doc::concat(parts))
+    }
+
     fn element(&self, e: &SyntaxElement, in_head: bool) -> Result<Doc, FormatError> {
         if let Some(d) = self.hooks.element(e, in_head) {
             return d;
         }
-        // A call on a plain name (`W(a.B())`) at the head of a `grouped` chain is printed as its
-        // callee and arguments: formatting it as a chain again would not end.
+        // A call on a plain name (`W(a.B())`) at the head of a `grouped` chain is the language's to
+        // print; a language whose call rule makes every call a chain asks for it again: that
+        // second request gets the callee and arguments as they are (`plain_call_text`).
         if let SyntaxElement::Node(n) = e
             && self.call_heads
             && self.tag(n, "call")
@@ -366,14 +385,10 @@ impl<'a> Walk<'a> {
         {
             let all = self.significant(n);
             if self.plain_receiver(&self.receiver(n, &all)) {
-                let parts = all
-                    .iter()
-                    .map(|c| match c {
-                        SyntaxElement::Node(c) => self.cx.format(c),
-                        SyntaxElement::Token(t) => Ok(self.cx.token(t)),
-                    })
-                    .collect::<Result<Vec<_>, _>>()?;
-                return Ok(doc::concat(parts));
+                let outer = HEAD_CALL.replace(Some(n.text_range()));
+                let doc = self.cx.format(n);
+                HEAD_CALL.set(outer);
+                return doc;
             }
         }
         match e {
@@ -633,13 +648,17 @@ pub fn member_chain(
     policy: &ChainPolicy,
     hooks: &dyn ChainHooks,
 ) -> Result<Doc, FormatError> {
+    let call_heads = policy.style == Style::Grouped;
     let w = Walk {
         cx,
         hooks,
-        call_heads: policy.style == Style::Grouped,
+        call_heads,
         links: RefCell::new(Vec::with_capacity(4)),
         dropped: RefCell::new(Vec::new()),
     };
+    if call_heads && HEAD_CALL.get() == Some(node.text_range()) {
+        return w.plain_call_text(node);
+    }
     let head = w.walk(node);
     let links = w.links.take();
     let Some(head) = head else {

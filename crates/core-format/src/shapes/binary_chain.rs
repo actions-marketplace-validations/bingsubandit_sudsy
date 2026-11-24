@@ -53,6 +53,8 @@ pub struct BinaryPolicy {
     pub hug: Hug,
     /// A single operation groups its operator and right side, whatever the operator line.
     pub group_single: bool,
+    /// A single operation is grouped beside a chain of another kind (`group_single`).
+    pub group_mixed_chains: bool,
     /// Kinds of chains that, inside another chain, have no group of their own.
     pub open_kinds: Vec<String>,
     /// Kinds of right operands that stay on the operator's line.
@@ -78,6 +80,7 @@ impl BinaryPolicy {
                 .strings(core_config::opt::BINARY_OPEN_KINDS)
                 .map(String::from)
                 .collect(),
+            group_mixed_chains: options.flag(core_config::opt::BINARY_GROUP_MIXED_CHAINS, true),
             group_single: options.flag(
                 core_config::opt::BINARY_GROUP_SINGLE,
                 text(OPERATOR_LINE) == "end",
@@ -296,7 +299,15 @@ pub fn binary_chain(
             node_kind(&spine[0].right),
         ]
         .iter()
-        .all(|k| k.is_none_or(|k| !g.has_tag(k, "binary-chain")));
+        .all(|k| {
+            k.is_none_or(|k| {
+                if policy.group_mixed_chains {
+                    k != node.kind()
+                } else {
+                    !g.has_tag(k, "binary-chain")
+                }
+            })
+        });
 
     let first_doc = {
         let d = operand(cx, hooks, first)?;

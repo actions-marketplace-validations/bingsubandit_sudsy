@@ -38,6 +38,8 @@ pub const BINARY_HUG: core_config::OptId = core_config::opt::BINARY_HUG;
 #[allow(dead_code)]
 pub const BINARY_GROUP_SINGLE: core_config::OptId = core_config::opt::BINARY_GROUP_SINGLE;
 #[allow(dead_code)]
+pub const BINARY_GROUP_MIXED_CHAINS: core_config::OptId = core_config::opt::BINARY_GROUP_MIXED_CHAINS;
+#[allow(dead_code)]
 pub const BINARY_INLINE_RIGHT_KINDS: core_config::OptId = core_config::opt::BINARY_INLINE_RIGHT_KINDS;
 #[allow(dead_code)]
 pub const BINARY_OPEN_KINDS: core_config::OptId = core_config::opt::BINARY_OPEN_KINDS;
@@ -470,6 +472,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::binary_indent(1),
         core_config::shared::binary_hug("assignment"),
         core_config::shared::binary_group_single(false),
+        core_config::shared::binary_group_mixed_chains(true),
         core_config::shared::binary_inline_right_kinds(&["RecursivePattern"]),
         core_config::shared::binary_open_kinds(&[]),
         core_config::shared::indent_nested_binary(false),

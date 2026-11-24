@@ -1030,6 +1030,14 @@ pub mod shared {
         )
     }
 
+    pub fn binary_group_mixed_chains(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            opt::BINARY_GROUP_MIXED_CHAINS,
+            default,
+            "A single binary operation (`a.length > 0` in `a.length > 0 || b`) is grouped also when its parent or a side is an operation of another kind; off: it is not when any of them is an operator chain of whatever kind.",
+        )
+    }
+
     pub fn binary_group_single(default: bool) -> OptionDef {
         OptionDef::boolean(
             opt::BINARY_GROUP_SINGLE,

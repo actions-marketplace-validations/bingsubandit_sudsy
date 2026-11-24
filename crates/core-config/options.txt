@@ -16,6 +16,7 @@ assignment_layout
 assignment_left_min_parameters
 assignment_left_unless_kinds
 assignment_op_token_skip_kinds
+binary_group_mixed_chains
 binary_group_single
 binary_hug
 binary_indent

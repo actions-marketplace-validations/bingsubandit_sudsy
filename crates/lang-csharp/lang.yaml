@@ -34,6 +34,7 @@ options:
   - binary_indent: [1]
   - binary_hug: ["assignment"]
   - binary_group_single: [false]
+  - binary_group_mixed_chains: [true]
   - binary_inline_right_kinds: [[RecursivePattern]]
   - binary_open_kinds: [[]]
   - indent_nested_binary: [false]

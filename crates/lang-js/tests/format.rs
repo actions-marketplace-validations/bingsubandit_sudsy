@@ -495,3 +495,19 @@ fn line_comments_after_operators_and_optional_chain_bodies() {
         "type A<T> = T extends X\n  ? // yes\n    Y\n  : // no\n    Z;\nconst k = // c\n  f(a);\nlet o = // c\n  { a };\nxs.find((x) =>\n  someLongName?.includesTheValueOfSomething(xxxxxxxxxxxxxxxxxxxxxxxxx),\n);\n"
     );
 }
+
+#[test]
+fn a_call_on_a_name_at_the_head_of_a_chain_keeps_its_argument_spacing() {
+    // The head call is formatted by the language, not copied token by token (`f(a,b).g(c)`).
+    assert_eq!(
+        fmt("f(a, b).g(c);\nmap(a, b).join(\" \");\nx = f(a, b, c).g(d, e).h();\n"),
+        "f(a, b).g(c);\nmap(a, b).join(\" \");\nx = f(a, b, c).g(d, e).h();\n"
+    );
+}
+
+#[test]
+fn a_comparison_inside_a_logical_chain_breaks_only_when_it_does_not_fit() {
+    // `!=` is grouped with its right side although its parent is another kind of binary chain.
+    let src = "const second =\n  thing != null &&\n  veryLongFunctionName(argumentNumberOne, argumentNumberTwo, argumentNumber3)\n    .x != null;\n";
+    assert_eq!(fmt(src), src);
+}

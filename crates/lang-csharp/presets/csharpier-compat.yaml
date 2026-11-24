@@ -14,6 +14,7 @@ csharp:
     switch_arm_layout: assignment
     indent_nested_binary: true
     binary_group_single: true
+    binary_group_mixed_chains: false
     binary_open_kinds: [OrPattern, AndPattern]
     member_chain_style: grouped
     member_chain_keep_accesses: always

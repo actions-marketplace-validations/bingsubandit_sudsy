@@ -8386,6 +8386,11 @@
               ],
               "type": "string"
             },
+            "binary_group_mixed_chains": {
+              "default": true,
+              "description": "A single binary operation (`a.length > 0` in `a.length > 0 || b`) is grouped also when its parent or a side is an operation of another kind; off: it is not when any of them is an operator chain of whatever kind.",
+              "type": "boolean"
+            },
             "binary_group_single": {
               "default": false,
               "description": "A single binary operation (`a(...) == b`) whose parent, left and right side are no operation of its kind breaks before its operator only when the operator and the right side do not fit on the line where the left side ends, however the left side breaks (an operator at the start of a line only; one at the end always does this).",
@@ -12086,6 +12091,11 @@
                       "hanging"
                     ],
                     "type": "string"
+                  },
+                  "binary_group_mixed_chains": {
+                    "default": true,
+                    "description": "A single binary operation (`a.length > 0` in `a.length > 0 || b`) is grouped also when its parent or a side is an operation of another kind; off: it is not when any of them is an operator chain of whatever kind.",
+                    "type": "boolean"
                   },
                   "binary_group_single": {
                     "default": false,
