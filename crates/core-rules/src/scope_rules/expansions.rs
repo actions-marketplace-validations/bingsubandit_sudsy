@@ -72,7 +72,7 @@ pub(super) fn add_reads(model: &mut Model, file: &FileContext<'_>, lang: &ScopeL
         }
         let mut found: Vec<(usize, &str, bool)> = Vec::new();
         for (i, _) in text.match_indices('$') {
-            if text[..i].ends_with('\\') {
+            if text[..i].ends_with(|c| lang.escape.contains(c)) {
                 continue;
             }
             let (mut j, braced) = match text.as_bytes().get(i + 1) {
@@ -109,8 +109,9 @@ pub(super) fn add_reads(model: &mut Model, file: &FileContext<'_>, lang: &ScopeL
                 Access::READ
             };
             let scope = scope_of(model, range);
+            let folded = lang.fold.then(|| name.to_lowercase());
             model.add_reference(
-                name,
+                folded.as_deref().unwrap_or(name),
                 range,
                 (parent.text_range(), parent.kind()),
                 access,

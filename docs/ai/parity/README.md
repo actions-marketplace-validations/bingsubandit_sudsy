@@ -47,7 +47,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | php-cs-fixer | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | phpstan | 0.0% | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | prettier | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
-| psscriptanalyzer | 33.8% | 75 | 12 | 8 | 1 | 0 | 0 | 54 | 1 |
+| psscriptanalyzer | 87.1% | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
 | roslynator | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |
 | rubocop | 96.2% | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
 | ruff | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |

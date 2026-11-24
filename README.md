@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 18 languages, early support for 9 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 19 languages, early support for 8 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -14,7 +14,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, Angular templates, CSS / SCSS / Less, Markdown, YAML, Java, Shell, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, Angular templates, CSS / SCSS / Less, Markdown, YAML, PowerShell, Java, Shell, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -74,6 +74,7 @@ Each number is measured on real-world code against the reference tool with its d
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>██░░░░░░░░ 20% stylelint-scss<br>███████░░░ 78% stylelint-less | Ready |
 | Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
+| PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
 | XML | █████████░ 99% CSharpier XML | 19 rules · no reference tool | Ready |
@@ -85,7 +86,6 @@ Each number is measured on real-world code against the reference tool with its d
 | HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>████████░░ 86% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
 | Vue / Svelte | ████████░░ 89% Prettier | ██████░░░░ 60% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
 | JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | ░░░░░░░░░░ 0% eslint-plugin-jsonc | In progress |
-| PowerShell | █████████░ 92% Invoke-Formatter | ███░░░░░░░ 33% PSScriptAnalyzer | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
 | Kotlin | ████████░░ 84% ktlint | █████████░ 92% ktlint | In progress |
 | SQL | ███████░░░ 79% sqlfluff | ████████░░ 85% sqlfluff | In progress |

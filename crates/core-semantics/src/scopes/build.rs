@@ -646,9 +646,12 @@ impl Binder<'_> {
                 }
                 _ => (t.text(), range),
             };
-            let Some(text) = table.name_of(text) else {
+            let Some((text, tail)) = table.name_and_tail(text) else {
                 continue;
             };
+            let text = &*text;
+            // A member of a variable (`$a.b = 1`) is read through the variable, whatever the row says.
+            let hit = hit.filter(|_| !tail);
             let access = match hit.map(|(_, f)| settle(*f, node, table)) {
                 Some(Flow::Skip) => continue,
                 Some(Flow::Declare) => {
@@ -842,7 +845,9 @@ fn access(
     match flow {
         Flow::Write => (Access::WRITE, false),
         Flow::ReadWrite => (rw, false),
-        Flow::Assign(plain) if op_text == Some(*plain) => (Access::WRITE, false),
+        Flow::Assign(plain) if op_text == Some(*plain) && !table.target_is_read(node) => {
+            (Access::WRITE, false)
+        }
         Flow::Assign(_) => (rw, false),
         Flow::Type => (Access::TYPE, false),
         Flow::Query => (query, false),

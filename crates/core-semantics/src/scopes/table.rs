@@ -10,6 +10,7 @@
 
 use super::Flags;
 use core_syntax::{Grammar, SyntaxKind, SyntaxNode};
+use std::borrow::Cow;
 
 /// The scope a declaration goes to.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -249,6 +250,9 @@ pub struct Table {
     params: Vec<bool>,
     bare: bool,
     identifiers: bool,
+    sigils: &'static str,
+    fold: bool,
+    element_writes: &'static [&'static str],
     dynamic: &'static [&'static str],
 }
 
@@ -284,6 +288,9 @@ impl Table {
             params: vec![false; size(false)],
             bare: false,
             identifiers: false,
+            sigils: "",
+            fold: false,
+            element_writes: &[],
             dynamic: &[],
         };
         for row in rows {
@@ -318,6 +325,44 @@ impl Table {
         self
     }
 
+    /// Names are written with one of these characters in front (`$x`, `@x`, `${x}`); a name with a
+    /// scope or drive qualifier (`$script:x`) is no name of the file's scopes.
+    pub fn sigil_names(mut self, sigils: &'static str) -> Table {
+        self.sigils = sigils;
+        self
+    }
+
+    /// Names that differ in case are the same name.
+    pub fn fold_case(mut self, on: bool) -> Table {
+        self.fold = on;
+        self
+    }
+
+    /// A statement whose target name is followed by one of these tokens (`$a[0] = 1`: `[`; a list
+    /// `$a, $b = ...`: `,`), or that starts with something that is no name (`$script:a = 1`),
+    /// reads the name instead of writing it.
+    pub fn element_writes(mut self, tokens: &'static [&'static str]) -> Table {
+        self.element_writes = tokens;
+        self
+    }
+
+    /// Whether an assignment node reads its target name (see [`Table::element_writes`]).
+    pub(crate) fn target_is_read(&self, node: &SyntaxNode) -> bool {
+        if self.element_writes.is_empty() {
+            return false;
+        }
+        let mut code = node
+            .children_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| !t.text().trim().is_empty());
+        code.next().is_some_and(|first| {
+            !(self.is_name_token(first.kind()) && self.name_of(first.text()).is_some())
+                || code
+                    .next()
+                    .is_some_and(|t| self.element_writes.contains(&t.text()))
+        })
+    }
+
     /// Referring to one of these names makes the names of the scope unknowable (`extract`).
     pub fn dynamic_names(mut self, names: &'static [&'static str]) -> Table {
         self.dynamic = names;
@@ -343,15 +388,49 @@ impl Table {
     }
 
     /// The name a name token's text stands for (`None`: it is no name).
-    pub(crate) fn name_of<'a>(&self, text: &'a str) -> Option<&'a str> {
+    pub(crate) fn name_of<'a>(&self, text: &'a str) -> Option<Cow<'a, str>> {
+        self.name_and_tail(text).map(|(name, _)| name)
+    }
+
+    /// As [`Table::name_of`], and whether the text goes on after the name (`$a.b`: a member of
+    /// the variable, so a write to it reads the variable).
+    pub(crate) fn name_and_tail<'a>(&self, text: &'a str) -> Option<(Cow<'a, str>, bool)> {
+        if self.sigils.is_empty() && !self.fold && !self.identifiers {
+            return Some((Cow::Borrowed(text), false));
+        }
+        let (name, tail) = self.split_name(text)?;
+        let name = if self.fold && name.chars().any(char::is_uppercase) {
+            Cow::Owned(name.to_lowercase())
+        } else {
+            Cow::Borrowed(name)
+        };
+        Some((name, tail))
+    }
+
+    fn split_name<'a>(&self, text: &'a str) -> Option<(&'a str, bool)> {
+        if !self.sigils.is_empty() {
+            let rest = text.strip_prefix(|c| self.sigils.contains(c))?;
+            let (name, after) = match rest.strip_prefix('{') {
+                Some(inner) => inner.split_once('}')?,
+                None => {
+                    let end = rest
+                        .find(|c: char| !(c.is_alphanumeric() || c == '_' || c == '?'))
+                        .unwrap_or(rest.len());
+                    rest.split_at(end)
+                }
+            };
+            let qualified = after.starts_with(':') && !after.starts_with("::");
+            return (!name.is_empty() && !name.contains(':') && !qualified)
+                .then_some((name, !after.is_empty()));
+        }
         if !self.identifiers {
-            return Some(text);
+            return Some((text, false));
         }
         let name = text.split_once('[').map_or(text, |(n, _)| n);
         let mut chars = name.chars();
         (chars.next().is_some_and(|c| c.is_alphabetic() || c == '_')
             && chars.all(|c| c.is_alphanumeric() || c == '_'))
-        .then_some(name)
+        .then_some((name, false))
     }
 
     /// The first own name token of the node, else the name its first child node ends with.

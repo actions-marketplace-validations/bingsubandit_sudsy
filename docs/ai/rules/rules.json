@@ -12715,22 +12715,23 @@
       "default_level": "off",
       "description": "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used.",
       "example": {
-        "config": "unused-variable:\n  level: warn\n  options: { caught_errors: none, ignore_pattern: \"^_\", ignore_rest_siblings: true }\nunused-parameter:\n  level: warn\n  options: { args: all, ignore_pattern: \"^_\" }\n",
+        "config": null,
         "fixed": null,
-        "input": "export function f(o, _skip, a, b) {\n  const { x, ...rest } = o;\n  const _hidden = 1;\n  try { g(); } catch (err) { g(); }\n  return a;\n}\n",
-        "language": "js",
+        "input": "function F {\n    param([Parameter(Mandatory = $true)]$Unused, $Used)\n    $Used\n}\nfunction G {\n    param($a, $b)\n    $a | ForEach-Object { $b }\n    { $a }\n}\n",
+        "language": "powershell",
         "spans": [
           {
-            "column": 32,
-            "length": 1,
-            "line": 1
+            "column": 41,
+            "length": 7,
+            "line": 2
           }
         ]
       },
       "fix": null,
       "id": "unused-parameter",
       "languages": [
-        "js"
+        "js",
+        "powershell"
       ],
       "options": [
         {
@@ -12755,13 +12756,19 @@
         "js/eslint-recommended",
         "js/typescript-eslint-recommended",
         "js/biome-recommended",
-        "js/oxlint"
+        "js/oxlint",
+        "powershell/psscriptanalyzer"
       ],
       "upstream": [
         {
           "id": "no-unused-vars",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "PSReviewUnusedParameter",
+          "partial": true,
+          "tool": "psscriptanalyzer"
         },
         {
           "id": "no-unused-vars",
@@ -14890,6 +14897,55 @@
     },
     {
       "category": "correctness",
+      "default_level": "off",
+      "description": "A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose \"text\"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "Write-Verbose -Verbose \"text\"\nWrite-Verbose \"text\"\nWrite-Verbose -Message \"text\" -Verbose\nWrite-Verbose -ErrorAction Stop \"text\"\nWrite-Verbose -Verbose:$true \"text\"\nWrite-Verbose\nWrite-Verbose @args\n\"text\" | Write-Verbose\nJoin-Path -Path a\nJoin-Path -Resolve a\nJoin-Path a -Resolve\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 1,
+            "length": 13,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 13,
+            "line": 5
+          },
+          {
+            "column": 1,
+            "length": 13,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 9,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-mandatory-parameter",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseCmdletCorrectly",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
       "default_level": "warn",
       "description": "An assignment to, a parameter named like, or a `foreach` variable named like an automatic variable (`$Error`, `$Event`, `$input`, `$PSItem`, `$_`, `$PWD`, `$Host`, `$this`, `$true`, ...). `$null = ...` is fine.",
       "example": {
@@ -15414,6 +15470,113 @@
       "upstream": [
         {
           "id": "PSPossibleIncorrectComparisonWithNull",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A parameter of a `param` block with `ValueFromPipeline` or `ValueFromPipelineByPropertyName`, in a function or script block that has no `process` block (a `filter` is one).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "function Remove-Thing { }\nfunction Set-Thing { [CmdletBinding(SupportsShouldProcess)] param() }\nfunction Stop-Thing { [CmdletBinding(SupportsShouldProcess = $false)] param() }\nfunction Get-Thing { }\nfunction global:New-Thing { }\nfunction Get-Items { }\nfunction Get-Status { }\nfunction Get-Address { }\nfunction Get-Alias { }\nfunction Get-Series { }\nfunction Get-Name {\n    param([Parameter(ValueFromPipeline)]$Item)\n    $Item\n}\nfunction Get-Name2 {\n    param([Parameter(ValueFromPipeline)]$Item)\n    process { $Item }\n}\nfilter Get-Name3 { param([Parameter(ValueFromPipeline)]$Item) $Item }\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 41,
+            "length": 5,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "process-block-for-pipeline",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseProcessBlockForPipelineCommand",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A function named `Verb-Nouns` whose noun ends in `s` and is no singular word that ends in `ss`, `us`, `is` or `as` (`Status`, `Address`, `Analysis`, `Alias`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "function Remove-Thing { }\nfunction Set-Thing { [CmdletBinding(SupportsShouldProcess)] param() }\nfunction Stop-Thing { [CmdletBinding(SupportsShouldProcess = $false)] param() }\nfunction Get-Thing { }\nfunction global:New-Thing { }\nfunction Get-Items { }\nfunction Get-Status { }\nfunction Get-Address { }\nfunction Get-Alias { }\nfunction Get-Series { }\nfunction Get-Name {\n    param([Parameter(ValueFromPipeline)]$Item)\n    $Item\n}\nfunction Get-Name2 {\n    param([Parameter(ValueFromPipeline)]$Item)\n    process { $Item }\n}\nfilter Get-Name3 { param([Parameter(ValueFromPipeline)]$Item) $Item }\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 10,
+            "length": 9,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "singular-nouns",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseSingularNouns",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A function named with the verb `New`, `Set`, `Remove`, `Start`, `Stop`, `Restart`, `Reset` or `Update` whose text has no `SupportsShouldProcess` (or has `SupportsShouldProcess = $false`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "function Remove-Thing { }\nfunction Set-Thing { [CmdletBinding(SupportsShouldProcess)] param() }\nfunction Stop-Thing { [CmdletBinding(SupportsShouldProcess = $false)] param() }\nfunction Get-Thing { }\nfunction global:New-Thing { }\nfunction Get-Items { }\nfunction Get-Status { }\nfunction Get-Address { }\nfunction Get-Alias { }\nfunction Get-Series { }\nfunction Get-Name {\n    param([Parameter(ValueFromPipeline)]$Item)\n    $Item\n}\nfunction Get-Name2 {\n    param([Parameter(ValueFromPipeline)]$Item)\n    process { $Item }\n}\nfilter Get-Name3 { param([Parameter(ValueFromPipeline)]$Item) $Item }\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 10,
+            "length": 12,
+            "line": 1
+          },
+          {
+            "column": 10,
+            "length": 10,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "supports-should-process",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseShouldProcessForStateChangingFunctions",
           "partial": true,
           "tool": "psscriptanalyzer"
         }
@@ -33679,19 +33842,19 @@
       "description": "A local variable or catch variable that is never used (the compiler's CS0168), or is only assigned constants and never read (CS0219). Variables captured by lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219).",
       "example": {
         "config": null,
-        "fixed": "class A { void F() {\n    \n    int a = 1, b = 2;\n    try { F(); } catch (System.Exception) { }\n    System.Console.WriteLine(b + a);\n} }\n",
-        "input": "class A { void F() {\n    int k = 5;\n    int a = 1, b = 2;\n    try { F(); } catch (System.Exception e) { }\n    System.Console.WriteLine(b + a);\n} }\n",
-        "language": "csharp",
+        "fixed": null,
+        "input": "function F {\n    $unused = 1\n    $read = 2\n    \"$read\"\n    $member = @{}\n    $member.x = 1\n    $list = @(1)\n    $list[0] = 2\n    $a, $b = 1, 2\n    $script:s = 1\n    $ErrorActionPreference = 'Stop'\n    $count = 1\n    $count++\n    $block = 1\n    $f = { $block }\n    & $f\n    $Mixed = 1\n    \"$mixed\"\n    ${with space} = 1\n    ${with space}\n    $q = 1\n    $script:t = $q\n    $splat = @{}\n    Get-Item @splat\n    $u = 1\n}\n",
+        "language": "powershell",
         "spans": [
           {
-            "column": 9,
-            "length": 1,
+            "column": 5,
+            "length": 7,
             "line": 2
           },
           {
-            "column": 42,
-            "length": 1,
-            "line": 4
+            "column": 5,
+            "length": 2,
+            "line": 25
           }
         ]
       },
@@ -33700,6 +33863,7 @@
       "languages": [
         "csharp",
         "js",
+        "powershell",
         "python",
         "shell"
       ],
@@ -33709,6 +33873,7 @@
         "js/typescript-eslint-recommended",
         "js/biome-recommended",
         "js/oxlint",
+        "powershell/psscriptanalyzer",
         "python/ruff",
         "shell/shellcheck"
       ],
@@ -33717,6 +33882,11 @@
           "id": "no-unused-vars",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "PSUseDeclaredVarsMoreThanAssignments",
+          "partial": true,
+          "tool": "psscriptanalyzer"
         },
         {
           "id": "F841",

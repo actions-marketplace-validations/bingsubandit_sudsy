@@ -1,0 +1,11 @@
+id: missing-mandatory-parameter
+family: missing-arguments
+message: "`{name}` is called without any of its mandatory parameters"
+description: A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose "text"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone.
+example: 'Write-Verbose -Verbose "text"'
+severity: off
+category: correctness
+params:
+  name-token: Parameter
+  pipe: Pipe
+  splat: "@"

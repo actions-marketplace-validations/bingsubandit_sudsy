@@ -1,0 +1,17 @@
+id: unused-variable
+family: scope
+params: { check: unused-local-variable }
+message: "The variable '{name}' is assigned but never used."
+description: A variable that a function, script block or script assigns with `=` and never reads in it or in the blocks inside it (a read in a string counts). A name with a scope qualifier (`$script:x`), a member or element write (`$a.b = 1`) and the targets of a list assignment are left alone; so is a scope that reads `$PSBoundParameters`.
+example: 'function f { $unused = 1 }'
+severity: off
+category: cleanup
+---
+id: unused-parameter
+family: scope
+params: { check: unused-method-argument }
+message: "The parameter '{name}' has been declared but not used."
+description: A parameter of a `param` block that the function or script block never reads (a read in a block inside it counts). A scope that reads `$PSBoundParameters` is left alone.
+example: 'function f { param($unused) }'
+severity: off
+category: cleanup

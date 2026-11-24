@@ -100,6 +100,7 @@ concept markup-checks # users: html (shared)
 concept markup-layout # users: html
 concept member-order # users: csharp
 concept min-phony # users: makefile
+concept missing-arguments # users: powershell (shared)
 concept missing-permissions # users: github-actions
 concept module-names # users: hcl (shared)
 concept multiline-start-family # users: kotlin (shared)

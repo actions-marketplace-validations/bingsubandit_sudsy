@@ -833,7 +833,7 @@ pub fn comment_doc(c: &Comment) -> Doc {
 }
 
 /// [`comment_doc`] in a comment style.
-pub(crate) fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
+pub fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
     let text = c.text();
     match c.kind {
         CommentKind::Lines => lines_doc(&text),

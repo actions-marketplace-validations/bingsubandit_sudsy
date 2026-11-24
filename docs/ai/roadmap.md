@@ -23,7 +23,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 13 | GraphQL | `naming-convention` 80 of 149 missed, `description-style` 11, `require-deprecation-reason` 10; the schema-bound rules cannot run |
 | 14 | Terraform (HCL) | module-level rules: `terraform_required_providers` 37, `unused_declarations` 31, `typed_variables` 27 |
 | 15 | Java | at the lint bar; 934 files with layout gaps (line comments, chains in ternaries) |
-| 16 | PowerShell | `PSUseShouldProcessForStateChangingFunctions` 140, `PSUseDeclaredVarsMoreThanAssignments` 130 |
+| 16 | PowerShell | `PSUseOutputTypeCorrectly` 59 (needs command output types), `PSProvideCommentHelp` 14, `PSUseDeclaredVarsMoreThanAssignments` 17 |
 | 17 | Shell | `SC1091` 12 and `SC1090` 2 (source following), `SC2235` 2; backticks, `case` in `if`, arithmetic spacing |
 | 18 | HTML | `wcag/h63` 48, `parser-error` 21; html-eslint `indent` 16,182 planned; embedded code 56 files |
 | 19 | Markdown | `MD010` 309 (tabs); corpus of 64 files |
@@ -38,6 +38,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP, JSON, YAML, XML, PowerShell, Markdown and the lint shares of JSON, YAML, GraphQL, StyleCop, PSScriptAnalyzer, SCSS and Less; recorded and not re-run: the C# format share (the corpus differential needs the CSharpier baseline) and the other lint shares.
 
 ## Small tasks
+- Family rule documents of off-by-default rules are read in full at registration (PowerShell `scope.yaml` and `missing-mandatory-parameter.yaml` cost github-actions.lint-query about +120 allocations in a workflow with a PowerShell script): measure and load them lazily.
 - Speed row of StyleCop (`scripts/speed.sh stylecop`, the analyzer driver over the C# corpus; the run did not finish in 40 minutes on the agent host, so `bench/speed.json` still says not measured).
 - Input encoding support: a source in another encoding (the sqlfluff corpus file `collate.windows.win1252.sql`, Windows-1252) is read as UTF-8 only, so sudsy rejects it; gap `non-utf8-input` in `tests/parity/sqlfluff/differences.yaml` (201 layout findings count as missing).
 - `shape::leaves()` and `expr::findings` clone one `String` per key of the walked path: a borrowed path type would cut github-actions.lint allocs (+6.1% over the base before the expression step).

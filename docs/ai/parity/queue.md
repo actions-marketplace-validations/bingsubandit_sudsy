@@ -360,6 +360,27 @@ Format: unclassified 32 of 567 differing files (6%).
 11. `new-syntax` (10 files): `using` declarations and import attributes / `with` clauses printed differently Fix: add the layout rows for the new nodes.
 12. `jsx-layout` (5 files): JSX layout of comments, spread attributes and text fill Fix: JSX shape.
 
+## psscriptanalyzer
+
+Lint: target 87.1% (933 of 1071, 138 missed, measured on 3d6ef290); rules by missed findings:
+1. `PSUseOutputTypeCorrectly` (59 missed)
+2. `PSUseDeclaredVarsMoreThanAssignments` (17 missed)
+3. `PSProvideCommentHelp` (14 missed)
+4. `PSReviewUnusedParameter` (8 missed)
+5. `ExpectedExpression` (7 missed)
+6. `PSAvoidUsingPositionalParameters` (7 missed)
+7. `PSAvoidAssignmentToAutomaticVariable` (3 missed)
+8. `PSAvoidDefaultValueForMandatoryParameter` (3 missed)
+9. `PSAvoidOverwritingBuiltInCmdlets` (3 missed)
+10. `PSPossibleIncorrectUsageOfAssignmentOperator` (3 missed)
+11. `PSUseBOMForUnicodeEncodedFile` (2 missed)
+12. `UnexpectedToken` (2 missed)
+13. `ConfigurationNotAllowedOnArm64` (1 missed)
+14. `InvalidLeftHandSide` (1 missed)
+15. `MissingLoopStatement` (1 missed)
+
+7 more rules: 7 missed.
+
 ## rubocop
 
 Lint: target 96.2% (7717 of 8022, 305 missed, measured on f4e9edb2); rules by missed findings:

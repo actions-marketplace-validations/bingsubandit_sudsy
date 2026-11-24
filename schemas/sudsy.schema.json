@@ -2833,6 +2833,10 @@
               "$ref": "#/definitions/rule",
               "description": "A document without a doctype is rendered in quirks mode."
             },
+            "missing-mandatory-parameter": {
+              "$ref": "#/definitions/rule",
+              "description": "A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose \"text\"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone."
+            },
             "missing-permissions": {
               "$ref": "#/definitions/rule",
               "description": "A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access."
@@ -4553,6 +4557,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `printf` whose format string contains an expansion and no `%`."
             },
+            "process-block-for-pipeline": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter of a `param` block with `ValueFromPipeline` or `ValueFromPipelineByPropertyName`, in a function or script block that has no `process` block (a `filter` is one)."
+            },
             "property-allowed-list": {
               "description": "A property that is not in the `list` option (names, or `/regex/`). Custom properties are left out; an empty list allows everything.",
               "oneOf": [
@@ -5992,6 +6000,10 @@
               "$ref": "#/definitions/rule",
               "description": "A document has more than one top-level heading (markdownlint MD025). The second and later `h1` are reported."
             },
+            "singular-nouns": {
+              "$ref": "#/definitions/rule",
+              "description": "A function named `Verb-Nouns` whose noun ends in `s` and is no singular word that ends in `ss`, `us`, `is` or `as` (`Status`, `Address`, `Analysis`, `Alias`)."
+            },
             "sorted-array-values": {
               "description": "The items of a sequence of only strings or only numbers are not in order (ascending by default; numbers compare as numbers). Sequences of other or mixed items are skipped. The items that would have to move (the fewest) are reported and the first report carries the fix; the fix is unsafe because sequence order can be data.",
               "oneOf": [
@@ -6202,6 +6214,10 @@
             "subprocess-run-without-check": {
               "$ref": "#/definitions/rule",
               "description": "A call of `subprocess.run` with no `check` keyword (and no `**kwargs`)."
+            },
+            "supports-should-process": {
+              "$ref": "#/definitions/rule",
+              "description": "A function named with the verb `New`, `Set`, `Remove`, `Start`, `Stop`, `Restart`, `Reset` or `Update` whose text has no `SupportsShouldProcess` (or has `SupportsShouldProcess = $false`)."
             },
             "suppression-justification": {
               "$ref": "#/definitions/rule",
