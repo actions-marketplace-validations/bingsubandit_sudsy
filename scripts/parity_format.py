@@ -442,8 +442,9 @@ class Differences:
         groups = ", ".join(f"{k} {self.groups[k]}" for k in (*INTENTIONAL, "REVIEW"))
         print(f"target {percent(self.same, left)} ({self.same} of {left}); intentional: {groups}")
 
-    def finish(self, filtered=False):
-        """Prints the problems of the lists and the report; returns the number of problems."""
+    def finish(self, filtered=False, scope=None):
+        """Prints the problems of the lists and the report; returns the number of problems. `scope`: the files this lint run covered
+        (a tool's fixture run and its coverage run share the file; a key of the other run's files is not stale here)."""
         bad = 0
         used = {n for names in self.files.values() for n in names}
         for n in sorted(used - set(self.defs)):
@@ -465,7 +466,7 @@ class Differences:
                 bad += 1
         if not filtered:
             for key in self.files:
-                if (" " in key) == self.lint and key not in self.differing and key not in NON_UTF8:
+                if (" " in key) == self.lint and key not in self.differing and key not in NON_UTF8 and (scope is None or key.split(" ")[0] in scope):
                     print(f"STALE: {key} is listed but no longer differs")
                     bad += 1
         counts = Counter()

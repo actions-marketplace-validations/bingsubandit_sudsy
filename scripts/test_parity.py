@@ -68,6 +68,17 @@ class Runner(unittest.TestCase):
         self.assertEqual(bad, 1)
         self.assertIn("STALE fixes note: gone", out.getvalue())
 
+    def test_a_lint_run_is_stale_only_for_the_files_it_covered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            (folder / "differences.yaml").write_text("differences:\n  a: gap  one\nfiles:\n  fix/a tool:x 1: a\n  corpus/b tool:x 2: a\n", encoding="utf-8")
+            diffs = pf.Differences(folder, lint=True)
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                bad = diffs.finish(scope={"fix/a"})
+        self.assertEqual(bad, 1)
+        self.assertIn("STALE: fix/a tool:x 1", out.getvalue())
+        self.assertNotIn("corpus/b", out.getvalue())
+
     def test_changed_output_of_a_pinned_file_is_reviewed_and_counts_against_sudsy(self):
         with tempfile.TemporaryDirectory() as tmp:
             bad, diffs, out = run_verdicts(self.folder(tmp, "ours"), [("ok.txt", "x", "x"), ("a.txt", "t", "changed")])

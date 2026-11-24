@@ -2,8 +2,10 @@ differences:
   windows-run-busybox: "choice  the base image is `mcr.microsoft.com/windows/servercore` and the RUN line is `RUN powershell ...`: hadolint parses it as sh"
   windows-run-escape: "choice  the file has `# escape=` followed by a backtick, a Windows base image and no `SHELL`: its RUN lines run under cmd.exe, hadolint parses them as sh"
   windows-run-powershell: "choice  the file has a `SHELL` line that starts powershell on a Windows base image: its RUN lines run under PowerShell, hadolint parses them as sh"
+  rm-fr: "choice  `rm -fr /var/lib/apt/lists` counts as the cleanup (hadolint accepts only the flag order `-rf`)"
   user-variable: gap  a variable as the user is accepted whether or not an ARG defines it (hadolint reports it)
 files:
+  run-stage/cases hadolint:delete-apt-lists 29: rm-fr
   dockerfile/dotnet-docker/samples/AspNetCoreRazorApp/Dockerfile.windowsservercore-iis hadolint:SC1072 7: windows-run-escape
   dockerfile/dotnet-docker/src/aspnet/10.0/nanoserver-ltsc2022/amd64/Dockerfile hadolint:SC1072 9: windows-run-escape
   dockerfile/dotnet-docker/src/aspnet/10.0/nanoserver-ltsc2025/amd64/Dockerfile hadolint:SC1072 9: windows-run-escape

@@ -1,0 +1,2 @@
+# The Sudsy side of the comparison: the preset that mirrors actionlint's checks.
+extends: [preset:github-actions/actionlint]

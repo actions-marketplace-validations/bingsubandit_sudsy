@@ -1,2 +1,2 @@
-# The Sudsy side of the comparison with .markdownlint.jsonc: the equivalent rules are on by default.
-lint: {}
+# The Sudsy side of the comparison with .markdownlint.jsonc: the preset of markdownlint's default set; the rules the config leaves off are not in the comparison (the catalog maps only the on ones).
+extends: [preset:markdown/markdownlint]

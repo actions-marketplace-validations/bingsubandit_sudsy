@@ -158,6 +158,7 @@ def corpus_sources(tool, suffixes=()):
 
 
 PLUGINS = {"eslint-plugin-vue": "vue", "eslint-plugin-svelte": "svelte"}  # tool -> its language, the prefix of its rule names
+ENABLE_MAPPED = {"ruff": "python", "eslint": "js", "typescript-eslint": "js"}  # tool -> the config key of its language: the tool runs every mapped rule, so the Sudsy side turns every mapped rule on too
 
 
 def plugin_config(tool, last):
@@ -243,6 +244,12 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
     for config in ("sudsy.yaml", "buf.yaml"):
         if (folder / config).exists():
             shutil.copy(folder / config, work / config)
+    if tool in ENABLE_MAPPED:  # a rule mapped later needs no line in sudsy.yaml
+        data = yaml.safe_load((work / "sudsy.yaml").read_text(encoding="utf-8"))
+        rules = data.setdefault(ENABLE_MAPPED[tool], {}).setdefault("lint", {}).setdefault("rules", {})
+        for rule in (set(mapping.values()) | set(aliases)) - {"syntax-error"}:  # the parser's diagnostic is no rule
+            rules.setdefault(rule, "warn")
+        (work / "sudsy.yaml").write_text(yaml.safe_dump(data), encoding="utf-8", newline="\n")
     diffs = parity_format.Differences(folder, lint=True)
     mismatches, total = 0, 0
     sources = [(f"{s.parent.name}/{s.stem}", f"{s.parent.name}-{s.stem}{s.suffix}", s) for suffix in suffixes for s in sorted((ROOT / "tests/rules" / lang).glob(f"*/*{suffix}"))
@@ -323,7 +330,7 @@ def rule_fixtures(tool, sudsy, version, prefix, exe):
         print(f"{label}: {len(upstream)} {tool}, {len(ours)} sudsy: {'MISMATCH' if problems else 'ok'}")
         print("\n".join(problems))
         mismatches += len(problems)
-    mismatches += diffs.finish()
+    mismatches += diffs.finish(scope={label for label, _, _ in sources})
     diffs.summary()
     print(f"{total} {tool} findings, {mismatches} mismatch(es) ({tool} {version}, {sum(k in diffs.files for k in diffs.differing)} known)")
     return 1 if mismatches else 0
@@ -918,7 +925,8 @@ def main():
             return rubocop_coverage(sudsy, version, prefix)
         return coverage(tool, sudsy, version, prefix, str(parity_format.executable(prefix, install_of(config).get("exe", ""))) if prefix else None)
     if tool == "rubocop":
-        sys.exit("rubocop: coverage only (scripts/parity.sh coverage rubocop)")
+        print("rubocop: no fixtures, coverage mode only (scripts/parity.sh coverage rubocop)")
+        return 0
     if tool == "stylecop":
         return stylecop(sudsy, version)
     if tool == "psscriptanalyzer":
@@ -927,7 +935,8 @@ def main():
         exe = parity_format.tools()["format"][config["install"]] if isinstance(config["install"], str) else config
         return rule_fixtures(tool, sudsy, version, prefix, str(parity_format.executable(prefix, exe["install"].get("exe", ""))))
     if tool not in ("yamllint", "eslint-jsonc", "markdownlint"):
-        sys.exit(f"{tool}: no fixtures, coverage mode only (scripts/parity.sh coverage {tool})")
+        print(f"{tool}: no fixtures, coverage mode only (scripts/parity.sh coverage {tool})")
+        return 0
     mapping = rule_map(tool)
     folder = ROOT / "tests/parity" / tool
     suffixes = {"eslint-jsonc": (".json",), "markdownlint": (".md",)}.get(tool, (".yaml", ".yml"))

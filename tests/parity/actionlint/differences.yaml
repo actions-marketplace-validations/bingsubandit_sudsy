@@ -16,7 +16,6 @@ fixes:  # lint rule -> where and what to change
   syntax-check: "rows in crates/lang-github-actions/src/shape.rs (core_rules::shape): missing messages are one-off sections (snapshot, environment string forms), typed defaults, anchors"
   expression/types: "no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)"
   expression/context: "which contexts a key allows: a table per key path read by the same expression checker"
-  action/outdated-runner: "a table of popular actions whose major version runs on a retired runner (data read by shared Rust)"
   syntax-check/yaml: "anchors and aliases: unused anchor, recursive alias, merge key; a YAML-level check, shared with other YAML dialects"
   glob: "filter patterns of branches, tags and paths: a glob syntax check in a shared crate"
   if-cond: "an `if:` that is always true: needs the expression parser"

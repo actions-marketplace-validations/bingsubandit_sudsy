@@ -50,6 +50,7 @@ Where Sudsy differs from hadolint by design:
 
 <!-- generated:differences:hadolint -->
 
+- `rm-fr`: `rm -fr /var/lib/apt/lists` counts as the cleanup (hadolint accepts only the flag order `-rf`)
 - `windows-run-busybox`: the base image is `mcr.microsoft.com/windows/servercore` and the RUN line is `RUN powershell ...`: hadolint parses it as sh
 - `windows-run-escape`: the file has `# escape=` followed by a backtick, a Windows base image and no `SHELL`: its RUN lines run under cmd.exe, hadolint parses them as sh
 - `windows-run-powershell`: the file has a `SHELL` line that starts powershell on a Windows base image: its RUN lines run under PowerShell, hadolint parses them as sh
