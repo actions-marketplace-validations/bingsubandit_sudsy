@@ -7,6 +7,10 @@
 mod format;
 mod hooks;
 mod rules;
+mod commands {
+    include!("commands.generated.rs");
+}
+mod scope;
 
 pub use format::{PowerShellFormatter, option_schema};
 

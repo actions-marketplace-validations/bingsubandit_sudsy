@@ -31,7 +31,8 @@ refused:
 flags:
   skip_with: "a fixture that has an `.options.json` is skipped: its options are not mapped to Sudsy's yet"
 target: 94.6
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 4132, total: 4367, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   RUF100: 83
   SIM114: 20
   UP031: 11
@@ -47,3 +48,46 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   FURB188: 3
   G201: 3
   PLE2502: 3
+  PLR0206: 3
+  RUF015: 3
+  B026: 2
+  C419: 2
+  FURB157: 2
+  I001: 2
+  PIE800: 2
+  PIE808: 2
+  PLC0206: 2
+  PLE0605: 2
+  PLR1711: 2
+  PLW0120: 2
+  PYI041: 2
+  PYI063: 2
+  SIM101: 2
+  UP036: 2
+  C401: 1
+  C417: 1
+  EXE001: 1
+  FURB136: 1
+  FURB192: 1
+  LOG015: 1
+  PERF102: 1
+  PERF402: 1
+  PIE794: 1
+  PIE796: 1
+  PIE804: 1
+  PIE807: 1
+  PLW0211: 1
+  PLW0602: 1
+  PLW1508: 1
+  PYI019: 1
+  PYI046: 1
+  PYI050: 1
+  PYI059: 1
+  PYI061: 1
+  RUF007: 1
+  RUF019: 1
+  RUF051: 1
+  SIM113: 1
+  SIM401: 1
+  SIM905: 1
+  TRY004: 1

@@ -45,7 +45,7 @@ pub fn required(element: &str) -> impl Iterator<Item = &'static str> {
 
 /// The values `attr` of `element` is limited to, when the metadata lists them (`[enum]` items are
 /// `[element,element:]attribute=value|value`; an item for the element wins over a global one),
-/// as `a|b|c`.
+/// as items `a|b|c` or `/regex/` (see `core_rules::allowed_values`).
 pub fn allowed(element: &str, attr: &str) -> Option<&'static str> {
     /// The `[enum]` items sorted by attribute: attribute, elements of the item (none: global), values.
     static ENUMS: LazyLock<Vec<(&'static str, Option<&'static str>, &'static str)>> =

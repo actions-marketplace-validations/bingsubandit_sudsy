@@ -6,6 +6,6 @@ severity: off
 category: style
 rule:
   kind: Element
-  regex: '(?i)^<table\b'
-  child: { kind: Element, regex: '(?i)^<tr\b' }
+  regex: '(?i)^<tr\b'
+  parent: { kind: Element, regex: '(?i)^<table\b' }
 report-on: first-token

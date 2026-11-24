@@ -15,7 +15,10 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   SingleSpaceSeparator: "cause: no rule. Token pattern rule: one space between tokens on a line"
   JavadocMissingLeadingAsterisk: "cause: no rule. Check on the shared doc-comment parser"
   JavadocTagContinuationIndentation: "cause: no rule. Check on the shared doc-comment parser"
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 53149, total: 59973, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  Indentation: 4338
+  EmptyLineSeparator: 658
   VariableDeclarationUsageDistance: 632
   SingleSpaceSeparator: 239
   LineLength: 186
@@ -31,3 +34,40 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   PatternVariableName: 28
   JavadocTagContinuationIndentation: 27
   OneTopLevelClass: 26
+  AbbreviationAsWordInName: 21
+  AnnotationLocationMethodsAndCtors: 20
+  MultilineCommentLeadingAsteriskPresence: 19
+  MethodTypeParameterName: 16
+  InvalidJavadocPosition: 13
+  GenericWhitespace: 11
+  RequireEmptyLineBeforeBlockTagGroup: 11
+  WhitespaceAround: 11
+  AvoidEscapedUnicodeCharacters: 10
+  MultipleVariableDeclarations: 10
+  LeftCurlyNl: 9
+  JavadocParagraph: 8
+  NoFinalizer: 8
+  RecordComponentName: 8
+  IllegalTokenText: 7
+  ClassTypeParameterName: 6
+  LeftCurlyEol: 6
+  NonEmptyAtclauseDescription: 6
+  RightCurly: 6
+  WhitespaceAfter: 6
+  SingleLineJavadoc: 5
+  MissingSwitchDefault: 4
+  ModuleDirectiveOrder: 4
+  TextBlockGoogleStyleFormatting: 3
+  ArrayBracketNoWhitespace: 2
+  FallThrough: 2
+  LambdaParameterName: 2
+  MethodName: 2
+  NeedBraces: 2
+  OuterTypeFilename: 2
+  PackageDeclaration: 2
+  ParenPad: 2
+  CommentsIndentation: 1
+  ConstructorsDeclarationGrouping: 1
+  JavadocContentLocation: 1
+  OperatorWrapEOL: 1
+  whitespaceCharactersMustBeEscaped: 1

@@ -351,9 +351,133 @@ pub fn redundant_semicolons(
     }
 }
 
+/// `fun f(): T { return x }` becomes `fun f(): T = x` (also `throw`): a function whose body is one
+/// `#return` or `#throw` without a label and without comments. A `throw` body of a function with
+/// no declared type gets the first of `redundant_return_types` (`fun f(): Unit = throw x`: the
+/// body has type `Nothing`). Edits `(from, to, text)`.
+pub fn expression_body(
+    g: &Grammar,
+    tree: &SyntaxNode,
+    text: &str,
+    options: &core_config::ResolvedOptions,
+    edits: &mut Vec<(usize, usize, String)>,
+) {
+    let default_type = options
+        .strings(core_config::opt::REDUNDANT_RETURN_TYPES)
+        .next();
+    for fun in tree
+        .descendants()
+        .filter(|n| g.has_tag(n.kind(), "function"))
+    {
+        let Some(block) = fun.children().find(|n| g.has_tag(n.kind(), "block")) else {
+            continue;
+        };
+        let mut items = block.children();
+        let (Some(stmt), None) = (items.next(), items.next()) else {
+            continue;
+        };
+        let throws = g.has_tag(stmt.kind(), "throw");
+        let mut parts = stmt.children();
+        let (Some(value), None) = (parts.next(), parts.next()) else {
+            continue; // (a label, or nothing returned)
+        };
+        let has_comment = block
+            .descendants_with_tokens()
+            .any(|e| g.has_tag(e.kind(), "comment"));
+        if !(throws || g.has_tag(stmt.kind(), "return")) || has_comment {
+            continue;
+        }
+        let Some(end) = block
+            .children_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| !g.is_trivia(t.kind()))
+            .last()
+            .map(|t| t.text_range().end())
+        else {
+            continue;
+        };
+        let (b, v) = (block.text_range(), value.text_range());
+        let untyped = text[..usize::from(b.start())].trim_end().ends_with(')');
+        let prefix = match default_type {
+            Some(t) if throws && untyped => format!(": {t} = throw "),
+            _ if throws => "= throw ".to_string(),
+            _ => "= ".to_string(),
+        };
+        edits.push((b.start().into(), v.start().into(), prefix));
+        edits.push((v.end().into(), end.into(), String::new()));
+    }
+}
+
+/// The `text` with the edits `(from, to, text)` applied: an insert first, then the larger of the
+/// edits that start at the same place; an edit inside the text an earlier one replaced is dropped.
+pub fn apply_edits(text: &str, mut edits: Vec<(usize, usize, String)>) -> String {
+    edits.sort_by_key(|(s, e, _)| (*s, e > s, std::cmp::Reverse(*e)));
+    let mut out = String::with_capacity(text.len());
+    let mut at = 0;
+    for (s, e, with) in edits {
+        if s < at {
+            continue;
+        }
+        out.push_str(&text[at..s]);
+        out.push_str(&with);
+        at = e;
+    }
+    out.push_str(&text[at..]);
+    out
+}
+
+/// `${name}` in a string template: an entry of one of the kinds of `redundant_template_braces`
+/// that holds one plain name (an `#identifier` token, no backticks) loses its braces unless the
+/// text after it goes on with a name (a letter, a digit, `_`) or another `$`. Edits
+/// `(from, to, text)`.
+pub fn redundant_template_braces(
+    grammar: &Grammar,
+    tree: &SyntaxNode,
+    text: &str,
+    options: &core_config::ResolvedOptions,
+    edits: &mut Vec<(usize, usize, String)>,
+) {
+    let kinds: Vec<&str> = options
+        .strings(core_config::opt::REDUNDANT_TEMPLATE_BRACES)
+        .collect();
+    if kinds.is_empty() {
+        return;
+    }
+    for (at, _) in text.match_indices("${") {
+        let Some(open) = u32::try_from(at)
+            .ok()
+            .and_then(|at| tree.token_at_offset(at.into()).right_biased())
+        else {
+            continue;
+        };
+        let Some(entry) = open.parent().filter(|p| {
+            kinds.contains(&grammar.name(p.kind())) && p.first_token().as_ref() == Some(&open)
+        }) else {
+            continue;
+        };
+        let end = usize::from(entry.text_range().end());
+        let code: Vec<_> = entry
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|t| !grammar.is_trivia(t.kind()))
+            .collect();
+        let plain = code.len() == 3
+            && grammar.has_tag(code[1].kind(), "identifier")
+            && code[1]
+                .text()
+                .chars()
+                .all(|c| c.is_alphanumeric() || c == '_');
+        let next = text[end..].chars().next();
+        if plain && next.is_none_or(|c| !(c.is_alphanumeric() || c == '_' || c == '$')) {
+            edits.push((at, at + 2, "$".into()));
+            edits.push((end - 1, end, String::new()));
+        }
+    }
+}
+
 /// The last entry of a body (`trailing_comma_last_entry`: pairs of a body kind and an entry kind)
 /// with one entry per line, or with several entries over several lines, gets a trailing comma; a
-/// `;` after it goes on a line of its own.
+/// `;` after it goes on a line of its own, or is replaced by the comma when nothing follows it.
 pub fn trailing_comma_last_entry(
     grammar: &Grammar,
     tree: &SyntaxNode,
@@ -406,7 +530,13 @@ pub fn trailing_comma_last_entry(
                         usize::from(semi.text_range().start()),
                         usize::from(semi.text_range().end()),
                     );
-                    edits.push((s, e, format!(",\n{indent};")));
+                    // (nothing follows the entry in the body: the `;` is not needed)
+                    let sep = if entry.next_sibling().is_none() {
+                        ",".to_string()
+                    } else {
+                        format!(",\n{indent};")
+                    };
+                    edits.push((s, e, sep));
                 }
             } else {
                 let end = usize::from(last.text_range().end());

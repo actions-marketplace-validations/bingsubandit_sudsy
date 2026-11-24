@@ -34,7 +34,7 @@ token String #string #el #tok
 // `@'...'@` and `@"..."@`, whole.
 token HereString #string #el #tok
 // `=`, `+=`, `-=`, ...
-token Assign #el #tok
+token Assign #el #tok #operator
 // `+`, `-`, `-eq`, `-and`, `!`, `-not`, `..`, ...
 token Op #el #tok
 token Comma "," #el #tok
@@ -53,7 +53,7 @@ token CloseBracket "]" #el #tok
 token Eof
 token Unknown #error
 
-node Program #opaque = items:#el* Eof
+node Program #scope = items:#el* Eof
 // `a + b`, `a -eq b`: the operators of a binary expression.
 node Binary #el #opaque = parts:#el*
 // `-not a`, `-1`, `a++`, `-split a`: the operators of a unary expression.
@@ -65,11 +65,13 @@ node HashEntry #el #opaque = parts:#el*
 // `Get-Item -Path x`: a command with its name, parameters and arguments.
 node Command #el #call = callee:CommandName? arguments:#el*
 // `function Name(...) { }`, `filter`, `workflow`: the name is the first `Word` after the keyword.
-node Function #el #opaque = parts:#el*
+node Function #el #scope = parts:#el*
 // The `{ }` body of a function and a script block used as a value.
-node ScriptBlock #el #opaque = parts:#el*
+node ScriptBlock #el #scope = parts:#el*
 // A declared parameter: `[Parameter()][string]$Name = 'x'`.
 node ParamDecl #el #opaque = parts:#el*
+// `[Parameter(Mandatory)]`: an attribute of a parameter or a function.
+node Attribute #el #opaque = parts:#el*
 // `$x = ...`, `$x += ...`
 node AssignStmt #el #opaque = parts:#el*
 // `catch [Type] { }`

@@ -1,0 +1,3 @@
+supports-should-process: warn
+singular-nouns: warn
+process-block-for-pipeline: warn

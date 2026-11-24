@@ -232,6 +232,25 @@ impl OptionSchema {
         self
     }
 
+    /// This schema with `defs` after its own options, keeping its presets: a dialect takes the
+    /// options and the presets of its base language, so that the base's presets apply to its files.
+    pub fn extended(&self, defs: Vec<OptionDef>) -> Self {
+        let mut out = OptionSchema::new([self.defs(), &defs].concat());
+        out.presets = self.presets().to_vec();
+        out
+    }
+
+    /// The presets of this provider after the ones the schema already has.
+    pub fn add_presets(mut self, presets: Vec<Preset>) -> Self {
+        // A lazy schema is built here, with its presets.
+        if let Some(l) = self.later.take() {
+            self.defs = l.get().defs().to_vec();
+            self.presets = l.get().presets().to_vec();
+        }
+        self.presets.extend(presets);
+        self
+    }
+
     pub fn presets(&self) -> &[Preset] {
         match &self.later {
             Some(l) => l.get().presets(),
@@ -567,6 +586,14 @@ pub mod shared {
         )
     }
 
+    pub fn redundant_template_braces(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::REDUNDANT_TEMPLATE_BRACES,
+            default,
+            "String template entries of these kinds (`${name}`) lose their braces when they hold one plain name and the text after them cannot continue it.",
+        )
+    }
+
     pub fn semicolon_keep_parents(default: &[&str]) -> OptionDef {
         OptionDef::words(
             opt::SEMICOLON_KEEP_PARENTS,
@@ -607,6 +634,22 @@ pub mod shared {
         )
     }
 
+    pub fn open_comment_inside_parents(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::OPEN_COMMENT_INSIDE_PARENTS,
+            default,
+            "Node kinds whose braced body moves a comment after its `{` to the first body line; a body of any other kind keeps the comment on the `{` line. Empty: every body moves it.",
+        )
+    }
+
+    pub fn comment_space_exempt(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::COMMENT_SPACE_EXEMPT,
+            default,
+            "Prefixes of line comments (`//region`) that the rule `comment-space` leaves as they are when the formatter runs it. With the option set, a comment with a repeated marker (`///`) or `--` after it gets its space too.",
+        )
+    }
+
     pub fn ctor_own_line_kinds(default: &[&str]) -> OptionDef {
         OptionDef::words(
             opt::CTOR_OWN_LINE_KINDS,
@@ -628,6 +671,22 @@ pub mod shared {
             opt::COMMENT_TRIM_LINES,
             default,
             "The lines of a block comment lose their trailing blanks.",
+        )
+    }
+
+    pub fn block_comment_keep_tight(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            opt::BLOCK_COMMENT_KEEP_TIGHT,
+            default,
+            "A block comment written against the token after it (`f(/*name=*/x)`) stays against it; otherwise one blank follows the comment.",
+        )
+    }
+
+    pub fn single_block_comment_as_line(default: bool) -> OptionDef {
+        OptionDef::boolean(
+            opt::SINGLE_BLOCK_COMMENT_AS_LINE,
+            default,
+            "A block comment that sits on one line and ends its line in the output is written as a line comment (`/* note */` becomes `// note`). Documentation comments (`/**`) and empty comments stay.",
         )
     }
 
@@ -803,6 +862,22 @@ pub mod shared {
             opt::REWRITE_PARENTHESIZE_PAIRS,
             default,
             "Pairs of node kinds (child, parent, child, parent, ...): a node of the first kind directly inside one of the second gets parentheses around it.",
+        )
+    }
+
+    pub fn assignment_hug_except_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::ASSIGNMENT_HUG_EXCEPT_KINDS,
+            default,
+            "Kinds of assignment (a declaration) whose value does not stay on the operator's line when its kind is in `assignment_hug_kinds`.",
+        )
+    }
+
+    pub fn assignment_hug_kinds(default: &[&str]) -> OptionDef {
+        OptionDef::words(
+            opt::ASSIGNMENT_HUG_KINDS,
+            default,
+            "Node kinds of a value that stays on the operator's line and breaks inside (an array literal: `entries = [`).",
         )
     }
 

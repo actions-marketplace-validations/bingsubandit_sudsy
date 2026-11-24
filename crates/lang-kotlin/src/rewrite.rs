@@ -36,49 +36,6 @@ fn blank_before_kdoc(tree: &SyntaxNode, text: &str, edits: &mut Vec<(usize, usiz
     }
 }
 
-/// `fun f(): T { return x }` becomes `fun f(): T = x` (also `throw`): a body that is one `return` or
-/// `throw` without a label and without comments.
-fn expression_body(tree: &SyntaxNode, edits: &mut Vec<(usize, usize, String)>) {
-    for fun in tree.descendants().filter(|n| n.kind() == k::FUN) {
-        let Some(block) = fun.children().find(|n| n.kind() == k::BLOCK) else {
-            continue;
-        };
-        let mut items = block.children();
-        let (Some(stmt), None) = (items.next(), items.next()) else {
-            continue;
-        };
-        let labelled = stmt.children().any(|c| c.kind() == k::LABEL_QUALIFIER);
-        let value = stmt
-            .children()
-            .find(|c| !matches!(c.kind(), k::LABEL_QUALIFIER));
-        let (Some(value), false) = (value, labelled) else {
-            continue;
-        };
-        let simple = matches!(stmt.kind(), k::RETURN | k::THROW);
-        let comment = block
-            .descendants_with_tokens()
-            .any(|e| e.kind() == k::COMMENT);
-        if !simple || comment {
-            continue;
-        }
-        let (b, v) = (block.text_range(), value.text_range());
-        let rbrace = block
-            .children_with_tokens()
-            .filter_map(|e| e.into_token())
-            .find(|t| t.kind() == k::RBRACE);
-        let Some(end) = rbrace.map(|t| t.text_range().end()) else {
-            continue;
-        };
-        let prefix = if stmt.kind() == k::THROW {
-            "= throw "
-        } else {
-            "= "
-        };
-        edits.push((b.start().into(), v.start().into(), prefix.into()));
-        edits.push((v.end().into(), end.into(), String::new()));
-    }
-}
-
 /// The source with the rewrites applied, or `None` when there is nothing to rewrite.
 pub fn rewrite(
     tree: &SyntaxNode,
@@ -92,7 +49,8 @@ pub fn rewrite(
         .collect();
     blank_before_kdoc(tree, text, &mut edits);
     core_format::rewrite::trailing_comma_last_entry(g, tree, text, options, &mut edits);
-    expression_body(tree, &mut edits);
+    core_format::rewrite::expression_body(g, tree, text, options, &mut edits);
+    core_format::rewrite::redundant_template_braces(g, tree, text, options, &mut edits);
     core_format::rewrite::trailing_commas_before(g, tree, text, options, &mut edits);
     core_format::rewrite::redundant_semicolons(
         g,
@@ -103,17 +61,5 @@ pub fn rewrite(
             .collect::<Vec<_>>(),
         &mut edits,
     );
-    if edits.is_empty() {
-        return None;
-    }
-    edits.sort();
-    let mut out = String::with_capacity(text.len());
-    let mut at = 0;
-    for (s, e, with) in edits {
-        out.push_str(&text[at..s]);
-        out.push_str(&with);
-        at = e;
-    }
-    out.push_str(&text[at..]);
-    Some(out)
+    (!edits.is_empty()).then(|| core_format::rewrite::apply_edits(text, edits))
 }

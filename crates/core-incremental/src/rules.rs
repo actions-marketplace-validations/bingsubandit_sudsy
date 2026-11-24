@@ -93,7 +93,10 @@ pub fn lint_settings(db: &dyn Db, file: File) -> Result<LintSettings, Failure> {
 /// project phase of a file share one activation; it re-runs only when the file's rule settings or
 /// the extension set change.
 #[salsa::tracked(returns(ref), no_eq)]
-fn active_rules(db: &dyn Db, file: File) -> Result<(Vec<ActiveRule<'static>>, Depth), Failure> {
+pub(crate) fn active_rules(
+    db: &dyn Db,
+    file: File,
+) -> Result<(Vec<ActiveRule<'static>>, Depth), Failure> {
     let provider = provider_of(db, file)?;
     let settings = lint_settings(db, file).as_ref().map_err(Clone::clone)?;
     let depth = settings.depth;
@@ -297,5 +300,5 @@ pub fn project_diagnostics(
         }
         out.extend(run_project(active, &facts));
     }
-    Ok(out)
+    crate::module::silenced(db, out, files)
 }

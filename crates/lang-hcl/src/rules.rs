@@ -1,11 +1,10 @@
 //! The Rust rules of HCL (tflint's terraform ruleset): the checks that read several nodes or build
 //! a fix. The checks on one node's own text are pattern files in `rules/`.
 //!
-//! concept: new deprecated-interpolation, new deprecated-index, new comment-syntax, naming-convention, new unused-declarations
+//! concept: new deprecated-interpolation, new deprecated-index, new comment-syntax, naming-convention
 //! what: deprecated-interpolation: A string that is one interpolation, `"${var.a}"`, where the expression alone does (tflint terraform_deprecated_interpolation)
 //! what: deprecated-index: A list item read with the legacy dot syntax, `a.0` (tflint terraform_deprecated_index)
 //! what: comment-syntax: A `//` comment where `#` is the convention (tflint terraform_comment_syntax)
-//! what: unused-declarations: A variable, local value or data source that nothing in the same file refers to (tflint terraform_unused_declarations, within one file: a module that uses its variables in
 
 use crate::generated::kind as k;
 use core_rules::diagnostic::Edit;
@@ -14,14 +13,15 @@ use core_rules::rule::FileContext;
 use core_rules::{Rule, RuleContext, rule};
 use core_syntax::roles::code_tokens;
 use core_syntax::{SyntaxNode, SyntaxNodeExt, SyntaxToken, TextRange};
-use std::collections::HashSet;
 
 pub static RULES: &[&dyn Rule] = &[
     &DeprecatedInterpolation,
     &DeprecatedIndex,
     &CommentSyntax,
     &NamingConvention,
-    &UnusedDeclarations,
+    &crate::modules::UNUSED_DECLARATIONS,
+    &crate::modules::REQUIRED_PROVIDERS,
+    &crate::modules::REQUIRED_VERSION,
 ];
 
 /// The labels of a block (`resource "a" "b"`: `a`, `b`) as written between the quotes, and the
@@ -207,71 +207,6 @@ rule! {
         for (name, range) in names {
             if !well_named(&name, mixed) {
                 ctx.report(range, format!("`{name}` is not in {}", ctx.options.string("format")));
-            }
-        }
-    }
-}
-
-/// Names referenced as `var.x`, `local.x` and `data.t.x` in the file.
-fn references(root: &SyntaxNode) -> HashSet<String> {
-    let mut found = HashSet::new();
-    for var in root.descendants().filter(|n| n.kind() == k::VARIABLE_EXPR) {
-        let head = var.text().to_string();
-        let mut attrs = std::iter::successors(var.next_sibling(), |n| n.next_sibling())
-            .take_while(|n| n.kind() == k::GET_ATTR)
-            .map(|n| {
-                n.tokens()
-                    .find(|t| t.kind() == k::IDENT)
-                    .map(|t| t.text().to_string())
-                    .unwrap_or_default()
-            });
-        let name = match head.as_str() {
-            "var" | "local" => attrs.next().map(|a| format!("{head}.{a}")),
-            "data" => attrs
-                .next()
-                .zip(attrs.next())
-                .map(|(t, n)| format!("data.{t}.{n}")),
-            _ => None,
-        };
-        found.extend(name);
-    }
-    found
-}
-
-rule! {
-    pub UnusedDeclarations {
-        id: "unused-declarations",
-        category: Suspicious,
-        default: Off,
-        description: "A variable, local value or data source that nothing in the same file refers to \
-                  (tflint terraform_unused_declarations, within one file: a module that uses its \
-                  variables in other files needs the rule off or those files in one).",
-        example: "variable \"unused\" {}",
-    }
-
-    fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let used = references(file.root);
-        for block in file.root.descendants().filter(|n| n.kind() == k::BLOCK) {
-            let Some(kind) = block_type(&block) else { continue };
-            let declared: Vec<(String, TextRange)> = match kind.as_str() {
-                "variable" => labels(&block).into_iter().take(1).map(|(n, t)| (format!("var.{n}"), t.text_range())).collect(),
-                "data" => match &labels(&block)[..] {
-                    [(t, _), (n, tok)] => vec![(format!("data.{t}.{n}"), tok.text_range())],
-                    _ => vec![],
-                },
-                "locals" => block.child(k::BODY)
-                    .into_iter()
-                    .flat_map(|b| b.children().collect::<Vec<_>>())
-                    .filter(|a| a.kind() == k::ATTRIBUTE)
-                    .filter_map(|a| a.tokens().find(|t| t.kind() == k::IDENT))
-                    .map(|t| (format!("local.{}", t.text()), t.text_range()))
-                    .collect(),
-                _ => continue,
-            };
-            for (name, range) in declared {
-                if !used.contains(&name) {
-                    ctx.report(range, format!("`{name}` is declared but not used"));
-                }
             }
         }
     }

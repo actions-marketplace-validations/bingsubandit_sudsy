@@ -72,7 +72,7 @@ token Comma "," #punctuation #separator
 
 // Hard and soft keywords and modifiers (`fun`, `val`, `in`, `!is`, `as?`, `data`, ...).
 token Keyword #keyword
-token Identifier
+token Identifier #identifier
 token Integer #restyle
 token Float #restyle
 token Character

@@ -9,6 +9,49 @@ use crate::rule::RuleMeta;
 use core_syntax::TextRange;
 use std::path::{Path, PathBuf};
 
+/// What a rule's project phase looks at.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Scope {
+    /// Every file of the project; only at `analysis: deep`.
+    Project,
+    /// The files of one directory, the unit a language judges as a whole; at every depth, and the
+    /// rule collects nothing when it is off.
+    Directory(DirectoryScope),
+}
+
+/// The files that make up a directory's unit.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct DirectoryScope {
+    /// File name suffixes of the unit's files (`.tf`).
+    pub members: &'static [&'static str],
+    /// Suffixes of files that belong to the unit but that Sudsy does not read: a directory with
+    /// one has facts of unknown completeness.
+    pub opaque: &'static [&'static str],
+    /// Suffixes of files whose declarations are merged into the others (`_override.tf`).
+    pub merged: &'static [&'static str],
+}
+
+impl DirectoryScope {
+    fn named(path: &Path, suffixes: &[&str]) -> bool {
+        path.file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| suffixes.iter().any(|s| n.ends_with(s)))
+    }
+
+    pub fn is_member(&self, path: &Path) -> bool {
+        Self::named(path, self.members)
+    }
+
+    pub fn is_opaque(&self, path: &Path) -> bool {
+        Self::named(path, self.opaque)
+    }
+
+    /// A member whose declarations are merged into the others (an override file).
+    pub fn is_merged(&self, path: &Path) -> bool {
+        Self::named(path, self.merged)
+    }
+}
+
 /// One fact a rule gathered from a file. Facts are plain strings so that they can be cached with
 /// the file's result and compared.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -23,6 +66,9 @@ pub struct Fact {
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ProjectFacts {
     facts: Vec<Fact>,
+    /// The (rule, file) pairs whose `collect` ran: a file that is missing here left no facts
+    /// because it could not be read (it did not parse), not because it has none.
+    collected: Vec<(&'static str, PathBuf)>,
     current: Option<(&'static str, PathBuf)>,
 }
 
@@ -46,6 +92,7 @@ impl ProjectFacts {
     pub fn from_facts(facts: Vec<Fact>) -> Self {
         ProjectFacts {
             facts,
+            collected: Vec::new(),
             current: None,
         }
     }
@@ -55,6 +102,7 @@ impl ProjectFacts {
     }
 
     pub(crate) fn begin(&mut self, rule: &'static str, file: &Path) {
+        self.collected.push((rule, file.to_path_buf()));
         self.current = Some((rule, file.to_path_buf()));
     }
 
@@ -69,6 +117,12 @@ impl ProjectFacts {
 
     pub fn extend(&mut self, other: &ProjectFacts) {
         self.facts.extend(other.facts.iter().cloned());
+        self.collected.extend(other.collected.iter().cloned());
+    }
+
+    /// Whether `rule` collected from `file`.
+    pub fn collected(&self, rule: &str, file: &Path) -> bool {
+        self.collected.iter().any(|(r, f)| *r == rule && f == file)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -79,11 +133,20 @@ impl ProjectFacts {
 pub struct ProjectContext<'a> {
     pub options: &'a RuleOptions,
     pub(crate) meta: &'static RuleMeta,
+    /// A directory rule: the unit's files, in the order of their facts.
+    pub files: &'a [PathBuf],
+    /// A directory rule: every file of the unit was read and collected, so a rule that reports
+    /// what is absent from the unit may do so. False otherwise: such a rule stays silent.
+    pub complete: bool,
     pub(crate) severity: Severity,
     pub(crate) out: &'a mut Vec<(PathBuf, Diagnostic)>,
 }
 
 impl ProjectContext<'_> {
+    pub fn rule_id(&self) -> &'static str {
+        self.meta.id
+    }
+
     pub fn report(
         &mut self,
         file: &Path,

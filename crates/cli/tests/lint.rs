@@ -291,3 +291,28 @@ fn yaml_anchor_rules_run_through_the_cli() {
     let o = sudsy(t.path(), &["lint", "a.yaml"]);
     assert!(out(&o).contains("no-undefined-alias"), "{}", out(&o));
 }
+
+#[test]
+fn a_module_is_judged_as_a_whole_and_only_the_named_files_are_reported() {
+    let t = tempfile::tempdir().unwrap();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "lint:\n  rules:\n    unused-declarations: warn\n",
+    );
+    write(t.path(), "m/a.tf", "variable \"x\" {}\nvariable \"y\" {}\n");
+    write(t.path(), "m/b.tf", "output \"o\" { value = var.x }\n");
+    // The use in `b.tf` counts when only `a.tf` is named; `b.tf` itself gets no report.
+    let o = sudsy(t.path(), &["lint", "--format", "github", "m/a.tf"]);
+    let text = out(&o);
+    assert!(text.contains("`var.y` is declared but not used"), "{text}");
+    assert!(!text.contains("var.x"), "{text}");
+    // Both named: still only the unused variable, from `a.tf`.
+    let o = sudsy(t.path(), &["lint", "--format", "github", "m"]);
+    assert_eq!(out(&o).matches("unused-declarations").count(), 1);
+    // Editing the sibling changes the result of the next run.
+    write(t.path(), "m/b.tf", "output \"o\" { value = var.y }\n");
+    let text = out(&sudsy(t.path(), &["lint", "--format", "github", "m/a.tf"]));
+    assert!(text.contains("`var.x` is declared but not used"), "{text}");
+    assert!(!text.contains("var.y"), "{text}");
+}

@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 16 languages, early support for 11 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 21 languages, early support for 6 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -14,7 +14,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, GraphQL, TOML, Angular templates, CSS / SCSS / Less, YAML, Java, Shell, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, Vue / Svelte, Angular templates, CSS / SCSS / Less, Markdown, YAML, PowerShell, Java, Kotlin, Shell, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -67,29 +67,29 @@ Each number is measured on real-world code against the reference tool with its d
 | JavaScript / TypeScript | ████████░░ 86% Prettier | ██████████ 100% ESLint<br>██████████ 100% typescript-eslint | Ready |
 | Python | ████████░░ 86% ruff format | █████████░ 94% ruff | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
-| GraphQL | █████████░ 99% Prettier | 22 rules · no reference tool | Ready |
-| TOML | █████████░ 98% taplo | 16 rules · no reference tool | Ready |
-| Angular templates | █████████░ 97% Prettier | 143 rules · no reference tool | Ready |
-| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>not measured stylelint-scss<br>not measured stylelint-less | Ready |
+| Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
+| GraphQL | █████████░ 99% Prettier | 23 rules · no reference tool | Ready |
+| TOML | █████████░ 98% taplo | 17 rules · no reference tool | Ready |
+| Vue / Svelte | ████████░░ 89% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
+| Angular templates | █████████░ 97% Prettier | 154 rules · no reference tool | Ready |
+| CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>██░░░░░░░░ 20% stylelint-scss<br>███████░░░ 78% stylelint-less | Ready |
+| Markdown | █████████░ 91% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | ██████████ 100% Prettier | █████████░ 99% yamllint | Ready |
+| PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
+| Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
-| XML | █████████░ 99% CSharpier XML | 18 rules · no reference tool | Ready |
+| XML | █████████░ 99% CSharpier XML | 19 rules · no reference tool | Ready |
 | Dockerfile | ██████████ 100% stable · no reference tool | ████████░░ 86% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 85% actionlint | Ready |
-| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 25 rules · no reference tool | Ready |
+| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 26 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
-| Terraform (HCL) | █████████░ 99% terraform fmt | █████░░░░░ 58% tflint | In progress |
-| HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>██████░░░░ 62% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
-| Vue / Svelte | ████████░░ 89% Prettier | ██░░░░░░░░ 23% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | In progress |
-| Markdown | █████████░ 92% Prettier | ████████░░ 83% markdownlint | In progress |
-| JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | not measured eslint-plugin-jsonc | In progress |
-| PowerShell | █████████░ 92% Invoke-Formatter | ███░░░░░░░ 33% PSScriptAnalyzer | In progress |
+| HTML | █████████░ 91% Prettier | ░░░░░░░░░░ 0% html-eslint<br>████████░░ 86% html-validate<br>░░░░░░░░░░ 5% htmlhint | In progress |
+| JSON / JSONC | ██████████ 100% Prettier<br>██████████ 100% Biome | ░░░░░░░░░░ 0% eslint-plugin-jsonc | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
-| Kotlin | ████████░░ 82% ktlint | █████████░ 92% ktlint | In progress |
-| SQL | ███████░░░ 78% sqlfluff | ████████░░ 82% sqlfluff | In progress |
-| C# | ██████████ 100% CSharpier | not measured StyleCop<br>not measured Roslynator | In progress |
+| SQL | ███████░░░ 79% sqlfluff | ████████░░ 85% sqlfluff | In progress |
+| C# | ██████████ 100% CSharpier | ██░░░░░░░░ 23% StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
@@ -106,6 +106,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 |---|---:|---|---:|
 | JavaScript / TypeScript | 33 | Prettier | [17](https://prettier.io/docs/options) |
 | CSS / SCSS / Less | 7 | Prettier | [5](https://prettier.io/docs/options) |
+| HTML | 11 | Prettier | [9](https://prettier.io/docs/options) |
 | YAML | 14 | Prettier | [7](https://prettier.io/docs/options) |
 | GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
 | Python | 13 | ruff format | [9](https://docs.astral.sh/ruff/settings/#format) |
@@ -129,7 +130,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 | JSON | Format | Prettier | 26× faster | 0.009 s / 0.23 s | 43 / 85 MB |
 |  |  | Biome | 4.1× faster | 0.009 s / 0.037 s | 43 / 42 MB |
 |  |  | dprint | 1.7× faster | 0.007 s / 0.012 s | 73 / 73 MB |
-|  | Lint | eslint-plugin-jsonc | not measured | - | - |
+|  | Lint | eslint-plugin-jsonc | 1.4× faster | 0.87 s / 1.18 s | 866 / 75 MB |
 | YAML | Format | Prettier | 43× faster | 0.15 s / 6.48 s | 103 / 237 MB |
 |  |  | dprint | 1.4× faster | 0.17 s / 0.23 s | 99 / 73 MB |
 |  | Lint | yamllint | 18× faster | 0.071 s / 1.25 s | 62 / 55 MB |
@@ -145,7 +146,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 |  | Lint | html-validate | 25× faster | 0.090 s / 2.27 s | 104 / 285 MB |
 |  |  | HTMLHint | 4.0× faster | 0.066 s / 0.26 s | 82 / 100 MB |
 |  |  | html-eslint | 2.0× faster | 0.062 s / 0.12 s | 82 / 75 MB |
-| Angular | Format | Prettier | not measured | - | - |
+| Angular | Format | Prettier | 79× faster | 0.096 s / 7.54 s | 83 / 248 MB |
 | TOML | Format | taplo | 1.6× faster | 0.012 s / 0.019 s | 45 / 40 MB |
 | Python | Format | ruff | 4.8× slower | 0.31 s / 0.066 s | 224 / 58 MB |
 |  | Lint | ruff | 2.1× slower | 0.34 s / 0.17 s | 245 / 57 MB |
@@ -158,22 +159,22 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 | Kotlin | Format | ktlint | 30× faster | 1.61 s / 48.42 s | 501 / 715 MB |
 |  | Lint | ktlint | 42× faster | 1.14 s / 48.01 s | 485 / 683 MB |
 | PHP | Format | PHP-CS-Fixer | 161× faster | 1.77 s / 285.46 s | 1161 / 70 MB |
-|  | Lint | PHPStan | not measured | - | - |
+|  | Lint | PHPStan | 84× faster | 1.44 s / 120.93 s | 1194 / 499 MB |
 | PowerShell | Format | Invoke-Formatter | 38× faster | 0.11 s / 4.38 s | 165 / 163 MB |
 |  | Lint | PSScriptAnalyzer | 151× faster | 0.13 s / 20.17 s | 136 / 313 MB |
-| Protobuf | Format | buf | 3.6× faster | 0.069 s / 0.25 s | 118 / 74 MB |
-|  | Lint | buf | not measured | - | - |
+| Protobuf | Format | buf | 3.3× faster | 0.069 s / 0.23 s | 115 / 75 MB |
+|  | Lint | buf | 1.3× faster | 0.091 s / 0.12 s | 123 / 39 MB |
 | HCL | Format | terraform fmt | 3.5× faster | 0.11 s / 0.40 s | 123 / 87 MB |
 |  | Lint | tflint | 23× faster | 0.20 s / 4.69 s | 120 / 89 MB |
 | C# | Format | CSharpier | 3.3× faster | 4.36 s / 14.38 s | 572 / 456 MB |
 |  | Lint | StyleCop | not measured | - | - |
 | XML | Format | CSharpier | 4.0× faster | 0.11 s / 0.44 s | 104 / 97 MB |
-| C# (.editorconfig) | Format | dotnet format | not measured | - | - |
+| C# (.editorconfig) | Format | dotnet format | 5.2× faster | 1.93 s / 10.05 s | 537 / 807 MB |
 | Ruby | Lint | RuboCop | 88× faster | 3.00 s / 264.55 s | 1180 / 377 MB |
-| Vue | Lint | eslint-plugin-vue | not measured | - | - |
-| Svelte | Lint | eslint-plugin-svelte | not measured | - | - |
-| SCSS | Lint | stylelint-scss | not measured | - | - |
-| Less | Lint | stylelint-less | not measured | - | - |
+| Vue | Lint | eslint-plugin-vue | 73× faster | 0.11 s / 8.27 s | 154 / 634 MB |
+| Svelte | Lint | eslint-plugin-svelte | 49× faster | 0.10 s / 4.91 s | 71 / 600 MB |
+| SCSS | Lint | stylelint-scss | 47× faster | 0.052 s / 2.43 s | 89 / 273 MB |
+| Less | Lint | stylelint-less | 54× faster | 0.080 s / 4.29 s | 120 / 440 MB |
 | Markdown | Lint | markdownlint | 7.5× faster | 0.096 s / 0.72 s | 87 / 198 MB |
 | Dockerfile | Lint | hadolint | 36× faster | 0.071 s / 2.57 s | 70 / 74 MB |
 | GitHub Actions | Lint | actionlint | 2.1× slower | 0.14 s / 0.065 s | 76 / 71 MB |

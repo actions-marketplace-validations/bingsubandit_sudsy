@@ -43,8 +43,6 @@
       ],
       "presets": [
         "css/stylelint-standard",
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "kotlin/ktlint",
         "yaml/yamllint",
         "csharp/stylecop"
@@ -472,19 +470,17 @@
         }
       ],
       "presets": [
+        "json/eslint-plugin-jsonc-recommended",
         "html/html-validate-standard",
         "html/htmlhint",
         "html/html-eslint-recommended",
         "html/eslint-plugin-vue-recommended",
+        "graphql/graphql-eslint-recommended",
         "hcl/tflint-recommended",
         "js/eslint-recommended",
         "js/biome-recommended",
         "js/oxlint",
-        "python/ruff",
-        "html/html-validate-standard",
-        "html/htmlhint",
-        "html/html-eslint-recommended",
-        "html/eslint-plugin-vue-recommended"
+        "python/ruff"
       ],
       "upstream": [
         {
@@ -610,8 +606,6 @@
       "options": [],
       "presets": [
         "css/stylelint-recommended",
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "csharp/stylecop"
       ],
       "upstream": [
@@ -672,10 +666,56 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A block comment that fits on one line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`) and languages with no line comment marker are left alone.",
+      "description": "A tab character in a line. Each run of tabs is one report.",
       "example": {
         "config": null,
         "fixed": null,
+        "input": "---\ntitle:\tx\n---\n\nA\ttab in text.\n\n```\n\tcode\n```\n\nNo tab here.\n",
+        "language": "markdown",
+        "spans": [
+          {
+            "column": 2,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-hard-tabs",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
+          "name": "ignore_kinds",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "markdown/markdownlint"
+      ],
+      "upstream": [
+        {
+          "id": "MD010",
+          "partial": true,
+          "tool": "markdownlint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A block comment that fits on one line and ends its line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`), empty comments, comments with code after them on the line and languages with no line comment marker are left alone.",
+      "example": {
+        "config": null,
+        "fixed": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n// one line\nval a = 1\n",
         "input": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n/* one line */\nval a = 1\n",
         "language": "kotlin",
         "spans": [
@@ -686,7 +726,7 @@
           }
         ]
       },
-      "fix": null,
+      "fix": "safe",
       "id": "no-single-line-block-comment",
       "languages": [
         "all"
@@ -728,8 +768,7 @@
       "options": [],
       "presets": [
         "html/html-validate-recommended",
-        "yaml/yamllint",
-        "html/html-validate-recommended"
+        "yaml/yamllint"
       ],
       "upstream": [
         {
@@ -1108,8 +1147,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1253,8 +1290,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1298,8 +1333,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1355,8 +1388,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1405,8 +1436,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1453,8 +1482,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1506,8 +1533,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1559,8 +1584,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1608,8 +1631,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1695,8 +1716,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1740,8 +1759,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1785,8 +1802,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1823,8 +1838,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1868,8 +1881,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -1906,8 +1917,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1951,8 +1960,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -1989,8 +1996,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2039,8 +2044,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2092,8 +2095,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2179,8 +2180,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2217,8 +2216,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2260,8 +2257,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2339,8 +2334,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2418,8 +2411,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2461,8 +2452,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2550,8 +2539,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2603,8 +2590,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2641,8 +2626,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2679,8 +2662,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2717,8 +2698,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -2760,8 +2739,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2805,8 +2782,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2850,8 +2825,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -2898,8 +2871,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -3086,8 +3057,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3131,8 +3100,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -3181,8 +3148,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3224,8 +3189,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3282,8 +3245,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3320,8 +3281,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3363,8 +3322,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3388,8 +3345,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3426,8 +3381,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3464,8 +3417,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3507,8 +3458,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3557,8 +3506,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -3704,8 +3651,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3749,8 +3694,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -3799,8 +3742,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -3852,8 +3793,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -3895,8 +3834,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -4061,8 +3998,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -4111,8 +4046,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -4279,8 +4212,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -4662,8 +4593,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -4746,8 +4675,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -4883,8 +4810,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -4962,8 +4887,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -5048,8 +4971,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -5091,8 +5012,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -5141,8 +5060,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-recommended",
-        "css/stylelint-recommended",
         "css/stylelint-recommended"
       ],
       "upstream": [
@@ -5189,8 +5106,6 @@
       ],
       "options": [],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -5382,8 +5297,6 @@
         }
       ],
       "presets": [
-        "css/stylelint-standard",
-        "css/stylelint-standard",
         "css/stylelint-standard"
       ],
       "upstream": [
@@ -8386,6 +8299,7 @@
         }
       ],
       "presets": [
+        "graphql/graphql-eslint-recommended",
         "java/google"
       ],
       "upstream": [
@@ -8479,7 +8393,9 @@
         "graphql"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "graphql/graphql-eslint-recommended"
+      ],
       "upstream": [
         {
           "id": "no-anonymous-operations",
@@ -8516,7 +8432,9 @@
         "graphql"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "graphql/graphql-eslint-recommended"
+      ],
       "upstream": [
         {
           "id": "no-typename-prefix",
@@ -8886,17 +8804,22 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `terraform` block with no `required_providers` block (tflint terraform_required_providers, in the file that has the block: the rule does not know the other files of the module).",
+      "description": "A provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, reported on the last such block of the provider, and a `required_providers` entry without a `version` (tflint terraform_required_providers). The built-in `terraform` provider is exempt; override files do not count.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "terraform {\n  backend \"s3\" {}\n}\n\nterraform {\n  required_version = \">= 1.5\"\n  required_providers {\n    aws = { source = \"hashicorp/aws\" }\n  }\n}\n",
+        "input": "terraform {\n  backend \"s3\" {}\n  required_providers {\n    aws = { source = \"hashicorp/aws\", version = \"~> 5\" }\n    gcp = { source = \"hashicorp/google\" }\n  }\n}\n\nresource \"aws_instance\" \"a\" {}\nresource \"gcp_thing\" \"b\" {}\nresource \"azure_thing\" \"c\" {}\nresource \"azure_thing\" \"d\" {}\nresource \"terraform_data\" \"e\" {}\n",
         "language": "hcl",
         "spans": [
           {
+            "column": 5,
+            "length": 3,
+            "line": 5
+          },
+          {
             "column": 1,
-            "length": 9,
-            "line": 1
+            "length": 8,
+            "line": 12
           }
         ]
       },
@@ -8920,11 +8843,11 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `terraform` block with no `required_version` argument (tflint terraform_required_version, in the file that has the block: the rule does not know the other files of the module).",
+      "description": "A module none of whose `terraform` blocks sets `required_version` (tflint terraform_required_version), reported on the `terraform` block, or on the start of `main.tf` when the module has no such block. Override files do not count.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "terraform {\n  backend \"s3\" {}\n}\n\nterraform {\n  required_version = \">= 1.5\"\n  required_providers {\n    aws = { source = \"hashicorp/aws\" }\n  }\n}\n",
+        "input": "terraform {\n  backend \"s3\" {}\n  required_providers {\n    aws = { source = \"hashicorp/aws\", version = \"~> 5\" }\n    gcp = { source = \"hashicorp/google\" }\n  }\n}\n\nresource \"aws_instance\" \"a\" {}\nresource \"gcp_thing\" \"b\" {}\nresource \"azure_thing\" \"c\" {}\nresource \"azure_thing\" \"d\" {}\nresource \"terraform_data\" \"e\" {}\n",
         "language": "hcl",
         "spans": [
           {
@@ -8988,11 +8911,11 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A variable, local value or data source that nothing in the same file refers to (tflint terraform_unused_declarations, within one file: a module that uses its variables in other files needs the rule off or those files in one).",
+      "description": "A variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to (tflint terraform_unused_declarations). Override files declare nothing of their own; a module with `.tf.json` files, a file that does not parse or one that cannot be read is not judged.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "variable \"used\" {}\nvariable \"unused\" {}\nlocals {\n  used_local   = var.used\n  unused_local = 1\n}\ndata \"aws_ami\" \"used\" {}\ndata \"aws_ami\" \"unused\" {}\noutput \"x\" {\n  value = \"${local.used_local}-${data.aws_ami.used.id}\"\n}\n",
+        "input": "variable \"used\" {}\nvariable \"unused\" {}\nlocals {\n  used_local   = var.used\n  unused_local = 1\n}\ndata \"aws_ami\" \"used\" {}\ndata \"aws_ami\" \"unused\" {}\noutput \"x\" {\n  value = \"${local.used_local}-${data.aws_ami.used.id}\"\n}\nprovider \"aws\" {\n  alias = \"west\"\n}\nprovider \"aws\" {\n  alias = \"east\"\n}\nresource \"aws_instance\" \"a\" {\n  provider = aws.east\n}\n",
         "language": "hcl",
         "spans": [
           {
@@ -9009,6 +8932,11 @@
             "column": 16,
             "length": 8,
             "line": 8
+          },
+          {
+            "column": 1,
+            "length": 8,
+            "line": 12
           }
         ]
       },
@@ -12787,22 +12715,23 @@
       "default_level": "off",
       "description": "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used.",
       "example": {
-        "config": "unused-variable:\n  level: warn\n  options: { caught_errors: none, ignore_pattern: \"^_\", ignore_rest_siblings: true }\nunused-parameter:\n  level: warn\n  options: { args: all, ignore_pattern: \"^_\" }\n",
+        "config": null,
         "fixed": null,
-        "input": "export function f(o, _skip, a, b) {\n  const { x, ...rest } = o;\n  const _hidden = 1;\n  try { g(); } catch (err) { g(); }\n  return a;\n}\n",
-        "language": "js",
+        "input": "function F {\n    param([Parameter(Mandatory = $true)]$Unused, $Used)\n    $Used\n}\nfunction G {\n    param($a, $b)\n    $a | ForEach-Object { $b }\n    { $a }\n}\n",
+        "language": "powershell",
         "spans": [
           {
-            "column": 32,
-            "length": 1,
-            "line": 1
+            "column": 41,
+            "length": 7,
+            "line": 2
           }
         ]
       },
       "fix": null,
       "id": "unused-parameter",
       "languages": [
-        "js"
+        "js",
+        "powershell"
       ],
       "options": [
         {
@@ -12827,13 +12756,19 @@
         "js/eslint-recommended",
         "js/typescript-eslint-recommended",
         "js/biome-recommended",
-        "js/oxlint"
+        "js/oxlint",
+        "powershell/psscriptanalyzer"
       ],
       "upstream": [
         {
           "id": "no-unused-vars",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "PSReviewUnusedParameter",
+          "partial": true,
+          "tool": "psscriptanalyzer"
         },
         {
           "id": "no-unused-vars",
@@ -13476,7 +13411,7 @@
       "description": "An import list the formatter would reorder or rewrite (ktlint import-ordering).",
       "example": {
         "config": null,
-        "fixed": null,
+        "fixed": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n// one line\nval a = 1\n",
         "input": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n/* one line */\nval a = 1\n",
         "language": "kotlin",
         "spans": [
@@ -14962,6 +14897,55 @@
     },
     {
       "category": "correctness",
+      "default_level": "off",
+      "description": "A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose \"text\"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "Write-Verbose -Verbose \"text\"\nWrite-Verbose \"text\"\nWrite-Verbose -Message \"text\" -Verbose\nWrite-Verbose -ErrorAction Stop \"text\"\nWrite-Verbose -Verbose:$true \"text\"\nWrite-Verbose\nWrite-Verbose @args\n\"text\" | Write-Verbose\nJoin-Path -Path a\nJoin-Path -Resolve a\nJoin-Path a -Resolve\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 1,
+            "length": 13,
+            "line": 1
+          },
+          {
+            "column": 1,
+            "length": 13,
+            "line": 5
+          },
+          {
+            "column": 1,
+            "length": 13,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 9,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-mandatory-parameter",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseCmdletCorrectly",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
       "default_level": "warn",
       "description": "An assignment to, a parameter named like, or a `foreach` variable named like an automatic variable (`$Error`, `$Event`, `$input`, `$PSItem`, `$_`, `$PWD`, `$Host`, `$this`, `$true`, ...). `$null = ...` is fine.",
       "example": {
@@ -15486,6 +15470,113 @@
       "upstream": [
         {
           "id": "PSPossibleIncorrectComparisonWithNull",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A parameter of a `param` block with `ValueFromPipeline` or `ValueFromPipelineByPropertyName`, in a function or script block that has no `process` block (a `filter` is one).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "function Remove-Thing { }\nfunction Set-Thing { [CmdletBinding(SupportsShouldProcess)] param() }\nfunction Stop-Thing { [CmdletBinding(SupportsShouldProcess = $false)] param() }\nfunction Get-Thing { }\nfunction global:New-Thing { }\nfunction Get-Items { }\nfunction Get-Status { }\nfunction Get-Address { }\nfunction Get-Alias { }\nfunction Get-Series { }\nfunction Get-Name {\n    param([Parameter(ValueFromPipeline)]$Item)\n    $Item\n}\nfunction Get-Name2 {\n    param([Parameter(ValueFromPipeline)]$Item)\n    process { $Item }\n}\nfilter Get-Name3 { param([Parameter(ValueFromPipeline)]$Item) $Item }\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 41,
+            "length": 5,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "process-block-for-pipeline",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseProcessBlockForPipelineCommand",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A function named `Verb-Nouns` whose noun ends in `s` and is no singular word that ends in `ss`, `us`, `is` or `as` (`Status`, `Address`, `Analysis`, `Alias`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "function Remove-Thing { }\nfunction Set-Thing { [CmdletBinding(SupportsShouldProcess)] param() }\nfunction Stop-Thing { [CmdletBinding(SupportsShouldProcess = $false)] param() }\nfunction Get-Thing { }\nfunction global:New-Thing { }\nfunction Get-Items { }\nfunction Get-Status { }\nfunction Get-Address { }\nfunction Get-Alias { }\nfunction Get-Series { }\nfunction Get-Name {\n    param([Parameter(ValueFromPipeline)]$Item)\n    $Item\n}\nfunction Get-Name2 {\n    param([Parameter(ValueFromPipeline)]$Item)\n    process { $Item }\n}\nfilter Get-Name3 { param([Parameter(ValueFromPipeline)]$Item) $Item }\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 10,
+            "length": 9,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "singular-nouns",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseSingularNouns",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A function named with the verb `New`, `Set`, `Remove`, `Start`, `Stop`, `Restart`, `Reset` or `Update` whose text has no `SupportsShouldProcess` (or has `SupportsShouldProcess = $false`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "function Remove-Thing { }\nfunction Set-Thing { [CmdletBinding(SupportsShouldProcess)] param() }\nfunction Stop-Thing { [CmdletBinding(SupportsShouldProcess = $false)] param() }\nfunction Get-Thing { }\nfunction global:New-Thing { }\nfunction Get-Items { }\nfunction Get-Status { }\nfunction Get-Address { }\nfunction Get-Alias { }\nfunction Get-Series { }\nfunction Get-Name {\n    param([Parameter(ValueFromPipeline)]$Item)\n    $Item\n}\nfunction Get-Name2 {\n    param([Parameter(ValueFromPipeline)]$Item)\n    process { $Item }\n}\nfilter Get-Name3 { param([Parameter(ValueFromPipeline)]$Item) $Item }\n",
+        "language": "powershell",
+        "spans": [
+          {
+            "column": 10,
+            "length": 12,
+            "line": 1
+          },
+          {
+            "column": 10,
+            "length": 10,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "supports-should-process",
+      "languages": [
+        "powershell"
+      ],
+      "options": [],
+      "presets": [
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "PSUseShouldProcessForStateChangingFunctions",
           "partial": true,
           "tool": "psscriptanalyzer"
         }
@@ -22677,7 +22768,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -22704,6 +22795,45 @@
       "upstream": [
         {
           "id": "CV04",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `;` written after a space, a line break or another `;` instead of right after its statement (sqlfluff CV06).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 9,
+            "length": 2,
+            "line": 11
+          },
+          {
+            "column": 9,
+            "length": 1,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "detached-semicolon",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "CV06",
           "partial": false,
           "tool": "sqlfluff"
         }
@@ -22750,7 +22880,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\nselect a from t as x;\nselect x.a from t as x join u as y on x.id = y.id;\n",
         "language": "sql",
         "spans": [
           {
@@ -22823,7 +22953,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -22968,7 +23098,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\nselect a from t as x;\nselect x.a from t as x join u as y on x.id = y.id;\n",
         "language": "sql",
         "spans": [
           {
@@ -23049,7 +23179,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -23093,7 +23223,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\nselect a from t as x;\nselect x.a from t as x join u as y on x.id = y.id;\n",
         "language": "sql",
         "spans": [
           {
@@ -23127,7 +23257,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -23397,7 +23527,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -23436,7 +23566,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -23509,6 +23639,11 @@
         "spans": [
           {
             "column": 8,
+            "length": 5,
+            "line": 1
+          },
+          {
+            "column": 26,
             "length": 5,
             "line": 1
           },
@@ -23595,7 +23730,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\n",
+        "input": "select 1 union select 2;\nselect 1 union all select 2;\nselect 1 union distinct select 2;\nselect ifnull(a, 0), nvl(b, 0), coalesce(c, 0) from t;\nselect count(1), count(0), count(*), count(a) from t;\nselect a from t right join u on t.a = u.a;\nselect a from t left join u on t.a = u.a;\nselect case when a then 1 else null end, case when a then 1 else 2 end from t;\nselect a b, c as d from t u join v as w on u.a = w.a;\nselect a from t join u on t.a = u.a inner join v on v.a = t.a;\nselect 1 ;\nselect 2\n;\n",
         "language": "sql",
         "spans": [
           {
@@ -23629,7 +23764,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\nselect a from t as x;\nselect x.a from t as x join u as y on x.id = y.id;\n",
         "language": "sql",
         "spans": [
           {
@@ -23663,7 +23798,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\n",
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\nselect a from t as x;\nselect x.a from t as x join u as y on x.id = y.id;\n",
         "language": "sql",
         "spans": [
           {
@@ -23690,6 +23825,40 @@
       "upstream": [
         {
           "id": "RF02",
+          "partial": false,
+          "tool": "sqlfluff"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A table alias in a `FROM` clause that no qualified reference of the select (nested queries included) uses (sqlfluff AL05).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "select * from t;\nselect a, b from t1 join t2 on t1.id = t2.id;\nselect t.a, b from t;\nselect a, b as a from t;\nselect a, b from t group by a, 2;\nwith c as (select a from t) select * from c;\nselect x.a from (select * from t) as x;\nselect a from t as x;\nselect x.a from t as x join u as y on x.id = y.id;\n",
+        "language": "sql",
+        "spans": [
+          {
+            "column": 20,
+            "length": 1,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unused-alias",
+      "languages": [
+        "sql"
+      ],
+      "options": [],
+      "presets": [
+        "sql/sqlfluff"
+      ],
+      "upstream": [
+        {
+          "id": "AL05",
           "partial": false,
           "tool": "sqlfluff"
         }
@@ -25472,7 +25641,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -25510,7 +25678,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -25558,7 +25725,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -25596,8 +25762,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
-        "html/htmlhint",
         "html/html-validate-recommended",
         "html/htmlhint"
       ],
@@ -25641,8 +25805,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
-        "html/eslint-plugin-vue-recommended",
         "html/html-validate-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
@@ -25741,10 +25903,6 @@
         "html/html-validate-recommended",
         "html/htmlhint",
         "html/html-eslint-recommended",
-        "html/eslint-plugin-vue-recommended",
-        "html/html-validate-recommended",
-        "html/htmlhint",
-        "html/html-eslint-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -25802,7 +25960,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -25845,7 +26002,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -25888,7 +26044,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -25926,7 +26081,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -25974,7 +26128,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -26017,7 +26170,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -26139,9 +26291,6 @@
       "presets": [
         "html/html-validate-standard",
         "html/htmlhint",
-        "html/html-eslint-recommended",
-        "html/html-validate-standard",
-        "html/htmlhint",
         "html/html-eslint-recommended"
       ],
       "upstream": [
@@ -26190,8 +26339,6 @@
       "options": [],
       "presets": [
         "html/html-validate-standard",
-        "html/htmlhint",
-        "html/html-validate-standard",
         "html/htmlhint"
       ],
       "upstream": [
@@ -26234,7 +26381,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -26277,8 +26423,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
-        "html/htmlhint",
         "html/html-validate-recommended",
         "html/htmlhint"
       ],
@@ -26327,13 +26471,133 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
         {
           "id": "element-name",
           "partial": false,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), or one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block in `<p>`'s `<button>`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 15,
+            "length": 5,
+            "line": 5
+          },
+          {
+            "column": 16,
+            "length": 12,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 6,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-permitted-content",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-permitted-content",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An element the parent allows at most once (`<head>`, `<body>`, `<title>`, `<caption>`) that appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 23,
+            "length": 7,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-permitted-occurrences",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-permitted-occurrences",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "Children out of the order the parent requires (`<tbody>` before `<tfoot>`, `<head>` before `<body>`, `<summary>` first in `<details>`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 23,
+            "length": 7,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-permitted-order",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-permitted-order",
+          "partial": true,
           "tool": "html-validate"
         }
       ]
@@ -26377,9 +26641,6 @@
       "presets": [
         "html/html-validate-standard",
         "html/htmlhint",
-        "html/html-eslint-recommended",
-        "html/html-validate-standard",
-        "html/htmlhint",
         "html/html-eslint-recommended"
       ],
       "upstream": [
@@ -26413,6 +26674,43 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "An element that lacks a child it requires (`<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 9,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "element-required-content",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-standard"
+      ],
+      "upstream": [
+        {
+          "id": "element-required-content",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "Screen readers need text in a heading; whitespace is not text. An image with an `alt` or an `<svg>` inside counts as content.",
       "example": {
         "config": null,
@@ -26437,7 +26735,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -26480,7 +26777,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -26539,6 +26835,85 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 6,
+            "line": 14
+          }
+        ]
+      },
+      "fix": null,
+      "id": "form-submit",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h32",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is not a simple one (one row or one column of headers) (WCAG H63).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 12,
+            "length": 4,
+            "line": 18
+          },
+          {
+            "column": 52,
+            "length": 4,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "header-scope",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h63",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`.",
       "example": {
         "config": null,
@@ -26573,7 +26948,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-eslint-recommended",
         "html/html-eslint-recommended"
       ],
       "upstream": [
@@ -26589,6 +26963,43 @@
         },
         {
           "id": "heading-level",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 25,
+            "length": 8,
+            "line": 19
+          }
+        ]
+      },
+      "fix": null,
+      "id": "hidden-focusable",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "hidden-focusable",
           "partial": true,
           "tool": "html-validate"
         }
@@ -26636,7 +27047,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -26702,6 +27112,43 @@
     {
       "category": "correctness",
       "default_level": "off",
+      "description": "An `<img>` with no `alt` has no text alternative (WCAG H37; html-validate wcag/h37). One hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<script type=\"text/javascript\"></script>\n<script type=\"module\"></script>\n<script></script>\n<img src=\"a.png\">\n<img src=\"a.png\" alt=\"\">\n<img src=\"a.png\" role=\"presentation\">\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 17,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "img-alt",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h37",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
       "description": "An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`.",
       "example": {
         "config": null,
@@ -26726,7 +27173,6 @@
       ],
       "options": [],
       "presets": [
-        "html/htmlhint",
         "html/htmlhint"
       ],
       "upstream": [
@@ -26744,6 +27190,43 @@
           "id": "input-requires-label",
           "partial": false,
           "tool": "htmlhint"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title><title>y</title></head>\n<body>\n<ul><li>a</li><div></div></ul>\n<p><a href=\"x\"><a href=\"y\">z</a></a></p>\n<font>old</font>\n<table><tbody></tbody><thead></thead></table>\n<details><div></div></details>\n<a href=\"x\"><img alt=\"logo\" src=\"a\"></a>\n<a href=\"x\">text</a>\n<a href=\"x\" aria-label=\"n\"><i></i></a>\n<a href=\"x\"><i></i></a>\n<form><input name=\"q\"></form>\n<form><button>go</button></form>\n<form id=\"f\"></form><button form=\"f\">go</button>\n<table><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></table>\n<table><tr><th></th><th scope=\"col\">b</th></tr><tr><th>c</th><td>2</td></tr></table>\n<div aria-hidden=\"true\"><button>x</button></div>\n<div aria-hidden=\"true\"><button tabindex=\"-1\">x</button></div>\n</body>\n</html>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 1,
+            "length": 12,
+            "line": 13
+          }
+        ]
+      },
+      "fix": null,
+      "id": "link-text",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "wcag/h30",
+          "partial": true,
+          "tool": "html-validate"
         }
       ]
     },
@@ -26774,7 +27257,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -26812,7 +27294,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -26850,7 +27331,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -26888,8 +27368,6 @@
       ],
       "options": [],
       "presets": [
-        "html/htmlhint",
-        "html/html-eslint-recommended",
         "html/htmlhint",
         "html/html-eslint-recommended"
       ],
@@ -26938,7 +27416,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -27018,7 +27495,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -27061,7 +27537,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -27099,7 +27574,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -27137,7 +27611,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -27210,7 +27683,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27248,7 +27720,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -27286,8 +27757,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
-        "html/html-eslint-recommended",
         "html/html-validate-standard",
         "html/html-eslint-recommended"
       ],
@@ -27331,7 +27800,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27369,7 +27837,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27407,7 +27874,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27445,7 +27911,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27483,7 +27948,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27521,7 +27985,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27559,7 +28022,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27597,7 +28059,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27635,7 +28096,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27673,7 +28133,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27716,7 +28175,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27759,7 +28217,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -27797,7 +28254,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -27840,7 +28296,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -27878,7 +28333,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -27916,7 +28370,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -27959,9 +28412,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
-        "html/htmlhint",
-        "html/html-eslint-recommended",
         "html/html-validate-standard",
         "html/htmlhint",
         "html/html-eslint-recommended"
@@ -28011,8 +28461,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
-        "html/htmlhint",
         "html/html-validate-recommended",
         "html/htmlhint"
       ],
@@ -28078,9 +28526,6 @@
       "presets": [
         "html/html-validate-recommended",
         "html/htmlhint",
-        "html/html-eslint-recommended",
-        "html/html-validate-recommended",
-        "html/htmlhint",
         "html/html-eslint-recommended"
       ],
       "upstream": [
@@ -28128,7 +28573,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -28166,8 +28610,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
-        "html/htmlhint",
         "html/html-validate-recommended",
         "html/htmlhint"
       ],
@@ -28226,7 +28668,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -28269,7 +28710,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -28307,7 +28747,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -28430,7 +28869,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -28468,7 +28906,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -28506,7 +28943,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -28559,7 +28995,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -28602,7 +29037,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -28640,7 +29074,6 @@
       ],
       "options": [],
       "presets": [
-        "html/htmlhint",
         "html/htmlhint"
       ],
       "upstream": [
@@ -28728,7 +29161,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -28806,7 +29238,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -28879,7 +29310,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -28917,7 +29347,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -28970,7 +29399,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -29008,7 +29436,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29046,7 +29473,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29119,7 +29545,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29157,7 +29582,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -29195,7 +29619,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -29248,7 +29671,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -29270,7 +29692,7 @@
         "language": "html",
         "spans": [
           {
-            "column": 1,
+            "column": 8,
             "length": 1,
             "line": 3
           }
@@ -29286,7 +29708,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -29324,7 +29745,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -29362,7 +29782,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29415,7 +29834,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29453,7 +29871,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-svelte-recommended",
         "html/eslint-plugin-svelte-recommended"
       ],
       "upstream": [
@@ -29535,7 +29952,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29591,6 +30007,43 @@
       "upstream": [
         {
           "id": "require-sri",
+          "partial": true,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty says what the browser assumes (html-validate script-type).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<script type=\"text/javascript\"></script>\n<script type=\"module\"></script>\n<script></script>\n<img src=\"a.png\">\n<img src=\"a.png\" alt=\"\">\n<img src=\"a.png\" role=\"presentation\">\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 9,
+            "length": 22,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "script-type",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "script-type",
           "partial": true,
           "tool": "html-validate"
         }
@@ -29773,7 +30226,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -29831,7 +30283,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -29869,7 +30320,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard",
         "html/html-validate-standard"
       ],
       "upstream": [
@@ -29912,7 +30362,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29950,7 +30399,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -29988,7 +30436,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30026,7 +30473,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30064,7 +30510,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30112,7 +30557,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
         "html/html-validate-recommended"
       ],
       "upstream": [
@@ -30160,7 +30604,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30198,7 +30641,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30241,7 +30683,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30289,7 +30730,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30327,7 +30767,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30365,7 +30804,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30403,7 +30841,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30441,7 +30878,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30479,7 +30915,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30522,7 +30957,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30560,7 +30994,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30598,7 +31031,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30636,7 +31068,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30674,7 +31105,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30717,7 +31147,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30755,7 +31184,6 @@
       ],
       "options": [],
       "presets": [
-        "html/eslint-plugin-vue-recommended",
         "html/eslint-plugin-vue-recommended"
       ],
       "upstream": [
@@ -30777,8 +31205,8 @@
         "language": "html",
         "spans": [
           {
-            "column": 1,
-            "length": 5,
+            "column": 4,
+            "length": 2,
             "line": 9
           }
         ]
@@ -30793,8 +31221,6 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended",
-        "html/htmlhint",
         "html/html-validate-recommended",
         "html/htmlhint"
       ],
@@ -33416,19 +33842,19 @@
       "description": "A local variable or catch variable that is never used (the compiler's CS0168), or is only assigned constants and never read (CS0219). Variables captured by lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219).",
       "example": {
         "config": null,
-        "fixed": "class A { void F() {\n    \n    int a = 1, b = 2;\n    try { F(); } catch (System.Exception) { }\n    System.Console.WriteLine(b + a);\n} }\n",
-        "input": "class A { void F() {\n    int k = 5;\n    int a = 1, b = 2;\n    try { F(); } catch (System.Exception e) { }\n    System.Console.WriteLine(b + a);\n} }\n",
-        "language": "csharp",
+        "fixed": null,
+        "input": "function F {\n    $unused = 1\n    $read = 2\n    \"$read\"\n    $member = @{}\n    $member.x = 1\n    $list = @(1)\n    $list[0] = 2\n    $a, $b = 1, 2\n    $script:s = 1\n    $ErrorActionPreference = 'Stop'\n    $count = 1\n    $count++\n    $block = 1\n    $f = { $block }\n    & $f\n    $Mixed = 1\n    \"$mixed\"\n    ${with space} = 1\n    ${with space}\n    $q = 1\n    $script:t = $q\n    $splat = @{}\n    Get-Item @splat\n    $u = 1\n}\n",
+        "language": "powershell",
         "spans": [
           {
-            "column": 9,
-            "length": 1,
+            "column": 5,
+            "length": 7,
             "line": 2
           },
           {
-            "column": 42,
-            "length": 1,
-            "line": 4
+            "column": 5,
+            "length": 2,
+            "line": 25
           }
         ]
       },
@@ -33437,6 +33863,7 @@
       "languages": [
         "csharp",
         "js",
+        "powershell",
         "python",
         "shell"
       ],
@@ -33446,6 +33873,7 @@
         "js/typescript-eslint-recommended",
         "js/biome-recommended",
         "js/oxlint",
+        "powershell/psscriptanalyzer",
         "python/ruff",
         "shell/shellcheck"
       ],
@@ -33454,6 +33882,11 @@
           "id": "no-unused-vars",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "PSUseDeclaredVarsMoreThanAssignments",
+          "partial": true,
+          "tool": "psscriptanalyzer"
         },
         {
           "id": "F841",

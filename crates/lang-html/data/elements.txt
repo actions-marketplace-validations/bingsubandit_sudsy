@@ -31,6 +31,9 @@ a:download audio:crossorigin audio:preload autocorrect contenteditable dialog:cl
 img:crossorigin img:fetchpriority img:loading input:capture link:crossorigin popover
 script:crossorigin spellcheck track:kind translate video:crossorigin video:preload
 writingsuggestions
+[list]
+a:rel accesskey aria-controls aria-describedby aria-flowto aria-labelledby aria-owns form:rel
+link:blocking link:rel object:blocking output:for script:blocking td:headers th:headers
 [deprecated-attr]
 a:charset a:coords a:datafld a:datasrc a:methods a:name a:shape a:urn applet:datafld
 applet:datasrc area:nohref body:alink body:background body:bgcolor body:link body:marginbottom
@@ -67,28 +70,50 @@ aria-labelledby aria-owns button:commandfor button:form button:popovertarget fie
 input:form input:list input:popovertarget label:for output:for output:form select:form td:headers
 textarea:form th:headers
 [enum]
-
+a,area,form:target=_blank|_self|_parent|_top /^[^_].*$/
 a,area,iframe,img,link,script:referrerpolicy=|no-referrer|no-referrer-when-downgrade|same-origin|origin|strict-origin|origin-when-cross-origin|strict-origin-when-cross-origin|unsafe-url
-area:shape=rect|circle|poly|default
+a,form,link:rel=/^.+$/ a:download=/^.+$/ a:href=/^.*$/ accesskey=/./
+area:shape=rect|circle|poly|default aria-activedescendant=/^\S+$/ aria-controls=/^\S+$/
+aria-describedby=/^\S+$/ aria-details=/^\S+$/ aria-errormessage=/^\S+$/ aria-flowto=/^\S+$/
+aria-labelledby=/^\S+$/ aria-owns=/^\S+$/
+audio,embed,iframe,img,input,script,track,video:src=/^.+$/
 audio,img,link,script,video:crossorigin=anonymous|use-credentials
 audio,video:preload=none|metadata|auto autocapitalize=off|none|on|sentences|words|characters
-autocorrect=on|off button,input:formmethod=get|post|dialog
-button,input:popovertargetaction=toggle|show|hide button:type=submit|reset|button
+autocorrect=on|off button,fieldset,input,output,select,textarea:form=/^\S+$/
+button,fieldset,input,output,select,textarea:name=/^.+$/ button,input:formmethod=get|post|dialog
+button,input:formtarget=_blank|_self|_parent|_top /^[^_].*$/ button,input:popovertarget=/^\S+$/
+button,input:popovertargetaction=toggle|show|hide
+button:command=toggle-popover|show-popover|hide-popover|close|request-close|show-modal /^--/
+button:commandfor=/^\S+$/ button:type=submit|reset|button
+canvas,embed,iframe,img,input,object,source,video:height=/^\d+$/
+canvas,embed,iframe,img,input,object,source,video:width=/^\d+$/ col,colgroup:span=/^\d+$/
 contenteditable=true|false dialog:closedby=any|closerequest|none dir=ltr|rtl|auto
-draggable=true|false enterkeyhint=enter|done|go|next|previous|search|send form:autocomplete=on|off
+draggable=true|false enterkeyhint=enter|done|go|next|previous|search|send
+form:action=/^\s*\S+\s*$/ form:autocomplete=on|off
 form:enctype=application/x-www-form-urlencoded|multipart/form-data|text/plain
-form:method=get|post|dialog hidden=hidden|until-found img,link,script:fetchpriority=high|low|auto
-img:decoding=sync|async|auto img:loading=lazy|eager input:capture=environment|user
-input:colorspace=limited-srgb|display-p3
+form:method=get|post|dialog headingoffset=/^[0-8]$/ hidden=hidden|until-found id=/^\S+$/
+img,link,script:fetchpriority=high|low|auto img:decoding=sync|async|auto img:loading=lazy|eager
+img:srcset=/^[^]+$/ input,select:size=/^\d+$/ input,textarea:maxlength=/^\d+$/
+input,textarea:minlength=/^\d+$/ input:capture=environment|user
+input:colorspace=limited-srgb|display-p3 input:list=/^\S+$/ input:max=/^.+$/ input:min=/^.+$/
 input:type=button|checkbox|color|date|datetime-local|email|file|hidden|image|month|number|password|radio|range|reset|search|submit|tel|text|time|url|week
-inputmode=none|text|decimal|numeric|tel|search|email|url link,object,script:blocking=render
+inputmode=none|text|decimal|numeric|tel|search|email|url label,output:for=/^\S+$/
+li:value=/^-?\d+$/ link,object,script:blocking=render link,script:integrity=/^.+$/
 link:as=audio|audioworklet|document|embed|fetch|font|frame|iframe|image|manifest|object|paintworklet|report|script|serviceworker|sharedworker|style|track|video|webidentity|worker|xslt
-math:dir=ltr|rtl math:display=block|inline math:overflow=linebreak|scroll|elide|truncate|scale
-meta:charset=utf-8 ol:type=a|A|i|I|1 popover=auto|hint|manual spellcheck=true|false
-svg:focusable=true|false template:shadowrootmode=open|closed
-template:shadowrootslotassignment=named|manual textarea:wrap=hard|soft
-th:scope=row|col|rowgroup|colgroup track:kind=subtitles|captions|descriptions|chapters|metadata
-translate=yes|no writingsuggestions=true|false
+link:href=/^.+$/ map:name=/^\S+$/ math:dir=ltr|rtl math:display=block|inline
+math:overflow=linebreak|scroll|elide|truncate|scale meta:charset=utf-8
+meter,progress:max=/^-?(\d+(\.\d+)?|\.\d+)(E[+-]?\d+)?$/i
+meter,progress:value=/^-?(\d+(\.\d+)?|\.\d+)(E[+-]?\d+)?$/i
+meter:high=/^-?(\d+(\.\d+)?|\.\d+)(E[+-]?\d+)?$/i meter:low=/^-?(\d+(\.\d+)?|\.\d+)(E[+-]?\d+)?$/i
+meter:min=/^-?(\d+(\.\d+)?|\.\d+)(E[+-]?\d+)?$/i
+meter:optimum=/^-?(\d+(\.\d+)?|\.\d+)(E[+-]?\d+)?$/i object:data=/^.+$/ object:name=/^[^_].*$/
+ol:start=/^\d+$/ ol:type=a|A|i|I|1 popover=auto|hint|manual spellcheck=true|false
+svg:focusable=true|false tabindex=/^-?\d+$/ td,th:colspan=/^\d+$/ td,th:headers=/^\S+$/
+td,th:rowspan=/^\d+$/ template:shadowrootmode=open|closed
+template:shadowrootslotassignment=named|manual textarea:cols=/^\d+$/ textarea:dirname=/^.+$/
+textarea:rows=/^\d+$/ textarea:wrap=hard|soft th:scope=row|col|rowgroup|colgroup
+track:kind=subtitles|captions|descriptions|chapters|metadata translate=yes|no video:poster=/^.+$/
+writingsuggestions=true|false xmlns=/^.+$/
 [entities]
 AElig AMP Aacute Abreve Acirc Acy Afr Agrave Alpha Amacr And Aogon Aopf ApplyFunction Aring Ascr
 Assign Atilde Auml Backslash Barv Barwed Bcy Because Bernoullis Beta Bfr Bopf Breve Bscr Bumpeq

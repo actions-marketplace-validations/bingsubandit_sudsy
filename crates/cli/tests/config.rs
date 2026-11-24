@@ -205,6 +205,19 @@ fn config_errors_name_the_file_and_position_and_suggest() {
 }
 
 #[test]
+fn a_preset_applies_to_the_dialects_of_its_language() {
+    let t = tempfile::tempdir().unwrap();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "extends: [preset:css/stylelint-standard]\n",
+    );
+    write(t.path(), "a.scss", "a {\n  margin: 0px;\n}\n");
+    let out = sudsy(t.path(), &["lint", "."]);
+    assert!(String::from_utf8_lossy(&out.stdout).contains("length-zero-no-unit"));
+}
+
+#[test]
 fn extends_a_file_in_another_directory() {
     let t = tempfile::tempdir().unwrap();
     write(
@@ -220,6 +233,42 @@ fn extends_a_file_in_another_directory() {
     write(t.path(), "a.json", "{\"a\":1}");
     assert_eq!(sudsy(t.path(), &["format"]).status.code(), Some(0));
     assert_eq!(read(t.path(), "a.json"), "{\n \"a\": 1\n}\n");
+}
+
+#[test]
+fn a_preset_of_the_base_language_applies_to_its_dialects() {
+    // `no-v-html` is off by default and on in the Vue preset.
+    let t = tempfile::tempdir().unwrap();
+    let preset = "html/eslint-plugin-vue-recommended";
+    write(
+        t.path(),
+        "sudsy.yaml",
+        &format!("extends: [preset:{preset}]\n"),
+    );
+    write(
+        t.path(),
+        "a.vue",
+        "<template>\n  <p v-html=\"x\" />\n</template>\n",
+    );
+    let out = sudsy(t.path(), &["lint", "a.vue"]);
+    assert!(stdout(&out).contains("no-v-html"), "{}", stdout(&out));
+}
+
+#[test]
+fn a_svelte_file_takes_its_preset_from_html() {
+    let t = tempfile::tempdir().unwrap();
+    // Every rule of the Svelte preset is on by default, so the proof is where `config print`
+    // says the value came from.
+    let preset = "html/eslint-plugin-svelte-recommended";
+    write(
+        t.path(),
+        "sudsy.yaml",
+        &format!("extends: [preset:{preset}]\n"),
+    );
+    write(t.path(), "b.svelte", "<p>{@html x}</p>\n");
+    let out = sudsy(t.path(), &["config", "print", "b.svelte"]);
+    let line = format!("warn  (preset {preset})");
+    assert!(stdout(&out).contains(&line), "{}", stdout(&out));
 }
 
 #[test]

@@ -310,6 +310,11 @@ impl NodeFormatter for MarkupFormatter {
                 tab: cx.options.int(core_config::opt::INDENT_SIZE) as usize,
                 bracket_same_line: bracket_same_line(cx.options),
                 single_attribute_per_line: single_attribute_per_line(cx.options),
+                expression_mode: core_format::EmbedMode::expression_of(cx.options),
+                content_lines: core_format::content_lines::ContentLines::of(
+                    cx.options,
+                    model::INLINE,
+                ),
             },
         )))
     }

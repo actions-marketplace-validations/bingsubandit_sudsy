@@ -17,6 +17,7 @@ options:
   - end_of_line
   - max_blank_lines: [10, "Largest number of blank lines kept between statements and comments."]
 presets: [psscriptanalyzer]
+families: scope::FAMILIES
 mapping:
   same: 'hash_entry command script_block catch_clause comment'
   Program: source_file
@@ -25,6 +26,7 @@ mapping:
   Hash: hashtable_expression
   Function: function_definition
   ParamDecl: parameter
+  Attribute: attribute
   AssignStmt: assignment_statement
   Foreach: foreach_statement
   Block: statement_block

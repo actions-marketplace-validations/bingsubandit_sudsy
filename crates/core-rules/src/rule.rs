@@ -7,7 +7,7 @@ use crate::hooks::RuleHooks;
 use crate::layout::{LayoutRole, LayoutSink};
 use crate::lines::LineIndex;
 use crate::options::{Check, OptionDecl, RuleOptions};
-use crate::project::{ProjectContext, ProjectFacts};
+use crate::project::{ProjectContext, ProjectFacts, Scope};
 use crate::tree::TraversalCache;
 use core_config::{RuleOptionSchema, RuleSchema};
 use core_semantics::{BodyFlow, SemanticView};
@@ -328,6 +328,12 @@ pub trait Rule: Send + Sync {
 
     /// Body scope: once per method, lambda or local function of the provider.
     fn check_body(&self, _body: &BodyContext<'_>, _ctx: &mut RuleContext<'_>) {}
+
+    /// Where the rule's project phase looks: every file of the project at `analysis: deep`
+    /// (default), or the files of one directory at every depth ([`Scope::Directory`]).
+    fn scope(&self) -> Scope {
+        Scope::Project
+    }
 
     /// Project scope, phase 1: gather facts from each file.
     fn collect(&self, _file: &FileContext<'_>, _facts: &mut ProjectFacts) {}

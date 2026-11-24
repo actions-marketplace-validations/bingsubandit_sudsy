@@ -30,6 +30,7 @@ impl NodeFormatter for PowerShellFormatter {
         CommentStyle {
             gap: 0,
             keep_gap: true,
+            trim_lines: true,
             ..Default::default()
         }
     }
@@ -427,12 +428,15 @@ fn program(cx: &FormatCtx<'_>, root: &SyntaxNode) -> Doc {
             let mut inline: Vec<Doc> = Vec::new();
             for c in &leading {
                 if c.kind == comments::CommentKind::Block && c.breaks_after == 0 {
-                    inline.push(core_format::context::comment_doc(c));
+                    inline.push(core_format::context::comment_doc_in(c, &cx.comment_style));
                     inline.push(doc::lit(" "));
                     continue;
                 }
                 let mut parts: Vec<Doc> = blank_lines(blank).collect();
-                parts.extend([doc::hardline(), core_format::context::comment_doc(c)]);
+                parts.extend([
+                    doc::hardline(),
+                    core_format::context::comment_doc_in(c, &cx.comment_style),
+                ]);
                 lines.push(indented(frames.depth(), doc::concat(parts)));
                 blank = c.breaks_after.saturating_sub(1);
             }
@@ -455,7 +459,7 @@ fn program(cx: &FormatCtx<'_>, root: &SyntaxNode) -> Doc {
             // The first token: its comments stand on lines of their own.
             let leading = std::mem::take(&mut tks[i].leading);
             for c in &leading {
-                cur.push(core_format::context::comment_doc(c));
+                cur.push(core_format::context::comment_doc_in(c, &cx.comment_style));
                 cur.push(doc::hardline());
                 cur.extend(blank_lines(c.breaks_after.saturating_sub(1)));
             }

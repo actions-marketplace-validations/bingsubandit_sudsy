@@ -361,6 +361,38 @@ fn embedded_html_and_vue_formats_are_fixed_points() {
     );
 }
 
+/// `content_newline_with_attributes` breaks the content of an element that has attributes (not an
+/// inline one, not one without) and `indent_expression_operands` indents the operands of an
+/// expression that continues on following lines; both are fixed points.
+#[test]
+fn vue_layout_options_content_lines_and_operand_indent() {
+    let t = tempfile::tempdir().unwrap();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "vue:\n  format:\n    content_newline_with_attributes: true\n    indent_expression_operands: true\n",
+    );
+    write(
+        t.path(),
+        "a.vue",
+        "<template>\n<p>a</p>\n<p class=\"x\">b</p>\n<span class=\"x\">c</span>\n<p :class=\"cond_aaaaaaaaaaaaaaaaaaaa && cond_bbbbbbbbbbbbbbbbbbbbbb && cond_cccccccccccccccccccccc\">d</p>\n</template>\n",
+    );
+    assert_eq!(sudsy(t.path(), &[]).status.code(), Some(0));
+    let vue = read(t.path(), "a.vue");
+    assert!(vue.contains("<p>a</p>"), "{vue}");
+    assert!(vue.contains("<p class=\"x\">\n    b\n  </p>"), "{vue}");
+    assert!(vue.contains("<span class=\"x\">c</span>"), "{vue}");
+    assert!(
+        vue.contains("cond_aaaaaaaaaaaaaaaaaaaa &&\n        cond_bbbbbbbbbbbbbbbbbbbbbb"),
+        "{vue}"
+    );
+    assert_eq!(
+        sudsy(t.path(), &["--check"]).status.code(),
+        Some(0),
+        "{vue}"
+    );
+}
+
 /// The safety check accepts what the formatter rewrites in Vue and Svelte: the values of `.prop` and
 /// `slot-scope` attributes, root custom blocks without blanks between them, and a destructuring
 /// pattern in a block tag (`}}`).

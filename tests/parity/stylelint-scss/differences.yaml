@@ -1,0 +1,40 @@
+differences: {}
+files: {}
+target: 20.6
+measured: {covered: 599, total: 2904, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  scss/dollar-variable-colon-space-after: 857
+  scss/no-global-function-names: 289
+  scss/dollar-variable-empty-line-before: 271
+  scss/comment-no-empty: 223
+  scss/double-slash-comment-empty-line-before: 198
+  no-invalid-position-at-import-rule: 70
+  function-name-case: 54
+  scss/at-mixin-argumentless-call-parentheses: 51
+  declaration-block-no-redundant-longhand-properties: 44
+  at-rule-empty-line-before: 30
+  custom-property-empty-line-before: 30
+  scss/at-rule-conditional-no-parentheses: 27
+  selector-not-notation: 20
+  scss/at-extend-no-missing-placeholder: 19
+  scss/at-if-no-null: 18
+  scss/at-function-pattern: 17
+  value-keyword-case: 16
+  scss/at-if-closing-brace-newline-after: 13
+  scss/at-if-closing-brace-space-after: 12
+  scss/operator-no-newline-after: 12
+  scss/at-mixin-pattern: 6
+  scss/dollar-variable-pattern: 6
+  scss/load-no-partial-leading-underscore: 3
+  alpha-value-notation: 2
+  color-function-alias-notation: 2
+  container-name-pattern: 2
+  declaration-empty-line-before: 2
+  declaration-property-value-keyword-no-deprecated: 2
+  length-zero-no-unit: 2
+  media-feature-range-notation: 2
+  block-no-redundant-nested-style-rules: 1
+  nesting-selector-no-missing-scoping-root: 1
+  number-max-precision: 1
+  scss/function-quote-no-quoted-strings-inside: 1
+  scss/operator-no-unspaced: 1

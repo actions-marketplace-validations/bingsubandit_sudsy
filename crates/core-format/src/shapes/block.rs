@@ -3,9 +3,7 @@
 //! tools: Prettier statements, google-java-format blocks, ktlint curly-spacing
 //! reads: tag:block
 
-use super::{
-    BlankRule, Rendered, Slot, container, container_between, dangling_comments, gap, render_slots,
-};
+use super::{BlankRule, Rendered, Slot, container, container_between, gap, render_slots};
 use crate::FormatCtx;
 use crate::comments::{self, Comment};
 use crate::doc::{self, Doc};
@@ -162,13 +160,49 @@ pub fn block(
     block_of(cx, container(cx, node)?, style, false)
 }
 
-/// [`block`] where comments after the opening delimiter move inside, to lines of their own.
+/// [`block`] where comments after the opening delimiter move inside, to lines of their own; with
+/// `open_comment_inside_parents` only in a body whose parent has one of the kinds.
 pub fn block_open_inside(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
     style: &BlockStyle,
 ) -> Result<Doc, FormatError> {
-    block_of(cx, container(cx, node)?, style, true)
+    block_of(cx, container(cx, node)?, style, opens_inside(cx, node))
+}
+
+/// Does the body `node` move the comments after its opening delimiter inside
+/// ([`block_open_inside`])?
+pub fn opens_inside(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    let parents = core_config::opt::OPEN_COMMENT_INSIDE_PARENTS;
+    cx.options.strings(parents).next().is_none()
+        || node
+            .parent()
+            .is_some_and(|p| cx.options.list_has(parents, cx.grammar.name(p.kind())))
+}
+
+/// The body `els` of `node` when it is `{` and `}` only, kept on one line (or split when the
+/// source breaks after `{`); `None` when it holds comments that must stay in the body, or one
+/// that [`block_open_inside`] moves inside.
+pub fn empty_braces(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> Option<Doc> {
+    let [SyntaxElement::Token(open), SyntaxElement::Token(close)] = els else {
+        return None;
+    };
+    if open.text() != "{" || close.text() != "}" {
+        return None;
+    }
+    if !comments::leading_comments(cx.grammar, close).is_empty()
+        || (comments::has_trailing_comment(cx.grammar, open) && opens_inside(cx, node))
+    {
+        return None;
+    }
+    let gap = if comments::break_after(cx.grammar, open) {
+        doc::hardline()
+    } else if open.text_range().end() != close.text_range().start() {
+        doc::lit(" ")
+    } else {
+        doc::lit("")
+    };
+    Some(doc::concat(vec![cx.token(open), gap, cx.token(close)]))
 }
 
 /// [`block`] for the delimiters `open` and `close` among the children of `node`.
@@ -252,7 +286,7 @@ pub fn headed_braces(
         parts.push(h);
     }
     parts.push(doc::indent(doc::concat(vec![
-        super::dangling_comments(&moved, false),
+        super::dangling_comments_in(&cx.comment_style, &moved, false),
         doc::line(),
         body,
         super::dangling_comments_in(&cx.comment_style, &dangling, false),
@@ -394,7 +428,7 @@ fn braces_of(
         (Some(_), false) => doc::hardline(),
     };
     let inner = doc::concat(vec![
-        dangling_comments(moved, false),
+        super::dangling_comments_in(&cx.comment_style, moved, false),
         first_hardline,
         body.unwrap_or(Doc::Nil),
         super::dangling_comments_in(&cx.comment_style, &dangling, blank_before_close),

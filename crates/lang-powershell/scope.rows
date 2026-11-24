@@ -1,0 +1,15 @@
+// What PowerShell says to the shared scope rules: a variable exists from its first assignment in
+// the function, script block or script that holds it, and a block sees the names around it. Names
+// are the words that start with `$` (or `@`, a splat) and a read is any such word; a name with a
+// scope or drive qualifier (`$script:x`, `$env:x`) is none of these. Format: core_semantics::scopes::rows.
+names Word
+bare
+methods ScriptBlock Program
+// A function that reads `$PSBoundParameters` may hand every parameter on.
+dynamic psboundparameters
+conventions null erroractionpreference warningpreference verbosepreference debugpreference informationpreference progresspreference confirmpreference whatifpreference
+Program var-scope
+Function var-scope
+ScriptBlock var-scope
+ParamDecl declares=value|parameter token=first/declare
+AssignStmt token=first/assign."=" implicit=value|let@unseen

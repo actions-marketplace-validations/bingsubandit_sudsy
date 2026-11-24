@@ -40,11 +40,13 @@ pub use assignment::{
 };
 pub use binary_chain::{
     BinaryHooks, BinaryPolicy, Hug, NoBinaryHooks, OperatorLine, Place, binary_chain, flattens,
+    unindented_root,
 };
 pub use block::{
     BlockStyle, Continuations, LabelStyle, annotation_line, blank_before, block, block_between,
-    block_open_inside, braces, document, headed_braces, labeled, labeled_statement, open_comments,
-    single_line_body, spread_cases_style, statement_sequence, statement_sequence_with,
+    block_open_inside, braces, document, empty_braces, headed_braces, labeled, labeled_statement,
+    open_comments, opens_inside, single_line_body, spread_cases_style, statement_sequence,
+    statement_sequence_with,
 };
 pub use call_arguments::{
     Args, CallStyle, Expanded, HugLast, Item, Plan, call_arguments, can_hug, expression_of,
@@ -659,7 +661,7 @@ pub fn dangling_comments_in(
         if (i == 0 && blank_before) || (i > 0 && cs[i - 1].breaks_after >= 2) {
             parts.push(doc::hardline());
         }
-        parts.push(crate::context::comment_doc(c));
+        parts.push(crate::context::comment_doc_in(c, st));
     }
     doc::concat(parts)
 }

@@ -14,6 +14,11 @@ html:
       empty-heading: error
       empty-title: error
       long-title: error
+      form-submit: error
+      header-scope: error
+      hidden-focusable: error
+      img-alt: error
+      link-text: error
       meta-refresh: error
       no-autoplay: error
       no-conditional-comment: error
@@ -30,6 +35,7 @@ html:
       prefer-native-element: error
       prefer-tbody: error
       presentation-role-style: error
+      script-type: error
       text-content: error
       unique-landmark: error
       valid-id: error

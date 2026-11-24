@@ -14,3 +14,9 @@ powershell:
       no-global-vars: warn
       no-automatic-variable-assignment: warn
       null-comparison-side: warn
+      supports-should-process: warn
+      singular-nouns: warn
+      process-block-for-pipeline: warn
+      missing-mandatory-parameter: warn
+      unused-variable: warn
+      unused-parameter: warn

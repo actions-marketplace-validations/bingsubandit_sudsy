@@ -13,10 +13,12 @@
 pub mod adjacent;
 mod align;
 pub mod blank;
+pub mod block_frames;
 pub mod calls;
 pub mod case;
 pub mod columns;
 pub mod comments;
+pub mod content_lines;
 pub mod context;
 pub mod directives;
 pub mod doc;
@@ -156,6 +158,9 @@ pub fn format_tree(root: &SyntaxNode, cx: &FormatCtx<'_>) -> Result<String, Form
     take_peak();
     let mut doc = cx.format_unguarded(root)?;
     let (mut printed, mut keep) = printer::print_protected(&mut doc, &print_options(cx.options));
+    if cx.comment_style.block_as_line {
+        comments::settle_block_comments(cx.grammar, &mut printed, &mut keep);
+    }
     if cx.comment_style.align_lines {
         comments::align_marked_gaps(
             &mut printed,

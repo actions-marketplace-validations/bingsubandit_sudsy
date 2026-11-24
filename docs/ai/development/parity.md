@@ -2,7 +2,7 @@
 
 `scripts/parity.sh <tool>` runs the upstream tool and `sudsy lint` on the fixtures in `tests/parity/<tool>/` and compares the diagnostics as `(rule, line, column)`. The upstream rule name is mapped to a Sudsy rule id through the catalog (`docs/ai/parity/<tool>.yaml`: the entries whose status is `rule <id>`; an entry that names several ids (`rule unused-variable, unused-parameter`) maps to the first, and the diagnostics of the others are compared as the first's); an upstream rule with no mapping is a mismatch. Every mismatch is printed (`only <tool>`, `only sudsy`) and the exit code is 1 when there is any. Run it from Git Bash.
 
-Tools: <!-- generated:parity-tools -->`actionlint`, `buf`, `checkmake`, `checkstyle`, `eslint`, `eslint-jsonc`, `eslint-plugin-svelte`, `eslint-plugin-vue`, `hadolint`, `html-eslint`, `html-validate`, `htmlhint`, `ktlint`, `markdownlint`, `phpstan`, `psscriptanalyzer`, `rubocop`, `ruff`, `shellcheck`, `sqlfluff`, `stylecop`, `stylelint`, `stylelint-less`, `stylelint-scss`, `tflint`, `typescript-eslint`, `yamllint` (lint mode); `biome`, `buf`, `clang-format`, `csharpier`, `csharpier-xml`, `dotnet-format`, `google-java-format`, `invoke-formatter`, `ktlint`, `php-cs-fixer`, `prettier`, `prettier-angular`, `prettier-css`, `prettier-html`, `prettier-js`, `ruff`, `shfmt`, `sqlfluff`, `taplo`, `terraform` (format mode, below).<!-- /generated --> Both modes install the tool at the catalog's `version` on first use and build the debug CLI; the install is data (see [Tool entries](#tool-entries)). yamllint is a pip package installed below `<target>/parity/yamllint-<version>/` (needs Python 3 and network).
+Tools: <!-- generated:parity-tools -->`actionlint`, `buf`, `checkmake`, `checkstyle`, `eslint`, `eslint-jsonc`, `eslint-plugin-svelte`, `eslint-plugin-vue`, `graphql-eslint`, `hadolint`, `html-eslint`, `html-validate`, `htmlhint`, `ktlint`, `markdownlint`, `phpstan`, `psscriptanalyzer`, `rubocop`, `ruff`, `shellcheck`, `sqlfluff`, `stylecop`, `stylelint`, `stylelint-less`, `stylelint-scss`, `tflint`, `typescript-eslint`, `yamllint` (lint mode); `biome`, `buf`, `clang-format`, `csharpier`, `csharpier-xml`, `dotnet-format`, `google-java-format`, `invoke-formatter`, `ktlint`, `php-cs-fixer`, `prettier`, `prettier-angular`, `prettier-css`, `prettier-html`, `prettier-js`, `ruff`, `shfmt`, `sqlfluff`, `taplo`, `terraform` (format mode, below).<!-- /generated --> Both modes install the tool at the catalog's `version` on first use and build the debug CLI; the install is data (see [Tool entries](#tool-entries)). yamllint is a pip package installed below `<target>/parity/yamllint-<version>/` (needs Python 3 and network).
 
 ## Fixtures
 `tests/parity/<tool>/` holds one file per case plus the two configs that make the tools comparable: the upstream config (`.yamllint`) enables only rules Sudsy has an equivalent for, with the parameters Sudsy's rules take, and `sudsy.yaml` enables the matching Sudsy rules. A fixture is one file for every config, so the parameters must be the same for all cases. Fixtures where the tools legitimately differ are not included; those differences are recorded in the catalog entry's `gap`. Rules the formatter covers (yamllint `comments`) are off in `.yamllint`: they are tested as formatter output instead.
@@ -29,7 +29,8 @@ intentional:            # only the lead or the user adds these: name -> invalid-
   subst-indent: tool-wrong
 fixes:                  # gap name or lint rule -> one line: where and what to change (a name no longer in `differences` or `missed` fails the run)
   for-no-in: crates/lang-bash/grammar, accept `for x do`
-missed:                 # lint: rule -> findings of the corpus it misses (the 15 largest; `scripts/parity.sh coverage <tool>` checks it, `COVERAGE_WRITE=1` writes it)
+measured:               # lint: {covered, total, main}: what the target counts and the main commit the measured tree is based on (written with `missed`)
+missed:                 # lint: rule -> findings that count as missing, all of them, layout left after `sudsy format` included: covered + missed = total, or the run and codegen fail (`scripts/parity.sh coverage <tool>` checks it, `COVERAGE_WRITE=1` writes both)
   SC2086: 28
 unclassified: 12        # format: most differing files of the ratchet groups that no `name:N` explains (a ratchet)
 pins:                   # file -> pin of Sudsy's output for it, for the tool-wrong names (scripts/parity.sh --pin <tool> prints them)
@@ -77,58 +78,7 @@ The target of every run (`scripts/parity.sh format <tool>`, `scripts/parity.sh c
 
 `scripts/parity.sh stability <group>` is the format number of a language with no reference formatter (Dockerfile, Makefile, GitHub Actions, INI, EditorConfig, .gitignore): each file of the group's corpus (the `stability` entry of `scripts/parity_tools.json`: `fetch`, `corpus` as a coverage entry, `as`, `place`; the folders of the lint coverage runs) is copied alone into its own folder and formatted twice with `sudsy format` (a debug build, so the safety check runs). It is stable when it parses and formats without a refusal, the second format changes nothing and the summary line of the first has no `copied through` (more than half of the file text copied by `verbatim_node`, `verbatim_range` or a whole-file keep: `core_format::copied_through_files`, counted in `provider-api`'s `format_checked`). The run prints each file that is not stable with its reason, the share, and fails below `ratchet` (the least stable files, raised when the run says so) or when `target-files` is stale; both are per group in `tests/parity/stability/differences.yaml`, which the README table reads. No input is dropped.
 
-| Format run | Target |
-|---|---:|
-| biome | 100.0% (4 of 4) |
-| buf | 99.1% (320 of 323) |
-| clang-format | 14.7% (975 of 6639) |
-| csharpier-xml | 99.7% (323 of 324) |
-| csharpier | 100.0% (9 of 9) |
-| dotnet-format | 91.7% (11 of 12) |
-| google-java-format | 91.6% (4889 of 5338) |
-| invoke-formatter | not run here |
-| ktlint | 69.4% (4009 of 5776) |
-| php-cs-fixer | 88.5% (9189 of 10382) |
-| prettier-angular | 97.7% (1191 of 1219) |
-| prettier-css | 87.4% (714 of 817) |
-| prettier-html | 86.1% (2185 of 2539) |
-| prettier-js | 86.0% (3484 of 4051) |
-| prettier | 95.3% (223 of 234) |
-| ruff | 79.4% (1303 of 1641) |
-| shfmt | 86.6% (71 of 82) |
-| sqlfluff | 78.2% (678 of 867) |
-| taplo | 98.1% (203 of 207) |
-| terraform | 99.1% (314 of 317) |
-
-| Coverage run | Target |
-|---|---:|
-| actionlint | 5.1% (37 of 721) |
-| buf | 85.8% (2027 of 2362) |
-| checkmake | 100.0% (349 of 349) |
-| checkstyle | 23.1% (13871 of 59978) |
-| eslint-jsonc | - |
-| eslint-plugin-svelte | 100.0% (67 of 67) |
-| eslint-plugin-vue | 23.0% (1241 of 5404) |
-| eslint | 100.0% (4411 of 4413) |
-| hadolint | 78.2% (618 of 790) |
-| html-eslint | 0.2% (37 of 19963) |
-| html-validate | 62.9% (616 of 980) |
-| htmlhint | 5.0% (65 of 1301) |
-| ktlint | 11.9% (15437 of 129297) |
-| markdownlint | 82.4% (1538 of 1867) |
-| phpstan | - |
-| psscriptanalyzer | - |
-| rubocop | 96.2% (7717 of 8022) |
-| ruff | 94.6% (4132 of 4367) |
-| shellcheck | 86.6% (201 of 232) |
-| sqlfluff | 82.6% (16772 of 20300) |
-| stylecop | - |
-| stylelint-less | - |
-| stylelint-scss | - |
-| stylelint | 94.7% (12012 of 12686) |
-| tflint | 58.7% (84 of 143) |
-| typescript-eslint | 100.0% (3644 of 3644) |
-| yamllint | 99.5% (1993 of 2004) |
+The numbers themselves are in the generated pages [../parity/README.md](../parity/README.md) and [../parity/queue.md](../parity/queue.md) (covered, total, the main commit measured on, every cause); no other page repeats them.
 
 ## Nightly
 `.github/workflows/nightly.yml` (daily 02:17 UTC, and `workflow_dispatch`) runs every parity tool of `scripts/parity_tools.json` and every language crate with ignored conformance tests, so a broken ratchet (`ratchet` minima, `second-format` and `refused` maxima, a new mismatch) or a broken corpus test fails without a person. `scripts/ci-nightly-matrix.py` builds the job matrix: one job per tool (`scripts/parity.sh [format] <tool>`) and per crate (`scripts/conformance.sh lang-<x>`: the fetch script, then `cargo test --profile corpus -p lang-<x> -- --ignored` minus the measurements `measure_startup_cost`, `scaling` and `model_cost`; `#[ignore]` reasons with "measurement", "prints timings" or "flaky" do not select a crate). A new tool or crate joins by existing; nothing is listed twice. Jobs do not stop each other and carry the tool's or crate's name. Tools (`target/parity`, keyed on the pins in `parity_tools.json`, `docs/ai/parity/*.yaml`, `jre.sh`, `dotnet-tools.json`) and corpora (`tests/conformance/corpus`, keyed on the fetch scripts, which update a stale cache by commit) are cached per job; the Cargo cache is saved from the default branch only. A cache is saved only by a passing job.
@@ -194,7 +144,7 @@ Example: `"speed": {"language": "Python", "label": "ruff", "corpus": {"group": "
 ## Format mode
 One runner (`scripts/parity_format.py`) serves every format tool; an entry also has:
 - `command`: the tool's command line with `{prefix}`, `{exe}`, `{python}`, `{root}`, `{group}` and `{file}` (a Python tool runs as `{python} -m <tool>` with `env` `PYTHONPATH={prefix}`; there are no wrapper scripts, only the PowerShell tools have one: no `pwsh` command line exists); `env`: variables of the run (`{prefix}`); `group`: a regex over the fixture's name whose first group is `{group}`; `input`: `arg` (the file name is an argument), `stdin`, `in-place` (the tool rewrites a copy) or `batch` (one run over copies of all fixtures, for a tool that starts slowly; `reject`: a regex over the tool's output whose first group names a file the tool rejects); `tool_may_reject`: a file the tool rejects is a difference, not an error;
-- `fixtures`: sources of fixtures, each a `dir` (default: the tool's folder) with `suffixes`, a fixture-name `prefix`, `recursive`, or a `list` file with `starts`; `kind: editorconfig-cases` is the `dotnet-format` layout below.
+- `fixtures`: sources of fixtures, each a `dir` (default: the tool's folder) with `suffixes`, a fixture-name `prefix`, `recursive`, `nested` (copied with its folders, not flattened: the place selects the language or dialect), or a `list` file with `starts`; `kind: editorconfig-cases` is the `dotnet-format` layout below.
 
 `scripts/parity.sh format prettier|biome` formats every JSON and YAML fixture in `tests/parity/<tool>/` with the tool (`prettier --no-config --no-editorconfig --embedded-language-formatting=off`, `biome format` with its defaults) and with `sudsy format`, and compares the outputs byte for byte. The tool is installed with npm at the catalog's `version` into `target/parity/<tool>-<version>/` on first use (needs Node and network); the fixtures are copied to `target/parity/<tool>-work/` first because `sudsy format` writes in place. The folder's `sudsy.yaml` extends the matching presets (`json/prettier-compat` and `yaml/prettier-compat`; `json/biome`), so a difference is a preset or formatter gap. Every difference is printed as a unified diff and the exit code is 1.
 

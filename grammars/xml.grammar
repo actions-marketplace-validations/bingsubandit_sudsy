@@ -39,7 +39,7 @@ token Unknown #error
 node Chunk #content #misc = value:#chunk
 node Document = items:#misc* root:Element tail:#misc* Eof
 node Element #content = start:#start-tag content:#content* end:ETag?
-node STag #start-tag #mapping = Lt Name entries:Attribute* Gt
-node EmptyTag #start-tag #mapping = Lt Name entries:Attribute* SlashGt
+node STag #start-tag #mapping = Lt name:Name entries:Attribute* Gt
+node EmptyTag #start-tag #mapping = Lt name:Name entries:Attribute* SlashGt
 node ETag = LtSlash Name Gt
 node Attribute #key-value = key:Name Equals value:AttValue

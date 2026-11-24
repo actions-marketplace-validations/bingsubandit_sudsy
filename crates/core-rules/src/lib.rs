@@ -11,6 +11,7 @@
 //!
 //! concept: none (glue: crate root)
 
+pub mod allowed_values;
 pub mod blank_lines;
 pub mod cases;
 pub mod checks;
@@ -18,10 +19,13 @@ pub mod clause_style;
 pub mod commands;
 pub mod comments;
 pub mod configure;
+pub mod content_model;
 pub mod curly;
 pub mod decl_rows;
 mod declare;
+pub mod detached_token;
 pub mod diagnostic;
+pub mod directory_facts;
 pub mod doc_comments;
 pub mod doc_lines;
 pub mod doc_style;
@@ -36,6 +40,7 @@ pub mod fixes;
 pub mod flow_rules;
 pub mod format_diff;
 pub mod format_strings;
+pub mod hard_tabs;
 pub mod heading_style;
 pub mod hooks;
 pub mod imports;
@@ -43,8 +48,12 @@ pub mod keys;
 pub mod layout;
 pub mod lines;
 pub mod listed;
+pub mod markup;
+pub mod markup_checks;
 pub mod max;
+pub mod missing_arguments;
 pub mod modifiers;
+pub mod module_names;
 pub mod multiline_start;
 pub mod names;
 pub mod naming;
@@ -79,8 +88,8 @@ pub use diagnostic::{
     Category, Diagnostic, Edit, FORMAT, Fix, FixKind, Related, SYNTAX_ERROR, Severity,
 };
 pub use engine::{
-    ActiveRule, FileReport, layers_needed, run_file, run_file_rules, run_project, run_rules,
-    silence,
+    ActiveRule, FileReport, collect_directory, directory_rules, layers_needed, run_directory,
+    run_file, run_file_rules, run_project, run_rules, silence,
 };
 pub use extension::{ALL_LANGUAGES, ExtensionRule, Extensions};
 pub use family::{Checked, Family, Params};
@@ -91,7 +100,7 @@ pub use hooks::{
 pub use layout::{Attach, LayoutRole, attached, run_layout};
 pub use lines::LineIndex;
 pub use options::{Check, Opt, OptionDecl, RuleOptions};
-pub use project::{Fact, ProjectContext, ProjectFacts};
+pub use project::{DirectoryScope, Fact, ProjectContext, ProjectFacts, Scope};
 pub use regex::{Meta, Re, RegexCache, meta_regex};
 pub use rule::{BodyContext, EmbeddedTree, FileContext, Layer, Rule, RuleContext, RuleMeta};
 pub use scope_rules::{ScopeLang, ScopeRule};

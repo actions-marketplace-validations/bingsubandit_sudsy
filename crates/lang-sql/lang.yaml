@@ -2,7 +2,7 @@ vscode-languages: [sql]
 extensions: [sql]
 formatter: SqlFormatter
 parse: parse::parse_file
-families: "&[core_rules::unique::FAMILY, core_rules::token_case::FAMILY, core_rules::word_names::KEYWORD_NAME, core_rules::word_names::NEEDLESS_QUOTES, core_rules::query_scope::UNKNOWN_COLUMNS, core_rules::query_scope::REFERENCE_QUALIFICATION, core_rules::query_scope::REFERENCE_CONSISTENCY, core_rules::query_scope::UNIQUE_ALIASES, core_rules::clause_style::FAMILY]"
+families: "&[core_rules::unique::FAMILY, core_rules::token_case::FAMILY, core_rules::word_names::KEYWORD_NAME, core_rules::word_names::NEEDLESS_QUOTES, core_rules::query_scope::UNKNOWN_COLUMNS, core_rules::query_scope::REFERENCE_QUALIFICATION, core_rules::query_scope::REFERENCE_CONSISTENCY, core_rules::query_scope::UNIQUE_ALIASES, core_rules::query_scope::UNUSED_ALIAS, core_rules::detached_token::FAMILY, core_rules::clause_style::FAMILY]"
 hooks: hooks::SqlHooks
 options:
   - dialect:
@@ -18,6 +18,12 @@ options:
       values: ["trailing", "leading"]
       default: "trailing"
       doc: "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one."
+  - alter_table_indent:
+      default: false
+      doc: "Indent the actions of `ALTER TABLE name` one level under the statement."
+  - block_indent:
+      default: false
+      doc: "Indent the bodies of `BEGIN`, `LOOP`, `WHILE`, `REPEAT`, `IF` and `CASE` blocks one level under their opener."
   - keyword_case:
       values: ["consistent", "upper", "lower", "capitalise"]
       default: "consistent"

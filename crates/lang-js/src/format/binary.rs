@@ -125,7 +125,10 @@ impl shapes::BinaryHooks for Hooks {
             Some(k::UNARY_EXPRESSION) => p
                 .as_ref()
                 .is_some_and(|p| super::unary::has_commented_parentheses(cx, p)),
-            Some(k::ARRAY_EXPRESSION) => super::embed::is_unindented_root(cx, node),
+            Some(k::ARRAY_EXPRESSION) => shapes::unindented_root(
+                core_format::EmbedMode::of(cx.options),
+                super::embed::is_root(cx, node),
+            ),
             _ => false,
         };
         if inside_parens {

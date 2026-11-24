@@ -26,7 +26,8 @@ fixes:  # lint rule -> where and what to change
   glob: "filter patterns of branches, tags and paths: a glob syntax check in a shared crate"
   if-cond: "an `if:` that is always true: needs the expression parser"
   events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"
-missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts/parity.sh coverage <tool> checks it; COVERAGE_WRITE=1 writes it)
+measured: {covered: 614, total: 721, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   expression/types: 14
   action: 12
   syntax-check/unexpected-key: 9
@@ -42,3 +43,12 @@ missed:  # lint rule -> findings of the corpus it misses, the top rules (scripts
   events: 3
   if-cond: 3
   syntax-check/duplicate-key: 3
+  syntax-check/kind: 3
+  env-var: 2
+  expression/context: 2
+  expression/syntax: 2
+  glob: 2
+  syntax-check/undefined-alias: 2
+  events/inputs: 1
+  job-needs/duplicate: 1
+  job-needs/unknown: 1

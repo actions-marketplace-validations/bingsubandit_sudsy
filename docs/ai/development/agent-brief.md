@@ -7,7 +7,9 @@ The standard brief of a build agent; a task prompt links it and adds only the ta
 - Write the slot to `.cargo/tmp/SLOT` (`/scratch/slots/sudsy/<n>`); the scripts read it before `CARGO_TARGET_DIR` (the inherited one names the lead's slot; [dev-loop.md](dev-loop.md#parallel-agents)). Plain `cargo` still needs the variable.
 - Commit WIP often (`WIP: <what>`); `land.sh` squashes before the push.
 - Multi-step commands (loops, heredocs, several git calls) go in `.cargo/tmp/*.sh`, written with Write, run with `bash`. One plain command per call otherwise.
-- PATH is set for agents: no PATH prefixes. No wait loops, `sleep` or Monitor: see the finish and background rules in CLAUDE.md.
+- PATH is set for agents: no PATH prefixes. No wait loops, `sleep`, `pgrep` or Monitor: `scripts/long.sh` and the finish rule in CLAUDE.md; never let a wait pass 5 minutes.
+- Independent reads and searches go out together: several tool calls in one turn (each turn rereads the whole context), read by line range, not whole files.
+- Refused forms, each a wasted call: git together with other commands, `&&` chains, `cd`, `$(...)`, loops or heredocs (one plain git command per call; the rest in a script file); `cargo` without `CARGO_TARGET_DIR=<slot>` in front, also in a command that only mentions cargo; `finish.sh --wait` piped.
 
 ## Rules in one line each
 - HARD RULE: nothing is done in a language that can be generic ([CLAUDE.md](../../../CLAUDE.md)).
@@ -15,6 +17,7 @@ The standard brief of a build agent; a task prompt links it and adds only the ta
 - Hard case: measure once (a prototype, an ablation), record numbers and the missing capability in [hard-cases.md](../design/hard-cases.md), move on. No unmeasured skips.
 - No byte-compare of formatter output against a base build; an escaped regression becomes a test.
 - A shared concept is turned on by the data in its row of [the kit index](../kit/index.md) (column `turned on by`: an option, a tag, a kind set, a rules section): set that data in the language, never write a switch or a second implementation.
+- Parity goal: rank the uncovered findings per cause with counts before code, pick causes that sum to the goal, one finish per batch; a blocked landing reports its worth in points.
 - Performance: check the change against [the checklist](../performance/checklist.md); on an allocation overrun run `perf-bench` there, not valgrind.
 
 ## Checks

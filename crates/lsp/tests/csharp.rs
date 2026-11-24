@@ -130,6 +130,32 @@ fn deep_diagnostics_use_every_file_of_the_project_not_only_the_open_ones() {
 }
 
 #[test]
+fn a_suppression_comment_silences_a_project_finding_in_its_file() {
+    let t = tempfile::tempdir().unwrap();
+    std::fs::write(t.path().join("sudsy.yaml"), "analysis: deep\n").unwrap();
+    let text = "partial class P {
+    private int quiet;  // sudsy-disable-line unused-private-member
+    private int lonely;
+}
+";
+    std::fs::write(t.path().join("A.cs"), text).unwrap();
+    let mut client = Client::start(t.path(), providers(&lang_csharp::testing::built_worker()));
+    let uri = client.open("A.cs", "csharp", text);
+    let found = client.diagnostics(&uri);
+    let messages: Vec<_> = found.iter().map(|d| d.message.as_str()).collect();
+    assert!(
+        messages
+            .iter()
+            .any(|m| m.contains("`lonely` is never used")),
+        "{messages:?}"
+    );
+    assert!(
+        !messages.iter().any(|m| m.contains("`quiet`")),
+        "{messages:?}"
+    );
+}
+
+#[test]
 fn the_unity_preset_counts_message_methods_of_derived_types_as_used() {
     let t = tempfile::tempdir().unwrap();
     std::fs::write(

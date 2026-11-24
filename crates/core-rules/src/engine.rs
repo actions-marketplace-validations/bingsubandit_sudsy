@@ -6,7 +6,7 @@
 use crate::diagnostic::{Diagnostic, Severity};
 use crate::layout::LayoutSink;
 use crate::options::RuleOptions;
-use crate::project::{ProjectContext, ProjectFacts};
+use crate::project::{DirectoryScope, ProjectContext, ProjectFacts, Scope};
 use crate::rule::{BodyContext, FileContext, Rule, RuleContext};
 use crate::suppress::Suppressions;
 use core_semantics::Layers;
@@ -191,7 +191,7 @@ pub(crate) fn traverse(
 
     let mut facts = ProjectFacts::default();
     if collect {
-        for a in active {
+        for a in active.iter().filter(|a| a.rule.scope() == Scope::Project) {
             facts.begin(a.rule.meta().id, file.path);
             a.rule.collect(file, &mut facts);
         }
@@ -203,10 +203,59 @@ pub(crate) fn traverse(
 /// The project phase: every active rule sees the facts gathered from all files.
 pub fn run_project(active: &[ActiveRule<'_>], facts: &ProjectFacts) -> Vec<(PathBuf, Diagnostic)> {
     let mut out = Vec::new();
-    for a in active {
+    for a in active.iter().filter(|a| a.rule.scope() == Scope::Project) {
         let mut ctx = ProjectContext {
             options: &a.options,
             meta: a.rule.meta(),
+            files: &[],
+            complete: true,
+            severity: a.severity,
+            out: &mut out,
+        };
+        a.rule.finish(facts, &mut ctx);
+    }
+    out
+}
+
+/// The directory rules among `active`.
+pub fn directory_rules<'a, 'b>(
+    active: &'b [ActiveRule<'a>],
+) -> impl Iterator<Item = (&'b ActiveRule<'a>, DirectoryScope)> {
+    active.iter().filter_map(|a| match a.rule.scope() {
+        Scope::Directory(d) => Some((a, d)),
+        Scope::Project => None,
+    })
+}
+
+/// Phase 1 of the directory rules among `active`, on one file of the unit.
+pub fn collect_directory(file: &FileContext<'_>, active: &[ActiveRule<'_>]) -> ProjectFacts {
+    let mut facts = ProjectFacts::default();
+    for (a, _) in directory_rules(active) {
+        facts.begin(a.rule.meta().id, file.path);
+        a.rule.collect(file, &mut facts);
+    }
+    facts.end();
+    facts
+}
+
+/// Phase 2 of the directory rules among `active` over the facts of the unit's `files`. `opaque`:
+/// the directory holds files that were not read. A rule reports on any file of the unit; the
+/// caller keeps the ones it was asked for.
+pub fn run_directory(
+    active: &[ActiveRule<'_>],
+    facts: &ProjectFacts,
+    files: &[PathBuf],
+    opaque: bool,
+) -> Vec<(PathBuf, Diagnostic)> {
+    let mut out = Vec::new();
+    for (a, _) in directory_rules(active) {
+        let id = a.rule.meta().id;
+        let complete = !opaque && files.iter().all(|f| facts.collected(id, f));
+        let mut ctx = ProjectContext {
+            options: &a.options,
+            meta: a.rule.meta(),
+            files,
+            complete,
             severity: a.severity,
             out: &mut out,
         };

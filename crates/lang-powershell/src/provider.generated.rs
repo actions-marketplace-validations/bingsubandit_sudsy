@@ -7,7 +7,7 @@ core_syntax::include_generated!();
 
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {
-    provider_of_composite(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("powershell", woodruffw_trough_tree_sitter_powershell::LANGUAGE), grammar: grammars::POWERSHELL, mapping: &MAPPING, extensions: &["ps1", "psm1", "psd1"], file_names: &[], schema: option_schema(), formatter: &PowerShellFormatter, hooks: &hooks::PowerShellHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[], validate: None }, Some(COMPOSITE))
+    provider_of_composite(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("powershell", woodruffw_trough_tree_sitter_powershell::LANGUAGE), grammar: grammars::POWERSHELL, mapping: &MAPPING, extensions: &["ps1", "psm1", "psd1"], file_names: &[], schema: option_schema(), formatter: &PowerShellFormatter, hooks: &hooks::PowerShellHooks, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: scope::FAMILIES, validate: None }, Some(COMPOSITE))
 }
 
 pub const MAPPING: Mapping = Mapping {
@@ -27,6 +27,7 @@ pub const MAPPING: Mapping = Mapping {
         ("%=", "Assign"),
         ("??=", "Assign"),
         ("assignment_statement", "AssignStmt"),
+        ("attribute", "Attribute"),
         ("binary_expression", "Binary"),
         ("statement_block", "Block"),
         ("command_name", "CommandName"),

@@ -30,18 +30,18 @@ entries:
   doctype-style: rule doctype-style | uppercase only, without the style option
   element-case: rule element-case | lowercase only, without the style and ignoreForeign options
   element-name: rule element-name
-  element-permitted-content: deferred | needs the content model (permitted content, parents, order, required descendants) of every element, which the generated table does not hold
-  element-permitted-occurrences: deferred | needs the content model (permitted content, parents, order, required descendants) of every element, which the generated table does not hold
-  element-permitted-order: deferred | needs the content model (permitted content, parents, order, required descendants) of every element, which the generated table does not hold
+  element-permitted-content: rule element-permitted-content | the content model of html-validate (data/model.txt); elements that no model row names are not judged
+  element-permitted-occurrences: rule element-permitted-occurrences | the content model of html-validate (data/model.txt); elements that no model row names are not judged
+  element-permitted-order: rule element-permitted-order | the content model of html-validate (data/model.txt); elements that no model row names are not judged
   element-permitted-parent: deferred | needs the content model (permitted content, parents, order, required descendants) of every element, which the generated table does not hold
   element-required-ancestor: deferred | needs the content model (permitted content, parents, order, required descendants) of every element, which the generated table does not hold
   element-required-attributes: rule element-required-attributes
-  element-required-content: deferred | needs the content model (permitted content, parents, order, required descendants) of every element, which the generated table does not hold
+  element-required-content: rule element-required-content | the content model of html-validate (data/model.txt); elements that no model row names are not judged
   empty-heading: rule empty-heading
   empty-title: rule empty-title
   form-dup-name: planned | needs the grouping of radio and checkbox controls by form and name
   heading-level: rule heading-level | a sectioning root (`<dialog>`, `<section>` with its own outline) does not reset the levels; no allowMultipleH1 and minInitialRank options
-  hidden-focusable: planned | needs the focusable elements and the hidden state inherited from ancestors
+  hidden-focusable: rule hidden-focusable | tabindex, disabled, hiding attributes and styles of the element and its ancestors; a disabling fieldset is not looked at
   id-pattern: rule id-pattern
   input-attributes: planned | needs the table of attributes allowed for each input type
   input-missing-label: rule input-missing-label | does not skip what is inside aria-hidden
@@ -68,7 +68,7 @@ entries:
   no-raw-characters: rule syntax-error | a raw character is the parser's error; the relaxed option is not available
   no-redundant-aria-label: planned | needs the accessible text of the element, which compares the label with the content
   no-redundant-for: rule no-redundant-for
-  no-redundant-role: rule no-redundant-role | the roles of 19 elements that always have the role; the conditional implicit roles (`<img>`, `<input>` by type, `<select>`, `<li>`, `<section>`) are not checked
+  no-redundant-role: rule no-redundant-role | the roles of 19 elements that always have the role, and img with a non-empty alt; the conditional implicit roles (`<input>` by type, `<select>`, `<li>`, `<section>`) are not checked
   no-self-closing: rule no-self-closing
   no-style-tag: rule no-style-tag
   no-trailing-whitespace: rule no-trailing-whitespace | also reported inside pre and raw text
@@ -84,7 +84,7 @@ entries:
   require-csp-nonce: planned | needs the configurable nonce attribute and the elements it applies to
   require-sri: rule require-sri | no target, include and exclude options
   script-element: rule syntax-error | an unclosed script is the parser's error
-  script-type: planned | needs the script type table and MIME parse
+  script-type: rule script-type | the JavaScript MIME types and an empty type; the allowed module and importmap types are not special
   svg-focusable: rule svg-focusable
   tel-non-breaking: planned | needs the text of tel links and its whitespace rules
   text-content: rule text-content | button only
@@ -96,10 +96,10 @@ entries:
   void: planned | deprecated in html-validate; void-style and no-void-end-tag replace it
   void-content: rule no-void-end-tag
   void-style: rule void-style | the omit style only, without the style option
-  wcag/h30: planned
-  wcag/h32: planned
+  wcag/h30: rule link-text | text of the link without the hidden parts, an img with alt or an aria-label inside; dynamic values are not told from static ones
+  wcag/h32: rule form-submit | a submit button inside the form or one that names its id with form=
   wcag/h36: planned
-  wcag/h37: planned
-  wcag/h63: planned
+  wcag/h37: rule img-alt | an img without alt unless aria-hidden or a presentation role
+  wcag/h63: rule header-scope | the non-strict mode only, simple tables (one header row or one header column without thead) are left alone
   wcag/h67: planned
   wcag/h71: planned

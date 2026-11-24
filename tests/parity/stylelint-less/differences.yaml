@@ -1,0 +1,27 @@
+differences: {}
+files: {}
+target: 78.0
+measured: {covered: 7834, total: 10039, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  declaration-property-value-no-unknown: 806
+  import-notation: 424
+  selector-pseudo-element-colon-notation: 156
+  media-query-no-invalid: 121
+  no-invalid-position-at-import-rule: 118
+  comment-empty-line-before: 116
+  at-rule-no-unknown: 92
+  declaration-block-no-redundant-longhand-properties: 92
+  selector-not-notation: 76
+  at-rule-prelude-no-invalid: 65
+  no-duplicate-selectors: 44
+  no-descending-specificity: 40
+  less/no-duplicate-variables: 22
+  shorthand-property-no-redundant-values: 11
+  selector-class-pattern: 5
+  declaration-property-value-keyword-no-deprecated: 4
+  at-rule-descriptor-no-unknown: 3
+  at-rule-descriptor-value-no-unknown: 3
+  CssSyntaxError: 2
+  number-max-precision: 2
+  selector-pseudo-class-no-unknown: 2
+  length-zero-no-unit: 1

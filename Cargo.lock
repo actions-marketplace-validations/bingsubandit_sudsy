@@ -508,6 +508,7 @@ dependencies = [
  "core-syntax",
  "lang-css",
  "lang-dockerfile",
+ "lang-hcl",
  "lang-html",
  "lang-js",
  "lang-json",
@@ -518,6 +519,7 @@ dependencies = [
  "lang-yaml",
  "provider-api",
  "salsa",
+ "tempfile",
 ]
 
 [[package]]

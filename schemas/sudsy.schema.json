@@ -1061,6 +1061,10 @@
               "$ref": "#/definitions/rule",
               "description": "The summary of a finalizer starts with \"Finalizes an instance of the <see cref=\"T\"/> class.\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text."
             },
+            "detached-semicolon": {
+              "$ref": "#/definitions/rule",
+              "description": "A `;` written after a space, a line break or another `;` instead of right after its statement (sqlfluff CV06)."
+            },
             "directive-keyword-space": {
               "$ref": "#/definitions/rule",
               "description": "No space between `#` and the directive keyword (`#if`, not `# if`)."
@@ -1294,9 +1298,25 @@
               "$ref": "#/definitions/rule",
               "description": "A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone."
             },
+            "element-permitted-content": {
+              "$ref": "#/definitions/rule",
+              "description": "An element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), or one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block in `<p>`'s `<button>`)."
+            },
+            "element-permitted-occurrences": {
+              "$ref": "#/definitions/rule",
+              "description": "An element the parent allows at most once (`<head>`, `<body>`, `<title>`, `<caption>`) that appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`."
+            },
+            "element-permitted-order": {
+              "$ref": "#/definitions/rule",
+              "description": "Children out of the order the parent requires (`<tbody>` before `<tfoot>`, `<head>` before `<body>`, `<summary>` first in `<details>`)."
+            },
             "element-required-attributes": {
               "$ref": "#/definitions/rule",
               "description": "An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...)."
+            },
+            "element-required-content": {
+              "$ref": "#/definitions/rule",
+              "description": "An element that lacks a child it requires (`<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`)."
             },
             "else-null": {
               "$ref": "#/definitions/rule",
@@ -1565,6 +1585,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `font-family` (or `font`) list with no generic family (`serif`, `sans-serif`, ...) to fall back on. `@font-face` is left out."
             },
+            "form-submit": {
+              "$ref": "#/definitions/rule",
+              "description": "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32)."
+            },
             "forward-annotation-syntax-error": {
               "$ref": "#/definitions/rule",
               "description": "A quoted annotation that is not an expression."
@@ -1830,6 +1854,10 @@
               "$ref": "#/definitions/rule",
               "description": "A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity)."
             },
+            "header-scope": {
+              "$ref": "#/definitions/rule",
+              "description": "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is not a simple one (one row or one column of headers) (WCAG H63)."
+            },
             "heading-increment": {
               "$ref": "#/definitions/rule",
               "description": "A heading is more than one level deeper than the heading before it (an `h4` right after an `h2`). Going back up by any number of levels is fine (markdownlint MD001)."
@@ -1878,6 +1906,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "hidden-focusable": {
+              "$ref": "#/definitions/rule",
+              "description": "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not."
             },
             "html-self-closing": {
               "$ref": "#/definitions/rule",
@@ -1982,6 +2014,10 @@
             "illegal-escape-text": {
               "$ref": "#/definitions/rule",
               "description": "A string or character literal writes backspace, tab, line feed, form feed, carriage return, a quote or a backslash as an octal or unicode escape (Checkstyle IllegalTokenText)."
+            },
+            "img-alt": {
+              "$ref": "#/definitions/rule",
+              "description": "An `<img>` with no `alt` has no text alternative (WCAG H37; html-validate wcag/h37). One hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is left alone."
             },
             "implicit-alias": {
               "$ref": "#/definitions/rule",
@@ -2328,6 +2364,10 @@
             "length-zero-no-unit": {
               "$ref": "#/definitions/rule",
               "description": "A zero length written with a unit (`0px`); other dimensions (`0s`, `0deg`) are left alone, and so is what is inside a function."
+            },
+            "link-text": {
+              "$ref": "#/definitions/rule",
+              "description": "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone."
             },
             "literal-case": {
               "description": "`NULL`, `TRUE` and `FALSE` are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP04).",
@@ -2792,6 +2832,10 @@
             "missing-doctype": {
               "$ref": "#/definitions/rule",
               "description": "A document without a doctype is rendered in quirks mode."
+            },
+            "missing-mandatory-parameter": {
+              "$ref": "#/definitions/rule",
+              "description": "A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose \"text\"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone."
             },
             "missing-permissions": {
               "$ref": "#/definitions/rule",
@@ -3723,6 +3767,40 @@
               "$ref": "#/definitions/rule",
               "description": "A variable in the `global:` scope, other than the special variables PSScriptAnalyzer exempts (`$global:LASTEXITCODE`, `$global:ErrorActionPreference`, `$global:PSDefaultParameterValues`, ...)."
             },
+            "no-hard-tabs": {
+              "description": "A tab character in a line. Each run of tabs is one report.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "ignore_kinds": {
+                          "default": [],
+                          "description": "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "no-implicit-button-type": {
               "$ref": "#/definitions/rule",
               "description": "A `<button>` without a `type` is a submit button, which is rarely meant outside a form. A Svelte spread (`{...props}`) may carry the `type`."
@@ -4062,7 +4140,7 @@
             },
             "no-single-line-block-comment": {
               "$ref": "#/definitions/rule",
-              "description": "A block comment that fits on one line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`) and languages with no line comment marker are left alone."
+              "description": "A block comment that fits on one line and ends its line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`), empty comments, comments with code after them on the line and languages with no line comment marker are left alone."
             },
             "no-space-in-code": {
               "$ref": "#/definitions/rule",
@@ -4479,6 +4557,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `printf` whose format string contains an expansion and no `%`."
             },
+            "process-block-for-pipeline": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter of a `param` block with `ValueFromPipeline` or `ValueFromPipelineByPropertyName`, in a function or script block that has no `process` block (a `filter` is one)."
+            },
             "property-allowed-list": {
               "description": "A property that is not in the `list` option (names, or `/regex/`). Custom properties are left out; an empty list allows everything.",
               "oneOf": [
@@ -4887,11 +4969,11 @@
             },
             "required-providers": {
               "$ref": "#/definitions/rule",
-              "description": "A `terraform` block with no `required_providers` block (tflint terraform_required_providers, in the file that has the block: the rule does not know the other files of the module)."
+              "description": "A provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, reported on the last such block of the provider, and a `required_providers` entry without a `version` (tflint terraform_required_providers). The built-in `terraform` provider is exempt; override files do not count."
             },
             "required-version": {
               "$ref": "#/definitions/rule",
-              "description": "A `terraform` block with no `required_version` argument (tflint terraform_required_version, in the file that has the block: the rule does not know the other files of the module)."
+              "description": "A module none of whose `terraform` blocks sets `required_version` (tflint terraform_required_version), reported on the `terraform` block, or on the start of `main.tf` when the module has no such block. Override files do not count."
             },
             "return-in-void-context": {
               "$ref": "#/definitions/rule",
@@ -4932,6 +5014,10 @@
             "script-injection": {
               "$ref": "#/definitions/rule",
               "description": "An expression in a `run` script reads text that an attacker can choose (an issue or pull request title, a branch name, a commit message): it is pasted into the script before the shell runs, so it can inject commands. Pass it through an environment variable (`env:`) and read `\"$VAR\"` instead."
+            },
+            "script-type": {
+              "$ref": "#/definitions/rule",
+              "description": "A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty says what the browser assumes (html-validate script-type)."
             },
             "selection-set-depth": {
               "description": "An operation or fragment nests selection sets deeper than allowed, which makes a query expensive to execute. Fragments that are spread are not followed.",
@@ -5914,6 +6000,10 @@
               "$ref": "#/definitions/rule",
               "description": "A document has more than one top-level heading (markdownlint MD025). The second and later `h1` are reported."
             },
+            "singular-nouns": {
+              "$ref": "#/definitions/rule",
+              "description": "A function named `Verb-Nouns` whose noun ends in `s` and is no singular word that ends in `ss`, `us`, `is` or `as` (`Status`, `Address`, `Analysis`, `Alias`)."
+            },
             "sorted-array-values": {
               "description": "The items of a sequence of only strings or only numbers are not in order (ascending by default; numbers compare as numbers). Sequences of other or mixed items are skipped. The items that would have to move (the fewest) are reported and the first report carries the fix; the fix is unsafe because sequence order can be data.",
               "oneOf": [
@@ -6124,6 +6214,10 @@
             "subprocess-run-without-check": {
               "$ref": "#/definitions/rule",
               "description": "A call of `subprocess.run` with no `check` keyword (and no `**kwargs`)."
+            },
+            "supports-should-process": {
+              "$ref": "#/definitions/rule",
+              "description": "A function named with the verb `New`, `Set`, `Remove`, `Start`, `Stop`, `Restart`, `Reset` or `Update` whose text has no `SupportsShouldProcess` (or has `SupportsShouldProcess = $false`)."
             },
             "suppression-justification": {
               "$ref": "#/definitions/rule",
@@ -6620,6 +6714,10 @@
               "$ref": "#/definitions/rule",
               "description": "A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. `scratch`, a variable and an earlier stage's name are fine."
             },
+            "unused-alias": {
+              "$ref": "#/definitions/rule",
+              "description": "A table alias in a `FROM` clause that no qualified reference of the select (nested queries included) uses (sqlfluff AL05)."
+            },
             "unused-annotation": {
               "$ref": "#/definitions/rule",
               "description": "A local variable annotated without a value and never read."
@@ -6638,7 +6736,7 @@
             },
             "unused-declarations": {
               "$ref": "#/definitions/rule",
-              "description": "A variable, local value or data source that nothing in the same file refers to (tflint terraform_unused_declarations, within one file: a module that uses its variables in other files needs the rule off or those files in one)."
+              "description": "A variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to (tflint terraform_unused_declarations). Override files declare nothing of their own; a module with `.tf.json` files, a file that does not parse or one that cannot be read is not judged."
             },
             "unused-import": {
               "$ref": "#/definitions/rule",
@@ -7137,6 +7235,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -7159,6 +7262,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_size": {
@@ -8655,16 +8763,10 @@
       "items": {
         "examples": [
           "preset:cpp/chromium",
-          "preset:cpp/chromium",
-          "preset:cpp/gnu",
           "preset:cpp/gnu",
           "preset:cpp/google",
-          "preset:cpp/google",
-          "preset:cpp/microsoft",
           "preset:cpp/microsoft",
           "preset:cpp/mozilla",
-          "preset:cpp/mozilla",
-          "preset:cpp/webkit",
           "preset:cpp/webkit",
           "preset:csharp/csharpier-compat",
           "preset:csharp/dotnet-runtime",
@@ -8672,25 +8774,16 @@
           "preset:csharp/stylecop",
           "preset:csharp/unity",
           "preset:css/stylelint-recommended",
-          "preset:css/stylelint-recommended",
-          "preset:css/stylelint-recommended",
-          "preset:css/stylelint-standard",
-          "preset:css/stylelint-standard",
           "preset:css/stylelint-standard",
           "preset:dockerfile/hadolint",
           "preset:github-actions/actionlint",
+          "preset:graphql/graphql-eslint-recommended",
           "preset:hcl/tflint-recommended",
           "preset:html/eslint-plugin-svelte-recommended",
-          "preset:html/eslint-plugin-svelte-recommended",
-          "preset:html/eslint-plugin-vue-recommended",
           "preset:html/eslint-plugin-vue-recommended",
           "preset:html/html-eslint-recommended",
-          "preset:html/html-eslint-recommended",
-          "preset:html/html-validate-recommended",
           "preset:html/html-validate-recommended",
           "preset:html/html-validate-standard",
-          "preset:html/html-validate-standard",
-          "preset:html/htmlhint",
           "preset:html/htmlhint",
           "preset:java/google",
           "preset:js/biome",
@@ -8700,6 +8793,7 @@
           "preset:js/typescript-eslint-recommended",
           "preset:json/biome",
           "preset:json/dprint",
+          "preset:json/eslint-plugin-jsonc-recommended",
           "preset:json/prettier-compat",
           "preset:kotlin/ktlint",
           "preset:makefile/checkmake",
@@ -9130,6 +9224,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -9152,6 +9251,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_size": {
@@ -9976,6 +10080,28 @@
               ],
               "type": "string"
             },
+            "assignment_hug_except_kinds": {
+              "default": [
+                "Fun"
+              ],
+              "description": "Kinds of assignment (a declaration) whose value does not stay on the operator's line when its kind is in `assignment_hug_kinds`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "assignment_hug_kinds": {
+              "default": [
+                "CollectionLiteralExpression",
+                "LabeledExpression",
+                "LambdaExpression"
+              ],
+              "description": "Node kinds of a value that stays on the operator's line and breaks inside (an array literal: `entries = [`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "assignment_indent": {
               "default": 1,
               "description": "Levels of indentation of a value that moves below the operator of an assignment.",
@@ -9986,7 +10112,8 @@
             "assignment_keep_break_kinds": {
               "default": [
                 "Property",
-                "BinaryExpression"
+                "BinaryExpression",
+                "PropertyAccessor"
               ],
               "description": "Node kinds of assignments and declarations whose value stays below the operator when the source has it there, whether or not it would fit on the line.",
               "items": {
@@ -10022,6 +10149,11 @@
               },
               "type": "array"
             },
+            "block_comment_keep_tight": {
+              "default": true,
+              "description": "A block comment written against the token after it (`f(/*name=*/x)`) stays against it; otherwise one blank follows the comment.",
+              "type": "boolean"
+            },
             "class_signature_wrap_min_parameters": {
               "default": 1,
               "description": "A class with at least this many primary-constructor parameters puts each on a line of its own, even when the signature fits.",
@@ -10040,6 +10172,19 @@
               "default": true,
               "description": "The lines of a block comment keep their indentation relative to the comment's own line when the comment moves.",
               "type": "boolean"
+            },
+            "comment_space_exempt": {
+              "default": [
+                "//region",
+                "//endregion",
+                "//noinspection",
+                "//language="
+              ],
+              "description": "Prefixes of line comments (`//region`) that the rule `comment-space` leaves as they are when the formatter runs it. With the option set, a comment with a repeated marker (`///`) or `--` after it gets its space too.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "comment_trim_lines": {
               "default": true,
@@ -10154,6 +10299,18 @@
               ],
               "type": "string"
             },
+            "open_comment_inside_parents": {
+              "default": [
+                "Try",
+                "Catch",
+                "Finally"
+              ],
+              "description": "Node kinds whose braced body moves a comment after its `{` to the first body line; a body of any other kind keeps the comment on the `{` line. Empty: every body moves it.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "raw_string_calls": {
               "default": [
                 "trimIndent",
@@ -10170,6 +10327,16 @@
                 "Unit"
               ],
               "description": "Return types (`Unit`) that a function with a block body has anyway: the rule `redundant-return-type` leaves them out when the formatter runs it (`format_rules`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "redundant_template_braces": {
+              "default": [
+                "LongStringTemplateEntry"
+              ],
+              "description": "String template entries of these kinds (`${name}`) lose their braces when they hold one plain name and the text after them cannot continue it.",
               "items": {
                 "type": "string"
               },
@@ -10202,6 +10369,11 @@
             "signature_wrap_annotated": {
               "default": true,
               "description": "A signature with an annotated parameter puts each parameter on a line of its own, even when it fits.",
+              "type": "boolean"
+            },
+            "single_block_comment_as_line": {
+              "default": true,
+              "description": "A block comment that sits on one line and ends its line in the output is written as a line comment (`/* note */` becomes `// note`). Documentation comments (`/**`) and empty comments stay.",
               "type": "boolean"
             },
             "single_line_body_kinds": {
@@ -10598,6 +10770,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -10620,6 +10797,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_size": {
@@ -12520,6 +12702,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -12542,6 +12729,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_size": {
@@ -13359,6 +13551,28 @@
                     ],
                     "type": "string"
                   },
+                  "assignment_hug_except_kinds": {
+                    "default": [
+                      "Fun"
+                    ],
+                    "description": "Kinds of assignment (a declaration) whose value does not stay on the operator's line when its kind is in `assignment_hug_kinds`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "assignment_hug_kinds": {
+                    "default": [
+                      "CollectionLiteralExpression",
+                      "LabeledExpression",
+                      "LambdaExpression"
+                    ],
+                    "description": "Node kinds of a value that stays on the operator's line and breaks inside (an array literal: `entries = [`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "assignment_indent": {
                     "default": 1,
                     "description": "Levels of indentation of a value that moves below the operator of an assignment.",
@@ -13369,7 +13583,8 @@
                   "assignment_keep_break_kinds": {
                     "default": [
                       "Property",
-                      "BinaryExpression"
+                      "BinaryExpression",
+                      "PropertyAccessor"
                     ],
                     "description": "Node kinds of assignments and declarations whose value stays below the operator when the source has it there, whether or not it would fit on the line.",
                     "items": {
@@ -13405,6 +13620,11 @@
                     },
                     "type": "array"
                   },
+                  "block_comment_keep_tight": {
+                    "default": true,
+                    "description": "A block comment written against the token after it (`f(/*name=*/x)`) stays against it; otherwise one blank follows the comment.",
+                    "type": "boolean"
+                  },
                   "class_signature_wrap_min_parameters": {
                     "default": 1,
                     "description": "A class with at least this many primary-constructor parameters puts each on a line of its own, even when the signature fits.",
@@ -13423,6 +13643,19 @@
                     "default": true,
                     "description": "The lines of a block comment keep their indentation relative to the comment's own line when the comment moves.",
                     "type": "boolean"
+                  },
+                  "comment_space_exempt": {
+                    "default": [
+                      "//region",
+                      "//endregion",
+                      "//noinspection",
+                      "//language="
+                    ],
+                    "description": "Prefixes of line comments (`//region`) that the rule `comment-space` leaves as they are when the formatter runs it. With the option set, a comment with a repeated marker (`///`) or `--` after it gets its space too.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "comment_trim_lines": {
                     "default": true,
@@ -13537,6 +13770,18 @@
                     ],
                     "type": "string"
                   },
+                  "open_comment_inside_parents": {
+                    "default": [
+                      "Try",
+                      "Catch",
+                      "Finally"
+                    ],
+                    "description": "Node kinds whose braced body moves a comment after its `{` to the first body line; a body of any other kind keeps the comment on the `{` line. Empty: every body moves it.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "raw_string_calls": {
                     "default": [
                       "trimIndent",
@@ -13553,6 +13798,16 @@
                       "Unit"
                     ],
                     "description": "Return types (`Unit`) that a function with a block body has anyway: the rule `redundant-return-type` leaves them out when the formatter runs it (`format_rules`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "redundant_template_braces": {
+                    "default": [
+                      "LongStringTemplateEntry"
+                    ],
+                    "description": "String template entries of these kinds (`${name}`) lose their braces when they hold one plain name and the text after them cannot continue it.",
                     "items": {
                       "type": "string"
                     },
@@ -13585,6 +13840,11 @@
                   "signature_wrap_annotated": {
                     "default": true,
                     "description": "A signature with an annotated parameter puts each parameter on a line of its own, even when it fits.",
+                    "type": "boolean"
+                  },
+                  "single_block_comment_as_line": {
+                    "default": true,
+                    "description": "A block comment that sits on one line and ends its line in the output is written as a line comment (`/* note */` becomes `// note`). Documentation comments (`/**`) and empty comments stay.",
                     "type": "boolean"
                   },
                   "single_line_body_kinds": {
@@ -14573,6 +14833,16 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "alter_table_indent": {
+                    "default": false,
+                    "description": "Indent the actions of `ALTER TABLE name` one level under the statement.",
+                    "type": "boolean"
+                  },
+                  "block_indent": {
+                    "default": false,
+                    "description": "Indent the bodies of `BEGIN`, `LOOP`, `WHILE`, `REPEAT`, `IF` and `CASE` blocks one level under their opener.",
+                    "type": "boolean"
+                  },
                   "comma_position": {
                     "default": "trailing",
                     "description": "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one.",
@@ -14727,6 +14997,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -14749,6 +15024,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_script_and_style": {
@@ -14950,6 +15230,11 @@
                     "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
                     "type": "boolean"
                   },
+                  "content_newline_with_attributes": {
+                    "default": false,
+                    "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -14972,6 +15257,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_expression_operands": {
+                    "default": false,
+                    "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
                     "type": "boolean"
                   },
                   "indent_script_and_style": {
@@ -15956,6 +16246,16 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "alter_table_indent": {
+              "default": false,
+              "description": "Indent the actions of `ALTER TABLE name` one level under the statement.",
+              "type": "boolean"
+            },
+            "block_indent": {
+              "default": false,
+              "description": "Indent the bodies of `BEGIN`, `LOOP`, `WHILE`, `REPEAT`, `IF` and `CASE` blocks one level under their opener.",
+              "type": "boolean"
+            },
             "comma_position": {
               "default": "trailing",
               "description": "Where a comma goes when a list is broken over lines: at the end of a line, or at the start of the next one.",
@@ -16110,6 +16410,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16132,6 +16437,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_script_and_style": {
@@ -16333,6 +16643,11 @@
               "description": "Put the `>` of a multi-line start tag at the end of the last attribute's line.",
               "type": "boolean"
             },
+            "content_newline_with_attributes": {
+              "default": false,
+              "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16355,6 +16670,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_expression_operands": {
+              "default": false,
+              "description": "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand.",
               "type": "boolean"
             },
             "indent_script_and_style": {

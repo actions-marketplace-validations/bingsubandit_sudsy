@@ -41,6 +41,11 @@ pub struct ScopeLang {
     expansions: &'static [&'static str],
     arithmetic: &'static [&'static str],
     identifiers: bool,
+    sigils: &'static str,
+    fold: bool,
+    element_writes: &'static [&'static str],
+    argument_blocks: &'static [&'static str],
+    escape: &'static str,
     lowercase_undefined: bool,
     first_undefined: bool,
     spec: OnceLock<Spec>,
@@ -59,6 +64,11 @@ impl ScopeLang {
             expansions: &[],
             arithmetic: &[],
             identifiers: false,
+            sigils: "",
+            fold: false,
+            element_writes: &[],
+            argument_blocks: &[],
+            escape: "\\",
             lowercase_undefined: false,
             first_undefined: false,
             spec: OnceLock::new(),
@@ -95,6 +105,40 @@ impl ScopeLang {
     /// Name tokens are words: only identifiers, with an optional `[subscript]`, are names.
     pub const fn identifier_names(mut self) -> Self {
         self.identifiers = true;
+        self
+    }
+
+    /// Name tokens are words that start with one of these characters (`$x`, `@x`, `${x}`); the
+    /// name is what follows.
+    pub const fn sigil_names(mut self, sigils: &'static str) -> Self {
+        self.sigils = sigils;
+        self
+    }
+
+    /// An assignment whose target is followed by one of these tokens (`[`, `,`) or starts with
+    /// something that is no name reads the name instead of writing it.
+    pub const fn element_writes(mut self, tokens: &'static [&'static str]) -> Self {
+        self.element_writes = tokens;
+        self
+    }
+
+    /// A parameter counts as read only in its own scope and in blocks that are arguments of
+    /// these commands (names in lower case).
+    pub const fn argument_blocks(mut self, commands: &'static [&'static str]) -> Self {
+        self.argument_blocks = commands;
+        self
+    }
+
+    /// Names that differ in case are one name.
+    pub const fn case_insensitive(mut self) -> Self {
+        self.fold = true;
+        self
+    }
+
+    /// The characters that keep the `$` after them from starting a read in an expansion (the
+    /// backslash, by default).
+    pub const fn expansion_escape(mut self, escape: &'static str) -> Self {
+        self.escape = escape;
         self
     }
 
@@ -135,6 +179,9 @@ impl ScopeLang {
                 .bare_names(s.bare)
                 .dynamic_names(s.dynamic)
                 .identifier_names(self.identifiers)
+                .sigil_names(self.sigils)
+                .fold_case(self.fold)
+                .element_writes(self.element_writes)
                 .label_names(s.labels, grammar)
         })
     }
@@ -354,6 +401,8 @@ pub fn build(
             "unused-variable" => Check::UnusedVariable,
             "unused-local-variable" => Check::UnusedLocal,
             "unused-parameter" => Check::UnusedParameter,
+            "unused-method-argument" => Check::UnusedMethodArgument,
+            "unused-block-argument" => Check::UnusedBlockArgument,
             "use-before-define" => Check::UseBeforeDefine,
             "redeclared-variable" => Check::RedeclaredVariable,
             "shadowed-variable" => Check::ShadowedVariable,
@@ -468,6 +517,29 @@ impl ScopeRule {
 /// Whether `text` contains `name` as a whole word.
 /// Does the path end with the flavor's suffix? One that does not start with a dot (`__init__.py`)
 /// is a whole file name.
+/// The name as the declaration writes it, where names are compared without case.
+fn written(
+    lang: &ScopeLang,
+    file: &FileContext<'_>,
+    at: core_syntax::TextRange,
+    name: &str,
+) -> String {
+    if !lang.fold {
+        return name.to_string();
+    }
+    let text = &file.text[usize::from(at.start())..usize::from(at.end())];
+    let text = text.trim_start_matches(|c| lang.sigils.contains(c));
+    let text = text
+        .strip_prefix('{')
+        .and_then(|t| t.strip_suffix('}'))
+        .unwrap_or(text);
+    if text.eq_ignore_ascii_case(name) {
+        text.to_string()
+    } else {
+        name.to_string()
+    }
+}
+
 fn matches(path: &str, suffix: &str) -> bool {
     path.strip_suffix(suffix).is_some_and(|head| {
         suffix.starts_with('.') || head.is_empty() || head.ends_with(['/', '\\'])
@@ -595,6 +667,21 @@ impl Rule for ScopeRule {
                 .take_while(|s| std::mem::replace(&mut open, !m.scope(*s).closed))
                 .any(|s| m.scope(s).dynamic)
         };
+        // With `argument-blocks`, a read in a block inside the scope counts only when the block is
+        // an argument of one of those commands.
+        let reads_here = |from: ScopeId, owner: ScopeId| {
+            let blocks = lang.argument_blocks;
+            blocks.is_empty()
+                || m.ancestors(from).take_while(|s| *s != owner).all(|s| {
+                    m.scope(s).node.parent().is_some_and(|call| {
+                        let name = call
+                            .children_with_tokens()
+                            .map(|e| e.to_string())
+                            .find(|t| !t.trim().is_empty());
+                        name.is_some_and(|n| blocks.contains(&n.trim().to_lowercase().as_str()))
+                    })
+                })
+        };
         match self.check {
             Check::UnusedImport => {
                 // Used by name, whatever the name resolves to: a local `mock` does not hide the
@@ -640,7 +727,10 @@ impl Rule for ScopeRule {
                         continue;
                     }
                     for d in &s.decls {
-                        ctx.report(d.name, template.replace("{name}", &s.name));
+                        ctx.report(
+                            d.name,
+                            template.replace("{name}", &written(lang, file, d.name, &s.name)),
+                        );
                     }
                 }
             }
@@ -664,7 +754,8 @@ impl Rule for ScopeRule {
                     let s = m.symbol(id);
                     if !s.flags.contains(Flags::PARAMETER)
                         || s.name.starts_with('_')
-                        || m.refs_of(id).any(|r| r.is_read())
+                        || m.refs_of(id)
+                            .any(|r| r.is_read() && reads_here(r.scope, s.scope))
                         || dynamic(s.scope)
                     {
                         continue;
@@ -680,7 +771,11 @@ impl Rule for ScopeRule {
                         {
                             continue;
                         }
-                        ctx.report(d.name, format!("the parameter `{}` is never read", s.name));
+                        let template = self.template("the parameter `{name}` is never read");
+                        ctx.report(
+                            d.name,
+                            template.replace("{name}", &written(lang, file, d.name, &s.name)),
+                        );
                     }
                 }
             }

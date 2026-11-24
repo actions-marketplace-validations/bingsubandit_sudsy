@@ -15,15 +15,17 @@ impl P<'_> {
         if !self.eat_name() {
             return false;
         }
-        while self.is_t(0, T::Dot) && self.starts_name(1) {
-            self.bump();
-            if self.is_op(0, "*") {
-                self.bump();
-                break;
-            }
-            self.eat_name();
-        }
+        core_syntax::access::access_chain(self, false);
         self.close(k::OBJECT_REFERENCE, m);
+        true
+    }
+
+    /// A name with subscripts, the target of an assignment or an insert column: `a`, `a[1:5]`.
+    pub fn assign_target(&mut self) -> bool {
+        if !self.obj_ref() {
+            return false;
+        }
+        core_syntax::access::access_chain(self, true);
         true
     }
 
@@ -184,5 +186,47 @@ impl P<'_> {
             self.error(at, "syntax error");
             self.close(SyntaxKind::ERROR, m);
         }
+    }
+}
+
+impl core_syntax::access::Access for P<'_> {
+    fn at_subscript(&self) -> bool {
+        self.is_t(0, T::LSquare)
+    }
+    fn subscript(&mut self) {
+        self.array_accessor();
+    }
+    fn at_member(&self) -> bool {
+        self.is_t(0, T::Dot) && self.starts_name(1)
+    }
+    fn bump_dot(&mut self) {
+        self.bump();
+    }
+    fn at_wildcard(&self) -> bool {
+        self.is_op(0, "*")
+    }
+    fn bump_wildcard(&mut self) {
+        self.bump();
+    }
+    fn name(&mut self) {
+        self.eat_name();
+    }
+}
+
+impl core_syntax::access::Subscript for P<'_> {
+    fn at_slice(&self) -> bool {
+        self.is_t(0, T::Colon)
+    }
+    fn at_comma(&self) -> bool {
+        self.is_t(0, T::Comma)
+    }
+    fn bump_slice(&mut self) {
+        self.bump_as(k::SLICE);
+    }
+    fn bump_comma(&mut self) {
+        self.bump();
+    }
+    fn element(&mut self) -> bool {
+        P::element(self)
     }
 }

@@ -6,7 +6,9 @@ use crate::session::Session;
 use anyhow::{Result, anyhow};
 use clap::{Args, ValueEnum};
 use core_config::Depth;
-use core_incremental::{File, Stage, lint, project_diagnostics};
+use core_incremental::{
+    File, Siblings, Stage, directory_scope, lint, module_diagnostics, project_diagnostics,
+};
 use core_rules::{SYNTAX_ERROR, Severity};
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -103,7 +105,48 @@ pub fn collect(session: &Session, loaded: &[anyhow::Result<File>]) -> Result<Col
             file.diagnostics.push(diagnostic);
         }
     }
+    add_directory_findings(session, &ok_files, &mut out)?;
     Ok(out)
+}
+
+/// The findings of the directory rules (a module's files judged together) on the files of the run.
+/// The siblings of a file that the run does not name (or that the config ignores) give facts and
+/// get no findings.
+fn add_directory_findings(session: &Session, ok_files: &[File], out: &mut Collected) -> Result<()> {
+    let (db, project) = (&session.db, &session.project);
+    let mut dirs: std::collections::BTreeMap<PathBuf, (core_rules::DirectoryScope, Vec<File>)> =
+        Default::default();
+    for &file in ok_files {
+        if let Some(scope) = directory_scope(db, file)
+            && let Some(dir) = file.path(db).parent()
+        {
+            dirs.entry(dir.to_path_buf())
+                .or_insert((scope, Vec::new()))
+                .1
+                .push(file);
+        }
+    }
+    let siblings = Siblings::default();
+    for (dir, (scope, own)) in dirs {
+        let unit = siblings.unit(db, &dir, &scope, &own);
+        let found = module_diagnostics(db, unit)
+            .as_ref()
+            .map_err(|failure| anyhow!("{}", failure.message))?;
+        for (path, diagnostic) in found {
+            let shown = project.show(path);
+            if let Some(file) = out.files.iter_mut().find(|f| f.path == shown) {
+                file.diagnostics.push(diagnostic.clone());
+                file.diagnostics.sort_by(|a, b| {
+                    (a.range.start(), a.range.end(), &a.rule).cmp(&(
+                        b.range.start(),
+                        b.range.end(),
+                        &b.rule,
+                    ))
+                });
+            }
+        }
+    }
+    Ok(())
 }
 
 /// The rule table SARIF carries: every rule, plus the two ids that are not rules.
