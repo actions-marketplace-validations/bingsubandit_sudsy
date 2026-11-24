@@ -39,6 +39,7 @@ ed6d5d6ae34aa1b1 sql-real/mysql/benchbase/src/main/resources/benchmarks/epinions
 2933250fe9b96d8e sql-real/mysql/benchbase/src/main/resources/benchmarks/seats/ddl-mysql.sql
 e3b0c44298fc1c14 sql-real/mysql/benchbase/src/main/resources/benchmarks/tatp/ddl-mysql.sql
 65782414698ab8a7 sql-real/mysql/benchbase/src/main/resources/benchmarks/tpch/ddl-mysql.sql
+420c95deed660311 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.0.0_schema/mysql/dolphinscheduler_dml.sql
 fe27a7f8b5d3ec57 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.2.0_schema/mysql/dolphinscheduler_ddl_post.sql
 e3b0c44298fc1c14 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.2.2_schema/mysql/dolphinscheduler_dml.sql
 e3b0c44298fc1c14 sql-real/mysql/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.3.1_schema/mysql/dolphinscheduler_dml.sql
@@ -86,6 +87,7 @@ e8d9dabe18f2098a sql-real/mysql/temporal/schema/mysql/v8/visibility/versioned/v1
 e3b0c44298fc1c14 sql-real/postgres/benchbase/src/main/resources/benchmarks/resourcestresser/ddl-postgres.sql
 e3b0c44298fc1c14 sql-real/postgres/benchbase/src/main/resources/benchmarks/tatp/ddl-postgres.sql
 a0b38291dfa10d32 sql-real/postgres/benchbase/src/main/resources/benchmarks/voter/ddl-postgres.sql
+7b746f6fd6554f78 sql-real/postgres/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.0.0_schema/postgresql/dolphinscheduler_dml.sql
 e3b0c44298fc1c14 sql-real/postgres/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.0.2_schema/postgresql/dolphinscheduler_dml.sql
 cef326581a65a145 sql-real/postgres/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.2.0_schema/postgresql/dolphinscheduler_dml.sql
 e3b0c44298fc1c14 sql-real/postgres/dolphinscheduler/dolphinscheduler-dao/src/main/resources/sql/upgrade/3.2.1_schema/postgresql/dolphinscheduler_ddl_post.sql
@@ -144,8 +146,6 @@ fa66b47af250e571 sql-real/tsql/benchbase/src/main/resources/benchmarks/ycsb/ddl-
 673b503ae1ec9d03 sql-real/tsql/hive/standalone-metastore/metastore-server/src/main/sql/mssql/upgrade-2.0.0-to-2.1.0.mssql.sql
 ac0bd6e7f511dcb4 sql-real/tsql/hive/standalone-metastore/metastore-server/src/main/sql/mssql/upgrade-4.0.0-alpha-1-to-4.0.0-alpha-2.mssql.sql
 8d6e1a0bdb5dcf35 sql-real/tsql/hive/standalone-metastore/metastore-server/src/main/sql/mssql/upgrade-4.2.0-to-4.3.0.mssql.sql
-e3b0c44298fc1c14 sql-real/tsql/sqlserver-kit/Stored_Procedure/dbo.sp_generate_merge.sql
 09163bc27aa2a424 sql-real/tsql/sqlserver-kit/Stored_Procedure/dbo.usp_LogError.sql
 6852bffb8e5c9d74 sql-real/tsql/sqlserver-kit/User_Defined_Function/udf_CalculateDistanceBetween2Coordinates.sql
-e3b0c44298fc1c14 sql-real/tsql/tigertoolbox/SQL-Nexus-and-ReadTrace-Analysis-Scripts/ReadTrace_Queries.sql
 a551c3ac4e8fde9c sql-real/tsql/tigertoolbox/Sessions/PASS-Modern-Migration-Tour/LabFiles/AdventureWorks_PASSModernMigrationTour/Cleanup.sql

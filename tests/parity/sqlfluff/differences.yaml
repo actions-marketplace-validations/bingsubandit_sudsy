@@ -5,35 +5,35 @@ differences:
   if-condition-wrap: gap  "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (the nesting of `ELSE IF`, a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`)"
   identifier-case: gap  "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
   tsql-block-indent: gap  "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
-  fix-loop-limit: gap  "the reference run leaves a large file as written or stops fixing it early (its run sets neither `large_file_skip_byte_limit` nor `runaway_limit`); not measured which, so the file is not a result of Sudsy"
+  fix-loop-limit: gap  "sqlfluff `fix` is not at its own fixed point on the file, a second run changes it (`LT05` wraps one more nesting level per run; 5 files of the real-world corpus), so the reference output is one pass of it"
 files:
   sqlfluff-ansi: parse-gap, layout-gap
   sqlfluff-mysql: parse-gap, layout-gap
   sqlfluff-postgres: parse-gap, layout-gap
   sqlfluff-tsql: parse-gap, layout-gap
   postgres-regress: parse-gap, layout-gap
-  real-world: if-condition-wrap:82, fix-loop-limit:50, layout-gap:77, identifier-case:30, tsql-block-indent:22
+  real-world: if-condition-wrap:128, fix-loop-limit:5, layout-gap:77, identifier-case:44, tsql-block-indent:22
   sql/postgres/src/test/regress/sql/collate.windows.win1252.sql: non-utf8-input
 ratchet:
   sqlfluff-ansi: 205
   sqlfluff-mysql: 235
   sqlfluff-postgres: 143
   sqlfluff-tsql: 153
-  postgres-regress: 49
-  real-world: 588
+  postgres-regress: 51
+  real-world: 608
 target-files:
-  postgres-regress: 141
+  postgres-regress: 79
   sqlfluff-ansi: 212
   sqlfluff-mysql: 254
   sqlfluff-postgres: 162
   sqlfluff-tsql: 190
-  real-world: 849
+  real-world: 825
 second-format:
   real-world: 0
 refused:
   real-world: 0
-unclassified: 174
-target: 77.4
+unclassified: 110
+target: 70.7
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
@@ -45,57 +45,63 @@ fixes:  # gap name or lint rule -> one line: where and what to change
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 23804, total: 30743, main: 'bc4843a8'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 92222, total: 130392, main: '3cdf2fac'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 3541
-  LT01: 907
-  CP02: 617
-  CP01: 299
-  LT05: 242
-  RF02: 127
-  PRS: 114
-  CV11: 109
-  CP05: 77
-  RF03: 64
-  ST06: 60
-  CV10: 58
-  AL09: 57
-  LT06: 52
-  LT09: 47
-  AL01: 44
-  RF05: 43
-  ST09: 41
-  TQ03: 41
-  CP03: 37
-  LT04: 31
-  ST12: 30
-  RF01: 25
-  LT15: 22
-  AL03: 21
-  AL04: 21
-  LT03: 20
-  TQ02: 19
-  TQ01: 16
-  CV06: 15
+  LT02: 19005
+  LT01: 3269
+  CP01: 3216
+  CP02: 2275
+  CV06: 1454
+  LT05: 1422
+  CP04: 1154
+  AL03: 793
+  RF02: 636
+  LT04: 584
+  LT09: 324
+  CV11: 320
+  PRS: 263
+  LT15: 243
+  LT03: 240
+  CP03: 218
+  AL01: 208
+  RF01: 206
+  LT11: 193
+  RF03: 183
+  ST06: 179
+  CV10: 174
+  AL09: 165
+  LT06: 150
+  CP05: 143
+  AL08: 136
+  LT08: 116
+  RF06: 102
+  ST12: 100
+  ST09: 94
+  RF05: 76
+  TQ02: 54
+  TQ03: 51
+  AM03: 50
+  LT14: 49
+  ST05: 42
+  TQ01: 42
+  AL02: 40
+  RF04: 31
+  AL04: 27
+  ST01: 25
+  AM05: 22
+  AM01: 19
   LXR: 15
-  ST05: 14
-  AM05: 13
-  LT14: 12
-  RF04: 12
-  LT08: 8
-  RF06: 8
-  AM03: 7
-  LT12: 7
-  AM01: 6
-  ST01: 6
-  AL02: 5
-  CP04: 5
+  ST10: 15
+  AM04: 11
+  LT12: 9
   ST08: 5
+  AM02: 4
   JJ01: 4
-  LT11: 4
   ST04: 4
-  AM02: 2
+  AL05: 3
   CV01: 2
-  AM04: 1
-  ST10: 1
+  AM06: 1
+  LT07: 1
+  ST02: 1
   ST11: 1
+  TMP: 1

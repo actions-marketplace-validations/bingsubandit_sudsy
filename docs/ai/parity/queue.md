@@ -8,11 +8,12 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
+| SQL | lint sqlfluff | 4 | 70.7% | 14.3 | 18612 findings | `LT02` 19005 | 3 | 19.07 | 3cdf2fac |
+| SQL | format sqlfluff | 4 | 73.7% | 11.3 | 94 files | `if-condition-wrap` 128 | 3 | 15.07 | - |
 | PHP | lint PHPStan | 4 | 31.0% | 54.0 | 594 findings | `class.notFound` 254, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 11.37 | 9de1e355 |
 | C / C++ | format clang-format | 4 | 44.1% | 40.9 | 2714 files | `pointer-align` 983, `reference-align` 910, `binary-op-space` 370, `braced-list-padding` 230 +1 more | 15 | 10.90 | - |
-| SQL | format sqlfluff | 4 | 69.3% | 15.7 | 134 files | `if-condition-wrap` 82, `layout-gap` 77 | 6 | 10.49 | - |
-| SQL | lint sqlfluff | 4 | 77.4% | 7.6 | 2328 findings | `LT02` 3541 | 3 | 10.13 | bc4843a8 |
 | HTML | lint html-eslint | 1 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 5.03 | 9de1e355 |
+| (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
 Not measured: C / C++ lint clang-tidy (no target, blocked).
@@ -537,53 +538,53 @@ Format: unclassified 0 of 11 differing files (0%).
 
 ## sqlfluff
 
-Format: unclassified 174 of 435 differing files (40%).
-1. `if-condition-wrap` (82 files): "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (the nesting of `ELSE IF`, a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`)"
+Format: unclassified 110 of 327 differing files (34%).
+1. `if-condition-wrap` (128 files): "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (the nesting of `ELSE IF`, a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`)"
 2. `layout-gap` (77 files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
-3. `fix-loop-limit` (50 files): "the reference run leaves a large file as written or stops fixing it early (its run sets neither `large_file_skip_byte_limit` nor `runaway_limit`); not measured which, so the file is not a result of Sudsy"
-4. `identifier-case` (30 files): "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
-5. `tsql-block-indent` (22 files): "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
+3. `identifier-case` (44 files): "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
+4. `tsql-block-indent` (22 files): "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
+5. `fix-loop-limit` (5 files): "sqlfluff `fix` is not at its own fixed point on the file, a second run changes it (`LT05` wraps one more nesting level per run; 5 files of the real-world corpus), so the reference output is one pass of it"
 6. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 7. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 77.4% (23804 of 30743, 6939 missed, measured on bc4843a8); rules by missed findings:
-1. `LT02` (3541 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
-2. `LT01` (907 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
-3. `CP02` (617 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
-4. `CP01` (299 missed) Fix: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
-5. `LT05` (242 missed) Fix: line-length findings (1,538); not yet split by file
-6. `RF02` (127 missed)
-7. `PRS` (114 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-8. `CV11` (109 missed)
-9. `CP05` (77 missed)
-10. `RF03` (64 missed) Fix: references of selects over table functions and nested queries
-11. `ST06` (60 missed)
-12. `CV10` (58 missed)
-13. `AL09` (57 missed)
-14. `LT06` (52 missed)
-15. `LT09` (47 missed)
+Lint: target 70.7% (92222 of 130392, 38170 missed, measured on 3cdf2fac); rules by missed findings:
+1. `LT02` (19005 missed) Fix: indentation findings left after `sudsy format` on real-world code (8,585 of 41,963 findings; 140 files are rejected and keep their layout); not yet split by construct
+2. `LT01` (3269 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
+3. `CP01` (3216 missed) Fix: capitalisation findings of keywords left after `sudsy format` (2,630); not yet split by file
+4. `CP02` (2275 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
+5. `CV06` (1454 missed)
+6. `LT05` (1422 missed) Fix: line-length findings (1,538); not yet split by file
+7. `CP04` (1154 missed)
+8. `AL03` (793 missed)
+9. `RF02` (636 missed)
+10. `LT04` (584 missed)
+11. `LT09` (324 missed)
+12. `CV11` (320 missed)
+13. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+14. `LT15` (243 missed)
+15. `LT03` (240 missed)
 
-37 more rules: 568 missed.
+43 more rules: 2972 missed.
 
 ## sqlfluff-fixtures
 
-Lint: target 86.8% (17313 of 19955, 2642 missed, measured on c2644b20); rules by missed findings:
-1. `LT02` (392 missed)
-2. `PRS` (380 missed)
-3. `LT01` (219 missed)
-4. `CP02` (148 missed)
-5. `LT09` (148 missed)
-6. `RF03` (105 missed)
-7. `LXR` (102 missed)
-8. `LT14` (90 missed)
-9. `ST06` (75 missed)
-10. `AL03` (72 missed)
-11. `RF02` (66 missed)
-12. `CP01` (62 missed)
-13. `RF06` (61 missed)
-14. `RF05` (59 missed)
-15. `RF01` (53 missed)
+Lint: target 59.6% (26803 of 45007, 18204 missed, measured on 3cdf2fac); rules by missed findings:
+1. `CP01` (4211 missed)
+2. `LT01` (2805 missed)
+3. `LT02` (2639 missed)
+4. `PRS` (967 missed)
+5. `AL03` (930 missed)
+6. `CP02` (897 missed)
+7. `LT09` (896 missed)
+8. `LT14` (677 missed)
+9. `AL01` (538 missed)
+10. `LT05` (498 missed)
+11. `AM04` (365 missed)
+12. `ST06` (272 missed)
+13. `RF02` (256 missed)
+14. `CP05` (214 missed)
+15. `RF03` (197 missed)
 
-46 more rules: 610 missed.
+48 more rules: 1842 missed.
 
 ## stylecop
 
