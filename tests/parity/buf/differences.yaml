@@ -12,4 +12,12 @@ files:
   corpus/protobuf/src/google/protobuf/unittest.proto: statement-comments
   corpus/protobuf/src/google/protobuf/unittest_custom_options.proto: option-comments, literal-field-blank
 target: 85.8
-# not measured on f4e9edb2: the corpus is absent on the host (0 files); target is the last recorded
+measured: {covered: 2027, total: 2362, main: '7514c1f3'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  RPC_REQUEST_RESPONSE_UNIQUE: 117
+  PACKAGE_DIRECTORY_MATCH: 98
+  RPC_RESPONSE_STANDARD_NAME: 65
+  FIELD_NOT_REQUIRED: 39
+  RPC_REQUEST_STANDARD_NAME: 9
+  IMPORT_USED: 5
+  PACKAGE_DEFINED: 2

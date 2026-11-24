@@ -155,22 +155,27 @@ pub(crate) fn catalogs() -> Result<Vec<Catalog>> {
 
 /// One row per catalog: the entries by coverage.
 fn catalog_counts(catalogs: Vec<Catalog>) -> Result<String> {
-    let shares = coverage_shares()?;
+    let ratchets = lint_ratchets()?;
     let mut out = String::from(
-        "| Tool | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+        "| Tool | Target | Measured on | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|
 ",
     );
     for c in catalogs {
         let n = |coverage: &str| c.entries.iter().filter(|e| e.coverage == coverage).count();
         let planned = c.entries.iter().filter(|e| e.sudsy == "planned").count();
         out += &format!(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {planned} |
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {planned} |
 ",
             c.tool,
-            shares
+            ratchets
                 .get(&c.tool)
+                .and_then(|r| r.target)
                 .map_or("-".to_string(), |t| format!("{t:.1}%")),
+            ratchets
+                .get(&c.tool)
+                .and_then(|r| r.measured.as_ref()?.main.as_deref())
+                .map_or("-".to_string(), |m| format!("`{m}`")),
             c.entries.len(),
             n("covered"),
             n("partial"),
@@ -187,14 +192,31 @@ fn catalog_counts(catalogs: Vec<Catalog>) -> Result<String> {
 /// leaving out the reviewed exclusions of docs/ai/design/parity-target.md, `scripts/parity.sh
 /// coverage <tool>`) of each lint tool, by catalog name.
 pub(crate) fn coverage_shares() -> Result<BTreeMap<String, f64>> {
-    #[derive(serde::Deserialize)]
-    struct Ratchets {
-        target: Option<f64>,
-    }
+    Ok(lint_ratchets()?
+        .into_iter()
+        .filter_map(|(catalog, r)| Some((catalog, r.target?)))
+        .collect())
+}
+
+/// What a lint tool's `differences.yaml` records of its coverage run.
+#[derive(serde::Deserialize)]
+struct Ratchets {
+    target: Option<f64>,
+    measured: Option<Measured>,
+}
+
+/// The `measured` key: the origin/main commit the measured tree is based on.
+#[derive(serde::Deserialize)]
+struct Measured {
+    main: Option<String>,
+}
+
+/// The ratchets of each lint tool that has a `differences.yaml`, by catalog name.
+fn lint_ratchets() -> Result<BTreeMap<String, Ratchets>> {
     let root = xtask::repo_root();
     let text = std::fs::read_to_string(root.join("scripts/parity_tools.json"))?;
     let modes: BTreeMap<String, BTreeMap<String, serde_json::Value>> = serde_json::from_str(&text)?;
-    let mut shares = BTreeMap::new();
+    let mut out = BTreeMap::new();
     for (tool, entry) in &modes["lint"] {
         let path = root
             .join("tests/parity")
@@ -205,11 +227,11 @@ pub(crate) fn coverage_shares() -> Result<BTreeMap<String, f64>> {
         };
         let r: Ratchets = serde_saphyr::from_str(&text)
             .map_err(|e| anyhow::anyhow!("{}: {e}", path.display()))?;
-        if let (Some(share), Some(catalog)) = (r.target, entry["catalog"].as_str()) {
-            shares.insert(catalog.to_string(), share);
+        if let Some(catalog) = entry["catalog"].as_str() {
+            out.insert(catalog.to_string(), r);
         }
     }
-    Ok(shares)
+    Ok(out)
 }
 
 /// The tools of `scripts/parity_tools.json`, per mode.

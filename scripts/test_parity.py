@@ -205,5 +205,40 @@ class Stability(unittest.TestCase):
                 self.assertEqual(ps.unstable(exe, file), why, body)
 
 
+class FetchScripts(unittest.TestCase):
+    def test_every_corpus_entry_names_fetch_scripts_that_exist_and_make_its_folder(self):
+        root = Path(__file__).resolve().parent.parent
+        for mode, entries in pf.tools().items():
+            if mode not in ("lint", "format"):
+                continue
+            for name, entry in entries.items():
+                fetch = entry.get("fetch", [])
+                for script in fetch:
+                    self.assertTrue((root / script).is_file(), f"{mode} {name}: {script} does not exist")
+                for source in entry.get("coverage", {}).get("corpus", []):
+                    folder = source["dir"].split("tests/conformance/")[-1]
+                    if not folder.startswith("corpus/"):
+                        continue
+                    top = folder.split("/")[1]
+                    texts = "".join((root / s).read_text(encoding="utf-8") for s in fetch if (root / s).is_file())
+                    self.assertTrue(fetch, f"{mode} {name}: corpus {folder} but no fetch")
+                    self.assertIn(top, texts, f"{mode} {name}: no fetch script of the entry makes corpus/{top}")
+
+
+class Pwsh(unittest.TestCase):
+    def test_a_host_without_pwsh_gets_the_pinned_release_on_its_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            calls = []
+            def fake_run(cmd, cwd):
+                calls.append(cmd[-1])
+                (Path(tmp) / "pwsh-7.5.4").mkdir(exist_ok=True)
+                (Path(tmp) / "pwsh-7.5.4" / "pwsh").write_text("")
+            with unittest.mock.patch.object(pf.shutil, "which", lambda n: None), unittest.mock.patch.object(pf, "run", fake_run), \
+                    unittest.mock.patch.object(pf.sys, "platform", "linux"), unittest.mock.patch.dict(pf.os.environ, {"PATH": "/bin"}):
+                pf.ensure_pwsh("7.5.4", Path(tmp))
+                self.assertTrue(pf.os.environ["PATH"].startswith(str(Path(tmp) / "pwsh-7.5.4")))
+            self.assertIn("powershell-7.5.4-linux-", calls[0])
+
+
 if __name__ == "__main__":
     unittest.main()

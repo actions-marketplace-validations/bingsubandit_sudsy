@@ -64,6 +64,23 @@ def executable(prefix, name):
     return exe if exe.exists() else prefix / name
 
 
+def ensure_pwsh(version, parity):
+    """`pwsh` from PATH, else the portable PowerShell release of that version (Linux) unpacked below `parity`, put on PATH (the runs call `pwsh`)."""
+    if shutil.which("pwsh"):
+        return
+    if not sys.platform.startswith("linux"):
+        sys.exit("parity: no pwsh on PATH (a portable build is fetched on Linux only)")
+    root = parity / f"pwsh-{version}"
+    if not (root / "pwsh").exists():
+        arch = "arm64" if platform.machine().lower() in ("aarch64", "arm64") else "x64"
+        url = f"https://github.com/PowerShell/PowerShell/releases/download/v{version}/powershell-{version}-linux-{arch}.tar.gz"
+        shutil.rmtree(root, ignore_errors=True)
+        root.mkdir(parents=True)
+        run(["bash", "-c", f"curl -fsSL '{url}' | tar xz -C '{root}'"], ROOT)
+        (root / "pwsh").chmod(0o755)
+    os.environ["PATH"] = f"{root}{os.pathsep}{os.environ['PATH']}"
+
+
 def install(spec, catalog, version, prefix):
     """Installs the tool into prefix unless it is there."""
     if "npm" in spec:
@@ -118,6 +135,7 @@ def install(spec, catalog, version, prefix):
         if not executable(prefix, spec["exe"]).exists():
             run(["dotnet", "tool", "install", spec["dotnet-tool"], "--version", version, "--tool-path", prefix], ROOT)
     elif "psmodule" in spec:
+        ensure_pwsh(spec["pwsh"], prefix.parent)
         if not (prefix / spec["psmodule"]).is_dir():
             prefix.mkdir(parents=True, exist_ok=True)
             run(["pwsh", "-NoProfile", "-Command", f"Save-Module {spec['psmodule']} -RequiredVersion {version} -Path '{prefix}'"], ROOT)

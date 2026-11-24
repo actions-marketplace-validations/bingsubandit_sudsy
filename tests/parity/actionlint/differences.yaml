@@ -21,7 +21,7 @@ fixes:  # lint rule -> where and what to change
   glob: "filter patterns of branches, tags and paths: a glob syntax check in a shared crate"
   if-cond: "an `if:` that is always true: needs the expression parser"
   events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"
-measured: {covered: 615, total: 721, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 615, total: 721, main: '7514c1f3'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   expression/types: 14
   action: 12

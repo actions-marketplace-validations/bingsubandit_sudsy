@@ -8,7 +8,7 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.60 | 3f07cafc |
+| HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.60 | 7514c1f3 |
 | PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1446 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `function.notFound` 140 +4 more | 24 | 10.62 | 9e31c610 |
 | C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
 
@@ -24,7 +24,7 @@ New language: locked until every primary leg is at the bar. Blocked legs do not 
 
 ## actionlint
 
-Lint: target 85.3% (615 of 721, 106 missed, measured on 2ad6316d); rules by missed findings:
+Lint: target 85.3% (615 of 721, 106 missed, measured on 7514c1f3); rules by missed findings:
 1. `expression/types` (14 missed) Fix: no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)
 2. `action` (12 missed)
 3. `syntax-check/unexpected-key` (9 missed)
@@ -49,10 +49,18 @@ Lint: target 85.3% (615 of 721, 106 missed, measured on 2ad6316d); rules by miss
 2. `option-comments` (1 files): comments separated by blank lines between the file options travel with the next statement; buf keeps them where they stand
 3. `statement-comments` (1 files): comments inside a statement before its `;` stay line comments on their own lines; buf joins them into block comments on the statement's line
 4. `literal-field-blank` (- files): a blank line before a comment between the fields of a message literal is dropped; buf keeps it
+Lint: target 85.8% (2027 of 2362, 335 missed, measured on 7514c1f3); rules by missed findings:
+1. `RPC_REQUEST_RESPONSE_UNIQUE` (117 missed)
+2. `PACKAGE_DIRECTORY_MATCH` (98 missed)
+3. `RPC_RESPONSE_STANDARD_NAME` (65 missed)
+4. `FIELD_NOT_REQUIRED` (39 missed)
+5. `RPC_REQUEST_STANDARD_NAME` (9 missed)
+6. `IMPORT_USED` (5 missed)
+7. `PACKAGE_DEFINED` (2 missed)
 
 ## checkstyle
 
-Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 4aebdcad); rules by missed findings:
+Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by missed findings:
 1. `Indentation` (4338 missed)
 2. `EmptyLineSeparator` (658 missed)
 3. `VariableDeclarationUsageDistance` (632 missed) Fix: cause: no rule. Scope family: statements between a local's declaration and its first use
@@ -103,7 +111,7 @@ Format: unclassified 1602 of 1602 differing files (100%).
 
 ## eslint-plugin-vue
 
-Lint: target 88.8% (1392 of 1567, 175 missed, measured on f4e9edb2); rules by missed findings:
+Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by missed findings:
 1. `vue/html-indent` (144 missed)
 2. `vue/html-self-closing` (24 missed)
 3. `vue/no-template-shadow` (3 missed)
@@ -117,14 +125,14 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on f4e9edb2); rules by mi
 
 ## graphql-eslint
 
-Lint: target 88.1% (192 of 218, 26 missed, measured on e98263ba); rules by missed findings:
+Lint: target 88.1% (192 of 218, 26 missed, measured on 7514c1f3); rules by missed findings:
 1. `description-style` (11 missed)
 2. `require-deprecation-reason` (10 missed)
 3. `naming-convention` (5 missed)
 
 ## hadolint
 
-Lint: target 91.2% (685 of 751, 66 missed, measured on 2ad6316d); rules by missed findings:
+Lint: target 91.2% (685 of 751, 66 missed, measured on 7514c1f3); rules by missed findings:
 1. `DL3066` (30 missed) Fix: user-variable gap of numeric-user-id, report a USER with a variable whose ARG default is not numeric (lang-dockerfile rules, stage facts)
 2. `SC2251` (12 missed)
 3. `DL1000` (5 missed)
@@ -140,7 +148,7 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 2ad6316d); rules by misse
 
 ## html-eslint
 
-Lint: target 33.5% (82 of 245, 163 missed, measured on 3f07cafc); rules by missed findings:
+Lint: target 33.5% (82 of 245, 163 missed, measured on 7514c1f3); rules by missed findings:
 1. `indent` (97 missed) Fix: 4 files are refused (a block that spans elements, `</h{{ .Level }}>`) and hold most of what is left; formatting the unbalanced region as written (parser records the span, printer copies the element) is about 60 shared lines and clears under half of them, not built
 2. `no-duplicate-id` (20 missed)
 3. `no-obsolete-attrs` (12 missed)
@@ -155,7 +163,7 @@ Lint: target 33.5% (82 of 245, 163 missed, measured on 3f07cafc); rules by misse
 
 ## html-validate
 
-Lint: target 86.9% (852 of 980, 128 missed, measured on 1f4c633b); rules by missed findings:
+Lint: target 86.9% (852 of 980, 128 missed, measured on 7514c1f3); rules by missed findings:
 1. `no-implicit-close` (19 missed)
 2. `no-inline-style` (15 missed)
 3. `attr-spacing` (14 missed)
@@ -176,7 +184,7 @@ Lint: target 86.9% (852 of 980, 128 missed, measured on 1f4c633b); rules by miss
 
 ## htmlhint
 
-Lint: target 93% (1210 of 1301, 91 missed, measured on e98263ba); rules by missed findings:
+Lint: target 93% (1210 of 1301, 91 missed, measured on 7514c1f3); rules by missed findings:
 1. `doctype-first` (36 missed)
 2. `spec-char-escape` (31 missed)
 3. `tag-pair` (16 missed)
@@ -235,7 +243,7 @@ Format: unclassified 0 of 15 differing files (0%).
 36. `kt-array-hug` (1 files): an annotation argument array stays on the `=` line in ktlint (`foo = [`); fix: a shared option: keep `name = [` on the `=` line in annotation arguments
 37. `kt-ctor-annot-header` (1 files): the annotated constructor header differs; fix: classify further
 38. `kt-template-braces` (1 files): `${name}` is written as `$name` by ktlint; fix: a shared rule: `${name}` to `$name` when no identifier char follows
-Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 1f4c633b); rules by missed findings:
+Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 7514c1f3); rules by missed findings:
 1. `function-signature` (1660 missed)
 2. `multiline-expression-wrapping` (904 missed)
 3. `blank-line-between-when-conditions` (726 missed)
@@ -256,7 +264,7 @@ Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 1f4c633b); rules 
 
 ## markdownlint
 
-Lint: target 99% (1965 of 1985, 20 missed, measured on 2ad6316d); rules by missed findings:
+Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by missed findings:
 1. `MD037` (6 missed)
 2. `MD029` (4 missed)
 3. `MD041` (4 missed)
@@ -367,7 +375,7 @@ Format: unclassified 32 of 567 differing files (6%).
 
 ## psscriptanalyzer
 
-Lint: target 87.1% (933 of 1071, 138 missed, measured on 3d6ef290); rules by missed findings:
+Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by missed findings:
 1. `PSUseOutputTypeCorrectly` (59 missed)
 2. `PSUseDeclaredVarsMoreThanAssignments` (17 missed)
 3. `PSProvideCommentHelp` (14 missed)
@@ -388,7 +396,7 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 3d6ef290); rules by mis
 
 ## rubocop
 
-Lint: target 96.2% (7717 of 8022, 305 missed, measured on 4aebdcad); rules by missed findings:
+Lint: target 96.2% (7717 of 8022, 305 missed, measured on 7514c1f3); rules by missed findings:
 1. `Lint/UselessAssignment` (168 missed)
 2. `Lint/AssignmentInCondition` (14 missed)
 3. `Lint/EmptyFile` (7 missed)
@@ -419,7 +427,7 @@ Format: unclassified 0 of 226 differing files (0%).
 7. `bracket-split` (16 files): 16 files first differ here: which bracket splits first when a call, subscript or collection ends a line (hugging, nested subscripts, first-line width). fix: best-fit layout of the last bracket in the shared delimited_list shape
 8. `docstring` (13 files): 13 files first differ here: docstring edge cases: the closing quotes of a docstring that fills the line, quotes and escapes at the end, code in docstrings. fix: docstring exact-fit rule and a docstring-code option in the shared string layout
 9. `fstring-quotes` (13 files): 13 files first differ here: quotes of strings inside f-string replacement fields and nested f-strings. fix: f-string replacement field normalisation in the shared string literal code
-Lint: target 94.6% (4132 of 4367, 235 missed, measured on 4aebdcad); rules by missed findings:
+Lint: target 94.6% (4132 of 4367, 235 missed, measured on 7514c1f3); rules by missed findings:
 1. `RUF100` (83 missed)
 2. `SIM114` (20 missed)
 3. `UP031` (11 missed)
@@ -438,6 +446,27 @@ Lint: target 94.6% (4132 of 4367, 235 missed, measured on 4aebdcad); rules by mi
 
 43 more rules: 61 missed.
 
+## shellcheck
+
+Lint: target 86.6% (201 of 232, 31 missed, measured on 7514c1f3); rules by missed findings:
+1. `SC1091` (12 missed)
+2. `SC1090` (2 missed)
+3. `SC2235` (2 missed)
+4. `SC2001` (1 missed)
+5. `SC2004` (1 missed)
+6. `SC2016` (1 missed)
+7. `SC2097` (1 missed)
+8. `SC2098` (1 missed)
+9. `SC2102` (1 missed)
+10. `SC2124` (1 missed)
+11. `SC2128` (1 missed)
+12. `SC2148` (1 missed)
+13. `SC2154` (1 missed)
+14. `SC2181` (1 missed)
+15. `SC2221` (1 missed)
+
+3 more rules: 3 missed.
+
 ## shfmt
 
 1. `arith-spacing` (3 files): `i++ ))` (a blank before `))` after `++`, which tree-sitter-bash lexes as one word) and the subscripts `${a[i+1]}` are kept as written; shfmt writes `i++))` and `${a[i + 1]}`
@@ -453,7 +482,7 @@ Lint: target 94.6% (4132 of 4367, 235 missed, measured on 4aebdcad); rules by mi
 1. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 2. `layout-gap` (- files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
 3. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 86.6% (17329 of 20007, 2678 missed, measured on d38c58d7); rules by missed findings:
+Lint: target 86.6% (17329 of 20007, 2678 missed, measured on 7514c1f3); rules by missed findings:
 1. `LT02` (442 missed)
 2. `PRS` (380 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
 3. `LT01` (215 missed)
@@ -496,7 +525,7 @@ Lint: target 87.3% (357012 of 409179, 52167 missed, measured on e98263ba); rules
 
 ## stylelint
 
-Lint: target 94.8% (12023 of 12686, 663 missed, measured on e98263ba); rules by missed findings:
+Lint: target 94.8% (12023 of 12686, 663 missed, measured on 7514c1f3); rules by missed findings:
 1. `media-feature-range-notation` (415 missed)
 2. `value-keyword-case` (127 missed)
 3. `declaration-block-no-redundant-longhand-properties` (57 missed)
@@ -508,7 +537,7 @@ Lint: target 94.8% (12023 of 12686, 663 missed, measured on e98263ba); rules by 
 
 ## stylelint-less
 
-Lint: target 85.4% (8494 of 9947, 1453 missed, measured on e98263ba); rules by missed findings:
+Lint: target 85.4% (8494 of 9947, 1453 missed, measured on 7514c1f3); rules by missed findings:
 1. `declaration-property-value-no-unknown` (806 missed)
 2. `selector-pseudo-element-colon-notation` (156 missed)
 3. `media-query-no-invalid` (121 missed)
@@ -529,7 +558,7 @@ Lint: target 85.4% (8494 of 9947, 1453 missed, measured on e98263ba); rules by m
 
 ## stylelint-scss
 
-Lint: target 89.9% (1818 of 2022, 204 missed, measured on e98263ba); rules by missed findings:
+Lint: target 89.9% (1818 of 2022, 204 missed, measured on 7514c1f3); rules by missed findings:
 1. `function-name-case` (54 missed)
 2. `declaration-block-no-redundant-longhand-properties` (44 missed)
 3. `at-rule-empty-line-before` (30 missed)
@@ -561,7 +590,7 @@ Lint: target 89.9% (1818 of 2022, 204 missed, measured on e98263ba); rules by mi
 
 ## tflint
 
-Lint: target 93% (133 of 143, 10 missed, measured on 4aebdcad); rules by missed findings:
+Lint: target 93% (133 of 143, 10 missed, measured on 7514c1f3); rules by missed findings:
 1. `terraform_required_version` (9 missed) Fix: named gap: 9 findings sit at a terraform.tf line 0 that the module does not have (a module without main.tf and without a terraform block); Sudsy reports no finding on a file that does not exist; the lead decides on an exclusion
 2. `terraform_required_providers` (1 missed) Fix: named gap: a required_providers entry in the legacy string form (aws = "~> 1") that tflint reports as a legacy constraint in one corpus file (the rule of tflint is not clear from one case)
 
