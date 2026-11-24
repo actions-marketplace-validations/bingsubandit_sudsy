@@ -16,6 +16,8 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | `deferred` | Wanted eventually, deliberately not scheduled. | deferred |
 | `wontfix <reason>` | Out of scope. | wontfix |
 
+The clang-format run does not compare line wrapping (the `wrap_compare` `note` of its entry in `scripts/parity_tools.json`): its format share counts files whose tokens and non-wrap gaps equal clang-format's, and the byte-identical share is printed beside it.
+
 ## Tools and corpora on a fresh host
 `scripts/parity.sh` installs a tool from its `install` key in `scripts/parity_tools.json` (npm, pip, a release file, a PowerShell module with `psmodule`) and runs the `fetch` scripts of its corpus (`tests/conformance/fetch-<language>-corpus.sh`; the corpora are gitignored, so a new checkout fetches them first: a run on an empty corpus prints `0 of 0 findings`, which is a missing corpus, not a result). Two things come from outside the runner: PowerShell (`pwsh` 7.4 or later on `PATH`; on Linux the tarball `powershell-<version>-linux-<x64|arm64>.tar.gz` of the PowerShell GitHub release, unpacked anywhere) for `invoke-formatter` and `psscriptanalyzer`, and the .NET SDK for the C# tools. PHP is not needed: `php-cs-fixer` and `phpstan` unpack a static PHP of dl.static-php.dev into their prefix. The nightly matrix runs the same commands. Hosts used: registry.npmjs.org, pypi.org, github.com releases, dl.static-php.dev, www.powershellgallery.com, api.nuget.org (StyleCop.Analyzers for the fixtures and the driver), repo.packagist.org and api.github.com (the PHP corpus's Composer packages).
 

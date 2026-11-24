@@ -16,7 +16,7 @@ Blocked on a decision:
 
 | Language | Leg | Now | Points | Reason |
 |---|---|---|---|---|
-| C / C++ | format clang-format | 18.4% | 66.6 | a cost-based choice in the Doc printer (bin-packing, break after `=`) waits on the lead and user decision of docs/ai/design/cpp-formatter.md |
+| C / C++ | format clang-format | 31.2% | 53.8 | bar for the new comparison |
 
 Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target, blocked).
 

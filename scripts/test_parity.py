@@ -12,6 +12,7 @@ import parity_coverage as pc
 import parity_format as pf
 import parity_lint as pl
 import parity_stability as ps
+import parity_wrap as pw
 import speed
 
 YAML = """differences:
@@ -222,6 +223,59 @@ class Stability(unittest.TestCase):
             with tempfile.TemporaryDirectory() as tmp:
                 exe, file = self.fake(tmp, body)
                 self.assertEqual(ps.unstable(exe, file), why, body)
+
+WRAP_CFG = {"gap_kinds": ["Whitespace", "Newline", "Continuation"], "comment_kind": "Comment", "eof_kind": "EndOfFile", "string_kind": "String", "brace_kinds": ["Lbrace", "Rbrace"], "macro_boundary": ["Semi", "Lbrace", "Rbrace"], "paren_kinds": ["Lpar", "Rpar"], "format_off": "clang-format off", "format_on": "clang-format on", "boundary": ["statement", "directive"], "container": ["block"], "wrap_inside": []}
+WRAP_TAGS = {"Stmt": {"statement"}, "Directive": {"directive"}}
+WRAP_TOKENS = [("Comment", r"//[^\n]*"), ("Continuation", r"\\\n"), ("Ident", r"\w+"), ("Semi", ";"), ("Lbrace", "{"), ("Rbrace", "}"), ("Lpar", r"\("), ("Rpar", r"\)"), ("Equal", "="), ("Plus", r"\+"), ("Hash", "#")]
+
+
+def wrap_tree(src, nodes):
+    """A Tree of `src` whose depth-1 nodes are `nodes` (kind, first, last token text); the tokens come from a small lexer."""
+    import re
+
+    toks = [(m.lastgroup, m.start(), m.end()) for m in re.finditer("|".join(f"(?P<{k}>{r})" for k, r in WRAP_TOKENS), src)]
+    lines, i = ["Unit 0.." + str(len(src))], 0
+    for kind, first, last in nodes:
+        a = next(j for j in range(i, len(toks)) if src[toks[j][1] : toks[j][2]].startswith(first))
+        b = min(j for j in range(a, len(toks)) if src[toks[j][1] : toks[j][2]] == last)
+        lines.append(f"  {kind} {toks[a][1]}..{toks[b][2]}")
+        lines += [f"    {k} {s}..{e} {src[s:e]!r}" for k, s, e in toks[a : b + 1]]
+        i = b + 1
+    lines.append(f"  EndOfFile {len(src)}..{len(src)} \"\"")
+    return pw.Tree(WRAP_CFG, WRAP_TAGS, "\n".join(lines), src.encode())
+
+
+def wrap_equal(theirs, ours, nodes):
+    return pw.compare(wrap_tree(theirs, nodes), wrap_tree(ours, nodes))
+
+
+class Wrap(unittest.TestCase):
+    STMT = [("Stmt", "x", ";")]
+
+    def test_a_wrap_point_is_a_space_or_a_newline_at_any_indent(self):
+        self.assertTrue(wrap_equal("x = a +\n    b;\n", "x = a + b;\n", self.STMT)[0])
+        self.assertTrue(wrap_equal("x = a +\n    b;\n", "x = a +\n  b;\n", self.STMT)[0])
+
+    def test_a_changed_token_or_spacing_is_a_difference(self):
+        self.assertEqual(wrap_equal("x = a + b;\n", "x = a - b;\n", self.STMT)[1], ["tokens-other"])
+        self.assertEqual(wrap_equal("x = a + b;\n", "x =  a + b;\n", self.STMT)[1], ["spacing"])
+
+    def test_statements_stay_on_their_own_lines(self):
+        nodes = [("Stmt", "x", ";"), ("Stmt", "y", ";")]
+        self.assertEqual(wrap_equal("x = 1;\ny = 2;\n", "x = 1; y = 2;\n", nodes)[1], ["statement-join"])
+
+    def test_the_statements_of_a_macro_body_are_compared(self):
+        macro = [("Directive", "#", "0")]
+        theirs = "#define F(a) \\\n  do { \\\n    a; \\\n  } while (0)\n"
+        self.assertTrue(wrap_equal(theirs, theirs, macro)[0])
+        self.assertFalse(wrap_equal(theirs, "#define F(a) \\\n  do { a; \\\n  } while (0)\n", macro)[0])
+        self.assertTrue(wrap_equal("#define F(a) a + \\\n  1\n", "#define F(a) a + 1\n", [("Directive", "#", "1")])[0])  # a wrap point of a macro body
+
+    def test_text_under_clang_format_off_is_compared_exactly(self):
+        nodes = [("Stmt", "//", ";"), ("Stmt", "y", ";")]
+        src = "// clang-format off\nx = a +\n  b;\n// clang-format on\ny = c;\n"
+        self.assertTrue(wrap_equal(src, src, nodes)[0])
+        self.assertFalse(wrap_equal(src, src.replace("a +\n  b", "a + b"), nodes)[0])
 
 
 class FetchScripts(unittest.TestCase):

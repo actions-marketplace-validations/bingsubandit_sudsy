@@ -28,14 +28,14 @@ files:
   gnu: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
   microsoft: wrap-misc, wrap-args, wrap-brace, template-break, indent, content, define, directive-wrap, ws-tab, wrap-assign, wrap-binary, ws-other, wrap-comment, wrap-ctor-init, ws-comment-gap
 ratchet:
-  llvm: 231
+  llvm: 273
   fmt: 34
-  range-v3: 73
-  folly: 430
-  linux: 443
-  sqlite: 8
-  google: 0
-  chromium: 0
+  range-v3: 95
+  folly: 538
+  linux: 1111
+  sqlite: 15
+  google: 2
+  chromium: 1
   mozilla: 0
   webkit: 0
   gnu: 0

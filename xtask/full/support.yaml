@@ -107,7 +107,7 @@
   format: [{tool: csharpier-xml, name: CSharpier XML}]
 - language: C / C++
   ids: [c, cpp]
-  format: [{tool: clang-format, name: clang-format, blocked: "a cost-based choice in the Doc printer (bin-packing, break after `=`) waits on the lead and user decision of docs/ai/design/cpp-formatter.md"}]
+  format: [{tool: clang-format, name: clang-format, blocked: "bar for the new comparison"}]
   lint: [{tool: clang-tidy, name: clang-tidy, blocked: "C/C++ is paused until the clang-format comparison is decided"}]
 - language: Ruby
   ids: [ruby]

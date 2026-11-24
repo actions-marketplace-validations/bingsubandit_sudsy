@@ -7,6 +7,7 @@ Corpora, tool versions, presets, options and differences for every language. Sta
 The status and the headline numbers of every language are in the generated table "Language support" of the [README](../README.md#language-support); this page holds what the table leaves out: corpora, tool versions, presets, options and the main differences.
 
 - **Format:** share of corpus files where `sudsy format` gives the same bytes as the reference formatter. The corpus is real-world code unless the section says otherwise.
+- **C / C++ format** does not compare line wrapping (where a statement, a list or an enum breaks, the indent of continuation lines); see the C / C++ section.
 - **Lint:** share of the reference linter's findings on the corpus that Sudsy also reports with the named preset, on the same line. This is recall. False positives are not counted.
 - All numbers compare against the reference tool with its default settings, not your project's config. See [keep your current style](configuration.md#keep-your-current-style).
 - With no config, lint reports likely bugs only. Lint numbers need the preset. See [configuration](configuration.md#presets).
@@ -288,7 +289,7 @@ The status and the headline numbers of every language are in the generated table
 
 - Files are kept as written. There are no lint rules.
 - **Parser:** a lexer with a token-level structure. There is no full grammar.
-- **Not done:** a clang-format compatible layout.
+- **Not done:** a clang-format compatible layout. The format number ignores line wrapping (where a statement, a list or an enum breaks, and the indent of the continuation lines); the rest is compared exactly, and the byte-identical share is printed next to it.
 
 ## INI, EditorConfig, .gitignore
 
