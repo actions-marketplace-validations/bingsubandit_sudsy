@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 
 import parity_coverage as pc
+import parity_gaps as pg
 import parity_format as pf
 import parity_landing as pld
 import parity_lint as pl
@@ -313,6 +314,12 @@ class Wrap(unittest.TestCase):
         self.assertEqual(wrap_equal("x = a + b;\n", "x = a - b;\n", self.STMT)[1], ["tokens-other"])
         self.assertEqual(wrap_equal("x = a + b;\n", "x =  a + b;\n", self.STMT)[1], ["spacing"])
 
+    def test_every_differing_gap_is_listed_with_its_kinds_and_blanks(self):
+        ref, out = wrap_tree("x = a + b;\ny =  c;\n", [("Stmt", "x", ";"), ("Stmt", "y", ";")]), wrap_tree("x = a +  b;\ny = c;\n", [("Stmt", "x", ";"), ("Stmt", "y", ";")])
+        found = pw.gaps(ref, out)
+        self.assertEqual([(g["c"], g["o"], g["t"]) for g in found], [("spacing", "  ", " "), ("spacing", " ", "  ")])
+        self.assertEqual(pw.gaps(wrap_tree("x = a;\n", self.STMT), wrap_tree("x = b;\n", self.STMT))[0]["c"], "tokens")
+
     def test_statements_stay_on_their_own_lines(self):
         nodes = [("Stmt", "x", ";"), ("Stmt", "y", ";")]
         self.assertEqual(wrap_equal("x = 1;\ny = 2;\n", "x = 1; y = 2;\n", nodes)[1], ["statement-join"])
@@ -372,6 +379,25 @@ class Wrap(unittest.TestCase):
         theirs = '// clang-format off\nx = "ab"\n  "cd";\n// clang-format on\n'
         ours = '// clang-format off\nx = "abcd";\n// clang-format on\n'
         self.assertEqual(self.literal_score(ours, theirs, ours, off), (False, ["tokens-other"]))
+
+
+class Gaps(unittest.TestCase):
+    def rec(self, c, a, b, o="", t=" "):
+        return {"c": c, "a": a, "b": b, "p": "N", "g": "", "o": o, "t": t, "x": ""}
+
+    def test_a_set_makes_a_file_equal_only_when_all_its_causes_are_in_it(self):
+        files = {"g/a": [self.rec("spacing", "X", "Y"), self.rec("spacing", "Y", "Z")], "g/b": [self.rec("spacing", "X", "Y")], "g/c": [self.rec("indent", "Y", "Z")]}
+        causes = {n: {pg.sig(r, "kinds") for r in recs} for n, recs in files.items()}
+        order = pg.greedy({n: set(c) for n, c in causes.items()}, 5)
+        self.assertEqual([(new, done) for _, new, done in order], [(1, 1), (1, 2), (1, 3)])
+        self.assertEqual(order[0][0][1:3], ("X", "Y"))  # finishes `b` and brings `a` nearer
+        self.assertTrue(pg.matches(self.rec("spacing", "X", "Y"), pg.pattern("c=spacing,a=X|W")))
+        self.assertFalse(pg.matches(self.rec("indent", "X", "Y"), pg.pattern("c=spacing")))
+
+    def test_a_gap_is_named_by_its_kinds(self):
+        self.assertEqual(pg.gap_name(self.rec("spacing", "Rpar", "Ident")), "cast-space")
+        self.assertEqual(pg.gap_name(self.rec("spacing", "Ident", "Star")), "pointer-align")
+        self.assertEqual(pg.gap_name(self.rec("brace-placement", "Rpar", "Lbrace", "nl1", " ")), "brace-own-line-in-source")
 
 
 class FetchScripts(unittest.TestCase):

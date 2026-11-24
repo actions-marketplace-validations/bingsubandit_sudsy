@@ -545,9 +545,10 @@ pub struct SpaceRules {
     pointer: Pointer,
     /// The braces of the `braced_list_padding` kind sets.
     pad: Pad,
-    /// The `binary_node` and `binary_clear` kind sets: the nodes of binary operations, and the parents
-    /// that prove a name `*` name (`T *x`, `a * b`) is a product.
-    binary: (Vec<SyntaxKind>, Vec<SyntaxKind>),
+    /// The `binary_node`, `binary_clear` and `binary_cast` kind sets: the nodes of binary operations, the parents
+    /// that prove a name `*` name (`T *x`, `a * b`) is a product, and the tokens that may close a cast type
+    /// (`(T)*p`, `(T)&x`: a mark between it and a name stays as written).
+    binary: (Vec<SyntaxKind>, Vec<SyntaxKind>, Vec<SyntaxKind>),
 }
 
 /// The kind sets of padded braces: `pad_list` (the nodes whose braces are padded), `pad_open` and
@@ -690,7 +691,7 @@ impl SpaceRules {
                 bare: set("pointer_bare"),
                 end: set("pointer_end"),
             },
-            binary: (set("binary_node"), set("binary_clear")),
+            binary: (set("binary_node"), set("binary_clear"), set("binary_cast")),
             pad: Pad {
                 except: set("pad_except"),
                 lists: set("pad_list"),
@@ -829,6 +830,9 @@ impl SpaceRules {
             .and_then(|n| n.parent())
             .is_some_and(|n| self.binary.1.contains(&n.kind()));
         let (l, r) = (left.kind(), right.kind());
+        if self.binary.2.contains(&l) && p.names.contains(&r) {
+            return None;
+        }
         let declaration = (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
             && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));
         (clear || !declaration).then_some(true)

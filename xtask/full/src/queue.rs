@@ -16,6 +16,8 @@ pub(crate) struct Tool {
     #[serde(default)]
     fixes: BTreeMap<String, String>,
     #[serde(default)]
+    sets: Vec<String>,
+    #[serde(default)]
     pub missed: BTreeMap<String, u64>,
     pub measured: Option<Measured>,
     #[serde(default)]
@@ -113,6 +115,12 @@ fn section(name: &str, t: &Tool) -> String {
         let text = t.differences[*gap].trim_start_matches("gap").trim();
         let n = n.map_or("-".to_string(), |n| n.to_string());
         out += &format!("{}. `{gap}` ({n} files): {text}{}\n", rank + 1, note(gap));
+    }
+    if !t.sets.is_empty() {
+        out += "Ranked sets (greedy, `scripts/parity_gaps.py`: fix the causes from the top together; files equal after each):\n";
+        for (i, s) in t.sets.iter().take(TOP).enumerate() {
+            out += &format!("{}. {s}\n", i + 1);
+        }
     }
     if !t.missed.is_empty() {
         let mut rules: Vec<_> = t.missed.iter().collect();

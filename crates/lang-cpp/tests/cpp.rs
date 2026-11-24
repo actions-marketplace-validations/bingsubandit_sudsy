@@ -541,11 +541,11 @@ fn the_file_gives_the_pointer_alignment_when_asked() {
 fn binary_operators_get_a_blank_on_both_sides() {
     use provider_api::format_testing::Formatting;
     let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
-    let src = "void f() {\n  x = a*b+1;\n  y = a&&b || c&d;\n  T *p = q;\n  z = (a & MASK) * b;\n  n = sizeof(T **) + f((U)&v);\n}\nvoid (*fp)(const Foo *Self, Node *N);\n";
+    let src = "void f() {\n  x = a*b+1;\n  y = a&&b || c&d;\n  T *p = q;\n  z = (a & MASK) * b;\n  n = sizeof(T **) + f((U)&v) + sizeof(char *[5]);\n  m = x + (uint32_t)*A + (T)&b[i];\n  k = (x)*1000;\n}\nvoid (*fp)(const Foo *Self, Node *N);\n";
     let out = core_format::testing::assert_formats(&formatting, src);
     assert_eq!(
         out,
-        "void f() {\n  x = a * b + 1;\n  y = a && b || c & d;\n  T *p = q;\n  z = (a & MASK) * b;\n  n = sizeof(T **) + f((U)&v);\n}\nvoid (*fp)(const Foo *Self, Node *N);\n"
+        "void f() {\n  x = a * b + 1;\n  y = a && b || c & d;\n  T *p = q;\n  z = (a & MASK) * b;\n  n = sizeof(T **) + f((U)&v) + sizeof(char *[5]);\n  m = x + (uint32_t)*A + (T)&b[i];\n  k = (x) * 1000;\n}\nvoid (*fp)(const Foo *Self, Node *N);\n"
     );
 }
 

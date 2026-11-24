@@ -45,6 +45,7 @@ class Tree:
         self.src, self.string = src, cfg["string_kind"]
         self.kind, self.start, self.end = [], [], []
         self.sb, self.eb, self.br, self.dr, self.cm, self.frame = [], [], [], [], [], []
+        self.par, self.gpar = [], []  # the kinds of the parent node and of its parent
         self.mb, self.off = [], []  # the token ends a statement of a macro body; the token is between `format_off` and `format_on`
         mkinds, pars, off, pdepth = set(cfg["macro_boundary"]), set(cfg["paren_kinds"]), False, 0
         stack = []  # frames: [name, tags, first, first_code, anchor, boundary]
@@ -98,6 +99,7 @@ class Tree:
                     if f[4] == "self":
                         f[4] = t
                     ncode += 1
+            self.par.append(stack[-1][0] if stack else ""), self.gpar.append(stack[-2][0] if len(stack) > 1 else "")
             self.br.append(name in braces and bool(stack) and "block" in stack[-1][1])
             self.dr.append(depth_dir > 0)
             pdepth += (name in pars) * (1 if name == cfg["paren_kinds"][0] else -1)
@@ -275,6 +277,34 @@ def compare(ref, out, shape=None, where=None):
     return not causes, causes, wraps
 
 
+def gap_text(g):
+    """A gap as the gap list writes it: its blanks (`sp` for a long run), or its line breaks."""
+    if b"\n" in g:
+        return "nl" + str(g.count(b"\n"))
+    return g.decode("latin-1").replace("\t", "\\t") if len(g) <= 3 else f"{len(g)}sp"
+
+
+def gaps(ref, out):
+    """Every difference of two Trees as records {c: cause, a, b: kinds of the tokens around the gap, p, g: parent and
+    grandparent kinds of the second token, o, t: the gap of `out` and of the reference, x: the two token texts}; when the
+    tokens differ, the first pair that does (`parity_gaps.py` ranks them)."""
+    def text(tree, i):
+        return tree.src[tree.start[i] : tree.end[i]][:40].decode("utf-8", "replace")
+
+    ta, tb = [norm(ref, i) for i in range(ref.n)], [norm(out, i) for i in range(out.n)]
+    if ta != tb:
+        k = next((i for i, (x, y) in enumerate(zip(ta, tb)) if x != y), min(len(ta), len(tb)))
+        if k < min(ref.n, out.n):
+            return [{"c": "tokens-reorder" if sorted(ta) == sorted(tb) else "tokens", "a": ref.kind[k], "b": out.kind[k], "p": out.par[k], "g": out.gpar[k], "o": text(out, k), "t": text(ref, k), "x": text(out, k - 1) if k else ""}]
+        return [{"c": "tokens", "a": "", "b": "", "p": "", "g": "", "o": f"{out.n} tokens", "t": f"{ref.n} tokens", "x": ""}]
+    where = []
+    _, causes, _ = compare(ref, out, None, where)
+    return [
+        {"c": c, "a": out.kind[i - 1] if i else "", "b": out.kind[i], "p": out.par[i], "g": out.gpar[i], "o": gap_text(out.gap(i)), "t": gap_text(ref.gap(i)), "x": (text(out, i - 1) if i else "") + " " + text(out, i)}
+        for c, i in list(zip(causes, where))[:400]
+    ]
+
+
 class Checker:
     """Parses texts with the dump command of Sudsy and compares them."""
 
@@ -295,7 +325,7 @@ class Checker:
             return None
         return Tree(self.cfg, self.tags, r.stdout.decode("utf-8", "replace"), data)
 
-    def score(self, theirs, ours, suffix, ref_tree=None, source=None):
+    def score(self, theirs, ours, suffix, ref_tree=None, source=None, listing=False):
         """The result of one file: ok, causes, wraps; the column-limit guard is added by the caller. `ours` is a text,
         or a Tree built from the reference's own tokens (a control), whose wrap points are the reference's. `source` is the
         text both tools read: a string literal the reference tool split is compared as the whole literal."""
@@ -310,7 +340,10 @@ class Checker:
             if ref is None or out is None:
                 return {"ok": False, "causes": ["tree"], "wraps": 0}
             ok, causes, wraps = compare(ref, out)
-        return {"ok": ok, "causes": causes, "wraps": wraps}
+        r = {"ok": ok, "causes": causes, "wraps": wraps}
+        if listing and not ok:
+            r["gaps"] = gaps(ref, out)
+        return r
 
 
 def over_limit(text, limit, tab=TAB):
@@ -461,15 +494,15 @@ def file_result(checker, cfg, folder, style, theirs, ours, copy, controlled, var
     base = over_limit(theirs, limit)
     source = copy.read_text(encoding="utf-8")
 
-    def one(text):
+    def one(text, listing=False):
         if text is None:
             return {"ok": False, "causes": ["rejected"], "wraps": 0, "byte": False, "guard": False}
-        r = checker.score(theirs, text, suffix, ref, source)
+        r = checker.score(theirs, text, suffix, ref, source, listing)
         raw = text.src.decode("utf-8") if isinstance(text, Tree) else text
         r.update(byte=raw == theirs, guard=over_limit(raw, limit) > base)
         return r
 
-    rec = one(ours)
+    rec = one(ours, bool(os.environ.get("PARITY_GAPS")))
     keep = os.environ.get("PARITY_KEEP")
     if keep:
         d = Path(keep) / copy.parent.name / copy.name
