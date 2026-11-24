@@ -1,5 +1,9 @@
 differences:
   hugo-template-tokens: "choice  the tool reads the text of a Hugo template inside a tag (`{{`, `}}`, `end`, `with`, `.Level`, `(eq`) as attribute, class or element names; the file is a template, not HTML, and no real attribute is repeated outside a template action"
+  action-text: choice  the tool reads the text of a `{{ }}` action as markup (a tag or comment inside a string) and its words as elements; the action is one piece of text and stays as written
+  action-attribute: choice  the tool counts the words of a `{{ if }}` action among the attributes of a tag as attributes; Sudsy keeps the action as one attribute
+  front-matter: choice  the tool reads the front matter between the two `---` lines as text to indent; it is data of the page generator and stays as written
+  textarea-value: choice  the tool indents the text of a `<textarea>` (its ignore list names `pre` and `xmp` only); the text is the value of the field, so reindenting changes it
 files:
   html/bootstrap/site/content/docs/5.3/examples/cheatsheet-rtl/index.html html-eslint:no-duplicate-attrs 713: hugo-template-tokens
   html/bootstrap/site/content/docs/5.3/examples/cheatsheet/index.html html-eslint:no-duplicate-attrs 712: hugo-template-tokens
@@ -16,20 +20,312 @@ files:
   html/bootstrap/site/layouts/shortcodes/example.html html-eslint:no-duplicate-attrs 34: hugo-template-tokens
   html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:no-duplicate-attrs 39: hugo-template-tokens
   html/bootstrap/site/layouts/shortcodes/table.html html-eslint:no-duplicate-attrs 26: hugo-template-tokens
+  html/bootstrap/site/content/docs/5.3/examples/badges/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/blog-rtl/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/blog-rtl/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/blog/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/blog/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/breadcrumbs/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/carousel-rtl/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/carousel/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/cheatsheet-rtl/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/cheatsheet-rtl/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/cheatsheet/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/cheatsheet/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/checkout-rtl/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/checkout-rtl/index.html html-eslint:indent 8: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/checkout/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/checkout/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/cover/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard-rtl/index.html html-eslint:indent 10: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard-rtl/index.html html-eslint:indent 11: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard-rtl/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard-rtl/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard-rtl/index.html html-eslint:indent 9: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard/index.html html-eslint:indent 10: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard/index.html html-eslint:indent 8: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dashboard/index.html html-eslint:indent 9: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/dropdowns/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/features/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/grid/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/headers/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/heroes/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/jumbotrons/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/list-groups/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/masonry/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/masonry/index.html html-eslint:indent 6: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/masonry/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/modals/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/navbar-fixed/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/navbar-static/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/navbars-offcanvas/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/navbars/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/offcanvas-navbar/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/offcanvas-navbar/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/pricing/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/product/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/sidebars/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/sidebars/index.html html-eslint:indent 7: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/sign-in/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/sticky-footer-navbar/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/content/docs/5.3/examples/sticky-footer/index.html html-eslint:indent 5: front-matter
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:attrs-newline 123: action-attribute
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:attrs-newline 2: action-attribute
+  html/bootstrap/site/layouts/_default/examples.html html-eslint:element-newline 119: action-text
+  html/bootstrap/site/layouts/partials/docs-sidebar.html html-eslint:attrs-newline 28: action-attribute
+  html/bootstrap/site/layouts/partials/docs-sidebar.html html-eslint:attrs-newline 47: action-attribute
+  html/bootstrap/site/layouts/partials/docs-sidebar.html html-eslint:attrs-newline 63: action-attribute
+  html/bootstrap/site/layouts/partials/favicons.html html-eslint:element-newline 1: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:attrs-newline 160: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:attrs-newline 162: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:attrs-newline 165: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:attrs-newline 168: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:element-newline 160: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 161: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 162: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 163: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 164: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 165: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 166: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 167: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 168: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 169: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 170: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 171: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 194: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 195: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 196: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 197: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 198: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 199: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 200: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 201: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 202: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 203: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 204: action-text
+  html/bootstrap/site/layouts/partials/home/components-utilities.html html-eslint:indent 205: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 52: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 53: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 54: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 55: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 56: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 58: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 59: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 60: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 70: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 71: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 72: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 73: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 75: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 76: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 77: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 78: action-text
+  html/bootstrap/site/layouts/partials/home/css-variables.html html-eslint:indent 79: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 40: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 41: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 42: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 44: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 45: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 46: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 62: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 64: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 65: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 66: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 67: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 69: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 70: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 71: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 72: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 73: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 74: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 76: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 77: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 78: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 79: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 80: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 81: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 82: action-text
+  html/bootstrap/site/layouts/partials/home/customize.html html-eslint:indent 83: action-text
+  html/bootstrap/site/layouts/partials/home/get-started.html html-eslint:attrs-newline 88: action-text
+  html/bootstrap/site/layouts/partials/home/get-started.html html-eslint:element-newline 88: action-text
+  html/bootstrap/site/layouts/partials/home/get-started.html html-eslint:element-newline 89: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:attrs-newline 75: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:element-newline 74: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:element-newline 79: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:element-newline 80: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:element-newline 81: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 75: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 76: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 77: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 78: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 79: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 80: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 81: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 82: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 83: action-text
+  html/bootstrap/site/layouts/partials/home/plugins.html html-eslint:indent 84: action-text
+  html/bootstrap/site/layouts/partials/stylesheet.html html-eslint:attrs-newline 12: action-attribute
+  html/bootstrap/site/layouts/partials/stylesheet.html html-eslint:attrs-newline 5: action-attribute
+  html/bootstrap/site/layouts/shortcodes/bs-table.html html-eslint:element-newline 7: action-text
+  html/bootstrap/site/layouts/shortcodes/bs-table.html html-eslint:element-newline 8: action-text
+  html/bootstrap/site/layouts/shortcodes/bs-table.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/bs-table.html html-eslint:indent 8: action-text
+  html/bootstrap/site/layouts/shortcodes/bs-table.html html-eslint:indent 9: action-text
+  html/bootstrap/site/layouts/shortcodes/callout.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:attrs-newline 24: action-attribute
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:attrs-newline 43: action-attribute
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:attrs-newline 68: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:attrs-newline 69: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:element-newline 68: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:element-newline 69: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 10: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 4: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 5: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 6: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 69: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 7: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 70: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 71: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 72: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 8: action-text
+  html/bootstrap/site/layouts/shortcodes/example.html html-eslint:indent 9: action-text
+  html/bootstrap/site/layouts/shortcodes/js-docs.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/js-docs.html html-eslint:indent 4: action-text
+  html/bootstrap/site/layouts/shortcodes/js-docs.html html-eslint:indent 5: action-text
+  html/bootstrap/site/layouts/shortcodes/param.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/param.html html-eslint:indent 3: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:attrs-newline 45: action-attribute
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 10: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 11: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 12: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 4: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 5: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 6: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 7: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 8: action-text
+  html/bootstrap/site/layouts/shortcodes/placeholder.html html-eslint:indent 9: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 25: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 26: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 27: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 4: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 5: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 7: action-text
+  html/bootstrap/site/layouts/shortcodes/scss-docs.html html-eslint:indent 8: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:attrs-newline 26: action-attribute
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:element-newline 23: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 2: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 27: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 28: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 29: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 31: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 35: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 4: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 5: action-text
+  html/bootstrap/site/layouts/shortcodes/table.html html-eslint:indent 6: action-text
+  html/learning-area/javascript/asynchronous/workers/finished/index.html html-eslint:indent 32: textarea-value
+  html/learning-area/javascript/asynchronous/workers/start/index.html html-eslint:indent 32: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 23: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 25: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 26: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 27: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 28: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 29: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 31: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 32: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 33: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 35: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 36: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 37: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 39: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 41: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 43: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 44: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 45: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 47: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 48: textarea-value
+  html/learning-area/javascript/oojs/tasks/json/json1.html html-eslint:indent 49: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 23: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 24: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 25: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 26: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 27: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 28: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 29: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 30: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 32: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 36: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 38: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 39: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 41: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 42: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 44: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 45: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics1.html html-eslint:indent 46: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 23: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 25: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 28: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 30: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 31: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 32: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics2.html html-eslint:indent 33: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 23: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 24: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 25: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 26: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 27: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 28: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 29: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 30: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics3.html html-eslint:indent 31: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 23: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 24: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 25: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 26: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 27: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 28: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 29: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 30: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 32: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 33: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 34: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 35: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 36: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 37: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 38: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 39: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 41: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 42: textarea-value
+  html/learning-area/javascript/oojs/tasks/object-basics/object-basics4.html html-eslint:indent 43: textarea-value
+  html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 23: textarea-value
+  html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 25: textarea-value
+  html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 26: textarea-value
+  html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 27: textarea-value
+  html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 29: textarea-value
+  html/learning-area/javascript/oojs/tasks/oojs/oojs1.html html-eslint:indent 30: textarea-value
 intentional:
   hugo-template-tokens: tool-wrong
-target: 0.3
-measured: {covered: 62, total: 19925, main: '2ad6316d'}  # of the target; `main`: the origin/main commit the measured tree is based on
+  action-text: tool-wrong
+  action-attribute: tool-wrong
+  front-matter: tool-wrong
+  textarea-value: tool-wrong
+target: 33.5
+fixes:  # lint rule -> one line: where and what to change
+  indent: 4 files are refused (a block that spans elements, `</h{{ .Level }}>`) and hold most of what is left; formatting the unbalanced region as written (parser records the span, printer copies the element) is about 60 shared lines and clears under half of them, not built
+measured: {covered: 82, total: 245, main: '3f07cafc'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  indent: 16182
-  element-newline: 2175
-  attrs-newline: 1158
-  require-closing-tags: 153
-  no-extra-spacing-tags: 132
-  no-multiple-h1: 20
-  no-duplicate-id: 16
+  indent: 97
+  no-duplicate-id: 20
   no-obsolete-attrs: 12
-  require-img-alt: 9
+  require-closing-tags: 11
+  attrs-newline: 7
+  element-newline: 7
   use-baseline: 4
+  quotes: 2
+  require-img-alt: 1
   require-li-container: 1
   require-title: 1

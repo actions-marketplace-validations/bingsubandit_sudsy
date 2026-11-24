@@ -309,7 +309,8 @@ impl NodeFormatter for MarkupFormatter {
                 width: cx.options.int(core_config::opt::LINE_WIDTH) as usize,
                 tab: cx.options.int(core_config::opt::INDENT_SIZE) as usize,
                 bracket_same_line: bracket_same_line(cx.options),
-                single_attribute_per_line: single_attribute_per_line(cx.options),
+                tags: core_format::tag_layout::TagLayout::of(cx.options),
+                template_actions: cx.options.is(core_config::opt::DIALECT, "template"),
                 expression_mode: core_format::EmbedMode::expression_of(cx.options),
                 content_lines: core_format::content_lines::ContentLines::of(
                     cx.options,

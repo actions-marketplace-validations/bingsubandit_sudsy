@@ -9,8 +9,8 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | JSON / JSONC | lint eslint-plugin-jsonc | 3 | 0.0% | 85.0 | 12 findings | `jsonc/no-useless-escape` 14 | 3 | 85.00 | 4aebdcad |
-| HTML | lint html-eslint | 2 | 0.3% | 84.7 | 16875 findings | `indent` 16182, `element-newline` 2175 | 6 | 28.23 | 2ad6316d |
 | HTML | lint htmlhint | 1 | 5.0% | 80.0 | 1041 findings | `spec-char-escape` 1087 | 3 | 26.67 | 4aebdcad |
+| HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.61 | 3f07cafc |
 | PHP | lint PHPStan | 3 | 0.0% | 85.0 | 2154 findings | `class.notFound` 1322, `new.static` 317, `method.notFound` 171, `function.notFound` 140 +3 more | 21 | 12.14 | 1f4c633b |
 | C# | lint StyleCop | 3 | 24.6% | 60.4 | 247038 findings | `SA1101` 108918, `SA1600` 59930, `SA1611` 45566, `SA1200` 25732 +1 more | 15 | 12.07 | a6a124c7 |
 | C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
@@ -149,19 +149,18 @@ Lint: target 91.2% (685 of 751, 66 missed, measured on 2ad6316d); rules by misse
 
 ## html-eslint
 
-Lint: target 0.3% (62 of 19925, 19863 missed, measured on 2ad6316d); rules by missed findings:
-1. `indent` (16182 missed)
-2. `element-newline` (2175 missed)
-3. `attrs-newline` (1158 missed)
-4. `require-closing-tags` (153 missed)
-5. `no-extra-spacing-tags` (132 missed)
-6. `no-multiple-h1` (20 missed)
-7. `no-duplicate-id` (16 missed)
-8. `no-obsolete-attrs` (12 missed)
-9. `require-img-alt` (9 missed)
-10. `use-baseline` (4 missed)
-11. `require-li-container` (1 missed)
-12. `require-title` (1 missed)
+Lint: target 33.5% (82 of 245, 163 missed, measured on 3f07cafc); rules by missed findings:
+1. `indent` (97 missed) Fix: 4 files are refused (a block that spans elements, `</h{{ .Level }}>`) and hold most of what is left; formatting the unbalanced region as written (parser records the span, printer copies the element) is about 60 shared lines and clears under half of them, not built
+2. `no-duplicate-id` (20 missed)
+3. `no-obsolete-attrs` (12 missed)
+4. `require-closing-tags` (11 missed)
+5. `attrs-newline` (7 missed)
+6. `element-newline` (7 missed)
+7. `use-baseline` (4 missed)
+8. `quotes` (2 missed)
+9. `require-img-alt` (1 missed)
+10. `require-li-container` (1 missed)
+11. `require-title` (1 missed)
 
 ## html-validate
 

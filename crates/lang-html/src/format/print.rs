@@ -6,10 +6,12 @@
 //! tools: markup-layout: Prettier printer-html
 
 use super::model::{Dialect, N, T, Tree, is_ws, pre_like};
+use crate::go_template::ACTIONS;
 use core_format::EmbedMode;
 use core_format::context::verbatim_text;
 use core_format::doc::{self, Doc, GroupId};
 use core_format::embed as embed_text;
+use core_format::requote::{Entities, requote};
 use core_format::shapes;
 
 mod angular;
@@ -29,7 +31,10 @@ pub struct Opts<'a> {
     pub width: usize,
     pub tab: usize,
     pub bracket_same_line: bool,
-    pub single_attribute_per_line: bool,
+    /// The attribute limit, slash gap and void style of start tags.
+    pub tags: core_format::tag_layout::TagLayout,
+    /// `{{ }}` actions are kept as written (`dialect: template`).
+    pub template_actions: bool,
     /// The mode of embedded expressions: `Expression`, or `ExpressionIndented` (`indent_expression_operands`).
     pub expression_mode: EmbedMode,
     pub content_lines: core_format::content_lines::ContentLines,
@@ -74,8 +79,14 @@ fn dedent(v: &str) -> String {
     embed_text::dedent(v, TEMPLATE)
 }
 
+/// The entities of the quotes in a value.
+const QUOTES: Entities = Entities {
+    single: "&apos;",
+    double: "&quot;",
+};
+
 fn unescape_quotes(v: &str) -> String {
-    v.replace("&apos;", "'").replace("&quot;", "\"")
+    QUOTES.plain(v)
 }
 
 impl P<'_> {
@@ -187,6 +198,18 @@ impl P<'_> {
         format!("</{}", self.n(id).name)
     }
 
+    /// A space stands before the `/>` of the element.
+    fn slash_gap(&self, id: usize) -> bool {
+        self.o
+            .tags
+            .slash_gap(self.n(id).self_closing, self.n(id).void)
+    }
+
+    /// A void element written without the `/`.
+    fn slashless(&self, id: usize) -> bool {
+        self.o.tags.slashless(self.n(id).void)
+    }
+
     fn close_end_marker(&self, id: usize) -> &'static str {
         if self.n(id).t == T::Interp {
             "}}"
@@ -194,7 +217,7 @@ impl P<'_> {
             "}"
         } else if self.should_not_print_closing(id) {
             ""
-        } else if self.n(id).t == T::Element && self.n(id).self_closing {
+        } else if self.n(id).t == T::Element && self.n(id).self_closing && !self.slashless(id) {
             "/>"
         } else {
             ">"
@@ -618,23 +641,23 @@ impl P<'_> {
         if let Some(d) = self.embedded_attribute(id, name, v) {
             return d;
         }
-        let v = if name.eq_ignore_ascii_case("class") && !v.contains("{{") && !v.trim().is_empty() {
-            v.split(is_ws)
+        let class = name.eq_ignore_ascii_case("class") && !v.contains("{{") && !v.trim().is_empty();
+        let (q, value) = if class {
+            let v = v
+                .split(is_ws)
                 .filter(|w| !w.is_empty())
                 .collect::<Vec<_>>()
-                .join(" ")
+                .join(" ");
+            let (q, value) = requote(&[(false, &v)], &QUOTES);
+            (q, value.into_owned().into())
+        } else if self.o.template_actions && v.contains("{{") {
+            requote(&ACTIONS.pieces(v), &QUOTES)
         } else {
-            unescape_quotes(v)
-        };
-        let single = v.matches('\'').count() < v.matches('"').count();
-        let (q, v) = if single {
-            ('\'', v.replace('\'', "&apos;"))
-        } else {
-            ('"', v.replace('"', "&quot;"))
+            requote(&[(false, v)], &QUOTES)
         };
         doc::concat(vec![
             s(format!("{name}={q}")),
-            verbatim_text(&v),
+            verbatim_text(&value),
             s(q.to_string()),
         ])
     }
@@ -642,13 +665,13 @@ impl P<'_> {
     fn attributes(&self, id: usize) -> Doc {
         let n = self.n(id);
         if n.attrs.is_empty() {
-            return s(if n.self_closing { " " } else { "" });
+            return s(if self.slash_gap(id) { " " } else { "" });
         }
         let force_not_to_break = n.name == "script"
             && n.attrs.len() == 1
             && n.attrs[0].name.eq_ignore_ascii_case("src")
             && n.kids.is_empty();
-        let per_line = self.o.single_attribute_per_line && n.attrs.len() > 1;
+        let per_line = self.o.tags.per_line(n.attrs.len());
         let sep = if per_line {
             doc::hardline()
         } else {
@@ -667,6 +690,7 @@ impl P<'_> {
             },
             doc::join(&sep, printed),
         ]))];
+        let slash = self.slash_gap(id);
         if n.kids
             .first()
             .is_some_and(|&f| self.borrow_parent_open_end(f))
@@ -674,13 +698,9 @@ impl P<'_> {
             || force_not_to_break
             || self.o.bracket_same_line
         {
-            parts.push(s(if n.self_closing { " " } else { "" }));
+            parts.push(s(if slash { " " } else { "" }));
         } else {
-            parts.push(if n.self_closing {
-                doc::line()
-            } else {
-                doc::softline()
-            });
+            parts.push(if slash { doc::line() } else { doc::softline() });
         }
         doc::concat(parts)
     }
@@ -788,10 +808,17 @@ impl P<'_> {
             && !f.lead_sp
             && l.trail_ss
             && !l.trail_sp;
-        let (hug, force_break) =
-            self.o
-                .content_lines
-                .decide(&n.name, n.attrs.len(), hug, self.force_break_content(id));
+        let free_elements = n.kids.iter().any(|&c| self.n(c).t == T::Element)
+            && n.kids
+                .iter()
+                .all(|&c| !self.n(c).lead_ss && !self.n(c).trail_ss);
+        let (hug, force_break) = self.o.content_lines.decide(
+            &n.name,
+            n.attrs.len(),
+            free_elements,
+            hug,
+            self.force_break_content(id),
+        );
         let before = if hug {
             doc::if_break_in(attrs, doc::softline(), doc::nil())
         } else if f.lead_sp && f.lead_ss {

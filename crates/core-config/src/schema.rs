@@ -192,6 +192,8 @@ pub struct OptionSchema {
 #[derive(Clone, Debug)]
 struct Later {
     build: fn() -> OptionSchema,
+    /// Options after the built ones (`extended` on a lazy schema).
+    extra: Vec<OptionDef>,
     cell: std::sync::OnceLock<Box<OptionSchema>>,
 }
 
@@ -217,6 +219,7 @@ impl OptionSchema {
             presets: Vec::new(),
             later: Some(Later {
                 build,
+                extra: Vec::new(),
                 cell: std::sync::OnceLock::new(),
             }),
         }
@@ -235,6 +238,18 @@ impl OptionSchema {
     /// This schema with `defs` after its own options, keeping its presets: a dialect takes the
     /// options and the presets of its base language, so that the base's presets apply to its files.
     pub fn extended(&self, defs: Vec<OptionDef>) -> Self {
+        // A lazy schema stays lazy: startup builds every provider and a dialect's base is not read.
+        if let Some(l) = &self.later {
+            return OptionSchema {
+                defs: Vec::new(),
+                presets: Vec::new(),
+                later: Some(Later {
+                    build: l.build,
+                    extra: [l.extra.as_slice(), &defs].concat(),
+                    cell: std::sync::OnceLock::new(),
+                }),
+            };
+        }
         let mut out = OptionSchema::new([self.defs(), &defs].concat());
         out.presets = self.presets().to_vec();
         out
@@ -1076,7 +1091,14 @@ pub mod shared {
 }
 impl Later {
     fn get(&self) -> &OptionSchema {
-        self.cell.get_or_init(|| Box::new((self.build)()))
+        self.cell.get_or_init(|| {
+            let built = (self.build)();
+            Box::new(if self.extra.is_empty() {
+                built
+            } else {
+                built.extended(self.extra.clone())
+            })
+        })
     }
 }
 

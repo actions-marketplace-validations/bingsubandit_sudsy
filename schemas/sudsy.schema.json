@@ -7558,6 +7558,11 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -7610,10 +7615,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",
@@ -9651,6 +9677,21 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
+            "dialect": {
+              "default": "auto",
+              "description": "`template`: the file is a template whose `{{ }}` actions (Go templates, Hugo) stay as written; a block of actions (`if` ... `end`) must open and close inside one element (a file that does not is not formatted); an action among the attributes is one attribute, kept as written.",
+              "enum": [
+                "auto",
+                "html",
+                "template"
+              ],
+              "type": "string"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -9703,10 +9744,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",
@@ -11197,6 +11259,11 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -11249,10 +11316,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -13233,6 +13321,21 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
+                  "dialect": {
+                    "default": "auto",
+                    "description": "`template`: the file is a template whose `{{ }}` actions (Go templates, Hugo) stay as written; a block of actions (`if` ... `end`) must open and close inside one element (a file that does not is not formatted); an action among the attributes is one attribute, kept as written.",
+                    "enum": [
+                      "auto",
+                      "html",
+                      "template"
+                    ],
+                    "type": "string"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -13285,10 +13388,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -15528,6 +15652,11 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -15585,10 +15714,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -15761,6 +15911,11 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -15818,10 +15973,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -16941,6 +17117,11 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16998,10 +17179,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",
@@ -17174,6 +17376,11 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -17231,10 +17438,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",

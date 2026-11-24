@@ -35,6 +35,7 @@ pub mod literals;
 mod placement;
 pub mod printer;
 mod relay;
+pub mod requote;
 pub mod rewrite;
 pub mod rules;
 pub mod safety;
@@ -42,6 +43,7 @@ pub mod seq;
 pub mod shapes;
 pub mod spacing;
 pub mod tabs;
+pub mod tag_layout;
 pub mod testing;
 
 pub use context::{DefaultFormatter, EmbedMode, Embedder, FormatCtx, NodeFormatter, Variants};

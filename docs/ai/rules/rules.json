@@ -27315,9 +27315,15 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard"
+        "html/html-validate-standard",
+        "html/html-eslint-recommended"
       ],
       "upstream": [
+        {
+          "id": "require-title",
+          "partial": true,
+          "tool": "html-eslint"
+        },
         {
           "id": "element-required-content",
           "partial": true,
@@ -27758,9 +27764,15 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended"
+        "html/html-validate-recommended",
+        "html/html-eslint-recommended"
       ],
       "upstream": [
+        {
+          "id": "require-img-alt",
+          "partial": false,
+          "tool": "html-eslint"
+        },
         {
           "id": "wcag/h37",
           "partial": true,
@@ -29151,11 +29163,6 @@
         "html/html-eslint-recommended"
       ],
       "upstream": [
-        {
-          "id": "require-closing-tags",
-          "partial": true,
-          "tool": "html-eslint"
-        },
         {
           "id": "no-implicit-close",
           "partial": false,

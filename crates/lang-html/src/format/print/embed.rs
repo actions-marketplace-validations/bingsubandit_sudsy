@@ -287,6 +287,9 @@ impl P<'_> {
 
     /// `{{ expression }}` on one line, when the expression formats to one line.
     pub(super) fn interpolation_text(&self, id: usize) -> Option<String> {
+        if self.o.template_actions {
+            return None;
+        }
         let out = self.formatted_interpolation(id)?;
         (!out.contains('\n')).then(|| format!("{{{{ {out} }}}}"))
     }
@@ -316,6 +319,13 @@ impl P<'_> {
     /// `{{ expression }}`: the expression on the line when it fits, else on lines of its own.
     pub(super) fn interpolation(&self, id: usize) -> Doc {
         let n = self.n(id);
+        if self.o.template_actions {
+            return doc::concat(vec![
+                s(self.open_start(id)),
+                verbatim_text(&n.value),
+                s(self.close_end(id)),
+            ]);
+        }
         let code = n.value.trim();
         if code.is_empty() {
             return doc::concat(vec![s(self.open_start(id)), s(self.close_end(id))]);

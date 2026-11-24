@@ -14,6 +14,7 @@ concept angular-template-layout # users: html
 concept arrow-function-layout # users: js
 concept async-suffix # users: csharp
 concept attribute-content-lines # users: html (shared)
+concept attribute-requote # users: html (shared)
 concept behavior-summaries # users: csharp (shared)
 concept block-collection-layout # users: yaml
 concept build-stage-checks # users: dockerfile
@@ -160,6 +161,7 @@ concept style-declaration-checks # users: css
 concept suppression-justification # users: csharp
 concept tab-keep # users: markdown (shared)
 concept table-alignment # users: markdown
+concept tag-layout # users: html (shared)
 concept template-expression-checks # users: html
 concept template-literal-layout # users: js
 concept template-syntax-checks # users: html

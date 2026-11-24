@@ -10,6 +10,8 @@ One hand-written, lossless parser reads all four languages (`crates/lang-html/sr
 
 Files: `.html`, `.htm` (`*.component.html` is Angular, below).
 
+`dialect: template` (HTML only, default `auto`: plain HTML) reads `{{ ... }}` of Go templates (Hugo) as an `Interpolation` the printer keeps as written (`core_syntax::template_actions` with the words of `go_template.rs`; the dialect reaches the parser through `SourceFile::language_version`). An action among the attributes is one attribute, kept as written; a quoted value is re-quoted by the quotes outside its actions. Safe by refusal, with a parse error (the file is not formatted): a block (`if`, `range`, `with`, `define`, `block` up to `end`; `else` inside) that does not open and close among the children of one element. A `}}` ends an action, also in a quoted value, whose quotes may then hold `"` (the printer re-quotes it with `'`). On the html-eslint corpus (Bootstrap's Hugo site) 4 of 259 files are refused: a block that spans elements, or an action in an end tag name (`</h{{ .Level }}>`).
+
 ## Vue
 `.vue` files are the `vue` language (`crates/lang-html/src/dialect.rs`): the HTML tree read in `Mode::Vue` (entities stay in the text, `{{ }}` is an `Interpolation` of `{{`, a `Chunk` and `}}`, a directive name is several `AttrName` tokens: `:`, the name, `.`, a modifier; void elements need their exact lowercase name; root elements other than `template`, `script` and `style` are raw custom blocks unless the file is an HTML page), the config section `vue` on top of `html`, and the formatter above with these additions:
 - `content_newline_with_attributes` and `indent_expression_operands` lay out like eslint-plugin-vue (`singleline-html-element-content-newline` with its default `ignores`: `INLINE` in `format/model.rs`; `html-indent`: embedded expressions get `EmbedMode::ExpressionIndented`, the JS binary chain then indents its operands). With `single_attribute_per_line` and `whitespace_sensitivity: ignore` on the Vue corpus they clear the 360 `singleline-html-element-content-newline` findings and 383 of 527 `html-indent` ones; 144 remain: object and ternary continuation lines inside an expression (Prettier's `? ` alignment and nested object indent differ from the rule's offsets).
@@ -50,8 +52,13 @@ Prettier's printer-html is the reference (`format/model.rs` builds the nodes and
 | `whitespace_sensitivity` | `css`, `strict`, `ignore` | `css` | Whether whitespace between inline elements and text is significant: `css` follows each element's CSS display, `strict` treats every element as inline, `ignore` as block. |
 | `bracket_same_line` | bool | `false` | Put the `>` of a multi-line start tag at the end of the last attribute's line. |
 | `single_attribute_per_line` | bool | `false` | Put every attribute of a tag that has several on its own line. |
+| `max_attributes_per_line` | int 0-100 | `0` | Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1. |
+| `self_closing_space` | bool | `true` | Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`). |
+| `void_element_style` | `selfclose`, `omit` | `selfclose` | How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`). |
 | `content_newline_with_attributes` | bool | `false` | Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults). |
+| `content_newline_with_elements` | bool | `false` | Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`). |
 | `indent_expression_operands` | bool | `false` | Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand. |
+| `dialect` | `auto`, `html`, `template` | `auto` | `template`: the file is a template whose `{{ }}` actions (Go templates, Hugo) stay as written; a block of actions (`if` ... `end`) must open and close inside one element (a file that does not is not formatted); an action among the attributes is one attribute, kept as written. |
 <!-- /generated -->
 
 ## Conformance
@@ -106,15 +113,21 @@ Where Sudsy differs from Prettier's Angular output by design:
 
 `tests/conformance/fetch-angular-corpus.sh` fetches angular/components, angular/angular, the RealWorld app and Prettier's angular format tests at pinned commits; `cargo test --profile corpus -p lang-html --test integration -- --ignored --nocapture angular` runs the shared checks on every `.html` of the first three. The files with findings are not Angular (the Dgeni templates of components, a stackblitz page).
 
-## Licenses
-`bench/inputs/html`: the five `bootstrap-*` pages are Bootstrap 5.3.3's `js/tests/visual` (MIT, Copyright 2011-2024 The Bootstrap Authors); `mdn-accessibility-assessment.html` is from mdn/learning-area (CC0 1.0). `bench/inputs/vue`: three files of vuejs/core's `sfc-playground` (MIT, Copyright 2018-present Yuxi (Evan) You and Vue contributors); `bench/inputs/svelte`: three files of sveltejs/realworld (MIT, Copyright 2020 Svelte contributors); `bench/inputs/component.html`: two templates of gothinkster/angular-realworld-example-app (MIT, Copyright 2021 Thinkster) and four of angular/components and angular/angular (MIT, Copyright Google LLC).
+## html-eslint
 
-Where Sudsy differs from html-eslint by design:
+`scripts/parity.sh coverage html-eslint` formats the corpus with the `html-eslint-recommended` preset and lints it again; layout findings that remain count as missing, except those pinned per finding in `tests/parity/html-eslint/differences.yaml` where the tool is wrong:
 
 <!-- generated:differences:html-eslint -->
 
+- `action-attribute`: the tool counts the words of a `{{ if }}` action among the attributes of a tag as attributes; Sudsy keeps the action as one attribute
+- `action-text`: the tool reads the text of a `{{ }}` action as markup (a tag or comment inside a string) and its words as elements; the action is one piece of text and stays as written
+- `front-matter`: the tool reads the front matter between the two `---` lines as text to indent; it is data of the page generator and stays as written
 - `hugo-template-tokens`: the tool reads the text of a Hugo template inside a tag (`{{`, `}}`, `end`, `with`, `.Level`, `(eq`) as attribute, class or element names; the file is a template, not HTML, and no real attribute is repeated outside a template action
+- `textarea-value`: the tool indents the text of a `<textarea>` (its ignore list names `pre` and `xmp` only); the text is the value of the field, so reindenting changes it
 <!-- /generated -->
+
+## Licenses
+`bench/inputs/html`: the five `bootstrap-*` pages are Bootstrap 5.3.3's `js/tests/visual` (MIT, Copyright 2011-2024 The Bootstrap Authors); `mdn-accessibility-assessment.html` is from mdn/learning-area (CC0 1.0). `bench/inputs/vue`: three files of vuejs/core's `sfc-playground` (MIT, Copyright 2018-present Yuxi (Evan) You and Vue contributors); `bench/inputs/svelte`: three files of sveltejs/realworld (MIT, Copyright 2020 Svelte contributors); `bench/inputs/component.html`: two templates of gothinkster/angular-realworld-example-app (MIT, Copyright 2021 Thinkster) and four of angular/components and angular/angular (MIT, Copyright Google LLC).
 
 Where Sudsy differs from html-validate by design:
 

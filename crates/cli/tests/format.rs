@@ -393,6 +393,48 @@ fn vue_layout_options_content_lines_and_operand_indent() {
     );
 }
 
+/// `dialect: template` keeps `{{ }}` actions as written and refuses a file whose blocks do not open
+/// and close in one element, and keeps an action among the attributes as one attribute; `void_element_style`,
+/// `self_closing_space` and `max_attributes_per_line` lay out the tags; all are fixed points.
+#[test]
+fn html_template_actions_and_tag_options() {
+    let t = tempfile::tempdir().unwrap();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "html:\n  format:\n    dialect: template\n    void_element_style: omit\n    self_closing_space: false\n    max_attributes_per_line: 2\n",
+    );
+    write(
+        t.path(),
+        "a.html",
+        "<div>\n{{ if .x }}<br />{{ end }}\n<a href=\"{{< r \"/x\" >}}\" class=\"y\" id=\"z\">t</a><svg><use href=\"#a\" /></svg>\n</div>\n",
+    );
+    let open = "{{ define \"x\" }}<body>{{ end }}</body>\n";
+    write(t.path(), "b.html", open);
+    let spans = "{{ if .x }}<p>{{ else }}<p class=\"a\">{{ end }}</p>\n";
+    write(t.path(), "c.html", spans);
+    write(
+        t.path(),
+        "d.html",
+        "<p   {{ if .y }}hidden{{ end }}>x</p>\n",
+    );
+    assert_ne!(sudsy(t.path(), &[]).status.code(), Some(0));
+    let html = read(t.path(), "a.html");
+    assert!(html.contains("{{ if .x }}<br>{{ end }}"), "{html}");
+    assert!(html.contains("href='{{< r \"/x\" >}}'"), "{html}");
+    assert!(html.contains("<use href=\"#a\"/>"), "{html}");
+    assert!(html.contains("<a\n"), "{html}");
+    assert_eq!(read(t.path(), "b.html"), open);
+    let tag = read(t.path(), "d.html");
+    assert!(tag.contains("{{ if .y }}\n  hidden\n  {{ end }}"), "{tag}");
+    assert_eq!(read(t.path(), "c.html"), spans);
+    assert_eq!(
+        sudsy(t.path(), &["--check", "a.html"]).status.code(),
+        Some(0),
+        "{html}"
+    );
+}
+
 /// The safety check accepts what the formatter rewrites in Vue and Svelte: the values of `.prop` and
 /// `slot-scope` attributes, root custom blocks without blanks between them, and a destructuring
 /// pattern in a block tag (`}}`).

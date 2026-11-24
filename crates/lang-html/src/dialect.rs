@@ -39,13 +39,22 @@ fn spec(
 
 /// `.html` and `.htm` files.
 pub fn provider() -> ParserProvider {
+    let options = vec![OptionDef::choice(
+        core_config::opt::DIALECT,
+        &["auto", "html", "template"],
+        "auto",
+        "`template`: the file is a template whose `{{ }}` actions (Go templates, Hugo) stay as written; a block of actions (`if` ... `end`) must open and close inside one element (a file that does not is not formatted); an action among the attributes is one attribute, kept as written.",
+    )];
     let spec = spec(
         &["html", "htm"],
         &[],
-        option_schema(),
+        schema(options),
         &crate::HtmlFormatter,
     );
-    ParserProvider::new(spec, |f| parser::parse(&f.text, Mode::Html))
+    ParserProvider::new(spec, |f| {
+        let templates = f.language_version.as_deref() == Some("template");
+        parser::parse_with(&f.text, Mode::Html, templates)
+    })
 }
 
 /// `.vue` single-file components.

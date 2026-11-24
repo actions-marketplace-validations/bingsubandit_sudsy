@@ -33,6 +33,7 @@ pub mod scan;
 pub mod shape;
 pub mod spans;
 pub mod strings;
+pub mod template_actions;
 pub mod tree;
 pub mod trivia;
 pub mod wire;

@@ -62,8 +62,9 @@ Options declared by more than one language, generated from the option schemas; p
 | `conditional_layout` | `indented`, `chained` | java `indented`, js `chained`, csharp `indented` |
 | `constructor_initializer_indent` | int 0-16 | cpp `4`, c `4` |
 | `content_newline_with_attributes` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
+| `content_newline_with_elements` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `continuation_indent` | int 0-16 | cpp `4`, c `4` |
-| `dialect` | json: `auto`, `json`, `jsonc`; sql: `ansi`, `postgres`, `mysql`, `tsql` | json `auto`, sql `ansi` |
+| `dialect` | json: `auto`, `json`, `jsonc`; html: `auto`, `html`, `template`; sql: `ansi`, `postgres`, `mysql`, `tsql` | json `auto`, html `auto`, sql `ansi` |
 | `document_end` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `document_start` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `embedded_language_formatting` | `auto`, `off` | html `auto`, markdown `auto`, angular `auto`, vue `auto`, svelte `auto` |
@@ -82,6 +83,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `indent_style` | `space`, `tab` | json `space`, css `space`, scss `space`, less `space`, html `space`, cpp `space`, c `space`, dockerfile `space`, graphql `space`, java `space`, js `space`, kotlin `space`, makefile `space`, php `space`, powershell `space`, protobuf `space`, python `space`, ruby `space`, shell `tab`, sql `space`, toml `space`, xml `space`, angular `space`, vue `space`, svelte `space`, csharp `space` |
 | `keep_leading_blank_lines` | bool | cpp `true`, c `true` |
 | `line_width` | int 20-1000 | json `80`, css `80`, scss `80`, less `80`, html `80`, cpp `80`, c `80`, graphql `80`, java `100`, js `80`, kotlin `140`, php `120`, python `88`, ruby `120`, sql `80`, toml `80`, xml `100`, yaml `80`, github-actions `80`, angular `80`, vue `80`, svelte `80`, csharp `120` |
+| `max_attributes_per_line` | int 0-100 | html `0`, angular `0`, vue `0`, svelte `0` |
 | `max_blank_lines` | int 0-10 | css `1`, scss `1`, less `1`, cpp `1`, c `1`, dockerfile `1`, editorconfig `1`, gitignore `1`, ini `1`, makefile `2`, powershell `10`, shell `1`, toml `1`, xml `1`, yaml `1`, github-actions `1` |
 | `member_chain_break_on_block` | `never`, `inner`, `any` | java `any`, csharp `never` |
 | `member_chain_indent` | int 0-4 | java `2`, js `1`, kotlin `1`, python `0`, csharp `1` |
@@ -93,6 +95,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `penalty_return_type` | int 0-1000 | cpp `60`, c `60` |
 | `pointer_alignment` | `right`, `left`, `middle` | cpp `right`, c `right` |
 | `quote_style` | js: `double`, `single`; python: `double`, `single`, `preserve`; yaml: `preserve`, `single`, `double`, `prefer_double`; github-actions: `preserve`, `single`, `double`, `prefer_double` | js `double`, python `double`, yaml `preserve`, github-actions `preserve` |
+| `self_closing_space` | bool | html `true`, angular `true`, vue `true`, svelte `true` |
 | `sequence_indent` | `preserve`, `indented`, `flush` | yaml `preserve`, github-actions `preserve` |
 | `short_case_labels` | bool | cpp `false`, c `false` |
 | `short_enums` | bool | cpp `true`, c `true` |
@@ -105,6 +108,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `space_before_parens` | `never`, `control_statements`, `always` | cpp `control_statements`, c `control_statements` |
 | `spaces_before_trailing_comments` | int 0-16 | cpp `1`, c `1` |
 | `trailing_commas` | json: `never`, `multiline`; js: `all`, `es5`, `none`; kotlin: `never`, `multiline`; php: `never`, `multiline`; toml: `never`, `multiline`; csharp: `preserve`, `never`, `multiline` | json `never`, js `all`, kotlin `multiline`, php `multiline`, toml `multiline`, csharp `preserve` |
+| `void_element_style` | `selfclose`, `omit` | html `selfclose`, angular `selfclose`, vue `selfclose`, svelte `selfclose` |
 | `whitespace_sensitivity` | `css`, `strict`, `ignore` | html `css`, angular `css`, vue `css`, svelte `css` |
 | `wrap_lines` | bool | cpp `true`, c `true` |
 <!-- /generated -->
