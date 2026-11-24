@@ -85,6 +85,19 @@ options:
           union: [ClassSpecifier]
           enum: [EnumSpecifier]
           namespace: [NamespaceDeclaration]
+        attach_call:
+          function: [Call]
+  - split_empty_braces:
+      kind: "words"
+      default: []
+      doc: "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`."
+  - for_each_macros:
+      kind: "words"
+      default: [foreach, Q_FOREACH, BOOST_FOREACH]
+      doc: "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`."
+      kinds:
+        loop_call:
+          control: [Call]
   - align_with_tabs:
       default: false
       doc: "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."

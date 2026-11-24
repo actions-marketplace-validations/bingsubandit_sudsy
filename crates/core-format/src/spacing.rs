@@ -538,6 +538,10 @@ pub struct SpaceRules {
     unhang: Vec<Pattern>,
     /// The `attach` kind sets of the options: the constructs whose `{` follows the option's words.
     attach: Vec<crate::rules::Binding>,
+    /// The `attach_call` and `loop_call` kind sets: a block right after a node of such a kind (a call
+    /// head, `list_for_each(x) {`) belongs to the construct of the `attach_call` word, or to the
+    /// word of the `loop_call` set when the head's name is among the words of that option.
+    attach_call: (Vec<crate::rules::Binding>, Vec<crate::rules::Binding>),
     /// The `tight_after` and `tight_behind` kind sets: no blank after a token of the first when the
     /// token before it is of the second (`Args &&...rest`).
     tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
@@ -673,6 +677,13 @@ impl SpaceRules {
             .filter(|b| b.role == "attach")
             .cloned()
             .collect();
+        let calls = |role: &str| -> Vec<crate::rules::Binding> {
+            (bindings.iter())
+                .filter(|b| b.role == role)
+                .cloned()
+                .collect()
+        };
+        let attach_call = (calls("attach_call"), calls("loop_call"));
         let set = |role: &str| -> Vec<SyntaxKind> {
             (bindings.iter())
                 .filter(|b| b.role == role)
@@ -681,6 +692,7 @@ impl SpaceRules {
         };
         SpaceRules {
             attach,
+            attach_call,
             tight: (set("tight_after"), set("tight_behind")),
             pointer: Pointer {
                 marks: set("pointer"),
@@ -935,24 +947,44 @@ impl SpaceRules {
 
     /// Does a language option place braces (an `attach` kind set)?
     pub fn has_attach(&self) -> bool {
-        !self.attach.is_empty()
+        !self.attach.is_empty() || !self.attach_call.0.is_empty()
     }
 
     /// The option and the word of the construct an opening brace `{` belongs to: the `{` that
     /// starts the block (child of a construct of an `attach` kind set); of several words for one
     /// kind (`class`, `struct`) the one the construct's own keyword spells.
-    pub fn attach_word(&self, brace: &SyntaxToken) -> Option<(core_config::OptId, &str)> {
-        if self.attach.is_empty() || brace.text() != "{" {
+    pub fn attach_word(
+        &self,
+        brace: &SyntaxToken,
+        options: &core_config::ResolvedOptions,
+    ) -> Option<(core_config::OptId, &str)> {
+        if (self.attach.is_empty() && self.attach_call.0.is_empty()) || brace.text() != "{" {
             return None;
         }
         let block = brace.parent()?;
-        let construct = block.parent()?;
         let mut tokens = block
             .descendants_with_tokens()
             .filter_map(|e| e.into_token());
         if tokens.find(|t| !t.text().trim().is_empty()).as_ref() != Some(brace) {
             return None;
         }
+        if let Some(head) = block.prev_sibling()
+            && let Some(chosen) =
+                (self.attach_call.0.iter()).find(|b| b.kinds.contains(&head.kind()))
+        {
+            let name = (head.descendants_with_tokens())
+                .filter_map(|e| e.into_token())
+                .find(|t| !t.text().trim().is_empty())
+                .map(|t| t.text().to_string());
+            let loops = self.attach_call.1.iter().find(|l| {
+                l.kinds.contains(&head.kind())
+                    && options
+                        .strings(l.option)
+                        .any(|w| Some(w) == name.as_deref())
+            });
+            return Some((chosen.option, loops.unwrap_or(chosen).word.as_str()));
+        }
+        let construct = block.parent()?;
         let mut of = self
             .attach
             .iter()

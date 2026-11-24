@@ -26,6 +26,10 @@ pub const BRACED_LIST_PADDING: core_config::OptId = core_config::opt::BRACED_LIS
 #[allow(dead_code)]
 pub const BRACE_WRAPPING: core_config::OptId = core_config::opt::BRACE_WRAPPING;
 #[allow(dead_code)]
+pub const SPLIT_EMPTY_BRACES: core_config::OptId = core_config::opt::SPLIT_EMPTY_BRACES;
+#[allow(dead_code)]
+pub const FOR_EACH_MACROS: core_config::OptId = core_config::opt::FOR_EACH_MACROS;
+#[allow(dead_code)]
 pub const ALIGN_WITH_TABS: core_config::OptId = core_config::opt::ALIGN_WITH_TABS;
 #[allow(dead_code)]
 pub const INDENT_BRACES: core_config::OptId = core_config::opt::INDENT_BRACES;
@@ -96,6 +100,8 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("brace_wrapping", "attach", "namespace", &["NamespaceDeclaration"]),
     ("brace_wrapping", "attach", "struct", &["ClassSpecifier"]),
     ("brace_wrapping", "attach", "union", &["ClassSpecifier"]),
+    ("brace_wrapping", "attach_call", "function", &["Call"]),
+    ("for_each_macros", "loop_call", "control", &["Call"]),
     ("short_functions", "fit", "", &["FunctionDeclaration"]),
     ("short_functions", "no_fit_under", "", &["TemplateDeclaration"]),
     ("short_functions", "no_fit_with", "", &["ConstructorInitializers"]),
@@ -354,6 +360,8 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::boolean(core_config::opt::DERIVE_POINTER_ALIGNMENT, false, "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."),
         core_config::OptionDef::boolean(core_config::opt::BRACED_LIST_PADDING, false, "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`."),
         core_config::OptionDef::words(core_config::opt::BRACE_WRAPPING, &[], "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."),
+        core_config::OptionDef::words(core_config::opt::SPLIT_EMPTY_BRACES, &[], "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`."),
+        core_config::OptionDef::words(core_config::opt::FOR_EACH_MACROS, &["foreach", "Q_FOREACH", "BOOST_FOREACH"], "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`."),
         core_config::OptionDef::boolean(core_config::opt::ALIGN_WITH_TABS, false, "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."),
         core_config::OptionDef::boolean(core_config::opt::INDENT_BRACES, false, "Indent a brace that is on its own line together with the block it opens."),
         core_config::OptionDef::choice(core_config::opt::SHORT_FUNCTIONS, &["none", "empty", "inline", "all"], "all", "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."),

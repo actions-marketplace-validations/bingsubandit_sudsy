@@ -7909,6 +7909,18 @@
               "description": "End the file with a newline.",
               "type": "boolean"
             },
+            "for_each_macros": {
+              "default": [
+                "foreach",
+                "Q_FOREACH",
+                "BOOST_FOREACH"
+              ],
+              "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "indent_braces": {
               "default": false,
               "description": "Indent a brace that is on its own line together with the block it opens.",
@@ -8058,6 +8070,14 @@
               "maximum": 16,
               "minimum": 0,
               "type": "integer"
+            },
+            "split_empty_braces": {
+              "default": [],
+              "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "wrap_lines": {
               "default": true,
@@ -8240,6 +8260,18 @@
               "description": "End the file with a newline.",
               "type": "boolean"
             },
+            "for_each_macros": {
+              "default": [
+                "foreach",
+                "Q_FOREACH",
+                "BOOST_FOREACH"
+              ],
+              "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "indent_braces": {
               "default": false,
               "description": "Indent a brace that is on its own line together with the block it opens.",
@@ -8389,6 +8421,14 @@
               "maximum": 16,
               "minimum": 0,
               "type": "integer"
+            },
+            "split_empty_braces": {
+              "default": [],
+              "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "wrap_lines": {
               "default": true,
@@ -11810,6 +11850,18 @@
                     "description": "End the file with a newline.",
                     "type": "boolean"
                   },
+                  "for_each_macros": {
+                    "default": [
+                      "foreach",
+                      "Q_FOREACH",
+                      "BOOST_FOREACH"
+                    ],
+                    "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "indent_braces": {
                     "default": false,
                     "description": "Indent a brace that is on its own line together with the block it opens.",
@@ -11959,6 +12011,14 @@
                     "maximum": 16,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "split_empty_braces": {
+                    "default": [],
+                    "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "wrap_lines": {
                     "default": true,
@@ -12141,6 +12201,18 @@
                     "description": "End the file with a newline.",
                     "type": "boolean"
                   },
+                  "for_each_macros": {
+                    "default": [
+                      "foreach",
+                      "Q_FOREACH",
+                      "BOOST_FOREACH"
+                    ],
+                    "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "indent_braces": {
                     "default": false,
                     "description": "Indent a brace that is on its own line together with the block it opens.",
@@ -12290,6 +12362,14 @@
                     "maximum": 16,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "split_empty_braces": {
+                    "default": [],
+                    "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "wrap_lines": {
                     "default": true,

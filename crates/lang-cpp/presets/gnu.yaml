@@ -4,6 +4,7 @@ cpp:
     break_after_return_type: all_definitions
     break_before_binary_operators: all
     brace_wrapping: [class, struct, union, enum, function, namespace, extern, control, case, else, catch, while]
+    split_empty_braces: [class, struct, union, function, namespace]
     indent_braces: true
     line_width: 79
     space_before_parens: always

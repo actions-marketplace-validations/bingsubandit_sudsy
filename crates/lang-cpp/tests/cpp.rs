@@ -569,3 +569,36 @@ fn braced_lists_are_padded_by_option() {
         assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
     }
 }
+
+#[test]
+fn a_call_with_a_block_is_a_function_unless_it_is_a_loop_macro() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let src = "void f() {\n  list_for_each(a, b) { x(); }\n  my_loop(a) { x(); }\n}\n";
+    let words = |w: &[&str]| V::List(w.iter().map(|s| V::String((*s).into())).collect());
+    let run = |wrapping: &[&str], macros: &[&str]| {
+        let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+        formatting.options = vec![
+            ("brace_wrapping", words(wrapping)),
+            ("for_each_macros", words(macros)),
+        ];
+        core_format::testing::assert_formats(&formatting, src)
+    };
+    assert_eq!(
+        run(&["function"], &["my_loop"]),
+        "void f()\n{\n  list_for_each(a, b)\n  {\n    x();\n  }\n  my_loop(a) {\n    x();\n  }\n}\n"
+    );
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = vec![
+        ("brace_wrapping", words(&["function"])),
+        ("split_empty_braces", words(&["function"])),
+    ];
+    assert_eq!(
+        core_format::testing::assert_formats(&formatting, "void f() {}\nstruct S {};\nm(x) {}\n"),
+        "void f()\n{\n}\nstruct S {};\nm(x)\n{\n}\n"
+    );
+    assert_eq!(
+        run(&[], &[]),
+        "void f() {\n  list_for_each(a, b) {\n    x();\n  }\n  my_loop(a) {\n    x();\n  }\n}\n"
+    );
+}

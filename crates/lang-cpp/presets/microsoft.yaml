@@ -4,6 +4,7 @@ cpp:
     short_enums: false
     short_functions: none
     brace_wrapping: [class, enum, function, namespace, extern, control, else, catch]
+    split_empty_braces: [class, function, namespace]
     line_width: 120
     indent_size: 4
     penalty_return_type: 1000

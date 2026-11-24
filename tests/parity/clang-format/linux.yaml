@@ -6,6 +6,7 @@ cpp:
     continuation_indent: 8
     access_modifier_outdent: 4
     brace_wrapping: [class, function, namespace]
+    split_empty_braces: [class, function, namespace]
     short_functions: none
     indent_goto_labels: false
     align_trailing_comments: false

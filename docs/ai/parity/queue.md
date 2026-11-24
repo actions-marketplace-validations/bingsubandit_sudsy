@@ -10,7 +10,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 |---|---|---|---|---|---|---|---|---|---|
 | SQL | lint sqlfluff | 4 | 70.7% | 14.3 | 18612 findings | `LT02` 19005 | 3 | 19.07 | 3cdf2fac |
 | SQL | format sqlfluff | 4 | 73.7% | 11.3 | 94 files | `if-condition-wrap` 128 | 3 | 15.07 | - |
-| C / C++ | format clang-format | 4 | 45.9% | 39.1 | 2598 files | `reference-align` 467, `brace-own-line-in-source` 327, `pointer-align` 326, `cast-space` 316 +7 more | 33 | 4.74 | - |
+| C / C++ | format clang-format | 4 | 47.6% | 37.4 | 2485 files | `reference-align` 467, `brace-own-line-in-source` 327, `pointer-align` 326, `cast-space` 316 +6 more | 30 | 4.99 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -91,12 +91,12 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 
 ## clang-format
 
-Format: unclassified 1 of 3593 differing files (0%).
+Format: unclassified 1 of 3480 differing files (0%).
 1. `reference-align` (467 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`
 2. `brace-own-line-in-source` (327 files): a `{` on its own line in the source that clang-format attaches (a member function body, `extern "C"`, a lambda): the construct is not one of the `brace_wrapping` words Fix: check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque
 3. `pointer-align` (326 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 4. `cast-space` (316 files): blank after a C cast (`(T) x`): clang-format writes `(T)x` (SpaceAfterCStyleCast false) Fix: [space] row after the `)` of a Cast; Cast is opaque in the deep parse, so give it its parts
-5. `brace-own-line-in-reference` (271 files): a `{` clang-format puts on its own line (BraceWrapping of the style, also after a statement macro such as `for_each_cpu(i)`), Sudsy keeps it on the line Fix: brace_wrapping words exist; the macro head (`MacroStatement` with a block) needs a word list of loop macros in lang.yaml (ForEachMacros) read by the shared role pass
+5. `brace-own-line-in-reference` (271 files): a `{` clang-format puts on its own line (BraceWrapping of the style, also after a statement macro such as `for_each_cpu(i)`), Sudsy keeps it on the line Fix: a `name(args) {` is a function brace unless the name is in for_each_macros (done); what is left: the empty-body and init-list cases of the reference (`= {` after a wrap), `case X: {` and class heads wrapped by width
 6. `comment-line-indent-or-join` (260 files): a comment on its own line (or right after `{`) whose indent or place differs: clang-format aligns it with the code it belongs to, Sudsy keeps the source indent Fix: comment_gap rows: a comment takes the indent of the next line of code in the shared comment engine
 7. `angle-space` (180 files): blanks next to `<` and `>`: template brackets (`F<int>`, `template <typename...>`) and comparisons in `#if` conditions Fix: [space] rows by node (TemplateArguments, TemplateParameters, Binary); directive conditions as in binary-op-space
 8. `binary-op-space` (160 files): blanks around a binary operator (`a*b`, `x+1`, `0 ... N-1`, in a `#if` condition too): clang-format writes one blank on each side, Sudsy keeps the source Fix: [space] rows for the operators of Binary nodes; directive conditions need the expression parse of `#if` lines
@@ -108,7 +108,7 @@ Format: unclassified 1 of 3593 differing files (0%).
 14. `braced-list-padding` (81 files): blanks inside braces of an initializer list (`{ 1, 2 }` against `{1, 2}`, `{ }` against `{}`; Cpp11BracedListStyle) Fix: [space] rows after `{` and before `}` of InitList nodes, one padding option
 15. `space-before-paren` (81 files): blank before `(`: `if(` and `for(`, `sizeof (`, `decltype (`, `foreach (`, macro names (SpaceBeforeParens) Fix: space_before_parens exists; add the keyword and macro word lists as rows (sizeof, alignof, decltype, co_await, ForEachMacros)
 16. `trailing-comment-spacing` (81 files): blanks before a trailing comment (SpacesBeforeTrailingComments) and the alignment of consecutive trailing comments Fix: align_trailing_comments run rules: where a run ends and how wide the pad is
-17. `empty-body-braces` (75 files): an empty function body: clang-format keeps `{` and `}` on two lines when the `{` is on its own line (SplitEmptyFunction), Sudsy joins them to `{}` Fix: an option split_empty_body read by the shared block shape
+17. `empty-body-braces` (75 files): an empty function body: clang-format keeps `{` and `}` on two lines when the `{` is on its own line (SplitEmptyFunction), Sudsy joins them to `{}` Fix: split_empty_braces (done for wrapped function, class, namespace); what is left: styles whose empty body is `{ }` or `{}` by their own rule
 18. `statement-split-by-reference` (69 files): a statement or declarator part that clang-format puts on its own line (`) ;` after a macro call, attribute macros after `)`), Sudsy joins it Fix: StatementMacros and attribute macros as word lists; no rule needed for the others
 19. `ternary-colon-space` (63 files): GNU `a ?: b`: clang-format writes `?:`, Sudsy `? :` Fix: [space] row Question-Colon: no blank when adjacent
 20. `angle-brackets-merged-by-reference` (61 files): `> >` that clang-format writes `>>` (Standard: Latest; a token change) Fix: decide: join `> >` of closing template brackets (C++11 and later) in the printer, or let the comparison read both as equal

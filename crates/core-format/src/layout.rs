@@ -484,6 +484,11 @@ impl Layout {
                     }
                     style.expand_empty |= multiline && as_written;
                 }
+                // (`split_empty_braces`: an empty body whose brace is on its own line)
+                let open = (node.descendants_with_tokens())
+                    .filter_map(|e| e.into_token())
+                    .find(|t| !t.text().trim().is_empty());
+                style.expand_empty |= open.is_some_and(|b| flow.splits_empty(cx, &b));
                 shapes::block(cx, node, &style).or_else(|_| generic())
             }
             "compound" => compound(cx, node, self, flow).unwrap_or_else(generic),

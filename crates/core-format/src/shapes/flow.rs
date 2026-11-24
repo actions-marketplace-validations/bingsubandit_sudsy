@@ -142,7 +142,7 @@ impl Flow<'_> {
     /// row decides or a line comment ends the line.
     pub fn attach(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
         let rules = self.rules.filter(|r| r.has_attach())?;
-        let (name, word) = rules.attach_word(b)?;
+        let (name, word) = rules.attach_word(b, cx.options)?;
         if comments::trailing_comments(cx.grammar, a)
             .iter()
             .any(|c| c.kind == comments::CommentKind::Line)
@@ -151,6 +151,26 @@ impl Flow<'_> {
             return None;
         }
         Some(!cx.options.strings(name).any(|w| w == word))
+    }
+
+    /// Does an empty block with this opening brace keep its braces on two lines: the brace is on
+    /// its own line and the word of its construct is among `split_empty_braces`.
+    pub fn splits_empty(&self, cx: &FormatCtx<'_>, brace: &SyntaxToken) -> bool {
+        let Some(rules) = self.rules.filter(|r| r.has_attach()) else {
+            return false;
+        };
+        let mut a = brace.prev_token();
+        while let Some(t) = a.as_ref().filter(|t| t.text().trim().is_empty()) {
+            a = t.prev_token();
+        }
+        let (Some(a), Some((_, word))) = (a, rules.attach_word(brace, cx.options)) else {
+            return false;
+        };
+        self.attach(cx, &a, brace) == Some(false)
+            && cx
+                .options
+                .strings(core_config::opt::SPLIT_EMPTY_BRACES)
+                .any(|w| w == word)
     }
 
     /// The blank between a declarator mark (`*`, `&`) and its neighbour per the language's pointer

@@ -73,6 +73,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `embedded_language_formatting` | `auto`, `off` | html `auto`, markdown `auto`, angular `auto`, vue `auto`, svelte `auto` |
 | `end_of_line` | `auto`, `lf`, `crlf` | json `auto`, css `auto`, scss `auto`, less `auto`, html `auto`, cpp `auto`, c `auto`, dockerfile `auto`, editorconfig `auto`, gitignore `auto`, graphql `auto`, hcl `auto`, ini `auto`, java `auto`, js `auto`, kotlin `auto`, makefile `auto`, markdown `auto`, php `auto`, powershell `auto`, protobuf `auto`, python `auto`, ruby `auto`, shell `auto`, sql `auto`, toml `auto`, xml `auto`, yaml `auto`, github-actions `auto`, angular `auto`, vue `auto`, svelte `auto`, csharp `auto` |
 | `final_newline` | bool | json `true`, css `true`, scss `true`, less `true`, html `true`, cpp `true`, c `true`, dockerfile `true`, editorconfig `true`, gitignore `true`, graphql `true`, hcl `true`, ini `true`, java `true`, js `true`, kotlin `true`, makefile `true`, markdown `true`, php `true`, powershell `true`, protobuf `true`, python `true`, ruby `true`, shell `true`, sql `true`, toml `true`, xml `true`, yaml `true`, github-actions `true`, angular `true`, vue `true`, svelte `true`, csharp `true` |
+| `for_each_macros` | list of words | cpp `[foreach, Q_FOREACH, BOOST_FOREACH]`, c `[foreach, Q_FOREACH, BOOST_FOREACH]` |
 | `hug_first_argument` | bool | java `false`, js `true` |
 | `hug_last_argument` | `never`, `sole`, `sole_bare`, `last` | java `sole`, js `last`, csharp `last` |
 | `indent_braces` | bool | cpp `false`, c `false` |
@@ -111,6 +112,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `single_quote` | bool | css `false`, scss `false`, less `false` |
 | `space_before_parens` | `never`, `control_statements`, `always` | cpp `control_statements`, c `control_statements` |
 | `spaces_before_trailing_comments` | int 0-16 | cpp `1`, c `1` |
+| `split_empty_braces` | list of words | cpp `[]`, c `[]` |
 | `trailing_commas` | json: `never`, `multiline`; js: `all`, `es5`, `none`; kotlin: `never`, `multiline`; php: `never`, `multiline`; toml: `never`, `multiline`; csharp: `preserve`, `never`, `multiline` | json `never`, js `all`, kotlin `multiline`, php `multiline`, toml `multiline`, csharp `preserve` |
 | `void_element_style` | `selfclose`, `omit` | html `selfclose`, angular `selfclose`, vue `selfclose`, svelte `selfclose` |
 | `whitespace_sensitivity` | `css`, `strict`, `ignore` | html `css`, angular `css`, vue `css`, svelte `css` |

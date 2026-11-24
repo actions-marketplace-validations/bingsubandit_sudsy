@@ -7,6 +7,7 @@ cpp:
     bin_pack_parameters: false
     break_after_return_type: top_level
     brace_wrapping: [class, struct, union, enum, function, extern]
+    split_empty_braces: [function]
     break_constructor_initializers: before_comma
     break_template_declarations: "yes"
     constructor_initializer_indent: 2
