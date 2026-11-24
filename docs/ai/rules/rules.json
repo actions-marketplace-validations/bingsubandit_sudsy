@@ -10183,105 +10183,6 @@
       ]
     },
     {
-      "category": "style",
-      "default_level": "off",
-      "description": "A public or protected method, constructor or type has no `/** */` comment before it (Checkstyle MissingJavadocMethod and MissingJavadocType). Members of an interface are public. A method of a type that is not public (itself or an enclosing one), a type nested in a type that is not visible, and a declaration inside a method or an anonymous class are left out.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "/** Documented. */\npublic class Api {\n  private int x;\n  public Api() {}\n\n  /** Documented. */\n  public void ok() {}\n\n  public void f() {}\n\n  @Deprecated\n  protected void g() {}\n\n  @Override\n  public String toString() { return \"\"; }\n\n  @Test\n  public void t() {}\n\n  public int getX() { return x; }\n  public void setX(int x) { this.x = x; }\n  public int getY(int y) { return y; }\n\n  void packagePrivate() {}\n  private void hidden() {}\n  /** Nested. */\n  public interface Inner {\n    void member();\n  }\n\n  public static class NoDoc {\n    public void inNested() {}\n  }\n\n  public enum Kind {\n    A;\n\n    public void inEnum() {}\n  }\n\n  protected static class Prot {\n    public void inProt() {}\n  }\n\n  void run() {\n    Object o = new Object() {\n      public void anon() {}\n    };\n    class Local {\n      public void local() {}\n    }\n  }\n}\n\nclass PackagePrivate {\n  public void notPublicType() {}\n}\n",
-        "language": "java",
-        "spans": [
-          {
-            "column": 3,
-            "length": 6,
-            "line": 4
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 9
-          },
-          {
-            "column": 3,
-            "length": 1,
-            "line": 11
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 22
-          },
-          {
-            "column": 5,
-            "length": 4,
-            "line": 28
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 31
-          },
-          {
-            "column": 5,
-            "length": 6,
-            "line": 32
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 35
-          },
-          {
-            "column": 5,
-            "length": 6,
-            "line": 38
-          },
-          {
-            "column": 3,
-            "length": 9,
-            "line": 41
-          }
-        ]
-      },
-      "fix": null,
-      "id": "missing-doc-comment",
-      "languages": [
-        "java"
-      ],
-      "options": [
-        {
-          "default": [
-            "Override"
-          ],
-          "description": "Names of annotations (`*` matches any run of characters) that excuse a declaration.",
-          "name": "allowed_annotations",
-          "type": "list"
-        },
-        {
-          "default": false,
-          "description": "Leave out getters and setters: `getX`, `isX` with no parameter and one `return`, `setX` with one parameter and one statement.",
-          "name": "property_accessors",
-          "type": "bool"
-        }
-      ],
-      "presets": [
-        "java/google"
-      ],
-      "upstream": [
-        {
-          "id": "MissingJavadocMethod",
-          "partial": true,
-          "tool": "checkstyle"
-        },
-        {
-          "id": "MissingJavadocType",
-          "partial": true,
-          "tool": "checkstyle"
-        }
-      ]
-    },
-    {
       "category": "suspicious",
       "default_level": "warn",
       "description": "A `switch` statement with no `default` (Checkstyle MissingSwitchDefault).",
@@ -32473,6 +32374,41 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or `<include>` is left out, and so is a declaration without a comment. No fix.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "public class Api {\n  /**\n   * Adds.\n   * @param a first\n   */\n  public int add(int a, int b) { return a + b; }\n\n  /** Inherits. {@inheritDoc} */\n  public int sub(int a) { return a; }\n\n  private int hidden(int a) { return a; }\n}\n",
+        "language": "java",
+        "spans": [
+          {
+            "column": 29,
+            "length": 1,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "doc-param-missing",
+      "languages": [
+        "csharp",
+        "java"
+      ],
+      "options": [],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1611",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A partial type or method without a documentation comment (or with an empty one). Each part is checked on its own; StyleCop (SA1601) accepts one documented part, which needs the other parts of the project. Which elements need documentation follows StyleCop's defaults: everything but private members.",
       "example": {
         "config": null,
@@ -33190,6 +33126,47 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class C\n{\n    private int _count;\n    private int count;\n}\n",
+        "language": "csharp",
+        "spans": [
+          {
+            "column": 17,
+            "length": 6,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "field-name-no-underscore",
+      "languages": [
+        "csharp"
+      ],
+      "options": [
+        {
+          "default": "^[^_]",
+          "description": "Regular expression the name of a field must match; empty: not checked.",
+          "name": "fields",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1309",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}`. Not checked when that type is partial. No fix.",
       "example": {
         "config": null,
@@ -33344,6 +33321,102 @@
         },
         {
           "id": "SA1214",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A type, member, field or enum item that StyleCop's defaults ask to document (public, protected or internal, in types that are too; members of an interface, explicit interface implementations and enum items are public; partial declarations are left out) has no `///` comment before it. Private members are left alone. No fix.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "/** Documented. */\npublic class Api {\n  private int x;\n  public Api() {}\n\n  /** Documented. */\n  public void ok() {}\n\n  public void f() {}\n\n  @Deprecated\n  protected void g() {}\n\n  @Override\n  public String toString() { return \"\"; }\n\n  @Test\n  public void t() {}\n\n  public int getX() { return x; }\n  public void setX(int x) { this.x = x; }\n  public int getY(int y) { return y; }\n\n  void packagePrivate() {}\n  private void hidden() {}\n  /** Nested. */\n  public interface Inner {\n    void member();\n  }\n\n  public static class NoDoc {\n    public void inNested() {}\n  }\n\n  public enum Kind {\n    A;\n\n    public void inEnum() {}\n  }\n\n  protected static class Prot {\n    public void inProt() {}\n  }\n\n  void run() {\n    Object o = new Object() {\n      public void anon() {}\n    };\n    class Local {\n      public void local() {}\n    }\n  }\n}\n\nclass PackagePrivate {\n  public void notPublicType() {}\n}\n",
+        "language": "java",
+        "spans": [
+          {
+            "column": 3,
+            "length": 6,
+            "line": 4
+          },
+          {
+            "column": 3,
+            "length": 6,
+            "line": 9
+          },
+          {
+            "column": 3,
+            "length": 1,
+            "line": 11
+          },
+          {
+            "column": 3,
+            "length": 6,
+            "line": 22
+          },
+          {
+            "column": 5,
+            "length": 4,
+            "line": 28
+          },
+          {
+            "column": 3,
+            "length": 6,
+            "line": 31
+          },
+          {
+            "column": 5,
+            "length": 6,
+            "line": 32
+          },
+          {
+            "column": 3,
+            "length": 6,
+            "line": 35
+          },
+          {
+            "column": 5,
+            "length": 6,
+            "line": 38
+          },
+          {
+            "column": 3,
+            "length": 9,
+            "line": 41
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-doc-comment",
+      "languages": [
+        "csharp",
+        "java"
+      ],
+      "options": [],
+      "presets": [
+        "java/google",
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "MissingJavadocMethod",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "MissingJavadocType",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "SA1600",
+          "partial": false,
+          "tool": "StyleCop"
+        },
+        {
+          "id": "SA1602",
           "partial": false,
           "tool": "StyleCop"
         }
@@ -34228,6 +34301,45 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it.",
+      "example": {
+        "config": null,
+        "fixed": "class Qualify\n{\n    int x;\n    static int s;\n    int M() => this.x + s;\n    int N() => this.x;\n    void P(int x) { x = 1; this.M(); }\n}\n",
+        "input": "class Qualify\n{\n    int x;\n    static int s;\n    int M() => x + s;\n    int N() => this.x;\n    void P(int x) { x = 1; M(); }\n}\n",
+        "language": "csharp",
+        "spans": [
+          {
+            "column": 16,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 28,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "qualify-instance-members",
+      "languages": [
+        "csharp"
+      ],
+      "options": [],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1101",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A `using` directive inside a namespace whose name is not written fully qualified (it resolves relative to the enclosing namespace). The fix writes the full name, unless it has type arguments.",
       "example": {
         "config": null,
@@ -34924,6 +35036,40 @@
         },
         {
           "id": "SA1217",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "using System;\nnamespace N\n{\n    using System.IO;\n}\n",
+        "language": "csharp",
+        "spans": [
+          {
+            "column": 1,
+            "length": 13,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "using-placement",
+      "languages": [
+        "csharp"
+      ],
+      "options": [],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1200",
           "partial": false,
           "tool": "StyleCop"
         }

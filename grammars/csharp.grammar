@@ -767,7 +767,7 @@ node RecordStructDeclaration #member #declaration #type-declaration #scope =
     attribute_lists:AttributeList* modifiers:#modifier* keyword:RecordKeyword class_or_struct_keyword:#record-declaration-class-or-struct-keyword? identifier=name:IdentifierToken type_parameter_list:TypeParameterList? parameter_list:ParameterList? base_list:BaseList? constraint_clauses:TypeParameterConstraintClause* open_brace:OpenBraceToken? members:#member* close_brace:CloseBraceToken? semicolon:SemicolonToken?
 node EnumDeclaration #member #declaration #type-declaration #delimited-list #scope =
     attribute_lists:AttributeList* modifiers:#modifier* enum_keyword:EnumKeyword identifier=name:IdentifierToken base_list:BaseList? open_brace:OpenBraceToken? members:EnumMemberDeclaration* close_brace:CloseBraceToken? semicolon:SemicolonToken?
-node DelegateDeclaration #member #declaration =
+node DelegateDeclaration #member #declaration #delegate-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* delegate_keyword:DelegateKeyword return_type:#type identifier=name:IdentifierToken type_parameter_list:TypeParameterList? parameter_list:ParameterList constraint_clauses:TypeParameterConstraintClause* semicolon:SemicolonToken
 node EnumMemberDeclaration #member #declaration #enum-constant =
     attribute_lists:AttributeList* modifiers:#modifier* identifier=name:IdentifierToken equals_value:EqualsValueClause?
@@ -795,33 +795,33 @@ node AllowsConstraintClause #type-parameter-constraint #opaque =
     allows_keyword:AllowsKeyword constraints:#allows-constraint*
 node RefStructConstraint #allows-constraint #opaque =
     ref_keyword:RefKeyword struct_keyword:StructKeyword
-node FieldDeclaration #member #declaration =
+node FieldDeclaration #member #declaration #field-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* declaration:VariableDeclaration semicolon:SemicolonToken
-node EventFieldDeclaration #member #declaration =
+node EventFieldDeclaration #member #declaration #event-field-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* event_keyword:EventKeyword declaration:VariableDeclaration semicolon:SemicolonToken
 node ExplicitInterfaceSpecifier #opaque =
     name:#name dot:DotToken
-node MethodDeclaration #member #declaration #function #scope =
+node MethodDeclaration #member #declaration #function #scope #method-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* return_type:#type explicit_interface_specifier:ExplicitInterfaceSpecifier? identifier=name:IdentifierToken type_parameter_list:TypeParameterList? parameter_list=parameters:ParameterList constraint_clauses:TypeParameterConstraintClause* body:Block? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
-node OperatorDeclaration #member #declaration #function #scope =
+node OperatorDeclaration #member #declaration #function #scope #operator-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* return_type:#type explicit_interface_specifier:ExplicitInterfaceSpecifier? operator_keyword:OperatorKeyword checked_keyword:CheckedKeyword? operator:#operator-declaration-operator parameter_list=parameters:ParameterList body:Block? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
-node ConversionOperatorDeclaration #member #declaration #function #scope =
+node ConversionOperatorDeclaration #member #declaration #function #scope #conversion-operator-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* implicit_or_explicit_keyword:#conversion-operator-declaration-implicit-or-explicit-keyword explicit_interface_specifier:ExplicitInterfaceSpecifier? operator_keyword:OperatorKeyword checked_keyword:CheckedKeyword? type:#type parameter_list=parameters:ParameterList body:Block? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
-node ConstructorDeclaration #member #declaration #function #scope =
+node ConstructorDeclaration #member #declaration #function #scope #constructor-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* identifier=name:IdentifierToken parameter_list=parameters:ParameterList initializer:#constructor-initializer? body:Block? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
 node BaseConstructorInitializer #constructor-initializer #opaque =
     colon:ColonToken this_or_base_keyword:#constructor-initializer-this-or-base-keyword argument_list:ArgumentList
 node ThisConstructorInitializer #constructor-initializer #opaque =
     colon:ColonToken this_or_base_keyword:#constructor-initializer-this-or-base-keyword argument_list:ArgumentList
-node DestructorDeclaration #member #declaration #function #scope =
+node DestructorDeclaration #member #declaration #function #scope #destructor-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* tilde:TildeToken identifier=name:IdentifierToken parameter_list=parameters:ParameterList body:Block? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
-node PropertyDeclaration #member #declaration =
+node PropertyDeclaration #member #declaration #property-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* type:#type explicit_interface_specifier:ExplicitInterfaceSpecifier? identifier=name:IdentifierToken accessor_list:AccessorList? expression_body:ArrowExpressionClause? initializer:EqualsValueClause? semicolon:SemicolonToken?
 node ArrowExpressionClause #opaque =
     arrow:EqualsGreaterThanToken expression:#expression
-node EventDeclaration #member #declaration =
+node EventDeclaration #member #declaration #event-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* event_keyword:EventKeyword type:#type explicit_interface_specifier:ExplicitInterfaceSpecifier? identifier=name:IdentifierToken accessor_list:AccessorList? semicolon:SemicolonToken?
-node IndexerDeclaration #member #declaration =
+node IndexerDeclaration #member #declaration #indexer-declaration =
     attribute_lists:AttributeList* modifiers:#modifier* type:#type explicit_interface_specifier:ExplicitInterfaceSpecifier? this_keyword:ThisKeyword parameter_list:BracketedParameterList accessor_list:AccessorList? expression_body:ArrowExpressionClause? semicolon:SemicolonToken?
 node AccessorList #block =
     open_brace:OpenBraceToken accessors=items:#accessor-declaration* close_brace:CloseBraceToken
@@ -841,7 +841,7 @@ node ParameterList #delimited-list #parameter-list =
     open_paren:OpenParenToken parameters:Parameter* close_paren:CloseParenToken
 node BracketedParameterList #delimited-list #parameter-list =
     open_bracket:OpenBracketToken parameters:Parameter* close_bracket:CloseBracketToken
-node Parameter #opaque =
+node Parameter #parameter #opaque =
     attribute_lists:AttributeList* modifiers:#modifier* type:#type? identifier:#parameter-identifier? default:EqualsValueClause?
 node FunctionPointerParameter #opaque =
     attribute_lists:AttributeList* modifiers:#modifier* type:#type

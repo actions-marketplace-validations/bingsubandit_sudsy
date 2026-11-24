@@ -1223,6 +1223,10 @@
               "$ref": "#/definitions/rule",
               "description": "A `<param>` without text. Skipped when the comment has `<inheritdoc />`. No fix."
             },
+            "doc-param-missing": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or `<include>` is left out, and so is a declaration without a comment. No fix."
+            },
             "doc-partial-required": {
               "$ref": "#/definitions/rule",
               "description": "A partial type or method without a documentation comment (or with an empty one). Each part is checked on its own; StyleCop (SA1601) accepts one documented part, which needs the other parts of the project. Which elements need documentation follows StyleCop's defaults: everything but private members."
@@ -1609,6 +1613,37 @@
             "field-lower-snake-case": {
               "$ref": "#/definitions/rule",
               "description": "A field name that is not lower_snake_case (buf lint FIELD_LOWER_SNAKE_CASE)."
+            },
+            "field-name-no-underscore": {
+              "description": "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "fields": {
+                          "default": "^[^_]",
+                          "description": "Regular expression the name of a field must match; empty: not checked.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "field-not-required": {
               "$ref": "#/definitions/rule",
@@ -2981,45 +3016,8 @@
               ]
             },
             "missing-doc-comment": {
-              "description": "A public or protected method, constructor or type has no `/** */` comment before it (Checkstyle MissingJavadocMethod and MissingJavadocType). Members of an interface are public. A method of a type that is not public (itself or an enclosing one), a type nested in a type that is not visible, and a declaration inside a method or an anonymous class are left out.",
-              "oneOf": [
-                {
-                  "$ref": "#/definitions/level"
-                },
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "level": {
-                      "$ref": "#/definitions/level"
-                    },
-                    "options": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "allowed_annotations": {
-                          "default": [
-                            "Override"
-                          ],
-                          "description": "Names of annotations (`*` matches any run of characters) that excuse a declaration.",
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        },
-                        "property_accessors": {
-                          "default": false,
-                          "description": "Leave out getters and setters: `getX`, `isX` with no parameter and one `return`, `setX` with one parameter and one statement.",
-                          "type": "boolean"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "level"
-                  ],
-                  "type": "object"
-                }
-              ]
+              "$ref": "#/definitions/rule",
+              "description": "A type, member, field or enum item that StyleCop's defaults ask to document (public, protected or internal, in types that are too; members of an interface, explicit interface implementations and enum items are public; partial declarations are left out) has no `///` comment before it. Private members are left alone. No fix."
             },
             "missing-doctype": {
               "$ref": "#/definitions/rule",
@@ -5115,6 +5113,10 @@
             "property-summary-omits-restricted-accessor": {
               "$ref": "#/definitions/rule",
               "description": "A property summary says \"Gets or sets\" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property). The fix replaces the start of the text with the one that matches the visible accessor."
+            },
+            "qualify-instance-members": {
+              "$ref": "#/definitions/rule",
+              "description": "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it."
             },
             "qualify-namespace-usings": {
               "$ref": "#/definitions/rule",
@@ -7326,6 +7328,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "using-placement": {
+              "$ref": "#/definitions/rule",
+              "description": "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up."
             },
             "v-bind-style": {
               "$ref": "#/definitions/rule",

@@ -28,6 +28,7 @@ pub mod diagnostic;
 pub mod directory_facts;
 pub mod doc_comments;
 pub mod doc_lines;
+pub mod doc_params;
 pub mod doc_style;
 pub mod embed_keys;
 pub mod engine;

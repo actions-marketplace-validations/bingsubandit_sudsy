@@ -89,7 +89,7 @@ Each number is measured on real-world code against the reference tool with its d
 | INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 27 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
-| C# | ███████░░░ 78% CSharpier | ██░░░░░░░░ 24% StyleCop<br>not measured Roslynator | In progress |
+| C# | ███████░░░ 78% CSharpier | ████████░░ 87% StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | █░░░░░░░░░ 18% clang-format | not measured clang-tidy | In progress |
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).

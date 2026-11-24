@@ -9,7 +9,6 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | HTML | lint html-eslint | 2 | 33.5% | 51.5 | 127 findings | `indent` 97, `no-duplicate-id` 20, `no-obsolete-attrs` 12 | 5 | 20.60 | 3f07cafc |
-| C# | lint StyleCop | 3 | 24.6% | 60.4 | 247038 findings | `SA1101` 108918, `SA1600` 59930, `SA1611` 45566, `SA1200` 25732 +1 more | 15 | 12.08 | a6a124c7 |
 | PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1446 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `function.notFound` 140 +4 more | 24 | 10.62 | 9e31c610 |
 | C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
 
@@ -21,7 +20,7 @@ Blocked on a decision:
 
 Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: PHP lint PHPStan; C# format CSharpier; C# lint StyleCop.
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 2: PHP lint PHPStan; C# format CSharpier.
 
 ## actionlint
 
@@ -476,24 +475,24 @@ Lint: target 86.6% (17329 of 20007, 2678 missed, measured on d38c58d7); rules by
 ## stylecop
 
 1. `error-directive` (4 files): the preprocessor symbols of the platform are not set, so no branch of the `#if` chain is active (an `#error` or a missing value) and Sudsy refuses the file; Roslyn reads it
-Lint: target 24.6% (100884 of 409320, 308436 missed, measured on a6a124c7); rules by missed findings:
-1. `SA1101` (108918 missed)
-2. `SA1600` (59930 missed)
-3. `SA1611` (45566 missed)
-4. `SA1200` (25732 missed)
-5. `SA1309` (9589 missed)
-6. `SA1633` (7626 missed)
-7. `SA1602` (7380 missed)
-8. `SA1009` (6637 missed)
-9. `SA1503` (6318 missed)
-10. `SA1623` (3892 missed)
-11. `SA1119` (3220 missed)
-12. `SA1316` (3089 missed)
-13. `SA1128` (2321 missed)
-14. `SA1300` (1604 missed)
-15. `SA1401` (1594 missed)
+Lint: target 87.3% (357012 of 409179, 52167 missed, measured on e98263ba); rules by missed findings:
+1. `SA1633` (7626 missed)
+2. `SA1009` (6687 missed)
+3. `SA1503` (6318 missed)
+4. `SA1623` (3892 missed)
+5. `SA1119` (3220 missed)
+6. `SA1316` (3089 missed)
+7. `SA1128` (2323 missed)
+8. `SA1300` (1604 missed)
+9. `SA1401` (1594 missed)
+10. `SA1000` (1328 missed)
+11. `SA1618` (1303 missed)
+12. `SA1010` (1240 missed)
+13. `SA1308` (1218 missed)
+14. `SA1515` (1075 missed)
+15. `SA1118` (844 missed)
 
-79 more rules: 15020 missed.
+69 more rules: 8806 missed.
 
 ## stylelint
 

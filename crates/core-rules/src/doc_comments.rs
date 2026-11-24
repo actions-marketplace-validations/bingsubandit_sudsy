@@ -9,7 +9,14 @@
 //! - `getters` and `setters`: name prefixes of property accessors (`get is`, `set`), which the
 //!   option `property_accessors` leaves out: a getter has no parameter and one `#return`
 //!   statement, a setter one parameter and one expression statement;
-//! - `message` with `{name}`.
+//! - `message` with `{name}`;
+//! - `doc-start`: the prefixes of a doc comment (`///`), a comment element (token or node) that
+//!   starts with one is the doc comment; without it a `/** */` block comment is;
+//! - `report-at: name`: the report is at the name of the declaration (the row's path), not at its
+//!   first token;
+//! - `visible-with`: slots (`explicit_interface_specifier`) that make a declaration visible without
+//!   a modifier, `skip`: modifier keywords (`partial`) of the declarations left out;
+//! - `top-level-visible`: a declaration outside every type is visible without a modifier.
 //!
 //! A declaration inside a function or an object creation is not reported. The option
 //! `allowed_annotations` (a list of names, `*` matches any run of characters) leaves out a
@@ -57,6 +64,30 @@ pub fn leading_doc(node: &SyntaxNode, g: &Grammar) -> Option<SyntaxToken> {
     found
 }
 
+/// The text of the doc comment before the first code token of `holder`: with `starts`, the
+/// first comment element (a token, or a node such as a structured doc comment) that starts with
+/// one of them; without, the `/** */` block comment ([`leading_doc`]).
+pub fn leading_doc_text(holder: &SyntaxNode, g: &Grammar, starts: &[String]) -> Option<String> {
+    if starts.is_empty() {
+        return leading_doc(holder, g).map(|t| t.text().to_string());
+    }
+    for e in holder.descendants_with_tokens() {
+        if let Some(t) = e.as_token() {
+            if is_code(t, g) {
+                return None;
+            }
+        } else if let Some(n) = e.as_node()
+            && g.has_tag(n.kind(), "comment")
+        {
+            let text = n.text().to_string();
+            if starts.iter().any(|s| text.starts_with(s.as_str())) {
+                return Some(text);
+            }
+        }
+    }
+    None
+}
+
 struct Group {
     rows: Vec<Row>,
     outer: Vec<String>,
@@ -66,23 +97,39 @@ struct Missing {
     meta: &'static RuleMeta,
     message: String,
     groups: Vec<Group>,
-    visible: Vec<String>,
-    implicit: Vec<String>,
+    vis: Visibility,
     getters: Vec<String>,
     setters: Vec<String>,
     tags: Vec<&'static str>,
+    doc_start: Vec<String>,
+    report_name: bool,
 }
 
-fn words(text: &str) -> Vec<String> {
+/// Which declarations are visible: the params `visible`, `implicit-public-in`,
+/// `top-level-visible`, `visible-with` and `skip` of the families that read doc comments.
+pub(crate) struct Visibility {
+    visible: Vec<String>,
+    implicit: Vec<String>,
+    top_visible: bool,
+    visible_with: Vec<String>,
+    skip: Vec<String>,
+}
+
+pub(crate) fn words(text: &str) -> Vec<String> {
     text.split_whitespace().map(str::to_string).collect()
 }
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
     let message = p.text("message")?;
-    let visible = words(&p.optional("visible").unwrap_or_default());
-    let implicit = words(&p.optional("implicit-public-in").unwrap_or_default());
+    let vis = Visibility::read(&mut p)?;
     let getters = words(&p.optional("getters").unwrap_or_default());
     let setters = words(&p.optional("setters").unwrap_or_default());
+    let doc_start = words(&p.optional("doc-start").unwrap_or_default());
+    let report_name = p.choice(
+        "report-at",
+        false,
+        &[("first-token", false), ("name", true)],
+    )?;
     let mut outers = Vec::new();
     let mut groups = Vec::new();
     for (key, value) in p.rest() {
@@ -118,23 +165,34 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         meta,
         message,
         groups,
-        visible,
-        implicit,
+        vis,
         getters,
         setters,
         tags,
+        doc_start,
+        report_name,
     }))
 }
 
 /// The node with the modifiers of a declaration: `node`, or its parent when the parent holds them.
-fn holder(g: &Grammar, node: &SyntaxNode) -> SyntaxNode {
+pub(crate) fn holder(g: &Grammar, node: &SyntaxNode) -> SyntaxNode {
     match node.parent() {
         Some(p) if p.children().any(|c| g.has_tag(c.kind(), "modifiers")) => p,
         _ => node.clone(),
     }
 }
 
-impl Missing {
+impl Visibility {
+    pub(crate) fn read(p: &mut Params) -> Result<Visibility, String> {
+        Ok(Visibility {
+            visible: words(&p.optional("visible").unwrap_or_default()),
+            implicit: words(&p.optional("implicit-public-in").unwrap_or_default()),
+            top_visible: p.flag("top-level-visible")?,
+            visible_with: words(&p.optional("visible-with").unwrap_or_default()),
+            skip: words(&p.optional("skip").unwrap_or_default()),
+        })
+    }
+
     /// Is the declaration in `holder` (inside `node`'s enclosing declarations) visible without a modifier?
     fn implicit(&self, g: &Grammar, node: &SyntaxNode) -> bool {
         let Some(outer) = node
@@ -148,14 +206,65 @@ impl Missing {
             .descendants_with_tokens()
             .filter_map(|e| e.into_token())
             .find(|t| is_code(t, g));
-        keyword.is_some_and(|k| self.implicit.iter().any(|w| w == k.text()))
+        let listed = |t: &SyntaxToken| self.implicit.iter().any(|w| w == t.text());
+        keyword.as_ref().is_some_and(listed)
+            || outer
+                .children_with_tokens()
+                .filter_map(|e| e.into_token())
+                .any(|t| listed(&t))
     }
 
-    fn visible_declaration(&self, g: &Grammar, node: &SyntaxNode, holder: &SyntaxNode) -> bool {
+    /// Is the declaration outside every type (and function)?
+    fn top_level(&self, g: &Grammar, node: &SyntaxNode) -> bool {
+        self.top_visible
+            && !node
+                .ancestors()
+                .skip(1)
+                .any(|a| g.has_tag(a.kind(), "type-declaration"))
+    }
+
+    /// Is the declaration reported at all: not skipped, and visible?
+    pub(crate) fn visible_declaration(
+        &self,
+        g: &Grammar,
+        node: &SyntaxNode,
+        holder: &SyntaxNode,
+    ) -> bool {
+        !(self.skip.iter()).any(|w| has_modifier(g, holder, w))
+            && self.visible_by_modifier(g, node, holder)
+    }
+
+    pub(crate) fn words(&self) -> &[String] {
+        &self.visible
+    }
+
+    fn visible_by_modifier(&self, g: &Grammar, node: &SyntaxNode, holder: &SyntaxNode) -> bool {
         (self.visible.iter()).any(|w| has_modifier(g, holder, w))
             || (self.implicit(g, node) && !has_modifier(g, holder, "private"))
+            || (self.top_level(g, node) && !has_modifier(g, holder, "private"))
+            || (self.visible_with.iter()).any(|slot| g.slot(node, slot).is_some())
     }
 
+    /// Is every enclosing type declaration visible by one of `outer` (or implicitly)?
+    pub(crate) fn enclosing_visible(
+        &self,
+        g: &Grammar,
+        node: &SyntaxNode,
+        outer: &[String],
+    ) -> bool {
+        node.ancestors()
+            .skip(1)
+            .filter(|a| g.has_tag(a.kind(), "type-declaration"))
+            .all(|a| {
+                let h = holder(g, &a);
+                outer.iter().any(|w| has_modifier(g, &h, w))
+                    || ((self.implicit(g, &a) || self.top_level(g, &a))
+                        && !has_modifier(g, &h, "private"))
+            })
+    }
+}
+
+impl Missing {
     fn accessor(&self, g: &Grammar, node: &SyntaxNode, name: &str) -> bool {
         let prefixed = |words: &[String]| {
             (words.iter()).any(|w| {
@@ -203,35 +312,22 @@ impl Rule for Missing {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let g = ctx.file.grammar;
-        let Some(group) = self
+        let Some((group, row)) = self
             .groups
             .iter()
-            .find(|gr| gr.rows.iter().any(|r| r.matches(g, node)))
+            .find_map(|gr| gr.rows.iter().find(|r| r.matches(g, node)).map(|r| (gr, r)))
         else {
             return;
         };
         let holder = holder(g, node);
-        if !self.visible_declaration(g, node, &holder)
+        if !self.vis.visible_declaration(g, node, &holder)
             || (node.ancestors().skip(1))
                 .any(|a| g.has_tag(a.kind(), "function") || g.has_tag(a.kind(), "call"))
+            || (!group.outer.is_empty() && !self.vis.enclosing_visible(g, node, &group.outer))
         {
             return;
         }
-        if !group.outer.is_empty() {
-            for a in node
-                .ancestors()
-                .skip(1)
-                .filter(|a| g.has_tag(a.kind(), "type-declaration"))
-            {
-                let h = self::holder(g, &a);
-                let ok = group.outer.iter().any(|w| has_modifier(g, &h, w))
-                    || (self.implicit(g, &a) && !has_modifier(g, &h, "private"));
-                if !ok {
-                    return;
-                }
-            }
-        }
-        if leading_doc(&holder, g).is_some() {
+        if leading_doc_text(&holder, g, &self.doc_start).is_some() {
             return;
         }
         let allowed = ctx.options.list("allowed_annotations");
@@ -244,10 +340,15 @@ impl Rule for Missing {
             return;
         }
         let default = SlotPath::parse("name").unwrap_or_else(|_| unreachable!());
-        let Some(name) = default.find(g, node, ctx.file.text) else {
+        let Some(name) = (row.path.as_ref().unwrap_or(&default)).find(g, node, ctx.file.text)
+        else {
             return;
         };
         if ctx.options.bool("property_accessors") && self.accessor(g, node, &name.text) {
+            return;
+        }
+        if self.report_name {
+            ctx.report(name.range, self.message.replace("{name}", &name.text));
             return;
         }
         let Some(first) = holder

@@ -11,7 +11,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | `option <language>.format.<name>` | A formatter option does it. | covered, partial with a gap |
 | `formatter` | Fixed formatter behavior, no option. | covered, partial with a gap |
 | `config <text>` | Configuration outside rules and options (overrides, ignore files, presets, suppression comments). | covered, partial with a gap |
-| `sdk <id>` | A .NET SDK diagnostic (IDE, CA, CS) does it; Sudsy never reimplements these. | sdk |
+| `sdk <id>` | A .NET SDK diagnostic (IDE, CA, CS) does it and Sudsy has no rule for it (StyleCop ids with a rule are `rule`: [../design/stylecop-rules.md](../design/stylecop-rules.md)). | sdk |
 | `planned` | Accepted for implementation. | missing |
 | `deferred` | Wanted eventually, deliberately not scheduled. | deferred |
 | `wontfix <reason>` | Out of scope. | wontfix |
@@ -54,7 +54,7 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | shellcheck | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
 | sqlfluff | 86.6% | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
-| stylecop | 24.6% | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
+| stylecop | 87.3% | 197 | 126 | 10 | 1 | 39 | 21 | 0 | 1 |
 | stylelint | 94.8% | 150 | 90 | 11 | 45 | 0 | 0 | 4 | 45 |
 | stylelint-less | 85.4% | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
 | stylelint-scss | 89.9% | 71 | 16 | 2 | 52 | 0 | 0 | 1 | 52 |

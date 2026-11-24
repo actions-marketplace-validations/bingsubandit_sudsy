@@ -25,6 +25,7 @@ csharp:
       doc-comment-space: warn
       doc-param-has-name: warn
       doc-param-has-text: warn
+      doc-param-missing: warn
       doc-partial-required: warn
       doc-partial-summary-required: warn
       doc-partial-summary-text: warn
@@ -38,9 +39,11 @@ csharp:
       doc-typeparam-has-name: warn
       doc-typeparam-has-text: warn
       doc-value-text: warn
+      field-name-no-underscore: warn
       file-name-matches-type: warn
       inheritdoc-on-inheriting-member: warn
       member-order: warn
+      missing-doc-comment: warn
       no-comment-before-block: warn
       no-default-summary: warn
       no-default-value-type-constructor: warn
@@ -58,6 +61,7 @@ csharp:
       nullable-shorthand: warn
       property-summary-matches-accessors: warn
       property-summary-omits-restricted-accessor: warn
+      qualify-instance-members: warn
       qualify-namespace-usings: warn
       separate-attributes: warn
       separate-field-declarations: warn
@@ -75,3 +79,4 @@ csharp:
           compare: culture
           static_position: after
           alias_position: after
+      using-placement: warn

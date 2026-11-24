@@ -68,6 +68,9 @@ internal sealed class SymbolFindings
             case BaseExpressionSyntax b:
                 BaseCall(b);
                 break;
+            case IdentifierNameSyntax id:
+                UnqualifiedMember(id);
+                break;
             case ObjectCreationExpressionSyntax or ImplicitObjectCreationExpressionSyntax:
                 DefaultConstructor((BaseObjectCreationExpressionSyntax)node);
                 if (node is ObjectCreationExpressionSyntax creation)
@@ -165,6 +168,45 @@ internal sealed class SymbolFindings
         if (SymbolEqualityComparer.Default.Equals(target, found.Symbol))
         {
             Add("base_call", b.Span, "this");
+        }
+    }
+
+    // SA1101 -------------------------------------------------------------------------------------
+
+    private void UnqualifiedMember(IdentifierNameSyntax id)
+    {
+        switch (id.Parent)
+        {
+            case MemberAccessExpressionSyntax m when m.Name == id:
+            case MemberBindingExpressionSyntax:
+            case QualifiedNameSyntax:
+            case AliasQualifiedNameSyntax:
+            case NameColonSyntax:
+            case NameEqualsSyntax:
+            case NameMemberCrefSyntax:
+            case AssignmentExpressionSyntax { Parent: InitializerExpressionSyntax or AnonymousObjectMemberDeclaratorSyntax } a when a.Left == id:
+                return;
+        }
+
+        if (id.Parent is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }
+            || id.Ancestors().OfType<InvocationExpressionSyntax>().Any(i => i.Expression is IdentifierNameSyntax { Identifier.ValueText: "nameof" }
+                && model.GetSymbolInfo(i).Symbol is null))
+        {
+            return;
+        }
+
+        var symbol = model.GetSymbolInfo(id).Symbol;
+        var instance = symbol switch
+        {
+            IFieldSymbol f => !f.IsStatic && !f.IsConst && f.ContainingType.TypeKind != TypeKind.Enum,
+            IPropertySymbol p => !p.IsStatic,
+            IEventSymbol e => !e.IsStatic,
+            IMethodSymbol { MethodKind: MethodKind.Ordinary, ReducedFrom: null } m => !m.IsStatic,
+            _ => false,
+        };
+        if (instance)
+        {
+            Add("unqualified_member", id.Span, "this." + id.Identifier.Text);
         }
     }
 

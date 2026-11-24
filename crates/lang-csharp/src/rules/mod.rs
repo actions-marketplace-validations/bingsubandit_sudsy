@@ -32,6 +32,9 @@ use core_syntax::{SyntaxKind, SyntaxNode};
 pub static FAMILIES: &[Family] = &[
     doc_element::FAMILY,
     finding::FAMILY,
+    core_rules::doc_comments::FAMILY,
+    core_rules::doc_params::FAMILY,
+    core_rules::naming::FAMILY,
     core_rules::regex_source::FAMILY,
     core_rules::imports::family::<core_rules::imports::Plain>(),
     core_rules::simplify::FAMILY,

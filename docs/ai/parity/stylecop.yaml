@@ -40,7 +40,7 @@ entries:
   SA1027: option csharp.format.indent_style
   SA1028: formatter
   SA1100: rule no-unneeded-base-prefix
-  SA1101: sdk IDE0009
+  SA1101: rule qualify-instance-members
   SA1102: formatter
   SA1103: formatter
   SA1104: formatter
@@ -80,7 +80,7 @@ entries:
   SA1139: rule use-literal-suffix
   SA1141: rule use-tuple-syntax
   SA1142: sdk IDE0033
-  SA1200: sdk IDE0065
+  SA1200: rule using-placement
   SA1201: rule member-order
   SA1202: rule member-order
   SA1203: rule member-order
@@ -107,7 +107,7 @@ entries:
   SA1306: sdk IDE1006
   SA1307: sdk IDE1006
   SA1308: sdk IDE1006
-  SA1309: sdk IDE1006
+  SA1309: rule field-name-no-underscore
   SA1310: sdk IDE1006
   SA1311: sdk IDE1006
   SA1312: sdk IDE1006
@@ -150,9 +150,9 @@ entries:
   SA1518: option csharp.format.final_newline
   SA1519: sdk IDE0011
   SA1520: sdk IDE0011
-  SA1600: sdk CS1591
+  SA1600: rule missing-doc-comment
   SA1601: rule doc-partial-required | a partial type or method is reported when this part is undocumented even if another part is documented (needs the other parts)
-  SA1602: sdk CS1591
+  SA1602: rule missing-doc-comment
   SA1603: wontfix intentionally omitted from StyleCop Analyzers; CS1570 (badly formed XML) is the compiler's
   SA1604: rule doc-summary-required
   SA1605: rule doc-partial-summary-required | each part of a partial type or method needs its own summary here; StyleCop reads the same per-part comment, but SA1601's cross-part acceptance is not available (see SA1601)
@@ -161,7 +161,7 @@ entries:
   SA1608: rule no-default-summary
   SA1609: wontfix disabled by default upstream (property value element)
   SA1610: rule doc-value-text
-  SA1611: sdk CS1573
+  SA1611: rule doc-param-missing
   SA1612: sdk CS1572
   SA1613: rule doc-param-has-name
   SA1614: rule doc-param-has-text

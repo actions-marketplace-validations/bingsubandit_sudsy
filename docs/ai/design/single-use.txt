@@ -270,7 +270,6 @@ data tag:verbatim-trivia # users: csharp
 data tag:with-item # users: python
 data tag:wrapper # users: java
 local lang-cpp/lexer.rs source-lexer # lang: cpp
-local lang-csharp/rules/async_suffix.rs naming-convention # lang: csharp
 local lang-csharp/rules/binding.rs unused-import # lang: csharp
 local lang-csharp/rules/flow.rs unused-variable # lang: csharp
 local lang-css/format/mod.rs key-value-layout # lang: css
