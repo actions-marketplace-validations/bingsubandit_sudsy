@@ -26,11 +26,18 @@ csharp:
     wrapped_brace_line: all
     initializer_collapse: always
     initializer_expand: crowded
-    lambda_argument_hug: sole
+    initializer_group: creation
+    hug_last_argument: sole_bare
     constructor_initializer_line: new_line
     parameter_attribute_layout: hanging
     base_list_layout: hanging
     unbreakable_single_item_lists: true
+    conditional_layout: ladder
+    declarator_own_line_kinds: [VariableDeclaration]
+    stacked_flush_kinds: [UsingStatement, FixedStatement]
+    hanging_clause_kinds: [WhenClause, CatchFilterClause]
+    assignment_inline_test_kinds: [IsPatternExpression]
+    member_chain_hold_comments: true
     do_while_line: same_line
     space_between_empty_for_clauses: true
     space_after_empty_last_for_clause: true

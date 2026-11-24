@@ -294,7 +294,10 @@ pub fn binary_chain(
         && steps == 1
         && !(place == Place::Bare && logical)
         && [
-            parent.as_ref().map(SyntaxNode::kind),
+            parent
+                .as_ref()
+                .map(SyntaxNode::kind)
+                .filter(|_| policy.group_mixed_chains),
             node_kind(&spine[0].left),
             node_kind(&spine[0].right),
         ]

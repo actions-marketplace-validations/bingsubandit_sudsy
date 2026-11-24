@@ -27,18 +27,28 @@ pub const INDENT: core_config::OptId = core_config::opt::CONDITIONAL_INDENT;
 pub struct ConditionalPolicy {
     /// `chained` (else `indented`).
     pub chained: bool,
+    /// `ladder`: a chain of conditionals in the `else` branch is one ladder of lines.
+    pub ladder: bool,
     /// Levels of indentation of the branches in the `indented` layout.
     pub indent: usize,
     /// Indentation width, for the alignment of a conditional in a `then` branch.
     pub tab_width: usize,
+    /// A ladder whose parent is of one of these kinds is indented one level (a returned value).
+    pub ladder_parents: Vec<String>,
+    /// A ladder that is an item of one of these kinds is indented when its list has several.
+    pub ladder_items: Vec<String>,
 }
 
 impl ConditionalPolicy {
     pub fn of(options: &ResolvedOptions) -> Self {
+        let strings = |id| options.strings(id).map(String::from).collect();
         Self {
             chained: options.is(LAYOUT, "chained"),
+            ladder: options.is(LAYOUT, "ladder"),
             indent: options.uint(INDENT, 1),
             tab_width: options.uint(core_config::opt::INDENT_SIZE, 2),
+            ladder_parents: strings(core_config::opt::CONDITIONAL_LADDER_PARENT_KINDS),
+            ladder_items: strings(core_config::opt::CONDITIONAL_LADDER_ITEM_KINDS),
         }
     }
 }
@@ -163,6 +173,9 @@ pub fn conditional(
     if policy.chained {
         return chained(cx, node, &p, policy, hooks);
     }
+    if policy.ladder && is_ladder(cx, node) {
+        return ladder(cx, node, &p, policy, hooks);
+    }
     let before = |e: &SyntaxElement| {
         let last = match e {
             SyntaxElement::Token(t) => Some(t.clone()),
@@ -191,6 +204,67 @@ pub fn conditional(
         operand(cx, hooks, &p.test)?,
         branches,
     ])))
+}
+
+/// A conditional whose `then` is no conditional and whose `else` is one, or that is the `else` of
+/// such a conditional.
+pub fn is_ladder(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    let g = cx.grammar;
+    let kind = node.kind();
+    let slot = |n: &SyntaxNode, f: &str| g.slot(n, f).and_then(|e| e.as_node().map(roles::un));
+    if slot(node, "then").is_some_and(|t| t.kind() == kind) {
+        return false;
+    }
+    if slot(node, "else").is_some_and(|e| e.kind() == kind) {
+        return true;
+    }
+    let held = roles::outer(node);
+    held.parent().is_some_and(|up| {
+        up.kind() == kind
+            && g.slot(&up, "else").and_then(|e| e.into_node()).as_ref() == Some(&held)
+            && is_ladder(cx, &up)
+    })
+}
+
+/// `test ? a` then `: test ? b` then `: c`, each on a line of its own once any does not fit.
+fn ladder(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    p: &Parts,
+    policy: &ConditionalPolicy,
+    hooks: &dyn ConditionalHooks,
+) -> Result<Doc, FormatError> {
+    use doc::{break_parent, concat, group, indent, line};
+    let nested = roles::outer(node)
+        .parent()
+        .is_some_and(|up| up.kind() == node.kind());
+    let marked = |t: &SyntaxToken| concat(vec![hooks.token(cx, t), gap(cx, hooks, t)]);
+    let contents = group(concat(vec![
+        if nested { break_parent() } else { Doc::Nil },
+        group(concat(vec![
+            operand(cx, hooks, &p.test)?,
+            indent(concat(vec![
+                line(),
+                marked(&p.q),
+                operand(cx, hooks, &p.then)?,
+            ])),
+        ])),
+        line(),
+        group(concat(vec![
+            marked(&p.colon),
+            operand(cx, hooks, &p.other)?,
+        ])),
+    ]));
+    let is =
+        |names: &[String], n: &SyntaxNode| names.iter().any(|s| s == cx.grammar.name(n.kind()));
+    let indented = node.parent().is_some_and(|up| {
+        is(&policy.ladder_parents, &up)
+            || (is(&policy.ladder_items, &up)
+                && up
+                    .parent()
+                    .is_some_and(|l| l.children().filter(|c| c.kind() == up.kind()).count() > 1))
+    });
+    Ok(if indented { indent(contents) } else { contents })
 }
 
 fn chained(

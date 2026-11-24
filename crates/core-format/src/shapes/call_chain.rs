@@ -90,6 +90,9 @@ pub struct ChainPolicy {
     /// A chain of at most this many characters on one line of the source with fewer dots than
     /// `force_links` is never broken (`wrapped`: a third of the line width; 0: none).
     pub flat_below: usize,
+    /// The comments in front of the chain go before it: their line breaks decide nothing
+    /// (`member_chain_hold_comments`).
+    pub hold_comments: bool,
 }
 
 impl ChainPolicy {
@@ -129,6 +132,7 @@ impl ChainPolicy {
             factory_heads: options.flag(core_config::opt::MEMBER_CHAIN_FACTORY_HEADS, true),
             hug_calls: int(core_config::opt::MEMBER_CHAIN_HUG_CALLS, 0),
             indent_head: options.flag(core_config::opt::MEMBER_CHAIN_INDENT_HEAD, false),
+            hold_comments: options.flag(core_config::opt::MEMBER_CHAIN_HOLD_COMMENTS, false),
         }
     }
 }
@@ -641,8 +645,31 @@ fn soft(
 }
 
 /// The chain that ends with `node`: on one line if it fits, else the head and then one group per
-/// line.
+/// line. With `hold_comments` the comments in front of the chain go before it.
 pub fn member_chain(
+    cx: &FormatCtx<'_>,
+    node: &SyntaxNode,
+    policy: &ChainPolicy,
+    hooks: &dyn ChainHooks,
+) -> Result<Doc, FormatError> {
+    let held = policy
+        .hold_comments
+        .then(|| cx.first_token(node))
+        .flatten()
+        .filter(|t| {
+            !cx.is_held_leading(t) && !comments::leading_comments(cx.grammar, t).is_empty()
+        });
+    if let Some(t) = &held {
+        cx.hold_leading(t);
+    }
+    let doc = chain_doc(cx, node, policy, hooks)?;
+    Ok(match held {
+        Some(t) => doc::concat(vec![cx.held_leading(&t), doc]),
+        None => doc,
+    })
+}
+
+fn chain_doc(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
     policy: &ChainPolicy,

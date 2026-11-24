@@ -79,14 +79,6 @@ pub fn initializer_layout(options: &ResolvedOptions) -> ListLayout {
     }
 }
 
-pub fn expand_crowded_initializers(options: &ResolvedOptions) -> bool {
-    initializer_expand(options) == InitializerExpand::Crowded
-}
-
-pub fn hug_only_sole_lambda(options: &ResolvedOptions) -> bool {
-    lambda_argument_hug(options) == LambdaArgumentHug::Sole
-}
-
 pub fn hanging_parameter_attributes(options: &ResolvedOptions) -> bool {
     parameter_attribute_layout(options) == ParameterAttributeLayout::Hanging
 }

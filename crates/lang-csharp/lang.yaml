@@ -67,7 +67,7 @@ options:
       doc: "Blank lines between the elements of a collection initializer, array initializer or collection expression: `preserve` keeps the source's (at most one); `remove` drops them. The members of an object initializer keep theirs."
   - inline_accessor_bodies:
       default: false
-      doc: "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines."
+      doc: "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines. Accessors without a body (`{ get; set; }`) then also collapse onto one line when the source has them on several."
   - preserve_single_line_blocks:
       default: false
       doc: "A block written on one line (`void M() { return; }`, `get { return x; }`,              `if (a)` followed by `{ b(); }`) stays on one line, as `{ a; b; }`, when it has no comment and no label in it. Type, namespace, enum and `switch` bodies written on one line stay as well."
@@ -92,14 +92,15 @@ options:
   - preserve_query_breaks:
       default: false
       doc: "A query expression with a line break in the source keeps one clause per line even when it fits on a line."
+  - initializer_group:
+      values: ["own", "creation"]
+      default: "own"
+      doc: "The braces of the initializer of a `new` expression: `own` breaks them only when they do not fit; `creation` breaks them together with the whole `new T(...) { ... }`, so that they are expanded once the type and arguments do not fit on the line either."
   - initializer_expand:
       values: ["fit", "crowded"]
       default: "fit"
       doc: "Initializers (and anonymous types) that fit on a line: `fit` keeps them on it; `crowded` puts one item per line when there are three or more member assignments, or two or more items one of which creates an object with an initializer."
-  - lambda_argument_hug:
-      values: ["last", "sole"]
-      default: "last"
-      doc: "A lambda argument whose body can hang from the call's line: `last` hugs a block lambda that is the last argument; `sole` hugs a lambda (block or expression) only when it is the only argument."
+  - hug_last_argument: ["last"]
   - constructor_initializer_line:
       values: ["same_line", "new_line"]
       default: "same_line"
@@ -119,6 +120,53 @@ options:
   - unbreakable_single_item_lists:
       default: false
       doc: "Never break a list that holds one simple item: an attribute list with one attribute, a type argument list with one name, an index that is one name or literal."
+  - declarator_own_line_kinds:
+      kind: "words"
+      default: []
+      doc: "Kinds of declaration whose declarators after the first (`int a, b;`, also fields) each stand on a line of their own, indented. Empty keeps them on the line of the first."
+  - declarator_own_line_except_kinds:
+      kind: "words"
+      default: [ForStatement]
+      doc: "Kinds of parent in which the declarators of `declarator_own_line_kinds` stay on one line (the header of a `for`)."
+  - stacked_flush_kinds:
+      kind: "words"
+      default: []
+      doc: "Kinds of statement (`using`, `fixed`) whose body is another statement of the same kind: it goes on the next line at the same level, so that a stack of them reads like a list. Empty indents it like any embedded statement."
+  - hanging_clause_kinds:
+      kind: "words"
+      default: []
+      doc: "Kinds of clause (`when` of a `catch` filter or a `case` guard) that move to an indented line of their own when the whole does not fit; a condition in parentheses hugs them. Empty keeps them on the line of what precedes them."
+  - hanging_clause_inline_after:
+      kind: "words"
+      default: [SwitchExpressionArm, DiscardPattern]
+      doc: "Pairs of a parent kind and the kind of its first child: a hanging clause of such a parent stays on the line (`_ when x`)."
+  - attached_value_kinds:
+      kind: "words"
+      default: [ObjectInitializerExpression, CollectionInitializerExpression, ArrayInitializerExpression, ComplexElementInitializerExpression, WithInitializerExpression, CollectionExpression]
+      doc: "With `wrapped_brace_line: all`: kinds of the value of an assignment whose braces or brackets start on the operator's line when the value breaks."
+  - attached_parent_kinds:
+      kind: "words"
+      default: [SimpleAssignmentExpression, EqualsValueClause]
+      doc: "Kinds of assignment whose value is attached (`attached_value_kinds`)."
+  - attached_except_kinds:
+      kind: "words"
+      default: [PropertyDeclaration]
+      doc: "Kinds of parent of an assignment (`attached_parent_kinds`) whose value is not attached: a property's initializer moves as a whole."
+  - assignment_inline_test_kinds:
+      kind: "words"
+      default: []
+      doc: "Kinds of operator chain that, as the test of a conditional, do not move the conditional below the operator of an assignment (`x is null ? a : b`)."
+  - conditional_ladder_parent_kinds:
+      kind: "words"
+      default: [ReturnStatement]
+      doc: "With `conditional_layout: ladder`: kinds of parent of a ladder that is indented one level (a returned value)."
+  - conditional_ladder_item_kinds:
+      kind: "words"
+      default: [Argument]
+      doc: "With `conditional_layout: ladder`: kinds of an item of a list that indent a ladder when the list has several of them (an argument among others)."
+  - member_chain_hold_comments:
+      default: false
+      doc: "The comments in front of a member chain stay in front of it: their line breaks do not decide whether the chain breaks."
   - do_while_line:
       values: ["new_line", "same_line"]
       default: "new_line"

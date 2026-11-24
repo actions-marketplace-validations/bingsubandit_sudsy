@@ -9,7 +9,6 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
 | PHP | lint PHPStan | 3 | 0.0% | 85.0 | 1395 findings | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `staticMethod.notFound` 90 +4 more | 24 | 10.62 | d3ae913f |
-| C# | format CSharpier | 3 | 79.0% | 6.0 | 459 files | `unclassified` 459 | 3 | 6.02 | - |
 
 Blocked on a decision:
 
@@ -19,7 +18,7 @@ Blocked on a decision:
 
 Not measured: C# lint Roslynator (no target); C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 2: PHP lint PHPStan; C# format CSharpier.
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 1: PHP lint PHPStan.
 
 ## actionlint
 
@@ -124,7 +123,7 @@ Format: unclassified 0 of 4570 differing files (0%).
 
 ## csharpier
 
-Format: unclassified 1602 of 1602 differing files (100%).
+Format: unclassified 1103 of 1103 differing files (100%).
 
 ## csharpier-xml
 

@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 24 languages, early support for 3 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 25 languages, early support for 2 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -14,7 +14,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, HTML, Vue / Svelte, Angular templates, CSS / SCSS / Less, Markdown, YAML, JSON / JSONC, PowerShell, Java, Kotlin, Shell, SQL, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, HTML, Vue / Svelte, Angular templates, CSS / SCSS / Less, Markdown, YAML, JSON / JSONC, PowerShell, Java, Kotlin, Shell, SQL, C#, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore and Ruby. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -82,6 +82,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
 | SQL | ████████░░ 85% sqlfluff | ████████░░ 86% sqlfluff | Ready |
+| C# | ████████░░ 85% CSharpier | ████████░░ 87% StyleCop<br>not measured Roslynator | Ready |
 | XML | █████████░ 99% CSharpier XML | 20 rules · no reference tool | Ready |
 | Dockerfile | ██████████ 100% stable · no reference tool | █████████░ 91% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
@@ -89,7 +90,6 @@ Each number is measured on real-world code against the reference tool with its d
 | INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 27 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ░░░░░░░░░░ 0% PHPStan | In progress |
-| C# | ███████░░░ 78% CSharpier | ████████░░ 87% StyleCop<br>not measured Roslynator | In progress |
 | C / C++ | ███░░░░░░░ 31% clang-format | not measured clang-tidy | In progress |
 
 Notes: clang-format (C / C++): line wrapping is not compared.
@@ -116,7 +116,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CSS, Dockerfile, EditorCon
 | Java | 23 | google-java-format | [1](https://github.com/google/google-java-format#using-the-formatter) |
 | Protobuf | 4 | buf format | [0](https://buf.build/docs/format/style) |
 | Terraform (HCL) | 3 | terraform fmt | [0](https://developer.hashicorp.com/terraform/cli/commands/fmt) |
-| C# | 78 | CSharpier | [5](https://csharpier.com/docs/Options) |
+| C# | 91 | CSharpier | [5](https://csharpier.com/docs/Options) |
 <!-- /generated -->
 
 - **Your own rules:** [YAML patterns](docs/rules.md#pattern-rules) with fixes, and sandboxed [Wasm plugins](docs/rules.md#wasm-plugins).

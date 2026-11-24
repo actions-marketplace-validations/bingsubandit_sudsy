@@ -12,7 +12,7 @@ use super::options::{
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc};
 use core_format::seq::{children, el, first, last};
-use core_format::shapes::paren_group;
+use core_format::shapes::{self, paren_group};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -226,6 +226,9 @@ fn separator_raw(
             && cx.grammar.has_tag(nk, "statement")
             && !(pk == k::ELSE_CLAUSE && nk == k::IF_STATEMENT)
         {
+            if core_format::seq::stacked_flush(cx, parent, n) {
+                return Sep::Hard;
+            }
             return Sep::Embedded;
         }
         if matches!(nk, k::ELSE_CLAUSE | k::CATCH_CLAUSE | k::FINALLY_CLAUSE) {
@@ -234,6 +237,9 @@ fn separator_raw(
             } else {
                 Sep::Hard
             };
+        }
+        if shapes::hangs(cx, nk) {
+            return Sep::None; // starts with a `line` of its own
         }
         if nk == k::TYPE_PARAMETER_CONSTRAINT_CLAUSE {
             return Sep::HardIndented;
@@ -260,6 +266,9 @@ fn separator_raw(
         } else {
             Sep::Hard
         };
+    }
+    if core_format::seq::own_line_declarator(cx, parent, prev) {
+        return Sep::HardIndented;
     }
     if pk == k::DO_STATEMENT
         && matches!(next, SyntaxElement::Token(t) if t.kind() == k::WHILE_KEYWORD)
@@ -341,6 +350,8 @@ fn has_paren_condition(kind: SyntaxKind) -> bool {
             | k::DO_STATEMENT
             | k::LOCK_STATEMENT
             | k::SWITCH_STATEMENT
+            | k::USING_STATEMENT
+            | k::FIXED_STATEMENT
     )
 }
 

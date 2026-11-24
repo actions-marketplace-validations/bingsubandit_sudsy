@@ -37,7 +37,7 @@ pub mod tabular;
 pub use arrow::{ArrowStyle, arrow_body};
 pub use assignment::{
     Assign, AssignHooks, AssignLayout, AssignPolicy, AssignStyle, NoAssignHooks, assignment,
-    complex_type_args, is_assign_op,
+    attached, complex_type_args, is_assign_op,
 };
 pub use binary_chain::{
     BinaryHooks, BinaryPolicy, Hug, NoBinaryHooks, OperatorLine, Place, binary_chain, flattens,
@@ -74,10 +74,13 @@ pub use heritage::{ClauseBreak, HeritageLayout, clause_break, clause_list, herit
 pub use inline_list::{InlineItem, InlineStyle, inline_list};
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{
-    ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, delimited_list,
-    delimited_list_around, delimited_list_between,
+    Crowded, ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, creation_group, crowded,
+    delimited_list, delimited_list_around, delimited_list_between, in_creation_group,
 };
-pub use maybe_parenthesize::{between, enclosed, head_test, keyword_argument, maybe_parenthesize};
+pub use maybe_parenthesize::{
+    HangPolicy, between, enclosed, hang_operand, hanging_clause, hangs, head_test,
+    keyword_argument, maybe_parenthesize,
+};
 pub use omit_parens::{OmitHooks, can_omit, head_fits};
 pub use paren_list::paren_list;
 pub use parens::{

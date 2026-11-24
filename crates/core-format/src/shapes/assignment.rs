@@ -7,7 +7,7 @@
 //! concept: assignment-layout
 //! what: Where the line breaks between the operator and the right side of an assignment or entry.
 //! tools: Prettier assignment layouts, google-java-format assignment wrapping
-//! reads: option:assignment_layout, tag:assignment
+//! reads: option:assignment_layout, option:attached_value_kinds, tag:assignment
 
 use super::chain::ends_in_line_comment;
 use crate::FormatCtx;
@@ -58,6 +58,8 @@ pub enum AssignLayout {
     /// The right side always starts a new line (a line comment ends the operator's line).
     BreakAlways,
     OnlyLeft,
+    /// The right side starts with a line of its own: `left op` and the right side, no blank.
+    Attached,
 }
 
 /// The values where reference tools differ; a language declares each as an option.
@@ -66,10 +68,14 @@ pub struct AssignPolicy {
     /// A conditional on the right moves below the operator; else only one whose test is an
     /// operator chain does.
     pub conditional_always: bool,
+    /// A ladder of conditionals (`layout: ladder`) moves below the operator.
+    pub conditional_ladder: bool,
     /// Kinds besides operator chains that count as one in the test of a conditional.
     pub conditional_test_kinds: Vec<String>,
     /// Levels of indentation of the right side below the operator.
     pub indent: usize,
+    /// Kinds of operator chain that stay on the operator's line as the test of a conditional.
+    pub inline_test_kinds: Vec<String>,
 }
 
 impl AssignPolicy {
@@ -83,13 +89,45 @@ impl AssignPolicy {
                 _ => AssignStyle::Compact,
             },
             conditional_always: text(CONDITIONAL) == "always",
+            conditional_ladder: options.is(super::conditional::LAYOUT, "ladder"),
             conditional_test_kinds: options
                 .strings(core_config::opt::ASSIGNMENT_CONDITIONAL_TEST_KINDS)
                 .map(String::from)
                 .collect(),
             indent: options.uint(INDENT, 1),
+            inline_test_kinds: options
+                .strings(core_config::opt::ASSIGNMENT_INLINE_TEST_KINDS)
+                .map(String::from)
+                .collect(),
         }
     }
+
+    /// Is `n` an operator chain that stays inline: the test of a conditional, of a listed kind?
+    fn inline_test(&self, cx: &FormatCtx<'_>, n: &SyntaxNode) -> bool {
+        let g = cx.grammar;
+        self.inline_test_kinds.iter().any(|k| k == g.name(n.kind()))
+            && n.parent()
+                .is_some_and(|p| g.has_tag(p.kind(), "conditional"))
+    }
+}
+
+/// Is `node` the value of an assignment whose braces or brackets start on the operator's line
+/// (`wrapped_brace_line: all`; kinds of `attached_value_kinds`), and nothing is in front of it? The
+/// assignment is a node of `attached_parent_kinds` that is no child of `attached_except_kinds`.
+pub fn attached(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    let (g, o) = (cx.grammar, cx.options);
+    let has = |id, n: &SyntaxNode| o.list_has(id, g.name(n.kind()));
+    o.is(core_config::opt::WRAPPED_BRACE_LINE, "all")
+        && has(core_config::opt::ATTACHED_VALUE_KINDS, node)
+        && node.parent().is_some_and(|p| {
+            has(core_config::opt::ATTACHED_PARENT_KINDS, &p)
+                && !p
+                    .parent()
+                    .is_some_and(|d| has(core_config::opt::ATTACHED_EXCEPT_KINDS, &d))
+        })
+        && !cx
+            .first_token(node)
+            .is_some_and(|t| !comments::leading_comments(g, &t).is_empty())
 }
 
 /// An assignment with its left side and operator printed.
@@ -246,6 +284,7 @@ fn render(layout: AssignLayout, left: Doc, op: Doc, right: Doc, levels: usize) -
             indented(levels, doc::concat(vec![doc::hardline(), right])),
         ]),
         OnlyLeft => left,
+        Attached => doc::group(doc::concat(vec![doc::group(left), op, right])),
     }
 }
 
@@ -393,15 +432,19 @@ fn choose(
         return BreakLhs;
     }
     if let Some(r) = &right_inner {
-        if g.has_tag(r.kind(), "binary-chain") && !hooks.inline_binary(cx, r) {
+        if g.has_tag(r.kind(), "binary-chain")
+            && !(hooks.inline_binary(cx, r) || policy.inline_test(cx, r))
+        {
             return BreakAfterOperator;
         }
         if g.has_tag(r.kind(), "conditional")
             && (policy.conditional_always
+                || (policy.conditional_ladder && super::conditional::is_ladder(cx, r))
                 || g.slot(r, "condition")
                     .and_then(|e| e.as_node().map(roles::un))
                     .is_some_and(|t| {
-                        (g.has_tag(t.kind(), "binary-chain") && !hooks.inline_binary(cx, &t))
+                        (g.has_tag(t.kind(), "binary-chain")
+                            && !(hooks.inline_binary(cx, &t) || policy.inline_test(cx, &t)))
                             || policy
                                 .conditional_test_kinds
                                 .iter()
@@ -417,6 +460,9 @@ fn choose(
         && !cx.options.list_has(HUG_EXCEPT, g.name(a.node.kind()))
     {
         return NeverBreakAfterOperator;
+    }
+    if right.as_node().is_some_and(|r| attached(cx, r)) {
+        return Attached;
     }
     if let Some(l) = hooks.layout(cx, a, right, policy) {
         return l;
