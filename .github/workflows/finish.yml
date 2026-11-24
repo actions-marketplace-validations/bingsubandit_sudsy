@@ -113,6 +113,12 @@ jobs:
         with:
           tool: nextest
       - run: cargo xtask codegen --check
+      # The corpora of the landing check (scripts/parity_landing.py): the gate runs the fetch scripts, which are idempotent per pinned commit.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tests/conformance/corpus
+          key: corpus-landing-${{ hashFiles('tests/conformance/fetch-*.sh', 'tests/conformance/tarball-corpus.sh') }}
+          restore-keys: corpus-landing-
       - name: Gate
         env:
           GATE_ARGS: ${{ inputs.gate_args }}

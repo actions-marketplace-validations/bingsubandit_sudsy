@@ -28,6 +28,7 @@ from pathlib import Path
 
 import yaml
 
+import parity_landing
 import parity_wrap
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -278,6 +279,17 @@ def placed(folder, name, source):
     return folder / (name if source.get("nested") else name.replace("/", "__"))
 
 
+def copy_path(config, source, here, name):
+    """`placed`, with the extension the language is read from: `copy_as` of the source (`.h` of a C++ project is `.cpp`),
+    `copy_suffix` of the tool (Angular: `*.component.html`)."""
+    copy = placed(here, name, source)
+    if "copy_as" in source:
+        copy = copy.with_name(copy.name + source["copy_as"])
+    if "copy_suffix" in config:
+        copy = copy.with_name(copy.name.removesuffix(".html") + config["copy_suffix"])
+    return copy
+
+
 def upstream(config, prefix, version, copy, work, style=None, folder=None):
     """The tool's output for the copy of a fixture, or None when it rejects the file."""
     exe = executable(prefix, config.get("install", {}).get("exe", ""))
@@ -522,11 +534,16 @@ def editorconfig_cases(version, sudsy, parity):
     return bad
 
 
-def prepare(config, parity):
-    """Builds what the entry needs, fetches its corpora and installs the tool; returns (version, prefix)."""
+def use_worker(config):
+    """Builds the C# worker for an entry that needs it and points Sudsy at it."""
     if "worker" in config.get("needs", []):
         run(["dotnet", "build", "--nologo", "-v:q", "workers/csharp/Sudsy.Worker"], ROOT)
         os.environ.setdefault("SUDSY_CSHARP_WORKER", str(ROOT / "workers/csharp/Sudsy.Worker/bin/Debug/net10.0/Sudsy.Worker.dll"))
+
+
+def prepare(config, parity):
+    """Builds what the entry needs, fetches its corpora and installs the tool; returns (version, prefix)."""
+    use_worker(config)
     for script in config.get("fetch", []):
         run(["bash", script], ROOT)
     if "catalog" not in config:
@@ -578,12 +595,8 @@ def main():
         name, fixture, _, source = item
         style = source.get("style")
         here = work / f"style-{style}" if style else work  # a style has its own folder and `sudsy.yaml` (`<style>.yaml` of the tool's folder)
-        copy = placed(here, name, source)
+        copy = copy_path(config, source, here, name)
         copy.parent.mkdir(parents=True, exist_ok=True)
-        if "copy_as" in source:  # the language comes from the extension: `.h` of a C++ project is `.cpp`
-            copy = copy.with_name(copy.name + source["copy_as"])
-        if "copy_suffix" in config:  # the file name selects the language (Angular: `*.component.html`)
-            copy = copy.with_name(copy.name.removesuffix(".html") + config["copy_suffix"])
         shutil.copy(fixture, copy)
         theirs = batch[name] if batch is not None else upstream(config, prefix, version, copy, here, style)
         ours, refused = sudsy_format(sudsy, copy, here, config.get("sudsy_command", "format"))
@@ -593,7 +606,7 @@ def main():
         masked = False
         if config.get("ignore_trailing_blanks"):  # the tool keeps the trailing blanks of a line, Sudsy never does
             before = theirs == ours
-            theirs, ours = (re.sub(r"[ 	]+$", "", t, flags=re.M) if t is not None else None for t in (theirs, ours))
+            theirs, ours = (parity_landing.normalize(config, t) if t is not None else None for t in (theirs, ours))
             masked = not before and theirs == ours
         flagged["ignore_trailing_blanks"] += masked
         if checker and theirs is not None:
@@ -666,6 +679,11 @@ def main():
             bad += now > top
     bad += known.finish(only is not None)
     known.summary()
+    if os.environ.get("PARITY_WRITE") and only is None:  # the landing sample (scripts/parity_landing.py): the corpus files that equal the tool's output now
+        if "wrap_compare" in config:
+            print("landing sample: not written (the comparison is not byte equality)")
+        else:
+            parity_landing.write(folder, tool, {path: theirs for (_, path, _, _), (theirs, ours, _, _) in zip(found, results) if theirs is not None and theirs == ours})
     rejected = sum(theirs is None for theirs, *_ in results)
     for flag, why in known.flags.items():  # reference-tool flags that turn a feature off: named gaps, with the files they apply to
         count = filters["skip_with"] if flag == "skip_with" else flagged[flag] if flag in flagged else len(found)

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import parity_coverage as pc
 import parity_format as pf
+import parity_landing as pld
 import parity_lint as pl
 import parity_stability as ps
 import parity_wrap as pw
@@ -340,6 +341,74 @@ class Pwsh(unittest.TestCase):
                 pf.ensure_pwsh("7.5.4", Path(tmp))
                 self.assertTrue(pf.os.environ["PATH"].startswith(str(Path(tmp) / "pwsh-7.5.4")))
             self.assertIn("powershell-7.5.4-linux-", calls[0])
+
+
+class Landing(unittest.TestCase):
+    """The landing check on a throwaway corpus and a fake `sudsy` that upper-cases the files it is given."""
+
+    def setup(self, tmp, sample="keep", corpus_files=("a.txt", "b.txt")):
+        tmp = Path(tmp)
+        corpus, folder = tmp / "corpus", tmp / "leg"
+        corpus.mkdir()
+        folder.mkdir()
+        (folder / "sudsy.yaml").write_text("", encoding="utf-8")
+        for name in corpus_files:
+            (corpus / name).write_text(f"{name}\n", encoding="utf-8")
+        exe = tmp / "sudsy"
+        exe.write_text('#!/bin/sh\nshift\nfor f; do tr a-z A-Z < "$f" > "$f.t"; mv "$f.t" "$f"; done\n', encoding="utf-8")
+        exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+        if sample == "keep":
+            sample = "".join(f"{pld.digest(n.upper() + chr(10))} {n}\n" for n in ("a.txt", "b.txt"))
+        (folder / "landing.txt").write_text(pld.HEADER + sample, encoding="utf-8")
+        config = {"fixtures": [{"dir": str(corpus), "suffixes": [".txt"]}]}
+        return config, folder, str(exe), tmp / "work", corpus
+
+    def check(self, tmp, ci=False, **kw):
+        config, folder, exe, work, corpus = self.setup(tmp, **kw)
+        return pld.check("leg", config, folder, exe, work, ci, corpus)
+
+    def test_files_equal_to_the_recorded_hashes_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self.check(tmp), ([], None))
+
+    def test_a_wrong_hash_fails_and_names_the_file_and_the_way_to_record_a_wanted_difference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems, _ = self.check(tmp, sample=f"{pld.digest('A.TXT' + chr(10))} a.txt\n{'0' * 16} b.txt\n")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("1 of 2", problems[0])
+        self.assertIn("  b.txt", problems[0])
+        self.assertNotIn("  a.txt", problems[0])
+        self.assertIn("PARITY_WRITE=1 scripts/parity.sh format leg", problems[0])
+
+    def test_an_empty_or_missing_sample_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(len(self.check(tmp, sample="")[0]), 1)
+        with tempfile.TemporaryDirectory() as tmp:
+            config, folder, exe, work, corpus = self.setup(tmp)
+            (folder / "landing.txt").unlink()
+            self.assertEqual(len(pld.check("leg", config, folder, exe, work, False, corpus)[0]), 1)
+
+    def test_a_missing_corpus_file_fails_in_ci_and_is_named_when_skipped_elsewhere(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems, note = self.check(tmp, ci=True, corpus_files=("a.txt",))
+            self.assertEqual((len(problems), note), (1, None))
+            self.assertIn("corpus is absent", problems[0])
+        with tempfile.TemporaryDirectory() as tmp:
+            problems, note = self.check(tmp, corpus_files=("a.txt",))
+            self.assertEqual(problems, [])
+            self.assertIn("skipped", note)
+
+    def test_the_sample_is_the_first_files_in_hash_order_and_reads_back(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            corpus, folder = Path(tmp) / "corpus", Path(tmp)
+            equal = {corpus / f"f{i}.txt": f"t{i}\n" for i in range(pld.SAMPLE + 50)}
+            with contextlib.redirect_stdout(io.StringIO()):
+                pld.write(folder, "leg", equal, corpus)
+                pld.write(folder, "leg", {Path(tmp) / "outside.txt": "x"}, corpus)  # not a pinned corpus file: the sample stays
+            entries = pld.read(folder)
+        self.assertEqual(len(entries), pld.SAMPLE)
+        self.assertEqual(entries, sorted(entries, key=lambda e: e[1]))
+        self.assertEqual(entries[0][0], pld.digest(equal[corpus / entries[0][1]]))
 
 
 if __name__ == "__main__":

@@ -2,7 +2,8 @@
 # Pre-commit gate. Usage: scripts/gate.sh [--rust-only] [--affected [--base REV]] [-p <crate>]...
 # Default: everything. --affected: what `cargo xtask affected` selects for the change against REV
 # (default the merge-base with origin/main): its crates (clippy, tests, doctests), the codegen check,
-# the sample plugin, the changed workers (workers/<name>/check.sh) and the extension. -p (repeatable)
+# the sample plugin, the changed workers (workers/<name>/check.sh), the extension and the landing check
+# (`scripts/parity.sh landing`: when formatting code changed). -p (repeatable)
 # limits clippy and tests to those crates and skips the rest. fmt always checks the whole workspace.
 # Each step is killed after GATE_TIMEOUT seconds (default 1800) and the gate fails.
 set -uo pipefail
@@ -26,7 +27,7 @@ gate() {
   local name=$1 t=$SECONDS from; shift; from=$(wc -l <"$glog")
   echo "== $name" >>"$glog"
   timeout -k 15 "${GATE_TIMEOUT:-1800}" "$@" >>"$glog" 2>&1; local rc=$?
-  [ $rc -eq 0 ] && return 0
+  if [ $rc -eq 0 ]; then [ -z "${CI:-}" ] || echo "gate step: $name $((SECONDS - t))s"; return 0; fi  # CI logs show what each step took
   [ $rc -eq 124 ] && echo "GATE TIMED OUT after ${GATE_TIMEOUT:-1800}s (GATE_TIMEOUT): $name" >&2
   echo "GATE FAILED: $name ($((SECONDS - t))s)" >&2
   tail -n +$((from + 2)) "$glog" >"$glog.step"; fail_summary "$glog.step" "$glog" >&2
@@ -49,7 +50,7 @@ elif [ $affected = 1 ]; then
   crates=$(sed -n 's/^crates //p' <<<"$sel") steps=$(sed -n 's/^steps //p' <<<"$sel")
   ws=(); if [ "$crates" = all ]; then ws=(--workspace); else for c in $crates; do ws+=(-p "$c"); done; fi
 else
-  ws=(--workspace) steps="codegen sample-plugin vscode"
+  ws=(--workspace) steps="codegen landing sample-plugin vscode"
   for w in workers/*/check.sh; do steps="$steps worker:$(basename "$(dirname "$w")")"; done
 fi
 has() { case " $steps " in *" $1 "*) return 0 ;; esac; return 1; }
@@ -85,6 +86,12 @@ if [ ${#ws[@]} -gt 0 ]; then
     case "$a" in -p) ;; --workspace) doc+=("$a") ;; *) [ -f "crates/$a/src/lib.rs" ] && doc+=(-p "$a") ;; esac
   done
   [ ${#doc[@]} -gt 0 ] && gate "cargo test --doc" cargo test "${doc[@]}" --doc
+fi
+if has landing; then
+  # Corpus files that equal the reference formatter's output must still do (scripts/parity_landing.py). CI fetches the corpora (cached);
+  # elsewhere a missing corpus skips its leg with the fetch script named.
+  [ -n "${CI:-}" ] && for f in $(python3 scripts/parity_landing.py --fetch); do gate "fetch $f" bash "$f"; done
+  gate "landing check" bash scripts/parity.sh landing
 fi
 if has sample-plugin; then
   # The sample plugin is a workspace of its own: format check and its native rule tests. With a

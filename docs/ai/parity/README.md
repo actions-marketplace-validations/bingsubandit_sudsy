@@ -64,7 +64,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | terraform | - | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | tflint | 93.0% | `7514c1f3` | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
 | typescript-eslint | 100.0% | `7514c1f3` | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
-| yamllint | 99.6% | `4aebdcad` | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
+| yamllint | 98.5% | `dc16e446` | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
 <!-- /generated -->
 
 ## Lint coverage by function

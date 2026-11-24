@@ -629,9 +629,11 @@ Lint: target 93% (133 of 143, 10 missed, measured on 7514c1f3); rules by missed 
 
 ## yamllint
 
-Lint: target 99.6% (1995 of 2004, 9 missed, measured on 4aebdcad); rules by missed findings:
-1. `comments.require-starting-space` (3 missed)
-2. `comments-indentation` (2 missed)
-3. `document-start` (2 missed)
-4. `truthy` (2 missed)
+Lint: target 98.5% (2240 of 2274, 34 missed, measured on dc16e446); rules by missed findings:
+1. `indentation` (11 missed)
+2. `empty-lines` (7 missed)
+3. `document-start` (6 missed)
+4. `comments.require-starting-space` (5 missed)
+5. `trailing-spaces` (3 missed)
+6. `comments-indentation` (2 missed)
 

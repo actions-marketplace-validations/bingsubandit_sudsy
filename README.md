@@ -75,7 +75,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Angular templates | █████████░ 97% Prettier | 156 rules · no reference tool | Ready |
 | CSS / SCSS / Less | ████████░░ 87% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 85% stylelint-less | Ready |
 | Markdown | █████████░ 92% Prettier | █████████░ 99% markdownlint | Ready |
-| YAML | █████████░ 94% Prettier | █████████░ 99% yamllint | Ready |
+| YAML | █████████░ 94% Prettier | █████████░ 98% yamllint | Ready |
 | JSON / JSONC | █████████░ 99% Prettier<br>█████████░ 99% Biome | ██████████ 100% eslint-plugin-jsonc | Ready |
 | PowerShell | █████████░ 92% Invoke-Formatter | ████████░░ 87% PSScriptAnalyzer | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
