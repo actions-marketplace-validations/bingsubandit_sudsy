@@ -20,6 +20,8 @@ pub const NAMESPACE_INDENTATION: core_config::OptId = core_config::opt::NAMESPAC
 #[allow(dead_code)]
 pub const POINTER_ALIGNMENT: core_config::OptId = core_config::opt::POINTER_ALIGNMENT;
 #[allow(dead_code)]
+pub const DERIVE_POINTER_ALIGNMENT: core_config::OptId = core_config::opt::DERIVE_POINTER_ALIGNMENT;
+#[allow(dead_code)]
 pub const BRACE_WRAPPING: core_config::OptId = core_config::opt::BRACE_WRAPPING;
 #[allow(dead_code)]
 pub const ALIGN_WITH_TABS: core_config::OptId = core_config::opt::ALIGN_WITH_TABS;
@@ -69,6 +71,13 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("indent_goto_labels", "flush_unless", "", &["LabelStatement"]),
     ("indent_pp_directives", "tight", "", &["Directive"]),
     ("namespace_indentation", "flat", "", &["NamespaceDeclaration"]),
+    ("pointer_alignment", "pointer", "", &["Star", "Amp", "AmpAmp"]),
+    ("pointer_alignment", "pointer_bare", "", &["TemplateArguments"]),
+    ("pointer_alignment", "pointer_end", "", &["Greater", "Comma", "Rpar", "Ellipsis"]),
+    ("pointer_alignment", "pointer_in", "", &["Parameter", "FunctionDeclaration", "SimpleDeclaration", "TemplateArguments"]),
+    ("pointer_alignment", "pointer_in_under", "", &["Cast"]),
+    ("pointer_alignment", "pointer_name", "", &["Ident", "Keyword"]),
+    ("pointer_alignment", "pointer_type", "", &["Ident", "Keyword", "Greater"]),
     ("pointer_alignment", "tight_after", "", &["Ellipsis"]),
     ("pointer_alignment", "tight_behind", "", &["Star", "Amp", "AmpAmp"]),
     ("brace_wrapping", "attach", "class", &["ClassSpecifier"]),
@@ -146,6 +155,10 @@ pub fn pointer_alignment(o: &core_config::ResolvedOptions) -> PointerAlignment {
         "middle" => PointerAlignment::Middle,
         _ => PointerAlignment::Right,
     }
+}
+#[allow(dead_code)]
+pub fn derive_pointer_alignment(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(DERIVE_POINTER_ALIGNMENT, false)
 }
 #[allow(dead_code)]
 pub fn align_with_tabs(o: &core_config::ResolvedOptions) -> bool {
@@ -325,6 +338,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::INDENT_PP_DIRECTIVES, &["none", "keep"], "none", "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."),
         core_config::OptionDef::choice(core_config::opt::NAMESPACE_INDENTATION, &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
         core_config::OptionDef::choice(core_config::opt::POINTER_ALIGNMENT, &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
+        core_config::OptionDef::boolean(core_config::opt::DERIVE_POINTER_ALIGNMENT, false, "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."),
         core_config::OptionDef::words(core_config::opt::BRACE_WRAPPING, &[], "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."),
         core_config::OptionDef::boolean(core_config::opt::ALIGN_WITH_TABS, false, "With `indent_style: tab`, the alignment of continuation lines uses tabs for each whole indent width and spaces for the rest."),
         core_config::OptionDef::boolean(core_config::opt::INDENT_BRACES, false, "Indent a brace that is on its own line together with the block it opens."),

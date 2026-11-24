@@ -153,6 +153,32 @@ impl Flow<'_> {
         Some(!cx.options.strings(name).any(|w| w == word))
     }
 
+    /// The blank between a declarator mark (`*`, `&`) and its neighbour per the language's pointer
+    /// alignment (`derive_pointer_alignment`: the file's), `None` when `a` and `b` are no such pair.
+    fn pointer_blank(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_pointer())?;
+        let side = match cx.options.get(core_config::opt::POINTER_ALIGNMENT) {
+            Some(core_config::OptionValue::String(s)) => s.as_str(),
+            _ => return None,
+        };
+        let derived = || match cx.pointer_net(|| rules.pointer_evidence(a)) {
+            n if n > 0 => "right",
+            n if n < 0 => "left",
+            _ => side,
+        };
+        let side = if cx.options.bool(core_config::opt::DERIVE_POINTER_ALIGNMENT) {
+            derived()
+        } else {
+            side
+        };
+        let (before, after) = match side {
+            "left" => (false, true),
+            "middle" => (true, true),
+            _ => (true, false),
+        };
+        rules.pointer_gap(a, b, before, after)
+    }
+
     /// What stands between two neighbouring tokens: a line break the source has, else a blank
     /// where the spacing rule or the source wants one.
     pub fn between(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<Doc> {
@@ -192,7 +218,7 @@ impl Flow<'_> {
                 return (space && !glued).then(|| doc::lit(" "));
             }
         }
-        match self.want(a, b) {
+        match self.pointer_blank(cx, a, b).or_else(|| self.want(a, b)) {
             Some(blank) => blank.then(|| doc::lit(" ")),
             None if broken => Some(doc::lit(" ")),
             None if !gap => self.at_least_one(a, b).then(|| doc::lit(" ")),

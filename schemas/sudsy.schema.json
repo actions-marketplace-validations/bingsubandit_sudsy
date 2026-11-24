@@ -7853,6 +7853,11 @@
               "minimum": 0,
               "type": "integer"
             },
+            "derive_pointer_alignment": {
+              "default": false,
+              "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+              "type": "boolean"
+            },
             "end_of_line": {
               "default": "auto",
               "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -8173,6 +8178,11 @@
               "maximum": 16,
               "minimum": 0,
               "type": "integer"
+            },
+            "derive_pointer_alignment": {
+              "default": false,
+              "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+              "type": "boolean"
             },
             "end_of_line": {
               "default": "auto",
@@ -11734,6 +11744,11 @@
                     "minimum": 0,
                     "type": "integer"
                   },
+                  "derive_pointer_alignment": {
+                    "default": false,
+                    "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+                    "type": "boolean"
+                  },
                   "end_of_line": {
                     "default": "auto",
                     "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -12054,6 +12069,11 @@
                     "maximum": 16,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "derive_pointer_alignment": {
+                    "default": false,
+                    "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+                    "type": "boolean"
                   },
                   "end_of_line": {
                     "default": "auto",

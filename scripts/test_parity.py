@@ -250,7 +250,7 @@ class Stability(unittest.TestCase):
 
 WRAP_CFG = {"gap_kinds": ["Whitespace", "Newline", "Continuation"], "comment_kind": "Comment", "eof_kind": "EndOfFile", "string_kind": "String", "brace_kinds": ["Lbrace", "Rbrace"], "macro_boundary": ["Semi", "Lbrace", "Rbrace"], "paren_kinds": ["Lpar", "Rpar"], "format_off": "clang-format off", "format_on": "clang-format on", "boundary": ["statement", "directive"], "container": ["block"], "wrap_inside": []}
 WRAP_TAGS = {"Stmt": {"statement"}, "Directive": {"directive"}}
-WRAP_TOKENS = [("Comment", r"//[^\n]*"), ("Continuation", r"\\\n"), ("Ident", r"\w+"), ("Semi", ";"), ("Lbrace", "{"), ("Rbrace", "}"), ("Lpar", r"\("), ("Rpar", r"\)"), ("Equal", "="), ("Plus", r"\+"), ("Hash", "#")]
+WRAP_TOKENS = [("String", r'(?:u8|u|U|L)?"[^"\n]*"'), ("Comment", r"//[^\n]*"), ("Continuation", r"\\\n"), ("Ident", r"\w+"), ("Semi", ";"), ("Lbrace", "{"), ("Rbrace", "}"), ("Lpar", r"\("), ("Rpar", r"\)"), ("Equal", "="), ("Plus", r"\+"), ("Hash", "#")]
 
 
 def wrap_tree(src, nodes, bom=False):
@@ -329,6 +329,37 @@ class Wrap(unittest.TestCase):
         src = "// clang-format off\nx = a +\n  b;\n// clang-format on\ny = c;\n"
         self.assertTrue(wrap_equal(src, src, nodes)[0])
         self.assertFalse(wrap_equal(src, src.replace("a +\n  b", "a + b"), nodes)[0])
+
+
+    def literal_score(self, source, theirs, ours, nodes=STMT):
+        """Checker.score on texts whose trees come from the test lexer."""
+        chk = pw.Checker.__new__(pw.Checker)
+        chk.tree = lambda text, suffix: wrap_tree(text, nodes)
+        r = chk.score(theirs, ours, ".c", None, source)
+        return r["ok"], r["causes"]
+
+    def test_a_string_literal_the_tool_split_equals_the_whole_literal(self):
+        one, two = 'x = "abcd";\n', 'x = "ab"\n    "cd";\n'
+        self.assertEqual(self.literal_score(one, two, one), (True, []))
+        self.assertEqual(self.literal_score('x = L"abcd";\n', 'x = L"ab"\n    L"cd";\n', 'x = L"abcd";\n'), (True, []))
+        self.assertEqual(self.literal_score(one, two, 'x = "abXd";\n'), (False, ["tokens-other"]))  # another content
+        self.assertEqual(self.literal_score(one, two, 'x = L"abcd";\n'), (False, ["tokens-other"]))  # another prefix
+        self.assertEqual(self.literal_score(one, 'x = L"ab"\n    "cd";\n', one), (False, ["tokens-other"]))  # a run of two prefixes
+
+    def test_a_source_of_two_literals_stays_two_unless_the_tool_changed_them(self):
+        two, one = 'x = "ab" "cd";\n', 'x = "abcd";\n'
+        self.assertEqual(self.literal_score(two, two, one), (False, ["tokens-string-split"]))  # Sudsy joined what the tool kept
+        self.assertEqual(self.literal_score(two, 'x = "ab"\n    "cd" "e";\n', 'x = "ab" "cd" "e";\n'), (True, []))
+        self.assertEqual(self.literal_score(two, 'x = "a"\n    "b"\n    "cd";\n', two), (True, []))  # the tool split further
+
+    def test_no_literal_is_joined_in_a_directive_or_under_clang_format_off(self):
+        directive = [("Directive", "#", ";")]
+        theirs, ours = '#define X "ab"\n  "cd";\n', '#define X "abcd";\n'
+        self.assertEqual(self.literal_score(ours, theirs, ours, directive), (False, ["tokens-other"]))
+        off = [("Stmt", "//", ";")]
+        theirs = '// clang-format off\nx = "ab"\n  "cd";\n// clang-format on\n'
+        ours = '// clang-format off\nx = "abcd";\n// clang-format on\n'
+        self.assertEqual(self.literal_score(ours, theirs, ours, off), (False, ["tokens-other"]))
 
 
 class FetchScripts(unittest.TestCase):

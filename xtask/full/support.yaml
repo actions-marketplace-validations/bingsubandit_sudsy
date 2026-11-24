@@ -107,7 +107,7 @@
   format: [{tool: csharpier-xml, name: CSharpier XML, groups: [real-world]}]
 - language: C / C++
   ids: [c, cpp]
-  format: [{tool: clang-format, name: clang-format, note: "line wrapping is not compared", blocked: "bar for the new comparison"}]
+  format: [{tool: clang-format, name: clang-format, note: "line wrapping is not compared"}]
   lint: [{tool: clang-tidy, name: clang-tidy, blocked: "C/C++ is paused until the clang-format comparison is decided"}]
 - language: Ruby
   ids: [ruby]

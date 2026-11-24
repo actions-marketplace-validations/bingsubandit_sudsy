@@ -1,5 +1,5 @@
 differences:
-  pointer-align: "gap  `*` of a pointer declarator: clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing (`*` is `keep`)"
+  pointer-align: "gap  `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing"
   reference-align: "gap  `&` and `&&` of a reference declarator, the same as pointer-align"
   binary-op-space: "gap  blanks around a binary operator (`a*b`, `x+1`, `0 ... N-1`, in a `#if` condition too): clang-format writes one blank on each side, Sudsy keeps the source"
   braced-list-padding: "gap  blanks inside braces of an initializer list (`{ 1, 2 }` against `{1, 2}`, `{ }` against `{}`; Cpp11BracedListStyle)"
@@ -8,7 +8,7 @@ differences:
   angle-space: "gap  blanks next to `<` and `>`: template brackets (`F<int>`, `template <typename...>`) and comparisons in `#if` conditions"
   short-body-joined-by-reference: "gap  a lambda or enum body that clang-format joins onto the line when it fits (AllowShortLambdasOnASingleLine, AllowShortEnumsOnASingleLine) where the source breaks it"
   macro-body-indent: "gap  continuation lines of a `#define` body: clang-format indents the nested `do {` bodies and aligns the `\\`, Sudsy keeps the source indent"
-  break-string-literals: "gap  a string literal that clang-format splits in two at the column limit (BreakStringLiterals; a token change and a wrap)"
+  break-string-literals: "gap  a string literal that clang-format splits in two at the column limit (BreakStringLiterals): the comparison reads it as the one literal, so the files of this name differ in another cause"
   line-after-comment-indent-or-join: "gap  the line after a comment (a parameter, a declarator, an initializer item) that clang-format re-indents or joins"
   comment-line-indent-or-join: "gap  a comment on its own line (or right after `{`) whose indent or place differs: clang-format aligns it with the code it belongs to, Sudsy keeps the source indent"
   empty-body-braces: "gap  an empty function body: clang-format keeps `{` and `}` on two lines when the `{` is on its own line (SplitEmptyFunction), Sudsy joins them to `{}`"
@@ -62,7 +62,7 @@ fixes:
   angle-space: "[space] rows by node (TemplateArguments, TemplateParameters, Binary); directive conditions as in binary-op-space"
   short-body-joined-by-reference: "short_lambdas and short_enums keep the source's choice when short; join a body that fits (the `join` policy of the shared block shape)"
   macro-body-indent: "lay out the body with the statement rows when it parses (`do { } while (0)`, blocks); align_escaped_newlines columns"
-  break-string-literals: "none in the formatter: Sudsy never splits strings; decide whether the comparison reads two adjacent strings as one, or BreakStringLiterals is turned off in the styles"
+  break-string-literals: "none: Sudsy never splits strings and the comparison reads a split as the whole literal; classify these files again by their remaining cause"
   line-after-comment-indent-or-join: "rides on parameter and initializer layout"
   comment-line-indent-or-join: "comment_gap rows: a comment takes the indent of the next line of code in the shared comment engine"
   empty-body-braces: "an option split_empty_body read by the shared block shape"
@@ -95,14 +95,14 @@ fixes:
   wrap-blank-lines: "max_blank_lines at a wrap point"
 unclassified: 0
 ratchet:
-  llvm: 273
-  fmt: 40
-  range-v3: 95
-  folly: 542
-  linux: 1111
-  sqlite: 15
+  llvm: 288
+  fmt: 41
+  range-v3: 161
+  folly: 1263
+  linux: 1153
+  sqlite: 20
   google: 2
-  chromium: 1
+  chromium: 2
   mozilla: 0
   webkit: 0
   gnu: 0

@@ -9,6 +9,7 @@ the output (`debug tree`): the node kinds and tags of the language's grammar fil
 compared exactly: newline count, brace placement, spacing, and the indentation of the first token of a line relative to the
 line that anchors its enclosing block (the line where the statement that owns the block starts, where the lambda starts,
 or the line of an initializer's `{`; so the indentation of a wrapped enclosing statement does not matter).
+Adjacent string literals that the reference tool split (BreakStringLiterals) are one literal: see `string_joins`.
 """
 import copy
 import os
@@ -149,6 +150,58 @@ def norm(tree, i):
     return re.sub(rb"[ \t]*\n[ \t]*", b"\n", t) if tree.cm[i] else t
 
 
+STRING = re.compile(rb'^(u8|u|U|L)?"(.*)"$', re.S)
+
+
+def string_runs(tree):
+    """The runs of adjacent string literals with one prefix (a raw string has none; a directive and the text under
+    `clang-format off` have no runs): [first token, one past the last, prefix, joined contents]. A single literal is a run."""
+    runs = []
+    for i in range(tree.n):
+        m = None
+        if tree.kind[i] == tree.string and not tree.dr[i] and not tree.off[i]:
+            m = STRING.match(tree.src[tree.start[i] : tree.end[i]])
+        if not m:
+            continue
+        prefix = m.group(1) or b""
+        if runs and runs[-1][1] == i and runs[-1][2] == prefix:
+            runs[-1][1] = i + 1
+            runs[-1][3] += m.group(2)
+        else:
+            runs.append([i, i + 1, prefix, m.group(2)])
+    return runs
+
+
+def string_joins(ref, out, src):
+    """BreakStringLiterals: the runs of `ref` and of `out` to join into one literal, or None when a difference is not the
+    tool's split. The runs are equal in order, prefix and joined contents; where their literal counts differ the tool must
+    have joined or split the run, so its count is not the one of the source tree `src` (a source of two literals that Sudsy
+    changed is a difference)."""
+    rr, ro, rs = string_runs(ref), string_runs(out), string_runs(src)
+    if len(rr) != len(ro) or any(a[2:] != b[2:] for a, b in zip(rr, ro)):
+        return None
+    joins = ([], [])
+    for k, (a, b) in enumerate(zip(rr, ro)):
+        na, nb = a[1] - a[0], b[1] - b[0]
+        if na == nb:
+            continue
+        if len(rs) != len(rr) or na == rs[k][1] - rs[k][0]:
+            return None
+        for side, run, n in ((0, a, na), (1, b, nb)):
+            if n > 1:
+                joins[side].append(run)
+    return joins
+
+
+def joined_text(tree, runs):
+    """The text of `tree` with each of `runs` written as one literal."""
+    text, pos = [], 0
+    for first, last, prefix, body in runs:
+        text += [tree.src[pos : tree.start[first]], prefix + b'"' + body + b'"']
+        pos = tree.end[last - 1]
+    return b"".join(text + [tree.src[pos:]]).decode("utf-8")
+
+
 def tokens_equal(a, b):
     """None when equal; else the kind of difference."""
     ta, tb = [norm(a, i) for i in range(a.n)], [norm(b, i) for i in range(b.n)]
@@ -158,14 +211,11 @@ def tokens_equal(a, b):
         return "tokens-reorder"
 
     def merge(tr, toks):
-        out, prev = [], False
-        for t, k in zip(toks, tr.kind):
-            q = k == tr.string and t.startswith(b'"')
-            if q and prev:
-                out[-1] = out[-1][:-1] + t[1:]
-            else:
-                out.append(t)
-            prev = q
+        out, i, runs = [], 0, {r[0]: r for r in string_runs(tr)}
+        while i < len(toks):
+            r = runs.get(i)
+            out.append(r[2] + b'"' + r[3] + b'"' if r else toks[i])
+            i = r[1] if r else i + 1
         return out
 
     if merge(a, ta) == merge(b, tb):
@@ -245,14 +295,21 @@ class Checker:
             return None
         return Tree(self.cfg, self.tags, r.stdout.decode("utf-8", "replace"), data)
 
-    def score(self, theirs, ours, suffix, ref_tree=None):
+    def score(self, theirs, ours, suffix, ref_tree=None, source=None):
         """The result of one file: ok, causes, wraps; the column-limit guard is added by the caller. `ours` is a text,
-        or a Tree built from the reference's own tokens (a control), whose wrap points are the reference's."""
+        or a Tree built from the reference's own tokens (a control), whose wrap points are the reference's. `source` is the
+        text both tools read: a string literal the reference tool split is compared as the whole literal."""
         ref = ref_tree or self.tree(theirs, suffix)
         out = ours if isinstance(ours, Tree) else self.tree(ours, suffix)
         if ref is None or out is None:
             return {"ok": False, "causes": ["tree"], "wraps": 0}
         ok, causes, wraps = compare(ref, out, ref if out is ours else None)
+        joins = string_joins(ref, out, self.tree(source, suffix)) if causes == ["tokens-string-split"] and source is not None else None
+        if joins:
+            ref, out = (self.tree(joined_text(t, j), suffix) if j else t for t, j in zip((ref, out), joins))
+            if ref is None or out is None:
+                return {"ok": False, "causes": ["tree"], "wraps": 0}
+            ok, causes, wraps = compare(ref, out)
         return {"ok": ok, "causes": causes, "wraps": wraps}
 
 
@@ -385,11 +442,12 @@ def file_result(checker, cfg, folder, style, theirs, ours, copy, controlled, var
     limit = column_limit(cfg, folder, style)
     ref = checker.tree(theirs, suffix)
     base = over_limit(theirs, limit)
+    source = copy.read_text(encoding="utf-8")
 
     def one(text):
         if text is None:
             return {"ok": False, "causes": ["rejected"], "wraps": 0, "byte": False, "guard": False}
-        r = checker.score(theirs, text, suffix, ref)
+        r = checker.score(theirs, text, suffix, ref, source)
         raw = text.src.decode("utf-8") if isinstance(text, Tree) else text
         r.update(byte=raw == theirs, guard=over_limit(raw, limit) > base)
         return r
@@ -403,7 +461,7 @@ def file_result(checker, cfg, folder, style, theirs, ours, copy, controlled, var
         if ours is not None:
             (d.parent / (d.name + ".S")).write_text(ours, encoding="utf-8")
     if controlled and ref is not None:
-        c = {"self": one(theirs), "verbatim": one(copy.read_text(encoding="utf-8"))}
+        c = {"self": one(theirs), "verbatim": one(source)}
         for name, text in controls(checker, ref, theirs, suffix, copy.name).items():
             c[name] = one(text)
         for name in cfg["variants"]:

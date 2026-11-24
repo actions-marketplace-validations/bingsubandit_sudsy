@@ -336,6 +336,8 @@ pub struct FormatCtx<'a> {
     cache: std::sync::OnceLock<Box<dyn std::any::Any + Send + Sync>>,
     /// The widths for `align_comments` (see [`crate::align`]), measured when first asked for.
     comment_align: std::sync::OnceLock<crate::align::AlignTable>,
+    /// The pointer evidence of the file (`derive_pointer_alignment`), counted when first asked for.
+    pointer_net: std::sync::OnceLock<i32>,
     /// The shared shapes' policies, built from the options on first use ([`FormatCtx::chain_policy`]).
     policies: Policies,
     /// Documents of nodes formatted for a layout, by node and flags (see [`FormatCtx::layout`]).
@@ -348,6 +350,11 @@ pub struct FormatCtx<'a> {
 }
 
 impl<'a> FormatCtx<'a> {
+    /// The pointer evidence of the file: `count` runs once.
+    pub fn pointer_net(&self, count: impl FnOnce() -> i32) -> i32 {
+        *self.pointer_net.get_or_init(count)
+    }
+
     pub fn new(
         grammar: &'a Grammar,
         options: &'a ResolvedOptions,
@@ -372,6 +379,7 @@ impl<'a> FormatCtx<'a> {
             any_held_leading: std::sync::atomic::AtomicBool::new(false),
             cache: std::sync::OnceLock::new(),
             comment_align: std::sync::OnceLock::new(),
+            pointer_net: std::sync::OnceLock::new(),
             policies: Policies::default(),
             layouts: Mutex::new(HashMap::new()),
             embedder: None,

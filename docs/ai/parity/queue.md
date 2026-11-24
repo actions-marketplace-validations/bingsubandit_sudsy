@@ -11,18 +11,13 @@ Weight: the primary tool of a leg 3, a popular secondary 2, any other 1. Points:
 | SQL | lint sqlfluff | 3 | 38.2% | 46.8 | 19639 findings | `LT02` 8585, `LT01` 6332, `CP02` 3270, `CP01` 2630 | 8 | 17.55 | 66718389 |
 | HTML | lint html-eslint | 2 | 69.9% | 15.1 | 49 findings | `use-baseline` 58 | 3 | 10.07 | 9de1e355 |
 | PHP | lint PHPStan | 3 | 31.0% | 54.0 | 594 findings | `class.notFound` 254, `method.notFound` 94, `function.notFound` 80, `ignore.unmatchedLine` 62 +3 more | 19 | 8.53 | 9de1e355 |
+| C / C++ | format clang-format | 3 | 44.1% | 40.9 | 2714 files | `pointer-align` 983, `reference-align` 910, `binary-op-space` 370, `braced-list-padding` 230 +1 more | 15 | 8.17 | - |
 | SQL | format sqlfluff | 3 | 63.3% | 21.7 | 147 files | `if-condition-wrap` 50, `type-args-split` 31, `index-on-wrap` 28, `identifier-case` 26 +1 more | 15 | 4.34 | - |
 | C# | lint Roslynator | 1 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 1.13 | 66718389 |
 
-Blocked on a decision:
-
-| Language | Leg | Now | Points | Reason |
-|---|---|---|---|---|
-| C / C++ | format clang-format | 31.3% | 53.7 | bar for the new comparison |
-
 Not measured: C / C++ lint clang-tidy (no target, blocked).
 
-New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 3: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff.
+New language: locked until every primary leg is at the bar. Blocked legs do not hold it. Held by 4: PHP lint PHPStan; SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format.
 
 ## actionlint
 
@@ -91,8 +86,8 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 
 ## clang-format
 
-Format: unclassified 0 of 4560 differing files (0%).
-1. `pointer-align` (983 files): `*` of a pointer declarator: clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing (`*` is `keep`) Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
+Format: unclassified 0 of 3709 differing files (0%).
+1. `pointer-align` (983 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 2. `reference-align` (910 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`
 3. `binary-op-space` (370 files): blanks around a binary operator (`a*b`, `x+1`, `0 ... N-1`, in a `#if` condition too): clang-format writes one blank on each side, Sudsy keeps the source Fix: [space] rows for the operators of Binary nodes; directive conditions need the expression parse of `#if` lines
 4. `braced-list-padding` (230 files): blanks inside braces of an initializer list (`{ 1, 2 }` against `{1, 2}`, `{ }` against `{}`; Cpp11BracedListStyle) Fix: [space] rows after `{` and before `}` of InitList nodes, one padding option
@@ -101,7 +96,7 @@ Format: unclassified 0 of 4560 differing files (0%).
 7. `angle-space` (140 files): blanks next to `<` and `>`: template brackets (`F<int>`, `template <typename...>`) and comparisons in `#if` conditions Fix: [space] rows by node (TemplateArguments, TemplateParameters, Binary); directive conditions as in binary-op-space
 8. `short-body-joined-by-reference` (122 files): a lambda or enum body that clang-format joins onto the line when it fits (AllowShortLambdasOnASingleLine, AllowShortEnumsOnASingleLine) where the source breaks it Fix: short_lambdas and short_enums keep the source's choice when short; join a body that fits (the `join` policy of the shared block shape)
 9. `macro-body-indent` (121 files): continuation lines of a `#define` body: clang-format indents the nested `do {` bodies and aligns the `\`, Sudsy keeps the source indent Fix: lay out the body with the statement rows when it parses (`do { } while (0)`, blocks); align_escaped_newlines columns
-10. `break-string-literals` (103 files): a string literal that clang-format splits in two at the column limit (BreakStringLiterals; a token change and a wrap) Fix: none in the formatter: Sudsy never splits strings; decide whether the comparison reads two adjacent strings as one, or BreakStringLiterals is turned off in the styles
+10. `break-string-literals` (103 files): a string literal that clang-format splits in two at the column limit (BreakStringLiterals): the comparison reads it as the one literal, so the files of this name differ in another cause Fix: none: Sudsy never splits strings and the comparison reads a split as the whole literal; classify these files again by their remaining cause
 11. `line-after-comment-indent-or-join` (79 files): the line after a comment (a parameter, a declarator, an initializer item) that clang-format re-indents or joins Fix: rides on parameter and initializer layout
 12. `comment-line-indent-or-join` (75 files): a comment on its own line (or right after `{`) whose indent or place differs: clang-format aligns it with the code it belongs to, Sudsy keeps the source indent Fix: comment_gap rows: a comment takes the indent of the next line of code in the shared comment engine
 13. `empty-body-braces` (68 files): an empty function body: clang-format keeps `{` and `}` on two lines when the `{` is on its own line (SplitEmptyFunction), Sudsy joins them to `{}` Fix: an option split_empty_body read by the shared block shape

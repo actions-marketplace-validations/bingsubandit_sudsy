@@ -479,3 +479,60 @@ fn a_header_keeps_the_text_of_cpp_strings() {
         assert!(out.contains("  int y;"), "{id}: {out}");
     }
 }
+
+fn fmt_pointers(side: &str, derive: bool, input: &str) -> String {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = vec![
+        ("pointer_alignment", V::String(side.into())),
+        ("derive_pointer_alignment", V::Bool(derive)),
+    ];
+    core_format::testing::assert_formats(&formatting, input)
+}
+
+const POINTERS: &str = "void f(int* a, const T &b, U&& c, int**d, char *const e, Args &&...args) {\n  int * x = 0, *y;\n  vector<int *> v;\n  auto p = (char*)q;\n  T& r = x;\n}\nT*g(T *a);\n";
+
+#[test]
+fn pointers_and_references_follow_pointer_alignment() {
+    assert_eq!(
+        fmt_pointers("right", false, POINTERS),
+        "void f(int *a, const T &b, U &&c, int **d, char *const e, Args &&...args) {\n  int *x = 0, *y;\n  vector<int *> v;\n  auto p = (char *)q;\n  T &r = x;\n}\nT *g(T *a);\n"
+    );
+    assert_eq!(
+        fmt_pointers("left", false, POINTERS),
+        "void f(int* a, const T& b, U&& c, int** d, char* const e, Args&&...args) {\n  int* x = 0, *y;\n  vector<int*> v;\n  auto p = (char*)q;\n  T& r = x;\n}\nT* g(T* a);\n"
+    );
+    assert_eq!(
+        fmt_pointers("middle", false, "void f(int* a, const T &b);\n"),
+        "void f(int * a, const T & b);\n"
+    );
+}
+
+#[test]
+fn a_multiplication_or_bitwise_and_keeps_its_blanks() {
+    let src = "void f() {\n  x = a * b;\n  y = a * b & c;\n  Foo<N * 2> w;\n  Foo<N * M> z;\n  int n = k * 2;\n}\nT operator*(T a);\nT operator&(T a, T b);\n";
+    for side in ["right", "left"] {
+        assert_eq!(fmt_pointers(side, false, src), src, "{side}");
+    }
+}
+
+#[test]
+fn the_file_gives_the_pointer_alignment_when_asked() {
+    let right = "int *a;\nint *b;\nint* c;\n";
+    assert_eq!(
+        fmt_pointers("left", true, right),
+        "int *a;\nint *b;\nint *c;\n"
+    );
+    assert_eq!(
+        fmt_pointers("left", false, right),
+        "int* a;\nint* b;\nint* c;\n"
+    );
+    let tie = "int *a;\nint* b;\n";
+    assert_eq!(fmt_pointers("left", true, tie), "int* a;\nint* b;\n");
+    assert_eq!(fmt_pointers("right", true, tie), "int *a;\nint *b;\n");
+    assert_eq!(
+        fmt_pointers("right", true, "int* a;\nint* b;\nint *c;\n"),
+        "int* a;\nint* b;\nint* c;\n"
+    );
+}

@@ -541,6 +541,48 @@ pub struct SpaceRules {
     /// The `tight_after` and `tight_behind` kind sets: no blank after a token of the first when the
     /// token before it is of the second (`Args &&...rest`).
     tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
+    /// The declarator marks (`*`, `&`) of the `pointer_alignment` kind sets.
+    pointer: Pointer,
+}
+
+/// The kind sets of the declarator marks: `pointer` (the marks), `pointer_in` (their parents) and
+/// `pointer_in_under` (the grandparents of marks in a parenthesized type), `pointer_type` (what
+/// stands before the first mark: a type), `pointer_name` (what a name behind the last mark is),
+/// `pointer_bare` (parents that hold types only, where a mark needs a `pointer_end` token behind it
+/// to be no multiplication).
+#[derive(Default)]
+struct Pointer {
+    marks: Vec<SyntaxKind>,
+    within: Vec<SyntaxKind>,
+    under: Vec<SyntaxKind>,
+    types: Vec<SyntaxKind>,
+    names: Vec<SyntaxKind>,
+    bare: Vec<SyntaxKind>,
+    end: Vec<SyntaxKind>,
+}
+
+/// The previous token that is no blank.
+fn prev_code(t: &SyntaxToken) -> Option<SyntaxToken> {
+    let mut p = t.prev_token();
+    while let Some(x) = &p {
+        if !x.text().trim().is_empty() {
+            break;
+        }
+        p = x.prev_token();
+    }
+    p
+}
+
+/// The next token that is no blank.
+fn next_code(t: &SyntaxToken) -> Option<SyntaxToken> {
+    let mut p = t.next_token();
+    while let Some(x) = &p {
+        if !x.text().trim().is_empty() {
+            break;
+        }
+        p = x.next_token();
+    }
+    p
 }
 
 fn row(grammar: &Grammar, line: &str) -> Row {
@@ -623,6 +665,15 @@ impl SpaceRules {
         SpaceRules {
             attach,
             tight: (set("tight_after"), set("tight_behind")),
+            pointer: Pointer {
+                marks: set("pointer"),
+                within: set("pointer_in"),
+                under: set("pointer_in_under"),
+                types: set("pointer_type"),
+                names: set("pointer_name"),
+                bare: set("pointer_bare"),
+                end: set("pointer_end"),
+            },
             index: Index::build(&space),
             space,
             joined: rows("joined"),
@@ -674,6 +725,85 @@ impl SpaceRules {
             prev = p.prev_token();
         }
         prev.is_some_and(|p| self.tight.1.contains(&p.kind()))
+    }
+
+    /// Does the language have declarator marks (`pointer` kind set)?
+    pub fn has_pointer(&self) -> bool {
+        !self.pointer.marks.is_empty()
+    }
+
+    /// Is `t` the `*` or `&` of a declarator (`T *x`, `T&`, `(char *)`, `vector<int *>`)? One whose
+    /// parent is no declaration part, that follows no type or mark, or that a multiplication or a
+    /// bitwise and can be (`N * 2` in template arguments, `operator*`) is none: its blanks stay.
+    pub fn is_mark(&self, t: &SyntaxToken) -> bool {
+        let p = &self.pointer;
+        if !p.marks.contains(&t.kind()) {
+            return false;
+        }
+        let Some(parent) = t.parent() else {
+            return false;
+        };
+        if !(p.within.contains(&parent.kind())
+            || parent.parent().is_some_and(|g| p.under.contains(&g.kind())))
+        {
+            return false;
+        }
+        let mut prev = prev_code(t);
+        while let Some(x) = prev.as_ref().filter(|x| p.marks.contains(&x.kind())) {
+            prev = prev_code(x);
+        }
+        if !prev.is_some_and(|x| p.types.contains(&x.kind()) && x.text() != "operator") {
+            return false;
+        }
+        if p.bare.contains(&parent.kind()) {
+            let mut next = next_code(t);
+            while let Some(x) = next.as_ref().filter(|x| p.marks.contains(&x.kind())) {
+                next = next_code(x);
+            }
+            return next.is_some_and(|x| p.end.contains(&x.kind()));
+        }
+        true
+    }
+
+    /// The blank between `a` and `b` when one of them is a declarator mark: `before` stands for the
+    /// blank in front of the first mark, `after` for the one behind the last, where a name follows.
+    pub fn pointer_gap(
+        &self,
+        a: &SyntaxToken,
+        b: &SyntaxToken,
+        before: bool,
+        after: bool,
+    ) -> Option<bool> {
+        if !self.has_pointer() {
+            return None;
+        }
+        if self.is_mark(b) {
+            return Some(if self.is_mark(a) { false } else { before });
+        }
+        (self.pointer.names.contains(&b.kind()) && self.is_mark(a)).then_some(after)
+    }
+
+    /// Right-aligned marks (a blank before, none behind) minus left-aligned ones (none before, a
+    /// blank behind) of the tree `t` is in (the evidence of `derive_pointer_alignment`).
+    pub fn pointer_evidence(&self, t: &SyntaxToken) -> i32 {
+        let Some(root) = t.parent().and_then(|p| p.ancestors().last()) else {
+            return 0;
+        };
+        let blank = |x: Option<SyntaxToken>| {
+            x.is_some_and(|x| x.text().trim().is_empty() && !x.text().contains('\n'))
+        };
+        let mut net = 0;
+        for m in root
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|m| self.pointer.marks.contains(&m.kind()))
+        {
+            let (before, after) = (blank(m.prev_token()), blank(m.next_token()));
+            if before != after && self.is_mark(&m) {
+                net += if before { 1 } else { -1 };
+            }
+        }
+        net
     }
 
     /// `Flow::want`: a blank between the tokens (`None`: as the source has it).

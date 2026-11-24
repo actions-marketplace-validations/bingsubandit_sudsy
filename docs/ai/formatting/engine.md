@@ -65,6 +65,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `content_newline_with_attributes` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `content_newline_with_elements` | bool | html `false`, angular `false`, vue `false`, svelte `false` |
 | `continuation_indent` | int 0-16 | cpp `4`, c `4` |
+| `derive_pointer_alignment` | bool | cpp `false`, c `false` |
 | `dialect` | json: `auto`, `json`, `jsonc`; html: `auto`, `html`, `template`, `template-open`; sql: `ansi`, `postgres`, `mysql`, `tsql` | json `auto`, html `auto`, sql `ansi` |
 | `document_end` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |
 | `document_start` | `preserve`, `always`, `never` | yaml `preserve`, github-actions `preserve` |

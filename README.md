@@ -90,7 +90,7 @@ Each number is measured on real-world code against the reference tool with its d
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 31% PHPStan | In progress |
 | SQL | ██████░░░░ 63% sqlfluff | ███░░░░░░░ 38% sqlfluff | In progress |
-| C / C++ | ███░░░░░░░ 31% clang-format | not measured clang-tidy | In progress |
+| C / C++ | ████░░░░░░ 44% clang-format | not measured clang-tidy | In progress |
 
 Notes: clang-format (C / C++): line wrapping is not compared.
 

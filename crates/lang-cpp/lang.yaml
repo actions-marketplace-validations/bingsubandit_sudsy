@@ -52,6 +52,16 @@ options:
       kinds:
         tight_after: [Ellipsis]
         tight_behind: [Star, Amp, AmpAmp]
+        pointer: [Star, Amp, AmpAmp]
+        pointer_in: [Parameter, FunctionDeclaration, SimpleDeclaration, TemplateArguments]
+        pointer_in_under: [Cast]
+        pointer_type: [Ident, Keyword, Greater]
+        pointer_name: [Ident, Keyword]
+        pointer_bare: [TemplateArguments]
+        pointer_end: [Greater, Comma, Rpar, Ellipsis]
+  - derive_pointer_alignment:
+      default: false
+      doc: "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."
   - brace_wrapping:
       kind: "words"
       doc: "Constructs whose opening brace goes on its own line: `class`, `struct`, `union`, `enum`, `function`, `namespace`, `extern`, `control` (if, for, while, switch, do, try), `case`, `else` (the `else` after a block starts a line), `catch` (the `catch` after a block starts a line), `while` (the `while` of a do loop starts a line). Empty: every brace stays on the line of its construct."

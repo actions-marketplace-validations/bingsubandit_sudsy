@@ -9,4 +9,5 @@ cpp:
     indent_case_labels: true
     penalty_return_type: 200
     pointer_alignment: left
+    derive_pointer_alignment: true
     spaces_before_trailing_comments: 2
