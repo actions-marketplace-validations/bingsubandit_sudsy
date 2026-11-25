@@ -2,8 +2,14 @@ id: no-debugger
 per-language: true
 message: a call that stops in a debugger was left in the code
 description: >-
-  A debugger statement, a call of one of the `calls` that start a debugger or an import matching `imports` (ESLint no-debugger,
-  ruff T100); a language lists its calls in its grammar's `rule` row.
+  Reports a statement or a call that stops the program in a debugger: a `debugger;` statement, a
+  call of one of the `calls` of the language (Python `breakpoint()`, `pdb.set_trace()`), or an
+  import matching the option `imports`. A language lists its calls in its grammar's `rule` row.
+why: >-
+  A debugger call left in the code stops the program for whoever runs it, and in production it hangs
+  a request or a process. It is always a leftover.
+
+  To fix, delete the statement.
 example: 'debugger;'
 severity: warn
 category: suspicious

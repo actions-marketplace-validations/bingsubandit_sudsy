@@ -22,8 +22,15 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A function with a block body declares the return type the language gives \
-                  it anyway (`: Unit`). The fix leaves out the colon and the type.",
+        description: "Removes a return type that the language gives every function with a block body \
+              anyway (`fun f(): Unit { }` in Kotlin; the types come from the option \
+              `redundant_return_types`). The functions are those with a block body, the type is \
+              the one after the colon that follows the parameters. The rule works in the \
+              formatter, which applies it when it is on (Kotlin has it on); `sudsy lint` makes \
+              no report for it.",
+        why: "The type says nothing the reader does not already know, and it makes the signature \
+              longer. `Unit` is what a block body returns when it has no `return` of a value.\n\
+              To fix, delete the colon and the type; the formatter does it.",
         example: "fun f(): Unit { }",
         format: true,
     }

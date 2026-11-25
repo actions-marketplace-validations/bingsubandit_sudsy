@@ -60,15 +60,13 @@ function configuration(r) {
   ].filter(Boolean).join('\n\n');
 }
 
-// The example of a page stays short: an input over 25 lines is cut to the lines around the reported spans
-// (`...` between; the context shrinks from 3 to 0 lines, then the last spans are left out, until at most 30 lines remain); the fixed text is cut
+// The example of a page is the window of the rule's own findings: the lines around the reported spans
+// (`...` between), without the lines where only other rules of the shared fixture report. The context shrinks
+// from 3 to 0 lines, then the last spans are left out, until at most 25 lines remain; the fixed text is cut
 // the same way when it has the same line count, else left out.
-const MAX_EXAMPLE = 25;
-const MAX_SHOWN = 30;
+const MAX_SHOWN = 25;
 function cut(e) {
   const lines = e.input.replace(/\n$/, '').split('\n');
-  if (lines.length <= MAX_EXAMPLE) return { lines, spans: e.spans, fixed: e.fixed?.replace(/\n$/, '') };
-  // Shrink the context, then drop the last spans, until at most 30 lines remain.
   for (let n = e.spans.length; n >= 1; n--) {
     for (const context of [3, 2, 1, 0]) {
       const result = cutAround({ ...e, spans: e.spans.slice(0, n) }, lines, context);
@@ -79,6 +77,7 @@ function cut(e) {
 }
 function cutAround(e, lines, context) {
   const keep = new Set();
+  const skip = new Set(e.other_lines ?? []);
   for (const s of e.spans) for (let l = Math.max(1, s.line - context); l <= Math.min(lines.length, s.line + context); l++) keep.add(l);
   const fixedLines = e.fixed?.replace(/\n$/, '').split('\n');
   const map = new Map(); // old line -> new line
@@ -86,7 +85,7 @@ function cutAround(e, lines, context) {
   const fixedOut = [];
   let prev = 0;
   for (let l = 1; l <= lines.length; l++) {
-    if (!keep.has(l)) continue;
+    if (!keep.has(l) || skip.has(l)) continue;
     if (l > prev + 1) { out.push('...'); fixedOut.push('...'); }
     out.push(lines[l - 1]);
     fixedOut.push(fixedLines?.[l - 1]);

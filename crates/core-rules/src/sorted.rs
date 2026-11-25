@@ -23,11 +23,20 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "The keys of a mapping are not in order (alphabetical by default). The keys \
-                  reported are chosen by `report`, and the first report carries the fix. \
-                  Comments on lines of their own stay where they are, a comment after an entry \
-                  moves with it; moving a YAML anchor below its alias breaks the document, so \
-                  the fix is unsafe.",
+        description: "Reports the keys of a mapping that are not in order (alphabetical by default). By \
+              default the fewest keys that would have to move are reported (`report: moved`), \
+              `misplaced` reports every key that sorts before one above it. The first report \
+              carries the fix. Comments on lines of their own stay where they are and a comment \
+              after an entry moves with it. Options: `order` (keys that come first), \
+              `direction`, `compare` (`ordinal`, `case_insensitive`, `natural`), `ignored_keys`, \
+              `min_keys` (default 2), `blank_line_groups`, `path_patterns` and `has_properties` \
+              (only mappings that have all of these keys). The fix is unsafe: moving a YAML \
+              anchor below its alias breaks the document.",
+        why: "Keys in a fixed order are quick to look up, and two branches that add different \
+              keys to a sorted file rarely conflict. The order of a mapping is usually not data, \
+              but where a tool reads it (a build order, a dependency list that is applied top \
+              down) the rule should be limited with `path_patterns` or turned off.\n\
+              To fix, sort the keys; the fix does it.",
         example: "{ \"b\": 1, \"a\": 2 }   // becomes { \"a\": 2, \"b\": 1 }",
         options: [
             sorting::ORDER,
@@ -102,11 +111,17 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "The items of a sequence of only strings or only numbers are not in order \
-                  (ascending by default; numbers compare as numbers). Sequences of other or \
-                  mixed items are skipped. The items that would have to move (the fewest) are \
-                  reported and the first report carries the fix; the fix is unsafe because \
-                  sequence order can be data.",
+        description: "Reports the items of a sequence that are not in order, for sequences of only \
+              strings or only numbers (ascending by default; numbers compare as numbers). A \
+              sequence of other or mixed items is skipped. The fewest items that would have to \
+              move are reported, and the first report carries the fix. The fix is unsafe: the \
+              order of a sequence can be data. Options: `direction`, `compare` (`ordinal`, \
+              `case_insensitive`, `natural`), `min_values` (default 2), `blank_line_groups` and \
+              `path_patterns` (only the sequences whose key path matches one).",
+        why: "A list that is kept sorted is easy to scan and to merge: new entries go to one \
+              place, and two branches that add different entries rarely conflict. The rule only \
+              makes sense where the order is not data, so it is off by default.\n\
+              To fix, sort the items, or turn the rule off for that list with `path_patterns`.",
         example: "[\"b\", \"a\"]   // becomes [\"a\", \"b\"]",
         options: [
             sorting::DIRECTION,

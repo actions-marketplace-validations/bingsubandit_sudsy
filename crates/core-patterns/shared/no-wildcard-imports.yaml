@@ -1,9 +1,14 @@
 id: no-wildcard-imports
 message: 'import the names you use, not every name'
 description: >-
-  An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's
-  `import . "fmt"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports,
-  ruff F403, revive dot-imports).
+  Reports an import of every name of a package or module (`import a.b.*;` in Java and Kotlin, `from
+  a import *` in Python, `import . "fmt"` in Go). A named import is not reported. Off by default.
+why: >-
+  A wildcard hides where a name comes from, and a name added to the package later can silently clash
+  with one in the file or change which one a call reaches. Tools and readers cannot tell from the
+  imports what the file uses.
+
+  To fix, import the names the file uses.
 example: 'import a.b.*'
 severity: off
 category: style

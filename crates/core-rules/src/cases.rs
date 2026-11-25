@@ -46,8 +46,13 @@ rule! {
         id: "no-duplicate-case",
         category: Suspicious,
         default: Warn,
-        description: "Two arms of one `switch` (or `match`, `when`, `case`) have the same test; \
-                  the second arm can never run. ESLint `no-duplicate-case`.",
+        description: "Reports an arm of a `switch`, `match`, `when` or `case` whose test is the same as \
+              the test of an earlier arm of the same statement (`case 1:` twice). The second arm \
+              is reported, the first is shown as related.",
+        why: "Only the first arm with that test can run, so the second is dead code. It is \
+              usually a copy that should have had another value, and the case it was meant for \
+              is then unhandled.\n\
+              To fix, change the test to the value it was meant for, or merge the two arms.",
         example: "switch (a) { case 1: break; case 1: break; }   // the second case is reported",
         tags: &["switch"],
     }

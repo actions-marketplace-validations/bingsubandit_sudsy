@@ -1,10 +1,16 @@
 id: no-empty-catch
 message: 'the catch clause is empty: the error is swallowed'
 description: >-
-  A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as
-  none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle
-  EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `comment_handles` off a comment does not count (PSScriptAnalyzer). With `broad_only` only a clause that
-  catches everything or one of the `types` is reported.
+  Reports a `catch`, `except` or `rescue` clause whose body has no statement and no comment (`catch
+  (e) { }`; in Python a lone `pass` counts as no statement). With the option `comment_handles` off a
+  comment does not count either. With `broad_only` only a clause that catches everything, or one of
+  the exception types of the option `types`, is reported.
+why: >-
+  An empty handler swallows the error without a trace: the program goes on in a state it did not
+  expect, and the failure shows up later far from its cause, with nothing in the logs.
+
+  To fix, handle the error, log it, or let it propagate; if ignoring it is right, say why in a
+  comment.
 example: 'try { run(); } catch (e) { }'
 severity: warn
 category: suspicious

@@ -1,9 +1,16 @@
 id: no-assignment-in-condition
 message: an assignment is used as a condition (was `==` meant?)
 description: >-
-  The condition of an `if`, ternary or loop is an assignment not wrapped in parentheses of its own
-  (ESLint no-cond-assign, PHPCS Generic.CodeAnalysis.AssignmentInCondition). Python's `:=` is the
-  idiom and is left alone.
+  Reports an assignment used as the condition of an `if`, a ternary or a loop (`if (a = b)`, `while
+  (x = next())`) when it is not wrapped in parentheses of its own (`if ((a = b))` is accepted).
+  Python's `:=` is left alone. Off by default.
+why: >-
+  An assignment in a condition is nearly always a typing error for `==`: the test then stores a
+  value and branches on it, and the comparison the author meant never happens. A reader cannot tell
+  the two intentions apart.
+
+  To fix, write `==` if a comparison was meant, or move the assignment out of the condition (or add
+  the extra parentheses) if it was meant.
 example: 'if (a = b) {}'
 severity: off
 category: suspicious

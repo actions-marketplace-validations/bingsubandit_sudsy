@@ -15,7 +15,15 @@ rule! {
         id: "no-hard-tabs",
         category: Style,
         default: Off,
-        description: "A tab character in a line. Each run of tabs is one report.",
+        description: "Reports a tab character in a line; a run of tabs is one report. The option \
+              `ignore_kinds` lists token kinds whose tabs are not reported (for example the code \
+              of a Markdown fence), and `indentation_only` reports only the tabs in the white \
+              space that starts a line.",
+        why: "A tab is as wide as each reader's editor and tool makes it, so text that is \
+              aligned with tabs looks different in a diff, in a review and on the web. Spaces \
+              look the same everywhere. Some formats (YAML indentation) do not accept tabs at \
+              all.\n\
+              To fix, replace the tab with spaces.",
         example: "\tindented with a tab   // reported at the tab",
         options: [
             OptionDecl {

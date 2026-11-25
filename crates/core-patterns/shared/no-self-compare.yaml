@@ -1,9 +1,14 @@
 id: no-self-compare
 message: a value is compared with itself
 description: >-
-  An equality or comparison whose two sides are the same tokens: the result never
-  changes (ESLint no-self-compare, ruff PLR0124, Sonar S1764). `x != x` as an `isNaN` test is
-  reported too.
+  Reports an equality or comparison whose two sides are the same tokens (`x === x`, `x < x`). `x !=
+  x` used as a test for NaN is reported too. Two calls (`f() === f()`) count as the same tokens and
+  are reported.
+why: >-
+  For a value the result is the same every time (except for NaN), so the test is dead or a typing
+  error: the author compared a variable with itself instead of with another one.
+
+  To fix, compare with the right value; to test for NaN, use `isNaN` or the language's own check.
 example: 'if (a === a) {}'
 severity: warn
 category: suspicious

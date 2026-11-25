@@ -154,6 +154,9 @@ test('rule page: header badges, short config, options config, upstream links, sh
   assert.ok(await page.locator('.example .squiggle').count() >= 1);
   const lines = await page.locator('.example pre').first().locator('.ec-line').count();
   assert.ok(lines <= 30, `example has ${lines} lines`);
+  await page.goto(`${B}/rules/delete-apt-lists/`); // a folder shared with other rules: only this rule's window
+  const shared = await page.locator('.example pre').first().innerText();
+  assert.ok(shared.includes('apt-get update') && (shared.match(/a \| b/g) ?? []).length <= 1, shared); // the lines of other rules are left out
   await page.goto(`${B}/rules/comment-space/`);
   await page.goto(`${B}/rules/SA1005/`);
   await page.waitForURL(`${B}/rules/comment-space/`);

@@ -17,8 +17,16 @@ rule! {
         id: "documented-command",
         category: Style,
         default: Off,
-        description: "A command of the `commands` option (a function or macro definition) with no \
-                  comment on the line right before it, or with a comment that has no text.",
+        description: "Reports a command listed in the option `commands` (for example `function` and \
+              `macro` in CMake, compared ignoring case) that has no comment on the line right \
+              before it, or whose comment has no text (`#` alone). A comment further up with a \
+              blank line between, or code in between, does not count. The option `doc_kinds` \
+              limits which comment kinds document (all by default); a comment of another kind \
+              counts as an empty one.",
+        why: "A function or macro is called from other files, so a reader meets the name far \
+              from its definition. A comment right above it is the place where tools and readers \
+              look for what it takes and does.\n\
+              To fix, write the comment on the line before the definition.",
         example: "function(f)   // reported: no comment before it\nendfunction()",
         options: [
         OptionDecl {

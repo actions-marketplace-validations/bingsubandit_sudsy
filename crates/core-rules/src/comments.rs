@@ -27,9 +27,16 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A line comment has text right after its marker. Exempt: nothing but \
-                  whitespace after the marker, a marker repeated (`////`, `##`), `--` separator \
-                  lines, and a `#!` shebang on the first line. The fix inserts the space.",
+        description: "Reports a line comment whose text starts right after the marker (`//text`, \
+              `#text`). Not reported: a comment with nothing after the marker, a repeated marker \
+              (`////`, `##`), a `--` separator line and a `#!` shebang on the first line. With \
+              the option `block` it also checks block comments (`/*a*/`: text right after the \
+              opening or before the closing delimiter). The fix inserts the space.",
+        why: "One space after the marker is the common way to write comments, and it separates \
+              the text from the marker so that the comment reads as text and not as a disabled \
+              piece of code. A comment without it is also hard to tell from commented-out code \
+              (`//foo();`).\n\
+              To fix, add the space; the fix does it.",
         example: "//comment   // write: // comment",
         options: [OptionDecl {
             name: "line",
@@ -268,10 +275,14 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A block comment that fits on one line and ends its line is written as a line \
-                  comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`), \
-                  empty comments, comments with code after them on the line and languages with no \
-                  line comment marker are left alone.",
+        description: "Reports a block comment that fits on one line and ends its line (`/* text */`): it \
+              is written as a line comment. Documentation comments (`/**`), empty comments, \
+              comments with code after them on the same line and languages without a line \
+              comment marker are not reported. The fix turns it into a line comment.",
+        why: "A line comment is the plain form for a short note. A block comment on one line is \
+              usually left over from a longer comment, and the next edit adds a second line \
+              inside it.\n\
+              To fix, use `// text`; the fix does it.",
         example: "/* a note */   // write: // a note",
     }
 
@@ -313,9 +324,14 @@ rule! {
         id: "block-comment-after-open",
         category: Style,
         default: Off,
-        description: "A block comment that follows an opening token on its line and ends the line \
-                  (`if (a) {    /* note */`): the code after the token starts on a line of its own \
-                  (ktlint `wrapping`). A line comment there is left alone.",
+        description: "Reports a block comment that follows an opening token on its line and ends the \
+              line (`if (a) { /* note */`). The tokens are the option `after` (default `{`). A \
+              line comment there, and a block comment with code after it on the line, are not \
+              reported.",
+        why: "The style keeps a block comment from ending the line of an opening brace. A \
+              comment on a line of its own above the first statement says clearly which \
+              statement it describes.\n\
+              To fix, move the comment to its own line.",
         example: "if (a) { /* note */   // write the note on its own line",
         options: [OptionDecl {
             name: "after",
@@ -370,9 +386,13 @@ rule! {
         id: "no-empty-comment",
         category: Style,
         default: Off,
-        description: "A comment has no text. A block comment is reported wherever it is; an empty line \
-                  comment only when it begins or ends a run of comments, because a bare `//` \
-                  between two comment lines separates paragraphs.",
+        description: "Reports a comment with no text. An empty block comment (`/**/`) is reported \
+              wherever it is. An empty line comment is reported only when it begins or ends a \
+              run of comment lines, because a bare `//` between two comment lines separates \
+              paragraphs; the option `separators` reports those too.",
+        why: "An empty comment says nothing: it is a leftover of a deleted comment or of an \
+              unfinished one, and a reader stops to look for the meaning that is not there.\n\
+              To fix, write the text or delete the comment.",
         example: "// ----\n//\nint x;   // the empty comment above is reported",
         options: [OptionDecl {
             name: "separators",
