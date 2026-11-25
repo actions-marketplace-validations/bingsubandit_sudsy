@@ -1211,6 +1211,10 @@
               "$ref": "#/definitions/rule",
               "description": "A documentation line (`///`) starts with a single space. More spaces are allowed to indent continuation lines, not on the first line of the comment; a tab or no space is always reported."
             },
+            "doc-first-word": {
+              "$ref": "#/definitions/rule",
+              "description": "The first line of the doc comment of an exported function, method, type, constant or variable does not start with its name (revive exported). A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types; a constant or variable in a group whose comment has text is not checked. Lines of directives (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is left to `missing-doc-comment`."
+            },
             "doc-paragraph": {
               "$ref": "#/definitions/rule",
               "description": "The paragraphs of a Javadoc comment: a `<p>` tag stands right before the first word of its paragraph (no space) and after an empty line, an empty line between paragraphs is followed by `<p>`, and the comment does not start with `<p>` (Checkstyle JavadocParagraph). Text inside `<pre>`, `<ul>` and the like, and after the first block tag, is left alone."
@@ -3031,6 +3035,10 @@
               "$ref": "#/definitions/rule",
               "description": "A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose \"text\"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone."
             },
+            "missing-package-comment": {
+              "$ref": "#/definitions/rule",
+              "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse."
+            },
             "missing-permissions": {
               "$ref": "#/definitions/rule",
               "description": "A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access."
@@ -4776,6 +4784,10 @@
             "outdated-version-block": {
               "$ref": "#/definitions/rule",
               "description": "A test of `sys.version_info` against a version older than the target's, or of `sys.version_info[0]` against a number: the result is always the same."
+            },
+            "package-comment-form": {
+              "$ref": "#/definitions/rule",
+              "description": "The first line of the comment above the `package` clause does not start with `Package` and the name of the package (revive package-comments). A file of package `main` is left alone. A comment of the right form with a blank line before the `package` clause is reported as detached."
             },
             "package-defined": {
               "$ref": "#/definitions/rule",

@@ -62,7 +62,7 @@ token Eof
 token Unknown #error
 
 node SourceFile #scope
-node PackageClause
+node PackageClause #namespace = Keyword name:PackageIdent
 node ImportDeclaration
 node ImportSpec
 node ImportSpecList
@@ -76,13 +76,13 @@ node ReceiverList #parameter-list
 node ParameterDeclaration #parameter
 node VariadicParameterDeclaration #parameter
 node ConstDeclaration
-node ConstSpec
+node ConstSpec #const-spec = name:Ident
 node VarDeclaration
-node VarSpec
+node VarSpec #var-spec = name:Ident
 node VarSpecList
 node TypeDeclaration
-node TypeSpec #scope
-node TypeAlias #scope
+node TypeSpec #scope #type-spec = name:TypeIdent
+node TypeAlias #scope #type-spec = name:TypeIdent
 node TypeArguments
 node TypeElem
 node TypeConstraint

@@ -13,7 +13,12 @@ static LANG: ScopeLang = ScopeLang::new(include_str!("../scope.rows")).late_decl
     "ReceiveStatement",
 ]);
 
-pub static FAMILIES: &[Family] = &[Family {
-    name: "scope",
-    build: |meta, p| scope_rules::build(&LANG, meta, p),
-}];
+pub static FAMILIES: &[Family] = &[
+    Family {
+        name: "scope",
+        build: |meta, p| scope_rules::build(&LANG, meta, p),
+    },
+    core_rules::doc_comments::FAMILY,
+    core_rules::doc_style::FAMILY,
+    core_rules::unit_doc::FAMILY,
+];

@@ -18,6 +18,7 @@ salsa.workspace = true
 [dev-dependencies]
 tempfile.workspace = true
 lang-dockerfile = { workspace = true, features = ["static-grammars"] }
+lang-go = { workspace = true, features = ["static-grammars"] }
 lang-css.workspace = true
 lang-hcl = { workspace = true, features = ["static-grammars"] }
 lang-html.workspace = true

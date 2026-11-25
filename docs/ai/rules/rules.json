@@ -8783,6 +8783,123 @@
       "upstream": []
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "The first line of the doc comment of an exported function, method, type, constant or variable does not start with its name (revive exported). A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types; a constant or variable in a group whose comment has text is not checked. Lines of directives (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is left to `missing-doc-comment`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\n// Run does it.\nfunc Run() {}\n\n// does it.\nfunc Wrong() {}\n\n// wrong lowercase.\nfunc lower() {}\n\n//go:noinline\n// Pragma is fine.\nfunc Pragma() {}\n\n// A T is fine, with an article.\ntype T struct{}\n\n// The U is fine.\ntype U int\n\n// Other\ntype V int\n\n// X is the comment of the group.\ntype (\n    // W is fine.\n    W int\n    X int\n)\n\n// Constants.\nconst (\n    // other, not checked: the group has a comment.\n    C = 1\n    D = 2\n)\n\n// Wrong names a variable.\nvar E = 1\n\n// Method does it.\nfunc (T) Method() {}\n\n// does it.\nfunc (T) Other() {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 11,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 8,
+            "line": 22
+          },
+          {
+            "column": 1,
+            "length": 26,
+            "line": 39
+          },
+          {
+            "column": 1,
+            "length": 11,
+            "line": 45
+          }
+        ]
+      },
+      "fix": null,
+      "id": "doc-first-word",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "exported",
+          "partial": true,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc F() {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 7,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-package-comment",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "package-comments",
+          "partial": true,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The first line of the comment above the `package` clause does not start with `Package` and the name of the package (revive package-comments). A file of package `main` is left alone. A comment of the right form with a blank line before the `package` clause is reported as detached.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "// Does things.\npackage a\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 15,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "package-comment-form",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "package-comments",
+          "partial": true,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
       "category": "suspicious",
       "default_level": "off",
       "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
@@ -33899,58 +34016,58 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "/** Documented. */\npublic class Api {\n  private int x;\n  public Api() {}\n\n  /** Documented. */\n  public void ok() {}\n\n  public void f() {}\n\n  @Deprecated\n  protected void g() {}\n\n  @Override\n  public String toString() { return \"\"; }\n\n  @Test\n  public void t() {}\n\n  public int getX() { return x; }\n  public void setX(int x) { this.x = x; }\n  public int getY(int y) { return y; }\n\n  void packagePrivate() {}\n  private void hidden() {}\n  /** Nested. */\n  public interface Inner {\n    void member();\n  }\n\n  public static class NoDoc {\n    public void inNested() {}\n  }\n\n  public enum Kind {\n    A;\n\n    public void inEnum() {}\n  }\n\n  protected static class Prot {\n    public void inProt() {}\n  }\n\n  void run() {\n    Object o = new Object() {\n      public void anon() {}\n    };\n    class Local {\n      public void local() {}\n    }\n  }\n}\n\nclass PackagePrivate {\n  public void notPublicType() {}\n}\n",
-        "language": "java",
+        "input": "// Package a is the test package.\npackage a\n\nfunc Run() {}\n\n// Detached comment.\n\nfunc Detached() {}\n\n//go:noinline\nfunc Pragma() {}\n\n// Deprecated: use Run.\nfunc Old() {}\n\ntype T struct{}\n\nfunc (T) Method() {}\n\nfunc (T) String() string { return \"\" }\n\ntype hidden struct{}\n\nfunc (hidden) Method() {}\n\nfunc unexported() {}\n\nconst A, b = 1, 2\n\nconst (\n    C = 1\n    D = 2\n)\n\n// Doc of the group.\nvar (\n    V = 1\n    W = 2\n)\n\nvar (\n    X = 1\n    // Y has a comment.\n    Y = 2\n    Z = 3\n)\n\ntype S []int\n\nfunc (s S) Len() int { return 0 }\nfunc (s S) Less(i, j int) bool { return false }\nfunc (s S) Swap(i, j int) {}\n",
+        "language": "go",
         "spans": [
           {
-            "column": 3,
-            "length": 6,
+            "column": 6,
+            "length": 3,
             "line": 4
           },
           {
-            "column": 3,
-            "length": 6,
-            "line": 9
+            "column": 6,
+            "length": 8,
+            "line": 8
           },
           {
-            "column": 3,
-            "length": 1,
+            "column": 6,
+            "length": 6,
             "line": 11
           },
           {
-            "column": 3,
-            "length": 6,
-            "line": 22
+            "column": 6,
+            "length": 3,
+            "line": 14
           },
           {
-            "column": 5,
-            "length": 4,
+            "column": 6,
+            "length": 1,
+            "line": 16
+          },
+          {
+            "column": 10,
+            "length": 6,
+            "line": 18
+          },
+          {
+            "column": 7,
+            "length": 1,
             "line": 28
           },
           {
-            "column": 3,
-            "length": 6,
+            "column": 5,
+            "length": 1,
             "line": 31
           },
           {
             "column": 5,
-            "length": 6,
-            "line": 32
+            "length": 1,
+            "line": 42
           },
           {
-            "column": 3,
-            "length": 6,
-            "line": 35
-          },
-          {
-            "column": 5,
-            "length": 6,
-            "line": 38
-          },
-          {
-            "column": 3,
-            "length": 9,
-            "line": 41
+            "column": 6,
+            "length": 1,
+            "line": 48
           }
         ]
       },
@@ -33958,10 +34075,12 @@
       "id": "missing-doc-comment",
       "languages": [
         "csharp",
+        "go",
         "java"
       ],
       "options": [],
       "presets": [
+        "go/revive",
         "java/google",
         "csharp/stylecop"
       ],
@@ -33975,6 +34094,11 @@
           "id": "MissingJavadocType",
           "partial": true,
           "tool": "checkstyle"
+        },
+        {
+          "id": "exported",
+          "partial": true,
+          "tool": "revive"
         },
         {
           "id": "SA1600",

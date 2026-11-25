@@ -2,5 +2,18 @@
 go:
   lint:
     rules:
+      doc-first-word: warn
+      missing-doc-comment: warn
+      missing-package-comment: warn
+      package-comment-form: warn
       redefines-builtin-id: warn
       unused-parameter: warn
+# revive checks the doc comments of non-test files only.
+overrides:
+  - files: ["**/*_test.go"]
+    go:
+      lint:
+        rules:
+          doc-first-word: "off"
+          missing-doc-comment: "off"
+          package-comment-form: "off"

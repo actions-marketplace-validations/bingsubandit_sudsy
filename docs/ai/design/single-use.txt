@@ -49,7 +49,6 @@ concept directory-facts # users: php (shared)
 concept distinct-group-by # users: sql
 concept doc-comment-model # users: csharp
 concept doc-comment-space # users: csharp
-concept doc-comment-style # users: java (shared)
 concept doc-partial-required # users: csharp
 concept doc-partial-typeparams # users: csharp
 concept doc-text-ends-with-period # users: csharp

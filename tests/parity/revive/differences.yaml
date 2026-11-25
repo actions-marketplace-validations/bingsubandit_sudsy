@@ -1,24 +1,24 @@
 # The four rules that need go/types (var-declaration, time-naming, unexported-return, context-keys-type) give
 # different findings on identical revive runs (see docs/ai/formatting/go.md): their `missed` is the highest of
 # several runs, so a run does not fail on the jitter. Keep that when rewriting `missed` (COVERAGE_WRITE=1).
-target: 32.0
-measured: {covered: 15180, total: 47485, main: 'a7429532'}  # of the target; `main`: the origin/main commit the measured tree is based on
+target: 69.3
+measured: {covered: 32892, total: 47485, main: 'b11e8bdd'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  exported: 15691
   var-naming: 10923
-  package-comments: 2355
   receiver-naming: 899
   indent-error-flow: 472
   empty-block: 320
   dot-imports: 297
-  context-as-argument: 237
+  exported: 282
   var-declaration: 254
+  context-as-argument: 237
   increment-decrement: 189
   error-strings: 183
   unexported-return: 141
   blank-imports: 82
   error-naming: 79
   superfluous-else: 75
+  package-comments: 52
   redefines-builtin-id: 34
   unreachable-code: 22
   error-return: 18

@@ -7,7 +7,9 @@
 //!   with none of the option `forbidden_fragments` (a regular expression);
 //! - `asterisk`: every line after the first starts with an asterisk;
 //! - `tag-indent`: the lines that continue a block tag (`@param x`) have the option `indent`
-//!   blanks after the asterisk or more.
+//!   blanks after the asterisk or more;
+//! - `first-word`: the first line of the comment of a declaration starts with its name
+//!   ([`crate::doc_first_word`]).
 //!
 //! concept: doc-comment-style
 //! what: Style checks on the lines of a doc comment: paragraphs, summary, asterisks, tag indent.
@@ -29,6 +31,7 @@ enum Check {
     Summary,
     Asterisk,
     TagIndent,
+    FirstWord,
 }
 
 struct DocStyle {
@@ -46,8 +49,12 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
             ("summary", Check::Summary),
             ("asterisk", Check::Asterisk),
             ("tag-indent", Check::TagIndent),
+            ("first-word", Check::FirstWord),
         ],
     )?;
+    if matches!(check, Check::FirstWord) {
+        return crate::doc_first_word::build(meta, p);
+    }
     p.done()?;
     Ok(Box::new(DocStyle {
         meta,
@@ -79,6 +86,7 @@ impl Rule for DocStyle {
                 Check::Summary => summary(&lines, ctx, &self.regex, at),
                 Check::Asterisk => asterisk(&lines, ctx),
                 Check::TagIndent => tag_indent(&lines, ctx),
+                Check::FirstWord => {}
             }
         }
     }

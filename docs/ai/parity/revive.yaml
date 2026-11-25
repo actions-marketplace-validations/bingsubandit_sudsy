@@ -40,7 +40,7 @@ entries:
   error-return: planned
   error-strings: planned
   errorf: planned
-  exported: planned
+  exported: rule missing-doc-comment, doc-first-word | No stuttering check (a name that starts with the package name), no own-declaration check for `var a, B`; a method that is sortable through methods in another file of the package is reported
   file-header: deferred | not in the default configuration of revive
   file-length-limit: deferred | not in the default configuration of revive
   filename-format: deferred | not in the default configuration of revive
@@ -70,7 +70,7 @@ entries:
   multiline-if-init: deferred | not in the default configuration of revive
   nested-structs: deferred | not in the default configuration of revive
   optimize-operands-order: deferred | not in the default configuration of revive
-  package-comments: planned
+  package-comments: rule missing-package-comment, package-comment-form | 52 findings are missed where a generated or build-excluded sibling that revive does not load holds the first file name or the only comment
   package-directory-mismatch: deferred | not in the default configuration of revive
   package-naming: deferred | not in the default configuration of revive
   range: planned
