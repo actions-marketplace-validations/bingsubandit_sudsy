@@ -18,6 +18,13 @@ const MORE: &[(&str, &[&str])] = &[
     ("LARGE", &["OBJECT"]),
 ];
 
+/// Does the type word `first` go on with the word `next` (`double precision`)?
+pub fn continues(first: &str, next: &str) -> bool {
+    MORE.iter().any(|(w, more)| {
+        w.eq_ignore_ascii_case(first) && more.iter().any(|m| m.eq_ignore_ascii_case(next))
+    })
+}
+
 const TRAILERS: &[&str] = &["UNSIGNED", "SIGNED", "ZEROFILL"];
 
 impl P<'_> {
@@ -61,8 +68,14 @@ impl P<'_> {
         } else if head != "INTERVAL" {
             self.type_args();
         }
+        // sqlfluff reads MySQL's `CHAR(255) ARRAY` as a name.
         if self.at("array") {
-            self.bump_as(k::TYPE_IDENTIFIER);
+            let kind = if self.d == super::Dialect::Mysql {
+                k::IDENTIFIER
+            } else {
+                k::TYPE_IDENTIFIER
+            };
+            self.bump_as(kind);
         }
         // `timestamp (3) with time zone`, `time without time zone`.
         if matches!(head.as_str(), "TIMESTAMP" | "TIME" | "TIMESTAMPTZ")
@@ -73,7 +86,7 @@ impl P<'_> {
             self.bump_as(k::TYPE_IDENTIFIER);
             self.bump_as(k::TYPE_IDENTIFIER);
         }
-        while self.at_any(TRAILERS) {
+        while self.at_any(TRAILERS) || (self.d == super::Dialect::Mysql && self.at("binary")) {
             self.bump_as(k::TYPE_IDENTIFIER);
         }
         while self.is_t(0, T::LSquare) {

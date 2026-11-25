@@ -207,6 +207,7 @@ fn compare(
     b: &SyntaxNode,
     words: bool,
     as_line: bool,
+    cut_blanks: bool,
 ) -> Result<usize, String> {
     let (a, b) = (a.green(), b.green());
     let (mut a, mut b) = (Events::new(g, &a), Events::new(g, &b));
@@ -235,7 +236,7 @@ fn compare(
                 Some(rest) if words => {
                     keys.extend(rest.split_whitespace().map(|w| format!("//{w}")))
                 }
-                _ => keys.push(comment_key(g, c, as_line)),
+                _ => keys.push(comment_key(g, c, as_line, cut_blanks)),
             }
         }
         keys.sort_unstable();
@@ -253,18 +254,31 @@ fn compare(
 }
 
 /// A comment without what the printer changes: it writes LF only and re-indents the lines of a
-/// multi-line comment; the end of a one-line comment is trimmed.
-fn comment_key(g: &Grammar, text: &str, as_line: bool) -> String {
+/// multi-line comment; the end of a one-line comment is trimmed. With `cut_blanks` the printer
+/// may cut the runs of blank lines inside a comment (`NodeFormatter::cuts_blank_lines_in_comments`).
+fn comment_key(g: &Grammar, text: &str, as_line: bool, cut_blanks: bool) -> String {
     let text = text.replace("\r\n", "\n");
     // (`single_block_comment_as_line`: a one-line block comment may be written as a line comment)
     if as_line && let Some(line) = line_form(g, &text) {
         return line;
     }
     if text.contains('\n') {
-        text.lines().map(str::trim).collect::<Vec<_>>().join("\n")
+        trimmed_lines(&text, cut_blanks)
     } else {
         text.trim_end().to_string()
     }
+}
+
+/// The lines of a multi-line comment trimmed; with `cut_blanks` a run of blank lines counts as
+/// one.
+pub(crate) fn trimmed_lines(text: &str, cut_blanks: bool) -> String {
+    let mut lines: Vec<&str> = Vec::new();
+    for line in text.lines().map(str::trim) {
+        if !(cut_blanks && line.is_empty() && lines.last().is_some_and(|l| l.is_empty())) {
+            lines.push(line);
+        }
+    }
+    lines.join("\n")
 }
 
 /// The line comment a one-line block comment (not a documentation comment, not empty) is written
@@ -282,18 +296,19 @@ pub(crate) fn line_form(g: &Grammar, text: &str) -> Option<String> {
 
 /// [`compare`] without the values of the `#restyle` items.
 pub fn equal_ignoring_trivia(g: &Grammar, a: &SyntaxNode, b: &SyntaxNode) -> Result<(), String> {
-    equal_with_line_comments(g, a, b, false)
+    equal_with_line_comments(g, a, b, false, false)
 }
 
 /// [`equal_ignoring_trivia`]; with `as_line` a one-line block comment may be a line comment
-/// (`single_block_comment_as_line`).
+/// (`single_block_comment_as_line`), with `cut_blanks` a comment may lose blank lines.
 pub fn equal_with_line_comments(
     g: &Grammar,
     a: &SyntaxNode,
     b: &SyntaxNode,
     as_line: bool,
+    cut_blanks: bool,
 ) -> Result<(), String> {
-    compare(g, a, b, false, as_line).map(drop)
+    compare(g, a, b, false, as_line, cut_blanks).map(drop)
 }
 
 /// The `#restyle` items of a tree in document order, as `compare` counts them.
@@ -424,6 +439,7 @@ pub fn verify(
         &after_tree,
         formatter.reflows_comments(),
         as_line,
+        formatter.cuts_blank_lines_in_comments(),
     )
     .map_err(FormatError::Safety)?
         > 0
@@ -442,7 +458,17 @@ mod tests {
     use core_syntax::grammars;
 
     fn key(text: &str, as_line: bool) -> String {
-        comment_key(grammars::csharp(), text, as_line)
+        comment_key(grammars::csharp(), text, as_line, false)
+    }
+
+    #[test]
+    fn a_cut_run_of_blank_lines_is_an_edit_unless_the_printer_cuts_them() {
+        let (a, b) = ("/* a\n\n\n b */", "/* a\n\n b */");
+        let key = |t, cut| comment_key(grammars::csharp(), t, false, cut);
+        assert_ne!(key(a, false), key(b, false));
+        assert_eq!(key(a, true), key(b, true));
+        // (a removed text line is an edit either way)
+        assert_ne!(key(a, true), key("/* a\n\n */", true));
     }
 
     #[test]

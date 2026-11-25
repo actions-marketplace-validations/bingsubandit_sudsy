@@ -8,8 +8,6 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| SQL | format sqlfluff | 4 | 78.3% | 6.7 | 56 files | `identifier-case` 103 | 3 | 8.93 | - |
-| SQL | lint sqlfluff | 4 | 79.7% | 5.3 | 6342 findings | `LT02` 11125 | 3 | 7.07 | 1456737e |
 | C / C++ | format clang-format | 4 | 61.7% | 23.3 | 1548 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +2 more | 18 | 5.18 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
@@ -22,7 +20,7 @@ Blocked on a decision:
 
 Not measured: C / C++ lint clang-tidy (no target, blocked); CMake lint cmake-lint (no target, blocked).
 
-New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format.
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
@@ -597,7 +595,7 @@ Format: unclassified 0 of 11 differing files (0%).
 
 ## sqlfluff
 
-Format: unclassified 110 of 289 differing files (38%).
+Format: unclassified 106 of 228 differing files (46%).
 1. `identifier-case` (103 files): "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
 2. `if-condition-wrap` (44 files): "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`, a statement after a comment in a body)"
 3. `layout-gap` (24 files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
@@ -605,24 +603,24 @@ Format: unclassified 110 of 289 differing files (38%).
 5. `tsql-block-indent` (3 files): "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
 6. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 7. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 79.7% (95303 of 119582, 24279 missed, measured on 1456737e); rules by missed findings:
-1. `LT02` (11125 missed) Fix: indentation findings left after `sudsy format` on real-world code (in the formatted files, 15 of 87 hold 80%, almost all T-SQL; `sp_RestoreGene` 2,190, `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies); the rest of the 13,017 sits in the files Sudsy refuses (8) or cannot read (18, not UTF-8) and keeps as written
-2. `CP01` (3033 missed) Fix: 3,033 keyword-case findings left after format; 2,791 are in two T-SQL files our parser refuses (tigertoolbox setup.sql, `CROSS apply ::fn_trace_geteventinfo(t .id)` after a long `case` select list; sqlserver-kit Recover_Deleted_Data_Proc.sql 693:22, `STUFF((select ... for xml path('')), 1, 1, '')` after a `case` with `0x,` hex literals), so the file keeps its case; parse fixes first
-3. `CP02` (1455 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
-4. `CV06` (1452 missed)
-5. `LT01` (1208 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
-6. `CP04` (1122 missed)
-7. `RF02` (594 missed)
-8. `LT05` (501 missed) Fix: line-length findings (1,538); not yet split by file
-9. `CV11` (320 missed)
-10. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-11. `LT04` (216 missed)
-12. `LT03` (211 missed)
-13. `RF01` (206 missed)
-14. `LT15` (204 missed)
-15. `LT06` (180 missed)
+Lint: target 88.7% (100738 of 113542, 12804 missed, measured on b11e8bdd); rules by missed findings:
+1. `LT02` (6040 missed) Fix: indentation findings left after `sudsy format` on real-world code (6,040 missed; almost all T-SQL: `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies, comments after a statement in an `IF` / `BEGIN` block); the files Sudsy refuses or cannot read (not UTF-8) keep their layout as written
+2. `CV06` (1452 missed)
+3. `CP02` (1041 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (1,041 missed): sqlfluff's per-file consistency choice of the identifier case differs from ours; not yet split by file
+4. `LT01` (438 missed) Fix: spacing findings left after `sudsy format` (438 missed); not yet split by construct
+5. `RF02` (413 missed)
+6. `CV11` (320 missed)
+7. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+8. `LT03` (236 missed)
+9. `RF01` (206 missed)
+10. `LT04` (202 missed)
+11. `CP01` (187 missed) Fix: 187 keyword-case findings left after format, in files with a word kind (`SEQUENCE NAME`, mysql `STATE`, `default NULL`) sqlfluff reads another way; not yet split by file
+12. `ST06` (179 missed)
+13. `CV10` (174 missed)
+14. `AL09` (165 missed)
+15. `LT06` (159 missed)
 
-42 more rules: 2189 missed.
+38 more rules: 1329 missed.
 
 ## sqlfluff-fixtures
 

@@ -29,6 +29,11 @@ pub trait Subject {
     fn block_as_line(&self) -> bool {
         false
     }
+    /// Whether the printer may cut runs of blank lines inside a comment
+    /// (`NodeFormatter::cuts_blank_lines_in_comments`).
+    fn cuts_blank_lines(&self) -> bool {
+        false
+    }
 }
 
 /// The comments of a tree, sorted (a formatter may move a comment). Structured trivia (doc comments, directives) count as one,
@@ -58,7 +63,7 @@ fn comments(subject: &dyn Subject, tree: &SyntaxNode) -> Vec<String> {
                 continue;
             }
             out.push(if structured || g.has_tag(e.kind(), "indentable") {
-                text.lines().map(str::trim).collect::<Vec<_>>().join("\n")
+                crate::safety::trimmed_lines(&text, subject.cuts_blank_lines())
             } else {
                 text.trim_end().to_string()
             });
@@ -91,8 +96,14 @@ pub fn check(subject: &dyn Subject, input: &str) -> Result<String, String> {
             .parse(&text)
             .map_err(|e| format!("rewritten input: {e}"))?,
     };
-    equal_with_line_comments(g, &reference, &after, subject.block_as_line())
-        .map_err(|e| format!("meaning changed: {e}"))?;
+    equal_with_line_comments(
+        g,
+        &reference,
+        &after,
+        subject.block_as_line(),
+        subject.cuts_blank_lines(),
+    )
+    .map_err(|e| format!("meaning changed: {e}"))?;
     if comments(subject, &reference) != comments(subject, &after) {
         return Err(format!(
             "comments changed: {:?} became {:?}",

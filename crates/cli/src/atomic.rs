@@ -23,7 +23,9 @@ pub fn write(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
 pub fn encode_like_file(path: &Path, text: &str, had_bom: bool) -> anyhow::Result<Vec<u8>> {
     let original = std::fs::read(path)?;
     provider_api::encoding::encode_like(&original, text, had_bom).ok_or_else(|| {
-        anyhow::anyhow!("a character of the result does not fit the encoding of the file")
+        anyhow::anyhow!(
+            "the result does not fit the encoding of the file (a character without a byte, or a changed non-ASCII byte)"
+        )
     })
 }
 

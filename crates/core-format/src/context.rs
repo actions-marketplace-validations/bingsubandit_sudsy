@@ -250,6 +250,12 @@ pub trait NodeFormatter: Send + Sync {
         false
     }
 
+    /// Does the formatter cut the runs of blank lines inside a comment (`cut_blank_runs`)? The
+    /// safety check then counts such a run as one.
+    fn cuts_blank_lines_in_comments(&self) -> bool {
+        false
+    }
+
     /// How comments are printed; the default keeps their text and puts one space before a
     /// comment after code.
     fn comment_style(&self, options: &ResolvedOptions) -> CommentStyle {
@@ -932,6 +938,68 @@ pub fn trimmed_lines_doc(text: &str) -> Doc {
     )
 }
 
+/// The characters of the first line of `text` and, when it spans lines, of its last line.
+pub fn line_ends(text: &str) -> (usize, Option<usize>) {
+    let mut lines = text.split('\n');
+    let first = lines.next().map_or(0, |l| l.chars().count());
+    (first, lines.next_back().map(|l| l.chars().count()))
+}
+
+/// The width of the widest physical line of pieces `(white space before it, a line break
+/// precedes it, text)` that holds more than one piece (the pieces are one logical line, so the
+/// breaks are the ones inside a piece); a piece that spans lines ends the line it starts on and
+/// starts the line it ends on. A tab counts `tab` columns. A single piece counts when no line
+/// holds more.
+pub fn widest_shared_line<'a>(
+    pieces: impl Iterator<Item = (&'a str, bool, &'a str)>,
+    tab: usize,
+) -> usize {
+    let (mut col, mut widest, mut pieces_on_line) = (0, 0, 0);
+    for (n, (ws, breaks, text)) in pieces.enumerate() {
+        if n == 0 || !breaks {
+            col += ws
+                .chars()
+                .map(|c| if c == '\t' { tab } else { 1 })
+                .sum::<usize>();
+        } else {
+            col = 0;
+        }
+        pieces_on_line += 1;
+        let (first, last) = line_ends(text);
+        col += first;
+        if let Some(last) = last {
+            if pieces_on_line > 1 {
+                widest = widest.max(col);
+            }
+            (col, pieces_on_line) = (last, 1);
+        }
+    }
+    if pieces_on_line > 1 || widest == 0 {
+        widest = widest.max(col);
+    }
+    widest
+}
+
+/// `text` with every run of blank lines cut to `most` lines; `None` when none is longer.
+pub fn cut_blank_runs(text: &str, most: u32) -> Option<String> {
+    let mut run = 0;
+    let mut changed = false;
+    let mut lines = Vec::new();
+    for line in text.split('\n') {
+        if line.trim().is_empty() {
+            run += 1;
+            if run > most {
+                changed = true;
+                continue;
+            }
+        } else {
+            run = 0;
+        }
+        lines.push(line);
+    }
+    changed.then(|| lines.join("\n"))
+}
+
 /// One own-line comment (or kept-as-written text) as a document, without the break after it.
 pub fn comment_doc(c: &Comment) -> Doc {
     comment_doc_in(c, &CommentStyle::default())
@@ -1172,6 +1240,39 @@ pub fn trailing_comments_doc(st: &CommentStyle, cs: &[Comment]) -> Doc {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn line_ends_of_a_text_that_spans_lines() {
+        assert_eq!(super::line_ends("ab"), (2, None));
+        assert_eq!(super::line_ends("ab\nc\ndef"), (2, Some(3)));
+    }
+
+    #[test]
+    fn the_widest_line_shared_by_pieces() {
+        let w = |p: &[(&'static str, bool, &'static str)], tab| {
+            super::widest_shared_line(p.iter().copied(), tab)
+        };
+        // a single piece, and tabs
+        assert_eq!(w(&[("", false, "abc")], 4), 3);
+        assert_eq!(w(&[("\t", false, "ab"), (" ", false, "c")], 4), 8);
+        // a break before a piece resets the column
+        assert_eq!(w(&[("", false, "abcd"), (" ", true, "ef")], 4), 2);
+        // a multi-line piece that ends on a long line: the line it ends on counts with what follows
+        assert_eq!(
+            w(&[("", false, "/* a\nb */"), (" ", false, "cdefg")], 4),
+            10
+        );
+        // one that starts on a long line: the line it starts on counts with what precedes it
+        assert_eq!(
+            w(&[("", false, "abcdefg"), (" ", false, "/* x\ny */")], 4),
+            12
+        );
+        // a lone multi-line piece does not make a line long
+        assert_eq!(
+            w(&[("", false, "$$ aaaaaaaaaa\nb $$"), ("", true, "c")], 4),
+            1
+        );
+    }
+
     use super::*;
     use core_syntax::{TreeBuilder, grammars};
     use std::cell::Cell;

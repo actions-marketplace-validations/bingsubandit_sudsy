@@ -345,6 +345,13 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         if let Some(end) = dollar_string(src, i, d, open) {
             return (T::Str, end);
         }
+        // `${table}`: a placeholder that a migration tool fills in.
+        if next == Some(b'{')
+            && let Some(close) = src[i + 2..].find(['}', '\n', ' '])
+            && b[i + 2 + close] == b'}'
+        {
+            return (T::Var, i + 2 + close + 1);
+        }
         if d == Dialect::Postgres && next.is_some_and(|n| n.is_ascii_digit()) {
             let mut j = i + 1;
             while j < b.len() && b[j].is_ascii_digit() {

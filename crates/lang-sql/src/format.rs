@@ -25,6 +25,11 @@ impl NodeFormatter for SqlFormatter {
         Ok((node.parent().is_none()).then(|| crate::layout::format(node, cx.grammar, cx.options)))
     }
 
+    /// The layout cuts blank lines inside a block comment like those between statements.
+    fn cuts_blank_lines_in_comments(&self) -> bool {
+        true
+    }
+
     /// The words whose case is set compare lowercase.
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
         match item {

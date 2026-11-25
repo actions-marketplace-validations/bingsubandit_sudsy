@@ -241,7 +241,7 @@ pub struct SourceFile {
 }
 
 #[derive(Debug, thiserror::Error)]
-#[error("{id} is not valid UTF-8")]
+#[error("{id} is not valid UTF-8 text (or holds a NUL byte)")]
 pub struct SourceError {
     pub id: String,
 }
@@ -267,6 +267,8 @@ impl SourceFile {
     ) -> Result<Self, SourceError> {
         let id = id.into();
         let mut text = match String::from_utf8(bytes) {
+            // (a NUL byte means a binary or a wide encoding without a mark)
+            Ok(text) if text.contains('\0') => return Err(SourceError { id }),
             Ok(text) => text,
             Err(e) => crate::encoding::decode(e.as_bytes())
                 .ok_or_else(|| SourceError { id: id.clone() })?,

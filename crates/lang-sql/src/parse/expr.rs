@@ -799,8 +799,11 @@ impl P<'_> {
                     && self.is_t(0, T::Word)
                     && self.is_t(1, T::LParen)
                 {
-                    // `(subquery).value(..)`, `x.query(..).query(..)`: a method of the xml type.
+                    // `(subquery).value(..)`, `x.query(..).query(..)`: a method of the xml type,
+                    // not a function: its case stays as written.
+                    let name = self.pos;
                     self.function(c);
+                    self.kinds[name] = k::WORD;
                 } else if self.is_t(0, T::Word) || self.is_t(0, T::Quoted) {
                     self.eat_name();
                 } else if self.at_op("*") {

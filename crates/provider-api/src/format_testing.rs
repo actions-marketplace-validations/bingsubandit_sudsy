@@ -64,6 +64,10 @@ impl Subject for Formatting {
             == Some(&OptionValue::Bool(true))
     }
 
+    fn cuts_blank_lines(&self) -> bool {
+        self.provider.formatter().cuts_blank_lines_in_comments()
+    }
+
     fn rewritten(&self, input: &str) -> String {
         let options = self.resolved();
         let file = self.source(input);
