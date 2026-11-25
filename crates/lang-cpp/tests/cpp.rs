@@ -394,7 +394,7 @@ fn access_specifiers_cases_and_labels_are_outdented() {
         fmt(
             "class A {\n  int x;\n\n  // kept\n\npublic:\n  // moves\nprivate:\n  int y;\n};\nvoid f() {\n  switch (x) {\n  case 1: {\n    break;\n  }\n  }\n  again:\n  g();\n}\n"
         ),
-        "class A {\n  int x;\n\n  // kept\n\npublic:\n// moves\nprivate:\n  int y;\n};\nvoid f() {\n  switch (x) {\n  case 1: {\n    break;\n  }\n  }\nagain:\n  g();\n}\n"
+        "class A {\n  int x;\n\n  // kept\n\npublic:\n  // moves\nprivate:\n  int y;\n};\nvoid f() {\n  switch (x) {\n  case 1: {\n    break;\n  }\n  }\nagain:\n  g();\n}\n"
     );
 }
 
@@ -501,7 +501,7 @@ fn pointers_and_references_follow_pointer_alignment() {
     );
     assert_eq!(
         fmt_pointers("left", false, POINTERS),
-        "void f(int* a, const T& b, U&& c, int** d, char* const e, Args&&...args) {\n  int* x = 0, *y;\n  vector<int*> v;\n  auto p = (char*)q;\n  T& r = x;\n}\nT* g(T* a);\n"
+        "void f(int* a, const T& b, U&& c, int** d, char* const e, Args&&... args) {\n  int* x = 0, *y;\n  vector<int*> v;\n  auto p = (char*)q;\n  T& r = x;\n}\nT* g(T* a);\n"
     );
     assert_eq!(
         fmt_pointers("middle", false, "void f(int* a, const T &b);\n"),
@@ -778,7 +778,7 @@ fn empty_bodies_have_one_line_or_two_by_their_construct_and_a_semicolon_body_its
         ("empty_body_own_line", V::Bool(true)),
     ];
     let src = "void g() {\n  for (;;) {}\n  while (x) {}\n  do {} while (x);\n  try {} catch (E) {}\n  { }\n  for (;;);\n  while (x);\n  auto f = [] {};\n  auto l = [x]\n  { return 1; };\n  auto m = [] noexcept\n  { return 1; };\n  std::vector<std::vector<int*>> v;\n  const auto&[k, v] = f();\n  for (auto&& [_, i] : f()) g(i);\n}\nstruct S {};\nT (*fp)(int);\nT(*fq)(int);\nvoid h(std::vector<std::vector<int>>*, int*[3]);\n";
-    let want = "void g() {\n  for (;;) {\n  }\n  while (x) {\n  }\n  do {\n  } while (x);\n  try {\n  } catch (E) {\n  }\n  {\n  }\n  for (;;)\n    ;\n  while (x)\n    ;\n  auto f = [] {};\n  auto l = [x] { return 1; };\n  auto m = [] noexcept {\n    return 1;\n  };\n  std::vector<std::vector<int *>> v;\n  const auto &[k, v] = f();\n  for (auto &&[_, i] : f())\n    g(i);\n}\nstruct S {};\nT (*fp)(int);\nT (*fq)(int);\nvoid h(std::vector<std::vector<int>> *, int *[3]);\n";
+    let want = "void g() {\n  for (;;) {\n  }\n  while (x) {\n  }\n  do {\n  } while (x);\n  try {\n  } catch (E) {\n  }\n  {\n  }\n  for (;;)\n    ;\n  while (x)\n    ;\n  auto f = [] {};\n  auto l = [x] { return 1; };\n  auto m = [] noexcept {\n    return 1;\n  };\n  std::vector<std::vector<int *>> v;\n  const auto &[k, v] = f();\n  for (auto &&[_, i] : f())\n    g(i);\n}\nstruct S {};\nT (*fp)(int);\nT(*fq)(int);\nvoid h(std::vector<std::vector<int>> *, int *[3]);\n";
     assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
 }
 
@@ -851,4 +851,101 @@ fn only_the_tree_for_formatting_reads_the_code_of_directives() {
     let plain = count(&file);
     file.for_format = true;
     assert!(count(&file) > plain);
+}
+
+#[test]
+fn macros_in_declarations_short_bodies_and_comments_before_labels() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    // (attribute macros after the type, a `template(` macro, `NAME(arg)(params)`, an initializer list
+    // that ends on its last value, and comments held at the indentation of their neighbours)
+    let src = "static void __init f(void) { return; }\nvoid __iomem *g(int a) { return 0; }\n__CRTDECL operator new(int a) { return 0; }\ntemplate(typename T)(requires C<T>) void h(T t) { return; }\nRANGES_FUNC(count)(I first, S last) { return 1; }\nMEM_STATIC U16 MEM_read16(const void *p) { return 1; }\nnoinline void nf() { return; }\ntemplate <typename... Ts> void k(Ts&... args);\nint a[] = {1, 2,\n           3\n};\nclass A {\n  int x;\n  // c\npublic:\n  int y;\n};\nvoid m() {\n  /* c */ for_each_x(a, b) {\n    q();\n  }\n lbl:\n  // note\n  x();\n}\n";
+    let want = "static void __init f(void) { return; }\nvoid __iomem *g(int a) { return 0; }\n__CRTDECL operator new(int a) { return 0; }\ntemplate(typename T)(requires C<T>) void h(T t) { return; }\nRANGES_FUNC(count)(I first, S last) { return 1; }\nMEM_STATIC U16 MEM_read16(const void *p) { return 1; }\nnoinline void nf() { return; }\ntemplate <typename... Ts> void k(Ts &...args);\nint a[] = {1, 2,\n           3};\nclass A {\n  int x;\n  // c\npublic:\n  int y;\n};\nvoid m() {\n  /* c */ for_each_x(a, b) {\n    q();\n  }\nlbl:\n  // note\n  x();\n}\n";
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+}
+
+#[test]
+fn a_closing_brace_of_a_list_stays_apart_from_comments_directives_and_statements() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let src = "int a[] = {1, 2, // x\n};\nint b[] = {\n#ifdef X\n    1,\n#endif\n};\nauto f = [] {\n  int c[] = {1};\n  ;\n};\n";
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), src);
+    // (a `}` after a directive that ends with a value stays on its own line)
+    let after_directive = "int a[] = {\n#ifndef X\n  1,\n#endif\n\n#define F ((size_t(*)(unsigned int, \\\n    const void *))a[8])\n\n}; /* end */\n";
+    core_format::testing::assert_formats(&formatting, after_directive);
+}
+
+fn fmt_opts(options: Vec<(&'static str, core_config::OptionValue)>, input: &str) -> String {
+    use provider_api::format_testing::Formatting;
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = options;
+    core_format::testing::assert_formats(&formatting, input)
+}
+
+#[test]
+fn a_blank_line_goes_before_an_access_specifier_only_after_a_plain_member() {
+    use core_config::OptionValue as V;
+    // first item: none; after a member: one; after a trailing comment, a directive or before a comment: as written
+    let src = "class A {\npublic:\n  int a;\nprotected:\n  int b; // c\nprivate:\n  int c;\n#endif\npublic:\n  int d;\n  // e\nprivate:\n  int f;\n};\n";
+    assert_eq!(
+        fmt_opts(vec![], src),
+        "class A {\npublic:\n  int a;\n\nprotected:\n  int b; // c\nprivate:\n  int c;\n#endif\npublic:\n  int d;\n  // e\nprivate:\n  int f;\n};\n"
+    );
+    let never = fmt_opts(
+        vec![(
+            "empty_line_before_access_modifier",
+            V::String("never".into()),
+        )],
+        "class A {\n  int a;\n\nprivate:\n  int c;\n};\n",
+    );
+    assert_eq!(never, "class A {\n  int a;\nprivate:\n  int c;\n};\n");
+    let always = fmt_opts(
+        vec![(
+            "empty_line_before_access_modifier",
+            V::String("always".into()),
+        )],
+        "class A {\n  int a; // c\nprivate:\n  int c;\n};\n",
+    );
+    assert_eq!(
+        always,
+        "class A {\n  int a; // c\n\nprivate:\n  int c;\n};\n"
+    );
+}
+
+#[test]
+fn a_call_head_is_found_past_a_comment_and_an_ellipsis_pointer_sticks_to_its_name() {
+    assert_eq!(
+        fmt(
+            "void f(int a) { g /* c */ (a); }\ntemplate <class... Ts> void h(Ts&... args, Us &&...more);\n"
+        ),
+        "void f(int a) { g /* c */ (a); }\ntemplate <class... Ts> void h(Ts &...args, Us &&...more);\n"
+    );
+}
+
+#[test]
+fn a_for_each_macro_is_found_behind_a_comment() {
+    use core_config::OptionValue as V;
+    let words = |w: &[&str]| V::List(w.iter().map(|w| V::String((*w).into())).collect());
+    // a loop macro: its brace stays on the line although `function` braces wrap
+    assert_eq!(
+        fmt_opts(
+            vec![
+                ("for_each_macros", words(&["EACH"])),
+                ("brace_wrapping", words(&["function"]))
+            ],
+            "void m() {\n  /* c */ EACH(a, b)\n  {\n    q();\n  }\n}\n"
+        ),
+        "void m()\n{\n  /* c */ EACH(a, b) {\n    q();\n  }\n}\n"
+    );
+}
+
+#[test]
+fn a_template_header_that_breaks_expands_the_short_body_and_one_that_fits_joins_it() {
+    // (the declaration fits its line, with the body, only once the header moved up)
+    assert_eq!(
+        fmt(
+            "template <class T> int fn(T first_argument, T second_argument, T third_arg_xxxxx) { return 1; }\ntemplate <class T> int g(T t) { return 1; }\n"
+        ),
+        "template <class T>\nint fn(T first_argument, T second_argument, T third_arg_xxxxx) {\n  return 1;\n}\ntemplate <class T> int g(T t) { return 1; }\n"
+    );
 }

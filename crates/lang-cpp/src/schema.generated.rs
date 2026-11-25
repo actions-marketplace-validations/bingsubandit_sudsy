@@ -24,6 +24,8 @@ pub const DERIVE_POINTER_ALIGNMENT: core_config::OptId = core_config::opt::DERIV
 #[allow(dead_code)]
 pub const SPACE_AFTER_CAST: core_config::OptId = core_config::opt::SPACE_AFTER_CAST;
 #[allow(dead_code)]
+pub const EMPTY_LINE_BEFORE_ACCESS_MODIFIER: core_config::OptId = core_config::opt::EMPTY_LINE_BEFORE_ACCESS_MODIFIER;
+#[allow(dead_code)]
 pub const KEEP_BLANK_LINES_AT_END_OF_BLOCKS: core_config::OptId = core_config::opt::KEEP_BLANK_LINES_AT_END_OF_BLOCKS;
 #[allow(dead_code)]
 pub const JOIN_CLOSING_ANGLES: core_config::OptId = core_config::opt::JOIN_CLOSING_ANGLES;
@@ -107,6 +109,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("space_after_cast", "cast_keep", "", &["AmpAmp", "Plus"]),
     ("space_after_cast", "cast_node", "", &["Cast"]),
     ("space_after_cast", "cast_tight", "", &["Star", "Amp", "Minus"]),
+    ("empty_line_before_access_modifier", "blank_before", "", &["AccessSpecifier"]),
     ("keep_blank_lines_at_end_of_blocks", "keep_end", "", &["Block"]),
     ("keep_blank_lines_at_end_of_blocks", "keep_end_before", "", &["Keyword", "CatchClause"]),
     ("keep_blank_lines_at_end_of_blocks", "keep_end_under", "", &["NamespaceDeclaration", "EnumSpecifier"]),
@@ -131,8 +134,6 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("brace_wrapping", "attach_in", "", &["Block"]),
     ("for_each_macros", "loop_call", "control", &["Call"]),
     ("short_functions", "fit", "", &["FunctionDeclaration"]),
-    ("short_functions", "no_fit_under", "", &["TemplateDeclaration"]),
-    ("short_functions", "no_fit_with", "", &["ConstructorInitializers"]),
     ("short_ifs", "head", "", &["Condition"]),
     ("short_ifs", "join", "", &["IfStatement"]),
     ("short_loops", "head", "", &["Condition"]),
@@ -207,6 +208,18 @@ pub fn derive_pointer_alignment(o: &core_config::ResolvedOptions) -> bool {
 #[allow(dead_code)]
 pub fn space_after_cast(o: &core_config::ResolvedOptions) -> bool {
     o.flag(SPACE_AFTER_CAST, false)
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EmptyLineBeforeAccessModifier { Never, Leave, LogicalBlock, Always }
+#[allow(dead_code)]
+pub fn empty_line_before_access_modifier(o: &core_config::ResolvedOptions) -> EmptyLineBeforeAccessModifier {
+    match o.text(EMPTY_LINE_BEFORE_ACCESS_MODIFIER) {
+        "never" => EmptyLineBeforeAccessModifier::Never,
+        "leave" => EmptyLineBeforeAccessModifier::Leave,
+        "always" => EmptyLineBeforeAccessModifier::Always,
+        _ => EmptyLineBeforeAccessModifier::LogicalBlock,
+    }
 }
 #[allow(dead_code)]
 pub fn keep_blank_lines_at_end_of_blocks(o: &core_config::ResolvedOptions) -> bool {
@@ -408,6 +421,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::POINTER_ALIGNMENT, &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
         core_config::OptionDef::boolean(core_config::opt::DERIVE_POINTER_ALIGNMENT, false, "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."),
         core_config::OptionDef::boolean(core_config::opt::SPACE_AFTER_CAST, false, "A blank after the `)` of a C cast (`(int) x` against `(int)x`)."),
+        core_config::OptionDef::choice(core_config::opt::EMPTY_LINE_BEFORE_ACCESS_MODIFIER, &["never", "leave", "logical_block", "always"], "logical_block", "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added."),
         core_config::OptionDef::boolean(core_config::opt::KEEP_BLANK_LINES_AT_END_OF_BLOCKS, false, "A blank line before the closing brace of a block stays."),
         core_config::OptionDef::boolean(core_config::opt::JOIN_CLOSING_ANGLES, false, "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart."),
         core_config::OptionDef::boolean(core_config::opt::EMPTY_BODY_OWN_LINE, false, "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`)."),

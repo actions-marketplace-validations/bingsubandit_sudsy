@@ -189,6 +189,36 @@ class CorpusAbsent(unittest.TestCase):
         self.assertIn("fetch-t-corpus.sh", out.getvalue())
 
 
+class StyleLists(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        folder = self.root / "folder"
+        folder.mkdir()
+        (folder / "s.clang-format").write_text("BasedOnStyle: LLVM\n")
+        (folder / "s.yaml").write_text("cpp:\n  format:\n    indent_size: 8\n")
+        self.folder = folder
+        self.config = {"fetch": ["fetch.sh"], "fixtures": [{"dir": "corpus", "style": "s", "style_list": {"file": ".cf", "key": "Macros", "option": "macros"}}]}
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_a_list_of_the_corpus_goes_into_both_style_files(self):
+        corpus = self.root / "corpus"
+        corpus.mkdir()
+        (corpus / ".cf").write_text("A: 1\nMacros:\n  - 'x_each'\n  - y_each\nB: 2\n")
+        with unittest.mock.patch.object(pf, "ROOT", self.root):
+            out = pf.style_files(self.config, self.folder, self.root / "work")
+        self.assertEqual((out / "s.clang-format").read_text(), "BasedOnStyle: LLVM\nMacros:\n  - 'x_each'\n  - 'y_each'\n")
+        self.assertEqual((out / "s.yaml").read_text(), "cpp:\n  format:\n    macros:\n      - x_each\n      - y_each\n    indent_size: 8\n")
+
+    def test_a_missing_corpus_file_stops_the_run_and_names_the_fetch_script(self):
+        with unittest.mock.patch.object(pf, "ROOT", self.root), self.assertRaises(SystemExit) as e:
+            pf.style_files(self.config, self.folder, self.root / "work")
+        self.assertIn("is missing", str(e.exception))
+        self.assertIn("fetch.sh", str(e.exception))
+
+
 class GroupFiles(unittest.TestCase):
     def test_each_group_gets_its_own_config_file(self):
         with tempfile.TemporaryDirectory() as tmp:

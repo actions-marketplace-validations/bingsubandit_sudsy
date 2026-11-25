@@ -34,6 +34,14 @@ pub struct BlockStyle {
     pub flat: bool,
     /// A block of one item and no comments stays on one line, `{ item }`, when it fits.
     pub fit_single: bool,
+    /// The width of the signature before the block written on one line, when the source breaks it
+    /// over several lines: the block stays on one line when signature and block fit one line (0: the
+    /// block fits the line it stands on).
+    pub fit_prefix: usize,
+    /// Items of these kinds get a blank line before them by `blank_mode` (`never`, `always`, or
+    /// `logical_block`: unless a comment stands in front); `leave` or no kinds: as the source has.
+    pub blank_before: Vec<SyntaxKind>,
+    pub blank_mode: &'static str,
 }
 
 impl BlockStyle {
@@ -49,6 +57,9 @@ impl BlockStyle {
         keep_trailing_blank: false,
         flat: false,
         fit_single: false,
+        fit_prefix: 0,
+        blank_before: Vec::new(),
+        blank_mode: "leave",
     };
 }
 
@@ -348,9 +359,34 @@ fn block_of(
     };
     let ends = ends_of(cx, &c.open, &c.close, &moved);
     let single = c.slots.len() == 1 && moved.is_empty();
+    let mut rendered = render_slots(cx, &c.slots, true)?;
+    for i in 1..rendered.len() {
+        if style.blank_before.contains(&rendered[i].first.kind()) {
+            // (a comment in front, a comment at the end of the line before or a directive before keeps the source)
+            let last = &rendered[i - 1].last;
+            let directive = cx.last_token(last).is_some_and(|t| {
+                t.parent_ancestors()
+                    .any(|n| g.has_tag(n.kind(), "directive"))
+            });
+            let comment = directive
+                || cx
+                    .first_token(&rendered[i].first)
+                    .is_some_and(|t| !comments::leading_comments(g, &t).is_empty())
+                || cx
+                    .last_token(last)
+                    .is_some_and(|t| !comments::trailing_comments(g, &t).is_empty());
+            let item = &mut rendered[i];
+            item.blank_before = match style.blank_mode {
+                "never" => 0,
+                "always" => item.blank_before.max(1),
+                "logical_block" if !comment => item.blank_before.max(1),
+                _ => item.blank_before,
+            };
+        }
+    }
     let items = sequence_items(
         cx,
-        render_slots(cx, &c.slots, true)?,
+        rendered,
         style.max_blank_lines,
         style.force_blank,
         style.keep_same_line,
@@ -361,14 +397,28 @@ fn block_of(
         && comments::leading_comments(g, &c.close).is_empty()
     {
         let Ends { opening, closing } = ends;
-        return Ok(doc::label(
-            doc::SHORT_BODY,
-            doc::group(doc::concat(vec![
-                opening,
+        let parts = |items| {
+            vec![
+                opening.clone(),
                 doc::indent(doc::concat(vec![doc::line(), items])),
                 doc::line(),
-                closing,
-            ])),
+                closing.clone(),
+            ]
+        };
+        if style.fit_prefix > 0 {
+            let items = doc::shared(items);
+            let flat = doc::group(doc::concat(parts(items.clone())));
+            let width = flat.flat_width().map(|w| w + style.fit_prefix + 1);
+            let apart = doc::group_broken(doc::concat(parts(items)));
+            return Ok(match width {
+                Some(w) => doc::fits_below(0, w, flat, apart),
+                None => apart,
+            });
+        }
+        // (shared: a header that breaks prints the body over lines from a copy of this group)
+        return Ok(doc::label(
+            doc::SHORT_BODY,
+            doc::group(doc::concat(parts(doc::shared(items)))),
         ));
     }
     Ok(braces_of(

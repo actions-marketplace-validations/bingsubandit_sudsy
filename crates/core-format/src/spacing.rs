@@ -548,6 +548,8 @@ pub struct SpaceRules {
     attach_in: Vec<SyntaxKind>,
     /// The `attach_apart` kinds: a token inside such a node (a directive) ends its line.
     attach_apart: Vec<SyntaxKind>,
+    /// The comment tokens: not part of the name of a call head.
+    comments: Vec<SyntaxKind>,
     /// The `tight_after` and `tight_behind` kind sets: no blank after a token of the first when the
     /// token before it is of the second (`Args &&...rest`).
     tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
@@ -713,6 +715,7 @@ impl SpaceRules {
             attach_after: set("attach_after"),
             attach_in: set("attach_in"),
             attach_apart: set("attach_apart"),
+            comments: grammar.kinds_with_tag("comment").map(|d| d.kind).collect(),
             tight: (set("tight_after"), set("tight_behind")),
             pointer: Pointer {
                 marks: set("pointer"),
@@ -862,7 +865,9 @@ impl SpaceRules {
         if self.is_mark(b) {
             return Some(if self.is_mark(a) { false } else { before });
         }
-        (self.pointer.names.contains(&b.kind()) && self.is_mark(a)).then_some(after)
+        // (`T &...args` against `T&... args`: the pack's `...` after a mark takes the mark's side)
+        (self.pointer.names.contains(&b.kind()) && (self.is_mark(a) || self.tight_gap(a)))
+            .then_some(after)
     }
 
     /// The blank around a `*`, `&` or `&&` of a binary operation: one, unless the operation may be a
@@ -1086,7 +1091,7 @@ impl SpaceRules {
         {
             let name = (head.descendants_with_tokens())
                 .filter_map(|e| e.into_token())
-                .find(|t| !t.text().trim().is_empty())
+                .find(|t| !t.text().trim().is_empty() && !self.comments.contains(&t.kind()))
                 .map(|t| t.text().to_string());
             let loops = self.attach_call.1.iter().find(|l| {
                 l.kinds.contains(&head.kind())

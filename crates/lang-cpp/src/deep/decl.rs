@@ -46,6 +46,10 @@ const ATTRIBUTES: &[&str] = &[
 ];
 
 impl Cx<'_> {
+    fn builtin(&self, i: usize, b: usize) -> bool {
+        self.is(i, b, k::KEYWORD) && is_builtin(self.text(i))
+    }
+
     /// A declaration, or none when the tokens are an expression.
     pub(super) fn declaration(&mut self, a: usize, b: usize, scope: u8) -> Option<Read> {
         let s = self.specifiers(a, b);
@@ -80,7 +84,10 @@ impl Cx<'_> {
         if let Some((q, id)) = self.declarators_of(s, b) {
             // `type name (` in a declaration scope is a function.
             if scope != BODY && self.open(id, b, k::LPAR) && self.params_like(id) {
-                return Some(self.function(id, b));
+                // (`RANGES_FUNC(count)(params)`: a macro call names the function)
+                let (next, (lo, hi)) = (self.skip(id), self.inner(id));
+                let named = hi == lo + 1 && self.open(next, b, k::LPAR) && self.params_like(next);
+                return Some(self.function(if named { next } else { id }, b));
             }
             return Some(self.variables(q, b));
         }
@@ -107,14 +114,24 @@ impl Cx<'_> {
                     {
                         p += 1;
                     } else if (ATTRIBUTES.contains(&w)
+                        || w == "template" // (`template(typename T)(requires C<T>)`: a macro)
                         || (t.kind == k::IDENT && w.starts_with("__")))
                         && self.open(p + 1, b, k::LPAR)
                     {
                         p = self.skip(p + 1);
+                        while w == "template" && self.open(p, b, k::LPAR) {
+                            p = self.skip(p);
+                        }
                     } else if t.kind == k::IDENT
-                        && crate::structure::macro_name(w)
-                        && self.name_like(p + 1, b)
-                        && !self.word(p + 1, b, "operator")
+                        && ((crate::structure::macro_name(w)
+                            && self.name_like(p + 1, b)
+                            && !self.open(p + 2, b, k::LPAR)
+                            && !self.word(p + 1, b, "operator"))
+                            // (`noinline void f()`, `asmlinkage __visible int f()`: before a builtin type or `__attr`)
+                            || self.builtin(p + 1, b)
+                            || (self.is(p + 1, b, k::IDENT)
+                                && self.text(p + 1).starts_with("__")
+                                && (self.is(p + 2, b, k::IDENT) || self.builtin(p + 2, b))))
                     {
                         p += 1;
                     } else {
@@ -196,13 +213,12 @@ impl Cx<'_> {
                 || self.word(q, b, "__restrict")
             {
                 q += 1;
-            } else if q > a
-                && matches!(self.c[q - 1].kind, k::STAR | k::AMP)
-                && self.is(q, b, k::IDENT)
+            } else if self.is(q, b, k::IDENT)
                 && self.text(q).starts_with("__")
-                && self.is(q + 1, b, k::IDENT)
+                && ((q + 1 < b && matches!(self.c[q + 1].kind, k::IDENT | k::STAR | k::AMP))
+                    || self.word(q + 1, b, "operator"))
             {
-                // (`void *__init name(`: an attribute macro behind the mark)
+                // (`void __init name(`, `void __iomem *name(`, `void *__init name(`: an attribute macro behind the type)
                 q += 1;
             } else {
                 return Some(q);
