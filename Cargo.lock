@@ -517,6 +517,7 @@ version = "0.0.3"
 dependencies = [
  "core-config",
  "core-format",
+ "core-packages",
  "core-rules",
  "core-semantics",
  "core-syntax",
@@ -536,6 +537,14 @@ dependencies = [
  "lang-yaml",
  "provider-api",
  "salsa",
+ "tempfile",
+]
+
+[[package]]
+name = "core-packages"
+version = "0.0.3"
+dependencies = [
+ "serde_json",
  "tempfile",
 ]
 
@@ -3912,6 +3921,8 @@ name = "symbol-bench"
 version = "0.0.3"
 dependencies = [
  "anyhow",
+ "core-config",
+ "core-incremental",
  "core-semantics",
  "languages",
  "perf-bench",

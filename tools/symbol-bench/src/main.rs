@@ -3,6 +3,11 @@
 //! (default 3) of the extraction alone is reported with the files' counts, the share of declarations
 //! the index must answer `Unknown` for, and the memory the symbols of all files keep (a count of
 //! their payload and the resident set before and after).
+//!
+//! `symbol-bench index DIR LANG [FILES]`: the index of a project of FILES files of DIR (default
+//! 6,000, spread over the whole set): the first answer, then the time from an edit to the answer
+//! after a body edit and after a signature edit, with the memory of the whole index.
+mod index;
 use anyhow::{Result, anyhow};
 use core_semantics::symbols::{FileSymbols, extract};
 use perf_bench::file;
@@ -36,7 +41,7 @@ fn payload(s: &FileSymbols) -> usize {
 }
 
 /// Resident memory in bytes (Linux), 0 elsewhere.
-fn rss() -> usize {
+pub(crate) fn rss() -> usize {
     std::fs::read_to_string("/proc/self/statm")
         .ok()
         .and_then(|s| s.split_whitespace().nth(1)?.parse::<usize>().ok())
@@ -136,7 +141,7 @@ fn run(dir: &Path, lang: &str, passes: usize) -> Result<()> {
     Ok(())
 }
 
-fn walk(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
+pub(crate) fn walk(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
     let Ok(entries) = std::fs::read_dir(dir) else {
         return;
     };
@@ -153,10 +158,18 @@ fn walk(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
 }
 
 fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().skip(1).collect();
+    let mut args: Vec<String> = std::env::args().skip(1).collect();
+    let indexed = args.first().is_some_and(|a| a == "index");
+    if indexed {
+        args.remove(0);
+    }
     let (Some(dir), Some(lang)) = (args.first(), args.get(1)) else {
-        return Err(anyhow!("symbol-bench DIR LANG [PASSES]"));
+        return Err(anyhow!("symbol-bench [index] DIR LANG [PASSES|FILES]"));
     };
+    if indexed {
+        let files = args.get(2).map_or(Ok(6000), |n| n.parse())?;
+        return index::run(Path::new(dir), lang, files);
+    }
     let passes = args.get(2).map_or(Ok(3), |n| n.parse())?;
     run(Path::new(dir), lang, passes)
 }

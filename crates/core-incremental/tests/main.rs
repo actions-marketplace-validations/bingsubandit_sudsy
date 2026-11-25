@@ -3,5 +3,6 @@
 mod directory;
 mod embedded;
 mod engine;
+mod index;
 mod package_comment;
 mod symbols;

@@ -8,6 +8,7 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 | id | module | what | tools | turned on by | used by | flags |
 |---|---|---|---|---|---|---|
 | editorconfig-options | core-config/editorconfig.rs | Format options read from .editorconfig as a fallback source. | EditorConfig, dotnet-format editorconfig | grammar:language | cmake, cpp, csharp, css, dockerfile, editorconfig, gitignore, go, graphql, hcl, html, ini, java, js, json, kotlin, makefile, markdown, php, powershell, protobuf, python, ruby, shell, sql, toml, xml, yaml |  |
+| package-locator | core-packages/composer.rs +2 | Finds the file of a qualified type name or an import from a project's package manifests (Composer autoload, import path roots). | PHPStan class.notFound, buf IMPORT_USED | file:symbols.rows | php, protobuf |  |
 
 ## format
 
@@ -350,6 +351,7 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 | role-vocabulary | core-syntax/roles.rs | What a node kind is for cross-language code, by role tags. | none (internal) | grammar:language | cmake, cpp, csharp, css, dockerfile, editorconfig, gitignore, go, graphql, hcl, html, ini, java, js, json, kotlin, makefile, markdown, php, powershell, protobuf, python, ruby, shell, sql, toml, xml, yaml |  |
 | source-lexer | lang-cpp/lexer.rs | Lexer: the source as tokens with byte spans for a hand-written parser. |  |  | cpp, css, java, json, sql, yaml | LOCAL: lang-cpp/lexer.rs, lang-css/lexer.rs, lang-java/lexer.rs, lang-json/lexer.rs, lang-sql/parse/lexer.rs, lang-yaml/parser/scan.rs |
 | string-literal-model | core-syntax/strings.rs | How a string token is delimited, what its escapes mean and how a value is written again. | none (string rows) | grammar:string | cmake, cpp, csharp, css, graphql, java, js, json, php, protobuf, python, shell, sql, toml, yaml |  |
+| symbol-index | core-incremental/index.rs | Answers whether a type, function or member exists: known with its declaration, proved absent, or unknown. | PHPStan class.notFound, buf IMPORT_USED | file:symbols.rows | php, protobuf |  |
 | template-actions | core-syntax/template_actions.rs | Delimited template actions in markup, their blocks counted per owning element. | html-eslint indent | option:dialect | html, json, sql |  |
 | tree-shape-check | core-syntax/shape.rs | Checks a tree against the node bodies of its grammar. | none (conformance) | grammar:language | cmake, cpp, csharp, css, dockerfile, editorconfig, gitignore, go, graphql, hcl, html, ini, java, js, json, kotlin, makefile, markdown, php, powershell, protobuf, python, ruby, shell, sql, toml, xml, yaml |  |
 | tree-sitter-adapter | core-treesitter/lib.rs +1 | A language-neutral adapter from tree-sitter to the lossless tree through a node-name mapping. | tree-sitter | path:core_treesitter | dockerfile, editorconfig, gitignore, go, graphql, hcl, ini, makefile, markdown, powershell, protobuf, shell, toml, xml, yaml |  |
@@ -373,5 +375,5 @@ One row per concept (one behavior). `turned on by`: the data the shared module r
 | scope-tables | core-semantics/scopes/rows.rs +1 | Which node kinds open scopes, declare, refer to or assign names, as rows resolved against the grammar. | none (language facts as rows) | family:scope, file:scope.rows | go, java, js, kotlin, php, powershell, python, ruby, shell |  |
 | semantic-facts | core-semantics/facts.rs | What a provider semantic model says about one file: declarations, references, diagnostics. | Roslyn semantic model |  | csharp | SINGLE-USE |
 | symbol-extraction | core-semantics/symbols/extract.rs | One walk of a tree that records the types, members, functions, constants and imports the rows name. | PHPStan class.notFound, buf IMPORT_USED | file:symbols.rows | php, protobuf |  |
-| symbol-index | core-semantics/symbols/mod.rs | The model of what a file declares to other files: types with parents and members, functions, constants, imports; names only. | PHPStan class.notFound, buf IMPORT_USED | file:symbols.rows | php, protobuf |  |
+| symbol-model | core-semantics/symbols/mod.rs | The model of what a file declares to other files: types with parents and members, functions, constants, imports; names only. | PHPStan class.notFound, buf IMPORT_USED | file:symbols.rows | php, protobuf |  |
 | symbol-tables | core-semantics/symbols/rows.rs | Which node kinds declare types, members, functions, constants and imports, and a language's name rules, as rows resolved against the grammar. | none (language facts as rows) | file:symbols.rows | php, protobuf |  |

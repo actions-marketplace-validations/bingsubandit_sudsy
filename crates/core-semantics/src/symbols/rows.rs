@@ -13,7 +13,7 @@
 //! enclosing scope, not in the namespace only), `fold KIND...` and `fallback KIND...` (name kinds:
 //! `type function constant member`), `constructor NAME`, `sigil CHARS`, `dynamic-members NAME...`,
 //! `declaring-calls NAME...`, `promotion WORD...` (modifiers that make a constructor parameter a
-//! property), `use-kinds WORD=KIND...`.
+//! property), `use-kinds WORD=KIND...`, `packages SYSTEM` (the package system that finds the files of names or imports: `composer`, `import-paths`).
 //!
 //! Roles (keys they take): `namespace` (`name`, flag `file`: the whole file), `type KIND`
 //! (`name`, `modifiers`, word `name-after=function`: the name follows that keyword), `heritage` (`names`, word `relation=extends|implements`), `function`
@@ -69,6 +69,8 @@ pub struct Facts {
     pub dynamic_members: Vec<String>,
     pub declaring_calls: Vec<String>,
     pub promotion: Vec<String>,
+    /// The package system of the language (see `core_packages::open`); empty for none.
+    pub packages: String,
     pub(crate) use_kinds: Vec<(String, NameKind)>,
 }
 
@@ -261,6 +263,7 @@ impl Table {
             "dynamic-members" => f.dynamic_members = list(),
             "declaring-calls" => f.declaring_calls = list(),
             "promotion" => f.promotion = list(),
+            "packages" => f.packages = one()?,
             "use-kinds" => {
                 for w in &words {
                     let (word, kind) = w
@@ -360,6 +363,14 @@ impl Table {
             .get(kind.index() as usize)
             .copied()
             .unwrap_or(false)
+    }
+
+    /// Names are visible through the files a file imports (Protobuf), not through the project.
+    pub fn sees_imports_only(&self) -> bool {
+        self.rows
+            .iter()
+            .flatten()
+            .any(|r| r.role == Role::FileImport)
     }
 
     pub(crate) fn is_call(&self, kind: SyntaxKind) -> bool {

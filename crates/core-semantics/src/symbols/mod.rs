@@ -7,7 +7,7 @@
 //! names they can stand for ([`Name`]); case folding and the fallback to the global namespace
 //! are options of the language ([`Facts`]).
 //!
-//! concept: symbol-index
+//! concept: symbol-model
 //! what: The model of what a file declares to other files: types with parents and members, functions, constants, imports; names only.
 //! tools: PHPStan class.notFound, buf IMPORT_USED
 //! reads: file:symbols.rows

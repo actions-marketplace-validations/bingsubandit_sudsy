@@ -86,6 +86,7 @@ core-plugins = { path = "crates/core-plugins" }
 plugin-sdk = { path = "crates/plugin-sdk" }
 core-flow = { path = "crates/core-flow" }
 core-semantics = { path = "crates/core-semantics" }
+core-packages = { path = "crates/core-packages" }
 core-incremental = { path = "crates/core-incremental" }
 core-rules = { path = "crates/core-rules" }
 core-format = { path = "crates/core-format" }

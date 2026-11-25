@@ -4,6 +4,7 @@
 separator .
 absolute .
 lexical
+packages import-paths
 
 Package namespace file name=FullIdent
 Import file-import names=String modifiers=Keyword

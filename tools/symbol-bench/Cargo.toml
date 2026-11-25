@@ -7,6 +7,8 @@ version.workspace = true
 publish.workspace = true
 
 [dependencies]
+core-config.workspace = true
+core-incremental.workspace = true
 core-semantics.workspace = true
 languages = { path = "../../crates/languages" }
 perf-bench = { path = "../perf-bench" }

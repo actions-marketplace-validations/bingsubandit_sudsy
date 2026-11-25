@@ -72,3 +72,23 @@ pub struct ExtensionSet {
     #[returns(ref)]
     pub extensions: core_rules::Extensions,
 }
+
+/// The files of a project and how to find what they do not hold: the symbol index reads it
+/// (`crate::index`). Only an index query reads it, so a run without index rules never builds one.
+#[salsa::input]
+pub struct Project {
+    /// The project's own files.
+    #[returns(ref)]
+    pub files: Vec<File>,
+    /// `files` is every file of the project: only then can a name that none declares be absent.
+    #[returns(copy)]
+    pub complete: bool,
+    /// Finds the files of names and imports outside `files`; `None` when the language has no
+    /// package system or no manifest was found.
+    #[returns(ref)]
+    pub locator: Option<std::sync::Arc<dyn core_packages::Locator>>,
+    /// Bumped when a manifest or a dependency file changed on disk: files read on demand are
+    /// read again.
+    #[returns(copy)]
+    pub revision: u64,
+}
