@@ -1,0 +1,6 @@
+no-empty-block:
+  level: warn
+  options:
+    comment_handles: false
+    waiting_loops: true
+    ignored_loop_heads: "^range\\b"

@@ -3,6 +3,7 @@
 // Format: see crates/core-syntax/src/grammar/mod.rs.
 
 language go 28 "Go"
+roles
 comments line "//" block "/*" "*/"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
@@ -17,19 +18,19 @@ token Newline #trivia #newline
 token Comment #trivia #comment
 
 // A name: a variable, a function, a parameter.
-token Ident
+token Ident #expression
 // The name of a field or method after a `.` or in a declaration.
 token FieldIdent
 // The name of a type.
 token TypeIdent
 // The name of a package: in `package p`, `p.T` and an import alias.
-token PackageIdent
+token PackageIdent #import-alias
 // The name of a label: `break L`, `L:`.
 token LabelName
 // `_`.
-token BlankIdent
+token BlankIdent #import-alias
 // The `.` of `import . "p"`.
-token DotImport
+token DotImport #import-alias
 // Reserved words (`func`, `type`, `range`, ...).
 token Keyword
 // `fallthrough`, wrapped in a statement node of its own.
@@ -43,110 +44,110 @@ token Assign #operator
 // `:=`
 token Define #operator
 // `, ; : . ...`
-token Punct #punctuation
+token Punct #punctuation #list-item
 // `( [ {` and their closers.
 token Open #punctuation
 token Close #punctuation
-token Int #literal
-token Float #literal
-token Imaginary #literal
-token Rune #literal
+token Int #expression #literal
+token Float #expression #literal
+token Imaginary #expression #literal
+token Rune #expression #literal
 // An interpreted string and a raw string, quotes included.
-token String #literal #string
-token Nil #literal
-token True #literal
-token False #literal
-token Iota #literal
+token String #expression #literal #string
+token Nil #expression #literal
+token True #expression #literal
+token False #expression #literal
+token Iota #expression #literal
 
 token Eof
 token Unknown #error
 
-node SourceFile #scope
-node PackageClause #namespace = Keyword name:PackageIdent
-node ImportDeclaration
-node ImportSpec
-node ImportSpecList
+node SourceFile #scope #source-file
+node PackageClause #namespace #opaque = Keyword name:PackageIdent
+node ImportDeclaration #opaque
+node ImportSpec #import = alias:#import-alias? path:String
+node ImportSpecList #opaque
 node FunctionDeclaration #scope #function = Keyword name:Ident TypeParameterList? parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?
 node MethodDeclaration #scope #function = Keyword receiver:ReceiverList name:FieldIdent TypeParameterList? parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?
-node TypeParameterList
-node TypeParameterDeclaration
-node ParameterList #parameter-list
-node ResultList #parameter-list
-node ReceiverList #parameter-list
-node ParameterDeclaration #parameter
-node VariadicParameterDeclaration #parameter
-node ConstDeclaration
-node ConstSpec #const-spec = name:Ident
-node VarDeclaration
-node VarSpec #var-spec = name:Ident
-node VarSpecList
-node TypeDeclaration
-node TypeSpec #scope #type-spec = name:TypeIdent
-node TypeAlias #scope #type-spec = name:TypeIdent
-node TypeArguments
-node TypeElem
-node TypeConstraint
-node ArrayType #type
-node ImplicitLengthArrayType #type
-node SliceType #type
-node StructType #type
-node FieldDeclarationList
-node FieldDeclaration #field-declaration
-node PointerType #type
+node TypeParameterList #opaque
+node TypeParameterDeclaration #opaque
+node ParameterList #parameter-list = Open parameters:#list-item* Close
+node ResultList #parameter-list = Open parameters:#list-item* Close
+node ReceiverList #parameter-list = Open parameters:#list-item* Close
+node ParameterDeclaration #parameter #list-item #opaque
+node VariadicParameterDeclaration #parameter #list-item #opaque
+node ConstDeclaration #statement #opaque
+node ConstSpec #const-spec #opaque = name:Ident
+node VarDeclaration #statement #opaque
+node VarSpec #var-spec #opaque = name:Ident
+node VarSpecList #opaque
+node TypeDeclaration #statement #opaque
+node TypeSpec #scope #type-spec = name:TypeIdent TypeParameterList? Assign? #type? TypeIdent?
+node TypeAlias #scope #type-spec = name:TypeIdent TypeParameterList? Assign? #type? TypeIdent?
+node TypeArguments #opaque
+node TypeElem #opaque
+node TypeConstraint #opaque
+node ArrayType #type #opaque
+node ImplicitLengthArrayType #type #opaque
+node SliceType #type #opaque
+node StructType #type #opaque
+node FieldDeclarationList #opaque
+node FieldDeclaration #field-declaration #opaque
+node PointerType #type #opaque
 node FunctionType #scope #signature #type
-node InterfaceType #type
+node InterfaceType #type #opaque
 node MethodElem #scope #signature = name:FieldIdent parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent?
-node MapType #type
-node ChannelType #type
-node QualifiedType #type
-node GenericType #type
-node NegatedType #type
-node ParenthesizedType #type
-node Block #block
-node StatementList
-node EmptyStatement
-node ExpressionStatement
-node LabeledStatement
-node EmptyLabeledStatement
-node FallthroughStatement
-node BreakStatement
-node ContinueStatement
-node GotoStatement
-node ReturnStatement
-node GoStatement
-node DeferStatement
-node IfStatement #scope
-node ExpressionSwitchStatement #scope
-node TypeSwitchStatement #scope
+node MapType #type #opaque
+node ChannelType #type #opaque
+node QualifiedType #type #opaque
+node GenericType #type #opaque
+node NegatedType #type #opaque
+node ParenthesizedType #type #opaque
+node Block #statement #block = Open items:StatementList? Close
+node StatementList #statements = items:#statement*
+node EmptyStatement #statement #opaque
+node ExpressionStatement #statement #simple #opaque
+node LabeledStatement #statement #goto-target #opaque
+node EmptyLabeledStatement #statement #goto-target #opaque
+node FallthroughStatement #statement #opaque
+node BreakStatement #statement #break = Keyword label:LabelName?
+node ContinueStatement #statement #continue = Keyword label:LabelName?
+node GotoStatement #statement #goto #opaque
+node ReturnStatement #statement #return = Keyword value:ExpressionList?
+node GoStatement #statement #opaque
+node DeferStatement #statement #opaque
+node IfStatement #scope #statement #conditional = Keyword init:#simple? Punct? condition:#expression then:Block Keyword? else:#statement?
+node ExpressionSwitchStatement #statement #scope
+node TypeSwitchStatement #statement #scope
 node ExpressionCase #scope
 node TypeCase #scope
 node DefaultCase #scope
-node SelectStatement #scope
+node SelectStatement #statement #scope
 node CommunicationCase #scope
-node ForStatement #scope
-node ForClause
-node RangeClause
-node SendStatement
-node ReceiveStatement
-node IncStatement
-node DecStatement
-node AssignmentStatement
-node ShortVarDeclaration #local-declaration = left:ExpressionList Define right:ExpressionList
-node ExpressionList
-node ParenthesizedExpression
-node CallExpression
-node ArgumentList
-node VariadicArgument
-node SelectorExpression
-node IndexExpression
-node SliceExpression
-node TypeAssertionExpression
-node TypeConversionExpression
-node TypeInstantiationExpression
-node BinaryExpression
-node UnaryExpression
-node CompositeLiteral
-node LiteralValue
-node LiteralElement
-node KeyedElement
-node FuncLiteral #scope #function = Keyword parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?
+node ForStatement #statement #scope #loop = Keyword condition:#for-head? cond_expr=condition:#expression? body:Block
+node ForClause #for-head #opaque
+node RangeClause #for-head #opaque
+node SendStatement #statement #simple #opaque
+node ReceiveStatement #opaque
+node IncStatement #statement #simple #increment = #expression Op
+node DecStatement #statement #simple #increment = #expression Op
+node AssignmentStatement #statement #simple #assignment = left:ExpressionList operator:#operator right:ExpressionList
+node ShortVarDeclaration #statement #simple #local-declaration #opaque = left:ExpressionList Define right:ExpressionList
+node ExpressionList #opaque
+node ParenthesizedExpression #expression #opaque
+node CallExpression #expression #call = callee:#expression TypeArguments? arguments:ArgumentList
+node ArgumentList #opaque
+node VariadicArgument #opaque
+node SelectorExpression #expression #opaque
+node IndexExpression #expression #opaque
+node SliceExpression #expression #opaque
+node TypeAssertionExpression #expression #opaque
+node TypeConversionExpression #expression #opaque
+node TypeInstantiationExpression #expression #opaque
+node BinaryExpression #expression #opaque
+node UnaryExpression #expression #opaque
+node CompositeLiteral #expression #opaque
+node LiteralValue #opaque
+node LiteralElement #opaque
+node KeyedElement #opaque
+node FuncLiteral #expression #scope #function = Keyword parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent? body:Block?

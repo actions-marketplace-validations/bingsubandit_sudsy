@@ -1,0 +1,16 @@
+id: receiver-naming
+family: naming-convention
+params:
+  match: regex
+  receivers: function&+receiver=receiver/ParameterDeclaration/Ident|receiver/ParameterDeclaration/BlankIdent
+  message: "receiver name `{name}` is generic: name it after its type (leave the name out when it is unused)"
+description: >-
+  The name of a method's receiver is `_`, `this` or `self`: a receiver
+  is named by a short form of its type, and left out when the method does not use it.
+why: >-
+  `this` and `self` carry the habits of other languages into Go, where a receiver is an ordinary parameter named after its type (`s` for `Server`). A `_` receiver is the same as no name, so leaving the name out says the method does not use the value. The Go code review comments ask for short names taken from the type.
+example: "func (self *T) M() {}"
+severity: off
+category: style
+options:
+  - { name: receivers, type: regex, default: "!^(?:_|this|self)$", description: "A regular expression the receiver name must match; one that starts with `!` is one it must not match. Empty: not checked." }

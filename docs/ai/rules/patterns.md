@@ -138,6 +138,7 @@ message: 'the value `$0` should start with `${NAME:upper-snake}_`'
 A rule can match on what a node is, not on the grammar's kind names, so one file runs in every grammar that has the roles ([../architecture/syntax-tree.md](../architecture/syntax-tree.md)):
 - `role: <name>` or a list: the node has one of these role tags. It pins the kinds the rule runs on; a built-in rule whose top-level `role` no node of the language has is left out of that language.
 - `operator: <kind>` or a list: the node's `operator` field is an operator of that kind (`Grammar::operator_kind`: `equality`, `comparison`, ...).
+- `needs-role: <name>` or a list (top level of a built-in rule only): the rule is left out of a language with no node of one of these role tags (a check on `x += 1` needs a language that has `x++`: role `increment`).
 - `fields: { <field>: <rule> }`: the child in each named role field (`Grammar::slot`) satisfies the rule. A token child satisfies `regex` (its text), `role` (a token carrying the tag) and `all`/`any`/`not`.
 - `items: { <field>: <rule> }`: some child in each named role field satisfies the rule (`fields` reads the first child; a catch lists several types). `single: <field>`: the role field holds exactly one child.
 - `same: [a, b]`: the two fields have the same tokens. `empty: true`: the node has no child node, no token but its brackets and no comment before its closing bracket; `bare: true`: the same, a comment aside. `inner: <rule>`: the node, looked through parentheses and wrappers that hold nothing else, satisfies the rule.

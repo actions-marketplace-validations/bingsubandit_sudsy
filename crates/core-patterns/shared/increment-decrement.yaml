@@ -1,0 +1,16 @@
+id: increment-decrement
+message: should replace x += 1 with x++ (or x -= 1 with x--)
+description: >-
+  `x += 1` and `x -= 1`, where `x++` and `x--` say the same. Only the
+  literal `1` counts. Left out of a language that has no `++`.
+why: >-
+  `x++` and `x--` are the short forms of `x += 1` and `x -= 1` and are what readers look for in a loop or a counter. Using one form everywhere makes counters easy to find. The rule is off by default because the long form is a valid style in some codebases.
+example: 'x += 1'
+severity: off
+category: style
+rule:
+  role: assignment
+  needs-role: increment
+  fields:
+    operator: { regex: '^[+-]=$' }
+    right: { regex: '^1$' }

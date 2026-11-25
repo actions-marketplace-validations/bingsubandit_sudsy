@@ -6567,6 +6567,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -6676,6 +6677,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -6753,37 +6755,47 @@
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement).",
+      "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement). With `comment_handles` off a comment does not count (revive empty-block). With `waiting_loops` an empty loop whose condition is a call is a wait and is left alone, and so is a loop whose head matches `ignored_loop_heads`.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "class A { void F() {\n try { } catch (Exception) { }\n try { } catch { /* ignored on purpose */ }\n try { } catch { Log(); }\n try { } catch { try { } catch { Log(); } }\n} }\n",
-        "language": "csharp",
+        "input": "package a\n\nfunc f(ok bool, ch chan int, g func() bool) {\n\tif ok {\n\t}\n\tif ok {\n\t\t// nothing\n\t} else {\n\t}\n\tfor ok {\n\t}\n\tfor i := 0; i < 3; i++ {\n\t}\n\tfor i := range ch {\n\t}\n\tfor g() {\n\t}\n\tfor range ch {\n\t}\n\t{\n\t}\n\tgo func() {}()\n\tselect {\n\t}\n}\n\nfunc empty() {}\n\nfunc forever() {\n\tfor {\n\t}\n}\n",
+        "language": "go",
         "spans": [
           {
-            "column": 6,
-            "length": 3,
-            "line": 2
-          },
-          {
-            "column": 6,
-            "length": 3,
-            "line": 3
-          },
-          {
-            "column": 6,
-            "length": 3,
+            "column": 8,
+            "length": 1,
             "line": 4
           },
           {
-            "column": 6,
-            "length": 3,
-            "line": 5
+            "column": 8,
+            "length": 1,
+            "line": 6
           },
           {
-            "column": 22,
-            "length": 3,
-            "line": 5
+            "column": 9,
+            "length": 1,
+            "line": 8
+          },
+          {
+            "column": 9,
+            "length": 1,
+            "line": 10
+          },
+          {
+            "column": 25,
+            "length": 1,
+            "line": 12
+          },
+          {
+            "column": 20,
+            "length": 1,
+            "line": 14
+          },
+          {
+            "column": 6,
+            "length": 1,
+            "line": 30
           }
         ]
       },
@@ -6793,6 +6805,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -6800,8 +6813,28 @@
         "python",
         "ruby"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": true,
+          "description": "A comment in the block counts as content",
+          "name": "comment_handles",
+          "type": "bool"
+        },
+        {
+          "default": false,
+          "description": "Leave alone an empty loop whose condition is a call",
+          "name": "waiting_loops",
+          "type": "bool"
+        },
+        {
+          "default": "\\b\\B",
+          "description": "A regular expression for the condition or head of a loop whose empty body is left alone",
+          "name": "ignored_loop_heads",
+          "type": "string"
+        }
+      ],
       "presets": [
+        "go/revive",
         "js/eslint-recommended"
       ],
       "upstream": [
@@ -6811,6 +6844,13 @@
           "partial": true,
           "tool": "eslint",
           "url": "https://eslint.org/docs/latest/rules/no-empty"
+        },
+        {
+          "id": "empty-block",
+          "note": "a bare `{}` block statement and an empty `switch` body are not read",
+          "partial": true,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#empty-block"
         }
       ]
     },
@@ -6975,6 +7015,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "php",
@@ -7067,23 +7108,18 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "class A { int F() { return 1; G(); G(); }\n int H(int x) { if (false) { G(); } throw null; x++; } int G() => 1; }\n",
-        "language": "csharp",
+        "input": "package a\n\nfunc f(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\tg()\n\t}\n\tg()\n\treturn 0\n}\n\nfunc h(a bool) int {\n\treturn 1\n\tg()\n}\n\nfunc k(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\treturn 2\n\t}\n\tg()\n}\n\nfunc m(a bool) int {\n\tif a {\n\t\tgoto done\n\t}\n\treturn 1\ndone:\n\tg()\n\treturn 2\n}\n\nfunc p(ok bool) {\n\tfor ok {\n\t\tg()\n\t}\n\tg()\n}\n",
+        "language": "go",
         "spans": [
           {
-            "column": 31,
-            "length": 4,
-            "line": 1
+            "column": 2,
+            "length": 3,
+            "line": 15
           },
           {
-            "column": 30,
-            "length": 4,
-            "line": 2
-          },
-          {
-            "column": 49,
-            "length": 4,
-            "line": 2
+            "column": 2,
+            "length": 3,
+            "line": 24
           }
         ]
       },
@@ -7093,6 +7129,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -7109,6 +7146,7 @@
         }
       ],
       "presets": [
+        "go/revive",
         "js/eslint-recommended",
         "js/biome-recommended",
         "js/oxlint"
@@ -7119,6 +7157,13 @@
           "partial": false,
           "tool": "eslint",
           "url": "https://eslint.org/docs/latest/rules/no-unreachable"
+        },
+        {
+          "id": "unreachable-code",
+          "note": "the code after `panic`, `os.Exit`, `log.Fatal*` and `t.Fatal*` is not read as unreachable",
+          "partial": true,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#unreachable-code"
         },
         {
           "id": "RCS1148",
@@ -9496,6 +9541,252 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A package-level `var` of one name made by `errors.New` or `fmt.Errorf` starts with `err`, or `Err` when exported.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nimport \"errors\"\n\nvar failed = errors.New(\"x\")\nvar Bad = errors.New(\"x\")\nvar errOK = errors.New(\"x\")\nvar ErrOK = fmt.Errorf(\"x\")\nvar _ = errors.New(\"x\")\nvar (\n\toops error = errors.New(\"x\")\n\tone, two     = errors.New(\"x\"), errors.New(\"y\")\n\tother        = other()\n)\n\nfunc f() {\n\tvar local = errors.New(\"x\")\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 5,
+            "length": 24,
+            "line": 5
+          },
+          {
+            "column": 5,
+            "length": 21,
+            "line": 6
+          },
+          {
+            "column": 2,
+            "length": 28,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "error-naming",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "error-naming",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#error-naming"
+        }
+      ],
+      "why": "A package-level error variable is a sentinel that callers compare against with `errors.Is`, and it is read from other packages. The `err` and `Err` prefixes make such variables recognizable at the use site and keep the exported ones apart from other exported names. It is a Go convention; nothing breaks without it."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The text of an error made with `fmt.Errorf`, `errors.New`, `errors.Errorf`, `errors.Wrap` and the like ends in `.`, `:`, `!` or a newline (a capital first letter is not reported). The text is the first argument, or the second of the functions that wrap an error (`errors.Wrap(err, \"failed.\")`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nvar a = errors.New(\"failed.\")\nvar b = fmt.Errorf(\"failed: %w\", err)\nvar c = fmt.Errorf(\"failed:\")\nvar d = errors.Wrap(err, \"could not read!\")\nvar e = errors.New(\"line\\n\")\nvar f = errors.New(\"Capitalized\")\nvar g = errors.New(\"quoted \\\\n\")\nvar h = errors.New(`raw.`)\nvar i = errors.New(msg + \".\")\nvar j = log.Printf(\"failed.\")\nvar k = errors.New(\"\")\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 20,
+            "length": 9,
+            "line": 8
+          },
+          {
+            "column": 20,
+            "length": 9,
+            "line": 10
+          },
+          {
+            "column": 26,
+            "length": 17,
+            "line": 11
+          },
+          {
+            "column": 20,
+            "length": 8,
+            "line": 12
+          },
+          {
+            "column": 20,
+            "length": 6,
+            "line": 15
+          }
+        ]
+      },
+      "fix": null,
+      "id": "error-strings",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "error-strings",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#error-strings"
+        }
+      ],
+      "why": "Error strings are joined into longer messages (`failed to open: ` plus the cause), so a full stop, colon, exclamation mark or newline at the end leaves a doubled or dangling mark in the result and in logs. The Go code review comments ask for messages without end punctuation."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`errors.New(fmt.Sprintf(...))` is `fmt.Errorf(...)` (the `t.Error(fmt.Sprintf(...))` form on a `*testing.T` needs types and is not read).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f() {\n\t_ = errors.New(fmt.Sprintf(\"x %d\", 1))\n\t_ = errors.New(fmt.Sprint(\"x\"), 1)\n\t_ = errors.New(\"x\")\n\t_ = fmt.Errorf(\"x %d\", 1)\n\t_ = errors.New(fmt.Sprintf(\"x\") + \"y\")\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 6,
+            "length": 34,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "errorf",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "errorf",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#errorf"
+        }
+      ],
+      "why": "`fmt.Errorf` formats and wraps (`%w`) in one call, and `go vet` knows its format string. `errors.New(fmt.Sprintf(...))` formats a string first and then wraps it in an error, which is longer and cannot wrap another error with `%w`.\n\nTo fix, call `fmt.Errorf` with the same format and arguments."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`x += 1` and `x -= 1`, where `x++` and `x--` say the same. Only the literal `1` counts. Left out of a language that has no `++`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(x int, xs []int, m *map[string]int) {\n\tx += 1\n\tx -= 1\n\txs[0] += 1\n\t(*m)[\"k\"] += 1\n\tx += 2\n\tx += 01\n\tx *= 1\n\tfor i := 0; i < 3; i += 1 {\n\t}\n}\n\ntype U map[string]int\n\nfunc (s *U) M() error {\n\t(*s)[\"called\"] += 1\n\treturn nil\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 2,
+            "length": 6,
+            "line": 4
+          },
+          {
+            "column": 2,
+            "length": 6,
+            "line": 5
+          },
+          {
+            "column": 2,
+            "length": 10,
+            "line": 6
+          },
+          {
+            "column": 2,
+            "length": 14,
+            "line": 7
+          },
+          {
+            "column": 21,
+            "length": 6,
+            "line": 11
+          },
+          {
+            "column": 2,
+            "length": 19,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "increment-decrement",
+      "languages": [
+        "go",
+        "js"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "increment-decrement",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#increment-decrement"
+        }
+      ],
+      "why": "`x++` and `x--` are the short forms of `x += 1` and `x -= 1` and are what readers look for in a loop or a counter. Using one form everywhere makes counters easy to find. The rule is off by default because the long form is a valid style in some codebases."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `else` block after an `if` block that ends in `return`: the code of the `else` can follow the `if`. An `else if` is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\treturn 2\n\t}\n}\n\nfunc h(a, b bool) int {\n\tif a {\n\t\treturn 1\n\t} else if b {\n\t\treturn 2\n\t}\n\tif x := g(); x {\n\t\treturn 1\n\t} else {\n\t\tg()\n\t}\n\tif a {\n\t\tg()\n\t} else {\n\t\treturn 3\n\t}\n\treturn 0\n}\n\nfunc n(a, b bool) int {\n\tif a {\n\t\tif b {\n\t\t\treturn 1\n\t\t} else {\n\t\t\treturn 2\n\t\t}\n\t} else {\n\t\tg()\n\t}\n\treturn 0\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 6
+          },
+          {
+            "column": 9,
+            "length": 1,
+            "line": 19
+          },
+          {
+            "column": 10,
+            "length": 1,
+            "line": 34
+          }
+        ]
+      },
+      "fix": null,
+      "id": "indent-error-flow",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "indent-error-flow",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#indent-error-flow"
+        }
+      ],
+      "why": "When the `if` block ends in `return`, the `else` only adds a level of indentation to the code that follows. Without it the normal path stays at the left edge and the early return reads as a guard, which is the Go way of handling errors first. Removing the `else` does not change what the function does.\n\nTo fix, delete `else` and move its block after the `if`."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse.",
       "example": {
         "config": null,
@@ -9564,6 +9855,146 @@
           "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#package-comments"
         }
       ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`for k, _ := range x`: the second value is the blank identifier, so `for k := range x` says the same.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(xs []int) {\n\tfor i, _ := range xs {\n\t}\n\tfor i, v := range xs {\n\t}\n\tfor i := range xs {\n\t}\n\tfor _, _ = range xs {\n\t}\n\tfor _, v := range xs {\n\t}\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 6,
+            "length": 1,
+            "line": 4
+          },
+          {
+            "column": 6,
+            "length": 1,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "range",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "range",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#range"
+        }
+      ],
+      "why": "`for k, _ := range x` and `for k := range x` do the same; the blank identifier is noise that suggests the second value matters. The short form is what `gofmt -s` produces, so code that uses it needs no later cleanup."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The methods of a type declared in one file name their receiver the same. The first method sets the name; `_`, `this` and `self` are left to `receiver-naming`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\ntype T struct{}\ntype S[K any] struct{}\n\nfunc (t T) A()   {}\nfunc (u *T) B()  {}\nfunc (t *T) C()  {}\nfunc (self T) D() {}\nfunc (_ T) E()   {}\nfunc (T) F()     {}\nfunc (this *T) G() {}\n\nfunc (s *S[K]) H() {}\nfunc (x *S[K]) I() {}\nfunc (s S[K]) J()  {}\n\ntype U struct{}\n\nfunc (u U) A()  {}\nfunc (U) B()    {}\nfunc (v *U) C() {}\nfunc f(t T)     {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 19,
+            "line": 7
+          },
+          {
+            "column": 1,
+            "length": 21,
+            "line": 15
+          },
+          {
+            "column": 1,
+            "length": 18,
+            "line": 22
+          }
+        ]
+      },
+      "fix": null,
+      "id": "receiver-name-consistent",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "receiver-naming",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#receiver-naming"
+        }
+      ],
+      "why": "A method set reads as one unit. When one method calls its receiver `s` and the next `srv`, a reader has to check each body to know that both mean the same value, and a copied body keeps the wrong name. The Go code review comments ask for one receiver name per type."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The name of a method's receiver is `_`, `this` or `self`: a receiver is named by a short form of its type, and left out when the method does not use it.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\ntype T struct{}\ntype S[K any] struct{}\n\nfunc (t T) A()   {}\nfunc (u *T) B()  {}\nfunc (t *T) C()  {}\nfunc (self T) D() {}\nfunc (_ T) E()   {}\nfunc (T) F()     {}\nfunc (this *T) G() {}\n\nfunc (s *S[K]) H() {}\nfunc (x *S[K]) I() {}\nfunc (s S[K]) J()  {}\n\ntype U struct{}\n\nfunc (u U) A()  {}\nfunc (U) B()    {}\nfunc (v *U) C() {}\nfunc f(t T)     {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 7,
+            "length": 4,
+            "line": 9
+          },
+          {
+            "column": 7,
+            "length": 1,
+            "line": 10
+          },
+          {
+            "column": 7,
+            "length": 4,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "receiver-naming",
+      "languages": [
+        "go"
+      ],
+      "options": [
+        {
+          "default": "!^(?:_|this|self)$",
+          "description": "A regular expression the receiver name must match; one that starts with `!` is one it must not match. Empty: not checked.",
+          "name": "receivers",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "receiver-naming",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#receiver-naming"
+        }
+      ],
+      "why": "`this` and `self` carry the habits of other languages into Go, where a receiver is an ordinary parameter named after its type (`s` for `Server`). A `_` receiver is the same as no name, so leaving the name out says the method does not use the value. The Go code review comments ask for short names taken from the type."
     },
     {
       "category": "suspicious",
@@ -9689,6 +10120,47 @@
           "url": "https://docs.astral.sh/ruff/rules/A002/"
         }
       ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `else` block after an `if` block that ends in `break`, `continue` or `goto`: the code of the `else` can follow the `if`. An `else if` is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(a, b bool) {\n\tfor {\n\t\tif a {\n\t\t\tcontinue\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t\tif a {\n\t\t\tbreak\n\t\t} else if b {\n\t\t\tg()\n\t\t}\n\t\tif a {\n\t\t\tg()\n\t\t\tgoto end\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t\tif a {\n\t\t\treturn\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t}\nend:\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 10,
+            "length": 1,
+            "line": 7
+          },
+          {
+            "column": 10,
+            "length": 1,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "superfluous-else",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "superfluous-else",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#superfluous-else"
+        }
+      ],
+      "why": "When the `if` block ends in `break`, `continue` or `goto`, control never reaches the `else`, so the `else` only indents the code that follows. Without it the code reads as a guard followed by the main path. Removing the `else` does not change what the loop does.\n\nTo fix, delete `else` and move its block after the `if`."
     },
     {
       "category": "suspicious",
@@ -36599,22 +37071,22 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An import of every name of a package or module, `import a.b.*;` or `from a import *` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403).",
+      "description": "An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's `import . \"fmt\"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403, revive dot-imports).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "import java.util.*;\nimport static java.lang.Math.*;\n\nclass A {}\n",
-        "language": "java",
+        "input": "package a\n\nimport (\n\t. \"fmt\"\n\t\"os\"\n\t_ \"embed\"\n\tm \"math\"\n)\n\nimport . \"strings\"\n",
+        "language": "go",
         "spans": [
           {
-            "column": 1,
-            "length": 19,
-            "line": 1
+            "column": 2,
+            "length": 7,
+            "line": 4
           },
           {
-            "column": 1,
-            "length": 31,
-            "line": 2
+            "column": 8,
+            "length": 11,
+            "line": 10
           }
         ]
       },
@@ -36622,13 +37094,24 @@
       "id": "no-wildcard-imports",
       "languages": [
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
         "python"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": [
+            "."
+          ],
+          "description": "The aliases that bring in every name of the imported package",
+          "name": "wildcard_aliases",
+          "type": "list"
+        }
+      ],
       "presets": [
+        "go/revive",
         "java/google",
         "kotlin/ktlint"
       ],
@@ -36645,6 +37128,12 @@
           "partial": false,
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-wildcard-imports"
+        },
+        {
+          "id": "dot-imports",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#dot-imports"
         },
         {
           "id": "F403",

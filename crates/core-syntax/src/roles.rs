@@ -55,6 +55,11 @@ pub const ROLES: &[Role] = &[
         doc: "stores a value, plain or compound",
     },
     Role {
+        name: "increment",
+        fields: "",
+        doc: "`x++` or `x--`, as an expression or a statement: marks a grammar that has them",
+    },
+    Role {
         name: "conditional",
         fields: "condition then else?",
         doc: "ternary expression, or an `if` statement or branch (`else` is the else branch, absent without one; in Python the first `elif`/`else` clause, whose siblings are the rest); a clause with no condition (`else`) has no `condition`",

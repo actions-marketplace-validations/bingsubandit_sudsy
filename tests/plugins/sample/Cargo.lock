@@ -149,6 +149,7 @@ dependencies = [
  "core-rules",
  "core-syntax",
  "regex",
+ "rowan",
  "serde",
  "serde-saphyr",
  "thiserror",

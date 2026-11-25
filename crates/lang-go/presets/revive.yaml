@@ -2,11 +2,28 @@
 go:
   lint:
     rules:
+      no-wildcard-imports: warn
       doc-first-word: warn
+      error-naming: warn
+      error-strings: warn
+      errorf: warn
+      increment-decrement: warn
+      indent-error-flow: warn
       missing-doc-comment: warn
       missing-package-comment: warn
+      no-empty-block:
+        level: warn
+        options:
+          comment_handles: false
+          waiting_loops: true
+          ignored_loop_heads: "^range\\b"
       package-comment-form: warn
+      range: warn
+      receiver-name-consistent: warn
+      receiver-naming: warn
       redefines-builtin-id: warn
+      superfluous-else: warn
+      unreachable-code: warn
       unused-parameter: warn
       var-naming: warn
 # revive checks the doc comments of non-test files only.

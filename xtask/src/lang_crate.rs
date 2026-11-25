@@ -208,6 +208,23 @@ fn provider(name: &str, v: &Value) -> String {
         Some(c) => format!("provider_of_composite({spec}, Some({c}))"),
         None => format!("provider_of({spec})"),
     };
+    let contexts: Vec<String> = v
+        .get("snippet-contexts")
+        .and_then(Value::as_array)
+        .map(|rows| {
+            rows.iter()
+                .map(|r| {
+                    let pair = |i| r.get(i).and_then(Value::as_str).unwrap_or_default();
+                    format!("({:?}, {:?})", pair(0), pair(1))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let body = if contexts.is_empty() {
+        body
+    } else {
+        format!("{body}.with_snippet_contexts(&[{}])", contexts.join(", "))
+    };
     format!(
         "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}\n}}\n"
     )

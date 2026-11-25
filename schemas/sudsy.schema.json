@@ -1693,6 +1693,18 @@
               "$ref": "#/definitions/rule",
               "description": "A class body that declares `boolean equals(Object)` and no `hashCode()`: equal objects get different hash codes (Checkstyle EqualsHashCode)."
             },
+            "error-naming": {
+              "$ref": "#/definitions/rule",
+              "description": "A package-level `var` of one name made by `errors.New` or `fmt.Errorf` starts with `err`, or `Err` when exported."
+            },
+            "error-strings": {
+              "$ref": "#/definitions/rule",
+              "description": "The text of an error made with `fmt.Errorf`, `errors.New`, `errors.Errorf`, `errors.Wrap` and the like ends in `.`, `:`, `!` or a newline (a capital first letter is not reported)."
+            },
+            "errorf": {
+              "$ref": "#/definitions/rule",
+              "description": "`errors.New(fmt.Sprintf(...))` is `fmt.Errorf(...)` (the `t.Error(fmt.Sprintf(...))` form on a `*testing.T` needs types and is not read)."
+            },
             "eval-array": {
               "$ref": "#/definitions/rule",
               "description": "An `eval` whose argument expands an array with `[@]`."
@@ -2392,6 +2404,14 @@
             "inconsistent-reference": {
               "$ref": "#/definitions/rule",
               "description": "In a select over one table, some column references are qualified (`t.a`) and others are not (sqlfluff RF03)."
+            },
+            "increment-decrement": {
+              "$ref": "#/definitions/rule",
+              "description": "`x += 1` and `x -= 1`, where `x++` and `x--` say the same."
+            },
+            "indent-error-flow": {
+              "$ref": "#/definitions/rule",
+              "description": "An `else` block after an `if` block that ends in `return`: the code of the `else` can follow the `if`."
             },
             "ineffective-access-modifier": {
               "$ref": "#/definitions/rule",
@@ -3829,8 +3849,45 @@
               "description": "An attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are left alone."
             },
             "no-empty-block": {
-              "$ref": "#/definitions/rule",
-              "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement)."
+              "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement). With `comment_handles` off a comment does not count (revive empty-block). With `waiting_loops` an empty loop whose condition is a call is a wait and is left alone, and so is a loop whose head matches `ignored_loop_heads`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "comment_handles": {
+                          "default": true,
+                          "description": "A comment in the block counts as content",
+                          "type": "boolean"
+                        },
+                        "ignored_loop_heads": {
+                          "default": "\\b\\B",
+                          "description": "A regular expression for the condition or head of a loop whose empty body is left alone",
+                          "type": "string"
+                        },
+                        "waiting_loops": {
+                          "default": false,
+                          "description": "Leave alone an empty loop whose condition is a call",
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-empty-catch": {
               "description": "A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `comment_handles` off a comment does not count (PSScriptAnalyzer). With `broad_only` only a clause that catches everything or one of the `types` is reported.",
@@ -4803,8 +4860,40 @@
               "description": "A call of `which`."
             },
             "no-wildcard-imports": {
-              "$ref": "#/definitions/rule",
-              "description": "An import of every name of a package or module, `import a.b.*;` or `from a import *` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403)."
+              "description": "An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's `import . \"fmt\"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403, revive dot-imports).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "wildcard_aliases": {
+                          "default": [
+                            "."
+                          ],
+                          "description": "The aliases that bring in every name of the imported package",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-with": {
               "$ref": "#/definitions/rule",
@@ -5391,9 +5480,48 @@
               "$ref": "#/definitions/rule",
               "description": "A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound."
             },
+            "range": {
+              "$ref": "#/definitions/rule",
+              "description": "`for k, _ := range x`: the second value is the blank identifier, so `for k := range x` says the same."
+            },
             "read-without-raw": {
               "$ref": "#/definitions/rule",
               "description": "A `read` without the `-r` flag."
+            },
+            "receiver-name-consistent": {
+              "$ref": "#/definitions/rule",
+              "description": "The methods of a type declared in one file name their receiver the same."
+            },
+            "receiver-naming": {
+              "description": "The name of a method's receiver is `_`, `this` or `self`: a receiver is named by a short form of its type, and left out when the method does not use it.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "receivers": {
+                          "default": "!^(?:_|this|self)$",
+                          "description": "A regular expression the receiver name must match; one that starts with `!` is one it must not match. Empty: not checked.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "redeclared-variable": {
               "$ref": "#/definitions/rule",
@@ -6839,6 +6967,10 @@
             "subprocess-run-without-check": {
               "$ref": "#/definitions/rule",
               "description": "A call of `subprocess.run` with no `check` keyword (and no `**kwargs`)."
+            },
+            "superfluous-else": {
+              "$ref": "#/definitions/rule",
+              "description": "An `else` block after an `if` block that ends in `break`, `continue` or `goto`: the code of the `else` can follow the `if`."
             },
             "supports-should-process": {
               "$ref": "#/definitions/rule",

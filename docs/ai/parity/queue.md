@@ -497,24 +497,24 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 
 ## revive
 
-Lint: target 92.4% (43845 of 47476, 3631 missed, measured on a31131a9); rules by missed findings:
-1. `receiver-naming` (899 missed)
-2. `indent-error-flow` (472 missed)
-3. `empty-block` (320 missed)
-4. `dot-imports` (297 missed)
-5. `exported` (282 missed)
-6. `var-declaration` (251 missed)
-7. `context-as-argument` (237 missed)
-8. `increment-decrement` (189 missed)
-9. `error-strings` (183 missed)
-10. `unexported-return` (138 missed)
-11. `blank-imports` (82 missed)
-12. `error-naming` (79 missed)
-13. `superfluous-else` (75 missed)
-14. `redefines-builtin-id` (34 missed)
-15. `unreachable-code` (22 missed)
+Lint: target 97.5% (46327 of 47483, 1156 missed, measured on 1d6de91f); rules by missed findings:
+1. `exported` (282 missed)
+2. `var-declaration` (252 missed)
+3. `context-as-argument` (237 missed)
+4. `unexported-return` (142 missed)
+5. `blank-imports` (82 missed)
+6. `redefines-builtin-id` (34 missed)
+7. `unreachable-code` (22 missed)
+8. `receiver-naming` (20 missed)
+9. `error-return` (18 missed)
+10. `superfluous-else` (17 missed)
+11. `context-keys-type` (12 missed)
+12. `package-comments` (11 missed)
+13. `var-naming` (11 missed)
+14. `unused-parameter` (6 missed)
+15. `time-naming` (5 missed)
 
-8 more rules: 71 missed.
+2 more rules: 5 missed.
 
 ## roslynator
 

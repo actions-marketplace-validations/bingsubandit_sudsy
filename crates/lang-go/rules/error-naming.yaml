@@ -1,0 +1,18 @@
+id: error-naming
+message: "error var $N should have name of the form errFoo (ErrFoo when exported)"
+description: >-
+  A package-level `var` of one name made by `errors.New` or `fmt.Errorf` starts with `err`, or `Err`
+  when exported.
+why: >-
+  A package-level error variable is a sentinel that callers compare against with `errors.Is`, and it is read from other packages. The `err` and `Err` prefixes make such variables recognizable at the use site and keep the exported ones apart from other exported names. It is a Go convention; nothing breaks without it.
+example: 'var failed = errors.New("x")'
+severity: off
+category: style
+rule:
+  kind: VarSpec
+  not-inside: { kind: Block }
+  all:
+    - regex: '^(?<N>\w+)\s+(?:[\w.*\[\]]+\s*)?=\s*(?:errors\.New|fmt\.Errorf)\('
+    - any:
+        - { regex: '^[A-Z]', not: { regex: '^Err' } }
+        - { regex: '^[a-z]', not: { regex: '^err' } }

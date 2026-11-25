@@ -62,6 +62,7 @@ Trailing trivia: after a token up to and including the end of its line. Leading:
 | `#binary` | `left` `operator` `right` | two operands and an operator, any precedence |
 | `#unary` | `operand` `operator?` | prefix, postfix or keyword operator on one operand |
 | `#assignment` | `left` `operator` `right` | stores a value, plain or compound |
+| `#increment` | - | `x++` or `x--`, as an expression or a statement: marks a grammar that has them |
 | `#conditional` | `condition` `then` `else?` | ternary expression, or an `if` statement or branch (`else` is the else branch, absent without one; in Python the first `elif`/`else` clause, whose siblings are the rest); a clause with no condition (`else`) has no `condition` |
 | `#loop` | `body` `condition?` `iterable?` `init?` `update?` | `while`, `do`, `for`, `foreach`; no condition in a `foreach` (it has an `iterable`) or `for (;;)`; `init` and `update` are the parts of a `for` that run before the loop and after each pass |
 | `#switch` | `cases` `subject?` | selects among cases by a value (`switch`, `match`, SQL `CASE`); `cases` are the `#case` nodes or the items that hold them |

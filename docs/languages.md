@@ -343,7 +343,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-go -->
 - **Measured:** Lint only: Ready.
   - Format: Sudsy does not format the language.
-  - Lint, revive: 92% of its findings also reported (43,845 of 47,476 findings).
+  - Lint, revive: 97% of its findings also reported (46,327 of 47,483 findings).
 <!-- /generated -->
 - Files: `*.go`.
 - **Formatter:** none yet; files stay as written. gofmt ships with Go and is the reference.

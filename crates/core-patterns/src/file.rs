@@ -1136,13 +1136,14 @@ fn load_full(
         .into_iter()
         // A rule written on roles that no node of the language has is not part of the language.
         .filter(|spec| {
-            let roles = spec.rule.as_ref().and_then(|r| r.role.as_ref());
-            roles.is_none_or(|r| {
-                let grammar = parser.grammar();
-                r.list()
-                    .iter()
-                    .any(|n| !grammar.nodes_with_tag(n).is_empty())
-            })
+            let rule = spec.rule.as_ref();
+            let grammar = parser.grammar();
+            let has = |n: &String| !grammar.nodes_with_tag(n).is_empty();
+            rule.and_then(|r| r.role.as_ref())
+                .is_none_or(|r| r.list().iter().any(has))
+                && rule
+                    .and_then(|r| r.needs_role.as_ref())
+                    .is_none_or(|r| r.list().iter().all(has))
         })
         .filter(|spec| !spec.per_language || parser.grammar().rule_row(&spec.id).is_some())
         .map(|mut spec| {

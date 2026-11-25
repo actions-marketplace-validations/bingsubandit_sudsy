@@ -7,7 +7,8 @@
 //! leading `$` and `_` are ignored (not by `words`). A path ending in `:each` names every
 //! part it finds (`a, b int`); when a node matches several rows of one option, all of them are
 //! read. A name that matches the option `ignore_pattern` (when the rule has one) is left out. With `match: regex` the value is a regular expression
-//! the name must match instead (empty: not checked). The message has `{name}` and
+//! the name must match instead (empty: not checked; a value that starts with `!` is a
+//! regular expression the name must not match). The message has `{name}` and
 //! `{convention}` (the value) and, for `words`, `{suggestion}` (the name spelled right); a param `message.<option>` is the message of that option.
 //!
 //! concept: naming-convention
@@ -130,11 +131,18 @@ impl Rule for Naming {
                     continue;
                 }
                 let (text, suggestion) = match &self.regex {
-                    Some(cache) => (
-                        &*found.text,
-                        (!convention.is_empty() && !cache.is_match(convention, &found.text))
-                            .then(String::new),
-                    ),
+                    Some(cache) => {
+                        // `!` in front: the name must not match
+                        let (forbid, pattern) = match convention.strip_prefix('!') {
+                            Some(p) => (true, p),
+                            None => (false, convention),
+                        };
+                        (
+                            &*found.text,
+                            (!pattern.is_empty() && cache.is_match(pattern, &found.text) == forbid)
+                                .then(String::new),
+                        )
+                    }
                     None if convention == "words" => {
                         (&*found.text, word_case::suggest(&found.text, &initialisms))
                     }

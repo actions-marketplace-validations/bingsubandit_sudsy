@@ -28,6 +28,7 @@ pub use matcher::{Captures, Pattern, SnippetParser};
 /// grammar has them); their fixtures live in the languages that test them.
 pub const SHARED_IDS: &[&str] = &[
     "boolean-literal-comparison",
+    "increment-decrement",
     "no-assignment-in-condition",
     "no-broad-catch",
     "no-constant-comparison",

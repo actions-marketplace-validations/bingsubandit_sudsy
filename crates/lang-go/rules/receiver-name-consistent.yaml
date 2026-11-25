@@ -1,0 +1,19 @@
+id: receiver-name-consistent
+family: unique-names
+params:
+  container: source-file
+  item: function
+  name: receiver/ParameterDeclaration/Ident
+  consistent: true
+  report: item
+  group: receiver/ParameterDeclaration/PointerType/GenericType/TypeIdent|receiver/ParameterDeclaration/PointerType/TypeIdent|receiver/ParameterDeclaration/GenericType/TypeIdent|receiver/ParameterDeclaration/TypeIdent
+  ignore: "^(?:_|this|self)$"
+  message: "receiver name {name} should be consistent with previous receiver name {previous} for {group}"
+description: >-
+  The methods of a type declared in one file name their receiver the same. The first method sets the name; `_`, `this` and `self` are left to
+  `receiver-naming`.
+why: >-
+  A method set reads as one unit. When one method calls its receiver `s` and the next `srv`, a reader has to check each body to know that both mean the same value, and a copied body keeps the wrong name. The Go code review comments ask for one receiver name per type.
+example: "func (a T) A() {}\nfunc (b T) B() {}"
+severity: off
+category: style

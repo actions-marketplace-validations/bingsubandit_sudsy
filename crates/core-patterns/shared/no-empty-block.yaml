@@ -3,15 +3,32 @@ message: the block is empty (put code or a comment in it)
 description: >-
   A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally`
   (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`)
-  (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement).
+  (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement). With
+  `comment_handles` off a comment does not count (revive empty-block). With `waiting_loops` an
+  empty loop whose condition is a call is a wait and is left alone, and so is a loop whose head
+  matches `ignored_loop_heads`.
 example: 'if (a) { }'
 severity: warn
 category: suspicious
+options:
+  - { name: comment_handles, type: bool, default: true, description: A comment in the block counts as content }
+  - { name: waiting_loops, type: bool, default: false, description: Leave alone an empty loop whose condition is a call }
+  - { name: ignored_loop_heads, type: regex, default: '\b\B', description: A regular expression for the condition or head of a loop whose empty body is left alone }
 rule:
   role: block
-  empty: true
+  all:
+    - any:
+        - empty: true
+        - all:
+            - not: { option: comment_handles }
+            - bare: true
+    - any:
+        - parent: { role: [conditional, loop, try] }
+        - parent: { parent: { role: [conditional, loop, try] } }
   not:
-    parent: { role: catch }
-  any:
-    - parent: { role: [conditional, loop, try] }
-    - parent: { parent: { role: [conditional, loop, try] } }
+    any:
+      - parent: { role: catch }
+      - all:
+          - { option: waiting_loops }
+          - parent: { role: loop, fields: { condition: { role: call } } }
+      - parent: { role: loop, fields: { condition: { regex-option: ignored_loop_heads } } }

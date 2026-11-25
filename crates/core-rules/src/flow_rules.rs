@@ -16,7 +16,7 @@ use crate::diagnostic::Edit;
 use crate::rule::{BodyContext, FileContext, RuleContext};
 use crate::tree::{code_start, significant_range};
 use crate::{Check, Opt, OptionDecl, rule};
-use core_flow::{BodyGraph, build, cases, endless_loop};
+use core_flow::{BodyGraph, build, cases, endless_loop, is_leaf};
 use core_syntax::{Grammar, SyntaxNode, SyntaxToken, TextRange};
 
 /// Does `n` have a graph of its own (a function, or a kind the provider calls a body)?
@@ -124,6 +124,8 @@ fn inert(s: &SyntaxNode, g: &Grammar) -> bool {
 /// `None` for the unit of a body kind when the provider's flow layer is there to read it.
 fn unit_of(n: &SyntaxNode, file: &FileContext<'_>) -> Option<(SyntaxNode, bool)> {
     let g = file.grammar;
+    // a handler is reported without a statement after it: it needs its unit anyway
+    let handler = g.has_tag(n.kind(), "catch");
     let (mut followed, mut open) = (false, true);
     let mut at = n.clone();
     while let Some(parent) = at.parent() {
@@ -143,12 +145,24 @@ fn unit_of(n: &SyntaxNode, file: &FileContext<'_>) -> Option<(SyntaxNode, bool)>
         if function {
             return Some((parent, followed));
         }
-        open &= !(g.has_tag(k, "loop")
-            || g.has_tag(k, "catch")
-            || (g.has_tag(k, "conditional") && g.slot(&parent, "else").is_none()));
+        // nothing is left to learn once a statement is known to follow
+        if open && !followed {
+            open = !(g.has_tag(k, "loop")
+                || g.has_tag(k, "catch")
+                || (g.has_tag(k, "conditional") && g.slot(&parent, "else").is_none())
+                || (is_leaf(g, &parent) && !switch_part(g, &parent)));
+            if !open && !handler {
+                return None;
+            }
+        }
         at = parent;
     }
     Some((at, followed))
+}
+
+/// A `case`, or the wrapper that holds the cases of a `switch` (`cases`): the graph reads below it.
+fn switch_part(g: &Grammar, n: &SyntaxNode) -> bool {
+    g.has_tag(n.kind(), "case") || n.parent().is_some_and(|p| g.has_tag(p.kind(), "switch"))
 }
 
 /// One unit of control flow: from the roles of its statements.

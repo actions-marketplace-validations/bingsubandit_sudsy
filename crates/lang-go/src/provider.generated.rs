@@ -7,7 +7,7 @@ core_syntax::include_generated!();
 
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {
-    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("go", tree_sitter_go::LANGUAGE), grammar: grammars::GO, mapping: &MAPPING, extensions: &["go"], file_names: &[], schema: option_schema(), formatter: &core_format::VerbatimFormatter { exact_end: &[] }, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[scope::FAMILY, core_rules::doc_comments::FAMILY, core_rules::naming::FAMILY, core_rules::doc_style::FAMILY, core_rules::unit_doc::FAMILY], validate: None })
+    provider_of(Spec { crate_name: env!("CARGO_PKG_NAME"), language: || core_packs::language!("go", tree_sitter_go::LANGUAGE), grammar: grammars::GO, mapping: &MAPPING, extensions: &["go"], file_names: &[], schema: option_schema(), formatter: &core_format::VerbatimFormatter { exact_end: &[] }, hooks: &core_rules::DEFAULT_HOOKS, rules: rules::RULES, pattern_files: provider_api::pattern_files!(), families: &[scope::FAMILY, core_rules::unique::FAMILY, core_rules::doc_comments::FAMILY, core_rules::naming::FAMILY, core_rules::doc_style::FAMILY, core_rules::unit_doc::FAMILY, core_rules::simplify::FAMILY], validate: None }).with_snippet_contexts(&[("func _() {\n", "\n}")])
 }
 
 pub const MAPPING: Mapping = Mapping {

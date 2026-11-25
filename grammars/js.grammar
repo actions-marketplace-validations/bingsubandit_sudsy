@@ -109,7 +109,7 @@ node NewExpression #expression #call =
 node ImportMeta #expression #opaque #pure
 node NewTarget #expression #opaque #pure
 node SpreadElement #expression #opaque
-node UpdateExpression #expression #unary =
+node UpdateExpression #expression #unary #increment =
     prefix=operator:#operator? LParen* operand:#expression RParen* postfix=operator:#operator?
 node UnaryExpression #expression #unary #pure = operator:#operator operand:#expression
 node BinaryExpression #expression #binary-chain #binary #pure = left:#expression operator:#operator right:#expression

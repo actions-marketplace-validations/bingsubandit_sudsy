@@ -85,7 +85,7 @@ Each number is measured on real-world code against the default rule set of the r
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | TOML | █████████░ 98% taplo | 22 rules · no reference tool | Ready |
 | XML | ██████████ 100% CSharpier XML | 24 rules · no reference tool | Ready |
-| Go | none | █████████░ 92% revive | Lint only: Ready |
+| Go | none | █████████░ 97% revive | Lint only: Ready |
 | CMake | none | █████████░ 97% cmake-lint | Lint only: Ready |
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Vue / Svelte | █████████░ 91% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
