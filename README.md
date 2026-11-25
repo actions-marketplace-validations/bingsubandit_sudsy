@@ -94,7 +94,7 @@ Each number is measured on real-world code against the default rule set of the r
 | Ruby | ████████░░ 86% RuboCop | █████████░ 96% RuboCop | Ready |
 | GraphQL | █████████░ 99% Prettier | 29 rules · no reference tool | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 89% buf | Ready |
-| C / C++ | ███████░░░ 70% clang-format | not measured clang-tidy | In progress |
+| C / C++ | ███████░░░ 72% clang-format | not measured clang-tidy | In progress |
 | Makefile | ███████░░░ 77% stable · no reference tool | ██████████ 100% checkmake | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 
