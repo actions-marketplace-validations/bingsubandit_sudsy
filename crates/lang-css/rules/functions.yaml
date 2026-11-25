@@ -2,7 +2,15 @@ id: function-calc-no-unspaced-operator
 family: check
 params: { check: calc-operators }
 message: "put a space on each side of `{name}`"
-description: "`+` and `-` in `calc()` need whitespace on both sides, or the expression is invalid."
+description: >-
+  Reports `+` and `-` inside `calc()` that lack whitespace on one or both sides (`calc(1px+2px)`),
+  on the operator.
+why: >-
+  CSS requires whitespace around `+` and `-` in `calc()`; `1px+2px` is read as a number with a sign,
+  not as a sum, so the whole declaration is invalid and the browser drops it. `*` and `/` do not
+  need the space.
+
+  To fix, put a space on each side of the operator.
 example: "a { width: calc(1px+2px) }   # reported"
 category: correctness
 ---
@@ -10,7 +18,15 @@ id: function-linear-gradient-no-nonstandard-direction
 family: check
 params: { check: linear-gradient-direction }
 message: "`{name}` is not a standard direction: write `to {name}`"
-description: "A `linear-gradient()` that starts with a side (`top`) instead of `to top` or an angle."
+description: >-
+  Reports a `linear-gradient()` that starts with a side keyword (`top`, `left bottom`) instead of
+  `to top` or an angle.
+why: >-
+  Before the standard, prefixed gradients named the side the gradient starts from. The standard
+  names the side it goes to, so `top` and `to top` mean opposite directions. Code copied from the
+  old notation draws the gradient reversed or is dropped.
+
+  To fix, write `to bottom` for a gradient that starts at the top, or use an angle.
 example: "a { background: linear-gradient(top, red, blue) }   # reported"
 category: correctness
 ---
@@ -18,7 +34,15 @@ id: font-family-no-missing-generic-family-keyword
 family: check
 params: { check: missing-generic-family }
 message: "add a generic family after `{name}`"
-description: A `font-family` (or `font`) list with no generic family (`serif`, `sans-serif`, ...) to fall back on. `@font-face` is left out.
+description: >-
+  Reports a `font-family` (or `font`) list that has no generic family (`serif`, `sans-serif`,
+  `monospace`, ...). `@font-face` is not checked.
+why: >-
+  When none of the named fonts is installed, the browser uses its default font, which can be a serif
+  face on a page designed for sans-serif. A generic family at the end tells it which kind of face to
+  fall back on.
+
+  To fix, end the list with the generic family that fits the first font.
 example: "a { font-family: Arial, Helvetica }   # reported"
 severity: off
 category: correctness
@@ -27,7 +51,13 @@ id: font-family-no-duplicate-names
 family: names
 params: { target: font-family, mode: unique }
 message: "the font family `{name}` is repeated"
-description: The same family twice in one `font-family` list.
+description: >-
+  Reports a family that appears twice in one `font-family` list, on the repeat.
+why: >-
+  The second entry is never reached: the browser has already tried that font. It is a copy and paste
+  mistake that hides the fallback order.
+
+  To fix, delete the repeat.
 example: "a { font-family: Arial, serif, Arial }   # reported"
 severity: off
 category: suspicious
@@ -36,7 +66,12 @@ id: function-name-case
 family: names
 params: { target: function, mode: lower }
 message: "write the function `{name}` in lowercase"
-description: A function name with capitals (`translateX` and the like keep theirs).
+description: >-
+  Reports a function name with capitals (`RGB()`). Names such as `translateX` that are written in
+  camel case in the specification keep theirs.
+why: >-
+  CSS reads function names without regard to case, so capitals add spellings of the same name. A
+  file that writes them in lowercase only is easier to search and read.
 example: "a { color: RGB(0, 0, 0) }   # reported"
 severity: off
 category: style

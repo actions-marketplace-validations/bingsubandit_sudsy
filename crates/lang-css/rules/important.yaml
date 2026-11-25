@@ -1,6 +1,13 @@
 id: declaration-no-important
 message: "do not use !important"
-description: A declaration that ends in `!important`.
+description: >-
+  Reports a declaration that ends in `!important`.
+why: >-
+  `!important` breaks the cascade: only another `!important` with higher specificity can override
+  it, so each use makes the next override harder and the stylesheet drifts into an arms race.
+  Specificity and source order should decide.
+
+  To fix, raise the specificity of the selector that should win, or reorder the rules.
 example: "a { color: red !important }   # reported"
 severity: off
 category: style
@@ -9,7 +16,13 @@ token: { kind: [Ident], regex: '^(?i:important)$' }
 ---
 id: keyframe-declaration-no-important
 message: "!important has no effect in a keyframe declaration"
-description: "`!important` in a declaration of a `@keyframes` rule: the declaration is ignored."
+description: >-
+  Reports `!important` in a declaration of a `@keyframes` rule.
+why: >-
+  A declaration with `!important` in a keyframe is ignored, so the property does not animate, and no
+  error tells you.
+
+  To fix, delete the `!important`.
 example: "@keyframes k { to { color: red !important } }   # reported"
 category: correctness
 rule:

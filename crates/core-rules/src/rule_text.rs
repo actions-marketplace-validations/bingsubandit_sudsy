@@ -34,15 +34,26 @@ pub fn shared_why(id: &str) -> Option<String> {
     Some(paragraphs.join("\n"))
 }
 
-/// The value of the folded block `key: >-` of a rule file's text (a line break is a space, a
-/// blank line a line break), `None` when the file has no such block.
+/// The value of `key` in a rule file's text: a folded block `>-` (a line break is a space, a
+/// blank line a line break) or a one-line scalar that reads the same in every YAML way of writing
+/// it. `None` when the file has no such key or writes it another way.
 pub fn block(source: &str, key: &str) -> Option<String> {
-    let mut lines = source.lines().skip_while(|l| {
-        !(l.starts_with(key)
-            && l[key.len()..].starts_with(':')
-            && l[key.len() + 1..].trim() == ">-")
-    });
-    lines.next()?;
+    let mut lines = source
+        .lines()
+        .skip_while(|l| !(l.starts_with(key) && l[key.len()..].starts_with(':')));
+    let value = lines.next()?[key.len() + 1..].trim();
+    if value != ">-" {
+        let quoted = |q: char| {
+            value
+                .strip_prefix(q)?
+                .strip_suffix(q)
+                .filter(|v| !v.contains(['\\', q]))
+        };
+        return quoted('\'')
+            .or_else(|| quoted('"'))
+            .or(Some(value).filter(|v| !v.starts_with(['\'', '"', '|', '>'])))
+            .map(str::to_string);
+    }
     let (mut out, mut blanks) = (String::new(), 0);
     for line in lines {
         if line.trim().is_empty() {
@@ -105,6 +116,8 @@ mod tests {
     fn a_block_is_read_from_the_file_text() {
         let file = "id: x\ndescription: >-\n  One\n  two.\nwhy: z\n";
         assert_eq!(block(file, "description").as_deref(), Some("One two."));
-        assert_eq!(block(file, "why"), None);
+        assert_eq!(block(file, "why").as_deref(), Some("z"));
+        assert_eq!(block(file, "example"), None);
+        assert_eq!(block("a: 'b c'\nd: \"e\"\n", "d").as_deref(), Some("e"));
     }
 }

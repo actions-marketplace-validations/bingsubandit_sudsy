@@ -2,7 +2,15 @@ id: no-global-function-names
 family: names
 params: { target: function, mode: renamed }
 message: "use `{replacement}` instead of `{name}`"
-description: "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone."
+description: >-
+  Reports a call of a Sass global function that a module of the standard library replaces (`map-get`
+  is `map.get`, `mix` is `color.mix`); calls written with their module are not reported.
+why: >-
+  Sass deprecates the global functions in favour of modules loaded with `@use`, and drops them in a
+  later major version. A call of a module function says where it comes from and is not changed by a
+  global of the same name.
+
+  To fix, `@use "sass:map"` and call `map.get`.
 example: "a { color: mix(red, blue) }   # reported"
 severity: off
 category: style
@@ -13,7 +21,12 @@ id: dollar-variable-pattern
 family: names
 params: { target: variable, mode: pattern }
 message: "the variable `{name}` does not match the pattern"
-description: A `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `$name` declaration whose name, without the `$`, does not match the `pattern` option (a
+  regex). An empty pattern allows everything.
+why: >-
+  A naming convention for Sass variables keeps the variables of a project predictable. The rule is a
+  policy: with no `pattern` it reports nothing.
 example: "$fooBar: 1;   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -24,7 +37,12 @@ id: at-mixin-pattern
 family: names
 params: { target: mixin, mode: pattern }
 message: "the mixin `{name}` does not match the pattern"
-description: A `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern
+  allows everything.
+why: >-
+  A naming convention for mixins keeps them predictable, so one can be guessed and searched for. The
+  rule is a policy: with no `pattern` it reports nothing.
 example: "@mixin fooBar { top: 0 }   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -35,7 +53,12 @@ id: at-function-pattern
 family: names
 params: { target: function-definition, mode: pattern }
 message: "the function `{name}` does not match the pattern"
-description: A `@function` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `@function` whose name does not match the `pattern` option (a regex). An empty pattern
+  allows everything.
+why: >-
+  A naming convention for Sass functions keeps them predictable, so one can be guessed and searched
+  for. The rule is a policy: with no `pattern` it reports nothing.
 example: "@function fooBar() { @return 1 }   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -44,7 +67,14 @@ options:
 ---
 id: at-mixin-argumentless-call-parentheses
 message: "remove the parentheses of the mixin call without arguments"
-description: "An `@include` of a mixin with empty parentheses (`@include foo()`); a `using (...)` clause after them is left alone."
+description: >-
+  Reports an `@include` of a mixin with empty parentheses (`@include foo()`). A `using (...)` clause
+  after them is not reported.
+why: >-
+  Sass allows `@include foo` and `@include foo()` for a mixin without arguments. Empty parentheses
+  add noise and suggest arguments that are not there.
+
+  To fix, delete the `()`.
 example: "a { @include foo(); }   # reported"
 severity: off
 category: style
@@ -52,7 +82,14 @@ rule: { kind: AtRule, regex: '^@(?i:include)\s+[^\s(;{]+\s*\(\s*\)\s*[;{]' }
 ---
 id: at-rule-conditional-no-parentheses
 message: "do not surround the condition with parentheses"
-description: "The condition of `@if`, `@else if` and `@while` written in parentheses (`@if ($a == 1)`)."
+description: >-
+  Reports the condition of an `@if`, `@else if` or `@while` that is written in parentheses (`@if ($a
+  == 1)`).
+why: >-
+  In Sass the condition ends at the block, so the parentheses do nothing; they come from the
+  languages where they are needed, and they add noise.
+
+  To fix, delete the parentheses.
 example: "@if ($a == 1) { a { top: 0 } }   # reported"
 severity: off
 category: style
@@ -60,7 +97,15 @@ rule: { kind: AtRule, regex: '^@(?i:if|while|else\s+if)\s*\([^{]*\)\s*\{' }
 ---
 id: at-extend-no-missing-placeholder
 message: "extend a placeholder selector (`%name`)"
-description: "An `@extend` of anything but a placeholder selector; a selector with interpolation is left alone."
+description: >-
+  Reports an `@extend` of anything but a placeholder selector (`%name`); a selector with
+  interpolation is not reported.
+why: >-
+  Extending a class or an element rewrites every selector that mentions it, so one `@extend` can add
+  many selectors to the output and change the cascade of rules that are far from it. A placeholder
+  exists only to be extended, so the effect is local.
+
+  To fix, extend a placeholder, or use a mixin.
 example: "a { @extend .b; }   # reported"
 severity: off
 category: style
@@ -68,7 +113,14 @@ rule: { kind: AtRule, regex: '^@(?i:extend)\s+[^%\s]', not: { regex: '#\{[^}]+\}
 ---
 id: at-if-no-null
 message: "compare with `not` or the value itself, not with `null`"
-description: "An `@if` that compares with `null` (`== null`, `!= null`): write `not $a` or `$a`."
+description: >-
+  Reports an `@if` that compares with `null` (`== null`, `!= null`).
+why: >-
+  In Sass `null` and `false` are falsy and everything else is truthy, so `$a == null` is written
+  more directly as `not $a`, and `$a != null` as `$a`. The shorter form also treats `false` the way
+  a condition does.
+
+  To fix, use `@if not $a` or `@if $a`.
 example: "@if $a == null { a { top: 0 } }   # reported"
 severity: off
 category: style
@@ -76,7 +128,14 @@ rule: { kind: AtRule, regex: '^@(?i:if)\b[^{\n]*(?: == null\b| != null[ \t]*\)?[
 ---
 id: load-no-partial-leading-underscore
 message: "write the partial without its leading underscore"
-description: "A `@use`, `@forward` or `@import` of a partial named with a leading underscore (`@use 'a/_b'`); CSS imports are left alone."
+description: >-
+  Reports a `@use`, `@forward` or `@import` of a partial with a leading underscore (`@use 'a/_b'`).
+  CSS imports are not reported.
+why: >-
+  Sass looks the partial up without the underscore, so the underscore is noise that makes a path
+  look like a different file.
+
+  To fix, write the name without the underscore: `@use 'a/b'`.
 example: "@use 'a/_b';   # reported"
 severity: off
 category: style

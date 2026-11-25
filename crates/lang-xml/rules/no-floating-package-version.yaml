@@ -1,9 +1,14 @@
 id: no-floating-package-version
 message: the package version floats; pin it so builds are reproducible
 description: >-
-  A `PackageReference` (or `PackageVersion`) whose `Version` contains `*` restores a different
-  package as new versions appear. Reported on the attribute; no fix, because the version to pin is
-  a decision.
+  Reports a `PackageReference` or `PackageVersion` whose `Version` contains `*` (`1.*`), on the
+  attribute. No fix, because the version to pin is a decision.
+why: >-
+  A floating version restores whatever is the newest match on the day of the build. Two builds of
+  the same commit can use different packages, a new release can break the build without a change in
+  the repository, and a compromised release arrives without anyone reading it.
+
+  To fix, pin the version (`1.2.3`), and update it on purpose.
 example: '<PackageReference Include="X" Version="1.*" />   <!-- Version="1.2.3" -->'
 severity: off
 category: suspicious

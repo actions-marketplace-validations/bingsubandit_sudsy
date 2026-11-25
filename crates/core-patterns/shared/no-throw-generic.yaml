@@ -2,9 +2,15 @@ id: no-throw-generic
 per-language: true
 message: raise a specific exception, not a generic one
 description: >-
-  A `raise` or `throw` of one of the generic `types`, itself or a call of it, which callers cannot
-  tell from any other error (ruff TRY002, RuboCop Lint/RaiseException). A language lists the types
-  in its grammar's `rule` row.
+  Reports a `raise` or `throw` of one of the generic `types`, itself or a call of it. Each language
+  lists the types in its grammar's `rule` row.
+why: >-
+  A caller cannot tell a generic exception from any other error, so it can only catch everything or
+  nothing, and the generic type also catches errors from other code. A specific type lets a caller
+  handle the case.
+
+  To fix, raise a specific exception: a built-in one that fits (`ValueError`), or a class of your
+  own.
 example: 'raise Exception("x")'
 severity: off
 category: style

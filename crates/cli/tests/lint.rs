@@ -276,6 +276,12 @@ fn rules_lists_and_explains() {
         shared.contains("\nWhy it matters\n  Several spaces in a row"),
         "{shared}"
     );
+    // The text of a pattern rule file reaches the page the same way.
+    let css = out(&sudsy(t.path(), &["rules", "color-hex-length"]));
+    assert!(
+        css.contains("\nWhy it matters\n  One length for hex colors"),
+        "{css}"
+    );
     let list_line = list
         .lines()
         .find(|l| l.starts_with("pipefail-shell"))

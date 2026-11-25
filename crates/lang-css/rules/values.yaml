@@ -2,7 +2,14 @@ id: color-hex-length
 family: check
 params: { check: hex-length }
 message: "write the hex color `{name}` with the other number of digits"
-description: "A hex color that can be written with three or four digits (`#aabbcc` is `#abc`); with the `style` option set to `long`, one that is written short."
+description: >-
+  Reports a hex color that can be written with three or four digits (`#aabbcc`). With the `style`
+  option set to `long`, a color written short is reported instead.
+why: >-
+  One length for hex colors keeps a file uniform, and the short form is the usual one: it is half
+  the bytes and still unambiguous.
+
+  To fix, shorten each pair of equal digits to one.
 example: "a { color: #aabbcc }   # reported"
 severity: off
 category: style
@@ -13,7 +20,14 @@ id: keyframe-selector-notation
 family: check
 params: { check: keyframe-selector-notation }
 message: "write `{name}` as a percentage"
-description: "`from` and `to` in a `@keyframes` that also uses percentages (a block with nothing but keywords is left alone)."
+description: >-
+  Reports `from` and `to` in a `@keyframes` that also uses percentages. A block with nothing but
+  keywords is not reported.
+why: >-
+  `from` is `0%` and `to` is `100%`, so mixing the forms in one animation makes the reader
+  translate. With percentages the animation reads as a timeline.
+
+  To fix, write `0%` and `100%`.
 example: "@keyframes k { from {} 50% {} to {} }   # from and to reported"
 severity: off
 category: style
@@ -22,7 +36,15 @@ id: shorthand-property-no-redundant-values
 family: check
 params: { check: redundant-values }
 message: "`{name}` has values that the shorter form implies"
-description: "A `margin`, `padding`, `border-color`, `border-style`, `border-width` or `border-radius` with two, three or four values that repeat (`1px 1px` is `1px`)."
+description: >-
+  Reports a `margin`, `padding`, `border-color`, `border-style`, `border-width` or `border-radius`
+  with two, three or four values that repeat (`1px 1px` is `1px`).
+why: >-
+  CSS fills the missing values of these shorthands by repeating the others, so the longer form says
+  the same as the shorter one. The short form is easier to read and cannot have one value changed by
+  mistake.
+
+  To fix, delete the values that the shorthand repeats by itself.
 example: "a { margin: 1px 2px 1px 2px }   # reported"
 severity: off
 category: style
@@ -31,7 +53,14 @@ id: font-family-name-quotes
 family: check
 params: { check: font-family-quotes }
 message: "the quotes around `{name}` are not needed"
-description: A quoted font family name that is also valid without quotes (`always-where-required`).
+description: >-
+  Reports a quoted font family name that is also valid without quotes (`"Arial"`, `"Open Sans"`).
+why: >-
+  A family name that is a sequence of identifiers (`Open Sans`) needs no quotes, and quoted and
+  unquoted names then mean the same. Quotes stay for the names that are not identifiers, such as one
+  that starts with a digit.
+
+  To fix, delete the quotes.
 example: "a { font-family: \"Arial\", sans-serif }   # reported"
 severity: off
 category: style
@@ -40,7 +69,13 @@ id: selector-anb-no-unmatchable
 family: check
 params: { check: nth-unmatchable }
 message: "`:nth-*({name})` matches nothing"
-description: "An `:nth-child()` and the like whose `An+B` can never match (`0`, `0n`, `-n`, `-2n-1`)."
+description: >-
+  Reports an `:nth-child()` and the like whose `An+B` can never match (`0`, `0n`, `-n`, `-2n-1`).
+why: >-
+  The selector matches no element, so the rule does nothing. It is a miscalculated formula, or a
+  leftover of a larger one.
+
+  To fix, correct the formula; `-n+3` matches the first three.
 example: "a:nth-child(0n+0) {}   # reported"
 category: correctness
 ---
@@ -48,7 +83,16 @@ id: no-descending-specificity
 family: check
 params: { check: descending-specificity }
 message: "`{name}` comes after a rule with the same target and a higher specificity"
-description: "A rule whose selector ends in the same compound (without its pseudo-classes) as an earlier rule in the same at-rule and has a lower specificity: the earlier one wins where the later was meant to. Nested rules are not compared."
+description: >-
+  Reports a rule whose selector ends in the same compound selector (not counting its pseudo-classes)
+  as an earlier rule in the same at-rule, and has a lower specificity. Nested rules are not
+  compared.
+why: >-
+  For the same element the rule with higher specificity wins, whatever its place. A later rule with
+  lower specificity (`a:hover` before `a`) never applies to what the earlier one covers, which is
+  almost never what the author meant.
+
+  To fix, move the rule with the lower specificity up, or raise its specificity.
 example: "a:hover {}\na {}   # reported"
 severity: off
 category: suspicious
@@ -57,7 +101,15 @@ id: no-invalid-position-declaration
 family: check
 params: { check: declaration-position }
 message: "a declaration is not valid here"
-description: A declaration at the top of a file, or in an at-rule such as `@media` that is not inside a rule.
+description: >-
+  Reports a declaration at the top of a file, or in an at-rule such as `@media` that is not inside a
+  rule.
+why: >-
+  CSS has declarations only inside a rule. At the top of a file the declaration is a syntax error
+  and the browser skips it and the text up to the next `}` or `;`, which may take the next rule with
+  it.
+
+  To fix, put the declaration in a rule.
 example: "color: red;   # reported"
 category: correctness
 ---
@@ -65,7 +117,15 @@ id: custom-property-no-missing-var-function
 family: check
 params: { check: missing-var-function }
 message: "write `var({name})`"
-description: A custom property that the file declares, used in a value without `var()`. Properties that take names (`transition`, `will-change`, ...) are left out.
+description: >-
+  Reports a custom property that the file declares, used in a value without `var()` (`calc(--x *
+  2)`), on the property name. Properties that take names (`transition`, `will-change`, ...) are not
+  reported.
+why: >-
+  `--x` in a value is a plain identifier, not the value of the custom property, so the declaration
+  is invalid or means something else.
+
+  To fix, write `var(--x)`.
 example: "a { --x: 1; width: calc(--x * 2) }   # reported"
 severity: off
 category: correctness
@@ -74,7 +134,14 @@ id: named-grid-areas-no-invalid
 family: check
 params: { check: grid-areas }
 message: "the grid areas are not valid"
-description: A `grid-template-areas` whose rows differ in length, are empty, or hold an area that is not a rectangle.
+description: >-
+  Reports a `grid-template-areas` whose rows differ in length, are empty, or hold an area that is
+  not a rectangle.
+why: >-
+  The browser drops the whole `grid-template-areas` declaration when its table is not a rectangle of
+  named cells, and every item placed by area then falls into an automatic cell.
+
+  To fix, give every row the same number of cells and make each area a rectangle.
 example: "a { grid-template-areas: \"a b\" \"a\" }   # reported"
 severity: off
 category: correctness
@@ -83,7 +150,13 @@ id: selector-no-qualifying-type
 family: check
 params: { check: qualifying-type }
 message: "do not qualify the selector with the type `{name}`"
-description: A type selector in the same compound as a class, id or attribute selector (`ul.nav`).
+description: >-
+  Reports a type selector in the same compound as a class, id or attribute selector (`ul.nav`).
+why: >-
+  The element name adds specificity and ties the rule to one element: changing `ul` to `ol` breaks
+  the style, while `.nav` would have kept working.
+
+  To fix, delete the type selector.
 example: "ul.nav {}   # reported"
 severity: off
 category: style

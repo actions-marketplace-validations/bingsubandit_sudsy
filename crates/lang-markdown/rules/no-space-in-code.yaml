@@ -1,8 +1,14 @@
 id: no-space-in-code
 message: the code span has spaces inside its backticks
 description: >-
-  A code span that starts or ends with a space (markdownlint MD038). A span with a space on both
-  sides of a backtick-led or backtick-ended content is allowed.
+  Reports a code span that starts or ends with a space (`` ` code ` ``). A span whose content starts
+  or ends with a backtick and is padded on both sides to separate it is not reported.
+why: >-
+  A renderer strips one space from each end only when both ends have one, so the spaces are lost or
+  shown depending on the renderer. In code that shows the exact text (a command with a leading
+  space) the difference matters, and elsewhere the spaces are noise.
+
+  To fix, delete the spaces inside the backticks.
 example: '` code `   # `code`'
 severity: off
 category: style

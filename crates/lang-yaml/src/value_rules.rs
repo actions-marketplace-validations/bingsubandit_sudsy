@@ -27,8 +27,13 @@ rule! {
         id: "no-empty-values",
         category: Style,
         default: Off,
-        description: "A mapping key or sequence entry without a value (an implicit null). Values \
-                  with an anchor or tag are not empty. Reported at the `:` or `-`.",
+        description: "Reports a mapping key or sequence entry without a value (an implicit null), at the \
+                  `:` or `-`. A value with an anchor or tag is not empty. The options \
+                  `block_mappings`, `flow_mappings` and `block_sequences` choose what is checked.",
+        why: "An empty value is `null`, but it is easy to read as an omission or a value that was \
+                  lost while editing, and parsers of config files may treat `null` and a missing key \
+                  differently.\n\
+                  To fix, write `null` or `~`, or give the key its value.",
         example: "key:      # reported; write `key: null`\nlist:\n  -       # reported",
         options: [
             flag("block_mappings", true, "Check block mappings."),
@@ -98,8 +103,12 @@ rule! {
         default: Off,
         fix: Safe,
         description: "Restricts how plain floats are written. Every option is off until set: \
-                  `.5` without a leading digit, `1e3` scientific notation, `.nan` and `.inf`. \
-                  Quoted and tagged scalars are not checked. The fix for `.5` is `0.5`.",
+                  `require_numeral_before_decimal` reports `.5`, `forbid_scientific_notation` reports \
+                  `1e3`, `forbid_nan` reports `.nan` and `forbid_inf` reports `.inf`. Quoted and \
+                  tagged scalars are not checked. The fix for `.5` is `0.5`.",
+        why: "YAML 1.1 and 1.2 parsers read some float spellings differently (`1e3` is a string in \
+                  YAML 1.1, since it requires a dot), and `.5` is hard to see. A project can choose \
+                  the spellings that every parser it uses reads the same way.",
         example: "x: .5   # with require_numeral_before_decimal; becomes 0.5",
         options: [
             flag(

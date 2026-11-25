@@ -52,9 +52,12 @@ rule! {
         id: "redundant-pattern",
         category: Suspicious,
         default: Off,
-        description: "A name pattern such as `foo` already matches files and directories called \
-                  `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern \
-                  in between).",
+        description: "Reports a `foo/` or `/foo` pattern that follows a plain `foo`, with no `!` pattern \
+                  between them: a name pattern already matches files and directories called `foo` at \
+                  every level.",
+        why: "The later pattern adds nothing, and a reader may think it is more specific than the \
+                  first.\n\
+                  To fix, delete the later pattern.",
         example: "build\n/build/   # reported: `build` covers it",
         kinds: &[kind::DOCUMENT],
     }
@@ -84,9 +87,14 @@ rule! {
         id: "negation-of-excluded-parent",
         category: Correctness,
         default: Warn,
-        description: "Git cannot re-include a file when a parent directory is excluded: `!a/b` \
-                  after `a/` has no effect. Exclude the contents (`a/*`) instead. Not reported \
-                  in `.dockerignore`, where the later pattern wins. Only literal paths are checked.",
+        description: "Reports a `!` pattern for a path whose parent directory is excluded by an earlier \
+                  pattern (`!a/b` after `a/`). Only literal paths are checked. In `.dockerignore`, \
+                  where the later pattern wins, it is not reported.",
+        why: "Git does not look inside an excluded directory, so it cannot re-include a file in \
+                  it, and the negation does nothing. The file stays ignored although the file seems to \
+                  say otherwise.\n\
+                  To fix, exclude the contents instead of the directory (`a/*`), then add the \
+                  negation.",
         example: "node_modules/\n!node_modules/keep.js   # reported: node_modules/ is excluded",
         kinds: &[kind::DOCUMENT],
     }

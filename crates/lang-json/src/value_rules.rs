@@ -33,9 +33,14 @@ rule! {
         id: "unsafe-numbers",
         category: Suspicious,
         default: Off,
-        description: "A number that a double-precision parser (JavaScript, most JSON libraries) \
-                  cannot hold: an integer beyond 2^53 - 1, a value that overflows to infinity, \
-                  underflows to zero or is subnormal.",
+        description: "Reports a number that a double-precision parser (JavaScript and most JSON libraries) \
+                  cannot hold exactly: an integer beyond 2^53 - 1, a value that overflows to infinity, \
+                  or one that underflows to zero or is subnormal.",
+        why: "JSON allows any number of digits, but most parsers read numbers as 64-bit floating \
+                  point. A large integer such as an id then changes silently (`12345678901234567890` \
+                  becomes `12345678901234567000`), and `1e999` becomes infinity, so the receiver sees \
+                  a different value from the one that was written.\n\
+                  To fix, write the value as a string.",
         example: "{ \"id\": 12345678901234567890, \"x\": 1e999 }   // both reported",
         kinds: &[kind::LITERAL],
     }

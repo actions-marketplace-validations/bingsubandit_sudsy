@@ -1,8 +1,13 @@
 id: no-trailing-punctuation
 message: the heading ends with punctuation
 description: >-
-  A heading that ends with `.`, `,`, `;`, `:` or `!` (or the full-width forms) reads as a
-  sentence, not a title (markdownlint MD026). `?` is allowed.
+  Reports a heading that ends with `.`, `,`, `;`, `:` or `!` (or the full-width forms). A `?` at the
+  end is not reported.
+why: >-
+  A heading is a title, not a sentence, and the punctuation at its end is carried into the table of
+  contents and the anchor. A heading that ends with `?` is a question title and is accepted.
+
+  To fix, delete the punctuation.
 example: '# Introduction.   # Introduction'
 severity: off
 category: style

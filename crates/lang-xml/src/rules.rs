@@ -57,9 +57,12 @@ rule! {
         id: "no-duplicate-include",
         category: Correctness,
         default: Warn,
-        description: "An element of a project file (`PackageReference`, `ProjectReference`, \
-                  `Compile`, ...) has the same `Include` as an earlier element of the same name in \
-                  the same parent. The duplicate is a restore warning or a build error.",
+        description: "Reports an element of a project file (`PackageReference`, `ProjectReference`, \
+                  `Compile`, ...) that has the same `Include` as an earlier element of the same name \
+                  in the same parent, on the later one.",
+        why: "The repeat is a restore warning or a build error, and where it is not it is dead \
+                  text that hides which of the two a later edit should change.\n\
+                  To fix, delete the repeat.",
         example: "<ItemGroup><Compile Include=\"A.cs\" /><Compile Include=\"A.cs\" /></ItemGroup>   // reported at the second",
         kinds: &[kind::ELEMENT],
     }

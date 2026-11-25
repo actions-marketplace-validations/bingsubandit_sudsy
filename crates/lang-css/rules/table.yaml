@@ -2,7 +2,15 @@ id: property-no-unknown
 family: table
 params: { target: property, mode: unknown, data: property }
 message: "unknown property `{name}`"
-description: A property that no CSS specification lists. Vendor-prefixed and custom properties, descriptors of `@font-face` and the like, and names with interpolation or SCSS and Less variables are left out.
+description: >-
+  Reports a property that no CSS specification lists. Vendor-prefixed and custom properties,
+  descriptors of `@font-face` and the like, and names with interpolation or SCSS and Less variables
+  are not reported. The option `ignore` lists names to leave out.
+why: >-
+  An unknown property is almost always a typo (`colour`) or a property that is not yet supported,
+  and the browser drops the declaration without an error, so the style is silently missing.
+
+  To fix, correct the name.
 example: "a { colour: red }   # reported"
 category: correctness
 options:
@@ -12,7 +20,15 @@ id: at-rule-no-unknown
 family: table
 params: { target: at-rule, mode: unknown, data: at-rule }
 message: "unknown at-rule `@{name}`"
-description: An at-rule that no CSS specification lists. Vendor-prefixed ones are left out; SCSS has its own (`@include`, `@mixin`, ...), and Less at-rules are not checked. Tailwind's are left out by default.
+description: >-
+  Reports an at-rule that no CSS specification lists. Vendor-prefixed ones are not reported; SCSS
+  has its own (`@include`, `@mixin`, ...) and Less at-rules are not checked. Tailwind's are left out
+  by default; the `ignore` option lists more.
+why: >-
+  An unknown at-rule is a typo or a rule that the browser does not implement, and the browser skips
+  the whole block it opens, so a large part of the stylesheet can be dropped.
+
+  To fix, correct the name.
 example: "@foo {}   # reported"
 category: correctness
 options:
@@ -22,7 +38,15 @@ id: unit-no-unknown
 family: table
 params: { target: unit, mode: unknown, data: unit }
 message: "unknown unit `{name}`"
-description: A unit that is not a CSS unit, in values and `@media` preludes. `x` counts only in `image-set()`, `image-resolution` and `resolution` media features.
+description: >-
+  Reports a unit that is not a CSS unit, in values and `@media` preludes. `x` is accepted only in
+  `image-set()`, `image-resolution` and `resolution` media features. The `ignore` option lists more
+  names.
+why: >-
+  An unknown unit (`1foo`, or `10pxx` by a typo) makes the declaration invalid, and the browser
+  drops it without an error.
+
+  To fix, correct the unit.
 example: "a { width: 1foo }   # reported"
 severity: off
 category: correctness
@@ -33,7 +57,15 @@ id: function-no-unknown
 family: table
 params: { target: function, mode: unknown, data: function }
 message: "unknown function `{name}`"
-description: A function in a declaration value that no CSS specification lists. Not checked in SCSS and Less, whose built-in functions are not in the table.
+description: >-
+  Reports a function in a declaration value that no CSS specification lists. SCSS and Less are not
+  checked, because their built-in functions are not in the table. The `ignore` option lists names to
+  leave out.
+why: >-
+  An unknown function is a typo or a function that the browser does not implement, and the
+  declaration is dropped without an error.
+
+  To fix, correct the name.
 example: "a { width: foo(1) }   # reported"
 severity: off
 category: correctness
@@ -44,7 +76,14 @@ id: media-feature-name-no-unknown
 family: table
 params: { target: media-feature, mode: unknown, data: media-feature }
 message: "unknown media feature `{name}`"
-description: A media feature name in `@media` that is not a CSS one. Vendor-prefixed names are left out.
+description: >-
+  Reports a media feature name in `@media` that is not a CSS one; vendor-prefixed names are not
+  reported.
+why: >-
+  An unknown media feature makes the query false, so the block is never applied, and no error tells
+  you.
+
+  To fix, correct the name.
 example: "@media (foo: 1) {}   # reported"
 category: correctness
 options:
@@ -54,7 +93,14 @@ id: selector-pseudo-class-no-unknown
 family: table
 params: { target: pseudo-class, mode: unknown, data: pseudo-class }
 message: "unknown pseudo-class `:{name}`"
-description: A pseudo-class that is not a CSS one. Vendor-prefixed ones are left out, and the `-webkit-scrollbar` ones count after those pseudo-elements.
+description: >-
+  Reports a pseudo-class that is not a CSS one. Vendor-prefixed ones are not reported, and the
+  `-webkit-scrollbar` pseudo-classes count after those pseudo-elements.
+why: >-
+  A selector with an unknown pseudo-class is invalid, and the browser drops the whole rule, not only
+  the pseudo-class. A typo (`:hovr`) therefore removes the style for every selector in the list.
+
+  To fix, correct the name.
 example: "a:foo {}   # reported"
 severity: off
 category: correctness
@@ -65,7 +111,12 @@ id: selector-pseudo-element-no-unknown
 family: table
 params: { target: pseudo-element, mode: unknown, data: pseudo-element }
 message: "unknown pseudo-element `::{name}`"
-description: A pseudo-element that is not a CSS one. Vendor-prefixed ones are left out.
+description: >-
+  Reports a pseudo-element that is not a CSS one. Vendor-prefixed ones are not reported.
+why: >-
+  A selector with an unknown pseudo-element is invalid, and the browser drops the whole rule.
+
+  To fix, correct the name.
 example: "a::foo {}   # reported"
 severity: off
 category: correctness
@@ -76,7 +127,14 @@ id: selector-type-no-unknown
 family: table
 params: { target: type, mode: unknown, data: type }
 message: "unknown type selector `{name}`"
-description: A type selector that is not an HTML, SVG or MathML element (custom elements included). Keyframe selectors and the arguments of `:lang()`, `:nth-child()` and the like are left out.
+description: >-
+  Reports a type selector that is not an HTML, SVG or MathML element; custom elements are accepted.
+  Keyframe selectors and the arguments of `:lang()`, `:nth-child()` and the like are not reported.
+why: >-
+  An unknown type selector never matches, so the rule does nothing. It is almost always a typo
+  (`dvi`) or a class that lost its dot.
+
+  To fix, correct the name or add the missing `.` or `#`.
 example: "foo {}   # reported"
 severity: off
 category: correctness
@@ -87,7 +145,15 @@ id: property-no-vendor-prefix
 family: table
 params: { target: property, mode: prefixed, data: prefixed-property }
 message: "the prefix of `{name}` is not needed"
-description: A vendor-prefixed property that autoprefixer knows the standard property of.
+description: >-
+  Reports a vendor-prefixed property that has a standard property (`-webkit-transition`). The
+  `ignore` option lists names to leave out.
+why: >-
+  Prefixed properties were the way to try a feature before it was standardised. Browsers support the
+  standard name now, so the prefixed one is dead weight, and tools that add prefixes where needed
+  (autoprefixing in a build) do it better.
+
+  To fix, delete the prefixed property or use the standard one.
 example: "a { -webkit-transition: none }   # reported"
 severity: off
 category: style
@@ -98,7 +164,14 @@ id: value-no-vendor-prefix
 family: table
 params: { target: value, mode: listed, data: prefixed-value }
 message: "the prefix of `{name}` is not needed"
-description: A vendor-prefixed keyword or function that autoprefixer knows the standard value of.
+description: >-
+  Reports a vendor-prefixed keyword or function that has a standard value (`-webkit-flex`).
+why: >-
+  A prefixed value was a way to try a feature before it was standardised. Browsers support the
+  standard value now, so the prefixed one is dead weight that a build step can add where it is
+  needed.
+
+  To fix, use the standard value.
 example: "a { display: -webkit-flex }   # reported"
 severity: off
 category: style
@@ -109,7 +182,15 @@ id: selector-no-vendor-prefix
 family: table
 params: { target: selector, mode: listed, data: prefixed-selector }
 message: "the prefix of `{name}` is not needed"
-description: A vendor-prefixed pseudo-class or pseudo-element that autoprefixer knows the standard one of.
+description: >-
+  Reports a vendor-prefixed pseudo-class or pseudo-element that has a standard one
+  (`::-moz-selection`).
+why: >-
+  A prefixed selector was a way to try a feature before it was standardised. Browsers support the
+  standard name now, so the prefixed one is dead weight that a build step can add where it is
+  needed.
+
+  To fix, use the standard selector.
 example: "a::-moz-selection {}   # reported"
 severity: off
 category: style
@@ -120,7 +201,13 @@ id: at-rule-no-vendor-prefix
 family: table
 params: { target: at-rule, mode: listed, data: prefixed-at-rule }
 message: "the prefix of `@{name}` is not needed"
-description: A vendor-prefixed at-rule that autoprefixer knows the standard one of.
+description: >-
+  Reports a vendor-prefixed at-rule that has a standard one (`@-webkit-keyframes`).
+why: >-
+  A prefixed at-rule was a way to try a feature before it was standardised. Browsers support the
+  standard name now, so the prefixed one repeats the whole block for nothing.
+
+  To fix, use the standard at-rule.
 example: "@-webkit-keyframes k {}   # reported"
 severity: off
 category: style
@@ -131,7 +218,13 @@ id: media-feature-name-no-vendor-prefix
 family: table
 params: { target: media-feature, mode: listed, data: prefixed-media-feature }
 message: "the prefix of `{name}` is not needed"
-description: A vendor-prefixed `device-pixel-ratio` media feature.
+description: >-
+  Reports a vendor-prefixed `device-pixel-ratio` media feature (`-webkit-min-device-pixel-ratio`).
+why: >-
+  The standard media feature is `resolution`, and the prefixed names are supported only by old
+  engines. The standard one works in every current browser.
+
+  To fix, use `min-resolution: 2dppx`.
 example: "@media (-webkit-min-device-pixel-ratio: 2) {}   # reported"
 severity: off
 category: style
@@ -142,7 +235,13 @@ id: at-rule-no-deprecated
 family: table
 params: { target: at-rule, mode: listed, data: deprecated-at-rule }
 message: "deprecated at-rule `@{name}`"
-description: A deprecated at-rule (`@document`, `@nest`, `@viewport`).
+description: >-
+  Reports a deprecated at-rule (`@document`, `@nest`, `@viewport`).
+why: >-
+  A deprecated at-rule was removed or is being removed from browsers, so a stylesheet that depends
+  on it stops working there. A replacement exists or the feature was dropped.
+
+  To fix, use the replacement named in the specification, for example `&` nesting for `@nest`.
 example: "@nest a {}   # reported"
 severity: off
 category: suspicious
@@ -153,7 +252,15 @@ id: property-no-deprecated
 family: table
 params: { target: property, mode: listed, data: deprecated-property }
 message: "deprecated property `{name}`"
-description: A deprecated property (`clip`, `word-wrap`, `grid-gap`, the `box-*` of the old flexbox, ...).
+description: >-
+  Reports a deprecated property (`clip`, `word-wrap`, `grid-gap`, the `box-*` properties of the old
+  flexbox, ...).
+why: >-
+  A deprecated property is replaced by another one, and browsers keep it working only for old pages.
+  New code should use the replacement, which gets the fixes and new values.
+
+  To fix, use the replacement: `overflow-wrap` for `word-wrap`, `gap` for `grid-gap`, `clip-path`
+  for `clip`.
 example: "a { word-wrap: break-word }   # reported"
 severity: off
 category: suspicious
@@ -164,7 +271,14 @@ id: selector-no-deprecated
 family: table
 params: { target: selector, mode: listed, data: deprecated-selector }
 message: "deprecated selector `{name}`"
-description: A deprecated pseudo-class, pseudo-element or HTML or SVG element.
+description: >-
+  Reports a deprecated pseudo-class, pseudo-element or HTML or SVG element used as a type selector
+  (`center {}`).
+why: >-
+  A deprecated selector targets something that the standard removed, so it matches less and less
+  over time, and browsers may drop it.
+
+  To fix, use the replacement named in the specification.
 example: "center {}   # reported"
 severity: off
 category: suspicious
@@ -175,7 +289,13 @@ id: media-type-no-deprecated
 family: table
 params: { target: media-type, mode: listed, data: deprecated-media-type }
 message: "deprecated media type `{name}`"
-description: A deprecated media type (`tv`, `handheld`, `projection`, ...) in `@media`.
+description: >-
+  Reports a deprecated media type (`tv`, `handheld`, `projection`, ...) in `@media`.
+why: >-
+  Media Queries Level 4 deprecates these types, and browsers match them as never true, so a block
+  that depends on one never applies.
+
+  To fix, use a media feature (`width`, `pointer`) that tells the same thing, or delete the block.
 example: "@media tv {}   # reported"
 severity: off
 category: suspicious

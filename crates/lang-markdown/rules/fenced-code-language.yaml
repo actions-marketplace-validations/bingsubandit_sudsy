@@ -1,7 +1,13 @@
 id: fenced-code-language
 message: the fenced code block has no language
 description: >-
-  A fenced code block without an info string (markdownlint MD040); name the language, or `text`.
+  Reports a fenced code block that has no info string after the opening fence.
+why: >-
+  Renderers use the language to highlight the code, and tools use it to pick a formatter or to run a
+  check on the block. Without it a block of JSON looks like any text, and tools skip it.
+
+  To fix, name the language after the fence (```` ```json ````), or `text` when the block is not
+  code.
 example: 'a fence with no word after it'
 severity: off
 category: style

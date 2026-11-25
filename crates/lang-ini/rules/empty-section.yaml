@@ -1,6 +1,13 @@
 id: empty-section
 message: the section has no settings
-description: A `[section]` header with nothing under it, usually left behind by a removed setting. Comments do not count as settings.
+description: >-
+  Reports a `[section]` header with no settings under it. Comments do not count as settings.
+why: >-
+  It usually is what is left when the last setting of a section was removed. A reader of the file
+  wonders if the section matters, and some programs treat an empty section differently from a
+  missing one.
+
+  To fix, delete the header, or add the setting.
 example: "[core]\n[user]   # reported: no settings\nname = x"
 severity: off
 category: suspicious

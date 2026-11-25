@@ -2,7 +2,12 @@ id: selector-class-pattern
 family: names
 params: { target: class, mode: pattern }
 message: "the class `.{name}` does not match the pattern"
-description: A class selector whose name does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a class selector whose name does not match the `pattern` option (a regex). An empty
+  pattern allows everything.
+why: >-
+  A naming convention for classes (kebab case, BEM) makes them predictable, so you can guess a class
+  and search for it. The rule is a policy: with no `pattern` it reports nothing.
 example: ".fooBar {}   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -13,7 +18,12 @@ id: selector-id-pattern
 family: names
 params: { target: id, mode: pattern }
 message: "the id `#{name}` does not match the pattern"
-description: An id selector whose name does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports an id selector whose name does not match the `pattern` option (a regex). An empty pattern
+  allows everything.
+why: >-
+  A naming convention for ids makes them predictable, so you can guess one and search for it. The
+  rule is a policy: with no `pattern` it reports nothing.
 example: "#fooBar {}   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -24,7 +34,13 @@ id: custom-property-pattern
 family: names
 params: { target: custom-property, mode: pattern }
 message: "the custom property `--{name}` does not match the pattern"
-description: "A custom property, as declared, used in `var()` or named by `@property`, whose name without the `--` does not match the `pattern` option (a regex). An empty pattern allows everything."
+description: >-
+  Reports a custom property whose name, without the `--`, does not match the `pattern` option (a
+  regex), where it is declared, used in `var()` or named by `@property`. An empty pattern allows
+  everything.
+why: >-
+  A naming convention for custom properties makes the variables of a design system predictable, so a
+  name can be guessed and searched for. The rule is a policy: with no `pattern` it reports nothing.
 example: "a { --fooBar: 1 }   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -35,7 +51,13 @@ id: keyframes-name-pattern
 family: names
 params: { target: keyframes-name, mode: pattern }
 message: "the keyframes name `{name}` does not match the pattern"
-description: A `@keyframes` name that does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `@keyframes` name that does not match the `pattern` option (a regex). An empty pattern
+  allows everything.
+why: >-
+  Animation names are global to the page, so a convention (a prefix, kebab case) keeps them
+  predictable and lowers the risk of two animations having the same name. The rule is a policy: with
+  no `pattern` it reports nothing.
 example: "@keyframes fooBar {}   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -46,7 +68,12 @@ id: custom-media-pattern
 family: names
 params: { target: custom-media, mode: pattern }
 message: "the custom media query `--{name}` does not match the pattern"
-description: A `@custom-media` name, without its `--`, that does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `@custom-media` name, without its `--`, that does not match the `pattern` option (a
+  regex). An empty pattern allows everything.
+why: >-
+  A naming convention for custom media queries keeps the breakpoints of a project predictable. The
+  rule is a policy: with no `pattern` it reports nothing.
 example: "@custom-media --fooBar (min-width: 1px);   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -57,7 +84,13 @@ id: selector-type-case
 family: names
 params: { target: type, mode: lower }
 message: "write the type selector `{name}` in lowercase"
-description: A type selector with capitals.
+description: >-
+  Reports a type selector with capitals (`A {}`).
+why: >-
+  HTML element names are matched without regard to case, so `A` and `a` select the same elements and
+  capitals only add spellings. Lowercase is the convention and the one the markup uses.
+
+  To fix, write the selector in lowercase.
 example: "A {}   # reported"
 severity: off
 category: style
@@ -66,7 +99,12 @@ id: layer-name-pattern
 family: names
 params: { target: layer, mode: pattern }
 message: "the layer name `{name}` does not match the pattern"
-description: A `@layer` name that does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `@layer` name that does not match the `pattern` option (a regex). An empty pattern
+  allows everything.
+why: >-
+  Layer names fix the order of the cascade across a project and its libraries, so a convention keeps
+  them predictable and collisions rare. The rule is a policy: with no `pattern` it reports nothing.
 example: "@layer fooBar;   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style
@@ -77,7 +115,12 @@ id: container-name-pattern
 family: names
 params: { target: container, mode: pattern }
 message: "the container name `{name}` does not match the pattern"
-description: A `@container` name that does not match the `pattern` option (a regex). An empty pattern allows everything.
+description: >-
+  Reports a `@container` name that does not match the `pattern` option (a regex). An empty pattern
+  allows everything.
+why: >-
+  Container names are global to the page, so a convention keeps them predictable and lowers the risk
+  of two components using one name. The rule is a policy: with no `pattern` it reports nothing.
 example: "@container fooBar (min-width: 1px) {}   # reported with pattern: ^[a-z-]+$"
 severity: off
 category: style

@@ -1,6 +1,14 @@
 id: length-zero-no-unit
 message: "a zero length needs no unit"
-description: "A zero length written with a unit (`0px`); other dimensions (`0s`, `0deg`) are left alone, and so is what is inside a function."
+description: >-
+  Reports a zero length written with a unit (`0px`). Dimensions that are not lengths (`0s`, `0deg`),
+  and anything inside a function, are not reported.
+why: >-
+  Zero is the same in every length unit, so the unit says nothing and costs bytes. Inside `calc()`
+  and the like the unit may be needed, so those are left alone, as are times and angles, where a
+  unit is required.
+
+  To fix, write `0`.
 example: "a { margin: 0px }   # reported"
 severity: off
 category: style
@@ -11,7 +19,14 @@ token:
 ---
 id: function-url-quotes
 message: "quote the url"
-description: "An unquoted `url(...)`: quote its argument."
+description: >-
+  Reports an unquoted `url(...)`.
+why: >-
+  An unquoted url has to escape spaces, parentheses and quotes, and a file name that has one of
+  these breaks the declaration. A quoted url can hold any character, so the habit of quoting never
+  breaks.
+
+  To fix, wrap the argument in quotes.
 example: "a { background: url(a.png) }   # reported"
 severity: off
 category: style
@@ -20,7 +35,12 @@ token: { kind: [Url] }
 ---
 id: import-notation
 message: "write the @import in the other notation (a string or url())"
-description: "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported)."
+description: >-
+  Reports an `@import` written in the notation the `url` option does not ask for: by default a
+  string, so `url(...)` is reported; with `url: true`, `url(...)`, so a string is reported.
+why: >-
+  One notation for imports keeps the file uniform and easy to search. The string form is shorter;
+  the `url()` form is the one that the older tools and bundlers read.
 example: "@import url(a.css);   # reported; with url: true, @import 'a.css'; is"
 severity: off
 category: style
@@ -35,7 +55,15 @@ rule:
 ---
 id: no-invalid-double-slash-comments
 message: "`//` does not start a comment in CSS"
-description: "A rule or declaration that starts with `//`: CSS has no line comments, so the text swallows the statement."
+description: >-
+  Reports a rule or declaration that starts with `//`.
+why: >-
+  CSS has no line comments. The browser reads `// note` as part of the next statement, so the
+  selector or the property name is wrong and the rule or declaration is dropped. The comment seems
+  to work and breaks the line below it.
+
+  To fix, write the comment as `/* note */`. Sass and Less read `//` as a comment, so there it is
+  not reported.
 example: "// note\na { color: red }   # reported"
 category: correctness
 rule:
@@ -45,7 +73,13 @@ rule:
 ---
 id: selector-pseudo-element-colon-notation
 message: "write the pseudo-element with two colons"
-description: "`:before`, `:after`, `:first-line` and `:first-letter` with one colon."
+description: >-
+  Reports `:before`, `:after`, `:first-line` or `:first-letter` written with one colon.
+why: >-
+  CSS3 separated pseudo-elements from pseudo-classes with two colons so the reader can tell them
+  apart. The single colon is kept only for old browsers, and a file that mixes both is inconsistent.
+
+  To fix, write `::before`.
 example: "a:before {}   # reported"
 severity: off
 category: style
@@ -56,7 +90,14 @@ rule:
 ---
 id: selector-attribute-quotes
 message: "quote the attribute value"
-description: "An attribute selector whose value is not quoted (`[a=b]`)."
+description: >-
+  Reports an attribute selector whose value is not quoted (`[a=b]`).
+why: >-
+  An unquoted value must be a valid identifier, so a value with a space, a digit at the start or a
+  punctuation mark makes the selector invalid and the rule is dropped. Always quoting avoids the
+  trap.
+
+  To fix, wrap the value in quotes: `[a="b"]`.
 example: "[a=b] {}   # reported"
 severity: off
 category: style
@@ -67,7 +108,13 @@ rule:
 ---
 id: color-no-invalid-hex
 message: "the hex color `$0` is not valid"
-description: "A hex color that does not have 3, 4, 6 or 8 hex digits."
+description: >-
+  Reports a hex color that does not have 3, 4, 6 or 8 digits (`#ab`).
+why: >-
+  CSS accepts only those lengths, so the declaration is invalid and the browser drops it, and the
+  element is left with the inherited or default color.
+
+  To fix, correct the number of digits.
 example: "a { color: #ab }   # reported"
 category: correctness
 rule: { kind: Value, parent: { kind: Declaration, child: { kind: Property } } }
@@ -75,7 +122,13 @@ token: { kind: [Hash], deep: true, regex: '^#[0-9A-Za-z]+$', not-regex: '^#(?:[0
 ---
 id: color-no-hex
 message: "do not use the hex color `$0`"
-description: "A hex color: write a named color or a function instead."
+description: >-
+  Reports a hex color (`#fff`).
+why: >-
+  Some projects use named colors or functions only, so a color can be told by its name or channels,
+  not by a code that has to be decoded. The rule is a policy for those; it is off by default.
+
+  To fix, write the color as a name or with `rgb()`, `hsl()` or another function.
 example: "a { color: #fff }   # reported"
 severity: off
 category: style

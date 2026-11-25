@@ -1,7 +1,13 @@
 id: rule-empty-line-before
 family: blank-line-before
 params: { tag: item, kind: Rule, block: declaration-block, always: multi-line, except: first-nested, ignore: after-comment, message: "expected {blank} before the rule" }
-description: "A rule whose block spans lines needs a blank line before it, unless a comment is right before it; the first rule of a block takes none (`always-multi-line` with `first-nested` as the exception)."
+description: >-
+  Reports a rule whose block spans several lines and has no empty line before it. A rule that is
+  first in its block, and one right after a comment, need none.
+why: >-
+  An empty line between rules shows where one rule ends and the next starts, and keeps a long file
+  scannable. A rule that opens a block has nothing to be separated from, and a comment belongs to
+  the rule below it.
 example: "a {\n  top: 0;\n}\nb {\n  top: 0;\n}   # b is reported"
 severity: off
 category: style
@@ -9,7 +15,14 @@ category: style
 id: at-rule-empty-line-before
 family: blank-line-before
 params: { tag: item, kind: AtRule, block: declaration-block, always: "true", except: "first-nested after-blockless-same-name", ignore: after-comment, skip: "@else", message: "expected {blank} before the at-rule" }
-description: "An at-rule needs a blank line before it, unless a comment is right before it; the first at-rule of a block, and a blockless one right after a blockless one of the same name (`@import` lines), take none."
+description: >-
+  Reports an at-rule with no empty line before it. The first at-rule of a block, one right after a
+  comment, and a blockless at-rule right after a blockless one of the same name (a run of `@import`
+  lines) need none. `@else` is not checked.
+why: >-
+  Blank lines separate the blocks of a stylesheet, so an `@media` or `@include` that follows a
+  declaration or a rule stays visible as its own unit. A run of `@import` or `@use` lines is one
+  list and stays together.
 example: "a {}\n@media (a) {}   # reported"
 severity: off
 category: style
@@ -17,7 +30,13 @@ category: style
 id: declaration-empty-line-before
 family: blank-line-before
 params: { tag: item, kind: Declaration, block: declaration-block, always: "true", except: "first-nested after-same-kind", ignore: "after-comment inside-single-line-block", skip: "--* $* @*", message: "expected {blank} before the declaration" }
-description: "A declaration right after a rule or at-rule needs a blank line before it, one after another declaration or first in a block takes none; a comment right before it, a single-line block, custom properties and variables are left alone."
+description: >-
+  Reports a declaration that follows a rule or at-rule and has no empty line before it. A
+  declaration after another declaration, one first in its block, one right after a comment, one in a
+  single-line block, and custom properties and variables are not reported.
+why: >-
+  Declarations that come after a nested rule belong to the parent again, and without a gap they read
+  as part of the nested block. An empty line shows the return to the parent.
 example: "a {\n  top: 0;\n\n  left: 0;\n}   # reported"
 severity: off
 category: style
@@ -25,7 +44,13 @@ category: style
 id: custom-property-empty-line-before
 family: blank-line-before
 params: { tag: item, kind: Declaration, block: declaration-block, only: "--*", always: "true", except: "first-nested after-same-kind", ignore: "after-comment inside-single-line-block", message: "expected {blank} before the custom property" }
-description: "A custom property needs a blank line before it, unless a comment is right before it or another custom property is; the first declaration of a block and those in a single-line block take none."
+description: >-
+  Reports a custom property declaration with no empty line before it. One that is first in its
+  block, right after a comment or another custom property, or in a single-line block is not
+  reported.
+why: >-
+  Custom properties are the variables of a block, and a gap before the first of them sets them off
+  from the ordinary declarations, so a reader finds the values a block defines.
 example: "a {\n  top: 0;\n  --x: 1;\n}   # reported"
 severity: off
 category: style
@@ -33,7 +58,12 @@ category: style
 id: dollar-variable-empty-line-before
 family: blank-line-before
 params: { tag: item, kind: Declaration, block: declaration-block, only: "$*", always: "true", except: "first-nested after-same-kind", ignore: "after-comment inside-single-line-block", message: "expected {blank} before the $-variable" }
-description: "A `$` variable declaration needs a blank line before it, unless a comment is right before it or another `$` variable is; the first statement of a block and those in a single-line block take none."
+description: >-
+  Reports a `$variable` declaration with no empty line before it. One that is first in its block,
+  right after a comment or another `$` variable, or in a single-line block is not reported.
+why: >-
+  A group of Sass variables is the settings of a block, and a gap before it sets it off from the
+  rules and declarations around, so the settings are easy to find.
 example: "a {\n  top: 0;\n  $x: 1;\n}   # reported"
 severity: off
 category: style
@@ -41,7 +71,12 @@ category: style
 id: double-slash-comment-empty-line-before
 family: blank-line-before
 params: { token: LineComment, block: declaration-block, always: "true", except: first-nested, ignore: "after-comment inline directive", directive: "stylelint-", message: "expected {blank} before the comment" }
-description: "A `//` comment on a line of its own needs a blank line before it, unless a comment is right before it, it comes first in a block, or it is a `stylelint-` directive."
+description: >-
+  Reports a `//` comment on a line of its own with no empty line before it. One that is first in its
+  block, right after another comment, on the line of code, or a directive comment is not reported.
+why: >-
+  A comment describes what follows, and an empty line before it ties it to the next rule rather than
+  to the end of the previous one.
 example: "$a: 1;\n// note   # reported"
 severity: off
 category: style
@@ -49,7 +84,13 @@ category: style
 id: comment-empty-line-before
 family: blank-line-before
 params: { token: Comment, block: declaration-block, always: "true", except: first-nested, ignore: "inline directive", directive: "stylelint-", message: "expected {blank} before the comment" }
-description: "A `/* */` comment on a line of its own needs a blank line before it, unless it comes first in a block, shares a line with code or is a `stylelint-` directive; a `//` comment is another rule's."
+description: >-
+  Reports a `/* */` comment on a line of its own with no empty line before it. One that is first in
+  its block, on the line of code, or a directive comment is not reported. A `//` comment is another
+  rule's.
+why: >-
+  A comment describes what follows, and an empty line before it ties it to the next rule rather than
+  to the end of the previous one.
 example: "a {}\n/* note */   # reported"
 severity: off
 category: style

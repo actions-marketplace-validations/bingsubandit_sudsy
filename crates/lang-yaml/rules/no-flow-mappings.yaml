@@ -1,6 +1,14 @@
 id: no-flow-mappings
 message: flow mappings are not allowed
-description: "A flow mapping (`{a: 1}`); write a block mapping instead."
+description: >-
+  Reports a flow mapping (`{a: 1}`), on its opening brace. With `allow_empty`, an empty one (`{}`)
+  is not reported.
+why: >-
+  Block style is the main style of YAML: one entry to a line, with diffs that show a single changed
+  entry. A flow mapping packs entries on one line, so a change touches the whole line and long ones
+  wrap badly.
+
+  To fix, write the entries on their own lines.
 example: "point: {x: 1}   # reported; write the entries on their own lines"
 severity: off
 category: style

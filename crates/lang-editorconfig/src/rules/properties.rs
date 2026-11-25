@@ -155,11 +155,15 @@ rule! {
         id: "unknown-property",
         category: Correctness,
         default: Warn,
-        description: "A property name that is not an EditorConfig or .NET (`dotnet_*`, `csharp_*`, \
-                  `visual_basic_*`, `dotnet_diagnostic.<ID>.severity`, naming rule) property but is \
-                  one typo away from one: the setting is silently ignored. Names of other tools \
-                  (`resharper_*`, `ij_*`) are left alone. Known properties and values: \
+        description: "Reports a property name that is not an EditorConfig or .NET property (`dotnet_*`, \
+                  `csharp_*`, `visual_basic_*`, naming rules, `dotnet_diagnostic.<ID>.severity`) but \
+                  is one typo away from one. Names of other tools (`resharper_*`, `ij_*`) are not \
+                  reported. The option `strict` also reports `dotnet_*`, `csharp_*` and \
+                  `visual_basic_*` names that are close to no known property. The known names are in \
                   `crates/lang-editorconfig/data/properties.txt`.",
+        why: "A misspelled property is not an error to an editor, which ignores what it does not \
+                  know, so the setting silently does nothing and a reader assumes it works.\n\
+                  To fix, correct the name; the message names the closest one.",
         example: "indent_syle = space   # unknown property; did you mean `indent_style`?",
         options: [OptionDecl {
             name: "strict",
@@ -193,13 +197,15 @@ rule! {
         id: "invalid-property-value",
         category: Correctness,
         default: Warn,
-        description: "A known EditorConfig or .NET property has a value it does not accept \
+        description: "Reports a known EditorConfig or .NET property that has a value it does not accept \
                   (`indent_style = tabs`, `dotnet_diagnostic.CA1000.severity = high`). Values are \
                   case-insensitive, `unset` is always valid, and .NET code-style options may end in \
-                  `:silent`, `:suggestion`, `:warning` or `:error`; formatting options do not \
-                  (Roslyn parses them with `bool.TryParse`, EditorConfigValueSerializer.cs). A \
-                  trailing `# comment` is ignored, as Roslyn does. Unknown properties are not \
-                  checked.",
+                  `:silent`, `:suggestion`, `:warning` or `:error`, which formatting options may not. \
+                  A trailing `# comment` is ignored. Unknown properties are not checked.",
+        why: "An editor ignores a value it does not know, so the setting silently has no effect \
+                  (`indent_style = tabs` does not select tabs). The file looks right and the code is \
+                  formatted another way.\n\
+                  To fix, use a value that the property accepts; the message names the closest one.",
         example: "indent_style = tabs   # `tabs` is not a value of `indent_style`; did you mean `tab`?",
         kinds: &[kind::PAIR],
     }

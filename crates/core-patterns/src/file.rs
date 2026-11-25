@@ -866,13 +866,12 @@ pub fn load_lazy(
 fn documents(source: &'static str) -> Vec<&'static str> {
     let mut out = Vec::new();
     let mut start = 0;
-    let mut at = 0;
-    for line in source.split_inclusive('\n') {
-        if line.trim_end() == "---" {
+    for (at, _) in source.match_indices("---") {
+        let end = source[at..].find('\n').map_or(source.len(), |n| at + n + 1);
+        if (at == 0 || source.as_bytes()[at - 1] == b'\n') && source[at..end].trim_end() == "---" {
             out.push(&source[start..at]);
-            start = at + line.len();
+            start = end;
         }
-        at += line.len();
     }
     out.push(&source[start..]);
     out.retain(|d| {
@@ -1529,5 +1528,21 @@ impl PatternRule {
                 diagnostic.fix(Fix::new(fix.title.clone(), fix.kind, vec![edit]));
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::documents;
+
+    #[test]
+    fn documents_split_at_separator_lines_only() {
+        let text = "id: a\nregex: 'x---y'\n---\nid: b\n--- \nid: c\n  ---\n";
+        let docs = documents(text);
+        assert_eq!(
+            docs,
+            ["id: a\nregex: 'x---y'\n", "id: b\n", "id: c\n  ---\n"]
+        );
+        assert_eq!(documents("---\nid: a\n"), ["id: a\n"]);
     }
 }

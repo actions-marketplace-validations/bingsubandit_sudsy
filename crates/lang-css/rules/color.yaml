@@ -1,6 +1,12 @@
 id: color-function-alias-notation
 message: "write rgb or hsl, not the alias with an a: they take an alpha value too"
-description: "`rgba()` and `hsla()`, the legacy names of `rgb()` and `hsl()`."
+description: >-
+  Reports `rgba()` and `hsla()`, the legacy names of `rgb()` and `hsl()`, on the function name.
+why: >-
+  Since Color Level 4 `rgb()` and `hsl()` take an optional alpha value, so the `a` names are aliases
+  that exist only for old code. Two names for one function make a stylesheet read as two styles.
+
+  To fix, write `rgb(0 0 0 / 50%)` instead of `rgba(0 0 0 / 50%)`.
 example: "a { color: rgba(0 0 0 / 50%) }   # reported"
 severity: off
 category: style
@@ -11,7 +17,16 @@ report-on: first-token
 ---
 id: color-function-notation
 message: "write the color function with spaces and `/` before the alpha value, not commas"
-description: "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`), also with a call such as `var()` as an argument."
+description: >-
+  Reports `rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0,
+  0, 0)`), also when one argument is a call such as `var()`. The space-separated form (`rgb(0 0 0)`)
+  is not reported.
+why: >-
+  The modern notation separates the channels with spaces and the alpha value with `/`, the way every
+  other color function of Color Level 4 (`lab()`, `oklch()`, `color()`) does, so one rule of writing
+  covers them all. The comma form is kept only for old browsers.
+
+  To fix, replace the commas with spaces and put `/` before the alpha value.
 example: "a { color: rgb(0, 0, 0) }   # reported"
 severity: off
 category: style
@@ -22,7 +37,16 @@ report-on: first-token
 ---
 id: alpha-value-notation
 message: "write the alpha value of a color function as a percentage"
-description: "The alpha value of `rgb()`, `hsl()`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()` or `color()` written as a number (`/ 0.5` is `/ 50%`); the comma form of `rgba()` and `hsla()` counts too."
+description: >-
+  Reports the alpha value of `rgb()`, `hsl()`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()` or
+  `color()` written as a number (`/ 0.5`), also the fourth argument of the comma form of `rgba()`
+  and `hsla()`, on the function name. A percentage is not reported.
+why: >-
+  An alpha value can be a number or a percentage, and a file that mixes both makes the reader
+  convert in the head: `0.5` and `50%` are the same. The rule keeps one notation, the percentage,
+  which reads as a share of opacity and matches how the channels of `hsl()` are written.
+
+  To fix, write `/ 50%` instead of `/ 0.5`.
 example: "a { color: rgb(0 0 0 / 0.5) }   # reported"
 severity: off
 category: style
@@ -35,7 +59,15 @@ report-on: first-token
 ---
 id: hue-degree-notation
 message: "write the hue of a color function as an angle with a unit"
-description: "The hue of `hsl()`, `hsla()`, `hwb()`, `lch()` or `oklch()` written as a number (`120` is `120deg`)."
+description: >-
+  Reports the hue of `hsl()`, `hsla()`, `hwb()`, `lch()` or `oklch()` written as a bare number
+  (`120`), on the function name. A hue with a unit (`120deg`) is not reported.
+why: >-
+  A hue is an angle, and without a unit `120` does not say if it is degrees, radians or turns; CSS
+  reads it as degrees, but the next reader has to know that. Writing `120deg` makes the value
+  self-describing and matches the other angle properties.
+
+  To fix, add `deg` to the number.
 example: "a { color: hsl(120 50% 50%) }   # reported"
 severity: off
 category: style

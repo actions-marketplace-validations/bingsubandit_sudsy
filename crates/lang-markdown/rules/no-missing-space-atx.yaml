@@ -1,8 +1,13 @@
 id: no-missing-space-atx
 message: there is no space after the # of the heading
 description: >-
-  A paragraph that starts with one to six `#` and no space reads as a heading to people but is
-  plain text to Markdown (markdownlint MD018).
+  Reports a paragraph that starts with one to six `#` and no space after them (`#Heading`).
+why: >-
+  To a reader this is a heading, but CommonMark needs a space after the `#`, so it is plain text
+  with a `#` in front. The heading is missing from the outline and from the table of contents.
+
+  To fix, add a space: `# Heading`. A deliberate hash tag at the start of a line can be escaped with
+  `\#`.
 example: '#Heading   # # Heading'
 severity: warn
 category: correctness

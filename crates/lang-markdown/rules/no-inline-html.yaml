@@ -1,8 +1,15 @@
 id: no-inline-html
 message: inline HTML is not Markdown
 description: >-
-  Raw HTML in a document (markdownlint MD033). Comments are not reported. Reported once per HTML
-  block, not per tag.
+  Reports raw HTML in a document, on each tag of inline HTML and on each HTML block. Comments are
+  not reported.
+why: >-
+  Markdown is meant to be read as it is and to be rendered in many places. HTML is dropped, escaped
+  or restyled by some renderers (a README on a package page, a chat message), and a document that
+  depends on it renders differently in each.
+
+  To fix, use the Markdown form (`**bold**`, a link or an image). Where HTML is needed, turn the
+  rule off for that file.
 example: '<b>bold</b>   # **bold**'
 severity: off
 category: style
