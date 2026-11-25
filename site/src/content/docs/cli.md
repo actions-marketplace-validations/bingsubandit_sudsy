@@ -15,7 +15,7 @@ description: The sudsy commands, exit codes and machine-readable output, for scr
 | `sudsy config print [file]` | The resolved configuration with the source of each value | 0 |
 | `sudsy init [--preset <name>] [--from <tool>] [--agents]` | Write a starter `sudsy.yaml`, migrate another tool's config, or add the agent block | 0 |
 
-Exit 2 means a file could not be processed or the configuration is invalid; exit 3 means files of a language that is not installed were skipped.
+Exit 2 means a file could not be processed or the configuration is invalid.
 
 ## Machine-readable output
 

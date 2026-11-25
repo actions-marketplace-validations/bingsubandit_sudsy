@@ -16,7 +16,7 @@ The status and the headline numbers of every language are in the generated table
 - Both numbers leave out only reviewed intentional differences (`tool-wrong`, `invalid-input`, `wontfix`). The lists are in `tests/parity/<tool>/differences.yaml` and [ai/parity/README.md](ai/parity/README.md).
 - Reproduce a number: `scripts/parity.sh <tool>` (format), `scripts/parity.sh coverage <tool>` (lint), `scripts/parity.sh stability <group>` (stable).
 - Every number comes from a pinned tool version. Versions are in the sections below.
-- Language names in `sudsy.yaml` sections match `sudsy languages list`: `js` (JavaScript and TypeScript), `python`, `hcl`, `shell`, and so on.
+- Language names in `sudsy.yaml` sections are the ones the editor schema lists: `js` (JavaScript and TypeScript), `python`, `hcl`, `shell`, and so on.
 
 ## Options every formatter shares
 
@@ -296,10 +296,6 @@ The status and the headline numbers of every language are in the generated table
 - Small formatters and a few rules. No reference tool, so no comparison: the format column is the stable share.
 - **Options:** `max_blank_lines`. INI adds `space_around_equals`.
 - **Rules:** invalid or duplicate entries, for example unknown EditorConfig properties and ignored `.gitignore` patterns.
-
-## Language packs
-
-These languages are small downloads, fetched with `sudsy languages add`: editorconfig, gitignore, graphql, hcl, ini, markdown, powershell, protobuf, shell, toml, xml, dockerfile and makefile. Every other language is built in. Until you fetch a pack, its files are skipped with a warning. See [configuration](configuration.md#language-packs).
 
 ## Reproduce (needs a source checkout)
 

@@ -322,6 +322,7 @@ impl Client {
     }
 
     /// `sudsy.installMissingLanguages`, with a language or without.
+    #[cfg(feature = "pack-mode")]
     pub fn install_command(&mut self, language: Option<&str>) -> serde_json::Value {
         let params = lsp_types::ExecuteCommandParams {
             command: "sudsy.installMissingLanguages".into(),

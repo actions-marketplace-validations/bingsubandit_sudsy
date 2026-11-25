@@ -232,11 +232,11 @@ impl Depth {
     }
 }
 
-/// What the project says about a language that may not be installed.
+/// What the project says about a language that may not be installed (pack mode only).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Need {
-    /// `sudsy languages sync` installs it; its files are skipped with a warning while missing.
+    /// The project needs it; in a pack-mode build its files are skipped with a warning while missing.
     Required,
     /// Its files are skipped silently when it is missing.
     Ignored,

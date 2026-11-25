@@ -5,8 +5,11 @@ mod debug;
 mod fix;
 mod format;
 mod init;
+#[cfg(feature = "pack-mode")]
 mod languages_cmd;
 mod lint;
+#[cfg(feature = "pack-mode")]
+mod missing;
 mod report;
 mod rules_cmd;
 mod session;
@@ -48,6 +51,7 @@ enum Command {
     #[command(subcommand)]
     Config(config_cmd::ConfigCommand),
     /// Install, remove and list languages.
+    #[cfg(feature = "pack-mode")]
     #[command(subcommand)]
     Languages(languages_cmd::LanguagesCommand),
     /// Write a starter sudsy.yaml.
@@ -66,6 +70,7 @@ fn main() -> ExitCode {
         Command::Check(args) => check::run(args),
         Command::Rules(args) => rules_cmd::run(args).map(|()| ExitCode::SUCCESS),
         Command::Config(c) => config_cmd::run(c).map(|()| ExitCode::SUCCESS),
+        #[cfg(feature = "pack-mode")]
         Command::Languages(c) => languages_cmd::run(c),
         Command::Init(args) => init::run(args).map(|()| ExitCode::SUCCESS),
         Command::Lsp => lsp::run_stdio().map(|()| ExitCode::SUCCESS),
@@ -73,7 +78,8 @@ fn main() -> ExitCode {
     match result {
         // Files were skipped for a missing language: a distinct status, unless something worse
         // already set one.
-        Ok(code) if code == ExitCode::SUCCESS && session::skipped() => ExitCode::from(3),
+        #[cfg(feature = "pack-mode")]
+        Ok(code) if code == ExitCode::SUCCESS && missing::skipped() => ExitCode::from(3),
         Ok(code) => code,
         Err(e) => {
             eprintln!("error: {e:#}");

@@ -32,6 +32,7 @@ tempfile.workspace = true
 [features]
 default = ["static-grammars"]
 static-grammars = ["languages/static-grammars", "lsp/static-grammars"]
+pack-mode = ["languages/pack-mode", "lsp/pack-mode"]
 
 [dev-dependencies]
 insta.workspace = true

@@ -8,7 +8,7 @@ publish.workspace = true
 
 [dependencies]
 core-config.workspace = true
-core-packs.workspace = true
+core-packs = { workspace = true, optional = true }
 core-patterns.workspace = true
 core-plugins.workspace = true
 core-rules.workspace = true
@@ -51,8 +51,10 @@ serde_json.workspace = true
 thiserror.workspace = true
 
 [features]
-# Grammars linked in (dev, tests, `cargo install`); without it the tree-sitter languages load from packs.
+# Grammars linked in (every build but pack mode).
 default = ["static-grammars"]
+# Pack mode (one CI job): the installed set, `languages` command and install prompts.
+pack-mode = ["dep:core-packs"]
 # generated:static-grammars
 static-grammars = ["lang-dockerfile/static-grammars", "lang-editorconfig/static-grammars", "lang-gitignore/static-grammars", "lang-go/static-grammars", "lang-graphql/static-grammars", "lang-hcl/static-grammars", "lang-ini/static-grammars", "lang-makefile/static-grammars", "lang-markdown/static-grammars", "lang-powershell/static-grammars", "lang-protobuf/static-grammars", "lang-shell/static-grammars", "lang-toml/static-grammars", "lang-xml/static-grammars"]
 # /generated

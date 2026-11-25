@@ -3,7 +3,7 @@
 //! tests use it directly.
 
 use crate::position::apply_change;
-use core_config::{ConfigError, EditorConfig, Need};
+use core_config::{ConfigError, EditorConfig};
 use core_incremental::{Database, Db, File, Siblings};
 use languages::{Project, installed::Checker};
 use lsp_types::TextDocumentContentChangeEvent;
@@ -118,6 +118,7 @@ impl Workspace {
         Some((language.to_string(), why))
     }
 
+    #[cfg(feature = "pack-mode")]
     /// The languages of the open documents that are not installed and not ignored, sorted.
     pub fn missing_open_languages(&self) -> Vec<String> {
         let missing: std::collections::BTreeSet<String> = (self.docs.keys())
@@ -128,13 +129,15 @@ impl Workspace {
         missing.into_iter().collect()
     }
 
+    #[cfg(feature = "pack-mode")]
     /// Whether the project's config says files of `language` are skipped without a word.
     pub fn ignores_language(&self, language: &str) -> bool {
         self.project
             .as_ref()
-            .is_some_and(|p| p.chain.needs().get(language) == Some(&Need::Ignored))
+            .is_some_and(|p| p.chain.needs().get(language) == Some(&core_config::Need::Ignored))
     }
 
+    #[cfg(feature = "pack-mode")]
     /// Serves the documents that were waiting for a language that is installed now.
     pub fn activate_installed(&mut self) {
         let waiting: Vec<PathBuf> = (self.docs.iter())

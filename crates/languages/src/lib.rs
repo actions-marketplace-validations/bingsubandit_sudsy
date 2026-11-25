@@ -1,6 +1,9 @@
 //! The languages Sudsy ships and what is derived from the whole set: the providers, their option
 //! schemas and rule lists. The CLI, the LSP server and `xtask` all need exactly this list.
 
+#[cfg(not(any(feature = "static-grammars", feature = "pack-mode")))]
+compile_error!("build with `static-grammars` (the default) or `pack-mode`");
+
 pub mod catalog;
 mod extensions;
 pub mod installed;
