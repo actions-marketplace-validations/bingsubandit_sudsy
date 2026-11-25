@@ -23,6 +23,19 @@ pub fn lower_ascii(name: &str) -> std::borrow::Cow<'_, str> {
     }
 }
 
+/// The ranges of the tokens whose kind name is in `kinds` (the option `ignore_kinds` of a
+/// text rule), in source order.
+pub fn token_ranges(root: &SyntaxNode, grammar: &Grammar, kinds: &[&str]) -> Vec<TextRange> {
+    if kinds.is_empty() {
+        return Vec::new();
+    }
+    root.descendants_with_tokens()
+        .filter_map(|e| e.into_token())
+        .filter(|t| kinds.contains(&grammar.name(t.kind())))
+        .map(|t| t.text_range())
+        .collect()
+}
+
 /// What the rules run on one file share: the last [`significant_range`] computed (the rules a
 /// node is dispatched to ask for it one after the other; it depends on the node's range only, so
 /// equal ranges share the answer) and whether the file text is ASCII.

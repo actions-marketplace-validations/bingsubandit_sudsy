@@ -101,6 +101,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("pointer_alignment", "pointer_in_loose", "", &["ForStatement", "CatchClause", "Parameter"]),
     ("pointer_alignment", "pointer_in_under", "", &["Cast"]),
     ("pointer_alignment", "pointer_name", "", &["Ident", "Keyword", "Lsqb"]),
+    ("pointer_alignment", "pointer_not_name", "", &["Captures"]),
     ("pointer_alignment", "pointer_ref", "", &["Amp", "AmpAmp"]),
     ("pointer_alignment", "pointer_type", "", &["Ident", "Keyword", "Greater", "GreaterGreater"]),
     ("pointer_alignment", "tight_after", "", &["Ellipsis"]),

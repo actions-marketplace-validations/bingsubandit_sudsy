@@ -3249,7 +3249,7 @@
 ["S106","missing","planned","","https://docs.astral.sh/ruff/rules/S106/"],
 ["S107","missing","planned","","https://docs.astral.sh/ruff/rules/S107/"],
 ["S108","missing","planned","","https://docs.astral.sh/ruff/rules/S108/"],
-["S110","covered","rule: no-empty-catch","","https://docs.astral.sh/ruff/rules/S110/"],
+["S110","partial","rule: no-empty-catch","The preset sets option `comment_handles` off because ruff reports an `except` whose only statement is `pass`, a comment or not.","https://docs.astral.sh/ruff/rules/S110/"],
 ["S112","missing","planned","","https://docs.astral.sh/ruff/rules/S112/"],
 ["S113","missing","planned","","https://docs.astral.sh/ruff/rules/S113/"],
 ["S201","missing","planned","","https://docs.astral.sh/ruff/rules/S201/"],

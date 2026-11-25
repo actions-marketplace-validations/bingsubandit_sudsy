@@ -89,11 +89,11 @@ token PipePipe "||" #punctuation #operator #part
 token PlusPlus "++" #punctuation #operator #part
 token MinusMinus "--" #punctuation #operator #part
 token Hash "#" #punctuation #part
-token HashHash "##" #punctuation #part
+token HashHash "##" #punctuation #part #paste
 
-token Ident #operand #type-token #part
+token Ident #operand #type-token #part #paste
 token Keyword #keyword #type-token #operand #operator #part
-token Number #literal #operand #part
+token Number #literal #operand #part #paste
 token String #literal #string #operand #part
 token Char #literal #string #operand #part
 string String Char quote "\"" "'" escape "\\" continuation line
@@ -164,7 +164,7 @@ node WhileStatement #child #statement #loop = Keyword condition:Condition body:#
 node DoStatement #child #statement #loop = Keyword body:#statement Keyword condition:Condition #part*
 node ForStatement #child #statement #scope #loop = Keyword Condition body:#statement
 node SwitchStatement #child #statement #scope #switch = Keyword subject:Condition cases=block:Block
-node CaseClause #child #case = Keyword test:#expression? test_token=test:#operand? Colon body:#child*
+node CaseClause #child #case = Keyword test:#expression? test_token=test:#operand? #paste* Colon body:#child*
 node LabelStatement #child #statement #goto-target #opaque = Ident Colon
 node TryStatement #child #statement #try = Keyword body:Block catches:CatchClause*
 node CatchClause #child #scope #catch = Keyword parameter:Condition body:Block

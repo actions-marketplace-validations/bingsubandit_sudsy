@@ -45,17 +45,11 @@ rule! {
         if !file.text.contains('\t') {
             return;
         }
-        let ignore = ctx.options.list("ignore_kinds");
-        let skipped: Vec<TextRange> = if ignore.is_empty() {
-            Vec::new()
-        } else {
-            file.root
-                .descendants_with_tokens()
-                .filter_map(|e| e.into_token())
-                .filter(|t| ignore.contains(&file.grammar.name(t.kind())))
-                .map(|t| t.text_range())
-                .collect()
-        };
+        let skipped = crate::tree::token_ranges(
+            file.root,
+            file.grammar,
+            ctx.options.list("ignore_kinds").as_slice(),
+        );
         let bytes = file.text.as_bytes();
         let leading = ctx.options.bool("indentation_only");
         // With `indentation_only`: whether only blanks lie between the line start and `at`.

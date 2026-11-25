@@ -1093,7 +1093,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "Reports spaces or tabs at the end of a line, from the first one to the line break. Every language is checked the same way, so Markdown's two-space line break is reported too.",
+      "description": "Reports spaces or tabs at the end of a line, from the first one to the line break. Tokens of the kinds the option `ignore_kinds` names (Markdown's fenced code) are not looked at, and `hard_break_spaces` allows Markdown's two-space line break.",
       "example": {
         "config": null,
         "fixed": null,
@@ -1113,7 +1113,20 @@
       "languages": [
         "all"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": [],
+          "description": "Kinds of tokens whose trailing white space is not reported (the code of a fence).",
+          "name": "ignore_kinds",
+          "type": "list"
+        },
+        {
+          "default": 0,
+          "description": "With a value above 0, that many spaces or more at the end of a line that the next non-blank line follows are a hard line break and not reported (Markdown: 2).",
+          "name": "hard_break_spaces",
+          "type": "int"
+        }
+      ],
       "presets": [
         "html/html-validate-recommended",
         "cmake/cmake-lint",
@@ -7744,7 +7757,7 @@
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Reports a `catch`, `except` or `rescue` clause whose body has no statement and no comment (`catch (e) { }`; in Python a lone `pass` counts as no statement). With the option `comment_handles` off a comment does not count either. With `broad_only` only a clause that catches everything, or one of the exception types of the option `types`, is reported.",
+      "description": "Reports a `catch`, `except` or `rescue` clause whose body has no statement and no comment (`catch (e) { }`; in Python a lone `pass` counts as no statement; a comment on a later line than the clause starts on, after its last token on that line or indented deeper than the clause, belongs to it). With the option `comment_handles` off a comment does not count either. With `broad_only` only a clause that catches everything, or one of the exception types of the option `types`, is reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7841,7 +7854,8 @@
         },
         {
           "id": "S110",
-          "partial": false,
+          "note": "The preset sets option `comment_handles` off because ruff reports an `except` whose only statement is `pass`, a comment or not.",
+          "partial": true,
           "tool": "ruff",
           "url": "https://docs.astral.sh/ruff/rules/S110/"
         }
@@ -28092,12 +28106,15 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "if a == a\n  b\nend\nh = { a: 1, a: 2 }\ncase x\nwhen 1 then y\nwhen 1 then z\nend\nif a && b = c\n  d\nend\n",
+        "input": "if a == a\n  b\nend\nh = { a: 1, a: 2 }\ncase x\nwhen 1 then y\nwhen 1 then z\nend\nif a && b = c\n  d\nend\nbegin\n  run\nrescue\nend\nx = 1\n# not part of the clause\nbegin\n  run\nrescue\n  # ignored on purpose\nend\nbegin\n  run\nrescue # trails the keyword\nend\ndef f\n  run\n  # before the clause\nrescue NameError\nend\n",
         "language": "ruby",
         "other_lines": [
           1,
           4,
-          7
+          7,
+          14,
+          25,
+          30
         ],
         "spans": [
           {

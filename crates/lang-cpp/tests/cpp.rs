@@ -328,6 +328,17 @@ fn a_backslash_before_a_line_break_continues_the_string() {
     assert_eq!(strings, ["\"a\\\r\nb\"", "'\\\\'", "\"open"]);
 }
 
+/// A `##` paste inside a `case` label is a part of the label, as in a macro body's `case X##_A:`.
+#[test]
+fn a_paste_in_a_case_label_fits_the_shape() {
+    let src = "#define M(X) switch (v) { case X##_A: return 1; case 2: break; }\nint f() { switch (v) { case A##B: break; } }\n";
+    let provider = provider(Dialect::C);
+    let parsed = provider.parse(&SourceFile::new("a.c", 1, src)).unwrap();
+    let checker = core_syntax::shape::ShapeChecker::new(provider.grammar());
+    let bad: Vec<String> = checker.violations(&parsed.tree).collect();
+    assert!(bad.is_empty(), "{bad:?}");
+}
+
 #[test]
 #[ignore]
 fn dump_tree() {
@@ -977,6 +988,11 @@ fn clang_spellings_of_operators_casts_and_declarations() {
     assert_eq!(
         fmt("void f() { auto [a, b] = g(); x[1] = 2; }\n"),
         "void f() {\n  auto [a, b] = g();\n  x[1] = 2;\n}\n"
+    );
+    // a `*` before a lambda is a product, not a declarator
+    assert_eq!(
+        fmt("void f() { z = a*[] { return 1; }(); }\n"),
+        "void f() { z = a * [] { return 1; }(); }\n"
     );
     assert_eq!(
         fmt("extern \"C\" int  f(void);\n"),

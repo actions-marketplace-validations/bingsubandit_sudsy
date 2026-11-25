@@ -116,27 +116,65 @@ rule! {
         category: Style,
         default: Off,
         description: "Reports spaces or tabs at the end of a line, from the first one to the line break. \
-              Every language is checked the same way, so Markdown's two-space line break is \
-              reported too.",
+              Tokens of the kinds the option `ignore_kinds` names (Markdown's fenced code) are not \
+              looked at, and `hard_break_spaces` allows Markdown's two-space line break.",
         why: "Trailing white space cannot be seen, adds nothing, and many editors strip it, so a \
               later edit shows a change on a line the author did not touch and makes diffs and \
               blame noisy.\n\
               To fix, delete it.",
         example: "text   \n   // reported at the spaces",
+        options: [
+            OptionDecl {
+                name: "ignore_kinds",
+                default: Opt::List(&[]),
+                check: Check::Any,
+                description: "Kinds of tokens whose trailing white space is not reported (the code of a fence).",
+            },
+            OptionDecl {
+                name: "hard_break_spaces",
+                default: Opt::Int(0),
+                check: Check::Any,
+                description: "With a value above 0, that many spaces or more at the end of a line that the next non-blank line follows are a hard line break and not reported (Markdown: 2).",
+            },
+        ],
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        // the options, and the language's `rule` row of this rule
+        let mut kinds = ctx.options.list("ignore_kinds");
+        let mut break_spaces = ctx.options.int("hard_break_spaces") as usize;
+        if let Some(row) = file.grammar.rule_row("no-trailing-whitespace") {
+            for (name, values) in &row.options {
+                match name.as_str() {
+                    "ignore_kinds" => kinds.extend(values.iter().map(String::as_str)),
+                    "hard_break_spaces" => {
+                        break_spaces = values.first().and_then(|v| v.parse().ok()).unwrap_or(0)
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let skipped = crate::tree::token_ranges(file.root, file.grammar, kinds.as_slice());
         for line in 0..file.lines.line_count() {
             let (start, end) = file.lines.line_range(file.text, line);
             let kept = file.text[start..end].trim_end_matches([' ', '\t']).len();
             if start + kept < end {
-                ctx.report(
-                    TextRange::new(
-                        TextSize::from((start + kept) as u32),
-                        TextSize::from(end as u32),
-                    ),
-                    "trailing whitespace",
+                let range = TextRange::new(
+                    TextSize::from((start + kept) as u32),
+                    TextSize::from(end as u32),
                 );
+                // a hard line break: enough spaces, and the paragraph goes on in the next line
+                let hard_break = break_spaces > 0
+                    && end - (start + kept) >= break_spaces
+                    && file.text[start + kept..end].bytes().all(|b| b == b' ')
+                    && line + 1 < file.lines.line_count()
+                    && {
+                        let (a, b) = file.lines.line_range(file.text, line + 1);
+                        !file.text[a..b].trim().is_empty()
+                    };
+                if !hard_break && !skipped.iter().any(|s| s.contains_range(range)) {
+                    ctx.report(range, "trailing whitespace");
+                }
             }
         }
     }

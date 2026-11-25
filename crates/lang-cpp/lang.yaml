@@ -59,6 +59,7 @@ options:
         pointer_ref: [Amp, AmpAmp]
         pointer_type: [Ident, Keyword, Greater, GreaterGreater]
         pointer_name: [Ident, Keyword, Lsqb]
+        pointer_not_name: [Captures]
         pointer_bare: [TemplateArguments]
         pointer_end: [Greater, GreaterGreater, Comma, Rpar, Ellipsis, Lsqb]
         binary_node: [Binary]

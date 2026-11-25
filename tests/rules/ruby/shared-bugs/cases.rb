@@ -13,3 +13,26 @@ if a && b = c
 #  ^^^^^^^^^^ no-assignment-in-logical-condition
   d
 end
+begin
+  run
+rescue
+^^^^^^ no-empty-catch
+end
+x = 1
+# not part of the clause
+begin
+  run
+rescue
+  # ignored on purpose
+end
+begin
+  run
+rescue # trails the keyword
+^^^^^^ no-empty-catch
+end
+def f
+  run
+  # before the clause
+rescue NameError
+^^^^^^^^^^^^^^^^ no-empty-catch
+end

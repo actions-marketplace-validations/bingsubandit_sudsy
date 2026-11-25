@@ -46,6 +46,7 @@ pub struct ScopeLang {
     fold: bool,
     element_writes: &'static [&'static str],
     late: &'static [&'static str],
+    deep: (&'static [&'static str], &'static [&'static str]),
     argument_blocks: &'static [&'static str],
     escape: &'static str,
     lowercase_undefined: bool,
@@ -70,6 +71,7 @@ impl ScopeLang {
             fold: false,
             element_writes: &[],
             late: &[],
+            deep: (&[], &[]),
             argument_blocks: &[],
             escape: "\\",
             lowercase_undefined: false,
@@ -129,6 +131,17 @@ impl ScopeLang {
     /// written before its end sees the name of the scope around (Go `ctx := ctx.With()`).
     pub const fn late_declares(mut self, kinds: &'static [&'static str]) -> Self {
         self.late = kinds;
+        self
+    }
+
+    /// Under nodes of these kinds, tokens of the second list's kinds are names too (Go: a parser
+    /// reads the chain `h[i][j]` as a type instantiation and tags its operands as types).
+    pub const fn deep_names(
+        mut self,
+        nodes: &'static [&'static str],
+        tokens: &'static [&'static str],
+    ) -> Self {
+        self.deep = (nodes, tokens);
         self
     }
 
@@ -194,6 +207,7 @@ impl ScopeLang {
                 .element_writes(self.element_writes)
                 .label_names(s.labels, grammar)
                 .late_declares(self.late, grammar)
+                .deep_names(self.deep.0, self.deep.1, grammar)
         })
     }
 }

@@ -581,7 +581,7 @@ struct Pad {
 
 /// The kind sets of the declarator marks: `pointer` (the marks), `pointer_in` (their parents) and
 /// `pointer_in_under` (the grandparents of marks in a parenthesized type), `pointer_in_loose` (grandparents of marks that need no `pointer_end` behind them: the declaration of a range `for` or a `catch`), `pointer_ref` (marks no other mark follows), `pointer_type` (what
-/// stands before the first mark: a type), `pointer_name` (what a name behind the last mark is),
+/// stands before the first mark: a type), `pointer_name` (what a name behind the last mark is), `pointer_not_name` (parents of a `pointer_name` or `pointer_end` token that make it none),
 /// `pointer_bare` (parents that hold types only, and what `pointer_in_under` names, where a mark needs a `pointer_end` token behind it
 /// to be no multiplication).
 #[derive(Default)]
@@ -593,6 +593,8 @@ struct Pointer {
     refs: Vec<SyntaxKind>,
     types: Vec<SyntaxKind>,
     names: Vec<SyntaxKind>,
+    /// Parents of a `names` or `end` token that make it neither (the `[` of a lambda's captures).
+    not_named: Vec<SyntaxKind>,
     bare: Vec<SyntaxKind>,
     end: Vec<SyntaxKind>,
 }
@@ -721,6 +723,7 @@ impl SpaceRules {
                 refs: set("pointer_ref"),
                 types: set("pointer_type"),
                 names: set("pointer_name"),
+                not_named: set("pointer_not_name"),
                 bare: set("pointer_bare"),
                 end: set("pointer_end"),
             },
@@ -825,7 +828,7 @@ impl SpaceRules {
             while let Some(x) = next.as_ref().filter(|x| p.marks.contains(&x.kind())) {
                 next = next_code(x);
             }
-            next.is_some_and(|x| p.end.contains(&x.kind()))
+            next.is_some_and(|x| p.end.contains(&x.kind()) && !self.not_named(&x))
         };
         if !known && !ends_type() {
             return false;
@@ -848,6 +851,17 @@ impl SpaceRules {
         true
     }
 
+    /// Is `t` a name behind a declarator mark (a `pointer_name` token, but for the parents of
+    /// `pointer_not_name`)?
+    fn is_name(&self, t: &SyntaxToken) -> bool {
+        self.pointer.names.contains(&t.kind()) && !self.not_named(t)
+    }
+
+    /// Is `t` in a parent of `pointer_not_name`?
+    fn not_named(&self, t: &SyntaxToken) -> bool {
+        (t.parent()).is_some_and(|n| self.pointer.not_named.contains(&n.kind()))
+    }
+
     /// The blank between `a` and `b` when one of them is a declarator mark: `before` stands for the
     /// blank in front of the first mark, `after` for the one behind the last, where a name follows.
     pub fn pointer_gap(
@@ -864,8 +878,7 @@ impl SpaceRules {
             return Some(if self.is_mark(a) { false } else { before });
         }
         // (`T &...args` against `T&... args`: the pack's `...` after a mark takes the mark's side)
-        (self.pointer.names.contains(&b.kind()) && (self.is_mark(a) || self.tight_gap(a)))
-            .then_some(after)
+        (self.is_name(b) && (self.is_mark(a) || self.tight_gap(a))).then_some(after)
     }
 
     /// The blank around a `*`, `&` or `&&` of a binary operation: one, unless the operation may be a
@@ -891,7 +904,7 @@ impl SpaceRules {
         let (l, r) = (left.kind(), right.kind());
         // (the `)` of a group of only a type's tokens before a name ends a cast and the operator
         // touches it; the `)` of any other group, a call or `sizeof(T)`, ends an operand)
-        if self.binary[2].contains(&l) && p.names.contains(&r) {
+        if self.binary[2].contains(&l) && self.is_name(&right) {
             // (a blank behind the mark as written makes it an operator)
             let spaced = self.binary[3].contains(&mark.kind())
                 && mark
@@ -905,7 +918,7 @@ impl SpaceRules {
             .is_some_and(|n| self.binary[4].contains(&n.kind()));
         let declaration = !operand
             && (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
-            && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));
+            && (self.is_name(&right) || p.end.contains(&r) || p.marks.contains(&r));
         (clear || !declaration).then_some(true)
     }
 

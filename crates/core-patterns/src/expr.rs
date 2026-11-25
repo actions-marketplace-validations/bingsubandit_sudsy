@@ -97,6 +97,10 @@ pub struct Spec {
     pub empty: Option<bool>,
     /// The node holds no node and no token but its brackets; a comment does not count.
     pub bare: Option<bool>,
+    /// The node holds a comment, or a comment follows its last token on a later line than the
+    /// node starts on, on that line or indented deeper than the node's line (the body of a clause
+    /// with no brace: `pass  # why`).
+    pub commented: Option<bool>,
     /// The node, looked through parentheses and single-child wrappers, holds this rule.
     pub inner: Option<Box<Spec>>,
 }
@@ -169,6 +173,7 @@ pub enum Expr {
     Same(String, String),
     Empty,
     Bare,
+    Commented,
     Inner(Box<Expr>),
 }
 
@@ -237,6 +242,53 @@ fn is_empty(node: &SyntaxNode, g: &Grammar) -> bool {
         .any(|t| {
             g.has_tag(t.kind(), "comment") && end.is_none_or(|end| t.text_range().start() < end)
         })
+}
+
+/// A comment on a later line than the node starts on (one that trails `rescue` is no comment of
+/// its body), inside the node or after its last token before the next one; in the second case
+/// also on the line of that token or indented deeper than the node's line.
+fn is_commented(node: &SyntaxNode, cx: &Ctx<'_>) -> bool {
+    let g = cx.grammar;
+    let is_comment = |t: &core_syntax::SyntaxToken| g.has_tag(t.kind(), "comment");
+    // (the comments before the node's first token are its leading trivia, not its comments)
+    let code = core_syntax::code_span(node, g).unwrap_or_else(|| node.text_range());
+    let start = usize::from(code.start());
+    // (on a later line than the node starts on)
+    let later = |at: usize| at > start && cx.text[start..at].contains('\n');
+    if node
+        .descendants_with_tokens()
+        .filter_map(|e| e.into_token())
+        .any(|t| is_comment(&t) && later(usize::from(t.text_range().start())))
+    {
+        return true;
+    }
+    let line_start = cx.text[..start].rfind('\n').map_or(0, |i| i + 1);
+    let indent = cx.text[line_start..start].len();
+    // A node that ends at a closing bracket keeps its comments inside it.
+    let last = node.last_token();
+    if last
+        .as_ref()
+        .is_some_and(|t| matches!(t.text(), "}" | ")" | "]"))
+    {
+        return false;
+    }
+    let mut next = last.and_then(|t| t.next_token());
+    let mut same_line = true;
+    while let Some(t) = next {
+        if !g.is_trivia(t.kind()) {
+            break;
+        }
+        if is_comment(&t) {
+            let at = usize::from(t.text_range().start());
+            let col = at - cx.text[..at].rfind('\n').map_or(0, |i| i + 1);
+            if later(at) && (same_line || col > indent) {
+                return true;
+            }
+        }
+        same_line &= !t.text().contains('\n');
+        next = t.next_token();
+    }
+    false
 }
 
 /// The tokens of an element that are not trivia, read lazily.
@@ -436,6 +488,9 @@ impl Expr {
         if spec.bare == Some(true) {
             all.push(Expr::Bare);
         }
+        if spec.commented == Some(true) {
+            all.push(Expr::Commented);
+        }
         if let Some(s) = &spec.inner {
             all.push(Expr::Inner(Box::new(sub(s)?)));
         }
@@ -443,7 +498,7 @@ impl Expr {
             0 => Err(
                 "a rule needs at least one of pattern, kind, regex, path, nth, inside, not-inside, \
                       has, not-has, parent, child, option, in-option, all, any, not, role, operator, fields, \
-                      items, single, same, empty, bare, inner, regex-option, rethrows"
+                      items, single, same, empty, bare, commented, inner, regex-option, rethrows"
                     .into(),
             ),
             1 => Ok(all.remove(0)),
@@ -613,6 +668,7 @@ impl Expr {
             }
             Expr::Empty => is_empty(node, cx.grammar).then(Captures::new),
             Expr::Bare => is_bare(node, cx.grammar).then(Captures::new),
+            Expr::Commented => is_commented(node, cx).then(Captures::new),
             Expr::Inner(e) => e.matches(&unwrap(node, cx.grammar), cx),
         }
     }
@@ -684,7 +740,8 @@ impl Expr {
             | Expr::Same(..)
             | Expr::Single(_)
             | Expr::Empty
-            | Expr::Bare => false,
+            | Expr::Bare
+            | Expr::Commented => false,
         }
     }
 
@@ -742,6 +799,7 @@ impl Expr {
             | Expr::Same(..)
             | Expr::Empty
             | Expr::Bare
+            | Expr::Commented
             | Expr::Inner(_) => {}
         }
     }

@@ -4,6 +4,7 @@
 
 language markdown 6 "Markdown"
 comments block "<!--" "-->"
+rule no-trailing-whitespace ignore_kinds "CodeText" hard_break_spaces "2"
 suppress disable-next-line "sudsy-disable-next-line"
 suppress disable-line "sudsy-disable-line"
 suppress disable "sudsy-disable"
