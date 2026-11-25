@@ -146,6 +146,9 @@ fn invalid_files_are_refused_with_a_reason() {
             .contains("at least one")
     );
     assert!(load(&format!("{base}rule: {{ kind: Array }}\nbogus: 1")).is_some());
+    // A user file is checked in release builds too (built-in files are checked in debug builds only).
+    let bad = load(&format!("{base}rule: {{ regex: '(' }}")).unwrap();
+    assert!(bad.contains("regex `(`"), "{bad}");
 }
 
 #[test]
