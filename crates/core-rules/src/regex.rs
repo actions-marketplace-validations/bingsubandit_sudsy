@@ -251,10 +251,10 @@ mod tests {
 
     #[test]
     fn a_cache_matches_whole_text_with_or_without_case() {
-        let cache = RegexCache::default();
+        let cache = super::RegexCache::default();
         assert!(cache.is_whole_match("ubuntu-.*", "UBUNTU-latest", true));
         assert!(!cache.is_whole_match("ubuntu", "ubuntu-latest", true));
-        assert!(!RegexCache::default().is_whole_match("ubuntu", "UBUNTU", false));
+        assert!(!super::RegexCache::default().is_whole_match("ubuntu", "UBUNTU", false));
         assert!(!cache.is_match(r"\b\B", "x"));
     }
 
