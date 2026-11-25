@@ -1,6 +1,7 @@
 tool: "php-cs-fixer"
 version: "3.95.31 (GitHub release; run by the static PHP 8.4.23 build of static-php-cli)"
 languages: ["php"]
+rule-url: none
 sources:
   - "https://cs.symfony.com/doc/ruleSets/PER-CS3x0.html"
   - "https://www.php-fig.org/per/coding-style/"

@@ -17,7 +17,7 @@ Goal: people and coding agents who search for a formatter or linter, or for a sp
 | npm / PyPI / Scoop / winget metadata | `scripts/package-channels.py`: DESC "One formatter and linter for JS/TS, Python, Protobuf, Terraform and more", no `keywords`, no PyPI classifiers | Registry search ranks on keywords and description, and Sudsy has none of the searched words: prettier, eslint, ruff, linter, formatter, hadolint. |
 | Package READMEs | `packaging/README.md`, hand-written | **Inaccurate:** it says "Ready for JavaScript/TypeScript, Python, Protobuf, Terraform, GraphQL and TOML", while the generated table shows JS/TS, Python and Terraform In progress. npmjs.com and pypi.org show this text. |
 | Names | VS Code publisher `Coox`, winget `Coox.Sudsy` | Old organisation name. |
-| VS Code | `.vsix` in releases; Marketplace publish is a manual job (`release.yml` `marketplace`) | No Open VSX, so Cursor, Windsurf and VSCodium don't find it. |
+| VS Code | On the Marketplace and Open VSX as `sudsy.sudsy`; the `.vsix` is also in releases; publishing is a manual job (`release.yml` `marketplace`, `openvsx`) | None. |
 | CI integration | No `action.yml`, no `.pre-commit-hooks.yaml` | The GitHub Marketplace and pre-commit are where people browse for linters. |
 | Config schema | `schemas/sudsy.schema.json` | Not in SchemaStore. |
 | Agents | No `llms.txt`, no Markdown twin of the docs, nothing in `sudsy init` for agent instructions | Agents read docs as text and follow the repo's `AGENTS.md`/`CLAUDE.md`. |

@@ -1,6 +1,7 @@
 tool: "stylelint-less"
 version: "4.2.2"
 languages: ["less"]
+rule-url: "https://github.com/stylelint-less/stylelint-less/tree/main/packages/stylelint-less/src/rules/{name}"
 sources:
   - "https://github.com/stylelint-less/stylelint-less/tree/v4.2.2/src/rules"
   - "https://github.com/stylelint-less/stylelint-less#list-of-rules"

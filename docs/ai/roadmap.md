@@ -136,5 +136,4 @@ Committed work too small for a step of its own: what to do and where, one line e
 - Self-contained C# worker for machines without .NET.
 - Repeatable benchmarks for the paths listed in [performance/numbers.md](performance/numbers.md).
 - Publish the documentation site ([development/site.md](development/site.md)): the Pages deploy runs from main; switch `DOCS_BASE_URL` on and add `codeDescription` links to diagnostics.
-- Release: first Marketplace publish ([development/ci-release.md](development/ci-release.md)).
 - SignPath code signing and the winget resubmission (parked until Sudsy has more reputation).

@@ -1,6 +1,7 @@
 tool: "rubocop"
 version: "1.92.3"
 languages: ["ruby"]
+rule-url: "https://docs.rubocop.org/rubocop/latest/cops_{group}.html#{id-flat}"
 sources:
   - "https://rubygems.org/gems/rubocop/versions/1.92.3"
   - "https://docs.rubocop.org/rubocop/1.92/cops_lint.html"

@@ -1,6 +1,7 @@
 tool: "revive"
 version: "1.17.1"
 languages: ["go"]
+rule-url: "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#{id}"
 sources:
   - "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md"
   - "https://github.com/mgechev/revive/blob/v1.17.1/defaults.toml"

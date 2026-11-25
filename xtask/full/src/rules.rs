@@ -116,9 +116,7 @@ fn entry(d: &RuleDoc) -> Value {
         "description": m.description,
         "options": options,
         "presets": d.presets,
-        "upstream": d.upstream.iter().map(|u| json!({
-            "tool": u.tool, "id": u.id, "partial": u.partial,
-        })).collect::<Vec<_>>(),
+        "upstream": d.upstream.iter().map(upstream).collect::<Vec<_>>(),
     });
     if let Some((language, e)) = &d.example {
         let spans: Vec<Value> = e
@@ -131,6 +129,17 @@ fn entry(d: &RuleDoc) -> Value {
             "language": language, "input": e.text, "spans": spans,
             "fixed": e.fixed, "config": e.config,
         });
+    }
+    v
+}
+
+/// An upstream entry; the page and the note of a partial match only when there are some.
+fn upstream(u: &Upstream) -> Value {
+    let mut v = json!({ "tool": u.tool, "id": u.id, "partial": u.partial });
+    for (key, text) in [("url", &u.url), ("note", &u.note)] {
+        if !text.is_empty() {
+            v[key] = json!(text);
+        }
     }
     v
 }

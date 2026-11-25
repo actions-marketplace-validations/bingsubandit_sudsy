@@ -1,6 +1,7 @@
 tool: "eslint-plugin-svelte"
 version: "3.24.1"
 languages: ["svelte"]
+rule-url: "https://sveltejs.github.io/eslint-plugin-svelte/rules/{id}/"
 sources:
   - "https://sveltejs.github.io/eslint-plugin-svelte/rules/"
 scope: "eslint-plugin-svelte's rules that read the markup; rules about `<script>` come with the JS semantic layer"

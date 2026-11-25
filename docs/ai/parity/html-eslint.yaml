@@ -1,6 +1,7 @@
 tool: "html-eslint"
 version: "0.68.0"
 languages: ["html"]
+rule-url: "https://html-eslint.org/docs/rules/{id}"
 sources:
   - "https://github.com/yeonjuan/html-eslint/tree/v0.68.0/docs/rules"
   - "https://html-eslint.org/docs/rules"

@@ -1,6 +1,7 @@
 tool: "terraform"
 version: "1.17.1 (releases.hashicorp.com; the version `scripts/parity.sh format terraform` downloads)"
 languages: ["hcl"]
+rule-url: none
 sources:
   - "https://developer.hashicorp.com/terraform/cli/commands/fmt"
   - "tests/parity/terraform (differential numbers, docs/ai/development/parity.md)"

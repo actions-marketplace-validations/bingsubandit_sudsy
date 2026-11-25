@@ -1,6 +1,9 @@
 tool: "graphql-eslint"
 version: "4.4.2 (@graphql-eslint/eslint-plugin, commit 0f57486 of graphql-hive/graphql-eslint)"
 languages: ["graphql"]
+rule-url: "https://the-guild.dev/graphql/eslint/rules/{id}"
+rule-urls:
+  "graphql-js-validation": "https://the-guild.dev/graphql/eslint/rules"
 sources:
   - "https://github.com/graphql-hive/graphql-eslint/tree/0f57486cad62cc2026e2c0f0224b3dec955c4a66/packages/plugin/src/rules (the rule folders)"
   - "https://the-guild.dev/graphql/eslint/rules"

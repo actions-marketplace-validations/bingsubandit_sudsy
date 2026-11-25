@@ -75,3 +75,15 @@ jobs:
           key: corpus-landing-${{ hashFiles('tests/conformance/fetch-*.sh', 'tests/conformance/tarball-corpus.sh') }}
           restore-keys: corpus-landing-
       - run: for f in $(python3 scripts/parity_landing.py --fetch); do bash "$f"; done
+
+  rule-links:
+    name: rule-links
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+      # every upstream rule page link of the parity catalogs answers 200 and has its anchor
+      - run: scripts/site.sh check-links

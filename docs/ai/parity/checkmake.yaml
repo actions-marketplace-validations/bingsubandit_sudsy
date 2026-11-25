@@ -1,6 +1,7 @@
 tool: "checkmake"
 version: "0.3.2"
 languages: ["makefile"]
+rule-url: "https://github.com/checkmake/checkmake/blob/main/docs/rules.md"
 sources:
   - "https://github.com/checkmake/checkmake/releases/tag/v0.3.2"
   - "https://github.com/checkmake/checkmake#rules"

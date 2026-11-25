@@ -1,6 +1,7 @@
 tool: "hadolint"
 version: "2.15.1"
 languages: ["dockerfile"]
+rule-url: "https://github.com/hadolint/hadolint/wiki/{id}"
 sources:
   - "https://github.com/hadolint/hadolint/releases/tag/v2.15.1"
   - "https://github.com/hadolint/hadolint#rules"

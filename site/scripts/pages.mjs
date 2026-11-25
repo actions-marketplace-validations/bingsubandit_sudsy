@@ -3,6 +3,8 @@
 // the speed table and the parity catalogs), next to rules.json.
 import { existsSync } from 'node:fs';
 import { base, rules, siteData } from '../config.mjs';
+import { badge, languageBadges, pageHead } from './badges.mjs';
+import { bar, legs, READY } from './bars.mjs';
 
 const pct = (v) => (v == null ? 'not measured' : `${Math.floor(v)}%`);
 const link = (path, text) => `[${text}](${base}/${path}/)`;
@@ -31,7 +33,15 @@ function sudsy([, coverage, status, gap]) {
     formatter: () => 'formatter',
   }[kind]();
   const label = { covered: 'covered', partial: 'partial', missing: 'not yet', sdk: 'SDK', wontfix: 'not planned', deferred: 'deferred' }[coverage];
-  return [what, label, kind === 'wontfix' ? arg : gap];
+  return [what, badge(coverage, label), kind === 'wontfix' ? arg : gap];
+}
+
+// "26 of 29 languages are ready, 2 are in progress and 1 is not measured yet." (exact counts from the data)
+function summary(languages) {
+  const n = (f) => languages.filter(f).length;
+  const [ready, progress, none] = [n((l) => /Ready$/.test(l.status)), n((l) => l.status === 'In progress'), n((l) => l.status === 'not measured')];
+  const is = (k) => (k === 1 ? 'is' : 'are');
+  return `${ready} of ${languages.length} languages are ready, ${progress} ${is(progress)} in progress and ${none} ${is(none)} not measured yet. \`Ready\` means the first tool of each column is at least ${READY}%; the others are shown for reference. Each bar is a share measured on real-world code against the reference tool; the tick marks ${READY}%.`;
 }
 
 export function pages({ put, cell, table }) {
@@ -43,13 +53,27 @@ export function pages({ put, cell, table }) {
   for (const t of tools) {
     const n = (c) => t.entries.filter((e) => e[1] === c).length;
     const langs = t.languages.map((l) => langName.get(l)).filter(Boolean);
-    const measured = t.coverage == null
-      ? `Sudsy has not been measured against ${show(t.tool)} on a corpus yet.`
-      : `On real-world code, Sudsy with the preset that mirrors ${show(t.tool)} also reports ${pct(t.coverage)} of the findings of ${show(t.tool)}'s default set${t.target == null ? '' : ` (${pct(t.target)} of the part in scope)`}.`;
+    const share = t.target == null
+      ? badge('missing', 'not measured on a corpus')
+      : badge(t.target >= 85 ? 'covered' : 'partial', `${pct(t.target)} of its findings also reported`);
+    const head = pageHead([
+      ...languageBadges(langs),
+      ...(t.version ? [badge('version', `version ${t.version}`)] : []),
+      share,
+      badge('covered', `${n('covered')} covered`),
+      badge('partial', `${n('partial')} partial`),
+      badge('missing', `${n('missing')} planned`),
+      badge('deferred', `${n('deferred')} deferred`),
+    ]);
     const body = [
-      `${show(t.tool)}${t.version ? ` ${t.version}` : ''} has ${t.entries.length} rules and settings in the parity catalog. Sudsy covers ${n('covered')} of them and ${n('partial')} in part; ${n('missing')} are planned and ${n('deferred')} deferred. ${measured}`,
-      langs.length && 'Languages: ' + [...new Map(langs.map((l) => [l.slug, l])).values()].map((l) => link(`languages/${l.slug}`, l.name)).join(', ') + '.',
-      table(['Id', 'Sudsy', 'Coverage', 'Note'], t.entries.map((e) => [tick(e[0]).replace(/\|/g, '\\|'), ...sudsy(e).map(cell)])),
+      head,
+      `Every rule and setting of ${show(t.tool)} in the parity catalog, with the Sudsy equivalent. The share is the part of ${show(t.tool)}'s default set (in scope) whose findings Sudsy also reports on real-world code, with the preset that mirrors it. Where the tool has a page for an entry, the id links to it.`,
+      "**Status**: `covered`; `partial` (the note says what differs); `not yet` (planned); `deferred`; `not planned`; `SDK` (a .NET SDK diagnostic does it).",
+      '<div class="tool-table">\n\n' + table(['Id', 'Sudsy', 'Status', 'Note'], t.entries.map((e) => {
+        const id = tick(e[0]).replace(/\|/g, '\\|');
+        const [what, status, note] = sudsy(e);
+        return [e[4] ? `[${id}](${e[4]})` : id, cell(what), status, cell(note)];
+      })) + '\n\n</div>',
     ].filter(Boolean).join('\n\n');
     put(`compare-${t.tool}.md`, {
       title: `${show(t.tool)} rules in Sudsy`,
@@ -62,21 +86,21 @@ export function pages({ put, cell, table }) {
   put('compare-index.md', {
     title: 'Compared tools', slug: 'compare',
     description: 'The linters and formatters Sudsy is measured against, with the share of their output it reproduces.',
-  }, 'Every tool Sudsy is measured against: its rules and settings, the Sudsy rule for each, and the measured coverage.\n\n' +
-    table(['Tool', 'Entries', 'Coverage of its default set', 'Languages'], tools.map((t) =>
-      [link(`compare/${t.tool}`, show(t.tool)), t.entries.length, pct(t.coverage), t.languages.join(', ')])));
+  }, 'Every tool Sudsy is measured against: its rules and settings, the Sudsy rule for each, and the share of its findings Sudsy also reports.\n\n' +
+    table(['Tool', 'Entries', 'Share of its default set Sudsy reproduces', 'Languages'], tools.map((t) =>
+      [link(`compare/${t.tool}`, show(t.tool)), t.entries.length, bar({ share: t.target, what: { task: show(t.tool), of: 'its default set also reported by Sudsy' } }), languageBadges(t.languages.map((l) => langName.get(l)).filter(Boolean)).join(' ')])));
 
+  const statusBadge = (st) => badge(/Ready$/.test(st) ? 'covered' : st === 'not measured' ? 'missing' : 'partial', st);
+  const task = (t) => badge('', t);
   for (const l of languages) {
-    const tool = (x) => (x.catalog && byTool.has(x.catalog) ? link(`compare/${x.catalog}`, x.name) : x.name);
-    const parity = [
-      ...l.format.map((x) => ['Format', tool(x), x.share == null ? 'not measured' : `${pct(x.share)} of the files come out identical`]),
-      ...l.lint.map((x) => ['Lint', tool(x), x.share == null ? 'not measured' : `${pct(x.share)} of the findings are also reported by Sudsy`]),
-    ];
+    const parity = l.format.length + l.lint.length;
     const body = [
-      `Status: **${l.status}**. Each number is measured on real-world code against the reference tool with its default settings. \`Ready\` means every number is at least 85%.`,
+      pageHead([statusBadge(l.status), badge('rules', `${l.rules} lint rules`)]),
+      `Each bar is measured on real-world code against the reference tool with its default settings; the tick marks ${READY}%. \`Ready\` means the first tool of each column is at least ${READY}%; the others are shown for reference.`,
+      l.requires,
       '## Parity',
-      parity.length ? table(['Task', 'Reference tool', 'Match'], parity) : `Sudsy has ${l.rules} rules for this language; no reference tool was found to compare with.`,
-      l.speed.length && '## Speed\n\n' + table(['Task', 'Compared with', 'Sudsy speed', 'Time (Sudsy / tool)', 'Peak memory (Sudsy / tool)'], l.speed.map((s) => s.slice(1).map(cell))),
+      parity ? `<div class="legs">${legs(l, byTool)}</div>` : `Sudsy has ${l.rules} rules for this language; no reference tool was found to compare with.`,
+      l.speed.length && '## Speed\n\n' + table(['Task', 'Compared with', 'Sudsy speed', 'Time (Sudsy / tool)', 'Peak memory (Sudsy / tool)'], l.speed.map((s) => [task(s[1]), ...s.slice(2).map(cell)])),
       l.presets.length && '## Presets\n\nA preset is an ordinary `sudsy.yaml`; use one with `extends`.\n\n' + l.presets.map((p) => `- [${tick(p)}](${base}/reference/presets/#${p.replace('/', '')}): \`extends: [preset:${p}]\``).join('\n'),
       `## Rules\n\n${l.rules} lint rules apply to ${l.name}: [browse them](${base}/rules/?language=${l.ids[0]}).`,
     ].filter(Boolean).join('\n\n');
@@ -92,12 +116,10 @@ export function pages({ put, cell, table }) {
   put('language-index.md', {
     title: 'Languages', slug: 'languages',
     description: 'Every language Sudsy formats and lints, with its status against the reference tools.',
-  }, table(['Language', 'Format', 'Lint', 'Status'], languages.map((l) => [
-    link(`languages/${l.slug}`, l.name),
-    l.format.map((x) => `${pct(x.share)} ${x.name}`).join('<br>') || 'none',
-    l.lint.map((x) => `${pct(x.share)} ${x.name}`).join('<br>') || `${l.rules} rules`,
-    l.status,
-  ])));
+  }, [
+    summary(languages),
+    '<div class="lang-list">' + languages.map((l) => `<div class="lang-row"><div class="lang-head"><a href="${base}/languages/${l.slug}/">${l.name}</a>${statusBadge(l.status)}</div>${legs(l, byTool)}</div>`).join('') + '</div>',
+  ].join('\n\n'));
   return written;
 }
 

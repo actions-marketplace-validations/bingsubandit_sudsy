@@ -1,6 +1,7 @@
 tool: "shfmt"
 version: "3.14.1 (GitHub release latest; the version `scripts/parity.sh format shfmt` downloads)"
 languages: ["shell"]
+rule-url: none
 sources:
   - "https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd"
   - "tests/parity/shfmt (differential numbers, docs/ai/development/parity.md)"

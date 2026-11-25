@@ -129,10 +129,17 @@ fn explain(out: &mut String, rules: &Rules, id: &str, presets: &[String]) {
     }
     let equivalent: Vec<String> = catalog::upstream(m.id, &languages)
         .iter()
-        .map(|u| u.to_string())
+        .map(|u| match u.url.as_str() {
+            "" => u.to_string(),
+            url => format!("{u} {url}"),
+        })
         .collect();
     if !equivalent.is_empty() {
-        let _ = writeln!(out, "  equivalent:    {}", equivalent.join(", "));
+        let _ = writeln!(
+            out,
+            "  equivalent:    {}",
+            equivalent.join("\n                 ")
+        );
     }
     let _ = writeln!(out, "\n{}", m.description);
     if !m.options.is_empty() {

@@ -1,6 +1,7 @@
 tool: "shellcheck"
 version: "0.11.0"
 languages: ["shell"]
+rule-url: "https://www.shellcheck.net/wiki/{id}"
 sources:
   - "https://github.com/koalaman/shellcheck/releases/tag/v0.11.0"
   - "https://github.com/koalaman/shellcheck/wiki/Checks"

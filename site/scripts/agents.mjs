@@ -10,10 +10,17 @@ const origin = site + base;
 const twins = new Map(); // slug -> { title, description, text }
 
 // Page Markdown for a reader without a browser: no layout HTML, no editor meta, absolute links to twins.
+// A progress bar reads as its label ("Format: 95% of files identical to Prettier"); in a table cell it stays in the line.
+const BAR = /<span class="bar [^"]*">.*?aria-label="([^"]*)".*?<span class="bar-num">[^<]*<\/span><\/span>/g;
+const bars = (body) => body.split('\n').map((line) => line.replace(BAR, (_, label) => (line.startsWith('|') ? label : `\n- ${label}`).replace(/&quot;/g, '"'))).join('\n');
+
 function clean(body) {
-  return body
-    .replace(/^<div class="meta"[\s\S]*?<\/div>\n/m, '')
-    .replace(/<\/?div[^>]*>\n?/g, '')
+  return bars(body)
+    .replace(/<div class="lang-head"><a href="([^"]*)">([^<]*)<\/a><span class="badge[^>]*>([^<]*)<\/span><\/div>/g, '\n\n**[$2]($1)**: $3')
+    .replace(/<div class="leg"><span class="leg-title">([^<]*)<\/span><span class="leg-empty">([^<]*)<\/span>/g, '\n- $1: $2')
+    .replace(/^<div class="page-head">(.*)<\/div>$/m, (_, badges) => badges.replace(/<\/span>/g, ' | ').replace(/<[^>]*>/g, '').replace(/ \| $/, ''))
+    .replace(/<span class="badge[^>]*>(?:<a[^>]*>)?([^<]*)(?:<\/a>)?<\/span>/g, '$1')
+    .replace(/<\/?div[^>]*>/g, '')
     .replace(/ squiggles="[^"]*" tip="[^"]*"/g, '')
     .replace(/<[a-z][^>]*>[\s\S]*?<\/[a-z]+>|<[a-z][^>]*\/>/g, '')
     .replace(/\]\(\/sudsy\/([^)#?]*?)\/?(#[^)]*)?\)/g, (m, path, hash) => (path ? `](${origin}/${path}.md${hash ?? ''})` : `](${origin}/index.md)`))
@@ -33,12 +40,14 @@ export function handwritten(dir) {
     index: 'Start with [getting started](/sudsy/getting-started/), the [command line](/sudsy/cli/) and the [languages](/sudsy/languages/).',
     rules: 'One page per rule at `rules/<id>.md`; every rule as data in [rules.json](/sudsy/rules.json). Filter by language with the [language pages](/sudsy/languages/); search an id of another tool (`SA1005`, `DL3008`) at `rules/<id>`.',
   };
-  const slugs = { 'getting-started.md': 'getting-started', 'cli.md': 'cli', 'index.md': 'index', 'rules/index.mdx': 'rules' };
+  const slugs = { 'getting-started.mdx': 'getting-started', 'cli.md': 'cli', 'index.md': 'index', 'rules/index.mdx': 'rules' };
   for (const [file, slug] of Object.entries(slugs)) {
     const text = readFileSync(dir + file, 'utf8');
     const [, front, body] = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
     const get = (k) => front.match(new RegExp(`^(?:  )?${k}: (.*)$`, 'm'))?.[1] ?? '';
-    const lines = body.replace(/^import .*\n/gm, '').replace(/<RuleSearch \/>\n?/, '');
+    // Starlight Tabs: each tab becomes a bold label.
+    const lines = body.replace(/^import .*\n/gm, '').replace(/<RuleSearch \/>\n?/, '')
+      .replace(/<TabItem label="([^"]*)">\n/g, '**$1**\n').replace(/<\/?(Tabs|TabItem)>\n?/g, '');
     twin(slug, { title: get('title'), description: get('description') }, extra[slug] ?? lines);
   }
 }
@@ -84,7 +93,7 @@ ${list(languages.map((l) => `languages/${l.slug}`))}
 
 ## Compared tools
 
-Each page lists every rule of the tool, the Sudsy rule that covers it and the measured coverage.
+Each page lists every rule of the tool, the Sudsy rule that covers it and the share of its findings Sudsy also reports.
 
 ${list(tools.map((t) => `compare/${t.tool}`))}
 

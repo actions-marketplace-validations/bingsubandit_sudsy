@@ -34,7 +34,7 @@ const POP: &str = "measured: {covered: 70, total: 100, main: abc123}\nmissed: {x
 
 const UNLISTED: &str = "measured: {covered: 10, total: 100, main: abc123}\nmissed: {y: 90}\n";
 
-const CATALOG: &str = "tool: lint\nlanguages: [x]\nentries:\n  mapped-rule: rule some-rule\n  unmapped-rule: planned\n";
+const CATALOG: &str = "tool: lint\nlanguages: [x]\nrule-url: none\nentries:\n  mapped-rule: rule some-rule\n  unmapped-rule: planned\n";
 
 #[test]
 fn table_from_fixture_data() {

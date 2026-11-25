@@ -1,6 +1,7 @@
 tool: "htmlhint"
 version: "1.9.2"
 languages: ["html"]
+rule-url: "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/{id}.mdx"
 sources:
   - "https://github.com/htmlhint/HTMLHint/tree/v1.9.2/src/core/rules"
   - "https://htmlhint.com/rules/"

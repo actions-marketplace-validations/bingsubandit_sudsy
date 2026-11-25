@@ -329,7 +329,10 @@ fn init_writes_a_starter_config_and_will_not_overwrite() {
     let out = sudsy(t.path(), &["init"]);
     assert_eq!(out.status.code(), Some(0), "{}", stderr(&out));
     let text = read(t.path(), "sudsy.yaml");
-    assert!(text.contains("extends: []"), "{text}");
+    assert!(
+        text.contains("extends: []   # e.g. preset:python/ruff\n"),
+        "{text}"
+    );
     // The starter loads.
     write(t.path(), "a.json", JSON);
     assert_eq!(sudsy(t.path(), &["format"]).status.code(), Some(0));

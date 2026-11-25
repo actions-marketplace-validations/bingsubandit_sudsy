@@ -5,11 +5,13 @@ and format on save, from the `sudsy.yaml` of your repository. How close each lan
 
 ## Install
 
-The extension is not on the Marketplace yet. Download the `.vsix` for your platform from the [latest release](https://github.com/bingsubandit/sudsy/releases) and run:
+Install `sudsy.sudsy` from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=sudsy.sudsy), or from [Open VSX](https://open-vsx.org/extension/sudsy/sudsy) for Cursor, Windsurf and VSCodium:
 
 ```sh
-code --install-extension sudsy-<platform>-<version>.vsix
+code --install-extension sudsy.sudsy
 ```
+
+The fallback is the `.vsix` for your platform from the [latest release](https://github.com/bingsubandit/sudsy/releases): `code --install-extension sudsy-<platform>-<version>.vsix`.
 
 It bundles the `sudsy` server. C# needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0); every other language works without it.
 

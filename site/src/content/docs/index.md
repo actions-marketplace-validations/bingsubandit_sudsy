@@ -1,9 +1,9 @@
 ---
 title: Sudsy
-description: Formatter and linter for C#, JSON, YAML, TOML, XML and Markdown.
+description: Fully featured polyglot formatter and linter for 20+ languages. Extremely configurable, plugin-extendable.
 template: splash
 hero:
-  tagline: Formatter and linter for C#, JSON, YAML, TOML, XML and Markdown.
+  tagline: Fully featured polyglot formatter and linter for 20+ languages. Extremely configurable, plugin-extendable.
   actions:
     - text: Get started
       link: /sudsy/getting-started/

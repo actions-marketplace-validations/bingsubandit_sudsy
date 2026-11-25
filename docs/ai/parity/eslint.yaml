@@ -1,6 +1,7 @@
 tool: "eslint"
 version: "9.39.5"
 languages: ["js"]
+rule-url: "https://eslint.org/docs/latest/rules/{id}"
 sources:
   - "https://github.com/eslint/eslint/tree/v9.39.5/lib/rules"
   - "https://eslint.org/docs/latest/rules/"

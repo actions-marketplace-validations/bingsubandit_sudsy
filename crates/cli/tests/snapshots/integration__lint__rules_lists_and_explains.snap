@@ -8,7 +8,12 @@ sorted-keys
   default level: off
   fix:           unsafe
   presets:       yaml/yamllint
-  equivalent:    Biome assist/source/useSortedKeys (partial), eslint-plugin-jsonc jsonc/sort-keys (partial), taplo reorder_keys (partial), taplo reorder_inline_tables (partial), yamllint key-ordering (partial), yamllint key-ordering.ignored-keys
+  equivalent:    Biome assist/source/useSortedKeys (partial) https://biomejs.dev/assist/actions/use-sorted-keys/
+                 eslint-plugin-jsonc jsonc/sort-keys (partial) https://ota-meshi.github.io/eslint-plugin-jsonc/rules/sort-keys.html
+                 taplo reorder_keys (partial)
+                 taplo reorder_inline_tables (partial)
+                 yamllint key-ordering (partial) https://yamllint.readthedocs.io/en/stable/rules.html#module-yamllint.rules.key_ordering
+                 yamllint key-ordering.ignored-keys https://yamllint.readthedocs.io/en/stable/rules.html#module-yamllint.rules.key_ordering
 
 The keys of a mapping are not in order (alphabetical by default). The keys reported are chosen by `report`, and the first report carries the fix. Comments on lines of their own stay where they are, a comment after an entry moves with it; moving a YAML anchor below its alias breaks the document, so the fix is unsafe.
 

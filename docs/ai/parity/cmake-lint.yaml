@@ -1,6 +1,7 @@
 tool: "cmake-lint"
 version: "0.6.13"
 languages: ["cmake"]
+rule-url: none
 sources:
   - "https://pypi.org/project/cmakelang/0.6.13/"
   - "https://cmake-format.readthedocs.io/en/latest/lint-summary.html"

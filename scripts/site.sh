@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# Documentation site (site/). Usage: scripts/site.sh build | dev | preview | test | scale-test [N]
+# Documentation site (site/). Usage: scripts/site.sh build | dev | preview | test | scale-test [N] | check-links [tool...] | list-bench [PORT]
 #   build        npm ci + generate pages from docs/ai/rules/rules.json + astro build -> site/dist
 #   test         build + browser smoke test (site/test/smoke.mjs; Playwright drives installed Edge or Chrome)
 #   dev          generate + astro dev server (no search: the index exists only in a build)
 #   preview      build, then serve site/dist with search at http://localhost:4321/sudsy/
+#   check-links  every upstream rule-url of the parity catalogs answers 200 and has its anchor (network; nightly)
+#   list-bench   page weight, full-list time, first filter and search of /rules/ in the build (served on PORT, default 4396)
 #   scale-test   build with N (default 10000) synthetic rules from a copy of rules.json in the build
 #                slot ($CARGO_TARGET_DIR/site-scale); prints build time and output/search index sizes
 set -euo pipefail
@@ -12,6 +14,12 @@ case "${1:-build}" in
   build) npm ci && npm run build ;;
   dev) npm ci && npm run dev ;;
   preview) npm ci && npm run build && npm run preview ;;
+  check-links) shift; node scripts/check-urls.mjs "$@" ;;
+  list-bench)
+    port=${2:-4396}
+    npx astro preview --port "$port" >/dev/null; sleep 2
+    node scripts/list-bench.mjs "$port" || { npx astro preview stop >/dev/null; exit 1; }
+    npx astro preview stop >/dev/null ;;
   test) npm ci && npm run build && node --test test/smoke.mjs ;;
   scale-test)
     n=${2:-10000}
@@ -38,5 +46,5 @@ case "${1:-build}" in
     echo "output: $(du -sk --apparent-size "$SITE_OUT" | cut -f1) KB, search index: $(du -sk --apparent-size "$SITE_OUT/pagefind" | cut -f1) KB"
     env -u SUDSY_RULES_JSON npm run generate >/dev/null  # leave the real pages in place
     ;;
-  *) echo "usage: scripts/site.sh build | dev | preview | test | scale-test [N]" >&2; exit 2 ;;
+  *) echo "usage: scripts/site.sh build | dev | preview | test | scale-test [N] | check-links [tool...] | list-bench [PORT]" >&2; exit 2 ;;
 esac

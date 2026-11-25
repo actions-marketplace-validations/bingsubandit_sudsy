@@ -1,6 +1,7 @@
 tool: "html-validate"
 version: "11.21.0"
 languages: ["html"]
+rule-url: "https://html-validate.org/rules/{id}.html"
 sources:
   - "https://github.com/html-validate/html-validate/tree/v11.21.0/docs/rules"
   - "https://html-validate.org/rules/"

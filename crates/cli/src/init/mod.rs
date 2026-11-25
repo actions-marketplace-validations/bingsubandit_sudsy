@@ -37,7 +37,7 @@ enum Tool {
 
 #[derive(Args)]
 pub struct InitArgs {
-    /// A preset to extend, e.g. `csharp/google`; repeat for several languages. Without it the
+    /// A preset to extend, e.g. `python/ruff`; repeat for several languages. Without it the
     /// starter extends the default preset of each language.
     #[arg(long = "preset", conflicts_with = "from")]
     presets: Vec<String>,
@@ -127,7 +127,7 @@ fn init(args: InitArgs) -> Result<()> {
 fn starter(presets: Vec<String>, known: &[(&str, &str)]) -> Result<String> {
     let mut text = String::from("# https://github.com/bingsubandit/sudsy\n");
     text.push_str(if presets.is_empty() {
-        "extends: []   # e.g. preset:csharp/google\n"
+        "extends: []   # e.g. preset:python/ruff\n"
     } else {
         "extends:\n"
     });

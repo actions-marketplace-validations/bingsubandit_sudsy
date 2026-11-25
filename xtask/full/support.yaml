@@ -4,6 +4,7 @@
 # the groups of tests/parity/stability that stand for the format leg (`scripts/parity.sh stability <group>`). `ids` are the
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
 # language names of its rows in bench/speed.json.
+# `requires` is one sentence the site shows on the language page.
 # `popular: true` (a widely used secondary tool, weight 1) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
   ids: [js]
@@ -98,6 +99,7 @@
   lint: [{tool: sqlfluff, name: sqlfluff}]
 - language: C#
   ids: [csharp]
+  requires: Needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0); every other language works without it.
   speed: [C#, C# (.editorconfig)]
   format: [{tool: csharpier, name: CSharpier, groups: [real-world]}]
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]

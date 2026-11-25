@@ -13,6 +13,8 @@ pub struct Entry {
     /// `covered`, `partial`, `missing`, `sdk`, `wontfix` or `deferred`.
     pub coverage: String,
     pub gap: String,
+    /// The tool's page for this rule (see [`Catalog::rule_url`]), empty when it has none.
+    pub url: String,
 }
 
 impl Entry {
@@ -30,6 +32,18 @@ impl Entry {
 pub struct Catalog {
     pub tool: String,
     pub languages: Vec<String>,
+    /// Where a rule of the tool is documented: a URL with `{id}`, `{id-lower}`, `{id-flat}` (lowercase
+    /// letters and digits of the id), `{group}` (the lowercase part before the first `/`) and `{name}`
+    /// (the part after it, or the whole id), or `none` for a tool without any page for its rules.
+    /// A rule with no page of its own uses the anchor of the list that names it.
+    #[serde(rename = "rule-url")]
+    pub rule_url: String,
+    /// A prefix of the ids that the template leaves out (`PS` of `PSUseSingularNouns`).
+    #[serde(rename = "rule-url-strip", default)]
+    rule_url_strip: String,
+    /// Pages that do not fit the template, by entry id.
+    #[serde(rename = "rule-urls", default)]
+    rule_urls: std::collections::BTreeMap<String, String>,
     /// Filled by [`parse`] from `listed` and `deferred`.
     #[serde(skip)]
     pub entries: Vec<Entry>,
@@ -92,6 +106,7 @@ pub fn parse(text: &str) -> Result<Catalog, String> {
             sudsy,
             coverage: coverage.into(),
             gap: gap.into(),
+            url: String::new(),
         });
     }
     for d in std::mem::take(&mut c.deferred) {
@@ -100,9 +115,60 @@ pub fn parse(text: &str) -> Result<Catalog, String> {
             sudsy: "deferred".into(),
             coverage: "deferred".into(),
             gap: d.gap.clone(),
+            url: String::new(),
         }));
     }
+    for id in c.rule_urls.keys() {
+        if !c.entries.iter().any(|e| &e.id == id) {
+            return Err(format!("rule-urls: `{id}` is no entry"));
+        }
+    }
+    for e in &mut c.entries {
+        // An option, a formatter behaviour or a setting is not a rule: no page of a rule list names it.
+        if matches!(
+            e.sudsy.split(':').next(),
+            Some("option" | "formatter" | "config")
+        ) {
+            continue;
+        }
+        e.url = match c.rule_urls.get(&e.id) {
+            Some(url) => url.clone(),
+            None if c.rule_url == "none" => String::new(),
+            None => resolve(
+                &c.rule_url,
+                e.id.strip_prefix(&c.rule_url_strip).unwrap_or(&e.id),
+            )?,
+        };
+    }
     Ok(c)
+}
+
+/// A `rule-url` template for one entry id.
+fn resolve(template: &str, id: &str) -> Result<String, String> {
+    let (group, name) = id.split_once('/').unwrap_or(("", id));
+    let flat: String = id
+        .chars()
+        .filter(char::is_ascii_alphanumeric)
+        .map(|c| c.to_ascii_lowercase())
+        .collect();
+    let mut out = String::new();
+    let mut rest = template;
+    while let Some((head, tail)) = rest.split_once('{') {
+        let (var, after) = tail
+            .split_once('}')
+            .ok_or_else(|| format!("rule-url `{template}`: unclosed `{{`"))?;
+        out += head;
+        out += &match var {
+            "id" => id.to_string(),
+            "id-lower" => id.to_lowercase(),
+            "id-flat" => flat.clone(),
+            "group" => group.to_lowercase(),
+            "name" => name.to_string(),
+            _ => return Err(format!("rule-url `{template}`: unknown `{{{var}}}`")),
+        };
+        rest = after;
+    }
+    Ok(out + rest)
 }
 
 macro_rules! catalogs {
@@ -194,6 +260,10 @@ pub struct Upstream {
     pub tool: String,
     pub id: String,
     pub partial: bool,
+    /// The tool's page for the rule, empty when it has none.
+    pub url: String,
+    /// What differs of a partial match, in the catalog's words.
+    pub note: String,
 }
 
 impl std::fmt::Display for Upstream {
@@ -226,6 +296,8 @@ pub fn upstream_in(catalogs: &[Catalog], rule: &str, languages: &[&str]) -> Vec<
                     tool: tool_name(&c.tool).to_string(),
                     id: e.id.clone(),
                     partial: e.coverage == "partial",
+                    url: e.url.clone(),
+                    note: e.gap.clone(),
                 });
             }
         }

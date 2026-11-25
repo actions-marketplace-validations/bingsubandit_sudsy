@@ -1,6 +1,15 @@
 tool: "biome"
 version: "2.6.4 (npm latest; configuration page schema URL)"
 languages: ["json"]
+rule-url: none
+rule-urls:
+  "suspicious/noDuplicateObjectKeys": "https://biomejs.dev/linter/rules/no-duplicate-object-keys/"
+  "suspicious/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys/"
+  "style/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals/"
+  "nursery/noJsonUnsafeValues": "https://biomejs.dev/linter/rules/no-json-unsafe-values/"
+  "nursery/useConsistentObjectKeys": "https://biomejs.dev/linter/rules/use-consistent-object-keys/"
+  "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys/"
+  "assist/source/useSortedPackageJson": "https://biomejs.dev/assist/actions/use-sorted-package-json/"
 sources:
   - "https://registry.npmjs.org/@biomejs/biome/latest"
   - "https://biomejs.dev/reference/configuration/"

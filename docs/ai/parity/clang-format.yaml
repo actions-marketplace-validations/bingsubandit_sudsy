@@ -1,6 +1,7 @@
 tool: "clang-format"
 version: "20.1.8 (PyPI clang-format wheel; the version `scripts/parity.sh format clang-format` installs)"
 languages: ["c", "cpp"]
+rule-url: none
 sources:
   - "https://clang.llvm.org/docs/ClangFormatStyleOptions.html"
   - "tests/parity/clang-format (differential numbers, docs/ai/development/parity.md)"
