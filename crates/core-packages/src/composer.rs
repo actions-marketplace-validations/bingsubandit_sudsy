@@ -15,6 +15,10 @@ use std::sync::OnceLock;
 struct Prefix {
     prefix: String,
     dirs: Vec<PathBuf>,
+    /// From the project's own `composer.json`: the project owns the whole namespace. A prefix of
+    /// an installed package may share its namespace with a PHP extension or a phar (`MongoDB\\BSON`,
+    /// `PHPStan\\`), so a file missing there proves nothing.
+    own: bool,
 }
 
 /// The autoload rules of a project and its installed packages. A project without a manifest has
@@ -47,8 +51,8 @@ impl Composer {
         let mut c = Composer::default();
         let manifest = read(&root.join("composer.json"));
         if let Some(m) = &manifest {
-            c.add(m, root);
-            c.add_section(m, "autoload-dev", root);
+            c.add_section(m, "autoload", root, true);
+            c.add_section(m, "autoload-dev", root, true);
         }
         let vendor = manifest
             .as_ref()
@@ -61,17 +65,13 @@ impl Composer {
                     || vendor.join(p.get("name").and_then(Value::as_str).unwrap_or("")),
                     |rel| clean(&vendor.join("composer").join(rel)),
                 );
-                c.add(p, &base);
+                c.add_section(p, "autoload", &base, false);
             }
         }
         c
     }
 
-    fn add(&mut self, owner: &Value, base: &Path) {
-        self.add_section(owner, "autoload", base);
-    }
-
-    fn add_section(&mut self, owner: &Value, section: &str, base: &Path) {
+    fn add_section(&mut self, owner: &Value, section: &str, base: &Path, own: bool) {
         let Some(auto) = owner.get(section) else {
             return;
         };
@@ -86,6 +86,7 @@ impl Composer {
                         .into_iter()
                         .map(|d| base.join(d.trim_end_matches('/')))
                         .collect(),
+                    own,
                 });
             }
         }
@@ -137,14 +138,17 @@ impl Locator for Composer {
     fn type_files(&self, name: &str) -> Located {
         let name = name.trim_start_matches('\\');
         let mut matched = false;
+        let mut shared = false;
         let mut found = Vec::new();
         for p in self.psr4.iter().filter(|p| has_prefix(name, &p.prefix)) {
             matched = true;
+            shared |= !p.own;
             let rel = format!("{}.php", name[p.prefix.len()..].replace('\\', "/"));
             found.extend(p.dirs.iter().filter_map(|d| existing(&d.join(&rel))));
         }
         for p in self.psr0.iter().filter(|p| has_prefix(name, &p.prefix)) {
             matched = true;
+            shared |= !p.own;
             let (space, class) = name.rsplit_once('\\').unwrap_or(("", name));
             let rel = if space.is_empty() {
                 format!("{}.php", class.replace('_', "/"))
@@ -160,7 +164,7 @@ impl Locator for Composer {
         found.dedup();
         if !found.is_empty() {
             Located::Files(found)
-        } else if matched {
+        } else if matched && !shared {
             Located::Missing
         } else {
             Located::Unknown
@@ -247,6 +251,11 @@ mod tests {
         assert_eq!(c.type_files("App\\Nope"), Located::Missing);
         assert_eq!(c.type_files("Tests\\FooTest"), Located::Missing);
         assert_eq!(c.type_files("Elsewhere\\Foo"), Located::Unknown);
+        assert_eq!(
+            c.type_files("Acme\\Lib\\Nope"),
+            Located::Unknown,
+            "an installed package may share its namespace with an extension"
+        );
         assert_eq!(c.type_files("Exception"), Located::Unknown);
         assert_eq!(
             Composer::open(&d.path().join("nothing")).type_files("App\\Foo"),

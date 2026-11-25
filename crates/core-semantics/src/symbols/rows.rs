@@ -12,7 +12,7 @@
 //! first segment that stands for the current namespace), `lexical` (a name is looked up in every
 //! enclosing scope, not in the namespace only), `fold KIND...` and `fallback KIND...` (name kinds:
 //! `type function constant member`), `constructor NAME`, `sigil CHARS`, `dynamic-members NAME...`,
-//! `declaring-calls NAME...`, `promotion WORD...` (modifiers that make a constructor parameter a
+//! `declaring-calls NAME[=KIND[:ARG]]...` (calls that declare names at run time; ARG: the argument that names it), `builtin-types NAME...` (type names with no declaration), `promotion WORD...` (modifiers that make a constructor parameter a
 //! property), `use-kinds WORD=KIND...`, `packages SYSTEM MANIFEST` (the package system that finds the files of names or imports: `composer`, `import-paths`; the manifest names the file in the project's root folder).
 //!
 //! Roles (keys they take): `namespace` (`name`, flag `file`: the whole file), `type KIND`
@@ -23,7 +23,7 @@
 //! (`names`, `adapt`), `use` (an import statement), `use-group` (`names`: the prefix of a group),
 //! `use-kind` (a node whose own keyword says which names it imports), `use-item` (`names`,
 //! `alias`), `file-import` (`names`, `modifiers`), `reference` (a node whose text is a name the file writes), `transparent` (its children count as its
-//! parent's), `ignore` (declares nothing).
+//! parent's), `ignore` (declares nothing; its `refs` still count as names the file writes). A `refs` entry is a kind (the own children of that kind) or `label:Kind` (the grammar's slot `label`, when it holds a `Kind`).
 
 use super::TypeKind;
 use core_syntax::{Grammar, SyntaxKind};
@@ -54,6 +54,17 @@ impl NameKind {
     }
 }
 
+/// A call that declares names at run time (`define`, `class_alias`).
+#[derive(Clone, Debug)]
+pub struct DeclaringCall {
+    pub name: String,
+    /// The kind of name it declares; all kinds when none.
+    pub kind: Option<NameKind>,
+    /// The 1-based argument that holds the declared name as a string or `Type::class`, when the
+    /// call has one: a call whose argument reads so declares exactly that name.
+    pub name_arg: Option<usize>,
+}
+
 /// What a language says in its fact lines.
 #[derive(Clone, Debug, Default)]
 pub struct Facts {
@@ -67,7 +78,10 @@ pub struct Facts {
     /// Characters a variable's name starts with that are no part of the property's name.
     pub sigil: String,
     pub dynamic_members: Vec<String>,
-    pub declaring_calls: Vec<String>,
+    /// Type names the language has built in (`int`, `string`): written, they name no declaration.
+    pub builtin: Vec<String>,
+    /// Calls that declare names at run time, with the kind of name each declares (all when none).
+    pub declaring_calls: Vec<DeclaringCall>,
     pub promotion: Vec<String>,
     /// The package system of the language (see `core_packages::open`); empty for none.
     pub packages: String,
@@ -135,12 +149,19 @@ pub(crate) struct Row {
     /// The name is the first name token after the own token with this text (`function`).
     pub after: String,
     pub relation: Option<super::Relation>,
+    /// `refs` entries written `label:Kind`: the child of the grammar's slot `label`, when it is
+    /// a token or node of `Kind`.
+    slots: Vec<(String, SyntaxKind)>,
     kinds: [Vec<SyntaxKind>; KEYS.len()],
 }
 
 impl Row {
     pub fn kinds(&self, key: Key) -> &[SyntaxKind] {
         &self.kinds[key as usize]
+    }
+
+    pub fn slots(&self) -> &[(String, SyntaxKind)] {
+        &self.slots
     }
 
     pub fn has(&self, key: Key, kind: SyntaxKind) -> bool {
@@ -166,13 +187,14 @@ fn allowed(role: Role) -> &'static [Key] {
         Role::Type => &[Name, Modifiers],
         Role::Heritage | Role::UseGroup => &[Names],
         Role::Function | Role::Method => &[Name, Params, Modifiers, Refs],
-        Role::Param => &[Name, Optional, Variadic, Modifiers],
+        Role::Param => &[Name, Optional, Variadic, Modifiers, Refs],
         Role::Property | Role::Const | Role::Case => &[Item, Name, Modifiers, Refs],
         Role::GlobalConst => &[Item, Name],
         Role::Mixin => &[Names, Adapt],
         Role::UseItem => &[Names, Alias],
         Role::FileImport => &[Names, Modifiers],
-        Role::Use | Role::UseKind | Role::Reference | Role::Transparent | Role::Ignore => &[],
+        Role::Ignore => &[Refs],
+        Role::Use | Role::UseKind | Role::Reference | Role::Transparent => &[],
     }
 }
 
@@ -265,8 +287,31 @@ impl Table {
             "constructor" => f.constructor = one()?,
             "sigil" => f.sigil = one()?,
             "dynamic-members" => f.dynamic_members = list(),
-            "declaring-calls" => f.declaring_calls = list(),
+            "declaring-calls" => {
+                for w in &words {
+                    let (name, spec) = w.split_once('=').unwrap_or((w, ""));
+                    let (kind, arg) = spec.split_once(':').unwrap_or((spec, ""));
+                    f.declaring_calls.push(DeclaringCall {
+                        name: name.to_string(),
+                        kind: match kind {
+                            "" => None,
+                            k => Some(
+                                NameKind::of(k)
+                                    .ok_or_else(|| format!("unknown name kind `{k}`"))?,
+                            ),
+                        },
+                        name_arg: match arg {
+                            "" => None,
+                            a => Some(
+                                a.parse()
+                                    .map_err(|_| format!("`{a}` is no argument number"))?,
+                            ),
+                        },
+                    });
+                }
+            }
             "promotion" => f.promotion = list(),
+            "builtin-types" => f.builtin = words.iter().map(|w| w.to_ascii_lowercase()).collect(),
             "packages" => {
                 f.packages = one()?;
                 f.manifest = words
@@ -306,6 +351,7 @@ impl Table {
             file: false,
             after: String::new(),
             relation: None,
+            slots: Vec::new(),
             kinds: Default::default(),
         };
         for w in words {
@@ -331,6 +377,16 @@ impl Table {
                     return Err(format!("`{key}` is no key of the role `{role_word}`"));
                 }
                 for name in value.split(',') {
+                    if let Some((label, kind)) = name.split_once(':').filter(|_| *k == Key::Refs) {
+                        grammar
+                            .field_at(node, label)
+                            .ok_or_else(|| format!("`{kind}` has no slot `{label}`"))?;
+                        let found = grammar
+                            .kind_by_name(kind)
+                            .ok_or_else(|| format!("`{kind}` is no kind of the grammar"))?;
+                        row.slots.push((label.to_string(), found));
+                        continue;
+                    }
                     let found = grammar
                         .kind_by_name(name)
                         .ok_or_else(|| format!("`{name}` is no kind of the grammar"))?;

@@ -152,7 +152,11 @@ fn a_name_the_locator_covers_and_no_file_declares_is_absent() {
     let project = w.project("composer", files, true);
     let index = Index::new(&w.db, project);
     assert!(index.type_(from, &name(&["App\\Nope"])).is_absent());
-    assert!(index.type_(from, &name(&["Acme\\Lib\\Nope"])).is_absent());
+    // A prefix of an installed package may share its namespace with an extension: no proof.
+    assert_eq!(
+        index.type_(from, &name(&["Acme\\Lib\\Nope"])),
+        Answer::Unknown
+    );
     // The first candidate is absent, the second is declared: the second is meant.
     let both = index.type_(from, &name(&["App\\Tool", "Acme\\Lib\\Tool"]));
     assert_eq!(&*known(both).item.name, "Acme\\Lib\\Tool");
@@ -178,7 +182,7 @@ fn a_missing_fact_makes_the_answer_unknown() {
     let broken = w.file("src/Broken.php", "<?php\nclass {{{");
     let with_broken = w.project("composer", vec![files[0], files[1], broken], true);
     assert_eq!(ask(with_broken, "App\\Nope"), Answer::Unknown);
-    let alias = w.file("src/Alias.php", "<?php\nclass_alias('A', 'B');\n");
+    let alias = w.file("src/Alias.php", "<?php\nclass_alias($a, $b);\n");
     let with_alias = w.project("composer", vec![files[0], alias], true);
     assert_eq!(ask(with_alias, "App\\Nope"), Answer::Unknown);
     assert!(is_known(&ask(with_alias, "App\\Base")));

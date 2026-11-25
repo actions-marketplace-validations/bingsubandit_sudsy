@@ -260,9 +260,21 @@ fn php_dynamic_and_adapted_types_are_marked() {
 
 #[test]
 fn php_calls_that_declare_names_are_listed() {
-    let s = php("define('FOO', 1);\n\\class_alias(A::class, 'B');\nstrlen('x');\n");
+    let s = php(
+        "define('FOO', 1);\n\\class_alias(A::class, 'B');\nclass_alias($x, $y);\nstrlen('x');\n",
+    );
     let calls: Vec<_> = s.declaring_calls.iter().map(|c| &**c).collect();
-    assert_eq!(calls, ["class_alias", "define"]);
+    assert_eq!(
+        calls,
+        ["class_alias", "define"],
+        "the dynamic alias and the constant"
+    );
+    let names: Vec<_> = s.types.iter().map(|t| (&*t.name, t.conditional)).collect();
+    assert_eq!(
+        names,
+        [("B", true)],
+        "a literal alias declares only its name"
+    );
 }
 
 #[test]

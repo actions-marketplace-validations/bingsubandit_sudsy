@@ -79,7 +79,10 @@ fn declared(db: &dyn Db, files: impl Iterator<Item = File>) -> Declared {
             d.blind = true;
             continue;
         };
-        d.blind |= !s.declaring_calls.is_empty();
+        d.blind |= s
+            .declaring_calls
+            .iter()
+            .any(|c| table.facts.call_declares(c, NameKind::Type));
         let facts = &table.facts;
         for t in &s.types {
             let key = (lang, facts.key(NameKind::Type, &t.name).into());

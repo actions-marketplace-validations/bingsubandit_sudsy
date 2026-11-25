@@ -479,7 +479,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-php -->
 - **Measured:** In progress.
   - Format, PHP-CS-Fixer: 88% of the files identical (9,190 of 10,382 files).
-  - Lint, PHPStan: 36% of its findings also reported (340 of 942 findings).
+  - Lint, PHPStan: 36% of its findings also reported (342 of 942 findings).
   - PHP-CS-Fixer: measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains).
 <!-- /generated -->
 

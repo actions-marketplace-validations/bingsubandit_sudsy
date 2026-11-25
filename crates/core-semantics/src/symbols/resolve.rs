@@ -21,6 +21,14 @@ pub struct Alias {
 }
 
 impl Facts {
+    /// Whether the declaring call `name` (as the file wrote it, lower case) may declare a name of
+    /// `kind`.
+    pub fn call_declares(&self, name: &str, kind: NameKind) -> bool {
+        self.declaring_calls
+            .iter()
+            .any(|c| c.name == name && c.kind.is_none_or(|k| k == kind))
+    }
+
     fn folds(&self, kind: NameKind) -> bool {
         self.fold & kind.bit() != 0
     }

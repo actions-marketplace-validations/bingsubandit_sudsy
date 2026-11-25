@@ -20,7 +20,10 @@ impl World {
     fn new(config: &str) -> World {
         let log = Arc::new(Mutex::new(Vec::new()));
         let sink = log.clone();
-        let providers: Vec<Box<dyn LanguageProvider>> = vec![Box::new(lang_protobuf::provider())];
+        let providers: Vec<Box<dyn LanguageProvider>> = vec![
+            Box::new(lang_protobuf::provider()),
+            Box::new(lang_php::provider()),
+        ];
         let mut db = Database::with_event_hook(
             providers,
             Box::new(move |event| {
@@ -58,7 +61,12 @@ impl World {
         linted
             .diagnostics
             .iter()
-            .filter(|d| d.rule == "import-used" || d.rule == "rpc-request-response-unique")
+            .filter(|d| {
+                matches!(
+                    &*d.rule,
+                    "import-used" | "rpc-request-response-unique" | "class-not-found"
+                )
+            })
             .map(|d| {
                 let line = file.text(&self.db)[..usize::from(d.range.start())]
                     .matches('\n')
@@ -84,6 +92,7 @@ fn open(w: &mut World, files: &[File]) {
     open_projects(&mut w.db, files, &roots);
 }
 
+const PHP_ON: &str = "php:\n  lint:\n    rules:\n      class-not-found: warn\n";
 const HEAD: &str = "syntax = \"proto3\";\npackage p;\n";
 
 #[test]
@@ -219,5 +228,55 @@ fn a_body_edit_of_another_file_leaves_the_findings_of_a_file_as_they_are() {
         w.runs("lint("),
         before,
         "no lint runs again: the symbols are equal"
+    );
+}
+
+const COMPOSER: &str = r#"{"autoload": {"psr-4": {"App\\": "src/"}}}"#;
+
+#[test]
+fn a_class_that_nothing_declares_is_reported_where_an_autoload_prefix_owns_its_name() {
+    let mut w = World::new(PHP_ON);
+    std::fs::write(w.dir.path().join("composer.json"), COMPOSER).unwrap();
+    let a = w.file(
+        "src/A.php",
+        "<?php\nnamespace App;\nuse Other\\Thing;\nclass A extends B {\n    public function f(B $b, string $s, ?int $i, ?Missing $m, Thing $t, \\Exception $e): Gone {\n        $x = new Absent();\n        Nowhere::run();\n        try {} catch (Lost $l) {}\n        return $b instanceof Nothing ? Fine::class : null;\n    }\n}\n",
+    );
+    let b = w.file("src/B.php", "<?php\nnamespace App;\nclass B {}\n");
+    open(&mut w, &[a, b]);
+    let lines: Vec<usize> = w.findings(a).into_iter().map(|(line, _)| line).collect();
+    assert_eq!(
+        lines,
+        [5, 5, 6, 7, 8, 9],
+        "Missing and Gone, new, static call, catch, instanceof; Thing and \\Exception are outside the prefix, ::class is not a use"
+    );
+}
+
+#[test]
+fn a_define_call_leaves_classes_provable_but_a_class_alias_does_not() {
+    let mut w = World::new(PHP_ON);
+    std::fs::write(w.dir.path().join("composer.json"), COMPOSER).unwrap();
+    let a = w.file(
+        "src/A.php",
+        "<?php\nnamespace App;\nclass A { function f(Missing $x) {} }\n",
+    );
+    let d = w.file("src/D.php", "<?php\ndefine('X', 1);\n");
+    open(&mut w, &[a, d]);
+    assert_eq!(w.findings(a).len(), 1, "define declares constants");
+    let literal = w.file(
+        "src/E.php",
+        "<?php\nnamespace App;\nclass_alias(A::class, 'App\\\\Old');\n",
+    );
+    open(&mut w, &[a, d, literal]);
+    assert_eq!(
+        w.findings(a).len(),
+        1,
+        "an alias of a known name declares only that name"
+    );
+    let dynamic = w.file("src/F.php", "<?php\nclass_alias($from, $to);\n");
+    open(&mut w, &[a, d, literal, dynamic]);
+    assert_eq!(
+        w.findings(a),
+        [],
+        "class_alias of unknown names may declare the class"
     );
 }

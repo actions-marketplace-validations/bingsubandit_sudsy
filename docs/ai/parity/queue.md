@@ -16,7 +16,7 @@ Blocked on a decision:
 
 | Language | Leg | Now | Points | Reason |
 |---|---|---|---|---|
-| PHP | lint PHPStan | 36.1% | 48.9 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
+| PHP | lint PHPStan | 36.3% | 48.7 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
 
 Not measured: C / C++ lint clang-tidy (no target, blocked).
 
@@ -380,8 +380,8 @@ Lint: target 99% (1965 of 1985, 20 missed, measured on 7514c1f3); rules by misse
 
 ## phpstan
 
-Lint: target 36.1% (340 of 942, 602 missed, measured on 362a7f17); rules by missed findings:
-1. `class.notFound` (209 missed)
+Lint: target 36.3% (342 of 942, 600 missed, measured on 062a8f18); rules by missed findings:
+1. `class.notFound` (207 missed)
 2. `method.notFound` (94 missed)
 3. `function.notFound` (80 missed)
 4. `new.static` (43 missed)

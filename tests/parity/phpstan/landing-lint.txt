@@ -71,9 +71,7 @@ e3b0c44298fc1c14 php/symfony/src/Symfony/Component/Config/ConfigCacheFactory.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/Config/Resource/SkippingResourceChecker.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/Console/ArgumentResolver/ValueResolver/BackedEnumValueResolver.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/Console/ArgumentResolver/ValueResolver/MapInputValueResolver.php
-e3b0c44298fc1c14 php/symfony/src/Symfony/Component/Console/Debug/CliRequest.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/Console/Question/ConfirmationQuestion.php
-e3b0c44298fc1c14 php/symfony/src/Symfony/Component/CssSelector/Parser/Handler/HandlerInterface.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/DependencyInjection/Attribute/AsAlias.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/DependencyInjection/Attribute/Autoconfigure.php
 e3b0c44298fc1c14 php/symfony/src/Symfony/Component/DependencyInjection/TypedReference.php

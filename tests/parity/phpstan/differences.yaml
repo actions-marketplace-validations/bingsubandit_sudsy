@@ -1,8 +1,8 @@
-target: 36.1
+target: 36.3
 
-measured: {covered: 340, total: 942, main: '362a7f17'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 342, total: 942, main: '062a8f18'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  class.notFound: 209
+  class.notFound: 207
   method.notFound: 94
   function.notFound: 80
   new.static: 43
