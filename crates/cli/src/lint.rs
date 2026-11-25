@@ -155,7 +155,7 @@ pub fn catalog(session: &Session) -> Catalog {
     let mut rules: Vec<(String, String)> =
         languages::rules(session.db.providers(), &session.project.extensions)
             .iter()
-            .map(|(_, r)| (r.meta().id.to_string(), r.meta().summary().to_string()))
+            .map(|(_, r)| (r.meta().id.to_string(), r.meta().summary()))
             .collect();
     rules.dedup();
     rules.push((SYNTAX_ERROR.into(), "The file does not parse.".into()));

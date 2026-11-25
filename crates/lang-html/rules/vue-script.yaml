@@ -2,7 +2,15 @@ id: require-default-prop
 family: script
 params: { check: default-prop }
 message: "prop `{name}` is not required and has no default value"
-description: "Vue's `require-default-prop` (eslint-plugin-vue). A prop that is not required, has no `default` and is not a `Boolean` is `undefined` when the parent leaves it out. With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked, as the plugin does without type information."
+description: >-
+  Reports a prop that is not required, has no `default` and is not a `Boolean` (`defineProps({ a:
+  String })`). With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults
+  (`withDefaults`, a props destructure) is checked.
+why: >-
+  The prop is `undefined` when the parent leaves it out, and the template or code then fails on it
+  or shows `undefined`.
+
+  To fix, add a `default`, or mark the prop `required`.
 example: "defineProps({ a: String })   defineProps({ a: { type: String, default: '' } })"
 severity: warn
 category: suspicious
@@ -11,7 +19,14 @@ id: require-prop-types
 family: script
 params: { check: prop-types }
 message: "prop `{name}` should define at least its type"
-description: "Vue's `require-prop-types` (eslint-plugin-vue). A prop in the array form, or an object with no `type` or `validator`."
+description: >-
+  Reports a prop in the array form (`defineProps(['a'])`), and an object with no `type` or
+  `validator`.
+why: >-
+  A prop with no type accepts anything, so a wrong value is shown only as a failure far from the
+  cause, and the component has no documentation of what it takes.
+
+  To fix, write the prop as an object with a `type`.
 example: "defineProps(['a'])   defineProps({ a: String })"
 severity: warn
 category: suspicious
@@ -20,7 +35,16 @@ id: no-dupe-keys
 family: script
 params: { check: dupe-keys }
 message: "duplicate key `{name}`: it collides in the script and the template"
-description: "Vue's `no-dupe-keys` (eslint-plugin-vue). A name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object; or a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`)."
+description: >-
+  Reports a name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component
+  object, and a prop or `defineModel` of `<script setup>` that a top-level name of the script (a
+  `const`, a function, an import) repeats, unless that name reads from the props object (`const a =
+  props.a`, `toRef(props, 'a')`).
+why: >-
+  All of these names are put on one object that the template reads, so one of them hides the other
+  and the template shows the wrong value.
+
+  To fix, rename one of them.
 example: "export default { props: ['a'], data() { return { a: 1 } } }"
 severity: error
 category: correctness

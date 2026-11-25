@@ -2,7 +2,14 @@ id: banana-in-box
 family: template
 params: { check: banana-in-box, only: component.html }
 message: "write the two-way binding as `[(x)]`: the banana goes in the box"
-description: "Angular's `banana-in-box` (@angular-eslint/template). `([x])` is no binding. Only in `.component.html` files."
+description: >-
+  Reports a two-way binding written the wrong way round, `([ngModel])`. Only in `.component.html`
+  files.
+why: >-
+  `([x])` is not a binding: Angular reads it as a property binding to a name that does not exist,
+  and the template fails to compile or the binding does nothing.
+
+  To fix, write `[(ngModel)]`: the banana (round) goes in the box (square).
 example: "<input ([ngModel])=\"a\">   <input [(ngModel)]=\"a\">"
 severity: error
 category: correctness
@@ -11,7 +18,14 @@ id: eqeqeq
 family: template
 params: { check: loose-equality, only: component.html }
 message: "use `===` / `!==`: `==` and `!=` convert their operands"
-description: "Angular's `eqeqeq` (@angular-eslint/template), on bindings, interpolations and block parameters. Only in `.component.html` files."
+description: >-
+  Reports `==` and `!=` in the bindings, interpolations and block parameters of an Angular template.
+  Only in `.component.html` files.
+why: >-
+  The loose operators convert their operands before they compare, so `0 == ''` and `null ==
+  undefined` are true and the template shows content for a value the author did not mean.
+
+  To fix, write `===` and `!==`.
 example: "<p *ngIf=\"a == b\">   <p *ngIf=\"a === b\">"
 severity: warn
 category: suspicious
@@ -20,7 +34,15 @@ id: no-negated-async
 family: template
 params: { check: negated-async, only: component.html }
 message: "`!(x | async)` and `(x | async) === false` are also true before the stream emits: compare with the value or use `@if` / `@else`"
-description: "Angular's `no-negated-async` (@angular-eslint/template). Only in `.component.html` files."
+description: >-
+  Reports `!(x | async)` and `(x | async) === false` in an Angular template. Only in
+  `.component.html` files.
+why: >-
+  The `async` pipe returns `null` before the stream emits its first value, so the negated test is
+  true while the data is still loading, and the template shows the empty or error state for a
+  moment.
+
+  To fix, compare with the value the stream emits, or use `@if` and `@else` on the pipe's result.
 example: "<p *ngIf=\"!(a$ | async)\">   <p *ngIf=\"(a$ | async) === false\">   <p *ngIf=\"a$ | async\">"
 severity: warn
 category: correctness
@@ -29,7 +51,13 @@ id: require-for-track
 family: template
 params: { check: for-track, only: component.html }
 message: "`@for` needs a `track` expression"
-description: "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files."
+description: >-
+  Reports an `@for` block with no `track` expression. Only in `.component.html` files.
+why: >-
+  Angular needs the expression to tell the items of the list apart, and it stops the build without
+  it. With a good key it moves the elements when the list changes instead of rebuilding them.
+
+  To fix, add `; track item.id` (a unique value of the item) to the `@for`.
 example: "@for (x of xs) { <p></p> }   @for (x of xs; track x.id) { <p></p> }"
 severity: error
 category: correctness

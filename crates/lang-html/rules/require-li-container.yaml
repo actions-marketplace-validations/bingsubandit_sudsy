@@ -1,6 +1,12 @@
 id: require-li-container
 message: an <li> belongs in a <ul>, <ol> or <menu>
-description: An `<li>` whose parent is not a list (`ul`, `ol`, `menu`) is not a list item.
+description: >-
+  Reports an `<li>` whose parent is not a list (`<ul>`, `<ol>` or `<menu>`).
+why: >-
+  An `<li>` outside a list is not a list item, so a screen reader announces no list, and the browser
+  draws no marker.
+
+  To fix, put the item in a list.
 example: '<div><li>a</li></div>   <ul><li>a</li></ul>'
 severity: off
 category: correctness

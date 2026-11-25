@@ -1,8 +1,12 @@
 id: meta-refresh
 message: a refresh with a delay takes control away from the user; redirect on the server or with a 0 delay
 description: >-
-  `<meta http-equiv="refresh" content="5">` reloads or redirects after a delay, which disorients
-  screen reader users and cannot be paused. A delay of 0 is allowed.
+  Reports `<meta http-equiv="refresh">` with a delay (`content="5"`). A delay of 0 is not reported.
+why: >-
+  A page that reloads or redirects by itself after a time takes the control from the user,
+  disorients screen reader users and cannot be paused.
+
+  To fix, redirect on the server, or use a 0 delay; for a reload, give the user a button.
 example: '<meta http-equiv="refresh" content="5">   <meta http-equiv="refresh" content="0; url=/new">'
 severity: off
 category: correctness

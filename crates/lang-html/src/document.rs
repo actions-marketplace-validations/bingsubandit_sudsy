@@ -51,8 +51,10 @@ rule! {
         id: "no-duplicate-id",
         category: Correctness,
         default: Warn,
-        description: "An `id` that an earlier element of the document already has. Ids must be \
-                  unique: scripts, links and labels find the first element only.",
+        description: "Reports an `id` that an earlier element of the document already has.",
+        why: "Ids must be unique. Scripts, links, labels and styles find the first element only, \
+              so the second one is silently unreachable.\n\
+              To fix, give the element another id.",
         example: "<p id=\"a\"></p><p id=\"a\"></p>   // reported at the second",
     }
 
@@ -74,7 +76,10 @@ rule! {
         id: "no-duplicate-class",
         category: Suspicious,
         default: Off,
-        description: "A class name written twice in one `class` attribute.",
+        description: "Reports a class name written twice in one `class` attribute.",
+        why: "The second one does nothing, and it is usually left over from a merge or from a \
+              class that should have had another name.\n\
+              To fix, remove the repeat.",
         example: "<p class=\"a b a\">   // reported at the second `a`",
     }
 
@@ -109,7 +114,10 @@ rule! {
         id: "no-multiple-main",
         category: Correctness,
         default: Warn,
-        description: "A second `<main>` element that is not `hidden`: a page has one main landmark.",
+        description: "Reports a second `<main>` element that is not `hidden`.",
+        why: "A page has one main landmark; a second one makes the shortcut of a screen reader \
+              to the main content ambiguous.\n\
+              To fix, use one `<main>`, or mark the other `hidden`.",
         example: "<main></main><main></main>   // reported at the second",
     }
 
@@ -146,9 +154,13 @@ rule! {
         id: "heading-level",
         category: Correctness,
         default: Off,
-        description: "Headings do not follow the document outline: the first heading is not an \
-                  `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the \
-                  page has more than one `<h1>` (each one is reported).",
+        description: "Reports a heading that breaks the outline of the document: the first heading is \
+              not an `<h1>`, a level is skipped going down (`<h1>` then `<h3>`), or the page has \
+              more than one `<h1>` (each one is reported).",
+        why: "Headings make the table of contents that screen reader users and search engines \
+              build. A skipped level suggests a section that is missing, and several `<h1>` \
+              leave the main topic unclear.\n\
+              To fix, use the level that follows the one above, and style the size with CSS.",
         example: "<h1>A</h1><h3>B</h3>   // reported at the `<h3>`",
     }
 
@@ -168,8 +180,11 @@ rule! {
         id: "no-missing-references",
         category: Correctness,
         default: Warn,
-        description: "An attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, \
-                  `form`, ...) names an id that no element of the document has.",
+        description: "Reports an attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, \
+              `headers`, `form`, ...) when no element of the document has that id.",
+        why: "A reference to nothing silently does nothing: a label that labels no control, a \
+              description that is never read, a list that offers no choices.\n\
+              To fix, correct the id or add the element that has it.",
         example: "<label for=\"x\">   // no element has id=\"x\"",
     }
 
@@ -204,8 +219,10 @@ rule! {
         id: "no-redundant-for",
         category: Style,
         default: Off,
-        description: "A `<label>` has a `for` that names a control inside it, which the label \
-                  already labels.",
+        description: "Reports a `<label>` whose `for` names a control that is inside the label.",
+        why: "The label already names the control it holds, so the `for` and the `id` it needs \
+              say the same thing twice, and they can drift apart when one is renamed.\n\
+              To fix, remove the `for` (and the `id` if nothing else uses it).",
         example: "<label for=\"x\"><input id=\"x\"></label>   <label><input></label>",
     }
 
@@ -236,8 +253,10 @@ rule! {
         id: "no-conditional-comment",
         category: Suspicious,
         default: Off,
-        description: "An Internet Explorer conditional comment (`<!--[if IE]>`). Only IE 9 and \
-                  older read them; other browsers see a comment.",
+        description: "Reports an Internet Explorer conditional comment (`<!--[if IE]>`).",
+        why: "Only Internet Explorer 9 and older read the content; every other browser sees a \
+              comment, so it is code that no current browser runs.\n\
+              To fix, remove the comment, or replace it with feature detection or CSS.",
         example: "<!--[if IE]><p>old</p><![endif]-->",
     }
 
@@ -292,9 +311,13 @@ rule! {
         id: "input-missing-label",
         category: Correctness,
         default: Off,
-        description: "An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no \
-                  `<label>` names: it is not inside one, no `<label for>` points at its `id`, \
-                  and it has no `aria-label` or `aria-labelledby`.",
+        description: "Reports an `<input>` (not hidden and not a button), `<select>` or `<textarea>` \
+              that no label names: it is not inside a `<label>`, no `<label for>` points at its \
+              `id`, and it has no `aria-label` or `aria-labelledby`.",
+        why: "A control without a name is read by a screen reader as just \"edit text\", and the \
+              click target is only the control itself, not its text.\n\
+              To fix, wrap the control in a `<label>`, or give it an `id` and a `<label for>`, \
+              or add `aria-label`.",
         example: "<input type=\"text\">   <label>Name <input type=\"text\"></label>",
     }
 
@@ -330,8 +353,10 @@ rule! {
         id: "multiple-labeled-controls",
         category: Correctness,
         default: Off,
-        description: "A `<label>` without `for` that holds more than one control: it labels only \
-                  the first.",
+        description: "Reports a `<label>` with no `for` that holds more than one control.",
+        why: "A label names only the first control it holds, so the second control has no name \
+              and a click on the label text goes to the wrong one.\n\
+              To fix, give each control its own label, with `for` and `id`.",
         example: "<label>A <input> <input></label>   <label>A <input></label>",
     }
 
@@ -362,9 +387,12 @@ rule! {
         id: "unique-landmark",
         category: Correctness,
         default: Off,
-        description: "Landmarks of one kind (`<nav>`, `<aside>`, or an element with the same \
-                  landmark `role`) that a screen reader user cannot tell apart: with several of \
-                  them, each needs an `aria-label` or `aria-labelledby` that no other has.",
+        description: "Reports landmarks of the same kind (`<nav>`, `<aside>`, or elements with the same \
+              landmark `role`) that a screen reader user cannot tell apart: with several of \
+              them, each needs an `aria-label` or `aria-labelledby` that no other has.",
+        why: "A list of landmarks that holds \"navigation, navigation, navigation\" gives no way \
+              to pick the right one.\n\
+              To fix, give each landmark a label that tells it from the others.",
         example: "<nav></nav><nav></nav>   <nav aria-label=\"Main\"></nav><nav aria-label=\"Footer\"></nav>",
     }
 
@@ -401,7 +429,10 @@ rule! {
         id: "map-dup-name",
         category: Correctness,
         default: Warn,
-        description: "A `<map>` whose `name` an earlier `<map>` already has: `usemap` finds the first.",
+        description: "Reports a `<map>` whose `name` an earlier `<map>` already has.",
+        why: "An image refers to its map by `usemap=\"#name\"`, and the browser finds the first \
+              one, so the second map is unreachable.\n\
+              To fix, give each map its own name.",
         example: "<map name=\"a\"></map><map name=\"a\"></map>   // reported at the second",
     }
 
@@ -422,8 +453,11 @@ rule! {
         id: "unrecognized-char-ref",
         category: Correctness,
         default: Warn,
-        description: "A named character reference in text (`&name;`) that HTML does not define. \
-                  Numeric references and references in attribute values are not checked.",
+        description: "Reports a named character reference in text (`&name;`) that HTML does not define. \
+              Numeric references and references in attribute values are not checked.",
+        why: "The browser shows the text as written, `&foo;`, which was not meant; it is usually \
+              a typo of an entity.\n\
+              To fix, correct the name, or write `&amp;` before it if the text is meant.",
         example: "<p>&foo;</p>   <p>&amp;</p>",
     }
 

@@ -11618,7 +11618,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
+      "description": "Reports a parameter of a function with a body (a declaration or a literal) that its body never mentions. A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
       "example": {
         "config": null,
         "fixed": null,
@@ -11715,7 +11715,8 @@
           "tool": "typescript-eslint",
           "url": "https://typescript-eslint.io/rules/no-unused-vars"
         }
-      ]
+      ],
+      "why": "A parameter that nothing reads is either dead weight in the signature or a sign that the body ignores a value it should use (a typo in a name often shows this way).\n\nTo fix, remove the parameter, or use it."
     },
     {
       "category": "style",
@@ -16369,7 +16370,7 @@
           "url": "https://ota-meshi.github.io/eslint-plugin-jsonc/rules/no-useless-escape.html"
         }
       ],
-      "why": "In a string the backslash before such a character is dropped: `'\\d'` is just `d`, not the digit class the author may have meant for a regex, and in a regex a useless escape hides which characters are special. The intended meaning is lost whichever way it was read.\n\nTo fix, remove the backslash, or double it to get a real backslash (`'\\\\d'`)."
+      "why": "In a string the useless backslash is dropped, so `'\\d'` is the letter `d`, which is not what a reader who knows regex expects. In a regex it hides the characters that matter.\n\nTo fix, remove the backslash, or write the escape that is meant (`\\\\d`)."
     },
     {
       "category": "suspicious",
@@ -16762,7 +16763,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked.",
+      "description": "Reports a name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -16831,7 +16832,8 @@
           "tool": "typescript-eslint",
           "url": "https://typescript-eslint.io/rules/no-redeclare"
         }
-      ]
+      ],
+      "why": "The second declaration replaces or merges with the first, so the earlier one is dead, and which of the two a use reaches depends on the order. It is usually a copy that should have had another name.\n\nTo fix, remove the repeat, or rename one of them."
     },
     {
       "category": "suspicious",
@@ -16897,7 +16899,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A variable, parameter or function with the name of one declared in a scope around it. A function declared later in the outer scope still counts (it is hoisted), a variable declared later does not, and `var a = function a() {}` is not a shadow. In TypeScript files a type and a value of one name, and the parameters of function types, are left alone.",
+      "description": "Reports a variable, parameter or function with the name of one declared in a scope around it. A function declared later in the outer scope still counts (it is hoisted), a variable declared later does not, and `var a = function a() {}` is not a shadow. In TypeScript files a type and a value of one name, and the parameters of function types, are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17000,7 +17002,8 @@
           "tool": "typescript-eslint",
           "url": "https://typescript-eslint.io/rules/no-shadow"
         }
-      ]
+      ],
+      "why": "The inner name hides the outer one for the rest of its scope, so the same word means two things, and a change that was meant for the outer variable lands on the inner one or the reverse.\n\nTo fix, rename the inner variable."
     },
     {
       "category": "style",
@@ -17049,7 +17052,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file, `require`, `module`, `exports` and `global`) and that is not in the `globals` option. `typeof x` and JSX tags are left alone.",
+      "description": "Reports a name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file, `require`, `module`, `exports` and `global`) and that is not in the option `globals`. `typeof x` and JSX tags are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17120,12 +17123,13 @@
           "tool": "ruff",
           "url": "https://docs.astral.sh/ruff/rules/F821/"
         }
-      ]
+      ],
+      "why": "An undeclared name fails with a ReferenceError when the line runs, or it silently creates a global when it is assigned. A typo in a name is the usual cause.\n\nTo fix, declare the name, import it, or add it to `globals` if the environment provides it."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A reference that comes before the declaration of what it names in the source (function declarations included), or runs while the variable is being initialized. References in types are left alone.",
+      "description": "Reports a reference that comes before the declaration of what it names in the source (function declarations included), or that runs while the variable is being initialized. References in types are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17222,7 +17226,8 @@
           "tool": "typescript-eslint",
           "url": "https://typescript-eslint.io/rules/no-use-before-define"
         }
-      ]
+      ],
+      "why": "A `let`, `const` or class read before its declaration fails at run time, and a `var` is `undefined` until then. Even where it works (a hoisted function), a reader meets the use before the definition.\n\nTo fix, move the declaration above its first use."
     },
     {
       "category": "suspicious",
@@ -33532,7 +33537,7 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "The `alt` of an `<area>` is the name of the link in the image map; without an `href` it names nothing.",
+      "description": "Reports an `<area>` that has an `href` and no non-empty `alt`, and an `<area>` that has an `alt` but no `href`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -33589,12 +33594,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/area-alt.html"
         }
-      ]
+      ],
+      "why": "The `alt` of an `<area>` is the name of its link in the image map, and the only text a screen reader has for it. An `alt` on an area with no `href` names nothing, because the area is not a link.\n\nTo fix, give each linked area an `alt` that says where the link goes, and remove the `alt` from areas without an `href`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "`aria-hidden=\"true\"` on `<body>` removes the whole page from the accessibility tree.",
+      "description": "Reports `aria-hidden=\"true\"` on `<body>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -33642,12 +33648,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/aria-hidden-body.html"
         }
-      ]
+      ],
+      "why": "The attribute removes an element and all of its content from the accessibility tree, so on `<body>` the whole page is hidden from screen readers while it still shows on screen.\n\nTo fix, remove the attribute. To hide only a part of the page, put it on that part."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "`aria-label` names interactive elements, landmarks and elements with a role. A generic element (`<div>`, `<span>`, `<p>`, `<b>`, ...) and an `<a>` without `href` have no role to name.",
+      "description": "Reports an `aria-label` on an element that cannot be named by it: a generic element (`<div>`, `<span>`, `<p>`, `<b>`, ...) with no role, and an `<a>` without `href`. Interactive elements, landmarks and elements with a `role` are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -33703,12 +33710,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/aria-label-misuse.html"
         }
-      ]
+      ],
+      "why": "Assistive technology ignores a label on an element that has no role, so the text is never read, and the author believes the element is described when it is not.\n\nTo fix, give the element a role (or use a native element that has one), or move the text into the content."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Attribute names are case-insensitive in HTML; lowercase is the convention. Everything inside `<svg>` and `<math>` keeps its case.",
+      "description": "Reports an attribute name that is not in lowercase (`CLASS=\"a\"`). Everything inside `<svg>` and `<math>` keeps its case and is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -33755,12 +33763,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/attr-lowercase.mdx"
         }
-      ]
+      ],
+      "why": "HTML reads attribute names without regard to case, so the capitals change nothing for the browser. They only make one file spell the same name two ways, which breaks searches and makes the markup look inconsistent.\n\nTo fix, write the name in lowercase."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An attribute name and its value are joined by `=` without whitespace.",
+      "description": "Reports white space around the `=` between an attribute name and its value (`class = \"a\"`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -33812,12 +33821,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/attr-delimiter.html"
         }
-      ]
+      ],
+      "why": "The spaces are valid, but few tools and readers expect them, and a line like `a = b c = d` is hard to split into attributes at a glance.\n\nTo fix, write `name=\"value\"` with nothing around the `=`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An attribute name that does not match the `pattern` option (a regex; by default letters, digits, `-` and `:`, in either case).",
+      "description": "Reports an attribute name that does not match the option `pattern`, a regex that by default allows letters, digits, `-` and `:` in either case. An underscore, for example, is reported (`data_x`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -33860,12 +33870,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/attr-pattern.html"
         }
-      ]
+      ],
+      "why": "A naming rule for attributes keeps custom data attributes and framework attributes uniform. A name outside the usual character set is most often a typing error that the browser silently accepts as a new attribute.\n\nTo fix, rename the attribute, or change the pattern."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An attribute value is quoted with `\"`; it is quoted with `'` only when it holds a `\"`. Unquoted values are reported too, except `name={expression}` in Svelte, where the braces are the syntax.",
+      "description": "Reports an attribute value that is not quoted with `\"`: a value with no quotes (`class=a`), and a value in `'` unless it holds a `\"` (`class='a'`). In Svelte, `name={expression}` is not reported, because the braces are the syntax.",
       "example": {
         "config": null,
         "fixed": null,
@@ -33939,12 +33950,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/attr-value-double-quotes.mdx"
         }
-      ]
+      ],
+      "why": "An unquoted value ends at the first space or `>`, so a later edit that adds a word to the value changes the markup. One quote style keeps the files uniform and the diffs small.\n\nTo fix, quote the value with `\"`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A quoted attribute value is followed by whitespace before the next attribute.",
+      "description": "Reports a quoted attribute value that is directly followed by the next attribute, with no white space between them (`class=\"a\"id=\"b\"`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -33983,12 +33995,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/attr-spacing.html"
         }
-      ]
+      ],
+      "why": "Parsers accept it with an error, and many tools read it differently. Two attributes stuck together are hard to read and are usually a missing space from an edit.\n\nTo fix, put a space between the attributes."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "An attribute that is limited to a list of values (`type` of `<button>`, `method` of `<form>`, ...) has another one.",
+      "description": "Reports an attribute whose value is not one of the values HTML allows for it on that element, for attributes with a fixed list such as `type` of `<button>` (`button`, `submit`, `reset`) and `method` of `<form>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34045,12 +34058,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/attribute-allowed-values.html"
         }
-      ]
+      ],
+      "why": "A browser that meets a value it does not know falls back to a default, which is not what the author wrote: `type=\"foo\"` on a button makes a submit button, and the typo is never shown.\n\nTo fix, use one of the allowed values."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A boolean attribute is true when present: `disabled`, not `disabled=\"disabled\"`.",
+      "description": "Reports a boolean attribute that is written with a value (`disabled=\"disabled\"`, `disabled=\"\"`). The attribute is true when it is present.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34096,12 +34110,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/attribute-boolean-style.html"
         }
-      ]
+      ],
+      "why": "The value of a boolean attribute is not read: `muted=\"false\"` still mutes. A value that looks like a switch invites that error, and the longer form says nothing more.\n\nTo fix, write the attribute alone (`disabled`). To turn it off, remove it."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An attribute whose empty value means the same as no value (`hidden`, `crossorigin`) is written without `=\"\"`.",
+      "description": "Reports an attribute whose empty value means the same as no value (`hidden=\"\"`, `crossorigin=\"\"`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -34147,12 +34162,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/attribute-empty-style.html"
         }
-      ]
+      ],
+      "why": "`=\"\"` adds characters and no meaning, and the two spellings of the same thing make the files inconsistent.\n\nTo fix, write the attribute without `=\"\"`."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements.",
+      "description": "Reports a prop of a component that is written in camelCase (`:cardTitle`). A component is a tag in PascalCase or with a hyphen; HTML and SVG elements are not checked. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
@@ -34198,12 +34214,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/attribute-hyphenation.html"
         }
-      ]
+      ],
+      "why": "In a template the HTML parser lowercases attribute names, so only kebab-case reads the same in every kind of template, and one style keeps the props easy to search for.\n\nTo fix, write the prop in kebab-case (`:card-title`)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Vue's `attributes-order` (eslint-plugin-vue) with its default order. A bare `v-bind=\"object\"` takes the place of the attribute it precedes. Not sorted alphabetically.",
+      "description": "Reports an attribute that is out of the recommended order: `is`, `v-for`, conditions (`v-if`, `v-else-if`, `v-else`, `v-show`), `v-pre` and `v-once`, `id`, `ref`, `key` and slots, `v-model`, other directives, plain and bound attributes, events, and `v-html` and `v-text` last. A bare `v-bind=\"object\"` takes the place of the attribute it precedes. The order is not alphabetical. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34249,12 +34266,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/attributes-order.html"
         }
-      ]
+      ],
+      "why": "A fixed order puts the directives that decide whether and how often an element exists first, so a reader sees at once what the element is before they read how it looks.\n\nTo fix, move the attribute to its place in the order."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "Angular's `banana-in-box` (@angular-eslint/template). `([x])` is no binding. Only in `.component.html` files.",
+      "description": "Reports a two-way binding written the wrong way round, `([ngModel])`. Only in `.component.html` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34292,12 +34310,13 @@
           "tool": "angular-eslint",
           "url": "https://github.com/angular-eslint/angular-eslint/blob/v20.7.0/packages/eslint-plugin-template/docs/rules/banana-in-box.md"
         }
-      ]
+      ],
+      "why": "`([x])` is not a binding: Angular reads it as a property binding to a name that does not exist, and the template fails to compile or the binding does nothing.\n\nTo fix, write `[(ngModel)]`: the banana (round) goes in the box (square)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A class name that does not match the `pattern` option (a regex; by default kebab-case).",
+      "description": "Reports a class name that does not match the option `pattern`, a regex that by default means kebab-case (`foo-bar`). Each class of a `class` attribute is checked on its own.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34345,12 +34364,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/class-pattern.html"
         }
-      ]
+      ],
+      "why": "Class names are looked up by name in stylesheets and scripts; one naming style makes them predictable to write and to search for. A class in another style is often a typo that no stylesheet ever matches.\n\nTo fix, rename the class here and in the stylesheet, or change the pattern."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "An element that HTML5 no longer has (`<center>`, `<font>`, `<marquee>`, ...).",
+      "description": "Reports an element that HTML5 no longer has (`<center>`, `<font>`, `<marquee>`, ...).",
       "example": {
         "config": null,
         "fixed": null,
@@ -34409,12 +34429,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/tag-no-obsolete.mdx"
         }
-      ]
+      ],
+      "why": "A removed element can be dropped by browsers at any time, and it mixes presentation into the markup. Assistive technology and search engines may treat it differently than the author expects.\n\nTo fix, replace it with CSS and a current element (`<font>` and `<center>` with a class)."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A doctype other than `html` puts the browser in quirks or limited-quirks mode.",
+      "description": "Reports a doctype that is not `<!DOCTYPE html>` (compared without regard to case), such as the HTML 4.01 public identifier.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34455,12 +34476,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/doctype-html5.mdx"
         }
-      ]
+      ],
+      "why": "A doctype other than `html` puts the browser in quirks or limited-quirks mode, which changes how boxes, tables and images are sized.\n\nTo fix, use `<!DOCTYPE html>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The doctype keyword is case-insensitive; uppercase is the convention.",
+      "description": "Reports a doctype keyword that is not in uppercase (`<!doctype html>`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -34495,12 +34517,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/doctype-style.html"
         }
-      ]
+      ],
+      "why": "The keyword is case-insensitive, so the browser does not care; uppercase is the form the specification and most documents use, and one form keeps the files alike.\n\nTo fix, write `<!DOCTYPE html>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Element names are case-insensitive in HTML; lowercase is the convention (not in `.vue`, `.svelte` and `*.component.html` files, where component names are capitalised). Everything inside `<svg>` and `<math>` keeps its case. Reported on the name of a start or end tag.",
+      "description": "Reports an element name that is not in lowercase, on the name of a start or end tag (`<DIV>`). Everything inside `<svg>` and `<math>` keeps its case and is not reported, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are capitalised.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34559,12 +34582,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/tagname-lowercase.mdx"
         }
-      ]
+      ],
+      "why": "HTML reads element names without regard to case, so capitals only make the same element appear in two spellings. In component files a capital also tells a component from an element, so a mixed use hides which one it is.\n\nTo fix, write the name in lowercase."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.",
+      "description": "Reports an element whose name is not a valid custom element name: a custom element is lowercase letters, digits, `-`, `.` and `_` and has a `-`. A plain HTML element is not reported, and everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34609,12 +34633,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/element-name.html"
         }
-      ]
+      ],
+      "why": "The dash is what keeps a custom element from clashing with an element that HTML adds later. A name without it is either a typo of a real element or a name that a browser may take over.\n\nTo fix, rename the element with a dash (`x-card`), or correct the typo."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), or one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block in `<p>`'s `<button>`).",
+      "description": "Reports an element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), and one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block element in a `<button>`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -34667,12 +34692,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/element-permitted-content.html"
         }
-      ]
+      ],
+      "why": "The browser repairs invalid nesting on its own, and the repair moves or splits elements (a `<div>` in a `<table>` is moved out). The page then differs from the markup and from what scripts and styles select.\n\nTo fix, move the element to a parent that permits it, or use an element that fits."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An element the parent allows at most once (`<head>`, `<body>`, `<title>`, `<caption>`) that appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`.",
+      "description": "Reports an element that the parent permits at most once (`<head>`, `<body>`, `<title>`, `<caption>`) when it appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`, and is reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34717,12 +34743,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/element-permitted-occurrences.html"
         }
-      ]
+      ],
+      "why": "The browser keeps the first one and merges or drops the others, so the second `<title>` has no effect and the content in a second `<body>` ends up somewhere else.\n\nTo fix, remove the repeated element, or merge its content into the first."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Children out of the order the parent requires (`<tbody>` before `<tfoot>`, `<head>` before `<body>`, `<summary>` first in `<details>`).",
+      "description": "Reports children that are out of the order the parent requires (`<thead>` and `<tfoot>` before `<tbody>`, `<head>` before `<body>`, `<summary>` first in `<details>`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -34767,12 +34794,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/element-permitted-order.html"
         }
-      ]
+      ],
+      "why": "The browser either reorders them or treats the later one as stray content, so the page shows something other than the order written.\n\nTo fix, put the children in the required order."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...).",
+      "description": "Reports an element that lacks an attribute it must have: `lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, and the like.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34855,12 +34883,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/html-lang-require.mdx"
         }
-      ]
+      ],
+      "why": "Each of these attributes carries something the element cannot work without: the language for screen reader pronunciation and hyphenation, the file of an image, the name of a frame.\n\nTo fix, add the attribute."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An element that lacks a child it requires (`<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`).",
+      "description": "Reports an element that lacks a child it requires: `<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34913,12 +34942,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/element-required-content.html"
         }
-      ]
+      ],
+      "why": "A page with no `<title>` has no name in tabs, history and search results, and a `<details>` with no `<summary>` shows a label the browser invents.\n\nTo fix, add the missing child."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Screen readers need text in a heading; whitespace is not text. An image with an `alt` or an `<svg>` inside counts as content.",
+      "description": "Reports a heading (`<h1>` to `<h6>`) with no text. White space is not text. An image with an `alt` or an `<svg>` inside counts as content.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34966,12 +34996,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/empty-heading.html"
         }
-      ]
+      ],
+      "why": "Screen reader users move through a page by its headings, and an empty one is announced as a heading with nothing in it. It is usually a leftover or a heading whose text comes from a script that did not run.\n\nTo fix, put text in the heading, or remove it."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "The `<title>` names the page in the browser tab, search results and screen readers; whitespace is not text.",
+      "description": "Reports a `<title>` with no text. White space is not text.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35013,12 +35044,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/empty-title.html"
         }
-      ]
+      ],
+      "why": "The title names the page in the browser tab, history, bookmarks and search results, and is the first thing a screen reader reads.\n\nTo fix, write a title that tells this page from the others of the site."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Angular's `eqeqeq` (@angular-eslint/template), on bindings, interpolations and block parameters. Only in `.component.html` files.",
+      "description": "Reports `==` and `!=` in the bindings, interpolations and block parameters of an Angular template. Only in `.component.html` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35066,12 +35098,13 @@
           "tool": "angular-eslint",
           "url": "https://github.com/angular-eslint/angular-eslint/blob/v20.7.0/packages/eslint-plugin-template/docs/rules/eqeqeq.md"
         }
-      ]
+      ],
+      "why": "The loose operators convert their operands before they compare, so `0 == ''` and `null == undefined` are true and the template shows content for a value the author did not mean.\n\nTo fix, write `===` and `!==`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32).",
+      "description": "Reports a `<form>` that has no submit button inside it and none that names it with `form=` (WCAG H32).",
       "example": {
         "config": null,
         "fixed": null,
@@ -35116,12 +35149,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/wcag/h32.html"
         }
-      ]
+      ],
+      "why": "Without a submit button a form can only be sent by pressing Enter in a field, which not every user knows, and which does nothing in a form with several fields in some browsers.\n\nTo fix, add a `<button type=\"submit\">` (or `<input type=\"submit\">`) to the form."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is not a simple one (one row or one column of headers) (WCAG H63).",
+      "description": "Reports a `<th>` with no `scope` (`row`, `col`, `rowgroup` or `colgroup`) in a table that is not a simple one. A table with a single row or a single column of headers is simple (WCAG H63).",
       "example": {
         "config": null,
         "fixed": null,
@@ -35171,12 +35205,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/wcag/h63.html"
         }
-      ]
+      ],
+      "why": "In a table with headers on both axes a screen reader cannot tell whether a header belongs to the cells beside it or below it, so a cell is read with the wrong header.\n\nTo fix, add the `scope` that says which cells the header describes."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported).",
+      "description": "Reports a heading that breaks the outline of the document: the first heading is not an `<h1>`, a level is skipped going down (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported).",
       "example": {
         "config": null,
         "fixed": null,
@@ -35243,12 +35278,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/heading-level.html"
         }
-      ]
+      ],
+      "why": "Headings make the table of contents that screen reader users and search engines build. A skipped level suggests a section that is missing, and several `<h1>` leave the main topic unclear.\n\nTo fix, use the level that follows the one above, and style the size with CSS."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not.",
+      "description": "Reports an element that can take focus (a link, a control, an element with `tabindex` of 0 or more) inside an element with `aria-hidden=\"true\"`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35293,12 +35329,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/hidden-focusable.html"
         }
-      ]
+      ],
+      "why": "Keyboard users can still reach the element, but assistive technology does not announce it, so focus goes to something that is not there for the screen reader user.\n\nTo fix, remove `aria-hidden`, or make the content not focusable (`tabindex=\"-1\"`, `disabled`, `inert`)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Vue's `html-self-closing` (eslint-plugin-vue) with its defaults: HTML elements, components, SVG and MathML elements without content are self-closing, void HTML elements are not. The elements of the file's root (`<template>`, `<script>`) are left alone.",
+      "description": "Reports an element written in the wrong form for Vue's style: an HTML element, a component, an SVG or MathML element without content should be self-closed (`<div />`), a void HTML element should not (`<img>`). The elements of the file's root (`<template>`, `<script>`) are not reported. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35351,12 +35388,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/html-self-closing.html"
         }
-      ]
+      ],
+      "why": "Both forms mean the same in a Vue template, and the style puts the empty elements in one shape that is quick to see.\n\nTo fix, write the empty element as `<div />` and the void one as `<img>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `id` that does not match the `pattern` option (a regex; by default kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter).",
+      "description": "Reports an `id` that does not match the option `pattern`, a regex that by default means kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35410,12 +35448,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/id-pattern.html"
         }
-      ]
+      ],
+      "why": "An id is a name that scripts, links and styles refer to; a single style makes it predictable. An id in capitals or with `_` is often written one way and referred to another.\n\nTo fix, rename the id and everything that refers to it, or change the pattern."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An `<img>` with no `alt` has no text alternative (WCAG H37; html-validate wcag/h37). One hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is left alone.",
+      "description": "Reports an `<img>` with no `alt` attribute (WCAG H37). An image hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is not reported, and neither is an empty `alt=\"\"`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35459,12 +35498,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/wcag/h37.html"
         }
-      ]
+      ],
+      "why": "With no `alt` a screen reader reads the file name, and a browser that does not load the image shows nothing. An `alt` is also what search engines index for the image.\n\nTo fix, add an `alt` that says what the image shows, or `alt=\"\"` if it is only decoration."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`.",
+      "description": "Reports an `<input>` (not hidden and not a button), `<select>` or `<textarea>` that no label names: it is not inside a `<label>`, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35528,12 +35568,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/input-requires-label.mdx"
         }
-      ]
+      ],
+      "why": "A control without a name is read by a screen reader as just \"edit text\", and the click target is only the control itself, not its text.\n\nTo fix, wrap the control in a `<label>`, or give it an `id` and a `<label for>`, or add `aria-label`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone.",
+      "description": "Reports a link (`<a href>`) with no text, no image with an `alt` and no `aria-label` (WCAG H30). A link hidden from assistive technology is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35578,12 +35619,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/wcag/h30.html"
         }
-      ]
+      ],
+      "why": "A screen reader announces the link as \"link\" with no purpose, and a list of the links of a page shows an empty entry. Sighted users get a link they cannot see or have no name for.\n\nTo fix, put text in the link, or an image with an `alt`, or add `aria-label`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Search engines cut a title off after about 70 characters.",
+      "description": "Reports a `<title>` longer than 70 characters.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35624,12 +35666,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/long-title.html"
         }
-      ]
+      ],
+      "why": "Search engines cut a title off after about that length, and a browser tab shows a few words only, so the end of a long title is not seen.\n\nTo fix, shorten the title, and put the key words first."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A `<map>` whose `name` an earlier `<map>` already has: `usemap` finds the first.",
+      "description": "Reports a `<map>` whose `name` an earlier `<map>` already has.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35680,12 +35723,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/map-dup-name.html"
         }
-      ]
+      ],
+      "why": "An image refers to its map by `usemap=\"#name\"`, and the browser finds the first one, so the second map is unreachable.\n\nTo fix, give each map its own name."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "`<meta http-equiv=\"refresh\" content=\"5\">` reloads or redirects after a delay, which disorients screen reader users and cannot be paused. A delay of 0 is allowed.",
+      "description": "Reports `<meta http-equiv=\"refresh\">` with a delay (`content=\"5\"`). A delay of 0 is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35726,12 +35770,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/meta-refresh.html"
         }
-      ]
+      ],
+      "why": "A page that reloads or redirects by itself after a time takes the control from the user, disorients screen reader users and cannot be paused.\n\nTo fix, redirect on the server, or use a 0 delay; for a reload, give the user a button."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A document without a doctype is rendered in quirks mode. Not in `.vue`, `.svelte` and `*.component.html` files, which are fragments of a page.",
+      "description": "Reports a document that has no doctype, on its start. Not in `.vue`, `.svelte` and `*.component.html` files, which are fragments of a page.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35779,12 +35824,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/doctype-first.mdx"
         }
-      ]
+      ],
+      "why": "A document with no doctype is rendered in quirks mode, which keeps old browser layout bugs alive and changes how boxes and tables are sized.\n\nTo fix, put `<!DOCTYPE html>` on the first line."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A `<label>` without `for` that holds more than one control: it labels only the first.",
+      "description": "Reports a `<label>` with no `for` that holds more than one control.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35835,12 +35881,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/multiple-labeled-controls.html"
         }
-      ]
+      ],
+      "why": "A label names only the first control it holds, so the second control has no name and a click on the label text goes to the wrong one.\n\nTo fix, give each control its own label, with `for` and `id`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The `name` of a form control that does not match the `pattern` option (a regex; by default camelCase, with a trailing `[]` allowed).",
+      "description": "Reports the `name` of a form control that does not match the option `pattern`, a regex that by default means camelCase, with a trailing `[]` allowed.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35883,12 +35930,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/name-pattern.html"
         }
-      ]
+      ],
+      "why": "The name is the key of the value on the server and in scripts, so a fixed style makes the keys predictable; a name in another style is often a typo that the server never reads.\n\nTo fix, rename the control and what reads its value, or change the pattern."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Abstract roles (`widget`, `landmark`, `command`, ...) are for the ARIA taxonomy, not for authors.",
+      "description": "Reports a `role` that is one of the abstract roles of the ARIA taxonomy (`widget`, `landmark`, `command`, ...).",
       "example": {
         "config": null,
         "fixed": null,
@@ -35936,12 +35984,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-abstract-role.html"
         }
-      ]
+      ],
+      "why": "Abstract roles exist to define the other roles and must not be used in content. Assistive technology ignores them, so the element has no role at all.\n\nTo fix, use a concrete role, or a native element."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `&` that starts no entity is valid HTML and renders as written; html-validate's `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`.",
+      "description": "Reports an `&` in text that starts no character reference (`a & b`), and a raw `<` in text where it is not a syntax error, such as the Hugo shortcode `{{<`. A `>` is the rule `no-raw-gt`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35979,12 +36028,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-raw-characters.html"
         }
-      ]
+      ],
+      "why": "A lone `&` renders as written, but it turns into a different character the day the text after it spells an entity, and some tools reject it.\n\nTo fix, write `&amp;` for the `&` and `&lt;` for the `<`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change.",
+      "description": "Reports a `{@debug}` tag.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36020,12 +36070,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-at-debug-tags/"
         }
-      ]
+      ],
+      "why": "The tag pauses the browser's debugger whenever its values change, for everyone who runs the page, and it is a leftover of debugging.\n\nTo fix, remove the tag."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Svelte's `no-at-html-tags` (eslint-plugin-svelte). Escape the text or sanitize it before it is rendered, or turn the rule off for a value you control.",
+      "description": "Reports a `{@html}` tag.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36061,12 +36112,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-at-html-tags/"
         }
-      ]
+      ],
+      "why": "`{@html}` inserts the text as markup, so a value that a user wrote can carry a script and runs it in the page: a cross-site scripting hole.\n\nTo fix, write `{value}` so that the text is escaped, or sanitize it first; turn the rule off for a value you control."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "Autoplaying audio and video annoys users and fails accessibility guidelines; `muted` media is allowed.",
+      "description": "Reports `<audio>` and `<video>` with `autoplay` and without `muted`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36108,12 +36160,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-autoplay.html"
         }
-      ]
+      ],
+      "why": "Sound that starts by itself startles users, drowns out a screen reader, and fails accessibility guidelines. Browsers block it in many cases, so the page also behaves differently from one visit to the next.\n\nTo fix, remove `autoplay`, or add `muted`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Svelte's `no-bind-value-on-checkable-inputs` (eslint-plugin-svelte).",
+      "description": "Reports `bind:value` on a checkbox or a radio button.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -36157,12 +36210,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-bind-value-on-checkable-inputs/"
         }
-      ]
+      ],
+      "why": "The `value` of such an input is a fixed string, and the state is in `checked`, so the binding does not follow what the user does.\n\nTo fix, use `bind:checked`, or `bind:group` for a group of them."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-child-content` (eslint-plugin-vue).",
+      "description": "Reports an element that has `v-html` or `v-text` and also content between its tags.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36208,12 +36262,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-child-content.html"
         }
-      ]
+      ],
+      "why": "The directive replaces the content of the element, so the text between the tags is never shown. It is a leftover or a mistake.\n\nTo fix, remove the content, or the directive."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An Internet Explorer conditional comment (`<!--[if IE]>`). Only IE 9 and older read them; other browsers see a comment.",
+      "description": "Reports an Internet Explorer conditional comment (`<!--[if IE]>`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -36247,12 +36302,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-conditional-comment.html"
         }
-      ]
+      ],
+      "why": "Only Internet Explorer 9 and older read the content; every other browser sees a comment, so it is code that no current browser runs.\n\nTo fix, remove the comment, or replace it with feature detection or CSS."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "An attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...).",
+      "description": "Reports an attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...).",
       "example": {
         "config": null,
         "fixed": null,
@@ -36304,12 +36360,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-deprecated-attr.html"
         }
-      ]
+      ],
+      "why": "Presentation in attributes is outdated and browsers may stop honoring it; it also overrides less specific CSS in surprising ways.\n\nTo fix, use CSS."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-functional-template` (eslint-plugin-vue).",
+      "description": "Reports `<template functional>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36346,12 +36403,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-functional-template.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed functional single file templates, so the component does not work.\n\nTo fix, write a function component."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element.",
+      "description": "Reports an `is` attribute on a plain HTML element that does not begin with `vue:` (`<tr is=\"row\">`). Only in `.vue` files, where a plain `is` would make a customized built-in element.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36388,12 +36446,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-html-element-is.html"
         }
-      ]
+      ],
+      "why": "In Vue 3 a plain `is` on an HTML element creates a native customized built-in element, not a Vue component.\n\nTo fix, write `is=\"vue:row\"`, or use `<component :is>`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-inline-template` (eslint-plugin-vue).",
+      "description": "Reports the `inline-template` attribute.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36430,12 +36489,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-inline-template.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed it, so the content of the tag is not used as the template of the component.\n\nTo fix, use a slot."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-scope-attribute` (eslint-plugin-vue).",
+      "description": "Reports the `scope` attribute on a `<template>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36472,12 +36532,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-scope-attribute.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed it, so the slot props are not passed to the content.\n\nTo fix, use `v-slot`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot.",
+      "description": "Reports the `slot` attribute on an element that is not a `<slot>`. Only in `.vue` files, because in HTML `slot` assigns an element to the slot of a web component.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36514,12 +36575,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-slot-attribute.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed the attribute for a named slot, so the content is not put in the slot.\n\nTo fix, use `v-slot` (`#name`) on a `<template>`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-slot-scope-attribute` (eslint-plugin-vue).",
+      "description": "Reports the `slot-scope` attribute.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36556,12 +36618,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-slot-scope-attribute.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed it, so the slot props are not passed to the content.\n\nTo fix, use `v-slot` (`#name=\"props\"`)."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-v-bind-sync` (eslint-plugin-vue). `:title.sync=\"t\"` is `v-model:title=\"t\"` in Vue 3.",
+      "description": "Reports the `.sync` modifier of `v-bind` (`:title.sync`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -36598,12 +36661,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-v-bind-sync.html"
         }
-      ]
+      ],
+      "why": "Vue 3 does not have `.sync`: the binding then does not update the parent, and the component works only until the first change.\n\nTo fix, write `v-model:title=\"t\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-v-is` (eslint-plugin-vue).",
+      "description": "Reports the `v-is` directive.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36640,12 +36704,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-v-is.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed it, so the element is not turned into the component.\n\nTo fix, write `is=\"vue:name\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-v-on-native-modifier` (eslint-plugin-vue).",
+      "description": "Reports the `.native` modifier of `v-on` (`@click.native`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -36682,12 +36747,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-v-on-native-modifier.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed it, so the listener is not added to the root element of the component.\n\nTo fix, declare the event in `emits` of the component, or listen on its root element."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-deprecated-v-on-number-modifiers` (eslint-plugin-vue).",
+      "description": "Reports a key code as a modifier of `v-on` (`@keyup.13`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -36724,12 +36790,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-deprecated-v-on-number-modifiers.html"
         }
-      ]
+      ],
+      "why": "Vue 3 removed key codes, so the listener never fires. The numbers are also deprecated in browsers.\n\nTo fix, write the key name (`@keyup.enter`)."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "Vue's `no-dupe-keys` (eslint-plugin-vue). A name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object; or a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`).",
+      "description": "Reports a name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object, and a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -36776,12 +36843,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-dupe-keys.html"
         }
-      ]
+      ],
+      "why": "All of these names are put on one object that the template reads, so one of them hides the other and the template shows the wrong value.\n\nTo fix, rename one of them."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported.",
+      "description": "Reports two `on:` directives of one element that have the same event and the same handler (modifiers do not count); both are reported.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -36832,12 +36900,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-dupe-on-directives/"
         }
-      ]
+      ],
+      "why": "The handler runs twice for the event, which is rarely meant.\n\nTo fix, remove one of them."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Svelte's `no-dupe-style-properties` (eslint-plugin-svelte). `|important` is not part of the property.",
+      "description": "Reports a `style:` directive that repeats the property of an earlier one on the element. `|important` is not part of the property.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -36883,12 +36952,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-dupe-style-properties/"
         }
-      ]
+      ],
+      "why": "The later one wins, and the earlier is dead code.\n\nTo fix, remove one of them."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte).",
+      "description": "Reports two `use:` directives of one element that have the same action and the same parameter.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -36939,12 +37009,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-dupe-use-directives/"
         }
-      ]
+      ],
+      "why": "The action runs twice on the element, which is rarely meant and doubles its set-up and clean-up.\n\nTo fix, remove one of them."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-dupe-v-else-if` (eslint-plugin-vue). Conditions are compared as text without blanks, `||` alternatives one by one; a condition that only some earlier `&&` terms cover is not found.",
+      "description": "Reports a `v-else-if` whose condition is the same as an earlier `v-if` or `v-else-if` of the chain. Conditions are compared as text without blanks, and `||` alternatives one by one; a condition that only some earlier `&&` terms cover is not found. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -36991,12 +37062,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-dupe-v-else-if.html"
         }
-      ]
+      ],
+      "why": "The earlier branch with the same condition always wins, so this branch can never run. It is usually a copy that was meant to have another condition.\n\nTo fix, change the condition, or remove the branch."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A class name written twice in one `class` attribute.",
+      "description": "Reports a class name written twice in one `class` attribute.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37036,12 +37108,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-dup-class.html"
         }
-      ]
+      ],
+      "why": "The second one does nothing, and it is usually left over from a merge or from a class that should have had another name.\n\nTo fix, remove the repeat."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "An `id` that an earlier element of the document already has. Ids must be unique: scripts, links and labels find the first element only.",
+      "description": "Reports an `id` that an earlier element of the document already has.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37101,12 +37174,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/id-unique.mdx"
         }
-      ]
+      ],
+      "why": "Ids must be unique. Scripts, links, labels and styles find the first element only, so the second one is silently unreachable.\n\nTo fix, give the element another id."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A `<button>` without a `type` is a submit button, which is rarely meant outside a form. A Svelte spread (`{...props}`) may carry the `type`.",
+      "description": "Reports a `<button>` with no `type`. A Svelte spread (`{...props}`) may carry the `type` and is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37181,12 +37255,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/button-type-require.mdx"
         }
-      ]
+      ],
+      "why": "A button without a type is a submit button, so inside a form a click sends the form, which is rarely meant for a button that opens a menu or toggles a panel.\n\nTo fix, add `type=\"button\"`, or `type=\"submit\"` if it should submit."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An element whose end tag is left out is closed by the next sibling or its parent's end tag (`<li>`, `<p>`, ...). Writing the end tag says where it ends. Void and self-closed elements have none.",
+      "description": "Reports an element whose end tag is left out and that the next sibling or the end tag of its parent closes (`<li>`, `<p>`, ...). Void and self-closed elements have no end tag and are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37229,12 +37304,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/tag-pair.mdx"
         }
-      ]
+      ],
+      "why": "The rules for the implied end are complex: a `<p>` ends when a `<div>` begins, a `<li>` when the next `<li>` begins. A reader and a tool cannot always tell where an element ends, and an edit can change it.\n\nTo fix, write the end tag."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `<input>` without a `type` is a text field by default; writing the type says so.",
+      "description": "Reports an `<input>` with no `type`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37276,12 +37352,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-implicit-input-type.html"
         }
-      ]
+      ],
+      "why": "Without a type an input is a text field, which is easy to read as an omission; with the type written, the intent is in the markup and tools that look for text fields find it.\n\nTo fix, add `type=\"text\"` (or the type that is meant)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it. A Svelte `style:property` directive is one too.",
+      "description": "Reports a `style` attribute, and a Svelte `style:property` directive. A `style` that sets only `display` is not reported, because scripts toggle it.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37348,12 +37425,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/inline-style-disabled.mdx"
         }
-      ]
+      ],
+      "why": "Styles in attributes cannot be shared between elements and pages, outweigh every rule of a stylesheet, and are blocked by a strict content security policy.\n\nTo fix, use a class and a stylesheet."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files.",
+      "description": "Reports a nested `<template>` that has no directive (`v-if`, `v-for`, `v-slot`, ...). Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37399,12 +37477,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-lone-template.html"
         }
-      ]
+      ],
+      "why": "A `<template>` with no directive is a wrapper that Vue renders without its own element, so it does nothing and only adds a level.\n\nTo fix, remove the tag and keep its content, or add the directive that was meant."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "An attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) names an id that no element of the document has.",
+      "description": "Reports an attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) when no element of the document has that id.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37449,12 +37528,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-missing-references.html"
         }
-      ]
+      ],
+      "why": "A reference to nothing silently does nothing: a label that labels no control, a description that is never read, a list that offers no choices.\n\nTo fix, correct the id or add the element that has it."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A second `<main>` element that is not `hidden`: a page has one main landmark.",
+      "description": "Reports a second `<main>` element that is not `hidden`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37495,12 +37575,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-multiple-main.html"
         }
-      ]
+      ],
+      "why": "A page has one main landmark; a second one makes the shortcut of a screen reader to the main content ambiguous.\n\nTo fix, use one `<main>`, or mark the other `hidden`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Angular's `no-negated-async` (@angular-eslint/template). Only in `.component.html` files.",
+      "description": "Reports `!(x | async)` and `(x | async) === false` in an Angular template. Only in `.component.html` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37543,12 +37624,13 @@
           "tool": "angular-eslint",
           "url": "https://github.com/angular-eslint/angular-eslint/blob/v20.7.0/packages/eslint-plugin-template/docs/rules/no-negated-async.md"
         }
-      ]
+      ],
+      "why": "The `async` pipe returns `null` before the stream emits its first value, so the negated test is true while the data is still loading, and the template shows the empty or error state for a moment.\n\nTo fix, compare with the value the stream emits, or use `@if` and `@else` on the pipe's result."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS.",
+      "description": "Reports a `<style>` that is inside an element.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -37592,12 +37674,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-nested-style-tag/"
         }
-      ]
+      ],
+      "why": "Only the `<style>` at the top level of a component is compiled as its CSS; a nested one is put into the page as an ordinary element, and its rules are not scoped to the component.\n\nTo fix, move the `<style>` to the top level."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Svelte's `no-object-in-text-mustaches` (eslint-plugin-svelte). An object, array, function or class written in `{ }` among text. Read from the first token of the expression, so an arrow function is not found.",
+      "description": "Reports an object, an array, a function or a class written in `{ }` among text. It reads the first token of the expression, so an arrow function is not found.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -37654,12 +37737,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-object-in-text-mustaches/"
         }
-      ]
+      ],
+      "why": "It renders as `[object Object]` or as the source of the function, which is never what the page should show.\n\nTo fix, use the value in an attribute or in code, or show a field of it."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`. A raw `<` is a syntax error.",
+      "description": "Reports a `>` in text (`a > b`). A raw `<` in text is a syntax error.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37701,12 +37785,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/spec-char-escape.mdx"
         }
-      ]
+      ],
+      "why": "A `>` is valid HTML and renders as written. Some tools and templates still treat a lone `>` as the end of a tag, so escaping it avoids surprises.\n\nTo fix, write `&gt;`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on.",
+      "description": "Reports `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>`, which are plain elements in Svelte.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -37752,12 +37837,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-raw-special-elements/"
         }
-      ]
+      ],
+      "why": "The special ones are `<svelte:head>`, `<svelte:body>` and so on; a plain `<head>` is just an unknown element in the component, so the content does not go where the author meant.\n\nTo fix, write `<svelte:name>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<label>` has a `for` that names a control inside it, which the label already labels.",
+      "description": "Reports a `<label>` whose `for` names a control that is inside the label.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37797,12 +37883,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-redundant-for.html"
         }
-      ]
+      ],
+      "why": "The label already names the control it holds, so the `for` and the `id` it needs say the same thing twice, and they can drift apart when one is renamed.\n\nTo fix, remove the `for` (and the `id` if nothing else uses it)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An element with a native role (`<nav>` is `navigation`, `<button>` is `button`) does not need a `role` that says the same.",
+      "description": "Reports a `role` on an element that already has that role by its name (`<nav role=\"navigation\">`, `<button role=\"button\">`, `<ul role=\"list\">`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -37860,12 +37947,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-redundant-role.html"
         }
-      ]
+      ],
+      "why": "The role adds nothing and can only fall out of step with the element: when the element is later changed to another one, the old `role` overrides the native meaning.\n\nTo fix, remove the `role`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "`<div />` is a start tag in HTML: the browser ignores the slash and the element stays open. Void elements (see `void-style`), `<svg>` and `<math>` are left alone.",
+      "description": "Reports an element that is self-closed with `/>` and is not a void element (`<div />`). Void elements (see `void-style`), `<svg>` and `<math>` are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37904,12 +37992,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-self-closing.html"
         }
-      ]
+      ],
+      "why": "In HTML `<div />` is a start tag: the browser ignores the slash and the element stays open and swallows what follows, so the page differs from what the markup seems to say.\n\nTo fix, write the end tag (`<div></div>`)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<style>` element inlines styling that an external stylesheet shares between pages. A `<style>` inside a `<template>` is allowed.",
+      "description": "Reports a `<style>` element. A `<style>` inside a `<template>` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -37949,12 +38038,13 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/style-disabled.mdx"
         }
-      ]
+      ],
+      "why": "A stylesheet that is part of the page is sent again with every page, cannot be cached or shared, and is blocked by a strict content security policy.\n\nTo fix, move the rules to a file and use `<link rel=\"stylesheet\">`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer; both `noopener` and `noreferrer` are required, as in eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`. Links to a scheme or host and computed links (`{href}`, `bind:href`, `:href`) count.",
+      "description": "Reports a link to another site with `target=\"_blank\"` that does not have both `noopener` and `noreferrer` in its `rel`. A link to a scheme or host and a computed link (`{href}`, `bind:href`, `:href`) count; a relative link does not.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38011,12 +38101,13 @@
           "tool": "html-eslint",
           "url": "https://html-eslint.org/docs/rules/no-target-blank"
         }
-      ]
+      ],
+      "why": "The opened page can reach this one through `window.opener` in old browsers and change its location (a phishing page), and it gets the referrer of the page it came from.\n\nTo fix, add `rel=\"noopener noreferrer\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-textarea-mustache` (eslint-plugin-vue).",
+      "description": "Reports `{{ }}` inside a `<textarea>`. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38062,12 +38153,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-textarea-mustache.html"
         }
-      ]
+      ],
+      "why": "The text of a `<textarea>` is its default value, and Vue does not interpolate it, so the user sees `{{ text }}` written out.\n\nTo fix, bind the value with `v-model`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.",
+      "description": "Reports an element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38115,12 +38207,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/no-unknown-elements.html"
         }
-      ]
+      ],
+      "why": "An unknown element is a typo (`<buton>`) or a custom element that needs a script to do anything; the browser shows it as an inline box with no meaning.\n\nTo fix, correct the name, or turn the rule off for custom elements."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Svelte's `no-unknown-style-directive-property` (eslint-plugin-svelte). Custom properties (`style:--x`) and vendor-prefixed ones pass. The property table is the CSS language's.",
+      "description": "Reports a `style:` directive that names a property CSS does not know (`style:marginLeft`). Custom properties (`style:--x`) and vendor-prefixed ones are not reported. The property table is the CSS language's.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -38166,12 +38259,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-unknown-style-directive-property/"
         }
-      ]
+      ],
+      "why": "CSS properties are lowercase and hyphenated; a camelCase name is ignored by the browser, so the style does not apply.\n\nTo fix, write the property name in CSS form (`style:margin-left`)."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Vue's `no-use-v-else-with-v-for` (eslint-plugin-vue). Put the `v-for` on a child or a wrapping `<template>`.",
+      "description": "Reports an element that has `v-else` and `v-for` together. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38215,12 +38309,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-use-v-else-with-v-for.html"
         }
-      ]
+      ],
+      "why": "`v-else` is evaluated first and cannot read the loop variable, and the result is not what the markup reads like.\n\nTo fix, put the `v-for` on a child or on a wrapping `<template>`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Vue's `no-use-v-if-with-v-for` (eslint-plugin-vue). Filter the list in a computed value, or move the `v-if` to a wrapping `<template>`.",
+      "description": "Reports an element that has `v-if` and `v-for` together.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38254,12 +38349,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-use-v-if-with-v-for.html"
         }
-      ]
+      ],
+      "why": "In Vue 3 `v-if` is evaluated first, so a condition on the loop variable fails with an error, and in Vue 2 the order was the other way round, which makes the code unsafe to port.\n\nTo fix, filter the list in a computed value, or move the `v-if` to a wrapping `<template>`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Svelte's `no-useless-children-snippet` (eslint-plugin-svelte).",
+      "description": "Reports a `{#snippet children()}` with no parameters inside a component.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -38305,12 +38401,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-useless-children-snippet/"
         }
-      ]
+      ],
+      "why": "It is the same as writing the content in the component, and the longer form hides that.\n\nTo fix, write the content without the snippet."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Svelte's `no-useless-mustaches` (eslint-plugin-svelte).",
+      "description": "Reports a string literal in `{ }` (`{\"text\"}`).",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -38371,12 +38468,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/no-useless-mustaches/"
         }
-      ]
+      ],
+      "why": "It is only text, so the braces and the quotes add noise and suggest a value that is computed.\n\nTo fix, write the text without the braces."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-v-for-template-key-on-child` (eslint-plugin-vue).",
+      "description": "Reports a `:key` on a child of a `<template v-for>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38422,12 +38520,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-v-for-template-key-on-child.html"
         }
-      ]
+      ],
+      "why": "In Vue 3 the key belongs on the `<template v-for>`; a key on a child is not used, so the list is patched in place and state stays on the wrong element.\n\nTo fix, move the `:key` to the `<template>`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first.",
+      "description": "Reports an element with `v-html`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38461,12 +38560,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-v-html.html"
         }
-      ]
+      ],
+      "why": "`v-html` inserts the text as markup, so a value that a user wrote can carry a script and runs it in the page: a cross-site scripting hole.\n\nTo fix, render the text with `{{ }}`, or sanitize the value first."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Vue's `no-v-text` (eslint-plugin-vue).",
+      "description": "Reports an element with `v-text`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38510,12 +38610,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-v-text.html"
         }
-      ]
+      ],
+      "why": "`v-text` replaces the whole content of the element, while `{{ }}` can sit among other text, and most Vue code uses the mustache, so two forms mean the same.\n\nTo fix, write `{{ }}` in the element."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `no-v-text-v-html-on-component` (eslint-plugin-vue).",
+      "description": "Reports `v-html` and `v-text` on a component. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38561,12 +38662,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/no-v-text-v-html-on-component.html"
         }
-      ]
+      ],
+      "why": "The directive replaces the content of the component, which does not render its children as HTML or text, so nothing shows.\n\nTo fix, pass the value as a prop or as a slot."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A void element (`<br>`, `<img>`, ...) has no content and no end tag; the browser ignores `</br>`.",
+      "description": "Reports an end tag of a void element (`</br>`, `</img>`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -38600,12 +38702,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/void-content.html"
         }
-      ]
+      ],
+      "why": "A void element has no content and no end tag, and the browser ignores `</br>`, but a stray `</p>` or `</br>` is one of the most common signs of markup that was converted wrongly.\n\nTo fix, remove the end tag."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<button>` can hold markup and is styled with CSS like any element; `<input type=\"button\">` cannot.",
+      "description": "Reports `<input type=\"button\">`, `type=\"submit\"`, `type=\"reset\"` and `type=\"image\"`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38647,12 +38750,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/prefer-button.html"
         }
-      ]
+      ],
+      "why": "A `<button>` can hold markup (an icon with text) and is styled like any other element; an `<input>` button shows only its `value` and has fewer ways to style.\n\nTo fix, use a `<button>` with the same `type`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...) on an element that is not that one needs scripting and styling the native element comes with.",
+      "description": "Reports a `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...) when it is on an element that is not that one (`<div role=\"main\">`, `<a role=\"button\">`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -38716,12 +38820,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/prefer-native-element.html"
         }
-      ]
+      ],
+      "why": "A native element comes with the keyboard handling, focus and semantics of its role. An element with a `role` must be given all of that by script and styles.\n\nTo fix, use the native element."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<tr>` directly in `<table>` is moved into an implied `<tbody>` by the browser; write it.",
+      "description": "Reports a `<tr>` that is directly in a `<table>`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38762,12 +38867,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/prefer-tbody.html"
         }
-      ]
+      ],
+      "why": "The browser puts it into an implied `<tbody>`, so the DOM differs from the markup, and a selector such as `table > tr` never matches.\n\nTo fix, write the `<tbody>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`none` and `presentation` are synonyms; `none` is the one ARIA 1.2 prefers.",
+      "description": "Reports `role=\"presentation\"`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38806,12 +38912,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/presentation-role-style.html"
         }
-      ]
+      ],
+      "why": "`none` and `presentation` mean the same, and ARIA 1.2 prefers `none`. Using one name keeps the files uniform.\n\nTo fix, write `role=\"none\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `require-component-is` (eslint-plugin-vue).",
+      "description": "Reports a `<component>` element with no `:is` (`v-bind:is`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -38857,12 +38964,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/require-component-is.html"
         }
-      ]
+      ],
+      "why": "`<component>` renders what `is` names and nothing without it, so the element shows nothing.\n\nTo fix, add `:is` with the component or tag name to render."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Vue's `require-default-prop` (eslint-plugin-vue). A prop that is not required, has no `default` and is not a `Boolean` is `undefined` when the parent leaves it out. With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked, as the plugin does without type information.",
+      "description": "Reports a prop that is not required, has no `default` and is not a `Boolean` (`defineProps({ a: String })`). With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38917,12 +39025,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/require-default-prop.html"
         }
-      ]
+      ],
+      "why": "The prop is `undefined` when the parent leaves it out, and the template or code then fails on it or shows `undefined`.\n\nTo fix, add a `default`, or mark the prop `required`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions.",
+      "description": "Reports an `{#each}` block with no key (`{#each items as item}`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -38956,12 +39065,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/require-each-key/"
         }
-      ]
+      ],
+      "why": "Without a key the block updates the elements in place when the list changes, which keeps stale state in inputs and components and breaks transitions.\n\nTo fix, add a key, `{#each items as item (item.id)}`."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files.",
+      "description": "Reports an `@for` block with no `track` expression. Only in `.component.html` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38992,12 +39102,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [],
+      "why": "Angular needs the expression to tell the items of the list apart, and it stops the build without it. With a good key it moves the elements when the list changes instead of rebuilding them.\n\nTo fix, add `; track item.id` (a unique value of the item) to the `@for`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "An `<li>` whose parent is not a list (`ul`, `ol`, `menu`) is not a list item.",
+      "description": "Reports an `<li>` whose parent is not a list (`<ul>`, `<ol>` or `<menu>`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -39038,12 +39149,13 @@
           "tool": "html-eslint",
           "url": "https://html-eslint.org/docs/rules/require-li-container"
         }
-      ]
+      ],
+      "why": "An `<li>` outside a list is not a list item, so a screen reader announces no list, and the browser draws no marker.\n\nTo fix, put the item in a list."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "Vue's `require-prop-types` (eslint-plugin-vue). A prop in the array form, or an object with no `type` or `validator`.",
+      "description": "Reports a prop in the array form (`defineProps(['a'])`), and an object with no `type` or `validator`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39099,12 +39211,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/require-prop-types.html"
         }
-      ]
+      ],
+      "why": "A prop with no type accepts anything, so a wrong value is shown only as a failure far from the cause, and the component has no documentation of what it takes.\n\nTo fix, write the prop as an object with a `type`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A `<script src>` or `<link rel=\"stylesheet\" href>` without `integrity` runs or applies a file that changed on its server (a CDN) without the page noticing.",
+      "description": "Reports a `<script src>` and a `<link rel=\"stylesheet\" href>` with no `integrity` attribute.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39152,12 +39265,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/require-sri.html"
         }
-      ]
+      ],
+      "why": "A file loaded from a CDN or another server can change after the page was written, and the page then runs or applies the changed file without noticing.\n\nTo fix, add `integrity` with the hash of the file and `crossorigin=\"anonymous\"`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty says what the browser assumes (html-validate script-type).",
+      "description": "Reports a `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty. `type=\"module\"` and other types are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39194,12 +39308,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/script-type.html"
         }
-      ]
+      ],
+      "why": "The browser assumes that type, so the attribute says nothing and is only more text.\n\nTo fix, remove the `type`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Svelte's `shorthand-attribute` (eslint-plugin-svelte).",
+      "description": "Reports `name={name}` where the shorthand `{name}` would do. The fix writes the shorthand.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -39243,12 +39358,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/shorthand-attribute/"
         }
-      ]
+      ],
+      "why": "The name is written twice for nothing, and one form keeps the components uniform.\n\nTo fix, write `{name}`; the fix does it."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Svelte's `shorthand-directive` (eslint-plugin-svelte), for `bind:`, `class:` and `style:`.",
+      "description": "Reports `bind:name={name}`, `class:name={name}` and `style:name={name}` where the shorthand (`bind:name`) would do. The fix writes the shorthand.",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -39301,12 +39417,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/shorthand-directive/"
         }
-      ]
+      ],
+      "why": "The name is written twice for nothing, and one form keeps the components uniform.\n\nTo fix, write `bind:name`; the fix does it."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Svelte's `spaced-html-comment` (eslint-plugin-svelte).",
+      "description": "Reports an HTML comment with no space after `<!--` or before `-->` (`<!--text-->`).",
       "example": {
         "config": null,
         "fixed": "<head></head>\n<svelte:head><title>t</title></svelte:head>\n<input on:click={a} on:click={a} on:click|once={c} use:tip use:tip use:other style:color=\"a\" style:color|important={b}>\n<input type=\"checkbox\" bind:value={v} bind:checked={v} {id} {id} bind:group class:on>\n<input bind:value class:big>\n<C>{#snippet children()}hi{/snippet}</C>\n<C>{#snippet children(x)}{x}{/snippet}</C>\n<p style:marginLeft=\"1px\" style:margin-left=\"1px\" style:--x=\"1\"></p>\n<p>{\"text\"} {'it'} {`tpl`} {`a${b}`} {\"a'b\"} {text}</p>\n<p>{{ a: 1 }} {[1]} {function () {}} {text}</p>\n<!--bad--> <!-- ok --> <!---->\n<div><style>a { color: red }</style></div>\n<a href=\"https://x.org\" target=\"_blank\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">x</a>\n<a href=\"https://x.org\" target=\"_blank\" rel=\"noreferrer\">x</a>\n<a href=\"/local\" target=\"_blank\">x</a>\n",
@@ -39350,12 +39467,13 @@
           "tool": "eslint-plugin-svelte",
           "url": "https://sveltejs.github.io/eslint-plugin-svelte/rules/spaced-html-comment/"
         }
-      ]
+      ],
+      "why": "A space keeps the text apart from the marker and reads as text, not as commented-out code.\n\nTo fix, write `<!-- text -->`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "Internet Explorer 11 and old Edge make every `<svg>` focusable unless it says `focusable=\"false\"`.",
+      "description": "Reports an `<svg>` that has no `focusable` attribute.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39404,12 +39522,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/svg-focusable.html"
         }
-      ]
+      ],
+      "why": "Internet Explorer 11 and old Edge make every `<svg>` a stop of the Tab key unless it says `focusable=\"false\"`.\n\nTo fix, add `focusable=\"false\"`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count.",
+      "description": "Reports a `<button>` with no name: no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby`. A `title` does not count.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39469,12 +39588,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/text-content.html"
         }
-      ]
+      ],
+      "why": "A button with no name is announced as just \"button\", and the user cannot tell what it does.\n\nTo fix, put text in the button or add `aria-label`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Landmarks of one kind (`<nav>`, `<aside>`, or an element with the same landmark `role`) that a screen reader user cannot tell apart: with several of them, each needs an `aria-label` or `aria-labelledby` that no other has.",
+      "description": "Reports landmarks of the same kind (`<nav>`, `<aside>`, or elements with the same landmark `role`) that a screen reader user cannot tell apart: with several of them, each needs an `aria-label` or `aria-labelledby` that no other has.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39543,12 +39663,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/unique-landmark.html"
         }
-      ]
+      ],
+      "why": "A list of landmarks that holds \"navigation, navigation, navigation\" gives no way to pick the right one.\n\nTo fix, give each landmark a label that tells it from the others."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A named character reference in text (`&name;`) that HTML does not define. Numeric references and references in attribute values are not checked.",
+      "description": "Reports a named character reference in text (`&name;`) that HTML does not define. Numeric references and references in attribute values are not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39590,12 +39711,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/unrecognized-char-ref.html"
         }
-      ]
+      ],
+      "why": "The browser shows the text as written, `&foo;`, which was not meant; it is usually a typo of an entity.\n\nTo fix, correct the name, or write `&amp;` before it if the text is meant."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.",
+      "description": "Reports an element, an attribute or an attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them. The option `available` sets how widely a feature must be available.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39662,12 +39784,13 @@
           "tool": "html-eslint",
           "url": "https://html-eslint.org/docs/rules/use-baseline"
         }
-      ]
+      ],
+      "why": "A feature that only some browsers have works for part of the users and does nothing or breaks for the rest, and the author sees it only in the browser they test with.\n\nTo fix, use a feature with wider support, or provide a fallback and turn the rule off for it."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form.",
+      "description": "Reports `v-bind:` where the shorthand `:` would do (`v-bind:href`). The fix writes `:`.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
@@ -39704,12 +39827,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/v-bind-style.html"
         }
-      ]
+      ],
+      "why": "One form keeps the templates uniform and shorter; the long form reads as a different thing from the short one though they mean the same.\n\nTo fix, write `:`; the fix does it."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components. On a `<template>` or `<slot>` the key goes on the child elements; components are left to `valid-v-for`.",
+      "description": "Reports a `v-for` with no `:key` (or `v-bind:key`). On a `<template>` or `<slot>` the key goes on the child elements; components are left to `valid-v-for`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39743,12 +39867,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/require-v-for-key.html"
         }
-      ]
+      ],
+      "why": "Without a key Vue patches the elements in place when the list changes, which keeps stale state in inputs and components and breaks transitions.\n\nTo fix, add a `:key` with a value that is unique to each item."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "Vue's `v-on-event-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements.",
+      "description": "Reports an event of a component that is written in camelCase (`@cardOpen`). A component is a tag in PascalCase or with a hyphen; HTML and SVG elements are not checked. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39789,12 +39914,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/v-on-event-hyphenation.html"
         }
-      ]
+      ],
+      "why": "Event names in a template are read in lowercase by the HTML parser, so kebab-case is the one form that works in every kind of template, and the component emits it in the same style.\n\nTo fix, write the event in kebab-case (`@card-open`)."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "Vue's `v-on-style` (eslint-plugin-vue), the shorthand form.",
+      "description": "Reports `v-on:` where the shorthand `@` would do (`v-on:click`). The fix writes `@`.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
@@ -39831,12 +39957,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/v-on-style.html"
         }
-      ]
+      ],
+      "why": "One form keeps the templates uniform and shorter.\n\nTo fix, write `@`; the fix does it."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "Vue's `v-slot-style` (eslint-plugin-vue), the shorthand form.",
+      "description": "Reports `v-slot:` where the shorthand `#` would do (`v-slot:head`). The fix writes `#`.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <MyCard :title=\"t\" @click=\"go\" :cardTitle=\"c\" cardSub=\"s\" my-prop=\"p\"\n    :ok=\"1\"\n    :cardOther=\"o\">\n    <template #head>h</template>\n    <template v-slot=\"p\">d</template>\n  </MyCard>\n  <svg :viewBox=\"v\"></svg>\n</template>\n",
@@ -39873,12 +40000,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/v-slot-style.html"
         }
-      ]
+      ],
+      "why": "One form keeps the templates uniform and shorter.\n\nTo fix, write `#`; the fix does it."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An `id` that is empty, has whitespace, begins with a digit or has other characters is valid HTML5 but breaks CSS selectors and some scripts.",
+      "description": "Reports an `id` that is empty, has white space, begins with a digit or has characters other than letters, digits, `-` and `_`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -39927,12 +40055,13 @@
           "tool": "html-validate",
           "url": "https://html-validate.org/rules/valid-id.html"
         }
-      ]
+      ],
+      "why": "Such an id is valid HTML5, but it must be escaped in CSS selectors (`#1a` does not select it) and some scripts and older tools fail on it.\n\nTo fix, rename the id."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-bind` (eslint-plugin-vue).",
+      "description": "Reports a `v-bind` that has no expression (`:name` alone is the shorthand for `:name=\"name\"`, a bare `v-bind` is not) or a modifier other than `camel`, `prop`, `attr` and `sync`.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -39979,12 +40108,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-bind.html"
         }
-      ]
+      ],
+      "why": "A binding with no value, or with a modifier Vue does not know, is ignored or fails to compile, and the attribute is missing from the element.\n\nTo fix, give the binding an expression and use the modifiers of the list."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-cloak` (eslint-plugin-vue).",
+      "description": "Reports a `v-cloak` that has an expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40022,12 +40152,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-cloak.html"
         }
-      ]
+      ],
+      "why": "The directive takes no value; a value is ignored, so the author believes there is a condition that does not exist.\n\nTo fix, write `v-cloak` alone."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-else` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain.",
+      "description": "Reports a `v-else` that has an expression, an argument or a modifier, shares an element with `v-if` or `v-else-if`, or is not on the element right after one with `v-if` or `v-else-if`. Only comments and blank space may sit between the elements of a chain.",
       "example": {
         "config": null,
         "fixed": null,
@@ -40070,12 +40201,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-else.html"
         }
-      ]
+      ],
+      "why": "A `v-else` that does not continue a chain is a compile error, and an expression on it is ignored, so the author believes there is a second condition.\n\nTo fix, write a bare `v-else` right after the `v-if` or `v-else-if` element."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-else-if` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain.",
+      "description": "Reports a `v-else-if` that has no expression, has an argument or a modifier, shares an element with `v-if` or `v-else`, or is not on the element right after one with `v-if` or `v-else-if`. Only comments and blank space may sit between the elements of a chain.",
       "example": {
         "config": null,
         "fixed": null,
@@ -40122,12 +40254,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-else-if.html"
         }
-      ]
+      ],
+      "why": "A `v-else-if` that does not continue a chain is a compile error, or it is ignored and the element is always rendered.\n\nTo fix, write `v-else-if=\"condition\"` right after the `v-if` or `v-else-if` element."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-for` (eslint-plugin-vue), the syntax of the directive. A missing `:key` is `v-for-key`.",
+      "description": "Reports a `v-for` whose value is not `item in items` (or `of`), or that has an argument or a modifier. A missing `:key` is `v-for-key`.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40165,12 +40298,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-for.html"
         }
-      ]
+      ],
+      "why": "A `v-for` that does not parse is a compile error, or it loops over nothing.\n\nTo fix, write `v-for=\"item in items\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-html` (eslint-plugin-vue).",
+      "description": "Reports a `v-html` that has no expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40208,12 +40342,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-html.html"
         }
-      ]
+      ],
+      "why": "Without an expression the directive fails to compile or inserts nothing.\n\nTo fix, write `v-html=\"body\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-if` (eslint-plugin-vue). An element with `v-else-if` or `v-else` continues an earlier chain.",
+      "description": "Reports a `v-if` that has no expression, has an argument or a modifier, or is on the same element as `v-else` or `v-else-if`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -40252,12 +40387,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-if.html"
         }
-      ]
+      ],
+      "why": "A `v-if` without an expression fails to compile or always hides the element, and an argument or a modifier is ignored.\n\nTo fix, write `v-if=\"condition\"` and put `v-else` on the next element."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-is` (eslint-plugin-vue).",
+      "description": "Reports a `v-is` that has no expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40295,12 +40431,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-is.html"
         }
-      ]
+      ],
+      "why": "Without an expression the directive fails to compile.\n\nTo fix, write `v-is=\"name\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-memo` (eslint-plugin-vue).",
+      "description": "Reports a `v-memo` that has no expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40338,12 +40475,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-memo.html"
         }
-      ]
+      ],
+      "why": "Without a list of values the directive fails to compile and the subtree is never cached.\n\nTo fix, write `v-memo=\"[a, b]\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-model` (eslint-plugin-vue). A file input has no value Vue can set; listen to `@change` instead.",
+      "description": "Reports a `v-model` that has no expression, and a `v-model` on a file input.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40385,12 +40523,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-model.html"
         }
-      ]
+      ],
+      "why": "A file input has no value that Vue can set, so the binding fails; a `v-model` with no expression binds nothing.\n\nTo fix, write `v-model=\"name\"`, and listen to `@change` on a file input."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-on` (eslint-plugin-vue). `@click=\"go\"`; `@click.prevent` alone is fine, `@click` is not.",
+      "description": "Reports a `v-on` with no handler and no modifier (`@click`). `@click.prevent` alone is not reported.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40428,12 +40567,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-on.html"
         }
-      ]
+      ],
+      "why": "A listener with no handler does nothing, so the click, or the key, has no effect.\n\nTo fix, write `@click=\"go\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-once` (eslint-plugin-vue).",
+      "description": "Reports a `v-once` that has an expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40471,12 +40611,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-once.html"
         }
-      ]
+      ],
+      "why": "The directive takes no value; a value is ignored, so the author believes there is a condition that does not exist.\n\nTo fix, write `v-once` alone."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-pre` (eslint-plugin-vue).",
+      "description": "Reports a `v-pre` that has an expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40514,12 +40655,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-pre.html"
         }
-      ]
+      ],
+      "why": "The directive takes no value; a value is ignored, so the author believes there is a condition that does not exist.\n\nTo fix, write `v-pre` alone."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-show` (eslint-plugin-vue).",
+      "description": "Reports a `v-show` that has no expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40557,12 +40699,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-show.html"
         }
-      ]
+      ],
+      "why": "Without an expression the directive fails to compile or never changes the element.\n\nTo fix, write `v-show=\"open\"`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot.",
+      "description": "Reports a `v-slot` with a modifier, and a `v-slot` on a plain HTML element (`<div #item>`). It goes on a `<template>` or a component. Only in `.vue` files.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40604,12 +40747,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-slot.html"
         }
-      ]
+      ],
+      "why": "Only a component can receive a slot, so the content on a plain element is lost.\n\nTo fix, put the `v-slot` on a `<template>` (`<template #name=\"props\">`) or on the component."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "Vue's `valid-v-text` (eslint-plugin-vue).",
+      "description": "Reports a `v-text` that has no expression, an argument or a modifier.",
       "example": {
         "config": null,
         "fixed": "<template>\n  <div v-if v-bind v-model v-html v-text v-show v-once=\"x\" v-pre=\"x\" v-cloak=\"x\" v-memo v-is />\n  <b v-for=\"xs\" :key=\"1\" :a=\"\" :a.x=\"1\" #a.m v-if:a=\"1\" @click />\n  <b v-for=\"x in xs\" :key=\"x\" @click.once=\"x\" :b.camel=\"x\" @click.prevent @keyup=\"k\" />\n  <input type=\"file\" v-model=\"f\" /><div v-if=\"a\" #item></div>\n  <p v-if=\"ok\" :a>\n    <template #default=\"p\"><C #item=\"{ a }\" /></template>\n  </p>\n</template>\n",
@@ -40647,12 +40791,13 @@
           "tool": "eslint-plugin-vue",
           "url": "https://eslint.vuejs.org/rules/valid-v-text.html"
         }
-      ]
+      ],
+      "why": "Without an expression the directive fails to compile or shows nothing.\n\nTo fix, write `v-text=\"msg\"`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A void element (`<br>`, `<img>`, ...) has no end tag and needs no `/`; write `<br>`, not `<br/>`.",
+      "description": "Reports a `/` at the end of a void element (`<br/>`, `<img />`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -40699,7 +40844,8 @@
           "tool": "htmlhint",
           "url": "https://github.com/htmlhint/HTMLHint/blob/v1.9.2/website/src/content/docs/rules/empty-tag-not-self-closed.mdx"
         }
-      ]
+      ],
+      "why": "A void element has no end tag and the slash is ignored, so it adds nothing; it only suggests the tag is closed like XML, which can mislead a reader about other elements such as `<div/>`.\n\nTo fix, write `<br>`."
     },
     {
       "category": "style",
@@ -42556,7 +42702,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A control character (below U+0020) in the constant string given to `new Regex(...)` and the static methods of `Regex`, written raw or as an escape.",
+      "description": "Reports a control character (below U+0020) in the constant string given to `new Regex(...)` and the static methods of `Regex`, written raw or as an escape.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42596,7 +42742,8 @@
           "tool": "eslint",
           "url": "https://eslint.org/docs/latest/rules/no-control-regex"
         }
-      ]
+      ],
+      "why": "A control character in a pattern is almost never intended: it is invisible in the source, and the pattern then matches a character that the reader cannot see. It is usually the result of a pasted character or of an escape that was written for something else.\n\nTo fix, remove the character, or write the one that is meant (`\\t`, `\\n`, `\\r`) with its letter escape."
     },
     {
       "category": "style",
@@ -43042,7 +43189,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A character class in the constant string given to `new Regex(...)` and the static methods of `Regex`, in which a combining mark follows another character.",
+      "description": "Reports a character class in the constant string given to `new Regex(...)` and the static methods of `Regex`, in which a combining mark follows another character.",
       "example": {
         "config": null,
         "fixed": null,
@@ -43083,12 +43230,13 @@
           "tool": "eslint",
           "url": "https://eslint.org/docs/latest/rules/no-misleading-character-class"
         }
-      ]
+      ],
+      "why": "A combining mark is a separate code point that attaches to the character before it. In a character class each code point is its own member, so the class matches the base letter or the mark alone and never the combined character the author sees.\n\nTo fix, write the combined character as a group outside the class, or as a single precomposed character."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "Two or more spaces outside a character class in the string given to `new Regex(...)` and the static methods of `Regex`.",
+      "description": "Reports two or more spaces outside a character class in the constant string given to `new Regex(...)` and the static methods of `Regex`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -43127,7 +43275,8 @@
           "tool": "eslint",
           "url": "https://eslint.org/docs/latest/rules/no-regex-spaces"
         }
-      ]
+      ],
+      "why": "Several spaces in a row are hard to count, and a pattern that has them is easily changed by an editor that collapses white space or by a reader who counts wrongly. The number of spaces is part of what the pattern matches.\n\nTo fix, write the number as a count (`a {3}b`)."
     },
     {
       "category": "style",
@@ -44012,7 +44161,7 @@
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "A local variable or catch variable that is never used (the compiler's CS0168), or is only assigned constants and never read (CS0219). Variables captured by lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219).",
+      "description": "Reports a local variable or catch variable that is never used, or that is only assigned constants and never read. Variables captured by lambdas or local functions count as used. The fix removes the declaration. Off by default, because the compiler already warns.",
       "example": {
         "config": null,
         "fixed": null,
@@ -44086,7 +44235,8 @@
           "tool": "typescript-eslint",
           "url": "https://typescript-eslint.io/rules/no-unused-vars"
         }
-      ]
+      ],
+      "why": "A variable that is never read is a leftover of changed code, or a result that was meant to be used, so the logic that should have used it is missing.\n\nTo fix, remove the variable, or use its value."
     },
     {
       "category": "style",

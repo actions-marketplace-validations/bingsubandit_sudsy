@@ -3,8 +3,15 @@ family: meta
 params: { check: element-name, owned-in: 'vue,svelte,component.html' }
 message: "<{name}> is neither an HTML element nor a valid custom element name"
 description: >-
-  A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it
-  never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.
+  Reports an element whose name is not a valid custom element name: a custom element is lowercase
+  letters, digits, `-`, `.` and `_` and has a `-`. A plain HTML element is not reported, and
+  everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and
+  `*.component.html` files, where component names are normal.
+why: >-
+  The dash is what keeps a custom element from clashing with an element that HTML adds later. A name
+  without it is either a typo of a real element or a name that a browser may take over.
+
+  To fix, rename the element with a dash (`x-card`), or correct the typo.
 example: '<custom_el>   <custom-el>'
 severity: off
 category: correctness

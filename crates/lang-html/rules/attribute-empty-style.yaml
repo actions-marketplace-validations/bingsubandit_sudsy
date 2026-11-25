@@ -3,7 +3,12 @@ family: meta
 params: { check: empty-style }
 message: "write `{attr}` without a value"
 description: >-
-  An attribute whose empty value means the same as no value (`hidden`, `crossorigin`) is written without `=""`.
+  Reports an attribute whose empty value means the same as no value (`hidden=""`, `crossorigin=""`).
+why: >-
+  `=""` adds characters and no meaning, and the two spellings of the same thing make the files
+  inconsistent.
+
+  To fix, write the attribute without `=""`.
 example: '<p hidden="">   <p hidden>'
 severity: off
 category: style

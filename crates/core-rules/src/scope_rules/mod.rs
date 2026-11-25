@@ -452,6 +452,7 @@ macro_rules! meta {
             id: $id,
             category: Category::$category,
             why: "",
+            source: "",
             description: $description,
             example: $example,
             default_level: Level::$level,

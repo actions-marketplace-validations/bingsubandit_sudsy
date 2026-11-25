@@ -1,8 +1,13 @@
 id: no-redundant-role
 message: the element already has this role
 description: >-
-  An element with a native role (`<nav>` is `navigation`, `<button>` is `button`) does not need a
-  `role` that says the same.
+  Reports a `role` on an element that already has that role by its name (`<nav role="navigation">`,
+  `<button role="button">`, `<ul role="list">`).
+why: >-
+  The role adds nothing and can only fall out of step with the element: when the element is later
+  changed to another one, the old `role` overrides the native meaning.
+
+  To fix, remove the `role`.
 example: '<nav role="navigation">   <nav>'
 severity: off
 category: style

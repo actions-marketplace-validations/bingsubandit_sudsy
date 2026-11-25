@@ -1,8 +1,14 @@
 id: attr-quotes
 message: quote attribute values with double quotes, unless the value holds one
 description: >-
-  An attribute value is quoted with `"`; it is quoted with `'` only when it holds a `"`.
-  Unquoted values are reported too, except `name={expression}` in Svelte, where the braces are the syntax.
+  Reports an attribute value that is not quoted with `"`: a value with no quotes (`class=a`), and a
+  value in `'` unless it holds a `"` (`class='a'`). In Svelte, `name={expression}` is not reported,
+  because the braces are the syntax.
+why: >-
+  An unquoted value ends at the first space or `>`, so a later edit that adds a word to the value
+  changes the markup. One quote style keeps the files uniform and the diffs small.
+
+  To fix, quote the value with `"`.
 example: "<p id=a title='b'>   <p id=\"a\" title=\"b\">"
 severity: off
 category: style

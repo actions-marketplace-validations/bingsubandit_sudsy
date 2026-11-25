@@ -1,6 +1,12 @@
 id: presentation-role-style
 message: write `role="none"` instead of `role="presentation"`
-description: '`none` and `presentation` are synonyms; `none` is the one ARIA 1.2 prefers.'
+description: >-
+  Reports `role="presentation"`.
+why: >-
+  `none` and `presentation` mean the same, and ARIA 1.2 prefers `none`. Using one name keeps the
+  files uniform.
+
+  To fix, write `role="none"`.
 example: '<p role="presentation">   <p role="none">'
 severity: off
 category: style

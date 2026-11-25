@@ -1,6 +1,12 @@
 id: long-title
 message: the title is longer than 70 characters
-description: Search engines cut a title off after about 70 characters.
+description: >-
+  Reports a `<title>` longer than 70 characters.
+why: >-
+  Search engines cut a title off after about that length, and a browser tab shows a few words only,
+  so the end of a long title is not seen.
+
+  To fix, shorten the title, and put the key words first.
 example: '<title>A title that goes on and on for far more than seventy characters in all, really</title>'
 severity: off
 category: style

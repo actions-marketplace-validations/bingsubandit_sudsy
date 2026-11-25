@@ -3,6 +3,11 @@ family: meta
 params: { check: deprecated-element }
 message: "<{name}> is deprecated"
 description: >-
-  An element that HTML5 no longer has (`<center>`, `<font>`, `<marquee>`, ...).
+  Reports an element that HTML5 no longer has (`<center>`, `<font>`, `<marquee>`, ...).
+why: >-
+  A removed element can be dropped by browsers at any time, and it mixes presentation into the
+  markup. Assistive technology and search engines may treat it differently than the author expects.
+
+  To fix, replace it with CSS and a current element (`<font>` and `<center>` with a class).
 example: '<center>   <div style="text-align: center">'
 category: correctness

@@ -1,6 +1,13 @@
 id: doctype-html
 message: use the HTML5 doctype, `<!DOCTYPE html>`
-description: A doctype other than `html` puts the browser in quirks or limited-quirks mode.
+description: >-
+  Reports a doctype that is not `<!DOCTYPE html>` (compared without regard to case), such as the
+  HTML 4.01 public identifier.
+why: >-
+  A doctype other than `html` puts the browser in quirks or limited-quirks mode, which changes how
+  boxes, tables and images are sized.
+
+  To fix, use `<!DOCTYPE html>`.
 example: '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">   <!DOCTYPE html>'
 category: correctness
 rule:

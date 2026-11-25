@@ -1,8 +1,15 @@
 id: element-case
 message: element names are lowercase
 description: >-
-  Element names are case-insensitive in HTML; lowercase is the convention (not in `.vue`, `.svelte` and `*.component.html` files, where component names are capitalised). Everything inside
-  `<svg>` and `<math>` keeps its case. Reported on the name of a start or end tag.
+  Reports an element name that is not in lowercase, on the name of a start or end tag (`<DIV>`).
+  Everything inside `<svg>` and `<math>` keeps its case and is not reported, and so are `.vue`,
+  `.svelte` and `*.component.html` files, where component names are capitalised.
+why: >-
+  HTML reads element names without regard to case, so capitals only make the same element appear in
+  two spellings. In component files a capital also tells a component from an element, so a mixed use
+  hides which one it is.
+
+  To fix, write the name in lowercase.
 example: '<DIV></DIV>   <div></div>'
 severity: off
 category: style

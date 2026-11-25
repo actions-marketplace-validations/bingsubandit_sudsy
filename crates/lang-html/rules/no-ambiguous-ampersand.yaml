@@ -1,8 +1,13 @@
 id: no-ambiguous-ampersand
 message: write `&amp;` for a lone `&` and `&lt;` for a `<` in text
 description: >-
-  An `&` that starts no entity is valid HTML and renders as written; html-validate's
-  `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`.
+  Reports an `&` in text that starts no character reference (`a & b`), and a raw `<` in text where
+  it is not a syntax error, such as the Hugo shortcode `{{<`. A `>` is the rule `no-raw-gt`.
+why: >-
+  A lone `&` renders as written, but it turns into a different character the day the text after it
+  spells an entity, and some tools reject it.
+
+  To fix, write `&amp;` for the `&` and `&lt;` for the `<`.
 example: '<p>a & b</p>   <p>a &amp; b</p>'
 severity: off
 category: style

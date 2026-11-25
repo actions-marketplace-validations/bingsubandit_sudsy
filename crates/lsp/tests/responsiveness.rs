@@ -61,6 +61,7 @@ static BLOCKER: RuleMeta = RuleMeta {
     id: "blocker",
     category: Category::Style,
     why: "",
+    source: "",
     description: "Blocks until the test says so.",
     example: "",
     default_level: Level::Warn,

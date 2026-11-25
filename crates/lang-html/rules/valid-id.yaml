@@ -1,8 +1,13 @@
 id: valid-id
 message: an `id` begins with a letter and holds letters, digits, `-` and `_`
 description: >-
-  An `id` that is empty, has whitespace, begins with a digit or has other characters is
-  valid HTML5 but breaks CSS selectors and some scripts.
+  Reports an `id` that is empty, has white space, begins with a digit or has characters other than
+  letters, digits, `-` and `_`.
+why: >-
+  Such an id is valid HTML5, but it must be escaped in CSS selectors (`#1a` does not select it) and
+  some scripts and older tools fail on it.
+
+  To fix, rename the id.
 example: '<p id="1a">   <p id="a1">'
 severity: off
 category: suspicious

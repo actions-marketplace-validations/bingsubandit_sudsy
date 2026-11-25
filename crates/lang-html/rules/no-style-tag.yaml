@@ -1,8 +1,12 @@
 id: no-style-tag
 message: use an external stylesheet with <link> instead of a <style> element
 description: >-
-  A `<style>` element inlines styling that an external stylesheet shares between pages. A
-  `<style>` inside a `<template>` is allowed.
+  Reports a `<style>` element. A `<style>` inside a `<template>` is not reported.
+why: >-
+  A stylesheet that is part of the page is sent again with every page, cannot be cached or shared,
+  and is blocked by a strict content security policy.
+
+  To fix, move the rules to a file and use `<link rel="stylesheet">`.
 example: '<style>p { color: red }</style>   <link rel="stylesheet" href="a.css">'
 severity: off
 category: style

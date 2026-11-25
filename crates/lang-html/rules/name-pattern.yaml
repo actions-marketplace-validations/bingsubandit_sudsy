@@ -3,7 +3,13 @@ family: names
 params: { target: name, mode: pattern }
 message: "the name `{name}` is not camelCase"
 description: >-
-  The `name` of a form control that does not match the `pattern` option (a regex; by default camelCase, with a trailing `[]` allowed).
+  Reports the `name` of a form control that does not match the option `pattern`, a regex that by
+  default means camelCase, with a trailing `[]` allowed.
+why: >-
+  The name is the key of the value on the server and in scripts, so a fixed style makes the keys
+  predictable; a name in another style is often a typo that the server never reads.
+
+  To fix, rename the control and what reads its value, or change the pattern.
 example: '<input name="foo_bar">   <input name="fooBar">'
 severity: off
 category: style

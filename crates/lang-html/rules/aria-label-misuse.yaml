@@ -1,8 +1,15 @@
 id: aria-label-misuse
 message: "`aria-label` cannot name this element"
 description: >-
-  `aria-label` names interactive elements, landmarks and elements with a role. A generic element
-  (`<div>`, `<span>`, `<p>`, `<b>`, ...) and an `<a>` without `href` have no role to name.
+  Reports an `aria-label` on an element that cannot be named by it: a generic element (`<div>`,
+  `<span>`, `<p>`, `<b>`, ...) with no role, and an `<a>` without `href`. Interactive elements,
+  landmarks and elements with a `role` are not reported.
+why: >-
+  Assistive technology ignores a label on an element that has no role, so the text is never read,
+  and the author believes the element is described when it is not.
+
+  To fix, give the element a role (or use a native element that has one), or move the text into the
+  content.
 example: '<div aria-label="x">   <div role="group" aria-label="x">'
 severity: off
 category: correctness

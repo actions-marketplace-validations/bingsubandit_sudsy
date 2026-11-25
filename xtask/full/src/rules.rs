@@ -17,6 +17,10 @@ pub struct RuleDoc {
     /// The first case of the rule's fixtures that reports it (the one in the rule's own folder
     /// when there is one), with its language.
     pub example: Option<(String, Example)>,
+    /// Languages whose rule of this id has the same own `why` as the first one: the text belongs
+    /// in `crates/core-rules/texts/why.txt` once.
+    pub same_why: Vec<String>,
+    whys: Vec<(String, String)>,
 }
 
 /// Every rule, shared rules first, then by language in provider order, then by id.
@@ -36,6 +40,18 @@ pub fn collect(providers: &[Box<dyn LanguageProvider>], catalogs: &[Catalog]) ->
     for (language, rule) in rules {
         let meta = rule.meta();
         if let Some(doc) = docs.last_mut().filter(|d| d.meta.id == meta.id) {
+            // The shared pattern rules are one rule per language with one text; two rules of one id
+            // with the same `why` and another `description` are two copies of the prose.
+            let (why, description) = (
+                meta.own_why().into_owned(),
+                meta.description_text().into_owned(),
+            );
+            if !why.trim().is_empty()
+                && doc.whys.iter().any(|(w, d)| *w == why && *d != description)
+            {
+                doc.same_why.push(language.clone());
+            }
+            doc.whys.push((why, description));
             doc.languages.push(language);
             continue;
         }
@@ -54,6 +70,11 @@ pub fn collect(providers: &[Box<dyn LanguageProvider>], catalogs: &[Catalog]) ->
             presets: presets.remove(meta.id).unwrap_or_default(),
             upstream: Vec::new(),
             example,
+            same_why: Vec::new(),
+            whys: vec![(
+                meta.own_why().into_owned(),
+                meta.description_text().into_owned(),
+            )],
         });
     }
     for doc in &mut docs {
@@ -113,13 +134,14 @@ fn entry(d: &RuleDoc) -> Value {
         "category": m.category.as_str(),
         "default_level": m.default_level.as_str(),
         "fix": m.fix.map(|k| k.as_str()),
-        "description": paragraphs(m.description),
+        "description": paragraphs(&m.description_text()),
         "options": options,
         "presets": d.presets,
         "upstream": d.upstream.iter().map(upstream).collect::<Vec<_>>(),
     });
-    if !m.why.is_empty() {
-        v["why"] = json!(paragraphs(m.why));
+    let why = m.why_text();
+    if !why.is_empty() {
+        v["why"] = json!(paragraphs(&why));
     }
     if let Some((language, e)) = &d.example {
         let spans: Vec<Value> = e
@@ -167,10 +189,18 @@ pub fn undescribed(docs: &[RuleDoc], baseline: Option<&str>) -> anyhow::Result<S
             .filter(|l| !l.is_empty() && !l.starts_with('#'))
             .collect()
     });
+    if let Some(d) = docs.iter().find(|d| !d.same_why.is_empty()) {
+        anyhow::bail!(
+            "rule `{}` has the same `why` in `{}` and in {}: put it once in crates/core-rules/texts/why.txt",
+            d.meta.id,
+            d.languages[0],
+            d.same_why.join(", ")
+        );
+    }
     let mut out = UNDESCRIBED_HEADER.to_string();
     let mut ids: Vec<&str> = docs
         .iter()
-        .filter(|d| d.meta.why.trim().is_empty())
+        .filter(|d| d.meta.why_text().trim().is_empty())
         .map(|d| d.meta.id)
         .collect();
     ids.sort();
@@ -213,7 +243,7 @@ pub fn table(docs: &[RuleDoc]) -> String {
     );
     for d in docs {
         let m = d.meta;
-        let mut description = cell(m.summary());
+        let mut description = cell(&m.summary());
         if !m.options.is_empty() {
             let options: Vec<String> = m
                 .options
@@ -257,4 +287,41 @@ pub fn table(docs: &[RuleDoc]) -> String {
         );
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core_rules::Category;
+    use core_rules::rule::Level;
+
+    static META: RuleMeta = RuleMeta {
+        id: "demo",
+        category: Category::Style,
+        description: "Reports a demo.",
+        why: "Because.",
+        source: "",
+        example: "",
+        default_level: Level::Off,
+        fix: None,
+        requires: &[],
+        uses: &[],
+        options: &[],
+    };
+
+    #[test]
+    fn the_same_why_in_two_languages_is_refused() {
+        let doc = |same_why: Vec<String>| RuleDoc {
+            meta: &META,
+            languages: vec!["a".into(), "b".into()],
+            presets: Vec::new(),
+            upstream: Vec::new(),
+            example: None,
+            same_why,
+            whys: Vec::new(),
+        };
+        assert!(undescribed(&[doc(Vec::new())], None).is_ok());
+        let err = undescribed(&[doc(vec!["b".into()])], None).unwrap_err();
+        assert!(err.to_string().contains("texts/why.txt"), "{err}");
+    }
 }

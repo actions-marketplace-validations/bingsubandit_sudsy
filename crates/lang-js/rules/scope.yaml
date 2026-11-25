@@ -2,7 +2,15 @@ id: undefined-variable
 family: scope
 params: { check: undefined-variable }
 message: "'{name}' is not defined."
-description: A name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file, `require`, `module`, `exports` and `global`) and that is not in the `globals` option. `typeof x` and JSX tags are left alone.
+description: >-
+  Reports a name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file,
+  `require`, `module`, `exports` and `global`) and that is not in the option `globals`. `typeof x`
+  and JSX tags are not reported.
+why: >-
+  An undeclared name fails with a ReferenceError when the line runs, or it silently creates a global
+  when it is assigned. A typo in a name is the usual cause.
+
+  To fix, declare the name, import it, or add it to `globals` if the environment provides it.
 example: "foo();   # reported"
 severity: off
 category: suspicious
@@ -80,7 +88,10 @@ id: redeclared-variable
 family: scope
 params: { check: redeclared-variable }
 message: "'{name}' is already defined."
-description: A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked.
+description: >-
+  Reports a name declared again in the same scope (`var` twice, a `var` and a parameter, two
+  functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an
+  interface) is allowed. Built-in globals are not checked.
 example: "var a = 1; var a = 2;   # the second a is reported"
 severity: off
 category: suspicious
@@ -89,7 +100,16 @@ id: use-before-define
 family: scope
 params: { check: use-before-define }
 message: "'{name}' was used before it was defined."
-description: A reference that comes before the declaration of what it names in the source (function declarations included), or runs while the variable is being initialized. References in types are left alone.
+description: >-
+  Reports a reference that comes before the declaration of what it names in the source (function
+  declarations included), or that runs while the variable is being initialized. References in types
+  are not reported.
+why: >-
+  A `let`, `const` or class read before its declaration fails at run time, and a `var` is
+  `undefined` until then. Even where it works (a hoisted function), a reader meets the use before
+  the definition.
+
+  To fix, move the declaration above its first use.
 example: "a(); function a() {}   # the first a is reported"
 severity: off
 category: suspicious
@@ -102,7 +122,11 @@ id: shadowed-variable
 family: scope
 params: { check: shadowed-variable }
 message: "'{name}' is already declared in the upper scope on line {line}."
-description: A variable, parameter or function with the name of one declared in a scope around it. A function declared later in the outer scope still counts (it is hoisted), a variable declared later does not, and `var a = function a() {}` is not a shadow. In TypeScript files a type and a value of one name, and the parameters of function types, are left alone.
+description: >-
+  Reports a variable, parameter or function with the name of one declared in a scope around it. A
+  function declared later in the outer scope still counts (it is hoisted), a variable declared later
+  does not, and `var a = function a() {}` is not a shadow. In TypeScript files a type and a value of
+  one name, and the parameters of function types, are not reported.
 example: "var a = 1; function f() { var a = 2; }   # the inner a is reported"
 severity: off
 category: suspicious
@@ -114,7 +138,11 @@ id: unused-variable
 family: scope
 params: { check: unused-variable }
 message: "'{name}' is {action}."
-description: "A variable, function, class, import or caught error that is never read. `a = a + 1` and `a++` as statements are no read, and exported names are used. In TypeScript files types, interfaces and enums count the same, and a name that only appears in `typeof` of a type is not read."
+description: >-
+  Reports a variable, function, class, import or caught error that is never read. `a = a + 1` and
+  `a++` as statements are not reads, and exported names are used. In TypeScript files types,
+  interfaces and enums count the same, and a name that only appears in `typeof` of a type is not
+  read.
 example: "const a = 1;   # reported"
 severity: off
 category: suspicious
@@ -127,7 +155,10 @@ id: unused-parameter
 family: scope
 params: { check: unused-parameter }
 message: "'{name}' is {action}."
-description: "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used."
+description: >-
+  Reports a parameter that is never read. By default only the parameters after the last one that is
+  read are reported; the parameters of setters and signatures and the properties a constructor
+  declares are used.
 example: "function f(a, b) { return a; }   # b is reported"
 severity: off
 category: suspicious

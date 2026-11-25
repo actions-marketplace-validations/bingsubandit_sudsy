@@ -1,6 +1,12 @@
 id: no-v-html
 message: "`v-html` inserts text as markup; a value from a user is a cross-site scripting hole"
-description: Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first.
+description: >-
+  Reports an element with `v-html`.
+why: >-
+  `v-html` inserts the text as markup, so a value that a user wrote can carry a script and runs it
+  in the page: a cross-site scripting hole.
+
+  To fix, render the text with `{{ }}`, or sanitize the value first.
 example: '<div v-html="comment"></div>   <div>{{ comment }}</div>'
 severity: off
 category: suspicious

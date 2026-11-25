@@ -1,6 +1,13 @@
 id: attr-spacing
 message: separate attributes with whitespace
-description: A quoted attribute value is followed by whitespace before the next attribute.
+description: >-
+  Reports a quoted attribute value that is directly followed by the next attribute, with no white
+  space between them (`class="a"id="b"`).
+why: >-
+  Parsers accept it with an error, and many tools read it differently. Two attributes stuck together
+  are hard to read and are usually a missing space from an edit.
+
+  To fix, put a space between the attributes.
 example: '<a href="x"class="y">   <a href="x" class="y">'
 severity: off
 category: style

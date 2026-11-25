@@ -3,6 +3,11 @@ family: meta
 params: { check: deprecated-attr }
 message: "the attribute {attr} is deprecated on <{name}>"
 description: >-
-  An attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...).
+  Reports an attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...).
+why: >-
+  Presentation in attributes is outdated and browsers may stop honoring it; it also overrides less
+  specific CSS in surprising ways.
+
+  To fix, use CSS.
 example: '<div align="center">   <div class="center">'
 category: correctness

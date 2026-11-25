@@ -3,7 +3,16 @@ family: meta
 params: { check: unsupported-feature, owned: 'is,slot', owned-in: 'vue,svelte,component.html' }
 message: "{feature} is not a {available} available baseline feature"
 description: >-
-  An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover="hint"`, `rel="manifest"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.
+  Reports an element, an attribute or an attribute value that not all major browsers support
+  (`<geolocation>`, `popover="hint"`, `rel="manifest"` on `<link>`), by the baseline data of
+  web-features. A name the data does not list is not reported; custom elements are skipped, and so
+  are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them. The
+  option `available` sets how widely a feature must be available.
+why: >-
+  A feature that only some browsers have works for part of the users and does nothing or breaks for
+  the rest, and the author sees it only in the browser they test with.
+
+  To fix, use a feature with wider support, or provide a fallback and turn the rule off for it.
 example: '<button interestfor="x">   <button>'
 category: suspicious
 severity: off

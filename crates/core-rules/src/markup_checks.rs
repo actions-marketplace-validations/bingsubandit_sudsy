@@ -345,6 +345,7 @@ macro_rules! markup_rule {
             id: $id:expr,
             category: $category:ident,
             description: $description:expr,
+            why: $why:expr,
             example: $example:expr,
             check: $check:ident,
             model: $model:expr,
@@ -356,7 +357,8 @@ macro_rules! markup_rule {
                 static META: $crate::RuleMeta = $crate::RuleMeta {
                     id: $id,
                     category: $crate::Category::$category,
-                    why: "",
+                    why: $why,
+                    source: "",
                     description: $description,
                     example: $example,
                     default_level: $crate::rule::Level::Off,

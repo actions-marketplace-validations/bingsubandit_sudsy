@@ -2,7 +2,14 @@ id: no-useless-escape
 family: regex
 params: { check: useless-escape, needless: "/" }
 message: 'Unnecessary escape character: \{name}.'
-description: A backslash in a string that escapes nothing needed. `\/` is a valid JSON escape, but `/` needs none. Equivalent - eslint-plugin-jsonc no-useless-escape.
+description: >-
+  Reports a backslash in a string that escapes nothing that needs it. `\/` is a valid JSON escape,
+  but `/` needs none.
+why: >-
+  The escape adds characters and makes the string harder to read and search. A reader may also take
+  it for one of the real escapes.
+
+  To fix, remove the backslash.
 example: '{ "a": "\/b" }   # reported'
 severity: off
 category: suspicious

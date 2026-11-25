@@ -3,7 +3,14 @@ family: meta
 params: { check: unknown-element, owned-in: 'vue,svelte,component.html' }
 message: "<{name}> is not an HTML element"
 description: >-
-  An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.
+  Reports an element name that HTML does not define, custom elements (`<my-element>`) included.
+  Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and
+  `*.component.html` files, where component names are normal.
+why: >-
+  An unknown element is a typo (`<buton>`) or a custom element that needs a script to do anything;
+  the browser shows it as an inline box with no meaning.
+
+  To fix, correct the name, or turn the rule off for custom elements.
 example: '<blink2>   <my-element>'
 severity: off
 category: suspicious

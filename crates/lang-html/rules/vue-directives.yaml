@@ -2,7 +2,14 @@ id: valid-v-if
 family: template
 params: { name: v-if, value: required, no-arg: true, modifiers: none, with: "v-else,v-else-if" }
 message: "`v-if` needs an expression, takes no argument or modifier, and does not share an element with `v-else` or `v-else-if`"
-description: "Vue's `valid-v-if` (eslint-plugin-vue). An element with `v-else-if` or `v-else` continues an earlier chain."
+description: >-
+  Reports a `v-if` that has no expression, has an argument or a modifier, or is on the same element
+  as `v-else` or `v-else-if`.
+why: >-
+  A `v-if` without an expression fails to compile or always hides the element, and an argument or a
+  modifier is ignored.
+
+  To fix, write `v-if="condition"` and put `v-else` on the next element.
 example: "<p v-if>   <p v-if=\"ok\">"
 severity: warn
 category: correctness
@@ -11,7 +18,15 @@ id: valid-v-else-if
 family: template
 params: { name: v-else-if, value: required, no-arg: true, modifiers: none, with: "v-if,v-else", after: "v-if,v-else-if" }
 message: "`v-else-if` needs an expression, takes no argument or modifier, and goes on the element right after one with `v-if` or `v-else-if`"
-description: "Vue's `valid-v-else-if` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+description: >-
+  Reports a `v-else-if` that has no expression, has an argument or a modifier, shares an element
+  with `v-if` or `v-else`, or is not on the element right after one with `v-if` or `v-else-if`. Only
+  comments and blank space may sit between the elements of a chain.
+why: >-
+  A `v-else-if` that does not continue a chain is a compile error, or it is ignored and the element
+  is always rendered.
+
+  To fix, write `v-else-if="condition"` right after the `v-if` or `v-else-if` element.
 example: "<p v-else-if>   <p v-if=\"a\"></p><p v-else-if=\"b\"></p>"
 severity: warn
 category: correctness
@@ -20,7 +35,15 @@ id: valid-v-else
 family: template
 params: { name: v-else, value: forbidden, no-arg: true, modifiers: none, with: "v-if,v-else-if", after: "v-if,v-else-if" }
 message: "`v-else` takes no expression, argument or modifier, and goes on the element right after one with `v-if` or `v-else-if`"
-description: "Vue's `valid-v-else` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+description: >-
+  Reports a `v-else` that has an expression, an argument or a modifier, shares an element with
+  `v-if` or `v-else-if`, or is not on the element right after one with `v-if` or `v-else-if`. Only
+  comments and blank space may sit between the elements of a chain.
+why: >-
+  A `v-else` that does not continue a chain is a compile error, and an expression on it is ignored,
+  so the author believes there is a second condition.
+
+  To fix, write a bare `v-else` right after the `v-if` or `v-else-if` element.
 example: "<p v-else=\"x\">   <p v-if=\"a\"></p><p v-else></p>"
 severity: warn
 category: correctness
@@ -29,7 +52,13 @@ id: valid-v-for
 family: template
 params: { name: v-for, value: iteration, no-arg: true, modifiers: none }
 message: "`v-for` needs `item in items` (or `of`) and takes no argument or modifier"
-description: "Vue's `valid-v-for` (eslint-plugin-vue), the syntax of the directive. A missing `:key` is `v-for-key`."
+description: >-
+  Reports a `v-for` whose value is not `item in items` (or `of`), or that has an argument or a
+  modifier. A missing `:key` is `v-for-key`.
+why: >-
+  A `v-for` that does not parse is a compile error, or it loops over nothing.
+
+  To fix, write `v-for="item in items"`.
 example: "<li v-for=\"xs\">   <li v-for=\"x in xs\">"
 severity: warn
 category: correctness
@@ -38,7 +67,14 @@ id: valid-v-bind
 family: template
 params: { name: v-bind, value: unless-arg, modifiers: "camel,prop,attr,sync" }
 message: "`v-bind` needs an expression (`:name` alone is the shorthand for `:name=\"name\"`) and takes only the modifiers `camel`, `prop`, `attr` and `sync`"
-description: "Vue's `valid-v-bind` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-bind` that has no expression (`:name` alone is the shorthand for `:name="name"`, a
+  bare `v-bind` is not) or a modifier other than `camel`, `prop`, `attr` and `sync`.
+why: >-
+  A binding with no value, or with a modifier Vue does not know, is ignored or fails to compile, and
+  the attribute is missing from the element.
+
+  To fix, give the binding an expression and use the modifiers of the list.
 example: "<a :href.x=\"u\"> <a v-bind>   <a :href=\"u\">"
 severity: warn
 category: correctness
@@ -47,7 +83,13 @@ id: valid-v-on
 family: template
 params: { name: v-on, value: unless-modifier }
 message: "`v-on` needs a handler, unless it has a modifier"
-description: "Vue's `valid-v-on` (eslint-plugin-vue). `@click=\"go\"`; `@click.prevent` alone is fine, `@click` is not."
+description: >-
+  Reports a `v-on` with no handler and no modifier (`@click`). `@click.prevent` alone is not
+  reported.
+why: >-
+  A listener with no handler does nothing, so the click, or the key, has no effect.
+
+  To fix, write `@click="go"`.
 example: "<b @click>   <b @click=\"go\">"
 severity: warn
 category: correctness
@@ -56,7 +98,13 @@ id: valid-v-model
 family: template
 params: { name: v-model, value: required, bad-host: file-input }
 message: "`v-model` needs an expression, and cannot bind a file input"
-description: "Vue's `valid-v-model` (eslint-plugin-vue). A file input has no value Vue can set; listen to `@change` instead."
+description: >-
+  Reports a `v-model` that has no expression, and a `v-model` on a file input.
+why: >-
+  A file input has no value that Vue can set, so the binding fails; a `v-model` with no expression
+  binds nothing.
+
+  To fix, write `v-model="name"`, and listen to `@change` on a file input.
 example: "<input v-model>   <input v-model=\"name\">"
 severity: warn
 category: correctness
@@ -65,7 +113,13 @@ id: valid-v-slot
 family: template
 params: { name: v-slot, modifiers: none, bad-host: html, only: vue }
 message: "`v-slot` takes no modifier and goes on a `<template>` or a component"
-description: "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot."
+description: >-
+  Reports a `v-slot` with a modifier, and a `v-slot` on a plain HTML element (`<div #item>`). It
+  goes on a `<template>` or a component. Only in `.vue` files.
+why: >-
+  Only a component can receive a slot, so the content on a plain element is lost.
+
+  To fix, put the `v-slot` on a `<template>` (`<template #name="props">`) or on the component.
 example: "<div #item>   <template #item>"
 severity: warn
 category: correctness
@@ -74,7 +128,12 @@ id: valid-v-html
 family: template
 params: { name: v-html, value: required, no-arg: true, modifiers: none }
 message: "`v-html` needs an expression and takes no argument or modifier"
-description: "Vue's `valid-v-html` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-html` that has no expression, an argument or a modifier.
+why: >-
+  Without an expression the directive fails to compile or inserts nothing.
+
+  To fix, write `v-html="body"`.
 example: "<div v-html>   <div v-html=\"body\">"
 severity: warn
 category: correctness
@@ -83,7 +142,12 @@ id: valid-v-text
 family: template
 params: { name: v-text, value: required, no-arg: true, modifiers: none }
 message: "`v-text` needs an expression and takes no argument or modifier"
-description: "Vue's `valid-v-text` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-text` that has no expression, an argument or a modifier.
+why: >-
+  Without an expression the directive fails to compile or shows nothing.
+
+  To fix, write `v-text="msg"`.
 example: "<p v-text>   <p v-text=\"msg\">"
 severity: warn
 category: correctness
@@ -92,7 +156,12 @@ id: valid-v-show
 family: template
 params: { name: v-show, value: required, no-arg: true, modifiers: none }
 message: "`v-show` needs an expression and takes no argument or modifier"
-description: "Vue's `valid-v-show` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-show` that has no expression, an argument or a modifier.
+why: >-
+  Without an expression the directive fails to compile or never changes the element.
+
+  To fix, write `v-show="open"`.
 example: "<p v-show>   <p v-show=\"open\">"
 severity: warn
 category: correctness
@@ -101,7 +170,12 @@ id: valid-v-is
 family: template
 params: { name: v-is, value: required, no-arg: true, modifiers: none }
 message: "`v-is` needs an expression and takes no argument or modifier"
-description: "Vue's `valid-v-is` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-is` that has no expression, an argument or a modifier.
+why: >-
+  Without an expression the directive fails to compile.
+
+  To fix, write `v-is="name"`.
 example: "<tr v-is>   <tr v-is=\"name\">"
 severity: warn
 category: correctness
@@ -110,7 +184,12 @@ id: valid-v-memo
 family: template
 params: { name: v-memo, value: required, no-arg: true, modifiers: none }
 message: "`v-memo` needs an expression and takes no argument or modifier"
-description: "Vue's `valid-v-memo` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-memo` that has no expression, an argument or a modifier.
+why: >-
+  Without a list of values the directive fails to compile and the subtree is never cached.
+
+  To fix, write `v-memo="[a, b]"`.
 example: "<p v-memo>   <p v-memo=\"[a, b]\">"
 severity: warn
 category: correctness
@@ -119,7 +198,13 @@ id: valid-v-once
 family: template
 params: { name: v-once, value: forbidden, no-arg: true, modifiers: none }
 message: "`v-once` takes no expression, argument or modifier"
-description: "Vue's `valid-v-once` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-once` that has an expression, an argument or a modifier.
+why: >-
+  The directive takes no value; a value is ignored, so the author believes there is a condition that
+  does not exist.
+
+  To fix, write `v-once` alone.
 example: "<p v-once=\"x\">   <p v-once>"
 severity: warn
 category: correctness
@@ -128,7 +213,13 @@ id: valid-v-pre
 family: template
 params: { name: v-pre, value: forbidden, no-arg: true, modifiers: none }
 message: "`v-pre` takes no expression, argument or modifier"
-description: "Vue's `valid-v-pre` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-pre` that has an expression, an argument or a modifier.
+why: >-
+  The directive takes no value; a value is ignored, so the author believes there is a condition that
+  does not exist.
+
+  To fix, write `v-pre` alone.
 example: "<p v-pre=\"x\">   <p v-pre>"
 severity: warn
 category: correctness
@@ -137,7 +228,13 @@ id: valid-v-cloak
 family: template
 params: { name: v-cloak, value: forbidden, no-arg: true, modifiers: none }
 message: "`v-cloak` takes no expression, argument or modifier"
-description: "Vue's `valid-v-cloak` (eslint-plugin-vue)."
+description: >-
+  Reports a `v-cloak` that has an expression, an argument or a modifier.
+why: >-
+  The directive takes no value; a value is ignored, so the author believes there is a condition that
+  does not exist.
+
+  To fix, write `v-cloak` alone.
 example: "<p v-cloak=\"x\">   <p v-cloak>"
 severity: warn
 category: correctness

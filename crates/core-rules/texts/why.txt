@@ -1,0 +1,50 @@
+# The `why` of rules with one reason in every language that has them (read only when a text is asked for, see shared_why.rs).
+# A section is `== id`, then paragraphs; a rule of a provider that has its own `why` keeps it.
+
+== no-control-regex
+A control character in a pattern is almost never intended: it is invisible in the source, and the
+pattern then matches a character that the reader cannot see. It is usually the result of a pasted
+character or of an escape that was written for something else.
+
+To fix, remove the character, or write the one that is meant (`\t`, `\n`, `\r`) with its letter
+escape.
+
+== no-regex-spaces
+Several spaces in a row are hard to count, and a pattern that has them is easily changed by an
+editor that collapses white space or by a reader who counts wrongly. The number of spaces is part
+of what the pattern matches.
+
+To fix, write the number as a count (`a {3}b`).
+
+== no-misleading-character-class
+A combining mark is a separate code point that attaches to the character before it. In a character
+class each code point is its own member, so the class matches the base letter or the mark alone
+and never the combined character the author sees.
+
+To fix, write the combined character as a group outside the class, or as a single precomposed
+character.
+
+== unused-variable
+A variable that is never read is a leftover of changed code, or a result that was meant to be
+used, so the logic that should have used it is missing.
+
+To fix, remove the variable, or use its value.
+
+== unused-parameter
+A parameter that nothing reads is either dead weight in the signature or a sign that the body
+ignores a value it should use (a typo in a name often shows this way).
+
+To fix, remove the parameter, or use it.
+
+== shadowed-variable
+The inner name hides the outer one for the rest of its scope, so the same word means two things,
+and a change that was meant for the outer variable lands on the inner one or the reverse.
+
+To fix, rename the inner variable.
+
+== redeclared-variable
+The second declaration replaces or merges with the first, so the earlier one is dead, and which of
+the two a use reaches depends on the order. It is usually a copy that should have had another
+name.
+
+To fix, remove the repeat, or rename one of them.

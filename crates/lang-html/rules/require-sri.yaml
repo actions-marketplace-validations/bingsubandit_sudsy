@@ -1,8 +1,12 @@
 id: require-sri
 message: a script or stylesheet needs an `integrity` attribute
 description: >-
-  A `<script src>` or `<link rel="stylesheet" href>` without `integrity` runs or applies a file
-  that changed on its server (a CDN) without the page noticing.
+  Reports a `<script src>` and a `<link rel="stylesheet" href>` with no `integrity` attribute.
+why: >-
+  A file loaded from a CDN or another server can change after the page was written, and the page
+  then runs or applies the changed file without noticing.
+
+  To fix, add `integrity` with the hash of the file and `crossorigin="anonymous"`.
 example: '<script src="a.js"></script>   <script src="a.js" integrity="sha384-..." crossorigin="anonymous"></script>'
 severity: off
 category: suspicious

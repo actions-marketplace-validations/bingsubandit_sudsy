@@ -1,8 +1,14 @@
 id: empty-heading
 message: the heading has no text
 description: >-
-  Screen readers need text in a heading; whitespace is not text. An image with an `alt` or an `<svg>`
-  inside counts as content.
+  Reports a heading (`<h1>` to `<h6>`) with no text. White space is not text. An image with an `alt`
+  or an `<svg>` inside counts as content.
+why: >-
+  Screen reader users move through a page by its headings, and an empty one is announced as a
+  heading with nothing in it. It is usually a leftover or a heading whose text comes from a script
+  that did not run.
+
+  To fix, put text in the heading, or remove it.
 example: '<h1></h1>   <h1>Title</h1>'
 severity: off
 category: correctness

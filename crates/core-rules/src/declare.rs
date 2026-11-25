@@ -52,6 +52,7 @@ macro_rules! rule {
                     category: $crate::Category::$category,
                     description: $description,
                     why: $crate::__why!($($why)?),
+                    source: "",
                     example: $example,
                     default_level: $crate::rule::Level::$level,
                     fix: $crate::__fix!($($fix)?),

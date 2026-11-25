@@ -269,6 +269,13 @@ fn rules_lists_and_explains() {
     assert!(what.contains("\nWhat it does\n  Reports a `RUN` with a pipe"));
     assert!(why.starts_with("  The exit status of a pipe"));
     assert!(why.contains("\n\n  To fix, set the option"), "{why}");
+    // A rule whose languages share one reason (`crates/core-rules/texts/why.txt`) shows it with
+    // the description of its language.
+    let shared = out(&sudsy(t.path(), &["rules", "no-regex-spaces"]));
+    assert!(
+        shared.contains("\nWhy it matters\n  Several spaces in a row"),
+        "{shared}"
+    );
     let list_line = list
         .lines()
         .find(|l| l.starts_with("pipefail-shell"))

@@ -1,8 +1,12 @@
 id: no-raw-gt
 message: write `&gt;` for a `>` in text
 description: >-
-  A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`.
-  A raw `<` is a syntax error.
+  Reports a `>` in text (`a > b`). A raw `<` in text is a syntax error.
+why: >-
+  A `>` is valid HTML and renders as written. Some tools and templates still treat a lone `>` as the
+  end of a tag, so escaping it avoids surprises.
+
+  To fix, write `&gt;`.
 example: '<p>a > b</p>   <p>a &gt; b</p>'
 severity: off
 category: style
