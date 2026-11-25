@@ -16,7 +16,7 @@ A `#` is a comment at the start of a line or after a blank, not after other text
 - Comments and parser directives stay where they are; blank lines between instructions are kept up to `max_blank_lines`.
 - Not changed: the shell code itself (`&&` chains, `;`), legacy `ENV key value`, `MAINTAINER`. The generic safety check plus `DockerfileFormatter::value` allow only case and blanks to change: every token keeps its kind and text with blanks removed (keywords compared case-insensitively).
 
-dockerfmt (reteps/dockerfmt) is the comparable tool; it rewrites shell code with mvdan/sh, converts legacy `ENV` and `MAINTAINER`, and ships Linux and macOS binaries only, so there is no parity entry: its output would differ on nearly every `RUN`, and Sudsy's conservative layout leaves shell code to a later Shell language.
+dockerfmt (reteps/dockerfmt) is the primary tool of the format leg by usage ([../design/dockerfile.md](../design/dockerfile.md): sources, corpus, decision table, agreement); it rewrites shell code with mvdan/sh, converts legacy `ENV` and `MAINTAINER`, and ships Linux and macOS binaries only, so there is no parity entry: its output would differ on nearly every `RUN`, and Sudsy's conservative layout leaves shell code to a later Shell language.
 
 ## Options
 <!-- generated:options -->
@@ -44,7 +44,7 @@ Shared: suppression comments (`# sudsy-disable-next-line <rule>`), `no-empty-com
 - Known gap: a `#` inside an `ADD` source (`ADD ${REPO}#${REF} /`) makes the parser take the following lines into the instruction.
 
 ## Conformance
-`tests/conformance/fetch-dockerfile-corpus.sh` fetches the Dockerfiles of dotnet/dotnet-docker (samples and the 10.0 runtime, aspnet and sdk images), docker-library (golang, python, nginx, postgres), moby and buildx at pinned commits; `cargo test --profile corpus -p lang-dockerfile --test integration -- --ignored --nocapture conformance` checks that each file parses (but for the gap above), round-trips, keeps its instructions and arguments (the safety check, with comments compared as well) and formats idempotently.
+`tests/conformance/fetch-dockerfile-evidence-corpus.sh` adds 20 more projects (563 files with this one; the stability group reads both). `tests/conformance/fetch-dockerfile-corpus.sh` fetches the Dockerfiles of dotnet/dotnet-docker (samples and the 10.0 runtime, aspnet and sdk images), docker-library (golang, python, nginx, postgres), moby and buildx at pinned commits; `cargo test --profile corpus -p lang-dockerfile --test integration -- --ignored --nocapture conformance` checks that each file parses (but for the gap above), round-trips, keeps its instructions and arguments (the safety check, with comments compared as well) and formats idempotently.
 
 Where Sudsy differs from hadolint by design:
 

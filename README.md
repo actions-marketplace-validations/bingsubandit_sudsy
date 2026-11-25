@@ -76,7 +76,7 @@ Each number is measured on real-world code against the default rule set of the r
 | Python | █████████░ 97% ruff format | █████████░ 94% ruff | Ready |
 | YAML | █████████░ 94% Prettier | █████████░ 98% yamllint | Ready |
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
-| Dockerfile | ██████████ 100% stable · no reference tool | █████████░ 91% hadolint | Ready |
+| Dockerfile | █████████░ 98% stable · no reference tool | █████████░ 91% hadolint | Ready |
 | SQL | ████████░░ 85% sqlfluff | █████████░ 90% sqlfluff | Ready |
 | Java | █████████░ 91% google-java-format | ████████░░ 88% Checkstyle | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 87% actionlint | Ready |

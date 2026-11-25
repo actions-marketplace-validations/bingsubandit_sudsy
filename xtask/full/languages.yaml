@@ -91,7 +91,7 @@
   format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
 - language: Dockerfile
   retrofit: true
-  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
+  format: {tool: "dockerfmt", gain: 0.4, cost: {parts: 3, est: true}, why: "npm @reteps/dockerfmt 1.55M a month (the engine of prettier-plugin-sh, 1.88M), 629 stars, pushed 2026-11-14, Go binary; the editor formatters (docker-language-server, dockerfile-utils) only indent; on the 563-file corpus (docs/ai/design/dockerfile.md) 45% of the held-out files equal, 84% without RUN shell code, 97% also without the rewrites; parts: shell layout of RUN, syntax rewrites (legacy ENV, COPY JSON, MAINTAINER), nested continuation indent"}
 - language: Makefile
   retrofit: true
   format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
@@ -155,9 +155,9 @@
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Batchfile
   gh: 815225
-  parser: ~1.2 # tree-sitter: wharflab/tree-sitter-batch (14 stars, pushed 2026-11)
-  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
-  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
+  parser: ~1.5 # hand-written; wharflab/tree-sitter-batch (14 stars, pushed 2026-11) is not used
+  format: {tool: "none found", gain: ~1.0, cost: {layout: whitespace, parts: 1, est: true}, why: "no maintained tool found; only blanks and case change"}
+  lint: {tool: "Blinter", gain: ~0.7, cost: {est: true}, why: "only tool found: PyPI Blinter 20,445 downloads a month, BatchLang/Blinter 54 stars, pushed 2026-11-16; Python"}
 - language: Beancount / hledger
   parser: ~1.2 # tree-sitter: polarmutex/tree-sitter-beancount (56 stars, pushed 2026-11)
   format: {tool: "hledger-fmt", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Rust, fast; aligns amounts; whitespace only"}
@@ -368,7 +368,7 @@
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Gradle
   so: 11.6
-  parser: ~0.2 # reuse: Groovy parser (semantic layer only)
+  parser: ~1.2 # tree-sitter: murtaza64/tree-sitter-groovy (26 stars, pushed 2026-09); Sudsy has no Groovy parser
   note: "build.gradle (Groovy DSL); build.gradle.kts is Kotlin"
   format: {tool: "npm-groovy-lint", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node plus JVM; Groovy DSL; width-based, many options"}
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}

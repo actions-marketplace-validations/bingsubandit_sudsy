@@ -190,7 +190,7 @@ The status and the numbers of every language are in the generated table "Languag
 
 <!-- generated:measured-dockerfile -->
 - **Measured:** Ready.
-  - Format, stable: 100% of the files format stably, by the rules of the formatter (211 of 211 files).
+  - Format, stable: 98% of the files format stably, by the rules of the formatter (554 of 563 files).
   - Lint, hadolint: 91% of its findings also reported (685 of 751 findings).
 <!-- /generated -->
 

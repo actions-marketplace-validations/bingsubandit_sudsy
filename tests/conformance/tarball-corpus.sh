@@ -15,7 +15,9 @@ fetch_tarballs() {
     rm -rf "$out.tmp"; mkdir -p "$out.tmp"
     args=()
     for p in $patterns; do case "$p" in "!"*) args+=("--exclude=${p#!}") ;; *) args+=(--wildcards "$p") ;; esac; done
-    curl -sSfL "https://codeload.github.com/$repo/tar.gz/$sha" | tar -xz -C "$out.tmp" --strip-components=1 "${args[@]}"
+    # TARBALL_LENIENT=1: a pattern that matches nothing in a repository is not an error (a repository with no file at all is)
+    curl -sSfL "https://codeload.github.com/$repo/tar.gz/$sha" | tar -xz -C "$out.tmp" --strip-components=1 "${args[@]}" \
+      || { [ -n "${TARBALL_LENIENT:-}" ] && [ -n "$(ls -A "$out.tmp")" ]; }
     mv "$out.tmp" "$out"
   done
   echo "corpus ready: $dest"
