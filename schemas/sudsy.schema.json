@@ -1109,6 +1109,79 @@
               "$ref": "#/definitions/rule",
               "description": "`export`, `local`, `declare`, `readonly` or `typeset` with a command substitution as the value reports the status of the declaration, not of the command."
             },
+            "declared-name-pattern": {
+              "description": "A name that a command declares (a variable it sets, a function or its parameters) does not match the pattern of its class. Only for languages whose commands open and close blocks.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "ignore_pattern": {
+                          "default": "",
+                          "description": "A regex; a name that matches is left out.",
+                          "type": "string"
+                        },
+                        "markers": {
+                          "default": [],
+                          "description": "Rows `WORD:class`: a command with the argument WORD (or the arguments `WORD WORD`, in a row) declares a variable of the class; the last row that fits wins.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "names": {
+                          "default": [],
+                          "description": "Rows `command:position:class` (`command` may be `command FIRST-ARGUMENT`): the argument at the position (`0`, `-1` for the last, or `1+` for the rest) are names of the class; the class `variable` is told by `markers` and `scopes`.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "patterns": {
+                          "default": [],
+                          "description": "Rows `class:regex`: the regex a name of the class must match from its start.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "reference_end": {
+                          "default": "",
+                          "description": "Where a reference ends (`}` in CMake).",
+                          "type": "string"
+                        },
+                        "reference_start": {
+                          "default": "",
+                          "description": "Where a reference to another name starts inside a name (`${` in CMake); the references, up to the matching `reference_end`, are cut out before the name is matched, and a name that is only references is left out.",
+                          "type": "string"
+                        },
+                        "scopes": {
+                          "default": [],
+                          "description": "Rows `block:class`: a variable set inside the block that starts with the command `block` (the innermost listed one) has the class; the row with no block is the class outside them. An empty class is not checked.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "default-except-not-last": {
               "$ref": "#/definitions/rule",
               "description": "A bare `except:` followed by another handler."
@@ -1387,6 +1460,48 @@
             "document-start": {
               "$ref": "#/definitions/rule",
               "description": "The first document does not start with `---`."
+            },
+            "documented-command": {
+              "description": "A command of the `commands` option (a function or macro definition) with no comment on the line right before it, or with a comment that has no text.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands that need a comment (case ignored).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "doc_kinds": {
+                          "default": [],
+                          "description": "The kinds of comment token that document (none listed: every comment does); a comment of another kind counts as one with no text.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "documented-outputs": {
               "$ref": "#/definitions/rule",
@@ -4129,6 +4244,11 @@
                             "type": "string"
                           },
                           "type": "array"
+                        },
+                        "indentation_only": {
+                          "default": false,
+                          "description": "Report only the tabs in the whitespace that starts a line.",
+                          "type": "boolean"
                         }
                       },
                       "type": "object"
@@ -6612,6 +6732,73 @@
             "split-command-output": {
               "$ref": "#/definitions/rule",
               "description": "An unquoted `$(...)` among the elements of an array assignment is split into words and globbed."
+            },
+            "statement-blank-lines": {
+              "description": "More blank lines than `max` right before a statement (the first statement of a file may have one more; arms and closers of blocks are not checked).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "max": {
+                          "default": 1,
+                          "description": "The longest run of blank lines allowed before a statement.",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "statement-indent": {
+              "description": "A statement, its closing parenthesis or a comment between statements is not at the column its block depth gives (depth times `size`). Only for languages whose commands open and close blocks.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allow_unindented": {
+                          "default": false,
+                          "description": "Accept a token at column 0 whatever its depth.",
+                          "type": "boolean"
+                        },
+                        "size": {
+                          "default": 2,
+                          "description": "Columns per block depth.",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "statement-wrapping": {
               "$ref": "#/definitions/rule",
@@ -9809,6 +9996,7 @@
       "description": "Presets (`preset:<language>/<name>`) or config files, applied in order.",
       "items": {
         "examples": [
+          "preset:cmake/cmake-lint",
           "preset:cpp/chromium",
           "preset:cpp/gnu",
           "preset:cpp/google",

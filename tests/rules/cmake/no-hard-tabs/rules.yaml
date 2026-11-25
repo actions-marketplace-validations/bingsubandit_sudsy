@@ -1,0 +1,4 @@
+no-hard-tabs:
+  level: warn
+  options:
+    indentation_only: true

@@ -95,6 +95,8 @@ def install(spec, catalog, version, prefix):
         if not (prefix / spec.get("dir", spec["pip"])).is_dir():
             if subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True).returncode == 0:
                 run([sys.executable, "-m", "pip", "install", "--quiet", "--target", prefix, f"{spec['pip']}=={version}"], ROOT)
+            elif shutil.which("uv"):  # no pip, but uv: it installs the dependencies too (cmakelang needs six)
+                run(["uv", "pip", "install", "--quiet", "--link-mode=copy", "--target", prefix, f"{spec['pip']}=={version}"], ROOT)
             else:  # no pip on the host: the tool's wheel from PyPI, unpacked (a tool without dependencies, as ruff)
                 files = json.load(urllib.request.urlopen(f"https://pypi.org/pypi/{spec['pip']}/{version}/json"))["urls"]
                 machine = platform.machine().lower()

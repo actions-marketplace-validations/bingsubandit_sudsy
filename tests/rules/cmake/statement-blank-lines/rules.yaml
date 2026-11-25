@@ -1,0 +1,4 @@
+statement-blank-lines:
+  level: warn
+  options:
+    max: 1

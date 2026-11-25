@@ -1,0 +1,5 @@
+documented-command:
+  level: warn
+  options:
+    commands: [function, macro]
+    doc_kinds: [LineComment]

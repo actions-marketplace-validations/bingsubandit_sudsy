@@ -18,7 +18,7 @@ Blocked on a decision:
 |---|---|---|---|---|
 | PHP | lint PHPStan | 36.1% | 48.9 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
 
-Not measured: C / C++ lint clang-tidy (no target, blocked); CMake lint cmake-lint (no target, blocked).
+Not measured: C / C++ lint clang-tidy (no target, blocked).
 
 New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format.
 
@@ -165,6 +165,27 @@ Ranked sets (greedy, `scripts/parity_gaps.py`: fix the causes from the top toget
 13. spacing Rpar|Lbrace in Block (e.g. `) {`): +20 files, 341 equal after it
 14. spacing Ident|Amp in ParenGroup (e.g. `A &`): +16 files, 357 equal after it
 15. spacing Ident|Lpar in DeclaratorGroup (e.g. `ReturnT (`): +15 files, 372 equal after it
+
+## cmake-lint
+
+Lint: target 97.2% (124892 of 128501, 3609 missed, measured on 92bc171a); rules by missed findings:
+1. `C0113` (979 missed)
+2. `C0307` (756 missed)
+3. `R0915` (442 missed)
+4. `W0105` (427 missed)
+5. `R0912` (406 missed)
+6. `E1120` (142 missed)
+7. `E1126` (91 missed)
+8. `W0106` (86 missed)
+9. `C0103` (69 missed)
+10. `E1121` (41 missed)
+11. `C0301` (40 missed)
+12. `C0327` (37 missed)
+13. `R0913` (31 missed)
+14. `E1122` (26 missed)
+15. `E1125` (8 missed)
+
+7 more rules: 28 missed.
 
 ## csharpier
 

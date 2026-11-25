@@ -92,6 +92,19 @@ pub struct Step {
     pub depth: u32,
 }
 
+impl Step {
+    /// The column the command is written at: its depth times the columns of one level. The
+    /// layout of a language and the indent lint both take their indent from here.
+    pub fn column(self, size: usize) -> usize {
+        self.depth as usize * size
+    }
+
+    /// The depth of the commands after this one: inside the block an opener or an arm starts.
+    pub fn after(self) -> u32 {
+        self.depth + matches!(self.role, Role::Open | Role::Arm) as u32
+    }
+}
+
 struct Open {
     block: u8,
     at: u32,
@@ -203,6 +216,14 @@ impl Pairing {
         }
     }
 
+    /// The opening words of the blocks the next command stands in, innermost first.
+    pub fn enclosing(&self) -> impl Iterator<Item = &'static str> + '_ {
+        self.stack
+            .iter()
+            .rev()
+            .map(|o| self.blocks[o.block as usize].open)
+    }
+
     /// The problems, in the order found, after the last command: the blocks still open come last.
     pub fn finish(mut self) -> Vec<Problem> {
         while let Some(open) = self.stack.pop() {
@@ -226,6 +247,20 @@ mod tests {
         Block::plain("foreach", "endforeach"),
         Block::plain("function", "endfunction"),
     ];
+
+    #[test]
+    fn enclosing_lists_open_blocks_innermost_first() {
+        let mut p = Pairing::new(&BLOCKS);
+        for w in ["function", "if", "else", "foreach"] {
+            p.word(w, 0);
+        }
+        assert_eq!(
+            p.enclosing().collect::<Vec<_>>(),
+            ["foreach", "if", "function"]
+        );
+        p.word("endforeach", 0);
+        assert_eq!(p.enclosing().next(), Some("if"));
+    }
 
     /// The roles with their depth as `o0 a0 c0 .` and the faults as `code@at`.
     fn run(words: &str) -> (String, Vec<String>) {

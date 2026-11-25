@@ -1,16 +1,136 @@
-# Style options of the reference formatters, for the README "Highly configurable" table (xtask/full/src/beyond.rs).
-# `language` is the Sudsy language id; `options` counts every documented setting or flag of the tool that changes
-# how that language's code is written, the shared ones (line width, indent, line ending) and experimental or preview
-# ones included, as the Sudsy count does. Not counted: modes (dry run, check, range, imports only), file selection,
-# deprecated settings, pragmas, and settings without effect on the language. `source` is where to check it.
-- {language: js, name: JavaScript / TypeScript, tool: Prettier, options: 17, source: "https://prettier.io/docs/options"}
-- {language: css, name: CSS / SCSS / Less, tool: Prettier, options: 5, source: "https://prettier.io/docs/options"}
-- {language: html, name: HTML, tool: Prettier, options: 8, source: "https://prettier.io/docs/options"}
-- {language: yaml, name: YAML, tool: Prettier, options: 6, source: "https://prettier.io/docs/options"}
-- {language: graphql, name: GraphQL, tool: Prettier, options: 5, source: "https://prettier.io/docs/options"}
-- {language: python, name: Python, tool: ruff format, options: 10, source: "https://docs.astral.sh/ruff/settings/#format"}
-- {language: shell, name: Shell, tool: shfmt, options: 7, source: "https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd"}
-- {language: java, name: Java, tool: google-java-format, options: 8, source: "https://github.com/google/google-java-format#from-the-command-line"}
-- {language: protobuf, name: Protobuf, tool: buf format, options: 0, source: "https://buf.build/docs/format/style"}
-- {language: hcl, name: Terraform (HCL), tool: terraform fmt, options: 0, source: "https://developer.hashicorp.com/terraform/cli/commands/fmt"}
-- {language: csharp, name: C#, tool: CSharpier, options: 4, source: "https://csharpier.com/docs/Configuration"}
+# Style options of every reference formatter of support.yaml, for the README "Highly configurable" table (xtask/full/src/beyond.rs).
+# One row per format tool of a support.yaml row: `language` is the first language id of that row, `tool` the tool name there;
+# codegen fails when a tool has no row or a row has no tool. `options` counts every documented setting or flag of the tool
+# that changes how that language's code is written, the shared ones (line width, indent, line ending, final newline) and
+# experimental or preview ones included, as the Sudsy count does (every option of the schema). Not counted: modes (dry run,
+# check, range, imports only), file selection, parser dialect, deprecated settings, pragmas, templating, settings without
+# effect on the language, and settings that only change code of another language embedded in the file (a script block, a
+# code fence): those belong to that language's row. `source` is where to check it; `note` says how the number was counted.
+# The same rules for every tool:
+# - A setting that groups named fields (clang-format BraceWrapping, SortIncludes) counts its fields, not the group. A table
+#   of one shape under many names (sqlfluff `layout:type:<element>`, clang-format IncludeCategories) counts the shape's
+#   keys once; a list of values counts one.
+# - A rule switch (a rule that can be turned on or off: ktlint `ktlint_standard_<rule>`, PSScriptAnalyzer `Enable`,
+#   sqlfluff rule selection, PHP-CS-Fixer fixer) counts one setting, plus its own options. Only rules that change how code
+#   is written count (not rules that only report, not fixers that can change behaviour: PHP-CS-Fixer "risky"). Sudsy counts
+#   the same way: a switchable rewrite is an option of the schema (a boolean or choice each), and the one option that
+#   switches rules by id (`format_rules`) counts one per rule it can name (the shared rules that rewrite the source).
+#   The rules of a language's `format.rules` have no switch and are no settings; its lint rules with fixes are not format
+#   options, as the lint-only checks of the tools are not.
+# - Version: the one of scripts/parity_tools.json and docs/languages.md; a tool without a pinned version: the latest at the
+#   time of counting (Biome 2.6.9, clang-format 23.1.5).
+- language: js
+  tool: Prettier
+  options: 17
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, useTabs, semi, singleQuote, quoteProps, jsxSingleQuote, trailingComma, bracketSpacing, objectWrap, bracketSameLine, arrowParens, endOfLine, embeddedLanguageFormatting, singleAttributePerLine, experimentalTernaries, experimentalOperatorPosition (3.9.10; each checked to change output on a small input)"
+- language: python
+  tool: ruff format
+  options: 11
+  source: "https://docs.astral.sh/ruff/settings/#format"
+  note: "ruff config format (preview, indent-style, quote-style, nested-string-quote-style, skip-magic-trailing-comma, line-ending, docstring-code-format, docstring-code-line-length; not exclude) plus line-length, indent-width, target-version (changes with-statement parentheses); 0.17.4"
+- language: protobuf
+  tool: buf format
+  options: 0
+  source: "https://buf.build/docs/reference/cli/buf/format/"
+  note: "buf format has only the flags --write, --diff, --exit-code, --config, --path, --exclude-path, --disable-symlinks, --error-format, -o (modes and file selection); the style is fixed (1.75.0)"
+- language: hcl
+  tool: terraform fmt
+  options: 0
+  source: "https://developer.hashicorp.com/terraform/cli/commands/fmt"
+  note: "terraform fmt has only -list, -write, -diff, -check, -no-color, -recursive (modes and file selection); the style is fixed (1.17.1)"
+- language: graphql
+  tool: Prettier
+  options: 5
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, useTabs, bracketSpacing, endOfLine (3.9.10; every option changed on a GraphQL sample, the other 12 did not)"
+- language: toml
+  tool: taplo
+  options: 19
+  source: "https://taplo.tamasfe.dev/configuration/formatter-options.html"
+  note: "the formatter options table: align_entries, align_comments, array_trailing_comma, array_auto_expand, array_auto_collapse, compact_arrays, compact_inline_tables, inline_table_expand, compact_entries, column_width, indent_tables, indent_entries, indent_string, trailing_newline, reorder_keys, reorder_arrays, reorder_inline_tables, allowed_blank_lines, crlf"
+- language: html
+  tool: Prettier
+  options: 8
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, useTabs, bracketSameLine, htmlWhitespaceSensitivity, singleAttributePerLine, endOfLine, embeddedLanguageFormatting; the JavaScript and CSS options only change the script and style blocks (3.9.10)"
+- language: vue
+  tool: Prettier
+  options: 18
+  source: "https://prettier.io/docs/options"
+  note: "the 8 HTML options, vueIndentScriptAndStyle, and the 9 that change the template expressions (singleQuote, bracketSpacing, objectWrap, arrowParens, experimentalOperatorPosition, experimentalTernaries, quoteProps, trailingComma, semi), each checked on a template; Svelte adds the prettier-plugin-svelte settings (not counted: Sudsy side is Vue)"
+- language: angular
+  tool: Prettier
+  options: 15
+  source: "https://prettier.io/docs/options"
+  note: "the 8 HTML options and the 7 that change the Angular expressions and bindings (singleQuote, bracketSpacing, objectWrap, arrowParens, experimentalOperatorPosition, quoteProps, trailingComma), each checked with the angular parser (3.9.10)"
+- language: css
+  tool: Prettier
+  options: 6
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, useTabs, singleQuote, endOfLine, and trailingComma (SCSS maps); each checked on CSS, SCSS and Less samples (3.9.10)"
+- language: markdown
+  tool: Prettier
+  options: 5
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, proseWrap, endOfLine, embeddedLanguageFormatting; useTabs has no effect on Markdown, the code options only change fenced code (3.9.10)"
+- language: yaml
+  tool: Prettier
+  options: 7
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, singleQuote, bracketSpacing, proseWrap, endOfLine, trailingComma (wrapped flow sequences); useTabs has no effect (3.9.10)"
+- language: json
+  tool: Prettier
+  options: 7
+  source: "https://prettier.io/docs/options"
+  note: "printWidth, tabWidth, useTabs, bracketSpacing, objectWrap, endOfLine, trailingComma (.jsonc); quoteProps and singleQuote only apply to .json5 (3.9.10)"
+- language: json
+  tool: Biome
+  options: 9
+  source: "https://biomejs.dev/reference/configuration/#json"
+  note: "the json.formatter keys of configuration_schema.json: indentStyle, indentWidth, lineEnding, lineWidth, trailingCommas, trailingNewline, bracketSpacing, delimiterSpacing, expand (not enabled); Biome 2.6.9"
+- language: powershell
+  tool: Invoke-Formatter
+  options: 33
+  source: "https://github.com/PowerShell/PSScriptAnalyzer/tree/1.25.0/docs/Rules"
+  note: "the six rules of the CodeFormatting settings, each Enable switch plus its settings: PlaceOpenBrace 4, PlaceCloseBrace 4, UseConsistentIndentation 4, UseConsistentWhitespace 10, AlignAssignmentStatement 7, UseCorrectCasing 4 (1.25.0)"
+- language: php
+  tool: PHP-CS-Fixer
+  options: 390
+  source: "https://cs.symfony.com/doc/rules/index.html"
+  note: "206 fixers that are neither deprecated nor risky (one switch each) plus their 182 options, plus the config settings indent and lineEnding; docs/rules of 3.95.31"
+- language: java
+  tool: google-java-format
+  options: 8
+  source: "https://github.com/google/google-java-format#from-the-command-line"
+  note: "CommandLineOptionsParser of 2.0.0: --style (google, aosp), --max-line-length, --skip-sorting-imports, --skip-removing-unused-imports, --skip-reflowing-long-strings, --skip-javadoc-formatting, --skip-reordering-modifiers, --cleanup; not --fix-imports-only, --lines, --offset, --length"
+- language: kotlin
+  tool: ktlint
+  options: 101
+  source: "https://github.com/pinterest/ktlint/blob/1.8.0/documentation/release-latest/docs/rules/configuration-ktlint.md"
+  note: "85 rule switches (ktlint_standard_<rule>) of the rules that can autocorrect, 16 properties: ktlint_code_style, indent_style, indent_size, max_line_length, insert_final_newline, ij_kotlin_allow_trailing_comma, ij_kotlin_allow_trailing_comma_on_call_site, ij_kotlin_imports_layout, ij_kotlin_indent_before_arrow_on_new_line, ij_kotlin_line_break_after_multiline_when_entry and 6 ktlint_* wrapping and annotation settings; not the 17 report-only rules and the 4 naming and back-ticked settings (1.8.0)"
+- language: shell
+  tool: shfmt
+  options: 8
+  source: "https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/shfmt.1.scd"
+  note: "-i, -bn, -ci, -sr, -kp, -fn, -mn, -s; not -ln and -p (dialect), -l, -w, -d, -f (modes) (3.14.1)"
+- language: sql
+  tool: sqlfluff
+  options: 68
+  source: "https://docs.sqlfluff.com/en/stable/configuration/default_configuration.html"
+  note: "the layout and capitalisation rules (--rules layout,capitalisation): 20 rule switches, their 24 rule settings, max_line_length, 15 [sqlfluff:indentation] keys (not template_blocks_indent), and the 8 keys of [sqlfluff:layout:type:*] (spacing_before, spacing_after, spacing_within, line_position, align_within, align_scope, keyword_line_position, keyword_line_position_exclusions); 4.5.0"
+- language: csharp
+  tool: CSharpier
+  options: 4
+  source: "https://csharpier.com/docs/Configuration"
+  note: "printWidth, useTabs, indentSize, endOfLine; xmlWhitespaceSensitivity is for XML only (1.3.0)"
+- language: xml
+  tool: CSharpier XML
+  options: 5
+  source: "https://csharpier.com/docs/Configuration"
+  note: "printWidth, useTabs, indentSize, endOfLine, xmlWhitespaceSensitivity (1.3.0)"
+- language: c
+  tool: clang-format
+  options: 257
+  source: "https://clang.llvm.org/docs/ClangFormatStyleOptions.html"
+  note: "--dump-config leaves of the C++ style: 249 fields of 161 options (a group counts its fields) plus 8 list options it omits when empty (QualifierOrder, RawStringFormats, Macros, TypeNames and 4 more); not BasedOnStyle, Language, DisableFormat, deprecated, Java, JavaScript, Objective-C, JSON, TableGen and Verilog options; 23.1.5"

@@ -35,6 +35,10 @@ pub static RULES: &[&dyn Rule] = &[
     &crate::redundant_return_type::RedundantReturnType,
     &crate::heading_style::HeadingStyle,
     &crate::hard_tabs::NoHardTabs,
+    &crate::declared_name::DeclaredNamePattern,
+    &crate::documented_command::DocumentedCommand,
+    &crate::statement_blank_lines::StatementBlankLines,
+    &crate::statement_indent::StatementIndent,
 ];
 
 rule! {

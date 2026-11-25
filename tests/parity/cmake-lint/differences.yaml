@@ -1,0 +1,29 @@
+# Out of both sides: the 47 files cmake-lint cannot parse (it crashes; scripts/parity_cmake_lint.py turns the crash into the pseudo finding E9999, `unreadable` in scripts/parity_tools.json drops the file).
+# C0307 statement-indent, named causes: cmake-lint 0.6.13 predates `block()` and does not indent a `block` body (502 missed and 1,460 extra findings, all in files with a `block(` command);
+# tab-indented lines (75 missed: Sudsy leaves them to no-hard-tabs); 179 missed in other files, not classified (in the one sampled, opencv/samples/CMakeLists.txt, cmake-lint's own tree nests the file inside an `if`).
+# Not classified: C0103 69 missed, documented-command 45 extra, declared-name-pattern 3 extra (`set(... CACHE STRING INTERNAL)` forms are handled; the rest are single lines).
+target: 97.2
+measured: {covered: 124892, total: 128501, main: '92bc171a'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  C0113: 979
+  C0307: 756
+  R0915: 442
+  W0105: 427
+  R0912: 406
+  E1120: 142
+  E1126: 91
+  W0106: 86
+  C0103: 69
+  E1121: 41
+  C0301: 40
+  C0327: 37
+  R0913: 31
+  E1122: 26
+  E1125: 8
+  C0304: 6
+  R0911: 6
+  C0114: 5
+  C0201: 5
+  C0112: 2
+  C0321: 2
+  W0101: 2

@@ -1,0 +1,5 @@
+max-line-length:
+  level: warn
+  options:
+    max: 10
+    allow_non_breakable_words: false

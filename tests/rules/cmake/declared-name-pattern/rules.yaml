@@ -1,0 +1,10 @@
+declared-name-pattern:
+  level: warn
+  options:
+    names: ["set:0:variable", "list LENGTH:2:variable", "function:0:function", "function:1+:argument", "foreach:0:argument"]
+    markers: ["PARENT_SCOPE:parent_scope", "CACHE:cache", "CACHE INTERNAL:internal"]
+    scopes: [":directory", "function:local", "macro:parent_scope"]
+    patterns: ["directory:[A-Z][0-9A-Z_]+", "local:[a-z][a-z0-9_]+", "cache:[A-Z][0-9A-Z_]+", "internal:_[A-Z][0-9A-Z_]+", "parent_scope:[a-z][a-z0-9_]+", "function:[0-9a-z_]+", "argument:[a-z][a-z0-9_]+"]
+    ignore_pattern: "^ENV\\{"
+    reference_start: "${"
+    reference_end: "}"

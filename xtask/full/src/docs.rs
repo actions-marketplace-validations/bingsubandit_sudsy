@@ -105,7 +105,11 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             ("support-ready", support.ready),
             (
                 "beyond",
-                crate::beyond::render(providers, include_str!("../tool-options.yaml"))?,
+                crate::beyond::render(
+                    providers,
+                    include_str!("../tool-options.yaml"),
+                    include_str!("../support.yaml"),
+                )?,
             ),
         ],
     )?);

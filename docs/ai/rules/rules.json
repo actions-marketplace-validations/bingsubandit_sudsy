@@ -187,6 +187,190 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A name that a command declares (a variable it sets, a function or its parameters) does not match the pattern of its class. Only for languages whose commands open and close blocks.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "set(lower 1)\nset(UPPER 1)\nset(lc \"\" CACHE STRING \"x\")\nset(_OK \"\" CACHE INTERNAL \"x\")\nset(lc2 \"\" CACHE STRING INTERNAL)\nset(ENV{any} 1)\nset(${x} 1)\nset(${x}_a 1)\nlist(LENGTH UPPER out)\nforeach(Item a b)\nendforeach()\nfunction(F_n Arg)\n  set(Local 1)\n  set(local 1)\n  set(xy 1 PARENT_SCOPE)\nendfunction()\nmacro(m)\n  set(xy 1)\n  set(XY 1)\nendmacro()\n",
+        "language": "cmake",
+        "spans": [
+          {
+            "column": 5,
+            "length": 5,
+            "line": 1
+          },
+          {
+            "column": 5,
+            "length": 2,
+            "line": 3
+          },
+          {
+            "column": 5,
+            "length": 3,
+            "line": 5
+          },
+          {
+            "column": 5,
+            "length": 6,
+            "line": 8
+          },
+          {
+            "column": 19,
+            "length": 3,
+            "line": 9
+          },
+          {
+            "column": 9,
+            "length": 4,
+            "line": 10
+          },
+          {
+            "column": 10,
+            "length": 3,
+            "line": 12
+          },
+          {
+            "column": 14,
+            "length": 3,
+            "line": 12
+          },
+          {
+            "column": 7,
+            "length": 5,
+            "line": 13
+          },
+          {
+            "column": 7,
+            "length": 2,
+            "line": 19
+          }
+        ]
+      },
+      "fix": null,
+      "id": "declared-name-pattern",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "Rows `command:position:class` (`command` may be `command FIRST-ARGUMENT`): the argument at the position (`0`, `-1` for the last, or `1+` for the rest) are names of the class; the class `variable` is told by `markers` and `scopes`.",
+          "name": "names",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "Rows `WORD:class`: a command with the argument WORD (or the arguments `WORD WORD`, in a row) declares a variable of the class; the last row that fits wins.",
+          "name": "markers",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "Rows `block:class`: a variable set inside the block that starts with the command `block` (the innermost listed one) has the class; the row with no block is the class outside them. An empty class is not checked.",
+          "name": "scopes",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "Rows `class:regex`: the regex a name of the class must match from its start.",
+          "name": "patterns",
+          "type": "list"
+        },
+        {
+          "default": "",
+          "description": "Where a reference to another name starts inside a name (`${` in CMake); the references, up to the matching `reference_end`, are cut out before the name is matched, and a name that is only references is left out.",
+          "name": "reference_start",
+          "type": "string"
+        },
+        {
+          "default": "",
+          "description": "Where a reference ends (`}` in CMake).",
+          "name": "reference_end",
+          "type": "string"
+        },
+        {
+          "default": "",
+          "description": "A regex; a name that matches is left out.",
+          "name": "ignore_pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "cmake/cmake-lint"
+      ],
+      "upstream": [
+        {
+          "id": "C0103",
+          "partial": false,
+          "tool": "cmake-lint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A command of the `commands` option (a function or macro definition) with no comment on the line right before it, or with a comment that has no text.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "# Does a thing.\nfunction(a)\nendfunction()\n\n# Detached.\n\nfunction(b)\nendfunction()\n#\nmacro(c)\nendmacro()\nset(d 1)\n#[[ block ]]\nfunction(e)\nendfunction()\n# Text.\n#\nfunction(f)\nendfunction()\n",
+        "language": "cmake",
+        "spans": [
+          {
+            "column": 1,
+            "length": 8,
+            "line": 7
+          },
+          {
+            "column": 1,
+            "length": 5,
+            "line": 10
+          },
+          {
+            "column": 1,
+            "length": 8,
+            "line": 14
+          }
+        ]
+      },
+      "fix": null,
+      "id": "documented-command",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "The commands that need a comment (case ignored).",
+          "name": "commands",
+          "type": "list"
+        },
+        {
+          "default": [],
+          "description": "The kinds of comment token that document (none listed: every comment does); a comment of another kind counts as one with no text.",
+          "name": "doc_kinds",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "cmake/cmake-lint"
+      ],
+      "upstream": [
+        {
+          "id": "C0111",
+          "partial": false,
+          "tool": "cmake-lint"
+        },
+        {
+          "id": "C0112",
+          "partial": false,
+          "tool": "cmake-lint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "Headings are written in more than one style: `#` in front of the text (atx) or text over `===` or `---` (setext). Style `consistent` takes the first heading's. The fix rewrites a heading of one line, level 1 or 2.",
       "example": {
         "config": null,
@@ -353,6 +537,7 @@
         }
       ],
       "presets": [
+        "cmake/cmake-lint",
         "java/google",
         "kotlin/ktlint",
         "markdown/markdownlint",
@@ -364,6 +549,11 @@
           "id": "LineLength",
           "partial": true,
           "tool": "checkstyle"
+        },
+        {
+          "id": "C0301",
+          "partial": false,
+          "tool": "cmake-lint"
         },
         {
           "id": "max-line-length",
@@ -731,18 +921,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "---\ntitle:\tx\n---\n\nA\ttab in text.\n\n```\n\tcode\n```\n\nNo tab here.\n",
-        "language": "markdown",
+        "input": "if(A)\n  \tset(x 1)\n  set(y\t2)\nendif()\n",
+        "language": "cmake",
         "spans": [
           {
-            "column": 2,
+            "column": 3,
             "length": 1,
-            "line": 5
-          },
-          {
-            "column": 1,
-            "length": 1,
-            "line": 8
+            "line": 2
           }
         ]
       },
@@ -757,12 +942,24 @@
           "description": "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
           "name": "ignore_kinds",
           "type": "list"
+        },
+        {
+          "default": false,
+          "description": "Report only the tabs in the whitespace that starts a line.",
+          "name": "indentation_only",
+          "type": "bool"
         }
       ],
       "presets": [
+        "cmake/cmake-lint",
         "markdown/markdownlint"
       ],
       "upstream": [
+        {
+          "id": "C0306",
+          "partial": false,
+          "tool": "cmake-lint"
+        },
         {
           "id": "MD010",
           "partial": true,
@@ -829,9 +1026,15 @@
       "options": [],
       "presets": [
         "html/html-validate-recommended",
+        "cmake/cmake-lint",
         "yaml/yamllint"
       ],
       "upstream": [
+        {
+          "id": "C0303",
+          "partial": false,
+          "tool": "cmake-lint"
+        },
         {
           "id": "no-trailing-spaces",
           "partial": false,
@@ -1073,6 +1276,94 @@
           "id": "key-ordering.ignored-keys",
           "partial": false,
           "tool": "yamllint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "More blank lines than `max` right before a statement (the first statement of a file may have one more; arms and closers of blocks are not checked).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "\n\nset(a 1)\n\nset(b 2)\n\n\nset(c 3)\nif(x)\n\n\nelse()\n\n\nendif()\n",
+        "language": "cmake",
+        "spans": [
+          {
+            "column": 1,
+            "length": 3,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "statement-blank-lines",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": 1,
+          "description": "The longest run of blank lines allowed before a statement.",
+          "name": "max",
+          "type": "int"
+        }
+      ],
+      "presets": [
+        "cmake/cmake-lint"
+      ],
+      "upstream": [
+        {
+          "id": "C0305",
+          "partial": false,
+          "tool": "cmake-lint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A statement, its closing parenthesis or a comment between statements is not at the column its block depth gives (depth times `size`). Only for languages whose commands open and close blocks.",
+      "example": {
+        "config": null,
+        "fixed": "if(A)\n  set(x 1)\n  # fine: the depth of the body\nelse()\n  foreach(i a b)\n    message(STATUS\n      ${i}\n    )\n  endforeach()\nendif()\n",
+        "input": "if(A)\n    set(x 1)\n  # fine: the depth of the body\nelse()\n  foreach(i a b)\n    message(STATUS\n      ${i}\n    )\n  endforeach()\nendif()\n",
+        "language": "cmake",
+        "spans": [
+          {
+            "column": 5,
+            "length": 3,
+            "line": 2
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "statement-indent",
+      "languages": [
+        "all"
+      ],
+      "options": [
+        {
+          "default": 2,
+          "description": "Columns per block depth.",
+          "name": "size",
+          "type": "int"
+        },
+        {
+          "default": false,
+          "description": "Accept a token at column 0 whatever its depth.",
+          "name": "allow_unindented",
+          "type": "bool"
+        }
+      ],
+      "presets": [
+        "cmake/cmake-lint"
+      ],
+      "upstream": [
+        {
+          "id": "C0307",
+          "partial": false,
+          "tool": "cmake-lint"
         }
       ]
     },

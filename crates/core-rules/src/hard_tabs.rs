@@ -17,12 +17,20 @@ rule! {
         default: Off,
         description: "A tab character in a line. Each run of tabs is one report.",
         example: "\tindented with a tab   // reported at the tab",
-        options: [OptionDecl {
-            name: "ignore_kinds",
-            default: Opt::List(&[]),
-            check: Check::Any,
-            description: "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
-        }],
+        options: [
+            OptionDecl {
+                name: "ignore_kinds",
+                default: Opt::List(&[]),
+                check: Check::Any,
+                description: "Kinds of tokens whose tabs are not reported (for example the code of a fence).",
+            },
+            OptionDecl {
+                name: "indentation_only",
+                default: Opt::Bool(false),
+                check: Check::Any,
+                description: "Report only the tabs in the whitespace that starts a line.",
+            },
+        ],
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
@@ -41,9 +49,18 @@ rule! {
                 .collect()
         };
         let bytes = file.text.as_bytes();
+        let leading = ctx.options.bool("indentation_only");
+        // With `indentation_only`: whether only blanks lie between the line start and `at`.
+        let mut line_start = true;
         let mut at = 0;
         while at < bytes.len() {
-            if bytes[at] != b'\t' {
+            let b = bytes[at];
+            if b == b'\n' || b == b'\r' {
+                line_start = true;
+            } else if b != b'\t' && b != b' ' {
+                line_start = false;
+            }
+            if bytes[at] != b'\t' || (leading && !line_start) {
                 at += 1;
                 continue;
             }
