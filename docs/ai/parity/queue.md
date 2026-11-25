@@ -218,10 +218,12 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by mi
 ## gersemi
 
 Format: unclassified 0 of 851 differing files (0%).
-1. `keyword-sections` (622 files): gersemi's definitions of a known command hold what CMake's help only says in prose or not at all (a keyword of a form such as `FILE_SET`, `IN ITEMS` or `HINTS ENV x`, which form words keep their first argument on the line since `list(APPEND NAME` does and `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not, commands that keep more than four plain values on one line); the table generated from the help has none of it, so the layout chooses by its generic rules
-2. `condition-layout` (169 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
-3. `blank-before-closer-comment` (30 files): gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
-4. `unknown-command-layout` (30 files): a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
+1. `keyword-sections` (623 files): gersemi's definitions of a known command hold what CMake's help only says in prose or not at all (a keyword of a form such as `FILE_SET`, `IN ITEMS` or `HINTS ENV x`, which form words keep their first argument on the line since `list(APPEND NAME` does and `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not, commands that keep more than four plain values on one line); the table generated from the help has none of it, so the layout chooses by its generic rules
+2. `condition-layout` (171 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
+3. `unknown-command-layout` (33 files): a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
+4. `empty-file` (14 files): a file of only blank lines (or none) is `\n` in gersemi; Sudsy writes an empty file
+5. `blank-before-closer-comment` (8 files): gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
+6. `template-lines` (2 files): gersemi accepts a line `@VAR@` on its own (`run_nvcc.cmake`) as a command; Sudsy rejects the file
 
 ## google-java-format
 

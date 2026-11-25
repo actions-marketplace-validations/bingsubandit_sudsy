@@ -531,7 +531,7 @@
    "task": "Lint",
    "tool": "cmake-lint",
    "version": "0.6.13",
-   "corpus": "the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others)",
+   "corpus": "the same corpus with all 9066 files",
    "files": 9066,
    "bytes": 22756981,
    "sudsy": {
