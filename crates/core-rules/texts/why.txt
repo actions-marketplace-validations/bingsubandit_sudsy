@@ -77,3 +77,10 @@ mistake or as code from another project. The convention itself is a choice of th
 is why the expression is an option.
 
 To fix, rename the declaration and its uses.
+
+== unused-import
+An import that nothing uses is dead code. It misleads the reader about what the file depends on,
+and where an import runs the module, as in Python, it still costs the time to load it and fails
+where the module is not installed.
+
+To fix, remove the import.
