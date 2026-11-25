@@ -16,8 +16,12 @@ rule! {
         id: "no-duplicate-sections",
         category: Correctness,
         default: Warn,
-        description: "Two sections of one file have the same name (EditorConfig: glob). Readers \
-                  merge them or keep only one, so the settings of the other may be lost; merge them.",
+        description: "Reports a section that has the same name as an earlier section of the file (INI \
+              and EditorConfig: the section header, for EditorConfig the glob).",
+        why: "Readers of the format handle repeated sections in different ways: some merge them, \
+              some keep only the last, so the settings of one of them may be lost or applied in \
+              an order that is hard to see.\n\
+              To fix, merge the two sections into one.",
         example: "[core]\nbare = false\n[core]   # reported: the same section again",
         tags: &["sections"],
     }

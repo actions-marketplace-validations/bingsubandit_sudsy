@@ -25,10 +25,17 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "The body of an `if`, `else`, loop or `when` entry is a statement without \
-                  braces. Style `always` wants braces on every body; `chain` only on the branches \
-                  of a chain where one has braces, spans lines or passes the line width, and on a \
-                  loop body on its own line. `else if` is fine.",
+        description: "Reports the body of an `if`, `else`, loop or `when` entry that is one statement \
+              without braces (`if (a) b();`, `else c();`, `for (;;) d();`, `while (x) y();`). \
+              `else if` is not reported. Style `always` (default) wants braces on every body; \
+              style `chain` wants them on the branches of a chain only where one branch has \
+              braces, spans lines or passes the line width, and on a loop body that stands on \
+              its own line. The language's `curly_style` option overrides the style when the \
+              formatter runs the rule. The fix adds the braces.",
+        why: "Without braces a second line added later to the body looks as if it belongs to the \
+              `if` or loop, but it runs every time. That is how the 2014 Apple `goto fail` bug \
+              happened, and braces make the extent of the body visible.\n\
+              To fix, add the braces; the fix does it.",
         example: "if (x) return;",
         options: [
             OptionDecl {

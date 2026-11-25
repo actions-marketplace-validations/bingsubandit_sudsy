@@ -1,6 +1,15 @@
 id: no-with
 message: "Unexpected use of 'with' statement."
-description: A `with` statement.
+description: >-
+  Reports a `with` statement.
+why: >-
+  Inside `with (obj) { ... }` every name may be a property of `obj` or a variable, and which one it
+  is depends on `obj` at run time, so neither a reader nor a tool can tell what `b` in `with (a) { b
+  }` refers to. The statement is a syntax error in strict mode and in ES modules, so a file that
+  uses it cannot be turned into a module later.
+
+  To fix, name the object in each access (`a.b`) or copy the properties you need into variables
+  before the block.
 example: "with (a) { b }   # reported"
 severity: error
 category: suspicious
@@ -8,7 +17,16 @@ rule: { kind: WithStatement }
 ---
 id: no-delete-var
 message: "Variables should not be deleted."
-description: "`delete` applied to a variable name."
+description: >-
+  Reports `delete` applied to a plain variable name, also in parentheses (`delete x`, `delete (x)`).
+  `delete x.y` and `delete x[0]` remove a property and are not reported.
+why: >-
+  `delete` removes object properties, not variables. On a variable it does nothing in sloppy mode
+  (the expression is `false`) and is a syntax error in strict mode and in modules, so the code
+  either has no effect or does not run.
+
+  To fix, assign `undefined` to the variable or leave the scope, or delete the property of an object
+  instead.
 example: "delete x;   # reported"
 severity: error
 category: suspicious
@@ -22,7 +40,15 @@ rule:
 ---
 id: no-octal
 message: "Octal literals should not be used."
-description: A number that starts with `0` and another digit (`017`, `08`).
+description: >-
+  Reports a number literal that starts with `0` followed by another digit, such as `017` or `08`.
+  `0`, `0.5` and the modern forms `0o17`, `0x1F` and `0b11` are not reported.
+why: >-
+  A leading zero makes a legacy octal literal: `017` is 15, not 17. A literal such as `08` or `09`
+  has a digit that is not octal, so it is read as the decimal 8 or 9, which hides the mistake. Both
+  forms are syntax errors in strict mode and in modules.
+
+  To fix, drop the leading zero for a decimal number or write `0o17` for an octal one.
 example: "var n = 017;   # reported"
 severity: error
 category: suspicious
@@ -30,7 +56,16 @@ rule: { kind: NumericLiteral, regex: '^0[0-9]' }
 ---
 id: no-empty-pattern
 message: "Unexpected empty pattern."
-description: A destructuring pattern with nothing in it (`{}`, `[]`).
+description: >-
+  Reports a destructuring pattern with nothing in it: `{}` or `[]` in a declaration, a parameter, an
+  assignment target or nested in another pattern (`var {a: {}} = x`). A default value in a pattern
+  (`{a = {}}`) is not an empty pattern.
+why: >-
+  An empty pattern binds no name, so the statement does nothing but check that the value is not
+  `null` or `undefined`. It is usually a mistake for a default value: `function f({a: {}}) {}` was
+  meant to be `function f({a = {}}) {}`, and the parameter stays without a default.
+
+  To fix, write the names to bind, or the default with `=`.
 example: "var {} = x;   # reported"
 category: suspicious
 rule:
@@ -42,14 +77,31 @@ rule:
 ---
 id: no-sparse-arrays
 message: "Unexpected comma in middle of array."
-description: A hole in an array literal (`[1, , 2]`), reported at its comma.
+description: >-
+  Reports a hole in an array literal, at the extra comma: `[1, , 2]` and `[, 1]`. A single trailing
+  comma (`[1, ]`) is not a hole.
+why: >-
+  A hole is an index with no element. `[1, , 2]` has the length 3, and methods such as `forEach` and
+  `map` skip the hole while `for` loops and spread read it as `undefined`, so the same array behaves
+  differently depending on how it is read. It is nearly always a typo for a single comma.
+
+  To fix, remove the extra comma, or write `undefined` (or `null`) where a value is meant.
 example: "var a = [1, , 2];   # the second comma is reported"
 category: suspicious
 rule: { kind: Elision, parent: { kind: ArrayExpression } }
 ---
 id: no-case-declarations
 message: "Unexpected lexical declaration in case block."
-description: "`let`, `const`, a function or a class declared directly in a `case` clause, where it is visible to the other cases."
+description: >-
+  Reports a `let`, `const`, `using`, function or class declared directly in a `case` or `default`
+  clause. A declaration inside a block in the clause (`case 1: { let a; }`) is not reported, and
+  neither is `var`.
+why: >-
+  A lexical declaration in a `case` clause is scoped to the whole `switch` block, not to the clause,
+  so the other clauses can see the name and, when execution jumps over the declaration, reading it
+  throws a `ReferenceError`. The code reads as if each clause had its own scope, and it does not.
+
+  To fix, put the body of the clause in braces: `case 1: { let b = 1; break; }`.
 example: "switch (a) { case 1: let b = 1; }   # reported"
 severity: off
 category: suspicious
@@ -61,7 +113,17 @@ rule:
 ---
 id: no-async-promise-executor
 message: "Promise executor functions should not be async."
-description: "`new Promise(async ...)`: an error thrown in the executor is lost."
+description: >-
+  Reports `new Promise(async ...)`: an `async` function (or arrow function) as the executor, with or
+  without a second argument.
+why: >-
+  The `Promise` constructor ignores what its executor returns. An error thrown in an `async`
+  executor rejects the promise the executor returned, which nobody holds, so the new promise never
+  settles and the caller waits forever; the error shows up only as an unhandled rejection, if at
+  all.
+
+  To fix, give the executor as a normal function and call `resolve` and `reject` yourself, or drop
+  `new Promise` and write an `async` function that returns the value.
 example: "new Promise(async (resolve) => resolve());   # reported"
 category: suspicious
 rule:
@@ -74,7 +136,15 @@ report-on: $F
 ---
 id: no-unsafe-negation
 message: "Unexpected negating the left operand of an `in` or `instanceof` operator."
-description: "`!a in b` and `!a instanceof B` negate `a`, not the test."
+description: >-
+  Reports `!a in b` and `!a instanceof B`, where the `!` is written without parentheses on the left
+  operand. `!(a in b)` and `(!a) in b` are not reported.
+why: >-
+  The `!` binds tighter than `in` and `instanceof`, so `!a in b` tests whether the key `false` (the
+  negation of `a`) is in `b`, and `!a instanceof B` is always `false` for a boolean. The test the
+  author meant, the negation of the whole expression, is never made.
+
+  To fix, write `!(a in b)` or `!(a instanceof B)`.
 example: "if (!a in b) {}   # reported"
 severity: error
 category: suspicious
@@ -85,7 +155,14 @@ rule:
 ---
 id: no-compare-neg-zero
 message: "Do not compare against -0."
-description: "`x === -0` is true for `0` too; use `Object.is(x, -0)`."
+description: >-
+  Reports a comparison with `-0` on either side of `==`, `!=`, `===`, `!==`, `<`, `<=`, `>` or `>=`.
+  `Object.is(x, -0)` and a comparison with `+0` are not reported.
+why: >-
+  `-0` and `0` are different values but compare as equal: `0 === -0` is `true`. So `x === -0` is
+  also true for plain zero, and the check does not do what it reads like.
+
+  To fix, use `Object.is(x, -0)`, which tells them apart.
 example: "if (x === -0) {}   # reported"
 category: suspicious
 rule:
@@ -95,7 +172,17 @@ rule:
 ---
 id: no-prototype-builtins
 message: "Do not access Object.prototype method directly from an object."
-description: "`obj.hasOwnProperty(k)`, `isPrototypeOf` and `propertyIsEnumerable` called on an object that may not inherit them; use `Object.prototype.hasOwnProperty.call(obj, k)`."
+description: >-
+  Reports a call of `hasOwnProperty`, `isPrototypeOf` or `propertyIsEnumerable` made on an object
+  itself: `obj.hasOwnProperty(k)`, `obj?.hasOwnProperty(k)` and `obj['hasOwnProperty'](k)`. Reading
+  the property without a call, and `Object.prototype.hasOwnProperty.call(obj, k)`, are not reported.
+why: >-
+  The method comes from the prototype chain, and the object may not have it. `Object.create(null)`
+  objects have no `hasOwnProperty`, so the call throws, and data from outside (a parsed JSON with a
+  key `"hasOwnProperty"`) can replace the method with its own value.
+
+  To fix, call it from the prototype: `Object.prototype.hasOwnProperty.call(obj, k)`, or use
+  `Object.hasOwn(obj, k)` where the target supports it.
 example: "a.hasOwnProperty('b');   # reported"
 severity: off
 category: suspicious
@@ -110,7 +197,15 @@ report-on: $M
 ---
 id: no-shadow-restricted-names
 message: "Shadowing of a restricted global name."
-description: "A variable, function, parameter or class named `NaN`, `Infinity`, `undefined`, `eval` or `arguments` (`var undefined;` without a value is left alone)."
+description: >-
+  Reports a variable, function, class, parameter or function-expression name that is `NaN`,
+  `Infinity`, `eval`, `arguments` or `undefined`. `var undefined;` without a value is not reported.
+why: >-
+  These names are read as the global values everywhere else in the program. A local called
+  `undefined` or `NaN` changes what a test such as `x === undefined` means inside its scope, and a
+  variable named `eval` or `arguments` is a syntax error in strict mode.
+
+  To fix, rename the variable.
 example: "var NaN;   # reported"
 severity: error
 category: suspicious
@@ -122,7 +217,16 @@ rule:
 ---
 id: no-var
 message: "Unexpected var, use let or const instead."
-description: "A `var` declaration."
+description: >-
+  Reports a `var` declaration (also `declare var` in TypeScript). `let` and `const` are not
+  reported.
+why: >-
+  A `var` belongs to the whole function, not to the block, and is hoisted: it can be read before its
+  line (as `undefined`) and declared twice in one scope without an error. `let` and `const` are
+  limited to their block, a second declaration is an error, and `const` states that the binding does
+  not change.
+
+  To fix, use `const` where the variable is not assigned again, otherwise `let`.
 example: "var a = 1;   # reported"
 severity: off
 category: style
@@ -130,7 +234,17 @@ rule: { kind: VariableDeclaration, regex: '^(declare\s+)?var\b' }
 ---
 id: prefer-spread
 message: "Use the spread operator instead of '.apply()'."
-description: "`f.apply(undefined, args)` and `o.m.apply(o, args)` with an `args` that is not an array literal."
+description: >-
+  Reports `f.apply(undefined, args)`, `f.apply(null, args)`, `o.m.apply(o, args)` and
+  `o['m'].apply(o, args)`, where the first argument is `null`, `undefined`, or the same object that
+  the method is read from. `f.apply(this, args)`, `o.m.apply(p, args)` with another object, and an
+  array literal or a spread (`...args`) as the arguments are not reported.
+why: >-
+  When the call keeps the same `this`, `apply` only spreads an array into arguments, which the
+  spread syntax says directly: `f(...args)` and `o.m(...args)`. The `apply` form needs the reader to
+  know the first argument is ignored.
+
+  To fix, write the call with `...args`.
 example: "f.apply(undefined, a);   # reported"
 severity: off
 category: style

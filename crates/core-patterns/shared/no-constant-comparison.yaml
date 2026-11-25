@@ -1,7 +1,14 @@
 id: no-constant-comparison
 message: both sides of the comparison are literals, so the result is always the same
 description: >-
-  An equality or comparison of two literals (ruff PLR0133, ESLint no-constant-binary-expression).
+  Reports an equality or a comparison whose two sides are both literals (`1 === 2`, `"a" < "b"`). An
+  operand that is an expression of literals (`1 + 1 === 2`) is not reported.
+why: >-
+  The result of a comparison of two literals is fixed when the code is written, so one branch of the
+  `if` never runs. It is usually a leftover of debugging, or of a value that was meant to be a
+  variable.
+
+  To fix, compare the variable, or replace the test with its result.
 example: 'if (1 === 2) {}'
 severity: warn
 category: suspicious

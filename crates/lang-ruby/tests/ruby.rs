@@ -132,6 +132,14 @@ fn data_after_end_is_kept() {
     }
 }
 
+/// Prism spans a `rescue` clause over the clauses after it; they must be siblings.
+#[test]
+fn rescue_clauses_are_siblings() {
+    let s = "def a\n  b\nrescue A\n  c\nrescue B\n  d\nrescue\n  e\nend\n";
+    assert_lossless(&lang_ruby::provider(), "a.rb", s);
+    assert_eq!(fmt(s), s);
+}
+
 #[test]
 fn syntax_errors_stay_lossless() {
     let parsed = assert_lossless(

@@ -50,8 +50,17 @@ rule! {
         id: "no-duplicate-keys",
         category: Correctness,
         default: Error,
-        description: "A mapping has the same key twice (after decoding escapes and quotes); parsers \
-                  disagree on which value wins.",
+        description: "Reports a key that a mapping has twice, after decoding escapes and quotes (`{\"a\": \
+              1, \"\\u0061\": 2}` has `a` twice). It reads the mappings of the language's grammar: \
+              JSON and JSONC objects, YAML and TOML mappings, JavaScript object literals, and \
+              similar entries of other languages. A YAML merge key (`<<`) may repeat, and the \
+              option `merge_keys: forbid` reports a second one too. The second key is reported, \
+              the first is shown as related.",
+        why: "Parsers disagree on what a duplicate means: many keep the last value, some the \
+              first, some reject the file. The value that is lost is silent, so a file can mean \
+              something different in two tools, and the second entry is often a copy that was \
+              meant to have another name.\n\
+              To fix, remove one of the keys, or give it its own name.",
         example: "{ \"a\": 1, \"a\": 2 }   // reported at the second \"a\"",
         options: [OptionDecl {
             name: "merge_keys",
@@ -187,8 +196,11 @@ rule! {
         id: "no-empty-keys",
         category: Suspicious,
         default: Off,
-        description: "A key is empty or only whitespace (after decoding escapes); some consumers \
-                  cannot address such a property.",
+        description: "Reports a key that is empty or only white space after decoding escapes (`\"\": 4`).",
+        why: "A property with no name cannot be reached the usual ways: a dotted path, a command \
+              line option or an environment variable has no spelling for it, and some consumers \
+              fail on it. It is nearly always a missing name.\n\
+              To fix, give the key a name.",
         example: "{ \"\": 1, \" \": 2 }   // both keys reported",
         tags: &["mapping"],
     }
@@ -241,10 +253,17 @@ rule! {
         id: "key-name-casing",
         category: Style,
         default: Off,
-        description: "A key does not follow one of the allowed naming conventions. The checks are \
-                  those of eslint-plugin-jsonc: a key with punctuation or whitespace never \
-                  matches, `camelCase` also rejects `_` and `-`, `snake_case` and `kebab-case` \
-                  reject capitals. No fix: renaming a key changes the data.",
+        description: "Reports a key that does not follow one of the allowed naming conventions of the \
+              option `allowed` (default `camelCase`; also `PascalCase`, `snake_case`, \
+              `kebab-case`, `SCREAMING_SNAKE_CASE`). A key with punctuation or white space never \
+              matches; `camelCase` also rejects `_` and `-`, and `snake_case` and `kebab-case` \
+              reject capitals. Keys that match one of the `ignored_keys` regexes, and a YAML \
+              merge key (`<<`), are not checked. There is no fix, because renaming a key changes \
+              the data.",
+        why: "Configuration and data files are read by programs and people, and one casing for \
+              all keys lets both guess a key's name without looking it up. A key in another \
+              casing is often a typo or a copy from another file with other conventions.\n\
+              To fix, rename the key and every place that reads it.",
         example: "{ \"first_name\": 1 }   // reported with the default `camelCase`",
         options: [
             OptionDecl {
@@ -271,7 +290,11 @@ rule! {
         if allowed.is_empty() {
             return;
         }
+        let merge_key = grammar.keys().merge.as_deref();
         for (_, key) in entries(node, grammar) {
+            if merge_key.is_some() && merge_key == Some(&*hooks.key_name(grammar, &key, text)) {
+                continue; // a merge key is no key of the data
+            }
             let parts = names::parts_of(grammar, &key, text);
             let whole;
             let names: &[Cow<'_, str>] = match &parts {

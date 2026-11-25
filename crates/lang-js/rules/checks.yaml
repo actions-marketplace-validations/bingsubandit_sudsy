@@ -2,7 +2,16 @@ id: no-dupe-class-members
 family: check
 params: { check: dupe-class-members }
 message: "Duplicate name '{name}'."
-description: A class member declared twice (a getter and a setter may share one, a static and an instance member may not clash).
+description: >-
+  Reports a class member whose name is already used by another member of the class: two methods, two
+  fields, a field and a method, two getters. A getter with its setter may share a name, and so may a
+  `static` and an instance member.
+why: >-
+  When two members have one name, the later one silently replaces the earlier, so the first body is
+  dead code. It is usually a copy-paste mistake where the second member was meant to have another
+  name.
+
+  To fix, rename one of them or delete the one that is not used.
 example: "class A { b() {} b() {} }   # the second b is reported"
 severity: error
 category: suspicious
@@ -11,7 +20,17 @@ id: no-dupe-else-if
 family: check
 params: { check: dupe-else-if }
 message: "This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain."
-description: An `else if` condition that an earlier condition of the chain already covers.
+description: >-
+  Reports an `else if` whose condition cannot be true at that point: it repeats a condition of an
+  earlier branch of the chain (`if (a) {} else if (a) {}`), or each operand of its `||` is a whole
+  earlier condition or an operand of an earlier `||` (`if (a || b) {} else if (a) {}`). A condition
+  that is only implied by an earlier one (`a && b` after `a`) is not found.
+why: >-
+  If an earlier condition was true its branch ran, and if it was false the same condition is false
+  again, so the later branch never runs. This is nearly always a copy-paste slip where the condition
+  was not changed, and the code the author meant to run is the dead one.
+
+  To fix, correct the condition or remove the branch.
 example: "if (a) {} else if (a) {}   # the second a is reported"
 category: suspicious
 ---
@@ -19,7 +38,15 @@ id: no-useless-catch
 family: check
 params: { check: useless-catch }
 message: "Unnecessary {name}."
-description: "A `catch` that only rethrows its error."
+description: >-
+  Reports a `catch` clause whose only statement is `throw` of the caught error, as in `catch (e) {
+  throw e; }`. It is also reported when the `try` has a `finally`. A `catch` that does more, or that
+  throws something else, is not reported.
+why: >-
+  A catch that only rethrows has the same effect as no catch: the error goes on up with its stack,
+  so the clause is noise that makes a reader look for handling that is not there.
+
+  To fix, delete the `catch` (keep the `finally`, if there is one) or handle the error there.
 example: "try { a() } catch (e) { throw e }   # reported"
 severity: off
 category: suspicious
@@ -28,7 +55,17 @@ id: use-isnan
 family: check
 params: { check: use-isnan }
 message: "{name}"
-description: "A comparison with `NaN`, or `NaN` as the discriminant or a case test of a `switch`; use `Number.isNaN`."
+description: >-
+  Reports a comparison with `NaN` (`NaN` or `Number.NaN` on either side of `==`, `!=`, `===`, `!==`,
+  `<`, `>`...), and `NaN` as the `switch` discriminant or as a `case` test. `isNaN(a)` and
+  `Number.isNaN(a)` are not reported.
+why: >-
+  `NaN` is not equal to any value, itself included, so `a === NaN` is always `false` and `a !== NaN`
+  is always `true`; a `switch` on `NaN` never matches a case, because it compares with `===`. The
+  check never does what it reads like.
+
+  To fix, use `Number.isNaN(a)`, which is true only for `NaN`; the global `isNaN` first converts its
+  argument to a number.
 example: "if (a === NaN) {}   # reported"
 severity: error
 category: suspicious
@@ -37,7 +74,18 @@ id: valid-typeof
 family: check
 params: { check: valid-typeof }
 message: "Invalid typeof comparison value."
-description: "`typeof x` compared with a string that is not a type name, or with `undefined`."
+description: >-
+  Reports a `typeof` comparison whose other side is a string that `typeof` never returns (a typo
+  such as `'strnig'`, or `'null'`), or the identifier `undefined` instead of the string
+  `'undefined'`. A string template, a variable and a valid type name are not reported.
+why: >-
+  `typeof` returns one of `"undefined"`, `"object"`, `"boolean"`, `"number"`, `"bigint"`,
+  `"string"`, `"symbol"` or `"function"`. A comparison with any other string is always false, and a
+  typo then silently turns a type check into dead code. `typeof a === undefined` compares a string
+  with the value `undefined`, which is never true either (and `typeof null` is `"object"`, not
+  `"null"`).
+
+  To fix, use one of the eight names, as a string.
 example: "typeof a === 'strnig'   # reported"
 severity: error
 category: suspicious
@@ -46,7 +94,16 @@ id: no-extra-boolean-cast
 family: simplify
 params: { check: redundant-cast, calls: Boolean }
 message: "Redundant {name}."
-description: "`!!x` or `Boolean(x)` where the value is used as a boolean anyway (a condition, `!`, `Boolean(...)`)."
+description: >-
+  Reports `!!x` and `Boolean(x)` in a place that already converts the value to a boolean: the test
+  of `if`, `while`, `do ... while`, `for` and `?:`, the operand of `!`, and the argument of
+  `Boolean(...)`. `const b = !!x`, a call argument (`f(!!x)`) and `!!(x)` are not reported.
+why: >-
+  The cast changes nothing where the language already tests for truthiness, so it only adds noise
+  and can suggest that the plain value is not allowed there. Where the real boolean is needed (an
+  assignment, an argument), the cast does a job and is left alone.
+
+  To fix, remove the `!!` or the `Boolean(...)` call.
 example: "if (!!a) {}   # reported"
 severity: off
 category: suspicious
@@ -55,7 +112,16 @@ id: no-unsafe-finally
 family: check
 params: { check: unsafe-finally }
 message: "Unsafe usage of {name}."
-description: "`return`, `throw`, and a `break` or `continue` that leaves the block, in a `finally` block: they override the `try`'s own outcome."
+description: >-
+  Reports `return`, `throw`, and a `break` or `continue` that leaves the `finally` block, written in
+  a `finally`. A `break` or `continue` of a loop inside the block, and a `return` in a function
+  declared in the block, are not reported.
+why: >-
+  A jump out of `finally` replaces how the `try` ended: a `return` there discards the value returned
+  by the `try` and swallows an exception that was being thrown, so errors disappear without a trace.
+
+  To fix, move the jump out of `finally` (after the `try` statement), or handle the error in a
+  `catch`.
 example: "try { a() } finally { return 1 }   # reported"
 category: suspicious
 ---
@@ -63,7 +129,16 @@ id: getter-return
 family: check
 params: { check: getter-return }
 message: "Expected to return a value in {name}."
-description: A getter that does not return a value on every path, or has a `return;`.
+description: >-
+  Reports a getter written with `get name() {}` (in a class or an object literal) that does not
+  return a value on every path: an empty body, a `return;` without a value, or an `if` without
+  `else` that returns only in one branch. A getter that always throws is not reported, and neither
+  is a `get` function given to `Object.defineProperty`.
+why: >-
+  A property read calls the getter and takes its result, so a path without a value makes the
+  property `undefined`, usually by a forgotten `return` rather than by intent.
+
+  To fix, return a value on every path.
 example: "var o = { get a() {} };   # reported"
 severity: error
 category: suspicious
@@ -72,7 +147,15 @@ id: require-yield
 family: check
 params: { check: require-yield }
 message: "This generator function does not have 'yield'."
-description: A generator function with a body and no `yield`.
+description: >-
+  Reports a generator (`function*`, a generator method, `async function*`) that has statements but
+  no `yield`. An empty generator is not reported.
+why: >-
+  A generator that never yields produces no values: iterating it runs the body once and ends at
+  once. That is the mistake of a `function*` that was meant to be a normal function, or of a `yield`
+  that was left out.
+
+  To fix, add the `yield`, or drop the `*`.
 example: "function* f() { a(); }   # reported"
 severity: error
 category: suspicious
@@ -81,7 +164,17 @@ id: no-useless-escape
 family: regex
 params: { check: useless-escape }
 message: 'Unnecessary escape character: \{name}.'
-description: A backslash in a string, template or regex that escapes nothing special (`"\d"`, `/\-/`).
+description: >-
+  Reports a backslash before a character that needs no escape, in a string (`'\d'`), a template
+  literal or a regex literal (`/\-/`, `/\_/`). Valid escapes (`\n`, `\t`, `\\`, `\'`, `\"`, `\x41`,
+  `\u0041`, `\0`, a line continuation) are not reported, and neither are a `\-` in the middle of a
+  character class (`/[a\-z]/`), `\^` at the start of one and `\/` in a regex literal.
+why: >-
+  In a string the backslash before such a character is dropped: `'\d'` is just `d`, not the digit
+  class the author may have meant for a regex, and in a regex a useless escape hides which
+  characters are special. The intended meaning is lost whichever way it was read.
+
+  To fix, remove the backslash, or double it to get a real backslash (`'\\d'`).
 example: "var s = '\\d';   # reported"
 severity: off
 category: suspicious
@@ -90,7 +183,15 @@ id: no-regex-spaces
 family: regex
 params: { check: spaces }
 message: "Spaces are hard to count. Use {{name}}."
-description: Two or more spaces in a regex literal or in the string of `new RegExp(...)`, outside a character class.
+description: >-
+  Reports two or more spaces in a row in a regex literal or in the constant string given to
+  `RegExp(...)` or `new RegExp(...)`, outside a character class. Spaces inside `[...]` and a counted
+  space (`a {2}b`) are not reported.
+why: >-
+  A run of spaces in a pattern is hard to count when reading, and an edit that adds or removes a
+  space changes what matches without being noticed.
+
+  To fix, write the count: `a {3}b` instead of three spaces.
 example: "var r = /a  b/;   # reported"
 category: suspicious
 ---
@@ -98,7 +199,14 @@ id: no-empty-character-class
 family: regex
 params: { check: empty-class }
 message: "Empty class."
-description: "`[]` in a regex literal, which matches nothing."
+description: >-
+  Reports `[]` in a regex literal. `[^]` (any character) and a `[]` in the string given to `new
+  RegExp` are not reported.
+why: >-
+  A character class with no members can match nothing, so a regex that contains it never matches. It
+  is nearly always an escape that was forgotten (`\[\]` meant) or a class whose content was deleted.
+
+  To fix, add the characters, or escape the brackets.
 example: "var r = /a[]/;   # reported"
 category: suspicious
 ---
@@ -106,7 +214,20 @@ id: no-irregular-whitespace
 family: check
 params: { check: irregular-whitespace }
 message: "Irregular whitespace not allowed."
-description: A no-break space, zero-width space or other unusual whitespace character outside a string.
+description: >-
+  Reports unusual whitespace characters: vertical tab, form feed, no-break space (U+00A0), the
+  spaces and zero-width characters U+2000 to U+200B, line and paragraph separators, narrow no-break
+  space, medium mathematical space, ideographic space, and a byte order mark that is not at the
+  start of the file. A string literal is not checked (the character is data there); comments,
+  template literals and regex literals are. A run of them is one report.
+why: >-
+  These characters look like a space (or like nothing) but are different characters: a search for a
+  space does not find them, a diff shows no change, and in code outside a string or comment some of
+  them make the file fail to parse. They usually arrive by copying text from a web page or a
+  document.
+
+  To fix, replace them with an ordinary space, or write the character as an escape (`\u00a0`) where
+  it is wanted.
 example: "var a =·1;   # reported when · is U+00A0"
 category: suspicious
 ---
@@ -114,7 +235,18 @@ id: no-loss-of-precision
 family: check
 params: { check: loss-of-precision }
 message: "This number literal will lose precision at runtime."
-description: A number literal that the double it becomes cannot represent exactly.
+description: >-
+  Reports a number literal that the 64-bit double it becomes does not hold exactly:
+  `9007199254740993` (above 2^53), `0x20000000000001`, a value that is too large (`1e400`, becomes
+  `Infinity`) or too small (`2e-400`, becomes `0`). `9007199254740992`, `0.1`, a number that has an
+  exact double (`1e20`) and BigInt literals (`123n`) are not reported.
+why: >-
+  JavaScript rounds such a literal when the file is read, so the program computes with another
+  number than the one written, with no error. Integers above 2^53 lose their last digits, which
+  breaks ids and counters.
+
+  To fix, use a BigInt literal (`9007199254740993n`), keep the value in a string, or write the
+  number the double really holds.
 example: "var n = 9007199254740993;   # reported"
 category: suspicious
 ---
@@ -122,7 +254,18 @@ id: ban-ts-comment
 family: check
 params: { check: ban-ts-comment }
 message: "Do not use a @ts- directive that alters compilation errors."
-description: "`@ts-ignore`, `@ts-nocheck` before the first statement, and `@ts-expect-error` without a description of at least three characters in a comment (`@ts-check` is allowed)."
+description: >-
+  Reports a `@ts-ignore` comment, a `@ts-nocheck` comment before the first statement, and a
+  `@ts-expect-error` comment whose description is shorter than three characters (`//
+  @ts-expect-error: the API types are wrong` is fine). Line and block comments are read. `@ts-check`
+  is not reported.
+why: >-
+  `@ts-ignore` hides every type error on the next line and keeps hiding them after the code changes,
+  so a later, real error on that line is never shown. `@ts-nocheck` turns checking off for the whole
+  file. `@ts-expect-error` is safer, because the compiler complains when the error is gone, but
+  without a reason nobody knows when it is safe to remove.
+
+  To fix, remove the error with a proper type, or use `@ts-expect-error` with a short reason.
 example: "// @ts-ignore   # reported"
 severity: off
 category: suspicious
@@ -131,7 +274,14 @@ id: no-extra-non-null-assertion
 family: check
 params: { check: extra-non-null }
 message: "Forbidden extra non-null assertion."
-description: "`a!!`, and `a!` right before `?.` (`a!?.b`, `a!?.()`)."
+description: >-
+  Reports a second non-null assertion in a row (`a!!.b`) and a `!` right before an optional chain
+  (`a!?.b`, `a!?.()`).
+why: >-
+  The second `!` of `a!!` changes nothing. In `a!?.b` the `!` says the value is not `null` while
+  `?.` says it may be, so one of the two is wrong and the reader cannot tell which.
+
+  To fix, remove the extra `!`, or the `?.` if the value cannot be null.
 example: "a!!.b;   # reported"
 severity: off
 category: suspicious
@@ -140,7 +290,18 @@ id: no-misused-new
 family: check
 params: { check: misused-new }
 message: "Misused `new`."
-description: "A class method `new(): C` that returns the class, an interface `new (): I` that returns the interface, and an interface method `constructor()`."
+description: >-
+  Reports `new` and `constructor` declarations that do not describe a constructor: a class method
+  signature `new(): C;` without a body that returns the class itself, an interface signature `new
+  (): I` that returns the interface itself, and an interface member named `constructor()`. A class
+  method named `new` with a body is not reported.
+why: >-
+  An interface cannot be constructed, so `new (): I` inside `interface I` describes a constructor
+  that does not exist, and an interface member `constructor()` is only a method with that name, not
+  a constructor. The code reads as a constructor but is not one.
+
+  To fix, declare the constructor in the class (`constructor()`), or put the `new` signature on a
+  separate interface that types the constructor.
 example: "interface I { new (): I }   # reported"
 severity: error
 category: suspicious
@@ -149,7 +310,15 @@ id: prefer-as-const
 family: check
 params: { check: prefer-as-const }
 message: "Expected a `const` assertion instead of a literal type."
-description: "A literal type that repeats the literal it is given to (`let a: 'a' = 'a'`, `'a' as 'a'`, `<'a'>'a'`); write `as const`."
+description: >-
+  Reports a literal type that only repeats the literal it is given: `let a: 'a' = 'a'`, `'a' as 'a'`
+  and `<'a'>'a'`. A type that differs from the value (`let a: 'a' = 'b'` is a type error, not
+  reported) and `as const` are not reported.
+why: >-
+  The literal is written twice and the two copies can drift apart when one is edited. `as const`
+  says it once and keeps the literal type.
+
+  To fix, write `let a = 'a' as const`.
 example: "let a: 'a' = 'a';   # reported"
 severity: off
 category: style
@@ -158,7 +327,15 @@ id: no-inferrable-types
 family: check
 params: { check: inferrable-types }
 message: "Type {name} trivially inferred from a {name} literal, remove type annotation."
-description: "A type annotation of a variable, parameter or property that its initial value already gives (`const a: number = 5`; not `readonly` or optional properties)."
+description: >-
+  Reports a type annotation on a variable, parameter or class property whose initial value already
+  gives that type (`const a: number = 5`, `s: string = 'x'`, `b: boolean = true`, `n: bigint = 1n`).
+  A value from a call, a `readonly` property and an optional property are not reported.
+why: >-
+  The compiler infers the same type from the value, so the annotation only adds a second place to
+  keep in sync.
+
+  To fix, drop the annotation.
 example: "const a: number = 5;   # reported"
 severity: off
 category: style
@@ -167,7 +344,14 @@ id: array-type
 family: check
 params: { check: array-type }
 message: "Array type using '{name}<T>' is forbidden. Use the `T[]` form instead."
-description: "`Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>`; write `T[]` and `readonly T[]`."
+description: >-
+  Reports `Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>` written as generic types, each level of
+  a nested one (`Array<Array<number>>` is two reports). The bare `Array` is not reported.
+why: >-
+  Two spellings of one type make code harder to scan and search; the bracket form `T[]` is shorter
+  and reads left to right.
+
+  To fix, write `T[]` and `readonly T[]`.
 example: "let a: Array<number>;   # reported"
 severity: off
 category: style
@@ -176,7 +360,16 @@ id: triple-slash-reference
 family: check
 params: { check: triple-slash-reference }
 message: "Do not use a triple slash reference for {name}, use `import` style instead."
-description: "A `/// <reference path=\"x\" />` before the first statement, and a `/// <reference types=\"x\" />` for a module the file imports."
+description: >-
+  Reports a `/// <reference path="x" />` or `/// <reference types="x" />` before the first statement
+  of the file; for `types` only when the file also imports that module. A directive after the first
+  statement is not reported.
+why: >-
+  Triple-slash references are the older way to include files and types before modules. An `import`
+  states the dependency where it is used, is followed by bundlers and other tools, and does not
+  depend on the order of directives.
+
+  To fix, replace the reference with an `import` (an `import type` where only types are needed).
 example: "/// <reference path=\"a\" />   # reported"
 severity: off
 category: style
@@ -185,7 +378,15 @@ id: adjacent-overload-signatures
 family: check
 params: { check: adjacent-overloads }
 message: "All {name} signatures should be adjacent."
-description: "Overloads of one function or method (or call and construct signatures) with other members between them."
+description: >-
+  Reports an overload (a signature or function with the same name as an earlier one) with another
+  member between it and the earlier overloads. It checks interface and class members, call and
+  construct signatures, and function declarations.
+why: >-
+  Overloads are read together as one declaration with several shapes. When another member sits
+  between them, a reader can miss one shape or take a later signature for an unrelated member.
+
+  To fix, move the overloads next to each other.
 example: "interface I { a(): void; b(): void; a(x: number): void }   # the last a is reported"
 severity: off
 category: style
@@ -194,7 +395,16 @@ id: no-unexpected-multiline
 family: check
 params: { check: unexpected-multiline }
 message: "Unexpected newline between {name}."
-description: "`[`, `(` or a template at the start of a line right after an expression, which continues it (`a\\n[b]` is a property access, not two statements)."
+description: >-
+  Reports a line that begins with `(`, `[` or a template literal right after a line that ends an
+  expression, where the two lines are one expression: `var d = a` followed by `(b);` calls `a(b)`. A
+  line that begins with `/`, `+` or another operator is not reported.
+why: >-
+  Automatic semicolon insertion does not insert a semicolon before `(`, `[` or a template, so the
+  new line continues the expression above: `a` followed by `(b)` is a call and followed by `[b]` is
+  a property access, and the program runs with a different meaning than the layout shows.
+
+  To fix, end the statement with a semicolon, or join the lines on purpose.
 example: "var a = b\n(c || d).e()   # reported"
 category: suspicious
 ---
@@ -202,7 +412,17 @@ id: no-control-regex
 family: regex
 params: { check: control }
 message: "Unexpected control character(s) in regular expression: {name}."
-description: A control character (below U+0020) in a regex literal or in the constant string given to `RegExp`, written raw or as `\x00`, `\u0000` or `\u{0}`.
+description: >-
+  Reports a control character (code below U+0020) in a regex literal or in the constant string given
+  to `RegExp`, written raw or as `\x1f`, `\u001f` or `\u{1f}`. The escapes `\t`, `\n` and `\r` are
+  not reported.
+why: >-
+  Control characters are invisible and rarely belong in a pattern for text. They get there by
+  mistake, for example from a string escape that was processed before the regex saw it, and then the
+  pattern matches something other than the author thought.
+
+  To fix, write `\t`, `\n` or `\r` where those are meant, and turn the rule off for the few places
+  that match control characters on purpose.
 example: "var r = /\\x1f/;   # reported"
 category: suspicious
 ---
@@ -210,7 +430,17 @@ id: no-misleading-character-class
 family: regex
 params: { check: misleading-class }
 message: "Unexpected combined character in character class."
-description: A character class of a regex (a literal or the constant string given to `RegExp`; names of variables written once are followed) in which a combining mark follows another character. The surrogate pair, emoji modifier, flag and joined-sequence checks are not made.
+description: >-
+  Reports a character class (in a regex literal or in the constant string given to `RegExp`) in
+  which a combining mark or variation selector follows another character: `[A\u0301]` or `[❤️]`.
+  Surrogate pairs, emoji modifiers, regional-indicator flags and joined emoji sequences are not
+  checked.
+why: >-
+  A character that looks like one letter can be two code points (`A` and the combining accent
+  U+0301), and a character class works on code points, so the class matches the letter and the
+  accent separately and does not match the combined letter as a unit.
+
+  To fix, move the sequence out of the class into an alternation (`(?:A\u0301|b)`).
 example: "var r = /[A\\u0301]/;   # reported"
 category: suspicious
 ---
@@ -218,7 +448,15 @@ id: no-duplicate-enum-values
 family: check
 params: { check: duplicate-enum-values }
 message: "Duplicate enum member value {name}."
-description: Two members of one enum initialized with the same string or number.
+description: >-
+  Reports an enum member initialised with a string or number that an earlier member of the same enum
+  already has (`A = 0, B = 0`). Computed values (`1 + 1`) are not compared.
+why: >-
+  Two names for one value make a value to name lookup (the reverse mapping of a numeric enum) answer
+  with the later one, and the second member is usually a copy-paste mistake with the value not
+  changed.
+
+  To fix, give the member its own value.
 example: "enum E { A = 0, B = 0 }   # the second member is reported"
 severity: off
 category: suspicious
@@ -227,7 +465,15 @@ id: no-lonely-if
 family: simplify
 params: { check: lonely-if }
 message: "Unexpected `if` as the only statement in an `else` block."
-description: "An `if` that is the only statement of an `else` block: write `else if`."
+description: >-
+  Reports an `if` that is the only statement of an `else` block (`else { if (b) { ... } }`), also
+  when that `if` has its own `else`. An `else` block with other statements, and an `if` inside an
+  `else if`, are not reported.
+why: >-
+  `else { if (b) ... }` is the same as `else if (b) ...` and has one more level of nesting and
+  braces for the reader to follow.
+
+  To fix, write `else if`.
 example: "if (a) { x(); } else { if (b) { y(); } }"
 severity: off
 category: style
@@ -236,7 +482,15 @@ id: no-else-return
 family: simplify
 params: { check: superfluous-else, jump: return }
 message: "Unnecessary `else` after `return`."
-description: "An `else` after an `if` chain whose branches all end in `return`: the code of the `else` can follow the `if`. An `else if` is left alone (ESLint `allowElseIf`)."
+description: >-
+  Reports an `else` when the `if` and every `else if` before it end in `return` (what the `else`
+  itself holds does not matter). An `else if` is not reported, and neither is a chain in which one
+  of the earlier branches can fall through.
+why: >-
+  When every earlier branch returns, the code in the `else` can follow the `if` without the `else`,
+  which removes one level of nesting and makes the early return plain.
+
+  To fix, delete the `else` and de-indent its body.
 example: "function f(a) { if (a) { return 1; } else { return 2; } }"
 severity: off
 category: style
@@ -245,7 +499,16 @@ id: no-unneeded-ternary
 family: simplify
 params: { check: boolean-conditional, then: any, else: any }
 message: "Unnecessary use of boolean literals in conditional expression."
-description: "A conditional expression whose two arms are boolean literals: `a ? true : false` is `!!a`, `a ? false : true` is `!a`."
+description: >-
+  Reports a conditional expression whose two arms are both boolean literals: `a ? true : false` (the
+  same as `!!a`), `a ? false : true` (`!a`), and `a ? true : true`. A conditional with one
+  non-boolean arm is not reported.
+why: >-
+  The condition is already the boolean value, or its negation, so the conditional only restates it
+  in a longer form.
+
+  To fix, write the condition (or `!` of it); use `Boolean(a)` where a real boolean is needed from a
+  value that is not one.
 example: "const x = a ? true : false;"
 severity: off
 category: style

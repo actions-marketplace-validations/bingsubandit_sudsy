@@ -9,8 +9,8 @@ const GO: &str = r"
   gh: 5330774.4
   so: 40.192
   parser: ~1.0
-  format: [{tool: gofmt, gain: 0.1, reach: 0.95, cost: 0.6, why: w}]
-  lint: [{tool: lint, gain: 0.4, reach: 0.85, cost: 1.0, why: w}]
+  format: {tool: gofmt, gain: 0.1, cost: {layout: whitespace}, why: w}
+  lint: {tool: lint, gain: 0.4, cost: {}, why: w}
 ";
 
 fn one(yaml: &str, support: &str) -> anyhow::Result<Vec<crate::newlang::Entry>> {
@@ -21,7 +21,7 @@ fn err(yaml: &str, support: &str) -> String {
     one(yaml, support).unwrap_err().to_string()
 }
 
-/// 4 x 85 x 0.8 x 0.34 / (20 x (1 + 1)) = 2.312; format 272 x 0.095 / (20 x 1.6) = 0.8075; both 272 x 0.435 / (20 x 2.6) = 2.27538.
+/// 4 x 85 x 0.8 x 0.4 / (20 x (1 + 1)) = 2.72; format 272 x 0.1 / (20 x (1 + 0.7)) = 0.8; both 272 x 0.5 / (20 x 2.7) = 2.5185.
 #[test]
 fn formula_by_hand() {
     let list = one(GO, "").unwrap();
@@ -31,40 +31,100 @@ fn formula_by_hand() {
         p.iter().map(|p| p.name).collect::<Vec<_>>(),
         ["lint", "format", "both"]
     );
-    near(p[0].score, 2.312);
-    near(p[1].score, 0.8075);
-    near(p[2].score, 2.275384615384615);
+    near(p[0].score, 2.72);
+    near(p[1].score, 0.8);
+    near(p[2].score, 272.0 * 0.5 / (20.0 * 2.7));
     assert!(p.iter().all(|p| p.est), "the parser is an estimate");
 }
 
-/// Of two alternatives of a leg the better score wins, whatever the order; reach under the bar is still scored and noted.
+/// The named parts of a cost: base 1.0, type worker +0.3, index +0.2, +0.1 per part, layout -0.3 / +0.2 / +0.5.
 #[test]
-fn best_alternative_wins() {
-    let yaml = r"
-- language: Rs
-  gh: 8329335
-  so: 62.8
-  parser: 1.0
-  lint:
-    - {tool: no-types, gain: 0.7, reach: ~0.3, cost: 1.0, why: w}
-    - {tool: types, gain: 0.7, reach: 0.85, cost: 3.0, why: w}
-";
-    let list = one(yaml, "").unwrap();
-    let p = plans(&list[0]);
-    // no types: 340 x 0.21 / (20 x 2) = 1.785; types: 340 x 0.595 / (20 x 4) = 2.529
-    assert_eq!(p.len(), 1);
-    assert_eq!(p[0].picks[0].1.tool, "types");
-    assert!(!p[0].est);
-    let cheap = yaml.replace("cost: 3.0", "cost: 9.0");
-    let list = one(&cheap, "").unwrap();
-    assert_eq!(plans(&list[0])[0].picks[0].1.tool, "no-types");
-    assert!(plans(&list[0])[0].est);
-    let text = section(&list, &[]);
-    assert!(
-        text.contains("cannot reach the bar: lint no-types reach ~0.3"),
-        "{text}"
+fn cost_parts_by_hand() {
+    let cost = |y: &str| {
+        let yaml = format!(
+            "- language: X\n  parser: 1.0\n  format: {{tool: t, gain: 0.1, cost: {y}, why: w}}\n"
+        );
+        one(&yaml, "").unwrap()[0]
+            .format
+            .as_ref()
+            .unwrap()
+            .cost
+            .total()
+    };
+    let near = |a: f64, b: f64| assert!((a - b).abs() < 1e-9, "{a} != {b}");
+    near(cost("{}"), 1.0);
+    near(cost("{parts: 3}"), 1.3);
+    near(cost("{layout: whitespace}"), 0.7);
+    near(cost("{layout: width, parts: 2}"), 1.4);
+    near(cost("{layout: penalty}"), 1.5);
+    let lint = "- language: X\n  parser: 1.0\n  lint: {tool: t, gain: 0.1, cost: {types: true, index: true, parts: 1}, why: w}\n";
+    near(
+        one(lint, "").unwrap()[0]
+            .lint
+            .as_ref()
+            .unwrap()
+            .cost
+            .total(),
+        1.6,
     );
-    assert!(text.contains("estimate: pick only to measure it"), "{text}");
+}
+
+/// A leg is one tool: a list fails, a layout on a lint leg and a type worker on a format leg fail.
+#[test]
+fn one_primary_tool_per_leg() {
+    let list = GO.replace(
+        "format: {tool: gofmt, gain: 0.1, cost: {layout: whitespace}, why: w}",
+        "format: [{tool: gofmt, gain: 0.1, cost: {}, why: w}, {tool: b, gain: 0.1, cost: {}, why: w}]",
+    );
+    assert!(
+        err(&list, "").contains("one primary tool per leg"),
+        "{}",
+        err(&list, "")
+    );
+    let layout = GO.replace(
+        "lint: {tool: lint, gain: 0.4, cost: {}",
+        "lint: {tool: lint, gain: 0.4, cost: {layout: width}",
+    );
+    assert!(err(&layout, "").contains("lint leg has no layout"));
+    let types = GO.replace("cost: {layout: whitespace}", "cost: {types: true}");
+    assert!(err(&types, "").contains("format leg has no type worker"));
+}
+
+/// A retrofit entry scores the no-tool format leg of a supported language with the parser paid and a `retrofit` note;
+/// its demand is the member of its row; it needs a row whose format leg has no reference tool.
+#[test]
+fn retrofit_rows() {
+    let support = "- language: Docker\n  popularity: [{name: Docker, gh: 5330774.4, so: 40.192}]\n  stability: [d]\n  lint: [{tool: h, name: H}]\n";
+    let yaml = "- language: Docker\n  retrofit: true\n  format: {tool: none found, gain: 1.0, cost: {parts: 1}, why: w}\n";
+    let list = one(yaml, support).unwrap();
+    let p = plans(&list[0]);
+    // 272 x 1.0 / (20 x 1.1) with the parser paid
+    assert_eq!(p.len(), 1);
+    assert!((p[0].score - 272.0 / 22.0).abs() < 1e-9);
+    let text = section(&list, &[]);
+    assert!(text.contains("retrofit to no-reference-tool.md"), "{text}");
+    assert!(
+        err(
+            yaml,
+            "- language: Docker\n  popularity: [{name: Docker}]\n  format: [{tool: f, name: F}]\n"
+        )
+        .contains("is a retrofit")
+    );
+    assert!(
+        err(
+            &yaml
+                .replace("Docker", "Elsewhere")
+                .replace("  retrofit", "  parser: 1.0\n  retrofit"),
+            ""
+        )
+        .contains("retrofit but not supported")
+    );
+    // without `retrofit` the same entry is refused: the leg exists
+    assert!(err(&yaml.replace("  retrofit: true\n", ""), support).contains("fully supported"));
+    // a member of a shared row takes its own popularity
+    let shared = "- language: Row\n  popularity: [{name: A, gh: 5330774.4, so: 40.192}, {name: B}]\n  stability: [d]\n";
+    let b = "- language: B\n  support: Row\n  retrofit: true\n  format: {tool: none found, gain: 1.0, cost: {}, why: w}\n";
+    assert_eq!(one(b, shared).unwrap()[0].demand.v, 0.1);
 }
 
 /// A supported language with a missing leg has a paid parser (term 0); a deferred leg has no plan.
@@ -73,14 +133,14 @@ fn paid_parser_and_deferred_leg() {
     let support = "- language: Ruby\n  popularity: [{name: Ruby, gh: 2082333.75, so: 15.7}]\n  lint: [{tool: rubocop, name: RuboCop}]\n";
     let yaml = r"
 - language: Ruby
-  format: [{tool: rubyfmt, gain: 0.4, reach: 0.9, cost: 1.0, why: w}]
+  format: {tool: rubocop, gain: 0.4, cost: {}, why: w}
 ";
     let list = one(yaml, support).unwrap();
     assert!(list[0].paid);
-    // 340 x 0.5 x 0.36 / (20 x (0 + 1)) = 3.06
+    // 340 x 0.5 x 0.4 / (20 x (0 + 1)) = 3.4
     let p = plans(&list[0]);
     assert_eq!(p.len(), 1);
-    assert!((p[0].score - 3.06).abs() < 1e-9);
+    assert!((p[0].score - 3.4).abs() < 1e-9);
     assert!(section(&list, &[]).contains("| 0 (paid) |"));
     let deferred = format!("{yaml}  deferred: [format]\n");
     assert!(plans(&one(&deferred, support).unwrap()[0]).is_empty());
@@ -90,10 +150,15 @@ fn paid_parser_and_deferred_leg() {
 fn bad_values_are_rejected() {
     let with = |from: &str, to: &str| GO.replace(from, to);
     assert!(err(&with("gain: 0.4", "gain: 0.5"), "").contains("gain 0.5"));
-    assert!(err(&with("reach: 0.85", "reach: 1.5"), "").contains("reach 1.5"));
     assert!(err(&with("gh: 5330774.4", "gh: 9000000"), "").contains("gh Some(9000000.0)"));
     assert!(err(&with("so: 40.192", "so: 0"), "").contains("so Some(0.0)"));
-    assert!(err(&with("why: w}]\n  lint", "why: ''}]\n  lint"), "").contains("why are required"));
+    assert!(
+        err(
+            &with("cost: {layout: whitespace}, why: w}", "cost: {}, why: ''}"),
+            ""
+        )
+        .contains("why are required")
+    );
     assert!(
         err(&with("parser: ~1.0", "parser: ~1.0\n  speed: 1"), "")
             .contains("parsing languages.yaml")
@@ -106,10 +171,9 @@ fn bad_values_are_rejected() {
     assert!(err(GO, half).contains("parser is paid"));
     assert!(err(&format!("{GO}{GO}"), "").contains("twice"));
     // A supported language keeps `gh` and `so` in support.yaml.
-    let format_only = GO.replace("  parser: ~1.0\n", "").replace(
-        "  lint: [{tool: lint, gain: 0.4, reach: 0.85, cost: 1.0, why: w}]\n",
-        "",
-    );
+    let format_only = GO
+        .replace("  parser: ~1.0\n", "")
+        .replace("  lint: {tool: lint, gain: 0.4, cost: {}, why: w}\n", "");
     assert!(err(&format_only, half).contains("`popularity` of its row"));
 }
 
@@ -121,7 +185,7 @@ fn estimates_print_a_tilde() {
     let list = one(&yaml, "").unwrap();
     let text = section(&list, &["Alpha lint X".into()]);
     assert!(
-        text.contains("| 2.31~ | 0.81~ | 2.28~ | lint: lint lint |"),
+        text.contains("| 2.72~ | 0.80~ | 2.52~ | lint: lint lint |"),
         "{text}"
     );
     assert!(text.contains("Primary legs under the bar now: Alpha lint X."));
@@ -163,7 +227,7 @@ fn demand_floor_and_cap() {
     assert_eq!(demand(None, None), crate::newlang::V { v: 0.1, est: true });
     assert_eq!(demand(Some(8_329_335.0), None).v, 1.0);
     let list = one(
-        "- language: X\n  parser: 1.0\n  lint: [{tool: t, gain: 0.1, reach: 1, cost: 1, why: w}]\n",
+        "- language: X\n  parser: 1.0\n  lint: {tool: t, gain: 0.1, cost: {}, why: w}\n",
         "",
     )
     .unwrap();
@@ -176,7 +240,7 @@ fn table_shows_the_top_rows() {
     let yaml: String = (0..27)
         .map(|i| {
             format!(
-                "- language: L{i}\n  parser: 1.0\n  lint: [{{tool: t, gain: 0.1, reach: 1, cost: 1, why: w}}]\n  gh: {}\n",
+                "- language: L{i}\n  parser: 1.0\n  lint: {{tool: t, gain: 0.1, cost: {{}}, why: w}}\n  gh: {}\n",
                 100_000 * (i + 1)
             )
         })

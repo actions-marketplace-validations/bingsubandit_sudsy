@@ -1,21 +1,25 @@
 # Languages and file formats Sudsy does not support yet, or supports with one leg missing: the data of the new-language
 # rows of docs/ai/parity/queue.md (xtask/full/src/newlang.rs). A language with a row in support.yaml takes only its missing
-# leg and no `parser` (paid). `deferred: [format|lint]` drops a leg the user put off.
+# leg and no `parser` (paid); its `gh` and `so` are the `popularity` of that row. `deferred: [format|lint]` drops a leg the user put off.
 #
 # A number written "~0.6" is an estimate (the first measuring replaces it); a plain number is measured.
-# Score of a plan (lint, format, both) = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)); the best
-# alternative of each leg wins. An entry with an estimate may only be picked to measure it.
+# Score of a plan (lint, format, both) = 4 x 85 x Demand x sum(Gain) / (20 x (Parser + sum Cost)). Every plan is assumed to
+# reach the 85% bar and everything it takes is in the Cost; findings that need running user code and bugs of the tool are
+# excluded from the target and are no cost. An entry with an estimate may only be picked to measure it.
+# One primary tool per leg (a list of tools fails codegen): the tool most users run for that use case, chosen by usage evidence
+# (package downloads, stars, config files in public repositories, the language's own documentation), recorded first in `why`.
+# The look-ups of 2026-11-25 are npm and PyPI downloads of a month, Homebrew installs of 30 days, CRAN downloads, GitHub stars.
 #   Gain: 0.1 official or de facto standard, native and fast, ships with the language; 0.4 good and fast third party
 #         (native binary); 0.7 slow or needs its own runtime (JVM, BEAM, Node, Python, Ruby, the language's toolchain);
-#         1.0 none or poor ("none found": no maintained tool, reach is a guess).
-#   Cost of a leg: 1.0; layout -0.3 whitespace only, +0.2 width-based; +0.1 per missing shared part.
+#         1.0 none or poor ("none found": no maintained tool; the leg is held to docs/ai/development/no-reference-tool.md).
+#   Cost of a leg, named parts in `cost` (xtask/full/src/newlang.rs `Cost`): base 1.0; `types: true` a type worker +0.3
+#         (lint that reads types); `index: true` a project or symbol index +0.2; `parts: N` each missing shared part +0.1;
+#         `layout` of a format leg: whitespace -0.3 (only blanks change), width +0.2, penalty +0.5 (choice by penalties),
+#         none for a canonical layout; `est: true` marks the parts as estimates. A leg with no tool: lint `parts: 3`
+#         (checklist from the specification, rules, judged precision), format `layout: width, parts: 1` (decision table).
 #   Parser: 1.0 good Rust crate, +0.2 tree-sitter (a grammar that exists; stars and last push are in the comment), +0.5
 #           hand-written (no grammar or crate found); 0.2 when the format sits on a parser Sudsy has (YAML, JSON, XML,
 #           Markdown, Python): only a semantic layer is new; 0 when paid.
-#   Reach: share of the reference tool's findings (lint) or files (format) the plan can match, 0-1. Estimates by kind of
-#          tool (reach / cost): format whitespace only 0.95 / 0.8, canonical 0.9 / 1.0, width-based 0.85 / 1.3, width-based
-#          with many options 0.75 / 1.3; lint syntactic rules 0.85 / 1.0, some rules need semantics 0.6 / 1.2, needs types
-#          0.4 / 2.0, few rules 0.9 / 0.7, schema checks 0.9 / 0.9; no tool 0.5 / 1.3. A tool that differs says so in `why`.
 #   Demand 0.1-1, computed from the raw values `gh` and `so` of the entry: per source sqrt(x / top of that source), the
 #     mean of the two, floored at 0.1 (xtask/full/src/newlang.rs, `demand`).
 #     gh = GitHub Innovation Graph languages.csv (github/innovationgraph, data/languages.csv), pushers of 2026 Q2 summed over
@@ -26,1203 +30,866 @@
 #     A language with a row in support.yaml keeps its `gh` and `so` there (`popularity`), not here.
 #     A language listed by one source only: the other is estimated as the listed one x 2.27 (survey over pushers), the median
 #          over the 42 languages both list of sqrt(so / 62.8) / sqrt(gh / 8,329,335); the demand shows "~". In neither: 0.1, "~".
+# `retrofit: true` marks the six existing legs with no reference tool (INI, EditorConfig, .gitignore, Dockerfile, Makefile and
+# GitHub Actions format): scored like any leg (parser paid), they keep their Ready state; `support` names the row of a language
+# that shares one. Their cost is what docs/ai/development/no-reference-tool.md still asks of them.
 # Inclusion: every language of the Innovation Graph with at least 20,000 pushers, every language of the survey, and every
 # language or format named by a formatter or linter list (conform.nvim, mega-linter, pre-commit, dprint plugins, linguist
 # data and markup types with a tool) or by the task; not the ones support.yaml already holds with both legs. A tool was looked
 # up (repository exists, last push, archived) on 2026-11-24, a parser too (grammar repository, crate on crates.io).
 
 - language: Go
-  format:
-    - {tool: gofmt, gain: ~0.1, reach: ~0.95, cost: ~1.1, why: "official, ships with Go; whitespace only 0.7 + 0.1 x 4 missing parts (column cells, operator-precedence spacing, doc comments, //go:build pairs)"}
+  format: {tool: "gofmt", gain: ~0.1, cost: {layout: whitespace, parts: 4, est: true}, why: "only tool found; official, ships with Go; whitespace only 0.7 + 0.1 x 4 missing parts (column cells, operator-precedence spacing, doc comments, //go:build pairs)"}
 - language: CMake
-  format:
-    - {tool: gersemi, gain: 0.7, reach: ~0.86, cost: 1.4, why: "slow, own runtime (Python); reach is the ceiling of a model with the keyword-section layout (0.61 without, 0.99 with every piece)"}
+  format: {tool: "gersemi", gain: 0.7, cost: {layout: width, parts: 2}, why: "kept as decided in docs/ai/design/cmake.md (user); PyPI cmakelang (cmake-format) 776k downloads a month against gersemi 181k, 371 stars (close call); own runtime (Python); the cost was measured with the keyword-section layout model"}
 - language: Swift
   gh: 449944
   so: 5.9
   parser: ~1.2 # tree-sitter-swift
-  format:
-    - {tool: swift-format, gain: ~0.7, reach: ~0.9, cost: ~1.2, why: "official but needs the Swift toolchain; width-based"}
-  lint:
-    - {tool: SwiftLint defaults, gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "needs the Swift toolchain and its own runtime"}
+  format: {tool: "SwiftFormat", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "Homebrew installs 30 days: SwiftFormat 13.1k against swift-format 2.6k, 8,957 stars against 2,971; Swift binary; width-based, many options"}
+  lint: {tool: "SwiftLint defaults", gain: ~0.7, cost: {est: true}, why: "only tool found; needs the Swift toolchain and its own runtime"}
 - language: Rust
   gh: 401012
   so: 18.2
   parser: ~1.0 # syn
-  format:
-    - {tool: rustfmt, gain: ~0.1, reach: ~0.9, cost: ~1.3, why: "official, ships with Rust; width-based, a few shared parts missing"}
-  lint:
-    - {tool: clippy without types, gain: ~0.7, reach: ~0.3, cost: ~1.0, why: "needs a build; most lints read types"}
-    - {tool: clippy with types, gain: ~0.7, reach: ~0.85, cost: ~3.0, why: "needs a type checker for the language"}
+  format: {tool: "rustfmt", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, ships with Rust; width-based, a few shared parts missing"}
+  lint: {tool: "clippy with types", gain: ~0.7, cost: {types: true, est: true}, why: "clippy is the standard Rust linter (ships with rustup); most lints read types; needs a type checker for the language"}
 - language: Scala
   gh: 28505
   so: 2.2
   parser: ~1.2 # tree-sitter-scala
-  format:
-    - {tool: scalafmt, gain: ~0.7, reach: ~0.85, cost: ~1.2, why: "good tool but runs on the JVM; width-based"}
-  lint:
-    - {tool: scalafix syntactic, gain: ~0.7, reach: ~0.6, cost: ~1.0, why: "JVM; the useful rules need the compiler"}
+  format: {tool: "scalafmt", gain: ~0.7, cost: {layout: width, est: true}, why: "only tool found; good tool but runs on the JVM; width-based"}
+  lint: {tool: "scalafix syntactic", gain: ~0.7, cost: {est: true}, why: "only tool found; JVM; the useful rules need the compiler"}
 - language: Dart
   gh: 258967
   so: 5.0
   parser: ~1.2 # tree-sitter-dart
-  format:
-    - {tool: dart format, gain: ~0.1, reach: ~0.9, cost: ~1.2, why: "official, ships with the SDK; width-based"}
-  lint:
-    - {tool: dart analyze, gain: ~0.1, reach: ~0.5, cost: ~1.0, why: "official, ships with the SDK; many lints read types"}
+  format: {tool: "dart format", gain: ~0.1, cost: {layout: width, est: true}, why: "only tool found; official, ships with the SDK; width-based"}
+  lint: {tool: "dart analyze", gain: ~0.1, cost: {est: true}, why: "only tool found; official, ships with the SDK; many lints read types"}
 - language: Lua
   gh: 269867
   so: 9.5
   parser: ~1.0 # full_moon
-  format:
-    - {tool: StyLua, gain: ~0.4, reach: ~0.9, cost: ~1.2, why: "good and fast third party; width-based"}
-  lint:
-    - {tool: selene, gain: ~0.4, reach: ~0.7, cost: ~1.0, why: "fast third party; standard-library definitions needed"}
+  format: {tool: "StyLua", gain: ~0.4, cost: {layout: width, est: true}, why: "only tool found; good and fast third party; width-based"}
+  lint: {tool: "selene", gain: ~0.4, cost: {est: true}, why: "only tool found; fast third party; standard-library definitions needed"}
 - language: GraphQL
-  lint:
-    - {tool: "graphql-eslint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; schema and operation rules; syntactic rules"}
-    - {tool: "graphql-schema-linter", gain: ~0.7, reach: ~0.5, cost: ~1.0, why: "Node; schema rules only; syntactic rules"}
+  lint: {tool: "graphql-eslint", gain: ~0.7, cost: {est: true}, why: "npm @graphql-eslint/eslint-plugin 7.7M downloads a month against graphql-schema-linter 0.44M; Node; schema and operation rules; syntactic rules"}
 - language: TOML
-  lint:
-    - {tool: "taplo lint", gain: ~0.4, reach: ~0.5, cost: ~0.9, why: "Rust, fast; schema validation only; schema checks"}
-    - {tool: "tombi lint", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; young; syntactic rules"}
+  lint: {tool: "taplo lint", gain: ~0.4, cost: {est: true}, why: "Homebrew installs 30 days: taplo 1.7k, tombi 1.0k; taplo also formats TOML in Sudsy's reference table (close call); Rust, fast; schema validation only; schema checks"}
 - language: Angular templates
-  lint:
-    - {tool: "angular-eslint template rules", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  lint: {tool: "angular-eslint template rules", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: XML
-  lint:
-    - {tool: "xmllint", gain: ~0.1, reach: ~0.6, cost: ~1.0, why: "official libxml2, native; DTD and schema checks; some rules need semantics"}
+  lint: {tool: "xmllint", gain: ~0.1, cost: {est: true}, why: "only tool found; official libxml2, native; DTD and schema checks; some rules need semantics"}
 - language: Ruby
-  format:
-    - {tool: "rubyfmt", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Rust, fast; few options; canonical, no width"}
-    - {tool: "rufo", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "Ruby runtime; canonical, no width"}
-    - {tool: "RuboCop layout cops", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Ruby runtime; the lint tool is the reference; width-based, many options"}
-- language: INI / EditorConfig / .gitignore
-  lint:
-    - {tool: "editorconfig-checker", gain: ~0.4, reach: ~0.5, cost: ~0.7, why: "Go, fast; checks whitespace against .editorconfig; few rules"}
+  format: {tool: "RuboCop layout cops", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "user decision: RuboCop is Ruby's reference tool, its Layout cops are the format; rubyfmt and rufo are left out; Ruby runtime; the lint tool is the reference; width-based, many options"}
+- language: INI
+  support: INI / EditorConfig / .gitignore
+  retrofit: true
+  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
+- language: EditorConfig
+  support: INI / EditorConfig / .gitignore
+  retrofit: true
+  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
+  lint: {tool: "editorconfig-checker", gain: ~0.4, cost: {est: true}, why: "editorconfig-checker is the checker the EditorConfig project lists; Go, fast; checks whitespace against .editorconfig; few rules"}
+- language: .gitignore
+  support: INI / EditorConfig / .gitignore
+  retrofit: true
+  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
+- language: Dockerfile
+  retrofit: true
+  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
+- language: Makefile
+  retrofit: true
+  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
+- language: GitHub Actions
+  retrofit: true
+  format: {tool: "none found", gain: 1.0, cost: {parts: 1, est: true}, why: "no reference tool: the corpus, decision table and agreement number of docs/ai/development/no-reference-tool.md are still to add"}
 - language: Ada
   gh: 4660
   so: 1.2
   parser: ~1.2 # tree-sitter: briot/tree-sitter-ada (28 stars, pushed 2026-10)
-  format:
-    - {tool: "gnatformat", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Ada, native; young; width-based"}
-  lint:
-    - {tool: "gnatcheck", gain: ~0.4, reach: ~0.6, cost: ~1.2, why: "native; semantic rules; some rules need semantics"}
+  format: {tool: "gnatformat", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Ada, native; young; width-based"}
+  lint: {tool: "gnatcheck", gain: ~0.4, cost: {index: true, est: true}, why: "only tool found; native; semantic rules; some rules need semantics"}
 - language: Ansible
   so: 9.4
   parser: ~0.2 # reuse: YAML parser (semantic layer only)
   note: "YAML with playbook semantics"
-  lint:
-    - {tool: "ansible-lint", gain: ~0.7, reach: ~0.6, cost: ~1.2, why: "Python runtime; rules read module metadata; some rules need semantics"}
+  lint: {tool: "ansible-lint", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; Python runtime; rules read module metadata; some rules need semantics"}
 - language: ANTLR
   gh: 24939
   parser: ~1.5 # hand-written: only grammars found have 1 star
-  format:
-    - {tool: "antlr-format", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node; width-based, many options; no push since 2024"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "antlr-format", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based, many options; no push since 2024"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Apex
   gh: 6613
   parser: ~1.2 # tree-sitter: aheber/tree-sitter-sfapex (92 stars, pushed 2026-11)
   note: "Salesforce: Apex, Aura, LWC, Flow"
-  format:
-    - {tool: "prettier-plugin-apex", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node plus JVM; width-based"}
-  lint:
-    - {tool: "PMD apex", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "JVM; syntactic rules"}
+  format: {tool: "prettier-plugin-apex", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node plus JVM; width-based"}
+  lint: {tool: "PMD apex", gain: ~0.7, cost: {est: true}, why: "only tool found; JVM; syntactic rules"}
 - language: ARM templates
   parser: ~0.2 # reuse: JSON parser (semantic layer only)
-  lint:
-    - {tool: "arm-ttk", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "PowerShell runtime; syntactic rules"}
+  lint: {tool: "arm-ttk", gain: ~0.7, cost: {est: true}, why: "only tool found; PowerShell runtime; syntactic rules"}
 - language: AsciiDoc
   parser: ~1.2 # tree-sitter: cpkio/tree-sitter-asciidoc (10 stars, pushed 2026-11)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: ASP.NET (Razor, Web Forms)
   gh: 20697
   parser: ~1.2 # tree-sitter: tris203/tree-sitter-razor (19 stars, pushed 2026-07)
   note: "Razor formatting lives in the IDE only"
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Assembly
   gh: 183160
   so: 7.3
   parser: ~1.2 # tree-sitter: RubixDev/tree-sitter-asm (58 stars, pushed 2025-11)
-  format:
-    - {tool: "asmfmt", gain: ~0.4, reach: ~0.3, cost: ~0.8, why: "Go, fast; Go assembler only, other dialects have none; whitespace only; no push since 2022"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "asmfmt", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Go, fast; Go assembler only, other dialects have none; whitespace only; no push since 2022"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Astro
   gh: 148168
   parser: ~1.2 # tree-sitter: virchau13/tree-sitter-astro (122 stars, pushed 2025-04)
-  format:
-    - {tool: "markup_fmt", gain: ~0.4, reach: ~0.8, cost: ~1.0, why: "Rust, fast (dprint plugin); HTML-like layout is built; width-based"}
-    - {tool: "prettier-plugin-astro", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "astro check", gain: ~0.7, reach: ~0.4, cost: ~2.0, why: "Node, reads TypeScript types; needs types"}
+  format: {tool: "prettier-plugin-astro", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "npm 7.1M downloads a month; the Astro docs name it; markup_fmt is a dprint plugin; Node; width-based"}
+  lint: {tool: "astro check", gain: ~0.7, cost: {types: true, est: true}, why: "only tool found; Node, reads TypeScript types; needs types"}
 - language: Avro IDL
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Awk
   gh: 49998
   parser: ~1.2 # tree-sitter: Beaglefoot/tree-sitter-awk (26 stars, pushed 2025-09)
-  format:
-    - {tool: "gawk --pretty-print", gain: ~0.4, reach: ~0.5, cost: ~1.0, why: "GNU, native; drops some comments; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "gawk --pretty-print", gain: ~0.4, cost: {est: true}, why: "only tool found; GNU, native; drops some comments; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Batchfile
   gh: 815225
   parser: ~1.2 # tree-sitter: wharflab/tree-sitter-batch (14 stars, pushed 2026-11)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Beancount / hledger
   parser: ~1.2 # tree-sitter: polarmutex/tree-sitter-beancount (56 stars, pushed 2026-11)
-  format:
-    - {tool: "hledger-fmt", gain: ~0.4, reach: ~0.95, cost: ~0.8, why: "Rust, fast; aligns amounts; whitespace only"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "hledger-fmt", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Rust, fast; aligns amounts; whitespace only"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: BibTeX
   parser: ~1.2 # tree-sitter: latex-lsp/tree-sitter-bibtex (22 stars, pushed 2025-04)
-  format:
-    - {tool: "bibtex-tidy", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node; width-based, many options"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "bibtex-tidy", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based, many options"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Bicep
   gh: 16575
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-bicep (10 stars, pushed 2026-09)
-  format:
-    - {tool: "bicep format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, native AOT build; canonical, no width"}
-  lint:
-    - {tool: "bicep lint", gain: ~0.1, reach: ~0.6, cost: ~1.2, why: "official; some rules read types; some rules need semantics"}
+  format: {tool: "bicep format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, native AOT build; canonical, no width"}
+  lint: {tool: "bicep lint", gain: ~0.1, cost: {index: true, est: true}, why: "only tool found; official; some rules read types; some rules need semantics"}
 - language: BitBake
   gh: 22237
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-bitbake (14 stars, pushed 2026-09)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "oelint-adv", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "oelint-adv", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: Blade
   gh: 189940
   parser: ~1.2 # tree-sitter: EmranMR/tree-sitter-blade (264 stars, pushed 2026-08)
-  format:
-    - {tool: "blade-formatter", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node; width-based and many options; width-based, many options"}
-  lint:
-    - {tool: "tlint", gain: ~0.7, reach: ~0.9, cost: ~0.7, why: "PHP runtime; Laravel style rules; few rules"}
+  format: {tool: "blade-formatter", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based and many options; width-based, many options"}
+  lint: {tool: "tlint", gain: ~0.7, cost: {est: true}, why: "only tool found; PHP runtime; Laravel style rules; few rules"}
 - language: BrightScript / BrighterScript
   gh: 323
   parser: ~1.2 # tree-sitter: ajdelcimmuto/tree-sitter-brightscript (9 stars, pushed 2026-08)
-  format:
-    - {tool: "brighterscript-formatter", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node; width-based, many options"}
-  lint:
-    - {tool: "bslint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "brighterscript-formatter", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based, many options"}
+  lint: {tool: "bslint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Caddyfile
   parser: ~1.2 # tree-sitter: caddyserver/tree-sitter-caddyfile (10 stars, pushed 2026-11)
-  format:
-    - {tool: "caddy fmt", gain: ~0.1, reach: ~0.95, cost: ~0.8, why: "official, Go, ships with Caddy; whitespace only"}
-  lint:
-    - {tool: "caddy validate", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official; loads the modules; needs types"}
+  format: {tool: "caddy fmt", gain: ~0.1, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; official, Go, ships with Caddy; whitespace only"}
+  lint: {tool: "caddy validate", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official; loads the modules; needs types"}
 - language: Cap'n Proto
   gh: 4189
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-capnp (5 stars, pushed 2026-09)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Cedar
   parser: ~1.0 # crate cedar-policy (4.15.0, updated 2026-11)
-  format:
-    - {tool: "cedar format", gain: ~0.1, reach: ~0.85, cost: ~1.3, why: "official, Rust, fast; width-based"}
-  lint:
-    - {tool: "cedar validate", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official; checks against a schema; needs types"}
+  format: {tool: "cedar format", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, Rust, fast; width-based"}
+  lint: {tool: "cedar validate", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official; checks against a schema; needs types"}
 - language: Clojure
   gh: 18170
   so: 1.3
   parser: ~1.2 # tree-sitter: clj-commons/tree-sitter-clojure (191 stars, pushed 2026-11)
-  format:
-    - {tool: "cljfmt", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "JVM start-up; canonical, no width"}
-    - {tool: "zprint", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "native build, fast; many options; width-based"}
-  lint:
-    - {tool: "clj-kondo", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "native build, fast; syntactic rules"}
+  format: {tool: "cljfmt", gain: ~0.7, cost: {est: true}, why: "GitHub stars 1,231 against zprint 625; clojure-lsp formats with cljfmt; JVM start-up; canonical, no width"}
+  lint: {tool: "clj-kondo", gain: ~0.4, cost: {est: true}, why: "only tool found; native build, fast; syntactic rules"}
 - language: CloudFormation
   parser: ~0.2 # reuse: YAML and JSON parsers (semantic layer only)
-  lint:
-    - {tool: "cfn-lint", gain: ~0.7, reach: ~0.8, cost: ~1.0, why: "Python runtime; resource specs are data; schema checks"}
+  lint: {tool: "cfn-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; resource specs are data; schema checks"}
 - language: COBOL
   gh: 4566
   so: 1.1
   parser: ~1.2 # tree-sitter: yutaro-sakamoto/tree-sitter-cobol (39 stars, pushed 2026-10)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: CodeQL
   gh: 1091
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-ql (37 stars, pushed 2026-10)
-  format:
-    - {tool: "codeql query format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, ships with the CodeQL CLI; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "codeql query format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, ships with the CodeQL CLI; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: CoffeeScript
   gh: 9152
   parser: ~1.5 # hand-written: only grammar found has 2 stars
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "coffeelint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules; archived"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "coffeelint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules; archived"}
 - language: Common Lisp / Scheme
   gh: 34595
   so: 2.6
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-commonlisp (63 stars, pushed 2026-09)
-  format:
-    - {tool: "schemat", gain: ~0.4, reach: ~0.4, cost: ~1.3, why: "Rust, fast; Scheme only, Common Lisp has none; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "schemat", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Rust, fast; Scheme only, Common Lisp has none; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Crystal
   gh: 852
   parser: ~1.2 # tree-sitter: crystal-lang-tools/tree-sitter-crystal (57 stars, pushed 2026-09)
-  format:
-    - {tool: "crystal tool format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, ships with Crystal, native; canonical, no width"}
-  lint:
-    - {tool: "Ameba", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Crystal, native, fast; syntactic rules"}
+  format: {tool: "crystal tool format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, ships with Crystal, native; canonical, no width"}
+  lint: {tool: "Ameba", gain: ~0.4, cost: {est: true}, why: "only tool found; Crystal, native, fast; syntactic rules"}
 - language: CSV / TSV
   parser: ~1.0 # crate csv (1.4.0, updated 2025-10)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "csvlint", gain: ~0.4, reach: ~0.9, cost: ~0.7, why: "Go, fast; structure only; few rules"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "csvlint", gain: ~0.4, cost: {est: true}, why: "only tool found; Go, fast; structure only; few rules"}
 - language: CUDA
   gh: 77783
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-cuda (36 stars, pushed 2026-11)
-  format:
-    - {tool: "clang-format", gain: ~0.1, reach: ~0.85, cost: ~1.0, why: "official LLVM; C++ layout is built; width-based, many options"}
-  lint:
-    - {tool: "clang-tidy", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official; reads types; needs types"}
+  format: {tool: "clang-format", gain: ~0.1, cost: {layout: penalty, est: true}, why: "only tool found; official LLVM; C++ layout is built; width-based, many options"}
+  lint: {tool: "clang-tidy", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official; reads types; needs types"}
 - language: CUE
   gh: 5568
   parser: ~1.2 # tree-sitter: cue-lang/tree-sitter-cue (40 stars, pushed 2026-10)
-  format:
-    - {tool: "cue fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Go, fast; canonical, no width"}
-  lint:
-    - {tool: "cue vet", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official; evaluates the constraints; needs types"}
+  format: {tool: "cue fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Go, fast; canonical, no width"}
+  lint: {tool: "cue vet", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official; evaluates the constraints; needs types"}
 - language: Cython
   gh: 67384
   parser: ~1.2 # tree-sitter: b0o/tree-sitter-cython (14 stars, pushed 2026-05)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "cython-lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "cython-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: D
   gh: 9665
   parser: ~1.2 # tree-sitter: gdamore/tree-sitter-d (67 stars, pushed 2026-06)
-  format:
-    - {tool: "dfmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "native D, fast; width-based"}
-  lint:
-    - {tool: "D-Scanner", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "native D, fast; syntactic rules"}
+  format: {tool: "dfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; native D, fast; width-based"}
+  lint: {tool: "D-Scanner", gain: ~0.4, cost: {est: true}, why: "only tool found; native D, fast; syntactic rules"}
 - language: D2
   parser: ~1.2 # tree-sitter: ravsii/tree-sitter-d2 (42 stars, pushed 2026-10)
-  format:
-    - {tool: "d2 fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Go, ships with D2; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "d2 fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Go, ships with D2; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Dhall
   gh: 126
   parser: ~1.0 # crate serde_dhall (0.13.0, updated 2025-09)
-  format:
-    - {tool: "dhall format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, native Haskell binary; canonical, no width"}
-  lint:
-    - {tool: "dhall lint", gain: ~0.1, reach: ~0.9, cost: ~0.7, why: "official; removes unused bindings; few rules"}
+  format: {tool: "dhall format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, native Haskell binary; canonical, no width"}
+  lint: {tool: "dhall lint", gain: ~0.1, cost: {est: true}, why: "only tool found; official; removes unused bindings; few rules"}
 - language: Docker Compose
   parser: ~0.2 # reuse: YAML parser (semantic layer only)
-  lint:
-    - {tool: "dclint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  lint: {tool: "dclint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: dotenv
   parser: ~1.2 # tree-sitter: pnx/tree-sitter-dotenv (9 stars, pushed 2026-11)
-  format:
-    - {tool: "dotenv-linter fix", gain: ~0.4, reach: ~0.95, cost: ~0.8, why: "Rust, fast; fixes ordering and quotes; whitespace only"}
-  lint:
-    - {tool: "dotenv-linter", gain: ~0.4, reach: ~0.9, cost: ~0.7, why: "Rust, fast; few rules"}
+  format: {tool: "dotenv-linter fix", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Rust, fast; fixes ordering and quotes; whitespace only"}
+  lint: {tool: "dotenv-linter", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; few rules"}
 - language: EDN
   parser: ~0.2 # reuse: Clojure parser (semantic layer only)
-  format:
-    - {tool: "zprint", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "native build, fast; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "zprint", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; native build, fast; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: EJS
   gh: 78205
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-embedded-template (83 stars, pushed 2025-08)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "ejs-lint", gain: ~0.7, reach: ~0.9, cost: ~0.7, why: "Node; syntax errors only; few rules"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "ejs-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntax errors only; few rules"}
 - language: Elixir
   gh: 21859
   so: 2.6
   parser: ~1.2 # tree-sitter: elixir-lang/tree-sitter-elixir (287 stars, pushed 2026-10)
-  format:
-    - {tool: "mix format", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "official, ships with Elixir; BEAM start-up; width-based"}
-  lint:
-    - {tool: "Credo", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Elixir runtime; syntactic rules"}
+  format: {tool: "mix format", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, ships with Elixir; BEAM start-up; width-based"}
+  lint: {tool: "Credo", gain: ~0.7, cost: {est: true}, why: "only tool found; Elixir runtime; syntactic rules"}
 - language: Elm
   gh: 1313
   parser: ~1.2 # tree-sitter: elm-tooling/tree-sitter-elm (87 stars, pushed 2026-11)
-  format:
-    - {tool: "elm-format", gain: ~0.4, reach: ~0.95, cost: ~0.8, why: "native Haskell binary; no options; whitespace only"}
-  lint:
-    - {tool: "elm-review", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "elm-format", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; native Haskell binary; no options; whitespace only"}
+  lint: {tool: "elm-review", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Emacs Lisp
   gh: 50457
   parser: ~1.2 # tree-sitter: Wilfred/tree-sitter-elisp (84 stars, pushed 2026-08)
-  format:
-    - {tool: "elisp-autofmt", gain: ~0.7, reach: ~0.7, cost: ~1.3, why: "needs Emacs; width-based, many options"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "elisp-autofmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; needs Emacs; width-based, many options"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: ERB
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-embedded-template (83 stars, pushed 2025-08)
-  format:
-    - {tool: "erb-formatter", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Ruby runtime; width-based"}
-  lint:
-    - {tool: "erb_lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Ruby runtime; syntactic rules"}
+  format: {tool: "erb-formatter", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Ruby runtime; width-based"}
+  lint: {tool: "erb_lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Ruby runtime; syntactic rules"}
 - language: Erlang
   gh: 10401
   so: 1.6
   parser: ~1.2 # tree-sitter: WhatsApp/tree-sitter-erlang (97 stars, pushed 2026-11)
-  format:
-    - {tool: "erlfmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "needs Erlang; width-based"}
-    - {tool: "efmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; young; width-based"}
-  lint:
-    - {tool: "elvis", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "needs Erlang; syntactic rules"}
+  format: {tool: "erlfmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "WhatsApp's formatter, 469 stars, pushed 2026-11; efmt is a young single-author tool; needs Erlang; width-based"}
+  lint: {tool: "elvis", gain: ~0.7, cost: {est: true}, why: "only tool found; needs Erlang; syntactic rules"}
 - language: F#
   gh: 8365
   so: 1.2
   parser: ~1.2 # tree-sitter: ionide/tree-sitter-fsharp (98 stars, pushed 2026-11)
-  format:
-    - {tool: "Fantomas", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: ".NET runtime; width-based"}
-  lint:
-    - {tool: "FSharpLint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: ".NET runtime; syntactic rules"}
+  format: {tool: "Fantomas", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; .NET runtime; width-based"}
+  lint: {tool: "FSharpLint", gain: ~0.7, cost: {est: true}, why: "only tool found; .NET runtime; syntactic rules"}
 - language: Fennel / Janet
   gh: 341
   parser: ~1.2 # tree-sitter: alexmozaidze/tree-sitter-fennel (20 stars, pushed 2026-10)
-  format:
-    - {tool: "fnlfmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "needs Fennel and Lua; width-based"}
-    - {tool: "janet-format", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "needs Janet; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "fnlfmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "fnlfmt is the formatter of the Fennel project; janet-format has no registry presence (weak evidence); needs Fennel and Lua; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Fish
   parser: ~1.2 # tree-sitter: ram02z/tree-sitter-fish (50 stars, pushed 2026-08)
-  format:
-    - {tool: "fish_indent", gain: ~0.1, reach: ~0.95, cost: ~0.8, why: "official, Rust, ships with fish; whitespace only"}
-  lint:
-    - {tool: "fish --no-execute", gain: ~0.1, reach: ~0.9, cost: ~0.7, why: "official; syntax errors only; few rules"}
+  format: {tool: "fish_indent", gain: ~0.1, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; official, Rust, ships with fish; whitespace only"}
+  lint: {tool: "fish --no-execute", gain: ~0.1, cost: {est: true}, why: "only tool found; official; syntax errors only; few rules"}
 - language: FlatBuffers
   parser: ~1.5 # hand-written: only grammars found have 1 star
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Fortran
   gh: 57934
   so: 1.7
   parser: ~1.2 # tree-sitter: stadelmanma/tree-sitter-fortran (55 stars, pushed 2026-11)
-  format:
-    - {tool: "fprettify", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python runtime; fixed-form sources unsupported; width-based, many options"}
-    - {tool: "findent", gain: ~0.4, reach: ~0.75, cost: ~1.3, why: "Fortran, native; width-based, many options"}
-  lint:
-    - {tool: "fortitude", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; syntactic rules"}
+  format: {tool: "fprettify", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "PyPI 46k downloads a month against findent 2k; Python runtime; fixed-form sources unsupported; width-based, many options"}
+  lint: {tool: "fortitude", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; syntactic rules"}
 - language: GDB script
   gh: 27939
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: GDScript
   gh: 48437
   so: 4.1
   parser: ~1.2 # tree-sitter: PrestonKnopp/tree-sitter-gdscript (122 stars, pushed 2026-10)
-  format:
-    - {tool: "gdformat", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Python runtime; width-based"}
-    - {tool: "GDScript-formatter", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; young; width-based"}
-  lint:
-    - {tool: "gdlint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "gdformat", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "PyPI gdtoolkit 543k downloads a month (also gdlint); GDScript-formatter has 498 stars; Python runtime; width-based"}
+  lint: {tool: "gdlint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: Gherkin
   gh: 53788
   parser: ~1.0 # crate gherkin (0.16.0, updated 2026-04)
-  format:
-    - {tool: "ghokin", gain: ~0.4, reach: ~0.95, cost: ~0.8, why: "Go, fast; table alignment; whitespace only"}
-  lint:
-    - {tool: "gherkin-lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules; no push since 2024"}
+  format: {tool: "ghokin", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Go, fast; table alignment; whitespace only"}
+  lint: {tool: "gherkin-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules; no push since 2024"}
 - language: Gleam
   gh: 321
   so: 1.3
   parser: ~1.2 # tree-sitter: gleam-lang/tree-sitter-gleam (107 stars, pushed 2026-09)
-  format:
-    - {tool: "gleam format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Rust, ships with Gleam; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "gleam format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Rust, ships with Gleam; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: GLSL
   gh: 103018
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-glsl (50 stars, pushed 2026-09)
-  format:
-    - {tool: "clang-format", gain: ~0.1, reach: ~0.7, cost: ~1.0, why: "official LLVM; C-like, GLSL qualifiers partial; width-based, many options"}
-  lint:
-    - {tool: "glslang", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official validator; needs the compiler; needs types"}
+  format: {tool: "clang-format", gain: ~0.1, cost: {layout: penalty, est: true}, why: "only tool found; official LLVM; C-like, GLSL qualifiers partial; width-based, many options"}
+  lint: {tool: "glslang", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official validator; needs the compiler; needs types"}
 - language: GN
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-gn (7 stars, pushed 2026-09)
-  format:
-    - {tool: "gn format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, native; ships with GN; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "gn format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, native; ships with GN; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Gradle
   so: 11.6
   parser: ~0.2 # reuse: Groovy parser (semantic layer only)
   note: "build.gradle (Groovy DSL); build.gradle.kts is Kotlin"
-  format:
-    - {tool: "npm-groovy-lint", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node plus JVM; Groovy DSL; width-based, many options"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "npm-groovy-lint", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node plus JVM; Groovy DSL; width-based, many options"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Grain
   parser: ~1.2 # tree-sitter: marceline-cramer/tree-sitter-grain (9 stars, pushed 2023-03)
-  format:
-    - {tool: "grain format", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "official, needs the Grain toolchain; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "grain format", gain: ~0.7, cost: {est: true}, why: "only tool found; official, needs the Grain toolchain; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Groovy
   gh: 43435
   so: 3.9
   parser: ~1.2 # tree-sitter: murtaza64/tree-sitter-groovy (26 stars, pushed 2026-09)
-  format:
-    - {tool: "npm-groovy-lint", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node plus JVM; width-based, many options"}
-  lint:
-    - {tool: "npm-groovy-lint lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node plus JVM; syntactic rules"}
-    - {tool: "CodeNarc", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "JVM; syntactic rules"}
+  format: {tool: "npm-groovy-lint", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node plus JVM; width-based, many options"}
+  lint: {tool: "CodeNarc", gain: ~0.7, cost: {est: true}, why: "CodeNarc is the rule engine of Gradle's codenarc plugin and of npm-groovy-lint (npm 175k a month), which wraps it; JVM; syntactic rules"}
 - language: Hack
   gh: 129569
   parser: ~1.2 # tree-sitter: slackhq/tree-sitter-hack (34 stars, pushed 2025-11, archived)
   note: "grammar archived"
-  format:
-    - {tool: "hackfmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "official, ships with HHVM; needs it; width-based"}
-  lint:
-    - {tool: "hhast", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "needs HHVM; syntactic rules; archived"}
+  format: {tool: "hackfmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, ships with HHVM; needs it; width-based"}
+  lint: {tool: "hhast", gain: ~0.7, cost: {est: true}, why: "only tool found; needs HHVM; syntactic rules; archived"}
 - language: Handlebars
   gh: 105883
   parser: ~1.5 # hand-written: only grammar found has 3 stars
   note: "Handlebars, Mustache"
-  format:
-    - {tool: "prettier glimmer", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-    - {tool: "djlint format", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python; width-based, many options"}
-  lint:
-    - {tool: "ember-template-lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "prettier glimmer", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "Prettier ships the glimmer parser (npm prettier 789M a month); djlint's Handlebars profile is a side mode; Node; width-based"}
+  lint: {tool: "ember-template-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Haskell
   gh: 23637
   so: 2.3
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-haskell (189 stars, pushed 2026-09)
   note: "layout rule needs a context-sensitive lexer"
-  format:
-    - {tool: "ormolu", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "native Haskell binary, fast; few options; canonical, no width"}
-    - {tool: "fourmolu", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "native; Ormolu with options; width-based"}
-    - {tool: "stylish-haskell", gain: ~0.4, reach: ~0.5, cost: ~0.8, why: "native; imports and alignment only; whitespace only"}
-  lint:
-    - {tool: "hlint", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "native; syntax-tree hints; syntactic rules"}
+  format: {tool: "ormolu", gain: ~0.4, cost: {est: true}, why: "Ormolu is the formatter HLS bundles; Homebrew installs fourmolu 12, ormolu 10, stylish-haskell 11 (no signal), stylish-haskell 1,024 stars mostly imports (close call, weak evidence); native Haskell binary, fast; few options; canonical, no width"}
+  lint: {tool: "hlint", gain: ~0.4, cost: {est: true}, why: "only tool found; native; syntax-tree hints; syntactic rules"}
 - language: Helm templates
   so: 9.7
   parser: ~1.2 # tree-sitter: ngalaiko/tree-sitter-go-template (143 stars, pushed 2026-10)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "helm lint", gain: ~0.1, reach: ~0.6, cost: ~1.5, why: "official, Go; renders the chart; some rules need semantics"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "helm lint", gain: ~0.1, cost: {index: true, est: true}, why: "only tool found; official, Go; renders the chart; some rules need semantics"}
 - language: HLSL
   gh: 111071
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-hlsl (14 stars, pushed 2026-09)
-  format:
-    - {tool: "clang-format", gain: ~0.1, reach: ~0.7, cost: ~1.0, why: "official LLVM; HLSL support partial; width-based, many options"}
-  lint:
-    - {tool: "dxc", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official compiler diagnostics; needs the compiler; needs types"}
+  format: {tool: "clang-format", gain: ~0.1, cost: {layout: penalty, est: true}, why: "only tool found; official LLVM; HLSL support partial; width-based, many options"}
+  lint: {tool: "dxc", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official compiler diagnostics; needs the compiler; needs types"}
 - language: HTTP files / Hurl
   parser: ~1.2 # tree-sitter: rest-nvim/tree-sitter-http (64 stars, pushed 2025-09)
-  format:
-    - {tool: "hurlfmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Rust, ships with Hurl; .hurl only; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "hurlfmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Rust, ships with Hurl; .hurl only; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Inko
   parser: ~1.5 # hand-written: only grammar found has 4 stars
-  format:
-    - {tool: "inko fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, ships with Inko; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "inko fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, ships with Inko; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Inno Setup
   gh: 42727
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Java properties
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-properties (7 stars, pushed 2026-09)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Jinja
   gh: 161920
   parser: ~1.2 # tree-sitter: dbt-labs/tree-sitter-jinja2 (34 stars, pushed 2026-11)
   note: "Jinja, Nunjucks"
-  format:
-    - {tool: "djangofmt", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Rust, fast; Django/Jinja markup; canonical, no width"}
-    - {tool: "djlint format", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python; many options; width-based, many options"}
-  lint:
-    - {tool: "djlint lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "djlint format", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "PyPI djlint 4.7M downloads a month against djangofmt 37k; Python; many options; width-based, many options"}
+  lint: {tool: "djlint lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: jq
   gh: 9135
   parser: ~1.2 # tree-sitter: flurie/tree-sitter-jq (34 stars, pushed 2025-05)
-  format:
-    - {tool: "jqfmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Go, fast; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "jqfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Go, fast; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: JSON5
   gh: 645
   parser: ~1.0 # crate json5 (1.3.8, updated 2026-11)
   note: "JSON row covers JSON and JSONC"
-  format:
-    - {tool: "prettier json5", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "eslint-plugin-jsonc", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "prettier json5", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based"}
+  lint: {tool: "eslint-plugin-jsonc", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Jsonnet
   gh: 8246
   parser: ~1.2 # tree-sitter: sourcegraph/tree-sitter-jsonnet (21 stars, pushed 2026-09)
-  format:
-    - {tool: "jsonnetfmt", gain: ~0.1, reach: ~0.85, cost: ~1.3, why: "official, Go, fast; width-based"}
-  lint:
-    - {tool: "jsonnet-lint", gain: ~0.1, reach: ~0.6, cost: ~1.2, why: "official, Go; evaluator-based checks; some rules need semantics"}
+  format: {tool: "jsonnetfmt", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, Go, fast; width-based"}
+  lint: {tool: "jsonnet-lint", gain: ~0.1, cost: {index: true, est: true}, why: "only tool found; official, Go; evaluator-based checks; some rules need semantics"}
 - language: Julia
   gh: 31344
   so: 1.5
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-julia (130 stars, pushed 2025-11)
-  format:
-    - {tool: "JuliaFormatter.jl", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Julia runtime, slow start; width-based"}
-    - {tool: "Runic.jl", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "Julia runtime, no options; canonical, no width"}
-  lint:
-    - {tool: "StaticLint.jl", gain: ~0.7, reach: ~0.5, cost: ~1.2, why: "Julia runtime; scope analysis; some rules need semantics; archived"}
+  format: {tool: "JuliaFormatter.jl", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "the formatter of the Julia VS Code extension, 649 stars; Runic.jl 261 stars; Julia runtime, slow start; width-based"}
+  lint: {tool: "StaticLint.jl", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; Julia runtime; scope analysis; some rules need semantics; archived"}
 - language: Jupyter Notebook
   gh: 1018851
   parser: ~1.0 # crate serde_json (1.0.154, updated 2026-10)
   note: "JSON file with Python cells: the Python leg does the work"
-  format:
-    - {tool: "ruff format on cells", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Rust, fast; the Python formatter does the cells; canonical, no width"}
-  lint:
-    - {tool: "ruff check on cells", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; the Python rules do the cells; syntactic rules"}
+  format: {tool: "ruff format on cells", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; the Python formatter does the cells; canonical, no width"}
+  lint: {tool: "ruff check on cells", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; the Python rules do the cells; syntactic rules"}
 - language: Just
   parser: ~1.2 # tree-sitter: casey/tree-sitter-just (198 stars, pushed 2026-03)
-  format:
-    - {tool: "just --fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Rust; marked unstable; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "just --fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Rust; marked unstable; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: KCL
   parser: ~1.2 # tree-sitter: kcl-lang/tree-sitter-kcl (9 stars, pushed 2026-08)
-  format:
-    - {tool: "kcl fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Rust/native; canonical, no width"}
-  lint:
-    - {tool: "kcl lint", gain: ~0.1, reach: ~0.6, cost: ~1.2, why: "official; type checks; some rules need semantics"}
+  format: {tool: "kcl fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Rust/native; canonical, no width"}
+  lint: {tool: "kcl lint", gain: ~0.1, cost: {index: true, est: true}, why: "only tool found; official; type checks; some rules need semantics"}
 - language: KDL
   parser: ~1.0 # crate kdl (6.7.1, updated 2026-05)
-  format:
-    - {tool: "kdlfmt", gain: ~0.4, reach: ~0.95, cost: ~0.8, why: "Rust, fast; whitespace only"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "kdlfmt", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Rust, fast; whitespace only"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Kubernetes manifests
   so: 20.4
   parser: ~0.2 # reuse: YAML parser (semantic layer only)
-  lint:
-    - {tool: "kubeconform", gain: ~0.4, reach: ~0.9, cost: ~0.9, why: "Go, fast; schema validation; schema checks"}
-    - {tool: "kube-linter", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Go, fast; best-practice checks; syntactic rules"}
+  lint: {tool: "kubeconform", gain: ~0.4, cost: {est: true}, why: "Homebrew installs 30 days: kubeconform 32k, kube-linter 1.8k, kube-score 55; Go, fast; schema validation; schema checks"}
 - language: LaTeX
   gh: 264355
   parser: ~1.2 # tree-sitter: latex-lsp/tree-sitter-latex (174 stars, pushed 2026-08)
-  format:
-    - {tool: "tex-fmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; width-based"}
-    - {tool: "latexindent", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Perl runtime; many options; width-based, many options"}
-  lint:
-    - {tool: "ChkTeX", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "C, fast; GNU; syntactic rules"}
+  format: {tool: "latexindent", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "latexindent ships with TeX Live and is the LaTeX Workshop default; Homebrew tex-fmt 59 installs (weak evidence: no registry count of latexindent); Perl runtime; many options; width-based, many options"}
+  lint: {tool: "ChkTeX", gain: ~0.4, cost: {est: true}, why: "only tool found; C, fast; GNU; syntactic rules"}
 - language: Linker Script
   gh: 91454
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-linkerscript (11 stars, pushed 2026-09)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Liquid
   gh: 24526
   parser: ~1.2 # tree-sitter: hankthetank27/tree-sitter-liquid (16 stars, pushed 2026-04)
-  format:
-    - {tool: "prettier-plugin-liquid", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "theme-check", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "prettier-plugin-liquid", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based"}
+  lint: {tool: "theme-check", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Liquidsoap
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "liquidsoap-prettier", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "liquidsoap-prettier", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: M4
   gh: 58305
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Mako
   gh: 156907
   parser: ~1.5 # hand-written: only grammar found has 1 star
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Marko
   gh: 118
   parser: ~1.5 # hand-written: only grammars found have 2 stars
-  format:
-    - {tool: "@marko/prettier-plugin", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "@marko/prettier-plugin", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: MATLAB
   gh: 80322
   so: 3.7
   parser: ~1.2 # tree-sitter: acristoffers/tree-sitter-matlab (46 stars, pushed 2026-11)
-  format:
-    - {tool: "miss_hit", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python runtime; style rules; width-based, many options; no push since 2024"}
-  lint:
-    - {tool: "miss_hit lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules; no push since 2024"}
+  format: {tool: "miss_hit", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Python runtime; style rules; width-based, many options; no push since 2024"}
+  lint: {tool: "miss_hit lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules; no push since 2024"}
 - language: MDX
   parser: ~1.0 # crate markdown (1.0.0, updated 2025-04)
-  format:
-    - {tool: "prettier mdx", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "eslint-mdx", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "prettier mdx", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based"}
+  lint: {tool: "eslint-mdx", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Mermaid
   gh: 35087
   parser: ~1.2 # tree-sitter: monaqa/tree-sitter-mermaid (48 stars, pushed 2024-04)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "mermaid-cli parse", gain: ~0.7, reach: ~0.9, cost: ~0.7, why: "Node plus a browser; few rules"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "mermaid-cli parse", gain: ~0.7, cost: {est: true}, why: "only tool found; Node plus a browser; few rules"}
 - language: Meson
   gh: 59349
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-meson (10 stars, pushed 2026-09)
-  format:
-    - {tool: "meson format", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "official, ships with Meson; needs Python; width-based"}
-    - {tool: "muon fmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "C, fast; width-based"}
-  lint:
-    - {tool: "muon analyze", gain: ~0.4, reach: ~0.6, cost: ~1.2, why: "C, fast; young; some rules need semantics"}
+  format: {tool: "meson format", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "ships with Meson (6.7k stars); muon 409 stars; official, ships with Meson; needs Python; width-based"}
+  lint: {tool: "muon analyze", gain: ~0.4, cost: {index: true, est: true}, why: "only tool found; C, fast; young; some rules need semantics"}
 - language: Metal
   gh: 21073
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-cpp (465 stars, pushed 2026-09)
-  format:
-    - {tool: "clang-format", gain: ~0.1, reach: ~0.8, cost: ~1.0, why: "official LLVM; MSL is C++14, address spaces partial; width-based, many options"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "clang-format", gain: ~0.1, cost: {layout: penalty, est: true}, why: "only tool found; official LLVM; MSL is C++14, address spaces partial; width-based, many options"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Mojo
   so: 0.6
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "mojo format", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "official; needs the Mojo toolchain; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "mojo format", gain: ~0.7, cost: {est: true}, why: "only tool found; official; needs the Mojo toolchain; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Nextflow
   gh: 3804
   parser: ~1.2 # tree-sitter: nextflow-io/tree-sitter-nextflow (6 stars, pushed 2026-11)
-  format:
-    - {tool: "nextflow fmt", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "official, JVM; canonical, no width"}
-  lint:
-    - {tool: "nextflow lint", gain: ~0.7, reach: ~0.6, cost: ~1.2, why: "official, JVM; some rules need semantics"}
+  format: {tool: "nextflow fmt", gain: ~0.7, cost: {est: true}, why: "only tool found; official, JVM; canonical, no width"}
+  lint: {tool: "nextflow lint", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; official, JVM; some rules need semantics"}
 - language: Nginx config
   parser: ~1.5 # hand-written: only grammar found has 4 stars
-  format:
-    - {tool: "nginxfmt", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python runtime; width-based, many options"}
-  lint:
-    - {tool: "gixy", gain: ~0.7, reach: ~0.5, cost: ~1.2, why: "Python runtime; checks read the whole config; some rules need semantics; no push since 2024"}
+  format: {tool: "nginxfmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Python runtime; width-based, many options"}
+  lint: {tool: "gixy", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; Python runtime; checks read the whole config; some rules need semantics; no push since 2024"}
 - language: Nickel
   parser: ~1.2 # tree-sitter: nickel-lang/tree-sitter-nickel (16 stars, pushed 2026-07)
-  format:
-    - {tool: "nickel format", gain: ~0.1, reach: ~0.85, cost: ~1.3, why: "official, Rust, fast; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "nickel format", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, Rust, fast; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Nim
   gh: 7188
   parser: ~1.2 # tree-sitter: alaviss/tree-sitter-nim (61 stars, pushed 2026-08)
-  format:
-    - {tool: "nimpretty", gain: ~0.1, reach: ~0.7, cost: ~1.3, why: "official, ships with Nim; still beta; width-based"}
-    - {tool: "nph", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Nim, native, fast; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "nimpretty", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "ships with Nim (18k stars); nph has no registry count (close call, weak evidence); official, ships with Nim; still beta; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Ninja
   so: 4.1
   parser: ~1.2 # tree-sitter: alemuller/tree-sitter-ninja (6 stars, pushed 2022-01)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Nix
   gh: 186775
   so: 4.5
   parser: ~1.2 # tree-sitter: nix-community/tree-sitter-nix (243 stars, pushed 2026-11)
-  format:
-    - {tool: "nixfmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "official, native Haskell binary; width-based; width-based"}
-    - {tool: "alejandra", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Rust, fast; opinionated; canonical, no width"}
-  lint:
-    - {tool: "statix", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; syntactic antipatterns; syntactic rules"}
+  format: {tool: "nixfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "the official formatter of nixpkgs (RFC 166), 1,640 stars; alejandra 1,428 stars (close call); official, native Haskell binary; width-based; width-based"}
+  lint: {tool: "statix", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; syntactic antipatterns; syntactic rules"}
 - language: NSIS
   gh: 46817
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Nushell
   gh: 4694
   parser: ~1.2 # tree-sitter: nushell/tree-sitter-nu (179 stars, pushed 2026-11)
-  format:
-    - {tool: "nufmt", gain: ~0.1, reach: ~0.85, cost: ~1.3, why: "official, Rust; young; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "nufmt", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, Rust; young; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Objective-C
   gh: 394738
   so: 2.6
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-objc (42 stars, pushed 2026-09)
-  format:
-    - {tool: "clang-format", gain: ~0.1, reach: ~0.85, cost: ~1.0, why: "official LLVM, native; C/C++ layout is built; width-based"}
-  lint:
-    - {tool: "clang-tidy", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official, native; most checks read types; needs types"}
+  format: {tool: "clang-format", gain: ~0.1, cost: {layout: penalty, est: true}, why: "only tool found; official LLVM, native; C/C++ layout is built; width-based"}
+  lint: {tool: "clang-tidy", gain: ~0.1, cost: {types: true, est: true}, why: "only tool found; official, native; most checks read types; needs types"}
 - language: OCaml
   gh: 12901
   so: 1.2
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-ocaml (101 stars, pushed 2026-11)
-  format:
-    - {tool: "ocamlformat", gain: ~0.1, reach: ~0.85, cost: ~1.3, why: "de facto standard, native; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "ocamlformat", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; de facto standard, native; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Odin
   gh: 1008
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-odin (42 stars, pushed 2026-09)
-  format:
-    - {tool: "odinfmt", gain: ~0.4, reach: ~0.75, cost: ~1.3, why: "Odin, native; width-based, many options"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "odinfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Odin, native; width-based, many options"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: OpenAPI
   parser: ~0.2 # reuse: YAML and JSON parsers (semantic layer only)
-  format:
-    - {tool: "openapi-format", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "Node; orders fields; canonical, no width"}
-  lint:
-    - {tool: "Spectral", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
-    - {tool: "vacuum", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Go, fast; Spectral-compatible rulesets; syntactic rules"}
+  format: {tool: "openapi-format", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; orders fields; canonical, no width"}
+  lint: {tool: "Spectral", gain: ~0.7, cost: {est: true}, why: "npm @stoplight/spectral-cli 10.3M downloads a month; vacuum Homebrew 507 installs; Node; syntactic rules"}
 - language: package.json
   parser: ~0.2 # reuse: JSON parser (semantic layer only)
-  format:
-    - {tool: "sort-package-json", gain: ~0.7, reach: ~0.95, cost: ~0.5, why: "Node; key order only; whitespace only"}
-  lint:
-    - {tool: "npm-package-json-lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "sort-package-json", gain: ~0.7, cost: {layout: whitespace, est: true}, why: "only tool found; Node; key order only; whitespace only"}
+  lint: {tool: "npm-package-json-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Pascal / Delphi
   gh: 26620
   so: 1.9
   parser: ~1.2 # tree-sitter: Isopod/tree-sitter-pascal (81 stars, pushed 2026-11)
-  format:
-    - {tool: "pasfmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; width-based"}
-  lint:
-    - {tool: "SonarDelphi", gain: ~0.7, reach: ~0.6, cost: ~1.2, why: "JVM; semantic rules; some rules need semantics"}
+  format: {tool: "pasfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Rust, fast; width-based"}
+  lint: {tool: "SonarDelphi", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; JVM; semantic rules; some rules need semantics"}
 - language: Pawn
   gh: 23110
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Perl
   gh: 144721
   so: 3.9
   parser: ~1.2 # tree-sitter: tree-sitter-perl/tree-sitter-perl (62 stars, pushed 2026-11)
   note: "Perl parses only at runtime in full: the grammar is partial"
-  format:
-    - {tool: "perltidy", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Perl runtime; very many options; width-based, many options"}
-  lint:
-    - {tool: "perlcritic", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Perl runtime; Perl is hard to parse, rules are syntactic; syntactic rules"}
+  format: {tool: "perltidy", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Perl runtime; very many options; width-based, many options"}
+  lint: {tool: "perlcritic", gain: ~0.7, cost: {est: true}, why: "only tool found; Perl runtime; Perl is hard to parse, rules are syntactic; syntactic rules"}
 - language: Pkl
   parser: ~1.2 # tree-sitter: apple/tree-sitter-pkl (54 stars, pushed 2026-11)
-  format:
-    - {tool: "pkl format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, native build; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "pkl format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, native build; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Prisma
   parser: ~1.2 # tree-sitter: victorhqc/tree-sitter-prisma (24 stars, pushed 2025-10)
-  format:
-    - {tool: "prisma format", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "official, Node; canonical, no width"}
-  lint:
-    - {tool: "prisma validate", gain: ~0.7, reach: ~0.7, cost: ~1.2, why: "official, Node; relations need the whole schema; some rules need semantics"}
+  format: {tool: "prisma format", gain: ~0.7, cost: {est: true}, why: "only tool found; official, Node; canonical, no width"}
+  lint: {tool: "prisma validate", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; official, Node; relations need the whole schema; some rules need semantics"}
 - language: Procfile
   gh: 212801
   parser: ~1.5 # hand-written: line format, no crate needed
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Prolog
   gh: 14292
   so: 0.9
   parser: ~1.2 # tree-sitter: Rukiza/tree-sitter-prolog (9 stars, pushed 2023-12)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Protocol Buffer text format
   parser: ~1.5 # hand-written: only grammar found has 4 stars
-  format:
-    - {tool: "txtpbfmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Go, fast; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "txtpbfmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Go, fast; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Puppet
   gh: 2732
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-puppet (9 stars, pushed 2024-12)
-  format:
-    - {tool: "puppet-lint --fix", gain: ~0.7, reach: ~0.6, cost: ~1.0, why: "Ruby runtime; width-based, many options"}
-  lint:
-    - {tool: "puppet-lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Ruby runtime; syntactic rules"}
+  format: {tool: "puppet-lint --fix", gain: ~0.7, cost: {est: true}, why: "only tool found; Ruby runtime; width-based, many options"}
+  lint: {tool: "puppet-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Ruby runtime; syntactic rules"}
 - language: PureScript
   gh: 3554
   parser: ~1.2 # tree-sitter: postsolar/tree-sitter-purescript (23 stars, pushed 2025-06)
-  format:
-    - {tool: "purs-tidy", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "purs-tidy", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: QMake
   gh: 21496
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: QML
   gh: 28366
   parser: ~1.2 # tree-sitter: yuja/tree-sitter-qmljs (33 stars, pushed 2026-07)
-  format:
-    - {tool: "qmlformat", gain: ~0.1, reach: ~0.85, cost: ~1.3, why: "official Qt, native; width-based"}
-  lint:
-    - {tool: "qmllint", gain: ~0.1, reach: ~0.6, cost: ~1.2, why: "official Qt; some checks read types; some rules need semantics"}
+  format: {tool: "qmlformat", gain: ~0.1, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official Qt, native; width-based"}
+  lint: {tool: "qmllint", gain: ~0.1, cost: {index: true, est: true}, why: "only tool found; official Qt; some checks read types; some rules need semantics"}
 - language: Quarto / R Markdown
   parser: ~1.0 # crate markdown (1.0.0, updated 2025-04)
-  format:
-    - {tool: "panache", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; young; width-based"}
-  lint:
-    - {tool: "panache lint", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; young; syntactic rules"}
+  format: {tool: "panache", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Rust, fast; young; width-based"}
+  lint: {tool: "panache lint", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; young; syntactic rules"}
 - language: R
   gh: 134434
   so: 4.6
   parser: ~1.2 # tree-sitter: r-lib/tree-sitter-r (155 stars, pushed 2026-06)
-  format:
-    - {tool: "air", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; Posit's formatter; width-based"}
-    - {tool: "styler", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "R runtime; width-based"}
-  lint:
-    - {tool: "jarl", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; young; syntactic rules"}
-    - {tool: "lintr", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "R runtime; syntactic rules"}
+  format: {tool: "styler", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "CRAN 44.9k downloads a month, tidyverse; air has 55k release downloads per release and is new (close call); R runtime; width-based"}
+  lint: {tool: "lintr", gain: ~0.7, cost: {est: true}, why: "CRAN 58k downloads a month, 1,301 stars; jarl 171 stars; R runtime; syntactic rules"}
 - language: Racket
   gh: 4510
   parser: ~1.2 # tree-sitter: 6cdh/tree-sitter-racket (37 stars, pushed 2026-08)
-  format:
-    - {tool: "raco fmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Racket runtime; width-based"}
-  lint:
-    - {tool: "raco review", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Racket runtime; syntactic rules"}
+  format: {tool: "raco fmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Racket runtime; width-based"}
+  lint: {tool: "raco review", gain: ~0.7, cost: {est: true}, why: "only tool found; Racket runtime; syntactic rules"}
 - language: Raku
   gh: 18430
   parser: ~1.5 # hand-written: only grammar found has 3 stars
   note: "no formatter; `raku -c` is the compiler"
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Rego (Open Policy Agent)
   gh: 10497
   parser: ~1.2 # tree-sitter: FallenAngel97/tree-sitter-rego (13 stars, pushed 2026-08)
-  format:
-    - {tool: "opa fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Go, fast; canonical, no width"}
-  lint:
-    - {tool: "Regal", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Go, fast; syntactic rules"}
+  format: {tool: "opa fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Go, fast; canonical, no width"}
+  lint: {tool: "Regal", gain: ~0.4, cost: {est: true}, why: "only tool found; Go, fast; syntactic rules"}
 - language: RenderScript
   gh: 23717
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: ReScript / Reason
   gh: 6624
   parser: ~1.2 # tree-sitter: rescript-lang/tree-sitter-rescript (62 stars, pushed 2026-11)
-  format:
-    - {tool: "rescript format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, native; canonical, no width"}
-    - {tool: "refmt", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "native OCaml; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "rescript format", gain: ~0.1, cost: {est: true}, why: "built into the ReScript compiler (7.5k stars); refmt is the legacy Reason tool; official, native; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: reStructuredText
   parser: ~1.2 # tree-sitter: stsewd/tree-sitter-rst (59 stars, pushed 2026-09)
-  format:
-    - {tool: "rstfmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Python runtime; width-based; no push since 2024"}
-    - {tool: "docstrfmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Python runtime; width-based"}
-  lint:
-    - {tool: "rstcheck", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "docstrfmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "PyPI 40k downloads a month against rstfmt 7k; Python runtime; width-based"}
+  lint: {tool: "rstcheck", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: Rich Text Format
   gh: 38224
   parser: ~1.2 # tree-sitter: GoodNotes/tree-sitter-rtf (14 stars, pushed 2026-02)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Robot Framework
   gh: 5752
   parser: ~1.2 # tree-sitter: Hubro/tree-sitter-robot (21 stars, pushed 2026-10)
-  format:
-    - {tool: "Robotidy", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python runtime; width-based, many options"}
-  lint:
-    - {tool: "Robocop", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "Robotidy", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Python runtime; width-based, many options"}
+  lint: {tool: "Robocop", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: Roc
   parser: ~1.2 # tree-sitter: faldor20/tree-sitter-roc (59 stars, pushed 2026-11)
-  format:
-    - {tool: "roc format", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Rust, ships with Roc; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "roc format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Rust, ships with Roc; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Roff
   gh: 121463
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "mandoc -Tlint", gain: ~0.4, reach: ~0.9, cost: ~0.7, why: "C, fast; man pages only; few rules"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "mandoc -Tlint", gain: ~0.4, cost: {est: true}, why: "only tool found; C, fast; man pages only; few rules"}
 - language: RON
   parser: ~1.0 # crate ron (0.12.3, updated 2026-10)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Sass (indented)
   gh: 12758
   parser: ~1.2 # tree-sitter: bajrangCoder/tree-sitter-sass (6 stars, pushed 2026-01)
-  format:
-    - {tool: "malva", gain: ~0.4, reach: ~0.8, cost: ~1.0, why: "Rust, fast (dprint plugin); CSS layout is built; width-based"}
-  lint:
-    - {tool: "sass-lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; unmaintained; syntactic rules; no push since 2023"}
+  format: {tool: "malva", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast (dprint plugin); CSS layout is built; width-based"}
+  lint: {tool: "sass-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; unmaintained; syntactic rules; no push since 2023"}
 - language: sed
   gh: 28801
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: ShaderLab
   gh: 94071
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Smarty
   gh: 72635
   parser: ~1.2 # tree-sitter: Kibadda/tree-sitter-smarty (6 stars, pushed 2026-07)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Smithy
   gh: 365
   parser: ~1.2 # tree-sitter: indoorvivants/tree-sitter-smithy (23 stars, pushed 2025-05)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "smithy validate", gain: ~0.7, reach: ~0.6, cost: ~1.2, why: "official, JVM; some rules need semantics"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "smithy validate", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; official, JVM; some rules need semantics"}
 - language: Snakemake
   parser: ~0.2 # reuse: Python parser (semantic layer only)
-  format:
-    - {tool: "snakefmt", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Python runtime; Black-style; width-based"}
-  lint:
-    - {tool: "snakemake --lint", gain: ~0.7, reach: ~0.6, cost: ~1.2, why: "official, Python; needs the workflow; some rules need semantics"}
+  format: {tool: "snakefmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Python runtime; Black-style; width-based"}
+  lint: {tool: "snakemake --lint", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; official, Python; needs the workflow; some rules need semantics"}
 - language: Solidity
   gh: 55393
   so: 0.8
   parser: ~1.2 # tree-sitter: JoranHonig/tree-sitter-solidity (186 stars, pushed 2026-02)
-  format:
-    - {tool: "forge fmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; ships with Foundry; width-based"}
-    - {tool: "prettier-plugin-solidity", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "Node; width-based"}
-  lint:
-    - {tool: "solhint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
+  format: {tool: "forge fmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "part of Foundry (10.8k stars); prettier-plugin-solidity npm 589k a month serves Hardhat projects (close call, weak evidence); Rust, fast; ships with Foundry; width-based"}
+  lint: {tool: "solhint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; syntactic rules"}
 - language: Soong (Android.bp)
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "bpfmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Go, fast; canonical, no width; archived"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "bpfmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Go, fast; canonical, no width; archived"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Standard ML
   gh: 10304
   parser: ~1.2 # tree-sitter: MatthewFluet/tree-sitter-sml (15 stars, pushed 2025-05)
-  format:
-    - {tool: "smlfmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "native, fast; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "smlfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; native, fast; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Starlark / Bazel
   gh: 50509
   so: 2.1
   parser: ~1.0 # crate starlark (0.14.3, updated 2026-11)
   note: "BUILD, .bzl, Starlark"
-  format:
-    - {tool: "buildifier", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official Bazel tool, Go, fast; canonical, no width"}
-  lint:
-    - {tool: "buildifier lint", gain: ~0.1, reach: ~0.85, cost: ~1.0, why: "official Bazel tool; warnings; syntactic rules"}
+  format: {tool: "buildifier", gain: ~0.1, cost: {est: true}, why: "only tool found; official Bazel tool, Go, fast; canonical, no width"}
+  lint: {tool: "buildifier lint", gain: ~0.1, cost: {est: true}, why: "only tool found; official Bazel tool; warnings; syntactic rules"}
 - language: Stylus
   gh: 10007
   parser: ~1.5 # hand-written: only grammars found have 0 stars
-  format:
-    - {tool: "stylus-supremacy", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Node; width-based, many options"}
-  lint:
-    - {tool: "stylint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; unmaintained; syntactic rules"}
+  format: {tool: "stylus-supremacy", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Node; width-based, many options"}
+  lint: {tool: "stylint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; unmaintained; syntactic rules"}
 - language: SWIG
   gh: 22045
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Tcl
   gh: 46229
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-tcl (28 stars, pushed 2026-11)
-  format:
-    - {tool: "tclfmt", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python runtime; width-based, many options"}
-  lint:
-    - {tool: "tclint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "tclfmt", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Python runtime; width-based, many options"}
+  lint: {tool: "tclint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: Tekton pipelines
   parser: ~0.2 # reuse: YAML parser (semantic layer only)
-  lint:
-    - {tool: "tekton-lint", gain: ~0.7, reach: ~0.9, cost: ~0.9, why: "Node; schema checks"}
+  lint: {tool: "tekton-lint", gain: ~0.7, cost: {est: true}, why: "only tool found; Node; schema checks"}
 - language: templ
   parser: ~1.2 # tree-sitter: vrischmann/tree-sitter-templ (101 stars, pushed 2026-11)
-  format:
-    - {tool: "templ fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Go, fast; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "templ fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Go, fast; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Thrift
   gh: 6850
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-thrift (7 stars, pushed 2026-09)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Twig
   gh: 24866
   parser: ~1.2 # tree-sitter: gbprod/tree-sitter-twig (45 stars, pushed 2026-09)
-  format:
-    - {tool: "Twig-CS-Fixer", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "PHP runtime; canonical, no width"}
-  lint:
-    - {tool: "Twig-CS-Fixer lint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "PHP runtime; syntactic rules"}
+  format: {tool: "Twig-CS-Fixer", gain: ~0.7, cost: {est: true}, why: "only tool found; PHP runtime; canonical, no width"}
+  lint: {tool: "Twig-CS-Fixer lint", gain: ~0.7, cost: {est: true}, why: "only tool found; PHP runtime; syntactic rules"}
 - language: TypeSpec
   parser: ~1.2 # tree-sitter: happenslol/tree-sitter-typespec (14 stars, pushed 2026-01)
-  format:
-    - {tool: "tsp format", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: "official, Node; width-based"}
-  lint:
-    - {tool: "tsp compile linter", gain: ~0.7, reach: ~0.6, cost: ~1.2, why: "official, Node; some rules need semantics"}
+  format: {tool: "tsp format", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; official, Node; width-based"}
+  lint: {tool: "tsp compile linter", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; official, Node; some rules need semantics"}
 - language: Typst
   parser: ~1.0 # crate typst-syntax (0.15.1, updated 2026-07)
-  format:
-    - {tool: "typstyle", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; width-based"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "typstyle", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Rust, fast; width-based"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: V
   gh: 334
   parser: ~1.2 # tree-sitter: vlang/v-analyzer (206 stars, pushed 2026-11)
-  format:
-    - {tool: "v fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, ships with V, native; canonical, no width"}
-  lint:
-    - {tool: "v vet", gain: ~0.1, reach: ~0.9, cost: ~0.7, why: "official, ships with V; few rules"}
+  format: {tool: "v fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, ships with V, native; canonical, no width"}
+  lint: {tool: "v vet", gain: ~0.1, cost: {est: true}, why: "only tool found; official, ships with V; few rules"}
 - language: VBA / VB6
   gh: 5007
   so: 4.0
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: VBScript
   gh: 25640
   parser: ~1.2 # tree-sitter: JJK96/tree-sitter-vbscript (5 stars, pushed 2026-02)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Verilog / SystemVerilog
   gh: 52928
   parser: ~1.2 # tree-sitter: tree-sitter/tree-sitter-verilog (124 stars, pushed 2026-09)
-  format:
-    - {tool: "verible-verilog-format", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "C++, fast; width-based"}
-  lint:
-    - {tool: "verible-verilog-lint", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "C++, fast; syntactic rules"}
-    - {tool: "Verilator --lint-only", gain: ~0.1, reach: ~0.4, cost: ~2.0, why: "official-grade, native; reads elaborated design; needs types"}
+  format: {tool: "verible-verilog-format", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; C++, fast; width-based"}
+  lint: {tool: "Verilator --lint-only", gain: ~0.1, cost: {types: true, est: true}, why: "Verilator 4.1k stars and Homebrew 1.7k installs against verible 2.0k stars; it elaborates the design; official-grade, native; reads elaborated design; needs types"}
 - language: VHDL
   gh: 15212
   parser: ~1.2 # tree-sitter: jpt13653903/tree-sitter-vhdl (27 stars, pushed 2026-11)
-  format:
-    - {tool: "vsg --fix", gain: ~0.7, reach: ~0.75, cost: ~1.3, why: "Python runtime; width-based, many options"}
-  lint:
-    - {tool: "vsg", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules"}
+  format: {tool: "vsg --fix", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Python runtime; width-based, many options"}
+  lint: {tool: "vsg", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules"}
 - language: Vim Script
   gh: 72973
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-vim (39 stars, pushed 2026-09)
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "vint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Python runtime; syntactic rules; no push since 2023"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "vint", gain: ~0.7, cost: {est: true}, why: "only tool found; Python runtime; syntactic rules; no push since 2023"}
 - language: Visual Basic .NET
   gh: 8079
   so: 4.0
   parser: ~1.2 # tree-sitter: CodeAnt-AI/tree-sitter-vb-dotnet (25 stars, pushed 2025-07)
-  format:
-    - {tool: "dotnet format", gain: ~0.7, reach: ~0.85, cost: ~1.3, why: ".NET SDK and MSBuild needed; width-based"}
-  lint:
-    - {tool: "Roslyn analyzers", gain: ~0.7, reach: ~0.4, cost: ~2.0, why: ".NET SDK; reads types; needs types"}
+  format: {tool: "dotnet format", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "only tool found; .NET SDK and MSBuild needed; width-based"}
+  lint: {tool: "Roslyn analyzers", gain: ~0.7, cost: {types: true, est: true}, why: "only tool found; .NET SDK; reads types; needs types"}
 - language: WebAssembly text
   gh: 6237
   parser: ~1.0 # crate wast (263.0.0, updated 2026-10)
-  format:
-    - {tool: "wasm-tools print", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Rust, fast; reprints the module; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "wasm-tools print", gain: ~0.4, cost: {est: true}, why: "only tool found; Rust, fast; reprints the module; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: WGSL
   parser: ~1.2 # tree-sitter: gpuweb/tree-sitter-wgsl (14 stars, pushed 2025-11)
-  format:
-    - {tool: "wgslfmt", gain: ~0.4, reach: ~0.85, cost: ~1.3, why: "Rust, fast; width-based"}
-  lint:
-    - {tool: "naga", gain: ~0.4, reach: ~0.4, cost: ~2.0, why: "Rust, fast; validation reads types; needs types"}
+  format: {tool: "wgslfmt", gain: ~0.4, cost: {layout: width, parts: 1, est: true}, why: "only tool found; Rust, fast; width-based"}
+  lint: {tool: "naga", gain: ~0.4, cost: {types: true, est: true}, why: "only tool found; Rust, fast; validation reads types; needs types"}
 - language: XSLT
   gh: 78805
   parser: ~0.2 # reuse: XML parser (semantic layer only)
   note: "the XML row formats it; no XSLT linter found"
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Yacc / Lex
   gh: 77019
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "none found", gain: ~1.0, cost: {layout: width, parts: 1, est: true}, why: "no maintained tool found"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Zig
   gh: 13352
   so: 2.9
   parser: ~1.2 # tree-sitter: tree-sitter-grammars/tree-sitter-zig (44 stars, pushed 2026-09)
-  format:
-    - {tool: "zig fmt", gain: ~0.1, reach: ~0.95, cost: ~0.8, why: "official, ships with Zig, native; whitespace only"}
-  lint:
-    - {tool: "zlint", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Zig, native, fast; young; syntactic rules"}
+  format: {tool: "zig fmt", gain: ~0.1, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; official, ships with Zig, native; whitespace only"}
+  lint: {tool: "zlint", gain: ~0.4, cost: {est: true}, why: "only tool found; Zig, native, fast; young; syntactic rules"}
 - language: Ziggy
   parser: ~1.5 # hand-written: no grammar or crate
-  format:
-    - {tool: "ziggy fmt", gain: ~0.1, reach: ~0.9, cost: ~1.0, why: "official, Zig, native; canonical, no width"}
-  lint:
-    - {tool: "none found", gain: ~1.0, reach: ~0.5, cost: ~1.3, why: "no maintained tool found; reach is a guess"}
+  format: {tool: "ziggy fmt", gain: ~0.1, cost: {est: true}, why: "only tool found; official, Zig, native; canonical, no width"}
+  lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}

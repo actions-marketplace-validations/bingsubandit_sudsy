@@ -5,3 +5,6 @@ snake_case: 2
 ^^^^^^^^^^^^ key-name-casing
 flow: {Pascal: 1}
 #      ^^^^^^ key-name-casing
+base: &base {a: 1}
+merged:
+  <<: *base

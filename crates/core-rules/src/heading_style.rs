@@ -47,9 +47,14 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "Headings are written in more than one style: `#` in front of the text (atx) \
-                  or text over `===` or `---` (setext). Style `consistent` takes the first \
-                  heading's. The fix rewrites a heading of one line, level 1 or 2.",
+        description: "Reports a heading written in another style than the document's: `#` before the \
+              text (ATX) or the text over a line of `=` or `-` (setext). The option `style` is \
+              `atx`, `setext` or `consistent` (the style of the first heading, the default). The \
+              fix rewrites a one-line heading of level 1 or 2.",
+        why: "Two heading styles in one document make it look edited by different hands, and \
+              tools that search for headings (outlines, scripts) must know both. Only level 1 \
+              and 2 have a setext form, so ATX is the one style that works for every level.\n\
+              To fix, use the style of the document; the fix does it for level 1 and 2.",
         example: "Title\n=====\n\n## Section   // reported at `Section` with style consistent",
         options: [
             OptionDecl {

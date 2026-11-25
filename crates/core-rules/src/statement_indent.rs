@@ -32,9 +32,17 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A statement, its closing parenthesis or a comment between statements is \
-                  not at the column its block depth gives (depth times `size`). Only for \
-                  languages whose commands open and close blocks.",
+        description: "Reports a statement, the closing parenthesis of a multi-line statement or a \
+              comment between statements that is not at the column that its block depth gives \
+              (depth times `size`, default 2) in a language whose files are a flat list of \
+              commands with block words such as `if` and `endif` (CMake). With \
+              `allow_unindented` a token in column 0 is accepted at any depth. A comment between \
+              statements may sit at the depth of the statement before or after it. The fix \
+              rewrites the white space before the token.",
+        why: "In a flat list of commands the indentation is the only sign of the blocks, because \
+              nothing but the block words delimit them. When it is wrong the reader sees a \
+              different nesting than the one that runs.\n\
+              To fix, indent to the block depth; the fix does it.",
         example: "if(A)\nset(x)   // reported: depth 1 wants column 2\nendif()",
         options: [
             OptionDecl {

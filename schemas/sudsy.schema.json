@@ -61,7 +61,7 @@
             },
             "adjacent-overload-signatures": {
               "$ref": "#/definitions/rule",
-              "description": "Overloads of one function or method (or call and construct signatures) with other members between them."
+              "description": "Reports an overload (a signature or function with the same name as an earlier one) with another member between it and the earlier overloads."
             },
             "alpha-value-notation": {
               "$ref": "#/definitions/rule",
@@ -185,7 +185,7 @@
             },
             "array-type": {
               "$ref": "#/definitions/rule",
-              "description": "`Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>`; write `T[]` and `readonly T[]`."
+              "description": "Reports `Array<T>`, `ReadonlyArray<T>` and `Readonly<T[]>` written as generic types, each level of a nested one (`Array<Array<number>>` is two reports)."
             },
             "array-type-style": {
               "$ref": "#/definitions/rule",
@@ -556,7 +556,7 @@
             },
             "ban-ts-comment": {
               "$ref": "#/definitions/rule",
-              "description": "`@ts-ignore`, `@ts-nocheck` before the first statement, and `@ts-expect-error` without a description of at least three characters in a comment (`@ts-check` is allowed)."
+              "description": "Reports a `@ts-ignore` comment, a `@ts-nocheck` comment before the first statement, and a `@ts-expect-error` comment whose description is shorter than three characters (`// @ts-expect-error: the API types are wrong` is fine)."
             },
             "banana-in-box": {
               "$ref": "#/definitions/rule",
@@ -579,7 +579,7 @@
               "description": "A `when` entry with a blank line the formatter would add or remove before it (ktlint blank-line-between-when-conditions)."
             },
             "block-comment-after-open": {
-              "description": "A block comment that follows an opening token on its line and ends the line (`if (a) {    /* note */`): the code after the token starts on a line of its own (ktlint `wrapping`). A line comment there is left alone.",
+              "description": "Reports a block comment that follows an opening token on its line and ends the line (`if (a) { /* note */`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -619,7 +619,7 @@
               "description": "A rule or at-rule block with nothing in it, comments included."
             },
             "boolean-literal-comparison": {
-              "description": "An equality with `true` or `false` (`x == true`, `x != False`) on either side (ruff E712, Checkstyle SimplifyBooleanExpression).",
+              "description": "Reports an equality or inequality with a boolean literal on either side (`x == true`, `x !== false`, `true == x`, `x != False`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -788,7 +788,7 @@
               "description": "A `/* */` comment on a line of its own needs a blank line before it, unless it comes first in a block, shares a line with code or is a `stylelint-` directive; a `//` comment is another rule's."
             },
             "comment-space": {
-              "description": "A line comment has text right after its marker. Exempt: nothing but whitespace after the marker, a marker repeated (`////`, `##`), `--` separator lines, and a `#!` shebang on the first line. The fix inserts the space.",
+              "description": "Reports a line comment whose text starts right after the marker (`//text`, `#text`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -829,11 +829,11 @@
             },
             "consistent-type-definitions": {
               "$ref": "#/definitions/rule",
-              "description": "A type alias of an object type literal; write an `interface`."
+              "description": "Reports a type alias of an object type (`type T = { a: 1 }`, also `{}` and an index signature type)."
             },
             "consistent-type-imports": {
               "$ref": "#/definitions/rule",
-              "description": "An import of a TypeScript file whose names are only used as types is written `import type`, and a type is not imported with `import(\"a\")`. Names that are not used at all are left alone; the separate `import type` fix style is the only one."
+              "description": "Reports an import in a TypeScript file whose names are all used only as types (also in `typeof` of a type) and is not written `import type`, a mixed import with such a name (the value names stay in an `import`), and the type form `import(\"a\").B`."
             },
             "constant-definition-in-block": {
               "$ref": "#/definitions/rule",
@@ -903,7 +903,7 @@
               "description": "A `COUNT` of the constant 1 or 0 (sqlfluff CV04)."
             },
             "curly": {
-              "description": "The body of an `if`, `else`, loop or `when` entry is a statement without braces. Style `always` wants braces on every body; `chain` only on the branches of a chain where one has braces, spans lines or passes the line width, and on a loop body on its own line. `else if` is fine.",
+              "description": "Reports the body of an `if`, `else`, loop or `when` entry that is one statement without braces (`if (a) b();`, `else c();`, `for (;;) d();`, `while (x) y();`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1110,7 +1110,7 @@
               "description": "`export`, `local`, `declare`, `readonly` or `typeset` with a command substitution as the value reports the status of the declaration, not of the command."
             },
             "declared-name-pattern": {
-              "description": "A name that a command declares (a variable it sets, a function or its parameters) does not match the pattern of its class. Only for languages whose commands open and close blocks.",
+              "description": "Reports a name that a command declares when it does not match the pattern of its class, for languages whose files are a flat list of commands (CMake).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1462,7 +1462,7 @@
               "description": "The first document does not start with `---`."
             },
             "documented-command": {
-              "description": "A command of the `commands` option (a function or macro definition) with no comment on the line right before it, or with a comment that has no text.",
+              "description": "Reports a command listed in the option `commands` (for example `function` and `macro` in CMake, compared ignoring case) that has no comment on the line right before it, or whose comment has no text (`#` alone).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2151,7 +2151,7 @@
             },
             "generic-function": {
               "$ref": "#/definitions/rule",
-              "description": "A function outside a class whose signature uses a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12)."
+              "description": "A function outside a class whose parameters use a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12)."
             },
             "get-attr-with-constant": {
               "$ref": "#/definitions/rule",
@@ -2159,7 +2159,7 @@
             },
             "getter-return": {
               "$ref": "#/definitions/rule",
-              "description": "A getter that does not return a value on every path, or has a `return;`."
+              "description": "Reports a getter written with `get name() {}` (in a class or an object literal) that does not return a value on every path: an empty body, a `return;` without a value, or an `if` without `else` that returns only in one branch."
             },
             "go-pin-versions": {
               "$ref": "#/definitions/rule",
@@ -2194,7 +2194,7 @@
               "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported)."
             },
             "heading-style": {
-              "description": "Headings are written in more than one style: `#` in front of the text (atx) or text over `===` or `---` (setext). Style `consistent` takes the first heading's. The fix rewrites a heading of one line, level 1 or 2.",
+              "description": "Reports a heading written in another style than the document's: `#` before the text (ATX) or the text over a line of `=` or `-` (setext).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2550,7 +2550,7 @@
               "description": "Reports a `CMD`, `ENTRYPOINT` or `HEALTHCHECK CMD` in shell form."
             },
             "key-name-casing": {
-              "description": "A key does not follow one of the allowed naming conventions. The checks are those of eslint-plugin-jsonc: a key with punctuation or whitespace never matches, `camelCase` also rejects `_` and `-`, `snake_case` and `kebab-case` reject capitals. No fix: renaming a key changes the data.",
+              "description": "Reports a key that does not follow one of the allowed naming conventions of the option `allowed` (default `camelCase`; also `PascalCase`, `snake_case`, `kebab-case`, `SCREAMING_SNAKE_CASE`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2820,7 +2820,7 @@
               ]
             },
             "max-line-length": {
-              "description": "A line is longer than the configured number of characters.",
+              "description": "Reports a line longer than `max` characters (default 120).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3195,7 +3195,7 @@
               "description": "A regexp literal that has both `(?<name>...)` and plain `(...)` groups (RuboCop Lint/MixedRegexpCaptureTypes)."
             },
             "modifier-order": {
-              "description": "The modifiers of a declaration are not in the order the style wants (Java: `public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp`; Kotlin: ktlint's order). The fix puts them in order.",
+              "description": "Reports the modifiers of a declaration (`public`, `static`, `final`, `override`, ...) that are not in the order the style of the language wants: for Java the order of the Java Language Specification (`public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp`), for Kotlin the order of the Kotlin coding conventions.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3480,7 +3480,7 @@
             },
             "no-assignment-in-condition": {
               "$ref": "#/definitions/rule",
-              "description": "The condition of an `if`, ternary or loop is an assignment not wrapped in parentheses of its own (ESLint no-cond-assign, PHPCS Generic.CodeAnalysis.AssignmentInCondition). Python's `:=` is the idiom and is left alone."
+              "description": "Reports an assignment used as the condition of an `if`, a ternary or a loop (`if (a = b)`, `while (x = next())`) when it is not wrapped in parentheses of its own (`if ((a = b))` is accepted)."
             },
             "no-assignment-in-logical-condition": {
               "$ref": "#/definitions/rule",
@@ -3488,7 +3488,7 @@
             },
             "no-async-promise-executor": {
               "$ref": "#/definitions/rule",
-              "description": "`new Promise(async ...)`: an error thrown in the executor is lost."
+              "description": "Reports `new Promise(async ...)`: an `async` function (or arrow function) as the executor, with or without a second argument."
             },
             "no-at-debug-tags": {
               "$ref": "#/definitions/rule",
@@ -3564,7 +3564,7 @@
             },
             "no-case-declarations": {
               "$ref": "#/definitions/rule",
-              "description": "`let`, `const`, a function or a class declared directly in a `case` clause, where it is visible to the other cases."
+              "description": "Reports a `let`, `const`, `using`, function or class declared directly in a `case` or `default` clause."
             },
             "no-child-content": {
               "$ref": "#/definitions/rule",
@@ -3572,7 +3572,7 @@
             },
             "no-class-assign": {
               "$ref": "#/definitions/rule",
-              "description": "A class declared by name that is assigned to."
+              "description": "Reports an assignment to a class that is declared by name (`class K {} K = 1;`)."
             },
             "no-cmdlet-aliases": {
               "$ref": "#/definitions/rule",
@@ -3584,7 +3584,7 @@
             },
             "no-compare-neg-zero": {
               "$ref": "#/definitions/rule",
-              "description": "`x === -0` is true for `0` too; use `Object.is(x, -0)`."
+              "description": "Reports a comparison with `-0` on either side of `==`, `!=`, `===`, `!==`, `<`, `<=`, `>` or `>=`."
             },
             "no-conditional-comment": {
               "$ref": "#/definitions/rule",
@@ -3592,15 +3592,15 @@
             },
             "no-const-assign": {
               "$ref": "#/definitions/rule",
-              "description": "A `const` variable that is assigned to again (the initializer is not)."
+              "description": "Reports a write to a `const` variable after its declaration: an assignment, `++` or `--`, or a destructuring target (`[c] = [1]`)."
             },
             "no-constant-comparison": {
               "$ref": "#/definitions/rule",
-              "description": "An equality or comparison of two literals (ruff PLR0133, ESLint no-constant-binary-expression)."
+              "description": "Reports an equality or a comparison whose two sides are both literals (`1 === 2`, `\"a\" < \"b\"`)."
             },
             "no-constant-condition": {
               "$ref": "#/definitions/rule",
-              "description": "The condition of an `if`, ternary or loop is a literal, so one branch never runs (ESLint no-constant-condition, PHPCS Generic.CodeAnalysis.UnconditionalIfStatement). `while (true)` and `while (1)` are the usual endless loop and are left alone."
+              "description": "Reports the condition of an `if`, a ternary or a loop that is a literal (`if (true)`, `if (0)`, `x = true ? 1 : 2`, `while (false)`)."
             },
             "no-control-regex": {
               "$ref": "#/definitions/rule",
@@ -3611,7 +3611,7 @@
               "description": "Reports a `COPY --from=stage / /`, which copies the whole file system of a stage to `/`."
             },
             "no-debugger": {
-              "description": "A debugger statement, a call of one of the `calls` that start a debugger or an import matching `imports` (ESLint no-debugger, ruff T100); a language lists its calls in its grammar's `rule` row.",
+              "description": "Reports a statement or a call that stops the program in a debugger: a `debugger;` statement, a call of one of the `calls` of the language (Python `breakpoint()`, `pdb.set_trace()`), or an import matching the option `imports`.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3663,7 +3663,7 @@
             },
             "no-delete-var": {
               "$ref": "#/definitions/rule",
-              "description": "`delete` applied to a variable name."
+              "description": "Reports `delete` applied to a plain variable name, also in parentheses (`delete x`, `delete (x)`)."
             },
             "no-deprecated-attr": {
               "$ref": "#/definitions/rule",
@@ -3723,11 +3723,11 @@
             },
             "no-dupe-class-members": {
               "$ref": "#/definitions/rule",
-              "description": "A class member declared twice (a getter and a setter may share one, a static and an instance member may not clash)."
+              "description": "Reports a class member whose name is already used by another member of the class: two methods, two fields, a field and a method, two getters."
             },
             "no-dupe-else-if": {
               "$ref": "#/definitions/rule",
-              "description": "An `else if` condition that an earlier condition of the chain already covers."
+              "description": "Reports an `else if` whose condition cannot be true at that point: it repeats a condition of an earlier branch of the chain (`if (a) {} else if (a) {}`), or each operand of its `||` is a whole earlier condition or an operand of an earlier `||` (`if (a || b) {} else if (a) {}`)."
             },
             "no-dupe-keys": {
               "$ref": "#/definitions/rule",
@@ -3759,7 +3759,7 @@
             },
             "no-duplicate-case": {
               "$ref": "#/definitions/rule",
-              "description": "Two arms of one `switch` (or `match`, `when`, `case`) have the same test; the second arm can never run. ESLint `no-duplicate-case`."
+              "description": "Reports an arm of a `switch`, `match`, `when` or `case` whose test is the same as the test of an earlier arm of the same statement (`case 1:` twice)."
             },
             "no-duplicate-class": {
               "$ref": "#/definitions/rule",
@@ -3771,7 +3771,7 @@
             },
             "no-duplicate-enum-values": {
               "$ref": "#/definitions/rule",
-              "description": "Two members of one enum initialized with the same string or number."
+              "description": "Reports an enum member initialised with a string or number that an earlier member of the same enum already has (`A = 0, B = 0`)."
             },
             "no-duplicate-heading": {
               "$ref": "#/definitions/rule",
@@ -3786,7 +3786,7 @@
               "description": "An element of a project file (`PackageReference`, `ProjectReference`, `Compile`, ...) has the same `Include` as an earlier element of the same name in the same parent. The duplicate is a restore warning or a build error."
             },
             "no-duplicate-keys": {
-              "description": "A mapping has the same key twice (after decoding escapes and quotes); parsers disagree on which value wins.",
+              "description": "Reports a key that a mapping has twice, after decoding escapes and quotes (`{\"a\": 1, \"\\u0061\": 2}` has `a` twice).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3826,7 +3826,7 @@
             },
             "no-duplicate-sections": {
               "$ref": "#/definitions/rule",
-              "description": "Two sections of one file have the same name (EditorConfig: glob). Readers merge them or keep only one, so the settings of the other may be lost; merge them."
+              "description": "Reports a section that has the same name as an earlier section of the file (INI and EditorConfig: the section header, for EditorConfig the glob)."
             },
             "no-duplicate-selectors": {
               "$ref": "#/definitions/rule",
@@ -3838,7 +3838,7 @@
             },
             "no-else-return": {
               "$ref": "#/definitions/rule",
-              "description": "An `else` after an `if` chain whose branches all end in `return`: the code of the `else` can follow the `if`. An `else if` is left alone (ESLint `allowElseIf`)."
+              "description": "Reports an `else` when the `if` and every `else if` before it end in `return` (what the `else` itself holds does not matter)."
             },
             "no-emphasis-as-heading": {
               "$ref": "#/definitions/rule",
@@ -3849,7 +3849,7 @@
               "description": "An attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are left alone."
             },
             "no-empty-block": {
-              "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement). With `comment_handles` off a comment does not count (revive empty-block). With `waiting_loops` an empty loop whose condition is a call is a wait and is left alone, and so is a loop whose head matches `ignored_loop_heads`.",
+              "description": "Reports a block with no statement and no comment as the body of an `if`, `else`, loop, `try` or `finally` (`if (a) { }`, `for (;;) { }`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3890,7 +3890,7 @@
               ]
             },
             "no-empty-catch": {
-              "description": "A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `comment_handles` off a comment does not count (PSScriptAnalyzer). With `broad_only` only a clause that catches everything or one of the `types` is reported.",
+              "description": "Reports a `catch`, `except` or `rescue` clause whose body has no statement and no comment (`catch (e) { }`; in Python a lone `pass` counts as no statement).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3935,14 +3935,14 @@
             },
             "no-empty-character-class": {
               "$ref": "#/definitions/rule",
-              "description": "`[]` in a regex literal, which matches nothing."
+              "description": "Reports `[]` in a regex literal."
             },
             "no-empty-class-body": {
               "$ref": "#/definitions/rule",
               "description": "A class or interface with `{ }` and nothing in it (ktlint no-empty-class-body)."
             },
             "no-empty-comment": {
-              "description": "A comment has no text. A block comment is reported wherever it is; an empty line comment only when it begins or ends a run of comments, because a bare `//` between two comment lines separates paragraphs.",
+              "description": "Reports a comment with no text.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3982,7 +3982,7 @@
             },
             "no-empty-keys": {
               "$ref": "#/definitions/rule",
-              "description": "A key is empty or only whitespace (after decoding escapes); some consumers cannot address such a property."
+              "description": "Reports a key that is empty or only white space after decoding escapes (`\"\": 4`)."
             },
             "no-empty-links": {
               "$ref": "#/definitions/rule",
@@ -3990,11 +3990,11 @@
             },
             "no-empty-object-type": {
               "$ref": "#/definitions/rule",
-              "description": "The type `{}` (not in an intersection) and an interface with no members and at most one `extends`."
+              "description": "Reports the type `{}` (also in `type T = {}`) and an interface with no members that extends at most one type."
             },
             "no-empty-pattern": {
               "$ref": "#/definitions/rule",
-              "description": "A destructuring pattern with nothing in it (`{}`, `[]`)."
+              "description": "Reports a destructuring pattern with nothing in it: `{}` or `[]` in a declaration, a parameter, an assignment target or nested in another pattern (`var {a: {}} = x`)."
             },
             "no-empty-source": {
               "$ref": "#/definitions/rule",
@@ -4084,19 +4084,19 @@
             },
             "no-explicit-any": {
               "$ref": "#/definitions/rule",
-              "description": "The `any` type."
+              "description": "Reports the `any` type wherever a type is written (`let a: any`, `any[]`, a constraint such as `T extends any`)."
             },
             "no-extra-boolean-cast": {
               "$ref": "#/definitions/rule",
-              "description": "`!!x` or `Boolean(x)` where the value is used as a boolean anyway (a condition, `!`, `Boolean(...)`)."
+              "description": "Reports `!!x` and `Boolean(x)` in a place that already converts the value to a boolean: the test of `if`, `while`, `do ... while`, `for` and `?:`, the operand of `!`, and the argument of `Boolean(...)`."
             },
             "no-extra-non-null-assertion": {
               "$ref": "#/definitions/rule",
-              "description": "`a!!`, and `a!` right before `?.` (`a!?.b`, `a!?.()`)."
+              "description": "Reports a second non-null assertion in a row (`a!!.b`) and a `!` right before an optional chain (`a!?.b`, `a!?.()`)."
             },
             "no-fallthrough": {
               "$ref": "#/definitions/rule",
-              "description": "A `case` with statements that can reach the next `case` or `default`, or an empty one followed by a blank line, without a comment that says `falls through` before the next one (or at the end of its block)."
+              "description": "Reports a `case` whose statements can reach the next `case` or `default`, and an empty one that is followed by a blank line, without a comment that says `falls through` before the next one (or at the end of its block)."
             },
             "no-floating-package-version": {
               "$ref": "#/definitions/rule",
@@ -4170,7 +4170,7 @@
             },
             "no-func-assign": {
               "$ref": "#/definitions/rule",
-              "description": "A function declared by name that is assigned to."
+              "description": "Reports an assignment to a function that is declared by name (`function f() {} f = 0;`), also `f++`."
             },
             "no-global-function-names": {
               "description": "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone.",
@@ -4280,7 +4280,7 @@
               "description": "A variable in the `global:` scope, other than the special variables PSScriptAnalyzer exempts (`$global:LASTEXITCODE`, `$global:ErrorActionPreference`, `$global:PSDefaultParameterValues`, ...)."
             },
             "no-hard-tabs": {
-              "description": "A tab character in a line. Each run of tabs is one report.",
+              "description": "Reports a tab character in a line; a run of tabs is one report.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4332,11 +4332,11 @@
             },
             "no-import-assign": {
               "$ref": "#/definitions/rule",
-              "description": "An imported binding that is assigned to, and the members of a namespace import (`import * as ns`) that are assigned to, deleted or passed to `Object.assign` and the like."
+              "description": "Reports a write to an imported name (`import a from 'a'; a = 1`, `bb = 2`), and a write to a member of a namespace import (`ns.x = 1`), a `delete ns.y` and `Object.assign(ns, {})`."
             },
             "no-inferrable-types": {
               "$ref": "#/definitions/rule",
-              "description": "A type annotation of a variable, parameter or property that its initial value already gives (`const a: number = 5`; not `readonly` or optional properties)."
+              "description": "Reports a type annotation on a variable, parameter or class property whose initial value already gives that type (`const a: number = 5`, `s: string = 'x'`, `b: boolean = true`, `n: bigint = 1n`)."
             },
             "no-inline-html": {
               "$ref": "#/definitions/rule",
@@ -4368,7 +4368,7 @@
             },
             "no-irregular-whitespace": {
               "$ref": "#/definitions/rule",
-              "description": "A no-break space, zero-width space or other unusual whitespace character outside a string."
+              "description": "Reports unusual whitespace characters: vertical tab, form feed, no-break space (U+00A0), the spaces and zero-width characters U+2000 to U+200B, line and paragraph separators, narrow no-break space, medium mathematical space, ideographic space, and a byte order mark that is not at the start of the file."
             },
             "no-latest-tag": {
               "$ref": "#/definitions/rule",
@@ -4380,11 +4380,11 @@
             },
             "no-lonely-if": {
               "$ref": "#/definitions/rule",
-              "description": "An `if` that is the only statement of an `else` block: write `else if`."
+              "description": "Reports an `if` that is the only statement of an `else` block (`else { if (b) { ... } }`), also when that `if` has its own `else`."
             },
             "no-loss-of-precision": {
               "$ref": "#/definitions/rule",
-              "description": "A number literal that the double it becomes cannot represent exactly."
+              "description": "Reports a number literal that the 64-bit double it becomes does not hold exactly: `9007199254740993` (above 2^53), `0x20000000000001`, a value that is too large (`1e400`, becomes `Infinity`) or too small (`2e-400`, becomes `0`)."
             },
             "no-ls-grep": {
               "$ref": "#/definitions/rule",
@@ -4416,7 +4416,7 @@
             },
             "no-misused-new": {
               "$ref": "#/definitions/rule",
-              "description": "A class method `new(): C` that returns the class, an interface `new (): I` that returns the interface, and an interface method `constructor()`."
+              "description": "Reports `new` and `constructor` declarations that do not describe a constructor: a class method signature `new(): C;` without a body that returns the class itself, an interface signature `new (): I` that returns the interface itself, and an interface member named `constructor()`."
             },
             "no-multiple-main": {
               "$ref": "#/definitions/rule",
@@ -4428,7 +4428,7 @@
             },
             "no-namespace": {
               "$ref": "#/definitions/rule",
-              "description": "A `namespace` or `module Name` declaration (not `declare module \"x\"` or `declare global`), except in a `.d.ts` file."
+              "description": "Reports a `namespace N {}` or `module N {}` declaration, also a dotted `namespace A.B {}`."
             },
             "no-negated-async": {
               "$ref": "#/definitions/rule",
@@ -4444,11 +4444,11 @@
             },
             "no-non-null-asserted-optional-chain": {
               "$ref": "#/definitions/rule",
-              "description": "A non-null assertion on an optional chain (`a?.b!`, `(a?.b)!`)."
+              "description": "Reports a non-null assertion on the end of an optional chain: `a?.b!` and `(a?.b)!`."
             },
             "no-non-null-assertion": {
               "$ref": "#/definitions/rule",
-              "description": "A non-null assertion `a!`."
+              "description": "Reports a non-null assertion (`a!`, `a!.b`) in a TypeScript file."
             },
             "no-object-in-text-mustaches": {
               "$ref": "#/definitions/rule",
@@ -4456,7 +4456,7 @@
             },
             "no-octal": {
               "$ref": "#/definitions/rule",
-              "description": "A number that starts with `0` and another digit (`017`, `08`)."
+              "description": "Reports a number literal that starts with `0` followed by another digit, such as `017` or `08`."
             },
             "no-octal-values": {
               "description": "A plain `0755` (octal to YAML 1.1 parsers, decimal 755 to YAML 1.2) or `0o755` (octal to YAML 1.2, a string to YAML 1.1). Quoted and tagged scalars are not checked. No fix: the intended value is not known.",
@@ -4550,7 +4550,7 @@
             },
             "no-prototype-builtins": {
               "$ref": "#/definitions/rule",
-              "description": "`obj.hasOwnProperty(k)`, `isPrototypeOf` and `propertyIsEnumerable` called on an object that may not inherit them; use `Object.prototype.hasOwnProperty.call(obj, k)`."
+              "description": "Reports a call of `hasOwnProperty`, `isPrototypeOf` or `propertyIsEnumerable` made on an object itself: `obj.hasOwnProperty(k)`, `obj?.hasOwnProperty(k)` and `obj['hasOwnProperty'](k)`."
             },
             "no-ps-grep": {
               "$ref": "#/definitions/rule",
@@ -4594,7 +4594,7 @@
             },
             "no-require-imports": {
               "$ref": "#/definitions/rule",
-              "description": "`require(...)` of the global `require` (not one the file declares itself) and `import x = require(...)`."
+              "description": "Reports a call of the global `require(...)` and an `import x = require(...)`."
             },
             "no-reserved-stage-name": {
               "$ref": "#/definitions/rule",
@@ -4613,7 +4613,7 @@
               "description": "Reports an `ARG` or `ENV` whose name suggests a secret."
             },
             "no-self-assign": {
-              "description": "A plain or logical assignment whose two sides are the same tokens, `a = a`, `a.b = a.b` or `@a ||= @a` (ESLint no-self-assign, RuboCop Lint/SelfAssignment).",
+              "description": "Reports an assignment whose two sides are the same tokens (`x = x`, `x.y = x.y`, `x[0] = x[0]`, `x ||= x`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4657,11 +4657,11 @@
             },
             "no-self-compare": {
               "$ref": "#/definitions/rule",
-              "description": "An equality or comparison whose two sides are the same tokens: the result never changes (ESLint no-self-compare, ruff PLR0124, Sonar S1764). `x != x` as an `isNaN` test is reported too."
+              "description": "Reports an equality or comparison whose two sides are the same tokens (`x === x`, `x < x`)."
             },
             "no-shadow-restricted-names": {
               "$ref": "#/definitions/rule",
-              "description": "A variable, function, parameter or class named `NaN`, `Infinity`, `undefined`, `eval` or `arguments` (`var undefined;` without a value is left alone)."
+              "description": "Reports a variable, function, class, parameter or function-expression name that is `NaN`, `Infinity`, `eval`, `arguments` or `undefined`."
             },
             "no-shell-symlink": {
               "$ref": "#/definitions/rule",
@@ -4669,7 +4669,7 @@
             },
             "no-single-line-block-comment": {
               "$ref": "#/definitions/rule",
-              "description": "A block comment that fits on one line and ends its line is written as a line comment (ktlint `no-single-line-block-comment`). Documentation comments (`/**`), empty comments, comments with code after them on the line and languages with no line comment marker are left alone."
+              "description": "Reports a block comment that fits on one line and ends its line (`/* text */`): it is written as a line comment."
             },
             "no-space-in-code": {
               "$ref": "#/definitions/rule",
@@ -4681,7 +4681,7 @@
             },
             "no-sparse-arrays": {
               "$ref": "#/definitions/rule",
-              "description": "A hole in an array literal (`[1, , 2]`), reported at its comma."
+              "description": "Reports a hole in an array literal, at the extra comma: `[1, , 2]` and `[, 1]`."
             },
             "no-style-tag": {
               "$ref": "#/definitions/rule",
@@ -4701,7 +4701,7 @@
             },
             "no-this-alias": {
               "$ref": "#/definitions/rule",
-              "description": "`const self = this` and `self = this` (destructuring `this` is allowed)."
+              "description": "Reports `const self = this`, `let self = this` and `self = this`: a variable that holds `this`."
             },
             "no-throw-generic": {
               "description": "A `raise` or `throw` of one of the generic `types`, itself or a call of it, which callers cannot tell from any other error (ruff TRY002, RuboCop Lint/RaiseException). A language lists the types in its grammar's `rule` row.",
@@ -4745,7 +4745,7 @@
             },
             "no-trailing-whitespace": {
               "$ref": "#/definitions/rule",
-              "description": "Spaces or tabs at the end of a line."
+              "description": "Reports spaces or tabs at the end of a line, from the first one to the line break."
             },
             "no-typename-prefix": {
               "$ref": "#/definitions/rule",
@@ -4757,7 +4757,7 @@
             },
             "no-unexpected-multiline": {
               "$ref": "#/definitions/rule",
-              "description": "`[`, `(` or a template at the start of a line right after an expression, which continues it (`a\\n[b]` is a property access, not two statements)."
+              "description": "Reports a line that begins with `(`, `[` or a template literal right after a line that ends an expression, where the two lines are one expression: `var d = a` followed by `(b);` calls `a(b)`."
             },
             "no-unit-return": {
               "$ref": "#/definitions/rule",
@@ -4773,7 +4773,7 @@
             },
             "no-unnecessary-type-constraint": {
               "$ref": "#/definitions/rule",
-              "description": "A type parameter constrained to `any` or `unknown`."
+              "description": "Reports a type parameter constrained to `any` or `unknown` (`<T extends unknown>`, also with a default)."
             },
             "no-unneeded-base-prefix": {
               "$ref": "#/definitions/rule",
@@ -4781,19 +4781,19 @@
             },
             "no-unneeded-ternary": {
               "$ref": "#/definitions/rule",
-              "description": "A conditional expression whose two arms are boolean literals: `a ? true : false` is `!!a`, `a ? false : true` is `!a`."
+              "description": "Reports a conditional expression whose two arms are both boolean literals: `a ? true : false` (the same as `!!a`), `a ? false : true` (`!a`), and `a ? true : true`."
             },
             "no-unsafe-finally": {
               "$ref": "#/definitions/rule",
-              "description": "`return`, `throw`, and a `break` or `continue` that leaves the block, in a `finally` block: they override the `try`'s own outcome."
+              "description": "Reports `return`, `throw`, and a `break` or `continue` that leaves the `finally` block, written in a `finally`."
             },
             "no-unsafe-function-type": {
               "$ref": "#/definitions/rule",
-              "description": "The global type `Function` as a type name, `extends` or `implements` target."
+              "description": "Reports the global type `Function` used as a type, as an `interface ... extends` target and as an `implements` target."
             },
             "no-unsafe-negation": {
               "$ref": "#/definitions/rule",
-              "description": "`!a in b` and `!a instanceof B` negate `a`, not the test."
+              "description": "Reports `!a in b` and `!a instanceof B`, where the `!` is written without parentheses on the left operand."
             },
             "no-unset-hookable-property": {
               "$ref": "#/definitions/rule",
@@ -4813,7 +4813,7 @@
             },
             "no-useless-catch": {
               "$ref": "#/definitions/rule",
-              "description": "A `catch` that only rethrows its error."
+              "description": "Reports a `catch` clause whose only statement is `throw` of the caught error, as in `catch (e) { throw e; }`."
             },
             "no-useless-children-snippet": {
               "$ref": "#/definitions/rule",
@@ -4821,11 +4821,11 @@
             },
             "no-useless-escape": {
               "$ref": "#/definitions/rule",
-              "description": "A backslash in a string, template or regex that escapes nothing special (`\"\\d\"`, `/\\-/`)."
+              "description": "Reports a backslash before a character that needs no escape, in a string (`'\\d'`), a template literal or a regex literal (`/\\-/`, `/\\_/`)."
             },
             "no-useless-expression": {
               "$ref": "#/definitions/rule",
-              "description": "An expression statement that is only a name, a literal, a member access or an operator expression: it is evaluated and thrown away (ESLint no-unused-expressions, ruff B018). Which kinds of expression have no effect of their own is the grammar's `#pure` tag."
+              "description": "Reports an expression statement whose value is thrown away and that has no effect of its own: a name, a literal, a member access or an operator expression (`x + y;`, `x.y;`, `-x;`, `x ? y : z;`)."
             },
             "no-useless-mustaches": {
               "$ref": "#/definitions/rule",
@@ -4849,7 +4849,7 @@
             },
             "no-var": {
               "$ref": "#/definitions/rule",
-              "description": "A `var` declaration."
+              "description": "Reports a `var` declaration (also `declare var` in TypeScript)."
             },
             "no-void-end-tag": {
               "$ref": "#/definitions/rule",
@@ -4860,7 +4860,7 @@
               "description": "A call of `which`."
             },
             "no-wildcard-imports": {
-              "description": "An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's `import . \"fmt\"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403, revive dot-imports).",
+              "description": "Reports an import of every name of a package or module (`import a.b.*;` in Java and Kotlin, `from a import *` in Python, `import .",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4897,7 +4897,7 @@
             },
             "no-with": {
               "$ref": "#/definitions/rule",
-              "description": "A `with` statement."
+              "description": "Reports a `with` statement."
             },
             "no-wmi-cmdlets": {
               "$ref": "#/definitions/rule",
@@ -4905,7 +4905,7 @@
             },
             "no-wrapper-object-types": {
               "$ref": "#/definitions/rule",
-              "description": "The global types `BigInt`, `Boolean`, `Number`, `Object`, `String` and `Symbol` as type names."
+              "description": "Reports the global types `BigInt`, `Boolean`, `Number`, `Object`, `String` and `Symbol` used as type names."
             },
             "none-comparison": {
               "$ref": "#/definitions/rule",
@@ -5084,7 +5084,7 @@
             },
             "prefer-as-const": {
               "$ref": "#/definitions/rule",
-              "description": "A literal type that repeats the literal it is given to (`let a: 'a' = 'a'`, `'a' as 'a'`, `<'a'>'a'`); write `as const`."
+              "description": "Reports a literal type that only repeats the literal it is given: `let a: 'a' = 'a'`, `'a' as 'a'` and `<'a'>'a'`."
             },
             "prefer-button": {
               "$ref": "#/definitions/rule",
@@ -5096,7 +5096,7 @@
             },
             "prefer-const": {
               "$ref": "#/definitions/rule",
-              "description": "A `let` variable that is written once, in the scope that declares it, where the write could be its declaration (an initializer, a `for-in` / `for-of` head, or an assignment statement of the same block). A destructuring assignment to members, parameters or outer names is left alone, as is the `let` of a `for (;;)` head."
+              "description": "Reports a `let` variable that is assigned once and could be a `const`: the single write is its initializer, a `for-in` or `for-of` head, or the first assignment statement in the same block as the declaration."
             },
             "prefer-native-element": {
               "$ref": "#/definitions/rule",
@@ -5104,11 +5104,11 @@
             },
             "prefer-rest-params": {
               "$ref": "#/definitions/rule",
-              "description": "`arguments` in an ordinary function, except as the object of `arguments.name`."
+              "description": "Reports `arguments` used in an ordinary function, except as the object of a member read by name (`arguments.length`)."
             },
             "prefer-spread": {
               "$ref": "#/definitions/rule",
-              "description": "`f.apply(undefined, args)` and `o.m.apply(o, args)` with an `args` that is not an array literal."
+              "description": "Reports `f.apply(undefined, args)`, `f.apply(null, args)`, `o.m.apply(o, args)` and `o['m'].apply(o, args)`, where the first argument is `null`, `undefined`, or the same object that the method is read from."
             },
             "prefer-tbody": {
               "$ref": "#/definitions/rule",
@@ -5603,7 +5603,7 @@
             },
             "redundant-return-type": {
               "$ref": "#/definitions/rule",
-              "description": "A function with a block body declares the return type the language gives it anyway (`: Unit`). The fix leaves out the colon and the type."
+              "description": "Removes a return type that the language gives every function with a block body anyway (`fun f(): Unit { }` in Kotlin; the types come from the option `redundant_return_types`)."
             },
             "redundant-string-coercion": {
               "$ref": "#/definitions/rule",
@@ -5651,7 +5651,7 @@
             },
             "require-yield": {
               "$ref": "#/definitions/rule",
-              "description": "A generator function with a body and no `yield`."
+              "description": "Reports a generator (`function*`, a generator method, `async function*`) that has statements but no `yield`."
             },
             "required-providers": {
               "$ref": "#/definitions/rule",
@@ -6691,7 +6691,7 @@
               "description": "A function named `Verb-Nouns` whose noun ends in `s` and is no singular word that ends in `ss`, `us`, `is` or `as` (`Status`, `Address`, `Analysis`, `Alias`)."
             },
             "sorted-array-values": {
-              "description": "The items of a sequence of only strings or only numbers are not in order (ascending by default; numbers compare as numbers). Sequences of other or mixed items are skipped. The items that would have to move (the fewest) are reported and the first report carries the fix; the fix is unsafe because sequence order can be data.",
+              "description": "Reports the items of a sequence that are not in order, for sequences of only strings or only numbers (ascending by default; numbers compare as numbers).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6754,7 +6754,7 @@
               ]
             },
             "sorted-keys": {
-              "description": "The keys of a mapping are not in order (alphabetical by default). The keys reported are chosen by `report`, and the first report carries the fix. Comments on lines of their own stay where they are, a comment after an entry moves with it; moving a YAML anchor below its alias breaks the document, so the fix is unsafe.",
+              "description": "Reports the keys of a mapping that are not in order (alphabetical by default).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6862,7 +6862,7 @@
               "description": "An unquoted `$(...)` among the elements of an array assignment is split into words and globbed."
             },
             "statement-blank-lines": {
-              "description": "More blank lines than `max` right before a statement (the first statement of a file may have one more; arms and closers of blocks are not checked).",
+              "description": "Reports more than `max` blank lines (default 1) right before a top-level statement (a direct child of the file that starts its line).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6893,7 +6893,7 @@
               ]
             },
             "statement-indent": {
-              "description": "A statement, its closing parenthesis or a comment between statements is not at the column its block depth gives (depth times `size`). Only for languages whose commands open and close blocks.",
+              "description": "Reports a statement, the closing parenthesis of a multi-line statement or a comment between statements that is not at the column that its block depth gives (depth times `size`, default 2) in a language whose files are a flat list of commands with block words such as `if` and `endif` (CMake).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7030,7 +7030,7 @@
             },
             "triple-slash-reference": {
               "$ref": "#/definitions/rule",
-              "description": "A `/// <reference path=\"x\" />` before the first statement, and a `/// <reference types=\"x\" />` for a module the file imports."
+              "description": "Reports a `/// <reference path=\"x\" />` or `/// <reference types=\"x\" />` before the first statement of the file; for `types` only when the file also imports that module."
             },
             "tuple-element-names-in-signatures": {
               "$ref": "#/definitions/rule",
@@ -7348,7 +7348,7 @@
             },
             "unknown-rule-in-directive": {
               "$ref": "#/definitions/rule",
-              "description": "A comment that disables a rule of another tool (the grammar's `suppress directive` markers) by a `Group/Name` whose group the tool does not have, such as an extension that is not loaded (the grammar's `suppress directive-group` rows list the groups there are)."
+              "description": "Reports a comment that disables rules of another tool (`# rubocop:disable Foo/Bar`) by a `Group/Name` whose group the tool does not have, for example the group of an extension that is not installed."
             },
             "unnecessary-collection-call": {
               "$ref": "#/definitions/rule",
@@ -7367,7 +7367,7 @@
               "description": "A `==`, `!=` or `=` in `[[ ]]` whose right side is an unquoted expansion."
             },
             "unreachable-code": {
-              "description": "A statement that can never run: after `return`, `throw`, `break` or `continue`, after an `if`/`else` or `try` that always jumps, or after a loop that never ends. Only the first statement of a run is reported. Where the language has a flow layer (C#) it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Hoisted declarations and empty statements are left out. Removing the statement is offered as an editor quick fix only, because unreachable code usually signals a bug.",
+              "description": "Reports a statement that can never run: after `return`, `throw`, `break` or `continue`, after an `if`/`else` or `try` that always jumps, or after a loop that never ends.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7680,7 +7680,7 @@
             },
             "use-isnan": {
               "$ref": "#/definitions/rule",
-              "description": "A comparison with `NaN`, or `NaN` as the discriminant or a case test of a `switch`; use `Number.isNaN`."
+              "description": "Reports a comparison with `NaN` (`NaN` or `Number.NaN` on either side of `==`, `!=`, `===`, `!==`, `<`, `>`...), and `NaN` as the `switch` discriminant or as a `case` test."
             },
             "use-lambda": {
               "$ref": "#/definitions/rule",
@@ -7823,7 +7823,7 @@
             },
             "valid-typeof": {
               "$ref": "#/definitions/rule",
-              "description": "`typeof x` compared with a string that is not a type name, or with `undefined`."
+              "description": "Reports a `typeof` comparison whose other side is a string that `typeof` never returns (a typo such as `'strnig'`, or `'null'`), or the identifier `undefined` instead of the string `'undefined'`."
             },
             "valid-v-bind": {
               "$ref": "#/definitions/rule",

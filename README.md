@@ -95,7 +95,7 @@ Each number is measured on real-world code against the default rule set of the r
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | GraphQL | █████████░ 99% Prettier | 29 rules · no reference tool | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
-| C / C++ | ██████░░░░ 67% clang-format | not measured clang-tidy | In progress |
+| C / C++ | ██████░░░░ 69% clang-format | not measured clang-tidy | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 
 Notes: clang-format (C / C++): line wrapping is not compared. PHP-CS-Fixer (PHP): measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains).

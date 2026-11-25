@@ -38,6 +38,8 @@ on:
         type: choice
         options: [a, b]
         default: a
+      empty:
+        options: []
   workflow_call:
     inputs:
       n:

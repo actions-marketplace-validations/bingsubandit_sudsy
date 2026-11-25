@@ -182,13 +182,18 @@ rule! {
         category: Suspicious,
         default: Warn,
         fix: Suggestion,
-        description: "A statement that can never run: after `return`, `throw`, `break` or `continue`, \
-                  after an `if`/`else` or `try` that always jumps, or after a loop that never ends. \
-                  Only the first statement of a run is reported. Where the language has a flow layer \
-                  (C#) it also covers constant conditions and calls that do not return \
-                  (`does_not_return` in `semantics:`). Hoisted declarations and empty statements are \
-                  left out. Removing the statement is offered as an editor quick fix only, because \
-                  unreachable code usually signals a bug.",
+        description: "Reports a statement that can never run: after `return`, `throw`, `break` or \
+              `continue`, after an `if`/`else` or `try` that always jumps, or after a loop that \
+              never ends. Only the first statement of such a run is reported. Where the language \
+              has a flow layer (C#) it also covers constant conditions and calls that do not \
+              return (`does_not_return` in `semantics:`, the option `non_returning_calls`). \
+              Hoisted declarations and empty statements are left out. Removing the statement is \
+              offered as an editor quick fix only, because unreachable code usually signals a \
+              bug.",
+        why: "Code that cannot run is either a leftover or a sign that an earlier `return` or \
+              `throw` is in the wrong place, in which case what the author expected to run does \
+              not.\n\
+              To fix, delete the statement, or move the jump that makes it unreachable.",
         example: "function f() { return; a(); }   // a() is reported",
         uses: [Flow],
         options: [OptionDecl {
@@ -260,9 +265,15 @@ rule! {
         id: "no-fallthrough",
         category: Suspicious,
         default: Warn,
-        description: "A `case` with statements that can reach the next `case` or `default`, or an \
-                  empty one followed by a blank line, without a comment that says `falls through` \
-                  before the next one (or at the end of its block).",
+        description: "Reports a `case` whose statements can reach the next `case` or `default`, and an \
+              empty one that is followed by a blank line, without a comment that says `falls \
+              through` before the next one (or at the end of its block). Cases that stack with \
+              no statement between them (`case 1: case 2: b();`) are not reported.",
+        why: "Execution that runs on from one case into the next is easily a forgotten `break`: \
+              the reader cannot tell it from an error, and the code of the second case then runs \
+              for the first value too.\n\
+              To fix, end the case with `break` or `return`; if the fall-through is meant, write \
+              a `// falls through` comment.",
         example: "switch (a) { case 1: b(); case 2: c(); }   // the second case is reported",
         tags: &["fallthrough"],
     }

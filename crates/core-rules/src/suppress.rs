@@ -163,10 +163,14 @@ crate::rule! {
         id: "unknown-rule-in-directive",
         category: Suspicious,
         default: Off,
-        description: "A comment that disables a rule of another tool (the grammar's `suppress \
-                  directive` markers) by a `Group/Name` whose group the tool does not have, such \
-                  as an extension that is not loaded (the grammar's `suppress directive-group` \
-                  rows list the groups there are).",
+        description: "Reports a comment that disables rules of another tool (`# rubocop:disable \
+              Foo/Bar`) by a `Group/Name` whose group the tool does not have, for example the \
+              group of an extension that is not installed. A name inside a known group is not \
+              checked (the groups are listed in the grammar's `suppress directive-group` rows).",
+        why: "A directive with a group the tool does not have does not suppress what the author \
+              expects, so the finding stays or the directive is ignored. It is usually a typo in \
+              the group name or an extension that is missing in the project.\n\
+              To fix, correct the name, or install the extension.",
         example: "# rubocop:disable Rails/Foo   // Rails is not a department of RuboCop itself",
     }
 

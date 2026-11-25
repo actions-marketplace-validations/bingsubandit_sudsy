@@ -76,6 +76,8 @@ pub struct Row {
     pub variant: &'static str,
     /// An empty mapping (`{}`) is fine; null, an empty string and an empty sequence still are errors.
     pub empty_map_ok: bool,
+    /// A written `null` or `~` is the text "null", not an empty value (a string where a mapping is allowed).
+    pub null_is_text: bool,
     /// A key repeated in the mapping, whatever the case, is an error.
     pub unique: bool,
     /// A null, empty string, empty mapping or empty sequence is an error.
@@ -103,6 +105,7 @@ impl Row {
         variant: "",
         unique: false,
         empty_map_ok: false,
+        null_is_text: false,
         non_empty: false,
         together: false,
         typed: None,
@@ -353,7 +356,7 @@ impl Walk<'_> {
         let name = Self::name(row, path);
         let in_list = path.last().is_some_and(|s| s.parse::<usize>().is_ok());
         let empty = match val {
-            Val::Null => true,
+            Val::Null => !row.null_is_text || at == key || self.text[at].trim().is_empty(),
             Val::Scalar { text, quoted } => text.is_empty() && (*quoted || row.kind == Kind::Str),
             Val::Map(m) => self.entries(m).is_empty() && !row.empty_map_ok,
             Val::Seq(s) => self.items(s).is_empty(),

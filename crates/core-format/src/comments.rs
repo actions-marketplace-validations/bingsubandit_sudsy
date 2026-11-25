@@ -218,6 +218,13 @@ impl CommentStyle {
 
     /// The gap before `c`: `gap`, or the blanks the source has when `keep_gap` and they are more.
     pub fn gap_before(&self, c: &Comment) -> crate::Doc {
+        // `if (/*c*/` at a line end: a block comment written against an opening bracket stays there.
+        let after_open = c.kind == CommentKind::Block
+            && !self.blank_before(c)
+            && matches!(&c.element, SyntaxElement::Token(t) if t.prev_token().is_some_and(|p| matches!(p.text(), "(" | "[")));
+        if after_open {
+            return crate::doc::Doc::Nil;
+        }
         if self.align_lines && ends_its_line(c) {
             return match self.gap {
                 1 => crate::doc::lit(GAP_MARK),

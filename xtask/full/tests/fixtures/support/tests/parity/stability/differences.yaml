@@ -1,6 +1,8 @@
 ratchet:
   one: 9
   two: 1
+  full: 4
 target-files:
   one: 10
   two: 1
+  full: 4

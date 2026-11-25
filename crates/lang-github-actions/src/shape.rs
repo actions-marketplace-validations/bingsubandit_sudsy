@@ -214,7 +214,7 @@ static SHAPE: Shape = Shape {
         row!("jobs.*.strategy.matrix.*", S, Kind::Seq, title: "matrix values", non_empty: true),
         row!("jobs.*.outputs", S, Kind::Map, non_empty: true),
         row!("jobs.*.outputs.*", S, Kind::Scalar),
-        row!("jobs.*.container|jobs.*.services.*", S, Kind::Any, required: &["image"], non_empty: true,
+        row!("jobs.*.container|jobs.*.services.*", S, Kind::Any, required: &["image"], non_empty: true, null_is_text: true,
             keys: &["image", "credentials", "env", "ports", "volumes", "options"]),
         row!("jobs.*.services", S, Kind::Map, unique: true, non_empty: true),
         row!("jobs.*.container.image|jobs.*.services.*.image|jobs.*.container.options\

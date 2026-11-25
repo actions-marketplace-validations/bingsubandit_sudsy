@@ -20,6 +20,11 @@ jobs:
     container:
       image: ''
 #            ^^ workflow-syntax
+  none:
+    runs-on: ubuntu-latest
+    container: null
+    steps:
+      - run: echo
   empty:
 # ^^^^^ workflow-syntax
     steps:

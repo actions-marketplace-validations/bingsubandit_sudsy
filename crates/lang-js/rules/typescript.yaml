@@ -1,6 +1,14 @@
 id: no-explicit-any
 message: "Unexpected any. Specify a different type."
-description: The `any` type.
+description: >-
+  Reports the `any` type wherever a type is written (`let a: any`, `any[]`, a constraint such as `T
+  extends any`).
+why: >-
+  `any` turns off type checking for everything that touches the value, and the value spreads: a call
+  result, a property and an assignment of an `any` are `any` too, so one hole hides errors far from
+  where it is written.
+
+  To fix, use `unknown` (it must be checked before use) or a real type.
 example: "let a: any;   # reported"
 severity: off
 category: suspicious
@@ -8,7 +16,14 @@ rule: { kind: TSAnyKeyword }
 ---
 id: no-non-null-assertion
 message: "Forbidden non-null assertion."
-description: "A non-null assertion `a!`."
+description: >-
+  Reports a non-null assertion (`a!`, `a!.b`) in a TypeScript file.
+why: >-
+  `a!` tells the compiler the value is not `null` or `undefined` without checking it. When the
+  assumption is wrong the program fails at run time with a `TypeError`, in the place the type system
+  was meant to protect.
+
+  To fix, check the value (`if (a)`) or use optional chaining (`a?.b`) and handle the missing case.
 example: "a!.b;   # reported"
 severity: off
 category: suspicious
@@ -16,7 +31,16 @@ rule: { kind: TSNonNullExpression }
 ---
 id: no-empty-object-type
 message: "The `{}` (\"empty object\") type, like an empty interface, allows any non-nullish value, including literals like `0` and `\"\"`; an interface that only extends one type is equivalent to that type."
-description: "The type `{}` (not in an intersection) and an interface with no members and at most one `extends`."
+description: >-
+  Reports the type `{}` (also in `type T = {}`) and an interface with no members that extends at
+  most one type. `{}` in an intersection (`{} & X`) and an interface that extends two types are not
+  reported.
+why: >-
+  `{}` does not mean an empty object: it accepts every value except `null` and `undefined`, numbers
+  and strings included. An empty interface that only extends one type is the same as that type.
+
+  To fix, write `object` for any non-primitive, `unknown` for any value, `Record<string, never>` for
+  an empty object, or the type itself.
 example: "type T = {};   # reported"
 severity: off
 category: suspicious
@@ -33,7 +57,15 @@ rule:
 ---
 id: no-namespace
 message: "ES2015 module syntax is preferred over namespaces."
-description: "A `namespace` or `module Name` declaration (not `declare module \"x\"` or `declare global`), except in a `.d.ts` file."
+description: >-
+  Reports a `namespace N {}` or `module N {}` declaration, also a dotted `namespace A.B {}`.
+  `declare module "x"`, `declare global`, and any namespace in a `.d.ts` file are not reported.
+why: >-
+  A TypeScript namespace is an older way to group code that does not exist in JavaScript: it
+  compiles to an object built by a function, cannot be tree-shaken well and is not understood by
+  tools that only strip types. ES modules do the same grouping and are the standard.
+
+  To fix, move the members to a module file and `export` them.
 example: "namespace N {}   # reported"
 severity: off
 category: style
@@ -46,7 +78,15 @@ rule:
 ---
 id: no-this-alias
 message: "Unexpected aliasing of 'this' to local variable."
-description: "`const self = this` and `self = this` (destructuring `this` is allowed)."
+description: >-
+  Reports `const self = this`, `let self = this` and `self = this`: a variable that holds `this`.
+  Destructuring `this` (`const { x } = this`) is not reported.
+why: >-
+  The alias is a leftover of code that needed `this` inside a function that has its own `this`. An
+  arrow function takes the `this` of the surrounding code without it, and the alias lets a reader
+  take `self` for something other than `this`.
+
+  To fix, use an arrow function, or `bind`.
 example: "const self = this;   # reported"
 severity: off
 category: style
@@ -57,7 +97,15 @@ rule:
 ---
 id: consistent-type-definitions
 message: "Use an `interface` instead of a `type`."
-description: "A type alias of an object type literal; write an `interface`."
+description: >-
+  Reports a type alias of an object type (`type T = { a: 1 }`, also `{}` and an index signature
+  type). A union, an intersection or any other type in an alias is not reported.
+why: >-
+  An `interface` and an object type alias describe the same shape, but interfaces can be extended
+  and merged, and the compiler reports their errors with the name of the interface instead of the
+  expanded type. One form in a code base is easier to search.
+
+  To fix, write `interface T { a: 1 }`.
 example: "type T = { a: 1 };   # reported"
 severity: off
 category: style
@@ -67,7 +115,15 @@ rule:
 ---
 id: no-non-null-asserted-optional-chain
 message: "Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong."
-description: "A non-null assertion on an optional chain (`a?.b!`, `(a?.b)!`)."
+description: >-
+  Reports a non-null assertion on the end of an optional chain: `a?.b!` and `(a?.b)!`. `a?.b!.c` is
+  not reported.
+why: >-
+  An optional chain returns `undefined` when `a` is missing, so asserting its result is not
+  `undefined` contradicts the chain, and the program will fail at run time when the assumption is
+  wrong.
+
+  To fix, handle the missing value, or drop `?.` if `a` cannot be null.
 example: "a?.b!;   # reported"
 severity: off
 category: suspicious
@@ -79,7 +135,14 @@ rule:
 ---
 id: no-unnecessary-type-constraint
 message: "Constraining the generic type `${NAME}` to `${C}` does nothing and is unnecessary."
-description: "A type parameter constrained to `any` or `unknown`."
+description: >-
+  Reports a type parameter constrained to `any` or `unknown` (`<T extends unknown>`, also with a
+  default).
+why: >-
+  Every type parameter already accepts any type, so `extends unknown` and `extends any` restrict
+  nothing and add noise (`extends any` also lets a reader think the check is turned off by choice).
+
+  To fix, remove the constraint.
 example: "function f<T extends unknown>() {}   # reported"
 severity: off
 category: suspicious

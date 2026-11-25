@@ -6,7 +6,7 @@ kind=Lpar / kind=Lbrace&parent=Block : no
 # `operator==(`, `operator new`.
 text=operator / kind=Ident|Keyword : yes
 text=operator / * : no
-exact=new|delete&parent=QualifiedName / kind=Lpar : no
+exact=new|delete|co_await&parent=QualifiedName / kind=Lpar : no
 kind!=Keyword&parent=QualifiedName / kind=Lpar : no
 kind=Rpar|Rsqb&parent=ParenGroup|BracketGroup&grand=QualifiedName / kind=Lpar : no
 # Separators and brackets.
@@ -24,7 +24,7 @@ kind=Arrow&parent=FunctionDeclaration|Lambda / * : yes
 * / kind=Arrow&parent=FunctionDeclaration|Lambda : yes
 kind=Number / kind=Ellipsis : keep
 kind=Ellipsis / kind=Number : keep
-kind=Ellipsis / kind=Greater&parent=TemplateParameters : no
+kind=Ellipsis / kind=Greater|GreaterGreater&parent=TemplateParameters|TemplateArguments : no
 kind=Ellipsis&parent=TemplateParameters / * : yes
 kind=Ellipsis / kind=Ident : yes
 kind=Ellipsis / * : no
@@ -35,6 +35,7 @@ kind=Rbrace&parent=Block / exact=while&parent=DoStatement : yes
 exact=constexpr / kind=Lpar : yes
 exact=if|for|while|switch|catch / kind=Lpar : yes
 exact=return|co_return|co_yield|co_await|throw|case|else|do|new|delete / kind=Lpar : yes
+exact=delete / kind=Lsqb : no
 exact=return|co_return|throw|case|else|do|new|delete / kind=ColonColon : yes
 exact=decltype|sizeof|alignof|typeof|noexcept|static_assert / kind=Lpar : no
 kind=Keyword / kind=Lpar&parent=DeclaratorGroup : yes
@@ -46,7 +47,7 @@ text=template / kind=Less : yes
 kind=Greater / kind=Greater&parent=TemplateArguments|TemplateParameters : keep
 * / kind=Less|Greater&parent=TemplateArguments|TemplateParameters : no
 kind=Less&parent=TemplateArguments|TemplateParameters / * : no
-kind=Greater&parent=TemplateArguments|TemplateParameters / kind=ColonColon|Lpar|Lbrace : no
+kind=Greater&parent=TemplateArguments|TemplateParameters / kind=ColonColon|Lpar|Lbrace|Lsqb : no
 kind=Greater&parent=TemplateArguments|TemplateParameters / * : yes
 # Prefix and postfix operators.
 kind=Bang|Tilde&parent=Unary / * : no
@@ -62,6 +63,9 @@ kind=Question&parent=Ternary / kind=Colon : no
 * / kind=Question|Colon&parent=Ternary : keep
 kind=Question|Colon&parent=Ternary / * : keep
 * / kind=PlusPlus|MinusMinus&parent=Postfix : no
+# Token pasting.
+kind=HashHash / * : no
+* / kind=HashHash : no
 # Member access and scope.
 kind=Colon|Question|Keyword / kind=ColonColon : yes
 kind=ColonColon|Dot|Arrow|DotStar|ArrowStar / * : no

@@ -18,6 +18,10 @@
 #          Docker Compose, Terraform, Make, CMake; web frameworks: Vue.js, Angular, Svelte.
 # `estimate: {value, basis}` of a member replaces the demand where no source lists the format (data formats): set by hand, always
 #     marked an estimate. Only rows of support.yaml use it; the new-language scores of languages.yaml keep the formula.
+# `exempt: true` and `evidence: <folder>`: a leg with no reference tool. A new language's leg needs `evidence` (a folder of
+#     tests/parity with `agreement` for the format leg beside `stability`, `checklist` and `precision` for the lint leg) and is
+#     Ready at stable 100% and agreement 80%, checklist 85% and precision 90% (docs/ai/development/no-reference-tool.md);
+#     the six legs that predate it (INI, EditorConfig, .gitignore, Dockerfile, Makefile, GitHub Actions format) are `exempt`.
 # `section` is the heading of the section of docs/languages.md of rows that share one (default: the row's `language`).
 # `popular: true` (a widely used secondary tool, weight 1) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
@@ -165,23 +169,27 @@
   lint: [{tool: revive, name: revive}]
 - language: Dockerfile
   popularity: [{name: Dockerfile, gh: 2143139, so: 46.3}]
+  exempt: true
   ids: [dockerfile]
   speed: [Dockerfile]
   stability: [dockerfile]
   lint: [{tool: hadolint, name: hadolint}]
 - language: Makefile
   popularity: [{name: Makefile, gh: 966194, so: 17.8}]
+  exempt: true
   ids: [makefile]
   speed: [Makefile]
   stability: [makefile]
   lint: [{tool: checkmake, name: checkmake}]
 - language: GitHub Actions
   popularity: [{name: GitHub Actions, estimate: {value: 0.5, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
+  exempt: true
   ids: [github-actions]
   speed: [GitHub Actions]
   stability: [github-actions]
   lint: [{tool: actionlint, name: actionlint}]
 - language: INI / EditorConfig / .gitignore
   popularity: [{name: INI, estimate: {value: 0.3, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}, {name: EditorConfig}, {name: .gitignore}]
+  exempt: true
   ids: [ini, editorconfig, gitignore]
   stability: [ini, editorconfig, gitignore]

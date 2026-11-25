@@ -24,9 +24,19 @@ rule! {
         id: "declared-name-pattern",
         category: Style,
         default: Off,
-        description: "A name that a command declares (a variable it sets, a function or its \
-                  parameters) does not match the pattern of its class. Only for languages whose \
-                  commands open and close blocks.",
+        description: "Reports a name that a command declares when it does not match the pattern of its \
+              class, for languages whose files are a flat list of commands (CMake). The option \
+              `names` says which argument of which command is a name and of which class \
+              (`command:position:class`), `markers` and `scopes` settle the class of a variable \
+              (a marker word among the arguments, or the innermost listed block it is set in), \
+              and `patterns` gives each class a regex that the name must match from its start. A \
+              class without a pattern is not checked. `reference_start` and `reference_end` cut \
+              references such as `${...}` out of a name first, and `ignore_pattern` leaves \
+              matching names out.",
+        why: "A naming convention is only useful when it holds everywhere: with it, a reader can \
+              tell from the name what kind of thing it is, and a search finds all of one kind. \
+              Without the option rows the rule checks nothing.\n\
+              To fix, rename the variable or function.",
         example: "function(f)\nset(Local 1)   // reported when `local` wants lower case\nendfunction()",
         options: [
             OptionDecl {

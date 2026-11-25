@@ -219,7 +219,7 @@ pub(super) fn is_type_variable(cx: &Cx, name: &SyntaxNode) -> bool {
         .is_some_and(|q| matches!(q.as_str(), "TypeVar" | "ParamSpec" | "TypeVarTuple"))
 }
 
-/// UP047: a function whose signature uses a module-level type variable.
+/// UP047: a function whose parameters use a module-level type variable (the return annotation alone does not count).
 pub(super) fn generic_function(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<'_>) {
     let Some(cx) = model(ctx.file) else { return };
     if cx.minor < 12
@@ -229,11 +229,9 @@ pub(super) fn generic_function(c: &Check, n: &SyntaxNode, ctx: &mut RuleContext<
     {
         return;
     }
-    let signature = n
+    let uses = n
         .children()
         .filter(|p| p.kind() == k::PARAMETERS)
-        .chain(cx.slot(n, "returns"));
-    let uses = signature
         .flat_map(|s| s.descendants().collect::<Vec<_>>())
         .any(|d| match d.kind() {
             k::EXPR_NAME => is_type_variable(&cx, &d),

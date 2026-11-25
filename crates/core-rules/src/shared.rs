@@ -46,7 +46,15 @@ rule! {
         id: "max-line-length",
         category: Style,
         default: Off,
-        description: "A line is longer than the configured number of characters.",
+        description: "Reports a line longer than `max` characters (default 120). With \
+              `allow_non_breakable_words` (default on) a line that has no space after its \
+              indentation, a leading `#` run or `- ` is not reported (a long URL); \
+              `allow_non_breakable_inline_mappings` also allows a YAML `key: value` line whose \
+              value has no space.",
+        why: "Long lines do not fit next to each other in a diff or a code review, wrap \
+              unpredictably in narrow windows, and hide the end of the line when a view scrolls \
+              sideways. The limit is a convention of the project, set with `max`.\n\
+              To fix, break the line at a natural place.",
         example: "max-line-length: { level: warn, options: { max: 100 } }\n\
               A line of 101 characters is reported from the 101st character on.",
         options: [
@@ -107,7 +115,13 @@ rule! {
         id: "no-trailing-whitespace",
         category: Style,
         default: Off,
-        description: "Spaces or tabs at the end of a line.",
+        description: "Reports spaces or tabs at the end of a line, from the first one to the line break. \
+              Every language is checked the same way, so Markdown's two-space line break is \
+              reported too.",
+        why: "Trailing white space cannot be seen, adds nothing, and many editors strip it, so a \
+              later edit shows a change on a line the author did not touch and makes diffs and \
+              blame noisy.\n\
+              To fix, delete it.",
         example: "text   \n   // reported at the spaces",
     }
 

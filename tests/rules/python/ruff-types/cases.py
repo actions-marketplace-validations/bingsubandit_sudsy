@@ -37,6 +37,9 @@ def f(x: T) -> T:
 #   ^ redeclared-variable
     return x
 
+def g() -> T:
+    pass
+
 import datetime
 x = datetime.timezone.utc
 #   ^^^^^^^^^^^^^^^^^^^^^ datetime-utc-alias

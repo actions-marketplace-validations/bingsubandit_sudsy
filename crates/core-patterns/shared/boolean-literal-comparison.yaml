@@ -1,8 +1,16 @@
 id: boolean-literal-comparison
 message: 'comparing with a boolean literal is redundant: use the expression itself or `!`'
 description: >-
-  An equality with `true` or `false` (`x == true`, `x != False`) on either side (ruff E712,
-  Checkstyle SimplifyBooleanExpression).
+  Reports an equality or inequality with a boolean literal on either side (`x == true`, `x !==
+  false`, `true == x`, `x != False`). The option `literals` lists the texts that count as boolean
+  literals, `not_operators` the operators that are not a comparison of value (Python `is`). Off by
+  default.
+why: >-
+  Comparing a condition with `true` or `false` adds a token pair that says what the expression
+  already says. `x == true` reads longer than `x`, and for values that are not strictly boolean (a
+  number, a string) the comparison also means something other than the plain test.
+
+  To fix, use the expression itself, or `!` before it.
 example: 'if (done == true) {}'
 severity: off
 category: cleanup

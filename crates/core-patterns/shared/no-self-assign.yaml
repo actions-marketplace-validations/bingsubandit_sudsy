@@ -1,8 +1,15 @@
 id: no-self-assign
 message: a variable is assigned to itself
 description: >-
-  A plain or logical assignment whose two sides are the same tokens, `a = a`, `a.b = a.b` or
-  `@a ||= @a` (ESLint no-self-assign, RuboCop Lint/SelfAssignment).
+  Reports an assignment whose two sides are the same tokens (`x = x`, `x.y = x.y`, `x[0] = x[0]`, `x
+  ||= x`). The option `operators` lists the operators that store the right side as it is (`=`,
+  `||=`, `&&=`, `??=`); `x += x` is not reported.
+why: >-
+  The assignment changes nothing, or only calls a getter and a setter for nothing. It is nearly
+  always a typing error where the right side should have been another variable, such as a parameter
+  with the same name as a field.
+
+  To fix, name the right variable, or delete the statement.
 example: 'a = a'
 severity: warn
 report-on: field right

@@ -1,0 +1,2 @@
+no-broad-catch: { level: warn, options: { bare: true, types: [Exception] } }
+default-except-not-last: warn

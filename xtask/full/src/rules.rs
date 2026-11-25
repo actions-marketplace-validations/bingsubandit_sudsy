@@ -128,8 +128,16 @@ fn entry(d: &RuleDoc) -> Value {
             .filter(|s| s.3 == m.id)
             .map(|s| json!({ "line": s.0, "column": s.1, "length": s.2 }))
             .collect();
+        // Lines where only other rules report: the page leaves them out of the shared input.
+        let mut other: Vec<usize> = e
+            .spans
+            .iter()
+            .filter(|s| s.3 != m.id && !e.spans.iter().any(|o| o.3 == m.id && o.0 == s.0))
+            .map(|s| s.0)
+            .collect();
+        other.dedup();
         v["example"] = json!({
-            "language": language, "input": e.text, "spans": spans,
+            "language": language, "input": e.text, "spans": spans, "other_lines": other,
             "fixed": e.fixed, "config": e.config,
         });
     }

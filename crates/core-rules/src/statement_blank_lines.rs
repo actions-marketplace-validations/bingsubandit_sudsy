@@ -19,8 +19,15 @@ rule! {
         id: "statement-blank-lines",
         category: Style,
         default: Off,
-        description: "More blank lines than `max` right before a statement (the first statement \
-                  of a file may have one more; arms and closers of blocks are not checked).",
+        description: "Reports more than `max` blank lines (default 1) right before a top-level statement \
+              (a direct child of the file that starts its line). The first statement of a file \
+              may have one more. Block arms and closers of the language (`else`, `endif`) are \
+              not checked. A line with only white space counts as blank. The finding is on the \
+              first token of the statement.",
+        why: "A run of blank lines is a visual gap that separates parts of a file. One blank \
+              line separates statements well, and more leave holes that make the file look as if \
+              something is missing.\n\
+              To fix, delete the extra blank lines.",
         example: "set(a 1)\n\n\nset(b 2)   // reported: 2 blank lines",
         options: [OptionDecl {
             name: "max",

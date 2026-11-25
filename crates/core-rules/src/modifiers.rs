@@ -22,10 +22,18 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "The modifiers of a declaration are not in the order the style wants \
-                  (Java: `public protected private abstract default static sealed non-sealed final \
-                  transient volatile synchronized native strictfp`; Kotlin: ktlint's order). The \
-                  fix puts them in order.",
+        description: "Reports the modifiers of a declaration (`public`, `static`, `final`, `override`, \
+              ...) that are not in the order the style of the language wants: for Java the order \
+              of the Java Language Specification (`public protected private abstract default \
+              static sealed non-sealed final transient volatile synchronized native strictfp`), \
+              for Kotlin the order of the Kotlin coding conventions. Annotations and unknown \
+              keywords keep their place. The finding sits on the keyword that is out of place, \
+              or on the first modifier with the option `report: list`. The fix reorders the \
+              keywords.",
+        why: "Modifiers in a fixed order are easier to scan: the access level is always first, \
+              so a reader and a search for `public static` find every declaration alike. The \
+              order carries no meaning for the compiler, so no behaviour changes.\n\
+              To fix, reorder the modifiers; the fix does it.",
         example: "static public final int X = 1;   // public static final",
         options: [OptionDecl {
             name: "report",

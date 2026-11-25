@@ -19,6 +19,14 @@ rule:
         - { option: bare }
         - not: { fields: { type: { regex: '' } } }
     - all:
-        - items: { type: { any: [{ in-option: types }, { has: { in-option: types } }] } }
+        - items:
+            type:
+              any:
+                - in-option: types
+                - has:
+                    all:
+                      - in-option: types
+                      # `a.Exception` names another class; `::Exception` names this one.
+                      - not: { parent: { role: member-access, fields: { object: { regex: '' } } } }
         - not: { rethrows: true }
         - not: { has: { role: call, regex-option: handled } }

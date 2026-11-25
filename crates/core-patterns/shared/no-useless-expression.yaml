@@ -2,9 +2,18 @@ id: no-useless-expression
 per-language: true
 message: the expression does nothing as a statement
 description: >-
-  An expression statement that is only a name, a literal, a member access or an operator
-  expression: it is evaluated and thrown away (ESLint no-unused-expressions, ruff B018). Which
-  kinds of expression have no effect of their own is the grammar's `#pure` tag.
+  Reports an expression statement whose value is thrown away and that has no effect of its own: a
+  name, a literal, a member access or an operator expression (`x + y;`, `x.y;`, `-x;`, `x ? y :
+  z;`). Calls, assignments, `delete` and `void` are not reported; a directive such as `"use strict"`
+  is, as it is a string. What counts as pure is the `#pure` tag of the language's grammar: Python's
+  table has names, literals, member accesses and list, set and dict displays, so `x + 1`, `x == 2`
+  and `-x` are not reported there. Off by default.
+why: >-
+  The statement is evaluated and dropped, so it does nothing. It is typically a line that was meant
+  to be a call (a missing `()`), a comparison written where an assignment was meant, or what is left
+  of a deleted line.
+
+  To fix, delete it, or write the call or the assignment it was meant to be.
 example: 'a + b;'
 severity: off
 category: suspicious
