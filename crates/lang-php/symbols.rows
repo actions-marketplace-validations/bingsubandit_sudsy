@@ -13,7 +13,7 @@ dynamic-members __call __callstatic __get __set
 declaring-calls define class_alias
 promotion public protected private readonly
 use-kinds function=function const=constant
-packages composer
+packages composer composer.json
 
 Namespace namespace name=Identifier
 Class type class name=Identifier modifiers=Keyword

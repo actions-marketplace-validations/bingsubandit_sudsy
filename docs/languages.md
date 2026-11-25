@@ -451,7 +451,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-protobuf -->
 - **Measured:** Ready.
   - Format, buf format: 99% of the files identical (319 of 322 files).
-  - Lint, buf: 85% of its findings also reported (2,027 of 2,362 findings).
+  - Lint, buf: 89% of its findings also reported (2,119 of 2,362 findings).
 <!-- /generated -->
 
 - **Formatter:** buf format 1.75.0. Corpus: googleapis, protobuf and grpc protos.

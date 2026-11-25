@@ -21,21 +21,7 @@ use core_semantics::symbols::{
 use std::collections::HashMap;
 use std::path::Path;
 
-/// What the index knows about a name.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Answer<T> {
-    Known(T),
-    /// Proved not to exist.
-    Absent,
-    Unknown,
-}
-
-impl<T> Answer<T> {
-    /// Whether the answer proves the name does not exist (the only answer a rule reports on).
-    pub fn is_absent(&self) -> bool {
-        matches!(self, Answer::Absent)
-    }
-}
+pub use core_semantics::symbols::Answer;
 
 /// Where a declaration is.
 #[derive(Debug)]
@@ -69,7 +55,7 @@ pub struct Declared {
     blind: bool,
 }
 
-fn table_of(db: &dyn Db, file: File) -> Option<(usize, &Table)> {
+pub(crate) fn table_of(db: &dyn Db, file: File) -> Option<(usize, &Table)> {
     let provider = provider_of(db, file).ok()?;
     let lang = provider.symbols()?;
     let index = db
@@ -79,7 +65,7 @@ fn table_of(db: &dyn Db, file: File) -> Option<(usize, &Table)> {
     Some((index, lang.table(provider.grammar())))
 }
 
-fn file_symbols(db: &dyn Db, file: File) -> Option<&FileSymbols> {
+pub(crate) fn file_symbols(db: &dyn Db, file: File) -> Option<&FileSymbols> {
     symbols(db, file).as_ref().ok()?.as_ref()
 }
 
@@ -242,6 +228,68 @@ impl<'db> Index<'db> {
         }
     }
 
+    /// The qualified name (as declared) that a written name stands for.
+    pub fn resolve(&self, from: File, name: &Name) -> Answer<Box<str>> {
+        match self.type_(from, name) {
+            Answer::Known(found) => Answer::Known(found.item.name.clone()),
+            Answer::Absent => Answer::Absent,
+            Answer::Unknown => Answer::Unknown,
+        }
+    }
+
+    /// Whether the file that the import `path` of `from` names, with the files it imports
+    /// publicly, declares one of the candidate `names`. `Unknown` while one of those files is not
+    /// read.
+    pub fn import_declares(&self, from: File, path: &str, names: &[Name]) -> Answer<bool> {
+        let Some((_, table)) = table_of(self.db, from) else {
+            return Answer::Unknown;
+        };
+        let Some(locator) = self.project.locator(self.db) else {
+            return Answer::Unknown;
+        };
+        let Some(first) = self.imported(locator.as_ref(), path) else {
+            return Answer::Unknown;
+        };
+        let mut seen = vec![first];
+        let mut pending = vec![first];
+        while let Some(file) = pending.pop() {
+            let Some(s) = file_symbols(self.db, file) else {
+                return Answer::Unknown;
+            };
+            for import in s.imports.iter().filter(|i| i.public) {
+                let Some(next) = self.imported(locator.as_ref(), &import.path) else {
+                    return Answer::Unknown;
+                };
+                if !seen.contains(&next) {
+                    seen.push(next);
+                    pending.push(next);
+                }
+            }
+        }
+        let facts = &table.facts;
+        let used = seen.iter().any(|&file| {
+            let Some(s) = file_symbols(self.db, file) else {
+                return false;
+            };
+            names.iter().flat_map(|n| n.iter()).any(|candidate| {
+                let is =
+                    |kind, declared: &str| facts.key(kind, declared) == facts.key(kind, candidate);
+                s.types.iter().any(|t| is(NameKind::Type, &t.name))
+                    || s.constants.iter().any(|c| is(NameKind::Constant, &c.name))
+                    || s.functions.iter().any(|f| is(NameKind::Function, &f.name))
+            })
+        });
+        Answer::Known(used)
+    }
+
+    /// The file an import path names.
+    fn imported(&self, locator: &dyn core_packages::Locator, path: &str) -> Option<File> {
+        match locator.import_file(path) {
+            Located::Files(paths) => paths.into_iter().next().and_then(|p| self.file_at(&p)),
+            _ => None,
+        }
+    }
+
     /// One qualified name, by the project's files and then the locator.
     fn by_name(
         &self,
@@ -335,7 +383,9 @@ impl<'db> Index<'db> {
             for import in s.imports.iter().filter(|i| direct || i.public) {
                 let path = match locator.import_file(&import.path) {
                     Located::Files(paths) => paths.into_iter().next(),
-                    _ => None,
+                    // A file the project does not have declares nothing.
+                    Located::Missing => continue,
+                    Located::Unknown => None,
                 };
                 let Some(found) = path.and_then(|p| self.file_at(&p)) else {
                     return Answer::Unknown;
@@ -365,7 +415,7 @@ impl<'db> Index<'db> {
     }
 
     /// The input of a file by path: a project file, else one read on demand.
-    fn file_at(&self, path: &Path) -> Option<File> {
+    pub(crate) fn file_at(&self, path: &Path) -> Option<File> {
         self.project
             .files(self.db)
             .iter()

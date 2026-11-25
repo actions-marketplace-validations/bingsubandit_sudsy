@@ -13,7 +13,7 @@
 //! enclosing scope, not in the namespace only), `fold KIND...` and `fallback KIND...` (name kinds:
 //! `type function constant member`), `constructor NAME`, `sigil CHARS`, `dynamic-members NAME...`,
 //! `declaring-calls NAME...`, `promotion WORD...` (modifiers that make a constructor parameter a
-//! property), `use-kinds WORD=KIND...`, `packages SYSTEM` (the package system that finds the files of names or imports: `composer`, `import-paths`).
+//! property), `use-kinds WORD=KIND...`, `packages SYSTEM MANIFEST` (the package system that finds the files of names or imports: `composer`, `import-paths`; the manifest names the file in the project's root folder).
 //!
 //! Roles (keys they take): `namespace` (`name`, flag `file`: the whole file), `type KIND`
 //! (`name`, `modifiers`, word `name-after=function`: the name follows that keyword), `heritage` (`names`, word `relation=extends|implements`), `function`
@@ -22,7 +22,7 @@
 //! constant of the namespace), `mixin`
 //! (`names`, `adapt`), `use` (an import statement), `use-group` (`names`: the prefix of a group),
 //! `use-kind` (a node whose own keyword says which names it imports), `use-item` (`names`,
-//! `alias`), `file-import` (`names`, `modifiers`), `transparent` (its children count as its
+//! `alias`), `file-import` (`names`, `modifiers`), `reference` (a node whose text is a name the file writes), `transparent` (its children count as its
 //! parent's), `ignore` (declares nothing).
 
 use super::TypeKind;
@@ -71,6 +71,8 @@ pub struct Facts {
     pub promotion: Vec<String>,
     /// The package system of the language (see `core_packages::open`); empty for none.
     pub packages: String,
+    /// The file that marks the root folder of a project of that package system.
+    pub manifest: String,
     pub(crate) use_kinds: Vec<(String, NameKind)>,
 }
 
@@ -92,6 +94,7 @@ pub(crate) enum Role {
     UseKind,
     UseItem,
     FileImport,
+    Reference,
     Transparent,
     Ignore,
 }
@@ -169,7 +172,7 @@ fn allowed(role: Role) -> &'static [Key] {
         Role::Mixin => &[Names, Adapt],
         Role::UseItem => &[Names, Alias],
         Role::FileImport => &[Names, Modifiers],
-        Role::Use | Role::UseKind | Role::Transparent | Role::Ignore => &[],
+        Role::Use | Role::UseKind | Role::Reference | Role::Transparent | Role::Ignore => &[],
     }
 }
 
@@ -191,6 +194,7 @@ fn role_of(word: &str) -> Option<Role> {
         "use-kind" => Role::UseKind,
         "use-item" => Role::UseItem,
         "file-import" => Role::FileImport,
+        "reference" => Role::Reference,
         "transparent" => Role::Transparent,
         "ignore" => Role::Ignore,
         _ => return None,
@@ -263,7 +267,13 @@ impl Table {
             "dynamic-members" => f.dynamic_members = list(),
             "declaring-calls" => f.declaring_calls = list(),
             "promotion" => f.promotion = list(),
-            "packages" => f.packages = one()?,
+            "packages" => {
+                f.packages = one()?;
+                f.manifest = words
+                    .get(1)
+                    .map(|w| w.to_string())
+                    .ok_or("`packages` needs the manifest file after the system")?;
+            }
             "use-kinds" => {
                 for w in &words {
                     let (word, kind) = w

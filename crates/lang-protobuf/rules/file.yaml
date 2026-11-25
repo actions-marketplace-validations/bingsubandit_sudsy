@@ -103,3 +103,19 @@ severity: off
 category: style
 options:
   - { name: pattern, type: regex, default: '^[a-z0-9]+(?:_[a-z0-9]+)*$', description: "Regular expression the file name without its extension must match; empty: not checked." }
+---
+id: import-used
+family: import-used
+params: { message: 'import "{path}" is unused' }
+description: >-
+  Reports an import of a file none of whose names the file uses. A public import is left alone. It
+  needs the imported files, found from the folder with the module's `buf.yaml`; an import it cannot
+  read is not reported.
+why: >-
+  An import that nothing uses makes the file depend on another one for no reason: a change there
+  can break this file, and tools load it for nothing.
+
+  To fix, remove the import.
+example: 'import "google/protobuf/empty.proto";'
+severity: off
+category: style

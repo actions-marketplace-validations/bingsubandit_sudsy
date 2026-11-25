@@ -4,7 +4,7 @@
 separator .
 absolute .
 lexical
-packages import-paths
+packages import-paths buf.yaml
 
 Package namespace file name=FullIdent
 Import file-import names=String modifiers=Keyword
@@ -14,9 +14,11 @@ Service type service name=ServiceName
 MessageBody transparent
 EnumBody transparent
 Oneof transparent
-Field property name=Ident
-OneofField property name=Ident
-MapField property name=Ident
+Field property name=Ident refs=Type
+OneofField property name=Ident refs=Type
+MapField property name=Ident refs=Type
+Group type message name=MessageName
+FullIdent reference
 EnumField case name=Ident
 Rpc method name=RpcName refs=MessageType
 Syntax ignore
@@ -25,4 +27,4 @@ OptionDecl ignore
 Reserved ignore
 Extensions ignore
 EmptyStatement ignore
-Extend ignore
+Extend global-const item=Field name=Ident

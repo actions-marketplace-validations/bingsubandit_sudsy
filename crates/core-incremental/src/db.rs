@@ -2,7 +2,7 @@
 //!
 //! concept: none (infrastructure: salsa database)
 
-use crate::inputs::{ConfigFile, ExtensionSet, File, WorkspaceRevision};
+use crate::inputs::{ConfigFile, ExtensionSet, File, ProjectEntry, Projects, WorkspaceRevision};
 use core_config::{ConfigChain, ConfigError, EditorConfig};
 use provider_api::{LanguageProvider, select_provider_index};
 use salsa::Setter;
@@ -98,6 +98,7 @@ impl Database {
         ConfigFile::new(&db, Ok(ConfigChain::default()));
         ExtensionSet::new(&db, core_rules::Extensions::default());
         WorkspaceRevision::new(&db, 0);
+        Projects::new(&db, Vec::new());
         db
     }
 
@@ -105,6 +106,11 @@ impl Database {
     /// reading them.
     pub fn supports(&self, path: &Path) -> bool {
         select_provider_index(&self.providers, path).is_some()
+    }
+
+    /// The position of the provider that handles `path`.
+    pub fn provider_index(&self, path: &Path) -> Option<usize> {
+        select_provider_index(&self.providers, path).map(|(i, _)| i)
     }
 
     /// Lets the providers start their background processes ahead of the first request.
@@ -166,6 +172,11 @@ impl Database {
             return;
         }
         let _previous = ExtensionSet::get(self).set_extensions(self).to(extensions);
+    }
+
+    /// Replaces the projects the index rules read.
+    pub fn set_projects(&mut self, list: Vec<ProjectEntry>) {
+        let _previous = Projects::get(self).set_list(self).to(list);
     }
 
     /// Replaces the config files.

@@ -27,6 +27,8 @@ entries:
   FIELD_LOWER_SNAKE_CASE: rule field-lower-snake-case
   FIELD_NOT_REQUIRED: rule field-not-required
   IMPORT_NO_PUBLIC: rule import-no-public
+  IMPORT_USED: rule import-used
+  RPC_REQUEST_RESPONSE_UNIQUE: rule rpc-request-response-unique
   MESSAGE_PASCAL_CASE: rule message-pascal-case
   ONEOF_LOWER_SNAKE_CASE: rule oneof-lower-snake-case
   PACKAGE_DEFINED: rule package-defined
@@ -43,11 +45,9 @@ entries:
   SERVICE_SUFFIX: rule service-suffix | The suffix is not configurable.
 deferred:
   - gap: "Needs the other files of the module."
-    ids: [DIRECTORY_SAME_PACKAGE, PACKAGE_SAME_DIRECTORY, PACKAGE_NO_IMPORT_CYCLE, PACKAGE_SAME_CSHARP_NAMESPACE, PACKAGE_SAME_GO_PACKAGE, PACKAGE_SAME_JAVA_MULTIPLE_FILES, PACKAGE_SAME_JAVA_PACKAGE, PACKAGE_SAME_PHP_NAMESPACE, PACKAGE_SAME_RUBY_PACKAGE, PACKAGE_SAME_SWIFT_PREFIX, RPC_REQUEST_RESPONSE_UNIQUE, STABLE_PACKAGE_NO_IMPORT_UNSTABLE]
+    ids: [DIRECTORY_SAME_PACKAGE, PACKAGE_SAME_DIRECTORY, PACKAGE_NO_IMPORT_CYCLE, PACKAGE_SAME_CSHARP_NAMESPACE, PACKAGE_SAME_GO_PACKAGE, PACKAGE_SAME_JAVA_MULTIPLE_FILES, PACKAGE_SAME_JAVA_PACKAGE, PACKAGE_SAME_PHP_NAMESPACE, PACKAGE_SAME_RUBY_PACKAGE, PACKAGE_SAME_SWIFT_PREFIX, STABLE_PACKAGE_NO_IMPORT_UNSTABLE]
   - gap: "Needs the module root, which the path of a file under it is compared with."
     ids: [PACKAGE_DIRECTORY_MATCH]
-  - gap: "Needs the symbols of the imported files to know which import is used."
-    ids: [IMPORT_USED]
   - gap: "Needs a CEL compiler."
     ids: [PROTOVALIDATE]
   - gap: "Not in the default categories; needs the comment that belongs to a declaration."

@@ -47,7 +47,7 @@ pub trait Locator: Send + Sync {
 pub fn open(system: &str, root: &Path) -> Option<Arc<dyn Locator>> {
     match system {
         "composer" => Some(Arc::new(Composer::open(root))),
-        "import-paths" => Some(Arc::new(ImportPaths::new(vec![root.to_path_buf()], false))),
+        "import-paths" => Some(Arc::new(ImportPaths::new(vec![root.to_path_buf()], true))),
         _ => None,
     }
 }

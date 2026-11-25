@@ -24,4 +24,6 @@ protobuf:
       service-suffix: warn
       rpc-request-standard-name: warn
       rpc-response-standard-name: warn
+      rpc-request-response-unique: warn
+      import-used: warn
       file-lower-snake-case: warn

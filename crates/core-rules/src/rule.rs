@@ -400,6 +400,16 @@ pub trait Rule: Send + Sync {
         false
     }
 
+    /// Whether the rule reads the symbol index ([`Rule::check_index`]): only then does a run build
+    /// one.
+    fn reads_index(&self) -> bool {
+        false
+    }
+
+    /// Index scope: once per file, after the others, with what the index knows about the names
+    /// the file writes.
+    fn check_index(&self, _index: &dyn crate::index_rules::IndexView, _ctx: &mut RuleContext<'_>) {}
+
     /// Whether the rule reads the formatter's output (`FileContext::format_changes`).
     fn reads_formatted(&self) -> bool {
         false

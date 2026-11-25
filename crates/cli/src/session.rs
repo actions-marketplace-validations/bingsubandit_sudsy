@@ -3,7 +3,7 @@
 
 use anyhow::{Context, Result};
 use core_config::Depth;
-use core_incremental::{Database, File};
+use core_incremental::{Database, File, open_projects, reads_index};
 use languages::{Project, providers};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -59,6 +59,42 @@ impl Session {
         loaded
     }
 
+    /// [`Session::load_all`] for the commands that lint. When a rule of one of the languages reads
+    /// the symbol index, every file is read first, the projects are opened, and `warm` runs then,
+    /// so that a rule sees all files of its project; otherwise one pass reads and warms each file.
+    pub fn load_linted(&mut self, warm: impl Fn(&Database, File) + Sync) -> Vec<Result<File>> {
+        if !self.index_wanted() {
+            return self.load_all(warm);
+        }
+        let loaded = self.load_all(|_, _| {});
+        let files: Vec<File> = loaded
+            .iter()
+            .filter_map(|f| f.as_ref().ok().copied())
+            .collect();
+        open_projects(&mut self.db, &files);
+        par_map(&self.db, &files, |db, file| warm(db, *file));
+        loaded
+    }
+
+    /// Whether a rule of the language of some path reads the index, decided on the first path of
+    /// each language.
+    fn index_wanted(&self) -> bool {
+        let mut probed = Vec::new();
+        for path in &self.paths {
+            let Some(provider) = self.db.provider_index(path) else {
+                continue;
+            };
+            if probed.contains(&provider) {
+                continue;
+            }
+            probed.push(provider);
+            if load(&self.db, &self.project, path).is_ok_and(|f| reads_index(&self.db, f)) {
+                return true;
+            }
+        }
+        false
+    }
+
     /// One stderr warning per `.editorconfig` line that sets a C# formatting key Sudsy does not
     /// follow, however many files it applies to.
     fn warn_ignored_editorconfig_keys(&self, loaded: &[Result<File>]) {
@@ -98,10 +134,10 @@ pub fn load(db: &Database, project: &Project, path: &Path) -> Result<File> {
 /// Runs `work` on every path on all cores. Inputs are only ever created, never set, while the
 /// workers run: each works through its own handle on the database (a salsa handle shares the
 /// memos) and claims the next path from a shared counter. Results come back in `paths` order.
-pub fn par_map<T: Send>(
+pub fn par_map<I: Sync, T: Send>(
     db: &Database,
-    paths: &[PathBuf],
-    work: impl Fn(&Database, &Path) -> T + Sync,
+    paths: &[I],
+    work: impl Fn(&Database, &I) -> T + Sync,
 ) -> Vec<T> {
     let threads = std::thread::available_parallelism()
         .map_or(1, usize::from)

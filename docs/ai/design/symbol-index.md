@@ -51,7 +51,7 @@ Protobuf is the second user and proves that the parts are not shaped like PHP. I
 3. **Locator and dependencies on demand (checkpoint)**: Composer and Protobuf imports; `Unknown` / `Absent` tests; editor latency and memory. Done: numbers in [numbers.md](../performance/numbers.md). The `symbols` query parses and drops the tree; it does not read the memoized `parse`, so a project of thousands of files keeps symbols, not trees (a file that is also linted is parsed twice).
 4. **Built-ins**: generator, license, size in the pack.
 5. **Rules**: in order of findings, each with covered and extra counts. Extra reports on the corpus are explained one by one; a rule with more extra than covered stays out of the preset.
-6. **Protobuf rules**, then the generalization review: what did the second language change, which facts become rows.
+6. **Protobuf rules**, then the generalization review: what did the second language change, which facts become rows. Done: `import-used` and `rpc-request-response-unique` (below).
 
 
 ## Phase 1 result
@@ -111,3 +111,10 @@ Recommendation: generate from reflection of the pinned static PHP per minor vers
 
 ### Reading
 The share the index can reach with proof is 74.1% of PHPStan level 0 on this corpus (82.7% with closed-world `Absent`, 58.8% when every chain with a conditional or dynamic part answers `Unknown`), below the 85% line of phase 1; 17.3% is out of reach by nature (ignore comments, conditional declarations PHPStan misses, expression types). Decision of the user: the 111 ignore comments are outside the target (942 findings: 82.8% with the index, 92.5% with closed-world `Absent`, 65.7% with every uncertain chain silent), the index is built as normal work, and PHP lint does not hold new languages meanwhile.
+
+## Index rules
+A rule that reads the index says so (`Rule::reads_index`) and runs after the others, once per file, in `Rule::check_index` with an `IndexView` (`core_rules::index_rules`; core-incremental implements it over the `Index` and the file's tree). It is part of the file's `lint` query, so it reads other files' symbols as dependencies: an edit that leaves a file's symbols equal re-runs nothing in the files that read it. The view gives the file's *sites* (`core_semantics::symbols::extract_sites`: imports and methods with their places, and every name written where the rows say `reference` or `refs`, resolved), `import_declares(path, names)`, `resolve(name)` and `referrers(type)` (every method of the project that names it).
+
+A run builds projects only when a rule of a language reads the index (`open_projects`; the CLI probes the first file of each language, then reads every file before it lints): the files are grouped under the folder nearest above them that holds the language's manifest (`packages SYSTEM MANIFEST` of its rows: `composer.json`, `buf.yaml`), each with its package locator. A file under no manifest has no view and its index rules report nothing; so does a run of the editor, which opens no project yet.
+
+Protobuf: `import-used` reports an import (not a public one) none of whose names, nor those of the files it imports publicly, the file writes (a field, rpc or extendee type, an option or extension name; the extension fields of an `extend` are declared as constants of their package). `rpc-request-response-unique` (family `member-ref-unique`) reports a method whose request or response type another method of the project names too. Both are off by default and on in `buf-standard`; they report only on what is `Known`. An import the module does not hold (a well-known `google/protobuf/*.proto` that buf bundles, another module) declares nothing for the lookup of names and leaves its own `import-used` unreported, so a name written from such a file is not resolved and not counted: the open gap of both rules on the buf corpus (3 of 5 `IMPORT_USED` and 27 of 117 `RPC_REQUEST_RESPONSE_UNIQUE` findings use `google.protobuf.Empty`).

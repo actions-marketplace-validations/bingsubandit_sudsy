@@ -37,3 +37,18 @@ rule:
   parent: { kind: Rpc, regex: '^rpc\s+(?<RPC>\w+)', parent: { kind: Service, regex: '^service\s+(?<SERVICE>\w+)' } }
 constraints:
   TYPE: { not-regex: '(?:^|\.)(?:${SERVICE})?${RPC}Response$' }
+---
+id: rpc-request-response-unique
+family: member-ref-unique
+params: { message: '"{type}" is used as the request or response type for multiple RPCs' }
+description: >-
+  Reports an rpc whose request or response type is also the request or response type of another rpc
+  of the project.
+why: >-
+  A message that several rpcs share couples them: adding a field for one call changes the others,
+  and the calls cannot evolve apart.
+
+  To fix, give each rpc its own request and response messages.
+example: 'service S { rpc A(Foo) returns (Bar); rpc B(Foo) returns (Baz); }'
+severity: off
+category: style

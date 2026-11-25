@@ -92,13 +92,13 @@ Format: unclassified 0 of 3 differing files (0%).
 2. `option-comments` (1 files): comments separated by blank lines between the file options travel with the next statement; buf keeps them where they stand
 3. `statement-comments` (1 files): comments inside a statement before its `;` stay line comments on their own lines; buf joins them into block comments on the statement's line
 4. `literal-field-blank` (0 files): a blank line before a comment between the fields of a message literal is dropped; buf keeps it
-Lint: target 85.8% (2027 of 2362, 335 missed, measured on 7514c1f3); rules by missed findings:
-1. `RPC_REQUEST_RESPONSE_UNIQUE` (117 missed)
-2. `PACKAGE_DIRECTORY_MATCH` (98 missed)
-3. `RPC_RESPONSE_STANDARD_NAME` (65 missed)
-4. `FIELD_NOT_REQUIRED` (39 missed)
+Lint: target 89.7% (2119 of 2362, 243 missed, measured on 2a570ae8); rules by missed findings:
+1. `PACKAGE_DIRECTORY_MATCH` (98 missed)
+2. `RPC_RESPONSE_STANDARD_NAME` (65 missed)
+3. `FIELD_NOT_REQUIRED` (39 missed)
+4. `RPC_REQUEST_RESPONSE_UNIQUE` (27 missed)
 5. `RPC_REQUEST_STANDARD_NAME` (9 missed)
-6. `IMPORT_USED` (5 missed)
+6. `IMPORT_USED` (3 missed)
 7. `PACKAGE_DEFINED` (2 missed)
 
 ## checkstyle

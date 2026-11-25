@@ -1083,6 +1083,16 @@ impl Rule for LazyFamily {
     fn reads_formatted(&self) -> bool {
         self.rule().reads_formatted()
     }
+    fn reads_index(&self) -> bool {
+        self.rule().reads_index()
+    }
+    fn check_index(
+        &self,
+        index: &dyn core_rules::index_rules::IndexView,
+        ctx: &mut RuleContext<'_>,
+    ) {
+        self.rule().check_index(index, ctx);
+    }
     fn bodies(&self) -> bool {
         self.rule().bodies()
     }

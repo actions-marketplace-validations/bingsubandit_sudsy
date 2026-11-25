@@ -2442,6 +2442,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an import list that the formatter would reorder or rewrite."
             },
+            "import-used": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an import of a file none of whose names the file uses."
+            },
             "in-dict-keys": {
               "$ref": "#/definitions/rule",
               "description": "Reports a membership test, a `for` loop or a comprehension over `.keys()` with no arguments, as in `k in d.keys()`."
@@ -5780,6 +5784,10 @@
             "rpc-pascal-case": {
               "$ref": "#/definitions/rule",
               "description": "Reports an rpc name that is not PascalCase."
+            },
+            "rpc-request-response-unique": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an rpc whose request or response type is also the request or response type of another rpc of the project."
             },
             "rpc-request-standard-name": {
               "$ref": "#/definitions/rule",

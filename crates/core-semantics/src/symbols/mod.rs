@@ -16,9 +16,25 @@ mod extract;
 mod resolve;
 mod rows;
 
-pub use extract::extract;
+pub use extract::{extract, extract_sites};
 pub use resolve::Alias;
 pub use rows::{Facts, NameKind, SymbolLang, Table};
+
+/// What the index knows about a name.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Answer<T> {
+    Known(T),
+    /// Proved not to exist.
+    Absent,
+    Unknown,
+}
+
+impl<T> Answer<T> {
+    /// Whether the answer proves the name does not exist (the only answer a rule reports on).
+    pub fn is_absent(&self) -> bool {
+        matches!(self, Answer::Absent)
+    }
+}
 
 /// What kind of type a declaration is. The words of a language's `type` rows name them.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -173,4 +189,33 @@ impl TypeSymbol {
             .iter()
             .find(|m| facts.key(NameKind::Member, &m.name) == key)
     }
+}
+
+/// An import statement of a file, with where it is written.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ImportSite {
+    pub path: Box<str>,
+    pub public: bool,
+    pub range: core_syntax::TextRange,
+}
+
+/// A method of a named type, with where it is written and the types it names.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MemberSite {
+    /// The qualified name of the type that holds it.
+    pub owner: Box<str>,
+    pub name: Box<str>,
+    pub refs: Vec<Name>,
+    pub range: core_syntax::TextRange,
+}
+
+/// What a file writes, read from its tree by the rules that look at use (an import nothing uses,
+/// a type that two methods name): unlike [`FileSymbols`] it holds offsets and every name of a
+/// body, so nothing that depends on the symbols reads it.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct FileSites {
+    pub imports: Vec<ImportSite>,
+    /// Every name the file writes in a place the rows call a reference, resolved.
+    pub uses: Vec<Name>,
+    pub methods: Vec<MemberSite>,
 }

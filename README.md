@@ -94,7 +94,7 @@ Each number is measured on real-world code against the default rule set of the r
 | INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 31 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
 | GraphQL | █████████░ 99% Prettier | 29 rules · no reference tool | Ready |
-| Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
+| Protobuf | █████████░ 99% buf format | ████████░░ 89% buf | Ready |
 | C / C++ | ██████░░░░ 69% clang-format | not measured clang-tidy | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 

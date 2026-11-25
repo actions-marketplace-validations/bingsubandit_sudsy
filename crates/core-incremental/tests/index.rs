@@ -320,7 +320,7 @@ fn protobuf_names_are_visible_through_imports_only() {
 }
 
 #[test]
-fn a_protobuf_import_that_cannot_be_found_leaves_every_name_unknown() {
+fn a_protobuf_import_that_cannot_be_found_declares_nothing_when_the_roots_are_all_there_are() {
     let w = World::new("");
     let a = w.file(
         "a.proto",
@@ -328,5 +328,18 @@ fn a_protobuf_import_that_cannot_be_found_leaves_every_name_unknown() {
     );
     let project = w.project("import-paths", vec![a], true);
     let index = Index::new(&w.db, project);
+    assert!(index.type_(a, &name(&["p.Nope"])).is_absent());
+    // Roots that may not be all of them: the file may be in another one.
+    let open = Project::new(
+        &w.db,
+        vec![a],
+        true,
+        Some(Arc::new(core_packages::ImportPaths::new(
+            vec![w.dir.path().to_path_buf()],
+            false,
+        ))),
+        0,
+    );
+    let index = Index::new(&w.db, open);
     assert_eq!(index.type_(a, &name(&["p.Nope"])), Answer::Unknown);
 }

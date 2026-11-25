@@ -403,12 +403,14 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `field-not-required` | protobuf | suspicious | off | none | Reports a proto2 `required` field. Equivalent: buf FIELD_NOT_REQUIRED. |
 | `file-lower-snake-case` | protobuf | style | off | none | Reports a file whose name (without `.proto`) is not lower_snake_case. Options: `pattern` (default `"^[a-z0-9]+(?:_[a-z0-9]+)*$"`): Regular expression the file name without its extension must match; empty: not checked. Equivalent: buf FILE_LOWER_SNAKE_CASE. |
 | `import-no-public` | protobuf | suspicious | off | none | Reports `import public`. Equivalent: buf IMPORT_NO_PUBLIC. |
+| `import-used` | protobuf | style | off | none | Reports an import of a file none of whose names the file uses. Equivalent: buf IMPORT_USED. |
 | `message-pascal-case` | protobuf | style | off | none | Reports a message name that is not PascalCase. Equivalent: buf MESSAGE_PASCAL_CASE. |
 | `oneof-lower-snake-case` | protobuf | style | off | none | Reports a oneof name that is not lower_snake_case. Equivalent: buf ONEOF_LOWER_SNAKE_CASE. |
 | `package-defined` | protobuf | style | off | none | Reports a file without a `package` statement. Equivalent: buf PACKAGE_DEFINED. |
 | `package-lower-snake-case` | protobuf | style | off | none | Reports a package whose components are not lower_snake_case. Equivalent: buf PACKAGE_LOWER_SNAKE_CASE. |
 | `package-version-suffix` | protobuf | style | off | none | Reports a package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1` (`v1beta` too). Equivalent: buf PACKAGE_VERSION_SUFFIX. |
 | `rpc-pascal-case` | protobuf | style | off | none | Reports an rpc name that is not PascalCase. Equivalent: buf RPC_PASCAL_CASE. |
+| `rpc-request-response-unique` | protobuf | style | off | none | Reports an rpc whose request or response type is also the request or response type of another rpc of the project. Equivalent: buf RPC_REQUEST_RESPONSE_UNIQUE. |
 | `rpc-request-standard-name` | protobuf | style | off | none | Reports an rpc whose request type is not named `<Rpc>Request` or `<Service><Rpc>Request`. Equivalent: buf RPC_REQUEST_STANDARD_NAME. |
 | `rpc-response-standard-name` | protobuf | style | off | none | Reports an rpc whose response type is not named `<Rpc>Response` or `<Service><Rpc>Response`. Equivalent: buf RPC_RESPONSE_STANDARD_NAME. |
 | `service-pascal-case` | protobuf | style | off | none | Reports a service name that is not PascalCase. Equivalent: buf SERVICE_PASCAL_CASE. |

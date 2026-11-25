@@ -12,19 +12,35 @@
 use super::resolve::Alias;
 use super::rows::{Facts, Key, NameKind, Role, Row, Table};
 use super::{
-    ConstSymbol, FileImport, FileSymbols, Flags, FunctionSymbol, Member, MemberKind, Name, Params,
-    Parent, TypeKind, TypeSymbol,
+    ConstSymbol, FileImport, FileSites, FileSymbols, Flags, FunctionSymbol, ImportSite, Member,
+    MemberKind, MemberSite, Name, Params, Parent, TypeKind, TypeSymbol,
 };
 use core_syntax::roles::code_text;
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, WalkEvent};
 
 /// The symbols the tree under `root` declares, by the rows of `table`.
 pub fn extract(root: &SyntaxNode, grammar: &Grammar, table: &Table) -> FileSymbols {
+    run(root, grammar, table, false).0
+}
+
+/// What the file writes: its imports with their places, the names it uses and its methods with
+/// theirs. Read by the rules that look at use, from the tree they are given.
+pub fn extract_sites(root: &SyntaxNode, grammar: &Grammar, table: &Table) -> FileSites {
+    run(root, grammar, table, true).1.unwrap_or_default()
+}
+
+fn run(
+    root: &SyntaxNode,
+    grammar: &Grammar,
+    table: &Table,
+    sites: bool,
+) -> (FileSymbols, Option<FileSites>) {
     let mut ex = Extractor {
         grammar,
         table,
         facts: &table.facts,
         out: FileSymbols::default(),
+        sites: sites.then(FileSites::default),
         frames: vec![Frame::default()],
         types: Vec::new(),
         depth: 0,
@@ -33,7 +49,7 @@ pub fn extract(root: &SyntaxNode, grammar: &Grammar, table: &Table) -> FileSymbo
     ex.walk(root);
     ex.out.declaring_calls.sort();
     ex.out.declaring_calls.dedup();
-    ex.out
+    (ex.out, ex.sites)
 }
 
 #[derive(Default)]
@@ -48,6 +64,8 @@ struct Extractor<'a> {
     table: &'a Table,
     facts: &'a Facts,
     out: FileSymbols,
+    /// Set when the caller reads what the file writes (see [`extract_sites`]).
+    sites: Option<FileSites>,
     frames: Vec<Frame>,
     /// The named types the walk is inside, with their qualified names.
     types: Vec<(SyntaxNode, String)>,
@@ -102,6 +120,7 @@ impl Extractor<'_> {
                 WalkEvent::Enter(node) => {
                     let kind = node.kind();
                     if let Some(row) = self.table.row_of(kind) {
+                        self.note_uses(&node, row);
                         match row.role {
                             Role::Namespace if !row.file => {
                                 let ns = name_in(&node, row.kinds(Key::Name), &row.after)
@@ -208,6 +227,30 @@ impl Extractor<'_> {
         Some(Params { min, max, variadic })
     }
 
+    /// The names a node writes, for the sites: its own text when the row is a reference, and the
+    /// types its `refs` name.
+    fn note_uses(&mut self, node: &SyntaxNode, row: &Row) {
+        if self.sites.is_none() {
+            return;
+        }
+        let mut written: Vec<String> = names_in(node, row.kinds(Key::Refs)).collect();
+        if row.role == Role::Reference {
+            written.push(code_text(node));
+        }
+        let names: Vec<Name> = written
+            .iter()
+            .map(|w| self.name(w, NameKind::Type))
+            .collect();
+        if let Some(sites) = &mut self.sites {
+            sites.uses.extend(names);
+        }
+    }
+
+    /// Where a node is written, without the comments and blank space around it.
+    fn span(&self, node: &SyntaxNode) -> core_syntax::TextRange {
+        core_syntax::code_span(node, self.grammar).unwrap_or_else(|| node.text_range())
+    }
+
     fn refs(&self, node: &SyntaxNode, row: &Row) -> Vec<Name> {
         names_in(node, row.kinds(Key::Refs))
             .map(|w| self.name(&w, NameKind::Type))
@@ -298,12 +341,22 @@ impl Extractor<'_> {
         {
             self.promoted(node, row, ty);
         }
+        let refs = self.refs(node, row);
+        let range = self.span(node);
+        if let Some(sites) = &mut self.sites {
+            sites.methods.push(MemberSite {
+                owner: ty.name.clone(),
+                name: name.clone().into(),
+                refs: refs.clone(),
+                range,
+            });
+        }
         ty.members.push(Member {
             name: name.into(),
             kind: MemberKind::Method,
             flags,
             params: self.params(node, row),
-            refs: self.refs(node, row),
+            refs,
         });
     }
 
@@ -385,7 +438,7 @@ impl Extractor<'_> {
     }
 
     fn global_consts(&mut self, node: &SyntaxNode, row: &Row) {
-        for item in node.children().filter(|c| row.has(Key::Item, c.kind())) {
+        for item in self.items_below(node, row) {
             if let Some(name) = name_in(&item, row.kinds(Key::Name), "") {
                 self.out.constants.push(ConstSymbol {
                     name: self.facts.qualify(self.scope(), &name).into(),
@@ -393,6 +446,24 @@ impl Extractor<'_> {
                 });
             }
         }
+    }
+
+    /// The items of a `global-const` row among the children of `node`, and of the children that
+    /// the rows make transparent (the body of a Protobuf `extend`).
+    fn items_below(&self, node: &SyntaxNode, row: &Row) -> Vec<SyntaxNode> {
+        let mut items = Vec::new();
+        for child in node.children() {
+            if row.has(Key::Item, child.kind()) {
+                items.push(child);
+            } else if self
+                .table
+                .row_of(child.kind())
+                .is_some_and(|r| r.role == Role::Transparent)
+            {
+                items.extend(self.items_below(&child, row));
+            }
+        }
+        items
     }
 
     fn read_use(&mut self, node: &SyntaxNode, prefix: &str, kind: NameKind) {
@@ -468,6 +539,14 @@ impl Extractor<'_> {
             }
             if let Some(path) = self.grammar.string_value(token.kind(), token.text()) {
                 let public = names_in(node, row.kinds(Key::Modifiers)).any(|w| w == "public");
+                let range = self.span(node);
+                if let Some(sites) = &mut self.sites {
+                    sites.imports.push(ImportSite {
+                        path: path.as_ref().into(),
+                        public,
+                        range,
+                    });
+                }
                 self.out.imports.push(FileImport {
                     path: path.into_owned().into(),
                     public,

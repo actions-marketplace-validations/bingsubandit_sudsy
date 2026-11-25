@@ -92,3 +92,20 @@ pub struct Project {
     #[returns(copy)]
     pub revision: u64,
 }
+
+/// One project of one language: the folder its manifest is in, and its [`Project`] input.
+#[derive(Clone)]
+pub struct ProjectEntry {
+    /// Position in the database's providers.
+    pub provider: usize,
+    pub root: PathBuf,
+    pub project: Project,
+}
+
+/// The projects of a run or a workspace, empty until a caller that runs index rules opens them
+/// (`Database::set_projects`).
+#[salsa::input(singleton)]
+pub struct Projects {
+    #[returns(ref)]
+    pub list: Vec<ProjectEntry>,
+}

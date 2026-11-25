@@ -21268,6 +21268,29 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "Reports an import of a file none of whose names the file uses. A public import is left alone. It needs the imported files, found from the folder with the module's `buf.yaml`; an import it cannot read is not reported.",
+      "fix": null,
+      "id": "import-used",
+      "languages": [
+        "protobuf"
+      ],
+      "options": [],
+      "presets": [
+        "protobuf/buf-standard"
+      ],
+      "upstream": [
+        {
+          "id": "IMPORT_USED",
+          "partial": false,
+          "tool": "buf",
+          "url": "https://buf.build/docs/lint/rules/#import_used"
+        }
+      ],
+      "why": "An import that nothing uses makes the file depend on another one for no reason: a change there can break this file, and tools load it for nothing.\n\nTo fix, remove the import."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "Reports a message name that is not PascalCase.",
       "example": {
         "config": null,
@@ -21519,6 +21542,29 @@
         }
       ],
       "why": "The Protobuf style guide names rpcs in PascalCase, and the name becomes a method name in the generated client and server code.\n\nTo fix, rename the rpc."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "Reports an rpc whose request or response type is also the request or response type of another rpc of the project.",
+      "fix": null,
+      "id": "rpc-request-response-unique",
+      "languages": [
+        "protobuf"
+      ],
+      "options": [],
+      "presets": [
+        "protobuf/buf-standard"
+      ],
+      "upstream": [
+        {
+          "id": "RPC_REQUEST_RESPONSE_UNIQUE",
+          "partial": false,
+          "tool": "buf",
+          "url": "https://buf.build/docs/lint/rules/#rpc_request_response"
+        }
+      ],
+      "why": "A message that several rpcs share couples them: adding a field for one call changes the others, and the calls cannot evolve apart.\n\nTo fix, give each rpc its own request and response messages."
     },
     {
       "category": "style",
