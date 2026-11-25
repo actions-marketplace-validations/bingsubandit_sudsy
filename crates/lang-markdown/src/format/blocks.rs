@@ -244,21 +244,21 @@ impl Render<'_> {
             };
             let pad = self.tab.saturating_sub(raw.len()).min(3);
             let mut marker = format!("{raw}{}", " ".repeat(pad));
-            if let Some(t) = significant(item).find(|t| t.kind() == k::TASK_MARKER) {
-                marker.push_str(&format!(
-                    "{} ",
-                    if t.text().contains(['x', 'X']) {
-                        "[x]"
-                    } else {
-                        "[ ]"
-                    }
-                ));
+            if let Some(t) = significant(item)
+                .take(2)
+                .find(|t| t.kind() == k::TASK_MARKER)
+            {
+                marker.push_str(if t.text().contains(['x', 'X']) {
+                    "[x] "
+                } else {
+                    "[ ] "
+                });
             }
             let body = self.blocks(item, !loose);
             if i > 0 && self.item_loose(&items, i - 1) {
                 out.push(String::new());
             }
-            let indent = " ".repeat(marker.len());
+            let indent = " ".repeat(raw.len() + pad);
             if body.is_empty() {
                 out.push(marker.trim_end().to_string());
             }
