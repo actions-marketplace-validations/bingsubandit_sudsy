@@ -378,3 +378,11 @@ fn an_edit_inside_a_body_leaves_the_symbols_equal_and_their_readers_alone() {
     file.set_text(&mut h.db).to(text.replace("m()", "n()"));
     assert_ne!(*symbols(&h.db, file).as_ref().unwrap(), before);
 }
+
+#[test]
+fn symbols_do_not_keep_the_parse_tree() {
+    let h = Harness::new();
+    h.symbols("a.php", "<?php\nclass A {}\n");
+    assert_eq!(h.runs("symbols"), 1);
+    assert_eq!(h.runs("parse("), 0, "the tree is dropped, not memoized");
+}

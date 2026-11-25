@@ -8,6 +8,11 @@
 //! 6,000, spread over the whole set): the first answer, then the time from an edit to the answer
 //! after a body edit and after a signature edit, with the memory of the whole index.
 mod index;
+
+#[cfg(feature = "mimalloc")]
+#[global_allocator]
+static A: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 use anyhow::{Result, anyhow};
 use core_semantics::symbols::{FileSymbols, extract};
 use perf_bench::file;

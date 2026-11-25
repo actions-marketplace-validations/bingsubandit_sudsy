@@ -3925,6 +3925,7 @@ dependencies = [
  "core-incremental",
  "core-semantics",
  "languages",
+ "mimalloc",
  "perf-bench",
  "provider-api",
 ]
