@@ -21,17 +21,17 @@ Blocked on a decision:
 |---|---|---|---|---|
 | PHP | lint PHPStan | 36.1% | 48.9 | needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision) |
 
-Not measured: C / C++ lint clang-tidy (no target, blocked).
+Not measured: C / C++ lint clang-tidy (no target, blocked); CMake lint cmake-lint (no target, blocked).
 
 New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format; Go lint revive.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
 | Ruby | 0.27 | 0 (paid) | - | 2.89~ | - | format: format rufo | estimate: pick only to measure it |
+| CMake | 0.35 | 0 (paid) | - | 2.57~ | - | format: format gersemi | estimate: pick only to measure it |
 | Batchfile | 0.51~ | ~1.2 | 1.74~ | 1.74~ | 2.29~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
 | Kubernetes manifests | 0.41~ | ~0.2 | 2.28~ | - | - | lint: lint kubeconform | estimate: pick only to measure it |
 | Jupyter Notebook | 0.57~ | ~1 | 1.65~ | 1.75~ | 2.27~ | both: lint ruff check on cells + format ruff format on cells | JSON file with Python cells: the Python leg does the work; estimate: pick only to measure it |
-| CMake | 0.35 | 1.2 | 1.67 | 1.38~ | 1.99~ | both: lint cmake-lint + format gersemi | estimate: pick only to measure it |
 | Gradle | 0.31~ | ~0.2 | 1.75~ | 1.84~ | 1.93~ | both: lint none found + format npm-groovy-lint | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format npm-groovy-lint reach ~0.75; build.gradle (Groovy DSL); build.gradle.kts is Kotlin; estimate: pick only to measure it |
 | Swift | 0.27 | ~1.2 | 1.31~ | 1.20~ | 1.70~ | both: lint SwiftLint defaults + format swift-format | estimate: pick only to measure it |
 | package.json | 0.10~ | ~0.2 | 0.84~ | 1.61~ | 1.26~ | format: format sort-package-json | estimate: pick only to measure it |

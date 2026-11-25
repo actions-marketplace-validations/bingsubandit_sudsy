@@ -7,10 +7,7 @@ use crate::generated::kind as k;
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodeExt, SyntaxToken, TextRange};
 
 pub fn is_trivia(kind: SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::WHITESPACE | k::NEWLINE | k::COMMENT | k::LINE_COMMENT
-    )
+    core_syntax::kind::in_mask(k::TRIVIA_MASK, kind)
 }
 
 /// The tokens below `node` that are not trivia, groups and functions included.

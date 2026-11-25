@@ -20,7 +20,7 @@ pub use core_syntax::parse::{MAX_DEPTH, Parsed};
 
 pub fn parse(src: &str, dialect: Dialect) -> Parsed {
     let mut p = Parser {
-        p: parse::Parser::new(src, lex(src, dialect), is_trivia, k::EOF),
+        p: parse::Parser::new(src, lex(src, dialect), k::TRIVIA_MASK, k::EOF),
         call_at: None,
         closers: Vec::new(),
     };
@@ -71,13 +71,6 @@ impl std::ops::DerefMut for Parser<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.p
     }
-}
-
-fn is_trivia(kind: SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::WHITESPACE | k::NEWLINE | k::COMMENT | k::LINE_COMMENT
-    )
 }
 
 fn is_comment(kind: SyntaxKind) -> bool {

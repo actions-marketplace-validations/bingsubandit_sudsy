@@ -3,6 +3,7 @@
 bat
 c
 clojure
+cmake
 coffeescript
 cpp
 csharp

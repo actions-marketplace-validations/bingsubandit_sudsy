@@ -255,6 +255,8 @@ pub struct Grammar {
     /// Hot tags per kind, indexed like `tokens` and `nodes`.
     token_flags: Vec<u32>,
     node_flags: Vec<u32>,
+    /// Bit `i` set: token `i` is trivia (the first 64 tokens; a parser reads it per token).
+    trivia_mask: u64,
     /// Does a node kind carry `trivia` (a structured comment)?
     trivia_nodes: bool,
     /// Per body item of every node, in node order: the range of `pool` holding the sorted kinds
@@ -855,6 +857,13 @@ impl Grammar {
     /// Is any node kind trivia (a doc comment that is a node)?
     pub fn has_trivia_nodes(&self) -> bool {
         self.trivia_nodes
+    }
+
+    /// The trivia tokens (of the first 64) as a bit set, by token index; codegen writes it as
+    /// `kind::TRIVIA_MASK` when every trivia token fits.
+    #[inline]
+    pub fn trivia_mask(&self) -> u64 {
+        self.trivia_mask
     }
 
     #[inline]

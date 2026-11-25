@@ -85,6 +85,19 @@ impl std::fmt::Debug for SyntaxKind {
     }
 }
 
+/// Whether the token `kind` is in `mask`, a bit set by token index (a language's
+/// `generated::kind::TRIVIA_MASK`). False for a node kind.
+#[inline]
+pub const fn in_mask(mask: u64, kind: SyntaxKind) -> bool {
+    kind.is_token() && token_in_mask(mask, kind)
+}
+
+/// [`in_mask`] for a kind known to be a token.
+#[inline]
+pub const fn token_in_mask(mask: u64, kind: SyntaxKind) -> bool {
+    kind.index() < 64 && mask >> (kind.index() & 63) & 1 != 0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

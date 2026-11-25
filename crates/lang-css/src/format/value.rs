@@ -27,10 +27,7 @@ pub(crate) struct Grp {
 }
 
 pub(crate) fn is_trivia(kind: SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::WHITESPACE | k::NEWLINE | k::COMMENT | k::LINE_COMMENT
-    )
+    core_syntax::kind::in_mask(k::TRIVIA_MASK, kind)
 }
 
 /// The significant children of a `Prelude`, `Property`, `Value`, `Function` or `Group` node.

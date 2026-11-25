@@ -3,7 +3,7 @@
 //! the document selector in `src/selector.generated.ts`.
 
 use anyhow::{Context, Result, bail};
-use provider_api::{FilePattern, LanguageProvider};
+use provider_api::LanguageProvider;
 use std::path::PathBuf;
 
 /// Marketplace limit on `keywords`.
@@ -65,7 +65,7 @@ fn language_ids(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> 
     Ok(ids)
 }
 
-/// Display names of the languages, `C/C++` as `C` and `C++`.
+/// Display names of the languages, `C/C++` as `C` and `C++`; the first 28.
 fn keywords(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
     let mut words: Vec<String> = Vec::new();
     for p in own_language(providers) {
@@ -127,10 +127,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     let mut extensions: Vec<&str> = providers
         .iter()
         .flat_map(|p| p.file_matchers())
-        .filter_map(|m| match &m.pattern {
-            FilePattern::Extension(e) => Some(e.as_str()),
-            _ => None,
-        })
+        .filter_map(|m| m.pattern.extension())
         .collect();
     extensions.dedup();
     let selector: String = ids

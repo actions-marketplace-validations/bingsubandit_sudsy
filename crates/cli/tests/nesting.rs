@@ -43,6 +43,7 @@ const NESTED: &[(&str, &str, &str, &str, &str)] = &[
     ("vue", "a.vue", "<template>", "(", ")"),
     ("svelte", "a.svelte", "", "{", "}"),
     ("csharp", "A.cs", "class A { int x = ", "(", ")"),
+    ("cmake", "CMakeLists.txt", "f", "(", ")"),
 ];
 
 #[test]

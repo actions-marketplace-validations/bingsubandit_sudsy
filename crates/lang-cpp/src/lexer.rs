@@ -318,22 +318,16 @@ fn raw_len(b: &[u8]) -> (usize, bool) {
     {
         return (0, true);
     }
-    let body = 3 + open;
-    let mut i = body;
-    while i < b.len() {
-        if b[i] == b')'
-            && b[i + 1..].starts_with(delim)
-            && b.get(i + 1 + delim.len()) == Some(&b'"')
-        {
-            let end = i + delim.len() + 2;
-            return (
-                end + b[end..].iter().take_while(|&&c| ident_byte(c)).count(),
-                true,
-            );
-        }
-        i += 1;
+    let mut closer = vec![b')'];
+    closer.extend_from_slice(delim);
+    closer.push(b'"');
+    match core_syntax::parse::raw_end(b, 3 + open, &closer) {
+        Some(end) => (
+            end + b[end..].iter().take_while(|&&c| ident_byte(c)).count(),
+            true,
+        ),
+        None => (b.len(), false),
     }
-    (b.len(), false)
 }
 
 fn number_len(b: &[u8]) -> usize {
@@ -380,9 +374,6 @@ pub fn lex(src: &str, dialect: Dialect) -> Lexed {
     let (mut i, mut line_start, mut dir, mut dirs) = (0, true, 0u32, 0u32);
     // After `#include`: the next `<` starts a header name.
     let mut header = false;
-    if b.starts_with("\u{feff}".as_bytes()) {
-        i = 3;
-    }
     macro_rules! tok {
         ($kind:expr, $len:expr) => {{
             let end = i + $len;

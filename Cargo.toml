@@ -94,6 +94,7 @@ lang-python = { path = "crates/lang-python" }
 lang-java = { path = "crates/lang-java" }
 lang-php = { path = "crates/lang-php" }
 lang-ruby = { path = "crates/lang-ruby" }
+lang-cmake = { path = "crates/lang-cmake" }
 lang-sql = { path = "crates/lang-sql" }
 lang-kotlin = { path = "crates/lang-kotlin" }
 lang-css = { path = "crates/lang-css" }

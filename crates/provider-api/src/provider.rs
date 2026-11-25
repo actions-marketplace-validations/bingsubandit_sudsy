@@ -140,6 +140,55 @@ pub enum FilePattern {
     FileName(String),
     /// Files with this extension directly inside a directory of this name, e.g. `.vscode/*.json`.
     InDirectory { dir: String, extension: String },
+    /// `pattern`, but not the files whose name matches one of `except` (patterns as of `FileName`,
+    /// such as `*.h.cmake`: a template of another language).
+    Except {
+        pattern: Box<FilePattern>,
+        except: Vec<String>,
+    },
+}
+
+impl FilePattern {
+    /// The extension a pattern selects, if it is one (an `Except` of one).
+    pub fn extension(&self) -> Option<&str> {
+        match self {
+            FilePattern::Extension(e) => Some(e),
+            FilePattern::Except { pattern, .. } => pattern.extension(),
+            _ => None,
+        }
+    }
+
+    pub fn matches(&self, path: &Path) -> bool {
+        let has_extension = |e: &str| path.extension().is_some_and(|x| x.eq_ignore_ascii_case(e));
+        match self {
+            FilePattern::Extension(e) => has_extension(e),
+            FilePattern::FileName(n) => name_matches(n, path),
+            FilePattern::InDirectory { dir, extension } => {
+                has_extension(extension)
+                    && path
+                        .parent()
+                        .and_then(Path::file_name)
+                        .is_some_and(|d| d == dir.as_str())
+            }
+            FilePattern::Except { pattern, except } => {
+                pattern.matches(path) && !except.iter().any(|n| name_matches(n, path))
+            }
+        }
+    }
+}
+
+/// A file name pattern (`Name`, `prefix*`, `*suffix`, or a path tail with `/`) against a path.
+fn name_matches(n: &str, path: &Path) -> bool {
+    if n.contains('/') {
+        return path.ends_with(n);
+    }
+    path.file_name().is_some_and(|x| match n.strip_suffix('*') {
+        Some(prefix) => x.to_string_lossy().starts_with(prefix),
+        None => match n.strip_prefix('*') {
+            Some(suffix) => x.to_string_lossy().ends_with(suffix),
+            None => x == n,
+        },
+    })
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -158,36 +207,20 @@ impl FileMatcher {
     }
 
     pub fn matches(&self, path: &Path) -> bool {
-        let has_extension = |e: &str| path.extension().is_some_and(|x| x.eq_ignore_ascii_case(e));
-        match &self.pattern {
-            FilePattern::Extension(e) => has_extension(e),
-            FilePattern::FileName(n) if n.contains('/') => path.ends_with(n),
-            FilePattern::FileName(n) => {
-                path.file_name().is_some_and(|x| match n.strip_suffix('*') {
-                    Some(prefix) => x.to_string_lossy().starts_with(prefix),
-                    None => match n.strip_prefix('*') {
-                        Some(suffix) => x.to_string_lossy().ends_with(suffix),
-                        None => x == n.as_str(),
-                    },
-                })
-            }
-            FilePattern::InDirectory { dir, extension } => {
-                has_extension(extension)
-                    && path
-                        .parent()
-                        .and_then(Path::file_name)
-                        .is_some_and(|d| d == dir.as_str())
-            }
-        }
+        self.pattern.matches(path)
     }
 
     /// When several matchers match a file, the most specific one wins.
     pub fn specificity(&self) -> u8 {
-        match self.pattern {
-            FilePattern::Extension(_) => 1,
-            FilePattern::InDirectory { .. } => 2,
-            FilePattern::FileName(_) => 3,
+        fn of(pattern: &FilePattern) -> u8 {
+            match pattern {
+                FilePattern::Extension(_) => 1,
+                FilePattern::InDirectory { .. } => 2,
+                FilePattern::FileName(_) => 3,
+                FilePattern::Except { pattern, .. } => of(pattern),
+            }
         }
+        of(&self.pattern)
     }
 }
 
@@ -320,5 +353,26 @@ mod tests {
         let m = FileMatcher::extension("cs");
         assert!(m.matches(Path::new("src/A.CS")));
         assert!(!m.matches(Path::new("src/A.csx")));
+    }
+
+    #[test]
+    fn excepted_names_are_not_claimed() {
+        let pattern = FilePattern::Except {
+            pattern: Box::new(FilePattern::Extension("cmake".into())),
+            except: vec!["*.h.cmake".into(), "Skip.cmake".into()],
+        };
+        let m = FileMatcher {
+            pattern,
+            dialect: None,
+        };
+        assert!(m.matches(Path::new("a/FindX.cmake")));
+        assert!(m.matches(Path::new("a/arm.toolchain.cmake")));
+        assert!(!m.matches(Path::new("a/config.h.cmake")));
+        assert!(!m.matches(Path::new("Skip.cmake")));
+        assert_eq!(
+            m.specificity(),
+            FileMatcher::extension("cmake").specificity()
+        );
+        assert_eq!(m.pattern.extension(), Some("cmake"));
     }
 }

@@ -474,13 +474,12 @@ fn dollar_string(src: &str, i: usize, d: Dialect, open: &mut bool) -> Option<usi
         return None;
     }
     let tag = &src[i..=j];
-    Some(src[j + 1..].find(tag).map_or_else(
-        || {
+    Some(
+        core_syntax::parse::raw_end(b, j + 1, tag.as_bytes()).unwrap_or_else(|| {
             *open = true;
             b.len()
-        },
-        |p| j + 1 + p + tag.len(),
-    ))
+        }),
+    )
 }
 
 fn number(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {

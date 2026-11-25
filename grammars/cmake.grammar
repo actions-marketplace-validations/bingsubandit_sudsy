@@ -1,0 +1,42 @@
+// CMake: a file is a flat list of commands `name(arguments)`. Blocks (`if` ... `endif`) are pairs
+// of commands and are not nodes of this tree. Words of an argument that touch (`-DFOO="bar"`,
+// `a"b"c`, `$<$<CONFIG:Debug>:dbg;"x y">`) are the parts of one `Argument`.
+// Format: see crates/core-syntax/src/grammar/mod.rs.
+
+language cmake 26 "CMake"
+comments line "#" block "#[[" "]]"
+suppress disable-next-line "sudsy-disable-next-line"
+suppress disable-line "sudsy-disable-line"
+suppress disable "sudsy-disable"
+suppress enable "sudsy-enable"
+suppress disable-file "sudsy-disable-file"
+suppress ignore "sudsy-ignore"
+suppress ignore-start "sudsy-ignore-start"
+suppress ignore-end "sudsy-ignore-end"
+
+// Trivia. Newline tokens end a line for the trivia attachment rule.
+token Whitespace #trivia #whitespace
+token Newline #trivia #newline
+token LineComment #trivia #comment
+// `#[==[ ... ]==]`, any number of `=`.
+token BracketComment #trivia #comment
+
+token LParen "(" #punctuation
+token RParen ")" #punctuation
+
+// A word: a command name or an unquoted argument (`\` escapes the next character).
+token Unquoted #argument-part
+token Quoted #argument-part #literal #string
+string Quoted quote "\"" escape "\\" continuation unknown keep map "n" 10 "r" 13 "t" 9
+// `[==[ ... ]==]`, any number of `=`.
+token Bracket #argument-part #literal
+
+// Zero-width end-of-file token; it carries the leading trivia of the file's tail.
+token Eof
+token Unknown #error
+
+node File = items:Command* Eof
+node Command = name:Unquoted LParen arguments:ArgumentList RParen
+node ArgumentList = items:#argument-item*
+node Argument #argument-item = parts:#argument-part*
+node ParenGroup #argument-item = LParen ArgumentList RParen

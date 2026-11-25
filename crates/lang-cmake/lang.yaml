@@ -1,0 +1,14 @@
+vscode-languages: [cmake]
+extensions: [cmake]
+file-names: [CMakeLists.txt]
+# Templates of other languages (`config.h.cmake`, `foo.pc.cmake`); a second extension of a cmake file (`arm.toolchain.cmake`) is no template.
+exclude-names: ["*.h.cmake", "*.hpp.cmake", "*.c.cmake", "*.cpp.cmake", "*.in.cmake", "*.pc.cmake", "*.sh.cmake", "*.fish.cmake", "*.bat.cmake", "*.properties.cmake", "*.gradle.cmake", "*.xml.cmake", "*.json.cmake", "*.py.cmake"]
+formatter: 'core_format::VerbatimFormatter { exact_end: &[] }'
+parse: parser::parse_file
+rules: "&[]"
+options:
+  - indent_size: 4
+  - line_width: 80
+  - indent_style
+  - final_newline: true
+  - end_of_line

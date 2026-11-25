@@ -113,6 +113,9 @@
   ids: [ruby]
   speed: [Ruby]
   lint: [{tool: rubocop, name: RuboCop}]
+- language: CMake
+  ids: [cmake]
+  lint: [{tool: cmake-lint, name: cmake-lint, blocked: "parser only, no rules and no catalog yet"}]
 - language: Go
   ids: [go]
   lint: [{tool: revive, name: revive}]

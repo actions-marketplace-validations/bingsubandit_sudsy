@@ -38,11 +38,8 @@
 - language: CMake
   gh: 608541
   so: 11.7
-  parser: 1.2 # tree-sitter-cmake: 9,034 of 9,035 real-code files parse
   format:
     - {tool: gersemi, gain: 0.7, reach: ~0.86, cost: 1.4, why: "slow, own runtime (Python); reach is the ceiling of a model with the keyword-section layout (0.61 without, 0.99 with every piece)"}
-  lint:
-    - {tool: cmake-lint, gain: 0.7, reach: 1.0, cost: 1.3, why: "own runtime (Python); reach measured on its source for the rules that fired, 128,509 findings"}
 - language: Swift
   gh: 449944
   so: 5.9
