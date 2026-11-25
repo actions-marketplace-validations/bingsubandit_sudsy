@@ -14,13 +14,7 @@ use crate::Dialect;
 use crate::generated::kind as k;
 use core_syntax::SyntaxKind;
 
-pub struct LTok {
-    pub kind: SyntaxKind,
-    pub start: u32,
-    pub end: u32,
-    /// The directive the token belongs to, counted from 1; 0 outside directives.
-    pub dir: u32,
-}
+pub use provider_api::directive_payload::DirectiveToken as LTok;
 
 pub struct Lexed {
     pub toks: Vec<LTok>,
@@ -473,6 +467,15 @@ pub fn lex(src: &str, dialect: Dialect) -> Lexed {
         {
             tok!(k::NUMBER, number_len(&b[i..]));
         } else if let Some((kind, len)) = punct(&b[i..]) {
+            // `__has_include(<name>)`: a header name follows the parenthesis.
+            header = kind == k::LPAR
+                && dir > 0
+                && out.toks.last().is_some_and(|t| {
+                    matches!(
+                        &src[t.start as usize..t.end as usize],
+                        "__has_include" | "__has_include_next"
+                    )
+                });
             tok!(kind, len);
         } else {
             tok!(k::OTHER, 1);

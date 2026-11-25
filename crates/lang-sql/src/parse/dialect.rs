@@ -26,6 +26,11 @@ impl Dialect {
         }
     }
 
+    /// Does the dialect split a file into batches (`GO`, the comments that open the file)?
+    pub fn has_batches(self) -> bool {
+        self == Dialect::Tsql
+    }
+
     /// Reserved words: they never name something unquoted.
     pub fn is_reserved(self, upper: &str) -> bool {
         sets().reserved[self as usize].contains(upper) || CLAUSE_WORDS.contains(&upper)

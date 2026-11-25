@@ -349,6 +349,9 @@ impl P<'_> {
             let ok = if p.at_table_function() {
                 p.keyword_table_function();
                 true
+            } else if p.d == Dialect::Tsql && p.is_t(0, T::Var) && !p.var_dotted(0) {
+                p.var_table();
+                true
             } else {
                 p.obj_ref()
             };

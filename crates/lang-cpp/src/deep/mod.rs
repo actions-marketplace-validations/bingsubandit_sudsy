@@ -65,7 +65,21 @@ struct Cx<'a> {
 /// The nodes of `structure` with the statements, declarations and expressions inside them.
 pub fn build(src: &str, toks: &[LTok], nodes: Vec<Node>) -> Vec<Node> {
     let mut cx = Cx::new(src, toks, nodes);
-    cx.run();
+    cx.run(SCOPE);
+    cx.finish()
+}
+
+/// [`build`] for the body of a macro: code of a function body.
+pub fn build_body(src: &str, toks: &[LTok], nodes: Vec<Node>) -> Vec<Node> {
+    let mut cx = Cx::new(src, toks, nodes);
+    cx.run(BODY);
+    cx.finish()
+}
+
+/// [`build`] for tokens that are one expression (the condition of an `#if`): no declaration, no line.
+pub fn build_expression(src: &str, toks: &[LTok], nodes: Vec<Node>) -> Vec<Node> {
+    let mut cx = Cx::new(src, toks, nodes);
+    cx.run(INIT);
     cx.finish()
 }
 
@@ -120,9 +134,9 @@ impl<'a> Cx<'a> {
 
     /// Reads every line of the file, in order: the scope a line is in is the one of the innermost
     /// `Block` around it, which the owner of the block set when its own line was read.
-    fn run(&mut self) {
+    fn run(&mut self, scope: u8) {
         let n = self.nodes.len();
-        spans::walk(self, n, SCOPE);
+        spans::walk(self, n, scope);
     }
 
     /// A `case` label covers the lines after it up to the next label or the end of the block.
@@ -204,7 +218,8 @@ impl<'a> Cx<'a> {
 
     /// A node over the tokens `a..=z`; none when a directive splits them.
     fn emit(&mut self, a: usize, z: usize, kind: SyntaxKind) {
-        if self.quiet || self.crosses(a, z) {
+        // (a separator the tokens end on, `bool Noexcept,` as the body of a macro, is read past them)
+        if self.quiet || a >= self.c.len() || self.crosses(a, z) {
             return;
         }
         let n = Node {

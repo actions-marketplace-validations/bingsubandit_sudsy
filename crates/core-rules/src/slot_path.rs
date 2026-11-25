@@ -1,8 +1,9 @@
 //! Slot paths: how a rule row names a part of a node, read off the grammar's labels.
 //!
 //! A path is alternatives separated by `|` (the first that finds something wins); an alternative
-//! is steps separated by `/` and an optional `:first`, `:last` or `:all` (which of the found parts;
-//! `first` by default). A step is a label of the current node (`name`, `start/entries`) or, capitalized, the name of a kind of its children (`StageName`); `label[v]`
+//! is steps separated by `/` and an optional `:first`, `:last`, `:all` or `:each` (which of the found parts;
+//! `first` by default; `each` is the same as `all` for [`SlotPath::find`] and makes
+//! [`SlotPath::find_each`] report every part). A step is a label of the current node (`name`, `start/entries`) or, capitalized, the name of a kind of its children (`StageName`); `label[v]`
 //! keeps the parts whose `key` slot has the text `v`; `.` is the node itself. The text of a part
 //! is its source with blanks collapsed, and the text of `:all` runs from the first part to the
 //! last.
@@ -24,6 +25,7 @@ enum Pick {
     First,
     Last,
     All,
+    Each,
 }
 
 /// A label at a fixed child position of a kind of node: how many children that are not skipped
@@ -188,6 +190,7 @@ impl SlotPath {
                 Some((s, "first")) => (s, Pick::First),
                 Some((s, "last")) => (s, Pick::Last),
                 Some((s, "all")) => (s, Pick::All),
+                Some((s, "each")) => (s, Pick::Each),
                 _ => (alt, Pick::First),
             };
             let steps = steps
@@ -233,23 +236,36 @@ impl SlotPath {
         text: &'t str,
     ) -> Option<Found<'t>> {
         let plan = self.plan(grammar);
-        plan.alts.iter().find_map(|alt| {
-            let (mut first, mut last) = (None, None);
-            let stop_at_first = alt.pick == Pick::First;
-            visit(grammar, node, &alt.steps, text, &mut |part| {
-                if first.is_none() {
-                    first = Some(part.clone());
+        plan.alts
+            .iter()
+            .find_map(|alt| find_alt(grammar, alt, node, text))
+    }
+
+    /// Every part the first alternative that finds something names, one by one (`a, b := 1, 2`:
+    /// `ExpressionList/Ident:each` finds `a` and `b`).
+    pub fn find_each<'t>(
+        &self,
+        grammar: &Grammar,
+        node: &SyntaxNode,
+        text: &'t str,
+    ) -> Vec<Found<'t>> {
+        for alt in &self.plan(grammar).alts {
+            if alt.pick != Pick::Each {
+                if let Some(one) = find_alt(grammar, alt, node, text) {
+                    return vec![one];
                 }
-                last = Some(part);
-                stop_at_first
+                continue;
+            }
+            let mut parts = Vec::new();
+            visit(grammar, node, &alt.steps, text, &mut |part| {
+                parts.push(found(text, span(grammar, &part)));
+                false
             });
-            let (first, last) = match alt.pick {
-                Pick::First | Pick::All => (first?, last?),
-                Pick::Last => (last.clone()?, last?),
-            };
-            let range = TextRange::new(span(grammar, &first).start(), span(grammar, &last).end());
-            Some(found(text, range))
-        })
+            if !parts.is_empty() {
+                return parts;
+            }
+        }
+        Vec::new()
     }
 
     /// [`SlotPath::find`] on the green tree, so no red element is allocated: `None` when a step
@@ -331,7 +347,7 @@ impl SlotPath {
                 },
             )?;
             let (first, last) = match alt.pick {
-                Pick::First | Pick::All => (first, last),
+                Pick::First | Pick::All | Pick::Each => (first, last),
                 Pick::Last => (last, last),
             };
             if let (Some(first), Some(last)) = (first, last) {
@@ -433,6 +449,30 @@ fn visit_green<F: FnMut(u32, u32) -> bool>(
 }
 
 /// Calls `found` with each part the steps name below `node`, in order, until it returns true.
+/// What one alternative finds in `node`.
+fn find_alt<'t>(
+    grammar: &Grammar,
+    alt: &Alt,
+    node: &SyntaxNode,
+    text: &'t str,
+) -> Option<Found<'t>> {
+    let (mut first, mut last) = (None, None);
+    let stop_at_first = alt.pick == Pick::First;
+    visit(grammar, node, &alt.steps, text, &mut |part| {
+        if first.is_none() {
+            first = Some(part.clone());
+        }
+        last = Some(part);
+        stop_at_first
+    });
+    let (first, last) = match alt.pick {
+        Pick::First | Pick::All | Pick::Each => (first?, last?),
+        Pick::Last => (last.clone()?, last?),
+    };
+    let range = TextRange::new(span(grammar, &first).start(), span(grammar, &last).end());
+    Some(found(text, range))
+}
+
 fn visit(
     grammar: &Grammar,
     node: &SyntaxNode,

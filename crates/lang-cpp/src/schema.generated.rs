@@ -90,6 +90,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("pointer_alignment", "binary_cast", "", &["Rpar"]),
     ("pointer_alignment", "binary_clear", "", &["Assignment", "ReturnStatement", "Binary", "Ternary", "Index", "Unary", "Arguments"]),
     ("pointer_alignment", "binary_node", "", &["Binary"]),
+    ("pointer_alignment", "binary_spaced", "", &["Amp"]),
     ("pointer_alignment", "pointer", "", &["Star", "Amp", "AmpAmp"]),
     ("pointer_alignment", "pointer_bare", "", &["TemplateArguments"]),
     ("pointer_alignment", "pointer_end", "", &["Greater", "GreaterGreater", "Comma", "Rpar", "Ellipsis", "Lsqb"]),
@@ -141,6 +142,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("break_template_declarations", "break_after", "", &["TemplateDeclaration"]),
     ("break_template_declarations", "head", "", &["TemplateParameters"]),
     ("align_escaped_newlines", "relay", "", &["Directive"]),
+    ("align_escaped_newlines", "relay_head", "", &["ParenGroup"]),
 ];
 #[allow(dead_code)]
 pub fn wrap_lines(o: &core_config::ResolvedOptions) -> bool {

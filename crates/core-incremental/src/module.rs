@@ -10,10 +10,10 @@ use crate::db::Db;
 use crate::failure::{Failure, Stage, guarded};
 use crate::inputs::File;
 use crate::queries::{parse, provider_of};
-use crate::rules::active_rules;
+use crate::rules::{active_rules, generated_skipped};
 use core_rules::suppress::Suppressions;
 use core_rules::{Diagnostic, DirectoryScope, FileContext, LineIndex, ProjectFacts};
-use core_rules::{collect_directory, directory_rules, run_directory};
+use core_rules::{collect_directory, collect_nothing, directory_rules, run_directory};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -76,6 +76,9 @@ pub fn module_facts(db: &dyn Db, file: File) -> Result<ProjectFacts, Failure> {
         let (active, _) = active_rules(db, file).as_ref().map_err(Clone::clone)?;
         if directory_rules(active).next().is_none() {
             return Ok(ProjectFacts::default());
+        }
+        if *generated_skipped(db, file) {
+            return Ok(collect_nothing(file.path(db), active));
         }
         let facts = with_context(db, file, |context| collect_directory(context, active))?;
         Ok(facts.unwrap_or_default())

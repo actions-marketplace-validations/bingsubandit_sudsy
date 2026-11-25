@@ -41,6 +41,7 @@ final_newline
 format_rules
 generated_header_markers
 generated_header_skip
+skip_generated_lint
 generated_names
 hug_first_argument
 hug_last_argument

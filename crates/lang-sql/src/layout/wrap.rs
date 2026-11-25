@@ -20,18 +20,18 @@ fn line_starts(seq: &Seq) -> Vec<usize> {
     out
 }
 
+/// The width of the longest physical line of blocks `s..e` that holds more than one block.
 fn width(seq: &Seq, s: usize, e: usize, tab: usize) -> usize {
-    (s..e)
-        .map(|i| {
-            let ws = &seq.points[i].ws;
-            let w = if i == s || seq.points[i].newlines == 0 {
-                ws.chars().map(|c| if c == '\t' { tab } else { 1 }).sum()
-            } else {
-                0
-            };
-            w + seq.blocks[i].text.chars().count()
-        })
-        .sum()
+    core_format::context::widest_shared_line(
+        (s..e).map(|i| {
+            (
+                &*seq.points[i].ws,
+                seq.points[i].newlines > 0,
+                &*seq.blocks[i].text,
+            )
+        }),
+        tab,
+    )
 }
 
 /// A place that wants line breaks around it: the blocks `start..=end`, where the breaks go and

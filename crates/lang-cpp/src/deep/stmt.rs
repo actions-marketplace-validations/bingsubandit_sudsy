@@ -28,6 +28,15 @@ impl Cx<'_> {
             self.list(a, b);
             return false;
         }
+        // `{.a = 1}` is a list of values.
+        if self.c[a].kind == k::LBRACE
+            && self.group_kind(a) == Some(k::BLOCK)
+            && self.is(a + 1, b, k::DOT)
+            && self.is(a + 2, b, k::IDENT)
+            && self.is(a + 3, b, k::EQUAL)
+        {
+            self.retag(a, k::INIT_LIST);
+        }
         // A block on its own is a node of its own, the line around it is not.
         if self.c[a].kind == k::LBRACE && self.group_kind(a) == Some(k::BLOCK) && self.skip(a) >= b
         {
@@ -52,7 +61,10 @@ impl Cx<'_> {
 
     /// One statement from `a`: where it ends, and its kind (none: the tokens stay a line).
     pub(super) fn statement(&mut self, a: usize, b: usize, scope: u8) -> Read {
-        let t = self.c[a];
+        // (nothing follows `template<...>` at the end of a macro body)
+        let Some(&t) = self.c.get(a) else {
+            return (a, None);
+        };
         if t.kind == k::SEMI {
             return (a + 1, Some(k::EMPTY_STATEMENT));
         }
@@ -89,7 +101,7 @@ impl Cx<'_> {
             }
             if e >= b || self.c[e - 1].kind == k::SEMI {
                 // (its arguments are read in a function body)
-                if args && scope == BODY && self.c[e - 1].kind == k::SEMI {
+                if args && scope == BODY {
                     self.args(a + 1, k::ARGUMENTS);
                 }
                 return (e, Some(k::MACRO_STATEMENT));

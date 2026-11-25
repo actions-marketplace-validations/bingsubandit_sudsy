@@ -210,6 +210,50 @@ fn tsql_drop_and_create_table_end_at_the_next_statement() {
 }
 
 #[test]
+fn tsql_select_into_and_create_index_end_at_the_next_statement() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "SELECT a\nINTO #f\nFROM t\nJOIN u\nON t.a = u.a\nCREATE INDEX i ON #f (a)\nIF 1 = 1\nDROP TABLE #f\nSELECT 2\n"
+        ),
+        "SELECT a\nINTO #f\nFROM t\nJOIN u\n    ON t.a = u.a\nCREATE INDEX i ON #f (a)\nIF 1 = 1\n    DROP TABLE #f\nSELECT 2\n"
+    );
+}
+
+#[test]
+fn tsql_update_of_a_table_variable_ends_at_the_next_statement() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "UPDATE @M SET a = 1\nFROM @M\nWHERE b = 1\nSELECT (\n1)\n"
+        ),
+        "UPDATE @M SET a = 1\nFROM @M\nWHERE b = 1\nSELECT (\n    1\n)\n"
+    );
+}
+
+#[test]
+fn tsql_cross_apply_takes_a_built_in_table_function() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "SELECT 1 FROM t CROSS APPLY ::fn_x(t .id) AS e JOIN u ON 1 = 1\n"
+        ),
+        "SELECT 1 FROM t CROSS APPLY ::fn_x(t.id) AS e JOIN u ON 1 = 1\n"
+    );
+}
+
+#[test]
+fn tsql_alter_table_ends_at_the_next_statement_and_a_computed_column_is_an_expression() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "ALTER TABLE t ADD c AS (CASE WHEN a = 1 THEN 2 ELSE 3 END)\nCREATE INDEX i ON t (c)\n"
+        ),
+        "ALTER TABLE t ADD c AS (CASE WHEN a = 1 THEN 2 ELSE 3 END)\nCREATE INDEX i ON t (c)\n"
+    );
+}
+
+#[test]
 fn tsql_declare_breaks_before_the_equals_of_a_long_value() {
     assert_eq!(
         formats_as(
@@ -285,5 +329,117 @@ fn drop_function_keeps_its_signature_and_a_reserved_charset_is_a_keyword() {
     assert_eq!(
         formats_as("mysql", "CREATE DATABASE d CHARACTER SET binary;\n"),
         "CREATE DATABASE d CHARACTER SET BINARY;\n"
+    );
+}
+
+#[test]
+fn a_table_variable_keeps_its_case() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "DECLARE @tmpCacheTbl TABLE (a int)\nINSERT INTO @tmpCacheTbl SELECT 1\nSELECT a FROM @tmpCacheTbl\n"
+        ),
+        "DECLARE @tmpCacheTbl TABLE (a int)\nINSERT INTO @tmpCacheTbl SELECT 1\nSELECT a FROM @tmpCacheTbl\n"
+    );
+}
+
+#[test]
+fn mysql_binary_after_a_type_and_array_follow_the_case_of_names() {
+    assert_eq!(
+        formats_as(
+            "mysql",
+            "CREATE TABLE t (a varchar(7) BINARY NULL, b bigint);\n"
+        ),
+        "CREATE TABLE t (a varchar(7) binary NULL, b bigint);\n"
+    );
+    assert_eq!(
+        formats_as(
+            "mysql",
+            "CREATE INDEX i ON t ((CAST(a AS CHAR(255) ARRAY)), b);\nselect ab from t;\n"
+        ),
+        "CREATE INDEX i ON t ((CAST(a AS CHAR(255) array)), b);\nSELECT ab FROM t;\n"
+    );
+}
+
+#[test]
+fn mysql_on_update_of_a_column_does_not_open_an_expression() {
+    assert_eq!(
+        formats_as(
+            "mysql",
+            "CREATE TABLE t (\n    a timestamp ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY `c` (`name`)\n);\n"
+        ),
+        "CREATE TABLE t (\n    a TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n    UNIQUE KEY `c` (`name`)\n);\n"
+    );
+}
+
+#[test]
+fn tsql_xml_methods_keep_their_case_and_cast_is_a_keyword() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "SELECT cast(N'' AS xml).value(1), LEFT(a, 1), count(1) FROM t\n"
+        ),
+        "SELECT\n    CAST(N'' AS xml).value(1),\n    LEFT(a, 1),\n    count(1)\nFROM t\n"
+    );
+}
+
+#[test]
+fn a_setting_value_true_or_false_is_a_literal_of_the_literal_case() {
+    assert_eq!(
+        formats_as("postgres", "SET a = false;\nSELECT NULL, TRUE;\n"),
+        "SET a = false;\nSELECT\n    null,\n    true;\n"
+    );
+}
+
+#[test]
+fn a_referential_action_after_on_update_is_a_keyword_and_a_placeholder_is_kept() {
+    assert_eq!(
+        formats_as(
+            "ansi",
+            "CREATE TABLE t (a int, FOREIGN KEY (a) REFERENCES u (b) ON UPDATE cascade ON DELETE no ACTION);\n"
+        ),
+        "CREATE TABLE t (\n    a int,\n    FOREIGN KEY (a) REFERENCES u (b) ON UPDATE CASCADE ON DELETE NO ACTION\n);\n"
+    );
+    assert_eq!(
+        formats_as(
+            "postgres",
+            "ALTER TABLE ${table} ALTER COLUMN c TYPE VARCHAR(256);\n"
+        ),
+        "ALTER TABLE ${table} ALTER COLUMN c TYPE VARCHAR(256);\n"
+    );
+}
+
+#[test]
+fn an_unnamed_multi_word_parameter_type_is_a_type() {
+    assert_eq!(
+        formats_as(
+            "postgres",
+            "CREATE FUNCTION f(double precision[], integer) RETURNS int AS $$ SELECT 1 $$ LANGUAGE sql;\n"
+        ),
+        "CREATE FUNCTION f(\n    double precision[], integer\n) RETURNS int AS $$ SELECT 1 $$ LANGUAGE sql;\n"
+    );
+}
+
+#[test]
+fn tsql_comments_that_open_the_file_leave_one_blank_line_like_a_batch_start() {
+    let sql = "/* c */\n\n\nSELECT 1;\n";
+    assert_eq!(formats_as("tsql", sql), "/* c */\n\nSELECT 1;\n");
+    assert_eq!(formats_as("ansi", sql), sql);
+}
+
+#[test]
+fn a_multi_line_token_does_not_make_the_line_it_ends_on_long() {
+    let sql = "CREATE FUNCTION convert_ts(s VARCHAR) RETURNS TIMESTAMP AS $$\nBEGIN\n   RETURN select_something_long_here(s);\nEND\n$$ LANGUAGE plpgsql;\n";
+    assert_eq!(formats_as("postgres", sql), sql);
+}
+
+#[test]
+fn blank_lines_inside_a_block_comment_count_like_those_between_statements() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "SELECT 1\n/* a\n\n\nb */\nFROM t;\n\n\n\n/* c\n\n\n\nd */\nSELECT 2;\n"
+        ),
+        "SELECT 1\n/* a\n\nb */\nFROM t;\n\n\n/* c\n\n\nd */\nSELECT 2;\n"
     );
 }

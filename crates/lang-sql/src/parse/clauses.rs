@@ -170,7 +170,7 @@ impl P<'_> {
             return;
         }
         self.select_clause();
-        if self.at("into") && self.d != Dialect::Tsql {
+        if self.at("into") {
             // `SELECT .. INTO [TEMP] tbl`, `INTO @var, @var`
             self.bump_as(k::KEYWORD);
             self.eat_any(&["temp", "temporary", "unlogged", "table"]);
@@ -179,6 +179,8 @@ impl P<'_> {
                 if p.d == Dialect::Mysql && p.is_t(0, T::Word) && !p.is_t(1, T::Dot) {
                     p.bump_as(k::WORD);
                     true
+                } else if p.d == Dialect::Tsql {
+                    p.obj_ref()
                 } else {
                     p.element()
                 }
@@ -455,6 +457,10 @@ impl P<'_> {
             self.var_table();
         } else if self.at_table_function() {
             self.keyword_table_function();
+        } else if self.d == Dialect::Tsql && self.is_t(0, T::Cast) && self.is_t(1, T::Word) {
+            // `::fn_trace_geteventinfo(1)`: a built-in table function.
+            self.bump_as(k::PREFIX);
+            self.expression_call();
         } else if self.starts_name(0) {
             if self.name_call_ahead() {
                 self.expression_call();
@@ -470,8 +476,8 @@ impl P<'_> {
     /// `@t`, `#temp`: a table named by a variable or a temp name.
     pub(super) fn var_table(&mut self) {
         let o = self.mark();
-        // A `#temp` table keeps its case.
-        let kind = if self.text(0).starts_with('#') {
+        // A `#temp` table or a table variable keeps its case.
+        let kind = if self.text(0).starts_with(['#', '@']) {
             k::WORD
         } else {
             k::IDENTIFIER

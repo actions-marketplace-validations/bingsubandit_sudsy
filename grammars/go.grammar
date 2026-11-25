@@ -91,11 +91,11 @@ node ImplicitLengthArrayType #type
 node SliceType #type
 node StructType #type
 node FieldDeclarationList
-node FieldDeclaration
+node FieldDeclaration #field-declaration
 node PointerType #type
 node FunctionType #scope #signature #type
 node InterfaceType #type
-node MethodElem #scope #signature
+node MethodElem #scope #signature = name:FieldIdent parameters:ParameterList result:ResultList? result_type:#type? result_token:TypeIdent?
 node MapType #type
 node ChannelType #type
 node QualifiedType #type
@@ -131,7 +131,7 @@ node ReceiveStatement
 node IncStatement
 node DecStatement
 node AssignmentStatement
-node ShortVarDeclaration
+node ShortVarDeclaration #local-declaration = left:ExpressionList Define right:ExpressionList
 node ExpressionList
 node ParenthesizedExpression
 node CallExpression

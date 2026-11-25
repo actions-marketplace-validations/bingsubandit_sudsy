@@ -2,6 +2,11 @@
 //! every byte maps to one code point, so the text round-trips byte for byte). The text of a source is always
 //! UTF-8; the writers encode the result back in the encoding the file had.
 //!
+//! A single-byte read is a guess: a Shift-JIS, GBK or Big5 file, or a binary one, has bytes that Windows-1252 text
+//! lacks. `decode` refuses control bytes, the five bytes Windows-1252 leaves undefined and a high byte followed by a
+//! byte a lexer reads as syntax (trail bytes of those encodings); `encode_like` refuses a result whose non-ASCII
+//! bytes, or the ASCII byte after one, differ from the original (a trim of 0xA0, a case change).
+//!
 //! concept: none (infrastructure: input encoding)
 
 /// Code points of the bytes 0x80..=0x9F in Windows-1252; the five undefined bytes map to the C1 control of the same value.
@@ -16,6 +21,41 @@ const CP1252: [char; 32] = [
 enum Kind {
     Utf16(bool),
     SingleByte,
+}
+
+/// Bytes that Windows-1252 text does not hold: control bytes but tab, line feed, form feed and carriage return, and
+/// the five undefined ones.
+fn is_foreign(b: u8) -> bool {
+    matches!(b, 0..=8 | 11 | 14..=31 | 0x7f | 0x81 | 0x8d | 0x8f | 0x90 | 0x9d)
+}
+
+/// The ASCII bytes a lexer reads as syntax that are also trail bytes of Shift-JIS, GBK and Big5.
+fn is_trail_syntax(b: u8) -> bool {
+    matches!(
+        b,
+        b'@' | b'[' | b'\\' | b']' | b'^' | b'`' | b'{' | b'|' | b'}' | b'~'
+    )
+}
+
+fn looks_multibyte(bytes: &[u8]) -> bool {
+    bytes.iter().any(|&b| is_foreign(b))
+        || bytes
+            .windows(2)
+            .any(|w| w[0] >= 0x80 && is_trail_syntax(w[1]))
+}
+
+/// Every byte from 0x80 up, with the byte after it when that is a possible trail byte (0x40..=0x7e).
+fn marked_bytes(bytes: &[u8]) -> Vec<(u8, u8)> {
+    (0..bytes.len())
+        .filter(|&i| bytes[i] >= 0x80)
+        .map(|i| {
+            let next = bytes.get(i + 1).copied();
+            (
+                bytes[i],
+                next.filter(|b| (0x40..0x7f).contains(b)).unwrap_or(0),
+            )
+        })
+        .collect()
 }
 
 fn kind_of(bytes: &[u8]) -> Option<Kind> {
@@ -40,6 +80,7 @@ pub fn decode(bytes: &[u8]) -> Option<String> {
                 .collect::<Result<String, _>>()
                 .ok()
         }
+        Kind::SingleByte if looks_multibyte(bytes) => None,
         Kind::SingleByte => Some(
             bytes
                 .iter()
@@ -65,13 +106,16 @@ pub fn encode_like(original: &[u8], text: &str, had_bom: bool) -> Option<Vec<u8>
                     .collect(),
             )
         }
-        Some(Kind::SingleByte) => text
-            .chars()
-            .map(|c| match u32::from(c) {
-                b @ (0..0x80 | 0xa0..0x100) => Some(b as u8),
-                _ => CP1252.iter().position(|&x| x == c).map(|i| 0x80 + i as u8),
-            })
-            .collect(),
+        Some(Kind::SingleByte) => {
+            let out: Option<Vec<u8>> = text
+                .chars()
+                .map(|c| match u32::from(c) {
+                    b @ (0..0x80 | 0xa0..0x100) => Some(b as u8),
+                    _ => CP1252.iter().position(|&x| x == c).map(|i| 0x80 + i as u8),
+                })
+                .collect();
+            out.filter(|out| marked_bytes(out) == marked_bytes(original))
+        }
         None => {
             let mut out = Vec::with_capacity(text.len() + 3);
             if had_bom {
@@ -89,10 +133,45 @@ mod tests {
 
     #[test]
     fn single_byte_text_round_trips() {
-        let bytes: Vec<u8> = (0x80..=0xffu8).chain(*b"\r\nselect").collect();
+        let bytes: Vec<u8> = (0x80..=0xffu8)
+            .filter(|&b| !is_foreign(b))
+            .flat_map(|b| [b, b' '])
+            .chain(*b"\r\nselect")
+            .collect();
         let text = decode(&bytes).unwrap();
-        assert!(text.starts_with("\u{20ac}\u{81}"));
+        assert!(text.starts_with("\u{20ac} \u{201a}"));
         assert_eq!(encode_like(&bytes, &text, false).unwrap(), bytes);
+    }
+
+    #[test]
+    fn bytes_that_text_lacks_are_not_single_byte_text() {
+        // NUL, a control byte, the undefined 0x81, Shift-JIS `\x95\x5c` and `\x83\x5b`.
+        for bad in [
+            &b"a\0b\xe9"[..],
+            b"a\x01\xe9",
+            b"a\x81b",
+            b"\x95\x5c'",
+            b"x\x83[y",
+        ] {
+            assert!(decode(bad).is_none(), "{bad:?}");
+        }
+        assert!(decode(b"caf\xe9_id \xa0 \t\r\n\x0c").is_some());
+    }
+
+    #[test]
+    fn a_result_that_touches_a_non_ascii_byte_is_not_encoded() {
+        let original = b"select \xc0Bc  \xa0";
+        let ok = decode(original).unwrap();
+        assert!(encode_like(original, &ok, false).is_some());
+        // trimmed 0xA0, lower-cased 0xC0, a case change after a high byte
+        for changed in [
+            "select \u{c0}Bc",
+            "select \u{e0}Bc  \u{a0}",
+            "select \u{c0}bc  \u{a0}",
+        ] {
+            assert!(encode_like(original, changed, false).is_none(), "{changed}");
+        }
+        assert!(encode_like(original, "select  \u{c0}Bc\n\u{a0}", false).is_some());
     }
 
     #[test]

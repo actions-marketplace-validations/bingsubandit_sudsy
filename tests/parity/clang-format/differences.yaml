@@ -27,7 +27,7 @@ differences:
   blank-lines-other: "gap  other blank-line cases: after `{` of a block, before an access specifier (EmptyLineBeforeAccessModifier)"
   sort-using-declarations: "gap  `using` declarations that clang-format sorts (SortUsingDeclarations; a reorder of tokens)"
   token-change: "gap  a token that differs between the outputs: a string literal clang-format splits where the comparison cannot join it, or a comment with trailing blanks (the tool's own artifacts; no token of Sudsy is changed or lost)"
-  escaped-newline-align: "gap  the `\\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy pads at line_width and keeps the lines"
+  escaped-newline-align: "gap  the `\\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy lays a body out as code but keeps the line breaks the author wrote inside a statement"
 files:
   llvm: brace-own-line-in-source:27, comment-line-indent-or-join:12, comma-space:11, binary-op-space:8, space-before-paren:8, pointer-align:8, spacing-rare:7, angle-brackets-merged-by-reference:6, braced-list-padding:5, empty-body-braces:5, cast-space:4, trailing-comment-spacing:4, continuation-indent-of-non-wrap-line:3, statement-joined-by-reference:3, blank-lines-other:3, sort-using-declarations:3, brace-own-line-in-reference:2, ternary-colon-space:2, angle-space:1, assignment-space:1, format-off:1, statement-split-by-reference:1
   fmt: spacing-rare:7, brace-own-line-in-reference:3, binary-op-space:3, escaped-newline-align:3, comment-line-indent-or-join:3, trailing-comment-spacing:2, pointer-align:2, angle-brackets-merged-by-reference:2, statement-joined-by-reference:1, ternary-colon-space:1, brace-own-line-in-source:1, statement-split-by-reference:1, assignment-space:1, continuation-indent-of-non-wrap-line:1
@@ -70,7 +70,7 @@ fixes:
   string-macro-space: "[space] row String-Ident"
   blank-lines-other: "[blank] rows, one option each"
   token-change: "none: the pairs are listed (62 `> >` as `>>` are their own gap, 14 are the using sort, the rest are two split strings and two comments); no meaning bug"
-  escaped-newline-align: "align_escaped_newlines per style (Linux: Left) and the macro body wrap of the shared macro layout"
+  escaped-newline-align: "a payload mode of the shared directive layout that drops the source breaks inside a statement (a statement of the body is one flow, then wrapped)"
 sets:
   - "tokens GreaterGreater|Greater in TemplateArguments (e.g. `bool`): +58 files, 58 equal after it"
   - "blank-lines Semi|Rbrace in Block (e.g. `; }`): +33 files, 91 equal after it"
@@ -99,12 +99,12 @@ sets:
   - "spacing Star|Ident in Binary (e.g. `* Token`): +9 files, 491 equal after it"
 unclassified: 0
 ratchet:
-  llvm: 316
-  fmt: 40
+  llvm: 318
+  fmt: 41
   range-v3: 257
-  folly: 1601
-  linux: 1844
-  sqlite: 34
+  folly: 1612
+  linux: 1973
+  sqlite: 50
   google: 2
   chromium: 2
   mozilla: 0

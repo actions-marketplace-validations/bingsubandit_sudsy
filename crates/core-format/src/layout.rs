@@ -500,7 +500,7 @@ impl Layout {
                     && empty_block
                     && (node.descendants_with_tokens())
                         .filter_map(|e| e.into_token())
-                        .any(|t| cx.grammar.is_trivia(t.kind()) && !t.text().trim().is_empty());
+                        .any(|t| cx.grammar.has_tag(t.kind(), "comment"));
                 let split = !commented
                     && rule.is_some_and(|b| {
                         node.parent().is_some_and(|p| b.kinds.contains(&p.kind()))
@@ -563,25 +563,28 @@ impl Layout {
             "items" if kids(cx, node).iter().any(|e| e.as_token().is_some()) => {
                 Ok(doc::line_start(crate::relay::relay(
                     node.text().to_string().trim(),
-                    crate::relay::Align::None,
-                    0,
+                    crate::relay::Place::NONE,
                     None,
                 )))
             }
             "items" => statements(cx, &node.children().collect::<Vec<_>>()),
             "line_start" => {
-                let relay = self.bound("relay", node.kind()).map(|b| {
-                    (
-                        crate::relay::Align::parse(cx.options.str(b.option)),
-                        cx.options.uint(core_config::opt::LINE_WIDTH, 80),
-                    )
+                let relay = self
+                    .bound("relay", node.kind())
+                    .map(|b| crate::relay::Place {
+                        align: crate::relay::Align::parse(cx.options.str(b.option)),
+                        width: cx.options.uint(core_config::opt::LINE_WIDTH, 80),
+                        tab: cx.options.uint(core_config::shared::INDENT_SIZE, 8),
+                    });
+                let tight = self.is_none(cx, "tight", node.kind());
+                // (a directive with parsed parameters, body or condition: laid out as code)
+                let payload = relay.and_then(|align| {
+                    let head = self
+                        .bound("relay", node.kind())
+                        .map_or_else(Vec::new, |b| self.bound_kinds(b.option, "relay_head"));
+                    crate::payload::layout(cx, node, flow, &head, tight, align)
                 });
-                Ok(line_start(
-                    cx,
-                    node,
-                    self.is_none(cx, "tight", node.kind()),
-                    relay,
-                ))
+                payload.unwrap_or_else(|| Ok(line_start(cx, node, tight, relay)))
             }
             other => panic!("layout: unknown shape `{other}`"),
         };
@@ -604,7 +607,7 @@ fn line_start(
     cx: &FormatCtx<'_>,
     node: &SyntaxNode,
     tight_hash: bool,
-    relay: Option<(crate::relay::Align, usize)>,
+    relay: Option<crate::relay::Place>,
 ) -> Doc {
     let style = &cx.comment_style;
     let gap = crate::relay::CommentGap {
@@ -620,7 +623,7 @@ fn line_start(
             _ => std::borrow::Cow::Borrowed(t),
         };
         match relay {
-            Some((align, width)) => crate::relay::relay(&t, align, width, Some(gap)),
+            Some(place) => crate::relay::relay(&t, place, Some(gap)),
             None => t.into_owned(),
         }
     };

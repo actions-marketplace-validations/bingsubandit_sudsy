@@ -149,6 +149,7 @@ pub(crate) fn source_file(db: &dyn Db, file: File, settings: Option<ParseSetting
         had_bom: file.had_bom(db),
         language_version,
         preprocessor_symbols,
+        for_format: false,
     }
 }
 
@@ -167,8 +168,26 @@ pub(crate) fn provider_of(db: &dyn Db, file: File) -> Result<&dyn LanguageProvid
 /// new version) retries.
 #[salsa::tracked(returns(ref))]
 pub fn parse(db: &dyn Db, file: File) -> Result<Parsed, Failure> {
+    parse_as(db, file, false)
+}
+
+/// [`parse`] for formatting: the tree of a provider that adds what only the layout reads; the
+/// plain tree for the others.
+#[salsa::tracked(returns(ref))]
+pub fn parse_for_format(db: &dyn Db, file: File) -> Result<Parsed, Failure> {
+    if provider_of(db, file)?.parses_for_format() {
+        parse_as(db, file, true)
+    } else {
+        parse(db, file).clone()
+    }
+}
+
+fn parse_as(db: &dyn Db, file: File, for_format: bool) -> Result<Parsed, Failure> {
     let provider = provider_of(db, file)?;
-    let source = source_file(db, file, parse_settings(db, file));
+    let source = SourceFile {
+        for_format,
+        ..source_file(db, file, parse_settings(db, file))
+    };
     match provider_api::guard::parse(provider, &source) {
         Ok(result) => Ok(Parsed {
             green: result.tree.green().into_owned(),
@@ -189,12 +208,15 @@ pub fn format(db: &dyn Db, file: File) -> Result<String, Failure> {
 
 fn format_body(db: &dyn Db, file: File) -> Result<String, Failure> {
     let provider = provider_of(db, file)?;
-    let parsed = parse(db, file).as_ref().map_err(Clone::clone)?;
+    let parsed = parse_for_format(db, file).as_ref().map_err(Clone::clone)?;
     let options = options(db, file).as_ref().map_err(Clone::clone)?;
     let directives = crate::rules::layout(db, file)
         .as_ref()
         .map_err(Clone::clone)?;
-    let source = source_file(db, file, parse_settings(db, file));
+    let source = SourceFile {
+        for_format: true,
+        ..source_file(db, file, parse_settings(db, file))
+    };
     let result = ParseResult {
         tree: parsed.root(),
         errors: parsed.errors.clone(),

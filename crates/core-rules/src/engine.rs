@@ -11,7 +11,7 @@ use crate::rule::{BodyContext, FileContext, Rule, RuleContext};
 use crate::suppress::Suppressions;
 use core_semantics::Layers;
 use core_syntax::SyntaxKind;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// A rule that is on for a file: its severity and checked options.
 pub struct ActiveRule<'a> {
@@ -268,6 +268,17 @@ pub fn collect_directory(file: &FileContext<'_>, active: &[ActiveRule<'_>]) -> P
     for (a, _) in directory_rules(active) {
         facts.begin(a.rule.meta().id, file.path);
         a.rule.collect(file, &mut facts);
+    }
+    facts.end();
+    facts
+}
+
+/// Phase 1 of the directory rules for a file of the unit that gives no facts (a generated file):
+/// it counts as read.
+pub fn collect_nothing(path: &Path, active: &[ActiveRule<'_>]) -> ProjectFacts {
+    let mut facts = ProjectFacts::default();
+    for (a, _) in directory_rules(active) {
+        facts.begin(a.rule.meta().id, path);
     }
     facts.end();
     facts

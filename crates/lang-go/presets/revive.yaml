@@ -8,6 +8,7 @@ go:
       package-comment-form: warn
       redefines-builtin-id: warn
       unused-parameter: warn
+      var-naming: warn
 # revive checks the doc comments of non-test files only.
 overrides:
   - files: ["**/*_test.go"]
@@ -17,3 +18,12 @@ overrides:
           doc-first-word: "off"
           missing-doc-comment: "off"
           package-comment-form: "off"
+  # revive leaves the names of tests, examples and benchmarks alone in a test file.
+  - files: ["**/*_test.go"]
+    go:
+      lint:
+        rules:
+          var-naming:
+            level: warn
+            options:
+              ignore_pattern: "^(LastInsertId|kWh|(Example|Test|Benchmark|Fuzz).*)$"

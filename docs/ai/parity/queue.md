@@ -8,10 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| Go | lint revive | 4 | 69.3% | 15.7 | 7471 findings | `var-naming` 10923 | 3 | 20.93 | b11e8bdd |
-| SQL | format sqlfluff | 4 | 78.3% | 6.7 | 56 files | `identifier-case` 103 | 3 | 8.93 | - |
-| SQL | lint sqlfluff | 4 | 79.7% | 5.3 | 6342 findings | `LT02` 11125 | 3 | 7.07 | 1456737e |
-| C / C++ | format clang-format | 4 | 61.7% | 23.3 | 1548 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +2 more | 18 | 5.18 | - |
+| C / C++ | format clang-format | 4 | 64.1% | 20.9 | 1389 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +1 more | 15 | 5.58 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -23,7 +20,7 @@ Blocked on a decision:
 
 Not measured: C / C++ lint clang-tidy (no target, blocked); CMake lint cmake-lint (no target, blocked).
 
-New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format; Go lint revive.
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
@@ -122,7 +119,7 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 
 ## clang-format
 
-Format: unclassified 0 of 2543 differing files (0%).
+Format: unclassified 0 of 2384 differing files (0%).
 1. `brace-own-line-in-source` (361 files): a `{` on its own line in the source that clang-format attaches (a member function body, `extern "C"`, a lambda): the construct is not one of the `brace_wrapping` words Fix: check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque
 2. `pointer-align` (328 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 3. `reference-align` (300 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`
@@ -130,7 +127,7 @@ Format: unclassified 0 of 2543 differing files (0%).
 5. `continuation-indent-of-non-wrap-line` (177 files): indent of a line that is not a wrap point: a label (`put:`) clang-format indents with its block, the body after a loop macro, the items of a macro argument list Fix: ForEachMacros and StatementMacros as lang.yaml word lists read by the shared role pass; labels by the indent_goto_labels rows
 6. `binary-op-space` (172 files): blanks around a binary operator (`a*b`, `x+1`, `0 ... N-1`, in a `#if` condition too): clang-format writes one blank on each side, Sudsy keeps the source Fix: [space] rows for the operators of Binary nodes; directive conditions need the expression parse of `#if` lines
 7. `angle-space` (152 files): blanks next to `<` and `>`: template brackets (`F<int>`, `template <typename...>`) and comparisons in `#if` conditions Fix: [space] rows by node (TemplateArguments, TemplateParameters, Binary); directive conditions as in binary-op-space
-8. `escaped-newline-align` (144 files): the `\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy pads at line_width and keeps the lines Fix: align_escaped_newlines per style (Linux: Left) and the macro body wrap of the shared macro layout
+8. `escaped-newline-align` (144 files): the `\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy lays a body out as code but keeps the line breaks the author wrote inside a statement Fix: a payload mode of the shared directive layout that drops the source breaks inside a statement (a statement of the body is one flow, then wrapped)
 9. `comma-space` (132 files): blanks around `,` in macro parameter lists and in lists inside directives Fix: [space] Comma rows inside Directive nodes
 10. `statement-joined-by-reference` (106 files): the body after a loop-macro head (`for_each_vma(vmi, vma) stmt;`): clang-format keeps it on the line, Sudsy breaks it Fix: treat a MacroStatement from the ForEachMacros list as a loop head
 11. `statement-split-by-reference` (106 files): a statement or declarator part that clang-format puts on its own line (`) ;` after a macro call, attribute macros after `)`), Sudsy joins it Fix: StatementMacros and attribute macros as word lists; no rule needed for the others
@@ -471,24 +468,24 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 
 ## revive
 
-Lint: target 69.3% (32892 of 47485, 14593 missed, measured on b11e8bdd); rules by missed findings:
-1. `var-naming` (10923 missed)
-2. `receiver-naming` (899 missed)
-3. `indent-error-flow` (472 missed)
-4. `empty-block` (320 missed)
-5. `dot-imports` (297 missed)
-6. `exported` (282 missed)
-7. `var-declaration` (254 missed)
-8. `context-as-argument` (237 missed)
-9. `increment-decrement` (189 missed)
-10. `error-strings` (183 missed)
-11. `unexported-return` (141 missed)
-12. `blank-imports` (82 missed)
-13. `error-naming` (79 missed)
-14. `superfluous-else` (75 missed)
-15. `package-comments` (52 missed)
+Lint: target 92.4% (43845 of 47476, 3631 missed, measured on a31131a9); rules by missed findings:
+1. `receiver-naming` (899 missed)
+2. `indent-error-flow` (472 missed)
+3. `empty-block` (320 missed)
+4. `dot-imports` (297 missed)
+5. `exported` (282 missed)
+6. `var-declaration` (251 missed)
+7. `context-as-argument` (237 missed)
+8. `increment-decrement` (189 missed)
+9. `error-strings` (183 missed)
+10. `unexported-return` (138 missed)
+11. `blank-imports` (82 missed)
+12. `error-naming` (79 missed)
+13. `superfluous-else` (75 missed)
+14. `redefines-builtin-id` (34 missed)
+15. `unreachable-code` (22 missed)
 
-8 more rules: 108 missed.
+8 more rules: 71 missed.
 
 ## roslynator
 
@@ -598,7 +595,7 @@ Format: unclassified 0 of 11 differing files (0%).
 
 ## sqlfluff
 
-Format: unclassified 110 of 289 differing files (38%).
+Format: unclassified 106 of 228 differing files (46%).
 1. `identifier-case` (103 files): "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
 2. `if-condition-wrap` (44 files): "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`, a statement after a comment in a body)"
 3. `layout-gap` (24 files): "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
@@ -606,24 +603,24 @@ Format: unclassified 110 of 289 differing files (38%).
 5. `tsql-block-indent` (3 files): "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
 6. `non-utf8-input` (1 files): "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
 7. `parse-gap` (- files): "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
-Lint: target 79.7% (95303 of 119582, 24279 missed, measured on 1456737e); rules by missed findings:
-1. `LT02` (11125 missed) Fix: indentation findings left after `sudsy format` on real-world code (in the formatted files, 15 of 87 hold 80%, almost all T-SQL; `sp_RestoreGene` 2,190, `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies); the rest of the 13,017 sits in the files Sudsy refuses (8) or cannot read (18, not UTF-8) and keeps as written
-2. `CP01` (3033 missed) Fix: 3,033 keyword-case findings left after format; 2,791 are in two T-SQL files our parser refuses (tigertoolbox setup.sql, `CROSS apply ::fn_trace_geteventinfo(t .id)` after a long `case` select list; sqlserver-kit Recover_Deleted_Data_Proc.sql 693:22, `STUFF((select ... for xml path('')), 1, 1, '')` after a `case` with `0x,` hex literals), so the file keeps its case; parse fixes first
-3. `CP02` (1455 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
-4. `CV06` (1452 missed)
-5. `LT01` (1208 missed) Fix: spacing findings left after `sudsy format` (6,332); not yet split by construct
-6. `CP04` (1122 missed)
-7. `RF02` (594 missed)
-8. `LT05` (501 missed) Fix: line-length findings (1,538); not yet split by file
-9. `CV11` (320 missed)
-10. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-11. `LT04` (216 missed)
-12. `LT03` (211 missed)
-13. `RF01` (206 missed)
-14. `LT15` (204 missed)
-15. `LT06` (180 missed)
+Lint: target 88.7% (100738 of 113542, 12804 missed, measured on b11e8bdd); rules by missed findings:
+1. `LT02` (6040 missed) Fix: indentation findings left after `sudsy format` on real-world code (6,040 missed; almost all T-SQL: `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies, comments after a statement in an `IF` / `BEGIN` block); the files Sudsy refuses or cannot read (not UTF-8) keep their layout as written
+2. `CV06` (1452 missed)
+3. `CP02` (1041 missed) Fix: capitalisation findings of identifiers left after `sudsy format` (1,041 missed): sqlfluff's per-file consistency choice of the identifier case differs from ours; not yet split by file
+4. `LT01` (438 missed) Fix: spacing findings left after `sudsy format` (438 missed); not yet split by construct
+5. `RF02` (413 missed)
+6. `CV11` (320 missed)
+7. `PRS` (263 missed) Fix: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
+8. `LT03` (236 missed)
+9. `RF01` (206 missed)
+10. `LT04` (202 missed)
+11. `CP01` (187 missed) Fix: 187 keyword-case findings left after format, in files with a word kind (`SEQUENCE NAME`, mysql `STATE`, `default NULL`) sqlfluff reads another way; not yet split by file
+12. `ST06` (179 missed)
+13. `CV10` (174 missed)
+14. `AL09` (165 missed)
+15. `LT06` (159 missed)
 
-42 more rules: 2189 missed.
+38 more rules: 1329 missed.
 
 ## sqlfluff-fixtures
 

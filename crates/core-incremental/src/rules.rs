@@ -7,7 +7,7 @@ use crate::db::Db;
 use crate::embedded::{EmbeddedRules, lint_embedded, parse_embedded};
 use crate::failure::{Failure, Stage, guarded};
 use crate::inputs::{ExtensionSet, File, WorkspaceRevision};
-use crate::queries::{config, parse, parse_settings, provider_of, selection, source_file};
+use crate::queries::{config, options, parse, parse_settings, provider_of, selection, source_file};
 use core_config::{Depth, FileInput, ResolvedRule};
 use core_format::DirectiveTable;
 use core_rules::engine::{ActiveRule, FileReport, run_rules_with};
@@ -192,8 +192,34 @@ pub fn lint(db: &dyn Db, file: File) -> Result<Linted, Failure> {
     guarded(Stage::Lint, || lint_body(db, file))
 }
 
+/// Is the file generated code that `skip_generated_lint` leaves unreported? A query of its own,
+/// so that an edit of a format option leaves the lint valid.
+#[salsa::tracked]
+pub(crate) fn generated_skipped(db: &dyn Db, file: File) -> bool {
+    let (Ok(provider), Ok(options)) = (provider_of(db, file), options(db, file)) else {
+        return false;
+    };
+    options
+        .resolved
+        .flag(core_config::opt::SKIP_GENERATED_LINT, false)
+        && provider_api::is_generated(
+            provider,
+            &file.path(db).to_string_lossy(),
+            file.text(db),
+            &options.resolved,
+        )
+}
+
 fn lint_body(db: &dyn Db, file: File) -> Result<Linted, Failure> {
     let provider = provider_of(db, file)?;
+    if *generated_skipped(db, file) {
+        return Ok(Linted {
+            diagnostics: Vec::new(),
+            facts: ProjectFacts::default(),
+            parses: true,
+            semantics_unavailable: None,
+        });
+    }
     let parsed = parse(db, file).as_ref().map_err(Clone::clone)?;
     if !parsed.errors.is_empty() {
         return Ok(Linted {

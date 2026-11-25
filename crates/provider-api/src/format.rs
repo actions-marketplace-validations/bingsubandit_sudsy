@@ -63,6 +63,17 @@ pub fn format_file(
     if generated_skipped(provider, file, options) {
         return Ok(file.text.clone());
     }
+    // (the tree for formatting carries what only the layout reads)
+    let owned;
+    let file = if provider.parses_for_format() && !file.for_format {
+        owned = SourceFile {
+            for_format: true,
+            ..file.clone()
+        };
+        &owned
+    } else {
+        file
+    };
     let parsed = crate::guard::parse(provider, file)?;
     format_parsed(provider, file, &parsed, options, directives)
 }
@@ -73,9 +84,18 @@ fn generated_skipped(
     file: &SourceFile,
     options: &ResolvedOptions,
 ) -> bool {
-    if !options.flag(core_config::opt::SKIP_GENERATED, false) {
-        return false;
-    }
+    options.flag(core_config::opt::SKIP_GENERATED, false)
+        && is_generated(provider, &file.id, &file.text, options)
+}
+
+/// Whether the file is generated code by the options `generated_names`, `generated_header_markers`
+/// and `generated_header_skip` (formatting and lint read the same lists).
+pub fn is_generated(
+    provider: &dyn LanguageProvider,
+    id: &str,
+    text: &str,
+    options: &ResolvedOptions,
+) -> bool {
     let spec = core_format::generated::GeneratedSpec {
         names: options.strings(core_config::opt::GENERATED_NAMES).collect(),
         markers: options
@@ -85,7 +105,7 @@ fn generated_skipped(
             .strings(core_config::opt::GENERATED_HEADER_SKIP)
             .collect(),
     };
-    core_format::generated::is_generated(&file.id, &file.text, provider.grammar(), &spec)
+    core_format::generated::is_generated(id, text, provider.grammar(), &spec)
 }
 
 /// [`format_file`] for a tree that is already parsed (the incremental engine memoizes parsing).
@@ -225,6 +245,7 @@ pub(crate) fn rewrite_loop(
             had_bom: file.had_bom,
             language_version: file.language_version.clone(),
             preprocessor_symbols: file.preprocessor_symbols.clone(),
+            for_format: file.for_format,
         };
         let reparsed = provider.parse(&again)?;
         if let Some(e) = reparsed.errors.first() {
@@ -337,6 +358,7 @@ fn format_checked(
                 had_bom: file.had_bom,
                 language_version: file.language_version.clone(),
                 preprocessor_symbols: symbols.to_vec(),
+                for_format: file.for_format,
             };
             let result = provider.parse(&again).map_err(|e| e.to_string())?;
             match result.errors.first() {
@@ -399,6 +421,7 @@ impl Variants for Reparses<'_> {
             had_bom: self.file.had_bom,
             language_version: self.file.language_version.clone(),
             preprocessor_symbols: symbols.to_vec(),
+            for_format: self.file.for_format,
         };
         let tree = self
             .provider

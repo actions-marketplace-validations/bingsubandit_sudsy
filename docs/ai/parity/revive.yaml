@@ -109,5 +109,5 @@ entries:
   useless-break: deferred | not in the default configuration of revive
   useless-fallthrough: deferred | not in the default configuration of revive
   var-declaration: planned
-  var-naming: planned
+  var-naming: rule var-naming
   waitgroup-by-value: deferred | not in the default configuration of revive

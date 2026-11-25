@@ -46,6 +46,8 @@ fn signature(seq: &Seq) -> u64 {
 
 pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -> Doc {
     let mut seq = Seq::build(root, grammar, ROWS.get().space());
+    let batches =
+        crate::parse::Dialect::from_name(options.text(crate::format::DIALECT)).has_batches();
     let flat = options.flag(core_config::opt::BLOCK_INDENT, false);
     let hanging = options.flag(core_config::opt::ALTER_TABLE_INDENT, false);
     if flat || hanging {
@@ -74,7 +76,7 @@ pub fn format(root: &SyntaxNode, grammar: &Grammar, options: &ResolvedOptions) -
         breaks::ctes(&mut seq);
         breaks::select_targets(&mut seq, width);
         breaks::keywords(&mut seq);
-        breaks::blank_lines(&mut seq);
+        breaks::blank_lines(&mut seq, batches);
         if !wrapped && signature(&seq) == before {
             break;
         }

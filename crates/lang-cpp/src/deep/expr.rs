@@ -132,6 +132,17 @@ impl Cx<'_> {
         }
     }
 
+    /// The group at `i` is the `{ }` of `({ statements })`: the parenthesis before it is no call.
+    fn statement_expression(&self, i: usize) -> bool {
+        i >= 1
+            && self.c[i - 1].kind == k::LPAR
+            && (i < 2
+                || !matches!(
+                    self.c[i - 2].kind,
+                    k::IDENT | k::RPAR | k::RSQB | k::GREATER | k::KEYWORD
+                ))
+    }
+
     /// `a, b, c` as the middle of a conditional.
     fn comma_expression(&mut self) {
         let at = self.pos;
@@ -425,7 +436,9 @@ impl Cx<'_> {
             }
             k::LBRACE if self.groups.is_open(at) => {
                 self.mark_init(at);
-                self.retag(at, k::INIT_LIST);
+                if self.group_kind(at) != Some(k::BLOCK) || !self.statement_expression(at) {
+                    self.retag(at, k::INIT_LIST);
+                }
                 self.pos = self.skip(at);
             }
             k::LSQB if self.groups.is_open(at) => self.lambda(),
@@ -596,7 +609,8 @@ impl Cx<'_> {
                 | k::MINUS
                 | k::PLUS
                 | k::TILDE
-                | k::BANG => {}
+                | k::BANG
+                | k::HASH_HASH => {}
                 k::AMP_AMP => {
                     if !lax
                         && !matches!(

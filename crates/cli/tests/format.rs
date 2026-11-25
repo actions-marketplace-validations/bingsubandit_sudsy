@@ -534,3 +534,43 @@ fn a_file_in_another_encoding_is_formatted_and_written_back_in_it() {
     assert_eq!(wide[..4], [0xff, 0xfe, b'{', 0]);
     assert_eq!(wide.len(), 2 * ("{ \"a\": 1 }\n".len() + 1));
 }
+
+#[test]
+fn single_byte_reads_that_could_be_other_text_are_refused_or_kept() {
+    let t = tempfile::tempdir().unwrap();
+    // Shift-JIS `\x95\x5c` in a string, NUL bytes, a control byte: refused, the file stays.
+    let refused: [(&str, &[u8]); 3] = [
+        ("sjis.json", b"{\"a\":   \"\x95\x5c\"}"),
+        ("nul.json", b"{\"a\":   \"x\0\"}"),
+        ("ctl.json", b"{\"a\":   \"x\x01\"}"),
+    ];
+    for (name, bytes) in refused {
+        fs::write(t.path().join(name), bytes).unwrap();
+        let out = sudsy(t.path(), &[name]);
+        assert_ne!(out.status.code(), Some(0), "{name}");
+        assert_eq!(fs::read(t.path().join(name)).unwrap(), bytes, "{name}");
+    }
+    // A UTF-8 file with a NUL byte is refused by every command.
+    fs::write(t.path().join("nul.sql"), b"select 1 /* \0 */;\n").unwrap();
+    for command in ["format", "lint", "fix"] {
+        let out = Command::new(env!("CARGO_BIN_EXE_sudsy"))
+            .args([command, "nul.sql"])
+            .current_dir(t.path())
+            .output()
+            .unwrap();
+        assert_eq!(out.status.code(), Some(2), "{command}");
+        assert!(
+            String::from_utf8_lossy(&out.stderr).contains("NUL"),
+            "{command}"
+        );
+    }
+    // A no-break space that formatting would trim is a byte of the file: it stays.
+    fs::write(t.path().join("nbsp.sql"), b"select 1 \xa0\n").unwrap();
+    let out = sudsy(t.path(), &["nbsp.sql"]);
+    let kept = fs::read(t.path().join("nbsp.sql")).unwrap();
+    assert!(
+        kept.contains(&0xa0),
+        "{kept:?} {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+}

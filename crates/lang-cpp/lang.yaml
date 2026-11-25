@@ -64,6 +64,7 @@ options:
         binary_node: [Binary]
         binary_clear: [Assignment, ReturnStatement, Binary, Ternary, Index, Unary, Arguments]
         binary_cast: [Rpar]
+        binary_spaced: [Amp]
   - derive_pointer_alignment:
       default: false
       doc: "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."
@@ -230,4 +231,5 @@ options:
       doc: "The backslashes of a multi-line macro: aligned at `line_width` (`right`), one blank after the longest line (`left`) or one blank after each line."
       kinds:
         relay: [Directive]
+        relay_head: [ParenGroup]
 presets: [google, chromium, mozilla, webkit, gnu, microsoft]

@@ -330,23 +330,35 @@ impl P<'_> {
                     self.error(self.pos, "unmatched )");
                     self.bump();
                 }
+                // `col AS (expr)`: a computed column.
+                T::LParen
+                    if w.table_stmt
+                        && self.d == super::Dialect::Tsql
+                        && self.prev_text_is("as") =>
+                {
+                    self.bracketed(|p| {
+                        p.expression();
+                    });
+                    w.after_name = false;
+                }
                 T::LParen => {
                     let columns = (w.after_name && w.create_table && depth == 0)
                         || (w.type_stmt && depth == 0 && self.prev_text_is("table"));
                     let params = w.after_name && (w.function_name || w.prepare);
                     let signature = w.after_name && w.function_name && !w.procedure;
                     let m = self.mark();
+                    let index_columns = w.after_name && w.index_stmt && depth == 0;
                     self.generic_bracket(
                         depth,
                         columns,
                         params,
                         w.create_table || w.table_stmt,
-                        w.after_name && w.index_stmt && depth == 0,
+                        index_columns,
                     );
                     if signature {
                         self.close(k::FUNCTION_CONTENTS, m);
                     }
-                    w.options |= columns;
+                    w.options |= columns || index_columns;
                     w.expect_name = false;
                     w.after_name = false;
                     w.item_start = false;
@@ -382,14 +394,26 @@ impl P<'_> {
                     break;
                 }
                 // T-SQL has no terminator: the next statement's first word ends a `DROP` after its names and a
-                // `CREATE TABLE` after its columns (`WITH` may still follow).
+                // `CREATE TABLE` after its columns and a `CREATE INDEX` after its column list (`WITH` may still follow).
                 T::Word
                     if depth == 0
                         && self.d == super::Dialect::Tsql
                         && self.pos > first
-                        && (w.drop || (w.create_table && w.options))
-                        && !self.at_any(&["if", "exists", "with"])
+                        && (w.drop || ((w.create_table || w.index_stmt) && w.options))
+                        && !self.at_any(&["exists", "with"])
+                        && (!self.at("if") || w.index_stmt)
                         && self.at_statement_start() =>
+                {
+                    break;
+                }
+                // An `ALTER TABLE` ends where one of these statements starts.
+                T::Word
+                    if depth == 0
+                        && self.d == super::Dialect::Tsql
+                        && self.pos > first
+                        && w.table_stmt
+                        && !w.create_table
+                        && self.at_list("tsql_table_ends") =>
                 {
                     break;
                 }
@@ -412,6 +436,13 @@ impl P<'_> {
                         && !self.at("end") =>
                 {
                     break;
+                }
+                // A T-SQL temporary table (`#t`, `##t`) is a name that keeps its case.
+                T::Var if self.text(0).starts_with('#') => {
+                    self.generic_name_as(false, true);
+                    w.name_list = true;
+                    w.expect_name = false;
+                    w.after_name = true;
                 }
                 T::Word | T::Quoted => {
                     // The `ON table (columns)` of a `CREATE INDEX` hangs under the statement.
@@ -736,8 +767,8 @@ impl P<'_> {
             && (w.value || self.is_op(1, "="))
         {
             let kind = match (self.d == super::Dialect::Tsql, w.value) {
+                (_, _) if matches!(up.as_str(), "TRUE" | "FALSE") => k::WORD_LITERAL,
                 (false, _) => k::WORD,
-                (true, _) if matches!(up.as_str(), "TRUE" | "FALSE") => k::WORD_LITERAL,
                 (true, true) if up.starts_with(|c: char| c.is_ascii_digit()) => k::WORD,
                 (true, true) if self.keyword_like(0) => k::KEYWORD,
                 (true, true) => k::IDENTIFIER,
@@ -781,7 +812,11 @@ impl P<'_> {
             && !(w.index && self.is_t(1, T::LParen))
         {
             w.item_start = false;
-            if w.params && word && super::types::is_type_word(&up) && !self.is_t(1, T::Word) {
+            if w.params
+                && word
+                && super::types::is_type_word(&up)
+                && (!self.is_t(1, T::Word) || super::types::continues(&up, self.text(1)))
+            {
                 self.type_name();
                 return;
             }
@@ -835,7 +870,9 @@ impl P<'_> {
             && !w.columns
             && !w.params
             && super::types::is_type_word(&up)
-            && (self.is(1, "as") || self.is_t(1, T::LSquare) && self.is_t(2, T::RSquare))
+            && (self.is(1, "as")
+                || self.is_t(1, T::LSquare) && self.is_t(2, T::RSquare)
+                || super::types::continues(&up, self.text(1)))
         {
             self.type_name();
             return;
@@ -1173,6 +1210,15 @@ impl P<'_> {
             {
                 self.chain(false);
                 w.expr = false;
+            }
+            // `ON UPDATE CURRENT_TIMESTAMP` of a column: a value, not the start of an expression.
+            if (w.columns || w.create_table)
+                && up == "UPDATE"
+                && self.text_back_is(2, "on")
+                && self.at_any(&["current_timestamp", "localtime", "localtimestamp", "now"])
+            {
+                w.expr = false;
+                self.chain(false);
             }
         } else {
             w.expect_name = false;

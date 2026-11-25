@@ -342,12 +342,17 @@ pub fn ctes(seq: &mut Seq) {
 
 /// The most line breaks (one more than blank lines) the gap before block `i` may have, by what
 /// sqlfluff's LT15 calls its scope: inside a statement 1 blank line, between statements 2 and
-/// between batches (after a T-SQL `GO`) 1. Leading and trailing comments of a statement lie
+/// between batches (after a T-SQL `GO`, and after the comments that open the file when the
+/// dialect has batches) 1. Leading and trailing comments of a statement lie
 /// between statements.
-fn max_breaks(seq: &Seq, i: usize) -> u32 {
+fn max_breaks(seq: &Seq, i: usize, batches: bool) -> u32 {
     let common = seq.common_node(i - 1, i);
     let alone = seq.points[i - 1].newlines > 0 || i == 1;
     if alone && seq.blocks[i - 1].text.eq_ignore_ascii_case("go") {
+        return 2;
+    }
+    // The comments that open the first batch.
+    if batches && (0..i).all(|j| seq.is_comment(j)) {
         return 2;
     }
     let mut n = common;
@@ -365,12 +370,18 @@ fn max_breaks(seq: &Seq, i: usize) -> u32 {
 
 /// No blank lines at the start of the file; at most one inside a statement and two between
 /// statements (LT13, LT15).
-pub fn blank_lines(seq: &mut Seq) {
+pub fn blank_lines(seq: &mut Seq, batches: bool) {
     seq.points[0].newlines = 0;
     seq.points[0].ws = Cow::Borrowed("");
     for i in 1..seq.blocks.len() {
-        let max = max_breaks(seq, i);
+        let max = max_breaks(seq, i, batches);
         let p = &mut seq.points[i];
         p.newlines = p.newlines.min(max);
+        // sqlfluff counts the line breaks inside a block comment too.
+        if seq.blocks[i].kind == k::BLOCK_COMMENT
+            && let Some(text) = core_format::context::cut_blank_runs(&seq.blocks[i].text, max - 1)
+        {
+            seq.blocks[i].text = text;
+        }
     }
 }
