@@ -280,3 +280,89 @@ fn a_define_call_leaves_classes_provable_but_a_class_alias_does_not() {
         "class_alias of unknown names may declare the class"
     );
 }
+
+#[test]
+fn an_alias_name_that_is_not_a_plain_literal_makes_the_project_blind() {
+    for dynamic in [
+        "class_alias(A::class, \"App\\\\$name\");",
+        "class_alias(A::class, 'App\\\\' . 'Old');",
+        "class_alias(A::class, $to::class);",
+        "class_alias(A::class, self::class);",
+    ] {
+        let mut w = World::new(PHP_ON);
+        std::fs::write(w.dir.path().join("composer.json"), COMPOSER).unwrap();
+        let a = w.file(
+            "src/A.php",
+            "<?php\nnamespace App;\nclass A { function f(Missing $x) {} }\n",
+        );
+        let d = w.file("src/D.php", &format!("<?php\nnamespace App;\n{dynamic}\n"));
+        open(&mut w, &[a, d]);
+        assert_eq!(w.findings(a), [], "{dynamic}");
+    }
+}
+
+#[test]
+fn a_protobuf_message_named_like_a_keyword_of_another_case_is_a_type() {
+    let mut w = World::new(ON);
+    w.manifest();
+    let a = w.file(
+        "a.proto",
+        &format!("{HEAD}import \"b.proto\";\nmessage A {{ String s = 1; }}\n"),
+    );
+    let b = w.file(
+        "b.proto",
+        &format!("{HEAD}message String {{}}\nmessage Double {{}}\n"),
+    );
+    open(&mut w, &[a, b]);
+    assert_eq!(w.findings(a), [], "the import is used by String");
+}
+
+#[test]
+fn a_class_the_file_tests_for_is_not_reported() {
+    let mut w = World::new(PHP_ON);
+    std::fs::write(w.dir.path().join("composer.json"), COMPOSER).unwrap();
+    let a = w.file(
+        "src/A.php",
+        "<?php\nnamespace App;\nclass A { function f() {\n    if (class_exists(Foo::class)) { new Foo(); }\n    if (interface_exists('App\\\\Bar')) { new Bar(); }\n    new Plain();\n} }\n",
+    );
+    open(&mut w, &[a]);
+    let lines: Vec<usize> = w.findings(a).into_iter().map(|(l, _)| l).collect();
+    assert_eq!(lines, [6], "only the unguarded name");
+}
+
+#[test]
+fn a_file_the_run_left_out_or_a_run_on_a_subfolder_proves_nothing_absent() {
+    let mut w = World::new(PHP_ON);
+    std::fs::write(w.dir.path().join("composer.json"), COMPOSER).unwrap();
+    let a = w.file(
+        "src/A.php",
+        "<?php\nnamespace App;\nclass A { function f(Missing $x) {} }\n",
+    );
+    open(&mut w, &[a]);
+    assert_eq!(w.findings(a).len(), 1, "everything under the root was read");
+    // On disk, but not in the run (an ignored file), off its autoload path.
+    let mut w2 = World::new(PHP_ON);
+    std::fs::write(w2.dir.path().join("composer.json"), COMPOSER).unwrap();
+    let a2 = w2.file(
+        "src/A.php",
+        "<?php\nnamespace App;\nclass A { function f(Missing $x) {} }\n",
+    );
+    std::fs::create_dir_all(w2.dir.path().join("generated")).unwrap();
+    std::fs::write(
+        w2.dir.path().join("generated/Any.php"),
+        "<?php\nnamespace App;\nclass Missing {}\n",
+    )
+    .unwrap();
+    open(&mut w2, &[a2]);
+    assert_eq!(w2.findings(a2), [], "a file left out may declare it");
+    // A run on a subfolder does not read every file of the project.
+    let mut w3 = World::new(PHP_ON);
+    std::fs::write(w3.dir.path().join("composer.json"), COMPOSER).unwrap();
+    let a3 = w3.file(
+        "src/A.php",
+        "<?php\nnamespace App;\nclass A { function f(Missing $x) {} }\n",
+    );
+    let sub = [w3.dir.path().join("src")];
+    open_projects(&mut w3.db, &[a3], &sub);
+    assert_eq!(w3.findings(a3), [], "a subfolder run is not complete");
+}

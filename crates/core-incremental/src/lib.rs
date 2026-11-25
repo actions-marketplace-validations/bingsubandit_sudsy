@@ -34,7 +34,9 @@ pub use inputs::{
     ConfigFile, ExtensionSet, File, Project, ProjectEntry, Projects, WorkspaceRevision,
 };
 pub use module::{Siblings, Unit, directory_scope, module_diagnostics, module_facts};
-pub use projects::{is_manifest, manifest_changed, manifests, open_projects, reads_index};
+pub use projects::{
+    is_manifest, is_source, manifest_changed, manifests, open_projects, reads_index, source_globs,
+};
 pub use queries::{
     FileOptions, Parsed, Selection, config, format, options, parse, parse_settings, selection,
 };

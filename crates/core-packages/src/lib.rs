@@ -40,6 +40,12 @@ pub trait Locator: Send + Sync {
     /// Files that declare names without a name-to-path rule (autoloaded function files, class
     /// maps). Read when a name is not found elsewhere.
     fn autoloaded(&self) -> Vec<PathBuf>;
+
+    /// The folder the installed dependencies live in: its files are read on demand, so a project
+    /// does not count them as its own.
+    fn dependency_dir(&self) -> Option<PathBuf> {
+        None
+    }
 }
 
 /// The locator of the package system `system` (the `packages` fact of a language's rows) for the

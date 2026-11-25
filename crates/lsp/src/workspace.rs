@@ -5,7 +5,8 @@
 use crate::position::apply_change;
 use core_config::{ConfigError, EditorConfig};
 use core_incremental::{
-    Database, Db, File, Siblings, is_manifest, manifest_changed, open_projects, reads_index,
+    Database, Db, File, Siblings, is_manifest, is_source, manifest_changed, manifests,
+    open_projects, reads_index, source_globs,
 };
 use languages::{Project, installed::Checker};
 use lsp_types::TextDocumentContentChangeEvent;
@@ -43,6 +44,8 @@ pub struct Workspace {
     index_open: bool,
     /// The files that make up the projects changed since the last `refresh_index`.
     index_dirty: bool,
+    /// Source files that changed on disk while not open, applied by the next `refresh_index`.
+    changed_sources: Vec<PathBuf>,
 }
 
 impl Workspace {
@@ -61,6 +64,7 @@ impl Workspace {
             siblings: Arc::default(),
             index_open: false,
             index_dirty: false,
+            changed_sources: Vec::new(),
         };
         workspace.db.prestart();
         let error = workspace.reload_config();
@@ -257,6 +261,10 @@ impl Workspace {
             self.index_open = true;
         }
         self.index_dirty = false;
+        if !self.changed_sources.is_empty() {
+            self.reread_sources();
+            manifest_changed(&mut self.db);
+        }
         self.load_project();
         let mut files: Vec<File> = (self.docs.values())
             .filter(|d| !d.skipped)
@@ -284,6 +292,62 @@ impl Workspace {
             self.index_dirty = true;
         }
         true
+    }
+
+    /// A watched file changed: when it is a source file of a language with a package system that
+    /// is not open, it is read again at the next `refresh_index` (created, changed or deleted by
+    /// something else: a checkout, a generator). True when it was one.
+    pub fn source_changed(&mut self, path: &Path) -> bool {
+        if !self.index_open || self.docs.contains_key(path) || !is_source(&self.db, path) {
+            return false;
+        }
+        self.changed_sources.push(path.to_path_buf());
+        self.index_dirty = true;
+        true
+    }
+
+    /// Globs of the manifests of the languages with a package system.
+    pub fn manifest_globs(&self) -> Vec<String> {
+        manifests(&self.db)
+            .into_iter()
+            .map(|m| format!("**/{m}"))
+            .collect()
+    }
+
+    /// File name globs of the sources `source_changed` takes.
+    pub fn source_globs(&self) -> Vec<String> {
+        source_globs(&self.db)
+    }
+
+    /// The background files after the changes on disk: a walk finds created and deleted files,
+    /// the changed ones are read again, the rest keep their inputs.
+    fn reread_sources(&mut self) {
+        let changed = std::mem::take(&mut self.changed_sources);
+        let (Some(old), Some(project)) = (self.background.take(), self.project.clone()) else {
+            return;
+        };
+        let paths =
+            core_workspace::discover_files(std::slice::from_ref(&self.root), &project.filter())
+                .unwrap_or_default();
+        let mut checker = Checker::new(self.db.providers());
+        let mut background = HashMap::new();
+        for path in paths {
+            if !self.db.supports(&path) || self.docs.contains_key(&path) {
+                continue;
+            }
+            let kept = old.get(&path).copied().filter(|_| !changed.contains(&path));
+            let file = kept.or_else(|| {
+                checker
+                    .missing(&path)
+                    .is_none()
+                    .then(|| self.read(&path))
+                    .flatten()
+            });
+            if let Some(file) = file {
+                background.insert(path, file);
+            }
+        }
+        self.background = Some(Arc::new(background));
     }
 
     /// Does the config ask for `analysis: deep`?

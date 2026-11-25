@@ -12,7 +12,7 @@
 //! first segment that stands for the current namespace), `lexical` (a name is looked up in every
 //! enclosing scope, not in the namespace only), `fold KIND...` and `fallback KIND...` (name kinds:
 //! `type function constant member`), `constructor NAME`, `sigil CHARS`, `dynamic-members NAME...`,
-//! `declaring-calls NAME[=KIND[:ARG]]...` (calls that declare names at run time; ARG: the argument that names it), `builtin-types NAME...` (type names with no declaration), `promotion WORD...` (modifiers that make a constructor parameter a
+//! `declaring-calls NAME[=KIND[:ARG]]...` (calls that declare names at run time; ARG: the argument that names it), `existence-guards NAME...` (calls whose first argument names a type: a use of that name in the file is not reported), `builtin-types NAME...` (type names with no declaration), `promotion WORD...` (modifiers that make a constructor parameter a
 //! property), `use-kinds WORD=KIND...`, `packages SYSTEM MANIFEST` (the package system that finds the files of names or imports: `composer`, `import-paths`; the manifest names the file in the project's root folder).
 //!
 //! Roles (keys they take): `namespace` (`name`, flag `file`: the whole file), `type KIND`
@@ -82,6 +82,8 @@ pub struct Facts {
     pub builtin: Vec<String>,
     /// Calls that declare names at run time, with the kind of name each declares (all when none).
     pub declaring_calls: Vec<DeclaringCall>,
+    /// Calls whose first argument names a type that the code only uses where it exists.
+    pub guards: Vec<String>,
     pub promotion: Vec<String>,
     /// The package system of the language (see `core_packages::open`); empty for none.
     pub packages: String,
@@ -310,8 +312,9 @@ impl Table {
                     });
                 }
             }
+            "existence-guards" => f.guards = words.iter().map(|w| w.to_ascii_lowercase()).collect(),
             "promotion" => f.promotion = list(),
-            "builtin-types" => f.builtin = words.iter().map(|w| w.to_ascii_lowercase()).collect(),
+            "builtin-types" => f.builtin = list(),
             "packages" => {
                 f.packages = one()?;
                 f.manifest = words

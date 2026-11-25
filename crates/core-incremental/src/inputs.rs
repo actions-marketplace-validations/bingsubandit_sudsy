@@ -100,6 +100,9 @@ pub struct ProjectEntry {
     pub provider: usize,
     pub root: PathBuf,
     pub project: Project,
+    /// A file of the language under the root (not in the dependencies folder) that the run left
+    /// out: the project is not complete.
+    pub left_out: bool,
 }
 
 /// The projects of a run or a workspace, empty until a caller that runs index rules opens them

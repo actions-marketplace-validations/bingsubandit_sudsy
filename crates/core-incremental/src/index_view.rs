@@ -75,28 +75,45 @@ impl IndexView for FileIndex<'_> {
 /// The methods of the project's files by the qualified type they name.
 #[salsa::tracked(returns(ref))]
 fn method_targets(db: &dyn Db, project: Project) -> HashMap<Box<str>, Vec<Referrer>> {
-    let index = Index::new(db, project);
     let mut targets: HashMap<Box<str>, Vec<Referrer>> = HashMap::new();
     for &file in project.files(db) {
-        let Some(symbols) = file_symbols(db, file) else {
-            continue;
-        };
-        if table_of(db, file).is_none() {
-            continue;
+        for (target, referrer) in file_method_targets(db, project, file) {
+            targets
+                .entry(target.clone())
+                .or_default()
+                .push(referrer.clone());
         }
-        for ty in &symbols.types {
-            for member in ty.members.iter().filter(|m| m.kind == MemberKind::Method) {
-                for name in &member.refs {
-                    if let Answer::Known(target) = index.resolve(file, name) {
-                        targets.entry(target).or_default().push(Referrer {
+    }
+    targets
+}
+
+/// The types the methods of one file name, resolved: an edit of another file that leaves these
+/// as they are does not build the project's table again.
+#[salsa::tracked(returns(ref))]
+fn file_method_targets(db: &dyn Db, project: Project, file: File) -> Vec<(Box<str>, Referrer)> {
+    let index = Index::new(db, project);
+    let mut out = Vec::new();
+    let Some(symbols) = file_symbols(db, file) else {
+        return out;
+    };
+    if table_of(db, file).is_none() {
+        return out;
+    }
+    for ty in &symbols.types {
+        for member in ty.members.iter().filter(|m| m.kind == MemberKind::Method) {
+            for name in &member.refs {
+                if let Answer::Known(target) = index.resolve(file, name) {
+                    out.push((
+                        target,
+                        Referrer {
                             path: file.path(db).clone(),
                             owner: ty.name.clone(),
                             method: member.name.clone(),
-                        });
-                    }
+                        },
+                    ));
                 }
             }
         }
     }
-    targets
+    out
 }

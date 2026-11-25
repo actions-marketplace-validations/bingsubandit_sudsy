@@ -44,11 +44,18 @@ fn run(
         frames: vec![Frame::default()],
         types: Vec::new(),
         depth: 0,
+        guarded: Vec::new(),
     };
     ex.frames[0].ns = ex.file_namespace(root);
     ex.walk(root);
     ex.out.declaring_calls.sort();
     ex.out.declaring_calls.dedup();
+    if let Some(sites) = &mut ex.sites {
+        let (guarded, facts) = (&ex.guarded, ex.facts);
+        sites.uses.retain(|u| {
+            !(u.name.iter()).any(|n| guarded.iter().any(|g| **g == *facts.key(NameKind::Type, n)))
+        });
+    }
     (ex.out, ex.sites)
 }
 
@@ -71,6 +78,8 @@ struct Extractor<'a> {
     types: Vec<(SyntaxNode, String)>,
     /// How many enclosing nodes make a declaration conditional.
     depth: u32,
+    /// The case-folded names an existence guard of the file names.
+    guarded: Vec<Box<str>>,
 }
 
 /// The text of the first own child (token, or node as its code text) of one of `kinds`, after the
@@ -141,7 +150,9 @@ impl Extractor<'_> {
                             Role::FileImport => self.file_import(&node, row),
                             _ => {}
                         }
-                    } else if self.table.is_call(kind) && !self.facts.declaring_calls.is_empty() {
+                    } else if self.table.is_call(kind)
+                        && !(self.facts.declaring_calls.is_empty() && self.facts.guards.is_empty())
+                    {
                         self.declaring_call(&node);
                     }
                     if self.table.makes_conditional(kind) {
@@ -277,8 +288,14 @@ impl Extractor<'_> {
                 _ => {}
             }
         }
-        out.retain(|(w, _)| !(self.facts.builtin.iter()).any(|b| b.eq_ignore_ascii_case(w)));
+        out.retain(|(w, _)| !self.is_builtin(w));
         out
+    }
+
+    /// A keyword type name of the language (compared as the language compares type names).
+    fn is_builtin(&self, name: &str) -> bool {
+        let key = self.facts.key(NameKind::Type, name);
+        (self.facts.builtin.iter()).any(|b| self.facts.key(NameKind::Type, b) == key)
     }
 
     /// Where a node is written, without the comments and blank space around it.
@@ -603,6 +620,13 @@ impl Extractor<'_> {
             .strip_prefix(self.facts.absolute.as_str())
             .unwrap_or(&text);
         let text = text.to_ascii_lowercase();
+        if self.facts.guards.contains(&text) {
+            if let Some(name) = self.declared_name(node, 1) {
+                let key = self.facts.key(NameKind::Type, &name).into_owned();
+                self.guarded.push(key.into());
+            }
+            return;
+        }
         let Some(call) = self.facts.declaring_calls.iter().find(|c| c.name == text) else {
             return;
         };
@@ -630,20 +654,29 @@ impl Extractor<'_> {
         let SyntaxElement::Node(args) = self.grammar.slot(call, "arguments")? else {
             return None;
         };
-        let arg = code_text(&args.children().nth(n - 1)?);
-        let arg = arg.trim();
-        let quoted = ['\'', '"']
-            .iter()
-            .find_map(|q| arg.strip_prefix(*q)?.strip_suffix(*q));
-        if let Some(text) = quoted {
-            let name = text.replace("\\\\", "\\");
-            return Some(
-                name.trim_start_matches(self.facts.absolute.as_str())
-                    .to_string(),
-            );
+        let arg = args.children().nth(n - 1)?;
+        let value = arg.children().next()?;
+        // A string literal without interpolation: one token with a string row of the grammar.
+        let mut parts = value.children_with_tokens();
+        if let (Some(SyntaxElement::Token(t)), None) = (parts.next(), parts.next())
+            && self.grammar.string_rows(t.kind()).next().is_some()
+        {
+            let text = self.grammar.string_value(t.kind(), t.text())?;
+            let name = text.trim_start_matches(self.facts.absolute.as_str());
+            return (!name.is_empty()).then(|| name.to_string());
         }
-        let lower = arg.to_ascii_lowercase();
-        let written = arg.get(..lower.strip_suffix("::class")?.len())?;
+        // `Name::class`: only a written name, not a variable or an expression.
+        let text = code_text(&value);
+        let lower = text.to_ascii_lowercase();
+        let written = text.get(..lower.strip_suffix("::class")?.len())?;
+        let plain = written
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_' || self.facts.separator.contains(c))
+            && !written.is_empty();
+        let named = plain && !self.is_builtin(written);
+        if !named {
+            return None;
+        }
         self.name(written, NameKind::Type)
             .into_iter()
             .next()

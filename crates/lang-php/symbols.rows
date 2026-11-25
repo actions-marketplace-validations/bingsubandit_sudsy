@@ -10,6 +10,7 @@ fallback function constant
 constructor __construct
 sigil $
 dynamic-members __call __callstatic __get __set
+existence-guards class_exists interface_exists trait_exists enum_exists
 declaring-calls define=constant class_alias=type:2
 promotion public protected private readonly
 use-kinds function=function const=constant

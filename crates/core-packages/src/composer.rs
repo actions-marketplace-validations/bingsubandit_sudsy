@@ -29,6 +29,7 @@ pub struct Composer {
     psr0: Vec<Prefix>,
     classmap: Vec<PathBuf>,
     files: Vec<PathBuf>,
+    vendor: PathBuf,
     expanded: OnceLock<Vec<PathBuf>>,
 }
 
@@ -68,6 +69,7 @@ impl Composer {
                 c.add_section(p, "autoload", &base, false);
             }
         }
+        c.vendor = vendor;
         c
     }
 
@@ -135,6 +137,10 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
 }
 
 impl Locator for Composer {
+    fn dependency_dir(&self) -> Option<PathBuf> {
+        (!self.vendor.as_os_str().is_empty()).then(|| self.vendor.clone())
+    }
+
     fn type_files(&self, name: &str) -> Located {
         let name = name.trim_start_matches('\\');
         let mut matched = false;

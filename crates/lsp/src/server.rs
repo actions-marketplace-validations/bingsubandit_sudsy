@@ -379,6 +379,7 @@ impl Server {
                 let mut manifests = false;
                 for path in p.changes.iter().filter_map(|c| path_of(&c.uri)) {
                     manifests |= self.workspace.manifest_changed(&path);
+                    manifests |= self.workspace.source_changed(&path);
                 }
                 if manifests {
                     self.edited_at = Some(Instant::now());
@@ -417,15 +418,13 @@ impl Server {
             kind: Some(WatchKind::all()),
         };
         let options = DidChangeWatchedFilesRegistrationOptions {
-            watchers: [
-                "**/*.yaml",
-                "**/*.yml",
-                "**/.editorconfig",
-                "**/*.wasm",
-                "**/composer.json",
-            ]
-            .map(watcher)
-            .into(),
+            watchers: ["**/*.yaml", "**/*.yml", "**/.editorconfig", "**/*.wasm"]
+                .into_iter()
+                .map(String::from)
+                .chain(self.workspace.manifest_globs())
+                .chain(self.workspace.source_globs())
+                .map(|g| watcher(&g))
+                .collect(),
         };
         self.call::<RegisterCapability>(RegistrationParams {
             registrations: vec![Registration {

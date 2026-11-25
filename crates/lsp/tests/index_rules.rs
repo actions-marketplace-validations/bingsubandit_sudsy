@@ -71,3 +71,22 @@ fn with_no_index_rule_active_no_project_is_opened() {
         "a rule that reads the index is active now"
     );
 }
+
+#[test]
+fn a_source_file_changed_on_disk_while_closed_is_read_again() {
+    let t = tempfile::tempdir().unwrap();
+    std::fs::write(t.path().join("sudsy.yaml"), ON).unwrap();
+    std::fs::write(t.path().join("buf.yaml"), "version: v2\n").unwrap();
+    std::fs::write(t.path().join("c.proto"), format!("{HEAD}message C {{}}\n")).unwrap();
+    let mut client = start(t.path());
+    let a = client.open(
+        "a.proto",
+        "proto",
+        &format!("{HEAD}import \"c.proto\";\nmessage A {{ C c = 1; }}\n"),
+    );
+    assert_eq!(unused(&mut client, &a), 0);
+    std::fs::write(t.path().join("c.proto"), format!("{HEAD}message D {{}}\n")).unwrap();
+    client.file_changed("c.proto");
+    assert_eq!(unused(&mut client, &a), 1, "c.proto no longer declares C");
+    client.shutdown();
+}
