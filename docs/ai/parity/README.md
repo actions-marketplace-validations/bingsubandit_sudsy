@@ -60,7 +60,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | ruff | 94.6% | `7514c1f3` | 980 | 134 | 1 | 687 | 0 | 18 | 140 | 687 |
 | shellcheck | 86.6% | `7514c1f3` | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
 | shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 88.7% | `b11e8bdd` | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
+| sqlfluff | 90.2% | `bede0bee` | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
 | stylecop | 87.3% | `e98263ba` | 197 | 126 | 10 | 1 | 39 | 21 | 0 | 1 |
 | stylelint | 94.8% | `7514c1f3` | 150 | 90 | 11 | 45 | 0 | 0 | 4 | 45 |
 | stylelint-less | 85.4% | `7514c1f3` | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
@@ -109,7 +109,7 @@ Not measured:
 | detekt, PMD, PHPCS | not catalogued |
 | eslint-plugin-jsonc | the JSON corpus is a parser test suite (JSONTestSuite), no real-world files |
 | stylelint-scss, stylelint-less | plugin rules without a recommended set of their own; need SCSS and Less configs and parsers |
-| angular-eslint, graphql-eslint, biome, taplo, terraform | no coverage entry yet (fixtures only) |
+| graphql-eslint, biome, taplo, terraform | no coverage entry yet (fixtures only) |
 
 Sets and corpora of each run: [../development/parity.md](../development/parity.md#coverage-mode). Findings of `formatter` entries are left out; a file the tool cannot read is left out and counted by the run. The layout rules that are `planned` in a catalog (html-eslint `indent`, ktlint `function-signature`) count as missing until the catalog says `formatter` ([../roadmap.md](../roadmap.md#small-tasks)).
 
