@@ -9,6 +9,7 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [architecture/csharp-worker.md](architecture/csharp-worker.md) | .NET worker, protocol, workspace, lifecycle |
 | [architecture/adding-a-language.md](architecture/adding-a-language.md) | Adding a tree-sitter language: steps and per-language cost |
 | [design/unification.md](design/unification.md) | Plan: moving the older languages onto the shared core, rule clusters, ordered steps |
+| [design/cpp-format.md](design/cpp-format.md) | Plan: the mechanisms that take C/C++ format parity from 4,597 to 5,644 files, upper bounds per step |
 | [design/site-refresh.md](design/site-refresh.md) | Plan: rule pages, rule list and rule descriptions of the public site |
 | [design/landing-page.md](design/landing-page.md) | Plan: the landing page of the public site |
 | [design/init.md](design/init.md) | Plan: interactive `sudsy init` |

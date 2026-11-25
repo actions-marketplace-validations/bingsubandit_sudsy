@@ -531,7 +531,7 @@ pub(crate) fn render_slots(
                 first: slots[i].node.clone(),
                 last: slots[j].node.clone(),
                 blank_before,
-                doc: cx.verbatim_range(&tok, &last),
+                doc: cx.verbatim_region(&tok, &last),
                 verbatim: true,
                 sep: slots[j].sep.clone(),
                 hole: false,

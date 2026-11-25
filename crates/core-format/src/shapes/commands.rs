@@ -229,7 +229,7 @@ pub fn command_list(cx: &FormatCtx<'_>, node: &SyntaxNode, spec: &Commands<'_>) 
                 Ok::<_, FormatError>(leading_info(cx, &items[n])?.1)
             })? - 1;
             let last = cx.last_token(&items[j]).ok_or_else(no_tokens)?;
-            (j, cx.verbatim_range(&start, &last), true, step.depth)
+            (j, cx.verbatim_region(&start, &last), true, step.depth)
         } else if mark == Some(IgnoreMark::Ignore) {
             (i, cx.verbatim_node(&items[i]), true, step.depth)
         } else {

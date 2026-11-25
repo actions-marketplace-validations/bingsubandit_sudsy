@@ -721,6 +721,32 @@ impl<'a> FormatCtx<'a> {
         leading_comments_doc_with(&self.leading_of(tok), &self.comment_style)
     }
 
+    /// [`FormatCtx::leading_comments_doc`] for the comments in front of a directive (`tok` is
+    /// its first token): the lines of comments right above it that start at column 0 in the
+    /// source stay at column 0, whatever the code around is indented.
+    pub fn leading_comments_doc_before_directive(&self, tok: &SyntaxToken) -> Doc {
+        let cs = self.leading(tok);
+        let st = &self.comment_style;
+        let flush = |c: &Comment| {
+            matches!(c.kind, CommentKind::Line | CommentKind::Block)
+                && matches!(&c.element, SyntaxElement::Token(t) if comments::column(t) == 0)
+        };
+        // the run of column-0 comments that touches the directive, no blank line in between
+        let mut at = cs.len();
+        while at > 0 && flush(&cs[at - 1]) && cs[at - 1].breaks_after == 1 {
+            at -= 1;
+        }
+        if at == cs.len() || cs[at..].iter().any(|c| c.kind != CommentKind::Line) {
+            return leading_comments_doc_with(&cs, st);
+        }
+        let mut parts = vec![leading_comments_doc_with(&cs[..at], st)];
+        for c in &cs[at..] {
+            parts.push(doc::outdent(usize::MAX, comment_doc_in(c, st)));
+            parts.push(doc::hardline());
+        }
+        doc::concat(parts)
+    }
+
     /// The comments in front of `tok`, as the comment style wants them attached to it.
     fn leading(&self, tok: &SyntaxToken) -> Vec<Comment> {
         let cs = self.leading_of(tok);
@@ -874,14 +900,12 @@ impl<'a> FormatCtx<'a> {
         }
     }
 
-    /// Source text from the start of `first` to the end of `last`, exactly as written (including
-    /// the comments between them), with `first`'s leading and `last`'s trailing comments around it.
-    pub fn verbatim_range(&self, first: &SyntaxToken, last: &SyntaxToken) -> Doc {
+    /// The source text from `from` to the end of `last`, as written.
+    fn raw_text(&self, from: &SyntaxToken, last: &SyntaxToken) -> String {
         // Sliced from the nearest node that holds both tokens: slicing the root walks the file.
-        let span = core_syntax::TextRange::new(first.text_range().start(), last.text_range().end());
+        let span = core_syntax::TextRange::new(from.text_range().start(), last.text_range().end());
         self.note_copied(span);
-        let raw = first
-            .parent_ancestors()
+        from.parent_ancestors()
             .find(|a| a.text_range().contains_range(span))
             .map(|n| {
                 let at = n.text_range().start();
@@ -892,10 +916,59 @@ impl<'a> FormatCtx<'a> {
                     ))
                     .to_string()
             })
-            .unwrap_or_default();
+            .unwrap_or_default()
+    }
+
+    /// Source text from the start of `first` to the end of `last`, exactly as written (including
+    /// the comments between them), with `first`'s leading and `last`'s trailing comments around it.
+    pub fn verbatim_range(&self, first: &SyntaxToken, last: &SyntaxToken) -> Doc {
         doc::concat(vec![
             self.leading_comments_doc(first),
-            verbatim_text(&raw),
+            verbatim_text(&self.raw_text(first, last)),
+            self.trailing_comments_doc(last),
+        ])
+    }
+
+    /// [`FormatCtx::verbatim_range`] for the region a `Start` mark opens: what follows the mark
+    /// (the comments after it too) stands as written, with the indentation of its first line.
+    pub fn verbatim_region(&self, first: &SyntaxToken, last: &SyntaxToken) -> Doc {
+        let g = self.grammar;
+        let cs = comments::leading_comments(g, first);
+        let Some(mark) = cs
+            .iter()
+            .rposition(|c| ignore::mark_of(g, c) == Some(IgnoreMark::Start))
+        else {
+            return self.verbatim_range(first, last);
+        };
+        let from = match cs.get(mark + 1).map(|c| &c.element) {
+            Some(SyntaxElement::Token(t)) => t.clone(),
+            Some(SyntaxElement::Node(_)) => return self.verbatim_range(first, last),
+            None => first.clone(),
+        };
+        // (the thing after the mark starts a line of its own; a line comment holds its line break)
+        let blank = |t: &SyntaxToken| t.text().trim().is_empty();
+        let own = |t: Option<SyntaxToken>| t.is_none_or(|t| t.text().ends_with('\n'));
+        let (indent, own_line) = match from.prev_token() {
+            Some(p) if blank(&p) => (
+                p.text().rsplit('\n').next().unwrap_or("").to_string(),
+                p.text().contains('\n') || own(p.prev_token()),
+            ),
+            p => (String::new(), own(p)),
+        };
+        if !own_line {
+            return self.verbatim_range(first, last);
+        }
+        let raw = format!("{indent}{}", self.raw_text(&from, last));
+        let (head, rest) = raw.split_once('\n').unwrap_or((&raw, ""));
+        let rest = if rest.is_empty() {
+            Doc::Nil
+        } else {
+            doc::verbatim(format!("\n{rest}"))
+        };
+        doc::concat(vec![
+            leading_comments_doc_with(&cs[..=mark], &self.comment_style),
+            doc::line_start(head.trim_end()),
+            rest,
             self.trailing_comments_doc(last),
         ])
     }

@@ -636,7 +636,7 @@ impl Layout {
                 } else {
                     format!("{words} {comment}")
                 };
-                let lead = first.map_or(Doc::Nil, |f| cx.leading_comments_doc(&f));
+                let lead = first.map_or(Doc::Nil, |f| cx.leading_comments_doc_before_directive(&f));
                 Ok(doc::concat(vec![lead, doc::line_start(&head), rest]))
             }
             "items" => statements(cx, &node.children().collect::<Vec<_>>()),
@@ -723,7 +723,7 @@ fn line_start(
     };
     let from = usize::from(first.text_range().start() - node.text_range().start());
     doc::concat(vec![
-        cx.leading_comments_doc(&first),
+        cx.leading_comments_doc_before_directive(&first),
         doc::line_start(tight(text[from..].trim())),
     ])
 }
