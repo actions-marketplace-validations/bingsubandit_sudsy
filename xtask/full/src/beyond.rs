@@ -27,6 +27,8 @@ pub fn render(
 ) -> Result<String> {
     let options: Vec<Options> = serde_saphyr::from_str(options_yaml)?;
     let rows = crate::support::rows(support_yaml)?;
+    let measured = crate::support::ordered(&xtask::repo_root(), &rows)?;
+    let rows: Vec<&crate::support::Row> = measured.iter().map(|m| m.row).collect();
     options_table(
         &|id| {
             let rules = core_rules::shared::RULES
@@ -60,7 +62,7 @@ fn sudsy_options(schema: &OptionSchema, rules: usize) -> usize {
 /// formatter, are errors.
 fn options_table(
     sudsy: &dyn Fn(&str) -> usize,
-    support: &[crate::support::Row],
+    support: &[&crate::support::Row],
     options: &[Options],
 ) -> Result<String> {
     let mut out = String::from(
@@ -110,7 +112,7 @@ mod tests {
     fn table(options: &str) -> Result<String> {
         let rows = crate::support::rows(SUPPORT)?;
         let options: Vec<Options> = serde_saphyr::from_str(options)?;
-        options_table(&|_| 3, &rows, &options)
+        options_table(&|_| 3, &rows.iter().collect::<Vec<_>>(), &options)
     }
 
     #[test]

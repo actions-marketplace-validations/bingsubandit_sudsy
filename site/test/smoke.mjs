@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
-const PORT = 4399;
+const PORT = Number(process.env.SITE_PORT ?? 4399); // SITE_PORT: another checkout may be serving on 4399
 const B = `http://localhost:${PORT}/sudsy`;
 const server = spawn('npx', ['astro', 'preview', '--port', String(PORT)], { shell: true, stdio: 'ignore' });
 let browser, page, index;
@@ -263,7 +263,7 @@ test('progress bars: width equals the number, tick at 85, not-measured state, la
 test('no horizontal overflow on desktop and phone', async () => {
   for (const width of [1200, 360]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ['rules/', 'rules/sorted-keys/', 'rules/max-line-length/', 'compare/hadolint/', 'compare/', 'languages/', 'languages/dockerfile/', 'languages/js/', '']) {
+    for (const path of ['rules/', 'rules/sorted-keys/', 'rules/max-line-length/', 'compare/hadolint/', 'compare/', 'languages/', 'languages/dockerfile/', 'languages/js/', 'measured/', '']) {
       await page.goto(`${B}/${path}`);
       if (path === 'rules/') await hits();
       await noOverflow(`${width}px ${path}`);
@@ -300,6 +300,37 @@ test('header logo and favicon load', async () => {
   assert.ok(await logo.evaluate((i) => i.complete && i.naturalWidth > 0));
   const href = await page.locator('link[rel~=icon]').first().getAttribute('href');
   assert.ok((await fetch(new URL(href, page.url()))).ok);
+});
+
+test('languages: the index follows the data order, every language links to its anchor of the measured page', async () => {
+  const { languages } = JSON.parse(readFileSync('../docs/ai/parity/site.json', 'utf8'));
+  await page.goto(`${B}/languages/`);
+  assert.deepEqual(await page.locator('.lang-row .lang-head > a').allTextContents(), languages.map((l) => l.name));
+  // Ready first, then the others; each group by popularity, most popular first.
+  const ready = languages.map((l) => /Ready$/.test(l.status));
+  assert.ok(ready.every((r, i) => i === 0 || r <= ready[i - 1]), 'ready languages come first');
+  for (const group of [true, false]) {
+    const p = languages.filter((l, i) => ready[i] === group).map((l) => l.popularity);
+    assert.deepEqual(p, [...p].sort((a, b) => b - a), `popularity order of ready=${group}`);
+  }
+  const hrefs = await page.locator('.lang-how').evaluateAll((a) => a.map((x) => x.getAttribute('href')));
+  assert.deepEqual(hrefs, languages.map((l) => `/sudsy/measured/#lang-${l.slug}`));
+  await page.goto(`${B}/measured/`);
+  for (const l of languages) assert.equal(await page.locator(`[id="lang-${l.slug}"]`).count(), 1, `anchor ${l.slug}`);
+  // The page is docs/languages.md: the section of each language is there, with the generated numbers.
+  const headings = await page.locator('h2').allTextContents();
+  for (const l of languages) assert.ok(headings.some((h) => h.replace(/\u200b/g, '').trim() === l.section), l.section);
+  assert.ok(await page.getByText('Measured', { exact: false }).count() >= languages.length);
+  // Links of the page work: site links answer, anchors exist.
+  for (const href of await page.locator('main a[href^="/sudsy/"]').evaluateAll((a) => [...new Set(a.map((x) => x.getAttribute('href')))])) {
+    assert.ok((await fetch(`http://localhost:${PORT}${href.split('#')[0]}`)).ok, href);
+  }
+  await page.goto(`${B}/languages/php/`);
+  const intro = await page.locator('.sl-markdown-content').innerText();
+  assert.match(intro, /default rule set/);
+  assert.match(intro, /except PHP-CS-Fixer: measured with the @PER-CS rule set/);
+  await page.goto(`${B}/languages/python/`);
+  assert.doesNotMatch(await page.locator('.sl-markdown-content').innerText(), /except /);
 });
 
 test('no console or network errors', () => assert.deepEqual(problems, []));

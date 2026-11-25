@@ -25,7 +25,7 @@ pub(crate) fn generate(
     let root = xtask::repo_root();
     let rows = support::rows(support_yaml)?;
     check(providers, &rows)?;
-    let measured = support::measure(&root, &rows)?;
+    let measured = support::ordered(&root, &rows)?;
     let shares = crate::docs::coverage_shares()?;
     let presets = presets()?;
     let catalog_of = catalog_names()?;
@@ -39,7 +39,7 @@ pub(crate) fn generate(
                     let catalog = catalog_of
                         .get(&t.tool)
                         .filter(|c| catalogs.iter().any(|k| &k.tool == *c));
-                    json!({ "name": t.name, "share": s, "catalog": catalog })
+                    json!({ "name": t.name, "share": s, "catalog": catalog, "note": t.note })
                 })
                 .collect()
         };
@@ -51,6 +51,11 @@ pub(crate) fn generate(
             "format": tool(&row.format, &m.format),
             "lint": tool(&row.lint, &m.lint),
             "requires": row.requires,
+            "section": row.section(),
+            "popularity_of": row.most_popular().0,
+            "popularity_basis": row.popularity.iter().find_map(|m| m.estimate.as_ref()).map(|e| e.basis.as_str()),
+            "popularity": (m.popularity.v * 1000.0).round() / 1000.0,
+            "popularity_estimate": m.popularity.est,
             "rules": rule_count(&row.ids),
             "presets": presets.iter().filter(|p| row.ids.iter().any(|i| p.starts_with(&format!("{i}/"))) || preset_in(p, &row.ids)).collect::<Vec<_>>(),
             "speed": crate::speed::rows_of(&row.speed)?,
@@ -58,10 +63,19 @@ pub(crate) fn generate(
     }
     // One line per language, per tool and per catalog entry: a diff shows what moved.
     let mut tools = Vec::new();
+    // The languages of a tool in the order of the language lists (an id of no row last).
+    let rank = |id: &String| {
+        measured
+            .iter()
+            .position(|m| m.row.ids.contains(id))
+            .unwrap_or(usize::MAX)
+    };
     for c in catalogs {
         let target = shares.get(&c.tool).copied();
+        let mut languages = c.languages.clone();
+        languages.sort_by_key(rank);
         let head = json!({
-            "tool": c.tool, "version": catalog_version(&c.tool)?, "languages": c.languages,
+            "tool": c.tool, "version": catalog_version(&c.tool)?, "languages": languages,
             "target": target, "rule_url": c.rule_url != "none",
         })
         .to_string();
@@ -95,7 +109,7 @@ pub(crate) fn generate(
             .filter(|t| tool_words.iter().any(|w| w == *t))
             .map(|t| t.to_string()),
     );
-    for row in &rows {
+    for row in measured.iter().map(|m| m.row) {
         for part in row.language.split(['/', ',', '(', ')']) {
             keywords.push(part.trim().to_lowercase());
         }

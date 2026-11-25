@@ -21,7 +21,7 @@
     "csharpier",
     "stylecop",
     "tflint",
-    "javascript"
+    "html"
   ],
-  "ready": "Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, HTML, Vue / Svelte, Angular templates, CSS / SCSS / Less, Markdown, YAML, JSON / JSONC, PowerShell, Java, Kotlin, Shell, SQL, C#, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore, Ruby, CMake and Go. The rest are in progress."
+  "ready": "Ready: HTML, JavaScript / TypeScript, CSS / SCSS / Less, JSON / JSONC, Markdown, Python, YAML, Shell, Dockerfile, SQL, Java, GitHub Actions, C#, PowerShell, Makefile, TOML, XML, Go, CMake, Kotlin, Vue / Svelte, Terraform (HCL), Angular templates, INI / EditorConfig / .gitignore, Ruby, GraphQL and Protobuf. The rest are in progress."
 }

@@ -5,6 +5,7 @@
 //! language Sudsy formats with no reference formatter has `stability` groups instead: the share of its
 //! corpus files that `scripts/parity.sh stability <group>` finds stable, in `tests/parity/stability`.
 
+use crate::newlang::{V, demand};
 use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -18,15 +19,6 @@ const STABILITY: &str = "stability";
 
 /// The ending of a cell with no reference tool.
 const NO_TOOL: &str = "no reference tool";
-
-/// The statuses in the order of the table.
-const STATUSES: [&str; 5] = [
-    "Ready",
-    "Lint only: Ready",
-    "In progress",
-    "Lint only: In progress",
-    "not measured",
-];
 
 #[derive(Deserialize)]
 pub(crate) struct Row {
@@ -48,6 +40,73 @@ pub(crate) struct Row {
     pub stability: Vec<String>,
     /// What a user needs before the language works, in one sentence (shown on the site's language page).
     pub requires: Option<String>,
+    /// The raw popularity values of the languages of the row (the sources and the formula of `languages.yaml`);
+    /// the row takes its most popular member. Every row has one (`check_measured`).
+    #[serde(default)]
+    pub popularity: Vec<Member>,
+    /// The heading of the section of docs/languages.md that holds the row, when it is not the row's name.
+    pub section: Option<String>,
+}
+
+/// A language (or file format) of a row with the raw values of the two popularity sources; a missing value means
+/// the source does not list it (`newlang::demand` estimates it).
+#[derive(Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct Member {
+    pub name: String,
+    pub gh: Option<f64>,
+    pub so: Option<f64>,
+    /// A popularity set by hand where no source lists the language: the value and its basis. Always an estimate.
+    pub estimate: Option<Estimate>,
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct Estimate {
+    pub value: f64,
+    pub basis: String,
+}
+
+impl Member {
+    fn demand(&self) -> V {
+        match &self.estimate {
+            Some(e) => V {
+                v: e.value,
+                est: true,
+            },
+            None => demand(self.gh, self.so),
+        }
+    }
+}
+
+impl Row {
+    /// The heading of the row's section in docs/languages.md.
+    pub fn section(&self) -> &str {
+        self.section.as_deref().unwrap_or(&self.language)
+    }
+
+    /// The most popular member of the row and its popularity 0.1-1 (an estimate when a source lacks it).
+    pub fn most_popular(&self) -> (&str, V) {
+        self.popularity
+            .iter()
+            .map(|m| (m.name.as_str(), m.demand()))
+            .reduce(|a, b| if b.1.v > a.1.v { b } else { a })
+            .unwrap_or(("", demand(None, None)))
+    }
+
+    /// The popularity by the sources and the formula alone, never an estimate set by hand (the new-language scores).
+    pub fn source_popularity(&self) -> V {
+        self.popularity
+            .iter()
+            .map(|m| demand(m.gh, m.so))
+            .reduce(|a, b| if b.v > a.v { b } else { a })
+            .unwrap_or_else(|| demand(None, None))
+    }
+
+    /// Popularity 0.1-1 of the row.
+    pub fn popularity(&self) -> V {
+        self.most_popular().1
+    }
 }
 
 /// A reference tool: its `tests/parity` folder, its name in the table and, for a folder that serves
@@ -91,6 +150,14 @@ struct Ratchets {
     #[serde(default, rename = "target-files")]
     target_files: BTreeMap<String, u64>,
     target: Option<f64>,
+    /// The findings of the lint corpus.
+    measured: Option<Findings>,
+}
+
+#[derive(Deserialize, Default, Clone, Copy)]
+struct Findings {
+    covered: u64,
+    total: u64,
 }
 
 /// The generated texts of the README: the table with the line under it, the headline count and the
@@ -110,7 +177,8 @@ pub fn render(
     let rows = rows(support_yaml)?;
     let mut out = String::from("| Language | Format | Lint | Status |\n|---|---|---|---|\n");
     let mut measured = Vec::new();
-    for m in measure(root, &rows)? {
+    let in_order = ordered(root, &rows)?;
+    for m in &in_order {
         let (row, status) = (m.row, m.status);
         let line = format!(
             "| {} | {} | {} | {status} |\n",
@@ -127,16 +195,15 @@ pub fn render(
         );
         measured.push((status, row.language.as_str(), line));
     }
-    // By status, the rows of one status in the order of `support.yaml` (the sort is stable).
-    measured.sort_by_key(|(status, ..)| STATUSES.iter().position(|s| s == status));
     let ready: Vec<&str> = measured
         .iter()
         .filter(|(status, ..)| status.ends_with("Ready"))
         .map(|(_, language, _)| *language)
         .collect();
     out += &measured.iter().map(|m| m.2.as_str()).collect::<String>();
-    let notes: Vec<String> = rows
+    let notes: Vec<String> = in_order
         .iter()
+        .map(|m| m.row)
         .flat_map(|r| r.format.iter().chain(&r.lint).map(move |t| (r, t)))
         .filter_map(|(r, t)| {
             Some(format!(
@@ -150,7 +217,7 @@ pub fn render(
     if !notes.is_empty() {
         out += &format!("\nNotes: {}\n", notes.join(" "));
     }
-    out += "\nHow to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).\n";
+    out += "\nThe rows are ordered by how widely the language is used. Every number is measured against each reference tool's default rule set; a row measured with another set says so in the notes above. How each language is measured, with the tool versions and corpora: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).\n";
     let (n, rest) = (ready.len(), rows.len() - ready.len());
     let headline = match n {
         0 => format!("Early support for {rest} languages."),
@@ -177,6 +244,12 @@ pub fn render(
 /// `ratchet:` of its groups (format) in its `differences.yaml`; a leg that lost it fails with the tool's name.
 pub fn check_measured(root: &Path, support_yaml: &str) -> Result<()> {
     for row in rows(support_yaml)? {
+        if row.popularity.is_empty() {
+            bail!(
+                "support.yaml: row `{}` has no `popularity` (one member per language with the `gh` and `so` values its sources list; none for a source that does not list it)",
+                row.language
+            );
+        }
         for t in row.lint.iter().filter(|t| t.blocked.is_none()) {
             if ratchets(root, &t.tool)?.target.is_none() {
                 bail!(
@@ -206,22 +279,39 @@ pub fn check_measured(root: &Path, support_yaml: &str) -> Result<()> {
     Ok(())
 }
 
-/// A row with its measured shares: format and lint per tool, and the status.
+/// A row with its measured shares: format and lint per tool (the share and what it counts: identical files of
+/// the files compared, covered findings of all), the status and the popularity.
 pub(crate) struct Measured<'a> {
     pub row: &'a Row,
     pub format: Vec<Option<f64>>,
     pub lint: Vec<Option<f64>>,
+    pub format_n: Vec<Option<(u64, u64)>>,
+    pub lint_n: Vec<Option<(u64, u64)>>,
     pub status: &'static str,
+    pub popularity: V,
+}
+
+impl Measured<'_> {
+    /// `Ready` rows come before the others (`In progress`, `not measured`).
+    fn ready(&self) -> bool {
+        self.status.ends_with("Ready")
+    }
+}
+
+/// The percentage of a count pair.
+fn percent(n: Option<(u64, u64)>) -> Option<f64> {
+    n.filter(|n| n.1 > 0)
+        .map(|(a, b)| a as f64 * 100.0 / b as f64)
 }
 
 /// The shares of every row, in the order of `rows`.
 pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'a>>> {
     rows.iter()
         .map(|row| {
-            let mut format: Vec<Option<f64>> = row
+            let mut format_n: Vec<Option<(u64, u64)>> = row
                 .format
                 .iter()
-                .map(|t| format_share(root, t))
+                .map(|t| format_counts(root, t))
                 .collect::<Result<_>>()?;
             if !row.stability.is_empty() {
                 let stability = Tool {
@@ -230,23 +320,45 @@ pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'
                     groups: row.stability.clone(),
                     ..Tool::default()
                 };
-                format.push(format_share(root, &stability)?);
+                format_n.push(format_counts(root, &stability)?);
             }
-            let lint: Vec<Option<f64>> = row
+            let lint_r: Vec<Ratchets> = row
                 .lint
                 .iter()
-                .map(|t| Ok(ratchets(root, &t.tool)?.target))
+                .map(|t| ratchets(root, &t.tool))
                 .collect::<Result<_>>()?;
+            let lint: Vec<Option<f64>> = lint_r.iter().map(|r| r.target).collect();
+            let lint_n = lint_r
+                .iter()
+                .map(|r| r.measured.map(|f| (f.covered, f.total)))
+                .collect();
+            let format: Vec<Option<f64>> = format_n.iter().map(|n| percent(*n)).collect();
             let no_formatter = row.format.is_empty() && row.stability.is_empty();
             let status = status(no_formatter, &format, &lint);
             Ok(Measured {
                 row,
                 format,
                 lint,
+                format_n,
+                lint_n,
                 status,
+                popularity: row.popularity(),
             })
         })
         .collect()
+}
+
+/// The rows in the order of every language list: the ready ones first, then the others, each by popularity
+/// (most popular first), equal popularity by name.
+pub(crate) fn ordered<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'a>>> {
+    let mut all = measure(root, rows)?;
+    all.sort_by(|a, b| {
+        (!a.ready())
+            .cmp(&!b.ready())
+            .then(b.popularity.v.total_cmp(&a.popularity.v))
+            .then(a.row.language.cmp(&b.row.language))
+    });
+    Ok(all)
 }
 
 fn ratchets(root: &Path, tool: &str) -> Result<Ratchets> {
@@ -263,9 +375,9 @@ fn ratchets(root: &Path, tool: &str) -> Result<Ratchets> {
 /// The ratchet group of the local fixture files of a tool folder: a few files, never the README number.
 const FIXTURES: &str = "fixtures";
 
-/// Identical over target files across the groups of the tool, never the local `fixtures` group; `None`
+/// Identical files and files compared across the groups of the tool, never the local `fixtures` group; `None`
 /// (`not measured`) until another group has `target-files`.
-fn format_share(root: &Path, tool: &Tool) -> Result<Option<f64>> {
+fn format_counts(root: &Path, tool: &Tool) -> Result<Option<(u64, u64)>> {
     let r = ratchets(root, &tool.tool)?;
     let wanted =
         |g: &&String| g.as_str() != FIXTURES && (tool.groups.is_empty() || tool.groups.contains(g));
@@ -281,7 +393,7 @@ fn format_share(root: &Path, tool: &Tool) -> Result<Option<f64>> {
         .filter(wanted)
         .map(|g| r.ratchet.get(g).copied().unwrap_or(0))
         .sum();
-    Ok((files > 0).then(|| same as f64 * 100.0 / files as f64))
+    Ok((files > 0).then_some((same, files)))
 }
 
 /// Bar, percent (rounded down, so the text never reads as passing the bar when it does not) and
@@ -328,5 +440,62 @@ fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &
         (_, true, false) => "Lint only: In progress",
         (_, false, true) => "Ready",
         (_, false, false) => "In progress",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixtures() -> std::path::PathBuf {
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support")
+    }
+
+    fn row(popularity: &str) -> Row {
+        let text = format!("- language: X\n  popularity: {popularity}\n");
+        rows(&text).unwrap().remove(0)
+    }
+
+    #[test]
+    fn a_grouped_row_takes_its_most_popular_member() {
+        // A quarter of the top of each source: the square root gives 0.5 for both.
+        let quarter = "{name: A, gh: 2082333.75, so: 15.7}";
+        let small = "{name: B, gh: 520583.4375, so: 3.925}";
+        let p = row(&format!("[{small}, {quarter}]")).popularity();
+        assert!((p.v - 0.5).abs() < 1e-9 && !p.est, "{p:?}");
+    }
+
+    #[test]
+    fn a_missing_source_makes_the_popularity_an_estimate() {
+        assert!(row("[{name: A, gh: 2082333.75}]").popularity().est);
+        // Neither source lists it: the floor, an estimate.
+        let none = row("[{name: A}]").popularity();
+        assert!(none.est && (none.v - 0.1).abs() < 1e-9, "{none:?}");
+    }
+
+    #[test]
+    fn a_hand_set_estimate_orders_the_row_but_not_the_new_language_scores() {
+        let r = row("[{name: A, gh: 2082333.75, estimate: {value: 0.9, basis: b}}]");
+        let p = r.popularity();
+        assert!((p.v - 0.9).abs() < 1e-9 && p.est, "{p:?}");
+        // The formula alone (one source: an estimate by 2.27) stays what the scores read.
+        assert!(r.source_popularity().v < 0.9);
+    }
+
+    #[test]
+    fn a_row_without_popularity_fails_the_check() {
+        let e = check_measured(&fixtures(), "- language: A\n").unwrap_err();
+        assert!(e.to_string().contains("no `popularity`"), "{e}");
+    }
+
+    #[test]
+    fn equal_popularity_is_ordered_by_name() {
+        let list = rows("- language: B\n- language: A\n").unwrap();
+        let names: Vec<&str> = ordered(&fixtures(), &list)
+            .unwrap()
+            .iter()
+            .map(|m| m.row.language.as_str())
+            .collect();
+        assert_eq!(names, ["A", "B"]);
     }
 }

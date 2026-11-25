@@ -138,14 +138,15 @@ pub(crate) fn entries(yaml: &str, support: &[Row]) -> Result<Vec<Entry>> {
                 "languages.yaml: `{name}` {src} {v:?} is not above 0 and at most {top}"
             );
         }
-        e.demand = demand(e.gh, e.so);
+        // A supported language keeps its raw values in support.yaml (one place for every popularity).
+        let row = support.iter().find(|r| r.language == name);
+        e.demand = row.map_or_else(|| demand(e.gh, e.so), Row::source_popularity);
         for leg in &e.deferred {
             ensure!(
                 leg == "format" || leg == "lint",
                 "languages.yaml: `{name}` defers unknown leg `{leg}`"
             );
         }
-        let row = support.iter().find(|r| r.language == name);
         e.paid = row.is_some();
         match (row, e.parser) {
             (Some(_), Some(_)) => {
@@ -173,6 +174,10 @@ pub(crate) fn entries(yaml: &str, support: &[Row]) -> Result<Vec<Entry>> {
                 "languages.yaml: `{name}` already has a lint leg"
             );
         }
+        ensure!(
+            row.is_none() || (e.gh.is_none() && e.so.is_none()),
+            "languages.yaml: `{name}` is supported: its `gh` and `so` are the `popularity` of its row in support.yaml"
+        );
         for (leg, alts) in [("format", &e.format), ("lint", &e.lint)] {
             for a in alts {
                 let at = format!("languages.yaml: `{name}` {leg} `{}`", a.tool);

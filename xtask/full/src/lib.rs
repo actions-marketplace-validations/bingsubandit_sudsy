@@ -8,10 +8,12 @@ mod beyond;
 mod differences;
 mod discover;
 mod docs;
+mod languages_doc;
 pub mod manifests;
 mod newlang;
 #[cfg(test)]
 mod newlang_tests;
+mod numbers;
 mod priority;
 #[cfg(test)]
 mod priority_tests;

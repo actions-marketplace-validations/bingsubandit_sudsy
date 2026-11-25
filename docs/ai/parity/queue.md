@@ -24,6 +24,7 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
+| Angular templates | 0.31~ | 0 (paid) | 3.16~ | - | - | lint: lint angular-eslint template rules | estimate: pick only to measure it |
 | Ruby | 0.27 | 0 (paid) | - | 2.89~ | - | format: format rufo | estimate: pick only to measure it |
 | CMake | 0.35 | 0 (paid) | - | 2.57~ | - | format: format gersemi | estimate: pick only to measure it |
 | Batchfile | 0.51~ | ~1.2 | 1.74~ | 1.74~ | 2.29~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
@@ -41,7 +42,6 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | Procfile | 0.26~ | ~1.5 | 0.79~ | 0.79~ | 1.08~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
 | Perl | 0.19 | ~1.2 | 0.88~ | 0.68~ | 1.04~ | both: lint perlcritic + format perltidy | cannot reach the bar: format perltidy reach ~0.75; Perl parses only at runtime in full: the grammar is partial; estimate: pick only to measure it |
 | GraphQL | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint graphql-eslint | estimate: pick only to measure it |
-| Angular templates | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint angular-eslint template rules | estimate: pick only to measure it |
 | Handlebars | 0.18~ | ~1.5 | 0.75~ | 0.67~ | 0.98~ | both: lint ember-template-lint + format prettier glimmer | Handlebars, Mustache; estimate: pick only to measure it |
 | Tekton pipelines | 0.10~ | ~0.2 | 0.97~ | - | - | lint: lint tekton-lint | estimate: pick only to measure it |
 | Lua | 0.28 | ~1 | 0.68~ | 0.79~ | 0.97~ | both: lint selene + format StyLua | cannot reach the bar: lint selene reach ~0.7; estimate: pick only to measure it |

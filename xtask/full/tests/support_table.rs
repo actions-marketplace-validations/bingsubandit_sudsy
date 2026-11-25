@@ -3,23 +3,28 @@
 #[test]
 fn table_from_fixture_ratchets() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
-    let support = r"
+    // Popularity (1.0 = top of both sources): Gamma 1, Alpha 0.5, Beta 0.25, the rest none (0.1, an estimate).
+    let support = r#"
 - language: Alpha
+  popularity: [{name: A, gh: 2082333.75, so: 15.7}]
   format: [{tool: fmt-a, name: FmtA, groups: [real-world, tests]}]
   lint: [{tool: lint-a, name: LintA}]
 - language: Beta
+  popularity: [{name: B, gh: 520583.4375, so: 3.925}]
   format: [{tool: fmt-a, name: FmtA, groups: [real-world]}, {tool: missing, name: Gone}]
   lint: [{tool: lint-a, name: LintA}]
 - language: Gamma
+  popularity: [{name: G, gh: 8329335, so: 62.8}]
   lint: [{tool: lint-a, name: LintA}]
 - language: Delta
 - language: Epsilon
   stability: [one, two]
   lint: [{tool: lint-a, name: LintA}]
 - language: Zeta
+  popularity: [{name: Z, gh: 2082333.75, so: 15.7}]
   stability: [one]
   lint: [{tool: absent, name: Absent}]
-";
+"#;
     let table = xtask_full::support::render(&root, support, &|_| 7).unwrap();
     let (headline, ready) = (table.headline.clone(), table.ready.clone());
     let table = table.table;
@@ -27,13 +32,15 @@ fn table_from_fixture_ratchets() {
     assert_eq!(
         rows,
         [
+            // Ready rows first, by popularity; Gamma (lint only) is the most popular.
+            "| Gamma | none | ████████░░ 85% LintA | Lint only: Ready |",
             "| Alpha | ████████░░ 86% FmtA | ████████░░ 85% LintA | Ready |",
             // Only the first tool of each list decides the status: the unmeasured `Gone` does not.
             "| Beta | █████████░ 90% FmtA<br>not measured Gone | ████████░░ 85% LintA | Ready |",
             // No reference formatter: the stability share of the groups, no file count.
             "| Epsilon | █████████░ 90% stable · no reference tool | ████████░░ 85% LintA | Ready |",
-            "| Gamma | none | ████████░░ 85% LintA | Lint only: Ready |",
             // An unmeasured lint tool is not a missing one: it does not pass.
+            // The others follow, by popularity.
             "| Zeta | █████████░ 90% stable · no reference tool | not measured Absent | In progress |",
             "| Delta | none | 7 rules · no reference tool | not measured |",
         ]
@@ -41,7 +48,7 @@ fn table_from_fixture_ratchets() {
     assert_eq!(headline, "Ready for 4 languages, early support for 2 more.");
     assert_eq!(
         ready,
-        "Ready: Alpha, Beta, Epsilon and Gamma. The rest are in progress."
+        "Ready: Gamma, Alpha, Beta and Epsilon. The rest are in progress."
     );
 }
 
@@ -122,7 +129,15 @@ fn no_format_leg_of_support_yaml_is_fixtures_only() {
 #[test]
 fn a_leg_without_a_number_fails_unless_blocked() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
-    let check = |s| xtask_full::support::check_measured(&root, s);
+    let check = |s: &str| {
+        xtask_full::support::check_measured(
+            &root,
+            &s.replace(
+                "- language: A\n",
+                "- language: A\n  popularity: [{name: A}]\n",
+            ),
+        )
+    };
     assert!(check("\n- language: A\n  format: [{tool: fmt-a, name: FmtA, groups: [real-world]}]\n  lint: [{tool: lint-a, name: LintA}]\n").is_ok());
     let e = check("\n- language: A\n  lint: [{tool: absent, name: Absent}]\n").unwrap_err();
     assert!(e.to_string().contains("`Absent`"), "{e}");

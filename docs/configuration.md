@@ -77,7 +77,7 @@ Every parity number in [languages](languages.md) compares against the reference 
 | You use | Do this | Carries over | Does not carry over |
 |---|---|---|---|
 | Prettier, Biome, ESLint, stylelint | `sudsy init --from <tool>` | The preset (for example `json/prettier-compat`), width, tabs, quotes and other mapped options, rule levels and options that have a Sudsy rule, ignore files as `exclude`. | Plugins, shared configs and rules Sudsy lacks. The command prints each one as `not migrated`. A JavaScript config file (`eslint.config.*`) is refused. |
-| ruff | `extends: [preset:python/ruff]`, then set options by hand: `line_width`, `quote_style`, `magic_trailing_comma`, `target_version` | The formatter style and ruff's default lint set (95.6% of its findings on the corpus). | `pyproject.toml` is not read. Rules you selected beyond ruff's defaults are not mapped. No `init --from ruff`. |
+| ruff | `extends: [preset:python/ruff]`, then set options by hand: `line_width`, `quote_style`, `magic_trailing_comma`, `target_version` | The formatter style and ruff's default lint set. | `pyproject.toml` is not read. Rules you selected beyond ruff's defaults are not mapped. No `init --from ruff`. |
 | Black | `extends: [preset:python/ruff]` | Black style, through ruff format. Set `line_width` if you changed Black's 88. | `pyproject.toml` is not read. The comparison runs ruff format, not Black itself. |
 
 `init --from` accepts: `yamllint`, `prettier`, `biome`, `eslint`, `stylelint`, `stylecop`, `csharpier`, `html-validate`, `htmlhint`, `html-eslint`. It writes only the differences from the extended presets. It replaces an existing `sudsy.yaml` only with `--force`. Details: [ai/config/cli.md](ai/config/cli.md#init---from).

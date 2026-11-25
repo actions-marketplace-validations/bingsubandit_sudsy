@@ -23,6 +23,7 @@
 #     so = Stack Overflow Developer Survey 2026 (survey.stackoverflow.co/2026, response data CSV), % of the 13,924 respondents
 #          who answered "languages worked with", top JavaScript 62.8; the tool list of the survey ("dev environments and build
 #          tools": CMake, Gradle, Ansible, Helm, Kubernetes, Bazel, Ninja, Docker Compose) on the same base.
+#     A language with a row in support.yaml keeps its `gh` and `so` there (`popularity`), not here.
 #     A language listed by one source only: the other is estimated as the listed one x 2.27 (survey over pushers), the median
 #          over the 42 languages both list of sqrt(so / 62.8) / sqrt(gh / 8,329,335); the demand shows "~". In neither: 0.1, "~".
 # Inclusion: every language of the Innovation Graph with at least 20,000 pushers, every language of the survey, and every
@@ -31,13 +32,9 @@
 # up (repository exists, last push, archived) on 2026-11-24, a parser too (grammar repository, crate on crates.io).
 
 - language: Go
-  gh: 440791
-  so: 16.7
   format:
     - {tool: gofmt, gain: ~0.1, reach: ~0.95, cost: ~1.1, why: "official, ships with Go; whitespace only 0.7 + 0.1 x 4 missing parts (column cells, operator-precedence spacing, doc comments, //go:build pairs)"}
 - language: CMake
-  gh: 608541
-  so: 11.7
   format:
     - {tool: gersemi, gain: 0.7, reach: ~0.86, cost: 1.4, why: "slow, own runtime (Python); reach is the ceiling of a model with the keyword-section layout (0.61 without, 0.99 with every piece)"}
 - language: Swift
@@ -86,7 +83,6 @@
     - {tool: "graphql-eslint", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; schema and operation rules; syntactic rules"}
     - {tool: "graphql-schema-linter", gain: ~0.7, reach: ~0.5, cost: ~1.0, why: "Node; schema rules only; syntactic rules"}
 - language: TOML
-  gh: 199
   lint:
     - {tool: "taplo lint", gain: ~0.4, reach: ~0.5, cost: ~0.9, why: "Rust, fast; schema validation only; schema checks"}
     - {tool: "tombi lint", gain: ~0.4, reach: ~0.85, cost: ~1.0, why: "Rust, fast; young; syntactic rules"}
@@ -94,12 +90,9 @@
   lint:
     - {tool: "angular-eslint template rules", gain: ~0.7, reach: ~0.85, cost: ~1.0, why: "Node; syntactic rules"}
 - language: XML
-  gh: 217
   lint:
     - {tool: "xmllint", gain: ~0.1, reach: ~0.6, cost: ~1.0, why: "official libxml2, native; DTD and schema checks; some rules need semantics"}
 - language: Ruby
-  gh: 449257
-  so: 5.9
   format:
     - {tool: "rubyfmt", gain: ~0.4, reach: ~0.9, cost: ~1.0, why: "Rust, fast; few options; canonical, no width"}
     - {tool: "rufo", gain: ~0.7, reach: ~0.9, cost: ~1.0, why: "Ruby runtime; canonical, no width"}

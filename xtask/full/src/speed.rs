@@ -37,21 +37,23 @@ fn load() -> Result<Speed> {
     serde_json::from_str(&text).with_context(|| format!("parsing {}", path.display()))
 }
 
-/// The languages of the rows in file order.
-fn languages(speed: &Speed) -> Vec<&str> {
+/// The languages of the rows in the order of `order` (the language names of the ordered rows of support.yaml);
+/// a language it does not name follows, in file order.
+fn languages<'a>(speed: &'a Speed, order: &[String]) -> Vec<&'a str> {
     let mut languages: Vec<&str> = Vec::new();
     for row in &speed.rows {
         if !languages.contains(&row.language.as_str()) {
             languages.push(&row.language);
         }
     }
+    languages.sort_by_key(|l| order.iter().position(|o| o == l).unwrap_or(usize::MAX));
     languages
 }
 
 /// The runner, the method and the corpus of each language: the generated block of docs/performance.md.
-pub(crate) fn method() -> Result<String> {
+pub(crate) fn method(order: &[String]) -> Result<String> {
     let speed = load()?;
-    let corpora: Vec<String> = languages(&speed)
+    let corpora: Vec<String> = languages(&speed, order)
         .into_iter()
         .filter_map(|language| {
             let mut texts: Vec<&str> = Vec::new();
@@ -76,9 +78,9 @@ pub(crate) fn method() -> Result<String> {
 }
 
 /// The table and the line under it.
-pub(crate) fn table() -> Result<String> {
+pub(crate) fn table(order: &[String]) -> Result<String> {
     let speed = load()?;
-    let languages = languages(&speed);
+    let languages = languages(&speed, order);
     let mut out = String::from(
         "| Language | Task | Compared with | Sudsy speed | Time (Sudsy / tool) | Peak memory (Sudsy / tool) |\n|---|---|---|---|---|---|\n",
     );
@@ -137,7 +139,10 @@ pub(crate) fn rows_of(names: &[String]) -> Result<Vec<[String; 6]>> {
 /// Every language name of `bench/speed.json`.
 pub(crate) fn language_names() -> Result<Vec<String>> {
     let speed = load()?;
-    Ok(languages(&speed).into_iter().map(String::from).collect())
+    Ok(languages(&speed, &[])
+        .into_iter()
+        .map(String::from)
+        .collect())
 }
 
 /// What Sudsy is against the tool: `same` within 10%, else `N× faster` or `N× slower`.

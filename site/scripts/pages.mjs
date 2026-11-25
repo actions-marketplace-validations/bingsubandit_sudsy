@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import { base, rules, siteData } from '../config.mjs';
 import { badge, languageBadges, pageHead } from './badges.mjs';
 import { bar, legs, READY } from './bars.mjs';
+import { SLUG as MEASURED, measuredLink, measuredPage } from './measured.mjs';
 
 const pct = (v) => (v == null ? 'not measured' : `${Math.floor(v)}%`);
 const link = (path, text) => `[${text}](${base}/${path}/)`;
@@ -41,7 +42,7 @@ function summary(languages) {
   const n = (f) => languages.filter(f).length;
   const [ready, progress, none] = [n((l) => /Ready$/.test(l.status)), n((l) => l.status === 'In progress'), n((l) => l.status === 'not measured')];
   const is = (k) => (k === 1 ? 'is' : 'are');
-  return `${ready} of ${languages.length} languages are ready, ${progress} ${is(progress)} in progress and ${none} ${is(none)} not measured yet. \`Ready\` means the first tool of each column is at least ${READY}%; the others are shown for reference. Each bar is a share measured on real-world code against the reference tool; the tick marks ${READY}%.`;
+  return `${ready} of ${languages.length} languages are ready, ${progress} ${is(progress)} in progress and ${none} ${is(none)} not measured yet. \`Ready\` means the first tool of each column is at least ${READY}%; the others are shown for reference. Each bar is a share measured on real-world code against the default rule set of the reference tool (a language measured with another set says so on its page); the tick marks ${READY}%. Ready languages come first, then the others, each by how widely the language is used. [How each language is measured](${base}/${MEASURED}/).`;
 }
 
 export function pages({ put, cell, table }) {
@@ -94,9 +95,10 @@ export function pages({ put, cell, table }) {
   const task = (t) => badge('', t);
   for (const l of languages) {
     const parity = l.format.length + l.lint.length;
+    const notes = [...l.format, ...l.lint].filter((x) => x.note).map((x) => `${x.name}: ${x.note}`);
     const body = [
       pageHead([statusBadge(l.status), badge('rules', `${l.rules} lint rules`)]),
-      `Each bar is measured on real-world code against the reference tool with its default settings; the tick marks ${READY}%. \`Ready\` means the first tool of each column is at least ${READY}%; the others are shown for reference.`,
+      `Each bar is measured on real-world code against the default rule set of the reference tool${notes.length ? `, except ${notes.join('; ')}` : ''}; the tick marks ${READY}%. \`Ready\` means the first tool of each column is at least ${READY}%; the others are shown for reference. [How ${l.name} is measured](${measuredLink(l.slug)}).`,
       l.requires,
       '## Parity',
       parity ? `<div class="legs">${legs(l, byTool)}</div>` : `Sudsy has ${l.rules} rules for this language; no reference tool was found to compare with.`,
@@ -118,8 +120,9 @@ export function pages({ put, cell, table }) {
     description: 'Every language Sudsy formats and lints, with its status against the reference tools.',
   }, [
     summary(languages),
-    '<div class="lang-list">' + languages.map((l) => `<div class="lang-row"><div class="lang-head"><a href="${base}/languages/${l.slug}/">${l.name}</a>${statusBadge(l.status)}</div>${legs(l, byTool)}</div>`).join('') + '</div>',
+    '<div class="lang-list">' + languages.map((l) => `<div class="lang-row"><div class="lang-head"><a href="${base}/languages/${l.slug}/">${l.name}</a>${statusBadge(l.status)}</div>${legs(l, byTool)}<a class="lang-how" href="${measuredLink(l.slug)}">How ${l.name} is measured</a></div>`).join('') + '</div>',
   ].join('\n\n'));
+  written.measured = measuredPage(put);
   return written;
 }
 
