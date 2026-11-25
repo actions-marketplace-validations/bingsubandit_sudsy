@@ -35,7 +35,7 @@ Corpus of each row ([docs/languages.md](languages.md) has the sources):
 - TOML: the toml-test valid files and the TOML fixtures of the repository
 - XML: the XML fixtures and the project files of dotnet/aspnetcore, without 1 files Sudsy cannot parse
 - Go: the Go corpus (Go, Kubernetes, Hugo, Prometheus)
-- CMake: the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others)
+- CMake: the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others), without 3 files Sudsy cannot parse and the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others)
 - Kotlin: the Kotlin corpus
 - Vue: the .vue files of Vue core, VitePress, Pinia and Nuxt UI
 - Svelte: the .svelte files of SvelteKit and the RealWorld app

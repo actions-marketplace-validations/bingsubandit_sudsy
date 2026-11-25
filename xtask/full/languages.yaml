@@ -40,8 +40,6 @@
 
 - language: Go
   format: {tool: "gofmt", gain: ~0.1, cost: {layout: whitespace, parts: 4, est: true}, why: "only tool found; official, ships with Go; whitespace only 0.7 + 0.1 x 4 missing parts (column cells, operator-precedence spacing, doc comments, //go:build pairs)"}
-- language: CMake
-  format: {tool: "gersemi", gain: 0.7, cost: {layout: width, parts: 2}, why: "kept as decided in docs/ai/design/cmake.md (user); PyPI cmakelang (cmake-format) 776k downloads a month against gersemi 181k, 371 stars (close call); own runtime (Python); the cost was measured with the keyword-section layout model"}
 - language: Swift
   gh: 449944
   so: 5.9

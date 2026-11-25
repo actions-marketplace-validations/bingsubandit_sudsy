@@ -1,5 +1,5 @@
 ratchet:
-  real-world: 8179
+  real-world: 8187
 target-files:
   real-world: 9038
 second-format:
@@ -13,6 +13,6 @@ differences:
   blank-before-closer-comment: gap  gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
   unknown-command-layout: gap  a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
 files:
-  real-world: keyword-sections:630, condition-layout:169, blank-before-closer-comment:30, unknown-command-layout:30
+  real-world: keyword-sections:622, condition-layout:169, blank-before-closer-comment:30, unknown-command-layout:30
 intentional: {}
 pins: {}

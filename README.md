@@ -86,7 +86,7 @@ Each number is measured on real-world code against the default rule set of the r
 | TOML | █████████░ 98% taplo | 22 rules · no reference tool | Ready |
 | XML | ██████████ 100% CSharpier XML | 24 rules · no reference tool | Ready |
 | Go | none | █████████░ 97% revive | Lint only: Ready |
-| CMake | none | █████████░ 97% cmake-lint | Lint only: Ready |
+| CMake | █████████░ 90% gersemi | █████████░ 97% cmake-lint | Ready |
 | Kotlin | ████████░░ 85% ktlint | █████████░ 92% ktlint | Ready |
 | Vue / Svelte | █████████░ 91% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
@@ -127,6 +127,7 @@ All languages: <!-- generated:languages -->HTML, JavaScript/TypeScript, CSS, JSO
 | PowerShell | 5 | Invoke-Formatter | [33](https://github.com/PowerShell/PSScriptAnalyzer/tree/1.25.0/docs/Rules) |
 | TOML | 11 | taplo | [19](https://taplo.tamasfe.dev/configuration/formatter-options.html) |
 | XML | 6 | CSharpier XML | [5](https://csharpier.com/docs/Configuration) |
+| CMake | 7 | gersemi | [4](https://github.com/BlankSpruce/gersemi#configuration) |
 | Kotlin | 45 | ktlint | [101](https://github.com/pinterest/ktlint/blob/1.8.0/documentation/release-latest/docs/rules/configuration-ktlint.md) |
 | Vue / Svelte | 17 | Prettier | [18](https://prettier.io/docs/options) |
 | Terraform (HCL) | 3 | terraform fmt | [0](https://developer.hashicorp.com/terraform/cli/commands/fmt) |
@@ -188,7 +189,8 @@ All languages: <!-- generated:languages -->HTML, JavaScript/TypeScript, CSS, JSO
 | TOML | Format | taplo | 1.6× faster | 0.012 s / 0.019 s | 45 / 40 MB |
 | XML | Format | CSharpier | 4.0× faster | 0.11 s / 0.44 s | 104 / 97 MB |
 | Go | Lint | revive | 1.2× slower | 18.07 s / 14.47 s | 2643 / 4115 MB |
-| CMake | Lint | cmake-lint | 46× faster | 1.46 s / 67.73 s | 755 / 42 MB |
+| CMake | Format | gersemi | 2.3× slower | 0.69 s / 0.30 s | 356 / 49 MB |
+|  | Lint | cmake-lint | 48× faster | 1.45 s / 69.22 s | 557 / 42 MB |
 | Kotlin | Format | ktlint | 30× faster | 1.61 s / 48.42 s | 501 / 715 MB |
 |  | Lint | ktlint | 42× faster | 1.14 s / 48.01 s | 485 / 683 MB |
 | Vue | Lint | eslint-plugin-vue | 73× faster | 0.11 s / 8.27 s | 154 / 634 MB |

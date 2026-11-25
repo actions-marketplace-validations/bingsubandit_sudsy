@@ -18,7 +18,6 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [development/no-reference-tool.md](development/no-reference-tool.md) | Planning a language or leg that has no reference tool to compare with: corpus, decision table, checklist, numbers |
 | [design/symbol-index.md](design/symbol-index.md) | Plan: names across files and dependencies for lint rules (types, functions, members), phases and checkpoints |
 | [design/go.md](design/go.md) | Plan: Go, parser and revive lint, phases and checkpoints |
-| [design/cmake.md](design/cmake.md) | Plan: CMake, hand-written parser, cmake-lint and gersemi, phases and checkpoints |
 | [architecture/language-packs.md](architecture/language-packs.md) | Language packs, switched off (every release has all languages built in): the `pack-mode` feature, manifest, cache, ABI check |
 | [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |
 | [formatting/engine.md](formatting/engine.md) | Layout doc, printer, shapes, directives, comments, safety check |

@@ -100,7 +100,7 @@
         {"dir": "tests/conformance/corpus/json-real", "suffixes": [".json"], "prefix": "corpus/", "ratchet": "real-world", "recursive": true, "nested": true}
       ]
     },
-    "gersemi": {"catalog": "gersemi",
+    "gersemi": {"speed": {"language": "CMake", "label": "gersemi", "corpus": {"group": "real-world", "text": "the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others)"}, "format": ["{python}", "-m", "gersemi", "--check", "--no-cache", "--no-warn-about-unknown-commands", "-q", "."]}, "catalog": "gersemi",
       "install": {"pip": "gersemi"},
       "fetch": ["tests/conformance/fetch-cmake-corpus.sh"],
       "command": ["{python}", "-m", "gersemi", "--no-cache", "--no-warn-about-unknown-commands", "{file}"],
