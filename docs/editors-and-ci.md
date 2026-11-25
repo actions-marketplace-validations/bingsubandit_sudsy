@@ -8,7 +8,7 @@ Install `sudsy.sudsy` from the [VS Code Marketplace](https://marketplace.visuals
 code --install-extension sudsy.sudsy
 ```
 
-The fallback is the `.vsix` for your platform from the [GitHub release](https://github.com/bingsubandit/sudsy/releases) (`code --install-extension sudsy-<platform>-<version>.vsix`). Platforms: `linux-x64`, `linux-arm64`, `darwin-x64`, `darwin-arm64`, `win32-x64`, `win32-arm64`. The package bundles `sudsy` and the C# worker. It starts `sudsy lsp` and adds nothing else. It covers all supported languages.
+The fallback is the `.vsix` for your platform from the [GitHub release](https://github.com/bingsubandit/sudsy/releases) (`code --install-extension sudsy-<platform>-<version>.vsix`). Platforms: `linux-x64`, `linux-arm64`, `darwin-x64`, `darwin-arm64`, `win32-x64`, `win32-arm64`. The package bundles `sudsy` and the C# worker. It starts `sudsy lsp` and adds nothing else. It covers all supported languages, all built in.
 
 Enable format on save per language, and fix on save:
 
@@ -35,7 +35,7 @@ The extension sets no defaults.
 - The two path settings cannot be set in a workspace `.vscode/settings.json`. This stops a repository from choosing which program runs.
 - The extension does not run in Restricted Mode. It starts a program and reads repository config, including plugins.
 - It validates `sudsy.yaml` against the JSON Schema. Install `redhat.vscode-yaml` to see the hints.
-- Palette commands: restart server, show output, "Sudsy: Install Missing Languages" (fetches the packs of the open files).
+- Palette commands: restart server, show output.
 - Every diagnostic has the quick fix "Show documentation for <rule>".
 
 ## Other editors
@@ -86,16 +86,6 @@ Or use the action of this repository (composite, installs `@sudsylint/sudsy` fro
 
 `--format github` prints one annotation per finding. The step fails on any error or unformatted file. If the repo has C# files, add `actions/setup-dotnet` with `dotnet-version: 10.0.x`.
 
-### Language packs in CI
-
-Files of a language whose pack is missing are skipped with a warning, and the exit code is 3 (when nothing else failed). Fetch the packs first. Add this step before `check`:
-
-```yaml
-      - run: npx @sudsylint/sudsy languages add hcl protobuf shell toml markdown
-```
-
-List the languages your repo uses. Or use a `sudsy-full-<version>-<platform>` archive from the GitHub release, which contains every language. More: [language packs](configuration.md#language-packs).
-
 ### Code scanning (SARIF)
 
 ```yaml
@@ -114,7 +104,6 @@ SARIF is version 2.1.0. It lists results and the rule table. It does not carry f
 | 0 | Success. |
 | 1 | An unformatted file or a lint error. |
 | 2 | A file could not be processed, or the config is invalid. |
-| 3 | Files of a language whose pack is missing were skipped. |
 
 ## Other output
 

@@ -117,10 +117,6 @@
       {
         "command": "sudsy.showOutput",
         "title": "Sudsy: Show Output"
-      },
-      {
-        "command": "sudsy.installMissingLanguages",
-        "title": "Sudsy: Install Missing Languages"
       }
     ],
     "configuration": {

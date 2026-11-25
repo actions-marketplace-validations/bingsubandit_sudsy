@@ -102,7 +102,7 @@ Set them under `format:` at the top level (all languages) or in a language secti
 
 - Shared keys: `line_width`, `indent_size`, `indent_style`, `final_newline`, `end_of_line`, `bracket_spacing`, `array_bracket_spacing`. A language ignores a shared key it does not declare. Any other key at this level is an error.
 - Each language adds its own keys. They are listed in [languages](languages.md) and in the editor schema.
-- Section names are language names. List them with `sudsy languages list`: `js`, `python`, `csharp`, `hcl`, `shell`, and so on.
+- Section names are language names, the ones the editor schema lists: `js`, `python`, `csharp`, `hcl`, `shell`, and so on.
 
 ## Lint rules
 
@@ -176,24 +176,6 @@ Plain JSON has no comments. Use `overrides` with `"off"` there.
 - A `csharp_space_*` key that Sudsy does not follow prints one warning per line on stderr.
 - Other keys belong to other tools and are ignored.
 
-## Language packs
-
-Some languages are small downloads, called packs. Fetch them once:
-
-```sh
-sudsy languages list                  # installed or available, with pack size
-sudsy languages add toml protobuf     # download packs for this version
-sudsy languages sync                  # install what `languages:` marks required
-sudsy languages remove toml
-```
-
-- Packs: editorconfig, gitignore, graphql, hcl, ini, markdown, powershell, protobuf, shell, toml, xml, dockerfile and makefile. The others are built in. The list is from `sudsy languages list` on 0.0.2.
-- Files of a language whose pack is missing are skipped. Sudsy prints one warning per language: `warning: 1 toml file(s) skipped: not installed; run `sudsy languages add toml``.
-- Exit code: if nothing else went wrong, `format`, `lint`, `fix` and `check` exit with 3 after a skip. Exit 3 is used only when everything else succeeded (verified: one skipped TOML file and one clean Python file gave 3). A language marked `ignored` is skipped silently and does not change the exit code.
-- `sudsy.yaml` marks a language: `languages: { toml: required, markdown: ignored }`. `required` is what `sync` installs.
-- The `sudsy-full-<version>-<platform>` archives on the GitHub release contain every pack. Use one for offline machines or to avoid the download.
-- In CI, run `sudsy languages add <names>` once before `check`, or use a full archive. See [editors and CI](editors-and-ci.md#github-actions).
-
 ## Commands
 
 | Command | What it does | Exit code |
@@ -206,7 +188,6 @@ sudsy languages remove toml
 | `sudsy config print [file]` | Show resolved config and sources. | 0 |
 | `sudsy init [--preset <name>] [--force]` | Write a starter `sudsy.yaml`. | 0 |
 | `sudsy init --agents` | Add a block that says how to run `sudsy check` and `sudsy fix` to `AGENTS.md` (`CLAUDE.md` when only that exists). Never written without the flag; a second run changes nothing. | 0 |
-| `sudsy languages list\|add\|remove\|sync` | Manage language packs. | 2 on failure |
 | `sudsy lsp` | Language server on stdio. | |
 
 Paths default to the current directory. `.gitignore` is honored, also outside a git checkout.
@@ -216,7 +197,6 @@ Exit codes for `format`, `lint`, `fix` and `check`:
 - `0`: success.
 - `1`: lint errors or unformatted files.
 - `2`: a file could not be processed, or the config is invalid. Other files are still processed.
-- `3`: everything else worked, but files of a language whose pack is missing were skipped. See [language packs](#language-packs).
 
 `lint`, `fix` and `check` take `--format human|json|sarif|github` and `--analysis fast|standard|deep`.
 

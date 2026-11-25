@@ -103,7 +103,7 @@ Notes: PHP-CS-Fixer (PHP): measured with the `@PER-CS` rule set (the default of 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->
 
-All languages: <!-- generated:languages -->C#, C/C++, CMake, CSS, Dockerfile, EditorConfig, Gitignore, Go, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->. Some are [language packs](docs/configuration.md#language-packs). Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
+All languages: <!-- generated:languages -->C#, C/C++, CMake, CSS, Dockerfile, EditorConfig, Gitignore, Go, GraphQL, HCL, HTML, INI, JSON, Java, JavaScript/TypeScript, Kotlin, Makefile, Markdown, PHP, PowerShell, Protobuf, Python, Ruby, SQL, Shell, TOML, XML and YAML<!-- /generated -->. Corpora, tool versions and the main differences per language: [docs/languages.md](docs/languages.md).
 
 ## Highly configurable
 

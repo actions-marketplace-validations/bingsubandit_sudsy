@@ -4,10 +4,7 @@
 use crate::actions::{FIX_ALL_KIND, code_action};
 use crate::analysis::{Analysis, Cancel};
 use crate::diagnostics::diagnostic;
-use crate::notifier::{
-    DOWNLOAD_ACTION, INSTALL_ACTION, INSTALL_COMMAND, INSTALL_PROMPT_PREFIX, NO_PROMPT_ACTION,
-    Notifier, RUNTIME_PROMPT_ID,
-};
+use crate::notifier::{DOWNLOAD_ACTION, Notifier, RUNTIME_PROMPT_ID};
 use crate::workspace::Workspace;
 use anyhow::{Result, anyhow};
 use crossbeam_channel::RecvTimeoutError;
@@ -26,10 +23,9 @@ use lsp_types::{
     DidChangeTextDocumentParams, DidChangeWatchedFilesParams,
     DidChangeWatchedFilesRegistrationOptions, DidCloseTextDocumentParams,
     DidOpenTextDocumentParams, DocumentDiagnosticParams, DocumentFormattingParams,
-    ExecuteCommandOptions, ExecuteCommandParams, FileSystemWatcher, GlobPattern, InitializeParams,
-    NumberOrString, OneOf, Registration, RegistrationParams, ServerCapabilities, ServerInfo,
-    ShowDocumentParams, TextDocumentIdentifier, TextDocumentSyncCapability, TextDocumentSyncKind,
-    Uri, WatchKind,
+    ExecuteCommandParams, FileSystemWatcher, GlobPattern, InitializeParams, NumberOrString, OneOf,
+    Registration, RegistrationParams, ServerCapabilities, ServerInfo, ShowDocumentParams,
+    TextDocumentIdentifier, TextDocumentSyncCapability, TextDocumentSyncKind, Uri, WatchKind,
 };
 use provider_api::LanguageProvider;
 use serde::Serialize;
@@ -63,8 +59,9 @@ fn capabilities() -> ServerCapabilities {
             ..Default::default()
         })),
         document_formatting_provider: Some(OneOf::Left(true)),
-        execute_command_provider: Some(ExecuteCommandOptions {
-            commands: vec![INSTALL_COMMAND.into()],
+        #[cfg(feature = "pack-mode")]
+        execute_command_provider: Some(lsp_types::ExecuteCommandOptions {
+            commands: vec![crate::notifier::INSTALL_COMMAND.into()],
             ..Default::default()
         }),
         ..Default::default()
@@ -104,6 +101,9 @@ pub struct Server {
 
 /// Quiet time after an edit before open files' diagnostics are asked for again: another file's
 /// edit can change them.
+#[cfg(feature = "pack-mode")]
+mod install;
+
 const REFRESH_DELAY: Duration = Duration::from_millis(400);
 
 /// Runs the server on `conn` until the client shuts it down.
@@ -204,17 +204,9 @@ impl Server {
             .and_then(|t| t.as_str());
         let id = serde_json::to_value(&response.id)?;
         let id = id.as_str().unwrap_or("");
-        if let Some(language) = id.strip_prefix(INSTALL_PROMPT_PREFIX) {
-            self.notifier.prompt_answered(language);
-            return match title {
-                Some(INSTALL_ACTION) => self.install(&[language.to_string()]).map(drop),
-                Some(NO_PROMPT_ACTION) => {
-                    // A write failure only means the language is offered again.
-                    let _ = core_packs::set_no_prompt(language, true);
-                    Ok(())
-                }
-                _ => Ok(()),
-            };
+        #[cfg(feature = "pack-mode")]
+        if let Some(answer) = self.install_prompt_answered(id, title) {
+            return answer;
         }
         if id != RUNTIME_PROMPT_ID || title != Some(DOWNLOAD_ACTION) {
             return Ok(());
@@ -225,44 +217,6 @@ impl Server {
             take_focus: None,
             selection: None,
         })
-    }
-
-    /// Same code as `sudsy languages add`, then the documents that waited start being served.
-    /// Returns what was installed and what failed (failures are also shown to the user).
-    // shortcut: a download blocks the message loop for its duration, move it to a thread if
-    // packs grow beyond a few hundred KB.
-    fn install(&mut self, languages: &[String]) -> Result<serde_json::Value> {
-        let (mut installed, mut failed) = (Vec::new(), Vec::new());
-        for language in languages {
-            match languages::installed::add(language, None) {
-                Ok(()) => installed.push(language.clone()),
-                Err(why) => {
-                    self.notifier.install_failed(language, &why);
-                    failed.push(serde_json::json!({ "language": language, "why": why }));
-                }
-            }
-        }
-        if !installed.is_empty() {
-            self.notifier.installed(&installed);
-            self.workspace.activate_installed();
-            if self.support.diagnostic_refresh {
-                self.call::<WorkspaceDiagnosticRefresh>(())?;
-            }
-        }
-        Ok(serde_json::json!({ "installed": installed, "failed": failed }))
-    }
-
-    /// `sudsy.installMissingLanguages`: the language in the argument, else every missing language
-    /// of the open documents.
-    fn install_missing(&mut self, params: ExecuteCommandParams) -> Result<serde_json::Value> {
-        let languages = match params.arguments.first().and_then(|a| a.as_str()) {
-            Some(language) => vec![language.to_string()],
-            None => self.workspace.missing_open_languages(),
-        };
-        if languages.is_empty() {
-            self.notifier.nothing_missing();
-        }
-        self.install(&languages)
     }
 
     fn send(&self, message: impl Into<Message>) -> Result<()> {
@@ -296,7 +250,8 @@ impl Server {
             Formatting::METHOD => self.answer(req, Self::formatting),
             ExecuteCommand::METHOD => {
                 match serde_json::from_value::<ExecuteCommandParams>(req.params) {
-                    Ok(p) if p.command == INSTALL_COMMAND => {
+                    #[cfg(feature = "pack-mode")]
+                    Ok(p) if p.command == crate::notifier::INSTALL_COMMAND => {
                         Response::new_ok(req.id, self.install_missing(p)?)
                     }
                     Ok(p) => Response::new_err(
@@ -379,11 +334,8 @@ impl Server {
                 let p: DidOpenTextDocumentParams = serde_json::from_value(note.params)?;
                 let doc = p.text_document;
                 if let Some(path) = path_of(&doc.uri) {
-                    if let Some((language, why)) = self.workspace.missing_language(&path)
-                        && !self.workspace.ignores_language(&language)
-                    {
-                        self.notifier.language_missing(&language, &why);
-                    }
+                    #[cfg(feature = "pack-mode")]
+                    self.prompt_missing(&path);
                     self.workspace.open(path, doc.version, doc.text);
                     self.edited_at = Some(Instant::now());
                 }

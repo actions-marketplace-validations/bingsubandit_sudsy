@@ -246,7 +246,7 @@ pub fn json_schema(languages: &[(&str, &OptionSchema)], rules: &[RuleSchema]) ->
             "type": "object",
             "propertyNames": { "enum": languages.iter().map(|(l, _)| *l).collect::<Vec<_>>() },
             "additionalProperties": { "enum": ["required", "ignored"] },
-            "description": "Languages the project needs: `required` ones are installed by `sudsy languages sync`; files of an `ignored` language are skipped silently when it is not installed."
+            "description": "Languages the project needs (`required`) or can do without (`ignored`). Both only matter in a build where a language can be missing; the released builds contain every language."
         }),
     );
     properties.insert("format".into(), options_object(shared_defs(languages)));

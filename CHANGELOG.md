@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Packaging
+* Every archive and package has all languages built in. The `sudsy-full-<version>-<platform>` archives and
+  the downloadable language packs are gone, and so are `sudsy languages`, the exit status 3 for a missing
+  language and the editor's install prompt and "Install Missing Languages" command. `languages:` entries in
+  `sudsy.yaml` are still accepted and change nothing.
+
 ## [0.0.3] - 2026-11-20
 
 ### Packaging

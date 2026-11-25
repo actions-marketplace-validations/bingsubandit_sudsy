@@ -18,7 +18,7 @@ a.py:1:8: warning[unused-import]: `os` imported but unused
 b.js:3:18: warning[no-debugger]: Unexpected 'debugger' statement.
 ```
 
-With no config, lint reports likely bugs only, never style. `sudsy format` rewrites the files; `sudsy fix` applies safe fixes, then formats. Some languages are small downloads: `sudsy languages add toml protobuf`.
+With no config, lint reports likely bugs only, never style. `sudsy format` rewrites the files; `sudsy fix` applies safe fixes, then formats.
 
 ## Install
 
