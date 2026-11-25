@@ -42,6 +42,16 @@ pub struct IndentFacts {
     pub branches: &'static [&'static str],
     /// Words that close a frame.
     pub closers: &'static [&'static str],
+    /// Kinds of the opener of a heredoc (`<<~EOS`) and of its body, which holds its closing label.
+    pub heredoc_openers: &'static [&'static str],
+    pub heredoc_bodies: &'static [&'static str],
+    /// Kinds between a call and its heredoc argument (the argument list).
+    pub heredoc_wrappers: &'static [&'static str],
+    /// Kinds of the brackets that open and close a list of elements, in the same order.
+    pub open_brackets: &'static [&'static str],
+    pub close_brackets: &'static [&'static str],
+    /// Kinds whose children are the elements of a list (arguments, array and hash elements).
+    pub elements: &'static [&'static str],
 }
 
 impl IndentFacts {
@@ -58,6 +68,12 @@ impl IndentFacts {
         keyword_frames: &[],
         branches: &[],
         closers: &[],
+        heredoc_openers: &[],
+        heredoc_bodies: &[],
+        heredoc_wrappers: &[],
+        open_brackets: &[],
+        close_brackets: &[],
+        elements: &[],
     };
 }
 
@@ -75,6 +91,23 @@ pub struct Indents {
     attached: Vec<SyntaxKind>,
     keyword_frames: Vec<SyntaxKind>,
     branches: Vec<SyntaxKind>,
+    heredoc_openers: Vec<SyntaxKind>,
+    heredoc_bodies: Vec<SyntaxKind>,
+    heredoc_wrappers: Vec<SyntaxKind>,
+    open_brackets: Vec<SyntaxKind>,
+    close_brackets: Vec<SyntaxKind>,
+    elements: Vec<SyntaxKind>,
+}
+
+/// A bracket that is open at the current token.
+struct Open {
+    /// The source line of the opener, and whether it is the last token of that line.
+    at: usize,
+    line: usize,
+    hanging: bool,
+    /// The source line of the first element, and how far the line of the last element moved.
+    first: Option<usize>,
+    shift: isize,
 }
 
 /// For the first token of each line: the nodes that start with it, innermost first, and the node
@@ -203,7 +236,64 @@ impl Indents {
             attached: kinds(facts.attached),
             keyword_frames: kinds(facts.keyword_frames),
             branches: kinds(facts.branches),
+            heredoc_openers: kinds(facts.heredoc_openers),
+            heredoc_bodies: kinds(facts.heredoc_bodies),
+            heredoc_wrappers: kinds(facts.heredoc_wrappers),
+            open_brackets: kinds(facts.open_brackets),
+            close_brackets: kinds(facts.close_brackets),
+            elements: kinds(facts.elements),
         }
+    }
+
+    /// The first token of the outermost call that has the heredoc of `opener` as an argument or
+    /// receiver (through calls and argument lists only).
+    fn heredoc_outer(&self, opener: &SyntaxToken) -> Option<SyntaxToken> {
+        let mut outer = None;
+        for n in opener.parent()?.ancestors().skip(1) {
+            if self.chains.contains(&n.kind()) {
+                outer = Some(n);
+            } else if !self.heredoc_wrappers.contains(&n.kind()) {
+                break;
+            }
+        }
+        outer?.first_token()
+    }
+
+    /// The text that replaces the body of the heredocs of the file, by token index
+    /// (`shifts`: how far the line of each token moves). A body that is not at `width` in from its opener's line is moved there when
+    /// its opener is `<<~` (the value stays: every line loses the same indentation); the closing label stands at the opener's
+    /// line, or where it is when the line of the call that holds the heredoc has it.
+    pub fn heredocs(
+        &self,
+        tks: &[Tk],
+        shifts: &[isize],
+        width: usize,
+    ) -> std::collections::HashMap<usize, String> {
+        let mut out = std::collections::HashMap::new();
+        let mut openers: std::collections::VecDeque<(usize, usize)> = Default::default();
+        let mut line_indents = Lines::new(tks.last().map_or(0, |t| t.last_line + 1));
+        let mut line_indent = 0;
+        for (i, tk) in tks.iter().enumerate() {
+            let is_body = self.heredoc_bodies.contains(&tk.kind);
+            if !is_body && (i == 0 || tk.newline) {
+                let shift = shifts.get(i).copied().unwrap_or(0);
+                line_indent = (tk.gap.len() as isize + shift).max(0) as usize;
+                line_indents.insert(tk.first_line, line_indent);
+            }
+            if self.heredoc_openers.contains(&tk.kind) {
+                openers.push_back((i, line_indent));
+            } else if is_body && let Some((o, base)) = openers.pop_front() {
+                let outer = self.heredoc_outer(&tks[o].tok).and_then(|t| {
+                    let at = tks
+                        .partition_point(|k| k.tok.text_range().start() < t.text_range().start());
+                    line_indents.get(&tks.get(at)?.first_line).copied()
+                });
+                if let Some(body) = reindent(tks[o].text(), tk.text(), (base, outer), width) {
+                    out.insert(i, body);
+                }
+            }
+        }
+        out
     }
 
     pub fn is_empty(&self) -> bool {
@@ -227,21 +317,75 @@ impl Indents {
             moved: Lines::new(lines),
             bodies: Default::default(),
         };
+        let mut open: Vec<Open> = Vec::new();
         for i in 0..tks.len() {
-            if !(i == 0 || tks[i].newline) || Some(tks[i].kind) == eof {
-                continue;
+            if (i == 0 || tks[i].newline) && Some(tks[i].kind) != eof {
+                let line = tks[i].first_line;
+                let src = tks[i].gap.len() as isize;
+                let shift = match self.target(&pass, i) {
+                    Some(t) => t as isize - src,
+                    None => match self.in_list(&pass, i, &mut open) {
+                        Some(t) => t as isize - src,
+                        None => open
+                            .iter()
+                            .rev()
+                            .find(|o| o.hanging && o.first.is_some())
+                            .map_or_else(|| self.inherited(&pass, i), |o| o.shift),
+                    },
+                };
+                pass.indent.insert(line, (src + shift).max(0) as usize);
+                pass.moved.insert(line, shift);
+                shifts[i] = shift;
             }
-            let line = tks[i].first_line;
-            let src = tks[i].gap.len() as isize;
-            let shift = match self.target(&pass, i) {
-                Some(t) => t as isize - src,
-                None => self.inherited(&pass, i),
-            };
-            pass.indent.insert(line, (src + shift).max(0) as usize);
-            pass.moved.insert(line, shift);
-            shifts[i] = shift;
+            let kind = tks[i].kind;
+            if self.open_brackets.contains(&kind) {
+                open.push(Open {
+                    at: i,
+                    line: tks[i].first_line,
+                    hanging: tks.get(i + 1).is_some_and(|n| n.newline),
+                    first: None,
+                    shift: 0,
+                });
+            } else if self.close_brackets.contains(&kind) {
+                open.pop();
+            }
         }
         shifts
+    }
+
+    /// Where the line that starts with token `i` stands in the list the innermost open bracket
+    /// holds, when the bracket is the last token of its line: the first element one step in from
+    /// the line of the bracket, later elements under it, the closer at the line of the bracket.
+    fn in_list(&self, pass: &Pass<'_, '_>, i: usize, open: &mut [Open]) -> Option<usize> {
+        let (top, outer) = open.split_last_mut()?;
+        // A list in the arguments of a call whose first argument is on the line of its bracket
+        // stands where the call's arguments stand.
+        if !top.hanging || outer.iter().any(|o| !o.hanging && o.line == top.line) {
+            return None;
+        }
+        if self.close_brackets.contains(&pass.tks[i].kind) {
+            return pass.indent.get(&top.line).copied();
+        }
+        let lead = pass.leads.of(i);
+        // The element belongs to the list that the bracket opens.
+        let list = lead.outermost(&self.elements)?.parent()?;
+        let o = top.at;
+        let j = pass
+            .cx
+            .first_token(&list)
+            .and_then(|t| self.index(pass, &t))?;
+        if j != o && !(j == o + 1 && pass.tks[o].tok.parent() == list.parent()) {
+            return None;
+        }
+        let at = match top.first {
+            None => {
+                top.first = Some(pass.tks[i].first_line);
+                *pass.indent.get(&top.line)? + pass.width
+            }
+            Some(first) => *pass.indent.get(&first)?,
+        };
+        top.shift = at as isize - pass.tks[i].gap.len() as isize;
+        Some(at)
     }
 
     /// The line the token is on, of a token of the stream.
@@ -480,4 +624,50 @@ impl Indents {
         };
         pass.indent.get(&line).copied()
     }
+}
+
+/// The body with its closing label of one heredoc: see
+/// [`Indents::heredocs`].
+fn reindent(
+    opener: &str,
+    body: &str,
+    (base, outer): (usize, Option<usize>),
+    width: usize,
+) -> Option<String> {
+    let squiggly = opener.starts_with("<<~");
+    if body.contains(['\r', '\t']) {
+        return None;
+    }
+    let (text, label) = body.rsplit_once('\n')?;
+    let blank = |l: &str| l.trim().is_empty();
+    let lead = |l: &str| l.len() - l.trim_start().len();
+    let want = base + width;
+    let min = text.split('\n').filter(|l| !blank(l)).map(lead).min();
+    let mut closing = lead(label);
+    let mut out = text.to_string();
+    if let Some(min) = min
+        && squiggly
+        && min != want
+    {
+        out = text
+            .split('\n')
+            .map(|l| match () {
+                // A line of blanks no longer than the indentation is empty in the value.
+                _ if blank(l) && l.len() <= min => String::new(),
+                _ => format!("{}{}", " ".repeat(want), &l[min..]),
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        closing = closing.max(base);
+    }
+    let dashed = squiggly || opener.starts_with("<<-");
+    if dashed && closing != base && outer != Some(closing) {
+        closing = base;
+    }
+    let label = format!(
+        "{}{}",
+        " ".repeat(if dashed { closing } else { lead(label) }),
+        label.trim_start()
+    );
+    Some(format!("{out}\n{label}"))
 }
