@@ -7,6 +7,11 @@ Machine unless noted: AMD Ryzen 5 3600 (6 cores / 12 threads), 32 GB, Windows 11
 |---|---|
 | 13.2 MB of JS-like text, one thread, release, x86-64 Linux agent host, best of 10 (`cargo test --release -p provider-api --lib -- --ignored nesting_cost --nocapture`) | 12.8 GB/s, 1.0 ms; 0.2 percent of the JS parse (20-22 MB/s) |
 
+## `sudsy init --yes`
+| Path | Number |
+|---|---|
+| Scan of the working directory (project walk, provider by file), the tool configs, the files; dev profile (opt-level 1), aarch64 Linux agent host, warm, best of 3 | excalidraw (1,326 files) 27 ms, express (216 files) 17 ms; no other command reads the init code, and the prompt libraries add no start-up work (`sudsy lint`/`format` unchanged in `bench.sh`) |
+
 ## Formatting (`perf-bench`, `format_file` = parse, layout, print, re-parse, tree compare, YAML model compare)
 | Path | Number |
 |---|---|

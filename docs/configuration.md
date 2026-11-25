@@ -3,6 +3,7 @@
 Sudsy reads one `sudsy.yaml` (or `sudsy.yml`) for all languages. The nearest file above the working directory applies. An empty file means the defaults.
 
 ```sh
+sudsy init                       # in a terminal: questions with defaults, then the files
 sudsy init --preset python/ruff   # write a starter sudsy.yaml
 sudsy config print src/app.py     # show every resolved value and its source
 ```
@@ -79,6 +80,8 @@ Every parity number in [languages](languages.md) compares against the reference 
 | Prettier, Biome, ESLint, stylelint | `sudsy init --from <tool>` | The preset (for example `json/prettier-compat`), width, tabs, quotes and other mapped options, rule levels and options that have a Sudsy rule, ignore files as `exclude`. | Plugins, shared configs and rules Sudsy lacks. The command prints each one as `not migrated`. A JavaScript config file (`eslint.config.*`) is refused. |
 | ruff | `extends: [preset:python/ruff]`, then set options by hand: `line_width`, `quote_style`, `magic_trailing_comma`, `target_version` | The formatter style and ruff's default lint set. | `pyproject.toml` is not read. Rules you selected beyond ruff's defaults are not mapped. No `init --from ruff`. |
 | Black | `extends: [preset:python/ruff]` | Black style, through ruff format. Set `line_width` if you changed Black's 88. | `pyproject.toml` is not read. The comparison runs ruff format, not Black itself. |
+
+`sudsy init` in a terminal asks: the languages found (those left out go into `exclude`), one style question (keep the tools found and take over their settings, Sudsy's defaults, or choose per language; two tools that set one value differently are asked about), the lint level (likely bugs only, or full rule sets), the agent instructions, and, when `.vscode/` or a GitHub remote exists, the VS Code extension with format on save and a GitHub Actions job. Every answer has a default, so Enter through all of them is sensible. Esc or Ctrl-C writes nothing. Nothing is asked without a terminal, with a CI variable set or with `--yes`. No file is overwritten: an existing `sudsy.yaml` stops the run, a JSON file is merged, anything else is left alone.
 
 `init --from` accepts: `yamllint`, `prettier`, `biome`, `eslint`, `stylelint`, `stylecop`, `csharpier`, `html-validate`, `htmlhint`, `html-eslint`. It writes only the differences from the extended presets. It replaces an existing `sudsy.yaml` only with `--force`. Details: [ai/config/cli.md](ai/config/cli.md#init---from).
 
@@ -186,7 +189,8 @@ Plain JSON has no comments. Use `overrides` with `"off"` there.
 | `sudsy check [paths]` | `format --check` plus `lint`. For CI. | 1 on any error or unformatted file |
 | `sudsy rules [term] [--language <lang>]` | List rules, explain one by id, or search. | 2 if nothing matches |
 | `sudsy config print [file]` | Show resolved config and sources. | 0 |
-| `sudsy init [--preset <name>] [--force]` | Write a starter `sudsy.yaml`. | 0 |
+| `sudsy init [--preset <name>] [--from <tool>] [--force]` | In a terminal: ask (below), then write `sudsy.yaml`. Otherwise write a starter, or the migration of the `--from` tools. | 0 |
+| `sudsy init --yes [--languages a,b] [--vscode] [--ci] [--agents]` | The same questions with their defaults, also without a terminal; each flag answers its question. | 0 |
 | `sudsy init --agents` | Add a block that says how to run `sudsy check` and `sudsy fix` to `AGENTS.md` (`CLAUDE.md` when only that exists). Never written without the flag; a second run changes nothing. | 0 |
 | `sudsy lsp` | Language server on stdio. | |
 

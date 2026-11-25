@@ -208,6 +208,7 @@ Sudsy does the same work as each tool: `format --check` and `lint` with the pres
 ## Configure
 
 ```sh
+sudsy init                          # in a terminal: asks about languages, style, tool configs to migrate
 sudsy init --preset python/ruff     # a starter sudsy.yaml with one or more presets
 sudsy init --from prettier          # read your .prettierrc and write the matching options
 ```

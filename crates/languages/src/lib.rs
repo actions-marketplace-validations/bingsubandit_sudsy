@@ -19,6 +19,16 @@ use provider_api::LanguageProvider;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+/// The VS Code language ids of a language crate (`lang-css`: `css`, `scss`, `less`), from the
+/// `vscode-languages` of its `lang.yaml`.
+pub fn vscode_languages(crate_name: &str) -> Vec<&'static str> {
+    include_str!("vscode_ids.txt")
+        .lines()
+        .filter_map(|l| l.split_once(' ').filter(|(k, _)| *k == crate_name))
+        .flat_map(|(_, ids)| ids.split(' '))
+        .collect()
+}
+
 /// The providers of the languages Sudsy handles. The C# worker is started on the first C# file
 /// only; when it cannot be found, the C# files fail with the reason and the rest are processed.
 pub fn providers() -> Vec<Box<dyn LanguageProvider>> {

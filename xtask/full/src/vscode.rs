@@ -43,11 +43,14 @@ fn own_language(
         .filter(|p| p.grammar().language == p.language())
 }
 
-/// VS Code language ids, in provider order, each once.
-fn language_ids(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
+/// VS Code language ids of each crate, in provider order, each crate once.
+fn ids_by_crate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(String, Vec<String>)>> {
     let langs = xtask::lang_crate::load(&xtask::repo_root())?;
-    let mut ids: Vec<String> = Vec::new();
+    let mut out: Vec<(String, Vec<String>)> = Vec::new();
     for p in own_language(providers) {
+        if out.iter().any(|(k, _)| k == p.crate_name()) {
+            continue;
+        }
         let lang = langs
             .iter()
             .find(|l| l.krate == p.crate_name())
@@ -56,10 +59,20 @@ fn language_ids(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> 
         if own.is_empty() {
             bail!("{}: lang.yaml has no `vscode-languages`", p.crate_name());
         }
-        for id in own {
-            if !ids.contains(&id) {
-                ids.push(id);
-            }
+        out.push((p.crate_name().to_string(), own));
+    }
+    Ok(out)
+}
+
+/// VS Code language ids, in provider order, each once.
+fn language_ids(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
+    let mut ids: Vec<String> = Vec::new();
+    for id in ids_by_crate(providers)?
+        .into_iter()
+        .flat_map(|(_, ids)| ids)
+    {
+        if !ids.contains(&id) {
+            ids.push(id);
         }
     }
     Ok(ids)
@@ -162,9 +175,15 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         from..end,
         &format!("\"description\": \"{}\",", description(providers)?),
     );
+    // `sudsy init` writes per-language editor settings from this: one line per crate, its ids.
+    let table: String = ids_by_crate(providers)?
+        .iter()
+        .map(|(krate, ids)| format!("{krate} {}\n", ids.join(" ")))
+        .collect();
     Ok(vec![
         (rel.into(), package),
         ("editors/vscode/src/selector.generated.ts".into(), selector),
+        ("crates/languages/src/vscode_ids.txt".into(), table),
     ])
 }
 

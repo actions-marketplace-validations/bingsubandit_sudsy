@@ -13,6 +13,9 @@ publish = false
 [workspace.dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+console = "0.16"
+ctrlc = "3"
+dialoguer = { version = "0.12", default-features = false }
 globset = "0.4"
 ignore = "0.4"
 insta = "1"

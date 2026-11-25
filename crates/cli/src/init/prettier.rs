@@ -27,6 +27,8 @@ pub const UNSUPPORTED: [&str; 11] = [
 /// Languages with `line_width`, `indent_size` and `end_of_line`.
 const ALL: &[&str] = &["json", "yaml", "js", "css", "html"];
 const JS: &[&str] = &["js"];
+/// Markdown takes the tab width (list indentation) and the line ending.
+const MD: &[&str] = &["markdown"];
 const QUOTE_PROPS: [&str; 3] = ["as-needed", "consistent", "preserve"];
 
 pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
@@ -35,10 +37,14 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
     };
     out.extend("json/prettier-compat");
     out.extend("yaml/prettier-compat");
+    out.extend("markdown/prettier-compat");
     for (key, value) in root {
         match (key.as_str(), value) {
             ("printWidth", v) if v.is_u64() => out.opt("printWidth", ALL, "line_width", v.clone()),
-            ("tabWidth", v) if v.is_u64() => out.opt("tabWidth", ALL, "indent_size", v.clone()),
+            ("tabWidth", v) if v.is_u64() => {
+                out.opt("tabWidth", ALL, "indent_size", v.clone());
+                out.opt_free(MD, "indent_size", v.clone());
+            }
             ("useTabs", Value::Bool(true)) => {
                 out.opt(
                     "useTabs",
@@ -50,6 +56,7 @@ pub fn migrate(config: &Value, out: &mut Out) -> Result<()> {
             ("useTabs", Value::Bool(false)) => {}
             ("endOfLine", Value::String(s)) if matches!(s.as_str(), "lf" | "crlf" | "auto") => {
                 out.opt("endOfLine", ALL, "end_of_line", s.clone());
+                out.opt_free(MD, "end_of_line", s.clone());
             }
             ("endOfLine", _) => {
                 out.skip_why("endOfLine", "`cr` is not supported; use lf, crlf or auto")
