@@ -19,9 +19,12 @@ rule! {
         category: Cleanup,
         default: Off,
         fix: Safe,
-        description: "A `using` directive that nothing in the file needs (the compiler's hidden \
-                  CS8019, IDE0005 in the SDK analyzers). Not reported in a file that has compiler errors or `#if` regions, \
-                  because unresolved or inactive code could be the one using it.",
+        description: "Reports a `using` directive that nothing in the file needs. It is not reported in a \
+                  file that has compiler errors or `#if` regions, because unresolved or inactive code \
+                  could be the one using it. The fix removes the directive.",
+        why: "An unused `using` adds noise at the top of the file, suggests a dependency that does \
+                  not exist, and slows the compiler a little. Removing them keeps the list of what the \
+                  file uses true.",
         example: "using System.Text;   // nothing from System.Text is used",
         requires: [Binding],
     }
@@ -63,9 +66,12 @@ rule! {
         id: "possible-null-dereference",
         category: Correctness,
         default: Off,
-        description: "A member or element access on an expression the compiler's nullable analysis \
-                  says may be null. Only code under `#nullable enable` is checked. Off by \
-                  default: the compiler reports the same thing as CS8602.",
+        description: "Reports a member or element access on an expression that the nullable analysis says \
+                  may be null. Only code under `#nullable enable` is checked. Off by default: the \
+                  compiler reports the same thing.",
+        why: "Dereferencing a null reference throws `NullReferenceException` at run time, so the \
+                  warning points at a crash that the code allows.\n\
+                  To fix, check for null before the access, or change the type if it cannot be null.",
         example: "string? s = Find();\nint n = s.Length;   // s may be null",
         requires: [Values],
     }
@@ -89,9 +95,15 @@ rule! {
         id: "unused-private-member",
         category: Cleanup,
         default: Warn,
-        description: "A private field, method, property or event that no file of the project uses \
-                  (`analysis: deep`). Members with attributes, overrides, interface \
-                  implementations, `extern` and `partial` methods are left alone, and so are the private                   methods named in `reflection_methods` of a type derived from one of                   `reflection_base_types` (a framework calls them by reflection; the `csharp/unity`                   preset lists Unity's). Overlaps the SDK analyzers IDE0051 (unused private member) and IDE0052 (unread private member).",
+        description: "Reports a private field, method, property or event that no file of the project uses \
+                  (needs `analysis: deep`). Members with attributes, overrides, interface \
+                  implementations, `extern` and `partial` methods are not reported, and neither are \
+                  the private methods named in `reflection_methods` of a type derived from one of \
+                  `reflection_base_types` (a framework calls them by reflection; the `csharp/unity` \
+                  preset lists Unity's).",
+        why: "A private member that nothing uses is dead code that readers have to understand, \
+                  tests and refactorings have to keep, and the compiler has to compile.\n\
+                  To fix, delete it.",
         example: "class A { private int cache; }   // cache is never used",
         requires: [Types, Project],
         options: [

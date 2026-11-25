@@ -6,9 +6,16 @@ params:
   ignored: declaration<constant-declaration|declaration<field-declaration&static&final|method-declaration&@Override=Identifier:last
   message: "abbreviation in name `{name}` must contain no more than one consecutive capital letter"
 description: >-
-  A name has two or more capital letters in a row (Checkstyle AbbreviationAsWordInName with
-  `allowedAbbreviationLength` 0): write `XmlParser`, not `XMLParser`. Constants and overridden
-  methods are left out.
+  Reports a name with two or more capital letters in a row (`XMLParser`), for type, method,
+  parameter, field and local variable names that match the `names` option. Names that match
+  `ignored` (constants and overridden methods by default) are not reported. With an empty `names`
+  the rule checks nothing.
+why: >-
+  A run of capitals hides where one word ends and the next starts: `XMLHTTPRequest` does not show if
+  it is XML HTTP or XMLH TTP, and tools that split names into words get it wrong. Treating an
+  abbreviation as a word (`XmlHttpRequest`) keeps the name readable and its camel case regular.
+
+  To fix, write the abbreviation as a word: `XmlParser`.
 example: "class XMLParser {}"
 severity: off
 category: style

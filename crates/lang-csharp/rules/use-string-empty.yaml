@@ -1,8 +1,13 @@
 id: use-string-empty
 message: use string.Empty for an empty string
 description: >-
-  `string.Empty` instead of `""` (or `@""`). Not reported where a constant is required:
-  `const`, attribute arguments, default parameter values, `case` labels and patterns.
+  Reports `""` (or `@""`) where `string.Empty` can be used. It is not reported where a constant is
+  required: `const`, attribute arguments, default parameter values, `case` labels and patterns.
+why: >-
+  `string.Empty` states that the string is empty on purpose, while `""` can be a value that was
+  forgotten. It is a convention that some projects choose and others do not.
+
+  To fix, write `string.Empty`.
 example: 'var s = "";   // write: var s = string.Empty;'
 severity: off
 category: style

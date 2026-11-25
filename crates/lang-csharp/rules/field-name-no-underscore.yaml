@@ -4,7 +4,15 @@ params:
   match: regex
   fields: field-declaration=declaration/variables/identifier
   message: "field `{name}` must not begin with an underscore"
-description: "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match."
+description: >-
+  Reports a field whose name begins with an underscore. The option `fields` is the expression a
+  field name must match.
+why: >-
+  The convention of many style guides names fields in camel case without a prefix and tells them
+  from locals by writing `this.`. A leading underscore is the other convention; a project picks one,
+  and the rule enforces it.
+
+  To fix, rename the field.
 example: "class C { int _count; }"
 severity: off
 category: style

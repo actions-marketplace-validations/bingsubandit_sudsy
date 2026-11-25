@@ -1,7 +1,12 @@
 id: package-defined
 message: 'the file has no package'
 description: >-
-  A file without a `package` statement (buf lint PACKAGE_DEFINED).
+  Reports a file without a `package` statement.
+why: >-
+  Without a package every name is global, so two files from different projects that define `Order`
+  collide, and the generated code puts the types in the default namespace.
+
+  To fix, add a `package` statement.
 example: 'syntax = "proto3";'
 severity: off
 category: style
@@ -11,8 +16,12 @@ report-on: first-token
 id: syntax-specified
 message: 'the file has no syntax or edition statement'
 description: >-
-  A file without `syntax = ...;` or `edition = ...;`, which makes it proto2 (buf lint
-  SYNTAX_SPECIFIED).
+  Reports a file without `syntax = ...;` or `edition = ...;`, which makes it proto2.
+why: >-
+  A file without the statement is proto2 by default. New files almost always mean proto3 or an
+  edition, and with the default they get required fields and other rules that differ.
+
+  To fix, add `syntax = "proto3";` or an `edition`.
 example: 'package a;'
 severity: off
 category: style
@@ -22,8 +31,13 @@ report-on: first-token
 id: package-version-suffix
 message: 'the last component of the package is a version such as v1'
 description: >-
-  A package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1`
-  (`v1beta` too; buf lint PACKAGE_VERSION_SUFFIX).
+  Reports a package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or
+  `v1p1alpha1` (`v1beta` too).
+why: >-
+  A version in the package lets an incompatible API live next to the old one under another name
+  (`api.v2`) instead of breaking its users. Without it a breaking change has to be made in place.
+
+  To fix, add a version component, for example `acme.orders.v1`.
 example: 'package a.b;'
 severity: off
 category: style
@@ -32,7 +46,13 @@ rule: { kind: FullIdent, parent: { kind: Package }, not: { regex: '(?:^|\.)v[1-9
 id: import-no-public
 message: 'public imports are discouraged'
 description: >-
-  `import public` (buf lint IMPORT_NO_PUBLIC).
+  Reports `import public`.
+why: >-
+  A public import makes the imported file's names visible to every file that imports this one. The
+  dependency spreads without being written down, and a change in the imported file breaks files that
+  never mention it.
+
+  To fix, import the files where their names are used.
 example: 'import public "a.proto";'
 severity: off
 category: suspicious
@@ -41,7 +61,13 @@ rule: { kind: Import, regex: '^import\s+public\b' }
 id: field-not-required
 message: 'the field is required'
 description: >-
-  A proto2 `required` field (buf lint FIELD_NOT_REQUIRED).
+  Reports a proto2 `required` field.
+why: >-
+  A required field can never be removed or made optional without breaking every reader and writer
+  that was built before the change: an old reader rejects messages without it. Protobuf's own advice
+  is to avoid `required`.
+
+  To fix, make it `optional` and check for it in the code.
 example: 'required string a = 1;'
 severity: off
 category: suspicious
@@ -50,7 +76,13 @@ rule: { kind: Field, regex: '^required\b' }
 id: service-suffix
 message: 'service names end in Service'
 description: >-
-  A service whose name does not end in `Service` (buf lint SERVICE_SUFFIX with its default suffix).
+  Reports a service whose name does not end in `Service`.
+why: >-
+  The suffix tells a reader of the generated code, which has clients and servers of the service,
+  that the name is a service. It also keeps the service from clashing with the message of the same
+  name.
+
+  To fix, rename it `OrdersService`.
 example: 'service Foo {}'
 severity: off
 category: style
@@ -60,7 +92,12 @@ id: file-lower-snake-case
 family: file-name
 params: { option: pattern, message: "the file name {name} should be lower_snake_case" }
 description: >-
-  The file name (without `.proto`) is not lower_snake_case (buf lint FILE_LOWER_SNAKE_CASE).
+  Reports a file whose name (without `.proto`) is not lower_snake_case.
+why: >-
+  The Protobuf style guide names files in lower_snake_case, and generated file names and import
+  paths derive from it. A different style gives different names in each language.
+
+  To fix, rename the file and update the imports.
 example: 'FooBar.proto'
 severity: off
 category: style

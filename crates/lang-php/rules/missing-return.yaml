@@ -6,9 +6,15 @@ params:
   skip-names: __construct __destruct
   doc: '@return\s+(.+)'
 description: >-
-  A function or method whose native return type or `@return` tag is not `void` or `never` and whose
-  end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left
-  out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen.
+  Reports a function or method whose native return type or `@return` tag is not `void` or `never`
+  and whose end can be reached without a `return` or `throw`, on the function. Generators are not
+  reported, and a call that never returns (`exit`, `die`, a `@return never` function) is not seen.
+why: >-
+  The function runs off its end and returns `null`, which breaks the declared type: a native type
+  gives a `TypeError` at run time, and a documented type gives the caller a `null` where it expects
+  a value.
+
+  To fix, return a value on every path, or throw.
 example: "function f(): int { if ($a) { return 1; } }"
 severity: off
 category: correctness

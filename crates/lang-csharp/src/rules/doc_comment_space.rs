@@ -14,9 +14,12 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A documentation line (`///`) starts with a single space. More spaces are \
-                  allowed to indent continuation lines, not on the first line of the comment; a \
-                  tab or no space is always reported.",
+        description: "Reports a documentation line (`///`) that does not start with a single space. More \
+                  spaces are allowed to indent continuation lines, but not on the first line of the \
+                  comment; a tab or no space is always reported. The fix writes the single space.",
+        why: "The space after the slashes separates the marker from the text, so the text of a \
+                  comment reads the same as a line of prose. A comment that starts at the slashes \
+                  (`///<summary>`) is hard to read and differs from the rest of the file.",
         example: "///<summary>x</summary>   // write: /// <summary>x</summary>",
     }
 

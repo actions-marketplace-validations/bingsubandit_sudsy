@@ -1,8 +1,13 @@
 id: string-literal-equality
 message: 'strings are compared with `equals`, not `==` or `!=`'
 description: >-
-  `==` or `!=` with a string literal as an operand compares references (Checkstyle
-  StringLiteralEquality).
+  Reports `==` or `!=` with a string literal as an operand.
+why: >-
+  `==` on strings compares references, not text. It works for two literals because they are interned
+  and fails for a string that was built or read, so the code passes its tests and breaks on real
+  data.
+
+  To fix, use `equals`: `"a".equals(s)`.
 example: 'if (s == "a") {}'
 severity: warn
 category: correctness
@@ -13,8 +18,13 @@ rule:
 id: equals-hash-code
 message: 'the class defines `equals(Object)` but not `hashCode()`'
 description: >-
-  A class body that declares `boolean equals(Object)` and no `hashCode()`: equal objects get
-  different hash codes (Checkstyle EqualsHashCode).
+  Reports a class that declares `boolean equals(Object)` and does not declare `hashCode()`.
+why: >-
+  Objects that are equal must have the same hash code. Without an own `hashCode` the one of `Object`
+  is used, so two equal objects land in different buckets and a `HashMap` or `HashSet` does not find
+  them.
+
+  To fix, declare `hashCode()` from the same fields as `equals`.
 example: 'class A { public boolean equals(Object o) { return true; } }'
 severity: warn
 category: correctness
@@ -29,7 +39,12 @@ report-on: first-token
 id: missing-switch-default
 message: 'the switch has no `default` label'
 description: >-
-  A `switch` statement with no `default` (Checkstyle MissingSwitchDefault).
+  Reports a `switch` statement that has no `default` label.
+why: >-
+  Without `default`, a value that no `case` names is ignored without notice, so a new enum constant
+  or an unexpected input falls through the switch and the program goes on with the wrong state.
+
+  To fix, add a `default` that handles the case or throws.
 example: 'switch (x) { case 1: f(); }'
 severity: warn
 category: suspicious
@@ -41,7 +56,13 @@ report-on: first-token
 id: empty-statement
 message: 'a lone `;` is an empty statement'
 description: >-
-  A `;` that is the body of an `if` or a loop, such as `while (x);` (Checkstyle EmptyStatement).
+  Reports a lone `;` that is the body of an `if` or a loop, such as `while (x);`, on the `;`.
+why: >-
+  The semicolon ends the statement, so the code that follows on the next line is not the body of the
+  loop, whatever its indentation says. It is a typical typo, and the loop either does nothing or
+  never ends.
+
+  To fix, delete the `;`, or write `{}` if an empty body is meant.
 example: 'while (x);'
 severity: warn
 category: suspicious
@@ -52,7 +73,12 @@ token: { kind: [Semi] }
 id: upper-ell
 message: 'write the long suffix as `L`: `l` looks like `1`'
 description: >-
-  An integer literal that ends in a lower case `l` (Checkstyle UpperEll).
+  Reports an integer literal that ends in a lower case `l` (`10l`).
+why: >-
+  A lower case `l` looks like the digit `1`, so `10l` reads as `101`. The upper case suffix cannot
+  be mistaken.
+
+  To fix, write `10L`.
 example: 'long x = 10l;'
 severity: warn
 category: suspicious

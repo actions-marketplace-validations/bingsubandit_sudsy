@@ -14,10 +14,11 @@ params:
   message: "name `{name}` must match `{convention}`"
   message.packages: "package name `{name}` must match `{convention}`"
 description: >-
-  A name does not match the regular expression set for what it names (Checkstyle PackageName,
-  TypeName, MethodName, MemberName, ConstantName, ParameterName, CatchParameterName and
-  LocalVariableName). A `static final` field is a constant, as is a field of an interface; the
-  other fields are members. No fix: renaming changes every use.
+  Reports a name that does not match the regular expression set for what it names: packages, types,
+  methods (test methods may have their own), fields, constants, parameters, catch parameters and
+  local variables. A `static final` field is a constant, as is a field of an interface; the other
+  fields are members. An empty expression leaves that kind unchecked. No fix: renaming changes every
+  use.
 example: "class my_class {   // types: ^[A-Z][a-zA-Z0-9]*$\n}"
 severity: off
 category: style

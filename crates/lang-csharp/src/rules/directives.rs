@@ -41,7 +41,10 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "No space between `#` and the directive keyword (`#if`, not `# if`).",
+        description: "Reports a preprocessor directive that has a space between `#` and its keyword (`# \
+                  if`). The fix removes the space.",
+        why: "The convention writes the directive as one word, `#if`, `#region`, so a search for \
+                  it finds all of them and the directives look alike.",
         example: "# if DEBUG   // write: #if DEBUG",
         kinds: DIRECTIVES,
     }

@@ -1,6 +1,14 @@
 id: unsafe-new-static
 message: "`new static` can build a subclass with another constructor: make the class or its constructor final"
-description: "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is."
+description: >-
+  Reports `new static` in a class that is not final and has no final or abstract constructor of its
+  own. A constructor or a final parent in another file cannot be seen; the
+  `@phpstan-consistent-constructor` tag of the class itself is.
+why: >-
+  `new static` builds the class of the caller, so a subclass can be built with its own constructor
+  with other parameters, and the call in the parent fails with a missing argument.
+
+  To fix, make the class or the constructor final, or call `new self`.
 example: "class A { function make() { return new static(); } }"
 severity: off
 category: suspicious
@@ -21,7 +29,14 @@ report-on: first-token
 ---
 id: no-inner-function
 message: "A named function declared inside a function or method only exists after the outer one has run: declare it at the top level or use a closure"
-description: "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner)."
+description: >-
+  Reports a `function name() {}` statement in the body of a function, method or closure.
+why: >-
+  The inner function is declared when the outer one runs, so it does not exist before the first
+  call, and a second call of the outer function fails with an error that the function is already
+  declared.
+
+  To fix, declare the function at the top level, or use a closure.
 example: "function a() { function b() {} }"
 severity: off
 category: suspicious
@@ -32,7 +47,13 @@ report-on: first-token
 ---
 id: implicit-nullable-parameter
 message: "The type is nullable only through the `null` default: write `?` before the type (deprecated in PHP 8.4)"
-description: "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable)."
+description: >-
+  Reports a parameter with a type that does not allow `null` and a `null` default (`int $a = null`).
+why: >-
+  The parameter is nullable only through the default, which is deprecated since PHP 8.4 and a notice
+  to code that runs there. The type says one thing and the default another.
+
+  To fix, write the nullable type: `?int $a = null`.
 example: "function f(int $a = null) {}"
 severity: off
 category: suspicious
@@ -44,7 +65,15 @@ constraints:
 ---
 id: no-unset-hookable-property
 message: "`unset` of `$this->${NAME}`: a subclass may give the property a hook, which cannot be unset"
-description: "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty)."
+description: >-
+  Reports `unset($this->name)` of a property the class declares when a subclass could give the
+  property a hook (PHP 8.4): the class is not final and the property is not private, final, static
+  or readonly.
+why: >-
+  A property with a hook cannot be unset, so the call fails with an error in the subclass that
+  overrides the property, while it works in the class that wrote it.
+
+  To fix, set the property to `null` instead, or make the class or the property final.
 example: "class A { public $a; function f() { unset($this->a); } }"
 severity: off
 category: suspicious

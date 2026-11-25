@@ -4,9 +4,15 @@ params:
   check: visible
   message: "write the character itself instead of its unicode escape, or explain the escape in a comment on the line"
 description: >-
-  A string or character literal writes a visible character as a `\uXXXX` escape, and the line has
-  no trailing comment (Checkstyle AvoidEscapedUnicodeCharacters). Escapes of control, space and
-  format characters are fine.
+  Reports a string or character literal that writes a visible character as a `\uXXXX` escape when
+  the line has no trailing comment. Escapes of control, space and format characters are not
+  reported.
+why: >-
+  The escape hides the character: the reader has to decode `é` to know it is an `é`, and cannot see
+  a typo in the code. The source file is UTF-8, so the character itself is safe. An escape stays
+  useful when a comment explains it, which is why a comment on the line allows it.
+
+  To fix, write the character itself, or add a trailing comment that says what it is.
 example: 'String s = "é";'
 severity: off
 category: style
@@ -19,8 +25,14 @@ params:
   octal: "true"
   message: "use the special escape sequence (`\\n`, `\\t`, `\\\"`) instead of an octal or unicode escape of the same character"
 description: >-
-  A string or character literal writes backspace, tab, line feed, form feed, carriage return,
-  a quote or a backslash as an octal or unicode escape (Checkstyle IllegalTokenText).
+  Reports a string or character literal that writes a backspace, tab, line feed, form feed, carriage
+  return, quote or backslash as an octal or unicode escape (`\u0009`).
+why: >-
+  These characters have their own escapes (`\b`, `\t`, `\n`, `\f`, `\r`, `\"`, `\'`, `\\`) which
+  every reader knows. A unicode escape for a line feed is even translated before the lexer runs, so
+  `\u000a` in a string ends the line and does not compile.
+
+  To fix, use the special escape.
 example: 'String s = "\u0009";'
 severity: off
 category: style

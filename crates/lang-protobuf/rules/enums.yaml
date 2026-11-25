@@ -1,7 +1,12 @@
 id: enum-value-upper-snake-case
 message: 'enum value names are UPPER_SNAKE_CASE'
 description: >-
-  An enum value name that is not UPPER_SNAKE_CASE (buf lint ENUM_VALUE_UPPER_SNAKE_CASE).
+  Reports an enum value name that is not UPPER_SNAKE_CASE.
+why: >-
+  The Protobuf style guide writes enum values in UPPER_SNAKE_CASE, as the generated code of many
+  languages writes constants.
+
+  To fix, rename the value.
 example: 'enum E { Foo = 0; }'
 severity: off
 category: style
@@ -11,8 +16,12 @@ token: { kind: [Ident], not-regex: '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$' }
 id: enum-zero-value-suffix
 message: 'the zero value of an enum ends in _UNSPECIFIED'
 description: >-
-  An enum value numbered 0 whose name does not end in `_UNSPECIFIED` (buf lint
-  ENUM_ZERO_VALUE_SUFFIX with its default suffix).
+  Reports an enum value numbered 0 whose name does not end in `_UNSPECIFIED`.
+why: >-
+  The zero value is what a field has when it is not set, so its name should say "nothing chosen". A
+  zero value named `ACTIVE` makes missing data look like a real choice.
+
+  To fix, name it `<ENUM>_UNSPECIFIED`.
 example: 'enum E { E_NONE = 0; }'
 severity: off
 category: style
@@ -22,7 +31,13 @@ token: { kind: [Ident], not-regex: '_UNSPECIFIED$' }
 id: enum-no-allow-alias
 message: 'the enum allows aliases'
 description: >-
-  `option allow_alias = true;` in an enum (buf lint ENUM_NO_ALLOW_ALIAS).
+  Reports `option allow_alias = true;` in an enum.
+why: >-
+  Aliases give two names to one number. A value read from the wire becomes one of the names, which
+  one depends on the generator, so the name in the code is not stable, and JSON output shows one of
+  them.
+
+  To fix, give each value its own number, and remove the option.
 example: 'enum E { option allow_alias = true; A = 0; B = 0; }'
 severity: off
 category: suspicious
@@ -31,7 +46,14 @@ rule: { kind: OptionDecl, parent: { kind: EnumBody }, regex: '^option\s+allow_al
 id: enum-first-value-zero
 message: 'the first value of an enum must be 0'
 description: >-
-  The first value of an enum is not 0 (buf lint ENUM_FIRST_VALUE_ZERO). Proto3 and editions with open enums require it; proto2 files (also those with no `syntax`) are checked only with the `proto2` option.
+  Reports an enum whose first value is not 0. Proto3 and editions with open enums require it; proto2
+  files (also those with no `syntax`) are checked only with the `proto2` option.
+why: >-
+  In proto3 the default of an enum field is the first value, and the value that a reader sees when
+  the field is not set. It has to be 0, and a first value that means something real (`ACTIVE = 1`
+  and a hidden 0) makes unset data look valid.
+
+  To fix, make the first value 0 and name it for "not set".
 example: 'enum E { A = 1; }'
 category: correctness
 options:
@@ -47,8 +69,13 @@ token: { kind: [Int], not-regex: '^(?:0[xX])?0*$' }
 id: enum-value-prefix
 message: 'the value `$0` should start with `${NAME:upper-snake}_`'
 description: >-
-  An enum value does not start with the enum's name in UPPER_SNAKE_CASE and an underscore (buf lint
-  ENUM_VALUE_PREFIX).
+  Reports an enum value that does not start with the name of the enum in UPPER_SNAKE_CASE and an
+  underscore (`COLOR_RED` in `Color`).
+why: >-
+  Enum values are scoped to the enclosing message or file, not to the enum, as in C++. Two enums in
+  one scope with a value `RED` collide, and the prefix prevents it.
+
+  To fix, add the prefix to the value.
 example: 'enum FooBar { BAZ = 0; }'
 severity: off
 category: style

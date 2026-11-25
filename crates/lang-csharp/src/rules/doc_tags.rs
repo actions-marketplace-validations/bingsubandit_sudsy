@@ -16,8 +16,10 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A `<returns>` on a method or delegate that returns `void`. The fix removes the element \
-                  with its line when it is alone on it.",
+        description: "Reports a `<returns>` on a method or delegate that returns `void`. The fix removes \
+                  the element with its line when it is alone on it.",
+        why: "There is nothing to return, so the tag documents a value that does not exist and is \
+                  shown in the reference as a result.",
         example: "/// <returns>Nothing.</returns>   // remove it\npublic void Run() { }",
         kinds: DOC_KINDS,
     }
@@ -60,8 +62,12 @@ rule! {
         id: "doc-partial-typeparams",
         category: Style,
         default: Off,
-        description: "A documented partial generic type (with a `<summary>`) that has no `<typeparam>` for one \
-                  of its type parameters. Each part is checked on its own. No fix.",
+        description: "Reports a documented partial generic type (one that has a `<summary>`) that has no \
+                  `<typeparam>` for one of its type parameters, on the parameter. Each part is checked \
+                  on its own. No fix.",
+        why: "Without the tag a reader of the documentation sees `T` and has to read the code to \
+                  learn what it stands for.\n\
+                  To fix, add `<typeparam name=\"T\">` with the meaning of `T`.",
         example: "/// <summary>Box.</summary>\npublic partial class Box<T> { }   // add <typeparam name=\"T\">",
         kinds: DOC_KINDS,
     }

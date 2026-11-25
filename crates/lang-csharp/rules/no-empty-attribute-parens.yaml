@@ -1,6 +1,11 @@
 id: no-empty-attribute-parens
 message: the attribute has empty parentheses
-description: "An attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are left alone."
+description: >-
+  Reports an attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in
+  them are not reported. The fix removes the parentheses.
+why: >-
+  The parentheses add two characters and no meaning: the attribute is constructed in both cases with
+  its parameterless constructor.
 example: "[Obsolete()]   // write: [Obsolete]"
 severity: off
 category: style

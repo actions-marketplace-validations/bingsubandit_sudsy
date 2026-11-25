@@ -2,7 +2,14 @@ id: doc-param-has-name
 family: doc-element
 params: { check: name, element: param, scope: element, report: attribute }
 message: "the <param> should declare the parameter name"
-description: "A `<param>` without a `name` attribute, or with an empty one. No fix."
+description: >-
+  Reports a `<param>` in a documentation comment that has no `name` attribute, or an empty one. No
+  fix.
+why: >-
+  The `name` is how the tools connect the text to a parameter. A `<param>` without it is
+  documentation that tells the IDE nothing and is shown nowhere.
+
+  To fix, add `name="value"` with the name of the parameter.
 example: "/// <param>The value.</param>   // write <param name=\"value\">\nvoid Set(int value) { }"
 severity: off
 category: style

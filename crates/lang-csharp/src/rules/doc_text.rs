@@ -30,8 +30,12 @@ rule! {
         id: "no-duplicate-doc-text",
         category: Style,
         default: Off,
-        description: "Two elements of one documentation comment with the same text (a copied and pasted \
-                  `<param>`, for example). Empty elements and \"The parameter is not used.\" are ignored. No fix.",
+        description: "Reports two elements of one documentation comment with the same text (a `<param>` \
+                  pasted twice, for example). Empty elements and \"The parameter is not used.\" are not \
+                  reported. No fix.",
+        why: "Two parameters described in the same words is almost always a copy and paste that \
+                  was not edited, so one of the descriptions is wrong.\n\
+                  To fix, write the right text for each element.",
         example: "/// <param name=\"a\">The value.</param>\n/// <param name=\"b\">The value.</param>   // describe b\nvoid M(int a, int b) { }",
         kinds: DOC_KINDS,
     }
@@ -62,9 +66,13 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A `///` comment that holds only text, no XML element: a plain comment written with \
-                  documentation slashes. The fix writes `//`, unless the comment documents a declaration \
-                  (it would remove documentation).",
+        description: "Reports a `///` comment that holds only text and no XML element: a plain comment \
+                  written with documentation slashes. The fix writes `//`, unless the comment \
+                  documents a declaration (it would remove documentation).",
+        why: "Three slashes make the comment documentation, and the compiler and tools then read \
+                  it as XML. A plain remark written that way is attached to the next declaration and \
+                  shown in its hover, or reported as malformed.\n\
+                  To fix, write `//`.",
         example: "/// helper for the loop   // write //\nint i;",
         kinds: &[kind::SINGLE_LINE_DOCUMENTATION_COMMENT_TRIVIA],
     }
@@ -92,8 +100,11 @@ rule! {
         id: "doc-text-not-empty",
         category: Style,
         default: Off,
-        description: "A `<remarks>`, `<example>`, `<exception>` or `<permission>` element without text, \
-                  written `<remarks></remarks>` or `<remarks />`. No fix.",
+        description: "Reports a `<remarks>`, `<example>`, `<exception>` or `<permission>` element without \
+                  text, written `<remarks></remarks>` or `<remarks />`. No fix.",
+        why: "An empty element is shown as a heading with nothing below it in the generated \
+                  documentation, so it adds noise and hides that the text was never written.\n\
+                  To fix, write the text or delete the element.",
         example: "/// <remarks></remarks>   // write something or remove it\nclass A { }",
         kinds: &[kind::XML_ELEMENT, kind::XML_EMPTY_ELEMENT],
     }
@@ -116,7 +127,10 @@ rule! {
         id: "no-doc-placeholder",
         category: Style,
         default: Off,
-        description: "A `<placeholder>` element in a documentation comment. No fix.",
+        description: "Reports a `<placeholder>` element in a documentation comment. No fix.",
+        why: "`<placeholder>` marks text that is to be filled in later, so a comment that has one \
+                  is not finished.\n\
+                  To fix, write the text.",
         example: "/// <placeholder>todo</placeholder>   // write the documentation\nclass A { }",
         kinds: &[kind::XML_ELEMENT, kind::XML_EMPTY_ELEMENT],
     }
@@ -257,11 +271,16 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "The last text of an element of a documentation comment does not end with a period \
-                  (`.` or `.)`). Each paragraph of `<para>` and `<note>` is checked, a paragraph that ends in \
-                  a colon (except the last), `-or-` and `<seealso>` are left alone, and an inline element \
-                  (`<see />`, `<c>`, ...) at the end counts as not ending with a period. The fix adds the \
-                  period, or replaces a trailing comma or semicolon with it.",
+        description: "Reports the last text of an element of a documentation comment that does not end \
+                  with a period (`.` or `.)`). Each paragraph of `<para>` and `<note>` is checked. A \
+                  paragraph that ends in a colon (except the last), `-or-` and `<seealso>` are not \
+                  reported, and an inline element (`<see />`, `<c>`, ...) at the end counts as not \
+                  ending with a period. The fix adds the period, or replaces a trailing comma or \
+                  semicolon with it.",
+        why: "Documentation is read as sentences in the generated reference, where the elements \
+                  are shown one below the other. Text with and without the final period looks uneven, \
+                  and the missing period is the first thing that shows that a sentence was not \
+                  finished.",
         example: "/// <summary>Counts the items</summary>   // Counts the items.\nint Count();",
         kinds: DOC_KINDS,
     }

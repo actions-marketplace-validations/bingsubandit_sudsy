@@ -23,10 +23,13 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "`int?` instead of `Nullable<int>` or `System.Nullable<int>`. Name-based: a \
-                  type of your own called `Nullable` is reported too. Not reported in `using` \
-                  aliases, `nameof`, `typeof(Nullable<>)` and before a member access \
-                  (`Nullable<int>.Equals`).",
+        description: "Reports `Nullable<int>` or `System.Nullable<int>`, which is `int?`. The check is by \
+                  name: a type of your own called `Nullable` is reported too. It is not reported in \
+                  `using` aliases, in `nameof`, in `typeof(Nullable<>)`, and before a member access \
+                  (`Nullable<int>.Equals`). The fix writes `int?`.",
+        why: "`int?` is the form of the language and is shorter. One spelling makes the nullable \
+                  types easy to find, and `Nullable<T>` stays for the places where the generic name is \
+                  the point.",
         example: "Nullable<int> x;   // write: int? x;",
         kinds: &[kind::GENERIC_NAME],
     }
@@ -100,9 +103,13 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A lambda instead of an anonymous method. The fix is offered when the anonymous \
-                  method has a parameter list and no comment before its body; `delegate { }` \
-                  without one converts to delegate types with any parameters, so it has no fix.",
+        description: "Reports an anonymous method (`delegate (x) { ... }`) where a lambda can be written. \
+                  The fix is offered when the anonymous method has a parameter list and no comment \
+                  before its body; `delegate { }` without a parameter list converts to delegate types \
+                  with any parameters, so it has no fix.",
+        why: "Lambdas are the short and usual form, and they bind the same way for the common \
+                  cases. One form for all code avoids the extra keyword and makes the file read the \
+                  same.",
         example: "Func<int, int> f = delegate (int x) { return x; };   // write: (int x) => { return x; }",
         kinds: &[kind::ANONYMOUS_METHOD_EXPRESSION],
     }
@@ -200,10 +207,12 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or \
-                  `decimal` when the literal's own type differs: `(long)1` is `1L`. Not reported \
-                  for hexadecimal and binary literals cast to a floating-point type, which have \
-                  no suffix.",
+        description: "Reports a numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or \
+                  `decimal` when the literal's own type differs: `(long)1` is `1L`. Hexadecimal and \
+                  binary literals cast to a floating-point type are not reported, since they have no \
+                  suffix. The fix writes the suffix.",
+        why: "The suffix gives the literal its type directly. A cast does the same at run time or \
+                  as a constant, and it hides that the literal is a number of another type.",
         example: "var x = (long)1;   // write: var x = 1L;",
         kinds: &[kind::CAST_EXPRESSION],
     }

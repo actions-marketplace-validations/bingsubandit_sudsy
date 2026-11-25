@@ -16,9 +16,11 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "One attribute per attribute list: `[A, B]` becomes `[A]` and `[B]`. Lists on \
-                  parameters and type parameters are left alone. The fix is not offered when the \
-                  list has a comment in it.",
+        description: "Reports an attribute list with several attributes: `[A, B]` is `[A]` and `[B]`. \
+                  Lists on parameters and type parameters are not reported. The fix is not offered \
+                  when the list has a comment in it.",
+        why: "One attribute to a list gives each its own line, so a diff shows exactly the \
+                  attribute that was added or removed and a comment can be put on one.",
         example: "[Serializable, Obsolete]   // write one list for each",
         kinds: &[kind::ATTRIBUTE_LIST],
     }

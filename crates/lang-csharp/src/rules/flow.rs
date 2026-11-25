@@ -96,10 +96,15 @@ rule! {
         id: "unused-assignment",
         category: Cleanup,
         default: Off,
-        description: "A value is stored in a local variable and no path reads it before it is \
-                  overwritten or the variable goes out of scope (a dead store). Variables that \
-                  are captured or whose address is taken are not checked; a variable that is \
-                  never read at all is reported by `unused-variable` instead. Overlaps the SDK analyzer IDE0059 (unnecessary assignment).",
+        description: "Reports a value stored in a local variable that no path reads before it is \
+                  overwritten or the variable goes out of scope (a dead store). Variables that are \
+                  captured or whose address is taken are not checked. A variable that is never read at \
+                  all is `unused-variable`'s.",
+        why: "A dead store is a computation whose result is thrown away. It is often the sign of a \
+                  bug: the value was meant to be used and a later line forgot it, or an earlier branch \
+                  was changed.\n\
+                  To fix, use the value, or delete the assignment (keep the right side if it has a \
+                  side effect).",
         example: "int n = 0;\nn = Count();   // the 0 is never read",
         requires: [Flow],
     }

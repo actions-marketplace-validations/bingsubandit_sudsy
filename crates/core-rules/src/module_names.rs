@@ -122,6 +122,7 @@ macro_rules! names_rule {
             category: $category:ident,
             default: $level:ident,
             description: $description:expr,
+            why: $why:expr,
             example: $example:expr,
             check: $check:ident,
             message: $message:expr,
@@ -134,7 +135,7 @@ macro_rules! names_rule {
                     static META: $crate::RuleMeta = $crate::RuleMeta {
                         id: $id,
                         category: $crate::Category::$category,
-                        why: "",
+                        why: $why,
                         source: "",
                         description: $description,
                         example: $example,

@@ -1,8 +1,12 @@
 id: rpc-request-standard-name
 message: 'the type should be named `${RPC}Request` or `${SERVICE}${RPC}Request`'
 description: >-
-  The request type of an rpc is not named `<Rpc>Request` or `<Service><Rpc>Request` (buf lint
-  RPC_REQUEST_STANDARD_NAME).
+  Reports an rpc whose request type is not named `<Rpc>Request` or `<Service><Rpc>Request`.
+why: >-
+  A request type with the name of its rpc is not reused for another rpc. A shared type couples the
+  two calls, and a change for one changes the other.
+
+  To fix, give each rpc its own request message with that name.
 example: 'service S { rpc Get(Foo) returns (GetResponse); }'
 severity: off
 category: style
@@ -17,8 +21,12 @@ constraints:
 id: rpc-response-standard-name
 message: 'the type should be named `${RPC}Response` or `${SERVICE}${RPC}Response`'
 description: >-
-  The response type of an rpc is not named `<Rpc>Response` or `<Service><Rpc>Response` (buf lint
-  RPC_RESPONSE_STANDARD_NAME).
+  Reports an rpc whose response type is not named `<Rpc>Response` or `<Service><Rpc>Response`.
+why: >-
+  A response type with the name of its rpc is not reused for another rpc. A shared type couples the
+  two calls, and a change for one changes the other.
+
+  To fix, give each rpc its own response message with that name.
 example: 'service S { rpc Get(GetRequest) returns (Foo); }'
 severity: off
 category: style

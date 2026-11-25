@@ -9,9 +9,14 @@ params:
   members: property
   message: "property name `{name}` must match `{convention}`"
 description: >-
-  A property whose name does not match the expression set for its kind (ktlint property-naming):
-  a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as
-  constants; a backing property may start with `_`; an `override` is left alone.
+  Reports a property whose name does not match the expression set for its kind: a `const val` is in
+  UPPER_SNAKE_CASE; top-level and object properties may also be written as constants; a backing
+  property may start with `_`; an `override` is not reported.
+why: >-
+  The case of a name tells a reader if it is a constant or a variable. A `const val` in camel case
+  reads as a variable that can change, and a mutable property in capitals reads as a constant.
+
+  To fix, rename the property to the style of its kind.
 example: 'val My_value = 1'
 severity: off
 category: style
@@ -32,9 +37,15 @@ params:
   functions: function
   message: "function name `{name}` must match `{convention}`"
 description: >-
-  A function whose name does not match the expression set for its kind (ktlint function-naming):
-  camel case; a function with a declared return type may also be a factory named in Pascal case;
-  an `override` and a `@Composable` function are left alone.
+  Reports a function whose name does not match the expression set for its kind: camel case; a
+  function with a declared return type may also be a factory named in Pascal case. A function that
+  is an `override` or `@Composable` is not reported.
+why: >-
+  Kotlin code reads functions in camel case, and a name in another case reads as a class or a
+  constant. Factory functions that look like constructors (`Foo()`) and Compose functions are an
+  exception by convention.
+
+  To fix, rename the function to camel case.
 example: 'fun My_function() {}'
 severity: off
 category: style
@@ -48,8 +59,14 @@ id: filename
 family: file-name
 params: { option: pattern, files: '\.kt$', until: ".", message: "the file name {name} should be in PascalCase" }
 description: >-
-  A `.kt` file whose name, up to its first dot, is not in PascalCase (ktlint filename; the
-  check that a file with a single class is named after it is not made).
+  Reports a `.kt` file whose name, up to its first dot, is not in PascalCase. The check that a file
+  with a single class is named after it is not made.
+why: >-
+  Kotlin files that hold a class are named after it, and the convention for all files is PascalCase.
+  A file named `my-file.kt` has a name that cannot be the name of a class in it, and tools that
+  match file and class names do not find it.
+
+  To fix, rename the file (`MyFile.kt`).
 example: 'path: my-file.kt'
 severity: off
 category: style

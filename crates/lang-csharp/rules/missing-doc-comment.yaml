@@ -18,10 +18,10 @@ params:
   enum-items: enum-constant
   outer.enum-items: public protected internal
 description: >-
-  A type, member, field or enum item that StyleCop's defaults ask to document (public, protected
-  or internal, in types that are too; members of an interface, explicit interface implementations
-  and enum items are public; partial declarations are left out) has no
-  `///` comment before it. Private members are left alone. No fix.
+  Reports a type, member, field or enum item that needs documentation and has no `///` comment
+  before it: public, protected or internal ones, in types that are too. Members of an interface,
+  explicit interface implementations and enum items count as public. Partial declarations are not
+  reported, and private members are not either. No fix.
 example: "public class C\n{\n    public int Count;   // add a /// <summary>\n}"
 severity: off
 category: style

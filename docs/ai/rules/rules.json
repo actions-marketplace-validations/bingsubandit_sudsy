@@ -11037,7 +11037,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "The first line of the doc comment of an exported function, method, type, constant or variable does not start with its name (revive exported). A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types; a constant or variable in a group whose comment has text is not checked. Lines of directives (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is left to `missing-doc-comment`.",
+      "description": "Reports an exported function, method, type, constant or variable whose doc comment does not start with its name. A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types, and a constant or variable in a group whose comment has text is not checked. Directive lines (`//go:generate`) and a first line `Deprecated: ` are not text. A declaration with no comment is left to `missing-doc-comment`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -11084,7 +11084,8 @@
           "tool": "revive",
           "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#exported"
         }
-      ]
+      ],
+      "why": "`go doc` and the package pages show the first sentence of a comment as the summary of the name, and search and lists read it as \"Name does ...\". A comment that starts with another word makes that sentence read wrong in the generated documentation.\n\nTo fix, start the comment with the name: `// Run does things.`"
     },
     {
       "category": "style",
@@ -11340,7 +11341,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse.",
+      "description": "Reports a package that has no comment right above the `package` clause in any file of its directory. The report is made once per directory, at the `package` keyword of the first file by name (a test file too). A test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse.",
       "example": {
         "config": null,
         "fixed": null,
@@ -11372,12 +11373,13 @@
           "tool": "revive",
           "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#package-comments"
         }
-      ]
+      ],
+      "why": "The package comment is the first thing `go doc` and the package index show, and it tells a reader what the package is for. A package without one is listed with no description.\n\nTo fix, add a comment of the form `// Package name does ...` right above the `package` clause of one file."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The first line of the comment above the `package` clause does not start with `Package` and the name of the package (revive package-comments). A file of package `main` is left alone. A comment of the right form with a blank line before the `package` clause is reported as detached.",
+      "description": "Reports a package comment whose first line does not start with `Package` and the name of the package. A comment of the right form with a blank line before the `package` clause is reported as detached. A file of package `main` is not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -11409,7 +11411,8 @@
           "tool": "revive",
           "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#package-comments"
         }
-      ]
+      ],
+      "why": "Documentation tools read the first sentence of the package comment as the package's summary, and a fixed form makes the summaries of all packages read the same. A blank line between the comment and the `package` clause makes the comment a plain comment, not the package's documentation.\n\nTo fix, start with `Package name` and remove the blank line."
     },
     {
       "category": "style",
@@ -11569,7 +11572,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
+      "description": "Reports a variable, constant, function, parameter, named result or type parameter that has the name of a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...); a name on the left of an assignment counts too. A method and a receiver are not reported. The options `allow`, `kinds`, `except_parents` and `assigned_by` change what is checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -11690,7 +11693,8 @@
           "tool": "ruff",
           "url": "https://docs.astral.sh/ruff/rules/A002/"
         }
-      ]
+      ],
+      "why": "The name hides the built-in in that scope, so a later `len(x)` or `string(b)` calls the new thing or fails to compile far from the declaration. The code works until somebody needs the built-in in the same scope, and then the error is hard to understand.\n\nTo fix, rename the declaration."
     },
     {
       "category": "style",
@@ -11840,7 +11844,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A name is not spelled in Go style: it has an underscore, is a constant in ALL_CAPS, or writes a common initialism (`Id`, `Http`, `Url`) in mixed case (revive var-naming, golint's rules). Checked are functions and methods with their parameters and results, the methods of interfaces (their parameters and results, not their names), constants, variables, types, the names of `:=` and the fields of structs. Receivers, function literals and function types are not.",
+      "description": "Reports a name that is not spelled in Go style: it has an underscore, it is a constant in ALL_CAPS, or it writes a common initialism (`Id`, `Http`, `Url`) in mixed case. Checked are functions and methods with their parameters and results, the methods of interfaces (their parameters and results, not their names), constants, variables, types, the names of `:=` and the fields of structs. Receivers, function literals and function types are not checked. The options `initialisms` and `ignore_pattern` change the words and names.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12009,12 +12013,13 @@
           "tool": "revive",
           "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#var-naming"
         }
-      ]
+      ],
+      "why": "Go code is read with the conventions of the standard library, where `userID` and `ServeHTTP` are written the same everywhere. A name that follows another style stands out and makes grep and completion less predictable.\n\nTo fix, rename to mixed caps with initialisms in capitals: `userID`, not `user_id` or `userId`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A name does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it. Equivalent: graphql-eslint naming-convention (styles only, no prefix or suffix lists).",
+      "description": "Reports a name that does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12259,12 +12264,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_naming_convention.md"
         }
-      ]
+      ],
+      "why": "Names that follow one convention are predictable: a reader can guess the name of a thing, tell a type from a variable at a glance and search for them. A name in another style stands out as a mistake or as code from another project. The convention itself is a choice of the project, which is why the expression is an option.\n\nTo fix, rename the declaration and its uses."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An operation without a name (`{ a }`, `query { a }`), which tools that log, trace or cache by operation name cannot tell apart. Equivalent - graphql-eslint no-anonymous-operations.",
+      "description": "Reports an operation without a name (`{ a }`, `query { a }`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -12305,12 +12311,13 @@
           "tool": "graphql-eslint",
           "url": "https://the-guild.dev/graphql/eslint/rules/no-anonymous-operations"
         }
-      ]
+      ],
+      "why": "Servers, logs, traces and caches identify an operation by its name. An anonymous one shows up as nothing in the query log, so it cannot be told from the others when something is slow or fails, and a persisted-query store has nothing to key it on.\n\nTo fix, name the operation: `query GetA { a }`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and every reference to one. A field selected in a query is not checked (`__typename`). Equivalent - graphql-eslint naming-convention without `allowLeadingUnderscore` and `allowTrailingUnderscore`.",
+      "description": "Reports a name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and every reference to one. A field selected in a query is not reported (`__typename`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -12362,12 +12369,13 @@
           "tool": "graphql-eslint",
           "url": "https://the-guild.dev/graphql/eslint/rules/naming-convention"
         }
-      ]
+      ],
+      "why": "Names that begin with two underscores are reserved for introspection, and one underscore is a mark that style guides use for private or generated names, which GraphQL has no concept of. A schema that avoids them has names that clients can use in generated code without escaping.\n\nTo fix, rename without the underscore."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A field of an object or interface type starts with the name of the type (`type User { userId: ID }`); the type already says it (case ignored). No fix: renaming a field changes the schema.",
+      "description": "Reports a field of an object or interface type that starts with the name of the type (`type User { userId: ID }`); case is ignored. No fix: renaming a field changes the schema.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12403,12 +12411,13 @@
           "tool": "graphql-eslint",
           "url": "https://the-guild.dev/graphql/eslint/rules/no-typename-prefix"
         }
-      ]
+      ],
+      "why": "The field is always read as `user.userId`, so the type name is said twice. It gets worse when a query is written with aliases or a field moves to another type.\n\nTo fix, drop the prefix (`id`)."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An operation or fragment nests selection sets deeper than allowed, which makes a query expensive to execute. Fragments that are spread are not followed.",
+      "description": "Reports an operation or fragment that nests selection sets deeper than the `max` option allows. Fragments that are spread are not followed.",
       "example": {
         "config": "selection-set-depth:\n  level: warn\n  options:\n    max: 2\n",
         "fixed": null,
@@ -12445,12 +12454,13 @@
           "tool": "graphql-eslint",
           "url": "https://the-guild.dev/graphql/eslint/rules/selection-set-depth"
         }
-      ]
+      ],
+      "why": "The cost of a query grows with its depth: each level can multiply the number of objects the server has to load. A depth limit is a cheap protection against queries that are expensive by accident or on purpose.\n\nTo fix, flatten the query, or split it into several requests."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "Two fragments of a document have the same name; a spread cannot tell which one it means. Checked within the file.",
+      "description": "Reports two fragments of a document with the same name, within one file.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12482,12 +12492,13 @@
           "tool": "graphql-eslint",
           "url": "https://the-guild.dev/graphql/eslint/rules/unique-fragment-name"
         }
-      ]
+      ],
+      "why": "A spread names the fragment it means, and with two of one name the tool cannot tell which, so it takes one or fails depending on the order. Code generators write one type per fragment name and collide.\n\nTo fix, rename one of them."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "Two operations of a document have the same name; a server cannot tell which to run and tools that key on the name (caches, persisted queries) collide. Checked within the file.",
+      "description": "Reports two operations of a document with the same name, within one file.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12519,12 +12530,13 @@
           "tool": "graphql-eslint",
           "url": "https://the-guild.dev/graphql/eslint/rules/unique-operation-name"
         }
-      ]
+      ],
+      "why": "A server cannot tell which operation a request with that name runs, and tools that key on the name (caches, persisted queries, generated code) collide.\n\nTo fix, rename one of them."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `//` comment where `#` is the convention (tflint terraform_comment_syntax). The fix writes `#`.",
+      "description": "Reports a `//` comment where `#` is the convention. The fix writes `#`.",
       "example": {
         "config": null,
         "fixed": "# old style\n# fine\nx = 1 # trailing\n/* block */\n",
@@ -12558,12 +12570,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_comment_syntax.md"
         }
-      ]
+      ],
+      "why": "Both forms are valid in the language, but the style that the Terraform documentation and the formatter use is `#`. Comments in one style are easy to search for and look the same in every module."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "A list item read with the legacy dot syntax, `a.0` (tflint terraform_deprecated_index). The fix writes `a[0]`.",
+      "description": "Reports a list item read with the legacy dot syntax, `a.0`. The fix writes `a[0]`.",
       "example": {
         "config": null,
         "fixed": "resource \"a\" \"b\" {\n  name = var.name\n  tags = [var.a, \"x-${var.b}\", \"${var.c}${var.d}\"]\n  id   = var.e\n  raw  = \"${~ var.f ~}\"\n  id2  = aws_instance.web[0].id\n  all  = aws_instance.web[0].id\n  ids  = aws_instance.web.*.id\n  num  = local.versions[1][2]\n  key  = { (var.k) = 1 }\n  sum  = 1 + \"${var.n}\"\n}\n",
@@ -12610,12 +12623,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_deprecated_index.md"
         }
-      ]
+      ],
+      "why": "The dot form is a deprecated spelling of the index. Newer versions of the language reject it or treat it differently, and the bracket form works with every expression."
     },
     {
       "category": "style",
       "default_level": "warn",
-      "description": "A string that is one interpolation, `\"${var.a}\"`, where the expression alone does (tflint terraform_deprecated_interpolation). The fix writes the expression. Not in Nomad job files (`.nomad`, `.nomad.hcl`), whose agent fills those in at run time.",
+      "description": "Reports a string that is one interpolation, `\"${var.a}\"`, where the expression alone does. The fix writes the expression. It is not reported in Nomad job files (`.nomad`, `.nomad.hcl`), whose agent fills those in at run time.",
       "example": {
         "config": null,
         "fixed": "resource \"a\" \"b\" {\n  name = var.name\n  tags = [var.a, \"x-${var.b}\", \"${var.c}${var.d}\"]\n  id   = var.e\n  raw  = \"${~ var.f ~}\"\n  id2  = aws_instance.web[0].id\n  all  = aws_instance.web[0].id\n  ids  = aws_instance.web.*.id\n  num  = local.versions[1][2]\n  key  = { (var.k) = 1 }\n  sum  = 1 + \"${var.n}\"\n}\n",
@@ -12676,12 +12690,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_deprecated_interpolation.md"
         }
-      ]
+      ],
+      "why": "Since Terraform 0.12 an expression can stand alone, and wrapping it in a string turns the value into a string, which loses its type (a list or a number becomes text) and adds noise."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `output` block with no `description` argument (tflint terraform_documented_outputs).",
+      "description": "Reports an `output` block with no `description` argument.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12712,12 +12727,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_documented_outputs.md"
         }
-      ]
+      ],
+      "why": "The description is what a user of the module reads in the registry and in generated documentation. An output without one has to be understood from the name and the expression.\n\nTo fix, add `description`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `variable` block with no `description` argument (tflint terraform_documented_variables).",
+      "description": "Reports a `variable` block with no `description` argument.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12748,12 +12764,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_documented_variables.md"
         }
-      ]
+      ],
+      "why": "The description is what the person who uses the module reads to know what to put in the variable. Without it, they have to read the code that uses it.\n\nTo fix, add `description`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A comparison with an empty list, `x == []` or `x != []` (tflint terraform_empty_list_equality): it is false for an empty set or a tuple of another type.",
+      "description": "Reports a comparison with an empty list, `x == []` or `x != []`. It is false for an empty set or a tuple of another type.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12799,12 +12816,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_empty_list_equality.md"
         }
-      ]
+      ],
+      "why": "`[]` is a tuple, and Terraform compares values of different types as not equal, so the comparison is false for an empty set or an empty list of another type, and the condition silently does the wrong thing.\n\nTo fix, compare the length: `length(x) == 0`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, reported on the last such block of the provider, and a `required_providers` entry without a `version` (tflint terraform_required_providers). The built-in `terraform` provider is exempt; override files do not count.",
+      "description": "Reports a provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, on the last such block of the provider, and a `required_providers` entry without a `version`. The built-in `terraform` provider is exempt, and override files do not count.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12843,12 +12861,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_required_providers.md"
         }
-      ]
+      ],
+      "why": "Without the declaration Terraform picks the source of the provider by the default for its name, and without a version it takes the newest, so two runs of the same code can use different providers and a new major version can break the module with no change in the code.\n\nTo fix, add the provider to `required_providers` with a `source` and a version constraint."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A module none of whose `terraform` blocks sets `required_version` (tflint terraform_required_version), reported on the `terraform` block, or on the start of `main.tf` when the module has no such block. Override files do not count.",
+      "description": "Reports a module none of whose `terraform` blocks sets `required_version`, on the `terraform` block, or on the start of `main.tf` when the module has no such block. Override files do not count.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12883,12 +12902,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_required_version.md"
         }
-      ]
+      ],
+      "why": "Terraform language features and the state format change between versions, and a state file written by a newer version cannot be used by an older one. A constraint makes an incompatible version fail at the start with a clear message instead of in the middle of an apply.\n\nTo fix, set `required_version` in a `terraform` block."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `variable` block with no `type` argument (tflint terraform_typed_variables).",
+      "description": "Reports a `variable` block with no `type` argument.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12921,12 +12941,13 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_typed_variables.md"
         }
-      ]
+      ],
+      "why": "Without a type any value is accepted and converted when it is used, so a wrong value (a string where a list was meant) is found late, with an error far from the variable. A type checks the value when it is given and documents what is expected.\n\nTo fix, add `type`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to (tflint terraform_unused_declarations). Override files declare nothing of their own; a module with `.tf.json` files, a file that does not parse or one that cannot be read is not judged.",
+      "description": "Reports a variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to. Override files declare nothing of their own. A module with `.tf.json` files, a file that does not parse or one that cannot be read is not judged.",
       "example": {
         "config": null,
         "fixed": null,
@@ -12973,7 +12994,8 @@
           "tool": "tflint",
           "url": "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_unused_declarations.md"
         }
-      ]
+      ],
+      "why": "An unused declaration is left over from a change. A variable that nothing reads misleads the user of the module, who sets it and sees no effect, and an unused data source still makes a request on each plan.\n\nTo fix, delete it."
     },
     {
       "category": "suspicious",
@@ -13011,7 +13033,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A name has two or more capital letters in a row (Checkstyle AbbreviationAsWordInName with `allowedAbbreviationLength` 0): write `XmlParser`, not `XMLParser`. Constants and overridden methods are left out.",
+      "description": "Reports a name with two or more capital letters in a row (`XMLParser`), for type, method, parameter, field and local variable names that match the `names` option. Names that match `ignored` (constants and overridden methods by default) are not reported. With an empty `names` the rule checks nothing.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13076,12 +13098,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/naming/abbreviationaswordinname.html#AbbreviationAsWordInName"
         }
-      ]
+      ],
+      "why": "A run of capitals hides where one word ends and the next starts: `XMLHTTPRequest` does not show if it is XML HTTP or XMLH TTP, and tools that split names into words get it wrong. Treating an abbreviation as a word (`XmlHttpRequest`) keeps the name readable and its camel case regular.\n\nTo fix, write the abbreviation as a word: `XmlParser`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An array creation whose `{` follows the `]` right away, `new int[]{1}` (Checkstyle ArrayBracketNoWhitespace).",
+      "description": "Reports an array creation in which the `{` of the initializer follows the `]` right away (`new int[]{1}`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -13118,12 +13141,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/whitespace/arraybracketnowhitespace.html#ArrayBracketNoWhitespace"
         }
-      ]
+      ],
+      "why": "The space between the brackets and the braces is the convention of the Java code style guides, and it separates the type from the initializer so that `new int[] {1}` reads as two parts.\n\nTo fix, put a space between `]` and `{`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A declarator or parameter with C-style brackets after the name (Checkstyle ArrayTypeStyle).",
+      "description": "Reports a variable or parameter that puts the array brackets after the name (`int a[]`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -13164,12 +13188,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/misc/arraytypestyle.html#ArrayTypeStyle"
         }
-      ]
+      ],
+      "why": "In Java the brackets are part of the type, and `int[] a` says it at the start. The C form is allowed for compatibility and makes the type hard to read, and `int[] a, b[]` declares two different types in one line.\n\nTo fix, write the brackets after the type: `int[] a`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A string or character literal writes a visible character as a `\\uXXXX` escape, and the line has no trailing comment (Checkstyle AvoidEscapedUnicodeCharacters). Escapes of control, space and format characters are fine.",
+      "description": "Reports a string or character literal that writes a visible character as a `\\uXXXX` escape when the line has no trailing comment. Escapes of control, space and format characters are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13206,12 +13231,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/misc/avoidescapedunicodecharacters.html#AvoidEscapedUnicodeCharacters"
         }
-      ]
+      ],
+      "why": "The escape hides the character: the reader has to decode `é` to know it is an `é`, and cannot see a typo in the code. The source file is UTF-8, so the character itself is safe. An escape stays useful when a comment explains it, which is why a comment on the line allows it.\n\nTo fix, write the character itself, or add a trailing comment that says what it is."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A line of a Javadoc comment after the first starts with an asterisk (Checkstyle JavadocMissingLeadingAsterisk). Empty lines are left alone.",
+      "description": "Reports a line of a Javadoc comment, after the first, that does not start with an asterisk. Empty lines are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13242,12 +13268,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/javadoc/javadocmissingleadingasterisk.html#JavadocMissingLeadingAsterisk"
         }
-      ]
+      ],
+      "why": "Javadoc strips the leading `*` of each line, so a line without one is kept with its indentation, and the comment renders differently from how it reads in the source. The asterisks also show where the comment ends.\n\nTo fix, start the line with `*`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The paragraphs of a Javadoc comment: a `<p>` tag stands right before the first word of its paragraph (no space) and after an empty line, an empty line between paragraphs is followed by `<p>`, and the comment does not start with `<p>` (Checkstyle JavadocParagraph). Text inside `<pre>`, `<ul>` and the like, and after the first block tag, is left alone.",
+      "description": "Reports Javadoc paragraphs that do not use `<p>` in the usual way: a `<p>` must stand right before the first word of its paragraph (no space after it) and after an empty line, an empty line between paragraphs must be followed by `<p>`, and the comment must not start with `<p>`. Text inside `<pre>`, `<ul>` and the like, and after the first block tag, is not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13294,12 +13321,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/javadoc/javadocparagraph.html#JavadocParagraph"
         }
-      ]
+      ],
+      "why": "Javadoc ignores empty lines, so paragraphs not marked with `<p>` run together in the generated page. A `<p>` that is misplaced adds an empty paragraph or starts a paragraph in the wrong place.\n\nTo fix, put `<p>` directly before the first word of each paragraph after the first."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A Javadoc comment starts with a summary: a first sentence that ends with a period (followed by a blank or the end of the text) and does not start with a forbidden fragment (Checkstyle SummaryJavadoc). A comment of `{@inheritDoc}` or `{@return ...}` needs none.",
+      "description": "Reports a Javadoc comment that does not start with a summary: the first sentence must end with a period followed by a blank or the end of the text, and must not start with a fragment that matches the `forbidden_fragments` option. A comment that is `{@inheritDoc}` or `{@return ...}` needs no summary.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13358,12 +13386,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/javadoc/summaryjavadoc.html#SummaryJavadoc"
         }
-      ]
+      ],
+      "why": "The first sentence is what the generated index and the IDE hover show, so a comment that does not start with a complete sentence gives a poor summary or one cut at the wrong place.\n\nTo fix, begin the comment with a sentence that ends with a period."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A line that continues a block tag (`@param x`) is indented by at least `indent` blanks after the asterisk (Checkstyle JavadocTagContinuationIndentation: its offset of 4 is 5 blanks here). Lines that start HTML and lines inside `<pre>` and the like are left alone.",
+      "description": "Reports a line that continues a block tag (`@param x`) and is indented by fewer than `indent` blanks after the asterisk (5 by default). Lines that start HTML and lines inside `<pre>` and the like are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13406,12 +13435,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/javadoc/javadoctagcontinuationindentation.html#JavadocTagContinuationIndentation"
         }
-      ]
+      ],
+      "why": "The indent shows that a line belongs to the tag above it: without it a long `@param` description reads as a paragraph of the comment.\n\nTo fix, indent the continuation lines."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A `;` that is the body of an `if` or a loop, such as `while (x);` (Checkstyle EmptyStatement).",
+      "description": "Reports a lone `;` that is the body of an `if` or a loop, such as `while (x);`, on the `;`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13448,12 +13478,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/coding/emptystatement.html#EmptyStatement"
         }
-      ]
+      ],
+      "why": "The semicolon ends the statement, so the code that follows on the next line is not the body of the loop, whatever its indentation says. It is a typical typo, and the loop either does nothing or never ends.\n\nTo fix, delete the `;`, or write `{}` if an empty body is meant."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A class body that declares `boolean equals(Object)` and no `hashCode()`: equal objects get different hash codes (Checkstyle EqualsHashCode).",
+      "description": "Reports a class that declares `boolean equals(Object)` and does not declare `hashCode()`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13490,12 +13521,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/coding/equalshashcode.html#EqualsHashCode"
         }
-      ]
+      ],
+      "why": "Objects that are equal must have the same hash code. Without an own `hashCode` the one of `Object` is used, so two equal objects land in different buckets and a `HashMap` or `HashSet` does not find them.\n\nTo fix, declare `hashCode()` from the same fields as `equals`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A string or character literal writes backspace, tab, line feed, form feed, carriage return, a quote or a backslash as an octal or unicode escape (Checkstyle IllegalTokenText).",
+      "description": "Reports a string or character literal that writes a backspace, tab, line feed, form feed, carriage return, quote or backslash as an octal or unicode escape (`\\u0009`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -13542,12 +13574,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/coding/illegaltokentext.html#IllegalTokenText"
         }
-      ]
+      ],
+      "why": "These characters have their own escapes (`\\b`, `\\t`, `\\n`, `\\f`, `\\r`, `\\\"`, `\\'`, `\\\\`) which every reader knows. A unicode escape for a line feed is even translated before the lexer runs, so `\\u000a` in a string ends the line and does not compile.\n\nTo fix, use the special escape."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A `switch` statement with no `default` (Checkstyle MissingSwitchDefault).",
+      "description": "Reports a `switch` statement that has no `default` label.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13583,7 +13616,8 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/coding/missingswitchdefault.html#MissingSwitchDefault"
         }
-      ]
+      ],
+      "why": "Without `default`, a value that no `case` names is ignored without notice, so a new enum constant or an unexpected input falls through the switch and the program goes on with the wrong state.\n\nTo fix, add a `default` that handles the case or throws."
     },
     {
       "category": "suspicious",
@@ -13673,7 +13707,7 @@
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "`==` or `!=` with a string literal as an operand compares references (Checkstyle StringLiteralEquality).",
+      "description": "Reports `==` or `!=` with a string literal as an operand.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13714,12 +13748,13 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/coding/stringliteralequality.html#StringLiteralEquality"
         }
-      ]
+      ],
+      "why": "`==` on strings compares references, not text. It works for two literals because they are interned and fails for a string that was built or read, so the code passes its tests and breaks on real data.\n\nTo fix, use `equals`: `\"a\".equals(s)`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A line of a comment starts with `todo` in any other case, or with `TODO` and no colon (Checkstyle TodoComment with the Google format). Javadoc comments are not read.",
+      "description": "Reports a line of a comment that starts with `todo` in any other case, or with `TODO` and no colon. Javadoc comments are not read.",
       "example": {
         "config": null,
         "fixed": null,
@@ -13773,7 +13808,8 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks.html"
         }
-      ]
+      ],
+      "why": "A fixed form (`TODO:`) lets people and tools find the open items by one search. A variant spelled differently is not found.\n\nTo fix, write `TODO:`."
     },
     {
       "category": "cleanup",
@@ -13894,7 +13930,7 @@
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "An integer literal that ends in a lower case `l` (Checkstyle UpperEll).",
+      "description": "Reports an integer literal that ends in a lower case `l` (`10l`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -13930,7 +13966,8 @@
           "tool": "checkstyle",
           "url": "https://checkstyle.org/checks/misc/upperell.html#UpperEll"
         }
-      ]
+      ],
+      "why": "A lower case `l` looks like the digit `1`, so `10l` reads as `101`. The upper case suffix cannot be mistaken.\n\nTo fix, write `10L`."
     },
     {
       "category": "style",
@@ -17466,7 +17503,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An argument list the formatter would wrap or join differently (ktlint argument-list-wrapping).",
+      "description": "Reports an argument list of a call that the Kotlin formatter would wrap or join differently: the arguments on one line when they fit, one per line when they do not.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17505,12 +17542,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#argument-list-wrapping"
         }
-      ]
+      ],
+      "why": "A call whose arguments are wrapped in a mixed way (two on the first line, the rest below, aligned to the bracket) is hard to scan and makes a diff show a change on every line when one argument is renamed. One layout for all lists lets the formatter apply it and keeps the diffs small.\n\nTo fix, run the formatter, which lays the list out."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A declaration with a blank line the formatter would add or remove before it, among declarations with comments or annotations too (ktlint spacing-between-declarations-with-comments, spacing-between-declarations-with-annotations).",
+      "description": "Reports a declaration (function, property, class, object, typealias) with a blank line before it that the formatter would add or remove. Declarations with comments or annotations before them are included.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17550,12 +17588,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#blank-line-between-declaration-with-comments"
         }
-      ]
+      ],
+      "why": "Blank lines show where one declaration ends and the next one begins. A file that is consistent shows the structure at a glance, and a formatter that keeps the same spacing does not turn up as a diff on each save.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `when` entry with a blank line the formatter would add or remove before it (ktlint blank-line-between-when-conditions).",
+      "description": "Reports a `when` entry with a blank line before it that the formatter would add or remove.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17594,12 +17633,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#blank-line-between-when-conditions"
         }
-      ]
+      ],
+      "why": "Blank lines between the entries of a `when` are laid out by one rule, so the spacing does not depend on the author and is not changed by hand.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A call chain whose lines the formatter would break or join differently (ktlint chain-method-continuation).",
+      "description": "Reports a call chain (`a.b().c()`, with `?.` too) whose line breaks differ from what the formatter writes.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17638,12 +17678,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#chain-method-continuation"
         }
-      ]
+      ],
+      "why": "A chain that is broken in some places and not in others hides which calls belong together, and a later edit adds or moves breaks. One layout for all chains makes each step visible and keeps the diff small.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A class, interface or object whose name starts with a lowercase letter or an underscore (ktlint class-naming).",
+      "description": "Reports a class, interface or object whose name starts with a lowercase letter or an underscore.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17685,12 +17726,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#class-naming"
         }
-      ]
+      ],
+      "why": "Kotlin follows the convention that types are in PascalCase, so a lowercase name reads as a variable or a function and is mistaken for one at the call site.\n\nTo fix, rename the class to PascalCase."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A class header (name, constructor, supertypes) the formatter would lay out differently (ktlint class-signature).",
+      "description": "Reports a class header (name, constructor, supertypes) that the formatter would lay out differently.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17729,12 +17771,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#class-signature"
         }
-      ]
+      ],
+      "why": "A long class header is laid out by fixed rules, so that all classes of a project look the same and a change to one parameter is one line in the diff.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint enum-entry-name-case).",
+      "description": "Reports an enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (`a` in `enum class E { a, B }`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -17780,12 +17823,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#enum-entry"
         }
-      ]
+      ],
+      "why": "Enum entries are constants, and the conventions for constants are `UPPER_SNAKE_CASE` or, since Kotlin reads them as objects, `PascalCase`. A lowercase entry reads as a property.\n\nTo fix, rename the entry in one of the two styles."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `.kt` file whose name, up to its first dot, is not in PascalCase (ktlint filename; the check that a file with a single class is named after it is not made).",
+      "description": "Reports a `.kt` file whose name, up to its first dot, is not in PascalCase. The check that a file with a single class is named after it is not made.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17824,12 +17868,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#file-name"
         }
-      ]
+      ],
+      "why": "Kotlin files that hold a class are named after it, and the convention for all files is PascalCase. A file named `my-file.kt` has a name that cannot be the name of a class in it, and tools that match file and class names do not find it.\n\nTo fix, rename the file (`MyFile.kt`)."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A function whose body the formatter would write differently (ktlint function-expression-body).",
+      "description": "Reports a function with a block body that is only a `return`, which the formatter would write as an expression body (`fun f(): Int { return 1 }` is `fun f(): Int = 1`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -17872,12 +17917,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#function-expression-body"
         }
-      ]
+      ],
+      "why": "A function with a single `return` as its body is clearer as an expression: the type is inferred and a line of braces goes away. One style makes functions of that kind look the same.\n\nTo fix, run the formatter, or write the expression body."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A function whose name does not match the expression set for its kind (ktlint function-naming): camel case; a function with a declared return type may also be a factory named in Pascal case; an `override` and a `@Composable` function are left alone.",
+      "description": "Reports a function whose name does not match the expression set for its kind: camel case; a function with a declared return type may also be a factory named in Pascal case. A function that is an `override` or `@Composable` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17945,12 +17991,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#function-naming"
         }
-      ]
+      ],
+      "why": "Kotlin code reads functions in camel case, and a name in another case reads as a class or a constant. Factory functions that look like constructors (`Foo()`) and Compose functions are an exception by convention.\n\nTo fix, rename the function to camel case."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A function whose signature (up to the body) the formatter would lay out differently: parameters on one line or one per line, the return type and the body start (ktlint function-signature).",
+      "description": "Reports a function whose signature (everything up to the body) the formatter would lay out differently: the parameters on one line or one per line, the return type, and where the body starts.",
       "example": {
         "config": null,
         "fixed": null,
@@ -17993,12 +18040,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#function-signature"
         }
-      ]
+      ],
+      "why": "A signature that is laid out the same way in the whole project is quick to scan, and when a parameter is added only one line changes.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An import list the formatter would reorder or rewrite (ktlint import-ordering).",
+      "description": "Reports an import list that the formatter would reorder or rewrite.",
       "example": {
         "config": null,
         "fixed": "import b.B\nimport a.A\n\nfun f(x: Int) = when (x) {\n    1 -> {\n        foo()\n    }\n\n    2 -> bar()\n    else -> baz()\n}\n\n// one line\nval a = 1\n",
@@ -18039,12 +18087,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#import-ordering"
         }
-      ]
+      ],
+      "why": "Imports in a fixed order make it easy to find one, and two developers who add an import in the same place do not conflict.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An expression that spans lines and starts after code on its line: the value of a property or a function body after `=`, or an argument (ktlint multiline-expression-wrapping).",
+      "description": "Reports an expression that spans lines and starts after code on its line: the value of a property or a function body after `=`, or an argument.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18087,12 +18136,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#multiline-expression-wrapping"
         }
-      ]
+      ],
+      "why": "An expression that begins after `val a = ` and goes on over several lines has its first line far from the left edge and the rest below, so the shape of the block is hard to read. A new line before it gives it a place of its own.\n\nTo fix, start the expression on the next line."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `if` whose lines the formatter would change (ktlint multiline-if-else).",
+      "description": "Reports an `if` whose line breaks the formatter would change.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18145,12 +18195,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#multiline-if-else"
         }
-      ]
+      ],
+      "why": "An `if` and `else` that are split over lines in an arbitrary way are hard to read, and a line added to a branch that has no braces is not part of it. One layout for every `if` avoids both.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A bracket, comma or arrow where the formatter would break the line, or add a trailing comma (ktlint wrapping).",
+      "description": "Reports a bracket, comma or arrow where the formatter would break the line, or add a trailing comma.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18188,12 +18239,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#wrapping"
         }
-      ]
+      ],
+      "why": "A list that wraps in one place and not in another has a layout that depends on who wrote it. One rule for the line breaks, and the trailing comma of a wrapped list, makes it independent of the author.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A class or interface with `{ }` and nothing in it (ktlint no-empty-class-body).",
+      "description": "Reports a class or interface with `{ }` and nothing in it (`class A {}`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -18235,12 +18287,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-empty-class-bodies"
         }
-      ]
+      ],
+      "why": "An empty body adds two characters and says nothing. Kotlin does not need the braces for a class without members.\n\nTo fix, delete the braces: `class A`."
     },
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "A `.kt` file with nothing in it but a package, imports and comments (ktlint no-empty-file).",
+      "description": "Reports a `.kt` file with nothing in it but a package, imports and comments.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18271,12 +18324,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-empty-file"
         }
-      ]
+      ],
+      "why": "A file without a declaration is a leftover of a deleted class, or one that was never filled, and it still compiles and shows up in the project.\n\nTo fix, delete the file, or add the declaration."
     },
     {
       "category": "cleanup",
       "default_level": "warn",
-      "description": "A function with a block body that declares `: Unit` (ktlint no-unit-return).",
+      "description": "Reports a function with a block body that declares `: Unit` as its return type.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18317,12 +18371,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-unit-as-return-type"
         }
-      ]
+      ],
+      "why": "`Unit` is what a function returns by default, so writing it repeats the language and distracts a reader who looks for a type that matters.\n\nTo fix, delete `: Unit`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A package whose name has an uppercase letter or an underscore (ktlint package-name).",
+      "description": "Reports a package whose name has an uppercase letter or an underscore.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18353,12 +18408,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#package-name"
         }
-      ]
+      ],
+      "why": "Package names in Kotlin and Java are in lowercase, joined without underscores, so a name with capitals looks like a class and does not match the directory on file systems that ignore case.\n\nTo fix, write the name in lowercase."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A parameter list the formatter would wrap or join differently (ktlint parameter-list-wrapping).",
+      "description": "Reports a parameter list that the formatter would wrap or join differently.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18401,12 +18457,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#parameter-list-wrapping"
         }
-      ]
+      ],
+      "why": "A function with a long parameter list is laid out by a fixed rule, so that the layout does not depend on the author and a new parameter is one line in the diff.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A property whose name does not match the expression set for its kind (ktlint property-naming): a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as constants; a backing property may start with `_`; an `override` is left alone.",
+      "description": "Reports a property whose name does not match the expression set for its kind: a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as constants; a backing property may start with `_`; an `override` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18492,12 +18549,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#property-naming"
         }
-      ]
+      ],
+      "why": "The case of a name tells a reader if it is a constant or a variable. A `const val` in camel case reads as a variable that can change, and a mutable property in capitals reads as a constant.\n\nTo fix, rename the property to the style of its kind."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A block whose lines the formatter would change (ktlint statement-wrapping).",
+      "description": "Reports a block whose line breaks the formatter would change, such as several statements on one line (`{ a(); b() }`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -18552,12 +18610,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#statement-wrapping"
         }
-      ]
+      ],
+      "why": "One statement to a line is the layout every Kotlin reader expects, and a second statement after a `;` is easily missed. It also makes a diff show a change to the statement and not to its neighbour.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The last line of an argument list that the formatter would change, the trailing comma (ktlint trailing-comma-on-call-site).",
+      "description": "Reports the last argument of a multi-line call that has a trailing comma the formatter would add or remove.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18596,12 +18655,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#trailing-comma-on-call-site"
         }
-      ]
+      ],
+      "why": "With a trailing comma, adding an argument at the end changes one line instead of two, and moving arguments does not need the comma moved. A project that chooses one form gets the same diff everywhere.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The last line of a parameter list that the formatter would change, the trailing comma (ktlint trailing-comma-on-declaration-site).",
+      "description": "Reports the last parameter of a multi-line declaration that has a trailing comma the formatter would add or remove.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18644,12 +18704,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#trailing-comma-on-declaration-site"
         }
-      ]
+      ],
+      "why": "With a trailing comma, adding a parameter at the end changes one line instead of two, and reordering parameters does not need the comma moved.\n\nTo fix, run the formatter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `when` entry whose first line the formatter would change (ktlint when-entry-bracing).",
+      "description": "Reports a `when` entry whose first line the formatter would change.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18688,12 +18749,13 @@
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#when-entry-bracing"
         }
-      ]
+      ],
+      "why": "Entries of one `when` that are written in different ways (some with braces, some without, in different line layouts) look as if the difference meant something. One layout for all entries makes a real difference stand out.\n\nTo fix, run the formatter."
     },
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "A rule whose recipe has more lines than allowed (checkmake `maxbodylength`). Every physical line counts, a continued command and a tab-indented comment included.",
+      "description": "Reports a rule whose recipe has more lines than the `max` option. Every physical line counts, a continued command and a tab-indented comment included.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18737,12 +18799,13 @@
           "tool": "checkmake",
           "url": "https://github.com/checkmake/checkmake/blob/main/docs/rules.md"
         }
-      ]
+      ],
+      "why": "A long recipe is a script that lives in a Makefile, where it is run by `make` through the shell line by line, cannot be tested by itself and is hard to read. A limit moves it to a script file.\n\nTo fix, move the commands to a script and call it."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the last `.PHONY` line, or the last rule's when there is none.",
+      "description": "Reports a target of the `required` option (default `all`, `clean` and `test`) that is not declared `.PHONY`, on the last `.PHONY` line, or on the last rule when there is none.",
       "example": {
         "config": "min-phony:\n  level: warn\n  options:\n    required: [all, build]\n",
         "fixed": null,
@@ -18784,12 +18847,13 @@
           "tool": "checkmake",
           "url": "https://github.com/checkmake/checkmake/blob/main/docs/rules.md"
         }
-      ]
+      ],
+      "why": "Conventional targets (`all`, `clean`, `test`) do not name files. If a file with that name appears, `make` considers the target up to date and does nothing.\n\nTo fix, add the target to `.PHONY`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A target with no recipe that is not declared `.PHONY` (checkmake `phonydeclared`); targets that start with a `.` are special and skipped.",
+      "description": "Reports a target with no recipe that is not declared `.PHONY`. Targets that start with a `.` are special and are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18835,12 +18899,13 @@
           "tool": "checkmake",
           "url": "https://github.com/checkmake/checkmake/blob/main/docs/rules.md"
         }
-      ]
+      ],
+      "why": "A target without a recipe that is not a file only groups other targets. If a file of that name appears, `make` stops running it, so the behaviour of the Makefile depends on what is in the directory.\n\nTo fix, add the target to `.PHONY`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A variable whose value runs `date` and that is not simply expanded (`:=`, `::=`): every use runs `date` again and the values differ within one build (checkmake `timestampexpanded`).",
+      "description": "Reports a variable whose value runs `date` and that is not simply expanded (`:=`, `::=`): every use runs `date` again and the values differ within one build.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18886,12 +18951,13 @@
           "tool": "checkmake",
           "url": "https://github.com/checkmake/checkmake/blob/main/docs/rules.md"
         }
-      ]
+      ],
+      "why": "A recursively expanded variable (`=`) runs its text each time it is used, so a build that uses `TS = $(shell date)` twice gets two different times, and file names built from it do not match.\n\nTo fix, write `TS := $(shell date +%s)`, which runs once."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A target defined by more than one rule, which merges prerequisites and overrides recipes (checkmake `uniquetargets`). Double-colon rules, `.PHONY` and the targets of `ignore` are skipped.",
+      "description": "Reports a target defined by more than one rule, which merges prerequisites and overrides recipes. Double-colon rules, `.PHONY` and the targets of the `ignore` option are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -18936,7 +19002,8 @@
           "tool": "checkmake",
           "url": "https://github.com/checkmake/checkmake/blob/main/docs/rules.md"
         }
-      ]
+      ],
+      "why": "Several rules for one target add their prerequisites and only one of them may have a recipe; `make` uses the last and warns about the override. The recipe that runs depends on the order of the rules.\n\nTo fix, merge the rules, or rename a target."
     },
     {
       "category": "style",
@@ -19609,7 +19676,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable).",
+      "description": "Reports a parameter with a type that does not allow `null` and a `null` default (`int $a = null`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -19646,12 +19713,13 @@
           "tool": "phpstan",
           "url": "https://phpstan.org/error-identifiers"
         }
-      ]
+      ],
+      "why": "The parameter is nullable only through the default, which is deprecated since PHP 8.4 and a notice to code that runs there. The type says one thing and the default another.\n\nTo fix, write the nullable type: `?int $a = null`."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen.",
+      "description": "Reports a function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw`, on the function. Generators are not reported, and a call that never returns (`exit`, `die`, a `@return never` function) is not seen.",
       "example": {
         "config": null,
         "fixed": null,
@@ -19686,12 +19754,13 @@
           "tool": "phpstan",
           "url": "https://phpstan.org/error-identifiers"
         }
-      ]
+      ],
+      "why": "The function runs off its end and returns `null`, which breaks the declared type: a native type gives a `TypeError` at run time, and a documented type gives the caller a `null` where it expects a value.\n\nTo fix, return a value on every path, or throw."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner).",
+      "description": "Reports a `function name() {}` statement in the body of a function, method or closure.",
       "example": {
         "config": null,
         "fixed": null,
@@ -19728,12 +19797,13 @@
           "tool": "phpstan",
           "url": "https://phpstan.org/error-identifiers"
         }
-      ]
+      ],
+      "why": "The inner function is declared when the outer one runs, so it does not exist before the first call, and a second call of the outer function fails with an error that the function is already declared.\n\nTo fix, declare the function at the top level, or use a closure."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty).",
+      "description": "Reports `unset($this->name)` of a property the class declares when a subclass could give the property a hook (PHP 8.4): the class is not final and the property is not private, final, static or readonly.",
       "example": {
         "config": null,
         "fixed": null,
@@ -19765,12 +19835,13 @@
           "tool": "phpstan",
           "url": "https://phpstan.org/error-identifiers"
         }
-      ]
+      ],
+      "why": "A property with a hook cannot be unset, so the call fails with an error in the subclass that overrides the property, while it works in the class that wrote it.\n\nTo fix, set the property to `null` instead, or make the class or the property final."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is.",
+      "description": "Reports `new static` in a class that is not final and has no final or abstract constructor of its own. A constructor or a final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is.",
       "example": {
         "config": null,
         "fixed": null,
@@ -19807,7 +19878,8 @@
           "tool": "phpstan",
           "url": "https://phpstan.org/error-identifiers"
         }
-      ]
+      ],
+      "why": "`new static` builds the class of the caller, so a subclass can be built with its own constructor with other parameters, and the call in the parent fails with a missing argument.\n\nTo fix, make the class or the constructor final, or call `new self`."
     },
     {
       "category": "style",
@@ -20715,7 +20787,7 @@
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "The first value of an enum is not 0 (buf lint ENUM_FIRST_VALUE_ZERO). Proto3 and editions with open enums require it; proto2 files (also those with no `syntax`) are checked only with the `proto2` option.",
+      "description": "Reports an enum whose first value is not 0. Proto3 and editions with open enums require it; proto2 files (also those with no `syntax`) are checked only with the `proto2` option.",
       "example": {
         "config": null,
         "fixed": null,
@@ -20758,12 +20830,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#enum_first_value_zero"
         }
-      ]
+      ],
+      "why": "In proto3 the default of an enum field is the first value, and the value that a reader sees when the field is not set. It has to be 0, and a first value that means something real (`ACTIVE = 1` and a hidden 0) makes unset data look valid.\n\nTo fix, make the first value 0 and name it for \"not set\"."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`option allow_alias = true;` in an enum (buf lint ENUM_NO_ALLOW_ALIAS).",
+      "description": "Reports `option allow_alias = true;` in an enum.",
       "example": {
         "config": null,
         "fixed": null,
@@ -20799,12 +20872,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#enum_no_allow_alias"
         }
-      ]
+      ],
+      "why": "Aliases give two names to one number. A value read from the wire becomes one of the names, which one depends on the generator, so the name in the code is not stable, and JSON output shows one of them.\n\nTo fix, give each value its own number, and remove the option."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum name that is not PascalCase (buf lint ENUM_PASCAL_CASE).",
+      "description": "Reports an enum name that is not PascalCase.",
       "example": {
         "config": null,
         "fixed": null,
@@ -20844,12 +20918,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#enum_pascal_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide names types in PascalCase, and the generated code of most languages uses the name as a type name, where another form reads as something else.\n\nTo fix, rename to PascalCase."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum value does not start with the enum's name in UPPER_SNAKE_CASE and an underscore (buf lint ENUM_VALUE_PREFIX).",
+      "description": "Reports an enum value that does not start with the name of the enum in UPPER_SNAKE_CASE and an underscore (`COLOR_RED` in `Color`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -20885,12 +20960,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#enum_value_prefix"
         }
-      ]
+      ],
+      "why": "Enum values are scoped to the enclosing message or file, not to the enum, as in C++. Two enums in one scope with a value `RED` collide, and the prefix prevents it.\n\nTo fix, add the prefix to the value."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum value name that is not UPPER_SNAKE_CASE (buf lint ENUM_VALUE_UPPER_SNAKE_CASE).",
+      "description": "Reports an enum value name that is not UPPER_SNAKE_CASE.",
       "example": {
         "config": null,
         "fixed": null,
@@ -20930,12 +21006,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#enum_value_upper_snake_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide writes enum values in UPPER_SNAKE_CASE, as the generated code of many languages writes constants.\n\nTo fix, rename the value."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum value numbered 0 whose name does not end in `_UNSPECIFIED` (buf lint ENUM_ZERO_VALUE_SUFFIX with its default suffix).",
+      "description": "Reports an enum value numbered 0 whose name does not end in `_UNSPECIFIED`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -20976,12 +21053,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#enum_zero_value_suffix"
         }
-      ]
+      ],
+      "why": "The zero value is what a field has when it is not set, so its name should say \"nothing chosen\". A zero value named `ACTIVE` makes missing data look like a real choice.\n\nTo fix, name it `<ENUM>_UNSPECIFIED`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A field name that is not lower_snake_case (buf lint FIELD_LOWER_SNAKE_CASE).",
+      "description": "Reports a field name that is not lower_snake_case.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21029,12 +21107,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#field_lower_snake_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide writes fields in lower_snake_case. Generators convert the name to camel case or leave it as it is, and the JSON mapping is derived from it, so a field that is written in another form maps to an unexpected name.\n\nTo fix, rename the field."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A proto2 `required` field (buf lint FIELD_NOT_REQUIRED).",
+      "description": "Reports a proto2 `required` field.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21067,12 +21146,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#field_not_required"
         }
-      ]
+      ],
+      "why": "A required field can never be removed or made optional without breaking every reader and writer that was built before the change: an old reader rejects messages without it. Protobuf's own advice is to avoid `required`.\n\nTo fix, make it `optional` and check for it in the code."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The file name (without `.proto`) is not lower_snake_case (buf lint FILE_LOWER_SNAKE_CASE).",
+      "description": "Reports a file whose name (without `.proto`) is not lower_snake_case.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21112,12 +21192,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#file_lower_snake_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide names files in lower_snake_case, and generated file names and import paths derive from it. A different style gives different names in each language.\n\nTo fix, rename the file and update the imports."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`import public` (buf lint IMPORT_NO_PUBLIC).",
+      "description": "Reports `import public`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21150,12 +21231,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#import_no_public"
         }
-      ]
+      ],
+      "why": "A public import makes the imported file's names visible to every file that imports this one. The dependency spreads without being written down, and a change in the imported file breaks files that never mention it.\n\nTo fix, import the files where their names are used."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A message name that is not PascalCase (buf lint MESSAGE_PASCAL_CASE).",
+      "description": "Reports a message name that is not PascalCase.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21195,12 +21277,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#message_pascal_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide names messages in PascalCase, and the name becomes a class or type name in the generated code.\n\nTo fix, rename the message."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A oneof name that is not lower_snake_case (buf lint ONEOF_LOWER_SNAKE_CASE).",
+      "description": "Reports a oneof name that is not lower_snake_case.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21240,12 +21323,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#oneof_lower_snake_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide writes oneof names as it does fields, in lower_snake_case, since the generators turn it into a property.\n\nTo fix, rename the oneof."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A file without a `package` statement (buf lint PACKAGE_DEFINED).",
+      "description": "Reports a file without a `package` statement.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21278,12 +21362,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#package_defined"
         }
-      ]
+      ],
+      "why": "Without a package every name is global, so two files from different projects that define `Order` collide, and the generated code puts the types in the default namespace.\n\nTo fix, add a `package` statement."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A package whose components are not lower_snake_case (buf lint PACKAGE_LOWER_SNAKE_CASE).",
+      "description": "Reports a package whose components are not lower_snake_case.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21316,12 +21401,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#package_lower_snake_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide writes packages in lower_snake_case, dot separated. Generators turn the package into namespaces or modules, and another form reads as something else there.\n\nTo fix, rename the package."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1` (`v1beta` too; buf lint PACKAGE_VERSION_SUFFIX).",
+      "description": "Reports a package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1` (`v1beta` too).",
       "example": {
         "config": null,
         "fixed": null,
@@ -21354,12 +21440,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#package_version_suffix"
         }
-      ]
+      ],
+      "why": "A version in the package lets an incompatible API live next to the old one under another name (`api.v2`) instead of breaking its users. Without it a breaking change has to be made in place.\n\nTo fix, add a version component, for example `acme.orders.v1`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An rpc name that is not PascalCase (buf lint RPC_PASCAL_CASE).",
+      "description": "Reports an rpc name that is not PascalCase.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21399,12 +21486,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#rpc_pascal_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide names rpcs in PascalCase, and the name becomes a method name in the generated client and server code.\n\nTo fix, rename the rpc."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The request type of an rpc is not named `<Rpc>Request` or `<Service><Rpc>Request` (buf lint RPC_REQUEST_STANDARD_NAME).",
+      "description": "Reports an rpc whose request type is not named `<Rpc>Request` or `<Service><Rpc>Request`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21435,12 +21523,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#rpc_request_response"
         }
-      ]
+      ],
+      "why": "A request type with the name of its rpc is not reused for another rpc. A shared type couples the two calls, and a change for one changes the other.\n\nTo fix, give each rpc its own request message with that name."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The response type of an rpc is not named `<Rpc>Response` or `<Service><Rpc>Response` (buf lint RPC_RESPONSE_STANDARD_NAME).",
+      "description": "Reports an rpc whose response type is not named `<Rpc>Response` or `<Service><Rpc>Response`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21471,12 +21560,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#rpc_request_response"
         }
-      ]
+      ],
+      "why": "A response type with the name of its rpc is not reused for another rpc. A shared type couples the two calls, and a change for one changes the other.\n\nTo fix, give each rpc its own response message with that name."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A service name that is not PascalCase (buf lint SERVICE_PASCAL_CASE).",
+      "description": "Reports a service name that is not PascalCase.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21516,12 +21606,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#service_pascal_case"
         }
-      ]
+      ],
+      "why": "The Protobuf style guide names services in PascalCase, and the name becomes a class name in the generated code.\n\nTo fix, rename the service."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A service whose name does not end in `Service` (buf lint SERVICE_SUFFIX with its default suffix).",
+      "description": "Reports a service whose name does not end in `Service`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21555,12 +21646,13 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#service_suffix"
         }
-      ]
+      ],
+      "why": "The suffix tells a reader of the generated code, which has clients and servers of the service, that the name is a service. It also keeps the service from clashing with the message of the same name.\n\nTo fix, rename it `OrdersService`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A file without `syntax = ...;` or `edition = ...;`, which makes it proto2 (buf lint SYNTAX_SPECIFIED).",
+      "description": "Reports a file without `syntax = ...;` or `edition = ...;`, which makes it proto2.",
       "example": {
         "config": null,
         "fixed": null,
@@ -21593,7 +21685,8 @@
           "tool": "buf",
           "url": "https://buf.build/docs/lint/rules/#syntax_specified"
         }
-      ]
+      ],
+      "why": "A file without the statement is proto2 by default. New files almost always mean proto3 or an edition, and with the default they get required fields and other rules that differ.\n\nTo fix, add `syntax = \"proto3\";` or an `edition`."
     },
     {
       "category": "style",
@@ -27224,7 +27317,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`).",
+      "description": "Reports a call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`); also a `do` block that binds to the outer call while a block method is an argument.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27265,12 +27358,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintambiguousblockassociation"
         }
-      ]
+      ],
+      "why": "A `{}` block binds to the nearest call and a `do ... end` block to the outermost one, so without parentheses it is easy to attach the block to a different method from the one that was meant, and the code runs without the block being used as intended.\n\nTo fix, add parentheses around the arguments."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "`x == x`, `a && a` and other comparison, logical and bitwise operators whose two sides are the same code (RuboCop Lint/BinaryOperatorWithIdenticalOperands).",
+      "description": "Reports a comparison, logical or bitwise operator (`== != === <=> =~ > >= < <= | ^ && ||`) whose two sides are the same code (`x == x`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -27315,12 +27409,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintbinaryoperatorwithidenticaloperands"
         }
-      ]
+      ],
+      "why": "The result is constant, or the operand is repeated by mistake: the second one was meant to be another variable.\n\nTo fix, correct one operand, or write the constant result."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "The symbol `:true` or `:false`, which is probably meant to be the boolean (RuboCop Lint/BooleanSymbol).",
+      "description": "Reports the symbol `:true` or `:false`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27370,12 +27465,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintbooleansymbol"
         }
-      ]
+      ],
+      "why": "`:true` is a symbol, and in a condition it is truthy like any other symbol, including `:false`. It is almost always a boolean meant to be `true` or `false`.\n\nTo fix, write `true` or `false`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A constant, class or module defined directly in a block (RuboCop Lint/ConstantDefinitionInBlock); `enums` blocks (Sorbet) are allowed.",
+      "description": "Reports a constant, class or module defined directly in a block. `enums` blocks (Sorbet) are not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27416,12 +27512,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintconstantdefinitioninblock"
         }
-      ]
+      ],
+      "why": "A constant in a block belongs to the scope that encloses the block, not to the block, so the definition is global to the file or class, and runs again each time the block does, with a warning about a constant that is already defined.\n\nTo fix, define the constant outside the block, or use a variable or `let`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A `when` with no statements and no comment (RuboCop Lint/EmptyWhen).",
+      "description": "Reports a `when` with no statements and no comment.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27466,12 +27563,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintemptywhen"
         }
-      ]
+      ],
+      "why": "An empty `when` does nothing for that value, which usually means the code was never written, and it does not fall through to the next branch in Ruby.\n\nTo fix, write the body, or add a comment that says that nothing is meant to happen."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "`==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when` (RuboCop Lint/FloatComparison); comparing with 0 or `nil` is fine.",
+      "description": "Reports `==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when`. Comparing with `0` or `nil` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27516,12 +27614,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintfloatcomparison"
         }
-      ]
+      ],
+      "why": "Floating point numbers are binary approximations: `0.1 + 0.2 == 0.3` is `false`. A comparison that is true in the test with round numbers can fail with real data.\n\nTo fix, compare with a tolerance (`(a - b).abs < Float::EPSILON`) or use `BigDecimal`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity).",
+      "description": "Reports a hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -27562,12 +27661,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#linthashcomparebyidentity"
         }
-      ]
+      ],
+      "why": "The hash then emulates identity with an integer, which also keeps no reference to the object and may collide after the object is freed. `compare_by_identity` does it by design.\n\nTo fix, call `h.compare_by_identity` and use the object as the key."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "`private` or `protected` before `def self.name`, which it does not affect (RuboCop Lint/IneffectiveAccessModifier); `private_class_method :name` in the class makes the method private on purpose.",
+      "description": "Reports `private` or `protected` before `def self.name`, which does not affect it. `private_class_method :name` in the class makes the method private on purpose and is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27608,12 +27708,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintineffectiveaccessmodifier"
         }
-      ]
+      ],
+      "why": "`private` applies to instance methods only, so the singleton method stays public although it looks private.\n\nTo fix, use `private_class_method`, or open `class << self` and put the methods after `private`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`) (RuboCop Lint/InheritException).",
+      "description": "Reports a class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -27654,12 +27755,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintinheritexception"
         }
-      ]
+      ],
+      "why": "A plain `rescue` catches `StandardError` and its subclasses only. An exception that inherits `Exception` is not caught by it, and it is also not caught by code that handles all normal errors, so it ends the program, as does `exit`.\n\nTo fix, inherit from `StandardError`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A single-quoted string that holds `#{...}`, which would interpolate in double quotes (RuboCop Lint/InterpolationCheck).",
+      "description": "Reports a single-quoted string that holds `#{...}`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27704,12 +27806,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintinterpolationcheck"
         }
-      ]
+      ],
+      "why": "Single quotes do not interpolate, so the text `#{b}` stays as it is. It is a typical slip when quotes are changed.\n\nTo fix, use double quotes, or remove the `#{...}`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation).",
+      "description": "Reports a number, symbol, `true`, `false`, `nil` or string literal that is the whole content of a `#{...}`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27759,12 +27862,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintliteralininterpolation"
         }
-      ]
+      ],
+      "why": "A literal does not need interpolation, and in `\"a #{1}\"` the value is known to the reader. Often it is a leftover of an expression that was replaced by a constant.\n\nTo fix, write the literal in the string itself."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`initialize` of a class with a parent other than Object, and the lifecycle callbacks `inherited` and `method_added`, that do not call `super` (RuboCop Lint/MissingSuper).",
+      "description": "Reports `initialize` of a class with a parent other than `Object`, and the callbacks `inherited` and `method_added`, that do not call `super`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27805,12 +27909,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintmissingsuper"
         }
-      ]
+      ],
+      "why": "The parent's `initialize` sets up the object, so a subclass that does not call it leaves the parent's state unset. The `inherited` and `method_added` hooks of a base class do work that a subclass must not skip.\n\nTo fix, call `super`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A regexp literal that has both `(?<name>...)` and plain `(...)` groups (RuboCop Lint/MixedRegexpCaptureTypes).",
+      "description": "Reports a regexp literal that has both named groups (`(?<name>...)`) and plain groups (`(...)`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -27855,12 +27960,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintmixedregexpcapturetypes"
         }
-      ]
+      ],
+      "why": "When a regexp has named groups, Ruby does not capture the plain groups, so `$2` and `match[2]` are `nil`, which is not what the numbered group in the source suggests.\n\nTo fix, name every group you need, or use `(?:...)` for the ones you do not."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "`if a && b = c`: the condition is a logical operation whose right operand is an assignment not wrapped in parentheses (RuboCop Lint/AssignmentInCondition); a plain assignment condition is `no-assignment-in-condition`.",
+      "description": "Reports a condition that is a logical operation (`&&`, `||`) with an assignment as the right operand not in parentheses (`if a && b = c`). An assignment as the whole condition is `no-assignment-in-condition`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27888,12 +27994,13 @@
       "presets": [
         "ruby/rubocop"
       ],
-      "upstream": []
+      "upstream": [],
+      "why": "In `a && b = c` the assignment is easy to read as a comparison (`==`), and the value of the whole condition is the assigned value, so the code branches on the wrong thing.\n\nTo fix, use `==` if a comparison was meant, or put the assignment in parentheses if it is on purpose."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`) (RuboCop Lint/ParenthesesAsGroupedExpression).",
+      "description": "Reports a space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -27934,12 +28041,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintparenthesesasgroupedexpression"
         }
-      ]
+      ],
+      "why": "Ruby reads `puts (1 + 2) * 3` as `puts((1 + 2) * 3)`, not as `puts(1 + 2) * 3`, so the parentheses group an expression instead of enclosing the arguments, and the code does what the spaces hide.\n\nTo fix, remove the space before `(`, or put the whole argument in parentheses."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A `begin ... end while cond` or `until` loop, which behaves unlike the other loops (RuboCop Lint/Loop).",
+      "description": "Reports `begin ... end while cond` and `begin ... end until cond`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -27984,12 +28092,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintloop"
         }
-      ]
+      ],
+      "why": "This loop runs the body once before it tests the condition, unlike every other `while` or `until`, and readers expect the test first. `loop do ... break if ... end` says what happens.\n\nTo fix, write `loop do`, with `break unless cond` at the end of the body."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "Raising `Exception` itself (`raise Exception`, `raise Exception.new`), which a plain `rescue` does not catch (RuboCop Lint/RaiseException).",
+      "description": "Reports `raise Exception` and `raise Exception.new`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -28030,12 +28139,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintraiseexception"
         }
-      ]
+      ],
+      "why": "A plain `rescue` does not catch `Exception`, only `StandardError`, so the error goes past every handler that is written for normal errors and ends the program.\n\nTo fix, raise `StandardError` or a subclass."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn` (RuboCop Lint/RedundantStringCoercion).",
+      "description": "Reports `to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -28080,12 +28190,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintredundantstringcoercion"
         }
-      ]
+      ],
+      "why": "Interpolation and these methods already convert the value with `to_s`, so the call adds nothing.\n\nTo fix, delete `.to_s`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "`return value` in `initialize` or a setter method, whose result is ignored (RuboCop Lint/ReturnInVoidContext).",
+      "description": "Reports `return value` in `initialize` or a setter method, whose result is ignored.",
       "example": {
         "config": null,
         "fixed": null,
@@ -28126,12 +28237,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintreturninvoidcontext"
         }
-      ]
+      ],
+      "why": "`new` always returns the new object, and an assignment `a.x = 1` evaluates to `1` whatever the setter returns. The value cannot be used by anyone, so it is a sign of a misunderstanding.\n\nTo fix, return nothing: `return` alone is fine."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`, `:count`) (RuboCop Lint/StructNewOverride).",
+      "description": "Reports a `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`, `:count`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -28172,7 +28284,8 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintstructnewoverride"
         }
-      ]
+      ],
+      "why": "The generated accessor replaces the method of `Struct`, which other code and the class itself depend on. `hash` breaks use as a hash key and `size` breaks code that reads the members.\n\nTo fix, rename the member."
     },
     {
       "category": "style",
@@ -28297,7 +28410,7 @@
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A bare `private`, `protected`, `public` or `module_function` that repeats the visibility already in force, or is followed by no method definition (RuboCop Lint/UselessAccessModifier).",
+      "description": "Reports a bare `private`, `protected`, `public` or `module_function` that repeats the visibility already in force, or is followed by no method definition.",
       "example": {
         "config": null,
         "fixed": null,
@@ -28346,12 +28459,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintuselessaccessmodifier"
         }
-      ]
+      ],
+      "why": "The modifier does nothing, so a reader who relies on it believes methods are private that are not, or the other way round.\n\nTo fix, delete it, or move the methods it was meant to cover under it."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A method whose whole body is a bare `super` (RuboCop Lint/UselessMethodDefinition).",
+      "description": "Reports a method whose whole body is a bare `super`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -28396,12 +28510,13 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintuselessmethoddefinition"
         }
-      ]
+      ],
+      "why": "The method does what the inherited one does, so the definition adds only code.\n\nTo fix, delete the method."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "`0.times` and `1.times` with a block (RuboCop Lint/UselessTimes).",
+      "description": "Reports `0.times` and `1.times` with a block.",
       "example": {
         "config": null,
         "fixed": null,
@@ -28442,7 +28557,8 @@
           "tool": "rubocop",
           "url": "https://docs.rubocop.org/rubocop/latest/cops_lint.html#lintuselesstimes"
         }
-      ]
+      ],
+      "why": "The block runs at most once, so the loop is a way to write `if`. It is usually left from a value that was a variable.\n\nTo fix, delete the loop, or call the code directly."
     },
     {
       "category": "suspicious",
@@ -41007,7 +41123,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "`get` goes before `set` or `init`, and `add` before `remove`. The fix swaps the two accessors (not offered when a comment stands between or in them).",
+      "description": "Reports a property or event whose accessors are in the wrong order: `get` goes before `set` or `init`, and `add` before `remove`. The fix swaps the two accessors; it is not offered when a comment stands between them or inside them.",
       "example": {
         "config": null,
         "fixed": "class A {\n int P { get { return 1; } set { } }\n event System.Action E { add { } remove { } }\n int Q { set { } /* why */ get { return 1; } }\n}\n",
@@ -41054,12 +41170,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1213.md"
         }
-      ]
+      ],
+      "why": "Readers expect to meet the reading accessor first and the writing one second. One order in all properties makes a file quick to scan and makes the odd one out stand out."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An async method returning Task or ValueTask has a name that does not end in `Async`. Overrides, explicit interface implementations and `Main` are left alone (their names are not the method's to choose). Renaming needs the binding layer, so there is no fix.",
+      "description": "Reports an `async` method that returns `Task` or `ValueTask` and whose name does not end in `Async`. Overrides, explicit interface implementations and `Main` are not reported, because their names are not the method's to choose. Renaming needs the binding layer, so there is no fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41088,12 +41205,13 @@
           "tool": "Roslynator",
           "url": "https://josefpihrt.github.io/docs/roslynator/analyzers/RCS1046"
         }
-      ]
+      ],
+      "why": "The suffix tells the caller that the method returns a task that has to be awaited. A call that forgets `await` on `Load()` compiles and runs on without waiting, but `LoadAsync()` calls for it. It also leaves room for a synchronous `Load()` next to it.\n\nTo fix, rename the method to end in `Async`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`. Without the type layer a constant is a literal, `nameof`, `int.MaxValue`-style member or an expression of those; a named constant on the left is not recognised.",
+      "description": "Reports a comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`. Without the type layer a constant is a literal, `nameof`, a member such as `int.MaxValue`, or an expression made of those; a named constant on the left is not recognised.",
       "example": {
         "config": null,
         "fixed": "class A {\n int a, b;\n Nullable<int> n = 1L < 2 ? null : null;\n void F(object o, int i) {\n  var f = (int x) => { return x; };\n  var g = o == null || i > 1;\n  var h = 1F + (double)2.5;\n }\n}\n",
@@ -41140,12 +41258,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1131.md"
         }
-      ]
+      ],
+      "why": "\"Yoda\" conditions came from C, where `x = null` by mistake compiled. In C# an assignment in a condition does not compile for a non-boolean, so the form has no protection to give, and it reads backwards: `x == null` says what is tested first.\n\nTo fix, swap the sides and mirror the operator. The fix is safe and does it."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The summary of a constructor starts with \"Initializes a new instance of the <see cref=\"T\"/> class\" (struct), \"Initializes static members of the ...\" for a static constructor, and a private constructor may say \"Prevents a default instance of the ... from being created\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text.",
+      "description": "Reports the summary of a constructor that does not start with the standard sentence: \"Initializes a new instance of the `<see cref=\"T\"/>` class\" (or \"struct\"), \"Initializes static members of the ...\" for a static constructor. A private constructor may say \"Prevents a default instance of the ... from being created\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text and is unsafe.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Constructors.</summary>\npublic class Constructors<T>\n{\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class.</summary>\n    public Constructors() { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class. Creates it.</summary>\n    public Constructors(int a) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class.</summary>\n    public Constructors(int a, int b) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class.</summary>\n    public Constructors(int a, int b, int c) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class. Initializes a new instance of the Constructors class.</summary>\n    public Constructors(long a) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class and more.</summary>\n    public Constructors(long a, long b) { }\n    /// <summary>\n    /// Initializes a new instance of the <see cref=\"Constructors{T}\"/> class.\n    /// </summary>\n    public Constructors(string a) { }\n    /// <summary>\n    /// Initializes a new instance of the\n    /// <see cref=\"Constructors{T}\"/> class.\n    /// </summary>\n    public Constructors(string a, string b) { }\n    /// <summary>\n    /// Initializes  a new instance of the <see cref=\"Constructors{T}\"/>   class.\n    /// </summary>\n    public Constructors(string a, string b, string c) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class.</summary>\n    /// <remarks>More.</remarks>\n    internal Constructors(char a) { }\n    /// <summary>Initializes static members of the <see cref=\"Constructors{T}\"/> class.</summary>\n    static Constructors() { }\n    /// <summary>Prevents a default instance of the <see cref=\"Constructors{T}\"/> class from being created.</summary>\n    private Constructors(char a, char b) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class.</summary>\n    private Constructors(char a, char b, char c) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class. Private.</summary>\n    private Constructors(char a, char b, char c, char d) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Constructors{T}\"/> class. Prevents a default instance of the <see cref=\"Constructors{T}\"/> class from being created.</summary>\n    protected Constructors(byte a) { }\n    /// <summary>Finalizes an instance of the <see cref=\"Constructors{T}\"/> class.</summary>\n    ~Constructors() { }\n    /// <inheritdoc />\n    protected Constructors(byte a, byte b) { }\n    /// <summary />\n    protected Constructors(byte a, byte b, byte c) { }\n    /// <remarks>No summary.</remarks>\n    protected Constructors(byte a, byte b, byte c, byte d) { }\n}\n",
@@ -41202,12 +41321,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1642.md"
         }
-      ]
+      ],
+      "why": "A constructor needs no description of what it does that every constructor does not already say; the standard sentence gives the same first line to all of them, and the text after it adds what is special about this one. Many documentation conventions require it."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`Debug.Assert` without a message, or with a constant blank one. With the type layer the call is checked against `System.Diagnostics.Debug`; without it any call written `Debug.Assert` is. No fix.",
+      "description": "Reports a `Debug.Assert` call without a message, or with a message that is a constant blank string. With the type layer the call is checked against `System.Diagnostics.Debug`; without it any call written `Debug.Assert` is. No fix.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -41249,12 +41369,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1405.md"
         }
-      ]
+      ],
+      "why": "When an assertion fails in a debug build the message is all that is shown. Without it the developer has the line number and the condition, and a long sequence of asserts in a function does not tell which one broke or why it matters.\n\nTo fix, add a message that says what is wrong when the condition is false."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`Debug.Fail` with a constant blank message. With the type layer the call is checked against `System.Diagnostics.Debug`; without it any call written `Debug.Fail` is. No fix.",
+      "description": "Reports a `Debug.Fail` call with a constant blank message. With the type layer the call is checked against `System.Diagnostics.Debug`; without it any call written `Debug.Fail` is. No fix.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -41296,12 +41417,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1406.md"
         }
-      ]
+      ],
+      "why": "`Debug.Fail` is reached only when something is wrong, and the message is the only information about what. An empty message leaves the reader of the failure with a stack trace and no idea of the cause.\n\nTo fix, say what went wrong."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The summary of a finalizer starts with \"Finalizes an instance of the <see cref=\"T\"/> class.\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text.",
+      "description": "Reports the summary of a finalizer that does not start with \"Finalizes an instance of the `<see cref=\"T\"/>` class.\" The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text and is unsafe.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Static.</summary>\npublic class StaticWrong\n{\n    /// <summary>Initializes static members of the <see cref=\"StaticWrong\"/> class. Static.</summary>\n    static StaticWrong() { }\n}\n/// <summary>Struct.</summary>\npublic struct Pair\n{\n    /// <summary>Initializes a new instance of the <see cref=\"Pair\"/> struct.</summary>\n    public Pair(int a) { }\n    /// <summary>Initializes a new instance of the <see cref=\"Pair\"/> struct.</summary>\n    public Pair(int a, int b) { }\n    /// <summary>Prevents a default instance of the <see cref=\"Pair\"/> struct from being created.</summary>\n    private Pair(int a, int b, int c) { }\n    /// <summary>Initializes static members of the <see cref=\"Pair\"/> struct.</summary>\n    static Pair() { }\n}\n/// <summary>Destructors.</summary>\npublic class Destructors<T>\n{\n    /// <summary>Finalizes an instance of the <see cref=\"Destructors{T}\"/> class.</summary>\n    ~Destructors() { }\n}\n/// <summary>Destructors.</summary>\npublic class DestructorsWrong\n{\n    /// <summary>Finalizes an instance of the <see cref=\"DestructorsWrong\"/> class. Cleans up.</summary>\n    ~DestructorsWrong() { }\n}\n/// <summary>Destructors.</summary>\npublic class DestructorsOther\n{\n    /// <summary>Finalizes an instance of the <see cref=\"DestructorsOther\"/> class.</summary>\n    ~DestructorsOther() { }\n}\n/// <summary>Destructors.</summary>\npublic class DestructorsMultiLine\n{\n    /// <summary>\n    /// Finalizes an instance of the <see cref=\"DestructorsMultiLine\"/> class.\n    /// </summary>\n    ~DestructorsMultiLine() { }\n}\n/// <summary>Destructors.</summary>\npublic class DestructorsNoPeriod\n{\n    /// <summary>Finalizes an instance of the <see cref=\"DestructorsNoPeriod\"/> class.</summary>\n    ~DestructorsNoPeriod() { }\n}\n/// <summary>Other.</summary>\npublic class Other { }\n",
@@ -41346,12 +41468,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1643.md"
         }
-      ]
+      ],
+      "why": "A finalizer is called by the runtime and not by code, so there is nothing to say about how it is used. The standard sentence gives every finalizer the same first line, and the text after it adds what the finalizer cleans up."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "No space between `#` and the directive keyword (`#if`, not `# if`).",
+      "description": "Reports a preprocessor directive that has a space between `#` and its keyword (`# if`). The fix removes the space.",
       "example": {
         "config": null,
         "fixed": "class A {\n#region R\n int a;\n#endregion\n#if X\n int b;\n#endif\n}\n",
@@ -41392,12 +41515,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1006.md"
         }
-      ]
+      ],
+      "why": "The convention writes the directive as one word, `#if`, `#region`, so a search for it finds all of them and the directives look alike."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A documentation line (`///`) starts with a single space. More spaces are allowed to indent continuation lines, not on the first line of the comment; a tab or no space is always reported.",
+      "description": "Reports a documentation line (`///`) that does not start with a single space. More spaces are allowed to indent continuation lines, but not on the first line of the comment; a tab or no space is always reported. The fix writes the single space.",
       "example": {
         "config": null,
         "fixed": "class A {\n //no space\n //\n // paragraph\n //\n // text\n //\n int a; //tail\n /// <summary>x</summary>\n /// <summary>y</summary>\n ///   <summary>z</summary>\n /* */\n int b;\n}\n",
@@ -41428,12 +41552,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1004.md"
         }
-      ]
+      ],
+      "why": "The space after the slashes separates the marker from the text, so the text of a comment reads the same as a line of prose. A comment that starts at the slashes (`///<summary>`) is hard to read and differs from the rest of the file."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<param>` without a `name` attribute, or with an empty one. No fix.",
+      "description": "Reports a `<param>` in a documentation comment that has no `name` attribute, or an empty one. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41489,12 +41614,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1613.md"
         }
-      ]
+      ],
+      "why": "The `name` is how the tools connect the text to a parameter. A `<param>` without it is documentation that tells the IDE nothing and is shown nowhere.\n\nTo fix, add `name=\"value\"` with the name of the parameter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<param>` without text. Skipped when the comment has `<inheritdoc />`. No fix.",
+      "description": "Reports a `<param>` without text. A comment with `<inheritdoc />` is not reported. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41562,12 +41688,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1614.md"
         }
-      ]
+      ],
+      "why": "An empty `<param name=\"x\"></param>` looks like documentation and says nothing, and it stops the compiler from warning about the missing parameter.\n\nTo fix, describe the parameter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or `<include>` is left out, and so is a declaration without a comment. No fix.",
+      "description": "Reports a parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment. A comment with `<inheritdoc />` or `<include>` is not reported, and neither is a declaration without a comment. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41599,12 +41726,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1611.md"
         }
-      ]
+      ],
+      "why": "The comment is what the IDE shows when the method is called and what the generated reference lists. A parameter that is not described leaves the caller to guess what it means, its unit, whether it may be null or empty, and what the method does with it.\n\nTo fix, add the tag that documents the parameter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A partial type or method without a documentation comment (or with an empty one). Each part is checked on its own; StyleCop (SA1601) accepts one documented part, which needs the other parts of the project. Which elements need documentation follows StyleCop's defaults: everything but private members.",
+      "description": "Reports a partial type or method without a documentation comment, or with an empty one. Each part is checked on its own: accepting one documented part would need all the other parts of the project. Which elements need documentation follows the default of private members being left out.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41663,12 +41791,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1601.md"
         }
-      ]
+      ],
+      "why": "A partial type is built from several files, and the documentation tools take the comment from one of them. A part without a comment leaves the reader of that file with nothing to read at the declaration.\n\nTo fix, document the part."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A documentation comment of a partial type or method without `<summary>` or `<content>` (and without `<inheritdoc />`). Each part is checked on its own. No fix.",
+      "description": "Reports a documentation comment of a partial type or method that has no `<summary>` or `<content>` (and no `<inheritdoc />`). Each part is checked on its own. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41719,12 +41848,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1605.md"
         }
-      ]
+      ],
+      "why": "The summary is the part of the comment that tools show in a list or a hover. A comment of a partial type without it is shown with no description.\n\nTo fix, add a `<summary>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The `<summary>` (or `<content>`) of a partial type or method has no text. Each part is checked on its own. No fix.",
+      "description": "Reports a partial type or method whose `<summary>` (or `<content>`) has no text. Each part is checked on its own. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41775,12 +41905,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1607.md"
         }
-      ]
+      ],
+      "why": "An empty summary is shown in a list or a hover as no description, and it hides that nobody wrote one.\n\nTo fix, write the summary."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A documented partial generic type (with a `<summary>`) that has no `<typeparam>` for one of its type parameters. Each part is checked on its own. No fix.",
+      "description": "Reports a documented partial generic type (one that has a `<summary>`) that has no `<typeparam>` for one of its type parameters, on the parameter. Each part is checked on its own. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -41833,12 +41964,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1619.md"
         }
-      ]
+      ],
+      "why": "Without the tag a reader of the documentation sees `T` and has to read the code to learn what it stands for.\n\nTo fix, add `<typeparam name=\"T\">` with the meaning of `T`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<returns>` without text. Skipped when the comment has `<inheritdoc />`. No fix.",
+      "description": "Reports a `<returns>` without text. A comment with `<inheritdoc />` is not reported. No fix.",
       "example": {
         "config": null,
         "fixed": "using System.Threading.Tasks;\n/// <summary>Return values.</summary>\npublic class Returns\n{\n    /// <summary>Returns.</summary>\n    public int NoReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns></returns>\n    public int EmptyReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns />\n    public int SelfClosingReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns>The value.</returns>\n    public int GoodReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns>\n    /// </returns>\n    public int BlankReturns() => 0;\n    /// <summary>Does.</summary>\n    public void VoidReturns() { }\n    /// <summary>Does.</summary>\n    public void VoidEmptyReturns() { }\n    /// <summary>Does.</summary>\n    public void VoidSelfClosingReturns() { }\n    /// <summary>Does.</summary>\n    public Task AsyncNoReturns() => null;\n    /// <summary>Does.</summary>\n    /// <inheritdoc />\n    public int Inherited() => 0;\n    /// <summary>Does.</summary>\n    /// <returns></returns>\n    /// <inheritdoc />\n    public int InheritedEmpty() => 0;\n    /// <summary>Does.</summary>\n    private int PrivateNoReturns() => 0;\n    /// <summary>Does.</summary>\n    internal int InternalNoReturns() => 0;\n    /// <summary>Does.</summary>\n    protected int ProtectedNoReturns() => 0;\n    /// <summary>Does.</summary>\n    public static int operator +(Returns a, Returns b) => 0;\n    /// <summary>Delegate.</summary>\n    public delegate int Callback();\n    /// <summary>Delegate.</summary>\n    public delegate void VoidCallback();\n    /// <summary>Does.</summary>\n    public ref int RefReturn() => throw null;\n}\n",
@@ -41898,12 +42030,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1616.md"
         }
-      ]
+      ],
+      "why": "An empty `<returns></returns>` looks like documentation and tells the reader nothing about the value, and it keeps tools from reporting that the result is not described.\n\nTo fix, describe what the method returns."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A documented method or delegate that does not return `void` and has no `<returns>` (and no `<inheritdoc />`). Private members are left alone, as in StyleCop's defaults. No fix.",
+      "description": "Reports a documented method or delegate that does not return `void` and has no `<returns>` (and no `<inheritdoc />`). Private members are not reported. No fix.",
       "example": {
         "config": null,
         "fixed": "using System.Threading.Tasks;\n/// <summary>Return values.</summary>\npublic class Returns\n{\n    /// <summary>Returns.</summary>\n    public int NoReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns></returns>\n    public int EmptyReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns />\n    public int SelfClosingReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns>The value.</returns>\n    public int GoodReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns>\n    /// </returns>\n    public int BlankReturns() => 0;\n    /// <summary>Does.</summary>\n    public void VoidReturns() { }\n    /// <summary>Does.</summary>\n    public void VoidEmptyReturns() { }\n    /// <summary>Does.</summary>\n    public void VoidSelfClosingReturns() { }\n    /// <summary>Does.</summary>\n    public Task AsyncNoReturns() => null;\n    /// <summary>Does.</summary>\n    /// <inheritdoc />\n    public int Inherited() => 0;\n    /// <summary>Does.</summary>\n    /// <returns></returns>\n    /// <inheritdoc />\n    public int InheritedEmpty() => 0;\n    /// <summary>Does.</summary>\n    private int PrivateNoReturns() => 0;\n    /// <summary>Does.</summary>\n    internal int InternalNoReturns() => 0;\n    /// <summary>Does.</summary>\n    protected int ProtectedNoReturns() => 0;\n    /// <summary>Does.</summary>\n    public static int operator +(Returns a, Returns b) => 0;\n    /// <summary>Delegate.</summary>\n    public delegate int Callback();\n    /// <summary>Delegate.</summary>\n    public delegate void VoidCallback();\n    /// <summary>Does.</summary>\n    public ref int RefReturn() => throw null;\n}\n",
@@ -41967,12 +42100,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1615.md"
         }
-      ]
+      ],
+      "why": "The summary says what a method does, and `<returns>` says what comes back, which a caller needs to use it right: units, meaning of `null`, which failure value.\n\nTo fix, add a `<returns>` that describes the value."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A documentation comment without `<summary>` (and without `<inheritdoc />`) on a type, member or field that StyleCop's defaults ask to document: everything but private members. Partial types and methods are `doc-partial-summary-required`. No fix.",
+      "description": "Reports a documentation comment without `<summary>` (and without `<inheritdoc />`) on a type, member or field that needs documentation: everything but private members. Partial types and methods belong to `doc-partial-summary-required`. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42090,12 +42224,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1604.md"
         }
-      ]
+      ],
+      "why": "The summary is what tools show in lists, in hovers and in the generated reference. A comment without it appears without a description, however much the other tags say.\n\nTo fix, add a `<summary>`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<summary>` without text (`<summary></summary>`; `<summary />` is left alone, as StyleCop does). Partial types and methods are `doc-partial-summary-text`. No fix.",
+      "description": "Reports a `<summary>` without text (`<summary></summary>`; `<summary />` is not reported). Partial types and methods belong to `doc-partial-summary-text`. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42169,12 +42304,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1606.md"
         }
-      ]
+      ],
+      "why": "An empty summary is a placeholder that was never filled in: it satisfies a check that a summary exists and tells the reader nothing.\n\nTo fix, write the summary."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The last text of an element of a documentation comment does not end with a period (`.` or `.)`). Each paragraph of `<para>` and `<note>` is checked, a paragraph that ends in a colon (except the last), `-or-` and `<seealso>` are left alone, and an inline element (`<see />`, `<c>`, ...) at the end counts as not ending with a period. The fix adds the period, or replaces a trailing comma or semicolon with it.",
+      "description": "Reports the last text of an element of a documentation comment that does not end with a period (`.` or `.)`). Each paragraph of `<para>` and `<note>` is checked. A paragraph that ends in a colon (except the last), `-or-` and `<seealso>` are not reported, and an inline element (`<see />`, `<c>`, ...) at the end counts as not ending with a period. The fix adds the period, or replaces a trailing comma or semicolon with it.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Interface.</summary>\npublic interface IFace\n{\n    /// <summary>Member.</summary>\n    void Run();\n}\n/// <summary>Record.</summary>\npublic record Record(int A);\n",
@@ -42215,12 +42351,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1629.md"
         }
-      ]
+      ],
+      "why": "Documentation is read as sentences in the generated reference, where the elements are shown one below the other. Text with and without the final period looks uneven, and the missing period is the first thing that shows that a sentence was not finished."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<remarks>`, `<example>`, `<exception>` or `<permission>` element without text, written `<remarks></remarks>` or `<remarks />`. No fix.",
+      "description": "Reports a `<remarks>`, `<example>`, `<exception>` or `<permission>` element without text, written `<remarks></remarks>` or `<remarks />`. No fix.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Text.</summary>\npublic class PlainComments\n{\n    /// plain text on a field\n    public int Field;\n    /// first line\n    /// second line\n    public void Attached() { }\n    /// <summary>Good.</summary>\n    /// extra text after the summary\n    public void Mixed() { }\n    void Body()\n    {\n        // plain in a body\n        int j = 0;\n\n        //\n        int k = 0;\n\n        /// <summary>Not plain.</summary>\n        int l = 0;\n    }\n    /** plain block */\n    public int Block;\n    //// four slashes\n    public int Four;\n    int last; //trailing\n}\n/// <summary>Text.</summary>\npublic class Empties\n{\n    /// <summary>Text.</summary>\n    /// <remarks></remarks>\n    /// <example />\n    /// <exception cref=\"System.Exception\"></exception>\n    /// <exception cref=\"System.ArgumentException\">Thrown.</exception>\n    /// <permission cref=\"System.Security.PermissionSet\" />\n    /// <remarks>\n    /// </remarks>\n    /// <remarks>Text.</remarks>\n    /// <returns></returns>\n    public int Elements() => 0;\n    /// <summary>\n    /// Text.\n    /// <remarks></remarks>\n    /// </summary>\n    public void Nested() { }\n    /// <remarks></remarks>\n    int Hidden;\n    /// <remarks><see cref=\"Hidden\"/>.</remarks>\n    public int Cref;\n    /// <remarks><!-- comment --></remarks>\n    public int Comment;\n}\n",
@@ -42295,12 +42432,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1627.md"
         }
-      ]
+      ],
+      "why": "An empty element is shown as a heading with nothing below it in the generated documentation, so it adds noise and hides that the text was never written.\n\nTo fix, write the text or delete the element."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<typeparam>` without a `name` attribute, or with an empty one, in the documentation of a generic class, struct, interface, method or delegate. No fix.",
+      "description": "Reports a `<typeparam>` without a `name` attribute, or with an empty one, in the documentation of a generic class, struct, interface, method or delegate. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42356,12 +42494,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1621.md"
         }
-      ]
+      ],
+      "why": "The `name` connects the text to a type parameter. Without it the tag is not shown with its parameter.\n\nTo fix, add `name=\"T\"`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<typeparam>` without text (`<typeparam name=\"T\" />` counts), in the documentation of a generic class, struct, interface, method or delegate. No fix.",
+      "description": "Reports a `<typeparam>` without text (`<typeparam name=\"T\" />` counts as without text), in the documentation of a generic class, struct, interface, method or delegate. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42425,12 +42564,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1622.md"
         }
-      ]
+      ],
+      "why": "A type parameter with an empty description looks documented and says nothing about what `T` is for, and it stops tools from reporting the missing text.\n\nTo fix, describe the type parameter."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A property's `<value>` without text (`<value></value>`; `<value />` is left alone, as StyleCop does). Skipped when the comment has `<inheritdoc />`. No fix.",
+      "description": "Reports a property's `<value>` without text (`<value></value>`; `<value />` is not reported). A comment with `<inheritdoc />` is not reported. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42478,12 +42618,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1610.md"
         }
-      ]
+      ],
+      "why": "An empty `<value>` is a placeholder: it satisfies a check that the tag exists and gives the reader nothing about what the property holds.\n\nTo fix, describe the value."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match.",
+      "description": "Reports a field whose name begins with an underscore. The option `fields` is the expression a field name must match.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42521,12 +42662,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1309.md"
         }
-      ]
+      ],
+      "why": "The convention of many style guides names fields in camel case without a prefix and tells them from locals by writing `this.`. A leading underscore is the other convention; a project picks one, and the rule enforces it.\n\nTo fix, rename the field."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}`. Not checked when that type is partial. No fix.",
+      "description": "Reports a file whose name, up to its first dot and ignoring case, is not the name of the first type in the file; a generic type may also be written `Name{T,U}`. Not checked when that type is partial. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42557,12 +42699,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1649.md"
         }
-      ]
+      ],
+      "why": "A file named after its type is found by the name from the file tree, from a stack trace and from a search. A file whose name says something else sends the reader to the wrong place.\n\nTo fix, rename the file or the type."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`<inheritdoc />` without `cref` on a type without a base list, or on a member that neither overrides nor implements anything (a constructor whose signature matches a base constructor is fine). No fix.",
+      "description": "Reports `<inheritdoc />` without `cref` on a type that has no base list, or on a member that neither overrides nor implements anything. A constructor whose signature matches a base constructor is not reported. No fix.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -42604,12 +42747,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1648.md"
         }
-      ]
+      ],
+      "why": "`inheritdoc` takes the documentation from what the member inherits. If it inherits nothing, the tool has no text to copy, and the member is shown without documentation although the comment looks complete.\n\nTo fix, write the documentation, or name the source with `cref`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Members are out of order. Compared with the member before, in the order of the `element_order` option: the kind (fields, constructors, finalizers, delegates, events, enums, interfaces, properties, indexers, operators, methods, structs, classes; in a namespace or file: namespaces, delegates, enums, interfaces, structs, classes), the access (public, internal, protected internal, protected, private protected, private), constants before other fields, static before instance members, readonly fields before the others. A trait only counts between members that agree on the traits listed before it. No fix: moving members would have to take their comments and directives along.",
+      "description": "Reports a member that is out of order compared with the member before it, in the order of the `element_order` option: the kind (fields, constructors, finalizers, delegates, events, enums, interfaces, properties, indexers, operators, methods, structs, classes; in a namespace or file: namespaces, delegates, enums, interfaces, structs, classes), the access (public, internal, protected internal, protected, private protected, private), constants before other fields, static before instance members, readonly fields before the others. A trait counts only between members that agree on the traits listed before it. No fix: moving members would have to take their comments and directives along.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42704,12 +42848,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1214.md"
         }
-      ]
+      ],
+      "why": "A fixed order lets a reader find a member without reading the class: fields at the top, constructors next, then the rest by visibility. Different files of a project then look the same.\n\nTo fix, move the member to its place."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A type, member, field or enum item that StyleCop's defaults ask to document (public, protected or internal, in types that are too; members of an interface, explicit interface implementations and enum items are public; partial declarations are left out) has no `///` comment before it. Private members are left alone. No fix.",
+      "description": "Reports a type, member, field or enum item that needs documentation and has no `///` comment before it: public, protected or internal ones, in types that are too. Members of an interface, explicit interface implementations and enum items count as public. Partial declarations are not reported, and private members are not either. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42816,12 +42961,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1602.md"
         }
-      ]
+      ],
+      "why": "Documentation of the public interface is what the users of a library read, in the IDE and in the generated reference. An element without a comment shows only its name and signature, and the caller has to read the code to learn what it does and what it expects.\n\nTo fix, add a comment that says what the element is for."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its `{`. Put it inside the block or above the statement.",
+      "description": "Reports a comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its `{`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42854,7 +43000,8 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1108.md"
         }
-      ]
+      ],
+      "why": "A comment there is attached to neither the head nor the block, and a reader may take it for a part of the condition. It is also easy to separate from its statement when the code is moved.\n\nTo fix, put the comment inside the block or above the statement."
     },
     {
       "category": "suspicious",
@@ -42905,7 +43052,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<summary>` that starts with the text Visual Studio generates, \"Summary description for ...\". Skipped when the comment has `<inheritdoc />`. No fix.",
+      "description": "Reports a `<summary>` that starts with the text Visual Studio generates, \"Summary description for ...\". A comment with `<inheritdoc />` is not reported. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -42963,12 +43110,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1608.md"
         }
-      ]
+      ],
+      "why": "The text is a placeholder that the tool inserts. It stays in the generated documentation as a sentence that says nothing about the element.\n\nTo fix, write the real summary."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`new S()` of a value type with an implicit parameterless constructor and no initializer: write `default(S)` (`Guid.Empty`, `CancellationToken.None`, `IntPtr.Zero`, the enum member with value 0 where they exist). No fix for a target-typed `new()`.",
+      "description": "Reports `new S()` of a value type that has an implicit parameterless constructor and no initializer: write `default(S)`, or the named constant where there is one (`Guid.Empty`, `CancellationToken.None`, `IntPtr.Zero`, the enum member with value 0). No fix for a target-typed `new()`.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -43014,12 +43162,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1129.md"
         }
-      ]
+      ],
+      "why": "`new S()` of such a struct is the zero value, the same as `default(S)`, but it reads as a call that does something. `default` states that the value is the zero value, and a named constant (`Guid.Empty`) says what that value means.\n\nTo fix, write `default(S)` or the constant."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<placeholder>` element in a documentation comment. No fix.",
+      "description": "Reports a `<placeholder>` element in a documentation comment. No fix.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Text.</summary>\npublic class Placeholders\n{\n    /// <summary>\n    /// <placeholder>todo</placeholder>\n    /// <placeholder />\n    /// </summary>\n    public void Placeholder() { }\n    /// <placeholder>todo.</placeholder>\n    private int Hidden;\n    /// <summary>\n    /// <para><placeholder>nested</placeholder></para>\n    /// </summary>\n    public int Nested;\n}\n",
@@ -43065,12 +43214,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1651.md"
         }
-      ]
+      ],
+      "why": "`<placeholder>` marks text that is to be filled in later, so a comment that has one is not finished.\n\nTo fix, write the text."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `///` comment that holds only text, no XML element: a plain comment written with documentation slashes. The fix writes `//`, unless the comment documents a declaration (it would remove documentation).",
+      "description": "Reports a `///` comment that holds only text and no XML element: a plain comment written with documentation slashes. The fix writes `//`, unless the comment documents a declaration (it would remove documentation).",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Text.</summary>\npublic class PlainComments\n{\n    /// plain text on a field\n    public int Field;\n    /// first line\n    /// second line\n    public void Attached() { }\n    /// <summary>Good.</summary>\n    /// extra text after the summary\n    public void Mixed() { }\n    void Body()\n    {\n        // plain in a body\n        int j = 0;\n\n        //\n        int k = 0;\n\n        /// <summary>Not plain.</summary>\n        int l = 0;\n    }\n    /** plain block */\n    public int Block;\n    //// four slashes\n    public int Four;\n    int last; //trailing\n}\n/// <summary>Text.</summary>\npublic class Empties\n{\n    /// <summary>Text.</summary>\n    /// <remarks></remarks>\n    /// <example />\n    /// <exception cref=\"System.Exception\"></exception>\n    /// <exception cref=\"System.ArgumentException\">Thrown.</exception>\n    /// <permission cref=\"System.Security.PermissionSet\" />\n    /// <remarks>\n    /// </remarks>\n    /// <remarks>Text.</remarks>\n    /// <returns></returns>\n    public int Elements() => 0;\n    /// <summary>\n    /// Text.\n    /// <remarks></remarks>\n    /// </summary>\n    public void Nested() { }\n    /// <remarks></remarks>\n    int Hidden;\n    /// <remarks><see cref=\"Hidden\"/>.</remarks>\n    public int Cref;\n    /// <remarks><!-- comment --></remarks>\n    public int Comment;\n}\n",
@@ -43137,12 +43287,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1626.md"
         }
-      ]
+      ],
+      "why": "Three slashes make the comment documentation, and the compiler and tools then read it as XML. A plain remark written that way is attached to the next declaration and shown in its hover, or reported as malformed.\n\nTo fix, write `//`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "Two elements of one documentation comment with the same text (a copied and pasted `<param>`, for example). Empty elements and \"The parameter is not used.\" are ignored. No fix.",
+      "description": "Reports two elements of one documentation comment with the same text (a `<param>` pasted twice, for example). Empty elements and \"The parameter is not used.\" are not reported. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -43203,12 +43354,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1625.md"
         }
-      ]
+      ],
+      "why": "Two parameters described in the same words is almost always a copy and paste that was not edited, so one of the descriptions is wrong.\n\nTo fix, write the right text for each element."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are left alone.",
+      "description": "Reports an attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are not reported. The fix removes the parentheses.",
       "example": {
         "config": null,
         "fixed": "[assembly: A]\n[assembly: B]\nclass C {\n [A]\n [B]\n void F([A, B] int p) { }\n [A, // why\n  B]\n int x;\n Action a = delegate() { };\n}\n",
@@ -43243,12 +43395,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1411.md"
         }
-      ]
+      ],
+      "why": "The parentheses add two characters and no meaning: the attribute is constructed in both cases with its parameterless constructor."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "An anonymous method with an empty parameter list: `delegate() { }` is `delegate { }`. Parentheses with a comment in them are left alone. The fix is unsafe: without a parameter list the method also converts to delegate types that have parameters, which can change which overload is chosen.",
+      "description": "Reports an anonymous method with an empty parameter list: `delegate() { }` is `delegate { }`. Parentheses with a comment in them are not reported. The fix is unsafe: without a parameter list the method also converts to delegate types that have parameters, which can change which overload is chosen.",
       "example": {
         "config": null,
         "fixed": "[assembly: A]\n[assembly: B]\nclass C {\n [A]\n [B]\n void F([A, B] int p) { }\n [A, // why\n  B]\n int x;\n Action a = delegate() { };\n}\n",
@@ -43283,12 +43436,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1410.md"
         }
-      ]
+      ],
+      "why": "`delegate { }` is the shorter spelling of the same body, and the empty parentheses add nothing to read. They are not always the same to the compiler: the form without a list also converts to delegate types that have parameters, which can change which overload is chosen, and that is why the fix is unsafe."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A lone `;` is a statement that does nothing. A statement labelled `label: ;` is allowed. The fix removes the statement (its whole line when it is alone on it), or turns an empty loop or `if` body into `{ }`; it is not offered for the only statement of a switch section. Overlaps compiler CS0642 for `if (x);`.",
+      "description": "Reports a lone `;` that does nothing. A statement labelled `label: ;` is not reported. The fix removes the statement (its whole line when it is alone on it), or turns an empty loop or `if` body into `{ }`; it is not offered for the only statement of a switch section. The compiler reports `if (x);` too.",
       "example": {
         "config": null,
         "fixed": "class A { void F(bool x, int y) {\n if (x){ } else { }\n while (x) /* c */ { }\n switch (y) { case 1:  break; default: ; }\n L: ;\n int z = 1;\n} }\n",
@@ -43341,7 +43495,8 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1106.md"
         }
-      ]
+      ],
+      "why": "A stray `;` is usually the result of a typo or an edit. After `if (x);` or `while (x);` it is the body of the statement, so the line that follows runs unconditionally, whatever its indentation says.\n\nTo fix, delete the `;`, or write `{ }` for a body that is meant to be empty."
     },
     {
       "category": "suspicious",
@@ -43438,7 +43593,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `#region` inside a block (a method, accessor or lambda body, or any block in one); regions belong between members. No fix.",
+      "description": "Reports a `#region` inside a block (a method, accessor or lambda body, or any block in one). Regions belong between members. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -43473,12 +43628,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1123.md"
         }
-      ]
+      ],
+      "why": "A region in a body splits one piece of logic with a fold that hides the middle of it. A body that needs sections is a body that should be split into methods.\n\nTo fix, extract the section into a method and delete the region."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`#region` hides code behind a label. Reported on every `#region` outside a block (a region inside a block is `no-region-in-body`'s), in disabled `#if` branches too; no fix, because removing a pair is a judgment call.",
+      "description": "Reports every `#region` outside a block (a region inside a block is `no-region-in-body`'s), also in disabled `#if` branches. No fix, because removing a pair is a judgment call.",
       "example": {
         "config": null,
         "fixed": null,
@@ -43509,12 +43665,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1124.md"
         }
-      ]
+      ],
+      "why": "A region hides code behind a label, so a reader of a large class sees only the labels and not the size of what is behind them. Regions make a file longer without making it clearer, and are often a sign that the class should be split.\n\nTo fix, remove the region, or move its members to a class of their own."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `<returns>` on a method or delegate that returns `void`. The fix removes the element with its line when it is alone on it.",
+      "description": "Reports a `<returns>` on a method or delegate that returns `void`. The fix removes the element with its line when it is alone on it.",
       "example": {
         "config": null,
         "fixed": "using System.Threading.Tasks;\n/// <summary>Return values.</summary>\npublic class Returns\n{\n    /// <summary>Returns.</summary>\n    public int NoReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns></returns>\n    public int EmptyReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns />\n    public int SelfClosingReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns>The value.</returns>\n    public int GoodReturns() => 0;\n    /// <summary>Returns.</summary>\n    /// <returns>\n    /// </returns>\n    public int BlankReturns() => 0;\n    /// <summary>Does.</summary>\n    public void VoidReturns() { }\n    /// <summary>Does.</summary>\n    public void VoidEmptyReturns() { }\n    /// <summary>Does.</summary>\n    public void VoidSelfClosingReturns() { }\n    /// <summary>Does.</summary>\n    public Task AsyncNoReturns() => null;\n    /// <summary>Does.</summary>\n    /// <inheritdoc />\n    public int Inherited() => 0;\n    /// <summary>Does.</summary>\n    /// <returns></returns>\n    /// <inheritdoc />\n    public int InheritedEmpty() => 0;\n    /// <summary>Does.</summary>\n    private int PrivateNoReturns() => 0;\n    /// <summary>Does.</summary>\n    internal int InternalNoReturns() => 0;\n    /// <summary>Does.</summary>\n    protected int ProtectedNoReturns() => 0;\n    /// <summary>Does.</summary>\n    public static int operator +(Returns a, Returns b) => 0;\n    /// <summary>Delegate.</summary>\n    public delegate int Callback();\n    /// <summary>Delegate.</summary>\n    public delegate void VoidCallback();\n    /// <summary>Does.</summary>\n    public ref int RefReturn() => throw null;\n}\n",
@@ -43570,12 +43727,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1617.md"
         }
-      ]
+      ],
+      "why": "There is nothing to return, so the tag documents a value that does not exist and is shown in the reference as a result."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`base.M()` or `base[i]` where the type does not override the member, so `this` binds to the same one. The fix writes `this`.",
+      "description": "Reports `base.M()` or `base[i]` where the type does not override the member, so `this` binds to the same one. The fix writes `this`.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -43617,7 +43775,8 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1100.md"
         }
-      ]
+      ],
+      "why": "`base.` says that the call goes to the parent on purpose, and a reader looks for the override that makes this necessary. When there is none, `this.M()` is the same call, and the `base` is a misleading hint."
     },
     {
       "category": "style",
@@ -43699,7 +43858,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "`int?` instead of `Nullable<int>` or `System.Nullable<int>`. Name-based: a type of your own called `Nullable` is reported too. Not reported in `using` aliases, `nameof`, `typeof(Nullable<>)` and before a member access (`Nullable<int>.Equals`).",
+      "description": "Reports `Nullable<int>` or `System.Nullable<int>`, which is `int?`. The check is by name: a type of your own called `Nullable` is reported too. It is not reported in `using` aliases, in `nameof`, in `typeof(Nullable<>)`, and before a member access (`Nullable<int>.Equals`). The fix writes `int?`.",
       "example": {
         "config": null,
         "fixed": "class A {\n int a, b;\n int? n = (long)1 < 2 ? null : null;\n void F(object o, int i) {\n  var f = delegate (int x) { return x; };\n  var g = null == o || 1 < i;\n  var h = (float)1 + (double)2.5;\n }\n}\n",
@@ -43737,12 +43896,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1125.md"
         }
-      ]
+      ],
+      "why": "`int?` is the form of the language and is shorter. One spelling makes the nullable types easy to find, and `Nullable<T>` stays for the places where the generic name is the point."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A member or element access on an expression the compiler's nullable analysis says may be null. Only code under `#nullable enable` is checked. Off by default: the compiler reports the same thing as CS8602.",
+      "description": "Reports a member or element access on an expression that the nullable analysis says may be null. Only code under `#nullable enable` is checked. Off by default: the compiler reports the same thing.",
       "fix": null,
       "id": "possible-null-dereference",
       "languages": [
@@ -43759,12 +43919,13 @@
           "tool": "Roslynator",
           "url": "https://josefpihrt.github.io/docs/roslynator/analyzers/RCS1202"
         }
-      ]
+      ],
+      "why": "Dereferencing a null reference throws `NullReferenceException` at run time, so the warning points at a crash that the code allows.\n\nTo fix, check for null before the access, or change the type if it cannot be null."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A property summary starts with \"Gets\", \"Sets\" or \"Gets or sets\" (\"Gets a value indicating whether\" and so on for `bool`), as the property's accessors reachable from outside the type say. The type is read from the declaration (`bool`, `Boolean`, `System.Boolean`). The fix replaces the start of the text and lower-cases what follows.",
+      "description": "Reports a property summary that does not start with \"Gets\", \"Sets\" or \"Gets or sets\" as the accessors that are reachable from outside the type say; for `bool` properties \"Gets a value indicating whether\" and the like. The type is read from the declaration (`bool`, `Boolean`, `System.Boolean`). The fix replaces the start of the text and lower-cases what follows, and is unsafe.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Properties of an internal class.</summary>\ninternal class InternalProperties\n{\n    /// <summary>Gets or sets the count.</summary>\n    protected internal int Both { get; protected set; }\n\n    /// <summary>Gets or sets the count.</summary>\n    protected internal int GoodBoth { get; protected set; }\n\n    /// <summary>Gets or sets the count.</summary>\n    public int PublicBoth { get; internal set; }\n}\n",
@@ -43796,12 +43957,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1623.md"
         }
-      ]
+      ],
+      "why": "A summary that says \"Gets or sets\" for a property that can only be read promises something the caller cannot do. The first words are a contract that tools and readers rely on."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A property summary says \"Gets or sets\" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property). The fix replaces the start of the text with the one that matches the visible accessor.",
+      "description": "Reports a property summary that says \"Gets or sets\" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property). The fix replaces the start of the text with the one that matches the visible accessor and is unsafe.",
       "example": {
         "config": null,
         "fixed": "using System;\n/// <summary>Properties.</summary>\npublic class Properties\n{\n    /// <summary>Gets a value indicating whether it is ready.</summary>\n    public bool? NullableBool { get; }\n    /// <summary>Gets the count.</summary>\n    internal int InternalBoth { get; private set; }\n    /// <summary>Gets the count.</summary>\n    protected int ProtectedPrivateSet { get; private set; }\n    /// <summary>Gets the count.</summary>\n    protected internal int ProtectedInternalSet { get; internal set; }\n    /// <summary>Gets the count.</summary>\n    public int InternalSet { get; internal set; }\n    /// <summary>Gets or sets the count.</summary>\n    public int ProtectedSet { get; protected set; }\n    /// <summary>Sets the count.</summary>\n    public int InternalGetPublicSet { internal get; set; }\n    /// <summary>Gets the expression.</summary>\n    public int Expression => 1;\n    /// <summary>Gets the expression.</summary>\n    public int GoodExpression => 1;\n    /// <summary>\n    /// <see cref=\"Both\"/> Gets the count.\n    /// </summary>\n    public int StartsWithSee { get; }\n    /// <summary>\n    /// Gets or sets the thing.\n    /// </summary>\n    public string MultiLine { get; set; }\n    /// <summary>\n    /// Gets or sets the thing.\n    /// </summary>\n    public string MultiLineWrong { get; set; }\n    /// <summary></summary>\n    public int Blank { get; }\n    /// <summary />\n    public int SelfClosing { get; }\n    /// <inheritdoc />\n    public int Inherited { get; }\n    /// <summary>The count.</summary>\n    /// <inheritdoc />\n    public int InheritedWithSummary { get; }\n    /// <summary>Gets or sets the count.</summary>\n    private int PrivateProperty { get; set; }\n    /// <summary>Gets or sets the count.</summary>\n    int ImplicitPrivate { get; set; }\n    /// <summary>Gets or sets the count.</summary>\n    public int this[int index] { get => index; }\n    /// <summary>Gets the count.</summary>\n    public ref int RefProperty => throw null;\n}\n",
@@ -43855,12 +44017,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1624.md"
         }
-      ]
+      ],
+      "why": "The documentation is for the callers of the property, and a caller outside the type cannot use the restricted accessor, so the summary should describe only what is possible."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it.",
+      "description": "Reports a field, property, method or event of the containing type that is used by its simple name. The fix writes `this.` before it.",
       "example": {
         "config": null,
         "fixed": "class Qualify\n{\n    int x;\n    static int s;\n    int M() => this.x + s;\n    int N() => this.x;\n    void P(int x) { x = 1; this.M(); }\n}\n",
@@ -43896,12 +44059,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1101.md"
         }
-      ]
+      ],
+      "why": "With `this.` it is clear at a glance that the name is a member and not a local, a parameter or a static, so a reader does not scroll up to see where a name comes from. It is a style that some projects choose and others do not."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `using` directive inside a namespace whose name is not written fully qualified (it resolves relative to the enclosing namespace). The fix writes the full name, unless it has type arguments.",
+      "description": "Reports a `using` directive inside a namespace whose name is not written fully qualified, so that it resolves relative to the enclosing namespace. The fix writes the full name, unless it has type arguments.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -43943,12 +44107,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1135.md"
         }
-      ]
+      ],
+      "why": "A relative name resolves to different things when a namespace with that name is added anywhere in the enclosing namespaces, so a new file can change what a `using` means without touching it.\n\nTo fix, write the full name."
     },
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "A `using` directive that nothing in the file needs (the compiler's hidden CS8019, IDE0005 in the SDK analyzers). Not reported in a file that has compiler errors or `#if` regions, because unresolved or inactive code could be the one using it.",
+      "description": "Reports a `using` directive that nothing in the file needs. It is not reported in a file that has compiler errors or `#if` regions, because unresolved or inactive code could be the one using it. The fix removes the directive.",
       "fix": "safe",
       "id": "remove-unused-usings",
       "languages": [
@@ -43956,12 +44121,13 @@
       ],
       "options": [],
       "presets": [],
-      "upstream": []
+      "upstream": [],
+      "why": "An unused `using` adds noise at the top of the file, suggests a dependency that does not exist, and slows the compiler a little. Removing them keeps the list of what the file uses true."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "One attribute per attribute list: `[A, B]` becomes `[A]` and `[B]`. Lists on parameters and type parameters are left alone. The fix is not offered when the list has a comment in it.",
+      "description": "Reports an attribute list with several attributes: `[A, B]` is `[A]` and `[B]`. Lists on parameters and type parameters are not reported. The fix is not offered when the list has a comment in it.",
       "example": {
         "config": null,
         "fixed": "[assembly: A]\n[assembly: B]\nclass C {\n [A]\n [B]\n void F([A, B] int p) { }\n [A, // why\n  B]\n int x;\n Action a = delegate() { };\n}\n",
@@ -44004,12 +44170,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1133.md"
         }
-      ]
+      ],
+      "why": "One attribute to a list gives each its own line, so a diff shows exactly the attribute that was added or removed and a comment can be put on one."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "One field or event per declaration: `int a, b;` becomes `int a;` and `int b;`, each with the attributes, modifiers and type of the original. The fix is not offered when the declaration has a comment in it.",
+      "description": "Reports a declaration of several fields or events (`int a, b;`), which becomes `int a;` and `int b;`, each with the attributes, modifiers and type of the original. The fix is not offered when the declaration has a comment in it.",
       "example": {
         "config": null,
         "fixed": "class A {\n int a;\n int b;\n Nullable<int> n = (long)1 < 2 ? null : null;\n void F(object o, int i) {\n  var f = delegate (int x) { return x; };\n  var g = null == o || 1 < i;\n  var h = (float)1 + (double)2.5;\n }\n}\n",
@@ -44040,12 +44207,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1132.md"
         }
-      ]
+      ],
+      "why": "One field to a declaration gives each its own line, so a change to one is one line in the diff and each can have its own comment and initializer."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A file holds one class or record: every later one is reported, more parts of the first class (when it is partial) excepted. Structs, interfaces, enums and delegates are not counted. No fix.",
+      "description": "Reports a class or record that comes after the first one in a file: more parts of the first class (when it is partial) are not reported. Structs, interfaces, enums and delegates are not counted. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -44080,12 +44248,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1402.md"
         }
-      ]
+      ],
+      "why": "A file with one class is found by the name of the class, and a change to a class touches one file. A file with several is a place where a class has to be searched for.\n\nTo fix, move the class into a file of its own."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A file declares one namespace: every later one, nested ones included, is reported. No fix.",
+      "description": "Reports a namespace that comes after the first one in a file; nested namespaces are reported too. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -44120,12 +44289,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1403.md"
         }
-      ]
+      ],
+      "why": "A file with one namespace has one place where its names come from. Several namespaces in a file make the meaning of a name depend on where in the file it is read.\n\nTo fix, move the later namespaces into files of their own."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`SuppressMessage` needs a `Justification` that says something: not missing, `null`, empty, blank or `\"<Pending>\"`. Matches the attribute by name. No fix.",
+      "description": "Reports a `SuppressMessage` attribute whose `Justification` is missing, `null`, empty, blank, or `\"<Pending>\"`. The attribute is matched by name. No fix.",
       "example": {
         "config": null,
         "fixed": null,
@@ -44164,12 +44334,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1404.md"
         }
-      ]
+      ],
+      "why": "A suppression hides a warning for good, and the reason is the only information a later reader has to judge whether it still holds. The text generated by tools (\"<Pending>\") is a placeholder that stays forever.\n\nTo fix, write why the warning does not apply."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A tuple type in the signature of a method, constructor, property, indexer, conversion operator or delegate whose elements have no names. Overrides and implementations of interface members are left alone (their names are not the member's to choose). No fix.",
+      "description": "Reports a tuple type in the signature of a method, constructor, property, indexer, conversion operator or delegate whose elements have no names. Overrides and implementations of interface members are not reported, since their names are not the member's to choose. No fix.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -44225,12 +44396,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1414.md"
         }
-      ]
+      ],
+      "why": "A caller sees `(int, int)` in the signature and `Item1` and `Item2` in the result, so it has to read the body to know which is which. Names (`(int Width, int Height)`) make the signature the documentation.\n\nTo fix, name the elements."
     },
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "A value is stored in a local variable and no path reads it before it is overwritten or the variable goes out of scope (a dead store). Variables that are captured or whose address is taken are not checked; a variable that is never read at all is reported by `unused-variable` instead. Overlaps the SDK analyzer IDE0059 (unnecessary assignment).",
+      "description": "Reports a value stored in a local variable that no path reads before it is overwritten or the variable goes out of scope (a dead store). Variables that are captured or whose address is taken are not checked. A variable that is never read at all is `unused-variable`'s.",
       "example": {
         "config": null,
         "fixed": null,
@@ -44277,12 +44449,13 @@
           "tool": "Roslynator",
           "url": "https://josefpihrt.github.io/docs/roslynator/analyzers/RCS1212"
         }
-      ]
+      ],
+      "why": "A dead store is a computation whose result is thrown away. It is often the sign of a bug: the value was meant to be used and a later line forgot it, or an earlier branch was changed.\n\nTo fix, use the value, or delete the assignment (keep the right side if it has a side effect)."
     },
     {
       "category": "cleanup",
       "default_level": "warn",
-      "description": "A private field, method, property or event that no file of the project uses (`analysis: deep`). Members with attributes, overrides, interface implementations, `extern` and `partial` methods are left alone, and so are the private                   methods named in `reflection_methods` of a type derived from one of                   `reflection_base_types` (a framework calls them by reflection; the `csharp/unity`                   preset lists Unity's). Overlaps the SDK analyzers IDE0051 (unused private member) and IDE0052 (unread private member).",
+      "description": "Reports a private field, method, property or event that no file of the project uses (needs `analysis: deep`). Members with attributes, overrides, interface implementations, `extern` and `partial` methods are not reported, and neither are the private methods named in `reflection_methods` of a type derived from one of `reflection_base_types` (a framework calls them by reflection; the `csharp/unity` preset lists Unity's).",
       "fix": null,
       "id": "unused-private-member",
       "languages": [
@@ -44313,7 +44486,8 @@
           "tool": "Roslynator",
           "url": "https://josefpihrt.github.io/docs/roslynator/analyzers/RCS1213"
         }
-      ]
+      ],
+      "why": "A private member that nothing uses is dead code that readers have to understand, tests and refactorings have to keep, and the compiler has to compile.\n\nTo fix, delete it."
     },
     {
       "category": "cleanup",
@@ -44398,7 +44572,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A lambda instead of an anonymous method. The fix is offered when the anonymous method has a parameter list and no comment before its body; `delegate { }` without one converts to delegate types with any parameters, so it has no fix.",
+      "description": "Reports an anonymous method (`delegate (x) { ... }`) where a lambda can be written. The fix is offered when the anonymous method has a parameter list and no comment before its body; `delegate { }` without a parameter list converts to delegate types with any parameters, so it has no fix.",
       "example": {
         "config": null,
         "fixed": "class A {\n int a, b;\n Nullable<int> n = 1L < 2 ? null : null;\n void F(object o, int i) {\n  var f = (int x) => { return x; };\n  var g = o == null || i > 1;\n  var h = 1F + (double)2.5;\n }\n}\n",
@@ -44440,12 +44614,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1130.md"
         }
-      ]
+      ],
+      "why": "Lambdas are the short and usual form, and they bind the same way for the common cases. One form for all code avoids the extra keyword and makes the file read the same."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L`. Not reported for hexadecimal and binary literals cast to a floating-point type, which have no suffix.",
+      "description": "Reports a numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L`. Hexadecimal and binary literals cast to a floating-point type are not reported, since they have no suffix. The fix writes the suffix.",
       "example": {
         "config": null,
         "fixed": "class A {\n int a, b;\n Nullable<int> n = 1L < 2 ? null : null;\n void F(object o, int i) {\n  var f = (int x) => { return x; };\n  var g = o == null || i > 1;\n  var h = 1F + (double)2.5;\n }\n}\n",
@@ -44484,12 +44659,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1139.md"
         }
-      ]
+      ],
+      "why": "The suffix gives the literal its type directly. A cast does the same at run time or as a constant, and it hides that the literal is a number of another type."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`string.Empty` instead of `\"\"` (or `@\"\"`). Not reported where a constant is required: `const`, attribute arguments, default parameter values, `case` labels and patterns.",
+      "description": "Reports `\"\"` (or `@\"\"`) where `string.Empty` can be used. It is not reported where a constant is required: `const`, attribute arguments, default parameter values, `case` labels and patterns.",
       "example": {
         "config": null,
         "fixed": "class A {\n const string C = \"\";\n string F(string s = \"\") {\n  if (s is \"\") { }\n  switch (s) { case \"\": break; }\n  return s ?? string.Empty;\n }\n [System.Obsolete(\"\")] void G() { }\n}\n",
@@ -44523,12 +44699,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1122.md"
         }
-      ]
+      ],
+      "why": "`string.Empty` states that the string is empty on purpose, while `\"\"` can be a value that was forgotten. It is a convention that some projects choose and others do not.\n\nTo fix, write `string.Empty`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "`ValueTuple<int, int>` and `ValueTuple.Create(a, b)` where tuple syntax `(int, int)` and `(a, b)` is available (not inside an expression tree). The fix is offered for types and `ValueTuple.Create` calls.",
+      "description": "Reports `ValueTuple<int, int>` and `ValueTuple.Create(a, b)` where tuple syntax (`(int, int)` and `(a, b)`) can be used; not inside an expression tree. The fix is offered for types and `ValueTuple.Create` calls.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing System.Diagnostics;\nnamespace A.B {\n  using A.C.D;\n  struct S { }\n  interface I { (int, int) Pair(); }\n  class P { public virtual void Run() { } }\n  class Q : P, I {\n    public (int, int) Pair() => (1, 2);\n    public (int, int) Other() => (1, 2);\n    public void Go((int, int) t) {\n      this.Run();\n      var s = default(S);\n      var d = default(DateTime);\n      var g = (1, 2);\n      Debug.Assert(true);\n      Debug.Assert(true, \"why\");\n      Debug.Fail(\"\");\n    }\n    /// <inheritdoc/>\n    public void Own() { }\n  }\n}\nnamespace C.D { }\nnamespace A.C.D { }\n",
@@ -44574,12 +44751,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1141.md"
         }
-      ]
+      ],
+      "why": "The tuple syntax is the form of the language, short and the one that supports element names. `ValueTuple<...>` is the type it compiles to, so writing it out is noise."
     },
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "`using` directives of a file or namespace are out of order: System first (`system_first`), names in alphabetical order (`compare`), and with the options `static_position` and `alias_position` set to `after`, `using static` directives after the plain ones and aliases after those, each group sorted. `global using` and `using unsafe` stay where they are, and a list restarts at a directive that has a preprocessor directive in front of it (the fix leaves such lists alone). Comments on lines of their own stay where they are; a comment after a directive moves with it. Overlaps the SDK analyzers' `dotnet_sort_system_directives_first` .editorconfig key.",
+      "description": "Reports `using` directives of a file or namespace that are out of order: `System` first (`system_first`), names in alphabetical order (`compare`), and, with the options `static_position` and `alias_position` set to `after`, `using static` directives after the plain ones and aliases after those, each group sorted. `global using` and `using unsafe` stay where they are, and a list restarts at a directive that has a preprocessor directive in front of it (the fix leaves such lists alone). Comments on lines of their own stay where they are; a comment after a directive moves with it.",
       "example": {
         "config": null,
         "fixed": "using System;\nusing static Foo.Bar;\nusing Aa;\nusing X = Y.Z;\nusing Alpha;\nusing static System.Math;\nusing Zeta;\nusing aa;\nusing W = Y.Z;\n\nclass A { }\n",
@@ -44715,12 +44893,13 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1217.md"
         }
-      ]
+      ],
+      "why": "A sorted list is easy to scan for a namespace, and two developers who add a directive do not both put it at the end and conflict. The `System` first convention is that of the .NET libraries."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up.",
+      "description": "Reports a `using` directive outside the namespace declaration in a file that has one. No fix: moving a directive changes how names are looked up.",
       "example": {
         "config": null,
         "fixed": null,
@@ -44751,7 +44930,8 @@
           "tool": "StyleCop",
           "url": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1200.md"
         }
-      ]
+      ],
+      "why": "A `using` inside the namespace is resolved relative to it, and one outside is global to the file. Projects choose one place for all files, so that the lookup of names does not depend on which file a directive is in."
     }
   ]
 }

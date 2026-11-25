@@ -1,7 +1,12 @@
 id: message-pascal-case
 message: 'message names are PascalCase'
 description: >-
-  A message name that is not PascalCase (buf lint MESSAGE_PASCAL_CASE).
+  Reports a message name that is not PascalCase.
+why: >-
+  The Protobuf style guide names messages in PascalCase, and the name becomes a class or type name
+  in the generated code.
+
+  To fix, rename the message.
 example: 'message foo_bar {}'
 severity: off
 category: style
@@ -10,7 +15,12 @@ rule: { kind: MessageName, not: { regex: '^[A-Z][A-Za-z0-9]*$' } }
 id: enum-pascal-case
 message: 'enum names are PascalCase'
 description: >-
-  An enum name that is not PascalCase (buf lint ENUM_PASCAL_CASE).
+  Reports an enum name that is not PascalCase.
+why: >-
+  The Protobuf style guide names types in PascalCase, and the generated code of most languages uses
+  the name as a type name, where another form reads as something else.
+
+  To fix, rename to PascalCase.
 example: 'enum foo_bar {}'
 severity: off
 category: style
@@ -19,7 +29,12 @@ rule: { kind: EnumName, not: { regex: '^[A-Z][A-Za-z0-9]*$' } }
 id: service-pascal-case
 message: 'service names are PascalCase'
 description: >-
-  A service name that is not PascalCase (buf lint SERVICE_PASCAL_CASE).
+  Reports a service name that is not PascalCase.
+why: >-
+  The Protobuf style guide names services in PascalCase, and the name becomes a class name in the
+  generated code.
+
+  To fix, rename the service.
 example: 'service foo_bar {}'
 severity: off
 category: style
@@ -28,7 +43,12 @@ rule: { kind: ServiceName, not: { regex: '^[A-Z][A-Za-z0-9]*$' } }
 id: rpc-pascal-case
 message: 'rpc names are PascalCase'
 description: >-
-  An rpc name that is not PascalCase (buf lint RPC_PASCAL_CASE).
+  Reports an rpc name that is not PascalCase.
+why: >-
+  The Protobuf style guide names rpcs in PascalCase, and the name becomes a method name in the
+  generated client and server code.
+
+  To fix, rename the rpc.
 example: 'rpc get_foo(A) returns (B);'
 severity: off
 category: style

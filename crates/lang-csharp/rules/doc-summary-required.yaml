@@ -2,7 +2,15 @@ id: doc-summary-required
 family: doc-element
 params: { check: required, element: summary, scope: summary, partial: no, skip-inheritdoc: true, report: names }
 message: "the documentation should have a <summary>"
-description: "A documentation comment without `<summary>` (and without `<inheritdoc />`) on a type, member or field that StyleCop's defaults ask to document: everything but private members. Partial types and methods are `doc-partial-summary-required`. No fix."
+description: >-
+  Reports a documentation comment without `<summary>` (and without `<inheritdoc />`) on a type,
+  member or field that needs documentation: everything but private members. Partial types and
+  methods belong to `doc-partial-summary-required`. No fix.
+why: >-
+  The summary is what tools show in lists, in hovers and in the generated reference. A comment
+  without it appears without a description, however much the other tags say.
+
+  To fix, add a `<summary>`.
 example: "/// <remarks>x</remarks>\npublic int Count;   // add a <summary>"
 severity: off
 category: style

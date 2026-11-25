@@ -55,9 +55,12 @@ rule! {
         category: Style,
         default: Warn,
         fix: Safe,
-        description: "A string that is one interpolation, `\"${var.a}\"`, where the expression alone \
-                  does (tflint terraform_deprecated_interpolation). The fix writes the expression. \
-                  Not in Nomad job files (`.nomad`, `.nomad.hcl`), whose agent fills those in at run time.",
+        description: "Reports a string that is one interpolation, `\"${var.a}\"`, where the expression alone \
+                  does. The fix writes the expression. It is not reported in Nomad job files \
+                  (`.nomad`, `.nomad.hcl`), whose agent fills those in at run time.",
+        why: "Since Terraform 0.12 an expression can stand alone, and wrapping it in a string \
+                  turns the value into a string, which loses its type (a list or a number becomes \
+                  text) and adds noise.",
         example: "name = \"${var.name}\"   // name = var.name",
         options: [OptionDecl {
             name: "except_in",
@@ -108,8 +111,9 @@ rule! {
         category: Style,
         default: Warn,
         fix: Safe,
-        description: "A list item read with the legacy dot syntax, `a.0` (tflint terraform_deprecated_index). \
-                  The fix writes `a[0]`.",
+        description: "Reports a list item read with the legacy dot syntax, `a.0`. The fix writes `a[0]`.",
+        why: "The dot form is a deprecated spelling of the index. Newer versions of the language \
+                  reject it or treat it differently, and the bracket form works with every expression.",
         example: "x = aws_instance.web.0.id   // aws_instance.web[0].id",
     }
 
@@ -136,8 +140,10 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A `//` comment where `#` is the convention (tflint terraform_comment_syntax). \
-                  The fix writes `#`.",
+        description: "Reports a `//` comment where `#` is the convention. The fix writes `#`.",
+        why: "Both forms are valid in the language, but the style that the Terraform documentation \
+                  and the formatter use is `#`. Comments in one style are easy to search for and look \
+                  the same in every module.",
         example: "// note   # note",
     }
 
@@ -172,10 +178,11 @@ rule! {
         id: "naming-convention",
         category: Style,
         default: Off,
-        description: "The name of a variable, output, module, resource, data source or local does not \
-                  follow the format (tflint terraform_naming_convention): the first label of \
-                  `variable`, `output` and `module`, the second of `resource` and `data`, and the \
-                  names assigned in `locals`.",
+        description: "Reports the name of a variable, output, module, resource, data source or local that \
+                  does not follow the format: the first label of `variable`, `output` and `module`, \
+                  the second of `resource` and `data`, and the names assigned in `locals`. The option \
+                  `format` is `snake_case` (lower case letters, digits, single underscores) or \
+                  `mixed_snake_case` (upper case letters too).",
         example: "variable \"myVar\" {}   // my_var",
         options: [
             OptionDecl {

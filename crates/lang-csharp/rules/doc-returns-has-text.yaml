@@ -2,7 +2,13 @@ id: doc-returns-has-text
 family: doc-element
 params: { check: text, element: returns, scope: element, skip-inheritdoc: true, report: element }
 message: "the <returns> should have text"
-description: "A `<returns>` without text. Skipped when the comment has `<inheritdoc />`. No fix."
+description: >-
+  Reports a `<returns>` without text. A comment with `<inheritdoc />` is not reported. No fix.
+why: >-
+  An empty `<returns></returns>` looks like documentation and tells the reader nothing about the
+  value, and it keeps tools from reporting that the result is not described.
+
+  To fix, describe what the method returns.
 example: "/// <returns></returns>   // describe the result\npublic int Count() => 0;"
 severity: off
 category: style

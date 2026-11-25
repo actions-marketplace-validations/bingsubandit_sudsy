@@ -2,7 +2,15 @@ id: selection-set-depth
 family: max
 params: { count: depth, tag: selection-set }
 message: "selection sets nest {count} levels deep; at most {max} are allowed"
-description: An operation or fragment nests selection sets deeper than allowed, which makes a query expensive to execute. Fragments that are spread are not followed.
+description: >-
+  Reports an operation or fragment that nests selection sets deeper than the `max` option allows.
+  Fragments that are spread are not followed.
+why: >-
+  The cost of a query grows with its depth: each level can multiply the number of objects the server
+  has to load. A depth limit is a cheap protection against queries that are expensive by accident or
+  on purpose.
+
+  To fix, flatten the query, or split it into several requests.
 example: "{ a { b { c { d { e { f { g { h } } } } } } } }   # reported at the default depth"
 severity: off
 category: suspicious

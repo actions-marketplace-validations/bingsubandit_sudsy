@@ -1,33 +1,7 @@
-- resumed 2: reset 6f5f27bb, tmp copied; re-run parity (run.sh), then cost.sh --languages
-- parity 83.4% (1387/1664), second 0, refused 0. cost check: lang-python grew 6643->6765. reviewing diff for move to core
-- NOT landing: diff is hand-written mechanisms in lang-python (+122 lines). Reporting table to lead.
-- lead: map onto core-format shapes parens.rs, maybe_parenthesize.rs, assignment.rs, list.rs, paren_list.rs, blank.rs; regenerate queue ranking
-- built shared shapes/omit_parens.rs (can_omit by tags + OmitHooks); next: replace Python Visit in paren.rs with hook
-- python Visit replaced by shared can_omit: python 6610 (<6643). running codegen + parity
-- parity dropped 77.1: any_paren must use bracketed(); fixed, rerun
-- 83.2: try await excluded from comment check
-- yaml regenerated (205/123/1059), queue.md codegen. next: gate -p core-format -p lang-python, check other-lang parity, finish
-- gate passed; finish --start
-- land.sh HARD RULE review rejected 17 findings (kept local commit); reported to lead
-- lead ruling: move blank rules, list opts, parens(policy), head-fit to shared; facts stay (comment |, power kinds, is_primary, pairs fix, assert rhs). start
-- reverted blank rules(block/compound), list one-item/magic/subscript + paren one-item arms; kept hang false. next: collapse via shapes::parenthesized, head_fits shared
-- head_fits moved shared (python 6555). parity run A: reverts of blank+list+one-item, collapse/await/for_target kept
-- collapse routed via shapes::parenthesized + #parenthesized tag; parity run B
-- yaml fixed (198/117/1055). next: JS/java/kt/cpp parity, gate, finish
-- step1 resume: bare tuple on delimited_list; block blanks on shared. reading shapes
-- inline_list shared; restored tuple items (python 6589, landed 6555). parity
-- ignore-line segment match (shared ignore.rs), mark from all leading comments; parity
-- source_blanks next to kept items; parity
-- fmt skip on one-line compound; parity
-- ty: pragma, await trailing comment strip; looking at comment cluster
-- 1400 (84.1%) stable; next blank-lines/misc small
-- docstring trailing blank collapse, leading quote space, empty; parity
-- chaperone space, fstring nested quote requote in triple; parity
-- decorator parens kept, annotation await parens; parity
-- docstring reindent moved shared (python 6554)
-- 85.0% 1415; docs/yaml updated; gate
-- lead ruling: move body_on_header/is_fmt_skip compound cond to ignore.rs; ends_line kinds to lang.yaml set; paste lead-approved.txt (4 lines)
-- moved header_line_ignored to ignore.rs, paren_line_end_parents option; parity
-- gate ok, JS 3484 held; finish
-- is_fmt_skip approved; land with 5 lines
-- ends_line option check moved to shapes::ends_statement_line (core-format); gate then land.sh again
+Task (rule texts, batches 5 and 6), worktree /persist/projects/sudsy/worktrees/agent-a9f51250eb9818677, slot CARGO_TARGET_DIR=/scratch/slots/sudsy/1:
+- Write `why` + corrected `description` for the undescribed rules (docs/ai/rules/undescribed.txt, 389 left after batch 4 = e2ad0c31) following docs/ai/development/rule-texts.md. No other tools' ids in texts. Check claims on the CLI (.cargo/tmp/c/ probe dir: sudsy.yaml + pos.sh FILE). lang-html is the Angular agent's: do not touch.
+- Batch 5: csharp, java, kotlin, go, ruby, php, makefile, graphql, protobuf, hcl. Batch 6: python (+ the "?" rules: percent-format, string-dot-format, f-string ... ), shell, powershell, sql, github-actions.
+- A text shared by several languages (same rule id in several crates) goes once into crates/core-rules/texts/why.txt; check each family rule against other languages before finish (review refuses identical prose).
+- Tools: .cargo/tmp/ls.py [crate-prefix] (undescribed by crate), show.py ID.. (definition), apply.py TEXTS yamldir.. (yaml rule files), apply_rs.py TEXTS srcdir.. (rule! blocks); texts file format: `== id`, description paras, `--`, why paras. Avoid the word git-ignore-like names in shell commands (worktree guard): use script files.
+- Each batch at most +0.3% startup.lint.instr. Gate with `scripts/gate.sh -p ...`, then `scripts/finish.sh --start` / `--wait` (timeout 600000). After FINISH OK write .cargo/tmp/msg-b5.txt (msg-b6.txt) with Co-Authored-By trailer, list the crates the cost check names, STOP before landing: the lead adds approval lines and lands. Write no approval lines.
+- Bugs found go to docs/ai/bugs.md with input. Final report via SubagentHandback.

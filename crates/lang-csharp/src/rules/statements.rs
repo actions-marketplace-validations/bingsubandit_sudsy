@@ -16,10 +16,14 @@ rule! {
         category: Suspicious,
         default: Off,
         fix: Safe,
-        description: "A lone `;` is a statement that does nothing. A statement labelled `label: ;` is \
-                  allowed. The fix removes the statement (its whole line when it is alone on \
-                  it), or turns an empty loop or `if` body into `{ }`; it is not offered for the \
-                  only statement of a switch section. Overlaps compiler CS0642 for `if (x);`.",
+        description: "Reports a lone `;` that does nothing. A statement labelled `label: ;` is not \
+                  reported. The fix removes the statement (its whole line when it is alone on it), or \
+                  turns an empty loop or `if` body into `{ }`; it is not offered for the only \
+                  statement of a switch section. The compiler reports `if (x);` too.",
+        why: "A stray `;` is usually the result of a typo or an edit. After `if (x);` or `while \
+                  (x);` it is the body of the statement, so the line that follows runs \
+                  unconditionally, whatever its indentation says.\n\
+                  To fix, delete the `;`, or write `{ }` for a body that is meant to be empty.",
         example: "int y = 1;;   // delete the second ;",
         kinds: &[kind::EMPTY_STATEMENT],
     }
@@ -66,9 +70,13 @@ rule! {
         id: "no-comment-before-block",
         category: Style,
         default: Off,
-        description: "A comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, \
-                  `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its \
-                  `{`. Put it inside the block or above the statement.",
+        description: "Reports a comment between the head of an `if`, `else`, `while`, `do`, `for`, \
+                  `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and \
+                  its `{`.",
+        why: "A comment there is attached to neither the head nor the block, and a reader may take \
+                  it for a part of the condition. It is also easy to separate from its statement when \
+                  the code is moved.\n\
+                  To fix, put the comment inside the block or above the statement.",
         example: "if (x) // why\n{                  // move the comment above the if",
         kinds: &[
             kind::IF_STATEMENT,

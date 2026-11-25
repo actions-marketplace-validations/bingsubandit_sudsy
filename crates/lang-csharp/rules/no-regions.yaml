@@ -1,9 +1,14 @@
 id: no-regions
 message: do not use regions
 description: >-
-  `#region` hides code behind a label. Reported on every `#region` outside a block (a region
-  inside a block is `no-region-in-body`'s), in disabled `#if` branches too; no fix, because
-  removing a pair is a judgment call.
+  Reports every `#region` outside a block (a region inside a block is `no-region-in-body`'s), also
+  in disabled `#if` branches. No fix, because removing a pair is a judgment call.
+why: >-
+  A region hides code behind a label, so a reader of a large class sees only the labels and not the
+  size of what is behind them. Regions make a file longer without making it clearer, and are often a
+  sign that the class should be split.
+
+  To fix, remove the region, or move its members to a class of their own.
 example: "#region Helpers   // delete the region and its #endregion"
 severity: off
 category: style

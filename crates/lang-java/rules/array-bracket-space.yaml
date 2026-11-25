@@ -1,8 +1,13 @@
 id: array-bracket-space
 message: 'put a space between `]` and the `{` of the array initializer'
 description: >-
-  An array creation whose `{` follows the `]` right away, `new int[]{1}` (Checkstyle
-  ArrayBracketNoWhitespace).
+  Reports an array creation in which the `{` of the initializer follows the `]` right away (`new
+  int[]{1}`).
+why: >-
+  The space between the brackets and the braces is the convention of the Java code style guides, and
+  it separates the type from the initializer so that `new int[] {1}` reads as two parts.
+
+  To fix, put a space between `]` and `{`.
 example: 'int[] a = new int[]{1};'
 severity: off
 category: style

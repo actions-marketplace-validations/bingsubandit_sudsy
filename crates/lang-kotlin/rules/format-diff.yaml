@@ -2,8 +2,14 @@ id: function-signature
 family: format-diff
 params: { kind: Fun, until: "Block Eq", through: Eq, skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the function signature is not laid out as the formatter writes it" }
 description: >-
-  A function whose signature (up to the body) the formatter would lay out differently: parameters
-  on one line or one per line, the return type and the body start (ktlint function-signature).
+  Reports a function whose signature (everything up to the body) the formatter would lay out
+  differently: the parameters on one line or one per line, the return type, and where the body
+  starts.
+why: >-
+  A signature that is laid out the same way in the whole project is quick to scan, and when a
+  parameter is added only one line changes.
+
+  To fix, run the formatter.
 example: 'fun f(a: Int,\n      b: Int) {}'
 severity: off
 category: style
@@ -12,7 +18,12 @@ id: parameter-list-wrapping
 family: format-diff
 params: { kind: ValueParameterList, skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the parameter list is not laid out as the formatter writes it" }
 description: >-
-  A parameter list the formatter would wrap or join differently (ktlint parameter-list-wrapping).
+  Reports a parameter list that the formatter would wrap or join differently.
+why: >-
+  A function with a long parameter list is laid out by a fixed rule, so that the layout does not
+  depend on the author and a new parameter is one line in the diff.
+
+  To fix, run the formatter.
 example: 'fun f(a: Int,\n      b: Int) {}'
 severity: off
 category: style
@@ -21,7 +32,14 @@ id: argument-list-wrapping
 family: format-diff
 params: { kind: ValueArgumentList, skip: "Block FunctionLiteral ClassBody LambdaArgument ObjectLiteral", message: "the argument list is not laid out as the formatter writes it" }
 description: >-
-  An argument list the formatter would wrap or join differently (ktlint argument-list-wrapping).
+  Reports an argument list of a call that the Kotlin formatter would wrap or join differently: the
+  arguments on one line when they fit, one per line when they do not.
+why: >-
+  A call whose arguments are wrapped in a mixed way (two on the first line, the rest below, aligned
+  to the bracket) is hard to scan and makes a diff show a change on every line when one argument is
+  renamed. One layout for all lists lets the formatter apply it and keeps the diffs small.
+
+  To fix, run the formatter, which lays the list out.
 example: 'val a = f(1,\n      2)'
 severity: off
 category: style
@@ -30,8 +48,13 @@ id: class-signature
 family: format-diff
 params: { kind: "Class ObjectDeclaration", until: ClassBody, message: "the class signature is not laid out as the formatter writes it" }
 description: >-
-  A class header (name, constructor, supertypes) the formatter would lay out differently (ktlint
-  class-signature).
+  Reports a class header (name, constructor, supertypes) that the formatter would lay out
+  differently.
+why: >-
+  A long class header is laid out by fixed rules, so that all classes of a project look the same and
+  a change to one parameter is one line in the diff.
+
+  To fix, run the formatter.
 example: 'class A(val a: Int,\n        val b: Int)'
 severity: off
 category: style

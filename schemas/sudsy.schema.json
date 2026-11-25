@@ -20,7 +20,7 @@
           "description": "Rule id (`no-empty-catch`, or `plugin/rule`) to a level or a level with options.",
           "properties": {
             "abbreviation-in-name": {
-              "description": "A name has two or more capital letters in a row (Checkstyle AbbreviationAsWordInName with `allowedAbbreviationLength` 0): write `XmlParser`, not `XMLParser`. Constants and overridden methods are left out.",
+              "description": "Reports a name with two or more capital letters in a row (`XMLParser`), for type, method, parameter, field and local variable names that match the `names` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -57,7 +57,7 @@
             },
             "accessor-order": {
               "$ref": "#/definitions/rule",
-              "description": "`get` goes before `set` or `init`, and `add` before `remove`. The fix swaps the two accessors (not offered when a comment stands between or in them)."
+              "description": "Reports a property or event whose accessors are in the wrong order: `get` goes before `set` or `init`, and `add` before `remove`."
             },
             "adjacent-overload-signatures": {
               "$ref": "#/definitions/rule",
@@ -69,7 +69,7 @@
             },
             "ambiguous-block-association": {
               "$ref": "#/definitions/rule",
-              "description": "A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`)."
+              "description": "Reports a call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`); also a `do` block that binds to the outer call while a block method is an argument."
             },
             "ambiguous-booleans": {
               "description": "Reports a plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the usual casings), which are booleans to a YAML 1.1 parser and strings to a YAML 1.2 parser.",
@@ -165,7 +165,7 @@
             },
             "argument-list-wrapping": {
               "$ref": "#/definitions/rule",
-              "description": "An argument list the formatter would wrap or join differently (ktlint argument-list-wrapping)."
+              "description": "Reports an argument list of a call that the Kotlin formatter would wrap or join differently: the arguments on one line when they fit, one per line when they do not."
             },
             "aria-hidden-body": {
               "$ref": "#/definitions/rule",
@@ -177,7 +177,7 @@
             },
             "array-bracket-space": {
               "$ref": "#/definitions/rule",
-              "description": "An array creation whose `{` follows the `]` right away, `new int[]{1}` (Checkstyle ArrayBracketNoWhitespace)."
+              "description": "Reports an array creation in which the `{` of the initializer follows the `]` right away (`new int[]{1}`)."
             },
             "array-in-string": {
               "$ref": "#/definitions/rule",
@@ -189,7 +189,7 @@
             },
             "array-type-style": {
               "$ref": "#/definitions/rule",
-              "description": "A declarator or parameter with C-style brackets after the name (Checkstyle ArrayTypeStyle)."
+              "description": "Reports a variable or parameter that puts the array brackets after the name (`int a[]`)."
             },
             "array-without-index": {
               "$ref": "#/definitions/rule",
@@ -213,7 +213,7 @@
             },
             "async-suffix": {
               "$ref": "#/definitions/rule",
-              "description": "An async method returning Task or ValueTask has a name that does not end in `Async`. Overrides, explicit interface implementations and `Main` are left alone (their names are not the method's to choose). Renaming needs the binding layer, so there is no fix."
+              "description": "Reports an `async` method that returns `Task` or `ValueTask` and whose name does not end in `Async`."
             },
             "at-extend-no-missing-placeholder": {
               "$ref": "#/definitions/rule",
@@ -548,7 +548,7 @@
             },
             "avoid-unicode-escape": {
               "$ref": "#/definitions/rule",
-              "description": "A string or character literal writes a visible character as a `\\uXXXX` escape, and the line has no trailing comment (Checkstyle AvoidEscapedUnicodeCharacters). Escapes of control, space and format characters are fine."
+              "description": "Reports a string or character literal that writes a visible character as a `\\uXXXX` escape when the line has no trailing comment."
             },
             "backslash-separator": {
               "$ref": "#/definitions/rule",
@@ -568,15 +568,15 @@
             },
             "binary-operator-with-identical-operands": {
               "$ref": "#/definitions/rule",
-              "description": "`x == x`, `a && a` and other comparison, logical and bitwise operators whose two sides are the same code (RuboCop Lint/BinaryOperatorWithIdenticalOperands)."
+              "description": "Reports a comparison, logical or bitwise operator (`== != === <=> =~ > >= < <= | ^ && ||`) whose two sides are the same code (`x == x`)."
             },
             "blank-line-between-declarations": {
               "$ref": "#/definitions/rule",
-              "description": "A declaration with a blank line the formatter would add or remove before it, among declarations with comments or annotations too (ktlint spacing-between-declarations-with-comments, spacing-between-declarations-with-annotations)."
+              "description": "Reports a declaration (function, property, class, object, typealias) with a blank line before it that the formatter would add or remove."
             },
             "blank-line-between-when-conditions": {
               "$ref": "#/definitions/rule",
-              "description": "A `when` entry with a blank line the formatter would add or remove before it (ktlint blank-line-between-when-conditions)."
+              "description": "Reports a `when` entry with a blank line before it that the formatter would add or remove."
             },
             "block-comment-after-open": {
               "description": "Reports a block comment that follows an opening token on its line and ends the line (`if (a) { /* note */`).",
@@ -667,7 +667,7 @@
             },
             "boolean-symbol": {
               "$ref": "#/definitions/rule",
-              "description": "The symbol `:true` or `:false`, which is probably meant to be the boolean (RuboCop Lint/BooleanSymbol)."
+              "description": "Reports the symbol `:true` or `:false`."
             },
             "break-outside-loop": {
               "$ref": "#/definitions/rule",
@@ -683,11 +683,11 @@
             },
             "chain-method-continuation": {
               "$ref": "#/definitions/rule",
-              "description": "A call chain whose lines the formatter would break or join differently (ktlint chain-method-continuation)."
+              "description": "Reports a call chain (`a.b().c()`, with `?.` too) whose line breaks differ from what the formatter writes."
             },
             "class-naming": {
               "$ref": "#/definitions/rule",
-              "description": "A class, interface or object whose name starts with a lowercase letter or an underscore (ktlint class-naming)."
+              "description": "Reports a class, interface or object whose name starts with a lowercase letter or an underscore."
             },
             "class-pattern": {
               "description": "Reports a class name that does not match the option `pattern`, a regex that by default means kebab-case (`foo-bar`).",
@@ -722,7 +722,7 @@
             },
             "class-signature": {
               "$ref": "#/definitions/rule",
-              "description": "A class header (name, constructor, supertypes) the formatter would lay out differently (ktlint class-signature)."
+              "description": "Reports a class header (name, constructor, supertypes) that the formatter would lay out differently."
             },
             "collapsible-if": {
               "$ref": "#/definitions/rule",
@@ -825,7 +825,7 @@
             },
             "comment-syntax": {
               "$ref": "#/definitions/rule",
-              "description": "A `//` comment where `#` is the convention (tflint terraform_comment_syntax). The fix writes `#`."
+              "description": "Reports a `//` comment where `#` is the convention."
             },
             "consistent-type-definitions": {
               "$ref": "#/definitions/rule",
@@ -837,15 +837,15 @@
             },
             "constant-definition-in-block": {
               "$ref": "#/definitions/rule",
-              "description": "A constant, class or module defined directly in a block (RuboCop Lint/ConstantDefinitionInBlock); `enums` blocks (Sorbet) are allowed."
+              "description": "Reports a constant, class or module defined directly in a block."
             },
             "constant-on-right": {
               "$ref": "#/definitions/rule",
-              "description": "A comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`. Without the type layer a constant is a literal, `nameof`, `int.MaxValue`-style member or an expression of those; a named constant on the left is not recognised."
+              "description": "Reports a comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`."
             },
             "constructor-summary-standard-text": {
               "$ref": "#/definitions/rule",
-              "description": "The summary of a constructor starts with \"Initializes a new instance of the <see cref=\"T\"/> class\" (struct), \"Initializes static members of the ...\" for a static constructor, and a private constructor may say \"Prevents a default instance of the ... from being created\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text."
+              "description": "Reports the summary of a constructor that does not start with the standard sentence: \"Initializes a new instance of the `<see cref=\"T\"/>` class\" (or \"struct\"), \"Initializes static members of the ...\" for a static constructor."
             },
             "container-name-pattern": {
               "description": "Reports a `@container` name that does not match the `pattern` option (a regex).",
@@ -1021,11 +1021,11 @@
             },
             "debug-assert-message": {
               "$ref": "#/definitions/rule",
-              "description": "`Debug.Assert` without a message, or with a constant blank one. With the type layer the call is checked against `System.Diagnostics.Debug`; without it any call written `Debug.Assert` is. No fix."
+              "description": "Reports a `Debug.Assert` call without a message, or with a message that is a constant blank string."
             },
             "debug-fail-message": {
               "$ref": "#/definitions/rule",
-              "description": "`Debug.Fail` with a constant blank message. With the type layer the call is checked against `System.Diagnostics.Debug`; without it any call written `Debug.Fail` is. No fix."
+              "description": "Reports a `Debug.Fail` call with a constant blank message."
             },
             "declaration-block-no-duplicate-custom-properties": {
               "$ref": "#/definitions/rule",
@@ -1208,10 +1208,10 @@
             },
             "deprecated-index": {
               "$ref": "#/definitions/rule",
-              "description": "A list item read with the legacy dot syntax, `a.0` (tflint terraform_deprecated_index). The fix writes `a[0]`."
+              "description": "Reports a list item read with the legacy dot syntax, `a.0`."
             },
             "deprecated-interpolation": {
-              "description": "A string that is one interpolation, `\"${var.a}\"`, where the expression alone does (tflint terraform_deprecated_interpolation). The fix writes the expression. Not in Nomad job files (`.nomad`, `.nomad.hcl`), whose agent fills those in at run time.",
+              "description": "Reports a string that is one interpolation, `\"${var.a}\"`, where the expression alone does.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1254,7 +1254,7 @@
             },
             "destructor-summary-standard-text": {
               "$ref": "#/definitions/rule",
-              "description": "The summary of a finalizer starts with \"Finalizes an instance of the <see cref=\"T\"/> class.\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text."
+              "description": "Reports the summary of a finalizer that does not start with \"Finalizes an instance of the `<see cref=\"T\"/>` class.\" The `<see>` is compared with the name of the type."
             },
             "detached-semicolon": {
               "$ref": "#/definitions/rule",
@@ -1262,7 +1262,7 @@
             },
             "directive-keyword-space": {
               "$ref": "#/definitions/rule",
-              "description": "No space between `#` and the directive keyword (`#if`, not `# if`)."
+              "description": "Reports a preprocessor directive that has a space between `#` and its keyword (`# if`)."
             },
             "distinct-group-by": {
               "$ref": "#/definitions/rule",
@@ -1278,58 +1278,58 @@
             },
             "doc-asterisk": {
               "$ref": "#/definitions/rule",
-              "description": "A line of a Javadoc comment after the first starts with an asterisk (Checkstyle JavadocMissingLeadingAsterisk). Empty lines are left alone."
+              "description": "Reports a line of a Javadoc comment, after the first, that does not start with an asterisk."
             },
             "doc-comment-space": {
               "$ref": "#/definitions/rule",
-              "description": "A documentation line (`///`) starts with a single space. More spaces are allowed to indent continuation lines, not on the first line of the comment; a tab or no space is always reported."
+              "description": "Reports a documentation line (`///`) that does not start with a single space."
             },
             "doc-first-word": {
               "$ref": "#/definitions/rule",
-              "description": "The first line of the doc comment of an exported function, method, type, constant or variable does not start with its name (revive exported). A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types; a constant or variable in a group whose comment has text is not checked. Lines of directives (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is left to `missing-doc-comment`."
+              "description": "Reports an exported function, method, type, constant or variable whose doc comment does not start with its name."
             },
             "doc-paragraph": {
               "$ref": "#/definitions/rule",
-              "description": "The paragraphs of a Javadoc comment: a `<p>` tag stands right before the first word of its paragraph (no space) and after an empty line, an empty line between paragraphs is followed by `<p>`, and the comment does not start with `<p>` (Checkstyle JavadocParagraph). Text inside `<pre>`, `<ul>` and the like, and after the first block tag, is left alone."
+              "description": "Reports Javadoc paragraphs that do not use `<p>` in the usual way: a `<p>` must stand right before the first word of its paragraph (no space after it) and after an empty line, an empty line between paragraphs must be followed by `<p>`, and the comment must not start with `<p>`."
             },
             "doc-param-has-name": {
               "$ref": "#/definitions/rule",
-              "description": "A `<param>` without a `name` attribute, or with an empty one. No fix."
+              "description": "Reports a `<param>` in a documentation comment that has no `name` attribute, or an empty one."
             },
             "doc-param-has-text": {
               "$ref": "#/definitions/rule",
-              "description": "A `<param>` without text. Skipped when the comment has `<inheritdoc />`. No fix."
+              "description": "Reports a `<param>` without text."
             },
             "doc-param-missing": {
               "$ref": "#/definitions/rule",
-              "description": "A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or `<include>` is left out, and so is a declaration without a comment. No fix."
+              "description": "Reports a parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment."
             },
             "doc-partial-required": {
               "$ref": "#/definitions/rule",
-              "description": "A partial type or method without a documentation comment (or with an empty one). Each part is checked on its own; StyleCop (SA1601) accepts one documented part, which needs the other parts of the project. Which elements need documentation follows StyleCop's defaults: everything but private members."
+              "description": "Reports a partial type or method without a documentation comment, or with an empty one."
             },
             "doc-partial-summary-required": {
               "$ref": "#/definitions/rule",
-              "description": "A documentation comment of a partial type or method without `<summary>` or `<content>` (and without `<inheritdoc />`). Each part is checked on its own. No fix."
+              "description": "Reports a documentation comment of a partial type or method that has no `<summary>` or `<content>` (and no `<inheritdoc />`)."
             },
             "doc-partial-summary-text": {
               "$ref": "#/definitions/rule",
-              "description": "The `<summary>` (or `<content>`) of a partial type or method has no text. Each part is checked on its own. No fix."
+              "description": "Reports a partial type or method whose `<summary>` (or `<content>`) has no text."
             },
             "doc-partial-typeparams": {
               "$ref": "#/definitions/rule",
-              "description": "A documented partial generic type (with a `<summary>`) that has no `<typeparam>` for one of its type parameters. Each part is checked on its own. No fix."
+              "description": "Reports a documented partial generic type (one that has a `<summary>`) that has no `<typeparam>` for one of its type parameters, on the parameter."
             },
             "doc-returns-has-text": {
               "$ref": "#/definitions/rule",
-              "description": "A `<returns>` without text. Skipped when the comment has `<inheritdoc />`. No fix."
+              "description": "Reports a `<returns>` without text."
             },
             "doc-returns-required": {
               "$ref": "#/definitions/rule",
-              "description": "A documented method or delegate that does not return `void` and has no `<returns>` (and no `<inheritdoc />`). Private members are left alone, as in StyleCop's defaults. No fix."
+              "description": "Reports a documented method or delegate that does not return `void` and has no `<returns>` (and no `<inheritdoc />`)."
             },
             "doc-summary": {
-              "description": "A Javadoc comment starts with a summary: a first sentence that ends with a period (followed by a blank or the end of the text) and does not start with a forbidden fragment (Checkstyle SummaryJavadoc). A comment of `{@inheritDoc}` or `{@return ...}` needs none.",
+              "description": "Reports a Javadoc comment that does not start with a summary: the first sentence must end with a period followed by a blank or the end of the text, and must not start with a fragment that matches the `forbidden_fragments` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1361,14 +1361,14 @@
             },
             "doc-summary-required": {
               "$ref": "#/definitions/rule",
-              "description": "A documentation comment without `<summary>` (and without `<inheritdoc />`) on a type, member or field that StyleCop's defaults ask to document: everything but private members. Partial types and methods are `doc-partial-summary-required`. No fix."
+              "description": "Reports a documentation comment without `<summary>` (and without `<inheritdoc />`) on a type, member or field that needs documentation: everything but private members."
             },
             "doc-summary-text": {
               "$ref": "#/definitions/rule",
-              "description": "A `<summary>` without text (`<summary></summary>`; `<summary />` is left alone, as StyleCop does). Partial types and methods are `doc-partial-summary-text`. No fix."
+              "description": "Reports a `<summary>` without text (`<summary></summary>`; `<summary />` is not reported)."
             },
             "doc-tag-indent": {
-              "description": "A line that continues a block tag (`@param x`) is indented by at least `indent` blanks after the asterisk (Checkstyle JavadocTagContinuationIndentation: its offset of 4 is 5 blanks here). Lines that start HTML and lines inside `<pre>` and the like are left alone.",
+              "description": "Reports a line that continues a block tag (`@param x`) and is indented by fewer than `indent` blanks after the asterisk (5 by default).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1400,23 +1400,23 @@
             },
             "doc-text-ends-with-period": {
               "$ref": "#/definitions/rule",
-              "description": "The last text of an element of a documentation comment does not end with a period (`.` or `.)`). Each paragraph of `<para>` and `<note>` is checked, a paragraph that ends in a colon (except the last), `-or-` and `<seealso>` are left alone, and an inline element (`<see />`, `<c>`, ...) at the end counts as not ending with a period. The fix adds the period, or replaces a trailing comma or semicolon with it."
+              "description": "Reports the last text of an element of a documentation comment that does not end with a period (`.` or `.)`)."
             },
             "doc-text-not-empty": {
               "$ref": "#/definitions/rule",
-              "description": "A `<remarks>`, `<example>`, `<exception>` or `<permission>` element without text, written `<remarks></remarks>` or `<remarks />`. No fix."
+              "description": "Reports a `<remarks>`, `<example>`, `<exception>` or `<permission>` element without text, written `<remarks></remarks>` or `<remarks />`."
             },
             "doc-typeparam-has-name": {
               "$ref": "#/definitions/rule",
-              "description": "A `<typeparam>` without a `name` attribute, or with an empty one, in the documentation of a generic class, struct, interface, method or delegate. No fix."
+              "description": "Reports a `<typeparam>` without a `name` attribute, or with an empty one, in the documentation of a generic class, struct, interface, method or delegate."
             },
             "doc-typeparam-has-text": {
               "$ref": "#/definitions/rule",
-              "description": "A `<typeparam>` without text (`<typeparam name=\"T\" />` counts), in the documentation of a generic class, struct, interface, method or delegate. No fix."
+              "description": "Reports a `<typeparam>` without text (`<typeparam name=\"T\" />` counts as without text), in the documentation of a generic class, struct, interface, method or delegate."
             },
             "doc-value-text": {
               "$ref": "#/definitions/rule",
-              "description": "A property's `<value>` without text (`<value></value>`; `<value />` is left alone, as StyleCop does). Skipped when the comment has `<inheritdoc />`. No fix."
+              "description": "Reports a property's `<value>` without text (`<value></value>`; `<value />` is not reported)."
             },
             "doctype-html": {
               "$ref": "#/definitions/rule",
@@ -1505,11 +1505,11 @@
             },
             "documented-outputs": {
               "$ref": "#/definitions/rule",
-              "description": "An `output` block with no `description` argument (tflint terraform_documented_outputs)."
+              "description": "Reports an `output` block with no `description` argument."
             },
             "documented-variables": {
               "$ref": "#/definitions/rule",
-              "description": "A `variable` block with no `description` argument (tflint terraform_documented_variables)."
+              "description": "Reports a `variable` block with no `description` argument."
             },
             "dollar-variable-empty-line-before": {
               "$ref": "#/definitions/rule",
@@ -1612,7 +1612,7 @@
             },
             "empty-list-equality": {
               "$ref": "#/definitions/rule",
-              "description": "A comparison with an empty list, `x == []` or `x != []` (tflint terraform_empty_list_equality): it is false for an empty set or a tuple of another type."
+              "description": "Reports a comparison with an empty list, `x == []` or `x != []`."
             },
             "empty-section": {
               "$ref": "#/definitions/rule",
@@ -1620,7 +1620,7 @@
             },
             "empty-statement": {
               "$ref": "#/definitions/rule",
-              "description": "A `;` that is the body of an `if` or a loop, such as `while (x);` (Checkstyle EmptyStatement)."
+              "description": "Reports a lone `;` that is the body of an `if` or a loop, such as `while (x);`, on the `;`."
             },
             "empty-title": {
               "$ref": "#/definitions/rule",
@@ -1628,14 +1628,14 @@
             },
             "empty-when": {
               "$ref": "#/definitions/rule",
-              "description": "A `when` with no statements and no comment (RuboCop Lint/EmptyWhen)."
+              "description": "Reports a `when` with no statements and no comment."
             },
             "enum-entry-name-case": {
               "$ref": "#/definitions/rule",
-              "description": "An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint enum-entry-name-case)."
+              "description": "Reports an enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (`a` in `enum class E { a, B }`)."
             },
             "enum-first-value-zero": {
-              "description": "The first value of an enum is not 0 (buf lint ENUM_FIRST_VALUE_ZERO). Proto3 and editions with open enums require it; proto2 files (also those with no `syntax`) are checked only with the `proto2` option.",
+              "description": "Reports an enum whose first value is not 0.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1667,23 +1667,23 @@
             },
             "enum-no-allow-alias": {
               "$ref": "#/definitions/rule",
-              "description": "`option allow_alias = true;` in an enum (buf lint ENUM_NO_ALLOW_ALIAS)."
+              "description": "Reports `option allow_alias = true;` in an enum."
             },
             "enum-pascal-case": {
               "$ref": "#/definitions/rule",
-              "description": "An enum name that is not PascalCase (buf lint ENUM_PASCAL_CASE)."
+              "description": "Reports an enum name that is not PascalCase."
             },
             "enum-value-prefix": {
               "$ref": "#/definitions/rule",
-              "description": "An enum value does not start with the enum's name in UPPER_SNAKE_CASE and an underscore (buf lint ENUM_VALUE_PREFIX)."
+              "description": "Reports an enum value that does not start with the name of the enum in UPPER_SNAKE_CASE and an underscore (`COLOR_RED` in `Color`)."
             },
             "enum-value-upper-snake-case": {
               "$ref": "#/definitions/rule",
-              "description": "An enum value name that is not UPPER_SNAKE_CASE (buf lint ENUM_VALUE_UPPER_SNAKE_CASE)."
+              "description": "Reports an enum value name that is not UPPER_SNAKE_CASE."
             },
             "enum-zero-value-suffix": {
               "$ref": "#/definitions/rule",
-              "description": "An enum value numbered 0 whose name does not end in `_UNSPECIFIED` (buf lint ENUM_ZERO_VALUE_SUFFIX with its default suffix)."
+              "description": "Reports an enum value numbered 0 whose name does not end in `_UNSPECIFIED`."
             },
             "eqeqeq": {
               "$ref": "#/definitions/rule",
@@ -1691,7 +1691,7 @@
             },
             "equals-hash-code": {
               "$ref": "#/definitions/rule",
-              "description": "A class body that declares `boolean equals(Object)` and no `hashCode()`: equal objects get different hash codes (Checkstyle EqualsHashCode)."
+              "description": "Reports a class that declares `boolean equals(Object)` and does not declare `hashCode()`."
             },
             "error-naming": {
               "$ref": "#/definitions/rule",
@@ -1743,10 +1743,10 @@
             },
             "field-lower-snake-case": {
               "$ref": "#/definitions/rule",
-              "description": "A field name that is not lower_snake_case (buf lint FIELD_LOWER_SNAKE_CASE)."
+              "description": "Reports a field name that is not lower_snake_case."
             },
             "field-name-no-underscore": {
-              "description": "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match.",
+              "description": "Reports a field whose name begins with an underscore.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1778,10 +1778,10 @@
             },
             "field-not-required": {
               "$ref": "#/definitions/rule",
-              "description": "A proto2 `required` field (buf lint FIELD_NOT_REQUIRED)."
+              "description": "Reports a proto2 `required` field."
             },
             "file-lower-snake-case": {
-              "description": "The file name (without `.proto`) is not lower_snake_case (buf lint FILE_LOWER_SNAKE_CASE).",
+              "description": "Reports a file whose name (without `.proto`) is not lower_snake_case.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1813,10 +1813,10 @@
             },
             "file-name-matches-type": {
               "$ref": "#/definitions/rule",
-              "description": "The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}`. Not checked when that type is partial. No fix."
+              "description": "Reports a file whose name, up to its first dot and ignoring case, is not the name of the first type in the file; a generic type may also be written `Name{T,U}`."
             },
             "filename": {
-              "description": "A `.kt` file whose name, up to its first dot, is not in PascalCase (ktlint filename; the check that a file with a single class is named after it is not made).",
+              "description": "Reports a `.kt` file whose name, up to its first dot, is not in PascalCase.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1852,7 +1852,7 @@
             },
             "float-comparison": {
               "$ref": "#/definitions/rule",
-              "description": "`==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when` (RuboCop Lint/FloatComparison); comparing with 0 or `nil` is fine."
+              "description": "Reports `==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when`."
             },
             "float-style": {
               "description": "Restricts how plain floats are written.",
@@ -2039,7 +2039,7 @@
             },
             "function-expression-body": {
               "$ref": "#/definitions/rule",
-              "description": "A function whose body the formatter would write differently (ktlint function-expression-body)."
+              "description": "Reports a function with a block body that is only a `return`, which the formatter would write as an expression body (`fun f(): Int { return 1 }` is `fun f(): Int = 1`)."
             },
             "function-linear-gradient-no-nonstandard-direction": {
               "$ref": "#/definitions/rule",
@@ -2050,7 +2050,7 @@
               "description": "Reports a function name with capitals (`RGB()`)."
             },
             "function-naming": {
-              "description": "A function whose name does not match the expression set for its kind (ktlint function-naming): camel case; a function with a declared return type may also be a factory named in Pascal case; an `override` and a `@Composable` function are left alone.",
+              "description": "Reports a function whose name does not match the expression set for its kind: camel case; a function with a declared return type may also be a factory named in Pascal case.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2131,7 +2131,7 @@
             },
             "function-signature": {
               "$ref": "#/definitions/rule",
-              "description": "A function whose signature (up to the body) the formatter would lay out differently: parameters on one line or one per line, the return type and the body start (ktlint function-signature)."
+              "description": "Reports a function whose signature (everything up to the body) the formatter would lay out differently: the parameters on one line or one per line, the return type, and where the body starts."
             },
             "function-url-quotes": {
               "$ref": "#/definitions/rule",
@@ -2179,7 +2179,7 @@
             },
             "hash-compare-by-identity": {
               "$ref": "#/definitions/rule",
-              "description": "A hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`) (RuboCop Lint/HashCompareByIdentity)."
+              "description": "Reports a hash looked up with `x.object_id` as the key (`h[x.object_id]`, `key?`, `fetch`)."
             },
             "header-scope": {
               "$ref": "#/definitions/rule",
@@ -2340,7 +2340,7 @@
             },
             "illegal-escape-text": {
               "$ref": "#/definitions/rule",
-              "description": "A string or character literal writes backspace, tab, line feed, form feed, carriage return, a quote or a backslash as an octal or unicode escape (Checkstyle IllegalTokenText)."
+              "description": "Reports a string or character literal that writes a backspace, tab, line feed, form feed, carriage return, quote or backslash as an octal or unicode escape (`\\u0009`)."
             },
             "img-alt": {
               "$ref": "#/definitions/rule",
@@ -2356,11 +2356,11 @@
             },
             "implicit-nullable-parameter": {
               "$ref": "#/definitions/rule",
-              "description": "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable)."
+              "description": "Reports a parameter with a type that does not allow `null` and a `null` default (`int $a = null`)."
             },
             "import-no-public": {
               "$ref": "#/definitions/rule",
-              "description": "`import public` (buf lint IMPORT_NO_PUBLIC)."
+              "description": "Reports `import public`."
             },
             "import-notation": {
               "description": "Reports an `@import` written in the notation the `url` option does not ask for: by default a string, so `url(...)` is reported; with `url: true`, `url(...)`, so a string is reported.",
@@ -2395,7 +2395,7 @@
             },
             "import-ordering": {
               "$ref": "#/definitions/rule",
-              "description": "An import list the formatter would reorder or rewrite (ktlint import-ordering)."
+              "description": "Reports an import list that the formatter would reorder or rewrite."
             },
             "in-dict-keys": {
               "$ref": "#/definitions/rule",
@@ -2415,15 +2415,15 @@
             },
             "ineffective-access-modifier": {
               "$ref": "#/definitions/rule",
-              "description": "`private` or `protected` before `def self.name`, which it does not affect (RuboCop Lint/IneffectiveAccessModifier); `private_class_method :name` in the class makes the method private on purpose."
+              "description": "Reports `private` or `protected` before `def self.name`, which does not affect it."
             },
             "inherit-exception": {
               "$ref": "#/definitions/rule",
-              "description": "A class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`) (RuboCop Lint/InheritException)."
+              "description": "Reports a class that inherits `Exception` directly (`class A < Exception`, `Class.new(Exception)`)."
             },
             "inheritdoc-on-inheriting-member": {
               "$ref": "#/definitions/rule",
-              "description": "`<inheritdoc />` without `cref` on a type without a base list, or on a member that neither overrides nor implements anything (a constructor whose signature matches a base constructor is fine). No fix."
+              "description": "Reports `<inheritdoc />` without `cref` on a type that has no base list, or on a member that neither overrides nor implements anything."
             },
             "inline-comment": {
               "$ref": "#/definitions/rule",
@@ -2439,7 +2439,7 @@
             },
             "interpolation-check": {
               "$ref": "#/definitions/rule",
-              "description": "A single-quoted string that holds `#{...}`, which would interpolate in double quotes (RuboCop Lint/InterpolationCheck)."
+              "description": "Reports a single-quoted string that holds `#{...}`."
             },
             "invalid-escape-sequence": {
               "$ref": "#/definitions/rule",
@@ -2774,7 +2774,7 @@
             },
             "literal-in-interpolation": {
               "$ref": "#/definitions/rule",
-              "description": "A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation)."
+              "description": "Reports a number, symbol, `true`, `false`, `nil` or string literal that is the whole content of a `#{...}`."
             },
             "load-no-partial-leading-underscore": {
               "$ref": "#/definitions/rule",
@@ -2789,7 +2789,7 @@
               "description": "Reports a `<map>` whose `name` an earlier `<map>` already has."
             },
             "max-body-length": {
-              "description": "A rule whose recipe has more lines than allowed (checkmake `maxbodylength`). Every physical line counts, a continued command and a tab-indented comment included.",
+              "description": "Reports a rule whose recipe has more lines than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3062,7 +3062,7 @@
               ]
             },
             "member-order": {
-              "description": "Members are out of order. Compared with the member before, in the order of the `element_order` option: the kind (fields, constructors, finalizers, delegates, events, enums, interfaces, properties, indexers, operators, methods, structs, classes; in a namespace or file: namespaces, delegates, enums, interfaces, structs, classes), the access (public, internal, protected internal, protected, private protected, private), constants before other fields, static before instance members, readonly fields before the others. A trait only counts between members that agree on the traits listed before it. No fix: moving members would have to take their comments and directives along.",
+              "description": "Reports a member that is out of order compared with the member before it, in the order of the `element_order` option: the kind (fields, constructors, finalizers, delegates, events, enums, interfaces, properties, indexers, operators, methods, structs, classes; in a namespace or file: namespaces, delegates, enums, interfaces, structs, classes), the access (public, internal, protected internal, protected, private protected, private), constants before other fields, static before instance members, readonly fields before the others.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3114,14 +3114,14 @@
             },
             "message-pascal-case": {
               "$ref": "#/definitions/rule",
-              "description": "A message name that is not PascalCase (buf lint MESSAGE_PASCAL_CASE)."
+              "description": "Reports a message name that is not PascalCase."
             },
             "meta-refresh": {
               "$ref": "#/definitions/rule",
               "description": "Reports `<meta http-equiv=\"refresh\">` with a delay (`content=\"5\"`)."
             },
             "min-phony": {
-              "description": "A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the last `.PHONY` line, or the last rule's when there is none.",
+              "description": "Reports a target of the `required` option (default `all`, `clean` and `test`) that is not declared `.PHONY`, on the last `.PHONY` line, or on the last rule when there is none.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3160,7 +3160,7 @@
             },
             "missing-doc-comment": {
               "$ref": "#/definitions/rule",
-              "description": "A type, member, field or enum item that StyleCop's defaults ask to document (public, protected or internal, in types that are too; members of an interface, explicit interface implementations and enum items are public; partial declarations are left out) has no `///` comment before it. Private members are left alone. No fix."
+              "description": "Reports a type, member, field or enum item that needs documentation and has no `///` comment before it: public, protected or internal ones, in types that are too."
             },
             "missing-doctype": {
               "$ref": "#/definitions/rule",
@@ -3172,7 +3172,7 @@
             },
             "missing-package-comment": {
               "$ref": "#/definitions/rule",
-              "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse."
+              "description": "Reports a package that has no comment right above the `package` clause in any file of its directory."
             },
             "missing-permissions": {
               "$ref": "#/definitions/rule",
@@ -3180,19 +3180,19 @@
             },
             "missing-return": {
               "$ref": "#/definitions/rule",
-              "description": "A function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen."
+              "description": "Reports a function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw`, on the function."
             },
             "missing-super": {
               "$ref": "#/definitions/rule",
-              "description": "`initialize` of a class with a parent other than Object, and the lifecycle callbacks `inherited` and `method_added`, that do not call `super` (RuboCop Lint/MissingSuper)."
+              "description": "Reports `initialize` of a class with a parent other than `Object`, and the callbacks `inherited` and `method_added`, that do not call `super`."
             },
             "missing-switch-default": {
               "$ref": "#/definitions/rule",
-              "description": "A `switch` statement with no `default` (Checkstyle MissingSwitchDefault)."
+              "description": "Reports a `switch` statement that has no `default` label."
             },
             "mixed-regexp-capture-types": {
               "$ref": "#/definitions/rule",
-              "description": "A regexp literal that has both `(?<name>...)` and plain `(...)` groups (RuboCop Lint/MixedRegexpCaptureTypes)."
+              "description": "Reports a regexp literal that has both named groups (`(?<name>...)`) and plain groups (`(...)`)."
             },
             "modifier-order": {
               "description": "Reports the modifiers of a declaration (`public`, `static`, `final`, `override`, ...) that are not in the order the style of the language wants: for Java the order of the Java Language Specification (`public protected private abstract default static sealed non-sealed final transient volatile synchronized native strictfp`), for Kotlin the order of the Kotlin coding conventions.",
@@ -3235,11 +3235,11 @@
             },
             "multiline-expression-wrapping": {
               "$ref": "#/definitions/rule",
-              "description": "An expression that spans lines and starts after code on its line: the value of a property or a function body after `=`, or an argument (ktlint multiline-expression-wrapping)."
+              "description": "Reports an expression that spans lines and starts after code on its line: the value of a property or a function body after `=`, or an argument."
             },
             "multiline-if-else": {
               "$ref": "#/definitions/rule",
-              "description": "An `if` whose lines the formatter would change (ktlint multiline-if-else)."
+              "description": "Reports an `if` whose line breaks the formatter would change."
             },
             "multiple-imports-on-one-line": {
               "$ref": "#/definitions/rule",
@@ -3309,7 +3309,7 @@
               "description": "Reports a `grid-template-areas` whose rows differ in length, are empty, or hold an area that is not a rectangle."
             },
             "naming-convention": {
-              "description": "A name does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it. Equivalent: graphql-eslint naming-convention (styles only, no prefix or suffix lists).",
+              "description": "Reports a name that does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3456,7 +3456,7 @@
             },
             "newline-wrapping": {
               "$ref": "#/definitions/rule",
-              "description": "A bracket, comma or arrow where the formatter would break the line, or add a trailing comma (ktlint wrapping)."
+              "description": "Reports a bracket, comma or arrow where the formatter would break the line, or add a trailing comma."
             },
             "no-abstract-role": {
               "$ref": "#/definitions/rule",
@@ -3472,7 +3472,7 @@
             },
             "no-anonymous-operations": {
               "$ref": "#/definitions/rule",
-              "description": "An operation without a name (`{ a }`, `query { a }`), which tools that log, trace or cache by operation name cannot tell apart. Equivalent - graphql-eslint no-anonymous-operations."
+              "description": "Reports an operation without a name (`{ a }`, `query { a }`)."
             },
             "no-apt": {
               "$ref": "#/definitions/rule",
@@ -3484,7 +3484,7 @@
             },
             "no-assignment-in-logical-condition": {
               "$ref": "#/definitions/rule",
-              "description": "`if a && b = c`: the condition is a logical operation whose right operand is an assignment not wrapped in parentheses (RuboCop Lint/AssignmentInCondition); a plain assignment condition is `no-assignment-in-condition`."
+              "description": "Reports a condition that is a logical operation (`&&`, `||`) with an assignment as the right operand not in parentheses (`if a && b = c`)."
             },
             "no-async-promise-executor": {
               "$ref": "#/definitions/rule",
@@ -3580,7 +3580,7 @@
             },
             "no-comment-before-block": {
               "$ref": "#/definitions/rule",
-              "description": "A comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its `{`. Put it inside the block or above the statement."
+              "description": "Reports a comment between the head of an `if`, `else`, `while`, `do`, `for`, `foreach`, `lock`, `try`, `catch`, `finally`, `switch`, `checked` or `unchecked` and its `{`."
             },
             "no-compare-neg-zero": {
               "$ref": "#/definitions/rule",
@@ -3651,7 +3651,7 @@
             },
             "no-default-summary": {
               "$ref": "#/definitions/rule",
-              "description": "A `<summary>` that starts with the text Visual Studio generates, \"Summary description for ...\". Skipped when the comment has `<inheritdoc />`. No fix."
+              "description": "Reports a `<summary>` that starts with the text Visual Studio generates, \"Summary description for ...\"."
             },
             "no-default-true-switch": {
               "$ref": "#/definitions/rule",
@@ -3659,7 +3659,7 @@
             },
             "no-default-value-type-constructor": {
               "$ref": "#/definitions/rule",
-              "description": "`new S()` of a value type with an implicit parameterless constructor and no initializer: write `default(S)` (`Guid.Empty`, `CancellationToken.None`, `IntPtr.Zero`, the enum member with value 0 where they exist). No fix for a target-typed `new()`."
+              "description": "Reports `new S()` of a value type that has an implicit parameterless constructor and no initializer: write `default(S)`, or the named constant where there is one (`Guid.Empty`, `CancellationToken.None`, `IntPtr.Zero`, the enum member with value 0)."
             },
             "no-delete-var": {
               "$ref": "#/definitions/rule",
@@ -3715,11 +3715,11 @@
             },
             "no-doc-placeholder": {
               "$ref": "#/definitions/rule",
-              "description": "A `<placeholder>` element in a documentation comment. No fix."
+              "description": "Reports a `<placeholder>` element in a documentation comment."
             },
             "no-doc-slashes-in-plain-comment": {
               "$ref": "#/definitions/rule",
-              "description": "A `///` comment that holds only text, no XML element: a plain comment written with documentation slashes. The fix writes `//`, unless the comment documents a declaration (it would remove documentation)."
+              "description": "Reports a `///` comment that holds only text and no XML element: a plain comment written with documentation slashes."
             },
             "no-dupe-class-members": {
               "$ref": "#/definitions/rule",
@@ -3767,7 +3767,7 @@
             },
             "no-duplicate-doc-text": {
               "$ref": "#/definitions/rule",
-              "description": "Two elements of one documentation comment with the same text (a copied and pasted `<param>`, for example). Empty elements and \"The parameter is not used.\" are ignored. No fix."
+              "description": "Reports two elements of one documentation comment with the same text (a `<param>` pasted twice, for example)."
             },
             "no-duplicate-enum-values": {
               "$ref": "#/definitions/rule",
@@ -3846,7 +3846,7 @@
             },
             "no-empty-attribute-parens": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are left alone."
+              "description": "Reports an attribute with empty parentheses: `[Foo()]` is `[Foo]`."
             },
             "no-empty-block": {
               "description": "Reports a block with no statement and no comment as the body of an `if`, `else`, loop, `try` or `finally` (`if (a) { }`, `for (;;) { }`).",
@@ -3939,7 +3939,7 @@
             },
             "no-empty-class-body": {
               "$ref": "#/definitions/rule",
-              "description": "A class or interface with `{ }` and nothing in it (ktlint no-empty-class-body)."
+              "description": "Reports a class or interface with `{ }` and nothing in it (`class A {}`)."
             },
             "no-empty-comment": {
               "description": "Reports a comment with no text.",
@@ -3974,11 +3974,11 @@
             },
             "no-empty-delegate-parens": {
               "$ref": "#/definitions/rule",
-              "description": "An anonymous method with an empty parameter list: `delegate() { }` is `delegate { }`. Parentheses with a comment in them are left alone. The fix is unsafe: without a parameter list the method also converts to delegate types that have parameters, which can change which overload is chosen."
+              "description": "Reports an anonymous method with an empty parameter list: `delegate() { }` is `delegate { }`."
             },
             "no-empty-file": {
               "$ref": "#/definitions/rule",
-              "description": "A `.kt` file with nothing in it but a package, imports and comments (ktlint no-empty-file)."
+              "description": "Reports a `.kt` file with nothing in it but a package, imports and comments."
             },
             "no-empty-keys": {
               "$ref": "#/definitions/rule",
@@ -4002,7 +4002,7 @@
             },
             "no-empty-statement": {
               "$ref": "#/definitions/rule",
-              "description": "A lone `;` is a statement that does nothing. A statement labelled `label: ;` is allowed. The fix removes the statement (its whole line when it is alone on it), or turns an empty loop or `if` body into `{ }`; it is not offered for the only statement of a switch section. Overlaps compiler CS0642 for `if (x);`."
+              "description": "Reports a lone `;` that does nothing."
             },
             "no-empty-values": {
               "description": "Reports a mapping key or sequence entry without a value (an implicit null), at the `:` or `-`.",
@@ -4348,7 +4348,7 @@
             },
             "no-inner-function": {
               "$ref": "#/definitions/rule",
-              "description": "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner)."
+              "description": "Reports a `function name() {}` statement in the body of a function, method or closure."
             },
             "no-interactive-commands": {
               "$ref": "#/definitions/rule",
@@ -4424,7 +4424,7 @@
             },
             "no-name-underscore": {
               "$ref": "#/definitions/rule",
-              "description": "A name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and every reference to one. A field selected in a query is not checked (`__typename`). Equivalent - graphql-eslint naming-convention without `allowLeadingUnderscore` and `allowTrailingUnderscore`."
+              "description": "Reports a name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and every reference to one."
             },
             "no-namespace": {
               "$ref": "#/definitions/rule",
@@ -4586,11 +4586,11 @@
             },
             "no-region-in-body": {
               "$ref": "#/definitions/rule",
-              "description": "A `#region` inside a block (a method, accessor or lambda body, or any block in one); regions belong between members. No fix."
+              "description": "Reports a `#region` inside a block (a method, accessor or lambda body, or any block in one)."
             },
             "no-regions": {
               "$ref": "#/definitions/rule",
-              "description": "`#region` hides code behind a label. Reported on every `#region` outside a block (a region inside a block is `no-region-in-body`'s), in disabled `#if` branches too; no fix, because removing a pair is a judgment call."
+              "description": "Reports every `#region` outside a block (a region inside a block is `no-region-in-body`'s), also in disabled `#if` branches."
             },
             "no-require-imports": {
               "$ref": "#/definitions/rule",
@@ -4602,7 +4602,7 @@
             },
             "no-returns-on-void": {
               "$ref": "#/definitions/rule",
-              "description": "A `<returns>` on a method or delegate that returns `void`. The fix removes the element with its line when it is alone on it."
+              "description": "Reports a `<returns>` on a method or delegate that returns `void`."
             },
             "no-reversed-links": {
               "$ref": "#/definitions/rule",
@@ -4749,7 +4749,7 @@
             },
             "no-typename-prefix": {
               "$ref": "#/definitions/rule",
-              "description": "A field of an object or interface type starts with the name of the type (`type User { userId: ID }`); the type already says it (case ignored). No fix: renaming a field changes the schema."
+              "description": "Reports a field of an object or interface type that starts with the name of the type (`type User { userId: ID }`); case is ignored."
             },
             "no-undefined-alias": {
               "$ref": "#/definitions/rule",
@@ -4761,7 +4761,7 @@
             },
             "no-unit-return": {
               "$ref": "#/definitions/rule",
-              "description": "A function with a block body that declares `: Unit` (ktlint no-unit-return)."
+              "description": "Reports a function with a block body that declares `: Unit` as its return type."
             },
             "no-unknown-elements": {
               "$ref": "#/definitions/rule",
@@ -4777,7 +4777,7 @@
             },
             "no-unneeded-base-prefix": {
               "$ref": "#/definitions/rule",
-              "description": "`base.M()` or `base[i]` where the type does not override the member, so `this` binds to the same one. The fix writes `this`."
+              "description": "Reports `base.M()` or `base[i]` where the type does not override the member, so `this` binds to the same one."
             },
             "no-unneeded-ternary": {
               "$ref": "#/definitions/rule",
@@ -4797,7 +4797,7 @@
             },
             "no-unset-hookable-property": {
               "$ref": "#/definitions/rule",
-              "description": "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty)."
+              "description": "Reports `unset($this->name)` of a property the class declares when a subclass could give the property a hook (PHP 8.4): the class is not final and the property is not private, final, static or readonly."
             },
             "no-unused-anchors": {
               "$ref": "#/definitions/rule",
@@ -4933,7 +4933,7 @@
             },
             "nullable-shorthand": {
               "$ref": "#/definitions/rule",
-              "description": "`int?` instead of `Nullable<int>` or `System.Nullable<int>`. Name-based: a type of your own called `Nullable` is reported too. Not reported in `using` aliases, `nameof`, `typeof(Nullable<>)` and before a member access (`Nullable<int>.Equals`)."
+              "description": "Reports `Nullable<int>` or `System.Nullable<int>`, which is `int?`."
             },
             "number-max-precision": {
               "description": "Reports a number with more decimal places than the `max` option.",
@@ -4972,7 +4972,7 @@
             },
             "oneof-lower-snake-case": {
               "$ref": "#/definitions/rule",
-              "description": "A oneof name that is not lower_snake_case (buf lint ONEOF_LOWER_SNAKE_CASE)."
+              "description": "Reports a oneof name that is not lower_snake_case."
             },
             "open-file-without-with": {
               "$ref": "#/definitions/rule",
@@ -4996,23 +4996,23 @@
             },
             "package-comment-form": {
               "$ref": "#/definitions/rule",
-              "description": "The first line of the comment above the `package` clause does not start with `Package` and the name of the package (revive package-comments). A file of package `main` is left alone. A comment of the right form with a blank line before the `package` clause is reported as detached."
+              "description": "Reports a package comment whose first line does not start with `Package` and the name of the package."
             },
             "package-defined": {
               "$ref": "#/definitions/rule",
-              "description": "A file without a `package` statement (buf lint PACKAGE_DEFINED)."
+              "description": "Reports a file without a `package` statement."
             },
             "package-lower-snake-case": {
               "$ref": "#/definitions/rule",
-              "description": "A package whose components are not lower_snake_case (buf lint PACKAGE_LOWER_SNAKE_CASE)."
+              "description": "Reports a package whose components are not lower_snake_case."
             },
             "package-name": {
               "$ref": "#/definitions/rule",
-              "description": "A package whose name has an uppercase letter or an underscore (ktlint package-name)."
+              "description": "Reports a package whose name has an uppercase letter or an underscore."
             },
             "package-version-suffix": {
               "$ref": "#/definitions/rule",
-              "description": "A package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1` (`v1beta` too; buf lint PACKAGE_VERSION_SUFFIX)."
+              "description": "Reports a package whose last component is not `v1`, `v1test...`, `v1alpha1`, `v1beta1` or `v1p1alpha1` (`v1beta` too)."
             },
             "parameter-assignment": {
               "$ref": "#/definitions/rule",
@@ -5020,11 +5020,11 @@
             },
             "parameter-list-wrapping": {
               "$ref": "#/definitions/rule",
-              "description": "A parameter list the formatter would wrap or join differently (ktlint parameter-list-wrapping)."
+              "description": "Reports a parameter list that the formatter would wrap or join differently."
             },
             "parentheses-as-grouped-expression": {
               "$ref": "#/definitions/rule",
-              "description": "A space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`) (RuboCop Lint/ParenthesesAsGroupedExpression)."
+              "description": "Reports a space between a method name and the `(` of its only argument (`puts (1 + 2) * 3`)."
             },
             "percent-format-expected-mapping": {
               "$ref": "#/definitions/rule",
@@ -5064,7 +5064,7 @@
             },
             "phony-declared": {
               "$ref": "#/definitions/rule",
-              "description": "A target with no recipe that is not declared `.PHONY` (checkmake `phonydeclared`); targets that start with a `.` are special and skipped."
+              "description": "Reports a target with no recipe that is not declared `.PHONY`."
             },
             "pip-pin-versions": {
               "$ref": "#/definitions/rule",
@@ -5076,11 +5076,11 @@
             },
             "possible-null-dereference": {
               "$ref": "#/definitions/rule",
-              "description": "A member or element access on an expression the compiler's nullable analysis says may be null. Only code under `#nullable enable` is checked. Off by default: the compiler reports the same thing as CS8602."
+              "description": "Reports a member or element access on an expression that the nullable analysis says may be null."
             },
             "post-condition-loop": {
               "$ref": "#/definitions/rule",
-              "description": "A `begin ... end while cond` or `until` loop, which behaves unlike the other loops (RuboCop Lint/Loop)."
+              "description": "Reports `begin ... end while cond` and `begin ... end until cond`."
             },
             "prefer-as-const": {
               "$ref": "#/definitions/rule",
@@ -5199,7 +5199,7 @@
               ]
             },
             "property-naming": {
-              "description": "A property whose name does not match the expression set for its kind (ktlint property-naming): a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as constants; a backing property may start with `_`; an `override` is left alone.",
+              "description": "Reports a property whose name does not match the expression set for its kind: a `const val` is in UPPER_SNAKE_CASE; top-level and object properties may also be written as constants; a backing property may start with `_`; an `override` is not reported.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5353,19 +5353,19 @@
             },
             "property-summary-matches-accessors": {
               "$ref": "#/definitions/rule",
-              "description": "A property summary starts with \"Gets\", \"Sets\" or \"Gets or sets\" (\"Gets a value indicating whether\" and so on for `bool`), as the property's accessors reachable from outside the type say. The type is read from the declaration (`bool`, `Boolean`, `System.Boolean`). The fix replaces the start of the text and lower-cases what follows."
+              "description": "Reports a property summary that does not start with \"Gets\", \"Sets\" or \"Gets or sets\" as the accessors that are reachable from outside the type say; for `bool` properties \"Gets a value indicating whether\" and the like."
             },
             "property-summary-omits-restricted-accessor": {
               "$ref": "#/definitions/rule",
-              "description": "A property summary says \"Gets or sets\" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property). The fix replaces the start of the text with the one that matches the visible accessor."
+              "description": "Reports a property summary that says \"Gets or sets\" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property)."
             },
             "qualify-instance-members": {
               "$ref": "#/definitions/rule",
-              "description": "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it."
+              "description": "Reports a field, property, method or event of the containing type that is used by its simple name."
             },
             "qualify-namespace-usings": {
               "$ref": "#/definitions/rule",
-              "description": "A `using` directive inside a namespace whose name is not written fully qualified (it resolves relative to the enclosing namespace). The fix writes the full name, unless it has type arguments."
+              "description": "Reports a `using` directive inside a namespace whose name is not written fully qualified, so that it resolves relative to the enclosing namespace."
             },
             "quote-array-element": {
               "$ref": "#/definitions/rule",
@@ -5470,7 +5470,7 @@
             },
             "raise-exception": {
               "$ref": "#/definitions/rule",
-              "description": "Raising `Exception` itself (`raise Exception`, `raise Exception.new`), which a plain `rescue` does not catch (RuboCop Lint/RaiseException)."
+              "description": "Reports `raise Exception` and `raise Exception.new`."
             },
             "raise-not-implemented": {
               "$ref": "#/definitions/rule",
@@ -5528,7 +5528,7 @@
               "description": "Reports a name declared again in the same scope (`var` twice, a `var` and a parameter, two functions)."
             },
             "redefines-builtin-id": {
-              "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
+              "description": "Reports a variable, constant, function, parameter, named result or type parameter that has the name of a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...); a name on the left of an assignment counts too.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5607,7 +5607,7 @@
             },
             "redundant-string-coercion": {
               "$ref": "#/definitions/rule",
-              "description": "`to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn` (RuboCop Lint/RedundantStringCoercion)."
+              "description": "Reports `to_s` on the last expression of a `#{...}` and on an argument of `puts`, `print` or `warn`."
             },
             "redundant-tuple-in-exception-handler": {
               "$ref": "#/definitions/rule",
@@ -5619,7 +5619,7 @@
             },
             "remove-unused-usings": {
               "$ref": "#/definitions/rule",
-              "description": "A `using` directive that nothing in the file needs (the compiler's hidden CS8019, IDE0005 in the SDK analyzers). Not reported in a file that has compiler errors or `#if` regions, because unresolved or inactive code could be the one using it."
+              "description": "Reports a `using` directive that nothing in the file needs."
             },
             "require-component-is": {
               "$ref": "#/definitions/rule",
@@ -5655,15 +5655,15 @@
             },
             "required-providers": {
               "$ref": "#/definitions/rule",
-              "description": "A provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, reported on the last such block of the provider, and a `required_providers` entry without a `version` (tflint terraform_required_providers). The built-in `terraform` provider is exempt; override files do not count."
+              "description": "Reports a provider that a `resource`, `data` or `provider` block uses and that no `required_providers` entry of the module names, on the last such block of the provider, and a `required_providers` entry without a `version`."
             },
             "required-version": {
               "$ref": "#/definitions/rule",
-              "description": "A module none of whose `terraform` blocks sets `required_version` (tflint terraform_required_version), reported on the `terraform` block, or on the start of `main.tf` when the module has no such block. Override files do not count."
+              "description": "Reports a module none of whose `terraform` blocks sets `required_version`, on the `terraform` block, or on the start of `main.tf` when the module has no such block."
             },
             "return-in-void-context": {
               "$ref": "#/definitions/rule",
-              "description": "`return value` in `initialize` or a setter method, whose result is ignored (RuboCop Lint/ReturnInVoidContext)."
+              "description": "Reports `return value` in `initialize` or a setter method, whose result is ignored."
             },
             "return-outside-function": {
               "$ref": "#/definitions/rule",
@@ -5679,15 +5679,15 @@
             },
             "rpc-pascal-case": {
               "$ref": "#/definitions/rule",
-              "description": "An rpc name that is not PascalCase (buf lint RPC_PASCAL_CASE)."
+              "description": "Reports an rpc name that is not PascalCase."
             },
             "rpc-request-standard-name": {
               "$ref": "#/definitions/rule",
-              "description": "The request type of an rpc is not named `<Rpc>Request` or `<Service><Rpc>Request` (buf lint RPC_REQUEST_STANDARD_NAME)."
+              "description": "Reports an rpc whose request type is not named `<Rpc>Request` or `<Service><Rpc>Request`."
             },
             "rpc-response-standard-name": {
               "$ref": "#/definitions/rule",
-              "description": "The response type of an rpc is not named `<Rpc>Response` or `<Service><Rpc>Response` (buf lint RPC_RESPONSE_STANDARD_NAME)."
+              "description": "Reports an rpc whose response type is not named `<Rpc>Response` or `<Service><Rpc>Response`."
             },
             "rpm-pin-versions": {
               "$ref": "#/definitions/rule",
@@ -5706,7 +5706,7 @@
               "description": "Reports a `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty."
             },
             "selection-set-depth": {
-              "description": "An operation or fragment nests selection sets deeper than allowed, which makes a query expensive to execute. Fragments that are spread are not followed.",
+              "description": "Reports an operation or fragment that nests selection sets deeper than the `max` option allows.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6582,19 +6582,19 @@
             },
             "separate-attributes": {
               "$ref": "#/definitions/rule",
-              "description": "One attribute per attribute list: `[A, B]` becomes `[A]` and `[B]`. Lists on parameters and type parameters are left alone. The fix is not offered when the list has a comment in it."
+              "description": "Reports an attribute list with several attributes: `[A, B]` is `[A]` and `[B]`."
             },
             "separate-field-declarations": {
               "$ref": "#/definitions/rule",
-              "description": "One field or event per declaration: `int a, b;` becomes `int a;` and `int b;`, each with the attributes, modifiers and type of the original. The fix is not offered when the declaration has a comment in it."
+              "description": "Reports a declaration of several fields or events (`int a, b;`), which becomes `int a;` and `int b;`, each with the attributes, modifiers and type of the original."
             },
             "service-pascal-case": {
               "$ref": "#/definitions/rule",
-              "description": "A service name that is not PascalCase (buf lint SERVICE_PASCAL_CASE)."
+              "description": "Reports a service name that is not PascalCase."
             },
             "service-suffix": {
               "$ref": "#/definitions/rule",
-              "description": "A service whose name does not end in `Service` (buf lint SERVICE_SUFFIX with its default suffix)."
+              "description": "Reports a service whose name does not end in `Service`."
             },
             "set-attr-with-constant": {
               "$ref": "#/definitions/rule",
@@ -6664,7 +6664,7 @@
             },
             "single-class-per-file": {
               "$ref": "#/definitions/rule",
-              "description": "A file holds one class or record: every later one is reported, more parts of the first class (when it is partial) excepted. Structs, interfaces, enums and delegates are not counted. No fix."
+              "description": "Reports a class or record that comes after the first one in a file: more parts of the first class (when it is partial) are not reported."
             },
             "single-cmd": {
               "$ref": "#/definitions/rule",
@@ -6680,7 +6680,7 @@
             },
             "single-namespace-per-file": {
               "$ref": "#/definitions/rule",
-              "description": "A file declares one namespace: every later one, nested ones included, is reported. No fix."
+              "description": "Reports a namespace that comes after the first one in a file; nested namespaces are reported too."
             },
             "single-title": {
               "$ref": "#/definitions/rule",
@@ -6930,7 +6930,7 @@
             },
             "statement-wrapping": {
               "$ref": "#/definitions/rule",
-              "description": "A block whose lines the formatter would change (ktlint statement-wrapping)."
+              "description": "Reports a block whose line breaks the formatter would change, such as several statements on one line (`{ a(); b() }`)."
             },
             "static-join": {
               "$ref": "#/definitions/rule",
@@ -6958,11 +6958,11 @@
             },
             "string-literal-equality": {
               "$ref": "#/definitions/rule",
-              "description": "`==` or `!=` with a string literal as an operand compares references (Checkstyle StringLiteralEquality)."
+              "description": "Reports `==` or `!=` with a string literal as an operand."
             },
             "struct-new-override": {
               "$ref": "#/definitions/rule",
-              "description": "A `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`, `:count`) (RuboCop Lint/StructNewOverride)."
+              "description": "Reports a `Struct.new` member that has the name of a method of `Struct` (`:hash`, `:size`, `:count`)."
             },
             "subprocess-run-without-check": {
               "$ref": "#/definitions/rule",
@@ -6978,7 +6978,7 @@
             },
             "suppression-justification": {
               "$ref": "#/definitions/rule",
-              "description": "`SuppressMessage` needs a `Justification` that says something: not missing, `null`, empty, blank or `\"<Pending>\"`. Matches the attribute by name. No fix."
+              "description": "Reports a `SuppressMessage` attribute whose `Justification` is missing, `null`, empty, blank, or `\"<Pending>\"`."
             },
             "svg-focusable": {
               "$ref": "#/definitions/rule",
@@ -6986,7 +6986,7 @@
             },
             "syntax-specified": {
               "$ref": "#/definitions/rule",
-              "description": "A file without `syntax = ...;` or `edition = ...;`, which makes it proto2 (buf lint SYNTAX_SPECIFIED)."
+              "description": "Reports a file without `syntax = ...;` or `edition = ...;`, which makes it proto2."
             },
             "test-and-or": {
               "$ref": "#/definitions/rule",
@@ -7010,19 +7010,19 @@
             },
             "timestamp-expanded": {
               "$ref": "#/definitions/rule",
-              "description": "A variable whose value runs `date` and that is not simply expanded (`:=`, `::=`): every use runs `date` again and the values differ within one build (checkmake `timestampexpanded`)."
+              "description": "Reports a variable whose value runs `date` and that is not simply expanded (`:=`, `::=`): every use runs `date` again and the values differ within one build."
             },
             "todo-comment": {
               "$ref": "#/definitions/rule",
-              "description": "A line of a comment starts with `todo` in any other case, or with `TODO` and no colon (Checkstyle TodoComment with the Google format). Javadoc comments are not read."
+              "description": "Reports a line of a comment that starts with `todo` in any other case, or with `TODO` and no colon."
             },
             "trailing-comma-on-call-site": {
               "$ref": "#/definitions/rule",
-              "description": "The last line of an argument list that the formatter would change, the trailing comma (ktlint trailing-comma-on-call-site)."
+              "description": "Reports the last argument of a multi-line call that has a trailing comma the formatter would add or remove."
             },
             "trailing-comma-on-declaration-site": {
               "$ref": "#/definitions/rule",
-              "description": "The last line of a parameter list that the formatter would change, the trailing comma (ktlint trailing-comma-on-declaration-site)."
+              "description": "Reports the last parameter of a multi-line declaration that has a trailing comma the formatter would add or remove."
             },
             "trap-expands-now": {
               "$ref": "#/definitions/rule",
@@ -7034,7 +7034,7 @@
             },
             "tuple-element-names-in-signatures": {
               "$ref": "#/definitions/rule",
-              "description": "A tuple type in the signature of a method, constructor, property, indexer, conversion operator or delegate whose elements have no names. Overrides and implementations of interface members are left alone (their names are not the member's to choose). No fix."
+              "description": "Reports a tuple type in the signature of a method, constructor, property, indexer, conversion operator or delegate whose elements have no names."
             },
             "type-alias-annotation": {
               "$ref": "#/definitions/rule",
@@ -7091,7 +7091,7 @@
             },
             "typed-variables": {
               "$ref": "#/definitions/rule",
-              "description": "A `variable` block with no `type` argument (tflint terraform_typed_variables)."
+              "description": "Reports a `variable` block with no `type` argument."
             },
             "unassigned-variable": {
               "$ref": "#/definitions/rule",
@@ -7161,7 +7161,7 @@
             },
             "unique-fragment-name": {
               "$ref": "#/definitions/rule",
-              "description": "Two fragments of a document have the same name; a spread cannot tell which one it means. Checked within the file."
+              "description": "Reports two fragments of a document with the same name, within one file."
             },
             "unique-landmark": {
               "$ref": "#/definitions/rule",
@@ -7169,10 +7169,10 @@
             },
             "unique-operation-name": {
               "$ref": "#/definitions/rule",
-              "description": "Two operations of a document have the same name; a server cannot tell which to run and tools that key on the name (caches, persisted queries) collide. Checked within the file."
+              "description": "Reports two operations of a document with the same name, within one file."
             },
             "unique-targets": {
-              "description": "A target defined by more than one rule, which merges prerequisites and overrides recipes (checkmake `uniquetargets`). Double-colon rules, `.PHONY` and the targets of `ignore` are skipped.",
+              "description": "Reports a target defined by more than one rule, which merges prerequisites and overrides recipes.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7403,7 +7403,7 @@
             },
             "unsafe-new-static": {
               "$ref": "#/definitions/rule",
-              "description": "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is."
+              "description": "Reports `new static` in a class that is not final and has no final or abstract constructor of its own."
             },
             "unsafe-numbers": {
               "$ref": "#/definitions/rule",
@@ -7485,7 +7485,7 @@
             },
             "unused-assignment": {
               "$ref": "#/definitions/rule",
-              "description": "A value is stored in a local variable and no path reads it before it is overwritten or the variable goes out of scope (a dead store). Variables that are captured or whose address is taken are not checked; a variable that is never read at all is reported by `unused-variable` instead. Overlaps the SDK analyzer IDE0059 (unnecessary assignment)."
+              "description": "Reports a value stored in a local variable that no path reads before it is overwritten or the variable goes out of scope (a dead store)."
             },
             "unused-block-argument": {
               "$ref": "#/definitions/rule",
@@ -7497,7 +7497,7 @@
             },
             "unused-declarations": {
               "$ref": "#/definitions/rule",
-              "description": "A variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to (tflint terraform_unused_declarations). Override files declare nothing of their own; a module with `.tf.json` files, a file that does not parse or one that cannot be read is not judged."
+              "description": "Reports a variable, local value, data source or provider alias that no file of the module (the `.tf` files of the directory) refers to."
             },
             "unused-import": {
               "$ref": "#/definitions/rule",
@@ -7553,7 +7553,7 @@
               ]
             },
             "unused-private-member": {
-              "description": "A private field, method, property or event that no file of the project uses (`analysis: deep`). Members with attributes, overrides, interface implementations, `extern` and `partial` methods are left alone, and so are the private                   methods named in `reflection_methods` of a type derived from one of                   `reflection_base_types` (a framework calls them by reflection; the `csharp/unity`                   preset lists Unity's). Overlaps the SDK analyzers IDE0051 (unused private member) and IDE0052 (unread private member).",
+              "description": "Reports a private field, method, property or event that no file of the project uses (needs `analysis: deep`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7604,7 +7604,7 @@
             },
             "upper-ell": {
               "$ref": "#/definitions/rule",
-              "description": "An integer literal that ends in a lower case `l` (Checkstyle UpperEll)."
+              "description": "Reports an integer literal that ends in a lower case `l` (`10l`)."
             },
             "use-baseline": {
               "description": "Reports an element, an attribute or an attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features.",
@@ -7684,19 +7684,19 @@
             },
             "use-lambda": {
               "$ref": "#/definitions/rule",
-              "description": "A lambda instead of an anonymous method. The fix is offered when the anonymous method has a parameter list and no comment before its body; `delegate { }` without one converts to delegate types with any parameters, so it has no fix."
+              "description": "Reports an anonymous method (`delegate (x) { ... }`) where a lambda can be written."
             },
             "use-literal-suffix": {
               "$ref": "#/definitions/rule",
-              "description": "A numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L`. Not reported for hexadecimal and binary literals cast to a floating-point type, which have no suffix."
+              "description": "Reports a numeric literal cast to `long`, `ulong`, `uint`, `float`, `double` or `decimal` when the literal's own type differs: `(long)1` is `1L`."
             },
             "use-string-empty": {
               "$ref": "#/definitions/rule",
-              "description": "`string.Empty` instead of `\"\"` (or `@\"\"`). Not reported where a constant is required: `const`, attribute arguments, default parameter values, `case` labels and patterns."
+              "description": "Reports `\"\"` (or `@\"\"`) where `string.Empty` can be used."
             },
             "use-tuple-syntax": {
               "$ref": "#/definitions/rule",
-              "description": "`ValueTuple<int, int>` and `ValueTuple.Create(a, b)` where tuple syntax `(int, int)` and `(a, b)` is available (not inside an expression tree). The fix is offered for types and `ValueTuple.Create` calls."
+              "description": "Reports `ValueTuple<int, int>` and `ValueTuple.Create(a, b)` where tuple syntax (`(int, int)` and `(a, b)`) can be used; not inside an expression tree."
             },
             "use-workdir-not-cd": {
               "$ref": "#/definitions/rule",
@@ -7704,7 +7704,7 @@
             },
             "useless-access-modifier": {
               "$ref": "#/definitions/rule",
-              "description": "A bare `private`, `protected`, `public` or `module_function` that repeats the visibility already in force, or is followed by no method definition (RuboCop Lint/UselessAccessModifier)."
+              "description": "Reports a bare `private`, `protected`, `public` or `module_function` that repeats the visibility already in force, or is followed by no method definition."
             },
             "useless-cat": {
               "$ref": "#/definitions/rule",
@@ -7720,7 +7720,7 @@
             },
             "useless-method-definition": {
               "$ref": "#/definitions/rule",
-              "description": "A method whose whole body is a bare `super` (RuboCop Lint/UselessMethodDefinition)."
+              "description": "Reports a method whose whole body is a bare `super`."
             },
             "useless-object-inheritance": {
               "$ref": "#/definitions/rule",
@@ -7732,10 +7732,10 @@
             },
             "useless-times": {
               "$ref": "#/definitions/rule",
-              "description": "`0.times` and `1.times` with a block (RuboCop Lint/UselessTimes)."
+              "description": "Reports `0.times` and `1.times` with a block."
             },
             "using-order": {
-              "description": "`using` directives of a file or namespace are out of order: System first (`system_first`), names in alphabetical order (`compare`), and with the options `static_position` and `alias_position` set to `after`, `using static` directives after the plain ones and aliases after those, each group sorted. `global using` and `using unsafe` stay where they are, and a list restarts at a directive that has a preprocessor directive in front of it (the fix leaves such lists alone). Comments on lines of their own stay where they are; a comment after a directive moves with it. Overlaps the SDK analyzers' `dotnet_sort_system_directives_first` .editorconfig key.",
+              "description": "Reports `using` directives of a file or namespace that are out of order: `System` first (`system_first`), names in alphabetical order (`compare`), and, with the options `static_position` and `alias_position` set to `after`, `using static` directives after the plain ones and aliases after those, each group sorted.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7795,7 +7795,7 @@
             },
             "using-placement": {
               "$ref": "#/definitions/rule",
-              "description": "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up."
+              "description": "Reports a `using` directive outside the namespace declaration in a file that has one."
             },
             "v-bind-style": {
               "$ref": "#/definitions/rule",
@@ -7924,7 +7924,7 @@
               ]
             },
             "var-naming": {
-              "description": "A name is not spelled in Go style: it has an underscore, is a constant in ALL_CAPS, or writes a common initialism (`Id`, `Http`, `Url`) in mixed case (revive var-naming, golint's rules). Checked are functions and methods with their parameters and results, the methods of interfaces (their parameters and results, not their names), constants, variables, types, the names of `:=` and the fields of structs. Receivers, function literals and function types are not.",
+              "description": "Reports a name that is not spelled in Go style: it has an underscore, it is a constant in ALL_CAPS, or it writes a common initialism (`Id`, `Http`, `Url`) in mixed case.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -8025,7 +8025,7 @@
             },
             "when-entry-bracing": {
               "$ref": "#/definitions/rule",
-              "description": "A `when` entry whose first line the formatter would change (ktlint when-entry-bracing)."
+              "description": "Reports a `when` entry whose first line the formatter would change."
             },
             "workdir-absolute": {
               "$ref": "#/definitions/rule",

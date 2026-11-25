@@ -2,7 +2,14 @@ id: doc-typeparam-has-text
 family: doc-element
 params: { check: text, element: typeparam, scope: generic, skip-inheritdoc: true, report: element }
 message: "the <typeparam> should have text"
-description: "A `<typeparam>` without text (`<typeparam name=\"T\" />` counts), in the documentation of a generic class, struct, interface, method or delegate. No fix."
+description: >-
+  Reports a `<typeparam>` without text (`<typeparam name="T" />` counts as without text), in the
+  documentation of a generic class, struct, interface, method or delegate. No fix.
+why: >-
+  A type parameter with an empty description looks documented and says nothing about what `T` is
+  for, and it stops tools from reporting the missing text.
+
+  To fix, describe the type parameter.
 example: "/// <typeparam name=\"T\"></typeparam>   // describe the type parameter\nvoid Add<T>() { }"
 severity: off
 category: style

@@ -1,7 +1,13 @@
 id: field-lower-snake-case
 message: 'field names are lower_snake_case'
 description: >-
-  A field name that is not lower_snake_case (buf lint FIELD_LOWER_SNAKE_CASE).
+  Reports a field name that is not lower_snake_case.
+why: >-
+  The Protobuf style guide writes fields in lower_snake_case. Generators convert the name to camel
+  case or leave it as it is, and the JSON mapping is derived from it, so a field that is written in
+  another form maps to an unexpected name.
+
+  To fix, rename the field.
 example: 'string FooBar = 1;'
 severity: off
 category: style
@@ -11,7 +17,12 @@ token: { kind: [Ident], not-regex: '^[a-z][a-z0-9]*(_[a-z0-9]+)*$' }
 id: oneof-lower-snake-case
 message: 'oneof names are lower_snake_case'
 description: >-
-  A oneof name that is not lower_snake_case (buf lint ONEOF_LOWER_SNAKE_CASE).
+  Reports a oneof name that is not lower_snake_case.
+why: >-
+  The Protobuf style guide writes oneof names as it does fields, in lower_snake_case, since the
+  generators turn it into a property.
+
+  To fix, rename the oneof.
 example: 'oneof FooBar { int32 a = 1; }'
 severity: off
 category: style
@@ -21,7 +32,12 @@ token: { kind: [Ident], not-regex: '^[a-z][a-z0-9]*(_[a-z0-9]+)*$' }
 id: package-lower-snake-case
 message: 'package names are lower_snake.case'
 description: >-
-  A package whose components are not lower_snake_case (buf lint PACKAGE_LOWER_SNAKE_CASE).
+  Reports a package whose components are not lower_snake_case.
+why: >-
+  The Protobuf style guide writes packages in lower_snake_case, dot separated. Generators turn the
+  package into namespaces or modules, and another form reads as something else there.
+
+  To fix, rename the package.
 example: 'package Foo.Bar;'
 severity: off
 category: style

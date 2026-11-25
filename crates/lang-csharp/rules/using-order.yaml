@@ -1,7 +1,17 @@
 id: using-order
 family: imports
 params: { report: misplaced, roots: System, fixed: global unsafe, alias_by_name: "true" }
-description: "`using` directives of a file or namespace are out of order: System first (`system_first`), names in alphabetical order (`compare`), and with the options `static_position` and `alias_position` set to `after`, `using static` directives after the plain ones and aliases after those, each group sorted. `global using` and `using unsafe` stay where they are, and a list restarts at a directive that has a preprocessor directive in front of it (the fix leaves such lists alone). Comments on lines of their own stay where they are; a comment after a directive moves with it. Overlaps the SDK analyzers' `dotnet_sort_system_directives_first` .editorconfig key."
+description: >-
+  Reports `using` directives of a file or namespace that are out of order: `System` first
+  (`system_first`), names in alphabetical order (`compare`), and, with the options `static_position`
+  and `alias_position` set to `after`, `using static` directives after the plain ones and aliases
+  after those, each group sorted. `global using` and `using unsafe` stay where they are, and a list
+  restarts at a directive that has a preprocessor directive in front of it (the fix leaves such
+  lists alone). Comments on lines of their own stay where they are; a comment after a directive
+  moves with it.
+why: >-
+  A sorted list is easy to scan for a namespace, and two developers who add a directive do not both
+  put it at the end and conflict. The `System` first convention is that of the .NET libraries.
 example: "using Zeta;\nusing Alpha;   // Alpha goes first"
 severity: off
 category: cleanup

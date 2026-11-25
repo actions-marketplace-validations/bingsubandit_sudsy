@@ -2,7 +2,15 @@ id: qualify-namespace-usings
 family: finding
 params: { check: unqualified_using, fix-title: "Qualify the using" }
 message: "the using is not fully qualified (`{text}`)"
-description: "A `using` directive inside a namespace whose name is not written fully qualified (it resolves relative to the enclosing namespace). The fix writes the full name, unless it has type arguments."
+description: >-
+  Reports a `using` directive inside a namespace whose name is not written fully qualified, so that
+  it resolves relative to the enclosing namespace. The fix writes the full name, unless it has type
+  arguments.
+why: >-
+  A relative name resolves to different things when a namespace with that name is added anywhere in
+  the enclosing namespaces, so a new file can change what a `using` means without touching it.
+
+  To fix, write the full name.
 example: "namespace A.B { using C.D; }   // C.D is A.C.D here: write using A.C.D;"
 severity: off
 category: style

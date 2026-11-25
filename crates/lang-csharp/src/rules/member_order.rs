@@ -238,15 +238,19 @@ rule! {
         id: "member-order",
         category: Style,
         default: Off,
-        description: "Members are out of order. Compared with the member before, in the order of the \
-                  `element_order` option: the kind (fields, constructors, finalizers, delegates, \
-                  events, enums, interfaces, properties, indexers, operators, methods, structs, \
-                  classes; in a namespace or file: namespaces, delegates, enums, interfaces, \
+        description: "Reports a member that is out of order compared with the member before it, in the \
+                  order of the `element_order` option: the kind (fields, constructors, finalizers, \
+                  delegates, events, enums, interfaces, properties, indexers, operators, methods, \
+                  structs, classes; in a namespace or file: namespaces, delegates, enums, interfaces, \
                   structs, classes), the access (public, internal, protected internal, protected, \
-                  private protected, private), constants before other fields, static before \
-                  instance members, readonly fields before the others. A trait only counts \
-                  between members that agree on the traits listed before it. No fix: moving \
-                  members would have to take their comments and directives along.",
+                  private protected, private), constants before other fields, static before instance \
+                  members, readonly fields before the others. A trait counts only between members that \
+                  agree on the traits listed before it. No fix: moving members would have to take \
+                  their comments and directives along.",
+        why: "A fixed order lets a reader find a member without reading the class: fields at the \
+                  top, constructors next, then the rest by visibility. Different files of a project \
+                  then look the same.\n\
+                  To fix, move the member to its place.",
         example: "class A {\n  void F() { }\n  int x;   // fields come first\n}",
         options: [OptionDecl {
             name: "element_order",
@@ -479,8 +483,12 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "`get` goes before `set` or `init`, and `add` before `remove`. The fix swaps \
-                  the two accessors (not offered when a comment stands between or in them).",
+        description: "Reports a property or event whose accessors are in the wrong order: `get` goes \
+                  before `set` or `init`, and `add` before `remove`. The fix swaps the two accessors; \
+                  it is not offered when a comment stands between them or inside them.",
+        why: "Readers expect to meet the reading accessor first and the writing one second. One \
+                  order in all properties makes a file quick to scan and makes the odd one out stand \
+                  out.",
         example: "int P { set { } get { return 1; } }   // get first",
         kinds: &[
             kind::PROPERTY_DECLARATION,

@@ -256,10 +256,14 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "A property summary starts with \"Gets\", \"Sets\" or \"Gets or sets\" (\"Gets a value \
-                  indicating whether\" and so on for `bool`), as the property's accessors reachable from outside \
-                  the type say. The type is read from the declaration (`bool`, `Boolean`, `System.Boolean`). \
-                  The fix replaces the start of the text and lower-cases what follows.",
+        description: "Reports a property summary that does not start with \"Gets\", \"Sets\" or \"Gets or sets\" \
+                  as the accessors that are reachable from outside the type say; for `bool` properties \
+                  \"Gets a value indicating whether\" and the like. The type is read from the \
+                  declaration (`bool`, `Boolean`, `System.Boolean`). The fix replaces the start of the \
+                  text and lower-cases what follows, and is unsafe.",
+        why: "A summary that says \"Gets or sets\" for a property that can only be read promises \
+                  something the caller cannot do. The first words are a contract that tools and \
+                  readers rely on.",
         example: "/// <summary>The count.</summary>\npublic int Count { get; set; }   // Gets or sets the count.",
         kinds: DOC_KINDS,
     }
@@ -275,9 +279,13 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "A property summary says \"Gets or sets\" while one of the accessors is not reachable \
-                  from outside the type (`private set`, `internal get` on a public property). The fix \
-                  replaces the start of the text with the one that matches the visible accessor.",
+        description: "Reports a property summary that says \"Gets or sets\" while one of the accessors is \
+                  not reachable from outside the type (`private set`, `internal get` on a public \
+                  property). The fix replaces the start of the text with the one that matches the \
+                  visible accessor and is unsafe.",
+        why: "The documentation is for the callers of the property, and a caller outside the type \
+                  cannot use the restricted accessor, so the summary should describe only what is \
+                  possible.",
         example: "/// <summary>Gets or sets the count.</summary>\npublic int Count { get; private set; }   // Gets the count.",
         kinds: DOC_KINDS,
     }
@@ -469,11 +477,16 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "The summary of a constructor starts with \"Initializes a new instance of the <see cref=\"T\"/> \
-                  class\" (struct), \"Initializes static members of the ...\" for a static constructor, and a \
-                  private constructor may say \"Prevents a default instance of the ... from being created\". The \
-                  `<see>` is compared with the name of the type. The fix puts the standard sentence before the \
-                  text.",
+        description: "Reports the summary of a constructor that does not start with the standard sentence: \
+                  \"Initializes a new instance of the `<see cref=\"T\"/>` class\" (or \"struct\"), \
+                  \"Initializes static members of the ...\" for a static constructor. A private \
+                  constructor may say \"Prevents a default instance of the ... from being created\". The \
+                  `<see>` is compared with the name of the type. The fix puts the standard sentence \
+                  before the text and is unsafe.",
+        why: "A constructor needs no description of what it does that every constructor does not \
+                  already say; the standard sentence gives the same first line to all of them, and the \
+                  text after it adds what is special about this one. Many documentation conventions \
+                  require it.",
         example: "/// <summary>Creates it.</summary>\npublic Foo() { }   // Initializes a new instance of the <see cref=\"Foo\"/> class.",
         kinds: DOC_KINDS,
     }
@@ -523,9 +536,12 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "The summary of a finalizer starts with \"Finalizes an instance of the <see cref=\"T\"/> \
-                  class.\". The `<see>` is compared with the name of the type. The fix puts the standard \
-                  sentence before the text.",
+        description: "Reports the summary of a finalizer that does not start with \"Finalizes an instance \
+                  of the `<see cref=\"T\"/>` class.\" The `<see>` is compared with the name of the type. \
+                  The fix puts the standard sentence before the text and is unsafe.",
+        why: "A finalizer is called by the runtime and not by code, so there is nothing to say \
+                  about how it is used. The standard sentence gives every finalizer the same first \
+                  line, and the text after it adds what the finalizer cleans up.",
         example: "/// <summary>Cleans up.</summary>\n~Foo() { }   // Finalizes an instance of the <see cref=\"Foo\"/> class.",
         kinds: DOC_KINDS,
     }

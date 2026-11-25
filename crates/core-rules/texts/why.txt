@@ -48,3 +48,32 @@ the two a use reaches depends on the order. It is usually a copy that should hav
 name.
 
 To fix, remove the repeat, or rename one of them.
+
+== redefines-builtin-id
+The name hides the built-in in that scope, so a later `len(x)` or `string(b)` calls the new thing
+or fails to compile far from the declaration. The code works until somebody needs the built-in in
+the same scope, and then the error is hard to understand.
+
+To fix, rename the declaration.
+
+== doc-param-missing
+The comment is what the IDE shows when the method is called and what the generated reference
+lists. A parameter that is not described leaves the caller to guess what it means, its unit,
+whether it may be null or empty, and what the method does with it.
+
+To fix, add the tag that documents the parameter.
+
+== missing-doc-comment
+Documentation of the public interface is what the users of a library read, in the IDE and in the
+generated reference. An element without a comment shows only its name and signature, and the
+caller has to read the code to learn what it does and what it expects.
+
+To fix, add a comment that says what the element is for.
+
+== naming-convention
+Names that follow one convention are predictable: a reader can guess the name of a thing, tell a
+type from a variable at a glance and search for them. A name in another style stands out as a
+mistake or as code from another project. The convention itself is a choice of the project, which
+is why the expression is an option.
+
+To fix, rename the declaration and its uses.

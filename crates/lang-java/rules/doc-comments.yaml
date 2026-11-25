@@ -3,10 +3,15 @@ family: doc-comment
 params:
   check: paragraph
 description: >-
-  The paragraphs of a Javadoc comment: a `<p>` tag stands right before the first word of its
-  paragraph (no space) and after an empty line, an empty line between paragraphs is followed by
-  `<p>`, and the comment does not start with `<p>` (Checkstyle JavadocParagraph). Text inside
-  `<pre>`, `<ul>` and the like, and after the first block tag, is left alone.
+  Reports Javadoc paragraphs that do not use `<p>` in the usual way: a `<p>` must stand right before
+  the first word of its paragraph (no space after it) and after an empty line, an empty line between
+  paragraphs must be followed by `<p>`, and the comment must not start with `<p>`. Text inside
+  `<pre>`, `<ul>` and the like, and after the first block tag, is not checked.
+why: >-
+  Javadoc ignores empty lines, so paragraphs not marked with `<p>` run together in the generated
+  page. A `<p>` that is misplaced adds an empty paragraph or starts a paragraph in the wrong place.
+
+  To fix, put `<p>` directly before the first word of each paragraph after the first.
 example: "/**\n * One.\n * <p> Two.\n */\nclass A {}"
 severity: off
 category: style
@@ -16,9 +21,15 @@ family: doc-comment
 params:
   check: summary
 description: >-
-  A Javadoc comment starts with a summary: a first sentence that ends with a period (followed by
-  a blank or the end of the text) and does not start with a forbidden fragment (Checkstyle
-  SummaryJavadoc). A comment of `{@inheritDoc}` or `{@return ...}` needs none.
+  Reports a Javadoc comment that does not start with a summary: the first sentence must end with a
+  period followed by a blank or the end of the text, and must not start with a fragment that matches
+  the `forbidden_fragments` option. A comment that is `{@inheritDoc}` or `{@return ...}` needs no
+  summary.
+why: >-
+  The first sentence is what the generated index and the IDE hover show, so a comment that does not
+  start with a complete sentence gives a poor summary or one cut at the wrong place.
+
+  To fix, begin the comment with a sentence that ends with a period.
 example: "/** no period */\nclass A {}"
 severity: off
 category: style
@@ -30,8 +41,14 @@ family: doc-comment
 params:
   check: asterisk
 description: >-
-  A line of a Javadoc comment after the first starts with an asterisk (Checkstyle
-  JavadocMissingLeadingAsterisk). Empty lines are left alone.
+  Reports a line of a Javadoc comment, after the first, that does not start with an asterisk. Empty
+  lines are not reported.
+why: >-
+  Javadoc strips the leading `*` of each line, so a line without one is kept with its indentation,
+  and the comment renders differently from how it reads in the source. The asterisks also show where
+  the comment ends.
+
+  To fix, start the line with `*`.
 example: "/**\n   text\n */\nclass A {}"
 severity: off
 category: style
@@ -41,9 +58,14 @@ family: doc-comment
 params:
   check: tag-indent
 description: >-
-  A line that continues a block tag (`@param x`) is indented by at least `indent` blanks after
-  the asterisk (Checkstyle JavadocTagContinuationIndentation: its offset of 4 is 5 blanks here).
-  Lines that start HTML and lines inside `<pre>` and the like are left alone.
+  Reports a line that continues a block tag (`@param x`) and is indented by fewer than `indent`
+  blanks after the asterisk (5 by default). Lines that start HTML and lines inside `<pre>` and the
+  like are not reported.
+why: >-
+  The indent shows that a line belongs to the tag above it: without it a long `@param` description
+  reads as a paragraph of the comment.
+
+  To fix, indent the continuation lines.
 example: "/**\n * @param x a\n * b\n */\nclass A {}"
 severity: off
 category: style

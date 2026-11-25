@@ -17,7 +17,11 @@ id: redefines-builtin-id
 family: scope
 params: { check: redefines-builtin }
 message: "redefinition of the built-in identifier `{name}`"
-description: "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported."
+description: >-
+  Reports a variable, constant, function, parameter, named result or type parameter that has the
+  name of a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...); a name on the left
+  of an assignment counts too. A method and a receiver are not reported. The options `allow`,
+  `kinds`, `except_parents` and `assigned_by` change what is checked.
 example: "var len = 1"
 severity: off
 category: suspicious

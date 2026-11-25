@@ -1,7 +1,13 @@
 id: array-type-style
 message: 'write the array brackets after the type: `int[] a`, not `int a[]`'
 description: >-
-  A declarator or parameter with C-style brackets after the name (Checkstyle ArrayTypeStyle).
+  Reports a variable or parameter that puts the array brackets after the name (`int a[]`).
+why: >-
+  In Java the brackets are part of the type, and `int[] a` says it at the start. The C form is
+  allowed for compatibility and makes the type hard to read, and `int[] a, b[]` declares two
+  different types in one line.
+
+  To fix, write the brackets after the type: `int[] a`.
 example: 'int a[];'
 severity: off
 category: style

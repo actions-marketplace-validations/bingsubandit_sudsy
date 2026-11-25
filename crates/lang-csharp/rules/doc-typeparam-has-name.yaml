@@ -2,7 +2,14 @@ id: doc-typeparam-has-name
 family: doc-element
 params: { check: name, element: typeparam, scope: generic, skip-inheritdoc: true, report: identifier }
 message: "the <typeparam> should declare the type parameter name"
-description: "A `<typeparam>` without a `name` attribute, or with an empty one, in the documentation of a generic class, struct, interface, method or delegate. No fix."
+description: >-
+  Reports a `<typeparam>` without a `name` attribute, or with an empty one, in the documentation of
+  a generic class, struct, interface, method or delegate. No fix.
+why: >-
+  The `name` connects the text to a type parameter. Without it the tag is not shown with its
+  parameter.
+
+  To fix, add `name="T"`.
 example: "/// <typeparam>The item.</typeparam>   // write <typeparam name=\"T\">\nvoid Add<T>() { }"
 severity: off
 category: style

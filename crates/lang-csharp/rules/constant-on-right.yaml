@@ -3,7 +3,16 @@ family: simplify
 params: { check: constant-first, calls: nameof, owners: "byte sbyte short ushort int uint long ulong char float double decimal", members: "MaxValue MinValue" }
 fix-kind: safe
 message: "put the constant on the right side of the comparison"
-description: "A comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x > 1`. Without the type layer a constant is a literal, `nameof`, `int.MaxValue`-style member or an expression of those; a named constant on the left is not recognised."
+description: >-
+  Reports a comparison with the constant on the left: `null == x` is `x == null`, `1 < x` is `x >
+  1`. Without the type layer a constant is a literal, `nameof`, a member such as `int.MaxValue`, or
+  an expression made of those; a named constant on the left is not recognised.
+why: >-
+  "Yoda" conditions came from C, where `x = null` by mistake compiled. In C# an assignment in a
+  condition does not compile for a non-boolean, so the form has no protection to give, and it reads
+  backwards: `x == null` says what is tested first.
+
+  To fix, swap the sides and mirror the operator. The fix is safe and does it.
 example: "if (null == x) { }   // write: if (x == null) { }"
 severity: off
 category: style
