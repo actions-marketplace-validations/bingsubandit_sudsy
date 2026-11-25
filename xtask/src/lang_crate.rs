@@ -178,7 +178,7 @@ fn format_rows(name: &str, v: &Value) -> String {
     };
     let flag = |key: &str| f.get(key).and_then(Value::as_bool).unwrap_or(false);
     format!(
-        "static FORMAT: core_format::rules::LazyRules = core_format::rules::LazyRules::new(|| grammars::{}.get(), include_str!(\"../format.rules\")){}.facts(core_format::rules::RuleFacts {{ exact_end: &{:?}, keep_comment_gap: {}, ..core_format::rules::RuleFacts::DEFAULT }});\n\n",
+        "static FORMAT: core_format::rules::LazyRules = core_format::rules::LazyRules::new(|| grammars::{}.get(), include_str!(\"../format.rules\")){}.facts(core_format::rules::RuleFacts {{ exact_end: &{:?}, keep_comment_gap: {}, ..core_format::rules::RuleFacts::DEFAULT }}){}{};\n\n",
         name.to_uppercase(),
         if flag("source-indent") {
             ".source_indent()"
@@ -187,6 +187,52 @@ fn format_rows(name: &str, v: &Value) -> String {
         },
         list(f, "exact-end"),
         flag("keep-comment-gap"),
+        blanks(f),
+        indents(f),
+    )
+}
+
+/// `blanks` of `format-rows`: the `.blanks(..)` builder, or nothing.
+fn blanks(f: &Value) -> String {
+    let Some(b) = f.get("blanks") else {
+        return String::new();
+    };
+    let field = |name: &str, key: &str| format!("{name}: &{:?}, ", list(b, key));
+    format!(
+        ".blanks(core_format::stream_blank::BlankFacts {{ {}{}{}{}{}{}{}{}{}{} }})",
+        field("statements", "statements"),
+        field("guard", "guard"),
+        field("jump", "jump"),
+        field("jump_words", "jump-words"),
+        field("branch", "branch"),
+        field("directives", "directives"),
+        field("modifiers", "modifiers"),
+        field("magic", "magic"),
+        field("body", "body"),
+        field("defs", "defs"),
+    )
+}
+
+/// `indents` of `format-rows`: the `.indents(..)` builder, or nothing.
+fn indents(f: &Value) -> String {
+    let Some(b) = f.get("indents") else {
+        return String::new();
+    };
+    let field = |name: &str, key: &str| format!("{name}: &{:?}, ", list(b, key));
+    format!(
+        ".indents(core_format::stream_indent::IndentFacts {{ {}{}{}{}{}{}{}{}{}{}{}{} }})",
+        field("statements", "statements"),
+        field("frames", "frames"),
+        field("operations", "operations"),
+        field("conditions", "conditions"),
+        field("opaque", "opaque"),
+        field("pairs", "pairs"),
+        field("chains", "chains"),
+        field("leaders", "leaders"),
+        field("attached", "attached"),
+        field("keyword_frames", "keyword-frames"),
+        field("branches", "branches"),
+        field("closers", "closers"),
     )
 }
 

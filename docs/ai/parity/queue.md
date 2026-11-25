@@ -547,7 +547,7 @@ Lint: target 0.4% (40 of 11111, 11071 missed, measured on 66718389); rules by mi
 
 ## rubocop
 
-Format: unclassified 5561 of 5561 differing files (100%).
+Format: unclassified 3350 of 3358 differing files (100%).
 Lint: target 96.2% (7717 of 8022, 305 missed, measured on 7514c1f3); rules by missed findings:
 1. `Lint/UselessAssignment` (168 missed)
 2. `Lint/AssignmentInCondition` (14 missed)

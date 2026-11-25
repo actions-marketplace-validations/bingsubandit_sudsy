@@ -164,6 +164,8 @@ concept single-namespace-per-file # users: csharp
 concept single-title # users: markdown
 concept statement-blank-lines # users: cmake (shared)
 concept statement-indent # users: cmake (shared)
+concept stream-blank-lines # users: ruby (shared)
+concept stream-block-indent # users: ruby (shared)
 concept style-declaration-checks # users: css
 concept suppression-justification # users: csharp
 concept tab-keep # users: markdown (shared)

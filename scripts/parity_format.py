@@ -362,6 +362,14 @@ def upstream_batch(config, prefix, found, work):
     return {n: None if c in rejected else (folder / c).read_bytes().decode("utf-8") for n, c in names.items()}
 
 
+def regression_counts(found, results):
+    """Per group, the files the tool leaves alone that Sudsy changes: a formatter that is right today may only get better."""
+    changed = Counter()
+    for (_, path, group, _), (theirs, ours, _, _) in zip(found, results):
+        changed[group or "fixtures"] += theirs is not None and ours is not None and theirs == path.read_bytes().decode("utf-8") != ours
+    return changed
+
+
 def check_reference(spec, parity, known, rejected):
     """The reference parser of a language (docs/ai/design/parity-target.md: `invalid-input` for a file Sudsy rejects needs the
     language's own parser to reject it too): `spec` is `{npm, version, script}`, a Node script that exits 1 on a syntax error.
@@ -733,9 +741,7 @@ def main():
             note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"
             print(f"second format {group}: {now} files change ({note}: {top})")
             bad += now > top
-        changed = Counter()  # the tool leaves the file alone, Sudsy changes it: a formatter that is right today may only get better
-        for (_, path, group, _), (theirs, ours, _, _) in zip(found, results):
-            changed[group or "fixtures"] += theirs is not None and ours is not None and theirs == path.read_bytes().decode("utf-8") != ours
+        changed = regression_counts(found, results)
         for group in sorted(known.regressions):
             now, top = changed[group], known.regressions[group]
             note = "ABOVE the maximum" if now > top else f"lower the maximum in differences.yaml to {now}" if now < top else "at the maximum"

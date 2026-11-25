@@ -1,6 +1,7 @@
 """Tests of the parity runner (`scripts/parity.sh --test`): pins, filter counts and the `fix` command, on throwaway fixtures."""
 import contextlib
 import io
+import shutil
 import stat
 import tempfile
 import unittest
@@ -609,6 +610,64 @@ class LintLanding(unittest.TestCase):
         few, filled = pld.select_lint(states, {"r0.txt"})
         self.assertTrue(filled)
         self.assertIn("r0.txt", few)
+
+
+class BatchRun(unittest.TestCase):
+    """`input: batch` of a slow tool: config `files`, the `cache` of its output and the `regressions` count."""
+
+    def config(self, tool, **more):
+        return {"catalog": "unit-batch", "install": {"exe": tool}, "command": ["{exe}"], "args": ["a.txt"], **more}
+
+    def tool(self, tmp, body):
+        prefix = Path(tmp) / "prefix"
+        prefix.mkdir()
+        exe = prefix / "tool"
+        exe.write_text("#!/bin/sh\n" + body, encoding="utf-8")
+        exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+        fixture = Path(tmp) / "a.txt"
+        fixture.write_text("in\n", encoding="utf-8")
+        return prefix, [("a.txt", fixture, None, None)]
+
+    def test_config_files_are_written_next_to_the_copies_with_the_prefix(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix, found = self.tool(tmp, 'cat conf.txt > a.txt\n')
+            work = Path(tmp) / "work"
+            work.mkdir()
+            out = pf.upstream_batch(self.config("tool", files={"conf.txt": "root {prefix}\n"}), prefix, found, work)
+            self.assertEqual(out["a.txt"], f"root {prefix}\n")
+
+    def test_cache_keeps_the_changed_files_and_is_keyed_by_the_fixture_contents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix, found = self.tool(tmp, 'echo changed > a.txt\necho run >> "$COUNT"\n')
+            count = Path(tmp) / "count"
+            config = self.config("tool", cache=True)
+            kept = []
+            try:
+                with unittest.mock.patch.dict("os.environ", {"COUNT": str(count)}):
+                    for n in range(2):
+                        work = Path(tmp) / f"work{n}"
+                        work.mkdir()
+                        self.assertEqual(pf.upstream_batch(config, prefix, found, work)["a.txt"], "changed\n")
+                    self.assertEqual(count.read_text().count("run"), 1)  # the second call came from the cache
+                    found[0][1].write_text("other\n", encoding="utf-8")
+                    work = Path(tmp) / "work2"
+                    work.mkdir()
+                    pf.upstream_batch(config, prefix, found, work)
+                    self.assertEqual(count.read_text().count("run"), 2)  # other contents, other key
+            finally:
+                kept = list((pf.ROOT / ".cargo/tmp/rb").glob("unit-batch-*"))
+                for d in kept:
+                    shutil.rmtree(d)
+            self.assertEqual(len(kept), 2)
+
+    def test_regressions_count_the_files_the_tool_leaves_alone_that_sudsy_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            a, b, c = (Path(tmp) / n for n in "abc")
+            for p in (a, b, c):
+                p.write_text("x\n", encoding="utf-8")
+            found = [("a", a, "g", None), ("b", b, "g", None), ("c", c, None, None)]
+            results = [("x\n", "y\n", None, None), ("z\n", "y\n", None, None), ("x\n", "x\n", None, None)]
+            self.assertEqual(dict(pf.regression_counts(found, results)), {"g": 1, "fixtures": 0})
 
 
 if __name__ == "__main__":

@@ -2,7 +2,34 @@ vscode-languages: [ruby]
 extensions: [rb, rake, gemspec, ru]
 file-names: [Gemfile, Rakefile, Guardfile, Capfile]
 formatter: FORMAT
-format-rows: {source-indent: true, exact-end: [Data], keep-comment-gap: true}
+format-rows:
+  source-indent: true
+  exact-end: [Data]
+  keep-comment-gap: true
+  blanks:
+    statements: [Statements]
+    guard: [If, Unless]
+    branch: [Else, If, Unless]
+    directives: ["rubocop:"]
+    jump: [Return, Break, Next, Redo, Retry]
+    jump-words: [raise, fail, throw]
+    modifiers: [private, protected, public, module_function]
+    magic: [frozen_string_literal, encoding, coding, warn_indent, shareable_constant_value]
+    body: [Class, Module, Def, Block]
+    defs: [Def, Class, Module]
+  indents:
+    statements: [Statements]
+    frames: [Def, Class, Module, SingletonClass, Block, Lambda, Begin]
+    attached: [Block]
+    leaders: [Dot]
+    chains: [Call]
+    pairs: [Assoc]
+    operations: [And, Or]
+    conditions: [If, Unless, While, Until]
+    opaque: [Arguments, Array, Parentheses]
+    keyword-frames: [If, Unless, While, Until, Case, When, Else, Rescue, Ensure]
+    branches: [Else, Rescue, Ensure, When]
+    closers: [end, "}"]
 parse: adapter::parse_file
 options:
   - indent_size: 2

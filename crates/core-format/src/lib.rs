@@ -45,6 +45,8 @@ pub mod seq;
 pub mod shapes;
 pub mod spacing;
 pub mod stream;
+pub mod stream_blank;
+pub mod stream_indent;
 pub mod tabs;
 pub mod tag_layout;
 pub mod testing;

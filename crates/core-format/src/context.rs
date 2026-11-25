@@ -586,6 +586,21 @@ impl<'a> FormatCtx<'a> {
     }
 
     pub fn first_token(&self, node: &SyntaxNode) -> Option<SyntaxToken> {
+        // The first token of the node, after the trivia in front of it, is nearly always the answer.
+        let range = node.text_range();
+        let mut cur = node.first_token();
+        let found = cur.is_some();
+        while let Some(t) = cur {
+            if !self.grammar.is_trivia(t.kind()) && !self.in_trivia_node(&t, node) {
+                return Some(t);
+            }
+            cur = t
+                .next_token()
+                .filter(|n| range.contains_range(n.text_range()));
+        }
+        if found {
+            return None;
+        }
         let mut walk = node.preorder_with_tokens();
         while let Some(event) = walk.next() {
             match event {

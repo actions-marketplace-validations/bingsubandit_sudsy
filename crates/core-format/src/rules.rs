@@ -341,6 +341,8 @@ pub struct LazyRules {
     signatures: &'static [core_syntax::signature::Signature],
     option_kinds: OptionKinds,
     source_indent: bool,
+    blank_facts: crate::stream_blank::BlankFacts,
+    indent_facts: crate::stream_indent::IndentFacts,
     cell: OnceLock<RuleFormatter>,
 }
 
@@ -373,6 +375,8 @@ impl LazyRules {
             signatures: &[],
             option_kinds: &[],
             source_indent: false,
+            blank_facts: crate::stream_blank::BlankFacts::NONE,
+            indent_facts: crate::stream_indent::IndentFacts::NONE,
             cell: OnceLock::new(),
         }
     }
@@ -404,6 +408,18 @@ impl LazyRules {
         self
     }
 
+    /// The kinds and words of the blank lines the source may lack ([`crate::stream_blank`]).
+    pub const fn blanks(mut self, facts: crate::stream_blank::BlankFacts) -> LazyRules {
+        self.blank_facts = facts;
+        self
+    }
+
+    /// The block structure of the language ([`crate::stream_indent`]).
+    pub const fn indents(mut self, facts: crate::stream_indent::IndentFacts) -> LazyRules {
+        self.indent_facts = facts;
+        self
+    }
+
     /// The language's [`RuleFacts`].
     pub const fn facts(mut self, facts: RuleFacts) -> LazyRules {
         self.facts = facts;
@@ -419,6 +435,10 @@ impl LazyRules {
                 self.option_kinds,
             );
             rules.stream = std::mem::take(&mut rules.stream).source_indent(self.source_indent);
+            rules.stream.blanks =
+                crate::stream_blank::Blanks::new((self.grammar)(), self.blank_facts);
+            rules.stream.indents =
+                crate::stream_indent::Indents::new((self.grammar)(), self.indent_facts);
             rules.file.blocks = self.blocks;
             rules.file.signatures = self.signatures;
             rules

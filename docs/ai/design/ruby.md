@@ -31,9 +31,9 @@ A line-preserving formatter in `core-format`, not a printer: every source line s
 | Need | Built on | Second language |
 |---|---|---|
 | line loop: lines of tokens, protected lines (multi-line literals, heredoc bodies, `__END__`, `=begin`) | extracted from HCL and PowerShell | HCL, PowerShell (moved onto it) |
-| indentation by nodes that end in a keyword (`def`..`end`, `do`..`end`, `if`..`else`..`end`; modifier forms open nothing) | `indent-frames` | none yet: kind sets as a plain option until one needs it |
+| indentation by nodes that end in a keyword (`def`..`end`, `do`..`end`, `if`..`else`..`end`; modifier forms open nothing), chains and operands | `stream-block-indent` (`core_format::stream_indent`) | none yet: kind sets as a plain option until one needs it |
 | continuation lines: under the first `.`, under the operand, one step from the statement; arguments, hash pairs and arrays aligned with the first element or one step from the line | `indent-frames`, `column-alignment` | check clang-format `AlignOperands`, ktlint chains; if none uses it: shared Rust with an option |
-| blank lines: after a guard clause, after leading magic comments, around an access modifier, none at the edges of a body | `blank-lines-between-members` | PHP (`blank_line_before_statement`) |
+| blank lines: after a guard clause, after leading magic comments, around an access modifier, none at the edges of a body | `stream-blank-lines` (`core_format::stream_blank`) | none: PHP's `blank_line_before_statement` (a blank before a jump) and `blank_line_after_opening_tag` are rules of its tree printer, not of the token stream, and share no fact with these |
 | token spacing, extra blanks kept only where they align with an adjacent line | `token-spacing-rows` | already shared |
 | `<<-` and `<<` to `<<~` with the body re-indented, closing label | `raw-string-reindent` | PHP (`heredoc_indentation`) |
 | `#x` to `# x` with the `#!`, `#:` exceptions | `token-rewrite-rows` | already shared |

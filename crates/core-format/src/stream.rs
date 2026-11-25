@@ -61,6 +61,8 @@ pub struct StreamRules {
     /// Each line keeps the indentation it has, and the language is written by its rows alone
     /// ([`format`]): the fact `source_indent` of the language's rules.
     pub(crate) source_indent: bool,
+    pub(crate) blanks: crate::stream_blank::Blanks,
+    pub(crate) indents: crate::stream_indent::Indents,
 }
 
 impl StreamRules {
@@ -76,6 +78,8 @@ impl StreamRules {
             brackets: Brackets::parse(g, text),
             continuation: value("continuation").and_then(|v| v.chars().next()),
             source_indent: false,
+            blanks: Default::default(),
+            indents: Default::default(),
         }
     }
 }
@@ -222,12 +226,30 @@ pub fn emit(
     };
     let blank_lines = |n: usize| (0..n.min(max_blank)).map(|_| doc::hardline());
     let eof = g.kind_by_name("Eof");
+    let leads = if rules.source_indent {
+        crate::stream_indent::Leads::new(cx, &tks)
+    } else {
+        Default::default()
+    };
+    let shifts = if rules.source_indent {
+        let width = cx.options.int(core_config::shared::INDENT_SIZE) as usize;
+        rules.indents.plan(cx, &tks, &leads, width)
+    } else {
+        Vec::new()
+    };
+    let shifted = |gap: &str, i: usize| -> String {
+        match shifts.get(i) {
+            Some(&d) if d != 0 => " ".repeat((gap.len() as isize + d).max(0) as usize),
+            _ => gap.to_string(),
+        }
+    };
 
     for i in 0..tks.len() {
         let is_eof = Some(tks[i].kind) == eof;
         if is_eof && tks[i].leading.is_empty() {
-            if i == 0 && rules.source_indent {
-                cur.extend((0..file_start_breaks(g, &tks[i].tok)).map(|_| doc::hardline()));
+            if i == 0 && rules.source_indent && file_start_breaks(g, &tks[i].tok) > 0 {
+                // A file of only blank lines keeps one line break, which the end trim leaves.
+                cur.push(doc::verbatim("\n"));
             }
             continue;
         }
@@ -250,9 +272,32 @@ pub fn emit(
             } else {
                 0
             };
+            let (want, closes) = if rules.source_indent {
+                (
+                    rules.blanks.wanted(cx, &tks, leads.of(i)),
+                    rules.blanks.closes(cx, &tks, i),
+                )
+            } else {
+                (None, false)
+            };
+            if closes && tks[i].leading.is_empty() {
+                blank = 0;
+            }
+            // Directives of a tool right after the code in front stay with it.
+            let directive = blank == 0
+                && (tks[i].leading.iter())
+                    .take_while(|c| rules.blanks.is_directive(c))
+                    .last()
+                    .is_some_and(|c| c.breaks_after > 1);
+            match want {
+                Some(true) if directive => {}
+                Some(true) => blank = blank.max(1),
+                Some(false) => blank = 0,
+                None => {}
+            }
             let leading = std::mem::take(&mut tks[i].leading);
             let mut inline: Vec<Doc> = Vec::new();
-            for c in &leading {
+            for (j, c) in leading.iter().enumerate() {
                 if c.kind == comments::CommentKind::Block && c.breaks_after == 0 {
                     inline.push(crate::context::comment_doc_in(c, &cx.comment_style));
                     inline.push(doc::lit(" "));
@@ -261,7 +306,7 @@ pub fn emit(
                 let mut parts: Vec<Doc> = blank_lines(blank).collect();
                 parts.push(doc::hardline());
                 if rules.source_indent {
-                    parts.push(doc::text(source_indent(c)));
+                    parts.push(doc::text(shifted(&source_indent(c), i)));
                 }
                 parts.push(crate::context::comment_doc_in(c, &cx.comment_style));
                 let depth = if rules.source_indent {
@@ -271,6 +316,9 @@ pub fn emit(
                 };
                 lines.push(indented(depth, doc::concat(parts)));
                 blank = c.breaks_after.saturating_sub(1);
+                if closes && j + 1 == leading.len() {
+                    blank = 0;
+                }
             }
             if brackets.is_close(tks[i].kind) {
                 frames.close(1);
@@ -283,7 +331,7 @@ pub fn emit(
             cur.extend(blank_lines(blank));
             cur.push(doc::hardline());
             if rules.source_indent {
-                cur.push(doc::text(tks[i].gap.clone()));
+                cur.push(doc::text(shifted(&tks[i].gap, i)));
             }
             cur.extend(inline);
         } else if i > 0 {
@@ -300,13 +348,17 @@ pub fn emit(
                 cur.extend((0..file_start_breaks(g, &tks[i].tok)).map(|_| doc::hardline()));
             }
             let leading = std::mem::take(&mut tks[i].leading);
-            for c in &leading {
+            for (j, c) in leading.iter().enumerate() {
                 cur.push(crate::context::comment_doc_in(c, &cx.comment_style));
                 cur.push(doc::hardline());
-                cur.extend(blank_lines(c.breaks_after.saturating_sub(1)));
+                // A blank line closes the magic comments at the top of the file.
+                let last_magic = rules.blanks.is_magic(c)
+                    && leading.get(j + 1).is_none_or(|n| !rules.blanks.is_magic(n));
+                let blank = c.breaks_after.saturating_sub(1);
+                cur.extend(blank_lines(if last_magic { blank.max(1) } else { blank }));
             }
             if rules.source_indent {
-                cur.push(doc::text(tks[i].gap.clone()));
+                cur.push(doc::text(shifted(&tks[i].gap, i)));
             }
         }
         if !is_eof {
