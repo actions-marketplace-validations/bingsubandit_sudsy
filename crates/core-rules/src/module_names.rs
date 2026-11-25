@@ -134,6 +134,7 @@ macro_rules! names_rule {
                     static META: $crate::RuleMeta = $crate::RuleMeta {
                         id: $id,
                         category: $crate::Category::$category,
+                        why: "",
                         description: $description,
                         example: $example,
                         default_level: $crate::rule::Level::$level,

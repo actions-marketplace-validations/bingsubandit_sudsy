@@ -67,6 +67,7 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [development/parity.md](development/parity.md) | `parity.sh`: differential tests against upstream tools |
 | [development/testing.md](development/testing.md) | Test layers, corpora, conformance |
 | [development/grammar-forks.md](development/grammar-forks.md) | Forked tree-sitter grammars: layout, `grammar-path`, `scripts/grammar-regen.sh` |
+| [development/rule-texts.md](development/rule-texts.md) | The `description` and `why` texts of a rule: where they live, how to write them, three examples |
 | [development/site.md](development/site.md) | The public rule documentation site: build, data sources, deploy switch |
 | [development/ci-release.md](development/ci-release.md) | CI jobs, release process, placeholders |
 | [roadmap.md](roadmap.md) | Deliberately not built or deferred |

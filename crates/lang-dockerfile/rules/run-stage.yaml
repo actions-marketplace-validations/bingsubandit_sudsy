@@ -3,7 +3,16 @@ family: consecutive-run
 params: {}
 message: 'merge this RUN with the one before it: each RUN adds a layer'
 description: >-
-  A RUN that is a single command, directly after another single-command RUN with the same flags (a comment in between does not count).
+  Reports a `RUN` that could be merged into the `RUN` before it. Both are one simple command, with
+  the same leading options (`--mount=...`). A comment between the two does not break the pair; any
+  other instruction does. A `RUN` with `&&`, `;` or a pipe is neither reported nor part of a pair.
+why: >-
+  Every `RUN` creates an image layer. Files that one `RUN` writes and the next one deletes (a
+  download, a package cache) still sit in the earlier layer and count toward the image size; joined
+  with `&&` in one `RUN`, the cleanup really removes them.
+
+  The price is a coarser build cache: when any part of the joined `RUN` changes, all of it runs
+  again.
 example: 'RUN a   RUN b'
 severity: off
 category: performance
@@ -13,7 +22,18 @@ family: run-pipe-shell
 params: { option: 'pipefail' }
 message: 'set the SHELL option -o pipefail before a RUN with a pipe: a failing command in the pipe is hidden'
 description: >-
-  A RUN with a pipe in a stage whose SHELL instruction does not set pipefail.
+  Reports a `RUN` with a pipe (`a | b`) in a stage whose `SHELL` does not set `pipefail`. No earlier
+  `SHELL` instruction of the stage has a word that contains `pipefail` (`SHELL ["/bin/bash", "-o",
+  "pipefail", "-c"]`). A `set -o pipefail` inside the `RUN` itself does not count. A new `FROM`
+  starts the check again.
+why: >-
+  The exit status of a pipe is the one of its last command. `curl -f https://example.com/x | tar xz`
+  succeeds even when curl fails and tar gets nothing, so the build goes on with a missing or broken
+  file and the error shows up much later. With `pipefail` any failing command of the pipe fails the
+  `RUN`.
+
+  To fix, set the option for the stage with `SHELL ["/bin/bash", "-o", "pipefail", "-c"]`; the
+  default `/bin/sh` of some images (Debian's dash) does not have the option.
 example: 'RUN a | b'
 severity: warn
 category: suspicious

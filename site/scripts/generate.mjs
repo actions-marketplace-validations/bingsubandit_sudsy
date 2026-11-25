@@ -24,6 +24,8 @@ const put = (file, front, body, twinBody = body) => {
 };
 // Raw HTML in a description must not open a tag: escape `<` outside code spans; one line for table cells.
 const md = (t) => t.split(/(`[^`]*`)/).map((s, i) => (i % 2 ? s : s.replace(/</g, '&lt;'))).join('').replace(/\s+/g, ' ').trim();
+// A rule text: paragraphs (separated by a blank line) kept, each on one line.
+const prose = (t) => t.split(/\n{2,}/).map(md).filter(Boolean).join('\n\n');
 const cell = (t) => md(String(t)).replace(/\|/g, '\\|');
 const table = (head, rows) => `| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|\n${rows.map((r) => `| ${r.join(' | ')} |`).join('\n')}`;
 const code = (lang, text) => '```' + lang + '\n' + text.replace(/\n$/, '') + '\n```';
@@ -130,19 +132,20 @@ for (const r of rules()) {
         return [t ? `[${u.tool}](${base}/compare/${t.tool}/)` : u.tool, u.url ? `[\`${u.id}\`](${u.url})` : `\`${u.id}\``,
           badge(u.partial ? 'partial' : 'covered', u.partial ? 'partial' : 'full'), ...(anyPartial ? [cell(u.note ?? '')] : [])];
       }));
-  const parts = [md(r.description).replace(/^/, '## What it does\n\n'), `<div class="example">\n\n${example(r.example, r.id)}\n\n</div>`, configuration(r), upstreamTable];
+  const why = r.why ? `## Why it matters\n\n${prose(r.why)}` : '';
+  const parts = [`## What it does\n\n${prose(r.description)}`, why, `<div class="example">\n\n${example(r.example, r.id)}\n\n</div>`, configuration(r), upstreamTable];
   const body = [pageHead(head), ...parts].filter(Boolean).join('\n\n');
   const plain = `Languages: ${r.languages.join(', ')}. Category: ${r.category}. Fix: ${r.fix ?? 'none'}. Default level: ${r.default_level}.`;
-  const twinBody = [md(r.description), plain, ...parts.slice(1)].filter(Boolean).join('\n\n');
+  const twinBody = [prose(r.description), why, plain, ...parts.slice(2)].filter(Boolean).join('\n\n');
   index.push({
     i: r.id, l: r.languages, c: r.category, f: r.fix ?? 'none', p: r.presets,
     u: r.upstream.map((u) => [u.tool, u.id, u.url ?? '']),
-    d: md(r.description).split(/(?<=\.)\s/)[0],
+    d: md(r.description.split('\n')[0]).split(/(?<=\.)\s/)[0],
   });
   const langs = r.languages.includes('all') ? 'all languages' : r.languages.map((l) => langName.get(l)?.name ?? l).join(', ');
   const like = [...new Set(r.upstream.map((u) => `${u.tool} ${u.id}`))].slice(0, 3);
   put(`rule-${r.id}.md`, {
-    title: r.id, slug: `rules/${r.id}`, description: md(r.description).slice(0, 160),
+    title: r.id, slug: `rules/${r.id}`, description: md(r.description.split(/\n{2,}/)[0]).split(/(?<=\.)\s/)[0].slice(0, 160),
     head: [{ tag: 'title', content: `${r.id}: ${langs} lint rule${like.length ? `, like ${like.join(', ')}` : ''} | Sudsy` }],
   }, body, twinBody);
 

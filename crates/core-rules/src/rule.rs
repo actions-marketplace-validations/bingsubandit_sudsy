@@ -24,6 +24,9 @@ pub struct RuleMeta {
     pub id: &'static str,
     pub category: Category,
     pub description: &'static str,
+    /// Why the rule exists: the harm it prevents or the convention it keeps. Empty while the
+    /// rule has none (the list in `docs/ai/rules/undescribed.txt` only shrinks).
+    pub why: &'static str,
     /// Code that triggers the rule and what it should look like instead, for `sudsy rules <id>`.
     pub example: &'static str,
     /// The level when the config does not mention the rule.
@@ -39,11 +42,31 @@ pub struct RuleMeta {
 }
 
 impl RuleMeta {
+    /// The first sentence of `description`, which stands alone: the rule list's column.
+    pub fn first_sentence(&self) -> &str {
+        let first = self.description.lines().next().unwrap_or("");
+        let end = first
+            .match_indices(". ")
+            .map(|(i, _)| i)
+            .find(|&i| !first[..i].ends_with('.'));
+        end.map_or(first, |i| &first[..=i])
+    }
+
+    /// What the editor, the schema and the SARIF table show: the first sentence of a rule that has
+    /// its `why`, the whole `description` of one that still has the older one-paragraph text.
+    pub fn summary(&self) -> &str {
+        if self.why.is_empty() {
+            self.description
+        } else {
+            self.first_sentence()
+        }
+    }
+
     /// The rule as the config's JSON Schema describes it.
     pub fn schema(&self) -> RuleSchema {
         RuleSchema {
             id: self.id.to_string(),
-            description: self.description.to_string(),
+            description: self.summary().to_string(),
             options: self
                 .options
                 .iter()

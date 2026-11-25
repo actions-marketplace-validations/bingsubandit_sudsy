@@ -23,6 +23,8 @@ ENTRYPOINT /run.sh
 ONBUILD CMD echo hi
 ONBUILD ONBUILD RUN x
 ^^^^^^^^^^^^^^^^^^^^^ no-nested-onbuild
+ONBUILD MAINTAINER x
+^^^^^^^^^^^^^^^^^^^^ no-nested-onbuild
 MAINTAINER a@b.c
 ^^^^^^^^^^^^^^^^ no-maintainer
 COPY --from=0 / /

@@ -26,6 +26,12 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             crate::rules::json(&rule_docs),
         ),
     ];
+    let baseline =
+        std::fs::read_to_string(xtask::repo_root().join("docs/ai/rules/undescribed.txt"));
+    out.push((
+        "docs/ai/rules/undescribed.txt".into(),
+        crate::rules::undescribed(&rule_docs, baseline.ok().as_deref())?,
+    ));
     for p in providers {
         let rel = format!("docs/ai/formatting/{}.md", p.language());
         // A dialect without a doc of its own (scss, less) is documented with its config base.

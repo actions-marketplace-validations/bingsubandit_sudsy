@@ -153,56 +153,56 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `no-self-assign` | c, cpp, csharp, java, js, php, python, ruby | suspicious | warn | none | A plain or logical assignment whose two sides are the same tokens, `a = a`, `a.b = a.b` or `@a \|\|= @a` (ESLint no-self-assign, RuboCop Lint/SelfAssignment). Options: `operators` (default `["=", "\|\|=", "&&=", "??="]`): The assignment operators that store the right side as it is. Equivalent: eslint no-self-assign (partial), rubocop Lint/SelfAssignment (partial). |
 | `no-self-compare` | c, cpp, csharp, java, js, kotlin, php, python, ruby | suspicious | warn | none | An equality or comparison whose two sides are the same tokens: the result never changes (ESLint no-self-compare, ruff PLR0124, Sonar S1764). `x != x` as an `isNaN` test is reported too. Equivalent: eslint no-self-compare. |
 | `unreachable-code` | c, cpp, csharp, java, js, kotlin, php, python, ruby | suspicious | warn | suggestion | A statement that can never run: after `return`, `throw`, `break` or `continue`, after an `if`/`else` or `try` that always jumps, or after a loop that never ends. Only the first statement of a run is reported. Where the language has a flow layer (C#) it also covers constant conditions and calls that do not return (`does_not_return` in `semantics:`). Hoisted declarations and empty statements are left out. Removing the statement is offered as an editor quick fix only, because unreachable code usually signals a bug. Options: `non_returning_calls` (default `true`): With a flow layer, treat the code after a call that never returns (`[DoesNotReturn]`, `does_not_return` in `semantics:`) as unreachable. A compiler does not, so turn this off to report exactly what it reports. Equivalent: eslint no-unreachable, Roslynator RCS1148. |
-| `apk-no-cache` | dockerfile | performance | off | none | apk add without --no-cache. Equivalent: hadolint DL3019. |
-| `apk-pin-versions` | dockerfile | suspicious | off | none | An apk add package without a version. Equivalent: hadolint DL3018. |
-| `apt-get-no-recommends` | dockerfile | performance | off | none | apt-get install that installs recommended packages. Equivalent: hadolint DL3015. |
-| `apt-get-pin-versions` | dockerfile | suspicious | off | none | An apt-get install package without a version. Equivalent: hadolint DL3008. |
-| `apt-get-yes` | dockerfile | correctness | warn | none | apt-get install without -y. Equivalent: hadolint DL3014. |
-| `copy-from-own-stage` | dockerfile | correctness | error | none | A `COPY --from` that names the stage it is in. Equivalent: hadolint DL3023. |
-| `copy-from-unknown-stage` | dockerfile | correctness | warn | none | A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`). Equivalent: hadolint DL3022. |
-| `copy-instead-of-add` | dockerfile | suspicious | off | none | An ADD with no URL and no archive (`.tar`, `.gz`, `.tgz`, `.xz` and the like) among its arguments, which ADD would extract or download. Equivalent: hadolint DL3020 (partial). |
-| `copy-many-needs-directory` | dockerfile | correctness | error | none | A COPY with more than one source whose last argument does not end with `/`. Equivalent: hadolint DL3021 (partial). |
-| `delete-apt-lists` | dockerfile | performance | off | none | A RUN that runs apt-get update (or apt update) and does not remove /var/lib/apt/lists, which stays in the image layer. A cache mount on that directory is fine. Equivalent: hadolint DL3009 (partial). |
-| `dnf-clean` | dockerfile | performance | off | none | dnf install with no dnf clean all after it. Equivalent: hadolint DL3040. |
-| `dnf-yes` | dockerfile | correctness | warn | none | dnf install without -y. Equivalent: hadolint DL3038. |
-| `duplicate-stage-name` | dockerfile | correctness | error | none | Two FROM instructions name their stage alike. Equivalent: hadolint DL3024. |
-| `expose-port-range` | dockerfile | correctness | error | none | An EXPOSE with a port above 65535. Equivalent: hadolint DL3011. |
-| `from-first` | dockerfile | correctness | error | none | An instruction other than ARG before the first FROM. Equivalent: hadolint DL3061. |
-| `gem-pin-versions` | dockerfile | suspicious | off | none | A gem install gem without a version. Equivalent: hadolint DL3028 (partial). |
-| `go-pin-versions` | dockerfile | suspicious | off | none | A go install or get package without a version (or at latest). Equivalent: hadolint DL3062 (partial). |
-| `json-cmd-entrypoint` | dockerfile | suspicious | warn | none | A CMD, ENTRYPOINT or HEALTHCHECK CMD in shell form, which runs under `sh -c` and does not get signals. Equivalent: hadolint DL3025. |
-| `last-user-not-root` | dockerfile | correctness | warn | none | A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`). Equivalent: hadolint DL3002. |
-| `merge-consecutive-run` | dockerfile | performance | off | none | A RUN that is a single command, directly after another single-command RUN with the same flags (a comment in between does not count). Equivalent: hadolint DL3059 (partial). |
-| `no-apt` | dockerfile | suspicious | off | none | A RUN that calls apt. Equivalent: hadolint DL3027. |
-| `no-copy-whole-stage` | dockerfile | suspicious | off | none | A `COPY --from` with `/` as a source and as the target. Equivalent: hadolint DL3067. |
-| `no-from-platform` | dockerfile | suspicious | off | none | A FROM with a fixed `--platform`; a variable such as `$BUILDPLATFORM` is fine. Equivalent: hadolint DL3029. |
-| `no-interactive-commands` | dockerfile | suspicious | off | none | A RUN that calls ssh, vim, shutdown, service, ps, free, top, kill or mount. Equivalent: hadolint DL3001. |
-| `no-latest-tag` | dockerfile | suspicious | off | none | A FROM image tagged `latest` (without a digest). Equivalent: hadolint DL3007. |
-| `no-maintainer` | dockerfile | cleanup | warn | none | A MAINTAINER instruction. Equivalent: hadolint DL4000. |
-| `no-nested-onbuild` | dockerfile | correctness | error | none | An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER. Equivalent: hadolint DL3043. |
-| `no-redundant-target-platform` | dockerfile | cleanup | off | none | A FROM with `--platform=$TARGETPLATFORM`, which is what it does without the option. Equivalent: hadolint DL3065. |
-| `no-reserved-stage-name` | dockerfile | suspicious | warn | none | A stage named `scratch` or `context`. Equivalent: hadolint DL3063. |
-| `no-secret-in-env` | dockerfile | suspicious | warn | none | An ARG or ENV whose name contains `api_key`, `client_key`, `password`, `private`, `secret`, `token` or `username`, or is a well-known credential variable. Build secrets belong in `--mount=type=secret`. Equivalent: hadolint DL3064 (partial). |
-| `no-shell-symlink` | dockerfile | suspicious | off | none | A RUN that links /bin/sh. Equivalent: hadolint DL4005. |
-| `no-sudo` | dockerfile | correctness | off | none | A RUN that calls sudo. Equivalent: hadolint DL3004. |
-| `npm-pin-versions` | dockerfile | suspicious | off | none | An npm install package without a version. Equivalent: hadolint DL3016 (partial). |
-| `numeric-user-id` | dockerfile | suspicious | off | none | A USER that is a name rather than a numeric id (a variable is accepted). Equivalent: hadolint DL3066 (partial). |
-| `pip-pin-versions` | dockerfile | suspicious | off | none | A pip install package without a version. Equivalent: hadolint DL3013 (partial). |
-| `pipefail-shell` | dockerfile | suspicious | warn | none | A RUN with a pipe in a stage whose SHELL instruction does not set pipefail. Equivalent: hadolint DL4006 (partial). |
-| `rpm-pin-versions` | dockerfile | suspicious | off | none | A yum or dnf install package without a version. Equivalent: hadolint DL3033 (partial), hadolint DL3041 (partial). |
-| `single-cmd` | dockerfile | suspicious | warn | none | A second CMD in one stage. Equivalent: hadolint DL4003. |
-| `single-entrypoint` | dockerfile | suspicious | warn | none | A second ENTRYPOINT in one stage. Equivalent: hadolint DL4004. |
-| `single-healthcheck` | dockerfile | suspicious | warn | none | A second HEALTHCHECK in one stage. Equivalent: hadolint DL3012. |
-| `untagged-base-image` | dockerfile | suspicious | off | none | A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. `scratch`, a variable and an earlier stage's name are fine. Equivalent: hadolint DL3006. |
-| `use-workdir-not-cd` | dockerfile | style | off | none | A RUN that calls cd. Equivalent: hadolint DL3003. |
-| `wget-progress` | dockerfile | style | off | none | A wget call with no progress, quiet or log-file flag. Equivalent: hadolint DL3047. |
-| `workdir-absolute` | dockerfile | correctness | off | none | A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable). Equivalent: hadolint DL3000. |
-| `yum-clean` | dockerfile | performance | off | none | yum install with no yum clean all after it. Equivalent: hadolint DL3032. |
-| `yum-yes` | dockerfile | correctness | warn | none | yum install without -y. Equivalent: hadolint DL3030. |
-| `zypper-clean` | dockerfile | performance | off | none | zypper install with no zypper clean after it. Equivalent: hadolint DL3036. |
-| `zypper-no-dist-upgrade` | dockerfile | suspicious | off | none | A zypper dist-upgrade. Equivalent: hadolint DL3035. |
-| `zypper-pin-versions` | dockerfile | suspicious | off | none | A zypper install package without a version. Equivalent: hadolint DL3037. |
-| `zypper-yes` | dockerfile | correctness | warn | none | zypper install without -y. Equivalent: hadolint DL3034. |
+| `apk-no-cache` | dockerfile | performance | off | none | Reports an `apk add` without the `--no-cache` flag. Equivalent: hadolint DL3019. |
+| `apk-pin-versions` | dockerfile | suspicious | off | none | Reports an `apk add` that names a package without a version. Equivalent: hadolint DL3018. |
+| `apt-get-no-recommends` | dockerfile | performance | off | none | Reports an `apt-get install` that also installs recommended packages. Equivalent: hadolint DL3015. |
+| `apt-get-pin-versions` | dockerfile | suspicious | off | none | Reports an `apt-get install` of a package without a version. Equivalent: hadolint DL3008. |
+| `apt-get-yes` | dockerfile | correctness | warn | none | Reports an `apt-get install` that does not answer apt's prompts. Equivalent: hadolint DL3014. |
+| `copy-from-own-stage` | dockerfile | correctness | error | none | Reports a `COPY --from` that names its own stage. Equivalent: hadolint DL3023. |
+| `copy-from-unknown-stage` | dockerfile | correctness | warn | none | Reports a `COPY --from=name` that names no stage defined earlier. Equivalent: hadolint DL3022. |
+| `copy-instead-of-add` | dockerfile | suspicious | off | none | Reports an `ADD` that only copies. Equivalent: hadolint DL3020 (partial). |
+| `copy-many-needs-directory` | dockerfile | correctness | error | none | Reports a `COPY` with several sources whose destination does not end with `/` (`COPY a b /app`). Equivalent: hadolint DL3021 (partial). |
+| `delete-apt-lists` | dockerfile | performance | off | none | Reports a `RUN` that updates the apt package lists and does not delete them. Equivalent: hadolint DL3009 (partial). |
+| `dnf-clean` | dockerfile | performance | off | none | Reports a `RUN` that installs with dnf and does not clean the cache. Equivalent: hadolint DL3040. |
+| `dnf-yes` | dockerfile | correctness | warn | none | Reports a `dnf install`, `dnf groupinstall` or `dnf localinstall` (also with `microdnf`) without `-y` or `--assumeyes`. Equivalent: hadolint DL3038. |
+| `duplicate-stage-name` | dockerfile | correctness | error | none | Reports a stage name that an earlier stage already uses, as in `FROM a AS app` followed by `FROM b AS app`. Equivalent: hadolint DL3024. |
+| `expose-port-range` | dockerfile | correctness | error | none | Reports an `EXPOSE` with a port number above 65535. Equivalent: hadolint DL3011. |
+| `from-first` | dockerfile | correctness | error | none | Reports an instruction other than `ARG` before the first `FROM`. Equivalent: hadolint DL3061. |
+| `gem-pin-versions` | dockerfile | suspicious | off | none | Reports a `gem install` (or `gem i`) of a gem without a version: `rails` instead of `rails:7.1.3`. Equivalent: hadolint DL3028 (partial). |
+| `go-pin-versions` | dockerfile | suspicious | off | none | Reports a `go install` or `go get` of a package without a version, or at `latest` or `none` (`example.com/tool@latest`). Equivalent: hadolint DL3062 (partial). |
+| `json-cmd-entrypoint` | dockerfile | suspicious | warn | none | Reports a `CMD`, `ENTRYPOINT` or `HEALTHCHECK CMD` in shell form. Equivalent: hadolint DL3025. |
+| `last-user-not-root` | dockerfile | correctness | warn | none | Reports a stage whose last `USER` is root, on that `USER`. Equivalent: hadolint DL3002. |
+| `merge-consecutive-run` | dockerfile | performance | off | none | Reports a `RUN` that could be merged into the `RUN` before it. Equivalent: hadolint DL3059 (partial). |
+| `no-apt` | dockerfile | suspicious | off | none | Reports a `RUN` that calls `apt`; use `apt-get` or `apt-cache` instead. Equivalent: hadolint DL3027. |
+| `no-copy-whole-stage` | dockerfile | suspicious | off | none | Reports a `COPY --from=stage / /`, which copies the whole file system of a stage to `/`. Equivalent: hadolint DL3067. |
+| `no-from-platform` | dockerfile | suspicious | off | none | Reports a `FROM` with a fixed `--platform`, such as `--platform=linux/amd64`. Equivalent: hadolint DL3029. |
+| `no-interactive-commands` | dockerfile | suspicious | off | none | Reports a `RUN` that calls `ssh`, `vim`, `shutdown`, `service`, `ps`, `free`, `top`, `kill` or `mount`. Equivalent: hadolint DL3001. |
+| `no-latest-tag` | dockerfile | suspicious | off | none | Reports a `FROM` whose image has the tag `latest` (`alpine:latest`). Equivalent: hadolint DL3007. |
+| `no-maintainer` | dockerfile | cleanup | warn | none | Reports a `MAINTAINER` instruction. Equivalent: hadolint DL4000. |
+| `no-nested-onbuild` | dockerfile | correctness | error | none | Reports an `ONBUILD` whose instruction is `ONBUILD`, `FROM` or `MAINTAINER`. Equivalent: hadolint DL3043. |
+| `no-redundant-target-platform` | dockerfile | cleanup | off | none | Reports a `FROM` with `--platform=$TARGETPLATFORM` (or `${TARGETPLATFORM}`), which is what `FROM` does without the option. Equivalent: hadolint DL3065. |
+| `no-reserved-stage-name` | dockerfile | suspicious | warn | none | Reports a stage named `scratch` or `context` (`FROM alpine AS scratch`), compared without regard to case. Equivalent: hadolint DL3063. |
+| `no-secret-in-env` | dockerfile | suspicious | warn | none | Reports an `ARG` or `ENV` whose name suggests a secret. Equivalent: hadolint DL3064 (partial). |
+| `no-shell-symlink` | dockerfile | suspicious | off | none | Reports a `RUN` that replaces `/bin/sh`. Equivalent: hadolint DL4005. |
+| `no-sudo` | dockerfile | correctness | off | none | Reports a `RUN` that calls `sudo`. Equivalent: hadolint DL3004. |
+| `npm-pin-versions` | dockerfile | suspicious | off | none | Reports an `npm install` (also `npm i` and `npm add`) of a package without a version: `express` instead of `express@4.18.2`, `@scope/name` instead of `@scope/name@1.2.0`. Equivalent: hadolint DL3016 (partial). |
+| `numeric-user-id` | dockerfile | suspicious | off | none | Reports a `USER` whose user is a name instead of a number (`USER app`, `USER app:1000`). Equivalent: hadolint DL3066 (partial). |
+| `pip-pin-versions` | dockerfile | suspicious | off | none | Reports a `pip install` (also `pip3`, `pip3.12`) of a package without a version. Equivalent: hadolint DL3013 (partial). |
+| `pipefail-shell` | dockerfile | suspicious | warn | none | Reports a `RUN` with a pipe (`a \| b`) in a stage whose `SHELL` does not set `pipefail`. Equivalent: hadolint DL4006 (partial). |
+| `rpm-pin-versions` | dockerfile | suspicious | off | none | Reports a `yum install`, `dnf install` or `microdnf install` of a package without a version. Equivalent: hadolint DL3033 (partial), hadolint DL3041 (partial). |
+| `single-cmd` | dockerfile | suspicious | warn | none | Reports each `CMD` after the first one in the same stage. Equivalent: hadolint DL4003. |
+| `single-entrypoint` | dockerfile | suspicious | warn | none | Reports each `ENTRYPOINT` after the first one in the same stage. Equivalent: hadolint DL4004. |
+| `single-healthcheck` | dockerfile | suspicious | warn | none | Reports each `HEALTHCHECK` after the first one in the same stage, `HEALTHCHECK NONE` included. Equivalent: hadolint DL3012. |
+| `untagged-base-image` | dockerfile | suspicious | off | none | Reports a `FROM` image with neither a tag nor a digest (`FROM alpine`). Equivalent: hadolint DL3006. |
+| `use-workdir-not-cd` | dockerfile | style | off | none | Reports a `RUN` that calls `cd`, anywhere in its script (also in a subshell such as `(cd sub && make)`). Equivalent: hadolint DL3003. |
+| `wget-progress` | dockerfile | style | off | none | Reports a `wget` call that does not limit its progress output. Equivalent: hadolint DL3047. |
+| `workdir-absolute` | dockerfile | correctness | off | none | Reports a `WORKDIR` with a relative path. Equivalent: hadolint DL3000. |
+| `yum-clean` | dockerfile | performance | off | none | Reports a `RUN` that installs with yum and does not clean the cache. Equivalent: hadolint DL3032. |
+| `yum-yes` | dockerfile | correctness | warn | none | Reports a `yum install`, `yum groupinstall` or `yum localinstall` without `-y` or `--assumeyes`. Equivalent: hadolint DL3030. |
+| `zypper-clean` | dockerfile | performance | off | none | Reports a `RUN` that installs with zypper and does not clean the cache. Equivalent: hadolint DL3036. |
+| `zypper-no-dist-upgrade` | dockerfile | suspicious | off | none | Reports a `zypper dist-upgrade` (or `dup`). Equivalent: hadolint DL3035. |
+| `zypper-pin-versions` | dockerfile | suspicious | off | none | Reports a `zypper install` (`in`) of a package without a version. Equivalent: hadolint DL3037. |
+| `zypper-yes` | dockerfile | correctness | warn | none | Reports a `zypper` command that asks for confirmation. Equivalent: hadolint DL3034. |
 | `invalid-property-value` | editorconfig | correctness | warn | none | A known EditorConfig or .NET property has a value it does not accept (`indent_style = tabs`, `dotnet_diagnostic.CA1000.severity = high`). Values are case-insensitive, `unset` is always valid, and .NET code-style options may end in `:silent`, `:suggestion`, `:warning` or `:error`; formatting options do not (Roslyn parses them with `bool.TryParse`, EditorConfigValueSerializer.cs). A trailing `# comment` is ignored, as Roslyn does. Unknown properties are not checked. |
 | `root-in-section` | editorconfig | correctness | warn | none | The `root` property stops the search for parent `.editorconfig` files, but only as a preamble pair (before the first `[section]`); inside a section editors ignore it. No fix: moving it into the preamble is the author's call. |
 | `unknown-property` | editorconfig | correctness | warn | none | A property name that is not an EditorConfig or .NET (`dotnet_*`, `csharp_*`, `visual_basic_*`, `dotnet_diagnostic.<ID>.severity`, naming rule) property but is one typo away from one: the setting is silently ignored. Names of other tools (`resharper_*`, `ij_*`) are left alone. Known properties and values: `crates/lang-editorconfig/data/properties.txt`. Options: `strict` (default `false`): Also report `dotnet_*`, `csharp_*` and `visual_basic_*` names that are close to no known property (the list may lag behind new .NET options). |

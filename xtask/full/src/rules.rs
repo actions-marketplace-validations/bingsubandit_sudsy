@@ -113,11 +113,14 @@ fn entry(d: &RuleDoc) -> Value {
         "category": m.category.as_str(),
         "default_level": m.default_level.as_str(),
         "fix": m.fix.map(|k| k.as_str()),
-        "description": m.description,
+        "description": paragraphs(m.description),
         "options": options,
         "presets": d.presets,
         "upstream": d.upstream.iter().map(upstream).collect::<Vec<_>>(),
     });
+    if !m.why.is_empty() {
+        v["why"] = json!(paragraphs(m.why));
+    }
     if let Some((language, e)) = &d.example {
         let spans: Vec<Value> = e
             .spans
@@ -144,6 +147,49 @@ fn upstream(u: &Upstream) -> Value {
     v
 }
 
+const UNDESCRIBED_HEADER: &str = "# Rules without a `why` text (docs/ai/development/rule-texts.md). Only shrinks: `cargo xtask codegen` drops a rule once it has one; a new rule needs `description` and `why`.\n";
+
+/// The ratchet `docs/ai/rules/undescribed.txt`: the ids of `baseline` that still have no `why`
+/// (all of them when there is no baseline yet). A rule without `why` that the baseline does not
+/// list is an error.
+pub fn undescribed(docs: &[RuleDoc], baseline: Option<&str>) -> anyhow::Result<String> {
+    let listed: Option<std::collections::BTreeSet<&str>> = baseline.map(|b| {
+        b.lines()
+            .map(str::trim)
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+            .collect()
+    });
+    let mut out = UNDESCRIBED_HEADER.to_string();
+    let mut ids: Vec<&str> = docs
+        .iter()
+        .filter(|d| d.meta.why.trim().is_empty())
+        .map(|d| d.meta.id)
+        .collect();
+    ids.sort();
+    ids.dedup();
+    for id in ids {
+        match &listed {
+            Some(l) if !l.contains(id) => anyhow::bail!(
+                "rule `{id}` has no `why` text (a new rule needs `description` and `why`, see docs/ai/development/rule-texts.md)"
+            ),
+            _ => {
+                out += id;
+                out.push('\n');
+            }
+        }
+    }
+    Ok(out)
+}
+
+/// A text with its paragraphs (one per line of the metadata) as Markdown: a blank line between.
+fn paragraphs(text: &str) -> String {
+    text.lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n\n")
+}
+
 /// A table cell: one line, no pipes.
 fn cell(text: &str) -> String {
     text.split_whitespace()
@@ -159,7 +205,7 @@ pub fn table(docs: &[RuleDoc]) -> String {
     );
     for d in docs {
         let m = d.meta;
-        let mut description = cell(m.description);
+        let mut description = cell(m.summary());
         if !m.options.is_empty() {
             let options: Vec<String> = m
                 .options

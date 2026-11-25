@@ -137,11 +137,11 @@
             },
             "apk-no-cache": {
               "$ref": "#/definitions/rule",
-              "description": "apk add without --no-cache."
+              "description": "Reports an `apk add` without the `--no-cache` flag."
             },
             "apk-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "An apk add package without a version."
+              "description": "Reports an `apk add` that names a package without a version."
             },
             "approved-verbs": {
               "$ref": "#/definitions/rule",
@@ -149,15 +149,15 @@
             },
             "apt-get-no-recommends": {
               "$ref": "#/definitions/rule",
-              "description": "apt-get install that installs recommended packages."
+              "description": "Reports an `apt-get install` that also installs recommended packages."
             },
             "apt-get-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "An apt-get install package without a version."
+              "description": "Reports an `apt-get install` of a package without a version."
             },
             "apt-get-yes": {
               "$ref": "#/definitions/rule",
-              "description": "apt-get install without -y."
+              "description": "Reports an `apt-get install` that does not answer apt's prompts."
             },
             "area-alt": {
               "$ref": "#/definitions/rule",
@@ -884,19 +884,19 @@
             },
             "copy-from-own-stage": {
               "$ref": "#/definitions/rule",
-              "description": "A `COPY --from` that names the stage it is in."
+              "description": "Reports a `COPY --from` that names its own stage."
             },
             "copy-from-unknown-stage": {
               "$ref": "#/definitions/rule",
-              "description": "A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`)."
+              "description": "Reports a `COPY --from=name` that names no stage defined earlier."
             },
             "copy-instead-of-add": {
               "$ref": "#/definitions/rule",
-              "description": "An ADD with no URL and no archive (`.tar`, `.gz`, `.tgz`, `.xz` and the like) among its arguments, which ADD would extract or download."
+              "description": "Reports an `ADD` that only copies."
             },
             "copy-many-needs-directory": {
               "$ref": "#/definitions/rule",
-              "description": "A COPY with more than one source whose last argument does not end with `/`."
+              "description": "Reports a `COPY` with several sources whose destination does not end with `/` (`COPY a b /app`)."
             },
             "count-star": {
               "$ref": "#/definitions/rule",
@@ -1192,7 +1192,7 @@
             },
             "delete-apt-lists": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that runs apt-get update (or apt update) and does not remove /var/lib/apt/lists, which stays in the image layer. A cache mount on that directory is fine."
+              "description": "Reports a `RUN` that updates the apt package lists and does not delete them."
             },
             "deprecated": {
               "$ref": "#/definitions/rule",
@@ -1270,11 +1270,11 @@
             },
             "dnf-clean": {
               "$ref": "#/definitions/rule",
-              "description": "dnf install with no dnf clean all after it."
+              "description": "Reports a `RUN` that installs with dnf and does not clean the cache."
             },
             "dnf-yes": {
               "$ref": "#/definitions/rule",
-              "description": "dnf install without -y."
+              "description": "Reports a `dnf install`, `dnf groupinstall` or `dnf localinstall` (also with `microdnf`) without `-y` or `--assumeyes`."
             },
             "doc-asterisk": {
               "$ref": "#/definitions/rule",
@@ -1564,7 +1564,7 @@
             },
             "duplicate-stage-name": {
               "$ref": "#/definitions/rule",
-              "description": "Two FROM instructions name their stage alike."
+              "description": "Reports a stage name that an earlier stage already uses, as in `FROM a AS app` followed by `FROM b AS app`."
             },
             "duplicate-table-alias": {
               "$ref": "#/definitions/rule",
@@ -1703,7 +1703,7 @@
             },
             "expose-port-range": {
               "$ref": "#/definitions/rule",
-              "description": "An EXPOSE with a port above 65535."
+              "description": "Reports an `EXPOSE` with a port number above 65535."
             },
             "expression-alias": {
               "$ref": "#/definitions/rule",
@@ -1910,7 +1910,7 @@
             },
             "from-first": {
               "$ref": "#/definitions/rule",
-              "description": "An instruction other than ARG before the first FROM."
+              "description": "Reports an instruction other than `ARG` before the first `FROM`."
             },
             "function-allowed-list": {
               "description": "A function that is not in the `list` option. An empty list allows everything.",
@@ -2131,7 +2131,7 @@
             },
             "gem-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A gem install gem without a version."
+              "description": "Reports a `gem install` (or `gem i`) of a gem without a version: `rails` instead of `rails:7.1.3`."
             },
             "generic-class": {
               "$ref": "#/definitions/rule",
@@ -2151,7 +2151,7 @@
             },
             "go-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A go install or get package without a version (or at latest)."
+              "description": "Reports a `go install` or `go get` of a package without a version, or at `latest` or `none` (`example.com/tool@latest`)."
             },
             "grep-count": {
               "$ref": "#/definitions/rule",
@@ -2527,7 +2527,7 @@
             },
             "json-cmd-entrypoint": {
               "$ref": "#/definitions/rule",
-              "description": "A CMD, ENTRYPOINT or HEALTHCHECK CMD in shell form, which runs under `sh -c` and does not get signals."
+              "description": "Reports a `CMD`, `ENTRYPOINT` or `HEALTHCHECK CMD` in shell form."
             },
             "key-name-casing": {
               "description": "A key does not follow one of the allowed naming conventions. The checks are those of eslint-plugin-jsonc: a key with punctuation or whitespace never matches, `camelCase` also rejects `_` and `-`, `snake_case` and `kebab-case` reject capitals. No fix: renaming a key changes the data.",
@@ -2670,7 +2670,7 @@
             },
             "last-user-not-root": {
               "$ref": "#/definitions/rule",
-              "description": "A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`)."
+              "description": "Reports a stage whose last `USER` is root, on that `USER`."
             },
             "late-future-import": {
               "$ref": "#/definitions/rule",
@@ -3090,7 +3090,7 @@
             },
             "merge-consecutive-run": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that is a single command, directly after another single-command RUN with the same flags (a comment in between does not count)."
+              "description": "Reports a `RUN` that could be merged into the `RUN` before it."
             },
             "message-pascal-case": {
               "$ref": "#/definitions/rule",
@@ -3456,7 +3456,7 @@
             },
             "no-apt": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls apt."
+              "description": "Reports a `RUN` that calls `apt`; use `apt-get` or `apt-cache` instead."
             },
             "no-assignment-in-condition": {
               "$ref": "#/definitions/rule",
@@ -3588,7 +3588,7 @@
             },
             "no-copy-whole-stage": {
               "$ref": "#/definitions/rule",
-              "description": "A `COPY --from` with `/` as a source and as the target."
+              "description": "Reports a `COPY --from=stage / /`, which copies the whole file system of a stage to `/`."
             },
             "no-debugger": {
               "description": "A debugger statement, a call of one of the `calls` that start a debugger or an import matching `imports` (ESLint no-debugger, ruff T100); a language lists its calls in its grammar's `rule` row.",
@@ -4109,7 +4109,7 @@
             },
             "no-from-platform": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM with a fixed `--platform`; a variable such as `$BUILDPLATFORM` is fine."
+              "description": "Reports a `FROM` with a fixed `--platform`, such as `--platform=linux/amd64`."
             },
             "no-func-assign": {
               "$ref": "#/definitions/rule",
@@ -4295,7 +4295,7 @@
             },
             "no-interactive-commands": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls ssh, vim, shutdown, service, ps, free, top, kill or mount."
+              "description": "Reports a `RUN` that calls `ssh`, `vim`, `shutdown`, `service`, `ps`, `free`, `top`, `kill` or `mount`."
             },
             "no-invalid-double-slash-comments": {
               "$ref": "#/definitions/rule",
@@ -4315,7 +4315,7 @@
             },
             "no-latest-tag": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM image tagged `latest` (without a digest)."
+              "description": "Reports a `FROM` whose image has the tag `latest` (`alpine:latest`)."
             },
             "no-lone-template": {
               "$ref": "#/definitions/rule",
@@ -4335,7 +4335,7 @@
             },
             "no-maintainer": {
               "$ref": "#/definitions/rule",
-              "description": "A MAINTAINER instruction."
+              "description": "Reports a `MAINTAINER` instruction."
             },
             "no-merge-keys": {
               "$ref": "#/definitions/rule",
@@ -4379,7 +4379,7 @@
             },
             "no-nested-onbuild": {
               "$ref": "#/definitions/rule",
-              "description": "An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER."
+              "description": "Reports an `ONBUILD` whose instruction is `ONBUILD`, `FROM` or `MAINTAINER`."
             },
             "no-nested-style-tag": {
               "$ref": "#/definitions/rule",
@@ -4521,7 +4521,7 @@
             },
             "no-redundant-target-platform": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM with `--platform=$TARGETPLATFORM`, which is what it does without the option."
+              "description": "Reports a `FROM` with `--platform=$TARGETPLATFORM` (or `${TARGETPLATFORM}`), which is what `FROM` does without the option."
             },
             "no-regex-spaces": {
               "$ref": "#/definitions/rule",
@@ -4541,7 +4541,7 @@
             },
             "no-reserved-stage-name": {
               "$ref": "#/definitions/rule",
-              "description": "A stage named `scratch` or `context`."
+              "description": "Reports a stage named `scratch` or `context` (`FROM alpine AS scratch`), compared without regard to case."
             },
             "no-returns-on-void": {
               "$ref": "#/definitions/rule",
@@ -4553,7 +4553,7 @@
             },
             "no-secret-in-env": {
               "$ref": "#/definitions/rule",
-              "description": "An ARG or ENV whose name contains `api_key`, `client_key`, `password`, `private`, `secret`, `token` or `username`, or is a well-known credential variable. Build secrets belong in `--mount=type=secret`."
+              "description": "Reports an `ARG` or `ENV` whose name suggests a secret."
             },
             "no-self-assign": {
               "description": "A plain or logical assignment whose two sides are the same tokens, `a = a`, `a.b = a.b` or `@a ||= @a` (ESLint no-self-assign, RuboCop Lint/SelfAssignment).",
@@ -4608,7 +4608,7 @@
             },
             "no-shell-symlink": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that links /bin/sh."
+              "description": "Reports a `RUN` that replaces `/bin/sh`."
             },
             "no-single-line-block-comment": {
               "$ref": "#/definitions/rule",
@@ -4632,7 +4632,7 @@
             },
             "no-sudo": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls sudo."
+              "description": "Reports a `RUN` that calls `sudo`."
             },
             "no-target-blank": {
               "$ref": "#/definitions/rule",
@@ -4832,7 +4832,7 @@
             },
             "npm-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "An npm install package without a version."
+              "description": "Reports an `npm install` (also `npm i` and `npm add`) of a package without a version: `express` instead of `express@4.18.2`, `@scope/name` instead of `@scope/name@1.2.0`."
             },
             "null-comparison": {
               "$ref": "#/definitions/rule",
@@ -4879,7 +4879,7 @@
             },
             "numeric-user-id": {
               "$ref": "#/definitions/rule",
-              "description": "A USER that is a name rather than a numeric id (a variable is accepted)."
+              "description": "Reports a `USER` whose user is a name instead of a number (`USER app`, `USER app:1000`)."
             },
             "oneof-lower-snake-case": {
               "$ref": "#/definitions/rule",
@@ -4979,11 +4979,11 @@
             },
             "pip-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A pip install package without a version."
+              "description": "Reports a `pip install` (also `pip3`, `pip3.12`) of a package without a version."
             },
             "pipefail-shell": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN with a pipe in a stage whose SHELL instruction does not set pipefail."
+              "description": "Reports a `RUN` with a pipe (`a | b`) in a stage whose `SHELL` does not set `pipefail`."
             },
             "possible-null-dereference": {
               "$ref": "#/definitions/rule",
@@ -5563,7 +5563,7 @@
             },
             "rpm-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A yum or dnf install package without a version."
+              "description": "Reports a `yum install`, `dnf install` or `microdnf install` of a package without a version."
             },
             "rule-empty-line-before": {
               "$ref": "#/definitions/rule",
@@ -6540,15 +6540,15 @@
             },
             "single-cmd": {
               "$ref": "#/definitions/rule",
-              "description": "A second CMD in one stage."
+              "description": "Reports each `CMD` after the first one in the same stage."
             },
             "single-entrypoint": {
               "$ref": "#/definitions/rule",
-              "description": "A second ENTRYPOINT in one stage."
+              "description": "Reports each `ENTRYPOINT` after the first one in the same stage."
             },
             "single-healthcheck": {
               "$ref": "#/definitions/rule",
-              "description": "A second HEALTHCHECK in one stage."
+              "description": "Reports each `HEALTHCHECK` after the first one in the same stage, `HEALTHCHECK NONE` included."
             },
             "single-namespace-per-file": {
               "$ref": "#/definitions/rule",
@@ -7341,7 +7341,7 @@
             },
             "untagged-base-image": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. `scratch`, a variable and an earlier stage's name are fine."
+              "description": "Reports a `FROM` image with neither a tag nor a digest (`FROM alpine`)."
             },
             "unused-alias": {
               "$ref": "#/definitions/rule",
@@ -7568,7 +7568,7 @@
             },
             "use-workdir-not-cd": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls cd."
+              "description": "Reports a `RUN` that calls `cd`, anywhere in its script (also in a subshell such as `(cd sub && make)`)."
             },
             "useless-access-modifier": {
               "$ref": "#/definitions/rule",
@@ -7889,7 +7889,7 @@
             },
             "wget-progress": {
               "$ref": "#/definitions/rule",
-              "description": "A wget call with no progress, quiet or log-file flag."
+              "description": "Reports a `wget` call that does not limit its progress output."
             },
             "when-entry-bracing": {
               "$ref": "#/definitions/rule",
@@ -7897,7 +7897,7 @@
             },
             "workdir-absolute": {
               "$ref": "#/definitions/rule",
-              "description": "A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable)."
+              "description": "Reports a `WORKDIR` with a relative path."
             },
             "workflow-syntax": {
               "$ref": "#/definitions/rule",
@@ -7909,11 +7909,11 @@
             },
             "yum-clean": {
               "$ref": "#/definitions/rule",
-              "description": "yum install with no yum clean all after it."
+              "description": "Reports a `RUN` that installs with yum and does not clean the cache."
             },
             "yum-yes": {
               "$ref": "#/definitions/rule",
-              "description": "yum install without -y."
+              "description": "Reports a `yum install`, `yum groupinstall` or `yum localinstall` without `-y` or `--assumeyes`."
             },
             "zip-without-explicit-strict": {
               "$ref": "#/definitions/rule",
@@ -7921,19 +7921,19 @@
             },
             "zypper-clean": {
               "$ref": "#/definitions/rule",
-              "description": "zypper install with no zypper clean after it."
+              "description": "Reports a `RUN` that installs with zypper and does not clean the cache."
             },
             "zypper-no-dist-upgrade": {
               "$ref": "#/definitions/rule",
-              "description": "A zypper dist-upgrade."
+              "description": "Reports a `zypper dist-upgrade` (or `dup`)."
             },
             "zypper-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A zypper install package without a version."
+              "description": "Reports a `zypper install` (`in`) of a package without a version."
             },
             "zypper-yes": {
               "$ref": "#/definitions/rule",
-              "description": "zypper install without -y."
+              "description": "Reports a `zypper` command that asks for confirmation."
             }
           },
           "type": "object"

@@ -360,6 +360,7 @@ mod extension {
     static META: RuleMeta = RuleMeta {
         id: "every-array",
         category: Category::Style,
+        why: "",
         description: "Reports every array.",
         example: "",
         default_level: core_config::Level::Warn,
@@ -390,6 +391,7 @@ mod extension {
     const META_LAYOUT: RuleMeta = RuleMeta {
         id: "",
         category: Category::Style,
+        why: "",
         description: "Lays every array out one item per line.",
         example: "",
         default_level: core_config::Level::Warn,

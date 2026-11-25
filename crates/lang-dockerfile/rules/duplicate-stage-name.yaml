@@ -1,8 +1,13 @@
 id: duplicate-stage-name
 family: unique-names
-params: { container: document, item: item, name: StageName, report: item }
+params: { container: document, item: item, name: StageName, report: item, fold: lower }
 message: "the stage name `{name}` is already used"
-description: Two FROM instructions name their stage alike.
+description: >-
+  Reports a stage name that an earlier stage already uses, as in `FROM a AS app` followed by `FROM b
+  AS app`. Names are compared without regard to case, as Docker does.
+why: >-
+  `FROM name` and `COPY --from=name` refer to a stage by its name. With two stages of one name the
+  builder cannot tell which one is meant, so Docker rejects the file.
 example: "FROM a AS x\nFROM b AS x   # reported"
 severity: error
 category: correctness

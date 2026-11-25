@@ -96,8 +96,14 @@ rule! {
         id: "untagged-base-image",
         category: Suspicious,
         default: Off,
-        description: "A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. \
-                  `scratch`, a variable and an earlier stage's name are fine.",
+        description: "Reports a `FROM` image with neither a tag nor a digest (`FROM alpine`). Docker reads it as \
+                  `:latest`. Not reported: `scratch`, a variable (`$BASE`) and the name of an earlier stage \
+                  (compared without case). A `:` in the registry host (`localhost:5000/app`) is a port, not a \
+                  tag.",
+        why: "An image without a tag is pulled as `latest`, so the Dockerfile does not even say which \
+                  version it builds on. The base changes with each upstream release, and a rebuild can fail or \
+                  behave differently with no change in the file.\n\
+                  Name a release (`alpine:3.20`) or a digest.",
         example: "FROM alpine   # FROM alpine:3.20",
         kinds: &[k::DOCUMENT],
     }
@@ -106,11 +112,12 @@ rule! {
         let mut stages: Vec<String> = Vec::new();
         for i in instructions(doc).iter().filter(|i| i.name == "FROM") {
             let (image, alias) = i.from();
-            let tagged = image.contains(':') || image.contains('@');
-            if !tagged && image != "scratch" && !image.starts_with('$') && !stages.contains(&image) {
+            // A `:` before the last `/` is a registry port, not a tag.
+            let tagged = image.rsplit('/').next().is_some_and(|name| name.contains(':')) || image.contains('@');
+            if !tagged && image != "scratch" && !image.starts_with('$') && !stages.contains(&image.to_lowercase()) {
                 ctx.report(i.range(ctx), format!("`{image}` has no tag"));
             }
-            stages.extend(alias);
+            stages.extend(alias.map(|a| a.to_lowercase()));
         }
     }
 }
@@ -120,7 +127,13 @@ rule! {
         id: "last-user-not-root",
         category: Correctness,
         default: Warn,
-        description: "A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`).",
+        description: "Reports a stage whose last `USER` is root, on that `USER`. That is `root` or `0`, also \
+                  `root:group` and `0:group`. Every stage is checked, build stages too. A stage with no `USER` \
+                  instruction is not reported.",
+        why: "The container's main process runs as the last user. If the application is compromised, the \
+                  attacker is root inside the container, which makes it easier to damage mounted volumes or to \
+                  break out of the container, and files the process writes to a volume are owned by root.\n\
+                  End the stage with an unprivileged `USER` (a numeric one, see `numeric-user-id`).",
         example: "USER root   # last USER of the stage",
         kinds: &[k::DOCUMENT],
     }
@@ -157,8 +170,12 @@ rule! {
         id: "copy-from-unknown-stage",
         category: Correctness,
         default: Warn,
-        description: "A `COPY --from` that names no earlier stage: not a stage name, not the index of an \
-                  earlier stage, and not an image (no `:`).",
+        description: "Reports a `COPY --from=name` that names no stage defined earlier. Not reported: the number \
+                  of an earlier stage (`--from=0`) and an image reference with a `:` (`--from=nginx:1`). A \
+                  stage defined further down does not count. Names are compared without regard to case.",
+        why: "Docker does not fail on an unknown name: it takes it for an image and pulls it from the \
+                  registry. A typo in a stage name (`buidler`) or a reference to a stage defined further down \
+                  copies files from whatever image has that name, or fails only when the pull fails.",
         example: "COPY --from=build /a /b   # no stage `build` before this line",
         kinds: &[k::DOCUMENT],
     }
@@ -175,7 +192,7 @@ rule! {
         }
         // An image (`name:tag`) and the index of an earlier stage need no stage name.
         let exempt = |from: &str, count: usize| from.contains(':') || from.parse::<usize>().is_ok_and(|n| n < count);
-        unknown_reference::check(&items, &Scope { earlier_only: true, ignore_case: false }, exempt, |tag, from| (significant_range(&all[tag].node, grammar), format!("`COPY --from` names no earlier stage: `{from}`")), ctx);
+        unknown_reference::check(&items, &Scope { earlier_only: true, ignore_case: true }, exempt, |tag, from| (significant_range(&all[tag].node, grammar), format!("`COPY --from` names no earlier stage: `{from}`")), ctx);
     }
 }
 
@@ -184,7 +201,11 @@ rule! {
         id: "copy-from-own-stage",
         category: Correctness,
         default: Error,
-        description: "A `COPY --from` that names the stage it is in.",
+        description: "Reports a `COPY --from` that names its own stage. That is `COPY --from=build` in the stage \
+                  that `FROM alpine AS build` starts. Names are compared without regard to case.",
+        why: "A stage cannot copy from itself: its content does not exist yet while it is built, and \
+                  BuildKit stops with a circular dependency error. The source is usually an earlier stage, or \
+                  the build context (then drop `--from`).",
         example: "FROM a AS x\nCOPY --from=x /a /b   # reported",
         kinds: &[k::DOCUMENT],
     }
@@ -194,7 +215,7 @@ rule! {
         for i in instructions(doc) {
             if i.name == "FROM" {
                 own = i.from().1;
-            } else if i.name == "COPY" && i.option("from").is_some_and(|f| Some(&f) == own.as_ref()) {
+            } else if i.name == "COPY" && i.option("from").is_some_and(|f| own.as_ref().is_some_and(|o| o.eq_ignore_ascii_case(&f))) {
                 ctx.report(i.range(ctx), "a stage cannot copy from itself");
             }
         }
@@ -206,7 +227,12 @@ rule! {
         id: "from-first",
         category: Correctness,
         default: Error,
-        description: "An instruction other than ARG before the first FROM.",
+        description: "Reports an instruction other than `ARG` before the first `FROM`. Comments, parser directives \
+                  and blank lines are allowed there.",
+        why: "Every instruction works on a build stage, and a stage starts with `FROM`. Only `ARG` may \
+                  come first, because its value can be used in the `FROM` line (`ARG VERSION=3` then `FROM \
+                  alpine:${VERSION}`). Any other instruction first makes the Dockerfile invalid, and Docker \
+                  rejects it.",
         example: "RUN echo hi\nFROM alpine:3   # the RUN comes first",
         kinds: &[k::DOCUMENT],
     }

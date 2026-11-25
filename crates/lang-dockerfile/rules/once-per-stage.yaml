@@ -3,7 +3,14 @@ family: once-per-stage
 params: { instruction: 'CMD' }
 message: 'only the last CMD of a stage takes effect'
 description: >-
-  A second CMD in one stage.
+  Reports each `CMD` after the first one in the same stage. A `CMD` after `ONBUILD` is not counted,
+  and a new `FROM` starts the count again.
+why: >-
+  A container has one default command. When a stage lists several `CMD` instructions only the last
+  one takes effect, and the earlier ones do nothing. They look like configuration that runs, so a
+  reader edits the wrong line or believes a command runs that never does.
+
+  Delete all but the one you mean.
 example: 'CMD a   CMD b'
 severity: warn
 category: suspicious
@@ -13,7 +20,14 @@ family: once-per-stage
 params: { instruction: 'ENTRYPOINT' }
 message: 'only the last ENTRYPOINT of a stage takes effect'
 description: >-
-  A second ENTRYPOINT in one stage.
+  Reports each `ENTRYPOINT` after the first one in the same stage. An `ENTRYPOINT` after `ONBUILD`
+  is not counted, and a new `FROM` starts the count again.
+why: >-
+  A container has one entrypoint. When a stage lists several `ENTRYPOINT` instructions only the last
+  one takes effect, and the earlier ones are ignored without a warning, so a change to an earlier
+  line does nothing.
+
+  Delete all but the one you mean.
 example: 'ENTRYPOINT a   ENTRYPOINT b'
 category: suspicious
 ---
@@ -22,6 +36,11 @@ family: once-per-stage
 params: { instruction: 'HEALTHCHECK' }
 message: 'only the last HEALTHCHECK of a stage takes effect'
 description: >-
-  A second HEALTHCHECK in one stage.
+  Reports each `HEALTHCHECK` after the first one in the same stage, `HEALTHCHECK NONE` included. A
+  new `FROM` starts the count again.
+why: >-
+  A container has one health check. When a stage lists several only the last one takes effect, so an
+  earlier one (an interval or a command you tuned) is ignored and the container is judged by another
+  check than the file suggests.
 example: 'HEALTHCHECK CMD a   HEALTHCHECK CMD b'
 category: suspicious

@@ -14,8 +14,14 @@ RUN npm install express
 RUN npm install express@4 @scope/pkg@1
 RUN npm install --loglevel verbose express@4
 RUN npm install ./local
+RUN npm i express
+^^^^^^^^^^^^^^^^^ npm-pin-versions
+RUN npm add express@4
 RUN gem install rails
 ^^^^^^^^^^^^^^^^^^^^^ gem-pin-versions
+RUN gem install --no-document rails
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ gem-pin-versions
+RUN gem install --source https://rubygems.org rails:7.0
 RUN gem install rails:7.0
 RUN gem install rails -v 7.0
 RUN go install example.com/x

@@ -3,7 +3,14 @@ family: run-command
 params: { program: 'apt-get', args: 'install', needs: '-y --yes --assume-yes -q*2 --quiet*2 -q=2' }
 message: 'use apt-get install -y to avoid a prompt'
 description: >-
-  apt-get install without -y.
+  Reports an `apt-get install` that does not answer apt's prompts. The flags that do are `-y`,
+  `--yes`, `--assume-yes` and `-qq` (also `-q=2` and `--quiet` twice), which implies yes; they may
+  stand anywhere in the command (`apt-get -y install` is fine). Other `apt-get` commands are not
+  checked.
+why: >-
+  A build has no terminal to answer questions. When `apt-get` needs a confirmation, for example
+  because the install pulls in additional packages, it prints `Do you want to continue? [Y/n]
+  Abort.` and exits with an error, which fails the `RUN` and the build.
 example: 'RUN apt-get install curl'
 severity: warn
 category: correctness
@@ -13,7 +20,14 @@ family: run-command
 params: { program: 'apt-get', args: 'install', needs: '--no-install-recommends APT::Install-Recommends=false' }
 message: 'use apt-get install --no-install-recommends'
 description: >-
-  apt-get install that installs recommended packages.
+  Reports an `apt-get install` that also installs recommended packages. `--no-install-recommends`
+  (or `-o APT::Install-Recommends=false`) stops that. Other `apt-get` commands are not checked.
+why: >-
+  By default `apt-get` also installs the packages that a package only recommends, which it does not
+  need to run. In an image they add size and build time, and more software to patch and to be
+  attacked through.
+
+  With the flag only the real dependencies are installed; name anything else you need yourself.
 example: 'RUN apt-get install -y curl'
 severity: off
 category: performance
@@ -23,7 +37,17 @@ family: run-command
 params: { program: 'apt-get', args: 'install', pinned: '=|/|\.deb$', skip-flag-args: 't target-release' }
 message: 'pin the versions in apt-get install: pkg=version'
 description: >-
-  An apt-get install package without a version.
+  Reports an `apt-get install` of a package without a version. A package is pinned when its name has
+  `=` (`curl=7.88.1-10`) or `/` (`curl/stable`, a release), or when it is a `.deb` file. The value
+  of `-t` or `--target-release` is not taken for a package. A variable such as `$PKGS` counts as
+  unpinned.
+why: >-
+  An unpinned install takes the newest version the distribution offers on the day of the build. Two
+  builds of one Dockerfile can then differ, and a new release can break the image without any change
+  in your code.
+
+  Pinned versions make the build repeatable. Debian and Ubuntu remove old versions from their
+  repositories, so a pin stops resolving after a while and needs updating.
 example: 'RUN apt-get install -y curl'
 severity: off
 category: suspicious
@@ -33,7 +57,18 @@ family: run-command
 params: { program: 'apt-get|apt', args: 'update', cleaned-by: 'rm ^/var/lib/apt/lists', cache-dir: '/var/lib/apt/lists' }
 message: 'delete the apt lists (/var/lib/apt/lists) in the same RUN'
 description: >-
-  A RUN that runs apt-get update (or apt update) and does not remove /var/lib/apt/lists, which stays in the image layer. A cache mount on that directory is fine.
+  Reports a `RUN` that updates the apt package lists and does not delete them. It runs `apt-get
+  update` or `apt update` and has no `rm` of `/var/lib/apt/lists` after it in the same `RUN`.
+  `apt-get clean` does not count, it empties another directory. A `RUN` with a `--mount` of type
+  `cache` or `tmpfs` on `/var/lib/apt/lists` is not reported.
+why: >-
+  `apt-get update` downloads the package index files into `/var/lib/apt/lists`, often tens of
+  megabytes that no program needs at run time. They are written into the layer of that `RUN`, and
+  deleting them in a later `RUN` hides them but does not make the image smaller, because the earlier
+  layer still holds the files.
+
+  To fix, remove them in the same `RUN`: `apt-get update && apt-get install -y ... && rm -rf
+  /var/lib/apt/lists/*`.
 example: 'RUN apt-get update && apt-get install -y curl'
 severity: off
 category: performance

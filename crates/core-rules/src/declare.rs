@@ -14,6 +14,7 @@
 ///         default: Off,
 ///         fix: Safe,                       // omitted: no fix
 ///         description: "A statement that is only `;`.",
+///         why: "...",                     // required for a new rule
 ///         example: "if (a) ;   // remove it",
 ///         requires: [Types],               // optional: `Layer` names; so are `uses` and `options`
 ///         kinds: &[kind::EMPTY_STATEMENT], // optional: `check` is called for these kinds
@@ -31,6 +32,7 @@ macro_rules! rule {
             default: $level:ident,
             $(fix: $fix:ident,)?
             description: $description:expr,
+            $(why: $why:expr,)?
             example: $example:expr,
             $(requires: [$($requires:ident),*],)?
             $(uses: [$($uses:ident),*],)?
@@ -49,6 +51,7 @@ macro_rules! rule {
                     id: $id,
                     category: $crate::Category::$category,
                     description: $description,
+                    why: $crate::__why!($($why)?),
                     example: $example,
                     default_level: $crate::rule::Level::$level,
                     fix: $crate::__fix!($($fix)?),
@@ -85,5 +88,17 @@ macro_rules! __fix {
     };
     ($kind:ident) => {
         Some($crate::FixKind::$kind)
+    };
+}
+
+/// The `why:` of [`rule!`]: absent is empty.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __why {
+    () => {
+        ""
+    };
+    ($text:expr) => {
+        $text
     };
 }

@@ -105,6 +105,7 @@ fn meta_of(plugin: &str, r: w::RuleInfo) -> Result<&'static RuleMeta, PluginErro
         uses: layers(plugin, &r.id, &r.uses)?,
         id: leak(id),
         category,
+        why: "",
         description: leak(r.description),
         example: leak(r.example),
         default_level,

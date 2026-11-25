@@ -3,27 +3,54 @@ family: run-command
 params: { program: 'pip(?:[^e].*)?', args: 'install', pinned: '[=<>!~]|\.whl$|\.tar\.gz$|/', unpinned: '^(?:git|hg|svn|bzr)[^@]*$', unless: '-r --requirement -c --constraint .', skip-flag-args: 'abi b build e editable extra-index-url f find-links i index-url implementation no-binary only-binary platform prefix progress-bar proxy python python-version root root-user-action src t target trusted-host upgrade-strategy' }
 message: 'pin the versions in pip install: pkg==version'
 description: >-
-  A pip install package without a version.
+  Reports a `pip install` (also `pip3`, `pip3.12`) of a package without a version. A package is
+  pinned when it has a specifier (`==`, `>=`, `<`, `!=`, `~=`) or is a wheel, a source archive or a
+  path (`.whl`, `.tar.gz`, anything with a `/`). A VCS requirement such as
+  `git+https://example.com/x.git` must name a revision after `@`.
+
+  Not reported: `pip install -r requirements.txt` and `-c constraints.txt` (the versions are in the
+  file), `pip install .`, and the values of options such as `-i`, `-e` or `-t`. `python -m pip
+  install` and `pipenv` are not checked.
+why: >-
+  An unpinned `pip install` takes the latest release of the package, and of the libraries it depends
+  on, on the day of the build. A new major version can break the application, and two builds of one
+  Dockerfile give different images.
+
+  Pin the packages, ideally in a `requirements.txt` made by a lock tool, and install it with `-r`.
 example: 'RUN pip install flask'
 severity: off
 category: suspicious
 ---
 id: npm-pin-versions
 family: run-command
-params: { program: 'npm', args: 'install', pinned: '^@[^/]+/[^@]+@|^[^@]+@|#|\.tar$|\.tar\.gz$|\.tgz$|^(?:/|\./|\.\./|~/)', unpinned: '^git(?:\+\w+)?://[^#]*$', skip-flag-args: 'loglevel registry' }
+params: { program: 'npm', args: 'install i add', pinned: '^@[^/]+/[^@]+@|^[^@]+@|#|\.tar$|\.tar\.gz$|\.tgz$|^(?:/|\./|\.\./|~/)', unpinned: '^git(?:\+\w+)?://[^#]*$', skip-flag-args: 'loglevel registry' }
 message: 'pin the versions in npm install: pkg@version'
 description: >-
-  An npm install package without a version.
+  Reports an `npm install` (also `npm i` and `npm add`) of a package without a version: `express`
+  instead of `express@4.18.2`, `@scope/name` instead of `@scope/name@1.2.0`. A path, a tarball
+  (`.tgz`, `.tar.gz`) or a git URL with a `#ref` counts as pinned. The value of `--loglevel` or
+  `--registry` is not taken for a package, and an `npm install` with no package (it reads
+  `package.json`) is not reported.
+why: >-
+  Without a version npm installs the latest release on the day of the build, so a new major version
+  of the package can break the image and two builds of one Dockerfile differ.
+
+  Pin the version in the command, or keep it in `package.json` with a lock file and use `npm ci`.
 example: 'RUN npm install express'
 severity: off
 category: suspicious
 ---
 id: gem-pin-versions
 family: run-command
-params: { program: 'gem', args: 'install i', pinned: ':', unless: '-v --version', skip-flag-args: '*' }
+params: { program: 'gem', args: 'install i', pinned: ':', unless: '-v --version', skip-flag-args: 'i install-dir n bindir s source p http-proxy P trust-policy platform config-file build-root target-rbconfig' }
 message: 'pin the versions in gem install: gem:version'
 description: >-
-  A gem install gem without a version.
+  Reports a `gem install` (or `gem i`) of a gem without a version: `rails` instead of `rails:7.1.3`.
+  `-v` or `--version` pins as well. The values of options that take one (`--source URL`, `-i DIR`,
+  `--platform NAME`) are not taken for gems.
+why: >-
+  Without a version `gem install` takes the newest release on the day of the build, and so a major
+  release of a gem can break the image, and two builds of one Dockerfile give different results.
 example: 'RUN gem install rails'
 severity: off
 category: suspicious
@@ -33,7 +60,17 @@ family: run-command
 params: { program: 'go', args: 'install get', pinned: '@|^[./]', unpinned: '@(?:latest|none)$' }
 message: 'pin the versions in go install: package@version'
 description: >-
-  A go install or get package without a version (or at latest).
+  Reports a `go install` or `go get` of a package without a version, or at `latest` or `none`
+  (`example.com/tool@latest`). `example.com/tool@v1.4.0` is pinned. A path that starts with `.` or
+  `/` (a package of the current module) is not reported.
+why: >-
+  `@latest` builds whatever release is newest on the day of the build, so the tool in the image
+  changes between builds and a new release can fail or behave differently. Without any version, `go
+  install` uses the version in the `go.mod` of the working directory (and fails when there is none),
+  and `go get` moves it to the latest release. In both cases the Dockerfile does not say which
+  version ends up in the image.
+
+  Write the version: `go install example.com/tool@v1.4.0`.
 example: 'RUN go install example.com/x'
 severity: off
 category: suspicious

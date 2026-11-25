@@ -1,7 +1,13 @@
 id: workdir-absolute
 message: 'WORKDIR should be an absolute path'
 description: >-
-  A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable).
+  Reports a `WORKDIR` with a relative path. A path is absolute when it starts with `/`, a drive
+  letter (`C:`) or a variable (`$HOME`, `${DIR}/x`). Quotes around the path make no difference, and
+  a relative path is reported also after an absolute `WORKDIR`.
+why: >-
+  A relative `WORKDIR` is resolved against the previous `WORKDIR`, or against the one of the base
+  image, which you may not control. Adding an instruction or changing the base image then moves the
+  directory without any sign in this line. An absolute path always means the same place.
 example: 'WORKDIR app'
 severity: off
 category: correctness
@@ -13,7 +19,15 @@ rule:
 id: no-latest-tag
 message: 'pin the base image to a release tag, not latest'
 description: >-
-  A FROM image tagged `latest` (without a digest).
+  Reports a `FROM` whose image has the tag `latest` (`alpine:latest`). A `latest` image with a
+  digest (`alpine:latest@sha256:...`) is not reported; an image with no tag at all is the business
+  of `untagged-base-image`.
+why: >-
+  `latest` is only a name that the image's owner moves to each new release. The base of your image
+  then changes without any edit in the Dockerfile: a rebuild can pull a new major version of the
+  operating system or runtime, and a build that worked yesterday fails or behaves differently today.
+
+  A release tag (`alpine:3.20`) or a digest keeps the base fixed.
 example: 'FROM alpine:latest'
 severity: off
 category: suspicious
@@ -24,7 +38,11 @@ rule:
 id: expose-port-range
 message: 'valid ports range from 0 to 65535'
 description: >-
-  An EXPOSE with a port above 65535.
+  Reports an `EXPOSE` with a port number above 65535. Several ports, `/tcp` and `/udp` suffixes and
+  ranges (`8000-70000`) are all checked; a variable is not.
+why: >-
+  TCP and UDP ports are 16-bit numbers from 0 to 65535. A larger number is a typo (a digit too
+  many), and Docker rejects it as an invalid port, so the build fails.
 example: 'EXPOSE 70000'
 severity: error
 category: correctness
@@ -35,7 +53,18 @@ rule:
 id: json-cmd-entrypoint
 message: 'use the JSON form for CMD and ENTRYPOINT'
 description: >-
-  A CMD, ENTRYPOINT or HEALTHCHECK CMD in shell form, which runs under `sh -c` and does not get signals.
+  Reports a `CMD`, `ENTRYPOINT` or `HEALTHCHECK CMD` in shell form. That is `CMD node server.js`
+  instead of the JSON array form `CMD ["node", "server.js"]`. The same instruction after `ONBUILD`
+  is not reported.
+why: >-
+  The shell form runs the command as `/bin/sh -c "..."`, so the shell, not your program, is the main
+  process of the container. `docker stop` sends SIGTERM to that shell, which usually does not pass
+  it on; after the timeout (10 seconds by default) Docker kills the container with SIGKILL, and the
+  program gets no chance to shut down cleanly. With an `ENTRYPOINT` in shell form, the arguments of
+  `CMD` and of `docker run` are ignored as well.
+
+  The JSON form starts the program directly. If you need a shell, write `["sh", "-c", "exec node
+  server.js"]`.
 example: 'CMD node server.js'
 severity: warn
 category: suspicious
@@ -47,7 +76,16 @@ rule:
 id: no-from-platform
 message: 'do not set --platform on FROM'
 description: >-
-  A FROM with a fixed `--platform`; a variable such as `$BUILDPLATFORM` is fine.
+  Reports a `FROM` with a fixed `--platform`, such as `--platform=linux/amd64`. A value that
+  contains `$BUILDPLATFORM` or `$TARGETPLATFORM` is not reported; other variables such as
+  `$TARGETARCH` are.
+why: >-
+  A fixed platform ties the build to one CPU architecture. On an arm64 machine the base image is
+  pulled for amd64 and runs under emulation, which is slow and sometimes breaks, and a
+  multi-platform build produces the same amd64 content for every target.
+
+  Without the option the base follows the platform of the build; a stage that must run on the build
+  machine uses `--platform=$BUILDPLATFORM`.
 example: 'FROM --platform=linux/amd64 alpine:3'
 severity: off
 category: suspicious
@@ -59,7 +97,11 @@ rule:
 id: no-redundant-target-platform
 message: 'the target platform is the default platform of FROM; drop the option'
 description: >-
-  A FROM with `--platform=$TARGETPLATFORM`, which is what it does without the option.
+  Reports a `FROM` with `--platform=$TARGETPLATFORM` (or `${TARGETPLATFORM}`), which is what `FROM`
+  does without the option.
+why: >-
+  The target platform is already the default platform of a `FROM`, so the option changes nothing and
+  only makes a reader look for what it does. Drop it.
 example: 'FROM --platform=$TARGETPLATFORM alpine:3'
 severity: off
 category: cleanup
@@ -70,19 +112,26 @@ rule:
 id: no-nested-onbuild
 message: 'ONBUILD cannot trigger ONBUILD, FROM or MAINTAINER'
 description: >-
-  An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER.
+  Reports an `ONBUILD` whose instruction is `ONBUILD`, `FROM` or `MAINTAINER`.
+why: >-
+  Docker does not allow these as triggers: `ONBUILD ONBUILD`, `ONBUILD FROM` and `ONBUILD
+  MAINTAINER` are rejected with an error when the file is built, so the Dockerfile cannot be used.
 example: 'ONBUILD FROM alpine'
 severity: error
 category: correctness
 rule:
   kind: Instruction
-  regex: '(?is)^onbuild(?-u:\b)'
-  child: { kind: Instruction, regex: '(?is)^(?:onbuild|from|maintainer)(?-u:\b)' }
+  regex: '(?is)^onbuild[ \t\r\n\\]+(?:onbuild|from|maintainer)(?-u:\b)'
 ---
 id: no-reserved-stage-name
 message: 'the stage name is a reserved word'
 description: >-
-  A stage named `scratch` or `context`.
+  Reports a stage named `scratch` or `context` (`FROM alpine AS scratch`), compared without regard
+  to case.
+why: >-
+  BuildKit reserves both names: `scratch` is the empty base image and `context` is the name of the
+  build context. A stage that takes one of them collides with that meaning, so `FROM scratch` or a
+  reference to `context` no longer clearly says what it uses.
 example: 'FROM alpine:3 AS scratch'
 severity: warn
 category: suspicious
@@ -93,7 +142,11 @@ rule:
 id: no-maintainer
 message: 'MAINTAINER is deprecated; use LABEL maintainer=...'
 description: >-
-  A MAINTAINER instruction.
+  Reports a `MAINTAINER` instruction.
+why: >-
+  `MAINTAINER` has been deprecated since Docker 1.13 and may be removed. Its replacement, a label
+  such as `LABEL org.opencontainers.image.authors="Name <name@example.com>"`, carries the same
+  information under a standard key that registries and tools read.
 example: 'MAINTAINER a@b.c'
 category: cleanup
 rule:
@@ -103,7 +156,14 @@ rule:
 id: no-copy-whole-stage
 message: 'do not copy an entire filesystem from another stage'
 description: >-
-  A `COPY --from` with `/` as a source and as the target.
+  Reports a `COPY --from=stage / /`, which copies the whole file system of a stage to `/`. A copy of
+  `/` into a folder (`/app/`) or of a folder is not reported.
+why: >-
+  It copies everything of the build stage: compilers, package caches, sources, and the stage's own
+  `/etc` and `/usr` over the ones of the final image. The image becomes as large as the build stage,
+  which defeats the purpose of a multi-stage build, and files of the base image are overwritten.
+
+  Copy only what the final image needs: `COPY --from=build /out/app /usr/local/bin/`.
 example: 'COPY --from=build / /'
 severity: off
 category: suspicious
@@ -114,8 +174,14 @@ rule:
 id: copy-instead-of-add
 message: 'use COPY instead of ADD for files and folders'
 description: >-
-  An ADD with no URL and no archive (`.tar`, `.gz`, `.tgz`, `.xz` and the like) among its arguments,
-  which ADD would extract or download.
+  Reports an `ADD` that only copies. That is an `ADD` with no URL (`http://`, `https://`) and no
+  archive (a name ending in `.tar`, `.gz`, `.tgz`, `.xz`, `.bz2` and the like) among its arguments.
+why: >-
+  `ADD` does more than copy: it unpacks local tar archives and downloads URLs. For a plain file or
+  folder that is a surprise, since an archive you meant to copy is extracted and a value that turns
+  out to be a URL starts a download. `COPY` only copies, so the instruction says what happens.
+
+  Keep `ADD` for unpacking an archive into the image.
 example: 'ADD app.js /app/'
 severity: off
 category: suspicious
@@ -128,7 +194,12 @@ rule:
 id: copy-many-needs-directory
 message: 'COPY with several sources needs a target ending in /'
 description: >-
-  A COPY with more than one source whose last argument does not end with `/`.
+  Reports a `COPY` with several sources whose destination does not end with `/` (`COPY a b /app`).
+  The JSON form, a single source and a heredoc (`<<`) are not checked.
+why: >-
+  With several sources the destination must be a directory, and Docker takes a destination without a
+  trailing slash for a file name. The build stops with an error that the destination of a copy of
+  several sources must end with `/`.
 example: 'COPY a b /app'
 severity: error
 category: correctness
@@ -141,7 +212,16 @@ rule:
 id: numeric-user-id
 message: 'a non-numeric user may not be resolvable by the host; use a numeric id'
 description: >-
-  A USER that is a name rather than a numeric id (a variable is accepted).
+  Reports a `USER` whose user is a name instead of a number (`USER app`, `USER app:1000`). `USER
+  1000`, `USER 1000:app` and a variable are not reported: only the user part is checked, the group
+  may be a name.
+why: >-
+  A name is looked up in the `/etc/passwd` of the image at run time, which tools outside the image
+  cannot do. Kubernetes with `runAsNonRoot: true` refuses to start a container whose image user is a
+  name (it cannot verify that the user is not root), and file permissions on mounted volumes use the
+  number, not the name.
+
+  Create the user with a fixed id (`useradd -u 1000 app`) and write `USER 1000`.
 example: 'USER app'
 severity: off
 category: suspicious
@@ -153,8 +233,17 @@ rule:
 id: no-secret-in-env
 message: 'potentially sensitive data should not be set with ARG or ENV'
 description: >-
-  An ARG or ENV whose name contains `api_key`, `client_key`, `password`, `private`, `secret`, `token`
-  or `username`, or is a well-known credential variable. Build secrets belong in `--mount=type=secret`.
+  Reports an `ARG` or `ENV` whose name suggests a secret. The name contains `api_key`, `client_key`,
+  `password`, `private`, `secret`, `token` or `username` (any case), or is one of a list of
+  well-known credential variables such as `AWS_ACCESS_KEY_ID`. Only the name is read, so
+  `PASSWORD_FILE` and `PRIVATE_NET` are reported too, and the value is not looked at.
+why: >-
+  The value of an `ENV` is stored in the image configuration, and the value of an `ARG` shows up in
+  `docker history`. Anyone who can pull the image can read them (`docker inspect`, `docker
+  history`), even when a later instruction unsets them.
+
+  A secret needed only during the build belongs in a build secret (`RUN --mount=type=secret,id=name
+  ...`); a runtime secret belongs in the environment of the running container or a secrets store.
 example: 'ENV DB_PASSWORD=x'
 severity: warn
 category: suspicious

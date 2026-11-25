@@ -133,6 +133,10 @@ test('rule page: header badges, short config, options config, upstream links, sh
   assert.equal(await page.getByText('Languages:').count(), 0);
   assert.equal(await page.locator('.page-head .badge.lang a').count(), 1);
   assert.equal(await page.getByRole('heading', { name: 'What it does' }).count(), 1);
+  assert.equal(await page.getByRole('heading', { name: 'Why it matters' }).count(), 1);
+  const second = page.locator('main p', { hasText: 'A pinned build is repeatable' }); // the paragraphs of a text stay apart
+  assert.equal(await second.count(), 1);
+  assert.ok(!(await second.textContent()).includes('Without a version'));
   assert.equal(await page.locator('pre', { hasText: 'apk-pin-versions: warn  # off (default), warn, error' }).count(), 1);
   assert.equal(await page.locator('pre', { hasText: 'level:' }).count(), 0);
   assert.equal(await page.getByText('Measured for the tool').count(), 0);
