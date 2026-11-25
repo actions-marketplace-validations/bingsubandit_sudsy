@@ -109,16 +109,28 @@ All languages: <!-- generated:languages -->C#, C/C++, CMake, CSS, Dockerfile, Ed
 | Language | Sudsy options | Reference tool | Tool options |
 |---|---:|---|---:|
 | JavaScript / TypeScript | 33 | Prettier | [17](https://prettier.io/docs/options) |
-| CSS / SCSS / Less | 7 | Prettier | [5](https://prettier.io/docs/options) |
-| HTML | 17 | Prettier | [8](https://prettier.io/docs/options) |
-| YAML | 14 | Prettier | [6](https://prettier.io/docs/options) |
-| GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
-| Python | 13 | ruff format | [10](https://docs.astral.sh/ruff/settings/#format) |
-| Shell | 8 | shfmt | [7](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd) |
-| Java | 23 | google-java-format | [8](https://github.com/google/google-java-format#from-the-command-line) |
-| Protobuf | 4 | buf format | [0](https://buf.build/docs/format/style) |
+| Python | 13 | ruff format | [11](https://docs.astral.sh/ruff/settings/#format) |
+| Protobuf | 4 | buf format | [0](https://buf.build/docs/reference/cli/buf/format/) |
 | Terraform (HCL) | 3 | terraform fmt | [0](https://developer.hashicorp.com/terraform/cli/commands/fmt) |
+| GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
+| TOML | 11 | taplo | [19](https://taplo.tamasfe.dev/configuration/formatter-options.html) |
+| HTML | 17 | Prettier | [8](https://prettier.io/docs/options) |
+| Vue / Svelte | 17 | Prettier | [18](https://prettier.io/docs/options) |
+| Angular templates | 16 | Prettier | [15](https://prettier.io/docs/options) |
+| CSS / SCSS / Less | 7 | Prettier | [6](https://prettier.io/docs/options) |
+| Markdown | 5 | Prettier | [5](https://prettier.io/docs/options) |
+| YAML | 14 | Prettier | [7](https://prettier.io/docs/options) |
+| JSON / JSONC | 10 | Prettier | [7](https://prettier.io/docs/options) |
+| JSON / JSONC | 10 | Biome | [9](https://biomejs.dev/reference/configuration/#json) |
+| PowerShell | 5 | Invoke-Formatter | [33](https://github.com/PowerShell/PSScriptAnalyzer/tree/1.25.0/docs/Rules) |
+| PHP | 7 | PHP-CS-Fixer | [390](https://cs.symfony.com/doc/rules/index.html) |
+| Java | 23 | google-java-format | [8](https://github.com/google/google-java-format#from-the-command-line) |
+| Kotlin | 45 | ktlint | [101](https://github.com/pinterest/ktlint/blob/1.8.0/documentation/release-latest/docs/rules/configuration-ktlint.md) |
+| Shell | 8 | shfmt | [8](https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/shfmt.1.scd) |
+| SQL | 14 | sqlfluff | [68](https://docs.sqlfluff.com/en/stable/configuration/default_configuration.html) |
 | C# | 93 | CSharpier | [4](https://csharpier.com/docs/Configuration) |
+| XML | 6 | CSharpier XML | [5](https://csharpier.com/docs/Configuration) |
+| C / C++ | 47 | clang-format | [257](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) |
 <!-- /generated -->
 
 - **Your own rules:** [YAML patterns](docs/rules.md#pattern-rules) with fixes, and sandboxed [Wasm plugins](docs/rules.md#wasm-plugins).
