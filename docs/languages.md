@@ -27,7 +27,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-html-vue-svelte-angular -->
 - **Measured (HTML):** Ready.
   - Format, Prettier: 95% of the files identical (506 of 532 files).
-  - Lint, html-validate: 92% of its findings also reported (2,245 of 2,428 findings).
+  - Lint, html-validate: 92% of its findings also reported (2,246 of 2,428 findings).
   - Lint, html-eslint: 88% of its findings also reported (281 of 319 findings).
   - Lint, htmlhint: 91% of its findings also reported (1,244 of 1,358 findings).
 - **Measured (Vue / Svelte):** Ready.

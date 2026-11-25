@@ -163,10 +163,10 @@ impl Rule for Meta {
 }
 
 impl Meta {
-    /// The unsupported features of an element and its attributes (`core_rules::feature_support`).
     fn owns(&self, ctx: &RuleContext<'_>) -> bool {
         (self.owned_in.iter()).any(|f| template::path_has_suffix(ctx.file.path, f))
     }
+    /// The unsupported features of an element and its attributes (`core_rules::feature_support`).
     fn unsupported(
         &self,
         name: &str,

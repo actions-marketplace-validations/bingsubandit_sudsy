@@ -260,9 +260,9 @@ Lint: target 88.1% (281 of 319, 38 missed, measured on 916059a8); rules by misse
 
 ## html-validate
 
-Lint: target 92.5% (2245 of 2428, 183 missed, measured on 0c8a3dcc); rules by missed findings:
+Lint: target 92.5% (2246 of 2428, 182 missed, measured on 2607e39a); rules by missed findings:
 1. `no-implicit-close` (30 missed)
-2. `no-raw-characters` (17 missed)
+2. `no-raw-characters` (16 missed)
 3. `no-inline-style` (15 missed)
 4. `attr-spacing` (14 missed)
 5. `no-dup-attr` (14 missed)
