@@ -69,6 +69,14 @@ Each new language should cost less code than the last. When a language's step 1 
 - Find the sinks: which kind of code grew most per language (formatter, rule fixtures, docs, generated data) and what would make it cheaper.
 - Record the per-language numbers in the list below and land the extraction as one step (gate, finish, bench flat).
 
+### Generalization of CMake
+CMake's step put its layout into shared code from the start: `lang-cmake` holds 336 hand-written lines (lexer 140, parser 146, block table 19, glue 31), the block table, the 343-row signature table (generated from CMake's help) and `lang.yaml` values. What each shared piece costs a second user:
+- `core_syntax::signature::Signature` (concept `command-signature`): two users, PowerShell's `missing-arguments` and CMake's layout. A third (a command table of another language) adds only rows.
+- `shapes::keyword_call` (concept `keyword-sections`): one caller, CMake; it reads a plain `Signature` and the option `leading_argument_commands`, so it stays shared Rust with no rows. Candidates for a second caller are the languages whose call is a name with keyword sections after it: Dockerfile instructions (`HEALTHCHECK --interval=30s CMD x`, `COPY --from=x`), PowerShell cmdlet parameters (its table is the same `Signature` type, `-Name value` is a `Values::One` keyword) and shell command lines. None of them is laid out by keyword today, so none moves in this step; the first one that needs it adds rows, not code.
+- `shapes::command_list` (concept `flat-command-list`): reads the block table and the signature table, so a second flat-command language (Makefile directives, `ifeq`/`endif`) adds a `Block` table.
+- `core_syntax::block_pair` (concept `keyword-block-pairing`): single-use (`design/single-use.txt`); a candidate second user is Makefile conditionals (`ifdef`/`ifeq`/`else`/`endif`, `define`/`endef`); not built until the Makefile needs it.
+In `lang-cmake` nothing is left that is a mechanism: the lexer and parser are the language's grammar facts (words, quoted and bracket arguments, `#[[ ]]` comments), the rest is data.
+
 ## Hand-written lines per language
 Hand-written Rust in `crates/lang-*/src` by kind, per grammar node (`node` lines of `grammars/<lang>.grammar`), generated files left out (`scripts/cost.sh --languages [REV]`, classes by path in `scripts/cost-kinds.txt`; unmatched files are "other": parser, adapter, lexer, glue). `github-actions` has no grammar; the C# worker (.NET) is not counted. Refresh the table when a language lands.
 
@@ -97,11 +105,12 @@ Hand-written Rust in `crates/lang-*/src` by kind, per grammar node (`node` lines
 | protobuf | 37 | 536 | 5 | 10 | 551 | 15 |
 | xml | 7 | 268 | 220 | 10 | 498 | 71 |
 | editorconfig | 4 | 74 | 253 | 10 | 337 | 84 |
+| cmake | 5 | 10 | 0 | 311 | 321 | 64 |
 | php | 169 | 39 | 6 | 257 | 302 | 2 |
 | gitignore | 2 | 50 | 157 | 9 | 216 | 108 |
 | ini | 4 | 118 | 5 | 9 | 132 | 33 |
 
-Shared crates (`core-*`, `provider-api`, `languages`): 24631, lang-* crates 62593, shared share 28.2% (budget 3000 lines per language)
+Shared crates (`core-*`, `provider-api`, `languages`): 76087, lang-* crates 67622, shared share 52.9% (budget 3000 lines per language)
 
 A new brace language has a budget of 3,000 hand-written lines to "usable" (decision 3 of the shared-core design). The CI job `cost` runs `scripts/cost.sh --languages --check BASE HEAD` on every push and pull request. It fails when the shared share falls by more than 0.1 points or a language crosses the budget (from at most the budget to above it), unless a commit message of the range has a line
 

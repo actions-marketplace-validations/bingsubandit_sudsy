@@ -7,10 +7,10 @@ files:
   accessibility/elements sudsy:input-missing-label 14: aria-hidden
   accessibility/elements sudsy:input-missing-label 15: aria-hidden
 target: 92.5
-measured: {covered: 2245, total: 2428, main: '0c8a3dcc'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 2246, total: 2428, main: '2607e39a'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   no-implicit-close: 30
-  no-raw-characters: 17
+  no-raw-characters: 16
   no-inline-style: 15
   attr-spacing: 14
   no-dup-attr: 14

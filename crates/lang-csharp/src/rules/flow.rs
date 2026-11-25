@@ -15,9 +15,10 @@ rule! {
         category: Cleanup,
         default: Off,
         fix: Safe,
-        description: "A local variable or catch variable that is never used (the compiler's CS0168), \
-                  or is only assigned constants and never read (CS0219). Variables captured by \
-                  lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219).",
+        description: "Reports a local variable or catch variable that is never used, or that is only \
+              assigned constants and never read. Variables captured by lambdas or local \
+              functions count as used. The fix removes the declaration. Off by default, because \
+              the compiler already warns.",
         example: "int total = 0;   // never read\ntry { Run(); } catch (Exception e) { }   // e is never used",
         requires: [Flow],
     }

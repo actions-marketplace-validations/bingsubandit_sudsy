@@ -65,14 +65,14 @@
             },
             "alpha-value-notation": {
               "$ref": "#/definitions/rule",
-              "description": "The alpha value of `rgb()`, `hsl()`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()` or `color()` written as a number (`/ 0.5` is `/ 50%`); the comma form of `rgba()` and `hsla()` counts too."
+              "description": "Reports the alpha value of `rgb()`, `hsl()`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()` or `color()` written as a number (`/ 0.5`), also the fourth argument of the comma form of `rgba()` and `hsla()`, on the function name."
             },
             "ambiguous-block-association": {
               "$ref": "#/definitions/rule",
               "description": "A call without parentheses whose last argument is a call with a braces block (`expect { x }.to change { y }`, RuboCop Lint/AmbiguousBlockAssociation); also a `do` block that binds to the outer call while a block method such as `map` ends its arguments (`puts items.map do ... end`)."
             },
             "ambiguous-booleans": {
-              "description": "A plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the usual casings): a boolean to YAML 1.1 parsers and a string to YAML 1.2 parsers. Lowercase `true` and `false` are fine.",
+              "description": "Reports a plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the usual casings), which are booleans to a YAML 1.1 parser and strings to a YAML 1.2 parser.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -161,7 +161,7 @@
             },
             "area-alt": {
               "$ref": "#/definitions/rule",
-              "description": "The `alt` of an `<area>` is the name of the link in the image map; without an `href` it names nothing."
+              "description": "Reports an `<area>` that has an `href` and no non-empty `alt`, and an `<area>` that has an `alt` but no `href`."
             },
             "argument-list-wrapping": {
               "$ref": "#/definitions/rule",
@@ -169,11 +169,11 @@
             },
             "aria-hidden-body": {
               "$ref": "#/definitions/rule",
-              "description": "`aria-hidden=\"true\"` on `<body>` removes the whole page from the accessibility tree."
+              "description": "Reports `aria-hidden=\"true\"` on `<body>`."
             },
             "aria-label-misuse": {
               "$ref": "#/definitions/rule",
-              "description": "`aria-label` names interactive elements, landmarks and elements with a role. A generic element (`<div>`, `<span>`, `<p>`, `<b>`, ...) and an `<a>` without `href` have no role to name."
+              "description": "Reports an `aria-label` on an element that cannot be named by it: a generic element (`<div>`, `<span>`, `<p>`, `<b>`, ...) with no role, and an `<a>` without `href`."
             },
             "array-bracket-space": {
               "$ref": "#/definitions/rule",
@@ -217,10 +217,10 @@
             },
             "at-extend-no-missing-placeholder": {
               "$ref": "#/definitions/rule",
-              "description": "An `@extend` of anything but a placeholder selector; a selector with interpolation is left alone."
+              "description": "Reports an `@extend` of anything but a placeholder selector (`%name`); a selector with interpolation is not reported."
             },
             "at-function-pattern": {
-              "description": "A `@function` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `@function` whose name does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -252,14 +252,14 @@
             },
             "at-if-no-null": {
               "$ref": "#/definitions/rule",
-              "description": "An `@if` that compares with `null` (`== null`, `!= null`): write `not $a` or `$a`."
+              "description": "Reports an `@if` that compares with `null` (`== null`, `!= null`)."
             },
             "at-mixin-argumentless-call-parentheses": {
               "$ref": "#/definitions/rule",
-              "description": "An `@include` of a mixin with empty parentheses (`@include foo()`); a `using (...)` clause after them is left alone."
+              "description": "Reports an `@include` of a mixin with empty parentheses (`@include foo()`)."
             },
             "at-mixin-pattern": {
-              "description": "A `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `@mixin` whose name does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -290,7 +290,7 @@
               ]
             },
             "at-rule-allowed-list": {
-              "description": "An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports an at-rule that is not in the `list` option (a vendor prefix is left out of the name).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -325,10 +325,10 @@
             },
             "at-rule-conditional-no-parentheses": {
               "$ref": "#/definitions/rule",
-              "description": "The condition of `@if`, `@else if` and `@while` written in parentheses (`@if ($a == 1)`)."
+              "description": "Reports the condition of an `@if`, `@else if` or `@while` that is written in parentheses (`@if ($a == 1)`)."
             },
             "at-rule-disallowed-list": {
-              "description": "An at-rule (vendor prefix left out) that is in the `list` option.",
+              "description": "Reports an at-rule that is in the `list` option (a vendor prefix is left out of the name).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -363,10 +363,10 @@
             },
             "at-rule-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "An at-rule needs a blank line before it, unless a comment is right before it; the first at-rule of a block, and a blockless one right after a blockless one of the same name (`@import` lines), take none."
+              "description": "Reports an at-rule with no empty line before it."
             },
             "at-rule-no-deprecated": {
-              "description": "A deprecated at-rule (`@document`, `@nest`, `@viewport`).",
+              "description": "Reports a deprecated at-rule (`@document`, `@nest`, `@viewport`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -400,7 +400,7 @@
               ]
             },
             "at-rule-no-unknown": {
-              "description": "An at-rule that no CSS specification lists. Vendor-prefixed ones are left out; SCSS has its own (`@include`, `@mixin`, ...), and Less at-rules are not checked. Tailwind's are left out by default.",
+              "description": "Reports an at-rule that no CSS specification lists.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -446,7 +446,7 @@
               ]
             },
             "at-rule-no-vendor-prefix": {
-              "description": "A vendor-prefixed at-rule that autoprefixer knows the standard one of.",
+              "description": "Reports a vendor-prefixed at-rule that has a standard one (`@-webkit-keyframes`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -481,14 +481,14 @@
             },
             "attr-case": {
               "$ref": "#/definitions/rule",
-              "description": "Attribute names are case-insensitive in HTML; lowercase is the convention. Everything inside `<svg>` and `<math>` keeps its case."
+              "description": "Reports an attribute name that is not in lowercase (`CLASS=\"a\"`)."
             },
             "attr-delimiter": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute name and its value are joined by `=` without whitespace."
+              "description": "Reports white space around the `=` between an attribute name and its value (`class = \"a\"`)."
             },
             "attr-pattern": {
-              "description": "An attribute name that does not match the `pattern` option (a regex; by default letters, digits, `-` and `:`, in either case).",
+              "description": "Reports an attribute name that does not match the option `pattern`, a regex that by default allows letters, digits, `-` and `:` in either case.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -520,31 +520,31 @@
             },
             "attr-quotes": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute value is quoted with `\"`; it is quoted with `'` only when it holds a `\"`. Unquoted values are reported too, except `name={expression}` in Svelte, where the braces are the syntax."
+              "description": "Reports an attribute value that is not quoted with `\"`: a value with no quotes (`class=a`), and a value in `'` unless it holds a `\"` (`class='a'`)."
             },
             "attr-spacing": {
               "$ref": "#/definitions/rule",
-              "description": "A quoted attribute value is followed by whitespace before the next attribute."
+              "description": "Reports a quoted attribute value that is directly followed by the next attribute, with no white space between them (`class=\"a\"id=\"b\"`)."
             },
             "attribute-allowed-values": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute that is limited to a list of values (`type` of `<button>`, `method` of `<form>`, ...) has another one."
+              "description": "Reports an attribute whose value is not one of the values HTML allows for it on that element, for attributes with a fixed list such as `type` of `<button>` (`button`, `submit`, `reset`) and `method` of `<form>`."
             },
             "attribute-boolean-style": {
               "$ref": "#/definitions/rule",
-              "description": "A boolean attribute is true when present: `disabled`, not `disabled=\"disabled\"`."
+              "description": "Reports a boolean attribute that is written with a value (`disabled=\"disabled\"`, `disabled=\"\"`)."
             },
             "attribute-empty-style": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute whose empty value means the same as no value (`hidden`, `crossorigin`) is written without `=\"\"`."
+              "description": "Reports an attribute whose empty value means the same as no value (`hidden=\"\"`, `crossorigin=\"\"`)."
             },
             "attribute-hyphenation": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+              "description": "Reports a prop of a component that is written in camelCase (`:cardTitle`)."
             },
             "attributes-order": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `attributes-order` (eslint-plugin-vue) with its default order. A bare `v-bind=\"object\"` takes the place of the attribute it precedes. Not sorted alphabetically."
+              "description": "Reports an attribute that is out of the recommended order: `is`, `v-for`, conditions (`v-if`, `v-else-if`, `v-else`, `v-show`), `v-pre` and `v-once`, `id`, `ref`, `key` and slots, `v-model`, other directives, plain and bound attributes, events, and `v-html` and `v-text` last."
             },
             "avoid-unicode-escape": {
               "$ref": "#/definitions/rule",
@@ -552,7 +552,7 @@
             },
             "backslash-separator": {
               "$ref": "#/definitions/rule",
-              "description": "`build\\out` is the pattern `buildout`: the backslash escapes `o`. Windows-style separators never match what was meant. Reported for a backslash before a letter, digit, `_` or `-` (`\\.` and `\\#` are ordinary escapes). No fix."
+              "description": "Reports a pattern with a backslash before a letter, digit, `_` or `-` (`build\\out`), which is the pattern `buildout`."
             },
             "ban-ts-comment": {
               "$ref": "#/definitions/rule",
@@ -560,7 +560,7 @@
             },
             "banana-in-box": {
               "$ref": "#/definitions/rule",
-              "description": "Angular's `banana-in-box` (@angular-eslint/template). `([x])` is no binding. Only in `.component.html` files."
+              "description": "Reports a two-way binding written the wrong way round, `([ngModel])`."
             },
             "bare-raise-outside-handler": {
               "$ref": "#/definitions/rule",
@@ -616,7 +616,7 @@
             },
             "block-no-empty": {
               "$ref": "#/definitions/rule",
-              "description": "A rule or at-rule block with nothing in it, comments included."
+              "description": "Reports a rule or at-rule block with nothing in it, comments included."
             },
             "boolean-literal-comparison": {
               "description": "Reports an equality or inequality with a boolean literal on either side (`x == true`, `x !== false`, `true == x`, `x != False`).",
@@ -690,7 +690,7 @@
               "description": "A class, interface or object whose name starts with a lowercase letter or an underscore (ktlint class-naming)."
             },
             "class-pattern": {
-              "description": "A class name that does not match the `pattern` option (a regex; by default kebab-case).",
+              "description": "Reports a class name that does not match the option `pattern`, a regex that by default means kebab-case (`foo-bar`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -730,14 +730,14 @@
             },
             "color-function-alias-notation": {
               "$ref": "#/definitions/rule",
-              "description": "`rgba()` and `hsla()`, the legacy names of `rgb()` and `hsl()`."
+              "description": "Reports `rgba()` and `hsla()`, the legacy names of `rgb()` and `hsl()`, on the function name."
             },
             "color-function-notation": {
               "$ref": "#/definitions/rule",
-              "description": "`rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)` is `rgb(0 0 0)`), also with a call such as `var()` as an argument."
+              "description": "Reports `rgb()`, `rgba()`, `hsl()` or `hsla()` with the legacy comma-separated arguments (`rgb(0, 0, 0)`), also when one argument is a call such as `var()`."
             },
             "color-hex-length": {
-              "description": "A hex color that can be written with three or four digits (`#aabbcc` is `#abc`); with the `style` option set to `long`, one that is written short.",
+              "description": "Reports a hex color that can be written with three or four digits (`#aabbcc`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -773,19 +773,19 @@
             },
             "color-no-hex": {
               "$ref": "#/definitions/rule",
-              "description": "A hex color: write a named color or a function instead."
+              "description": "Reports a hex color (`#fff`)."
             },
             "color-no-invalid-hex": {
               "$ref": "#/definitions/rule",
-              "description": "A hex color that does not have 3, 4, 6 or 8 hex digits."
+              "description": "Reports a hex color that does not have 3, 4, 6 or 8 digits (`#ab`)."
             },
             "commands-show-output": {
               "$ref": "#/definitions/rule",
-              "description": "A fenced code block in which every line starts with `$ ` shows commands without their output, which makes copying them awkward (markdownlint MD014)."
+              "description": "Reports a fenced code block in which every non-blank line starts with `$ `, so it shows commands without their output."
             },
             "comment-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "A `/* */` comment on a line of its own needs a blank line before it, unless it comes first in a block, shares a line with code or is a `stylelint-` directive; a `//` comment is another rule's."
+              "description": "Reports a `/* */` comment on a line of its own with no empty line before it."
             },
             "comment-space": {
               "description": "Reports a line comment whose text starts right after the marker (`//text`, `#text`).",
@@ -848,7 +848,7 @@
               "description": "The summary of a constructor starts with \"Initializes a new instance of the <see cref=\"T\"/> class\" (struct), \"Initializes static members of the ...\" for a static constructor, and a private constructor may say \"Prevents a default instance of the ... from being created\". The `<see>` is compared with the name of the type. The fix puts the standard sentence before the text."
             },
             "container-name-pattern": {
-              "description": "A `@container` name that does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `@container` name that does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -938,7 +938,7 @@
               ]
             },
             "custom-media-pattern": {
-              "description": "A `@custom-media` name, without its `--`, that does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `@custom-media` name, without its `--`, that does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -970,14 +970,14 @@
             },
             "custom-property-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "A custom property needs a blank line before it, unless a comment is right before it or another custom property is; the first declaration of a block and those in a single-line block take none."
+              "description": "Reports a custom property declaration with no empty line before it."
             },
             "custom-property-no-missing-var-function": {
               "$ref": "#/definitions/rule",
-              "description": "A custom property that the file declares, used in a value without `var()`. Properties that take names (`transition`, `will-change`, ...) are left out."
+              "description": "Reports a custom property that the file declares, used in a value without `var()` (`calc(--x * 2)`), on the property name."
             },
             "custom-property-pattern": {
-              "description": "A custom property, as declared, used in `var()` or named by `@property`, whose name without the `--` does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a custom property whose name, without the `--`, does not match the `pattern` option (a regex), where it is declared, used in `var()` or named by `@property`.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1029,10 +1029,10 @@
             },
             "declaration-block-no-duplicate-custom-properties": {
               "$ref": "#/definitions/rule",
-              "description": "A custom property declared twice in one block (names are case sensitive); the repeat is reported."
+              "description": "Reports a custom property declared twice in one block (names are case sensitive), on the repeat."
             },
             "declaration-block-no-duplicate-properties": {
-              "description": "A property declared twice in one block; the earlier declaration is reported (the later one when only the earlier is `!important`). `src` and custom properties are left out.",
+              "description": "Reports a property declared twice in one block, on the earlier declaration (on the later one when only the earlier one is `!important`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1064,10 +1064,10 @@
             },
             "declaration-block-no-shorthand-property-overrides": {
               "$ref": "#/definitions/rule",
-              "description": "A shorthand property declared after one of its longhands in the same block."
+              "description": "Reports a shorthand property declared after one of its longhands in the same block (`margin-top: 1px; margin: 0`), on the longhand."
             },
             "declaration-block-single-line-max-declarations": {
-              "description": "A block written on one line with more declarations than the `max` option.",
+              "description": "Reports a block written on one line that has more declarations than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1099,11 +1099,11 @@
             },
             "declaration-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "A declaration right after a rule or at-rule needs a blank line before it, one after another declaration or first in a block takes none; a comment right before it, a single-line block, custom properties and variables are left alone."
+              "description": "Reports a declaration that follows a rule or at-rule and has no empty line before it."
             },
             "declaration-no-important": {
               "$ref": "#/definitions/rule",
-              "description": "A declaration that ends in `!important`."
+              "description": "Reports a declaration that ends in `!important`."
             },
             "declare-and-assign-separately": {
               "$ref": "#/definitions/rule",
@@ -1196,7 +1196,7 @@
             },
             "deprecated": {
               "$ref": "#/definitions/rule",
-              "description": "An element that HTML5 no longer has (`<center>`, `<font>`, `<marquee>`, ...)."
+              "description": "Reports an element that HTML5 no longer has (`<center>`, `<font>`, `<marquee>`, ...)."
             },
             "deprecated-commands": {
               "$ref": "#/definitions/rule",
@@ -1250,7 +1250,7 @@
             },
             "descriptive-link-text": {
               "$ref": "#/definitions/rule",
-              "description": "Link text that is `click here`, `here`, `link` or `more` (markdownlint MD059)."
+              "description": "Reports a link whose text is `click here`, `here`, `link` or `more` (in any case) and nothing else."
             },
             "destructor-summary-standard-text": {
               "$ref": "#/definitions/rule",
@@ -1420,14 +1420,14 @@
             },
             "doctype-html": {
               "$ref": "#/definitions/rule",
-              "description": "A doctype other than `html` puts the browser in quirks or limited-quirks mode."
+              "description": "Reports a doctype that is not `<!DOCTYPE html>` (compared without regard to case), such as the HTML 4.01 public identifier."
             },
             "doctype-style": {
               "$ref": "#/definitions/rule",
-              "description": "The doctype keyword is case-insensitive; uppercase is the convention."
+              "description": "Reports a doctype keyword that is not in uppercase (`<!doctype html>`)."
             },
             "document-end": {
-              "description": "A document without the `...` end marker (or, with `present: false`, one that has it).",
+              "description": "Reports a document without the `...` end marker, or with `present: false` one that has it.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1459,7 +1459,7 @@
             },
             "document-start": {
               "$ref": "#/definitions/rule",
-              "description": "The first document does not start with `---`."
+              "description": "Reports a first document that does not start with `---`."
             },
             "documented-command": {
               "description": "Reports a command listed in the option `commands` (for example `function` and `macro` in CMake, compared ignoring case) that has no comment on the line right before it, or whose comment has no text (`#` alone).",
@@ -1513,10 +1513,10 @@
             },
             "dollar-variable-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "A `$` variable declaration needs a blank line before it, unless a comment is right before it or another `$` variable is; the first statement of a block and those in a single-line block take none."
+              "description": "Reports a `$variable` declaration with no empty line before it."
             },
             "dollar-variable-pattern": {
-              "description": "A `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1552,7 +1552,7 @@
             },
             "double-slash-comment-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "A `//` comment on a line of its own needs a blank line before it, unless a comment is right before it, it comes first in a block, or it is a `stylelint-` directive."
+              "description": "Reports a `//` comment on a line of its own with no empty line before it."
             },
             "duplicate-column-alias": {
               "$ref": "#/definitions/rule",
@@ -1576,31 +1576,31 @@
             },
             "element-case": {
               "$ref": "#/definitions/rule",
-              "description": "Element names are case-insensitive in HTML; lowercase is the convention. Everything inside `<svg>` and `<math>` keeps its case. Reported on the name of a start or end tag."
+              "description": "Reports an element name that is not in lowercase, on the name of a start or end tag (`<DIV>`)."
             },
             "element-name": {
               "$ref": "#/definitions/rule",
-              "description": "A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone."
+              "description": "Reports an element whose name is not a valid custom element name: a custom element is lowercase letters, digits, `-`, `.` and `_` and has a `-`."
             },
             "element-permitted-content": {
               "$ref": "#/definitions/rule",
-              "description": "An element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), or one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block in `<p>`'s `<button>`)."
+              "description": "Reports an element that its parent does not permit as content (`<li>` outside a list, `<div>` in a `<table>`, a deprecated element in flow content), and one that an ancestor forbids as a descendant (`<a>` in `<a>`, a block element in a `<button>`)."
             },
             "element-permitted-occurrences": {
               "$ref": "#/definitions/rule",
-              "description": "An element the parent allows at most once (`<head>`, `<body>`, `<title>`, `<caption>`) that appears again. A `<script>` or `<style>` after `</body>` opens an implied `<head>`."
+              "description": "Reports an element that the parent permits at most once (`<head>`, `<body>`, `<title>`, `<caption>`) when it appears again."
             },
             "element-permitted-order": {
               "$ref": "#/definitions/rule",
-              "description": "Children out of the order the parent requires (`<tbody>` before `<tfoot>`, `<head>` before `<body>`, `<summary>` first in `<details>`)."
+              "description": "Reports children that are out of the order the parent requires (`<thead>` and `<tfoot>` before `<tbody>`, `<head>` before `<body>`, `<summary>` first in `<details>`)."
             },
             "element-required-attributes": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...)."
+              "description": "Reports an element that lacks an attribute it must have: `lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, and the like."
             },
             "element-required-content": {
               "$ref": "#/definitions/rule",
-              "description": "An element that lacks a child it requires (`<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`)."
+              "description": "Reports an element that lacks a child it requires: `<title>` in `<head>`, `<summary>` in `<details>`, `<head>` and `<body>` in `<html>`."
             },
             "else-null": {
               "$ref": "#/definitions/rule",
@@ -1608,7 +1608,7 @@
             },
             "empty-heading": {
               "$ref": "#/definitions/rule",
-              "description": "Screen readers need text in a heading; whitespace is not text. An image with an `alt` or an `<svg>` inside counts as content."
+              "description": "Reports a heading (`<h1>` to `<h6>`) with no text."
             },
             "empty-list-equality": {
               "$ref": "#/definitions/rule",
@@ -1616,7 +1616,7 @@
             },
             "empty-section": {
               "$ref": "#/definitions/rule",
-              "description": "A `[section]` header with nothing under it, usually left behind by a removed setting. Comments do not count as settings."
+              "description": "Reports a `[section]` header with no settings under it."
             },
             "empty-statement": {
               "$ref": "#/definitions/rule",
@@ -1624,7 +1624,7 @@
             },
             "empty-title": {
               "$ref": "#/definitions/rule",
-              "description": "The `<title>` names the page in the browser tab, search results and screen readers; whitespace is not text."
+              "description": "Reports a `<title>` with no text."
             },
             "empty-when": {
               "$ref": "#/definitions/rule",
@@ -1687,7 +1687,7 @@
             },
             "eqeqeq": {
               "$ref": "#/definitions/rule",
-              "description": "Angular's `eqeqeq` (@angular-eslint/template), on bindings, interpolations and block parameters. Only in `.component.html` files."
+              "description": "Reports `==` and `!=` in the bindings, interpolations and block parameters of an Angular template."
             },
             "equals-hash-code": {
               "$ref": "#/definitions/rule",
@@ -1739,7 +1739,7 @@
             },
             "fenced-code-language": {
               "$ref": "#/definitions/rule",
-              "description": "A fenced code block without an info string (markdownlint MD040); name the language, or `text`."
+              "description": "Reports a fenced code block that has no info string after the opening fence."
             },
             "field-lower-snake-case": {
               "$ref": "#/definitions/rule",
@@ -1855,7 +1855,7 @@
               "description": "`==`, `!=`, `eql?` or `equal?` with a float on one side (a literal, `to_f`, arithmetic on a float), and a float in a `when` (RuboCop Lint/FloatComparison); comparing with 0 or `nil` is fine."
             },
             "float-style": {
-              "description": "Restricts how plain floats are written. Every option is off until set: `.5` without a leading digit, `1e3` scientific notation, `.nan` and `.inf`. Quoted and tagged scalars are not checked. The fix for `.5` is `0.5`.",
+              "description": "Restricts how plain floats are written.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1902,19 +1902,19 @@
             },
             "font-family-name-quotes": {
               "$ref": "#/definitions/rule",
-              "description": "A quoted font family name that is also valid without quotes (`always-where-required`)."
+              "description": "Reports a quoted font family name that is also valid without quotes (`\"Arial\"`, `\"Open Sans\"`)."
             },
             "font-family-no-duplicate-names": {
               "$ref": "#/definitions/rule",
-              "description": "The same family twice in one `font-family` list."
+              "description": "Reports a family that appears twice in one `font-family` list, on the repeat."
             },
             "font-family-no-missing-generic-family-keyword": {
               "$ref": "#/definitions/rule",
-              "description": "A `font-family` (or `font`) list with no generic family (`serif`, `sans-serif`, ...) to fall back on. `@font-face` is left out."
+              "description": "Reports a `font-family` (or `font`) list that has no generic family (`serif`, `sans-serif`, `monospace`, ...)."
             },
             "form-submit": {
               "$ref": "#/definitions/rule",
-              "description": "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32)."
+              "description": "Reports a `<form>` that has no submit button inside it and none that names it with `form=` (WCAG H32)."
             },
             "forward-annotation-syntax-error": {
               "$ref": "#/definitions/rule",
@@ -1925,7 +1925,7 @@
               "description": "Reports an instruction other than `ARG` before the first `FROM`."
             },
             "function-allowed-list": {
-              "description": "A function that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports a function that is not in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -1960,7 +1960,7 @@
             },
             "function-calc-no-unspaced-operator": {
               "$ref": "#/definitions/rule",
-              "description": "`+` and `-` in `calc()` need whitespace on both sides, or the expression is invalid."
+              "description": "Reports `+` and `-` inside `calc()` that lack whitespace on one or both sides (`calc(1px+2px)`), on the operator."
             },
             "function-call-in-default": {
               "$ref": "#/definitions/rule",
@@ -2004,7 +2004,7 @@
               ]
             },
             "function-disallowed-list": {
-              "description": "A function that is in the `list` option.",
+              "description": "Reports a function that is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2043,11 +2043,11 @@
             },
             "function-linear-gradient-no-nonstandard-direction": {
               "$ref": "#/definitions/rule",
-              "description": "A `linear-gradient()` that starts with a side (`top`) instead of `to top` or an angle."
+              "description": "Reports a `linear-gradient()` that starts with a side keyword (`top`, `left bottom`) instead of `to top` or an angle."
             },
             "function-name-case": {
               "$ref": "#/definitions/rule",
-              "description": "A function name with capitals (`translateX` and the like keep theirs)."
+              "description": "Reports a function name with capitals (`RGB()`)."
             },
             "function-naming": {
               "description": "A function whose name does not match the expression set for its kind (ktlint function-naming): camel case; a function with a declared return type may also be a factory named in Pascal case; an `override` and a `@Composable` function are left alone.",
@@ -2096,7 +2096,7 @@
               ]
             },
             "function-no-unknown": {
-              "description": "A function in a declaration value that no CSS specification lists. Not checked in SCSS and Less, whose built-in functions are not in the table.",
+              "description": "Reports a function in a declaration value that no CSS specification lists.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2135,7 +2135,7 @@
             },
             "function-url-quotes": {
               "$ref": "#/definitions/rule",
-              "description": "An unquoted `url(...)`: quote its argument."
+              "description": "Reports an unquoted `url(...)`."
             },
             "future-feature-not-defined": {
               "$ref": "#/definitions/rule",
@@ -2183,15 +2183,15 @@
             },
             "header-scope": {
               "$ref": "#/definitions/rule",
-              "description": "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is not a simple one (one row or one column of headers) (WCAG H63)."
+              "description": "Reports a `<th>` with no `scope` (`row`, `col`, `rowgroup` or `colgroup`) in a table that is not a simple one."
             },
             "heading-increment": {
               "$ref": "#/definitions/rule",
-              "description": "A heading is more than one level deeper than the heading before it (an `h4` right after an `h2`). Going back up by any number of levels is fine (markdownlint MD001)."
+              "description": "Reports a heading that is more than one level deeper than the heading before it (an `h4` right after an `h2`)."
             },
             "heading-level": {
               "$ref": "#/definitions/rule",
-              "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported)."
+              "description": "Reports a heading that breaks the outline of the document: the first heading is not an `<h1>`, a level is skipped going down (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported)."
             },
             "heading-style": {
               "description": "Reports a heading written in another style than the document's: `#` before the text (ATX) or the text over a line of `=` or `-` (setext).",
@@ -2236,18 +2236,18 @@
             },
             "hidden-focusable": {
               "$ref": "#/definitions/rule",
-              "description": "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not."
+              "description": "Reports an element that can take focus (a link, a control, an element with `tabindex` of 0 or more) inside an element with `aria-hidden=\"true\"`."
             },
             "html-self-closing": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `html-self-closing` (eslint-plugin-vue) with its defaults: HTML elements, components, SVG and MathML elements without content are self-closing, void HTML elements are not. The elements of the file's root (`<template>`, `<script>`) are left alone."
+              "description": "Reports an element written in the wrong form for Vue's style: an HTML element, a component, an SVG or MathML element without content should be self-closed (`<div />`), a void HTML element should not (`<img>`)."
             },
             "hue-degree-notation": {
               "$ref": "#/definitions/rule",
-              "description": "The hue of `hsl()`, `hsla()`, `hwb()`, `lch()` or `oklch()` written as a number (`120` is `120deg`)."
+              "description": "Reports the hue of `hsl()`, `hsla()`, `hwb()`, `lch()` or `oklch()` written as a bare number (`120`), on the function name."
             },
             "id-pattern": {
-              "description": "An `id` that does not match the `pattern` option (a regex; by default kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter).",
+              "description": "Reports an `id` that does not match the option `pattern`, a regex that by default means kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2344,7 +2344,7 @@
             },
             "img-alt": {
               "$ref": "#/definitions/rule",
-              "description": "An `<img>` with no `alt` has no text alternative (WCAG H37; html-validate wcag/h37). One hidden from assistive technology (`aria-hidden=\"true\"`, `role=\"presentation\"` or `none`) is left alone."
+              "description": "Reports an `<img>` with no `alt` attribute (WCAG H37)."
             },
             "implicit-alias": {
               "$ref": "#/definitions/rule",
@@ -2363,7 +2363,7 @@
               "description": "`import public` (buf lint IMPORT_NO_PUBLIC)."
             },
             "import-notation": {
-              "description": "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported).",
+              "description": "Reports an `@import` written in the notation the `url` option does not ask for: by default a string, so `url(...)` is reported; with `url: true`, `url(...)`, so a string is reported.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2427,7 +2427,7 @@
             },
             "inline-comment": {
               "$ref": "#/definitions/rule",
-              "description": "Gitignore-syntax files have no end-of-line comments: `*.log # logs` is the pattern `*.log # logs`, a file name with spaces and a `#`. No fix: put the comment on its own line."
+              "description": "Reports a pattern line with a ` #` after the pattern."
             },
             "inner-join": {
               "$ref": "#/definitions/rule",
@@ -2435,7 +2435,7 @@
             },
             "input-missing-label": {
               "$ref": "#/definitions/rule",
-              "description": "An `<input>` (not hidden or a button), `<select>` or `<textarea>` that no `<label>` names: it is not inside one, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`."
+              "description": "Reports an `<input>` (not hidden and not a button), `<select>` or `<textarea>` that no label names: it is not inside a `<label>`, no `<label for>` points at its `id`, and it has no `aria-label` or `aria-labelledby`."
             },
             "interpolation-check": {
               "$ref": "#/definitions/rule",
@@ -2443,7 +2443,7 @@
             },
             "invalid-escape-sequence": {
               "$ref": "#/definitions/rule",
-              "description": "A backslash in a string that is not raw and does not start an escape sequence (`\\d`, `\\_`), also in the pieces of an f-string."
+              "description": "Reports a backslash in a string that is not raw and does not start an escape sequence (`\"\\d\"`, `\"\\_\"`), also in the pieces of an f-string."
             },
             "invalid-event": {
               "$ref": "#/definitions/rule",
@@ -2471,7 +2471,7 @@
             },
             "invalid-property-value": {
               "$ref": "#/definitions/rule",
-              "description": "A known EditorConfig or .NET property has a value it does not accept (`indent_style = tabs`, `dotnet_diagnostic.CA1000.severity = high`). Values are case-insensitive, `unset` is always valid, and .NET code-style options may end in `:silent`, `:suggestion`, `:warning` or `:error`; formatting options do not (Roslyn parses them with `bool.TryParse`, EditorConfigValueSerializer.cs). A trailing `# comment` is ignored, as Roslyn does. Unknown properties are not checked."
+              "description": "Reports a known EditorConfig or .NET property that has a value it does not accept (`indent_style = tabs`, `dotnet_diagnostic.CA1000.severity = high`)."
             },
             "invalid-runs-on": {
               "description": "A `runs-on` label that is not one of the known runner labels. A job that also has `self-hosted` is not checked; `${{ matrix.name }}` stands for the matrix's values, other expressions are skipped.",
@@ -2602,18 +2602,18 @@
             },
             "keyframe-block-no-duplicate-selectors": {
               "$ref": "#/definitions/rule",
-              "description": "The same selector twice in one `@keyframes` rule (compared in lowercase)."
+              "description": "Reports a selector that is used twice in one `@keyframes` rule (`from` and `FROM` count as the same, names are compared in lowercase)."
             },
             "keyframe-declaration-no-important": {
               "$ref": "#/definitions/rule",
-              "description": "`!important` in a declaration of a `@keyframes` rule: the declaration is ignored."
+              "description": "Reports `!important` in a declaration of a `@keyframes` rule."
             },
             "keyframe-selector-notation": {
               "$ref": "#/definitions/rule",
-              "description": "`from` and `to` in a `@keyframes` that also uses percentages (a block with nothing but keywords is left alone)."
+              "description": "Reports `from` and `to` in a `@keyframes` that also uses percentages."
             },
             "keyframes-name-pattern": {
-              "description": "A `@keyframes` name that does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `@keyframes` name that does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2697,7 +2697,7 @@
               "description": "A `from __future__` import after other statements."
             },
             "layer-name-pattern": {
-              "description": "A `@layer` name that does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a `@layer` name that does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2729,11 +2729,11 @@
             },
             "length-zero-no-unit": {
               "$ref": "#/definitions/rule",
-              "description": "A zero length written with a unit (`0px`); other dimensions (`0s`, `0deg`) are left alone, and so is what is inside a function."
+              "description": "Reports a zero length written with a unit (`0px`)."
             },
             "link-text": {
               "$ref": "#/definitions/rule",
-              "description": "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone."
+              "description": "Reports a link (`<a href>`) with no text, no image with an `alt` and no `aria-label` (WCAG H30)."
             },
             "literal-case": {
               "description": "`NULL`, `TRUE` and `FALSE` are not all in one case: with the `policy` option `consistent` the first one written fixes the case (`upper`, `lower` or `capitalise`) and a later one that cannot be in it is reported; the other values name the case. The fix writes the word in that case; with `consistent` that is the case the words settled on (sqlfluff CP04).",
@@ -2778,15 +2778,15 @@
             },
             "load-no-partial-leading-underscore": {
               "$ref": "#/definitions/rule",
-              "description": "A `@use`, `@forward` or `@import` of a partial named with a leading underscore (`@use 'a/_b'`); CSS imports are left alone."
+              "description": "Reports a `@use`, `@forward` or `@import` of a partial with a leading underscore (`@use 'a/_b'`)."
             },
             "long-title": {
               "$ref": "#/definitions/rule",
-              "description": "Search engines cut a title off after about 70 characters."
+              "description": "Reports a `<title>` longer than 70 characters."
             },
             "map-dup-name": {
               "$ref": "#/definitions/rule",
-              "description": "A `<map>` whose `name` an earlier `<map>` already has: `usemap` finds the first."
+              "description": "Reports a `<map>` whose `name` an earlier `<map>` already has."
             },
             "max-body-length": {
               "description": "A rule whose recipe has more lines than allowed (checkmake `maxbodylength`). Every physical line counts, a continued command and a tab-indented comment included.",
@@ -2861,7 +2861,7 @@
               ]
             },
             "max-nesting-depth": {
-              "description": "A rule or at-rule nested in more rules or at-rules than the `max` option.",
+              "description": "Reports a rule or at-rule nested inside more rules or at-rules than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2892,7 +2892,7 @@
               ]
             },
             "media-feature-name-allowed-list": {
-              "description": "A media feature that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports a media feature that is not in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2926,7 +2926,7 @@
               ]
             },
             "media-feature-name-disallowed-list": {
-              "description": "A media feature that is in the `list` option.",
+              "description": "Reports a media feature that is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2960,7 +2960,7 @@
               ]
             },
             "media-feature-name-no-unknown": {
-              "description": "A media feature name in `@media` that is not a CSS one. Vendor-prefixed names are left out.",
+              "description": "Reports a media feature name in `@media` that is not a CSS one; vendor-prefixed names are not reported.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -2994,7 +2994,7 @@
               ]
             },
             "media-feature-name-no-vendor-prefix": {
-              "description": "A vendor-prefixed `device-pixel-ratio` media feature.",
+              "description": "Reports a vendor-prefixed `device-pixel-ratio` media feature (`-webkit-min-device-pixel-ratio`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3028,7 +3028,7 @@
               ]
             },
             "media-type-no-deprecated": {
-              "description": "A deprecated media type (`tv`, `handheld`, `projection`, ...) in `@media`.",
+              "description": "Reports a deprecated media type (`tv`, `handheld`, `projection`, ...) in `@media`.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3118,7 +3118,7 @@
             },
             "meta-refresh": {
               "$ref": "#/definitions/rule",
-              "description": "`<meta http-equiv=\"refresh\" content=\"5\">` reloads or redirects after a delay, which disorients screen reader users and cannot be paused. A delay of 0 is allowed."
+              "description": "Reports `<meta http-equiv=\"refresh\">` with a delay (`content=\"5\"`)."
             },
             "min-phony": {
               "description": "A target that must exist and be declared `.PHONY` (checkmake `minphony`). Reported on the last `.PHONY` line, or the last rule's when there is none.",
@@ -3164,7 +3164,7 @@
             },
             "missing-doctype": {
               "$ref": "#/definitions/rule",
-              "description": "A document without a doctype is rendered in quirks mode."
+              "description": "Reports a document that has no doctype, on its start."
             },
             "missing-mandatory-parameter": {
               "$ref": "#/definitions/rule",
@@ -3247,7 +3247,7 @@
             },
             "multiple-labeled-controls": {
               "$ref": "#/definitions/rule",
-              "description": "A `<label>` without `for` that holds more than one control: it labels only the first."
+              "description": "Reports a `<label>` with no `for` that holds more than one control."
             },
             "multiple-starred-expressions": {
               "$ref": "#/definitions/rule",
@@ -3274,7 +3274,7 @@
               "description": "A class attribute assigned a list, dict, set or comprehension (or a call that builds one) without a `ClassVar` or `Final` annotation; data classes, Pydantic models and named tuples are left alone."
             },
             "name-pattern": {
-              "description": "The `name` of a form control that does not match the `pattern` option (a regex; by default camelCase, with a trailing `[]` allowed).",
+              "description": "Reports the `name` of a form control that does not match the option `pattern`, a regex that by default means camelCase, with a trailing `[]` allowed.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3306,7 +3306,7 @@
             },
             "named-grid-areas-no-invalid": {
               "$ref": "#/definitions/rule",
-              "description": "A `grid-template-areas` whose rows differ in length, are empty, or hold an area that is not a rectangle."
+              "description": "Reports a `grid-template-areas` whose rows differ in length, are empty, or hold an area that is not a rectangle."
             },
             "naming-convention": {
               "description": "A name does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it. Equivalent: graphql-eslint naming-convention (styles only, no prefix or suffix lists).",
@@ -3448,7 +3448,7 @@
             },
             "negation-of-excluded-parent": {
               "$ref": "#/definitions/rule",
-              "description": "Git cannot re-include a file when a parent directory is excluded: `!a/b` after `a/` has no effect. Exclude the contents (`a/*`) instead. Not reported in `.dockerignore`, where the later pattern wins. Only literal paths are checked."
+              "description": "Reports a `!` pattern for a path whose parent directory is excluded by an earlier pattern (`!a/b` after `a/`)."
             },
             "nested-with": {
               "$ref": "#/definitions/rule",
@@ -3460,15 +3460,15 @@
             },
             "no-abstract-role": {
               "$ref": "#/definitions/rule",
-              "description": "Abstract roles (`widget`, `landmark`, `command`, ...) are for the ARIA taxonomy, not for authors."
+              "description": "Reports a `role` that is one of the abstract roles of the ARIA taxonomy (`widget`, `landmark`, `command`, ...)."
             },
             "no-alt-text": {
               "$ref": "#/definitions/rule",
-              "description": "An image with empty alternate text, `![](url)` (markdownlint MD045)."
+              "description": "Reports an image whose alternate text is empty (`![](url)`)."
             },
             "no-ambiguous-ampersand": {
               "$ref": "#/definitions/rule",
-              "description": "An `&` that starts no entity is valid HTML and renders as written; html-validate's `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`."
+              "description": "Reports an `&` in text that starts no character reference (`a & b`), and a raw `<` in text where it is not a syntax error, such as the Hugo shortcode `{{<`."
             },
             "no-anonymous-operations": {
               "$ref": "#/definitions/rule",
@@ -3492,11 +3492,11 @@
             },
             "no-at-debug-tags": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-at-debug-tags` (eslint-plugin-svelte). The tag pauses the browser's debugger when its values change."
+              "description": "Reports a `{@debug}` tag."
             },
             "no-at-html-tags": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-at-html-tags` (eslint-plugin-svelte). Escape the text or sanitize it before it is rendered, or turn the rule off for a value you control."
+              "description": "Reports a `{@html}` tag."
             },
             "no-automatic-variable-assignment": {
               "$ref": "#/definitions/rule",
@@ -3504,7 +3504,7 @@
             },
             "no-autoplay": {
               "$ref": "#/definitions/rule",
-              "description": "Autoplaying audio and video annoys users and fails accessibility guidelines; `muted` media is allowed."
+              "description": "Reports `<audio>` and `<video>` with `autoplay` and without `muted`."
             },
             "no-backticks": {
               "$ref": "#/definitions/rule",
@@ -3512,14 +3512,14 @@
             },
             "no-bare-urls": {
               "$ref": "#/definitions/rule",
-              "description": "A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a space or starts the paragraph. Reported on the URL."
+              "description": "Reports a URL (`http://` or `https://`) written in a paragraph that is neither a link nor an autolink, on the URL."
             },
             "no-bind-value-on-checkable-inputs": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-bind-value-on-checkable-inputs` (eslint-plugin-svelte)."
+              "description": "Reports `bind:value` on a checkbox or a radio button."
             },
             "no-broad-catch": {
-              "description": "A `catch`, `except` or `rescue` that catches everything (`bare`), or one of the broad `types` and does not raise the error again and has no call matching `handled` (ruff E722 and BLE001, RuboCop Lint/RescueException). A language sets what is broad in its grammar's `rule` row.",
+              "description": "Reports a `catch`, `except` or `rescue` clause that catches everything (a clause with no type, when the `bare` option is set) or one of the broad `types`, when it does not raise the error again and has no call that matches `handled`.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -3568,7 +3568,7 @@
             },
             "no-child-content": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-child-content` (eslint-plugin-vue)."
+              "description": "Reports an element that has `v-html` or `v-text` and also content between its tags."
             },
             "no-class-assign": {
               "$ref": "#/definitions/rule",
@@ -3588,7 +3588,7 @@
             },
             "no-conditional-comment": {
               "$ref": "#/definitions/rule",
-              "description": "An Internet Explorer conditional comment (`<!--[if IE]>`). Only IE 9 and older read them; other browsers see a comment."
+              "description": "Reports an Internet Explorer conditional comment (`<!--[if IE]>`)."
             },
             "no-const-assign": {
               "$ref": "#/definitions/rule",
@@ -3604,7 +3604,7 @@
             },
             "no-control-regex": {
               "$ref": "#/definitions/rule",
-              "description": "A control character (below U+0020) in the constant string given to `new Regex(...)` and the static methods of `Regex`, written raw or as an escape."
+              "description": "Reports a control character (below U+0020) in the constant string given to `new Regex(...)` and the static methods of `Regex`, written raw or as an escape."
             },
             "no-copy-whole-stage": {
               "$ref": "#/definitions/rule",
@@ -3667,51 +3667,51 @@
             },
             "no-deprecated-attr": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...)."
+              "description": "Reports an attribute that HTML5 no longer has on that element (`align`, `bgcolor`, `border`, ...)."
             },
             "no-deprecated-functional-template": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-functional-template` (eslint-plugin-vue)."
+              "description": "Reports `<template functional>`."
             },
             "no-deprecated-html-element-is": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element."
+              "description": "Reports an `is` attribute on a plain HTML element that does not begin with `vue:` (`<tr is=\"row\">`)."
             },
             "no-deprecated-inline-template": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-inline-template` (eslint-plugin-vue)."
+              "description": "Reports the `inline-template` attribute."
             },
             "no-deprecated-scope-attribute": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-scope-attribute` (eslint-plugin-vue)."
+              "description": "Reports the `scope` attribute on a `<template>`."
             },
             "no-deprecated-slot-attribute": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot."
+              "description": "Reports the `slot` attribute on an element that is not a `<slot>`."
             },
             "no-deprecated-slot-scope-attribute": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-slot-scope-attribute` (eslint-plugin-vue)."
+              "description": "Reports the `slot-scope` attribute."
             },
             "no-deprecated-v-bind-sync": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-v-bind-sync` (eslint-plugin-vue). `:title.sync=\"t\"` is `v-model:title=\"t\"` in Vue 3."
+              "description": "Reports the `.sync` modifier of `v-bind` (`:title.sync`)."
             },
             "no-deprecated-v-is": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-v-is` (eslint-plugin-vue)."
+              "description": "Reports the `v-is` directive."
             },
             "no-deprecated-v-on-native-modifier": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-v-on-native-modifier` (eslint-plugin-vue)."
+              "description": "Reports the `.native` modifier of `v-on` (`@click.native`)."
             },
             "no-deprecated-v-on-number-modifiers": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-deprecated-v-on-number-modifiers` (eslint-plugin-vue)."
+              "description": "Reports a key code as a modifier of `v-on` (`@keyup.13`)."
             },
             "no-descending-specificity": {
               "$ref": "#/definitions/rule",
-              "description": "A rule whose selector ends in the same compound (without its pseudo-classes) as an earlier rule in the same at-rule and has a lower specificity: the earlier one wins where the later was meant to. Nested rules are not compared."
+              "description": "Reports a rule whose selector ends in the same compound selector (not counting its pseudo-classes) as an earlier rule in the same at-rule, and has a lower specificity."
             },
             "no-doc-placeholder": {
               "$ref": "#/definitions/rule",
@@ -3731,31 +3731,31 @@
             },
             "no-dupe-keys": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-dupe-keys` (eslint-plugin-vue). A name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object; or a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`)."
+              "description": "Reports a name defined twice in `props`, `computed`, `data`, `methods` and `setup` of a component object, and a prop or `defineModel` of `<script setup>` that a top-level name of the script (a `const`, a function, an import) repeats, unless that name reads from the props object (`const a = props.a`, `toRef(props, 'a')`)."
             },
             "no-dupe-on-directives": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported."
+              "description": "Reports two `on:` directives of one element that have the same event and the same handler (modifiers do not count); both are reported."
             },
             "no-dupe-style-properties": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-dupe-style-properties` (eslint-plugin-svelte). `|important` is not part of the property."
+              "description": "Reports a `style:` directive that repeats the property of an earlier one on the element."
             },
             "no-dupe-use-directives": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte)."
+              "description": "Reports two `use:` directives of one element that have the same action and the same parameter."
             },
             "no-dupe-v-else-if": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-dupe-v-else-if` (eslint-plugin-vue). Conditions are compared as text without blanks, `||` alternatives one by one; a condition that only some earlier `&&` terms cover is not found."
+              "description": "Reports a `v-else-if` whose condition is the same as an earlier `v-if` or `v-else-if` of the chain."
             },
             "no-duplicate-anchors": {
               "$ref": "#/definitions/rule",
-              "description": "An anchor name is defined again in the same document; an alias refers to the latest definition above it, which is easy to misread."
+              "description": "Reports an anchor name that is defined again in the same document, on the second `&name`."
             },
             "no-duplicate-at-import-rules": {
               "$ref": "#/definitions/rule",
-              "description": "The same `@import` (url and media list) twice in one file."
+              "description": "Reports an `@import` that repeats an earlier one in the same file (same url, same media list; `'a.css'` and `url(a.css)` are the same url)."
             },
             "no-duplicate-case": {
               "$ref": "#/definitions/rule",
@@ -3763,7 +3763,7 @@
             },
             "no-duplicate-class": {
               "$ref": "#/definitions/rule",
-              "description": "A class name written twice in one `class` attribute."
+              "description": "Reports a class name written twice in one `class` attribute."
             },
             "no-duplicate-doc-text": {
               "$ref": "#/definitions/rule",
@@ -3775,15 +3775,15 @@
             },
             "no-duplicate-heading": {
               "$ref": "#/definitions/rule",
-              "description": "Two headings have the same text (markdownlint MD024), which makes their anchors ambiguous."
+              "description": "Reports a heading whose text is the same as an earlier heading in the document, on the later one, with the first as the related location."
             },
             "no-duplicate-id": {
               "$ref": "#/definitions/rule",
-              "description": "An `id` that an earlier element of the document already has. Ids must be unique: scripts, links and labels find the first element only."
+              "description": "Reports an `id` that an earlier element of the document already has."
             },
             "no-duplicate-include": {
               "$ref": "#/definitions/rule",
-              "description": "An element of a project file (`PackageReference`, `ProjectReference`, `Compile`, ...) has the same `Include` as an earlier element of the same name in the same parent. The duplicate is a restore warning or a build error."
+              "description": "Reports an element of a project file (`PackageReference`, `ProjectReference`, `Compile`, ...) that has the same `Include` as an earlier element of the same name in the same parent, on the later one."
             },
             "no-duplicate-keys": {
               "description": "Reports a key that a mapping has twice, after decoding escapes and quotes (`{\"a\": 1, \"\\u0061\": 2}` has `a` twice).",
@@ -3822,7 +3822,7 @@
             },
             "no-duplicate-pattern": {
               "$ref": "#/definitions/rule",
-              "description": "The same pattern appears twice with no opposite pattern (`!x` for `x`) in between, so the second one changes nothing."
+              "description": "Reports a pattern that appears twice with no opposite pattern (`!x` for `x`) between the two, on the second."
             },
             "no-duplicate-sections": {
               "$ref": "#/definitions/rule",
@@ -3830,7 +3830,7 @@
             },
             "no-duplicate-selectors": {
               "$ref": "#/definitions/rule",
-              "description": "The same selector list (in any order) on two rules in one block or file."
+              "description": "Reports a selector list that is already used by an earlier rule in the same block or file; the order of the selectors in the list does not matter (`b, a` repeats `a, b`)."
             },
             "no-egrep": {
               "$ref": "#/definitions/rule",
@@ -3842,7 +3842,7 @@
             },
             "no-emphasis-as-heading": {
               "$ref": "#/definitions/rule",
-              "description": "A one-line paragraph that is only emphasized text without closing punctuation (markdownlint MD036); use a heading."
+              "description": "Reports a paragraph of one line that is only emphasized text (`**Overview**`) with no closing punctuation, outside a heading."
             },
             "no-empty-attribute-parens": {
               "$ref": "#/definitions/rule",
@@ -3986,7 +3986,7 @@
             },
             "no-empty-links": {
               "$ref": "#/definitions/rule",
-              "description": "A link whose destination is empty or only `#` (markdownlint MD042)."
+              "description": "Reports a link whose destination is empty or only `#` (`[docs]()`, `[docs](#)`)."
             },
             "no-empty-object-type": {
               "$ref": "#/definitions/rule",
@@ -3998,14 +3998,14 @@
             },
             "no-empty-source": {
               "$ref": "#/definitions/rule",
-              "description": "A file with nothing but whitespace (a file with only comments is not empty)."
+              "description": "Reports a file with nothing but whitespace."
             },
             "no-empty-statement": {
               "$ref": "#/definitions/rule",
               "description": "A lone `;` is a statement that does nothing. A statement labelled `label: ;` is allowed. The fix removes the statement (its whole line when it is alone on it), or turns an empty loop or `if` body into `{ }`; it is not offered for the only statement of a switch section. Overlaps compiler CS0642 for `if (x);`."
             },
             "no-empty-values": {
-              "description": "A mapping key or sequence entry without a value (an implicit null). Values with an anchor or tag are not empty. Reported at the `:` or `-`.",
+              "description": "Reports a mapping key or sequence entry without a value (an implicit null), at the `:` or `-`.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4046,7 +4046,7 @@
               ]
             },
             "no-eval": {
-              "description": "A call of one of the `calls` that run a string as code (ruff S102, ESLint no-eval); a language lists its calls in its grammar's `rule` row.",
+              "description": "Reports a call of one of the `calls` that run a string as code, on the call.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4100,10 +4100,10 @@
             },
             "no-floating-package-version": {
               "$ref": "#/definitions/rule",
-              "description": "A `PackageReference` (or `PackageVersion`) whose `Version` contains `*` restores a different package as new versions appear. Reported on the attribute; no fix, because the version to pin is a decision."
+              "description": "Reports a `PackageReference` or `PackageVersion` whose `Version` contains `*` (`1.*`), on the attribute."
             },
             "no-flow-mappings": {
-              "description": "A flow mapping (`{a: 1}`); write a block mapping instead.",
+              "description": "Reports a flow mapping (`{a: 1}`), on its opening brace.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4134,7 +4134,7 @@
               ]
             },
             "no-flow-sequences": {
-              "description": "A flow sequence (`[a, b]`); write a block sequence instead.",
+              "description": "Reports a flow sequence (`[a, b]`), on its opening bracket.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4173,7 +4173,7 @@
               "description": "Reports an assignment to a function that is declared by name (`function f() {} f = 0;`), also `f++`."
             },
             "no-global-function-names": {
-              "description": "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone.",
+              "description": "Reports a call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are not reported.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4320,15 +4320,15 @@
             },
             "no-implicit-button-type": {
               "$ref": "#/definitions/rule",
-              "description": "A `<button>` without a `type` is a submit button, which is rarely meant outside a form. A Svelte spread (`{...props}`) may carry the `type`."
+              "description": "Reports a `<button>` with no `type`."
             },
             "no-implicit-close": {
               "$ref": "#/definitions/rule",
-              "description": "An element whose end tag is left out is closed by the next sibling or its parent's end tag (`<li>`, `<p>`, ...). Writing the end tag says where it ends. Void and self-closed elements have none."
+              "description": "Reports an element whose end tag is left out and that the next sibling or the end tag of its parent closes (`<li>`, `<p>`, ...)."
             },
             "no-implicit-input-type": {
               "$ref": "#/definitions/rule",
-              "description": "An `<input>` without a `type` is a text field by default; writing the type says so."
+              "description": "Reports an `<input>` with no `type`."
             },
             "no-import-assign": {
               "$ref": "#/definitions/rule",
@@ -4340,11 +4340,11 @@
             },
             "no-inline-html": {
               "$ref": "#/definitions/rule",
-              "description": "Raw HTML in a document (markdownlint MD033). Comments are not reported. Reported once per HTML block, not per tag."
+              "description": "Reports raw HTML in a document, on each tag of inline HTML and on each HTML block."
             },
             "no-inline-style": {
               "$ref": "#/definitions/rule",
-              "description": "A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it. A Svelte `style:property` directive is one too."
+              "description": "Reports a `style` attribute, and a Svelte `style:property` directive."
             },
             "no-inner-function": {
               "$ref": "#/definitions/rule",
@@ -4356,15 +4356,15 @@
             },
             "no-invalid-double-slash-comments": {
               "$ref": "#/definitions/rule",
-              "description": "A rule or declaration that starts with `//`: CSS has no line comments, so the text swallows the statement."
+              "description": "Reports a rule or declaration that starts with `//`."
             },
             "no-invalid-position-at-import-rule": {
               "$ref": "#/definitions/rule",
-              "description": "An `@import` after a rule that is not `@charset`, `@layer` or another `@import`: the browser ignores it."
+              "description": "Reports an `@import` that comes after a rule that is not `@charset`, `@layer` or another `@import`."
             },
             "no-invalid-position-declaration": {
               "$ref": "#/definitions/rule",
-              "description": "A declaration at the top of a file, or in an at-rule such as `@media` that is not inside a rule."
+              "description": "Reports a declaration at the top of a file, or in an at-rule such as `@media` that is not inside a rule."
             },
             "no-irregular-whitespace": {
               "$ref": "#/definitions/rule",
@@ -4376,7 +4376,7 @@
             },
             "no-lone-template": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files."
+              "description": "Reports a nested `<template>` that has no directive (`v-if`, `v-for`, `v-slot`, ...)."
             },
             "no-lonely-if": {
               "$ref": "#/definitions/rule",
@@ -4396,7 +4396,7 @@
             },
             "no-merge-keys": {
               "$ref": "#/definitions/rule",
-              "description": "The merge key (YAML `<<`), which YAML 1.2 dropped and some tools do not support."
+              "description": "Reports the merge key `<<`."
             },
             "no-misleading-backtick": {
               "$ref": "#/definitions/rule",
@@ -4404,15 +4404,15 @@
             },
             "no-misleading-character-class": {
               "$ref": "#/definitions/rule",
-              "description": "A character class in the constant string given to `new Regex(...)` and the static methods of `Regex`, in which a combining mark follows another character."
+              "description": "Reports a character class in the constant string given to `new Regex(...)` and the static methods of `Regex`, in which a combining mark follows another character."
             },
             "no-missing-references": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) names an id that no element of the document has."
+              "description": "Reports an attribute that refers to an `id` (`for`, `aria-labelledby`, `list`, `headers`, `form`, ...) when no element of the document has that id."
             },
             "no-missing-space-atx": {
               "$ref": "#/definitions/rule",
-              "description": "A paragraph that starts with one to six `#` and no space reads as a heading to people but is plain text to Markdown (markdownlint MD018)."
+              "description": "Reports a paragraph that starts with one to six `#` and no space after them (`#Heading`)."
             },
             "no-misused-new": {
               "$ref": "#/definitions/rule",
@@ -4420,7 +4420,7 @@
             },
             "no-multiple-main": {
               "$ref": "#/definitions/rule",
-              "description": "A second `<main>` element that is not `hidden`: a page has one main landmark."
+              "description": "Reports a second `<main>` element that is not `hidden`."
             },
             "no-name-underscore": {
               "$ref": "#/definitions/rule",
@@ -4432,7 +4432,7 @@
             },
             "no-negated-async": {
               "$ref": "#/definitions/rule",
-              "description": "Angular's `no-negated-async` (@angular-eslint/template). Only in `.component.html` files."
+              "description": "Reports `!(x | async)` and `(x | async) === false` in an Angular template."
             },
             "no-nested-onbuild": {
               "$ref": "#/definitions/rule",
@@ -4440,7 +4440,7 @@
             },
             "no-nested-style-tag": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS."
+              "description": "Reports a `<style>` that is inside an element."
             },
             "no-non-null-asserted-optional-chain": {
               "$ref": "#/definitions/rule",
@@ -4452,14 +4452,14 @@
             },
             "no-object-in-text-mustaches": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-object-in-text-mustaches` (eslint-plugin-svelte). An object, array, function or class written in `{ }` among text. Read from the first token of the expression, so an arrow function is not found."
+              "description": "Reports an object, an array, a function or a class written in `{ }` among text."
             },
             "no-octal": {
               "$ref": "#/definitions/rule",
               "description": "Reports a number literal that starts with `0` followed by another digit, such as `017` or `08`."
             },
             "no-octal-values": {
-              "description": "A plain `0755` (octal to YAML 1.1 parsers, decimal 755 to YAML 1.2) or `0o755` (octal to YAML 1.2, a string to YAML 1.1). Quoted and tagged scalars are not checked. No fix: the intended value is not known.",
+              "description": "Reports a plain `0755` (octal to YAML 1.1 parsers, decimal 755 to YAML 1.2) or `0o755` (octal to YAML 1.2, a string to YAML 1.1).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4503,7 +4503,7 @@
               "description": "A call of `ConvertTo-SecureString` with `-AsPlainText`."
             },
             "no-print": {
-              "description": "A call of one of the `calls` that write to the console (ruff T201 and T203), unless an argument matching `redirect` sends the output elsewhere and none matching `console` sends it back to the console; a language lists its calls and the two argument patterns in its grammar's `rule` row.",
+              "description": "Reports a call of one of the `calls` that write to the console, unless an argument matching `redirect` sends the output elsewhere and none matching `console` sends it back to the console.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4558,23 +4558,23 @@
             },
             "no-raw-gt": {
               "$ref": "#/definitions/rule",
-              "description": "A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`. A raw `<` is a syntax error."
+              "description": "Reports a `>` in text (`a > b`)."
             },
             "no-raw-special-elements": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on."
+              "description": "Reports `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>`, which are plain elements in Svelte."
             },
             "no-recursive-alias": {
               "$ref": "#/definitions/rule",
-              "description": "An alias inside the node its own anchor is on, which makes the data refer to itself."
+              "description": "Reports an alias that is inside the node of its own anchor, which makes the data refer to itself."
             },
             "no-redundant-for": {
               "$ref": "#/definitions/rule",
-              "description": "A `<label>` has a `for` that names a control inside it, which the label already labels."
+              "description": "Reports a `<label>` whose `for` names a control that is inside the label."
             },
             "no-redundant-role": {
               "$ref": "#/definitions/rule",
-              "description": "An element with a native role (`<nav>` is `navigation`, `<button>` is `button`) does not need a `role` that says the same."
+              "description": "Reports a `role` on an element that already has that role by its name (`<nav role=\"navigation\">`, `<button role=\"button\">`, `<ul role=\"list\">`)."
             },
             "no-redundant-target-platform": {
               "$ref": "#/definitions/rule",
@@ -4582,7 +4582,7 @@
             },
             "no-regex-spaces": {
               "$ref": "#/definitions/rule",
-              "description": "Two or more spaces outside a character class in the string given to `new Regex(...)` and the static methods of `Regex`."
+              "description": "Reports two or more spaces outside a character class in the constant string given to `new Regex(...)` and the static methods of `Regex`."
             },
             "no-region-in-body": {
               "$ref": "#/definitions/rule",
@@ -4606,7 +4606,7 @@
             },
             "no-reversed-links": {
               "$ref": "#/definitions/rule",
-              "description": "Link syntax written the wrong way round, `(text)[url]` (markdownlint MD011), at the start of a paragraph or after a blank. Reported on the paragraph; no fix, because `(text)[url]` may be meant literally."
+              "description": "Reports link syntax written the wrong way round (`(text)[url]`), at the start of a paragraph or after whitespace, on the whole paragraph."
             },
             "no-secret-in-env": {
               "$ref": "#/definitions/rule",
@@ -4653,7 +4653,7 @@
             },
             "no-self-closing": {
               "$ref": "#/definitions/rule",
-              "description": "`<div />` is a start tag in HTML: the browser ignores the slash and the element stays open. Void elements (see `void-style`), `<svg>` and `<math>` are left alone."
+              "description": "Reports an element that is self-closed with `/>` and is not a void element (`<div />`)."
             },
             "no-self-compare": {
               "$ref": "#/definitions/rule",
@@ -4673,11 +4673,11 @@
             },
             "no-space-in-code": {
               "$ref": "#/definitions/rule",
-              "description": "A code span that starts or ends with a space (markdownlint MD038). A span with a space on both sides of a backtick-led or backtick-ended content is allowed."
+              "description": "Reports a code span that starts or ends with a space (`` ` code ` ``)."
             },
             "no-space-in-links": {
               "$ref": "#/definitions/rule",
-              "description": "Link text that starts or ends with a space (markdownlint MD039)."
+              "description": "Reports link text that starts or ends with a space (`[ docs ](url)`)."
             },
             "no-sparse-arrays": {
               "$ref": "#/definitions/rule",
@@ -4685,7 +4685,7 @@
             },
             "no-style-tag": {
               "$ref": "#/definitions/rule",
-              "description": "A `<style>` element inlines styling that an external stylesheet shares between pages. A `<style>` inside a `<template>` is allowed."
+              "description": "Reports a `<style>` element."
             },
             "no-sudo": {
               "$ref": "#/definitions/rule",
@@ -4693,18 +4693,18 @@
             },
             "no-target-blank": {
               "$ref": "#/definitions/rule",
-              "description": "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer; both `noopener` and `noreferrer` are required, as in eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`. Links to a scheme or host and computed links (`{href}`, `bind:href`, `:href`) count."
+              "description": "Reports a link to another site with `target=\"_blank\"` that does not have both `noopener` and `noreferrer` in its `rel`."
             },
             "no-textarea-mustache": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-textarea-mustache` (eslint-plugin-vue)."
+              "description": "Reports `{{ }}` inside a `<textarea>`."
             },
             "no-this-alias": {
               "$ref": "#/definitions/rule",
               "description": "Reports `const self = this`, `let self = this` and `self = this`: a variable that holds `this`."
             },
             "no-throw-generic": {
-              "description": "A `raise` or `throw` of one of the generic `types`, itself or a call of it, which callers cannot tell from any other error (ruff TRY002, RuboCop Lint/RaiseException). A language lists the types in its grammar's `rule` row.",
+              "description": "Reports a `raise` or `throw` of one of the generic `types`, itself or a call of it.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -4741,7 +4741,7 @@
             },
             "no-trailing-punctuation": {
               "$ref": "#/definitions/rule",
-              "description": "A heading that ends with `.`, `,`, `;`, `:` or `!` (or the full-width forms) reads as a sentence, not a title (markdownlint MD026). `?` is allowed."
+              "description": "Reports a heading that ends with `.`, `,`, `;`, `:` or `!` (or the full-width forms)."
             },
             "no-trailing-whitespace": {
               "$ref": "#/definitions/rule",
@@ -4753,7 +4753,7 @@
             },
             "no-undefined-alias": {
               "$ref": "#/definitions/rule",
-              "description": "An alias names an anchor that is not defined earlier in the same document."
+              "description": "Reports an alias that names an anchor not defined earlier in the same document, on the alias."
             },
             "no-unexpected-multiline": {
               "$ref": "#/definitions/rule",
@@ -4765,11 +4765,11 @@
             },
             "no-unknown-elements": {
               "$ref": "#/definitions/rule",
-              "description": "An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone."
+              "description": "Reports an element name that HTML does not define, custom elements (`<my-element>`) included."
             },
             "no-unknown-style-directive-property": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-unknown-style-directive-property` (eslint-plugin-svelte). Custom properties (`style:--x`) and vendor-prefixed ones pass. The property table is the CSS language's."
+              "description": "Reports a `style:` directive that names a property CSS does not know (`style:marginLeft`)."
             },
             "no-unnecessary-type-constraint": {
               "$ref": "#/definitions/rule",
@@ -4801,15 +4801,15 @@
             },
             "no-unused-anchors": {
               "$ref": "#/definitions/rule",
-              "description": "An anchor that no alias refers to. The fix removes the anchor, which changes nothing about the data."
+              "description": "Reports an anchor that no alias refers to."
             },
             "no-use-v-else-with-v-for": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-use-v-else-with-v-for` (eslint-plugin-vue). Put the `v-for` on a child or a wrapping `<template>`."
+              "description": "Reports an element that has `v-else` and `v-for` together."
             },
             "no-use-v-if-with-v-for": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-use-v-if-with-v-for` (eslint-plugin-vue). Filter the list in a computed value, or move the `v-if` to a wrapping `<template>`."
+              "description": "Reports an element that has `v-if` and `v-for` together."
             },
             "no-useless-catch": {
               "$ref": "#/definitions/rule",
@@ -4817,7 +4817,7 @@
             },
             "no-useless-children-snippet": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-useless-children-snippet` (eslint-plugin-svelte)."
+              "description": "Reports a `{#snippet children()}` with no parameters inside a component."
             },
             "no-useless-escape": {
               "$ref": "#/definitions/rule",
@@ -4829,23 +4829,23 @@
             },
             "no-useless-mustaches": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `no-useless-mustaches` (eslint-plugin-svelte)."
+              "description": "Reports a string literal in `{ }` (`{\"text\"}`)."
             },
             "no-v-for-template-key-on-child": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-v-for-template-key-on-child` (eslint-plugin-vue)."
+              "description": "Reports a `:key` on a child of a `<template v-for>`."
             },
             "no-v-html": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-v-html` (eslint-plugin-vue). Render the text with `{{ }}`, or sanitize it first."
+              "description": "Reports an element with `v-html`."
             },
             "no-v-text": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-v-text` (eslint-plugin-vue)."
+              "description": "Reports an element with `v-text`."
             },
             "no-v-text-v-html-on-component": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `no-v-text-v-html-on-component` (eslint-plugin-vue)."
+              "description": "Reports `v-html` and `v-text` on a component."
             },
             "no-var": {
               "$ref": "#/definitions/rule",
@@ -4853,7 +4853,7 @@
             },
             "no-void-end-tag": {
               "$ref": "#/definitions/rule",
-              "description": "A void element (`<br>`, `<img>`, ...) has no content and no end tag; the browser ignores `</br>`."
+              "description": "Reports an end tag of a void element (`</br>`, `</img>`)."
             },
             "no-which": {
               "$ref": "#/definitions/rule",
@@ -4936,7 +4936,7 @@
               "description": "`int?` instead of `Nullable<int>` or `System.Nullable<int>`. Name-based: a type of your own called `Nullable` is reported too. Not reported in `using` aliases, `nameof`, `typeof(Nullable<>)` and before a member access (`Nullable<int>.Equals`)."
             },
             "number-max-precision": {
-              "description": "A number with more decimal places than the `max` option.",
+              "description": "Reports a number with more decimal places than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5088,7 +5088,7 @@
             },
             "prefer-button": {
               "$ref": "#/definitions/rule",
-              "description": "A `<button>` can hold markup and is styled with CSS like any element; `<input type=\"button\">` cannot."
+              "description": "Reports `<input type=\"button\">`, `type=\"submit\"`, `type=\"reset\"` and `type=\"image\"`."
             },
             "prefer-coalesce": {
               "$ref": "#/definitions/rule",
@@ -5100,7 +5100,7 @@
             },
             "prefer-native-element": {
               "$ref": "#/definitions/rule",
-              "description": "A `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...) on an element that is not that one needs scripting and styling the native element comes with."
+              "description": "Reports a `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...) when it is on an element that is not that one (`<div role=\"main\">`, `<a role=\"button\">`)."
             },
             "prefer-rest-params": {
               "$ref": "#/definitions/rule",
@@ -5112,11 +5112,11 @@
             },
             "prefer-tbody": {
               "$ref": "#/definitions/rule",
-              "description": "A `<tr>` directly in `<table>` is moved into an implied `<tbody>` by the browser; write it."
+              "description": "Reports a `<tr>` that is directly in a `<table>`."
             },
             "presentation-role-style": {
               "$ref": "#/definitions/rule",
-              "description": "`none` and `presentation` are synonyms; `none` is the one ARIA 1.2 prefers."
+              "description": "Reports `role=\"presentation\"`."
             },
             "printf-string-formatting": {
               "$ref": "#/definitions/rule",
@@ -5131,7 +5131,7 @@
               "description": "A parameter of a `param` block with `ValueFromPipeline` or `ValueFromPipelineByPropertyName`, in a function or script block that has no `process` block (a `filter` is one)."
             },
             "property-allowed-list": {
-              "description": "A property that is not in the `list` option (names, or `/regex/`). Custom properties are left out; an empty list allows everything.",
+              "description": "Reports a property that is not in the `list` option (names, or `/regex/`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5165,7 +5165,7 @@
               ]
             },
             "property-disallowed-list": {
-              "description": "A property that is in the `list` option (names, or `/regex/`). Custom properties are left out.",
+              "description": "Reports a property that is in the `list` option (names, or `/regex/`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5250,7 +5250,7 @@
               ]
             },
             "property-no-deprecated": {
-              "description": "A deprecated property (`clip`, `word-wrap`, `grid-gap`, the `box-*` of the old flexbox, ...).",
+              "description": "Reports a deprecated property (`clip`, `word-wrap`, `grid-gap`, the `box-*` properties of the old flexbox, ...).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5284,7 +5284,7 @@
               ]
             },
             "property-no-unknown": {
-              "description": "A property that no CSS specification lists. Vendor-prefixed and custom properties, descriptors of `@font-face` and the like, and names with interpolation or SCSS and Less variables are left out.",
+              "description": "Reports a property that no CSS specification lists.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5318,7 +5318,7 @@
               ]
             },
             "property-no-vendor-prefix": {
-              "description": "A vendor-prefixed property that autoprefixer knows the standard property of.",
+              "description": "Reports a vendor-prefixed property that has a standard property (`-webkit-transition`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5396,7 +5396,7 @@
               "description": "A quoted name in a parameter, return or variable annotation, for a target version that does not evaluate annotations (3.14)."
             },
             "quoted-strings": {
-              "description": "Which strings are quoted. Plain scalars that are not strings (`12`, `true`, `null`, dates, ...), block scalars and scalars tagged `!!` are never checked. `required: always` wants quotes on every string, `only_when_needed` reports quotes that change nothing (unless `extra_allowed` matches) and plain strings that `extra_required` matches, `optional` only the latter. Fixes: quoting a plain string and switching the quote type keep the value; removing quotes is unsafe because YAML 1.2 parsers read some strings (`1e3`) as numbers.",
+              "description": "Reports strings that are quoted or unquoted against the rule you set with `required`: `always` wants quotes on every string, `only_when_needed` reports quotes that change nothing (unless `extra_allowed` matches) and plain strings that `extra_required` matches, `optional` only the latter.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5525,7 +5525,7 @@
             },
             "redeclared-variable": {
               "$ref": "#/definitions/rule",
-              "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked."
+              "description": "Reports a name declared again in the same scope (`var` twice, a `var` and a parameter, two functions)."
             },
             "redefines-builtin-id": {
               "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
@@ -5599,7 +5599,7 @@
             },
             "redundant-pattern": {
               "$ref": "#/definitions/rule",
-              "description": "A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)."
+              "description": "Reports a `foo/` or `/foo` pattern that follows a plain `foo`, with no `!` pattern between them: a name pattern already matches files and directories called `foo` at every level."
             },
             "redundant-return-type": {
               "$ref": "#/definitions/rule",
@@ -5623,31 +5623,31 @@
             },
             "require-component-is": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `require-component-is` (eslint-plugin-vue)."
+              "description": "Reports a `<component>` element with no `:is` (`v-bind:is`)."
             },
             "require-default-prop": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `require-default-prop` (eslint-plugin-vue). A prop that is not required, has no `default` and is not a `Boolean` is `undefined` when the parent leaves it out. With a type (`defineProps<{ a?: string }>()`) only a component that sets defaults (`withDefaults`, a props destructure) is checked, as the plugin does without type information."
+              "description": "Reports a prop that is not required, has no `default` and is not a `Boolean` (`defineProps({ a: String })`)."
             },
             "require-each-key": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `require-each-key` (eslint-plugin-svelte). Without a key the block updates the elements in place, which keeps stale state in inputs and components and breaks transitions."
+              "description": "Reports an `{#each}` block with no key (`{#each items as item}`)."
             },
             "require-for-track": {
               "$ref": "#/definitions/rule",
-              "description": "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files."
+              "description": "Reports an `@for` block with no `track` expression."
             },
             "require-li-container": {
               "$ref": "#/definitions/rule",
-              "description": "An `<li>` whose parent is not a list (`ul`, `ol`, `menu`) is not a list item."
+              "description": "Reports an `<li>` whose parent is not a list (`<ul>`, `<ol>` or `<menu>`)."
             },
             "require-prop-types": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `require-prop-types` (eslint-plugin-vue). A prop in the array form, or an object with no `type` or `validator`."
+              "description": "Reports a prop in the array form (`defineProps(['a'])`), and an object with no `type` or `validator`."
             },
             "require-sri": {
               "$ref": "#/definitions/rule",
-              "description": "A `<script src>` or `<link rel=\"stylesheet\" href>` without `integrity` runs or applies a file that changed on its server (a CDN) without the page noticing."
+              "description": "Reports a `<script src>` and a `<link rel=\"stylesheet\" href>` with no `integrity` attribute."
             },
             "require-yield": {
               "$ref": "#/definitions/rule",
@@ -5675,7 +5675,7 @@
             },
             "root-in-section": {
               "$ref": "#/definitions/rule",
-              "description": "The `root` property stops the search for parent `.editorconfig` files, but only as a preamble pair (before the first `[section]`); inside a section editors ignore it. No fix: moving it into the preamble is the author's call."
+              "description": "Reports a `root` property inside a section."
             },
             "rpc-pascal-case": {
               "$ref": "#/definitions/rule",
@@ -5695,7 +5695,7 @@
             },
             "rule-empty-line-before": {
               "$ref": "#/definitions/rule",
-              "description": "A rule whose block spans lines needs a blank line before it, unless a comment is right before it; the first rule of a block takes none (`always-multi-line` with `first-nested` as the exception)."
+              "description": "Reports a rule whose block spans several lines and has no empty line before it."
             },
             "script-injection": {
               "$ref": "#/definitions/rule",
@@ -5703,7 +5703,7 @@
             },
             "script-type": {
               "$ref": "#/definitions/rule",
-              "description": "A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty says what the browser assumes (html-validate script-type)."
+              "description": "Reports a `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`, ...) or empty."
             },
             "selection-set-depth": {
               "description": "An operation or fragment nests selection sets deeper than allowed, which makes a query expensive to execute. Fragments that are spread are not followed.",
@@ -5738,10 +5738,10 @@
             },
             "selector-anb-no-unmatchable": {
               "$ref": "#/definitions/rule",
-              "description": "An `:nth-child()` and the like whose `An+B` can never match (`0`, `0n`, `-n`, `-2n-1`)."
+              "description": "Reports an `:nth-child()` and the like whose `An+B` can never match (`0`, `0n`, `-n`, `-2n-1`)."
             },
             "selector-attribute-name-disallowed-list": {
-              "description": "An attribute selector whose name is in the `list` option.",
+              "description": "Reports an attribute selector whose name is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5775,7 +5775,7 @@
               ]
             },
             "selector-attribute-operator-allowed-list": {
-              "description": "An attribute selector operator that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports an attribute selector operator that is not in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5809,7 +5809,7 @@
               ]
             },
             "selector-attribute-operator-disallowed-list": {
-              "description": "An attribute selector operator that is in the `list` option.",
+              "description": "Reports an attribute selector operator that is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5844,10 +5844,10 @@
             },
             "selector-attribute-quotes": {
               "$ref": "#/definitions/rule",
-              "description": "An attribute selector whose value is not quoted (`[a=b]`)."
+              "description": "Reports an attribute selector whose value is not quoted (`[a=b]`)."
             },
             "selector-class-pattern": {
-              "description": "A class selector whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports a class selector whose name does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5878,7 +5878,7 @@
               ]
             },
             "selector-combinator-allowed-list": {
-              "description": "A combinator (`>`, `+`, `~`, or a space for descendant) that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports a combinator (`>`, `+`, `~`, or a space for the descendant combinator) that is not in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5912,7 +5912,7 @@
               ]
             },
             "selector-combinator-disallowed-list": {
-              "description": "A combinator (`>`, `+`, `~`, or a space for descendant) that is in the `list` option.",
+              "description": "Reports a combinator (`>`, `+`, `~`, or a space for the descendant combinator) that is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5946,7 +5946,7 @@
               ]
             },
             "selector-disallowed-list": {
-              "description": "The selector list of a rule (whitespace collapsed) that is in the `list` option (selectors, or `/regex/`).",
+              "description": "Reports a rule whose selector list, with whitespace collapsed, is in the `list` option (selectors, or `/regex/`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -5980,7 +5980,7 @@
               ]
             },
             "selector-id-pattern": {
-              "description": "An id selector whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "description": "Reports an id selector whose name does not match the `pattern` option (a regex).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6011,7 +6011,7 @@
               ]
             },
             "selector-max-attribute": {
-              "description": "A selector with more attribute selectors than the `max` option.",
+              "description": "Reports a selector with more attribute selectors than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6042,7 +6042,7 @@
               ]
             },
             "selector-max-class": {
-              "description": "A selector with more class selectors than the `max` option (the ones inside `:not()` and the like count).",
+              "description": "Reports a selector with more class selectors than the `max` option; classes inside `:not()` and the like count.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6073,7 +6073,7 @@
               ]
             },
             "selector-max-combinators": {
-              "description": "A selector with more combinators (a space between compounds counts) than the `max` option.",
+              "description": "Reports a selector with more combinators than the `max` option; a space between two compound selectors counts.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6104,7 +6104,7 @@
               ]
             },
             "selector-max-compound-selectors": {
-              "description": "A selector with more compound selectors than the `max` option.",
+              "description": "Reports a selector with more compound selectors (parts between combinators) than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6135,7 +6135,7 @@
               ]
             },
             "selector-max-id": {
-              "description": "A selector with more id selectors than the `max` option.",
+              "description": "Reports a selector with more id selectors than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6166,7 +6166,7 @@
               ]
             },
             "selector-max-pseudo-class": {
-              "description": "A selector with more pseudo-classes than the `max` option.",
+              "description": "Reports a selector with more pseudo-classes than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6197,7 +6197,7 @@
               ]
             },
             "selector-max-type": {
-              "description": "A selector with more type selectors than the `max` option.",
+              "description": "Reports a selector with more type selectors than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6228,7 +6228,7 @@
               ]
             },
             "selector-max-universal": {
-              "description": "A selector with more `*` than the `max` option.",
+              "description": "Reports a selector with more `*` than the `max` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6259,7 +6259,7 @@
               ]
             },
             "selector-no-deprecated": {
-              "description": "A deprecated pseudo-class, pseudo-element or HTML or SVG element.",
+              "description": "Reports a deprecated pseudo-class, pseudo-element or HTML or SVG element used as a type selector (`center {}`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6294,10 +6294,10 @@
             },
             "selector-no-qualifying-type": {
               "$ref": "#/definitions/rule",
-              "description": "A type selector in the same compound as a class, id or attribute selector (`ul.nav`)."
+              "description": "Reports a type selector in the same compound as a class, id or attribute selector (`ul.nav`)."
             },
             "selector-no-vendor-prefix": {
-              "description": "A vendor-prefixed pseudo-class or pseudo-element that autoprefixer knows the standard one of.",
+              "description": "Reports a vendor-prefixed pseudo-class or pseudo-element that has a standard one (`::-moz-selection`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6331,7 +6331,7 @@
               ]
             },
             "selector-pseudo-class-allowed-list": {
-              "description": "A pseudo-class that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports a pseudo-class that is not in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6365,7 +6365,7 @@
               ]
             },
             "selector-pseudo-class-disallowed-list": {
-              "description": "A pseudo-class that is in the `list` option.",
+              "description": "Reports a pseudo-class that is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6399,7 +6399,7 @@
               ]
             },
             "selector-pseudo-class-no-unknown": {
-              "description": "A pseudo-class that is not a CSS one. Vendor-prefixed ones are left out, and the `-webkit-scrollbar` ones count after those pseudo-elements.",
+              "description": "Reports a pseudo-class that is not a CSS one.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6433,7 +6433,7 @@
               ]
             },
             "selector-pseudo-element-allowed-list": {
-              "description": "A pseudo-element that is not in the `list` option. An empty list allows everything.",
+              "description": "Reports a pseudo-element that is not in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6468,10 +6468,10 @@
             },
             "selector-pseudo-element-colon-notation": {
               "$ref": "#/definitions/rule",
-              "description": "`:before`, `:after`, `:first-line` and `:first-letter` with one colon."
+              "description": "Reports `:before`, `:after`, `:first-line` or `:first-letter` written with one colon."
             },
             "selector-pseudo-element-disallowed-list": {
-              "description": "A pseudo-element that is in the `list` option.",
+              "description": "Reports a pseudo-element that is in the `list` option.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6505,7 +6505,7 @@
               ]
             },
             "selector-pseudo-element-no-unknown": {
-              "description": "A pseudo-element that is not a CSS one. Vendor-prefixed ones are left out.",
+              "description": "Reports a pseudo-element that is not a CSS one.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6540,10 +6540,10 @@
             },
             "selector-type-case": {
               "$ref": "#/definitions/rule",
-              "description": "A type selector with capitals."
+              "description": "Reports a type selector with capitals (`A {}`)."
             },
             "selector-type-no-unknown": {
-              "description": "A type selector that is not an HTML, SVG or MathML element (custom elements included). Keyframe selectors and the arguments of `:lang()`, `:nth-child()` and the like are left out.",
+              "description": "Reports a type selector that is not an HTML, SVG or MathML element; custom elements are accepted.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6601,7 +6601,7 @@
               "description": "A statement `setattr(x, \"name\", v)` with a literal name that is an identifier."
             },
             "shadowed-variable": {
-              "description": "A variable, parameter or function with the name of one declared in a scope around it. A function declared later in the outer scope still counts (it is hoisted), a variable declared later does not, and `var a = function a() {}` is not a shadow. In TypeScript files a type and a value of one name, and the parameters of function types, are left alone.",
+              "description": "Reports a variable, parameter or function with the name of one declared in a scope around it.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6652,15 +6652,15 @@
             },
             "shorthand-attribute": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `shorthand-attribute` (eslint-plugin-svelte)."
+              "description": "Reports `name={name}` where the shorthand `{name}` would do."
             },
             "shorthand-directive": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `shorthand-directive` (eslint-plugin-svelte), for `bind:`, `class:` and `style:`."
+              "description": "Reports `bind:name={name}`, `class:name={name}` and `style:name={name}` where the shorthand (`bind:name`) would do."
             },
             "shorthand-property-no-redundant-values": {
               "$ref": "#/definitions/rule",
-              "description": "A `margin`, `padding`, `border-color`, `border-style`, `border-width` or `border-radius` with two, three or four values that repeat (`1px 1px` is `1px`)."
+              "description": "Reports a `margin`, `padding`, `border-color`, `border-style`, `border-width` or `border-radius` with two, three or four values that repeat (`1px 1px` is `1px`)."
             },
             "single-class-per-file": {
               "$ref": "#/definitions/rule",
@@ -6684,7 +6684,7 @@
             },
             "single-title": {
               "$ref": "#/definitions/rule",
-              "description": "A document has more than one top-level heading (markdownlint MD025). The second and later `h1` are reported."
+              "description": "Reports a second or later top-level heading (`# Title`) in a document."
             },
             "singular-nouns": {
               "$ref": "#/definitions/rule",
@@ -6851,7 +6851,7 @@
             },
             "spaced-html-comment": {
               "$ref": "#/definitions/rule",
-              "description": "Svelte's `spaced-html-comment` (eslint-plugin-svelte)."
+              "description": "Reports an HTML comment with no space after `<!--` or before `-->` (`<!--text-->`)."
             },
             "special-chars-in-identifier": {
               "$ref": "#/definitions/rule",
@@ -6982,7 +6982,7 @@
             },
             "svg-focusable": {
               "$ref": "#/definitions/rule",
-              "description": "Internet Explorer 11 and old Edge make every `<svg>` focusable unless it says `focusable=\"false\"`."
+              "description": "Reports an `<svg>` that has no `focusable` attribute."
             },
             "syntax-specified": {
               "$ref": "#/definitions/rule",
@@ -7006,7 +7006,7 @@
             },
             "text-content": {
               "$ref": "#/definitions/rule",
-              "description": "A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count."
+              "description": "Reports a `<button>` with no name: no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby`."
             },
             "timestamp-expanded": {
               "$ref": "#/definitions/rule",
@@ -7110,7 +7110,7 @@
               "description": "A star import in a function or class."
             },
             "undefined-variable": {
-              "description": "A name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file, `require`, `module`, `exports` and `global`) and that is not in the `globals` option. `typeof x` and JSX tags are left alone.",
+              "description": "Reports a name that no scope declares, that is not a global of ES2026 (or, in a `.cjs` file, `require`, `module`, `exports` and `global`) and that is not in the option `globals`.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7165,7 +7165,7 @@
             },
             "unique-landmark": {
               "$ref": "#/definitions/rule",
-              "description": "Landmarks of one kind (`<nav>`, `<aside>`, or an element with the same landmark `role`) that a screen reader user cannot tell apart: with several of them, each needs an `aria-label` or `aria-labelledby` that no other has."
+              "description": "Reports landmarks of the same kind (`<nav>`, `<aside>`, or elements with the same landmark `role`) that a screen reader user cannot tell apart: with several of them, each needs an `aria-label` or `aria-labelledby` that no other has."
             },
             "unique-operation-name": {
               "$ref": "#/definitions/rule",
@@ -7206,7 +7206,7 @@
               ]
             },
             "unit-allowed-list": {
-              "description": "A unit (`%` included) that is not in the `list` option, in values and at-rule preludes. An empty list allows everything.",
+              "description": "Reports a unit (`%` included) that is not in the `list` option, in values and at-rule preludes.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7240,7 +7240,7 @@
               ]
             },
             "unit-disallowed-list": {
-              "description": "A unit (`%` included) that is in the `list` option, in values and at-rule preludes.",
+              "description": "Reports a unit (`%` included) that is in the `list` option, in values and at-rule preludes.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7274,7 +7274,7 @@
               ]
             },
             "unit-no-unknown": {
-              "description": "A unit that is not a CSS unit, in values and `@media` preludes. `x` counts only in `image-set()`, `image-resolution` and `resolution` media features.",
+              "description": "Reports a unit that is not a CSS unit, in values and `@media` preludes.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7316,7 +7316,7 @@
               "description": "`needs` names a job that the workflow does not define."
             },
             "unknown-property": {
-              "description": "A property name that is not an EditorConfig or .NET (`dotnet_*`, `csharp_*`, `visual_basic_*`, `dotnet_diagnostic.<ID>.severity`, naming rule) property but is one typo away from one: the setting is silently ignored. Names of other tools (`resharper_*`, `ij_*`) are left alone. Known properties and values: `crates/lang-editorconfig/data/properties.txt`.",
+              "description": "Reports a property name that is not an EditorConfig or .NET property (`dotnet_*`, `csharp_*`, `visual_basic_*`, naming rules, `dotnet_diagnostic.<ID>.severity`) but is one typo away from one.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7399,7 +7399,7 @@
             },
             "unrecognized-char-ref": {
               "$ref": "#/definitions/rule",
-              "description": "A named character reference in text (`&name;`) that HTML does not define. Numeric references and references in attribute values are not checked."
+              "description": "Reports a named character reference in text (`&name;`) that HTML does not define."
             },
             "unsafe-new-static": {
               "$ref": "#/definitions/rule",
@@ -7407,7 +7407,7 @@
             },
             "unsafe-numbers": {
               "$ref": "#/definitions/rule",
-              "description": "A number that a double-precision parser (JavaScript, most JSON libraries) cannot hold: an integer beyond 2^53 - 1, a value that overflows to infinity, underflows to zero or is subnormal."
+              "description": "Reports a number that a double-precision parser (JavaScript and most JSON libraries) cannot hold exactly: an integer beyond 2^53 - 1, a value that overflows to infinity, or one that underflows to zero or is subnormal."
             },
             "unset-glob": {
               "$ref": "#/definitions/rule",
@@ -7512,7 +7512,7 @@
               "description": "A method parameter that the method never reads (RuboCop Lint/UnusedMethodArgument). Names that start with `_`, empty methods and methods that only raise NotImplementedError are left alone. No fix."
             },
             "unused-parameter": {
-              "description": "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
+              "description": "Reports a parameter of a function with a body (a declaration or a literal) that its body never mentions.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7600,14 +7600,14 @@
             },
             "unused-variable": {
               "$ref": "#/definitions/rule",
-              "description": "A local variable or catch variable that is never used (the compiler's CS0168), or is only assigned constants and never read (CS0219). Variables captured by lambdas or local functions count as used. Off by default: the compiler already warns (CS0168, CS0219)."
+              "description": "Reports a local variable or catch variable that is never used, or that is only assigned constants and never read."
             },
             "upper-ell": {
               "$ref": "#/definitions/rule",
               "description": "An integer literal that ends in a lower case `l` (Checkstyle UpperEll)."
             },
             "use-baseline": {
-              "description": "An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.",
+              "description": "Reports an element, an attribute or an attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7638,7 +7638,7 @@
               ]
             },
             "use-before-define": {
-              "description": "A reference that comes before the declaration of what it names in the source (function declarations included), or runs while the variable is being initialized. References in types are left alone.",
+              "description": "Reports a reference that comes before the declaration of what it names in the source (function declarations included), or that runs while the variable is being initialized.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -7799,27 +7799,27 @@
             },
             "v-bind-style": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form."
+              "description": "Reports `v-bind:` where the shorthand `:` would do (`v-bind:href`)."
             },
             "v-for-key": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `require-v-for-key` (eslint-plugin-vue). A `v-for` without a `:key` (or `v-bind:key`) makes Vue patch the elements in place, which keeps stale state in inputs and components. On a `<template>` or `<slot>` the key goes on the child elements; components are left to `valid-v-for`."
+              "description": "Reports a `v-for` with no `:key` (or `v-bind:key`)."
             },
             "v-on-event-hyphenation": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `v-on-event-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+              "description": "Reports an event of a component that is written in camelCase (`@cardOpen`)."
             },
             "v-on-style": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `v-on-style` (eslint-plugin-vue), the shorthand form."
+              "description": "Reports `v-on:` where the shorthand `@` would do (`v-on:click`)."
             },
             "v-slot-style": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `v-slot-style` (eslint-plugin-vue), the shorthand form."
+              "description": "Reports `v-slot:` where the shorthand `#` would do (`v-slot:head`)."
             },
             "valid-id": {
               "$ref": "#/definitions/rule",
-              "description": "An `id` that is empty, has whitespace, begins with a digit or has other characters is valid HTML5 but breaks CSS selectors and some scripts."
+              "description": "Reports an `id` that is empty, has white space, begins with a digit or has characters other than letters, digits, `-` and `_`."
             },
             "valid-typeof": {
               "$ref": "#/definitions/rule",
@@ -7827,70 +7827,70 @@
             },
             "valid-v-bind": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-bind` (eslint-plugin-vue)."
+              "description": "Reports a `v-bind` that has no expression (`:name` alone is the shorthand for `:name=\"name\"`, a bare `v-bind` is not) or a modifier other than `camel`, `prop`, `attr` and `sync`."
             },
             "valid-v-cloak": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-cloak` (eslint-plugin-vue)."
+              "description": "Reports a `v-cloak` that has an expression, an argument or a modifier."
             },
             "valid-v-else": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-else` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+              "description": "Reports a `v-else` that has an expression, an argument or a modifier, shares an element with `v-if` or `v-else-if`, or is not on the element right after one with `v-if` or `v-else-if`."
             },
             "valid-v-else-if": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-else-if` (eslint-plugin-vue). Only comments and blank space may sit between the elements of a chain."
+              "description": "Reports a `v-else-if` that has no expression, has an argument or a modifier, shares an element with `v-if` or `v-else`, or is not on the element right after one with `v-if` or `v-else-if`."
             },
             "valid-v-for": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-for` (eslint-plugin-vue), the syntax of the directive. A missing `:key` is `v-for-key`."
+              "description": "Reports a `v-for` whose value is not `item in items` (or `of`), or that has an argument or a modifier."
             },
             "valid-v-html": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-html` (eslint-plugin-vue)."
+              "description": "Reports a `v-html` that has no expression, an argument or a modifier."
             },
             "valid-v-if": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-if` (eslint-plugin-vue). An element with `v-else-if` or `v-else` continues an earlier chain."
+              "description": "Reports a `v-if` that has no expression, has an argument or a modifier, or is on the same element as `v-else` or `v-else-if`."
             },
             "valid-v-is": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-is` (eslint-plugin-vue)."
+              "description": "Reports a `v-is` that has no expression, an argument or a modifier."
             },
             "valid-v-memo": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-memo` (eslint-plugin-vue)."
+              "description": "Reports a `v-memo` that has no expression, an argument or a modifier."
             },
             "valid-v-model": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-model` (eslint-plugin-vue). A file input has no value Vue can set; listen to `@change` instead."
+              "description": "Reports a `v-model` that has no expression, and a `v-model` on a file input."
             },
             "valid-v-on": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-on` (eslint-plugin-vue). `@click=\"go\"`; `@click.prevent` alone is fine, `@click` is not."
+              "description": "Reports a `v-on` with no handler and no modifier (`@click`)."
             },
             "valid-v-once": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-once` (eslint-plugin-vue)."
+              "description": "Reports a `v-once` that has an expression, an argument or a modifier."
             },
             "valid-v-pre": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-pre` (eslint-plugin-vue)."
+              "description": "Reports a `v-pre` that has an expression, an argument or a modifier."
             },
             "valid-v-show": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-show` (eslint-plugin-vue)."
+              "description": "Reports a `v-show` that has no expression, an argument or a modifier."
             },
             "valid-v-slot": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-slot` (eslint-plugin-vue). `<template #name=\"props\">`; a plain element such as `<div>` cannot receive a slot."
+              "description": "Reports a `v-slot` with a modifier, and a `v-slot` on a plain HTML element (`<div #item>`)."
             },
             "valid-v-text": {
               "$ref": "#/definitions/rule",
-              "description": "Vue's `valid-v-text` (eslint-plugin-vue)."
+              "description": "Reports a `v-text` that has no expression, an argument or a modifier."
             },
             "value-no-vendor-prefix": {
-              "description": "A vendor-prefixed keyword or function that autoprefixer knows the standard value of.",
+              "description": "Reports a vendor-prefixed keyword or function that has a standard value (`-webkit-flex`).",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -8017,7 +8017,7 @@
             },
             "void-style": {
               "$ref": "#/definitions/rule",
-              "description": "A void element (`<br>`, `<img>`, ...) has no end tag and needs no `/`; write `<br>`, not `<br/>`."
+              "description": "Reports a `/` at the end of a void element (`<br/>`, `<img />`)."
             },
             "wget-progress": {
               "$ref": "#/definitions/rule",

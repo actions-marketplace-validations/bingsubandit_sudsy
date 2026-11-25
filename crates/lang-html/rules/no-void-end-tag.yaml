@@ -1,6 +1,12 @@
 id: no-void-end-tag
 message: "`<$NAME>` is a void element and has no end tag"
-description: A void element (`<br>`, `<img>`, ...) has no content and no end tag; the browser ignores `</br>`.
+description: >-
+  Reports an end tag of a void element (`</br>`, `</img>`).
+why: >-
+  A void element has no content and no end tag, and the browser ignores `</br>`, but a stray `</p>`
+  or `</br>` is one of the most common signs of markup that was converted wrongly.
+
+  To fix, remove the end tag.
 example: '<br></br>   <br>'
 category: correctness
 rule:

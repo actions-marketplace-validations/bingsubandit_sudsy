@@ -2,7 +2,13 @@ id: no-deprecated-v-bind-sync
 family: template
 params: { name: v-bind, banned: sync }
 message: "`.sync` is gone in Vue 3: use `v-model:name`"
-description: "Vue's `no-deprecated-v-bind-sync` (eslint-plugin-vue). `:title.sync=\"t\"` is `v-model:title=\"t\"` in Vue 3."
+description: >-
+  Reports the `.sync` modifier of `v-bind` (`:title.sync`).
+why: >-
+  Vue 3 does not have `.sync`: the binding then does not update the parent, and the component works
+  only until the first change.
+
+  To fix, write `v-model:title="t"`.
 example: "<C :title.sync=\"t\">   <C v-model:title=\"t\">"
 severity: warn
 category: correctness
@@ -11,7 +17,12 @@ id: no-deprecated-v-is
 family: template
 params: { name: v-is }
 message: "`v-is` is gone in Vue 3: use `is=\"vue:name\"`"
-description: "Vue's `no-deprecated-v-is` (eslint-plugin-vue)."
+description: >-
+  Reports the `v-is` directive.
+why: >-
+  Vue 3 removed it, so the element is not turned into the component.
+
+  To fix, write `is="vue:name"`.
 example: "<tr v-is=\"c\">   <tr is=\"vue:c\">"
 severity: warn
 category: correctness
@@ -20,7 +31,12 @@ id: no-deprecated-v-on-native-modifier
 family: template
 params: { name: v-on, banned: native }
 message: "`.native` is gone in Vue 3: declare the event in `emits`, or listen on the component's root element"
-description: "Vue's `no-deprecated-v-on-native-modifier` (eslint-plugin-vue)."
+description: >-
+  Reports the `.native` modifier of `v-on` (`@click.native`).
+why: >-
+  Vue 3 removed it, so the listener is not added to the root element of the component.
+
+  To fix, declare the event in `emits` of the component, or listen on its root element.
 example: "<C @click.native=\"go\">   <C @click=\"go\">"
 severity: warn
 category: correctness
@@ -29,7 +45,12 @@ id: no-deprecated-v-on-number-modifiers
 family: template
 params: { name: v-on, numeric-modifier: true }
 message: "key codes as modifiers (`@keyup.13`) are gone in Vue 3: use the key name (`@keyup.enter`)"
-description: "Vue's `no-deprecated-v-on-number-modifiers` (eslint-plugin-vue)."
+description: >-
+  Reports a key code as a modifier of `v-on` (`@keyup.13`).
+why: >-
+  Vue 3 removed key codes, so the listener never fires. The numbers are also deprecated in browsers.
+
+  To fix, write the key name (`@keyup.enter`).
 example: "<input @keyup.13=\"go\">   <input @keyup.enter=\"go\">"
 severity: warn
 category: correctness
@@ -38,7 +59,13 @@ id: no-deprecated-slot-attribute
 family: template
 params: { name: slot, host: not-slot, only: vue }
 message: "the `slot` attribute is gone in Vue 3: use `v-slot` (`#name`) on a `<template>`"
-description: "Vue's `no-deprecated-slot-attribute` (eslint-plugin-vue). Only in `.vue` files, because in HTML `slot` assigns an element to a web component's slot."
+description: >-
+  Reports the `slot` attribute on an element that is not a `<slot>`. Only in `.vue` files, because
+  in HTML `slot` assigns an element to the slot of a web component.
+why: >-
+  Vue 3 removed the attribute for a named slot, so the content is not put in the slot.
+
+  To fix, use `v-slot` (`#name`) on a `<template>`.
 example: "<p slot=\"head\">   <template #head><p></p></template>"
 severity: warn
 category: correctness
@@ -47,7 +74,12 @@ id: no-deprecated-slot-scope-attribute
 family: template
 params: { name: slot-scope }
 message: "`slot-scope` is gone in Vue 3: use `v-slot` (`#name=\"props\"`)"
-description: "Vue's `no-deprecated-slot-scope-attribute` (eslint-plugin-vue)."
+description: >-
+  Reports the `slot-scope` attribute.
+why: >-
+  Vue 3 removed it, so the slot props are not passed to the content.
+
+  To fix, use `v-slot` (`#name="props"`).
 example: "<template slot-scope=\"p\">   <template #default=\"p\">"
 severity: warn
 category: correctness
@@ -56,7 +88,12 @@ id: no-deprecated-scope-attribute
 family: template
 params: { name: scope, host: template }
 message: "`scope` on a `<template>` is gone in Vue 3: use `v-slot`"
-description: "Vue's `no-deprecated-scope-attribute` (eslint-plugin-vue)."
+description: >-
+  Reports the `scope` attribute on a `<template>`.
+why: >-
+  Vue 3 removed it, so the slot props are not passed to the content.
+
+  To fix, use `v-slot`.
 example: "<template scope=\"p\">   <template #default=\"p\">"
 severity: warn
 category: correctness
@@ -65,7 +102,12 @@ id: no-deprecated-functional-template
 family: template
 params: { name: functional, host: template }
 message: "`<template functional>` is gone in Vue 3: write a function component"
-description: "Vue's `no-deprecated-functional-template` (eslint-plugin-vue)."
+description: >-
+  Reports `<template functional>`.
+why: >-
+  Vue 3 removed functional single file templates, so the component does not work.
+
+  To fix, write a function component.
 example: "<template functional>   <template>"
 severity: warn
 category: correctness
@@ -74,7 +116,12 @@ id: no-deprecated-inline-template
 family: template
 params: { name: inline-template }
 message: "`inline-template` is gone in Vue 3: use a slot"
-description: "Vue's `no-deprecated-inline-template` (eslint-plugin-vue)."
+description: >-
+  Reports the `inline-template` attribute.
+why: >-
+  Vue 3 removed it, so the content of the tag is not used as the template of the component.
+
+  To fix, use a slot.
 example: "<C inline-template>   <C v-slot>"
 severity: warn
 category: correctness
@@ -83,7 +130,14 @@ id: no-deprecated-html-element-is
 family: template
 params: { name: is, value: vue-prefixed, host: html, only: vue }
 message: "`is` on an HTML element needs the `vue:` prefix in Vue 3 (`is=\"vue:name\"`), or use `<component :is>`"
-description: "Vue's `no-deprecated-html-element-is` (eslint-plugin-vue). Only in `.vue` files, where a plain `is` would make a customized built-in element."
+description: >-
+  Reports an `is` attribute on a plain HTML element that does not begin with `vue:` (`<tr
+  is="row">`). Only in `.vue` files, where a plain `is` would make a customized built-in element.
+why: >-
+  In Vue 3 a plain `is` on an HTML element creates a native customized built-in element, not a Vue
+  component.
+
+  To fix, write `is="vue:row"`, or use `<component :is>`.
 example: "<tr is=\"row\">   <tr is=\"vue:row\">"
 severity: warn
 category: correctness

@@ -1,6 +1,11 @@
 # CMake (`lang-cmake`)
 
-Plan and phases: [../design/cmake.md](../design/cmake.md).
+Both legs: format against gersemi, lint against cmake-lint's defaults, on a corpus of 9,066 files of LLVM, CMake, Qt, VTK, OpenCV, extra-cmake-modules and protobuf (22.8 MB).
+
+Facts that shape the code:
+- A file is a flat list of commands `name(args)`. Blocks are pairs of commands (`if`/`elseif`/`else`/`endif`, `foreach`, `while`, `function`, `macro`, `block`), each with its own closer; the tree stays flat and `block_pair` gives each command its role and depth.
+- Command names are case-insensitive; the lexer has no keywords. A word's role comes from the command's signature.
+- No licence trap: the signature table is written from CMake's own documentation (BSD-3-Clause); gersemi's table (MPL-2.0) and cmake-lint's (GPL-3.0) are never copied, only their output is compared.
 
 ## Parser
 Hand-written lexer and parser (`crates/lang-cmake/src/lexer.rs`, `parser.rs`) on the kit `core_syntax::parse` (`Lexer`, `Parser`, trivia attachment, depth guard); `Quoted` is scanned by the `string` row of the grammar (`StringSyntax::scan`). `grammars/cmake.grammar` has the tokens (`Unquoted`, `Quoted`, `Bracket`, `LParen`, `RParen`, line and bracket comments) and the nodes `File`, `Command` (name, `(`, `ArgumentList`, `)`), `ArgumentList`, `Argument`, `ParenGroup`. Blocks (`if` ... `endif`) are not nodes: they are pairs of commands, paired by name in the parse (below). Variable references and generator expressions are text inside an `Unquoted` or `Quoted` token: no rule reads their parts yet.
@@ -46,7 +51,7 @@ Reference tool: gersemi 0.29.2 (MPL-2.0, run as a tool: [../parity/gersemi.yaml]
 
 What CMake's help does not express stays out of the table and is chosen by the layout's generic rules (the causes in [../parity/queue.md](../parity/queue.md)): keywords that only the prose defines (`FILE_SET`, `IN ITEMS`, `ENV` after `HINTS`), which form words keep their first argument on the line (`list(APPEND NAME` does, `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not), and commands that keep more than four plain values on a line.
 
-Equal to gersemi on the corpus: 8,179 of 9,038 files (28 files gersemi rejects; the share is in the parity table); `second-format` 0. Causes of the 859 others, by the first differing hunk: keyword sections 630 (the table lacks what the help does not say), conditions 169 (a nested group that does not fit, `NOT` and `DEFINED` pairs), blank line in front of a comment before a closer 30, unknown commands 30 (user functions: the shift model against gersemi's re-layout). A call with a comment on a parenthesis (`set(# first`, a comment in front of `)`) is laid out by the flat list, which does not keep the name of `set` on the line.
+Equal to gersemi on the corpus: 8,187 of 9,038 files (28 files gersemi rejects; the share is in the parity table); `second-format` 0. Causes of the 851 others, by the first differing hunk: keyword sections 622 (the table lacks what the help does not say), conditions 169 (a nested group that does not fit, `NOT` and `DEFINED` pairs), blank line in front of a comment before a closer 30, unknown commands 30 (user functions: the shift model against gersemi's re-layout). A line comment after `(` stays on the opening line and one in front of `)` ends the body; a block comment on a parenthesis is laid out by the flat list.
 
 ## Conformance
 `tests/conformance/fetch-cmake-corpus.sh` fetches the `CMakeLists.txt` and `*.cmake` files of LLVM, CMake, Qt base, VTK, OpenCV, extra-cmake-modules and protobuf at pinned commits (9,066 files, 22.8 MB; the measurement of the plan left `.git*` folders out): every file prints back byte for byte and fits the grammar, 31 have parse errors and all are templates (`cargo test --profile corpus -p lang-cmake --test integration -- --ignored --nocapture conformance`, 5 s). Speed and the line-deletion test: [../performance/numbers.md](../performance/numbers.md).

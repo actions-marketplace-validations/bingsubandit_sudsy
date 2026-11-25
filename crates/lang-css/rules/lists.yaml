@@ -2,7 +2,13 @@ id: property-allowed-list
 family: names
 params: { target: property, mode: allowed }
 message: "the property `{name}` is not allowed"
-description: A property that is not in the `list` option (names, or `/regex/`). Custom properties are left out; an empty list allows everything.
+description: >-
+  Reports a property that is not in the `list` option (names, or `/regex/`). Custom properties are
+  not reported, and an empty list allows everything.
+why: >-
+  A project can limit the properties its styles use, for example to a design system's set, so a
+  one-off property fails in review rather than later in the browser. The rule is a policy: with no
+  `list` it reports nothing.
 example: "a { float: left }   # reported with list: [color]"
 severity: off
 category: style
@@ -13,7 +19,13 @@ id: property-disallowed-list
 family: names
 params: { target: property, mode: disallowed }
 message: "the property `{name}` is not allowed"
-description: A property that is in the `list` option (names, or `/regex/`). Custom properties are left out.
+description: >-
+  Reports a property that is in the `list` option (names, or `/regex/`). Custom properties are not
+  reported.
+why: >-
+  A project can forbid properties that its browsers or its design system do not support, or that
+  cause layout trouble (`float` in a flex design). The rule is a policy: with no `list` it reports
+  nothing.
 example: "a { float: left }   # reported with list: [float]"
 severity: off
 category: style
@@ -24,7 +36,12 @@ id: unit-allowed-list
 family: names
 params: { target: unit, mode: allowed }
 message: "the unit `{name}` is not allowed"
-description: A unit (`%` included) that is not in the `list` option, in values and at-rule preludes. An empty list allows everything.
+description: >-
+  Reports a unit (`%` included) that is not in the `list` option, in values and at-rule preludes. An
+  empty list allows everything.
+why: >-
+  A project can fix the units its layout uses (`rem` and `%`, not `px`), so lengths scale the same
+  way throughout. The rule is a policy: with no `list` it reports nothing.
 example: "a { width: 1em }   # reported with list: [px]"
 severity: off
 category: style
@@ -35,7 +52,11 @@ id: unit-disallowed-list
 family: names
 params: { target: unit, mode: disallowed }
 message: "the unit `{name}` is not allowed"
-description: A unit (`%` included) that is in the `list` option, in values and at-rule preludes.
+description: >-
+  Reports a unit (`%` included) that is in the `list` option, in values and at-rule preludes.
+why: >-
+  A project can forbid a unit that does not fit its design, for example `px` where text has to
+  follow the user's font size. The rule is a policy: with no `list` it reports nothing.
 example: "a { width: 1em }   # reported with list: [em]"
 severity: off
 category: style
@@ -46,7 +67,11 @@ id: function-allowed-list
 family: names
 params: { target: function, mode: allowed }
 message: "the function `{name}` is not allowed"
-description: A function that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports a function that is not in the `list` option. An empty list allows everything.
+why: >-
+  A project can limit the functions its stylesheets call to the ones its browsers support or its
+  design system allows. The rule is a policy: with no `list` it reports nothing.
 example: "a { width: calc(1px + 2px) }   # reported with list: [var]"
 severity: off
 category: style
@@ -57,7 +82,11 @@ id: function-disallowed-list
 family: names
 params: { target: function, mode: disallowed }
 message: "the function `{name}` is not allowed"
-description: A function that is in the `list` option.
+description: >-
+  Reports a function that is in the `list` option.
+why: >-
+  A project can forbid a function that its browsers do not support or that its design system
+  replaces. The rule is a policy: with no `list` it reports nothing.
 example: "a { width: calc(1px + 2px) }   # reported with list: [calc]"
 severity: off
 category: style
@@ -68,7 +97,12 @@ id: at-rule-allowed-list
 family: names
 params: { target: at-rule, mode: allowed }
 message: "the at-rule `@{name}` is not allowed"
-description: An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports an at-rule that is not in the `list` option (a vendor prefix is left out of the name). An
+  empty list allows everything.
+why: >-
+  A project can limit the at-rules of its stylesheets, for example to keep `@import` out of a
+  bundle. The rule is a policy: with no `list` it reports nothing.
 example: "@import 'a.css';   # reported with list: [media]"
 severity: off
 category: style
@@ -79,7 +113,11 @@ id: at-rule-disallowed-list
 family: names
 params: { target: at-rule, mode: disallowed }
 message: "the at-rule `@{name}` is not allowed"
-description: An at-rule (vendor prefix left out) that is in the `list` option.
+description: >-
+  Reports an at-rule that is in the `list` option (a vendor prefix is left out of the name).
+why: >-
+  A project can forbid an at-rule, such as `@import`, that costs a request per file or that its
+  build does not support. The rule is a policy: with no `list` it reports nothing.
 example: "@import 'a.css';   # reported with list: [import]"
 severity: off
 category: style
@@ -90,7 +128,11 @@ id: media-feature-name-allowed-list
 family: names
 params: { target: media-feature, mode: allowed }
 message: "the media feature `{name}` is not allowed"
-description: A media feature that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports a media feature that is not in the `list` option. An empty list allows everything.
+why: >-
+  A project can limit the media features of its queries to the ones its design uses. The rule is a
+  policy: with no `list` it reports nothing.
 example: "@media (min-width: 1px) {}   # reported with list: [width]"
 severity: off
 category: style
@@ -101,7 +143,11 @@ id: media-feature-name-disallowed-list
 family: names
 params: { target: media-feature, mode: disallowed }
 message: "the media feature `{name}` is not allowed"
-description: A media feature that is in the `list` option.
+description: >-
+  Reports a media feature that is in the `list` option.
+why: >-
+  A project can forbid media features that its browsers do not support or that its breakpoints
+  replace. The rule is a policy: with no `list` it reports nothing.
 example: "@media (min-width: 1px) {}   # reported with list: [min-width]"
 severity: off
 category: style
@@ -112,7 +158,11 @@ id: selector-pseudo-class-allowed-list
 family: names
 params: { target: pseudo-class, mode: allowed }
 message: "the pseudo-class `:{name}` is not allowed"
-description: A pseudo-class that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports a pseudo-class that is not in the `list` option. An empty list allows everything.
+why: >-
+  A project can limit the pseudo-classes of its selectors, for example to the ones its browsers
+  support. The rule is a policy: with no `list` it reports nothing.
 example: "a:hover {}   # reported with list: [focus]"
 severity: off
 category: style
@@ -123,7 +173,11 @@ id: selector-pseudo-class-disallowed-list
 family: names
 params: { target: pseudo-class, mode: disallowed }
 message: "the pseudo-class `:{name}` is not allowed"
-description: A pseudo-class that is in the `list` option.
+description: >-
+  Reports a pseudo-class that is in the `list` option.
+why: >-
+  A project can forbid a pseudo-class that its browsers do not support or that is slow on large
+  pages. The rule is a policy: with no `list` it reports nothing.
 example: "a:hover {}   # reported with list: [hover]"
 severity: off
 category: style
@@ -134,7 +188,11 @@ id: selector-pseudo-element-allowed-list
 family: names
 params: { target: pseudo-element, mode: allowed }
 message: "the pseudo-element `::{name}` is not allowed"
-description: A pseudo-element that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports a pseudo-element that is not in the `list` option. An empty list allows everything.
+why: >-
+  A project can limit the pseudo-elements of its selectors, for example to the ones its browsers
+  support. The rule is a policy: with no `list` it reports nothing.
 example: "a::before {}   # reported with list: [after]"
 severity: off
 category: style
@@ -145,7 +203,11 @@ id: selector-pseudo-element-disallowed-list
 family: names
 params: { target: pseudo-element, mode: disallowed }
 message: "the pseudo-element `::{name}` is not allowed"
-description: A pseudo-element that is in the `list` option.
+description: >-
+  Reports a pseudo-element that is in the `list` option.
+why: >-
+  A project can forbid a pseudo-element that its browsers do not support or that its design avoids.
+  The rule is a policy: with no `list` it reports nothing.
 example: "a::before {}   # reported with list: [before]"
 severity: off
 category: style
@@ -156,7 +218,12 @@ id: selector-combinator-allowed-list
 family: names
 params: { target: combinator, mode: allowed }
 message: "the combinator `{name}` is not allowed"
-description: A combinator (`>`, `+`, `~`, or a space for descendant) that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports a combinator (`>`, `+`, `~`, or a space for the descendant combinator) that is not in the
+  `list` option. An empty list allows everything.
+why: >-
+  A project can limit which relations between elements its selectors may use, for example to keep
+  selectors short and fast to match. The rule is a policy: with no `list` it reports nothing.
 example: "a > b {}   # reported with list: [\" \"]"
 severity: off
 category: style
@@ -167,7 +234,12 @@ id: selector-combinator-disallowed-list
 family: names
 params: { target: combinator, mode: disallowed }
 message: "the combinator `{name}` is not allowed"
-description: A combinator (`>`, `+`, `~`, or a space for descendant) that is in the `list` option.
+description: >-
+  Reports a combinator (`>`, `+`, `~`, or a space for the descendant combinator) that is in the
+  `list` option.
+why: >-
+  A project can forbid a combinator, for example the descendant combinator, which ties a rule to the
+  depth of the markup. The rule is a policy: with no `list` it reports nothing.
 example: "a > b {}   # reported with list: [\">\"]"
 severity: off
 category: style
@@ -178,7 +250,11 @@ id: selector-attribute-name-disallowed-list
 family: names
 params: { target: attribute, mode: disallowed }
 message: "the attribute `{name}` is not allowed in a selector"
-description: An attribute selector whose name is in the `list` option.
+description: >-
+  Reports an attribute selector whose name is in the `list` option.
+why: >-
+  A project can forbid selecting on an attribute such as `style`, whose value is generated or
+  changes without notice. The rule is a policy: with no `list` it reports nothing.
 example: "a[style] {}   # reported with list: [style]"
 severity: off
 category: style
@@ -189,7 +265,12 @@ id: selector-disallowed-list
 family: names
 params: { target: selector, mode: disallowed }
 message: "the selector `{name}` is not allowed"
-description: "The selector list of a rule (whitespace collapsed) that is in the `list` option (selectors, or `/regex/`)."
+description: >-
+  Reports a rule whose selector list, with whitespace collapsed, is in the `list` option (selectors,
+  or `/regex/`).
+why: >-
+  A project can forbid selectors that cause trouble, such as `*` or a bare element, which restyle
+  everything. The rule is a policy: with no `list` it reports nothing.
 example: "a b {}   # reported with list: [a b]"
 severity: off
 category: style
@@ -200,7 +281,13 @@ id: selector-attribute-operator-allowed-list
 family: names
 params: { target: attribute-operator, mode: allowed }
 message: "the attribute operator `{name}` is not allowed"
-description: An attribute selector operator that is not in the `list` option. An empty list allows everything.
+description: >-
+  Reports an attribute selector operator that is not in the `list` option. An empty list allows
+  everything.
+why: >-
+  A project can limit the attribute operators of its selectors to the ones it understands, since
+  `~=`, `|=` and `*=` match in ways that are easy to misread. The rule is a policy: with no `list`
+  it reports nothing.
 example: "[a~=b] {}   # reported with list: [=]"
 severity: off
 category: style
@@ -211,7 +298,11 @@ id: selector-attribute-operator-disallowed-list
 family: names
 params: { target: attribute-operator, mode: disallowed }
 message: "the attribute operator `{name}` is not allowed"
-description: An attribute selector operator that is in the `list` option.
+description: >-
+  Reports an attribute selector operator that is in the `list` option.
+why: >-
+  A project can forbid an operator, such as `*=`, whose substring match is easy to misread or slow.
+  The rule is a policy: with no `list` it reports nothing.
 example: "[a~=b] {}   # reported with list: [~=]"
 severity: off
 category: style

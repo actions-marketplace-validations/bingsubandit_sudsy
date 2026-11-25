@@ -3,6 +3,13 @@ family: meta
 params: { check: allowed-values }
 message: "the value `{value}` is not allowed for `{attr}` on <{name}>"
 description: >-
-  An attribute that is limited to a list of values (`type` of `<button>`, `method` of `<form>`, ...) has another one.
+  Reports an attribute whose value is not one of the values HTML allows for it on that element, for
+  attributes with a fixed list such as `type` of `<button>` (`button`, `submit`, `reset`) and
+  `method` of `<form>`.
+why: >-
+  A browser that meets a value it does not know falls back to a default, which is not what the
+  author wrote: `type="foo"` on a button makes a submit button, and the typo is never shown.
+
+  To fix, use one of the allowed values.
 example: '<button type="send">   <button type="submit">'
 category: correctness

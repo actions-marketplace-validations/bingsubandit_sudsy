@@ -4,7 +4,8 @@
 //! (`APPEND list`). The call stays on one line when it fits; else every section is a line of its
 //! own, indented, and a section that does not fit goes one value per line (a command line is
 //! filled). A call with a list of more than four values breaks even when it would fit. The
-//! closing parenthesis stands alone. A call with a comment inside is not laid out here.
+//! closing parenthesis stands alone. A line comment after `(` stays on the opening line, one in
+//! front of `)` is the last line of the body; a block comment there is not laid out here.
 //!
 //! concept: keyword-sections
 //! what: Lays out the arguments of a call by its command's signature: keyword sections, forms chosen by the first words, pairs and command lines, one line when it fits.
@@ -249,7 +250,7 @@ fn section_doc(items: &[Item], s: &Section) -> Doc {
 }
 
 /// The parenthesized arguments of a call to the command `sig`, or `None` for a call with no
-/// argument, a comment on the parenthesis or a signature that says nothing.
+/// argument, a block comment on the parenthesis or a signature that says nothing.
 pub fn keyword_call(
     cx: &FormatCtx<'_>,
     args: &SyntaxNode,
@@ -259,12 +260,14 @@ pub fn keyword_call(
 ) -> Result<Option<Doc>, FormatError> {
     let g = cx.grammar;
     let bare = sig.positional.is_empty() && sig.keywords.is_empty() && sig.forms.is_empty();
-    if bare
-        || !comments::trailing_comments(g, open).is_empty()
-        || !comments::leading_comments(g, close).is_empty()
-    {
+    let open_comments = comments::trailing_comments(g, open);
+    let close_comments = comments::leading_comments(g, close);
+    let block =
+        |cs: &[comments::Comment]| cs.iter().any(|c| c.kind == comments::CommentKind::Block);
+    if bare || block(&open_comments) || block(&close_comments) {
         return Ok(None);
     }
+    let around = !open_comments.is_empty() || !close_comments.is_empty();
     let mut items = Vec::new();
     for arg in args.children() {
         items.push(Item {
@@ -313,14 +316,16 @@ pub fn keyword_call(
             .strings(core_config::opt::LEADING_ARGUMENT_COMMANDS)
             .any(|c| c.eq_ignore_ascii_case(sig.name))
         && rest.len() > 1
+        && open_comments.is_empty()
         && matches!(rest.first(), Some(Section::Plain(_)));
     let plain = rest
         .iter()
         .filter(|s| matches!(s, Section::Plain(_)))
         .count();
-    let force = (plain.saturating_sub(sig.positional.len().max(usize::from(first_hug)))
-        > LONGEST_INLINE
-        && plain == rest.len())
+    let force = around
+        || (plain.saturating_sub(sig.positional.len().max(usize::from(first_hug)))
+            > LONGEST_INLINE
+            && plain == rest.len())
         || (!head.is_empty() && plain > LONGEST_INLINE);
     let mut docs: Vec<Doc> = Vec::new();
     if !head.is_empty() {
@@ -333,7 +338,21 @@ pub fn keyword_call(
         }
         docs.push(section_doc(&items, s));
     }
-    let body = join(docs);
+    let mut body = join(docs);
+    if !close_comments.is_empty() {
+        body = doc::concat(vec![
+            body,
+            super::dangling_comments_in(&cx.comment_style, &close_comments, false),
+        ]);
+    }
+    let opening = match open_comments.split_first() {
+        Some((first, more)) => doc::concat(vec![
+            doc::lit("("),
+            crate::context::comment_doc_in(first, &cx.comment_style),
+            doc::indent(super::dangling_comments_in(&cx.comment_style, more, false)),
+        ]),
+        None => doc::lit("("),
+    };
     let inner = if first_hug {
         doc::concat(vec![
             items[0].doc.clone(),
@@ -352,7 +371,7 @@ pub fn keyword_call(
         doc::nil()
     };
     Ok(Some(doc::group(doc::concat(vec![
-        doc::lit("("),
+        opening,
         breaker,
         inner,
         doc::lit(")"),

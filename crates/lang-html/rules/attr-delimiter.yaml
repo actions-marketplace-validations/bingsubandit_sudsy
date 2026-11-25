@@ -1,6 +1,12 @@
 id: attr-delimiter
 message: write an attribute and its value as `name=value`, with no space around the `=`
-description: An attribute name and its value are joined by `=` without whitespace.
+description: >-
+  Reports white space around the `=` between an attribute name and its value (`class = "a"`).
+why: >-
+  The spaces are valid, but few tools and readers expect them, and a line like `a = b c = d` is hard
+  to split into attributes at a glance.
+
+  To fix, write `name="value"` with nothing around the `=`.
 example: '<p id = "a">   <p id="a">'
 severity: off
 category: style

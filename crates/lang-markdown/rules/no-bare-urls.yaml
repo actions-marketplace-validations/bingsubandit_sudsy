@@ -1,8 +1,15 @@
 id: no-bare-urls
 message: wrap the URL in <> or write a link
 description: >-
-  A URL that is neither a link nor an autolink (markdownlint MD034), found when it follows a
-  space or starts the paragraph. Reported on the URL.
+  Reports a URL (`http://` or `https://`) written in a paragraph that is neither a link nor an
+  autolink, on the URL. It is found when it follows whitespace or starts the paragraph; headings are
+  not checked.
+why: >-
+  Markdown flavours differ in whether a bare URL becomes a link: some leave it as plain text, and
+  one that includes the trailing punctuation breaks the link. Marking it with `<...>` or a link
+  makes the intent explicit and the same everywhere.
+
+  To fix, write `<https://example.com>` or `[text](https://example.com)`.
 example: 'See https://example.com   # See <https://example.com>'
 severity: off
 category: style

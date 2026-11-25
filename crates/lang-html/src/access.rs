@@ -41,8 +41,12 @@ markup_rule! {
     pub LINK_TEXT {
         id: "link-text",
         category: Correctness,
-        description: "A link (`<a href>`) with no text, no image with alt text and no `aria-label`: \
-                  its purpose is not told to assistive technology (WCAG H30). Links hidden from it are left alone.",
+        description: "Reports a link (`<a href>`) with no text, no image with an `alt` and no \
+              `aria-label` (WCAG H30). A link hidden from assistive technology is not reported.",
+        why: "A screen reader announces the link as \"link\" with no purpose, and a list of the \
+              links of a page shows an empty entry. Sighted users get a link they cannot see or \
+              have no name for.\n\
+              To fix, put text in the link, or an image with an `alt`, or add `aria-label`.",
         example: "<a href=\"/x\"><i class=\"icon\"></i></a>",
         check: LinkText,
         model: model,
@@ -54,7 +58,12 @@ markup_rule! {
     pub FORM_SUBMIT {
         id: "form-submit",
         category: Correctness,
-        description: "A `<form>` with no submit button inside it and none that names it with `form=` (WCAG H32).",
+        description: "Reports a `<form>` that has no submit button inside it and none that names it with \
+              `form=` (WCAG H32).",
+        why: "Without a submit button a form can only be sent by pressing Enter in a field, \
+              which not every user knows, and which does nothing in a form with several fields \
+              in some browsers.\n\
+              To fix, add a `<button type=\"submit\">` (or `<input type=\"submit\">`) to the form.",
         example: "<form><input name=\"q\"></form>",
         check: FormSubmit,
         model: model,
@@ -66,8 +75,13 @@ markup_rule! {
     pub HEADER_SCOPE {
         id: "header-scope",
         category: Correctness,
-        description: "A `<th>` without `scope` (`row`, `col`, `rowgroup`, `colgroup`) in a table that is \
-                  not a simple one (one row or one column of headers) (WCAG H63).",
+        description: "Reports a `<th>` with no `scope` (`row`, `col`, `rowgroup` or `colgroup`) in a \
+              table that is not a simple one. A table with a single row or a single column of \
+              headers is simple (WCAG H63).",
+        why: "In a table with headers on both axes a screen reader cannot tell whether a header \
+              belongs to the cells beside it or below it, so a cell is read with the wrong \
+              header.\n\
+              To fix, add the `scope` that says which cells the header describes.",
         example: "<table><tr><th></th><th>b</th></tr><tr><th>c</th><td></td></tr></table>",
         check: HeaderScope,
         model: model,
@@ -79,8 +93,13 @@ markup_rule! {
     pub HIDDEN_FOCUSABLE {
         id: "hidden-focusable",
         category: Correctness,
-        description: "An element that can take focus (a link, a control, `tabindex` of 0 or more) inside \
-                  `aria-hidden=\"true\"`: keyboard users reach it, assistive technology does not.",
+        description: "Reports an element that can take focus (a link, a control, an element with \
+              `tabindex` of 0 or more) inside an element with `aria-hidden=\"true\"`.",
+        why: "Keyboard users can still reach the element, but assistive technology does not \
+              announce it, so focus goes to something that is not there for the screen reader \
+              user.\n\
+              To fix, remove `aria-hidden`, or make the content not focusable (`tabindex=\"-1\"`, \
+              `disabled`, `inert`).",
         example: "<div aria-hidden=\"true\"><button>x</button></div>",
         check: HiddenFocusable,
         model: model,

@@ -121,6 +121,13 @@ fn keywords_keep_their_case_and_comments_stay() {
 }
 
 #[test]
+fn comments_on_the_parentheses_of_a_known_command() {
+    // A comment in front of `)` ends the body; one after `(` stays on the opening line.
+    assert_eq!(fmt("set(A b\n# end\n)\n"), "set(A\n    b\n    # end\n)\n");
+    assert_eq!(fmt("set(# first\nA b)\n"), "set(# first\n    A\n    b\n)\n");
+}
+
+#[test]
 fn the_signature_table_is_sorted_by_lower_case_name() {
     let names: Vec<String> = lang_cmake::SIGNATURES
         .iter()

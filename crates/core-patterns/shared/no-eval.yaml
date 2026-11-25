@@ -2,8 +2,14 @@ id: no-eval
 per-language: true
 message: a string is run as code
 description: >-
-  A call of one of the `calls` that run a string as code (ruff S102, ESLint no-eval); a language
-  lists its calls in its grammar's `rule` row.
+  Reports a call of one of the `calls` that run a string as code, on the call. Each language lists
+  its calls in its grammar's `rule` row.
+why: >-
+  Code that is built from a string runs with all the rights of the program, so any part of the
+  string that comes from outside is a way to run commands on the machine. It is also hard to read
+  and not checked by the tools that analyse the program.
+
+  To fix, use a parser for the data (`json.loads`), a lookup table, or a function.
 example: 'exec("x = 1")'
 severity: warn
 category: suspicious

@@ -2,7 +2,11 @@ id: unused-variable
 family: scope
 params: { check: unused-local-variable }
 message: "`{name}` is assigned but never used in the file (export it if another program reads it)"
-description: A variable that the file assigns and never reads, in an expansion, an arithmetic expression or an operand of `read`, `export` and the like. A name that is exported, set in the environment of a command (`A=1 cmd`) or that steers the shell (`IFS`, `PATH`, `PS1`) is left alone.
+description: >-
+  Reports a variable that the file assigns and never reads, in an expansion, an arithmetic
+  expression or an operand of `read`, `export` and the like. A name that is exported, set in the
+  environment of a command (`A=1 cmd`) or that steers the shell (`IFS`, `PATH`, `PS1`) is not
+  reported.
 example: 'unused=1'
 severity: off
 category: cleanup

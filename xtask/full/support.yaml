@@ -163,6 +163,7 @@
   popularity: [{name: CMake, gh: 608541, so: 11.7}]
   ids: [cmake]
   speed: [CMake]
+  format: [{tool: gersemi, name: gersemi, groups: [real-world]}]
   lint: [{tool: cmake-lint, name: cmake-lint}]
 - language: Go
   popularity: [{name: Go, gh: 440791, so: 16.7}]

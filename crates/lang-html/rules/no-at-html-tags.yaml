@@ -1,6 +1,13 @@
 id: no-at-html-tags
 message: "`{@html}` inserts text as markup; a value from a user is a cross-site scripting hole"
-description: Svelte's `no-at-html-tags` (eslint-plugin-svelte). Escape the text or sanitize it before it is rendered, or turn the rule off for a value you control.
+description: >-
+  Reports a `{@html}` tag.
+why: >-
+  `{@html}` inserts the text as markup, so a value that a user wrote can carry a script and runs it
+  in the page: a cross-site scripting hole.
+
+  To fix, write `{value}` so that the text is escaped, or sanitize it first; turn the rule off for a
+  value you control.
 example: '{@html comment.body}   {comment.body}'
 severity: warn
 category: suspicious

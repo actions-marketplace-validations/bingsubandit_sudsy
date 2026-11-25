@@ -74,7 +74,11 @@ rule! {
         id: "no-undefined-alias",
         category: Correctness,
         default: Error,
-        description: "An alias names an anchor that is not defined earlier in the same document.",
+        description: "Reports an alias that names an anchor not defined earlier in the same document, on \
+                  the alias.",
+        why: "YAML requires the anchor to come first, in the same document, so the file is invalid \
+                  and a parser stops with an error.\n\
+                  To fix, define the anchor above the alias, or fix the name.",
         example: "a: *nope   # no `&nope` before it",
     }
 
@@ -100,8 +104,12 @@ rule! {
         id: "no-duplicate-anchors",
         category: Suspicious,
         default: Warn,
-        description: "An anchor name is defined again in the same document; an alias refers to the \
-                  latest definition above it, which is easy to misread.",
+        description: "Reports an anchor name that is defined again in the same document, on the second \
+                  `&name`.",
+        why: "An alias refers to the latest definition above it, so after a repeated anchor the \
+                  same `*name` can mean two different nodes depending on its place, which is easy to \
+                  misread.\n\
+                  To fix, give the second anchor another name.",
         example: "- &a 1\n- &a 2   # reported at the second `&a`",
     }
 
@@ -125,8 +133,10 @@ rule! {
         category: Cleanup,
         default: Off,
         fix: Safe,
-        description: "An anchor that no alias refers to. The fix removes the anchor, which changes \
+        description: "Reports an anchor that no alias refers to. The fix removes the anchor and changes \
                   nothing about the data.",
+        why: "An anchor that nobody uses is left from a removed alias and makes a reader look for \
+                  the place that shares the node.",
         example: "a: &x 1   # becomes a: 1 when no `*x` follows",
     }
 
@@ -178,8 +188,12 @@ rule! {
         id: "no-recursive-alias",
         category: Correctness,
         default: Error,
-        description: "An alias inside the node its own anchor is on, which makes the data refer to \
-                  itself.",
+        description: "Reports an alias that is inside the node of its own anchor, which makes the data \
+                  refer to itself.",
+        why: "The data is then a loop with no end. Parsers either refuse the file or build a \
+                  cyclic structure that breaks the first program that walks it, for example when it is \
+                  printed or converted to JSON.\n\
+                  To fix, remove the alias or move it out of the anchored node.",
         example: "a: &x\n  b: *x   # reported",
     }
 
@@ -205,7 +219,12 @@ rule! {
         id: "no-merge-keys",
         category: Suspicious,
         default: Off,
-        description: "The merge key (YAML `<<`), which YAML 1.2 dropped and some tools do not support.",
+        description: "Reports the merge key `<<`.",
+        why: "The merge key is from YAML 1.1; YAML 1.2 dropped it from the specification. Parsers \
+                  that follow 1.2 strictly or do not implement it read `<<` as an ordinary key, so the \
+                  merged values are missing.\n\
+                  To fix, write the merged entries out or let the tool that reads the file expand the \
+                  anchors.",
         example: "a:\n  <<: *base   # reported",
     }
 

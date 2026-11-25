@@ -27,6 +27,10 @@ pub struct RuleMeta {
     /// Why the rule exists: the harm it prevents or the convention it keeps. Empty while the
     /// rule has none (the list in `docs/ai/rules/undescribed.txt` only shrinks).
     pub why: &'static str,
+    /// The text of the rule's file, when its `>-` blocks `description` and `why` are read from it
+    /// on demand (a built-in pattern rule): the fields are then the one-line values, or empty.
+    /// Empty for every other rule. Read through `description_text` and `why_text`.
+    pub source: &'static str,
     /// Code that triggers the rule and what it should look like instead, for `sudsy rules <id>`.
     pub example: &'static str,
     /// The level when the config does not mention the rule.
@@ -42,21 +46,49 @@ pub struct RuleMeta {
 }
 
 impl RuleMeta {
+    /// The `description`, folded from the rule's file when it is a block there.
+    pub fn description_text(&self) -> std::borrow::Cow<'static, str> {
+        match crate::rule_text::block(self.source, "description") {
+            Some(text) if !self.source.is_empty() => std::borrow::Cow::Owned(text),
+            _ => std::borrow::Cow::Borrowed(self.description),
+        }
+    }
+
+    /// The `why` the rule's own file or code gives, empty when it has none.
+    pub fn own_why(&self) -> std::borrow::Cow<'static, str> {
+        match crate::rule_text::block(self.source, "why") {
+            Some(text) if !self.source.is_empty() => std::borrow::Cow::Owned(text),
+            _ => std::borrow::Cow::Borrowed(self.why),
+        }
+    }
+
+    /// The `why` of the rule: its own, or the text that every language's rule of this id shares
+    /// (`texts/why.txt`). Empty while the rule has none. Never read while linting.
+    pub fn why_text(&self) -> std::borrow::Cow<'static, str> {
+        let own = self.own_why();
+        if own.trim().is_empty() {
+            crate::rule_text::shared_why(self.id).map_or(own, std::borrow::Cow::Owned)
+        } else {
+            own
+        }
+    }
+
     /// The first sentence of `description`, which stands alone: the rule list's column.
-    pub fn first_sentence(&self) -> &str {
-        let first = self.description.lines().next().unwrap_or("");
+    pub fn first_sentence(&self) -> String {
+        let description = self.description_text();
+        let first = description.lines().next().unwrap_or("");
         let end = first
             .match_indices(". ")
             .map(|(i, _)| i)
             .find(|&i| !first[..i].ends_with('.'));
-        end.map_or(first, |i| &first[..=i])
+        end.map_or(first, |i| &first[..=i]).to_string()
     }
 
     /// What the editor, the schema and the SARIF table show: the first sentence of a rule that has
     /// its `why`, the whole `description` of one that still has the older one-paragraph text.
-    pub fn summary(&self) -> &str {
-        if self.why.is_empty() {
-            self.description
+    pub fn summary(&self) -> String {
+        if self.why_text().trim().is_empty() {
+            self.description_text().into_owned()
         } else {
             self.first_sentence()
         }
@@ -66,7 +98,7 @@ impl RuleMeta {
     pub fn schema(&self) -> RuleSchema {
         RuleSchema {
             id: self.id.to_string(),
-            description: self.summary().to_string(),
+            description: self.summary(),
             options: self
                 .options
                 .iter()

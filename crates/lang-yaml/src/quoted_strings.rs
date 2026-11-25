@@ -79,13 +79,18 @@ rule! {
         category: Style,
         default: Off,
         fix: Unsafe,
-        description: "Which strings are quoted. Plain scalars that are not strings (`12`, `true`, \
-                  `null`, dates, ...), block scalars and scalars tagged `!!` are never checked. \
-                  `required: always` wants quotes on every string, `only_when_needed` reports \
-                  quotes that change nothing (unless `extra_allowed` matches) and plain strings \
-                  that `extra_required` matches, `optional` only the latter. Fixes: quoting a \
-                  plain string and switching the quote type keep the value; removing quotes is \
-                  unsafe because YAML 1.2 parsers read some strings (`1e3`) as numbers.",
+        description: "Reports strings that are quoted or unquoted against the rule you set with \
+                  `required`: `always` wants quotes on every string, `only_when_needed` reports quotes \
+                  that change nothing (unless `extra_allowed` matches) and plain strings that \
+                  `extra_required` matches, `optional` only the latter. `quote_type` sets the quotes. \
+                  Plain scalars that are not strings (`12`, `true`, `null`, dates, ...), block scalars \
+                  and scalars tagged `!!` are never checked.",
+        why: "Whether to quote is a style choice, but it matters for safety: an unquoted `no`, \
+                  `1e3` or `0755` is not the string it looks like. A project that always quotes \
+                  strings never has to know which words YAML reads as something else, and one that \
+                  never quotes unless needed keeps the files short.\n\
+                  Fixes quote a plain string and change the quote type, both keep the value. Removing \
+                  quotes is unsafe, since a YAML 1.2 parser reads some strings (`1e3`) as numbers.",
         example: "name: bar   # with required: always; becomes name: \"bar\"",
         options: [
             OptionDecl {

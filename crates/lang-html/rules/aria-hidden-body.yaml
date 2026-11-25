@@ -1,6 +1,12 @@
 id: aria-hidden-body
 message: "`aria-hidden` must not be used on <body>: it hides the page from assistive technology"
-description: '`aria-hidden="true"` on `<body>` removes the whole page from the accessibility tree.'
+description: >-
+  Reports `aria-hidden="true"` on `<body>`.
+why: >-
+  The attribute removes an element and all of its content from the accessibility tree, so on
+  `<body>` the whole page is hidden from screen readers while it still shows on screen.
+
+  To fix, remove the attribute. To hide only a part of the page, put it on that part.
 example: '<body aria-hidden="true">   <body>'
 severity: off
 category: correctness

@@ -3,7 +3,13 @@ family: meta
 params: { check: required-attr }
 message: "<{name}> needs the attribute `{attr}`"
 description: >-
-  An attribute the element must have (`lang` on `<html>`, `src` on `<img>`, `title` on `<iframe>`, ...).
+  Reports an element that lacks an attribute it must have: `lang` on `<html>`, `src` on `<img>`,
+  `title` on `<iframe>`, and the like.
+why: >-
+  Each of these attributes carries something the element cannot work without: the language for
+  screen reader pronunciation and hyphenation, the file of an image, the name of a frame.
+
+  To fix, add the attribute.
 example: '<img>   <img src="a.png">'
 severity: off
 category: correctness

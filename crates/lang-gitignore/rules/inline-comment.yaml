@@ -1,8 +1,14 @@
 id: inline-comment
 message: "`#` starts a comment only at the start of a line; here it is part of the pattern, which then matches nothing"
 description: >-
-  Gitignore-syntax files have no end-of-line comments: `*.log # logs` is the pattern
-  `*.log # logs`, a file name with spaces and a `#`. No fix: put the comment on its own line.
+  Reports a pattern line with a ` #` after the pattern. Files of this syntax have no end-of-line
+  comments: `*.log # logs` is a pattern for a file name with spaces and a `#`, which matches
+  nothing. No fix.
+why: >-
+  The line looks like a pattern with a comment, but the whole text is the pattern, so the files the
+  author wants to ignore are not ignored.
+
+  To fix, put the comment on a line of its own above the pattern.
 example: "*.log   # reported: put the comment on the line above"
 severity: warn
 category: correctness

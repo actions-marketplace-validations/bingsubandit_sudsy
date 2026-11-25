@@ -1,6 +1,12 @@
 id: no-implicit-input-type
 message: an <input> needs a `type`
-description: An `<input>` without a `type` is a text field by default; writing the type says so.
+description: >-
+  Reports an `<input>` with no `type`.
+why: >-
+  Without a type an input is a text field, which is easy to read as an omission; with the type
+  written, the intent is in the markup and tools that look for text fields find it.
+
+  To fix, add `type="text"` (or the type that is meant).
 example: '<input name="a">   <input type="text" name="a">'
 severity: off
 category: style

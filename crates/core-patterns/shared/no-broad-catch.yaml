@@ -2,9 +2,16 @@ id: no-broad-catch
 per-language: true
 message: 'the clause catches too much: name the exceptions it handles'
 description: >-
-  A `catch`, `except` or `rescue` that catches everything (`bare`), or one of the broad `types` and
-  does not raise the error again and has no call matching `handled` (ruff E722 and BLE001, RuboCop
-  Lint/RescueException). A language sets what is broad in its grammar's `rule` row.
+  Reports a `catch`, `except` or `rescue` clause that catches everything (a clause with no type,
+  when the `bare` option is set) or one of the broad `types`, when it does not raise the error again
+  and has no call that matches `handled`. Each language lists the broad types in its grammar's
+  `rule` row.
+why: >-
+  A broad clause also catches errors that the code did not expect, a typo that raises `NameError` or
+  a user's interrupt, and turns them into a silent wrong result. The error is gone, and nobody
+  learns that the program is broken.
+
+  To fix, name the exceptions the code can handle, or raise the error again after the handling.
 example: "try:\n    f()\nexcept:\n    g()"
 severity: warn
 category: suspicious

@@ -3,7 +3,14 @@ family: names
 params: { target: attr-name, mode: pattern }
 message: "the attribute name `{name}` does not match the pattern"
 description: >-
-  An attribute name that does not match the `pattern` option (a regex; by default letters, digits, `-` and `:`, in either case).
+  Reports an attribute name that does not match the option `pattern`, a regex that by default allows
+  letters, digits, `-` and `:` in either case. An underscore, for example, is reported (`data_x`).
+why: >-
+  A naming rule for attributes keeps custom data attributes and framework attributes uniform. A name
+  outside the usual character set is most often a typing error that the browser silently accepts as
+  a new attribute.
+
+  To fix, rename the attribute, or change the pattern.
 example: '<p a_b="c">   <p a-b="c">'
 severity: off
 category: style

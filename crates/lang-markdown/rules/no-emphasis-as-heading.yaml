@@ -1,8 +1,15 @@
 id: no-emphasis-as-heading
 message: emphasis is used instead of a heading
 description: >-
-  A one-line paragraph that is only emphasized text without closing punctuation (markdownlint
-  MD036); use a heading.
+  Reports a paragraph of one line that is only emphasized text (`**Overview**`) with no closing
+  punctuation, outside a heading.
+why: >-
+  Bold text is not a heading to tools: it is missing from the outline, from the table of contents
+  and from the navigation of a screen reader, and it cannot be linked to. A short bold line that
+  works as a title belongs in a heading.
+
+  To fix, use a heading (`## Overview`). Text that ends with punctuation (`**Note.**`) is a sentence
+  and is not reported.
 example: '**Overview**   # ## Overview'
 severity: off
 category: style

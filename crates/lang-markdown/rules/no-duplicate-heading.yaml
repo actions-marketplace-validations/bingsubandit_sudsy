@@ -3,7 +3,14 @@ family: unique-names
 params: { container: document, item: heading, name: Inline, deep: "true", report: item, lead: Marker, related: first heading with this text }
 message: "the heading `{name}` is repeated"
 description: >-
-  Two headings have the same text (markdownlint MD024), which makes their anchors ambiguous.
+  Reports a heading whose text is the same as an earlier heading in the document, on the later one,
+  with the first as the related location.
+why: >-
+  Headings that have the same text get the same anchor (the renderer adds a number to the second),
+  so a link to `#usage` goes to the first one and a reader of the table of contents cannot tell the
+  two apart.
+
+  To fix, make the headings different, for example by adding the name of the section they belong to.
 example: "## Usage\n\n## Usage   // reported"
 severity: off
 category: style

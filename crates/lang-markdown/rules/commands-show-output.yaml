@@ -1,8 +1,15 @@
 id: commands-show-output
 message: the code block has $ prompts and no output; drop the $ or show the output
 description: >-
-  A fenced code block in which every line starts with `$ ` shows commands without their output,
-  which makes copying them awkward (markdownlint MD014).
+  Reports a fenced code block in which every non-blank line starts with `$ `, so it shows commands
+  without their output. A block that has any line without the prompt, such as an output line, is not
+  reported.
+why: >-
+  A reader who selects and copies the block gets the `$ ` with each command, and the shell then
+  fails on the first character. Blocks that mix commands and output need the prompt to tell them
+  apart, which is why they are left alone.
+
+  To fix, delete the `$ ` prompts, or show the output below the commands.
 example: 'a code block with the lines   $ npm install   $ npm test'
 severity: off
 category: style

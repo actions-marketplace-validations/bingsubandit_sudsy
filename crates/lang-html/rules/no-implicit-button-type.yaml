@@ -1,6 +1,13 @@
 id: no-implicit-button-type
 message: a <button> needs a `type`; a button without one submits its form
-description: A `<button>` without a `type` is a submit button, which is rarely meant outside a form. A Svelte spread (`{...props}`) may carry the `type`.
+description: >-
+  Reports a `<button>` with no `type`. A Svelte spread (`{...props}`) may carry the `type` and is
+  not reported.
+why: >-
+  A button without a type is a submit button, so inside a form a click sends the form, which is
+  rarely meant for a button that opens a menu or toggles a panel.
+
+  To fix, add `type="button"`, or `type="submit"` if it should submit.
 example: '<button>Go</button>   <button type="button">Go</button>'
 severity: off
 category: suspicious

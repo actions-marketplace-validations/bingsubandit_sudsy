@@ -1,6 +1,15 @@
 id: area-alt
 message: an <area> with an `href` needs a non-empty `alt`, and an `alt` needs an `href`
-description: The `alt` of an `<area>` is the name of the link in the image map; without an `href` it names nothing.
+description: >-
+  Reports an `<area>` that has an `href` and no non-empty `alt`, and an `<area>` that has an `alt`
+  but no `href`.
+why: >-
+  The `alt` of an `<area>` is the name of its link in the image map, and the only text a screen
+  reader has for it. An `alt` on an area with no `href` names nothing, because the area is not a
+  link.
+
+  To fix, give each linked area an `alt` that says where the link goes, and remove the `alt` from
+  areas without an `href`.
 example: '<area href="a">   <area href="a" alt="A">'
 severity: off
 category: correctness

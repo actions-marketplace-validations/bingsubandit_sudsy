@@ -1,0 +1,4 @@
+missing-doctype: warn
+element-case: warn
+element-name: warn
+no-unknown-elements: warn

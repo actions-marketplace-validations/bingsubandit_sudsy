@@ -1,6 +1,14 @@
 id: no-flow-sequences
 message: flow sequences are not allowed
-description: "A flow sequence (`[a, b]`); write a block sequence instead."
+description: >-
+  Reports a flow sequence (`[a, b]`), on its opening bracket. With `allow_empty`, an empty one
+  (`[]`) is not reported.
+why: >-
+  Block style is the main style of YAML: one item to a line, with diffs that show a single changed
+  item. A flow sequence packs items on one line, so a change touches the whole line and long ones
+  wrap badly.
+
+  To fix, write one `- item` per line.
 example: "list: [1, 2]   # reported; write one `- item` per line"
 severity: off
 category: style

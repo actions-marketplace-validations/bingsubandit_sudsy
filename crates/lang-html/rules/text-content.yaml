@@ -1,8 +1,13 @@
 id: text-content
 message: a <button> needs text that assistive technology can read
 description: >-
-  A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or
-  `aria-labelledby` has no name; a `title` does not count.
+  Reports a `<button>` with no name: no text (an `<svg>` counts by the text inside it, such as its
+  `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby`. A `title`
+  does not count.
+why: >-
+  A button with no name is announced as just "button", and the user cannot tell what it does.
+
+  To fix, put text in the button or add `aria-label`.
 example: '<button></button>   <button>Save</button>'
 severity: off
 category: correctness

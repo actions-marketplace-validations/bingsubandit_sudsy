@@ -1,7 +1,12 @@
 id: no-empty-links
 message: the link has no destination
 description: >-
-  A link whose destination is empty or only `#` (markdownlint MD042).
+  Reports a link whose destination is empty or only `#` (`[docs]()`, `[docs](#)`).
+why: >-
+  A link with no target does nothing or reloads the page, and it usually marks a link that was never
+  filled in or lost its URL while editing.
+
+  To fix, add the destination, or write plain text.
 example: '[docs]()   # [docs](https://example.com)'
 severity: warn
 category: correctness

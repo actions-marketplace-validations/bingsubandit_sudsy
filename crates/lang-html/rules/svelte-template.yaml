@@ -2,7 +2,13 @@ id: no-dupe-on-directives
 family: template
 params: { check: duplicate, prefix: "on:", strip-modifiers: true, same-value: true, only: svelte }
 message: "this `on:` directive and another one of the element have the same event and handler"
-description: "Svelte's `no-dupe-on-directives` (eslint-plugin-svelte). The same event and handler twice (modifiers do not count); both directives are reported."
+description: >-
+  Reports two `on:` directives of one element that have the same event and the same handler
+  (modifiers do not count); both are reported.
+why: >-
+  The handler runs twice for the event, which is rarely meant.
+
+  To fix, remove one of them.
 example: "<b on:click={go} on:click={go}>   <b on:click={go} on:keydown={go}>"
 severity: warn
 category: correctness
@@ -11,7 +17,12 @@ id: no-dupe-use-directives
 family: template
 params: { check: duplicate, prefix: "use:", same-value: true, only: svelte }
 message: "this `use:` directive and another one of the element have the same action and parameter"
-description: "Svelte's `no-dupe-use-directives` (eslint-plugin-svelte)."
+description: >-
+  Reports two `use:` directives of one element that have the same action and the same parameter.
+why: >-
+  The action runs twice on the element, which is rarely meant and doubles its set-up and clean-up.
+
+  To fix, remove one of them.
 example: "<b use:tip use:tip>   <b use:tip>"
 severity: warn
 category: correctness
@@ -20,7 +31,13 @@ id: no-dupe-style-properties
 family: template
 params: { check: duplicate, prefix: "style:", strip-modifiers: true, only: svelte }
 message: "this `style:` property repeats an earlier one of the element"
-description: "Svelte's `no-dupe-style-properties` (eslint-plugin-svelte). `|important` is not part of the property."
+description: >-
+  Reports a `style:` directive that repeats the property of an earlier one on the element.
+  `|important` is not part of the property.
+why: >-
+  The later one wins, and the earlier is dead code.
+
+  To fix, remove one of them.
 example: "<b style:color=\"a\" style:color={b}>   <b style:color={b}>"
 severity: warn
 category: correctness
@@ -29,7 +46,14 @@ id: no-raw-special-elements
 family: template
 params: { check: raw-special, only: svelte }
 message: "a special element is written `<svelte:name>`"
-description: "Svelte's `no-raw-special-elements` (eslint-plugin-svelte). `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>` are plain elements in Svelte; the special ones are `<svelte:head>` and so on."
+description: >-
+  Reports `<head>`, `<body>`, `<window>`, `<document>`, `<element>` and `<options>`, which are plain
+  elements in Svelte.
+why: >-
+  The special ones are `<svelte:head>`, `<svelte:body>` and so on; a plain `<head>` is just an
+  unknown element in the component, so the content does not go where the author meant.
+
+  To fix, write `<svelte:name>`.
 example: "<head></head>   <svelte:head></svelte:head>"
 severity: warn
 category: suspicious
@@ -38,7 +62,12 @@ id: no-useless-children-snippet
 family: template
 params: { check: children-snippet, only: svelte }
 message: "a `{#snippet children()}` without parameters is the content of the component: write the content"
-description: "Svelte's `no-useless-children-snippet` (eslint-plugin-svelte)."
+description: >-
+  Reports a `{#snippet children()}` with no parameters inside a component.
+why: >-
+  It is the same as writing the content in the component, and the longer form hides that.
+
+  To fix, write the content without the snippet.
 example: "<C>{#snippet children()}hi{/snippet}</C>   <C>hi</C>"
 severity: warn
 category: suspicious
@@ -47,7 +76,12 @@ id: no-useless-mustaches
 family: template
 params: { check: useless-mustache, only: svelte }
 message: "a string literal in `{ }` is just text: write it without the braces"
-description: "Svelte's `no-useless-mustaches` (eslint-plugin-svelte)."
+description: >-
+  Reports a string literal in `{ }` (`{"text"}`).
+why: >-
+  It is only text, so the braces and the quotes add noise and suggest a value that is computed.
+
+  To fix, write the text without the braces.
 example: "<p>{\"text\"}</p>   <p>text</p>"
 severity: warn
 category: suspicious
@@ -56,7 +90,14 @@ id: no-object-in-text-mustaches
 family: template
 params: { check: object-mustache, only: svelte }
 message: "an {phrase} in a text mustache renders as `[object Object]` or its source: use it in an attribute or in code"
-description: "Svelte's `no-object-in-text-mustaches` (eslint-plugin-svelte). An object, array, function or class written in `{ }` among text. Read from the first token of the expression, so an arrow function is not found."
+description: >-
+  Reports an object, an array, a function or a class written in `{ }` among text. It reads the first
+  token of the expression, so an arrow function is not found.
+why: >-
+  It renders as `[object Object]` or as the source of the function, which is never what the page
+  should show.
+
+  To fix, use the value in an attribute or in code, or show a field of it.
 example: "<p>{{ a: 1 }}</p>   <p>{a}</p>"
 severity: warn
 category: correctness
@@ -65,7 +106,12 @@ id: shorthand-attribute
 family: template
 params: { check: svelte-shorthand, only: svelte }
 message: "write `name={name}` as `{name}`"
-description: "Svelte's `shorthand-attribute` (eslint-plugin-svelte)."
+description: >-
+  Reports `name={name}` where the shorthand `{name}` would do. The fix writes the shorthand.
+why: >-
+  The name is written twice for nothing, and one form keeps the components uniform.
+
+  To fix, write `{name}`; the fix does it.
 example: "<b id={id}>   <b {id}>"
 severity: off
 category: style
@@ -75,7 +121,13 @@ id: shorthand-directive
 family: template
 params: { check: svelte-shorthand, directives: "bind,class,style", only: svelte }
 message: "write `bind:name={name}` as `bind:name`"
-description: "Svelte's `shorthand-directive` (eslint-plugin-svelte), for `bind:`, `class:` and `style:`."
+description: >-
+  Reports `bind:name={name}`, `class:name={name}` and `style:name={name}` where the shorthand
+  (`bind:name`) would do. The fix writes the shorthand.
+why: >-
+  The name is written twice for nothing, and one form keeps the components uniform.
+
+  To fix, write `bind:name`; the fix does it.
 example: "<input bind:value={value}>   <input bind:value>"
 severity: off
 category: style
@@ -85,7 +137,12 @@ id: spaced-html-comment
 family: template
 params: { check: spaced-comment, only: svelte }
 message: "put a space inside the comment: `<!-- text -->`"
-description: "Svelte's `spaced-html-comment` (eslint-plugin-svelte)."
+description: >-
+  Reports an HTML comment with no space after `<!--` or before `-->` (`<!--text-->`).
+why: >-
+  A space keeps the text apart from the marker and reads as text, not as commented-out code.
+
+  To fix, write `<!-- text -->`.
 example: "<!--text-->   <!-- text -->"
 severity: off
 category: style
@@ -94,7 +151,13 @@ id: no-nested-style-tag
 family: template
 params: { check: nested-style, only: svelte }
 message: "a `<style>` inside an element is not the component's stylesheet"
-description: "Svelte's `no-nested-style-tag` (eslint-plugin-svelte). Only the top-level `<style>` is compiled as CSS."
+description: >-
+  Reports a `<style>` that is inside an element.
+why: >-
+  Only the `<style>` at the top level of a component is compiled as its CSS; a nested one is put
+  into the page as an ordinary element, and its rules are not scoped to the component.
+
+  To fix, move the `<style>` to the top level.
 example: "<div><style>a{}</style></div>"
 severity: off
 category: suspicious
@@ -103,7 +166,13 @@ id: no-bind-value-on-checkable-inputs
 family: template
 params: { check: directive, name: bind:value, host: checkable }
 message: "a checkbox or radio button binds `bind:checked` (or `bind:group`), not `bind:value`"
-description: "Svelte's `no-bind-value-on-checkable-inputs` (eslint-plugin-svelte)."
+description: >-
+  Reports `bind:value` on a checkbox or a radio button.
+why: >-
+  The `value` of such an input is a fixed string, and the state is in `checked`, so the binding does
+  not follow what the user does.
+
+  To fix, use `bind:checked`, or `bind:group` for a group of them.
 example: "<input type=\"checkbox\" bind:value={v}>   <input type=\"checkbox\" bind:checked={v}>"
 severity: off
 category: correctness
@@ -112,7 +181,15 @@ id: no-target-blank
 family: template
 params: { check: target-blank }
 message: "a link with `target=\"_blank\"` needs `rel=\"noopener noreferrer\"`"
-description: "The page opened by `target=\"_blank\"` can reach this page through `window.opener` (old browsers) and gets the referrer; both `noopener` and `noreferrer` are required, as in eslint-plugin-svelte's `no-target-blank` and eslint-plugin-vue's `no-template-target-blank`. Links to a scheme or host and computed links (`{href}`, `bind:href`, `:href`) count."
+description: >-
+  Reports a link to another site with `target="_blank"` that does not have both `noopener` and
+  `noreferrer` in its `rel`. A link to a scheme or host and a computed link (`{href}`, `bind:href`,
+  `:href`) count; a relative link does not.
+why: >-
+  The opened page can reach this one through `window.opener` in old browsers and change its location
+  (a phishing page), and it gets the referrer of the page it came from.
+
+  To fix, add `rel="noopener noreferrer"`.
 example: "<a href=\"https://x.org\" target=\"_blank\">   <a href=\"https://x.org\" target=\"_blank\" rel=\"noopener noreferrer\">"
 severity: off
 category: suspicious
@@ -121,7 +198,13 @@ id: no-v-text
 family: template
 params: { name: v-text }
 message: "`v-text` replaces the content of the element: write `{{ }}`"
-description: "Vue's `no-v-text` (eslint-plugin-vue)."
+description: >-
+  Reports an element with `v-text`.
+why: >-
+  `v-text` replaces the whole content of the element, while `{{ }}` can sit among other text, and
+  most Vue code uses the mustache, so two forms mean the same.
+
+  To fix, write `{{ }}` in the element.
 example: "<p v-text=\"msg\"></p>   <p>{{ msg }}</p>"
 severity: off
 category: style
@@ -130,7 +213,15 @@ id: no-unknown-style-directive-property
 family: template
 params: { check: style-property, only: svelte }
 message: "this style directive names a property that CSS does not know (CSS properties are lowercase and hyphenated)"
-description: "Svelte's `no-unknown-style-directive-property` (eslint-plugin-svelte). Custom properties (`style:--x`) and vendor-prefixed ones pass. The property table is the CSS language's."
+description: >-
+  Reports a `style:` directive that names a property CSS does not know (`style:marginLeft`). Custom
+  properties (`style:--x`) and vendor-prefixed ones are not reported. The property table is the CSS
+  language's.
+why: >-
+  CSS properties are lowercase and hyphenated; a camelCase name is ignored by the browser, so the
+  style does not apply.
+
+  To fix, write the property name in CSS form (`style:margin-left`).
 example: "<p style:marginLeft=\"1px\">   <p style:margin-left=\"1px\">"
 severity: warn
 category: correctness

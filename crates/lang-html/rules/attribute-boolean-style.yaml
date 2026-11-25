@@ -3,7 +3,13 @@ family: meta
 params: { check: boolean-style }
 message: "write the boolean attribute `{attr}` without a value"
 description: >-
-  A boolean attribute is true when present: `disabled`, not `disabled="disabled"`.
+  Reports a boolean attribute that is written with a value (`disabled="disabled"`, `disabled=""`).
+  The attribute is true when it is present.
+why: >-
+  The value of a boolean attribute is not read: `muted="false"` still mutes. A value that looks like
+  a switch invites that error, and the longer form says nothing more.
+
+  To fix, write the attribute alone (`disabled`). To turn it off, remove it.
 example: '<input disabled="disabled">   <input disabled>'
 severity: off
 category: style

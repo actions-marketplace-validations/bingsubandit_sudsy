@@ -152,6 +152,12 @@ class NotComparable(unittest.TestCase):
         self.assertIn("not comparable on this corpus 2 findings of 1 of 1 listed rules: R2 2", out.getvalue())
 
 
+class NamedRules(unittest.TestCase):
+    def test_the_parser_diagnostic_is_not_compared_on_names(self):
+        ours = {("a", "syntax-error"): [("write `&amp;` for a lone `&`", 1)], ("a", "R"): [("unused `x`", 2)], ("a", "Q"): [("no name", 3)]}
+        self.assertEqual(pl.named_rules(ours), {"R"})
+
+
 class Missed(unittest.TestCase):
     def check(self, hit, total, text=""):
         with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):

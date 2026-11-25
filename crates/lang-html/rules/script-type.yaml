@@ -1,8 +1,12 @@
 id: script-type
 message: the `type` attribute is unnecessary for JavaScript
 description: >-
-  A `<script>` whose `type` is a JavaScript MIME type (`text/javascript`, `application/javascript`,
-  ...) or empty says what the browser assumes (html-validate script-type).
+  Reports a `<script>` whose `type` is a JavaScript MIME type (`text/javascript`,
+  `application/javascript`, ...) or empty. `type="module"` and other types are not reported.
+why: >-
+  The browser assumes that type, so the attribute says nothing and is only more text.
+
+  To fix, remove the `type`.
 example: '<script type="text/javascript"></script>   <script></script>'
 severity: off
 category: style

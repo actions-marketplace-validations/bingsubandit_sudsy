@@ -561,6 +561,12 @@ def message_name(message):
     return re.sub(r"^(?:v-(?:bind|on|slot):|[:@#])", "", name) if name else None
 
 
+def named_rules(ours):
+    """The Sudsy rules whose messages quote a name (their findings compare on it); not the parser's diagnostic, which merges
+    the messages of every rule aliased to it and is no rule."""
+    return {r for (_, r), ms in ours.items() if r != "syntax-error" and any(message_name(m) for m, _ in ms)}
+
+
 def target_numbers(tool, per, hit, total, owned, prefix="", wrong=0):
     """`(target share, denominator, out of scope findings)` of a coverage run: see `target_line`."""
     wontfix = {f"{prefix}{e['id']}" for e in catalog_entries(tool, sub=True) if e["coverage"] == "wontfix"}
@@ -764,7 +770,7 @@ def coverage(tool, sudsy, version, prefix, exe):
     def score(ours):
         """`(per, hits, total, tool-wrong findings by rule)`: a finding is covered when the mapped rule reports it on the same line.
         `per`: upstream rule -> [findings, covered]."""
-        named = {r for (_, r), ms in ours.items() if any(message_name(m) for m, _ in ms)}  # rules whose messages quote a name
+        named = named_rules(ours)
         per, wrong = {}, collections.Counter()
         instruction = (spec or {}).get("instruction")  # `{"rule_prefix", "continuation"}`: those codes are covered on any line of the instruction the tool's line starts
         offsets.clear()

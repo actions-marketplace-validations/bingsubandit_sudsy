@@ -1,8 +1,14 @@
 id: attr-case
 message: attribute names are lowercase
 description: >-
-  Attribute names are case-insensitive in HTML; lowercase is the convention. Everything inside
-  `<svg>` and `<math>` keeps its case.
+  Reports an attribute name that is not in lowercase (`CLASS="a"`). Everything inside `<svg>` and
+  `<math>` keeps its case and is not reported.
+why: >-
+  HTML reads attribute names without regard to case, so the capitals change nothing for the browser.
+  They only make one file spell the same name two ways, which breaks searches and makes the markup
+  look inconsistent.
+
+  To fix, write the name in lowercase.
 example: '<p CLASS="a">   <p class="a">'
 severity: off
 category: style

@@ -1,10 +1,18 @@
 id: missing-doctype
 message: the document has no doctype
-description: A document without a doctype is rendered in quirks mode.
+description: >-
+  Reports a document that has no doctype, on its start. Not in `.vue`, `.svelte` and
+  `*.component.html` files, which are fragments of a page.
+why: >-
+  A document with no doctype is rendered in quirks mode, which keeps old browser layout bugs alive
+  and changes how boxes and tables are sized.
+
+  To fix, put `<!DOCTYPE html>` on the first line.
 example: '<html>...</html>   <!DOCTYPE html><html>...</html>'
 severity: off
 category: correctness
 rule:
   kind: Document
   not-has: { kind: Doctype }
+  not: { path: '\.(vue|svelte)$|\.component\.html$' }
 report-on: start

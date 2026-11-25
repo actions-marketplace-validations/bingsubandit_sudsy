@@ -1,7 +1,12 @@
 id: no-space-in-links
 message: the link text has spaces inside its brackets
 description: >-
-  Link text that starts or ends with a space (markdownlint MD039).
+  Reports link text that starts or ends with a space (`[ docs ](url)`).
+why: >-
+  The spaces become part of the link, so the underlined, clickable text has blanks at its ends and
+  the link looks off.
+
+  To fix, move the spaces out of the brackets.
 example: '[ docs ](url)   # [docs](url)'
 severity: off
 category: style

@@ -1,6 +1,12 @@
 id: prefer-button
 message: use <button> instead of <input type="$TYPE">
-description: A `<button>` can hold markup and is styled with CSS like any element; `<input type="button">` cannot.
+description: >-
+  Reports `<input type="button">`, `type="submit"`, `type="reset"` and `type="image"`.
+why: >-
+  A `<button>` can hold markup (an icon with text) and is styled like any other element; an
+  `<input>` button shows only its `value` and has fewer ways to style.
+
+  To fix, use a `<button>` with the same `type`.
 example: '<input type="submit" value="Go">   <button type="submit">Go</button>'
 severity: off
 category: style

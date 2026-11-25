@@ -3,7 +3,13 @@ family: names
 params: { target: id, mode: pattern }
 message: "the id `{name}` is not kebab-case"
 description: >-
-  An `id` that does not match the `pattern` option (a regex; by default kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter).
+  Reports an `id` that does not match the option `pattern`, a regex that by default means
+  kebab-case: lowercase letters and digits in words joined by `-`, beginning with a letter.
+why: >-
+  An id is a name that scripts, links and styles refer to; a single style makes it predictable. An
+  id in capitals or with `_` is often written one way and referred to another.
+
+  To fix, rename the id and everything that refers to it, or change the pattern.
 example: '<p id="fooBar">   <p id="foo-bar">'
 severity: off
 category: style

@@ -46,12 +46,12 @@ ad6ed8d8e3a669cc html/dom-examples/geolocation-element/initial-permission-status
 d74a647867020446 html/dom-examples/html-in-canvas/webgl-example/index.html
 440dbe3c2b6e4928 html/dom-examples/indexeddb-examples/idbcursor/index.html
 2f711c4e1b8499b5 html/dom-examples/indexeddb-examples/idbindex/index.html
-1cdf1d9d07765ed9 html/dom-examples/interest-invokers/stock-moving/index.html
 be7ea241a2696c96 html/dom-examples/launch-handler/index.html
 e3b0c44298fc1c14 html/dom-examples/matchmedia/index.html
 5b2b322a4eef1f8b html/dom-examples/media-session/index.html
 c27db19e22784f32 html/dom-examples/media-source-extensions/managed-media-source/index.html
 961cf146154ad674 html/dom-examples/notifications/persistent/actions/donut.html
+90129f2f5b62fa00 html/dom-examples/popover-api/nested-popovers/index.html
 240d73ae28e029cf html/dom-examples/popover-api/popover-hint/index.html
 025e66410b1b5a22 html/dom-examples/popover-api/toggle-help-ui/index.html
 e3b0c44298fc1c14 html/dom-examples/resize-observer/resize-observer-border-radius.html

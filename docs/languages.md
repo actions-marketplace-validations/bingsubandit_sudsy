@@ -27,7 +27,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-html-vue-svelte-angular -->
 - **Measured (HTML):** Ready.
   - Format, Prettier: 95% of the files identical (506 of 532 files).
-  - Lint, html-validate: 92% of its findings also reported (2,245 of 2,428 findings).
+  - Lint, html-validate: 92% of its findings also reported (2,246 of 2,428 findings).
   - Lint, html-eslint: 88% of its findings also reported (281 of 319 findings).
   - Lint, htmlhint: 91% of its findings also reported (1,244 of 1,358 findings).
 - **Measured (Vue / Svelte):** Ready.
@@ -354,15 +354,20 @@ The status and the numbers of every language are in the generated table "Languag
 ## CMake
 
 <!-- generated:measured-cmake -->
-- **Measured:** Lint only: Ready.
-  - Format: Sudsy does not format the language.
+- **Measured:** Ready.
+  - Format, gersemi: 90% of the files identical (8,187 of 9,038 files).
   - Lint, cmake-lint: 97% of its findings also reported (124,892 of 128,501 findings).
 <!-- /generated -->
 - Files: `CMakeLists.txt` and `*.cmake`.
-- **Formatter:** none yet; files stay as written. gersemi is the candidate reference.
+- **Formatter:** gersemi 0.29.2 (its defaults: 80 columns, 4 spaces, `favour-inlining`). Corpus: LLVM, CMake, Qt, VTK, OpenCV, extra-cmake-modules and protobuf.
+- **Options:** `leading_argument_commands` (commands whose first argument stays on the line when the call breaks; default `[set]`).
+- **Differences:**
+  - Keywords that only the prose of CMake's help defines are not in the command table, so those calls follow the generic layout.
+  - Conditions break before `AND` and `OR` only; gersemi also breaks nested groups.
+  - Commands the table does not know (user functions and macros) are kept as written.
+- **Reproduce (needs a source checkout):** `scripts/parity.sh format gersemi`, `scripts/parity.sh coverage cmake-lint`.
 - **Linter:** cmake-lint (cmakelang 0.6.13) with its defaults; the 35 codes are in [ai/parity/cmake-lint.yaml](ai/parity/cmake-lint.yaml).
 - **Presets:** `cmake/cmake-lint` turns on the rules Sudsy has for it (they are off by default).
-- **Reproduce (needs a source checkout):** `scripts/parity.sh coverage cmake-lint`.
 
 ## Kotlin
 

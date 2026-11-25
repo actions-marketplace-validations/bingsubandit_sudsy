@@ -1,6 +1,12 @@
 id: block-no-empty
 message: the block is empty
-description: A rule or at-rule block with nothing in it, comments included.
+description: >-
+  Reports a rule or at-rule block with nothing in it, comments included.
+why: >-
+  An empty block does nothing. It is a leftover of a deleted declaration or a placeholder that was
+  never filled, and it adds bytes and noise to the file.
+
+  To fix, delete the rule, or put the declarations in it.
 example: "a {}   # reported"
 severity: off
 category: suspicious
@@ -8,7 +14,11 @@ rule: { kind: Block, regex: '^\{\s*\}$' }
 ---
 id: no-empty-source
 message: the file is empty
-description: A file with nothing but whitespace (a file with only comments is not empty).
+description: >-
+  Reports a file with nothing but whitespace. A file with only comments is not empty.
+why: >-
+  An empty stylesheet is a mistake: either the content was lost or the file is not needed. A build
+  that imports it then loads a file that does nothing.
 example: "(an empty file)   # reported"
 severity: off
 category: suspicious

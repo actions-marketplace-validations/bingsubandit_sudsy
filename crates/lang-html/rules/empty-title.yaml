@@ -1,6 +1,12 @@
 id: empty-title
 message: the <title> has no text
-description: The `<title>` names the page in the browser tab, search results and screen readers; whitespace is not text.
+description: >-
+  Reports a `<title>` with no text. White space is not text.
+why: >-
+  The title names the page in the browser tab, history, bookmarks and search results, and is the
+  first thing a screen reader reads.
+
+  To fix, write a title that tells this page from the others of the site.
 example: '<title></title>   <title>Home</title>'
 category: correctness
 rule:

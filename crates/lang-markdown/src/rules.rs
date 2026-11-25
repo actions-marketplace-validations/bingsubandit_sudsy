@@ -37,9 +37,12 @@ rule! {
         id: "heading-increment",
         category: Style,
         default: Off,
-        description: "A heading is more than one level deeper than the heading before it (an `h4` \
-                  right after an `h2`). Going back up by any number of levels is fine \
-                  (markdownlint MD001).",
+        description: "Reports a heading that is more than one level deeper than the heading before it (an \
+                  `h4` right after an `h2`). Going back up by any number of levels is not reported.",
+        why: "Headings make the outline of the page that screen readers and tables of contents are \
+                  built from. A skipped level leaves a hole in that outline: a reader who jumps by \
+                  level finds an `h4` with no `h3` above it.\n\
+                  To fix, use the missing level, or give the heading the level it has in the outline.",
         example: "# One\n\n### Three   // reported",
     }
 
@@ -53,8 +56,10 @@ rule! {
         id: "single-title",
         category: Style,
         default: Off,
-        description: "A document has more than one top-level heading (markdownlint MD025). The \
-                  second and later `h1` are reported.",
+        description: "Reports a second or later top-level heading (`# Title`) in a document.",
+        why: "A document has one title: the top-level heading is what tools use as the page title, \
+                  so a second one makes the title ambiguous, and the outline then has several roots.\n\
+                  To fix, make the later headings second-level, or split the document.",
         example: "# One\n\n# Two   // reported",
     }
 

@@ -11,7 +11,9 @@ id: redeclared-variable
 family: scope
 params: { check: redeclared-variable }
 message: "redefinition of unused `{name}`"
-description: "A function, class or import redefined, or an import covered by a name of a function, before anything read the first."
+description: >-
+  Reports a function, class or import that is defined again, or an import that a function of the
+  same name covers, before anything has read the first.
 example: "import os\nimport os"
 severity: warn
 category: suspicious
@@ -20,7 +22,14 @@ id: undefined-variable
 family: scope
 params: { check: undefined-variable }
 message: "undefined name `{name}`"
-description: "A name that no scope around the read binds and that is not a builtin (not when a `try` handles `NameError`)."
+description: >-
+  Reports a name that no scope around the read binds and that is not a builtin. A read in a `try`
+  that handles `NameError` is not reported.
+why: >-
+  An undefined name fails with a NameError when the line runs, so the error shows only on the path
+  that reaches it. A typo in a name is the usual cause.
+
+  To fix, define or import the name, or correct the typo.
 example: "print(x)"
 severity: warn
 category: correctness
@@ -29,7 +38,10 @@ id: unused-variable
 family: scope
 params: { check: unused-variable }
 message: "local variable `{name}` is assigned to but never used"
-description: "A local variable assigned and never read, or an exception named by `except ... as` and never read (not tuple unpacking, not `_` names, not in functions that call `locals()`)."
+description: >-
+  Reports a local variable that is assigned and never read, and an exception named by `except ...
+  as` and never read. Tuple unpacking, names that start with `_` and functions that call `locals()`
+  are not reported.
 example: "def f():\n    x = 1"
 severity: off
 category: suspicious
@@ -56,7 +68,14 @@ id: use-before-define
 family: scope
 params: { check: use-before-define }
 message: "local variable `{name}` referenced before assignment"
-description: "A name read in a function before the function assigns it, while an enclosing scope binds it too."
+description: >-
+  Reports a name that a function reads before the function assigns it, while an enclosing scope
+  binds it too.
+why: >-
+  The read does not see the outer name: the name is local to the whole function, so the read fails
+  with an UnboundLocalError.
+
+  To fix, assign the name before the read, or rename the local so that the outer name is read.
 example: "x = 1\ndef f():\n    print(x)\n    x = 2"
 severity: warn
 category: correctness
@@ -65,7 +84,9 @@ id: shadowed-variable
 family: scope
 params: { check: shadowed-variable }
 message: "`{name}` shadows an import or an argument"
-description: "A `for` variable with the name of an import, and a `for` variable, `with ... as` name or `except ... as` name that is also an argument of its function (and has not been bound since)."
+description: >-
+  Reports a `for` variable with the name of an import, and a `for` variable, `with ... as` name or
+  `except ... as` name that is also an argument of its function (and has not been bound since).
 example: "import os\nfor os in []:\n    pass"
 severity: warn
 category: suspicious
@@ -782,7 +803,9 @@ id: no-control-regex
 family: regex
 params: { check: control }
 message: "Unexpected control character(s) in regular expression: {name}."
-description: A control character (below U+0020) in the constant string given to `re.compile` and the other functions of `re` that take a pattern, written raw or as `\x00`.
+description: >-
+  Reports a control character (below U+0020) in the constant string given to `re.compile` and the
+  other functions of `re` that take a pattern, written raw or as `\x00`.
 example: "import re\nre.compile('\\x1f')   # reported"
 severity: off
 category: suspicious
@@ -791,7 +814,9 @@ id: no-regex-spaces
 family: regex
 params: { check: spaces }
 message: "Spaces are hard to count. Use {{name}}."
-description: Two or more spaces outside a character class in the string given to `re.compile` and the other functions of `re` that take a pattern.
+description: >-
+  Reports two or more spaces outside a character class in the constant string given to `re.compile`
+  and the other functions of `re` that take a pattern.
 example: "import re\nre.compile('a  b')   # reported"
 severity: off
 category: suspicious
@@ -800,7 +825,9 @@ id: no-misleading-character-class
 family: regex
 params: { check: misleading-class }
 message: "Unexpected combined character in character class."
-description: A character class in the constant string given to `re.compile` and the other functions of `re` that take a pattern, in which a combining mark follows another character.
+description: >-
+  Reports a character class in the constant string given to `re.compile` and the other functions of
+  `re` that take a pattern, in which a combining mark follows another character.
 example: "import re\nre.compile('[a\\u0301]')   # reported"
 severity: off
 category: suspicious

@@ -47,7 +47,7 @@ struct Meta {
     meta: &'static RuleMeta,
     check: Check,
     message: String,
-    /// Attributes a framework owns, not judged in files with a suffix of `owned_in`.
+    /// Attributes (and, for the element checks, every element name) a framework owns, not judged in files with a suffix of `owned_in`.
     owned: Vec<String>,
     owned_in: Vec<String>,
 }
@@ -105,6 +105,7 @@ impl Rule for Meta {
                 .replace("{value}", value)
         };
         match self.check {
+            Check::UnknownElement | Check::ElementName if self.owns(ctx) => {}
             Check::UnknownElement => {
                 if !name.contains(':') && !meta::has("elements", &name) && !foreign(tag, text) {
                     ctx.report(name_range, say("", ""));
@@ -162,6 +163,9 @@ impl Rule for Meta {
 }
 
 impl Meta {
+    fn owns(&self, ctx: &RuleContext<'_>) -> bool {
+        (self.owned_in.iter()).any(|f| template::path_has_suffix(ctx.file.path, f))
+    }
     /// The unsupported features of an element and its attributes (`core_rules::feature_support`).
     fn unsupported(
         &self,
@@ -173,10 +177,6 @@ impl Meta {
         static TABLE: SupportTable = SupportTable::new(include_str!("../data/baseline.txt"));
         let available = ctx.options.string("available").to_string();
         let attrs = dom::attrs(tag, ctx.file.text);
-        let in_framework = self
-            .owned_in
-            .iter()
-            .any(|f| template::path_has_suffix(ctx.file.path, f));
         let found = TABLE.features(
             Availability::parse(&available),
             name,
@@ -187,7 +187,7 @@ impl Meta {
                 value: a.value,
                 value_range: a.value_range,
             }),
-            if in_framework { &self.owned } else { &[] },
+            if self.owns(ctx) { &self.owned } else { &[] },
         );
         for (range, feature) in found {
             let message = self

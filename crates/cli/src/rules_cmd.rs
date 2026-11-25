@@ -88,7 +88,7 @@ fn matches((language, rule): &(String, &'static dyn Rule), term: &str) -> bool {
     let term = term.to_lowercase();
     let m = rule.meta();
     m.id.contains(&term)
-        || m.description.to_lowercase().contains(&term)
+        || m.description_text().to_lowercase().contains(&term)
         || catalog::upstream(m.id, &[language])
             .iter()
             .any(|u| u.id.to_lowercase().contains(&term))
@@ -150,11 +150,12 @@ fn explain(out: &mut String, rules: &Rules, id: &str, presets: &[String]) {
             equivalent.join("\n                 ")
         );
     }
-    if m.why.is_empty() {
-        let _ = writeln!(out, "\n{}", m.description);
+    let why = m.why_text();
+    if why.is_empty() {
+        let _ = writeln!(out, "\n{}", m.description_text());
     } else {
-        let _ = writeln!(out, "\nWhat it does\n{}", indented(m.description));
-        let _ = writeln!(out, "\nWhy it matters\n{}", indented(m.why));
+        let _ = writeln!(out, "\nWhat it does\n{}", indented(&m.description_text()));
+        let _ = writeln!(out, "\nWhy it matters\n{}", indented(&why));
     }
     if !m.options.is_empty() {
         let _ = writeln!(out, "\nOptions:");

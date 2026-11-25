@@ -170,11 +170,10 @@ description: >-
   `\u0041`, `\0`, a line continuation) are not reported, and neither are a `\-` in the middle of a
   character class (`/[a\-z]/`), `\^` at the start of one and `\/` in a regex literal.
 why: >-
-  In a string the backslash before such a character is dropped: `'\d'` is just `d`, not the digit
-  class the author may have meant for a regex, and in a regex a useless escape hides which
-  characters are special. The intended meaning is lost whichever way it was read.
+  In a string the useless backslash is dropped, so `'\d'` is the letter `d`, which is not what a
+  reader who knows regex expects. In a regex it hides the characters that matter.
 
-  To fix, remove the backslash, or double it to get a real backslash (`'\\d'`).
+  To fix, remove the backslash, or write the escape that is meant (`\\d`).
 example: "var s = '\\d';   # reported"
 severity: off
 category: suspicious
@@ -187,11 +186,6 @@ description: >-
   Reports two or more spaces in a row in a regex literal or in the constant string given to
   `RegExp(...)` or `new RegExp(...)`, outside a character class. Spaces inside `[...]` and a counted
   space (`a {2}b`) are not reported.
-why: >-
-  A run of spaces in a pattern is hard to count when reading, and an edit that adds or removes a
-  space changes what matches without being noticed.
-
-  To fix, write the count: `a {3}b` instead of three spaces.
 example: "var r = /a  b/;   # reported"
 category: suspicious
 ---
@@ -416,13 +410,6 @@ description: >-
   Reports a control character (code below U+0020) in a regex literal or in the constant string given
   to `RegExp`, written raw or as `\x1f`, `\u001f` or `\u{1f}`. The escapes `\t`, `\n` and `\r` are
   not reported.
-why: >-
-  Control characters are invisible and rarely belong in a pattern for text. They get there by
-  mistake, for example from a string escape that was processed before the regex saw it, and then the
-  pattern matches something other than the author thought.
-
-  To fix, write `\t`, `\n` or `\r` where those are meant, and turn the rule off for the few places
-  that match control characters on purpose.
 example: "var r = /\\x1f/;   # reported"
 category: suspicious
 ---
@@ -435,12 +422,6 @@ description: >-
   which a combining mark or variation selector follows another character: `[A\u0301]` or `[❤️]`.
   Surrogate pairs, emoji modifiers, regional-indicator flags and joined emoji sequences are not
   checked.
-why: >-
-  A character that looks like one letter can be two code points (`A` and the combining accent
-  U+0301), and a character class works on code points, so the class matches the letter and the
-  accent separately and does not match the combined letter as a unit.
-
-  To fix, move the sequence out of the class into an alternation (`(?:A\u0301|b)`).
 example: "var r = /[A\\u0301]/;   # reported"
 category: suspicious
 ---

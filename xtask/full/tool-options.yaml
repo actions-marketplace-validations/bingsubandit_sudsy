@@ -134,3 +134,8 @@
   options: 257
   source: "https://clang.llvm.org/docs/ClangFormatStyleOptions.html"
   note: "--dump-config leaves of the C++ style: 249 fields of 161 options (a group counts its fields) plus 8 list options it omits when empty (QualifierOrder, RawStringFormats, Macros, TypeNames and 4 more); not BasedOnStyle, Language, DisableFormat, deprecated, Java, JavaScript, Objective-C, JSON, TableGen and Verilog options; 23.1.5"
+- language: cmake
+  tool: gersemi
+  options: 4
+  source: "https://github.com/BlankSpruce/gersemi#configuration"
+  note: "line_length, indent (spaces or tabs), list_expansion, sort_order (0.29.2); not counted: unsafe (sanity checks), definitions and extensions (command definitions), disable_formatting, warn_about_unknown_commands, color, quiet, workers, cache (modes and output)"

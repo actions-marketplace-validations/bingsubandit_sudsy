@@ -1,6 +1,12 @@
 id: void-style
 message: omit the slash of a void element
-description: A void element (`<br>`, `<img>`, ...) has no end tag and needs no `/`; write `<br>`, not `<br/>`.
+description: >-
+  Reports a `/` at the end of a void element (`<br/>`, `<img />`).
+why: >-
+  A void element has no end tag and the slash is ignored, so it adds nothing; it only suggests the
+  tag is closed like XML, which can mislead a reader about other elements such as `<div/>`.
+
+  To fix, write `<br>`.
 example: '<br />   <br>'
 severity: off
 category: style

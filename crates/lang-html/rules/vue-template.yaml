@@ -2,7 +2,14 @@ id: no-lone-template
 family: template
 params: { check: lone-template, only: vue }
 message: "a `<template>` without `v-if`, `v-for`, `v-slot` or the like renders nothing of its own: remove the tag"
-description: "Vue's `no-lone-template` (eslint-plugin-vue). A nested `<template>` is a wrapper that Vue drops, so it only makes sense with a directive. Only in `.vue` files."
+description: >-
+  Reports a nested `<template>` that has no directive (`v-if`, `v-for`, `v-slot`, ...). Only in
+  `.vue` files.
+why: >-
+  A `<template>` with no directive is a wrapper that Vue renders without its own element, so it does
+  nothing and only adds a level.
+
+  To fix, remove the tag and keep its content, or add the directive that was meant.
 example: "<div><template><p></p></template></div>   <div><template v-if=\"a\"><p></p></template></div>"
 severity: warn
 category: suspicious
@@ -11,7 +18,13 @@ id: no-textarea-mustache
 family: template
 params: { check: textarea-mustache, only: vue }
 message: "`{{ }}` in a `<textarea>` is not interpolated: bind the text with `v-model`"
-description: "Vue's `no-textarea-mustache` (eslint-plugin-vue)."
+description: >-
+  Reports `{{ }}` inside a `<textarea>`. Only in `.vue` files.
+why: >-
+  The text of a `<textarea>` is its default value, and Vue does not interpolate it, so the user sees
+  `{{ text }}` written out.
+
+  To fix, bind the value with `v-model`.
 example: "<textarea>{{ text }}</textarea>   <textarea v-model=\"text\"></textarea>"
 severity: warn
 category: correctness
@@ -20,7 +33,12 @@ id: require-component-is
 family: template
 params: { check: component-is }
 message: "`<component>` needs `v-bind:is` (`:is`) to say what it renders"
-description: "Vue's `require-component-is` (eslint-plugin-vue)."
+description: >-
+  Reports a `<component>` element with no `:is` (`v-bind:is`).
+why: >-
+  `<component>` renders what `is` names and nothing without it, so the element shows nothing.
+
+  To fix, add `:is` with the component or tag name to render.
 example: "<component>   <component :is=\"view\">"
 severity: warn
 category: correctness
@@ -29,7 +47,13 @@ id: no-v-for-template-key-on-child
 family: template
 params: { check: key-on-child }
 message: "put the `:key` on the `<template v-for>`, not on its child, in Vue 3"
-description: "Vue's `no-v-for-template-key-on-child` (eslint-plugin-vue)."
+description: >-
+  Reports a `:key` on a child of a `<template v-for>`.
+why: >-
+  In Vue 3 the key belongs on the `<template v-for>`; a key on a child is not used, so the list is
+  patched in place and state stays on the wrong element.
+
+  To fix, move the `:key` to the `<template>`.
 example: "<template v-for=\"x in xs\"><li :key=\"x\"></li></template>   <template v-for=\"x in xs\" :key=\"x\"><li></li></template>"
 severity: warn
 category: correctness
@@ -38,7 +62,13 @@ id: no-child-content
 family: template
 params: { check: child-content }
 message: "the content of the element is replaced by `v-html` / `v-text`"
-description: "Vue's `no-child-content` (eslint-plugin-vue)."
+description: >-
+  Reports an element that has `v-html` or `v-text` and also content between its tags.
+why: >-
+  The directive replaces the content of the element, so the text between the tags is never shown. It
+  is a leftover or a mistake.
+
+  To fix, remove the content, or the directive.
 example: "<p v-text=\"t\">x</p>   <p v-text=\"t\"></p>"
 severity: warn
 category: correctness
@@ -47,7 +77,13 @@ id: no-use-v-else-with-v-for
 family: template
 params: { check: directive, name: v-else, with: v-for, only: vue }
 message: "`v-else` and `v-for` on one element: `v-else` is evaluated first and cannot read the loop variable"
-description: "Vue's `no-use-v-else-with-v-for` (eslint-plugin-vue). Put the `v-for` on a child or a wrapping `<template>`."
+description: >-
+  Reports an element that has `v-else` and `v-for` together. Only in `.vue` files.
+why: >-
+  `v-else` is evaluated first and cannot read the loop variable, and the result is not what the
+  markup reads like.
+
+  To fix, put the `v-for` on a child or on a wrapping `<template>`.
 example: "<li v-else v-for=\"x in xs\">   <template v-else><li v-for=\"x in xs\">"
 severity: warn
 category: suspicious
@@ -56,7 +92,13 @@ id: no-v-text-v-html-on-component
 family: template
 params: { check: component-html, only: vue }
 message: "`v-html` and `v-text` on a component replace its content, which it does not render as HTML or text: use a prop or a slot"
-description: "Vue's `no-v-text-v-html-on-component` (eslint-plugin-vue)."
+description: >-
+  Reports `v-html` and `v-text` on a component. Only in `.vue` files.
+why: >-
+  The directive replaces the content of the component, which does not render its children as HTML or
+  text, so nothing shows.
+
+  To fix, pass the value as a prop or as a slot.
 example: "<MyCard v-html=\"h\">   <div v-html=\"h\">"
 severity: warn
 category: correctness
@@ -65,7 +107,15 @@ id: no-dupe-v-else-if
 family: template
 params: { check: dupe-else-if, only: vue }
 message: "this `v-else-if` branch can never run: an earlier `v-if` or `v-else-if` of the chain has the same condition"
-description: "Vue's `no-dupe-v-else-if` (eslint-plugin-vue). Conditions are compared as text without blanks, `||` alternatives one by one; a condition that only some earlier `&&` terms cover is not found."
+description: >-
+  Reports a `v-else-if` whose condition is the same as an earlier `v-if` or `v-else-if` of the
+  chain. Conditions are compared as text without blanks, and `||` alternatives one by one; a
+  condition that only some earlier `&&` terms cover is not found. Only in `.vue` files.
+why: >-
+  The earlier branch with the same condition always wins, so this branch can never run. It is
+  usually a copy that was meant to have another condition.
+
+  To fix, change the condition, or remove the branch.
 example: "<a v-if=\"x\"/><b v-else-if=\"x\"/>   <a v-if=\"x\"/><b v-else-if=\"y\"/>"
 severity: warn
 category: correctness

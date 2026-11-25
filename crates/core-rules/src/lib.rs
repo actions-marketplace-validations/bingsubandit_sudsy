@@ -74,6 +74,7 @@ pub mod references;
 mod regex;
 pub mod regex_source;
 pub mod rule;
+pub mod rule_text;
 pub mod scope_rules;
 mod sections;
 pub mod shape;

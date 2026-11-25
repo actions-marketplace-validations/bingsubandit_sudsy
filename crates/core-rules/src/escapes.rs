@@ -22,7 +22,13 @@ rule! {
         id: "invalid-escape-sequence",
         category: Suspicious,
         default: Warn,
-        description: "A backslash in a string that is not raw and does not start an escape sequence (`\\d`, `\\_`), also in the pieces of an f-string.",
+        description: "Reports a backslash in a string that is not raw and does not start an escape \
+                  sequence (`\"\\d\"`, `\"\\_\"`), also in the pieces of an f-string.",
+        why: "The language keeps the backslash and the letter, so `\"\\d\"` works today, but a later \
+                  version can give the sequence a meaning, and newer interpreters already warn or \
+                  reject it. It is also usually a regular expression or a Windows path where the \
+                  author meant a different escape.\n\
+                  To fix, double the backslash (`\"\\\\d\"`) or make the string raw (`r\"\\d\"`).",
         example: "x = \"\\d\"",
         tags: &["string-escapes"],
     }

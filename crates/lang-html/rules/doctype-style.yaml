@@ -1,6 +1,12 @@
 id: doctype-style
 message: write DOCTYPE in uppercase
-description: The doctype keyword is case-insensitive; uppercase is the convention.
+description: >-
+  Reports a doctype keyword that is not in uppercase (`<!doctype html>`).
+why: >-
+  The keyword is case-insensitive, so the browser does not care; uppercase is the form the
+  specification and most documents use, and one form keeps the files alike.
+
+  To fix, write `<!DOCTYPE html>`.
 example: '<!doctype html>   <!DOCTYPE html>'
 severity: off
 category: style

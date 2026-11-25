@@ -1,7 +1,13 @@
 id: no-alt-text
 message: the image has no alternate text
 description: >-
-  An image with empty alternate text, `![](url)` (markdownlint MD045).
+  Reports an image whose alternate text is empty (`![](url)`).
+why: >-
+  The alternate text is what a screen reader reads, what shows when the image fails to load, and
+  what a search engine indexes. An image without it is invisible to all of them.
+
+  To fix, describe the image in the brackets. An image that is only decoration can keep an empty
+  text on purpose, and then the rule should be turned off for that file.
 example: '![](logo.png)   # ![Logo](logo.png)'
 severity: off
 category: style

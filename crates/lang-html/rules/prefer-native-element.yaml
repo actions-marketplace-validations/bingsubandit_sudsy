@@ -1,8 +1,13 @@
 id: prefer-native-element
 message: use the native element instead of this `role`
 description: >-
-  A `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...) on an
-  element that is not that one needs scripting and styling the native element comes with.
+  Reports a `role` that a native element already has (`main`, `navigation`, `button`, `list`, ...)
+  when it is on an element that is not that one (`<div role="main">`, `<a role="button">`).
+why: >-
+  A native element comes with the keyboard handling, focus and semantics of its role. An element
+  with a `role` must be given all of that by script and styles.
+
+  To fix, use the native element.
 example: '<div role="button">   <button>'
 severity: off
 category: style

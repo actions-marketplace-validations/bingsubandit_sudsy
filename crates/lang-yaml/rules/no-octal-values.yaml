@@ -1,9 +1,14 @@
 id: no-octal-values
 message: forbidden octal value
 description: >-
-  A plain `0755` (octal to YAML 1.1 parsers, decimal 755 to YAML 1.2) or `0o755` (octal to YAML 1.2,
-  a string to YAML 1.1). Quoted and tagged scalars are not checked. No fix: the intended value is
-  not known.
+  Reports a plain `0755` (octal to YAML 1.1 parsers, decimal 755 to YAML 1.2) or `0o755` (octal to
+  YAML 1.2, a string to YAML 1.1). Quoted and tagged scalars are not checked. The options `implicit`
+  and `explicit` choose which form is reported. No fix: the intended value is not known.
+why: >-
+  The same text is a different number to different parsers: a file mode written as `0755` is 493 to
+  one and 755 to the other, so the permissions come out wrong without an error.
+
+  To fix, quote the value (a string that the program converts itself) or write the decimal number.
 example: "mode: 0755   # quote it (a string) or write the decimal value"
 category: suspicious
 options:

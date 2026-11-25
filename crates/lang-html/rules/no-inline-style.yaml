@@ -1,6 +1,13 @@
 id: no-inline-style
 message: use a class and a stylesheet instead of a `style` attribute
-description: A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it. A Svelte `style:property` directive is one too.
+description: >-
+  Reports a `style` attribute, and a Svelte `style:property` directive. A `style` that sets only
+  `display` is not reported, because scripts toggle it.
+why: >-
+  Styles in attributes cannot be shared between elements and pages, outweigh every rule of a
+  stylesheet, and are blocked by a strict content security policy.
+
+  To fix, use a class and a stylesheet.
 example: '<p style="color: red">   <p class="red">'
 severity: off
 category: style

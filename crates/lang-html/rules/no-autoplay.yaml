@@ -1,6 +1,13 @@
 id: no-autoplay
 message: "`autoplay` starts media without the user asking for it"
-description: Autoplaying audio and video annoys users and fails accessibility guidelines; `muted` media is allowed.
+description: >-
+  Reports `<audio>` and `<video>` with `autoplay` and without `muted`.
+why: >-
+  Sound that starts by itself startles users, drowns out a screen reader, and fails accessibility
+  guidelines. Browsers block it in many cases, so the page also behaves differently from one visit
+  to the next.
+
+  To fix, remove `autoplay`, or add `muted`.
 example: '<video autoplay></video>   <video controls></video>'
 severity: off
 category: suspicious

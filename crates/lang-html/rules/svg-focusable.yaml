@@ -1,6 +1,12 @@
 id: svg-focusable
 message: an <svg> needs `focusable="false"` (or `true`) so that old Internet Explorer does not tab into it
-description: Internet Explorer 11 and old Edge make every `<svg>` focusable unless it says `focusable="false"`.
+description: >-
+  Reports an `<svg>` that has no `focusable` attribute.
+why: >-
+  Internet Explorer 11 and old Edge make every `<svg>` a stop of the Tab key unless it says
+  `focusable="false"`.
+
+  To fix, add `focusable="false"`.
 example: '<svg>   <svg focusable="false">'
 severity: off
 category: suspicious

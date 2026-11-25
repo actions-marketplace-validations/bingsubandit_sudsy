@@ -2,9 +2,15 @@ id: no-print
 per-language: true
 message: output goes through the logger, not a print call
 description: >-
-  A call of one of the `calls` that write to the console (ruff T201 and T203), unless an argument
-  matching `redirect` sends the output elsewhere and none matching `console` sends it back to the
-  console; a language lists its calls and the two argument patterns in its grammar's `rule` row.
+  Reports a call of one of the `calls` that write to the console, unless an argument matching
+  `redirect` sends the output elsewhere and none matching `console` sends it back to the console.
+  Each language lists its calls and the two patterns in its grammar's `rule` row.
+why: >-
+  A print call is usually debugging that was left in. It cannot be turned off by configuration, has
+  no level or timestamp and ends up on the wrong stream in a service, where a logger is configured
+  and read.
+
+  To fix, use the project's logger, or delete the call.
 example: 'print("x")'
 severity: off
 category: style

@@ -2,7 +2,13 @@ id: v-bind-style
 family: template
 params: { check: shorthand, from: "v-bind:", to: ":" }
 message: "write `v-bind:` as `:`"
-description: "Vue's `v-bind-style` (eslint-plugin-vue), the shorthand form."
+description: >-
+  Reports `v-bind:` where the shorthand `:` would do (`v-bind:href`). The fix writes `:`.
+why: >-
+  One form keeps the templates uniform and shorter; the long form reads as a different thing from
+  the short one though they mean the same.
+
+  To fix, write `:`; the fix does it.
 example: "<a v-bind:href=\"u\">   <a :href=\"u\">"
 severity: warn
 category: style
@@ -12,7 +18,12 @@ id: v-on-style
 family: template
 params: { check: shorthand, from: "v-on:", to: "@" }
 message: "write `v-on:` as `@`"
-description: "Vue's `v-on-style` (eslint-plugin-vue), the shorthand form."
+description: >-
+  Reports `v-on:` where the shorthand `@` would do (`v-on:click`). The fix writes `@`.
+why: >-
+  One form keeps the templates uniform and shorter.
+
+  To fix, write `@`; the fix does it.
 example: "<b v-on:click=\"go\">   <b @click=\"go\">"
 severity: warn
 category: style
@@ -22,7 +33,12 @@ id: v-slot-style
 family: template
 params: { check: shorthand, from: "v-slot:", to: "#" }
 message: "write `v-slot:` as `#`"
-description: "Vue's `v-slot-style` (eslint-plugin-vue), the shorthand form."
+description: >-
+  Reports `v-slot:` where the shorthand `#` would do (`v-slot:head`). The fix writes `#`.
+why: >-
+  One form keeps the templates uniform and shorter.
+
+  To fix, write `#`; the fix does it.
 example: "<template v-slot:head>   <template #head>"
 severity: warn
 category: style
@@ -32,7 +48,14 @@ id: attribute-hyphenation
 family: template
 params: { check: hyphenation, only: vue }
 message: "write the prop of a component in kebab-case (my-prop, not myProp)"
-description: "Vue's `attribute-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+description: >-
+  Reports a prop of a component that is written in camelCase (`:cardTitle`). A component is a tag in
+  PascalCase or with a hyphen; HTML and SVG elements are not checked. Only in `.vue` files.
+why: >-
+  In a template the HTML parser lowercases attribute names, so only kebab-case reads the same in
+  every kind of template, and one style keeps the props easy to search for.
+
+  To fix, write the prop in kebab-case (`:card-title`).
 example: "<MyCard :cardTitle=\"t\">   <MyCard :card-title=\"t\">"
 severity: warn
 category: style
@@ -41,7 +64,14 @@ id: v-on-event-hyphenation
 family: template
 params: { check: hyphenation, on: true, only: vue }
 message: "write the event of a component in kebab-case (my-event, not myEvent)"
-description: "Vue's `v-on-event-hyphenation` (eslint-plugin-vue). Applies to components (a tag in PascalCase or with a hyphen), not to HTML and SVG elements."
+description: >-
+  Reports an event of a component that is written in camelCase (`@cardOpen`). A component is a tag
+  in PascalCase or with a hyphen; HTML and SVG elements are not checked. Only in `.vue` files.
+why: >-
+  Event names in a template are read in lowercase by the HTML parser, so kebab-case is the one form
+  that works in every kind of template, and the component emits it in the same style.
+
+  To fix, write the event in kebab-case (`@card-open`).
 example: "<MyCard @cardOpen=\"go\">   <MyCard @card-open=\"go\">"
 severity: warn
 category: style
@@ -50,7 +80,16 @@ id: html-self-closing
 family: template
 params: { check: self-closing, only: vue }
 message: "write an empty element as `<div />` and a void element as `<img>`"
-description: "Vue's `html-self-closing` (eslint-plugin-vue) with its defaults: HTML elements, components, SVG and MathML elements without content are self-closing, void HTML elements are not. The elements of the file's root (`<template>`, `<script>`) are left alone."
+description: >-
+  Reports an element written in the wrong form for Vue's style: an HTML element, a component, an SVG
+  or MathML element without content should be self-closed (`<div />`), a void HTML element should
+  not (`<img>`). The elements of the file's root (`<template>`, `<script>`) are not reported. Only
+  in `.vue` files.
+why: >-
+  Both forms mean the same in a Vue template, and the style puts the empty elements in one shape
+  that is quick to see.
+
+  To fix, write the empty element as `<div />` and the void one as `<img>`.
 example: "<template><div></div><img /></template>   <template><div /><img></template>"
 severity: off
 category: style
@@ -59,7 +98,17 @@ id: attributes-order
 family: template
 params: { check: attributes-order, only: vue }
 message: "put this attribute earlier: the order is: is, v-for, conditions, v-pre and v-once, id, ref, key and slots, v-model, other directives, attributes, events, v-html and v-text"
-description: "Vue's `attributes-order` (eslint-plugin-vue) with its default order. A bare `v-bind=\"object\"` takes the place of the attribute it precedes. Not sorted alphabetically."
+description: >-
+  Reports an attribute that is out of the recommended order: `is`, `v-for`, conditions (`v-if`,
+  `v-else-if`, `v-else`, `v-show`), `v-pre` and `v-once`, `id`, `ref`, `key` and slots, `v-model`,
+  other directives, plain and bound attributes, events, and `v-html` and `v-text` last. A bare
+  `v-bind="object"` takes the place of the attribute it precedes. The order is not alphabetical.
+  Only in `.vue` files.
+why: >-
+  A fixed order puts the directives that decide whether and how often an element exists first, so a
+  reader sees at once what the element is before they read how it looks.
+
+  To fix, move the attribute to its place in the order.
 example: "<a @click=\"go\" :href=\"u\" v-if=\"ok\">   <a v-if=\"ok\" :href=\"u\" @click=\"go\">"
 severity: off
 category: style

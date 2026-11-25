@@ -135,6 +135,7 @@ macro_rules! names_rule {
                         id: $id,
                         category: $crate::Category::$category,
                         why: "",
+                        source: "",
                         description: $description,
                         example: $example,
                         default_level: $crate::rule::Level::$level,

@@ -2,7 +2,10 @@ id: unused-parameter
 family: scope
 params: { check: unused-parameter }
 message: "parameter '{name}' seems to be unused, consider removing or renaming it as _"
-description: "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use."
+description: >-
+  Reports a parameter of a function with a body (a declaration or a literal) that its body never
+  mentions. A name that matches `ignore_pattern` and the blank identifier are not checked; the
+  receiver and the named results are not parameters; an assignment to a parameter counts as a use.
 example: "func f(a, b int) int { return a }   // b is reported"
 severity: off
 category: suspicious

@@ -39,9 +39,15 @@ rule! {
         category: Suspicious,
         default: Off,
         fix: Unsafe,
-        description: "A plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the usual \
-                  casings): a boolean to YAML 1.1 parsers and a string to YAML 1.2 parsers. \
-                  Lowercase `true` and `false` are fine.",
+        description: "Reports a plain `yes`, `no`, `on`, `off`, `True`, `TRUE`, `False` or `FALSE` (in the \
+                  usual casings), which are booleans to a YAML 1.1 parser and strings to a YAML 1.2 \
+                  parser. Lowercase `true` and `false` are not reported. The fix quotes the value and \
+                  is unsafe.",
+        why: "The same file means two things: Python's PyYAML reads `no` as `false`, while a YAML \
+                  1.2 parser reads it as the string `\"no\"`. The classic failure is the country code \
+                  `NO` (Norway) turning into `false`, and a key `on` turning into `true`.\n\
+                  To fix, quote the value to make it a string, or write `true` or `false` where a \
+                  boolean is meant.",
         example: "enabled: yes   # becomes enabled: \"yes\"",
         options: [
             OptionDecl {
@@ -126,7 +132,11 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "The first document does not start with `---`.",
+        description: "Reports a first document that does not start with `---`. A document that has \
+                  directives (`%YAML`) already starts with `---`.",
+        why: "The `---` marker makes it clear where a document starts, and it is required to put a \
+                  directive in front. Some projects require it so that every file looks the same and \
+                  several documents can be concatenated.",
         example: "a: 1   # becomes ---\\na: 1",
         kinds: &[kind::STREAM],
     }
@@ -157,7 +167,11 @@ rule! {
         category: Style,
         default: Off,
         fix: Safe,
-        description: "A document without the `...` end marker (or, with `present: false`, one that has it).",
+        description: "Reports a document without the `...` end marker, or with `present: false` one that \
+                  has it.",
+        why: "Some projects require the end marker so a stream that was cut off is easy to tell \
+                  from one that is complete. Most files leave it out, which is why the rule is off by \
+                  default.",
         example: "a: 1   # becomes a: 1\\n...",
         options: [
             OptionDecl {

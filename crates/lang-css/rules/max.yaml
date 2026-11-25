@@ -2,7 +2,12 @@ id: selector-max-class
 family: selector-max
 params: { count: class }
 message: "the selector has {count} classes (at most {max})"
-description: A selector with more class selectors than the `max` option (the ones inside `:not()` and the like count).
+description: >-
+  Reports a selector with more class selectors than the `max` option; classes inside `:not()` and
+  the like count.
+why: >-
+  Every class in a selector is one more thing that must match, so a rule with many classes has high
+  specificity and is hard to override and tied to the markup. A limit keeps selectors short.
 example: ".a.b {}   # reported with max: 1"
 severity: off
 category: style
@@ -13,7 +18,11 @@ id: selector-max-id
 family: selector-max
 params: { count: id }
 message: "the selector has {count} ids (at most {max})"
-description: A selector with more id selectors than the `max` option.
+description: >-
+  Reports a selector with more id selectors than the `max` option.
+why: >-
+  An id adds more specificity than any number of classes, so a rule with ids can only be overridden
+  by another id or by `!important`. A limit (often 0) keeps the specificity of a project flat.
 example: "#a #b {}   # reported with max: 1"
 severity: off
 category: style
@@ -24,7 +33,11 @@ id: selector-max-attribute
 family: selector-max
 params: { count: attribute }
 message: "the selector has {count} attribute selectors (at most {max})"
-description: A selector with more attribute selectors than the `max` option.
+description: >-
+  Reports a selector with more attribute selectors than the `max` option.
+why: >-
+  Each attribute selector adds the specificity of a class and one more thing to match, so a limit
+  keeps rules short and easy to override.
 example: "[a][b] {}   # reported with max: 1"
 severity: off
 category: style
@@ -35,7 +48,11 @@ id: selector-max-pseudo-class
 family: selector-max
 params: { count: pseudo-class }
 message: "the selector has {count} pseudo-classes (at most {max})"
-description: A selector with more pseudo-classes than the `max` option.
+description: >-
+  Reports a selector with more pseudo-classes than the `max` option.
+why: >-
+  Each pseudo-class adds the specificity of a class and a state that must hold, so a long chain such
+  as `a:hover:focus:active` is hard to override and hard to read. A limit keeps selectors simple.
 example: "a:hover:focus {}   # reported with max: 1"
 severity: off
 category: style
@@ -46,7 +63,11 @@ id: selector-max-type
 family: selector-max
 params: { count: type }
 message: "the selector has {count} type selectors (at most {max})"
-description: A selector with more type selectors than the `max` option.
+description: >-
+  Reports a selector with more type selectors than the `max` option.
+why: >-
+  A selector made of many element names (`div ul li a`) is tied to the markup and breaks when an
+  element is wrapped or changed. A limit pushes the styling to classes.
 example: "a b {}   # reported with max: 1"
 severity: off
 category: style
@@ -57,7 +78,11 @@ id: selector-max-universal
 family: selector-max
 params: { count: universal }
 message: "the selector has {count} universal selectors (at most {max})"
-description: A selector with more `*` than the `max` option.
+description: >-
+  Reports a selector with more `*` than the `max` option.
+why: >-
+  The universal selector matches everything, so each one widens the rule, and `* *` can cost time on
+  large pages. A limit keeps such selectors rare.
 example: "* * {}   # reported with max: 1"
 severity: off
 category: style
@@ -68,7 +93,12 @@ id: selector-max-combinators
 family: selector-max
 params: { count: combinators }
 message: "the selector has {count} combinators (at most {max})"
-description: A selector with more combinators (a space between compounds counts) than the `max` option.
+description: >-
+  Reports a selector with more combinators than the `max` option; a space between two compound
+  selectors counts.
+why: >-
+  Every combinator ties the rule to one more level of the markup, so deep selectors break when the
+  markup changes and are slow to read and match. A limit keeps selectors shallow.
 example: "a b c {}   # reported with max: 1"
 severity: off
 category: style
@@ -79,7 +109,12 @@ id: selector-max-compound-selectors
 family: selector-max
 params: { count: compounds }
 message: "the selector has {count} compound selectors (at most {max})"
-description: A selector with more compound selectors than the `max` option.
+description: >-
+  Reports a selector with more compound selectors (parts between combinators) than the `max` option.
+why: >-
+  A selector with many compound parts describes a long path through the markup. It breaks when the
+  markup changes and has to be matched from right to left on every element. A limit keeps it
+  shallow.
 example: "a b c {}   # reported with max: 2"
 severity: off
 category: style
@@ -90,7 +125,12 @@ id: max-nesting-depth
 family: max
 params: { count: ancestors, tag: nest }
 message: "the nesting is {count} deep (at most {max})"
-description: A rule or at-rule nested in more rules or at-rules than the `max` option.
+description: >-
+  Reports a rule or at-rule nested inside more rules or at-rules than the `max` option.
+why: >-
+  Nested rules multiply: three levels of nesting give a selector that is the product of three, with
+  high specificity and tied to the markup. Deep nesting also makes the file hard to read. A limit
+  keeps nesting shallow.
 example: "a { b { c {} } }   # reported with max: 1"
 severity: off
 category: style
@@ -101,7 +141,12 @@ id: declaration-block-single-line-max-declarations
 family: max
 params: { count: children, tag: declaration-block, of: property-declaration, single-line: "true" }
 message: "the single-line block has {count} declarations (at most {max})"
-description: A block written on one line with more declarations than the `max` option.
+description: >-
+  Reports a block written on one line that has more declarations than the `max` option.
+why: >-
+  A single-line block is easy to scan only while it is short; with many declarations the line
+  becomes long, and a diff shows the whole line as changed. A limit (often 1) moves the rest to
+  separate lines.
 example: "a { b: c; d: e }   # reported with max: 1"
 severity: off
 category: style
@@ -112,7 +157,13 @@ id: number-max-precision
 family: max
 params: { count: decimals, tag: value, of: number }
 message: "the number has {count} decimals (at most {max})"
-description: A number with more decimal places than the `max` option.
+description: >-
+  Reports a number with more decimal places than the `max` option.
+why: >-
+  Long decimals (`1.23456789px`) are almost always the output of a calculator, and a browser rounds
+  lengths to a fraction of a pixel anyway, so the extra digits only add bytes and noise.
+
+  To fix, round the number to the precision that is needed.
 example: "a { width: 1.23456px }   # reported with max: 4"
 severity: off
 category: style

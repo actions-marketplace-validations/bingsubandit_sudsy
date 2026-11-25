@@ -1,7 +1,7 @@
 {
  "runner": "Linux aarch64, 8 cores",
  "runs": 5,
- "commit": "5c8c9fa7",
+ "commit": "b8207117",
  "rows": [
   {
    "id": "prettier/JSON/format",
@@ -127,6 +127,24 @@
    "other": {
     "s": 0.037,
     "mb": 42
+   }
+  },
+  {
+   "id": "gersemi/CMake/format",
+   "language": "CMake",
+   "task": "Format",
+   "tool": "gersemi",
+   "version": "0.29.2",
+   "corpus": "the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others), without 3 files Sudsy cannot parse",
+   "files": 9063,
+   "bytes": 22731175,
+   "sudsy": {
+    "s": 0.685,
+    "mb": 356
+   },
+   "other": {
+    "s": 0.304,
+    "mb": 49
    }
   },
   {
@@ -517,11 +535,11 @@
    "files": 9066,
    "bytes": 22756981,
    "sudsy": {
-    "s": 1.46,
-    "mb": 755
+    "s": 1.45,
+    "mb": 557
    },
    "other": {
-    "s": 67.731,
+    "s": 69.222,
     "mb": 42
    }
   },
