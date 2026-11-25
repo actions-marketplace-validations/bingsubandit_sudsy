@@ -358,6 +358,52 @@ fn describe(g: &Grammar, ev: Option<(usize, Event<'_>)>) -> String {
     }
 }
 
+/// The kinds of markup tags, for [`same_tags`].
+pub struct TagKinds<'a> {
+    /// Nodes that start an element.
+    pub start: &'a [SyntaxKind],
+    /// Nodes that end one (also an end tag without a start).
+    pub end: &'a [SyntaxKind],
+    /// The token of a tag node that holds its name.
+    pub name: SyntaxKind,
+    /// Names compare in lowercase.
+    pub ignore_case: bool,
+}
+
+/// The start and end tags of both trees are the same, tag by tag with their names. A grammar that
+/// tags its end tag node `#transparent` (an element may omit it) leaves it out of the generic
+/// comparison; this one refuses an end tag that was added or dropped.
+pub fn same_tags(before: &SyntaxNode, after: &SyntaxNode, kinds: &TagKinds) -> Result<(), String> {
+    let sequence = |tree: &SyntaxNode| -> Vec<(bool, String)> {
+        tree.descendants()
+            .filter_map(|n| {
+                let start = kinds.start.contains(&n.kind());
+                if !start && !kinds.end.contains(&n.kind()) {
+                    return None;
+                }
+                let name = n
+                    .children_with_tokens()
+                    .filter_map(|e| e.into_token())
+                    .find(|t| t.kind() == kinds.name)?;
+                let name = if kinds.ignore_case {
+                    name.text().to_ascii_lowercase()
+                } else {
+                    name.text().to_string()
+                };
+                Some((start, name))
+            })
+            .collect()
+    };
+    let (a, b) = (sequence(before), sequence(after));
+    match a.iter().zip(&b).position(|(x, y)| x != y) {
+        None if a.len() == b.len() => Ok(()),
+        at => Err(format!(
+            "the start and end tags changed at tag {}",
+            at.unwrap_or(a.len().min(b.len())) + 1
+        )),
+    }
+}
+
 /// Runs the generic check and then the provider's own. `reparse` parses the output and returns
 /// an error message if it has parse errors.
 pub fn verify(
@@ -386,7 +432,7 @@ pub fn verify(
             .map_err(FormatError::Safety)?;
     }
     formatter
-        .extra_check(before_tree, &after_tree)
+        .extra_check_with(before_tree, &after_tree, options)
         .map_err(FormatError::Safety)
 }
 

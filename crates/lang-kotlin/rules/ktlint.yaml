@@ -40,13 +40,13 @@ token: { kind: [Identifier], regex: '^[a-z_]' }
 id: enum-entry-name-case
 message: 'an enum entry is written in UPPER_SNAKE_CASE or PascalCase'
 description: >-
-  An enum entry whose name starts with a lowercase letter or an underscore (ktlint
+  An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint
   enum-entry-name-case).
 example: 'enum class E { a, B }'
 severity: off
 category: style
 rule: { kind: EnumEntry }
-token: { kind: [Identifier], regex: '^[a-z_]' }
+token: { kind: [Identifier], not-regex: '^(?:[A-Z][A-Za-z0-9]*|[A-Z][A-Z_0-9]*)$' }
 ---
 id: no-empty-file
 message: 'the file has no declarations'

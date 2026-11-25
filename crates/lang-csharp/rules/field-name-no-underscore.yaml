@@ -1,0 +1,12 @@
+id: field-name-no-underscore
+family: naming-convention
+params:
+  match: regex
+  fields: field-declaration=declaration/variables/identifier
+  message: "field `{name}` must not begin with an underscore"
+description: "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match."
+example: "class C { int _count; }"
+severity: off
+category: style
+options:
+  - { name: fields, type: regex, default: '^[^_]', description: "Regular expression the name of a field must match; empty: not checked." }

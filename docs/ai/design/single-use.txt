@@ -7,12 +7,14 @@
 concept accessor-order # users: csharp
 concept allowed-values # users: html (shared)
 concept ambiguous-booleans # users: yaml
+concept ancestor-kind-test # users: sql (shared)
 concept angular-expression-pipes # users: html
 concept angular-microsyntax # users: html
 concept angular-template-layout # users: html
 concept arrow-function-layout # users: js
 concept async-suffix # users: csharp
 concept attribute-content-lines # users: html (shared)
+concept attribute-requote # users: html (shared)
 concept behavior-summaries # users: csharp (shared)
 concept block-collection-layout # users: yaml
 concept build-stage-checks # users: dockerfile
@@ -22,6 +24,7 @@ concept class-body-checks # users: ruby
 concept clause-checks # users: ruby
 concept clause-line-breaks # users: sql
 concept clause-style # users: sql (shared)
+concept closer-join # users: 
 concept comment-syntax # users: hcl
 concept component-option-checks # users: html
 concept component-props-model # users: html
@@ -42,11 +45,10 @@ concept destructor-summary-standard-text # users: csharp
 concept detached-token-family # users: sql (shared)
 concept dialect-keyword-tables # users: sql
 concept directive-keyword-space # users: csharp
-concept directory-facts # users:  (shared)
+concept directory-facts # users: php (shared)
 concept distinct-group-by # users: sql
 concept doc-comment-model # users: csharp
 concept doc-comment-space # users: csharp
-concept doc-comment-style # users: java (shared)
 concept doc-partial-required # users: csharp
 concept doc-partial-typeparams # users: csharp
 concept doc-text-ends-with-period # users: csharp
@@ -59,6 +61,7 @@ concept duplicate-ids # users: github-actions
 concept element-metadata-checks # users: html
 concept escaped-newline-lines # users:  (shared)
 concept expression-language # users: github-actions (shared)
+concept feature-support # users: html (shared)
 concept file-header-order # users: protobuf
 concept file-name-matches-type # users: csharp
 concept flat-block-preservation # users: csharp
@@ -86,6 +89,7 @@ concept jsx-layout # users: js
 concept keep-together-neighbours # users: markdown (shared)
 concept key-shape # users: github-actions (shared)
 concept keyword-block-frames # users: sql (shared)
+concept keyword-block-pairing # users: cmake (shared)
 concept keyword-block-parse # users: sql (shared)
 concept known-names-table # users: css
 concept last-user-not-root # users: dockerfile
@@ -159,6 +163,7 @@ concept style-declaration-checks # users: css
 concept suppression-justification # users: csharp
 concept tab-keep # users: markdown (shared)
 concept table-alignment # users: markdown
+concept tag-layout # users: html (shared)
 concept template-expression-checks # users: html
 concept template-literal-layout # users: js
 concept template-syntax-checks # users: html
@@ -185,6 +190,7 @@ concept use-literal-suffix # users: csharp
 concept useless-echo # users: shell
 concept word-names # users: sql (shared)
 concept word-table # users: sql (shared)
+concept word-table-rows # users: sql (shared)
 concept worker-findings-family # users: csharp
 data grammar-line:case-insensitive # users: powershell
 data grammar-line:container # users: markdown
@@ -207,7 +213,6 @@ data row-key:call.line # users: js
 data row-key:call.node # users: js
 data row-key:call.params # users: js
 data row-key:call.parent # users: js
-data row-key:joined.text # users: php
 data row-key:layout.body # users: php
 data row-key:layout.clauses # users: php
 data row-key:layout.ctor # users: kotlin
@@ -257,10 +262,8 @@ data tag:module-body # users: js
 data tag:named-expr # users: python
 data tag:named-type # users: js
 data tag:negated # users: ruby
-data tag:quoted # users: js
 data tag:raw-strings # users: js
 data tag:regex # users: js
-data tag:signature # users: js
 data tag:string-escapes # users: python
 data tag:string-literal # users: python
 data tag:tuple # users: python
@@ -268,7 +271,6 @@ data tag:verbatim-trivia # users: csharp
 data tag:with-item # users: python
 data tag:wrapper # users: java
 local lang-cpp/lexer.rs source-lexer # lang: cpp
-local lang-csharp/rules/async_suffix.rs naming-convention # lang: csharp
 local lang-csharp/rules/binding.rs unused-import # lang: csharp
 local lang-csharp/rules/flow.rs unused-variable # lang: csharp
 local lang-css/format/mod.rs key-value-layout # lang: css
@@ -306,7 +308,6 @@ local lang-kotlin/format/expr.rs binary-chain-layout # lang: kotlin
 local lang-kotlin/rewrite.rs source-rewrite # lang: kotlin
 local lang-makefile/format.rs key-value-layout # lang: makefile
 local lang-makefile/rules.rs unique-names # lang: makefile
-local lang-markdown/format/keep.rs verbatim-formatter # lang: markdown
 local lang-powershell/format.rs block-and-statements # lang: powershell
 local lang-protobuf/format.rs key-value-layout # lang: protobuf
 local lang-python/format/block.rs blank-lines-between-members # lang: python
@@ -315,7 +316,6 @@ local lang-python/format/op.rs binary-chain-layout # lang: python
 local lang-python/rules/lints.rs call-shape-checks # lang: python
 local lang-python/rules/misc.rs call-shape-checks # lang: python
 local lang-python/rules/stmts.rs statement-shape-checks # lang: python
-local lang-ruby/format.rs verbatim-formatter # lang: ruby
 local lang-ruby/rules/calls.rs call-shape-checks # lang: ruby
 local lang-shell/format.rs block-and-statements # lang: shell
 local lang-shell/format/arith.rs token-spacing-rows # lang: shell

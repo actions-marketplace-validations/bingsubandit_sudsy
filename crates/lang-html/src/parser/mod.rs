@@ -10,6 +10,7 @@
 //!
 //! concept: recursive-descent-parser
 
+mod actions;
 mod angular;
 mod svelte;
 mod tags;
@@ -33,7 +34,15 @@ pub enum Mode {
 }
 
 pub fn parse(src: &str, mode: Mode) -> ParseResult {
+    parse_with(src, mode, false, true)
+}
+
+/// `templates`: `{{ }}` actions of a template language stay as written (see `actions.rs`); `balanced`: their blocks must open and close in one element.
+pub fn parse_with(src: &str, mode: Mode, templates: bool, balanced: bool) -> ParseResult {
     let mut p = P {
+        templates,
+        balanced,
+        blocks: core_syntax::template_actions::Blocks::default(),
         src,
         b: src.as_bytes(),
         mode,
@@ -86,6 +95,10 @@ struct P<'a> {
     src: &'a str,
     b: &'a [u8],
     mode: Mode,
+    /// HTML with `{{ }}` actions (see `actions.rs`).
+    templates: bool,
+    balanced: bool,
+    blocks: core_syntax::template_actions::Blocks,
     pos: usize,
     toks: Vec<Tok>,
     nodes: Vec<Node>,
@@ -159,7 +172,11 @@ impl<'a> P<'a> {
     }
 
     fn name_end(&self, mut i: usize) -> usize {
-        while i < self.b.len() && !is_ws(self.b[i]) && !matches!(self.b[i], b'>' | b'/' | b'<') {
+        while i < self.b.len()
+            && !is_ws(self.b[i])
+            && !matches!(self.b[i], b'>' | b'/' | b'<')
+            && !(self.templates && self.action_end(i).is_some())
+        {
             i += 1;
         }
         i
@@ -209,7 +226,7 @@ impl<'a> P<'a> {
                     }
                     None => self.text(true),
                 },
-                b'{' if self.mode == Mode::Vue => {
+                b'{' if self.mode == Mode::Vue || self.templates => {
                     if self.at(self.pos + 1) == b'{' && self.interpolation() {
                     } else {
                         self.text(true);
@@ -227,6 +244,9 @@ impl<'a> P<'a> {
                 _ => self.text(false),
             }
         }
+        if self.templates {
+            self.template_blocks_closed();
+        }
         while let Some((open, node)) = self.stack.pop() {
             if !matches!(open, Open::Element(..)) {
                 let at = self.nodes[node].start as usize;
@@ -242,7 +262,7 @@ impl<'a> P<'a> {
         matches!(self.mode, Mode::Html | Mode::Svelte)
     }
 
-    /// A raw `<`, `>` or `&` in text is an error (HTML and Svelte).
+    /// A raw `<` in text is an error (HTML and Svelte); a `>` or an `&` that starts no entity is text.
     fn strict(&self) -> bool {
         self.entities()
     }
@@ -301,11 +321,16 @@ impl<'a> P<'a> {
             match self.b[i] {
                 b'<' if !lead && self.tag_start(i) => break,
                 b'&' if !lead && self.entities() && self.entity(i).is_some() => break,
-                b'<' | b'>' | b'&' if self.strict() => {
+                b'<' if self.strict() => {
                     self.error(i, i + 1, "raw character in text");
                 }
                 b'{' | b'}' if !lead && self.mode == Mode::Svelte => break,
-                b'{' if !lead && self.mode == Mode::Vue && self.at(i + 1) == b'{' => break,
+                b'{' if !lead
+                    && (self.mode == Mode::Vue || self.templates)
+                    && self.at(i + 1) == b'{' =>
+                {
+                    break;
+                }
                 b'{' | b'}' if !lead && self.mode == Mode::Angular => break,
                 b'@' if !lead && self.mode == Mode::Angular && self.ng_candidate(i) => break,
                 _ => {}
@@ -612,6 +637,15 @@ impl<'a> P<'a> {
 
     fn attribute(&mut self) {
         let start = self.pos;
+        if let Some(end) = self.action_end(start) {
+            // An action among the attributes is one attribute, kept as written.
+            let n = self.open(k::ATTRIBUTE, start);
+            self.template_action(start, end - 2);
+            self.tok(k::ATTR_NAME, start, end);
+            self.pos = end;
+            self.close(n);
+            return;
+        }
         let n = self.open(k::ATTRIBUTE, start);
         if self.mode == Mode::Svelte && self.at(start) == b'{' {
             let end = self.brace_end(start).unwrap_or(self.b.len());
@@ -633,6 +667,7 @@ impl<'a> P<'a> {
                 } else {
                     is_ws(c)
                         || matches!(c, b'<' | b'>' | b'"' | b'\'' | b'/' | b'=')
+                        || (self.templates && self.action_end(end).is_some())
                         || (self.mode == Mode::Svelte && matches!(c, b'{' | b'}'))
                 };
                 if stop {
@@ -683,8 +718,8 @@ impl<'a> P<'a> {
         let at = self.skip_ws(self.pos);
         let c = self.at(at);
         if c == b'"' || c == b'\'' {
-            let end = match self.src[at + 1..].find(c as char) {
-                Some(i) => at + i + 2,
+            let end = match self.value_end(at + 1, c) {
+                Some(end) => end,
                 None => {
                     self.error(at, at + 1, "attribute value is not closed");
                     self.b.len()
@@ -723,6 +758,9 @@ impl<'a> P<'a> {
             return false;
         };
         let inner = start + 2;
+        if self.templates {
+            self.template_action(start, end);
+        }
         let n = self.open(k::INTERPOLATION, start);
         self.tok(k::L_BRACE_BRACE, start, inner);
         if !self.b[inner..end].is_empty() {

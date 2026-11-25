@@ -1,5 +1,7 @@
 #outer > .inner;
 .a { #outer.mixin(); color: red; }
 @import "a";
+^^^^^^^^^^^^ no-invalid-position-at-import-rule
 .b { color: blue }
 @import "b";
+^^^^^^^^^^^^ no-invalid-position-at-import-rule

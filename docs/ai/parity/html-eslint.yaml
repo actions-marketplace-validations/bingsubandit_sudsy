@@ -6,13 +6,13 @@ sources:
   - "https://html-eslint.org/docs/rules"
 scope: "@html-eslint/eslint-plugin's rules for HTML files"
 entries:
-  attrs-newline: planned
+  attrs-newline: formatter | `max_attributes_per_line` (the preset sets 2)
   class-spacing: planned
   css-no-empty-blocks: planned
-  element-newline: planned
+  element-newline: formatter | the formatter owns layout; an element after another on a line (inline elements and text, with the default `whitespace_sensitivity`) stays
   head-order: planned
   id-naming-convention: rule id-pattern | the convention is the pattern option (a regex), not named styles
-  indent: planned
+  indent: formatter | the formatter owns layout; the `>` that starts the text of an inline element (`>Home</a`) is Prettier's whitespace-sensitive layout and stays
   lowercase: rule element-case | the case of attribute names is `attr-case`
   max-element-depth: planned
   no-abstract-roles: rule no-abstract-role
@@ -25,7 +25,7 @@ entries:
   no-duplicate-in-head: planned
   no-empty-headings: rule empty-heading
   no-extra-spacing-attrs: planned
-  no-extra-spacing-tags: planned
+  no-extra-spacing-tags: formatter | `self_closing_space` (the preset sets off)
   no-extra-spacing-text: planned
   no-heading-inside-button: planned
   no-ineffective-attrs: planned
@@ -53,22 +53,22 @@ entries:
   quotes: rule attr-quotes | a single-quoted value that holds a double quote is allowed; unquoted values are reported
   require-attrs: planned
   require-button-type: rule no-implicit-button-type
-  require-closing-tags: rule no-implicit-close | implied end tags only; the self-closing options are `void-style` and `no-self-closing`
+  require-closing-tags: formatter | the formatter writes the end tags that were implied and void elements as `void_element_style` says (the preset writes `<br>`)
   require-content: planned
   require-details-summary: planned
   require-doctype: rule missing-doctype
   require-explicit-size: planned
   require-form-method: planned
   require-frame-title: rule element-required-attributes | reports `<embed>` as well as frames
-  require-img-alt: planned
+  require-img-alt: rule img-alt
   require-input-label: rule input-missing-label
   require-lang: rule element-required-attributes | also requires the attributes of other elements that html-validate requires (`src` of `<img>`)
-  require-li-container: planned
+  require-li-container: rule require-li-container
   require-meta-charset: planned
   require-meta-description: planned
   require-meta-viewport: planned
   require-open-graph-protocol: planned
-  require-title: planned
+  require-title: rule element-required-content | also requires the other children it lists (`<summary>` in `<details>`)
   sort-attrs: planned
   svg-require-viewbox: planned
-  use-baseline: planned
+  use-baseline: rule use-baseline | not the `sms:` links (a value prefix)

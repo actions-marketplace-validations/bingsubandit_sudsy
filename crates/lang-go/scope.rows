@@ -1,0 +1,19 @@
+// What Go says to the shared scope rules: names are bare Ident tokens, so every name that is not
+// a declaration is a use (an assignment counts as one: revive reads it so). Field, type, package
+// and label names are tokens of their own kinds. Format: core_semantics::scopes::rows.
+names Ident True False Nil Iota
+bare
+// The predeclared identifiers (`redefines-builtin`; Go 1.21 adds clear, max and min).
+globals append cap clear close complex copy delete imag len make max min new panic print println real recover true false iota nil any bool byte comparable complex128 complex64 error float32 float64 int int16 int32 int64 int8 rune string uint uint16 uint32 uint64 uint8 uintptr
+
+FunctionDeclaration declares=value|function@parent token=first/declare
+// A parameter; the named results and the receiver are plain values (revive checks parameters only).
+ParameterDeclaration declares=value|parameter parent-flags=ResultList:value parent-flags=ReceiverList:value token=all/declare
+VariadicParameterDeclaration declares=value|parameter parent-flags=ResultList:value parent-flags=ReceiverList:value token=all/declare
+TypeParameterDeclaration declares=type|type-parameter token=all/declare
+VarSpec declares=value|let token=all/declare
+ConstSpec declares=value|const token=all/declare
+// `a, b := x`, `for k, v := range x`, `case v := <-ch`: the names left of `:=` are declared.
+ShortVarDeclaration declares=value|let child=first/declare
+RangeClause declares=value|let child=first/?has-token.":=":declare:through
+ReceiveStatement declares=value|let child=first/?has-token.":=":declare:through

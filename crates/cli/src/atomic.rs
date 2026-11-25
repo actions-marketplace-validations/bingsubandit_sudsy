@@ -18,6 +18,15 @@ pub fn write(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
     Ok(())
 }
 
+/// `text` as the bytes to write over `path`: in the encoding the file has now (UTF-16 with its mark, Windows-1252, UTF-8 with
+/// or without `had_bom`).
+pub fn encode_like_file(path: &Path, text: &str, had_bom: bool) -> anyhow::Result<Vec<u8>> {
+    let original = std::fs::read(path)?;
+    provider_api::encoding::encode_like(&original, text, had_bom).ok_or_else(|| {
+        anyhow::anyhow!("a character of the result does not fit the encoding of the file")
+    })
+}
+
 #[cfg(test)]
 mod tests {
     #[cfg(unix)]

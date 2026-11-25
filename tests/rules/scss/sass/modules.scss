@@ -1,0 +1,26 @@
+@use "a/_b";
+^^^^^^^^^^^^ load-no-partial-leading-underscore
+@use "c.css";
+$fooBar: map-get($m, a) + list.length($x);
+^^^^^^^ dollar-variable-pattern
+//       ^^^^^^^ no-global-function-names
+@mixin fooBar { top: 0; }
+//     ^^^^^^ at-mixin-pattern
+@function myFn($x) { @return mix($x, red); }
+//        ^^^^ at-function-pattern
+//                           ^^^ no-global-function-names
+a {
+  @include foo();
+//^^^^^^^^^^^^^^^ at-mixin-argumentless-call-parentheses
+  @include foo() using ($x) { top: 0; }
+  @extend .b;
+//^^^^^^^^^^^ at-extend-no-missing-placeholder
+  @extend %b;
+  @extend .c-#{$x};
+  @if ($a == 1) { top: 0; }
+//^ at-rule-conditional-no-parentheses
+  @else if $a != null { top: 1; }
+  @else if $a != null and $b { top: 2; }
+  @if $a == null { top: 3; }
+//^^^^^^^^^^^^^^^^^^^^^^^^^^ at-if-no-null
+}

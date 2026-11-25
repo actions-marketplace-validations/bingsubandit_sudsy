@@ -32,18 +32,16 @@ impl Dialect {
 
 pub fn parse(src: &str, dialect: Dialect) -> Parsed {
     let mut p = Parser {
-        p: parse::Parser::new(src, lex(src, dialect == Dialect::Jsonc), is_trivia, k::EOF),
+        p: parse::Parser::new(
+            src,
+            lex(src, dialect == Dialect::Jsonc),
+            k::TRIVIA_MASK,
+            k::EOF,
+        ),
         dialect,
     };
     p.document();
     p.p.done()
-}
-
-fn is_trivia(kind: SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::WHITESPACE | k::NEWLINE | k::LINE_COMMENT | k::BLOCK_COMMENT
-    )
 }
 
 struct Parser<'a> {

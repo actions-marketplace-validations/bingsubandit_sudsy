@@ -1,7 +1,13 @@
 ratchet:
-  fixtures: 71
+  fixtures: 1
+  real-world: 70
 target-files:
-  fixtures: 82
+  fixtures: 1
+  real-world: 81
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
 differences:
   array-pipeline: gap  an array whose elements are a backslash-continued pipeline is kept as written
   arith-spacing: gap  `i++ ))` (a blank before `))` after `++`, which tree-sitter-bash lexes as one word) and the subscripts `${a[i+1]}` are kept as written; shfmt writes `i++))` and `${a[i + 1]}`
@@ -11,14 +17,5 @@ differences:
   case-in-if-indent: gap  the arms of a `case` used as an `if` condition are not indented a level further
   empty-file: gap  a file of one empty line becomes an empty file; shfmt keeps the line
 files:
-  corpus/bats-core/lib/bats-core/test_functions.bash: arith-spacing
-  corpus/bats-core/lib/bats-core/tracing.bash: arith-spacing, continued-conditions
-  corpus/bats-core/test/fixtures/suite_setup_teardown/call_load/test_helper.bash: empty-file
-  corpus/install/install.sh: continued-conditions
-  corpus/install-scripts/src/dotnet-install.sh: arith-spacing, expr-kept
-  corpus/nvm/nvm.sh: continued-conditions, brace-group-layout
-  corpus/pyenv/plugins/pyenv-binary/test/test_helper.bash: case-in-if-indent
-  corpus/pyenv/plugins/pyenv-link/test/test_helper.bash: case-in-if-indent
-  corpus/pyenv/pyenv.d/install/latest.bash: array-pipeline
-  corpus/pyenv/test/test_helper.bash: case-in-if-indent
-  corpus/rustup/rustup-init.sh: brace-group-layout
+  real-world: arith-spacing:3, case-in-if-indent:3, continued-conditions:2, empty-file:1, array-pipeline:1, brace-group-layout:1, expr-kept:0
+unclassified: 0

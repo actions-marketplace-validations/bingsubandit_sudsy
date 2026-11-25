@@ -51,6 +51,14 @@ pub struct BinaryPolicy {
     /// A chain that is an operand of a chain of another precedence indents its continuation lines.
     pub indent_nested: bool,
     pub hug: Hug,
+    /// A single operation groups its operator and right side, whatever the operator line.
+    pub group_single: bool,
+    /// A single operation is grouped beside a chain of another kind (`group_single`).
+    pub group_mixed_chains: bool,
+    /// Kinds of chains that, inside another chain, have no group of their own.
+    pub open_kinds: Vec<String>,
+    /// Kinds of right operands that stay on the operator's line.
+    pub inline_right_kinds: Vec<String>,
 }
 
 impl BinaryPolicy {
@@ -64,6 +72,19 @@ impl BinaryPolicy {
             },
             indent: options.uint(INDENT, 1),
             indent_nested: options.flag(INDENT_NESTED, true),
+            inline_right_kinds: options
+                .strings(core_config::opt::BINARY_INLINE_RIGHT_KINDS)
+                .map(String::from)
+                .collect(),
+            open_kinds: options
+                .strings(core_config::opt::BINARY_OPEN_KINDS)
+                .map(String::from)
+                .collect(),
+            group_mixed_chains: options.flag(core_config::opt::BINARY_GROUP_MIXED_CHAINS, true),
+            group_single: options.flag(
+                core_config::opt::BINARY_GROUP_SINGLE,
+                text(OPERATOR_LINE) == "end",
+            ),
             hug: match text(HUG) {
                 "assignment" => Hug::Assignment,
                 "statement" => Hug::Statement,
@@ -89,6 +110,8 @@ pub enum Place {
     /// A group, the continuation lines indented (flush when an inline right side follows no
     /// flattened chain).
     Indented,
+    /// The parts of an operand of another chain, indented, in the group of that chain.
+    Open,
 }
 
 /// Does the chain stand bare (its operands not indented) because it is the root of an embedded
@@ -122,6 +145,11 @@ pub trait BinaryHooks {
     }
     /// The comment after the last operand of a flattened chain moves after its operand.
     fn reattach_comments(&self) -> bool {
+        false
+    }
+    /// Does the right operand `n` of a hugging operation (`binary_inline_right_kinds`) start with a
+    /// line of its own, so that no space follows the operator?
+    fn starts_with_line(&self, _cx: &FormatCtx<'_>, _n: &SyntaxNode) -> bool {
         false
     }
     /// The last operand lays itself out outside the chain's group (JSX).
@@ -227,6 +255,17 @@ pub fn binary_chain(
     }
     let end = policy.operator_line == OperatorLine::End;
     let steps = spine.len();
+    if steps == 1 && hugs_right(cx, policy, node) {
+        let own_line = matches!(&spine[0].right, SyntaxElement::Node(n)
+            if hooks.starts_with_line(cx, &roles::un(n)));
+        return Ok(doc::concat(vec![
+            operand(cx, hooks, &spine[0].left)?,
+            doc::lit(" "),
+            hooks.token(cx, &spine[0].op),
+            if own_line { Doc::Nil } else { doc::lit(" ") },
+            operand(cx, hooks, &spine[0].right)?,
+        ]));
+    }
     let operand_of = |i: usize| {
         if right_assoc && i + 1 < steps {
             &spine[i + 1].left
@@ -246,21 +285,32 @@ pub fn binary_chain(
     let parent = outer.parent();
     let place = hooks
         .place(cx, node)
-        .unwrap_or_else(|| default_place(cx, policy, parent.as_ref()));
+        .unwrap_or_else(|| default_place(cx, policy, node, parent.as_ref()));
     let top_op = spine[0].op.text();
     let logical = matches!(g.operator_kind(top_op), Some("logical" | "coalesce"));
     // `a op b` alone: its operator and right side form a group of their own, unless a node of the
     // same kind is around them.
-    let group_step = end
+    let group_step = policy.group_single
         && steps == 1
         && !(place == Place::Bare && logical)
         && [
-            parent.as_ref().map(SyntaxNode::kind),
+            parent
+                .as_ref()
+                .map(SyntaxNode::kind)
+                .filter(|_| policy.group_mixed_chains),
             node_kind(&spine[0].left),
             node_kind(&spine[0].right),
         ]
         .iter()
-        .all(|k| *k != Some(node.kind()));
+        .all(|k| {
+            k.is_none_or(|k| {
+                if policy.group_mixed_chains {
+                    k != node.kind()
+                } else {
+                    !g.has_tag(k, "binary-chain")
+                }
+            })
+        });
 
     let first_doc = {
         let d = operand(cx, hooks, first)?;
@@ -291,14 +341,21 @@ pub fn binary_chain(
             tail.push(if group_step { doc::group(step) } else { step });
         } else {
             let before = last_token(cx, prev).is_some_and(|t| ends_in_line_comment(cx, &t));
-            tail.push(if before { doc::hardline() } else { doc::line() });
-            tail.push(hooks.token(cx, &l.op));
-            tail.push(if hooks.comment_ends_line(cx, &l.op) {
-                doc::hardline()
+            let step = [
+                if before { doc::hardline() } else { doc::line() },
+                hooks.token(cx, &l.op),
+                if hooks.comment_ends_line(cx, &l.op) {
+                    doc::hardline()
+                } else {
+                    doc::lit(" ")
+                },
+                target_doc,
+            ];
+            if group_step && !before {
+                tail.push(doc::group(doc::concat(step.into())));
             } else {
-                doc::lit(" ")
-            });
-            tail.push(target_doc);
+                tail.extend(step);
+            }
         }
         if let Some(t) = &nested {
             tail.push(cx.reattach_trailing(t));
@@ -319,6 +376,13 @@ pub fn binary_chain(
             let mut parts = vec![first_doc];
             parts.extend(tail);
             doc::concat(parts)
+        }
+        Place::Open => {
+            let mut rest = doc::concat(tail);
+            for _ in 0..policy.indent {
+                rest = doc::indent(rest);
+            }
+            doc::concat(vec![first_doc, rest])
         }
         Place::Wrapped => {
             let mut parts = vec![first_doc];
@@ -355,12 +419,44 @@ pub fn binary_chain(
     })
 }
 
+/// Does the operation `node` (a `#binary-chain`) keep its right side on the operator's line: the
+/// side is of a kind of `binary_inline_right_kinds`, and the operation is no operand of another
+/// chain and no test of a conditional expression?
+pub fn hugs_right(cx: &FormatCtx<'_>, policy: &BinaryPolicy, node: &SyntaxNode) -> bool {
+    let g = cx.grammar;
+    if policy.inline_right_kinds.is_empty() {
+        return false;
+    }
+    let mut buf = Vec::with_capacity(6);
+    let Ok(l) = link(cx, node, &mut buf) else {
+        return false;
+    };
+    let right = match &l.right {
+        SyntaxElement::Node(n) => roles::un(n),
+        SyntaxElement::Token(_) => return false,
+    };
+    let kind_ok = policy
+        .inline_right_kinds
+        .iter()
+        .any(|k| k == g.name(right.kind()));
+    kind_ok
+        && roles::outer(node).parent().is_none_or(|p| {
+            !g.has_tag(p.kind(), "binary-chain")
+                && !(g.has_tag(p.kind(), "conditional") && g.has_tag(p.kind(), "expression"))
+        })
+}
+
 fn node_kind(e: &SyntaxElement) -> Option<core_syntax::SyntaxKind> {
     e.as_node().map(|n| roles::un(n).kind())
 }
 
 /// The place from the roles around the chain and the policy.
-fn default_place(cx: &FormatCtx<'_>, policy: &BinaryPolicy, parent: Option<&SyntaxNode>) -> Place {
+fn default_place(
+    cx: &FormatCtx<'_>,
+    policy: &BinaryPolicy,
+    node: &SyntaxNode,
+    parent: Option<&SyntaxNode>,
+) -> Place {
     let g = cx.grammar;
     let Some(p) = parent else {
         return Place::Indented;
@@ -368,6 +464,10 @@ fn default_place(cx: &FormatCtx<'_>, policy: &BinaryPolicy, parent: Option<&Synt
     let kind = p.kind();
     if g.has_tag(kind, "binary-chain") && !policy.indent_nested {
         return Place::Flush;
+    }
+    if g.has_tag(kind, "binary-chain") && policy.open_kinds.iter().any(|k| k == g.name(node.kind()))
+    {
+        return Place::Open;
     }
     let assigned = ["assignment", "declaration", "key-value"]
         .iter()

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Differential test against an upstream tool. Usage: scripts/parity.sh [format|coverage|stability] <tool> | --pin <format tool> | --test
+# Differential test against an upstream tool. Usage: scripts/parity.sh [format|coverage|stability] <tool> | landing [<tool>...] | --pin <format tool> | --test
 # `--pin`: a format run that also prints the pins (hashes of Sudsy's output) of the `tool-wrong` entries, for the lead to paste;
+# `landing`: the landing check, `sudsy format` against the committed hashes of corpus files that equal the reference output (scripts/parity_landing.py; no reference tool);
 # `--test`: the runner's own tests (scripts/test_parity.py, no tool or build needed).
 # Lint mode runs the tool and `sudsy lint` on tests/parity/<tool>/ (or the rule fixtures) and compares
 # rule (mapped through docs/ai/parity/<tool>.yaml), line and column; format mode compares `sudsy format`
@@ -19,17 +20,22 @@ if [ "${1:-}" = --test ]; then test=1; shift; fi
 if [ "${1:-}" = --pin ]; then mode=format; extra=(--pin); shift; fi
 if [ "${1:-}" = format ]; then mode=format; shift; fi
 if [ "${1:-}" = stability ]; then mode=stability; shift; fi
+if [ "${1:-}" = landing ]; then mode=landing; shift; fi
 if [ "${1:-}" = coverage ]; then extra=(--coverage); shift; fi
 tool=${1:-}
+# The output goes to a log; the caller gets the verdict lines (scripts/lib/failsum.sh on a failure, the
+# summary without the per-file lines on a pass) and the log's path.
+. scripts/lib/failsum.sh
+plog=$tdir/parity/${PARITY_LOG:-last}.log; mkdir -p "$tdir/parity"
 py=
 for candidate in python3 python; do
   if "$candidate" -c 'import sys' >/dev/null 2>&1; then py=$candidate; break; fi
 done
 [ -n "$py" ] || { echo "parity.sh: python 3 is required" >&2; exit 2; }
 if [ -z "$test" ]; then
-  "$py" -c 'import json,sys; sys.exit(sys.argv[2] not in json.load(open("scripts/parity_tools.json"))[sys.argv[1]])' "$mode" "$tool" ||
+  [ $mode = landing ] || "$py" -c 'import json,sys; sys.exit(sys.argv[2] not in json.load(open("scripts/parity_tools.json"))[sys.argv[1]])' "$mode" "$tool" ||
     { echo "usage: scripts/parity.sh [format|stability] <$("$py" -c 'import json,sys; print("|".join(json.load(open("scripts/parity_tools.json"))[sys.argv[1]]))' "$mode")>" >&2; exit 2; }
-  cargo build --quiet -p cli
+  cargo build --quiet -p cli >"$plog" 2>&1 || { echo "parity.sh: cargo build failed"; fail_summary "$plog"; exit 1; }
   sudsy=$tdir/debug/sudsy; [ -x "$sudsy" ] || sudsy=$sudsy.exe
 fi
 # The comparison needs PyYAML (the lint catalogs, the differences.yaml of both modes).
@@ -40,5 +46,13 @@ if [ ! -d "$venv" ]; then
   "$vpy" -m pip install --quiet pyyaml
 fi
 py="$venv/bin/python"; [ -x "$py" ] || py="$venv/Scripts/python.exe"
-[ -z "$test" ] || exec "$py" scripts/test_parity.py
-exec "$py" "scripts/parity_$mode.py" "$tool" "$sudsy" "$tdir" "${extra[@]}"
+if [ -n "$test" ]; then cmd=("$py" scripts/test_parity.py); elif [ $mode = landing ]; then cmd=("$py" scripts/parity_landing.py "$sudsy" "$tdir" "$@"); else cmd=("$py" "scripts/parity_$mode.py" "$tool" "$sudsy" "$tdir" "${extra[@]}"); fi
+if "${cmd[@]}" >"$plog" 2>&1; then rc=0; else rc=$?; fi
+if [ $rc -ne 0 ]; then echo "parity.sh: exit $rc"; fail_summary "$plog"; exit $rc; fi
+# A pass: the per-file lines go, a long rest is cut to its start and its end.
+sed -E 's/\x1b\[[0-9;]*m//g' "$plog" | grep -vE ': (ok|known difference|rejected by the tool)' | awk '
+  { l[NR] = $0 } END { if (NR <= 16) { for (i = 1; i <= NR; i++) print l[i]; exit }
+    for (i = 1; i <= 10; i++) print l[i]
+    print "... (" NR - 13 " lines cut; full log: '"$plog"')"
+    for (i = NR - 2; i <= NR; i++) print l[i] }'
+exit 0

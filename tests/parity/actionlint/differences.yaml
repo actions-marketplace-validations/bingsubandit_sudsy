@@ -1,32 +1,79 @@
 differences:
-  script-line: gap  a script rule is reported at the line of the text of a block scalar; actionlint reports it at the line of the `|`
-  needs-location: gap  an unknown `needs` entry is reported at the entry; actionlint reports it at the job
-  action-files: gap  the corpus feeds composite actions (`.github/actions/*/action.yaml`) to actionlint as workflows (13 structure findings); Sudsy lints workflows only
-  self-hosted-labels: gap  a job with `self-hosted` is not checked for custom runner labels; actionlint wants them in its config
+  script-line: "gap  a script rule is reported at the line of the text inside a block scalar, actionlint at the line of the `|` (also its expression findings in a `run: |` block)"
+  self-hosted-labels: "gap  a job with `self-hosted` is not checked for custom runner labels; actionlint wants them in its config and reports the others as unknown"
+  undefined-alias-aborts: "gap  an undefined alias makes actionlint stop at \"could not parse as YAML\" (line 0) and report nothing else; Sudsy reports the alias and the unused anchor each at their line"
+  duplicate-entry-dropped: "gap  actionlint drops a duplicated key or job before checking it; Sudsy still checks the second entry (steps missing, an unknown output property)"
+  false-report: "gap  Sudsy reports what actionlint does not: `container: null` as an empty string, `options` on an input without `type` (docs/ai/bugs.md)"
+  glob-check: "gap  a filter glob with a leading or trailing space in a `|` scalar and an unterminated `[` in a version are not checked"
+  expression-checker: "gap  the expression checker lacks: contexts of the workflow `name`, expressions in env var names and credentials, `if: true` literals, matrix values of an `include`-only matrix, the outputs of known actions"
+  event-checks: "gap  more than 25 workflow_dispatch inputs, and an activity type given through a YAML anchor (`types: &created [created]`) are not checked"
+  empty-document: "gap  an empty file is not reported (\"workflow is empty\")"
+  expression-valued-keys: "gap  a key that must be an expression or a literal is not checked: `required: yes`, a `required` text, `env: &anchor` with a scalar, `matrix: $text`"
+  section-values: "gap  Sudsy lacks these structure messages: a null `steps:` is missing, an empty list item or `versions: ['']`, `snapshot` or `labels` of the wrong kind, an alias as a step, an anchored empty `with`, `permissions: \"\"`"
 files:
   deprecated-commands/cases actionlint:deprecated-commands 5: script-line
   deprecated-commands/cases sudsy:deprecated-commands 6: script-line
+  duplicate-ids/cases sudsy:workflow-syntax 11: duplicate-entry-dropped
+  invalid-expression/cases actionlint:expression-context 1: expression-checker
+  invalid-runs-on/cases actionlint:invalid-runs-on 7: self-hosted-labels
+  invalid-runs-on/cases actionlint:workflow-syntax 23: section-values
   script-injection/cases actionlint:script-injection 5: script-line
   script-injection/cases sudsy:script-injection 6: script-line
   script-injection/cases sudsy:script-injection 7: script-line
+  corpus/actionlint/testdata/err/assign_expression.yaml actionlint:workflow-syntax 11: expression-valued-keys
+  corpus/actionlint/testdata/err/empty.yaml actionlint:workflow-syntax 1: empty-document
+  corpus/actionlint/testdata/err/empty_sequence_or_string.yaml sudsy:invalid-event 5: false-report
+  corpus/actionlint/testdata/err/errors_in_anchor.yaml actionlint:invalid-event 4: event-checks
+  corpus/actionlint/testdata/err/errors_in_anchor.yaml actionlint:workflow-syntax 28: section-values
+  corpus/actionlint/testdata/err/expr_check_in_credentials.yaml actionlint:expression-types 22: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_credentials.yaml actionlint:expression-types 46: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-context 4: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-context 14: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-types 12: expression-checker
+  corpus/actionlint/testdata/err/expr_check_in_env_var_name.yaml actionlint:expression-types 14: expression-checker
   corpus/actionlint/testdata/err/github_script_untrusted_input.yaml actionlint:script-injection 11: script-line
   corpus/actionlint/testdata/err/github_script_untrusted_input.yaml sudsy:script-injection 16: script-line
-  unknown-needs/cases actionlint:unknown-needs 7: needs-location
-  unknown-needs/cases sudsy:unknown-needs 8: needs-location
-  corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml actionlint:unknown-needs 8: needs-location
-  corpus/actionlint/testdata/examples/invalid_ids_in_needs.yaml sudsy:unknown-needs 9: needs-location
-  invalid-runs-on/cases actionlint:invalid-runs-on 7: self-hosted-labels
-target: 85.2
+  corpus/actionlint/testdata/err/glob_more.yaml actionlint:invalid-glob 20: glob-check
+  corpus/actionlint/testdata/err/glob_more.yaml actionlint:invalid-glob 34: glob-check
+  corpus/actionlint/testdata/err/glob_more.yaml actionlint:workflow-syntax 14: section-values
+  corpus/actionlint/testdata/err/if_cond_constants.yaml actionlint:if-condition 31: expression-checker
+  corpus/actionlint/testdata/err/invalid_image_version_event.yaml actionlint:workflow-syntax 6: section-values
+  corpus/actionlint/testdata/err/invalid_snapshot.yaml actionlint:workflow-syntax 20: section-values
+  corpus/actionlint/testdata/err/invalid_steps.yaml actionlint:workflow-syntax 18: section-values
+  corpus/actionlint/testdata/err/issue170_empty_permissions.yaml actionlint:invalid-permissions 12: section-values
+  corpus/actionlint/testdata/err/issue280_runs_on.yaml actionlint:workflow-syntax 71: section-values
+  corpus/actionlint/testdata/err/outputs_of_action_skipping_inputs_check.yaml actionlint:expression-types 16: expression-checker
+  corpus/actionlint/testdata/err/recursive_anchors.yaml actionlint:workflow-syntax 15: section-values
+  corpus/actionlint/testdata/err/undefined_anchor.yaml actionlint:no-undefined-alias 0: undefined-alias-aborts
+  corpus/actionlint/testdata/err/undefined_anchor.yaml sudsy:no-undefined-alias 8: undefined-alias-aborts
+  corpus/actionlint/testdata/err/undefined_anchor.yaml sudsy:no-undefined-alias 14: undefined-alias-aborts
+  corpus/actionlint/testdata/err/undefined_anchor.yaml sudsy:no-unused-anchors 10: undefined-alias-aborts
+  corpus/actionlint/testdata/err/unused_anchors.yaml actionlint:workflow-syntax 24: expression-valued-keys
+  corpus/actionlint/testdata/err/workflow_call_event.yaml actionlint:workflow-syntax 16: expression-valued-keys
+  corpus/actionlint/testdata/err/workflow_call_outputs_syntax.yaml sudsy:expression-types 18: duplicate-entry-dropped
+  corpus/actionlint/testdata/err/workflow_dispatch_more_than_25_inputs.yaml actionlint:invalid-event 3: event-checks
+  corpus/actionlint/testdata/examples/contextual_matrix_values.yaml actionlint:expression-types 34: expression-checker
+  corpus/actionlint/testdata/examples/dangling_alias.yaml actionlint:no-undefined-alias 0: undefined-alias-aborts
+  corpus/actionlint/testdata/examples/dangling_alias.yaml sudsy:no-undefined-alias 9: undefined-alias-aborts
+  corpus/actionlint/testdata/examples/not_persistent_matrix_values.yaml actionlint:expression-types 22: expression-checker
+  corpus/actionlint/testdata/examples/popular_action_outputs.yaml actionlint:expression-types 18: expression-checker
+  corpus/actionlint/testdata/examples/yaml_anchor_usage.yaml actionlint:workflow-syntax 18: expression-valued-keys
+  corpus/actionlint/testdata/ok/container_syntax.yaml sudsy:workflow-syntax 11: false-report
+  corpus/starter-workflows/code-scanning/codeql.yml actionlint:workflow-syntax 45: expression-valued-keys
+  corpus/starter-workflows/deployments/google-cloudrun-docker.yml actionlint:expression-types 93: script-line
+  corpus/starter-workflows/deployments/google-cloudrun-docker.yml sudsy:expression-types 95: script-line
+  corpus/starter-workflows/deployments/google-cloudrun-source.yml actionlint:expression-types 74: script-line
+  corpus/starter-workflows/deployments/google-cloudrun-source.yml sudsy:expression-types 75: script-line
+target: 87.0
 fixes:  # lint rule -> where and what to change
   syntax-check: "rows in crates/lang-github-actions/src/shape.rs (core_rules::shape): missing messages are one-off sections (snapshot, environment string forms), typed defaults, anchors"
   expression/types: "no expression parser with types yet: needs a shared expression language (parse, types of contexts and functions)"
   expression/context: "which contexts a key allows: a table per key path read by the same expression checker"
-  action/outdated-runner: "a table of popular actions whose major version runs on a retired runner (data read by shared Rust)"
   syntax-check/yaml: "anchors and aliases: unused anchor, recursive alias, merge key; a YAML-level check, shared with other YAML dialects"
   glob: "filter patterns of branches, tags and paths: a glob syntax check in a shared crate"
   if-cond: "an `if:` that is always true: needs the expression parser"
   events/inputs: "a typed default of a workflow_dispatch or workflow_call input: a shared check over type, default and options keys"
-measured: {covered: 614, total: 721, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 627, total: 721, main: 'cbdd3e85'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   expression/types: 14
   action: 12
@@ -37,18 +84,15 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   syntax-check/expression-value: 6
   syntax-check/missing-key: 6
   expression/untrusted: 4
-  permissions: 4
   shell-name: 4
-  syntax-check: 4
-  events: 3
   if-cond: 3
-  syntax-check/duplicate-key: 3
   syntax-check/kind: 3
   env-var: 2
   expression/context: 2
   expression/syntax: 2
   glob: 2
   syntax-check/undefined-alias: 2
+  events: 1
   events/inputs: 1
   job-needs/duplicate: 1
-  job-needs/unknown: 1
+  permissions: 1

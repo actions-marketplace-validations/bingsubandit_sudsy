@@ -78,22 +78,30 @@ pub static SPEC: Spec = Spec {
 /// Puts the indents of the flat blocks (`blocks`) and of the hanging statements (`hanging`) on
 /// the points.
 pub fn add_indents(seq: &mut Seq, blocks: bool, hanging: bool) {
-    let toks: Vec<Tok> = seq
-        .blocks
+    // Comments are no words of a statement: a comment in front of one does not hide its start.
+    let code: Vec<usize> = (0..seq.blocks.len())
+        .filter(|&i| !seq.is_comment(i))
+        .collect();
+    let toks: Vec<Tok> = code
         .iter()
-        .map(|b| Tok {
-            text: &b.text,
-            keyword: b.kind == k::KEYWORD,
-            separator: matches!(b.kind, k::SEMICOLON | k::COLON),
-            name: match b.kind {
-                k::DOT => NameKind::Dot,
-                k::IDENTIFIER | k::WORD | k::QUOTED_IDENTIFIER => NameKind::Part,
-                _ => NameKind::None,
-            },
+        .map(|&i| {
+            let b = &seq.blocks[i];
+            Tok {
+                text: &b.text,
+                keyword: b.kind == k::KEYWORD,
+                separator: matches!(b.kind, k::SEMICOLON | k::COLON),
+                name: match b.kind {
+                    k::DOT => NameKind::Dot,
+                    k::IDENTIFIER | k::WORD | k::QUOTED_IDENTIFIER => NameKind::Part,
+                    _ => NameKind::None,
+                },
+            }
         })
         .collect();
     let found = points(&toks, &SPEC, blocks, hanging);
     for (at, meta) in found {
+        // A point past the last word is the end of the file.
+        let at = code.get(at).copied().unwrap_or(seq.points.len());
         if let Some(point) = seq.points.get_mut(at) {
             point.metas.push(meta);
         }

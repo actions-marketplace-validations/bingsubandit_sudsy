@@ -6,6 +6,10 @@
   "publisher": "sudsy",
   "icon": "icon.png",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bingsubandit/sudsy"
+  },
   "private": true,
   "engines": {
     "vscode": "^1.90.0"
@@ -20,9 +24,9 @@
     "HTML",
     "C",
     "C++",
+    "CMake",
     "Dockerfile",
-    "EditorConfig",
-    "Gitignore",
+    "Go",
     "GraphQL",
     "HCL",
     "INI",
@@ -57,9 +61,11 @@
     "onLanguage:svelte",
     "onLanguage:c",
     "onLanguage:cpp",
+    "onLanguage:cmake",
     "onLanguage:dockerfile",
     "onLanguage:editorconfig",
     "onLanguage:ignore",
+    "onLanguage:go",
     "onLanguage:graphql",
     "onLanguage:terraform",
     "onLanguage:hcl",
@@ -163,7 +169,7 @@
     "build": "npm run prepare-schema && node scripts/build.mjs",
     "test": "tsc -p tsconfig.test.json && node --test \"out/test/*.test.js\"",
     "stage-server": "node scripts/stage-server.mjs",
-    "package": "npm run build && vsce package --no-dependencies --allow-missing-repository"
+    "package": "npm run build && vsce package --no-dependencies"
   },
   "dependencies": {
     "vscode-languageclient": "^11.0.0"

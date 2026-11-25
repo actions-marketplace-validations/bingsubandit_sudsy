@@ -508,6 +508,7 @@ dependencies = [
  "core-syntax",
  "lang-css",
  "lang-dockerfile",
+ "lang-go",
  "lang-hcl",
  "lang-html",
  "lang-js",
@@ -1662,6 +1663,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "lang-cmake"
+version = "0.0.3"
+dependencies = [
+ "core-config",
+ "core-format",
+ "core-rules",
+ "core-syntax",
+ "provider-api",
+]
+
+[[package]]
 name = "lang-cpp"
 version = "0.0.3"
 dependencies = [
@@ -1757,6 +1769,21 @@ dependencies = [
  "insta",
  "konomanoasa-tree-sitter-gitignore",
  "provider-api",
+]
+
+[[package]]
+name = "lang-go"
+version = "0.0.3"
+dependencies = [
+ "core-config",
+ "core-format",
+ "core-packs",
+ "core-rules",
+ "core-syntax",
+ "core-treesitter",
+ "insta",
+ "provider-api",
+ "tree-sitter-go",
 ]
 
 [[package]]
@@ -2083,6 +2110,7 @@ dependencies = [
  "core-plugins",
  "core-rules",
  "core-workspace",
+ "lang-cmake",
  "lang-cpp",
  "lang-csharp",
  "lang-css",
@@ -2090,6 +2118,7 @@ dependencies = [
  "lang-editorconfig",
  "lang-github-actions",
  "lang-gitignore",
+ "lang-go",
  "lang-graphql",
  "lang-hcl",
  "lang-html",
@@ -2754,6 +2783,7 @@ dependencies = [
  "konomanoasa-tree-sitter-gitignore",
  "tree-sitter-bash",
  "tree-sitter-containerfile",
+ "tree-sitter-go",
  "tree-sitter-graphql",
  "tree-sitter-hcl",
  "tree-sitter-ini",
@@ -4061,6 +4091,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tree-sitter-go"
+version = "0.25.0"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
 name = "tree-sitter-graphql"
 version = "0.3.0"
 dependencies = [
@@ -4849,6 +4887,7 @@ dependencies = [
  "core-config",
  "core-rules",
  "core-syntax",
+ "insta",
  "languages",
  "provider-api",
  "serde",

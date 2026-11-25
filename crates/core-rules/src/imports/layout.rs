@@ -1,7 +1,7 @@
 //! Writing a sorted list of import statements back into the source: every statement keeps the
 //! comments on the lines above it and after it, the blank lines between statements go (an order
 //! may ask for one between groups), and `#if` regions stay as they are behind the sorted
-//! statements. A list with another preprocessor directive is left alone.
+//! statements. A list with another preprocessor directive between its statements is left alone.
 //!
 //! concept: sorted-imports
 //! what: Import statements ordered by group, name and case, with blank lines between groups.
@@ -10,7 +10,7 @@
 
 use super::entry::{self, Entry, item, starts_run};
 use super::order::Order;
-use crate::tree::{code_start, entry_range, significant_range};
+use crate::tree::{code_start, entry_range};
 use core_syntax::{Grammar, SyntaxNode, TextRange};
 
 /// How one list is written: `#if` regions stay verbatim behind the sorted statements.
@@ -34,7 +34,7 @@ struct Scan {
 }
 
 /// Walks the lines of `source[from..to]`, counting `#if` nesting. `None` for another directive
-/// or an `#endif` without `#if`.
+/// (not in front of the first statement, `first`) or an `#endif` without `#if`.
 fn scan(source: &str, from: usize, to: usize, state: &mut Scan, first: bool) -> Option<()> {
     let mut at = from;
     for line in source[from..to].split_inclusive('\n') {
@@ -50,7 +50,7 @@ fn scan(source: &str, from: usize, to: usize, state: &mut Scan, first: bool) -> 
                 state.consumed = at + line.trim_end().len();
                 state.regions.push((state.start, state.consumed));
             }
-        } else if t.starts_with('#') && !t.starts_with("#el") {
+        } else if t.starts_with('#') && !t.starts_with("#el") && !first {
             return None;
         }
         at += line.len();
@@ -62,10 +62,7 @@ fn scan(source: &str, from: usize, to: usize, state: &mut Scan, first: bool) -> 
 fn plan(entries: &[Entry], source: &str, g: &Grammar) -> Option<Plan> {
     let first = entries.first()?;
     let last = entries.last()?;
-    let mut span = TextRange::new(
-        significant_range(&first.node, g).start(),
-        entry_range(&last.node, g).end(),
-    );
+    let mut span = TextRange::new(code_start(&first.node, g), entry_range(&last.node, g).end());
     let mut st = Scan::default();
     let (mut in_region, mut lead_from) = (Vec::new(), Vec::new());
     let mut span_start = usize::from(span.start());
@@ -97,6 +94,9 @@ fn plan(entries: &[Entry], source: &str, g: &Grammar) -> Option<Plan> {
         scan(source, end, to, &mut st, false)?;
         end = st.consumed.max(to);
     }
+    // A region in front of the first statement (`#if DEBUG` / `#define`) is no part of the list.
+    let first_code = usize::from(code_start(&first.node, g));
+    st.regions.retain(|&(_, to)| to > first_code);
     span = TextRange::new(span_start.try_into().ok()?, end.try_into().ok()?);
     (st.depth == 0).then_some(Plan {
         span,

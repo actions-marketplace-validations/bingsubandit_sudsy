@@ -76,6 +76,13 @@ fn a_script_line_that_starts_with_a_bracket_after_a_continuation_parses() {
 }
 
 #[test]
+fn a_hash_after_text_is_not_a_comment() {
+    // `fmt` refuses a tree with an error node, and the `FROM` after the `#` must stay an instruction
+    let input = "FROM a\nADD ${R}#${V} /\nARG X=${V#linux/amd64}\nFROM b\n";
+    assert_eq!(fmt(input), input);
+}
+
+#[test]
 fn heredocs_are_kept() {
     let out = fmt("RUN <<EOF\nset -e\n  echo x  \n\nEOF\nCOPY <<-A /a\n\tbody\nA\nCMD x\n");
     assert_eq!(

@@ -1,4 +1,17 @@
 ratchet:
   fixtures: 5
+  real-world: 3188
 target-files:
   fixtures: 5
+  real-world: 3212
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
+differences:
+  number-array-fill: gap  Biome fills an array of numbers, many to a line up to the width; Sudsy puts one number on each line
+  comment-before-comma: gap  Biome puts a block comment after a value in front of the comma (`true /* c */,`); Sudsy writes it after the comma
+  lockfile-ignored: gap  Biome leaves package-lock.json as it is (a default ignore); Sudsy formats it
+files:
+  real-world: number-array-fill:12, lockfile-ignored:9, comment-before-comma:3
+unclassified: 0

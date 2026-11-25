@@ -40,6 +40,12 @@ pub fn resolve<'a>(
             let m = (p.file_matchers().iter()).find(|m| match &m.pattern {
                 FilePattern::Extension(e) if plain => e.eq_ignore_ascii_case(name),
                 FilePattern::InDirectory { .. } if plain => false,
+                FilePattern::Except { pattern, .. }
+                    if plain
+                        && matches!(&**pattern, FilePattern::Extension(e) if !e.eq_ignore_ascii_case(name)) =>
+                {
+                    false
+                }
                 FilePattern::FileName(n) if plain && !n.contains('/') => {
                     match n.strip_suffix('*') {
                         Some(prefix) => name.starts_with(prefix) || file.starts_with(prefix),

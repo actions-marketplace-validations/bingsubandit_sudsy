@@ -22,7 +22,7 @@ impl P<'_> {
             "while" => self.while_stmt(),
             "begin" => return self.begin_stmt(),
             "exec" | "execute" => self.exec_stmt(),
-            "print" | "return" | "throw" => self.keyword_expr(),
+            "print" | "return" | "throw" | "lineno" => self.keyword_expr(),
             "waitfor" => {
                 self.bump_as(k::KEYWORD);
                 self.eat_any(&["delay", "time"]);
@@ -30,14 +30,25 @@ impl P<'_> {
             }
             "raiserror" => self.raiserror(),
             "go" | "break" | "continue" => self.bump_as(k::KEYWORD),
+            "use" if self.starts_name(1) => {
+                self.bump_as(k::KEYWORD);
+                self.obj_ref();
+            }
             "create" | "alter" if self.routine_ahead() => self.routine(),
+            // `sp_configure 'x', 1`: a procedure called without `EXEC`.
+            _ if matches!(self.t(1), Some(T::Str | T::Number | T::Var))
+                && self.is_t(0, T::Word)
+                && !self.keyword_like(0) =>
+            {
+                self.exec_body()
+            }
             _ => return false,
         }
         true
     }
 
     /// `PRINT expr`, `RETURN expr`, `THROW a, b, c`.
-    fn keyword_expr(&mut self) {
+    pub(super) fn keyword_expr(&mut self) {
         self.bump_as(k::KEYWORD);
         if self.expression() {
             while self.is_t(0, T::Comma) {
@@ -118,6 +129,12 @@ impl P<'_> {
             }
             return;
         }
+        self.indented(false, |p| {
+            p.declare_items();
+        });
+    }
+
+    fn declare_items(&mut self) {
         self.list(|p| {
             if !p.is_t(0, T::Var) {
                 return false;
@@ -126,12 +143,14 @@ impl P<'_> {
             p.eat("as");
             if p.at("table") {
                 p.bump_as(k::KEYWORD);
-                p.generic_bracket_run();
+                p.generic_columns_bracket();
             } else {
                 p.type_name();
             }
             if p.at_op("=") {
+                let m = p.mark();
                 p.bump();
+                p.close(k::COMPARISON_OPERATOR, m);
                 p.expression();
             }
             true
@@ -149,7 +168,9 @@ impl P<'_> {
         self.bump();
         if self.is_t(0, T::Op) {
             // `+=`, `=`: an assignment.
+            let m = self.mark();
             self.bump();
+            self.close(k::COMPARISON_OPERATOR, m);
         }
         self.expression();
         self.dedent();
@@ -161,17 +182,24 @@ impl P<'_> {
             p.expression();
         });
         self.indented(false, |p| p.nested_statement());
+        // `IF c BEGIN .. END; ELSE ..`: the `;` before `ELSE` ends nothing.
+        if self.is_t(0, T::Semi) && self.is(1, "else") {
+            self.bump();
+        }
         if self.at("else") {
             self.bump_as(k::KEYWORD);
-            self.indented(false, |p| p.nested_statement());
+            // `ELSE IF`: the chained `IF` is the clause itself, not a body one level in.
+            if self.at("if") {
+                self.nested_statement();
+            } else {
+                self.indented(false, |p| p.nested_statement());
+            }
         }
     }
 
     fn while_stmt(&mut self) {
         self.bump_as(k::KEYWORD);
-        self.indented(true, |p| {
-            p.expression();
-        });
+        self.expression();
         self.indented(false, |p| p.nested_statement());
     }
 
@@ -199,7 +227,7 @@ impl P<'_> {
     }
 
     pub fn at_statement_start(&self) -> bool {
-        self.is_t(0, T::Word) && super::stmt::TSQL_STARTS.iter().any(|w| self.at(w))
+        self.at_list("tsql_starts")
     }
 
     /// `BEGIN TRY`, `BEGIN CATCH`, `BEGIN TRAN`, `BEGIN ... END`; false for a transaction.
@@ -219,6 +247,13 @@ impl P<'_> {
         let which = self.text(0).to_ascii_lowercase();
         if sub {
             self.bump_as(k::KEYWORD);
+        }
+        if self.at("atomic") {
+            // `BEGIN ATOMIC WITH (options)`: the options belong to the opening line.
+            self.bump_as(k::KEYWORD);
+            if self.eat("with") {
+                self.generic_bracket_run();
+            }
         }
         self.indent();
         self.block_body();
@@ -253,6 +288,10 @@ impl P<'_> {
 
     fn exec_stmt(&mut self) {
         self.bump_as(k::KEYWORD);
+        self.exec_body();
+    }
+
+    fn exec_body(&mut self) {
         if self.is_t(0, T::Var) && self.is_op(1, "=") {
             self.bump();
             self.bump();
@@ -328,11 +367,15 @@ impl P<'_> {
     fn routine(&mut self) {
         let m = self.mark();
         let mut function = false;
-        while !self.eof() && !self.is_t(0, T::Semi) && !self.at("as") {
+        let mut indented = false;
+        while !self.eof() && !self.is_t(0, T::Semi) && !self.at_any(&["as", "begin"]) {
             if self.is_t(0, T::Var) {
-                self.indent();
                 self.list(|p| p.parameter());
-                self.dedent();
+            } else if self.at("execute") && self.is(1, "as") {
+                (0..2).for_each(|_| self.bump_as(k::KEYWORD));
+                if self.is_t(0, T::Word) {
+                    self.bump_as(k::KEYWORD);
+                }
             } else if self.is_t(0, T::LParen) {
                 let signature = self.mark();
                 self.bracketed(|p| {
@@ -346,6 +389,10 @@ impl P<'_> {
                 self.bump_as(k::KEYWORD);
                 if self.starts_name(0) {
                     self.routine_name();
+                }
+                indented = !function;
+                if indented {
+                    self.indent();
                 }
             } else if self.at("returns") {
                 self.bump_as(k::KEYWORD);
@@ -369,6 +416,9 @@ impl P<'_> {
             } else {
                 self.bump();
             }
+        }
+        if indented {
+            self.dedent();
         }
         self.eat("as");
         while !self.eof() && !self.at("go") && !self.is_t(0, T::Semi) {

@@ -207,6 +207,7 @@ impl P<'_> {
 
     fn operand(&mut self, c: &mut Chain) -> bool {
         match self.t(0) {
+            Some(T::Var) if self.starts_name(0) && self.is_t(1, T::Dot) => self.name_or_call(c),
             Some(T::Number | T::Str | T::Var) => {
                 let string = self.is_t(0, T::Str);
                 self.bump();
@@ -354,6 +355,7 @@ impl P<'_> {
             |i| {
                 self.is_t(i, T::Op)
                     || self.is_t(i, T::Cast)
+                    || self.is_t(i, T::Dot)
                     || (self.is_t(i, T::Word) && self.at_op_word(i))
             },
         )
@@ -388,7 +390,7 @@ impl P<'_> {
                 self.bump_as(k::KEYWORD);
                 self.obj_ref();
                 if self.at("over") {
-                    self.over_clause();
+                    self.over_clause(false);
                 }
                 c.lone = false;
                 return true;
@@ -406,7 +408,12 @@ impl P<'_> {
                 if matches!(self.t(1), Some(T::Str | T::Number))
                     || ((self.is_op(1, "-") || self.is_op(1, "+")) && self.is_t(2, T::Number)) =>
             {
-                self.bump_as(k::KEYWORD);
+                let typed = self.d == super::Dialect::Postgres && self.is_t(1, T::Str);
+                self.bump_as(if typed {
+                    k::TYPE_IDENTIFIER
+                } else {
+                    k::KEYWORD
+                });
                 if self.is_t(0, T::Op) {
                     self.bump();
                 }
@@ -514,24 +521,14 @@ impl P<'_> {
                 self.bump_as(if self.is_t(0, T::Quoted) {
                     k::QUOTED_IDENTIFIER
                 } else {
-                    k::IDENTIFIER
+                    k::WORD
                 });
                 self.bump();
             } else {
                 // Keywords of T-SQL that take a bracket.
                 let keyword = self.d == super::Dialect::Tsql
                     && self.pos == nm_start
-                    && [
-                        "CONVERT",
-                        "TRY_CONVERT",
-                        "REPLICATE",
-                        "ISJSON",
-                        "OPENJSON",
-                        "JSON_ARRAYAGG",
-                        "JSON_OBJECT",
-                    ]
-                    .iter()
-                    .any(|w| self.at(w));
+                    && self.at_list("bracket_keywords");
                 self.bump_as(if keyword {
                     k::KEYWORD
                 } else {
@@ -565,12 +562,14 @@ impl P<'_> {
     /// `FILTER (...)`, `WITHIN GROUP (...)`, `OVER ...`.
     fn function_tail(&mut self) {
         if self.at_any(&["ignore", "respect"]) && self.is(1, "nulls") {
-            self.over_clause();
+            self.over_clause(false);
             return;
         }
+        let mut flush = false;
         while self.at("filter") && self.is_t(1, T::LParen)
             || (self.at("within") && self.is(1, "group"))
         {
+            flush |= self.at("within");
             self.bump_as(k::KEYWORD);
             self.eat("group");
             self.bracketed(|p| {
@@ -583,13 +582,16 @@ impl P<'_> {
             });
         }
         if self.at("over") {
-            self.over_clause();
+            self.over_clause(flush);
         }
     }
 
-    fn over_clause(&mut self) {
+    /// `flush`: the clause stays at the indent of the call (after `WITHIN GROUP`).
+    fn over_clause(&mut self, flush: bool) {
         let m = self.mark();
-        self.indent();
+        if !flush {
+            self.indent();
+        }
         if self.at_any(&["ignore", "respect"]) {
             self.bump_as(k::KEYWORD);
             self.eat("nulls");
@@ -600,7 +602,9 @@ impl P<'_> {
         } else {
             self.eat_name();
         }
-        self.dedent();
+        if !flush {
+            self.dedent();
+        }
         self.close(k::OVER_CLAUSE, m);
     }
 
@@ -774,7 +778,14 @@ impl P<'_> {
         loop {
             if self.is_t(0, T::Cast) {
                 self.bump();
-                if !self.type_name() {
+                // T-SQL `geometry::Parse(x)`: a static method, not a type.
+                if self.d == super::Dialect::Tsql
+                    && self.is_t(0, T::Word)
+                    && self.is_t(1, T::LParen)
+                    && !super::types::is_type_word(self.text(0))
+                {
+                    self.function(c);
+                } else if !self.type_name() {
                     self.chain(true);
                 }
                 c.lone = false;
@@ -784,7 +795,13 @@ impl P<'_> {
             } else if self.is_t(0, T::Dot) && self.pos > 0 && self.kinds[self.pos - 1] == k::R_PAREN
             {
                 self.bump();
-                if self.is_t(0, T::Word) || self.is_t(0, T::Quoted) {
+                if self.d == super::Dialect::Tsql
+                    && self.is_t(0, T::Word)
+                    && self.is_t(1, T::LParen)
+                {
+                    // `(subquery).value(..)`, `x.query(..).query(..)`: a method of the xml type.
+                    self.function(c);
+                } else if self.is_t(0, T::Word) || self.is_t(0, T::Quoted) {
                     self.eat_name();
                 } else if self.at_op("*") {
                     self.bump();

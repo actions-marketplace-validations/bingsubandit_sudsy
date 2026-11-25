@@ -54,6 +54,15 @@ impl NodeFormatter for HtmlFormatter {
     ) -> Result<Option<Doc>, FormatError> {
         HTML.format_node(node, cx)
     }
+
+    fn extra_check_with(
+        &self,
+        before: &SyntaxNode,
+        after: &SyntaxNode,
+        options: &core_config::ResolvedOptions,
+    ) -> Result<(), String> {
+        HTML.extra_check_with(before, after, options)
+    }
 }
 
 /// Blanks collapsed.
@@ -114,6 +123,32 @@ fn in_script_or_style(text: &core_syntax::SyntaxToken) -> bool {
 }
 
 impl NodeFormatter for MarkupFormatter {
+    /// `dialect: template-open`, in a file that has actions: the start and end tags are the same
+    /// before and after, token by token (the generic check skips `EndTag`, which a formatter may add where the source
+    /// leaves an element open, and a template block may close that element elsewhere).
+    fn extra_check_with(
+        &self,
+        before: &SyntaxNode,
+        after: &SyntaxNode,
+        options: &core_config::ResolvedOptions,
+    ) -> Result<(), String> {
+        if !options.is(core_config::opt::DIALECT, "template-open")
+            || !crate::go_template::ACTIONS.occurs_in(&before.text().to_string())
+        {
+            return Ok(());
+        }
+        core_format::safety::same_tags(
+            before,
+            after,
+            &core_format::safety::TagKinds {
+                start: &[k::START_TAG],
+                end: &[k::END_TAG, k::STRAY_END_TAG],
+                name: k::TAG_NAME,
+                ignore_case: true,
+            },
+        )
+    }
+
     /// What the formatter rewrites: tag names and the doctype in lowercase, the quotes of an
     /// attribute value, the blanks of a text, the form of the tag's closing `>`.
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
@@ -309,12 +344,25 @@ impl NodeFormatter for MarkupFormatter {
                 width: cx.options.int(core_config::opt::LINE_WIDTH) as usize,
                 tab: cx.options.int(core_config::opt::INDENT_SIZE) as usize,
                 bracket_same_line: bracket_same_line(cx.options),
-                single_attribute_per_line: single_attribute_per_line(cx.options),
+                tags: core_format::tag_layout::TagLayout::of(cx.options),
+                template_actions: cx
+                    .options
+                    .text(core_config::opt::DIALECT)
+                    .starts_with("template"),
+                keep_ends: match (
+                    cx.options.is(core_config::opt::DIALECT, "template-open"),
+                    crate::go_template::ACTIONS.occurs_in(&src),
+                ) {
+                    (false, _) => print::KeepEnds::No,
+                    (true, false) => print::KeepEnds::AtEof,
+                    (true, true) => print::KeepEnds::All,
+                },
                 expression_mode: core_format::EmbedMode::expression_of(cx.options),
                 content_lines: core_format::content_lines::ContentLines::of(
                     cx.options,
                     model::INLINE,
                 ),
+                indent_comment_lines: cx.options.flag(INDENT_COMMENT_LINES, false),
             },
         )))
     }

@@ -32,21 +32,12 @@ impl std::ops::DerefMut for Lexer<'_> {
 
 impl Lexer<'_> {
     fn next(&mut self) {
+        if self.blank(k::WHITESPACE, k::NEWLINE, |c| c == b' ' || c == b'\t') {
+            return;
+        }
         let start = self.pos;
         let c = self.peek().expect("not at the end");
         match c {
-            ' ' | '\t' => {
-                self.eat_while(|c| c == ' ' || c == '\t');
-                self.emit(k::WHITESPACE, start);
-            }
-            '\n' | '\r' => {
-                self.pos += if self.src[start..].starts_with("\r\n") {
-                    2
-                } else {
-                    1
-                };
-                self.emit(k::NEWLINE, start);
-            }
             '{' | '}' | '[' | ']' | ':' | ',' => {
                 self.pos += 1;
                 self.emit(
@@ -63,7 +54,7 @@ impl Lexer<'_> {
             }
             '"' => self.string(),
             '/' if self.peek_at(1) == Some('/') => {
-                self.eat_while(|c| c != '\n' && c != '\r');
+                self.eat_line();
                 self.emit(k::LINE_COMMENT, start);
                 self.comment_error(start);
             }

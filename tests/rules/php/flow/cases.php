@@ -35,3 +35,12 @@ function h($x) {
             m();
     }
 }
+function nested_break() {
+    while (true) { while (true) { break; } }
+    g();
+//  ^^^^ unreachable-code
+}
+function outer_break() {
+    while (true) { while (true) { break 2; } }
+    g();
+}

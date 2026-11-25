@@ -18,7 +18,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 8 | YAML | flow sequences without a trailing comma (13 files), comment indentation (15); `comments-indentation` 2 after the proof run |
 | 9 | Kotlin | layout rules come from the formatter (`format-diff`, `multiline-start`); misses: `string-template-indent`, `annotation`, `no-consecutive-comments`, `function-literal`, `multiline-loop`, `blank-line-between-when-conditions` (264 of 989), `filename` (single-class check) |
 | 10 | SQL | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126; 189 parse gaps and 189 layout gaps |
-| 11 | PHP | type analysis (`class.notFound` 7,407, `variable.undefined` 591); inline-text files (~790) |
+| 11 | PHP | type analysis (with the corpus dependencies installed: `class.notFound` 254 and `method.notFound` 94 of 1,098 PHPStan findings, `method.void` 42, `variable.undefined` 20, the rest of `new.static` 43 and `return.missing` 22 need other files; the classification is in [design/symbol-index.md](design/symbol-index.md#phase-1-result)); inline-text files (~790) |
 | 12 | Ruby | no formatter run |
 | 13 | GraphQL | `naming-convention` 80 of 149 missed, `description-style` 11, `require-deprecation-reason` 10; the schema-bound rules cannot run |
 | 14 | Terraform (HCL) | module-level rules: `terraform_required_providers` 37, `unused_declarations` 31, `typed_variables` 27 |
@@ -30,17 +30,19 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 | 20 | Vue | `vue-js-layout` 183 files; `vue/attributes-order` 81 |
 | 21 | Svelte | `svelte-attributes` 139 files; second-format not measured |
 | 22 | Protobuf | at the bar; `RPC_REQUEST_RESPONSE_UNIQUE` 117 (cross-file) |
-| 23 | CSS / SCSS / Less | CSS at the bar; SCSS `scss/` plugin rules (`dollar-variable-colon-space-after` 857, `no-global-function-names` 289) have no rules; Less `declaration-property-value-no-unknown` 806, `import-notation` 424; SCSS layout and comments |
+| 23 | CSS / SCSS / Less | CSS at the bar; SCSS `scss/` plugin rules (`dollar-variable-colon-space-after` 857, `no-global-function-names` 289) have no rules; Less `declaration-property-value-no-unknown` 806; SCSS layout and comments |
 | 24 | TOML | at the bar; second-format not measured |
 | 25 | JavaScript / TypeScript | at the bar; Prettier options of the projects (168 files) |
 | 26 | Python | at the bar; `RUF100` 83 |
+| 27 | Go | lint only (gofmt formats): revive's 22 default rules are mapped to shared rules in batches, `exported` 15,691, `unused-parameter` 14,178, `var-naming` 10,923 first; needs types: `var-declaration`, `unexported-return`, `context-keys-type`, `time-naming`, `errorf` |
 
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP, JSON, YAML, XML, PowerShell, Markdown and the lint shares of JSON, YAML, GraphQL, StyleCop, PSScriptAnalyzer, SCSS and Less; recorded and not re-run: the C# format share (the corpus differential needs the CSharpier baseline) and the other lint shares.
 
 ## Small tasks
+- Lint known-difference runs still open (counts of the last runs): ruff 148 mismatches (classified in the audit: SIM114 and UP046 report at another line than ours, UP031 right-hand sides, B018 operator expressions), psscriptanalyzer 50, shellcheck 15, typescript-eslint 6, stylelint 2.
 - Family rule documents of off-by-default rules are read in full at registration (PowerShell `scope.yaml` and `missing-mandatory-parameter.yaml` cost github-actions.lint-query about +120 allocations in a workflow with a PowerShell script): measure and load them lazily.
 - Speed row of StyleCop (`scripts/speed.sh stylecop`, the analyzer driver over the C# corpus; the run did not finish in 40 minutes on the agent host, so `bench/speed.json` still says not measured).
-- Input encoding support: a source in another encoding (the sqlfluff corpus file `collate.windows.win1252.sql`, Windows-1252) is read as UTF-8 only, so sudsy rejects it; gap `non-utf8-input` in `tests/parity/sqlfluff/differences.yaml` (201 layout findings count as missing).
+- sqlfluff AL04 (`duplicate-table-alias`: a subquery's table alias against the enclosing select's, reported at the outer table; 10 findings missed): a `unique-names` option `outer` covered all 10 but cost sql.lint +39% instructions (a check per container, walking the select) and +24% with a first-container prefix walk and a green-tree probe; a cheaper bound is not found. Needs a per-scope memo (one pass per select) before it can land.
 - `shape::leaves()` and `expr::findings` clone one `String` per key of the walked path: a borrowed path type would cut github-actions.lint allocs (+6.1% over the base before the expression step).
 - Python paren strip onto shared ParenPolicy/ParenHooks (for_target, await, one-item tuple arms).
 - Move JS layout functions (assign poorly_breakable, chain member, binary flush, ternary should_extra_indent, TS union/should_hug, parameter patterns) onto core-format shapes (unification).

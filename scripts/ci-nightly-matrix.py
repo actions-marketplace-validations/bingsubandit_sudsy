@@ -14,6 +14,8 @@ for mode in ("format", "lint", "stability"):  # the other sections (speed-only t
     for tool in modes[mode]:
         cmd = f"scripts/parity.sh {mode + ' ' if mode != 'lint' else ''}{tool}"
         include.append({"name": f"parity-{mode}-{tool}", "cmd": cmd})
+        if mode == "lint":  # the coverage run is the ratchet of the target and of the missed findings
+            include.append({"name": f"parity-coverage-{tool}", "cmd": f"scripts/parity.sh coverage {tool}"})
 for crate in sorted((root / "crates").glob("lang-*")):
     files = [*crate.glob("tests/*.rs"), *crate.glob("src/**/*.rs")]
     if any("#[ignore" in l and not skip.search(l) for f in files for l in f.read_text().splitlines()):

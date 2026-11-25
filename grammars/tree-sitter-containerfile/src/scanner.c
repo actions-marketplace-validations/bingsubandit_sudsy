@@ -22,6 +22,8 @@ typedef struct {
     bool directive_allowed;
     bool escape_seen;
     bool at_line_start;
+    // The last token start seen (not a `#`) was a blank: a `#` after other text is not a comment.
+    bool after_blank;
     int32_t escape_char;
     unsigned heredoc_count;
     char *heredocs[MAX_HEREDOCS];
@@ -596,6 +598,10 @@ static bool scan_comment(scanner_state *state, TSLexer *lexer) {
     if (lexer->lookahead != '#') {
         return false;
     }
+    // `${A}#${B}`: a `#` that abuts text is part of it (a comment starts a line or follows a blank).
+    if (!state->after_blank && lexer->get_column(lexer) != 0) {
+        return false;
+    }
 
     bool may_be_directive = (state->directive_allowed &&
                              state->at_line_start &&
@@ -837,6 +843,10 @@ static bool scan_content(scanner_state *state, TSLexer *lexer,
 bool tree_sitter_containerfile_external_scanner_scan(void *payload, TSLexer *lexer,
                                                   const bool *valid_symbols) {
     scanner_state *state = payload;
+    if (lexer->lookahead != '#') {
+        state->after_blank = lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
+                             lexer->lookahead == '\r' || lexer->lookahead == '\f';
+    }
 
     if (valid_symbols[ERROR_SENTINEL] && state->in_heredoc) {
         return scan_content(state, lexer, valid_symbols);

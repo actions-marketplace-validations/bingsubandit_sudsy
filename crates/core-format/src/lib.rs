@@ -12,6 +12,7 @@
 
 pub mod adjacent;
 mod align;
+pub mod ancestry;
 pub mod blank;
 pub mod block_frames;
 pub mod calls;
@@ -25,14 +26,17 @@ pub mod doc;
 pub mod embed;
 mod error;
 pub mod frames;
+pub mod generated;
 mod header_break;
 pub mod ignore;
+pub mod join;
 mod layout;
 mod lines;
 pub mod literals;
 mod placement;
 pub mod printer;
 mod relay;
+pub mod requote;
 pub mod rewrite;
 pub mod rules;
 pub mod safety;
@@ -40,7 +44,9 @@ pub mod seq;
 pub mod shapes;
 pub mod spacing;
 pub mod tabs;
+pub mod tag_layout;
 pub mod testing;
+pub mod verbatim;
 
 pub use context::{DefaultFormatter, EmbedMode, Embedder, FormatCtx, NodeFormatter, Variants};
 pub use directives::{DIRECTIVES_VERSION, Directive, DirectiveConflict, DirectiveTable, NodeKey};
@@ -48,6 +54,7 @@ pub use doc::Doc;
 pub use error::FormatError;
 pub use placement::{comment_lines, comment_lines_max};
 pub use printer::PrintOptions;
+pub use verbatim::VerbatimFormatter;
 
 use core_config::ResolvedOptions;
 use core_syntax::SyntaxNode;

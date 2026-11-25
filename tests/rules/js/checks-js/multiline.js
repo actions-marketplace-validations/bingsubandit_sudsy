@@ -1,3 +1,3 @@
 const a = b
-//         ^ no-unexpected-multiline
-(c || d).e();
+  (c || d).e();
+//^ no-unexpected-multiline

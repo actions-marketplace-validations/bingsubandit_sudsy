@@ -1,6 +1,9 @@
 # Chromium's C++ style as clang-format's Chromium style: Google's with one parameter per line and short inline functions.
 cpp:
   format:
+    join_closing_angles: true
+    empty_body_own_line: true
+    collapse_empty_blocks: true
     access_modifier_outdent: 1
     align_escaped_newlines: left
     short_functions: inline

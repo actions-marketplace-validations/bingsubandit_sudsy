@@ -22,7 +22,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::shared::final_newline(true),
         shared::end_of_line(),
         core_config::OptionDef::choice(core_config::opt::EMBEDDED_LANGUAGE_FORMATTING, &["auto", "off"], "auto", "Format the code of a fenced block with the formatter of the language its info string names (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way."),
-        core_config::OptionDef::words(core_config::opt::KEEP_TOGETHER_KINDS, &["LinkDef", "Html"], "Block kinds of which two in a row with no blank line between them in the source stay without one."),
+        core_config::OptionDef::words(core_config::opt::KEEP_TOGETHER_KINDS, &["LinkDef", "Html", "Inline>Html"], "Block kinds of which two in a row with no blank line between them in the source stay without one; `A>B` is a block of kind B right after one of kind A (an HTML block after a paragraph)."),
         ])
         .with_presets(vec![
         core_config::Preset::new("markdown/prettier-compat", include_str!("../presets/prettier-compat.yaml")),

@@ -5,7 +5,7 @@
 //!   `seed <path> <crate>...`       per changed path, the crates it selects directly
 //!   `full <reason>`                why everything is selected (only then)
 //!   `crates <name>...`             the crates to lint and test, or `crates all`
-//!   `steps <step>...`              codegen, sample-plugin, vscode, worker:<dir of workers/>
+//!   `steps <step>...`              codegen, landing, sample-plugin, vscode, worker:<dir of workers/>
 //!   `bench <folder> <crates|*>`    a `bench/inputs` folder to measure and the crates it measures
 //!                                  (comma-separated: the language's and those its inputs embed)
 //!
@@ -37,6 +37,14 @@ const FULL: &[&str] = &[
     "scripts/slot-run.sh",
     "scripts/bench.sh",
     "scripts/bench-measure.sh",
+];
+/// Shared crates whose change selects the landing check (formatting and lint code), besides every language crate.
+const LANDING: &[&str] = &[
+    "core-format",
+    "core-syntax",
+    "core-rules",
+    "core-patterns",
+    "core-flow",
 ];
 /// Read by no test or benchmark (unless a crate claims a path in them).
 const NO_CHECK: &[&str] = &[
@@ -170,7 +178,7 @@ pub fn select(ws: &Workspace, changed: &[String]) -> Affected {
     }
     if out.full.is_some() {
         out.crates = ws.crates.iter().map(|c| c.name.clone()).collect();
-        out.steps = ["codegen", "sample-plugin", "vscode"]
+        out.steps = ["codegen", "landing", "sample-plugin", "vscode"]
             .map(String::from)
             .into();
         out.steps
@@ -195,6 +203,13 @@ pub fn select(ws: &Workspace, changed: &[String]) -> Affected {
         .collect();
     if !changed.is_empty() {
         out.steps.insert("codegen".into());
+    }
+    // The landing check (scripts/parity_landing.py) formats and lints corpus files: any formatting or lint code can change them.
+    if set
+        .iter()
+        .any(|c| LANDING.contains(&c.as_str()) || c.starts_with("lang-"))
+    {
+        out.steps.insert("landing".into());
     }
     if out.crates.contains("plugin-sdk") {
         out.steps.insert("sample-plugin".into());
@@ -597,8 +612,21 @@ mod tests {
         assert_eq!(bench, ["json", "startup"]);
         assert_eq!(
             print(&a),
-            "seed crates/lang-json/src/lib.rs lang-json\ncrates cli core-rules lang-json languages perf-bench\nsteps codegen\nbench json lang-json\nbench startup *\n"
+            "seed crates/lang-json/src/lib.rs lang-json\ncrates cli core-rules lang-json languages perf-bench\nsteps codegen landing\nbench json lang-json\nbench startup *\n"
         );
+    }
+
+    #[test]
+    fn formatting_and_lint_code_select_the_landing_check() {
+        for (path, landing) in [
+            ("crates/core-syntax/src/a.rs", true),
+            ("crates/core-rules/src/a.rs", true),
+            ("crates/lang-shell/src/a.rs", true),
+            ("crates/cli/src/main.rs", false),
+            ("docs/ai/roadmap.md", false),
+        ] {
+            assert_eq!(sel(&[path]).steps.contains("landing"), landing, "{path}");
+        }
     }
 
     #[test]

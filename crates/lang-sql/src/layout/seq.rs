@@ -65,6 +65,8 @@ pub struct Seq {
     pub gaps: Vec<super::space::Gap>,
     /// The rows `gaps` come from.
     pub rules: &'static core_format::spacing::SpaceRules,
+    /// The token of every block.
+    pub tokens: Vec<SyntaxToken>,
 }
 
 pub fn is_comment(kind: SyntaxKind) -> bool {
@@ -83,6 +85,7 @@ impl Seq {
             nodes: Vec::new(),
             gaps: Vec::new(),
             rules,
+            tokens: Vec::new(),
         };
         let mut point = Point::default();
         let mut stack: Vec<(u32, Option<SyntaxElement>)> = Vec::new();
@@ -144,6 +147,7 @@ impl Seq {
             }
         }
         seq.gaps = super::space::gaps(&seq.rules.gaps(&tokens));
+        seq.tokens = tokens;
         seq
     }
 

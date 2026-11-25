@@ -99,6 +99,15 @@ fn dialect_constructs_parse() {
         "SELECT 'a' 'b', 'c' AS 'd';",
         "DECLARE @x XML (dbo.SomeSchemaCollection);",
         "SELECT * FROM Sales.Customer TABLESAMPLE SYSTEM (10 PERCENT);",
+        "FETCH NEXT FROM c INTO @a\nBEGIN\nSELECT 1\nEND\n",
+        "SET ANSI_NULLS ON\nGO\nBEGIN\nSELECT 1\nEND\n",
+        "IF 1 = 1 BEGIN SELECT 1 END; ELSE BEGIN SELECT 2 END",
+        "SELECT x.n.value('a', 'b'), @x.value('a', 'b'), #t.c, f(m.definition) FROM @x.nodes('/a') AS x(n);",
+        "SELECT ((SELECT 1 FOR XML PATH('')).value('.', 'x')), y.query('.').query('z');",
+        "WITH XMLNAMESPACES (DEFAULT 'u') SELECT 1;",
+        "SELECT * FROM sys.t (NOLOCK) AS a;",
+        "INSERT INTO @t (a, precision) VALUES (geometry::Parse(@c));",
+        "SELECT\u{a0}1;",
     ];
     for text in tsql {
         check(text, "tsql");
@@ -108,6 +117,7 @@ fn dialect_constructs_parse() {
         "ALTER TABLE t CHANGE COLUMN a b INT(11) NULL;",
         "SELECT DATE_ADD(CURDATE(), INTERVAL -30 DAY), @@global.time_zone;",
         "REPLACE tbl VALUE (1, 2), (11, 22);",
+        "SELECT 1;\ndelimiter d//\nSELECT 2 d//\ndelimiter ;\n",
     ] {
         check(text, "mysql");
     }

@@ -12,7 +12,7 @@ use super::options::{
 use crate::generated::kind as k;
 use core_format::doc::{self, Doc};
 use core_format::seq::{children, el, first, last};
-use core_format::shapes::paren_group;
+use core_format::shapes::{self, paren_group};
 use core_format::{FormatCtx, FormatError};
 use core_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -23,6 +23,8 @@ pub type R = Result<Doc, FormatError>;
 pub enum Sep {
     None,
     Space,
+    /// A space, or a line break when the group around it breaks (the parts of a `for` header).
+    Line,
     Hard,
     /// A hard line break, one indentation level deeper.
     HardIndented,
@@ -224,6 +226,9 @@ fn separator_raw(
             && cx.grammar.has_tag(nk, "statement")
             && !(pk == k::ELSE_CLAUSE && nk == k::IF_STATEMENT)
         {
+            if core_format::seq::stacked_flush(cx, parent, n) {
+                return Sep::Hard;
+            }
             return Sep::Embedded;
         }
         if matches!(nk, k::ELSE_CLAUSE | k::CATCH_CLAUSE | k::FINALLY_CLAUSE) {
@@ -232,6 +237,9 @@ fn separator_raw(
             } else {
                 Sep::Hard
             };
+        }
+        if shapes::hangs(cx, nk) {
+            return Sep::None; // starts with a `line` of its own
         }
         if nk == k::TYPE_PARAMETER_CONSTRAINT_CLAUSE {
             return Sep::HardIndented;
@@ -258,6 +266,9 @@ fn separator_raw(
         } else {
             Sep::Hard
         };
+    }
+    if core_format::seq::own_line_declarator(cx, parent, prev) {
+        return Sep::HardIndented;
     }
     if pk == k::DO_STATEMENT
         && matches!(next, SyntaxElement::Token(t) if t.kind() == k::WHILE_KEYWORD)
@@ -290,6 +301,11 @@ fn separator_raw(
     {
         return Sep::Space;
     }
+    if pk == k::FOR_STATEMENT
+        && core_format::shapes::for_header_breaks(&children(cx, parent), prev, next, FOR_TOKENS)
+    {
+        return Sep::Line;
+    }
     match (last(cx, prev), first(cx, next)) {
         (Some(a), Some(b)) => {
             if super::spaced(&a, &b) {
@@ -306,6 +322,7 @@ pub fn sep_doc(cx: &FormatCtx<'_>, sep: Sep) -> Doc {
     match sep {
         Sep::None => Doc::Nil,
         Sep::Space => doc::lit(" "),
+        Sep::Line => doc::line(),
         Sep::Hard | Sep::Embedded => doc::hardline(),
         Sep::HardIndented => doc::indent(doc::hardline()),
         Sep::Brace(element) => {
@@ -318,23 +335,18 @@ pub fn sep_doc(cx: &FormatCtx<'_>, sep: Sep) -> Doc {
     }
 }
 
-/// Statements whose parenthesized condition may break after `(` and before `)`.
-fn has_paren_condition(kind: SyntaxKind) -> bool {
-    matches!(
-        kind,
-        k::IF_STATEMENT
-            | k::WHILE_STATEMENT
-            | k::DO_STATEMENT
-            | k::LOCK_STATEMENT
-            | k::SWITCH_STATEMENT
-    )
-}
+const FOR_TOKENS: core_format::shapes::ForTokens = core_format::shapes::ForTokens {
+    open: k::OPEN_PAREN_TOKEN,
+    semi: k::SEMICOLON_TOKEN,
+    close: k::CLOSE_PAREN_TOKEN,
+};
 
 /// `label:` moved out by `label_indent`, then the labeled statement on the next line.
 pub fn labeled_statement(cx: &FormatCtx<'_>, node: &SyntaxNode) -> R {
     let style = core_format::shapes::LabelStyle {
         body_on_next_line: true,
         outdent: label_outdent(cx.options),
+        keep_blank: cx.options.flag(core_config::opt::LABEL_BLANK_LINE, false),
     };
     core_format::shapes::labeled_statement(cx, node, style, &|els| seq_of(cx, node, els))
         .or_else(|_| seq(cx, node))
@@ -359,7 +371,9 @@ pub fn seq_of(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R
             return Ok(doc::concat(vec![lead, seq_of(cx, node, &els[n..])?]));
         }
     }
-    let paren_condition = has_paren_condition(pk);
+    let paren_condition = cx
+        .options
+        .list_has(core_config::opt::PAREN_CONDITION_KINDS, cx.grammar.name(pk));
     let mut parts = Vec::with_capacity(els.len() * 2);
     let mut i = 0;
     while i < els.len() {
@@ -390,6 +404,9 @@ pub fn seq_of(cx: &FormatCtx<'_>, node: &SyntaxNode, els: &[SyntaxElement]) -> R
                 els[i..].iter().position(
                     |x| matches!(x, SyntaxElement::Token(t) if t.kind() == k::CLOSE_PAREN_TOKEN),
                 )
+            }
+            _ if pk == k::FOR_STATEMENT => {
+                core_format::shapes::for_header_close(els, i, FOR_TOKENS)
             }
             _ => None,
         };

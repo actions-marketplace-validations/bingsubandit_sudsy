@@ -11,6 +11,8 @@ function f() {
 f.apply(undefined, b);
 ^^^^^^^^^^^^^^^^^^^^^ prefer-spread
 f.apply(null, [1]);
+o[m].apply(o, b);
+^^^^^^^^^^^^^^^^ prefer-spread
 function g() {
   let d;
   d = 1;

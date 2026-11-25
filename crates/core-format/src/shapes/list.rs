@@ -1,7 +1,7 @@
 //! concept: delimited-list
 //! what: Delimited lists flat or one item per line with trailing comma and magic-comma policy.
 //! tools: Prettier arrays objects and parameters, ruff magic trailing comma, google-java-format lists
-//! reads: tag:delimited-list
+//! reads: tag:delimited-list, option:initializer_expand
 
 use super::{
     BlankRule, container, container_between, dangling_comments, gap, render_slots,
@@ -168,6 +168,66 @@ impl<'a> From<&'a ListStyle> for StyleOf<'a> {
     fn from(s: &'a ListStyle) -> Self {
         StyleOf::Given(s)
     }
+}
+
+/// The kinds of the items that crowd an initializer (`initializer_expand: crowded`).
+pub struct Crowded {
+    /// Member assignments (`A = 1`, `{ k, v }`).
+    pub assignments: &'static [SyntaxKind],
+    /// A list of these kinds whose first item is a list of its own kind is crowded.
+    pub nested: &'static [SyntaxKind],
+    /// Creations that carry an initializer, the kind of that initializer, and the kind of the
+    /// assignment whose last child may be such a creation.
+    pub creations: &'static [SyntaxKind],
+    pub initializer: SyntaxKind,
+    pub assignment: SyntaxKind,
+}
+
+/// `initializer_expand: crowded`: a nested list, three or more member assignments, or two or
+/// more items one of which creates an object with an initializer: the list breaks one item per
+/// line even where it fits.
+pub fn crowded(cx: &FormatCtx<'_>, node: &SyntaxNode, c: &Crowded) -> bool {
+    if !cx
+        .options
+        .is(core_config::opt::INITIALIZER_EXPAND, "crowded")
+    {
+        return false;
+    }
+    let items: Vec<SyntaxNode> = node
+        .children()
+        .filter(|i| !cx.grammar.is_trivia(i.kind()))
+        .collect();
+    fn creates(n: &SyntaxNode, c: &Crowded) -> bool {
+        if c.creations.contains(&n.kind()) {
+            n.children().any(|i| i.kind() == c.initializer)
+        } else {
+            n.kind() == c.assignment && n.children().last().is_some_and(|i| creates(&i, c))
+        }
+    }
+    (c.nested.contains(&node.kind()) && items.first().is_some_and(|i| i.kind() == node.kind()))
+        || (items.len() >= 3 && items.iter().all(|i| c.assignments.contains(&i.kind())))
+        || (items.len() >= 2 && items.iter().any(|i| creates(i, c)))
+}
+
+/// `new T(...) { ... }` with `initializer_group: creation`: the whole is one group, so the
+/// initializer breaks with the type and arguments.
+pub fn creation_group(cx: &FormatCtx<'_>, creation: Doc) -> Doc {
+    if cx
+        .options
+        .is(core_config::opt::INITIALIZER_GROUP, "creation")
+    {
+        doc::group(creation)
+    } else {
+        creation
+    }
+}
+
+/// Is the list `node` the initializer of one of the `creations`, in the group of `creation_group`
+/// (it has none of its own)?
+pub fn in_creation_group(cx: &FormatCtx<'_>, node: &SyntaxNode, creations: &[SyntaxKind]) -> bool {
+    cx.options
+        .is(core_config::opt::INITIALIZER_GROUP, "creation")
+        && node.parent().is_some_and(|p| creations.contains(&p.kind()))
 }
 
 /// `open item, item, item close` in a group; the node's directives `BreakAll` and `KeepTogether`
@@ -414,6 +474,12 @@ fn list_of(
                 style.force_blank,
                 style.blank_breaks,
             );
+            // (an empty item, as in `A<,>`, follows its separator directly)
+            let between = if !items[i].hole && items[i].last.text_range().is_empty() {
+                Doc::Nil
+            } else {
+                between
+            };
             if fill {
                 fill_parts.push(doc::concat(std::mem::take(&mut inner)));
                 fill_parts.push(between);
@@ -480,7 +546,18 @@ fn list_of(
     let inner = doc::concat(lead);
     let mut body_parts = Vec::new();
     if style.leading_line {
-        body_parts.push(doc::line());
+        // (a line comment ends the line before it)
+        let mut before = c.open.prev_token();
+        while let Some(t) = before.as_ref().filter(|t| cx.grammar.is_trivia(t.kind())) {
+            before = t.prev_token();
+        }
+        body_parts.push(
+            if before.is_some_and(|t| super::ends_in_line_comment(cx, &t)) {
+                doc::hardline()
+            } else {
+                doc::line()
+            },
+        );
     }
     let close_pad = if style.hug_close && dangling.is_empty() {
         Doc::Nil

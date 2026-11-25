@@ -8,12 +8,13 @@
 //! reads: rulefiles:pattern
 
 use crate::matcher::{Capture, Captures, Pattern, SnippetParser};
-use crate::metavar::Meta;
+use crate::metavar::{Meta, captured, template};
+use core_rules::doc_comments::{holder, leading_doc_text};
 use core_rules::tree::TraversalCache;
 use core_rules::{Check, Opt, OptionDecl, Re, RegexCache, RuleOptions};
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
 use serde::Deserialize;
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -68,6 +69,8 @@ pub struct Spec {
     /// The text of the node matches the `regex` option of this name.
     #[serde(rename = "regex-option")]
     pub regex_option: Option<String>,
+    /// The doc comment (`/** */`) before the node matches this regex.
+    pub doc: Option<String>,
     pub all: Option<Vec<Spec>>,
     pub any: Option<Vec<Spec>>,
     pub not: Option<Box<Spec>>,
@@ -113,6 +116,10 @@ pub struct Ctx<'a> {
     pub budget: Cell<u32>,
     /// Shared with the other rules run on the same node.
     pub ranges: &'a TraversalCache,
+    /// What the atoms before this one in an `all` captured: the names a `regex` with `${NAME}`
+    /// reads, also inside `inside`, `has` and `child`.
+    /// Only for a rule with a `regex` that has `${NAME}`.
+    pub env: Option<RefCell<Captures>>,
 }
 
 impl Ctx<'_> {
@@ -133,6 +140,9 @@ pub enum Expr {
     Kind(SyntaxKind),
     /// With the names of its capture groups.
     Regex(Re, Vec<String>),
+    /// A `regex` with `${NAME}` (captures of the atoms before it, escaped), built for each match.
+    RegexTemplate(String, RegexCache),
+    Doc(Re),
     Path(Re),
     Nth(usize),
     Inside(Box<Expr>),
@@ -258,10 +268,18 @@ impl Expr {
             // Every text matches: no regex to build (`fields: { x: { regex: '' } }` asks only that
             // the slot is there).
             all.push(Expr::All(Vec::new()));
+        } else if let Some(text) = spec.regex.as_ref().filter(|t| t.contains("${")) {
+            Re::new(&template(text, |_| "x".into())).map_err(|e| format!("regex `{text}`: {e}"))?;
+            all.push(Expr::RegexTemplate(text.clone(), RegexCache::default()));
         } else if let Some(text) = &spec.regex {
             let re = Re::new(text).map_err(|e| format!("regex `{text}`: {e}"))?;
             let groups = re.groups();
             all.push(Expr::Regex(re, groups));
+        }
+        if let Some(text) = &spec.doc {
+            all.push(Expr::Doc(
+                Re::new(text).map_err(|e| format!("doc regex `{text}`: {e}"))?,
+            ));
         }
         if let Some(text) = &spec.path {
             all.push(Expr::Path(
@@ -274,6 +292,10 @@ impl Expr {
             }
             all.push(Expr::Nth(n));
         }
+        // the direct parent is one step: tried before the searches over ancestors and descendants
+        if let Some(s) = &spec.parent {
+            all.push(Expr::Parent(Box::new(sub(s)?)));
+        }
         if let Some(s) = &spec.inside {
             all.push(Expr::Inside(Box::new(sub(s)?)));
         }
@@ -285,9 +307,6 @@ impl Expr {
         }
         if let Some(s) = &spec.not_has {
             all.push(Expr::Not(Box::new(Expr::Has(Box::new(sub(s)?)))));
-        }
-        if let Some(s) = &spec.parent {
-            all.push(Expr::Parent(Box::new(sub(s)?)));
         }
         if let Some(s) = &spec.child {
             all.push(Expr::Child(Box::new(sub(s)?)));
@@ -415,6 +434,18 @@ impl Expr {
                 let spans = re.groups_in(text, ascii)?;
                 Some(Capture::groups(groups, spans, range.start()).collect())
             }
+            Expr::RegexTemplate(source, cache) => {
+                let range = cx.ranges.significant_range(node, cx.grammar);
+                let env = cx.env.as_ref()?.borrow();
+                let resolved = template(source, |m| regex::escape(&captured(m, &env, cx.text)));
+                cache
+                    .is_match(&resolved, &cx.text[range])
+                    .then(Captures::new)
+            }
+            Expr::Doc(re) => {
+                let doc = leading_doc_text(&holder(cx.grammar, node), cx.grammar, &[])?;
+                re.is_match(&doc).then(Captures::new)
+            }
             Expr::Path(re) => {
                 let path = cx.path.to_string_lossy().replace('\\', "/");
                 re.is_match(&path).then(Captures::new)
@@ -489,6 +520,11 @@ impl Expr {
                 let mut captures = Captures::new();
                 for e in list {
                     for (name, capture) in e.matches(node, cx)? {
+                        if let Some(env) = &cx.env {
+                            env.borrow_mut()
+                                .entry(name.clone())
+                                .or_insert_with(|| capture.clone());
+                        }
                         captures.entry(name).or_insert(capture);
                     }
                 }
@@ -568,6 +604,22 @@ impl Expr {
         }
     }
 
+    /// Is there a `regex` with `${NAME}` anywhere in this?
+    pub fn templated(&self) -> bool {
+        match self {
+            Expr::RegexTemplate(..) => true,
+            Expr::Inside(e)
+            | Expr::Has(e)
+            | Expr::Not(e)
+            | Expr::Parent(e)
+            | Expr::Child(e)
+            | Expr::Inner(e) => e.templated(),
+            Expr::All(list) | Expr::Any(list) => list.iter().any(Expr::templated),
+            Expr::Fields(list) | Expr::Items(list) => list.iter().any(|(_, e)| e.templated()),
+            _ => false,
+        }
+    }
+
     /// Can evaluating this cost more than linear in the node's size: a `$$$` run (all splits are
     /// tried) or an `inside`/`has` walk?
     pub fn superlinear(&self) -> bool {
@@ -579,6 +631,8 @@ impl Expr {
             Expr::Fields(list) | Expr::Items(list) => list.iter().any(|(_, e)| e.superlinear()),
             Expr::Kind(_)
             | Expr::Regex(..)
+            | Expr::RegexTemplate(..)
+            | Expr::Doc(_)
             | Expr::Path(_)
             | Expr::Nth(_)
             | Expr::ChildToken(_)
@@ -629,6 +683,8 @@ impl Expr {
             Expr::All(list) | Expr::Any(list) => list.iter().for_each(|e| e.metas(out)),
             Expr::Inside(e) | Expr::Parent(e) => e.metas(out),
             Expr::Kind(_)
+            | Expr::RegexTemplate(..)
+            | Expr::Doc(_)
             | Expr::Path(_)
             | Expr::Nth(_)
             | Expr::Option(_)

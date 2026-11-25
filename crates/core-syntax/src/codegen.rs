@@ -285,6 +285,14 @@ pub fn rust_module(g: &Grammar, grammar_path: &str) -> Result<String, CodegenErr
             d.kind.index()
         );
     }
+    // A language whose trivia tokens do not all fit has no mask; a parser on the kit needs one.
+    if (g.tokens().iter()).all(|d| !d.has_tag("trivia") || d.kind.index() < 64) {
+        let _ = writeln!(
+            out,
+            "    /// The trivia tokens as a bit set by token index (`core_syntax::kind::in_mask`).\n    pub const TRIVIA_MASK: u64 = {:#x};",
+            g.trivia_mask()
+        );
+    }
     out.push_str("}\n\n");
 
     // Kinds that never take part in matching a body, and the kinds behind every tag a body uses.

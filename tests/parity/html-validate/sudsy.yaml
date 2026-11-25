@@ -44,6 +44,7 @@ html:
       no-inline-style: warn
       no-missing-references: warn
       no-multiple-main: warn
+      no-ambiguous-ampersand: warn
       no-redundant-for: warn
       no-redundant-role: warn
       no-self-closing: warn

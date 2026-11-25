@@ -65,8 +65,8 @@ rebase() {
 }
 
 # HARD RULE review: when the change adds lines to a language crate, a fresh headless Claude session
-# (scripts/review-hard-rule.md, read-only tools) sorts each added function into fact, glue or
-# mechanism; a mechanism refuses the landing. Its output goes to .cargo/tmp/review.txt and, for the
+# (scripts/review-hard-rule.md, read-only tools) sorts each added item into OK or
+# MECHANISM; a mechanism refuses the landing. Its output goes to .cargo/tmp/review.txt and, for the
 # lead, to hard-rule-reviews.log in the common git dir. The verdict is kept per content (the commit
 # message and the diff without line numbers): the model is not deterministic on borderline items, so
 # the same change is never reviewed twice and a FAIL cannot be rerun into a PASS; a changed diff or

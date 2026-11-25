@@ -28,6 +28,7 @@ use crate::generated::kind as k;
 use core_config::ResolvedOptions;
 use core_format::comments::CommentStyle;
 use core_format::rules::LazyRules;
+use core_format::shapes::{self, HangPolicy};
 use core_format::{Doc, FormatCtx, FormatError, NodeFormatter, Variants};
 use core_syntax::{SyntaxNode, SyntaxToken, grammars};
 
@@ -37,6 +38,14 @@ static ROWS: LazyRules = LazyRules::new(
     || grammars::CSHARP.get(),
     include_str!("../../format.rules"),
 );
+
+/// The operand of a cast `(T)x` that stays on the line of the head.
+const CAST_HANG: HangPolicy = HangPolicy {
+    always: &[k::PARENTHESIZED_EXPRESSION],
+    plain: &[k::IDENTIFIER_NAME],
+    calls: &[k::INVOCATION_EXPRESSION],
+    except_head: &[k::GENERIC_NAME],
+};
 
 /// Does a blank stand between the two tokens?
 fn spaced(a: &SyntaxToken, b: &SyntaxToken) -> bool {
@@ -162,7 +171,14 @@ impl NodeFormatter for CSharpFormatter {
                     && single_child(
                         cx,
                         node,
-                        &[k::PREDEFINED_TYPE, k::IDENTIFIER_NAME, k::QUALIFIED_NAME],
+                        &[
+                            k::PREDEFINED_TYPE,
+                            k::IDENTIFIER_NAME,
+                            k::QUALIFIED_NAME,
+                            k::TUPLE_TYPE,
+                            k::ARRAY_TYPE,
+                            k::NULLABLE_TYPE,
+                        ],
                     ) =>
             {
                 lists::unbreakable_list(cx, node)?
@@ -176,9 +192,7 @@ impl NodeFormatter for CSharpFormatter {
             k::ANONYMOUS_OBJECT_CREATION_EXPRESSION | k::LIST_PATTERN => {
                 lists::list_with_surroundings(cx, node)?
             }
-            k::ARRAY_RANK_SPECIFIER
-            | k::IMPLICIT_ARRAY_CREATION_EXPRESSION
-            | k::IMPLICIT_STACK_ALLOC_ARRAY_CREATION_EXPRESSION => seq::seq(cx, node)?,
+            k::ARRAY_RANK_SPECIFIER => seq::seq(cx, node)?,
             k::EQUALS_VALUE_CLAUSE => chains::equals_value_clause(cx, node)?,
             k::ARROW_EXPRESSION_CLAUSE => chains::arrow_clause(cx, node)?,
             k::CONDITIONAL_EXPRESSION => chains::conditional(cx, node)?,
@@ -186,11 +200,19 @@ impl NodeFormatter for CSharpFormatter {
                 chains::switch_arm(cx, node)?
             }
             k::PARENTHESIZED_EXPRESSION => chains::parenthesized(cx, node)?,
+            k::WHEN_CLAUSE | k::CATCH_FILTER_CLAUSE => {
+                shapes::hanging_clause(cx, node, &|e| seq::seq_of(cx, node, e))?
+            }
+            k::CAST_EXPRESSION => {
+                shapes::hang_operand(cx, node, &CAST_HANG, &|e| seq::seq_of(cx, node, e))?
+            }
             k::QUERY_EXPRESSION => query::query_expression(cx, node)?,
             k::QUERY_BODY => query::query_body(cx, node)?,
             k::QUERY_CONTINUATION => query::query_continuation(cx, node)?,
             _ => {
-                if g.has_tag(kind, "binary-chain") {
+                if lists::CREATIONS.contains(&kind) {
+                    shapes::creation_group(cx, seq::seq(cx, node)?)
+                } else if g.has_tag(kind, "binary-chain") {
                     chains::binary_chain(cx, node)?
                 } else if g.has_tag(kind, "member-chain") {
                     chains::member_chain(cx, node)?

@@ -3,9 +3,11 @@
 //! is out of order (the `imports` family) and the fix that writes it back ([`layout`], used by the
 //! formatters too).
 //!
-//! The family has two ways of reporting, `report: misplaced` (every statement that is out of
-//! place, with the reason, and a fix that sorts the list) and `report: block` (one finding when
-//! the block differs from the way isort writes it: [`block`]). Params: `report`, `message`,
+//! The family has three ways of reporting, `report: misplaced` (every statement that is out of
+//! place, with the reason, and a fix that sorts the list), `report: block` (one finding when
+//! the block differs from the way isort writes it: [`block`]) and `report: outside-scope` (every
+//! import of the file's own scope in a file that also has a namespace-tagged declaration: the
+//! imports belong inside it, no fix, since moving one changes name lookup). Params: `report`, `message`,
 //! `roots` (the path roots that come first with option `system_first`), `fixed` (modifiers that
 //! keep a statement in place), `alias_by_name`. The options are the rule's own.
 //!
@@ -58,6 +60,7 @@ pub const fn family<L: ImportLang>() -> Family {
 enum Report {
     Misplaced,
     Block,
+    OutsideScope,
 }
 
 struct Imports<L> {
@@ -83,7 +86,11 @@ fn build<L: ImportLang>(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dy
         report: p.choice(
             "report",
             true,
-            &[("misplaced", Report::Misplaced), ("block", Report::Block)],
+            &[
+                ("misplaced", Report::Misplaced),
+                ("block", Report::Block),
+                ("outside-scope", Report::OutsideScope),
+            ],
         )?,
         message: p.optional("message").unwrap_or_default(),
         roots: param_words(p.optional("roots")),
@@ -96,6 +103,18 @@ fn build<L: ImportLang>(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dy
 }
 
 impl<L: ImportLang> Imports<L> {
+    fn outside_scope(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
+        let g = ctx.file.grammar;
+        let Some(parent) = node.parent() else { return };
+        if g.has_tag(parent.kind(), "namespace")
+            || !parent.children().any(|c| g.has_tag(c.kind(), "namespace"))
+        {
+            return;
+        }
+        let range = TextRange::new(code_start(node, g), significant_range(node, g).end());
+        ctx.report(range, self.message.clone());
+    }
+
     fn order(&self, ctx: &RuleContext<'_>) -> Order {
         let o = ctx.options;
         let compare = match o.string("compare") {
@@ -163,6 +182,10 @@ impl<L: ImportLang> Rule for Imports<L> {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let g = ctx.file.grammar;
+        if matches!(self.report, Report::OutsideScope) {
+            self.outside_scope(node, ctx);
+            return;
+        }
         let first = entry::item(node);
         if !entry::starts_run(&first, g) {
             return;
@@ -170,6 +193,7 @@ impl<L: ImportLang> Rule for Imports<L> {
         let run = entry::run(&first, g);
         match self.report {
             Report::Misplaced => self.misplaced(&run, ctx),
+            Report::OutsideScope => {}
             Report::Block => {
                 let sections: Vec<String> = match ctx.options.list("sections") {
                     s if s.is_empty() => SECTIONS.iter().map(|s| (*s).to_owned()).collect(),

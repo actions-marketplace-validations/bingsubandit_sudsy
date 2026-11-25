@@ -2,9 +2,27 @@
 #[allow(dead_code)]
 pub const TRAILING_COMMAS: core_config::OptId = core_config::opt::TRAILING_COMMAS;
 #[allow(dead_code)]
+pub const SKIP_GENERATED: core_config::OptId = core_config::opt::SKIP_GENERATED;
+#[allow(dead_code)]
+pub const GENERATED_NAMES: core_config::OptId = core_config::opt::GENERATED_NAMES;
+#[allow(dead_code)]
+pub const GENERATED_HEADER_MARKERS: core_config::OptId = core_config::opt::GENERATED_HEADER_MARKERS;
+#[allow(dead_code)]
+pub const GENERATED_HEADER_SKIP: core_config::OptId = core_config::opt::GENERATED_HEADER_SKIP;
+#[allow(dead_code)]
+pub const LABEL_BLANK_LINE: core_config::OptId = core_config::opt::LABEL_BLANK_LINE;
+#[allow(dead_code)]
+pub const MEMBER_CHAIN_STYLE: core_config::OptId = core_config::opt::MEMBER_CHAIN_STYLE;
+#[allow(dead_code)]
 pub const MEMBER_CHAIN_MIN_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_MIN_CALLS;
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_KEEP_ACCESSES: core_config::OptId = core_config::opt::MEMBER_CHAIN_KEEP_ACCESSES;
+#[allow(dead_code)]
+pub const MEMBER_CHAIN_FACTORY_HEADS: core_config::OptId = core_config::opt::MEMBER_CHAIN_FACTORY_HEADS;
+#[allow(dead_code)]
+pub const MEMBER_CHAIN_HUG_CALLS: core_config::OptId = core_config::opt::MEMBER_CHAIN_HUG_CALLS;
+#[allow(dead_code)]
+pub const MEMBER_CHAIN_INDENT_HEAD: core_config::OptId = core_config::opt::MEMBER_CHAIN_INDENT_HEAD;
 #[allow(dead_code)]
 pub const MEMBER_CHAIN_BREAK_ON_BLOCK: core_config::OptId = core_config::opt::MEMBER_CHAIN_BREAK_ON_BLOCK;
 #[allow(dead_code)]
@@ -18,11 +36,21 @@ pub const BINARY_INDENT: core_config::OptId = core_config::opt::BINARY_INDENT;
 #[allow(dead_code)]
 pub const BINARY_HUG: core_config::OptId = core_config::opt::BINARY_HUG;
 #[allow(dead_code)]
+pub const BINARY_GROUP_SINGLE: core_config::OptId = core_config::opt::BINARY_GROUP_SINGLE;
+#[allow(dead_code)]
+pub const BINARY_GROUP_MIXED_CHAINS: core_config::OptId = core_config::opt::BINARY_GROUP_MIXED_CHAINS;
+#[allow(dead_code)]
+pub const BINARY_INLINE_RIGHT_KINDS: core_config::OptId = core_config::opt::BINARY_INLINE_RIGHT_KINDS;
+#[allow(dead_code)]
+pub const BINARY_OPEN_KINDS: core_config::OptId = core_config::opt::BINARY_OPEN_KINDS;
+#[allow(dead_code)]
 pub const INDENT_NESTED_BINARY: core_config::OptId = core_config::opt::INDENT_NESTED_BINARY;
 #[allow(dead_code)]
 pub const ASSIGNMENT_LAYOUT: core_config::OptId = core_config::opt::ASSIGNMENT_LAYOUT;
 #[allow(dead_code)]
 pub const ASSIGNMENT_CONDITIONAL: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL;
+#[allow(dead_code)]
+pub const ASSIGNMENT_CONDITIONAL_TEST_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_CONDITIONAL_TEST_KINDS;
 #[allow(dead_code)]
 pub const ASSIGNMENT_INDENT: core_config::OptId = core_config::opt::ASSIGNMENT_INDENT;
 #[allow(dead_code)]
@@ -58,9 +86,11 @@ pub const INITIALIZER_COLLAPSE: core_config::OptId = core_config::opt::INITIALIZ
 #[allow(dead_code)]
 pub const PRESERVE_QUERY_BREAKS: core_config::OptId = core_config::opt::PRESERVE_QUERY_BREAKS;
 #[allow(dead_code)]
+pub const INITIALIZER_GROUP: core_config::OptId = core_config::opt::INITIALIZER_GROUP;
+#[allow(dead_code)]
 pub const INITIALIZER_EXPAND: core_config::OptId = core_config::opt::INITIALIZER_EXPAND;
 #[allow(dead_code)]
-pub const LAMBDA_ARGUMENT_HUG: core_config::OptId = core_config::opt::LAMBDA_ARGUMENT_HUG;
+pub const HUG_LAST_ARGUMENT: core_config::OptId = core_config::opt::HUG_LAST_ARGUMENT;
 #[allow(dead_code)]
 pub const CONSTRUCTOR_INITIALIZER_LINE: core_config::OptId = core_config::opt::CONSTRUCTOR_INITIALIZER_LINE;
 #[allow(dead_code)]
@@ -71,6 +101,34 @@ pub const PARAMETER_ATTRIBUTE_LAYOUT: core_config::OptId = core_config::opt::PAR
 pub const BASE_LIST_LAYOUT: core_config::OptId = core_config::opt::BASE_LIST_LAYOUT;
 #[allow(dead_code)]
 pub const UNBREAKABLE_SINGLE_ITEM_LISTS: core_config::OptId = core_config::opt::UNBREAKABLE_SINGLE_ITEM_LISTS;
+#[allow(dead_code)]
+pub const DECLARATOR_OWN_LINE_KINDS: core_config::OptId = core_config::opt::DECLARATOR_OWN_LINE_KINDS;
+#[allow(dead_code)]
+pub const DECLARATOR_OWN_LINE_EXCEPT_KINDS: core_config::OptId = core_config::opt::DECLARATOR_OWN_LINE_EXCEPT_KINDS;
+#[allow(dead_code)]
+pub const STACKED_FLUSH_KINDS: core_config::OptId = core_config::opt::STACKED_FLUSH_KINDS;
+#[allow(dead_code)]
+pub const HANGING_CLAUSE_KINDS: core_config::OptId = core_config::opt::HANGING_CLAUSE_KINDS;
+#[allow(dead_code)]
+pub const PAREN_CONDITION_KINDS: core_config::OptId = core_config::opt::PAREN_CONDITION_KINDS;
+#[allow(dead_code)]
+pub const HANG_OPERAND_KINDS: core_config::OptId = core_config::opt::HANG_OPERAND_KINDS;
+#[allow(dead_code)]
+pub const HANGING_CLAUSE_INLINE_AFTER: core_config::OptId = core_config::opt::HANGING_CLAUSE_INLINE_AFTER;
+#[allow(dead_code)]
+pub const ATTACHED_VALUE_KINDS: core_config::OptId = core_config::opt::ATTACHED_VALUE_KINDS;
+#[allow(dead_code)]
+pub const ATTACHED_PARENT_KINDS: core_config::OptId = core_config::opt::ATTACHED_PARENT_KINDS;
+#[allow(dead_code)]
+pub const ATTACHED_EXCEPT_KINDS: core_config::OptId = core_config::opt::ATTACHED_EXCEPT_KINDS;
+#[allow(dead_code)]
+pub const ASSIGNMENT_INLINE_TEST_KINDS: core_config::OptId = core_config::opt::ASSIGNMENT_INLINE_TEST_KINDS;
+#[allow(dead_code)]
+pub const CONDITIONAL_LADDER_PARENT_KINDS: core_config::OptId = core_config::opt::CONDITIONAL_LADDER_PARENT_KINDS;
+#[allow(dead_code)]
+pub const CONDITIONAL_LADDER_ITEM_KINDS: core_config::OptId = core_config::opt::CONDITIONAL_LADDER_ITEM_KINDS;
+#[allow(dead_code)]
+pub const MEMBER_CHAIN_HOLD_COMMENTS: core_config::OptId = core_config::opt::MEMBER_CHAIN_HOLD_COMMENTS;
 #[allow(dead_code)]
 pub const DO_WHILE_LINE: core_config::OptId = core_config::opt::DO_WHILE_LINE;
 #[allow(dead_code)]
@@ -212,22 +270,22 @@ pub fn preserve_query_breaks(o: &core_config::ResolvedOptions) -> bool {
 }
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum InitializerGroup { Own, Creation }
+#[allow(dead_code)]
+pub fn initializer_group(o: &core_config::ResolvedOptions) -> InitializerGroup {
+    match o.text(INITIALIZER_GROUP) {
+        "creation" => InitializerGroup::Creation,
+        _ => InitializerGroup::Own,
+    }
+}
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InitializerExpand { Fit, Crowded }
 #[allow(dead_code)]
 pub fn initializer_expand(o: &core_config::ResolvedOptions) -> InitializerExpand {
     match o.text(INITIALIZER_EXPAND) {
         "crowded" => InitializerExpand::Crowded,
         _ => InitializerExpand::Fit,
-    }
-}
-#[allow(dead_code)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum LambdaArgumentHug { Last, Sole }
-#[allow(dead_code)]
-pub fn lambda_argument_hug(o: &core_config::ResolvedOptions) -> LambdaArgumentHug {
-    match o.text(LAMBDA_ARGUMENT_HUG) {
-        "sole" => LambdaArgumentHug::Sole,
-        _ => LambdaArgumentHug::Last,
     }
 }
 #[allow(dead_code)]
@@ -273,6 +331,10 @@ pub fn base_list_layout(o: &core_config::ResolvedOptions) -> BaseListLayout {
 #[allow(dead_code)]
 pub fn unbreakable_single_item_lists(o: &core_config::ResolvedOptions) -> bool {
     o.flag(UNBREAKABLE_SINGLE_ITEM_LISTS, false)
+}
+#[allow(dead_code)]
+pub fn member_chain_hold_comments(o: &core_config::ResolvedOptions) -> bool {
+    o.flag(MEMBER_CHAIN_HOLD_COMMENTS, false)
 }
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -426,17 +488,31 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::BRACE_NEWLINE, &["all", "none"], "all", "Opening braces of types, members, blocks and lambdas: `all` puts each on its own line (Allman); `none` keeps it on the line of the declaration or statement."),
         core_config::OptionDef::words(core_config::opt::BRACE_SAME_LINE, &[], "Elements whose opening brace stays on the line of the declaration or statement although `brace_newline` is `all`: `types`, `methods`, `properties`, `accessors`, `anonymous_methods`, `anonymous_types`, `control_blocks`, `lambdas`, `object_collection_array_initializers` (types include namespaces, methods include constructors, operators and local functions, properties include indexers and events, control blocks include `switch` statements and bare blocks)."),
         core_config::OptionDef::choice(core_config::opt::TRAILING_COMMAS, &["preserve", "never", "multiline"], "preserve", "Trailing comma after the last element of initializers, collection expressions, enums and switch expressions: `preserve` keeps what the source has; `never` removes it; `multiline` adds one when the list is on several lines and removes it otherwise."),
+        core_config::shared::skip_generated(true),
+        core_config::shared::generated_names(&["TemporaryGeneratedFile_*", "*.designer", "*.generated", "*.g", "*.g.i"]),
+        core_config::shared::generated_header_markers(&["<autogenerated", "<auto-generated"]),
+        core_config::shared::generated_header_skip(&["#"]),
+        core_config::shared::label_blank_line(false),
+        core_config::shared::member_chain_style("fluent"),
         core_config::shared::member_chain_min_calls(3),
         core_config::shared::member_chain_keep_accesses("never"),
+        core_config::shared::member_chain_factory_heads(true),
+        core_config::shared::member_chain_hug_calls(0),
+        core_config::shared::member_chain_indent_head(false),
         core_config::shared::member_chain_break_on_block("never"),
         core_config::shared::member_chain_short_head(4),
         core_config::shared::member_chain_indent(1),
         core_config::shared::binary_operator_line("start"),
         core_config::shared::binary_indent(1),
         core_config::shared::binary_hug("assignment"),
+        core_config::shared::binary_group_single(false),
+        core_config::shared::binary_group_mixed_chains(true),
+        core_config::shared::binary_inline_right_kinds(&["RecursivePattern"]),
+        core_config::shared::binary_open_kinds(&[]),
         core_config::shared::indent_nested_binary(false),
         core_config::shared::assignment_layout("compact"),
         core_config::shared::assignment_conditional("always"),
+        core_config::shared::assignment_conditional_test_kinds(&[]),
         core_config::shared::assignment_indent(1),
         core_config::shared::conditional_indent(1),
         core_config::shared::conditional_layout("indented"),
@@ -446,7 +522,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::BLANK_LINES_BETWEEN_MEMBERS, &["preserve", "separate", "always"], "preserve", "Blank lines between the members of a type, namespace or enum: `preserve` keeps the source's (at most one) and never adds one; `separate` also requires one between two members when either has a body, an attribute or a comment above it; `always` requires one between any two members of a type or namespace and between the `using` directives and what follows them, except between two fields or two `using` directives (enum members as `separate`)."),
         core_config::OptionDef::choice(core_config::opt::ACCESSOR_BLANK_LINES, &["preserve", "remove"], "preserve", "Blank lines between the accessors of a property that is laid out on several lines: `preserve` keeps the source's (at most one); `remove` drops them."),
         core_config::OptionDef::choice(core_config::opt::COLLECTION_BLANK_LINES, &["preserve", "remove"], "preserve", "Blank lines between the elements of a collection initializer, array initializer or collection expression: `preserve` keeps the source's (at most one); `remove` drops them. The members of an object initializer keep theirs."),
-        core_config::OptionDef::boolean(core_config::opt::INLINE_ACCESSOR_BODIES, false, "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines."),
+        core_config::OptionDef::boolean(core_config::opt::INLINE_ACCESSOR_BODIES, false, "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines. Accessors without a body (`{ get; set; }`) then also collapse onto one line when the source has them on several."),
         core_config::OptionDef::boolean(core_config::opt::PRESERVE_SINGLE_LINE_BLOCKS, false, "A block written on one line (`void M() { return; }`, `get { return x; }`,              `if (a)` followed by `{ b(); }`) stays on one line, as `{ a; b; }`, when it has no comment and no label in it. Type, namespace, enum and `switch` bodies written on one line stay as well."),
         core_config::OptionDef::boolean(core_config::opt::PRESERVE_SINGLE_LINE_STATEMENTS, false, "Statements written on one line stay there: `a(); b();` in a sequence, `case 1:              break;`, and a whole `if`, `while`, `for`, `foreach`, `do`, `try`, `using`, `lock`,              `fixed`, `checked` or `unsafe` statement (with its blocks) written on one line,              unless it has a comment, a `switch` or a label in it."),
         core_config::OptionDef::boolean(core_config::opt::INDENT_SWITCH_SECTION_BLOCK, true, "Indent a block that is the only statement of a `case` section below its label; when false the block starts at the label's indentation."),
@@ -454,13 +530,28 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::WRAPPED_BRACE_LINE, &["creation", "all", "none"], "creation", "Opening brace of an initializer or property pattern that is laid out on several lines: `creation` puts it on its own line for `new T { ... }` only; `all` also for an initializer nested in an assignment (`Prop = { ... }`) and for property patterns; `none` keeps it on the line of the expression."),
         core_config::OptionDef::choice(core_config::opt::INITIALIZER_COLLAPSE, &["preserve", "always"], "preserve", "Initializers and collection expressions: `preserve` keeps one expanded when the source has a line break in it; `always` puts one on a single line whenever it fits."),
         core_config::OptionDef::boolean(core_config::opt::PRESERVE_QUERY_BREAKS, false, "A query expression with a line break in the source keeps one clause per line even when it fits on a line."),
+        core_config::OptionDef::choice(core_config::opt::INITIALIZER_GROUP, &["own", "creation"], "own", "The braces of the initializer of a `new` expression: `own` breaks them only when they do not fit; `creation` breaks them together with the whole `new T(...) { ... }`, so that they are expanded once the type and arguments do not fit on the line either."),
         core_config::OptionDef::choice(core_config::opt::INITIALIZER_EXPAND, &["fit", "crowded"], "fit", "Initializers (and anonymous types) that fit on a line: `fit` keeps them on it; `crowded` puts one item per line when there are three or more member assignments, or two or more items one of which creates an object with an initializer."),
-        core_config::OptionDef::choice(core_config::opt::LAMBDA_ARGUMENT_HUG, &["last", "sole"], "last", "A lambda argument whose body can hang from the call's line: `last` hugs a block lambda that is the last argument; `sole` hugs a lambda (block or expression) only when it is the only argument."),
+        core_config::shared::hug_last_argument("last"),
         core_config::OptionDef::choice(core_config::opt::CONSTRUCTOR_INITIALIZER_LINE, &["same_line", "new_line"], "same_line", "The `: base(...)` or `: this(...)` initializer of a constructor: `same_line` keeps it after the parameter list; `new_line` puts it on its own indented line."),
         core_config::OptionDef::choice(core_config::opt::MEMBER_ATTRIBUTE_LINE, &["own_line", "keep"], "own_line", "An attribute list in front of a member, statement or type: `own_line` puts it on a line of its own; `keep` leaves one that the source writes on the same line as what it annotates there (`[SerializeField] private int speed;`)."),
         core_config::OptionDef::choice(core_config::opt::PARAMETER_ATTRIBUTE_LAYOUT, &["inline", "hanging"], "inline", "A parameter with attribute lists: `inline` keeps them in front of the parameter;              `hanging` keeps them there when the parameter fits and otherwise puts the rest of              the parameter on an indented line below them."),
         core_config::OptionDef::choice(core_config::opt::BASE_LIST_LAYOUT, &["inline", "hanging"], "inline", "The base list of a type (`: A, B`): `inline` keeps it on the line of the type name; `hanging` keeps it there when it fits and otherwise starts a line, with one base type per line."),
         core_config::OptionDef::boolean(core_config::opt::UNBREAKABLE_SINGLE_ITEM_LISTS, false, "Never break a list that holds one simple item: an attribute list with one attribute, a type argument list with one name, an index that is one name or literal."),
+        core_config::OptionDef::words(core_config::opt::DECLARATOR_OWN_LINE_KINDS, &[], "Kinds of declaration whose declarators after the first (`int a, b;`, also fields) each stand on a line of their own, indented. Empty keeps them on the line of the first."),
+        core_config::OptionDef::words(core_config::opt::DECLARATOR_OWN_LINE_EXCEPT_KINDS, &["ForStatement"], "Kinds of parent in which the declarators of `declarator_own_line_kinds` stay on one line (the header of a `for`)."),
+        core_config::OptionDef::words(core_config::opt::STACKED_FLUSH_KINDS, &[], "Kinds of statement (`using`, `fixed`) whose body is another statement of the same kind: it goes on the next line at the same level, so that a stack of them reads like a list. Empty indents it like any embedded statement."),
+        core_config::OptionDef::words(core_config::opt::HANGING_CLAUSE_KINDS, &[], "Kinds of clause (`when` of a `catch` filter or a `case` guard) that move to an indented line of their own when the whole does not fit; a condition in parentheses hugs them. Empty keeps them on the line of what precedes them."),
+        core_config::OptionDef::words(core_config::opt::PAREN_CONDITION_KINDS, &["IfStatement", "WhileStatement", "DoStatement", "LockStatement", "SwitchStatement"], "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content."),
+        core_config::OptionDef::words(core_config::opt::HANG_OPERAND_KINDS, &[], "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head."),
+        core_config::OptionDef::words(core_config::opt::HANGING_CLAUSE_INLINE_AFTER, &["SwitchExpressionArm", "DiscardPattern"], "Pairs of a parent kind and the kind of its first child: a hanging clause of such a parent stays on the line (`_ when x`)."),
+        core_config::OptionDef::words(core_config::opt::ATTACHED_VALUE_KINDS, &["ObjectInitializerExpression", "CollectionInitializerExpression", "ArrayInitializerExpression", "ComplexElementInitializerExpression", "WithInitializerExpression", "CollectionExpression"], "With `wrapped_brace_line: all`: kinds of the value of an assignment whose braces or brackets start on the operator's line when the value breaks."),
+        core_config::OptionDef::words(core_config::opt::ATTACHED_PARENT_KINDS, &["SimpleAssignmentExpression", "EqualsValueClause"], "Kinds of assignment whose value is attached (`attached_value_kinds`)."),
+        core_config::OptionDef::words(core_config::opt::ATTACHED_EXCEPT_KINDS, &["PropertyDeclaration"], "Kinds of parent of an assignment (`attached_parent_kinds`) whose value is not attached: a property's initializer moves as a whole."),
+        core_config::OptionDef::words(core_config::opt::ASSIGNMENT_INLINE_TEST_KINDS, &[], "Kinds of operator chain that, as the test of a conditional, do not move the conditional below the operator of an assignment (`x is null ? a : b`)."),
+        core_config::OptionDef::words(core_config::opt::CONDITIONAL_LADDER_PARENT_KINDS, &["ReturnStatement"], "With `conditional_layout: ladder`: kinds of parent of a ladder that is indented one level (a returned value)."),
+        core_config::OptionDef::words(core_config::opt::CONDITIONAL_LADDER_ITEM_KINDS, &["Argument"], "With `conditional_layout: ladder`: kinds of an item of a list that indent a ladder when the list has several of them (an argument among others)."),
+        core_config::OptionDef::boolean(core_config::opt::MEMBER_CHAIN_HOLD_COMMENTS, false, "The comments in front of a member chain stay in front of it: their line breaks do not decide whether the chain breaks."),
         core_config::OptionDef::choice(core_config::opt::DO_WHILE_LINE, &["new_line", "same_line"], "new_line", "The `while` of a `do` statement: `new_line` starts a line; `same_line` follows the closing brace (`} while (x);`)."),
         core_config::OptionDef::choice(core_config::opt::CLAUSE_KEYWORD_LINE, &["new_line", "same_line"], "new_line", "`else`, `catch` and `finally` after a block: `new_line` starts a line; `same_line` follows the closing brace (`} else {`) unless a comment sits between them."),
         core_config::OptionDef::choice(core_config::opt::ELSE_LINE, &["inherit", "new_line", "same_line"], "inherit", "`else` after a block: `new_line` starts a line; `same_line` follows the closing brace; `inherit` takes `clause_keyword_line`."),
@@ -488,6 +579,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::Preset::new("csharp/google", include_str!("../presets/google.yaml")),
         core_config::Preset::new("csharp/csharpier-compat", include_str!("../presets/csharpier-compat.yaml")),
         core_config::Preset::new("csharp/stylecop", include_str!("../presets/stylecop.yaml")),
+        core_config::Preset::new("csharp/roslynator", include_str!("../presets/roslynator.yaml")),
         core_config::Preset::new("csharp/unity", include_str!("../presets/unity.yaml")),
         ])
     })

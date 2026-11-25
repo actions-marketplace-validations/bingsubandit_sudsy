@@ -148,6 +148,9 @@ fn options(
             set("pattern", regex.into());
         }
         Some(Value::String(s)) if sudsy == "color-hex-length" => set("style", s.as_str().into()),
+        Some(Value::String(s)) if sudsy == "import-notation" && s == "url" => {
+            set("url", true.into())
+        }
         Some(Value::String(s)) if fixed(sudsy) == Some(s.as_str()) => {}
         Some(Value::Bool(_)) | None => {}
         Some(_) => unmapped = true,

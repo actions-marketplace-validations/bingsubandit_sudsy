@@ -4,7 +4,8 @@ obj/
 node_modules/
 *.vsix
 .vs/
-tests/conformance/corpus/
+tests/conformance/corpus
+tests/conformance/php-deps/symfony/monorepo/
 .claude/worktrees/
 
 # The tests' temp dir (.cargo/config.toml): everything in it is scratch; the dir itself is kept by .gitkeep

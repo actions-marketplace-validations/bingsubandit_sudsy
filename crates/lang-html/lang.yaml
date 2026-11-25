@@ -19,9 +19,26 @@ options:
   - single_attribute_per_line:
       default: false
       doc: "Put every attribute of a tag that has several on its own line."
+  - max_attributes_per_line:
+      range: [0, 100]
+      default: 0
+      doc: "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1."
+  - self_closing_space:
+      default: true
+      doc: "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`)."
+  - void_element_style:
+      values: ["selfclose", "omit"]
+      default: "selfclose"
+      doc: "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`)."
   - content_newline_with_attributes:
       default: false
       doc: "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults)."
+  - content_newline_with_elements:
+      default: false
+      doc: "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`)."
+  - indent_comment_lines:
+      default: false
+      doc: "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written."
   - indent_expression_operands:
       default: false
       doc: "Indent the operands of a binary or logical expression that continues on following lines in an attribute or `{{ }}` expression (`vue/html-indent`); the default aligns them with the first operand."

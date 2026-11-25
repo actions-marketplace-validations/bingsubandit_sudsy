@@ -6,7 +6,7 @@
 //! concept: node-sequence
 //! what: The children of a node as a sequence: kids, flat, first, last helpers and the plain layout.
 //! tools: none (internal)
-//! reads: tag:wrapper
+//! reads: tag:wrapper, option:stacked_flush_kinds, option:declarator_own_line_kinds
 
 use crate::FormatCtx;
 use crate::comments;
@@ -65,6 +65,39 @@ pub fn el(cx: &FormatCtx<'_>, e: &SyntaxElement) -> Result<Doc, FormatError> {
         SyntaxElement::Node(n) => cx.format(n),
         SyntaxElement::Token(t) => Ok(cx.token(t)),
     }
+}
+
+/// A statement of a kind of `stacked_flush_kinds` that is the body of one of the same kind stays
+/// on the next line at the level of its parent (`using (a)` then `using (b)`).
+pub fn stacked_flush(cx: &FormatCtx<'_>, parent: &SyntaxNode, body: &SyntaxNode) -> bool {
+    parent.kind() == body.kind()
+        && cx.options.list_has(
+            core_config::opt::STACKED_FLUSH_KINDS,
+            cx.grammar.name(body.kind()),
+        )
+}
+
+/// The items after the first of a declaration (`int a, b;`, kinds of `declarator_own_line_kinds`)
+/// stand on lines of their own, unless the declaration sits in a parent of
+/// `declarator_own_line_except_kinds` (a `for` header). `prev` is the element in front of the item.
+pub fn own_line_declarator(cx: &FormatCtx<'_>, decl: &SyntaxNode, prev: &SyntaxElement) -> bool {
+    let name = |n: &SyntaxNode| cx.grammar.name(n.kind());
+    matches!(prev, SyntaxElement::Token(t) if t.text() == ",")
+        && cx
+            .options
+            .list_has(core_config::opt::DECLARATOR_OWN_LINE_KINDS, name(decl))
+        && !decl.parent().is_some_and(|p| {
+            cx.options
+                .list_has(core_config::opt::DECLARATOR_OWN_LINE_EXCEPT_KINDS, name(&p))
+        })
+}
+
+/// Does a comment or a preprocessor directive (tag `directive`) stand anywhere in `node`?
+pub fn has_comment_or_directive(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    node.descendants_with_tokens().any(|e| match e {
+        SyntaxElement::Token(t) => cx.grammar.has_tag(t.kind(), "comment"),
+        SyntaxElement::Node(n) => cx.grammar.has_tag(n.kind(), "directive"),
+    })
 }
 
 /// Does the source have a line break after the element?

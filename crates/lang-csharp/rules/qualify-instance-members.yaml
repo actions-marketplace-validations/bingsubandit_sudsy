@@ -1,0 +1,10 @@
+id: qualify-instance-members
+family: finding
+params: { check: unqualified_member, fix-title: "Add `this.`" }
+message: "prefix the use of the instance member with `this.`"
+description: "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it."
+example: "class C { int x; int M() => x; }   // write this.x"
+severity: off
+category: style
+requires: [types]
+fix-kind: safe

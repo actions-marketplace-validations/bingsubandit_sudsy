@@ -104,6 +104,42 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Scans the blanks or the line break at the position as one token: a run of the bytes
+    /// `is_blank` accepts is a `ws` token, `\n`, `\r\n` or `\r` a `nl` token. `false` (nothing
+    /// scanned) at any other byte.
+    pub fn blank(&mut self, ws: SyntaxKind, nl: SyntaxKind, is_blank: impl Fn(u8) -> bool) -> bool {
+        let start = self.pos;
+        let b = self.src.as_bytes();
+        match b.get(start) {
+            Some(&c) if is_blank(c) => {
+                while self.pos < b.len() && is_blank(b[self.pos]) {
+                    self.pos += 1;
+                }
+                self.emit(ws, start);
+            }
+            Some(b'\r') if b.get(start + 1) == Some(&b'\n') => {
+                self.pos += 2;
+                self.emit(nl, start);
+            }
+            Some(b'\n' | b'\r') => {
+                self.pos += 1;
+                self.emit(nl, start);
+            }
+            _ => return false,
+        }
+        true
+    }
+
+    /// Moves the position to the end of the line (before its line break).
+    #[inline]
+    pub fn eat_line(&mut self) {
+        let rest = &self.src.as_bytes()[self.pos..];
+        self.pos += rest
+            .iter()
+            .position(|&c| c == b'\n' || c == b'\r')
+            .unwrap_or(rest.len());
+    }
+
     /// A token of `kind` from `start` to the position.
     #[inline]
     pub fn emit(&mut self, kind: SyntaxKind, start: usize) {
@@ -167,11 +203,12 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    /// `errors` are those of the lexer; they are kept as they are.
+    /// `errors` are those of the lexer; they are kept as they are. `trivia`: the language's
+    /// `kind::TRIVIA_MASK`.
     pub fn new(
         src: &'a str,
         (tokens, errors): (Vec<Token>, Vec<ParseError>),
-        is_trivia: impl Fn(SyntaxKind) -> bool,
+        trivia: u64,
         eof: SyntaxKind,
     ) -> Self {
         let trivia::Attached {
@@ -180,7 +217,7 @@ impl<'a> Parser<'a> {
             trailing,
         } = trivia::attach(
             tokens.len(),
-            |i| is_trivia(tokens[i].kind),
+            |i| crate::kind::token_in_mask(trivia, tokens[i].kind),
             |i| &src[tokens[i].start..tokens[i].end],
         );
         Parser {
@@ -329,6 +366,47 @@ impl<'a> Parser<'a> {
         self.error_until(self.eof_index());
     }
 
+    /// For each real token of kind `open`: the index of the `close` token that pairs with it
+    /// (stack matching in one pass), `u32::MAX` when there is none; other tokens hold `u32::MAX`.
+    pub fn pairs(&self, open: SyntaxKind, close: SyntaxKind) -> Vec<u32> {
+        let mut pairs = vec![u32::MAX; self.eof_index()];
+        let mut stack = Vec::new();
+        for i in 0..self.eof_index() {
+            let kind = self.kind_at(i);
+            if kind == open {
+                stack.push(i);
+            } else if kind == close
+                && let Some(o) = stack.pop()
+            {
+                pairs[o] = i as u32;
+            }
+        }
+        pairs
+    }
+
+    /// Whether real token `i` starts at column 0: the byte before it is a line break or there is none.
+    pub fn at_line_start(&self, i: usize) -> bool {
+        let at = self.tok(i).start;
+        at == 0 || matches!(self.src.as_bytes()[at - 1], b'\n' | b'\r')
+    }
+
+    /// An `ERROR` node of the balanced group that starts at the current `open` token: up to its
+    /// `close` token, or `limit` (a real token index) when it is not closed before.
+    pub fn error_group(&mut self, open: SyntaxKind, close: SyntaxKind, limit: usize) {
+        self.builder.start_node(SyntaxKind::ERROR);
+        let mut depth = 0usize;
+        while self.pos < limit && !self.at_eof() {
+            let kind = self.cur();
+            depth += usize::from(kind == open);
+            depth = depth.saturating_sub(usize::from(kind == close));
+            self.bump();
+            if depth == 0 {
+                break;
+            }
+        }
+        self.builder.finish_node();
+    }
+
     /// Goes one level deeper; `false` (and no change) at `max`.
     #[inline]
     pub fn enter(&mut self, max: usize) -> bool {
@@ -396,5 +474,115 @@ pub fn climb<P: Pratt>(p: &mut P, min: u8) {
             break;
         }
         p.infix(at, op);
+    }
+}
+
+/// Raw text whose closer is derived from its opener (a bracket text `[=[ ... ]=]`, a raw string
+/// `R"d( ... )d"`, a dollar quote `$tag$ ... $tag$`): the end (after `closer`) of the first
+/// `closer` at or after `from`, `None` when the text has no end.
+pub fn raw_end(src: &[u8], from: usize, closer: &[u8]) -> Option<usize> {
+    let (first, rest) = closer.split_first()?;
+    let mut i = from;
+    while let Some(p) = src.get(i..)?.iter().position(|c| c == first) {
+        let at = i + p;
+        if src[at + 1..].starts_with(rest) {
+            return Some(at + closer.len());
+        }
+        i = at + 1;
+    }
+    None
+}
+
+/// The start of the first line after the one holding `from` whose text (up to the end of the
+/// input) satisfies `starts`; the end of the input when there is none. Where an unterminated
+/// construct stops at the next line that starts a new statement.
+pub fn next_line_where(src: &str, from: usize, starts: impl Fn(&str) -> bool) -> usize {
+    let mut at = from;
+    while let Some(nl) = src[at..].find('\n') {
+        at += nl + 1;
+        if starts(&src[at..]) {
+            return at;
+        }
+    }
+    src.len()
+}
+
+/// Is the sign token ending at `sign_end` the sign of the number starting at `number_start`? The
+/// number touches the sign, and the sign starts an operand: a blank comes before it, or an
+/// opening token (`(`, `,`: `f(-1)`, `(1, -2)`).
+pub fn is_signed_number(
+    sign_end: u32,
+    number_start: u32,
+    blank_before: bool,
+    after_opener: bool,
+) -> bool {
+    sign_end == number_start && (blank_before || after_opener)
+}
+
+/// Does only a block comment (`open` .. `close`) stand before `offset` on its line?
+pub fn only_block_comment_before(src: &str, offset: usize, open: &str, close: &str) -> bool {
+    let line = src[..offset].rsplit('\n').next().unwrap_or("").trim();
+    line.starts_with(open) && line.ends_with(close)
+}
+
+#[cfg(test)]
+mod helper_tests {
+    use super::*;
+
+    #[test]
+    fn a_sign_touches_its_number_after_a_blank_or_an_opener() {
+        assert!(is_signed_number(5, 5, true, false));
+        assert!(is_signed_number(5, 5, false, true));
+        assert!(!is_signed_number(5, 5, false, false));
+        assert!(!is_signed_number(5, 6, true, true));
+    }
+
+    #[test]
+    fn only_a_block_comment_may_precede_on_the_line() {
+        let src = "x\n/* c */ delimiter\n a /* c */ delimiter";
+        let (a, b) = (
+            src.find("delimiter").unwrap(),
+            src.rfind("delimiter").unwrap(),
+        );
+        assert!(only_block_comment_before(src, a, "/*", "*/"));
+        assert!(!only_block_comment_before(src, b, "/*", "*/"));
+        assert!(!only_block_comment_before("x delimiter", 2, "/*", "*/"));
+    }
+
+    #[test]
+    fn raw_text_ends_at_its_own_closer() {
+        let src = b"[==[ a ]] ]=] ]==] ]==]";
+        assert_eq!(raw_end(src, 4, b"]==]"), Some(18));
+        assert_eq!(raw_end(src, 4, b"]]"), Some(9));
+        assert_eq!(raw_end(src, 4, b"]===]"), None);
+        assert_eq!(raw_end(src, 19, b"]==]"), Some(23));
+        assert_eq!(raw_end(src, 99, b"]"), None);
+        assert_eq!(raw_end(b"$a$ x $b$ y $a$", 3, b"$a$"), Some(15));
+        assert_eq!(raw_end(b"abc", 0, b""), None);
+        let starts = |l: &str| l.starts_with("x(");
+        assert_eq!(next_line_where("a\nb\nx(1)\nx(2)", 0, starts), 4);
+        assert_eq!(next_line_where("a\nx(1)", 2, starts), 6);
+    }
+
+    #[test]
+    fn blanks_and_line_breaks_are_tokens_of_their_own() {
+        let (ws, nl) = (SyntaxKind(1), SyntaxKind(2));
+        let mut lx = Lexer::new("  \t\r\n\n\rx \u{e9}", 0);
+        let blank = |lx: &mut Lexer| lx.blank(ws, nl, |c| c == b' ' || c == b'\t');
+        while blank(&mut lx) {}
+        assert_eq!(lx.pos, 7);
+        let kinds: Vec<_> = lx
+            .tokens
+            .iter()
+            .map(|t| (t.kind, t.end - t.start))
+            .collect();
+        assert_eq!(kinds, [(ws, 3), (nl, 2), (nl, 1), (nl, 1)]);
+        lx.pos += 1;
+        assert!(blank(&mut lx) && !blank(&mut lx));
+        lx.eat_line();
+        assert_eq!(lx.pos, lx.src.len());
+        let mut lx = Lexer::new("ab\r\ncd", 0);
+        lx.eat_line();
+        assert_eq!(lx.pos, 2);
     }
 }

@@ -7,6 +7,7 @@ Corpora, tool versions, presets, options and differences for every language. Sta
 The status and the headline numbers of every language are in the generated table "Language support" of the [README](../README.md#language-support); this page holds what the table leaves out: corpora, tool versions, presets, options and the main differences.
 
 - **Format:** share of corpus files where `sudsy format` gives the same bytes as the reference formatter. The corpus is real-world code unless the section says otherwise.
+- **C / C++ format** does not compare line wrapping (where a statement, a list or an enum breaks, the indent of continuation lines); see the C / C++ section.
 - **Lint:** share of the reference linter's findings on the corpus that Sudsy also reports with the named preset, on the same line. This is recall. False positives are not counted.
 - All numbers compare against the reference tool with its default settings, not your project's config. See [keep your current style](configuration.md#keep-your-current-style).
 - With no config, lint reports likely bugs only. Lint numbers need the preset. See [configuration](configuration.md#presets).
@@ -83,7 +84,7 @@ The status and the headline numbers of every language are in the generated table
 
 ## TOML
 
-- **Formatter:** taplo 0.10. Corpus: toml-test valid files and fixtures.
+- **Formatter:** taplo 0.10. Corpus: the .toml files of rust-analyzer, Bevy, Tokio, clap, serde, uv and Cargo (1,310 files); toml-test and the repository fixtures are listed apart.
 - **Linter:** none from a reference tool. Duplicate keys are reported.
 - **Presets:** `toml/taplo-compat` (`collapse: always`, `max_blank_lines: 2`, `align_comments: true`).
 - **Options:** `collapse`, `trailing_commas`, `align_comments`, `max_blank_lines`, `bracket_spacing`, `array_bracket_spacing`.
@@ -98,7 +99,7 @@ The status and the headline numbers of every language are in the generated table
 - One parser serves all four. Config sections: `html`, `vue`, `svelte`, `angular`.
 - **Formatter:** Prettier 3.9.10 (Svelte: with prettier-plugin-svelte 3.5.2).
 
-- **Corpora:** real-world files and Prettier's own tests for HTML, Vue and Svelte; the prettier-plugin-svelte samples; Angular components and Prettier's Angular tests (`--parser angular`).
+- **Corpora:** real-world files (the HTML group adds the demo pages of mdn's dom, webaudio, web-components, pwa, js, html and webgl examples, Web-Dev-For-Beginners and html5-boilerplate) and Prettier's own tests for HTML, Vue and Svelte; the prettier-plugin-svelte samples; Angular components and Prettier's Angular tests (`--parser angular`).
 - **Linters:** html-validate, htmlhint, html-eslint, eslint-plugin-vue, eslint-plugin-svelte. Angular: a few angular-eslint rules, no coverage run.
 - **Presets:** `html/html-validate-recommended`, `html/html-validate-standard`, `html/htmlhint`, `html/html-eslint-recommended`, `html/eslint-plugin-vue-recommended`, `html/eslint-plugin-svelte-recommended`.
 - **Options:** `whitespace_sensitivity`, `bracket_same_line`, `single_attribute_per_line`, `embedded_language_formatting`. Vue and Svelte add `indent_script_and_style`. Default `line_width` is 80.
@@ -120,7 +121,7 @@ The status and the headline numbers of every language are in the generated table
 
 - Config section: `php`.
 - **Formatter:** PHP-CS-Fixer 3.95.31 with `@PER-CS`. Corpus: Laravel, Symfony, WordPress, Composer.
-- **Linter:** PHPStan mapping exists. Sudsy does no type analysis.
+- **Linter:** PHPStan mapping covers 21% of level 0 (`new.static`, `function.inner`, `parameter.implicitlyNullable`, `unset.possiblyHookedProperty`, `variable.undefined`). Sudsy does no type analysis; the rules are on in `php/phpstan` except `missing-return`, which is off (more extras than findings).
 - **Presets:** `php/phpstan`.
 - **Options:** `trailing_commas`, `declaration_brace`. Default `line_width` is 120.
 - **Differences:**
@@ -167,8 +168,8 @@ The status and the headline numbers of every language are in the generated table
 ## SQL
 
 - Dialects: `ansi`, `postgres`, `mysql`, `tsql` (option `dialect`).
-- **Formatter:** sqlfluff 4.5.0 (`fix --rules layout,capitalisation`).
-- **Linter:** sqlfluff.
+- **Formatter:** sqlfluff 4.5.0 (`fix --rules layout,capitalisation`). Corpus: 971 real files of 18 permissively licensed projects (Hive, Ranger, Kestra, Temporal, OpenFGA, DolphinScheduler, Spring, pgvector, Pagila, BenchBase, DataFusion, SQL Server DBA scripts), the dialect set per project folder; sqlfluff's own dialect fixtures and PostgreSQL's regression inputs are measured and ratcheted, not in the README number.
+- **Linter:** sqlfluff on the same corpus.
 - **Presets:** `sql/sqlfluff`.
 - **Options:** `dialect`, `comma_position`, `keyword_case`, `identifier_case`, `function_case`, `literal_case`, `type_case`. Default `line_width` is 80.
 - **Differences:**
@@ -180,8 +181,8 @@ The status and the headline numbers of every language are in the generated table
 
 - Needs the .NET 10 runtime. Config section: `csharp`.
 - **Formatter:** CSharpier 1.3.0. Corpus: aspnetcore, Roslyn and runtime; the files CSharpier leaves alone are not compared.
-- **Linter:** StyleCop and Roslynator rules. StyleCop (1.2.0-beta.556, run as an analyzer driver over the corpus) is covered at 24.6% of its findings (100,884 of 409,320), for the rules it ships on: `SA1101`, `SA1600`, `SA1611`, `SA1200` are not rules yet. Roslynator has no findings run.
-- **Presets:** `csharp/csharpier-compat`, `csharp/stylecop`, `csharp/dotnet-runtime`, `csharp/google`, `csharp/unity`.
+- **Linter:** StyleCop and Roslynator rules. StyleCop (1.2.0-beta.556, run as an analyzer driver over the corpus) is covered at 87.3% of its findings (357,012 of 409,179), for the rules it ships on. Roslynator (Roslynator.Analyzers 5.0.1, the same driver with the framework references) is covered at 0.4% (40 of 11,111): few of its default rules have a Sudsy equivalent yet; 2,605 findings of 8 rules that change without the references of the projects are left out.
+- **Presets:** `csharp/csharpier-compat`, `csharp/stylecop`, `csharp/roslynator`, `csharp/dotnet-runtime`, `csharp/google`, `csharp/unity`.
 - **Options:** `brace_newline`, `brace_same_line`, `trailing_commas`, `sort_usings`, `member_chain_*`, `preprocessor_symbols`, `derive_symbol_sets`, `blank_lines_between_members`, `empty_braces`. Default `line_width` is 120.
 - **Differences:**
   - Lists that differ by a comma, mostly initializers after wrapped arguments.
@@ -218,7 +219,7 @@ The status and the headline numbers of every language are in the generated table
 ## JSON
 
 - Covers JSONC. Config section: `json`.
-- **Formatter:** Prettier 3.9.10 on 3,212 JSON files (SchemaStore, VS Code extension samples): 3,184 identical (99.1%). Biome on fixtures.
+- **Formatter:** Prettier 3.9.10 on 3,212 JSON files (SchemaStore, VS Code extension samples): 3,184 identical (99.1%). Biome on the same files.
 - **Linter:** eslint-plugin-jsonc recommended: on the corpus only `no-useless-escape` fires (14 findings) and Sudsy does not check string escapes yet, so 0.0%.
 - **Presets:** `json/prettier-compat`, `json/biome`, `json/dprint`, `json/eslint-plugin-jsonc-recommended`.
 - **Options:** `collapse` (`preserve`, `always`, `never`, `opening_break`), `trailing_commas` (JSONC), `dialect` (`auto`, `json`, `jsonc`), `bracket_spacing`. Default `line_width` is 80.
@@ -244,7 +245,7 @@ The status and the headline numbers of every language are in the generated table
 ## XML
 
 - Covers `.csproj`, `.props`, `.config`.
-- **Formatter:** CSharpier XML on aspnetcore project files and fixtures.
+- **Formatter:** CSharpier XML on the aspnetcore project files (372 files, 49 of them reviewed as CSharpier width accounting and left out of the share).
 - **Linter:** none.
 - **Presets:** `xml/csharpier-compat`.
 - **Options:** `max_blank_lines`. Default `line_width` is 100.
@@ -286,9 +287,9 @@ The status and the headline numbers of every language are in the generated table
 
 ## C / C++
 
-- Files are kept as written. There are no lint rules.
+- Layout by `format.rules` (indent, blanks, braces, keyword and operator spacing, comments); source line breaks and `*`/`&` spacing stay as written. There are no lint rules.
 - **Parser:** a lexer with a token-level structure. There is no full grammar.
-- **Not done:** a clang-format compatible layout.
+- **Not done:** a clang-format compatible layout. The format number ignores line wrapping (where a statement, a list or an enum breaks, and the indent of the continuation lines); the rest is compared exactly, and the byte-identical share is printed next to it.
 
 ## INI, EditorConfig, .gitignore
 

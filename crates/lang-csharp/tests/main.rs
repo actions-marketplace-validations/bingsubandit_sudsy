@@ -9,6 +9,7 @@ mod deep_nesting;
 mod differential;
 mod fixtures;
 mod format;
+mod format_compat;
 mod format_corpus;
 mod grammar;
 mod mapping;

@@ -1,0 +1,131 @@
+differences:
+  error-directive: gap  the preprocessor symbols of the platform are not set, so no branch of the `#if` chain is active (an `#error` or a missing value) and Sudsy refuses the file; Roslyn reads it
+files:
+  runtime/src/libraries/System.Private.CoreLib/src/System/OperatingSystem.cs: error-directive
+  runtime/src/libraries/System.Private.CoreLib/src/System/Threading/PortableThreadPool.cs: error-directive
+  runtime/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/RuntimeInformation.cs: error-directive
+  runtime/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/RuntimeInformation.Browser.cs: error-directive
+target: 0.4
+not-comparable:  # rule -> evidence. On the 1,334 aspnetcore files that compile completely with the reference packs (43 project folders; the files the compiler reports errors in were deleted until none were left) Roslynator through `dotnet build` (analyzers run on a compilation without errors) and the driver of this run give the same findings for every rule with findings there except these (compiler count, driver count in the same files)
+  RCS1130: compiler 0, driver 10
+  RCS1163: compiler 37, driver 44
+  RCS1192: compiler 0, driver 1
+  RCS1196: compiler 10, driver 1
+  RCS1215: compiler 1, driver 0
+  RCS1235: compiler 7, driver 3
+  RCS1261: compiler 4, driver 3
+  RCS1267: compiler 3, driver 0
+measured: {covered: 40, total: 11111, main: '66718389'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  RCS1157: 1714
+  RCS1118: 1422
+  RCS1123: 827
+  RCS1085: 760
+  RCS1021: 739
+  RCS1226: 664
+  RCS1146: 657
+  RCS1139: 374
+  RCS1251: 357
+  RCS1001: 211
+  RCS1032: 182
+  RCS1205: 170
+  RCS1058: 163
+  RCS1242: 134
+  RCS1214: 117
+  RCS1206: 101
+  RCS1220: 89
+  RCS1213: 88
+  RCS1232: 85
+  RCS1089: 84
+  RCS1247: 81
+  RCS1073: 80
+  RCS1166: 79
+  RCS1212: 76
+  RCS1180: 74
+  RCS1170: 71
+  RCS1160: 67
+  RCS1191: 61
+  RCS1158: 60
+  RCS1266: 60
+  RCS1003: 58
+  RCS1097: 55
+  RCS1249: 53
+  RCS1169: 52
+  RCS1104: 49
+  RCS1135: 49
+  RCS1194: 48
+  RCS1221: 48
+  RCS1102: 46
+  RCS1225: 46
+  RCS1259: 45
+  RCS1108: 44
+  RCS1243: 44
+  RCS1154: 43
+  RCS1229: 40
+  RCS1268: 40
+  RCS1218: 39
+  RCS1179: 38
+  RCS1233: 38
+  RCS1171: 37
+  RCS1203: 37
+  RCS1068: 32
+  RCS1132: 32
+  RCS1047: 27
+  RCS1234: 26
+  RCS1210: 23
+  RCS1262: 23
+  RCS1257: 22
+  RCS1059: 20
+  RCS1077: 19
+  RCS1049: 18
+  RCS1256: 16
+  RCS1156: 15
+  RCS1173: 14
+  RCS1033: 11
+  RCS1128: 11
+  RCS1187: 11
+  RCS1236: 11
+  RCS1246: 11
+  RCS1110: 10
+  RCS1202: 9
+  RCS1224: 9
+  RCS1239: 9
+  RCS1258: 9
+  RCS1015: 8
+  RCS1084: 8
+  RCS1159: 7
+  RCS1222: 6
+  RCS1099: 5
+  RCS1138: 5
+  RCS1197: 5
+  RCS1199: 5
+  RCS1216: 5
+  RCS1098: 4
+  RCS1105: 4
+  RCS1175: 4
+  RCS1075: 3
+  RCS1209: 3
+  RCS1230: 3
+  RCS1103: 2
+  RCS1113: 2
+  RCS1164: 2
+  RCS1193: 2
+  RCS1227: 2
+  RCS1190: 1
+  RCS1204: 1
+fixes:
+  RCS1157: worker check, constant values of the members of a Flags enum (Values layer)
+  RCS1118: worker check, a local assigned once with a constant initializer (flow and constant values)
+  RCS1123: pattern rule, mixed operators without parentheses (syntax only)
+  RCS1085: worker check, a property whose backing field no other member uses (binding)
+  RCS1021: pattern rule, a lambda with a block of one `return`
+  RCS1226: a doc-comment rule in the shared doc-comment module (paragraphs of long text), not a pattern
+  RCS1146: pattern rule, `$X != null && $X.$M` to `$X?.$M`
+  RCS1139: mapped to doc-summary-required, which reports on the declaration; Roslynator reports on the first line of the comment (a report-position option of the rule)
+  RCS1251: pattern rule, a record declaration with an empty body
+  RCS1001: pattern rule, a multi-line embedded statement without braces
+  RCS1032: pattern rule, parentheses around an expression that needs none
+  RCS1205: worker check, named arguments against the order of the parameters (binding)
+  RCS1058: pattern rule, `$X = $X + $Y`
+  RCS1242: worker check, a non-readonly struct passed by `in` (types)
+  RCS1214: pattern rule, an interpolated string with no interpolation

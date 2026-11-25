@@ -5,6 +5,7 @@ description: >-
   `@a ||= @a` (ESLint no-self-assign, RuboCop Lint/SelfAssignment).
 example: 'a = a'
 severity: warn
+report-on: field right
 category: suspicious
 options:
   - { name: operators, type: list, default: ['=', '||=', '&&=', '??='], description: The assignment operators that store the right side as it is }

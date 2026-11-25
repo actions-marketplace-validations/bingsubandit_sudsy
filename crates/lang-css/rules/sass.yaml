@@ -1,0 +1,83 @@
+id: no-global-function-names
+family: names
+params: { target: function, mode: renamed }
+message: "use `{replacement}` instead of `{name}`"
+description: "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone."
+example: "a { color: mix(red, blue) }   # reported"
+severity: off
+category: style
+options:
+  - { name: list, type: list, default: [red=color.red, blue=color.blue, green=color.green, mix=color.mix, hue=color.hue, saturation=color.saturation, lightness=color.lightness, complement=color.complement, adjust-color=color.adjust, scale-color=color.scale, change-color=color.change, ie-hex-str=color.ie-hex-str, map-get=map.get, map-merge=map.merge, map-remove=map.remove, map-keys=map.keys, map-values=map.values, map-has-key=map.has-key, unquote=string.unquote, quote=string.quote, str-length=string.length, str-insert=string.insert, str-index=string.index, str-slice=string.slice, to-upper-case=string.to-upper-case, to-lower-case=string.to-lower-case, unique-id=string.unique-id, percentage=math.percentage, ceil=math.ceil, floor=math.floor, abs=math.abs, random=math.random, unit=math.unit, unitless=math.is-unitless, comparable=math.compatible, length=list.length, nth=list.nth, set-nth=list.set-nth, join=list.join, append=list.append, zip=list.zip, index=list.index, list-separator=list.separator, feature-exists=meta.feature-exists, variable-exists=meta.variable-exists, global-variable-exists=meta.global-variable-exists, function-exists=meta.function-exists, mixin-exists=meta.mixin-exists, inspect=meta.inspect, get-function=meta.get-function, type-of=meta.type-of, call=meta.call, content-exists=meta.content-exists, keywords=meta.keywords, selector-nest=selector.nest, selector-append=selector.append, selector-replace=selector.replace, selector-unify=selector.unify, is-superselector=selector.is-superselector, simple-selectors=selector.simple-selectors, selector-parse=selector.parse, selector-extend=selector.extend, lighten=color.adjust, adjust-hue=color.adjust, darken=color.adjust, desaturate=color.adjust, opacify=color.adjust, transparentize=color.adjust], description: "`name=replacement` entries: a global function and the module function that replaces it." }
+---
+id: dollar-variable-pattern
+family: names
+params: { target: variable, mode: pattern }
+message: "the variable `{name}` does not match the pattern"
+description: A `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex). An empty pattern allows everything.
+example: "$fooBar: 1;   # reported with pattern: ^[a-z-]+$"
+severity: off
+category: style
+options:
+  - { name: pattern, type: regex, default: "", description: "The regex a variable name, without its `$`, must match." }
+---
+id: at-mixin-pattern
+family: names
+params: { target: mixin, mode: pattern }
+message: "the mixin `{name}` does not match the pattern"
+description: A `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.
+example: "@mixin fooBar { top: 0 }   # reported with pattern: ^[a-z-]+$"
+severity: off
+category: style
+options:
+  - { name: pattern, type: regex, default: "", description: The regex a mixin name must match. }
+---
+id: at-function-pattern
+family: names
+params: { target: function-definition, mode: pattern }
+message: "the function `{name}` does not match the pattern"
+description: A `@function` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.
+example: "@function fooBar() { @return 1 }   # reported with pattern: ^[a-z-]+$"
+severity: off
+category: style
+options:
+  - { name: pattern, type: regex, default: "", description: The regex a function name must match. }
+---
+id: at-mixin-argumentless-call-parentheses
+message: "remove the parentheses of the mixin call without arguments"
+description: "An `@include` of a mixin with empty parentheses (`@include foo()`); a `using (...)` clause after them is left alone."
+example: "a { @include foo(); }   # reported"
+severity: off
+category: style
+rule: { kind: AtRule, regex: '^@(?i:include)\s+[^\s(;{]+\s*\(\s*\)\s*[;{]' }
+---
+id: at-rule-conditional-no-parentheses
+message: "do not surround the condition with parentheses"
+description: "The condition of `@if`, `@else if` and `@while` written in parentheses (`@if ($a == 1)`)."
+example: "@if ($a == 1) { a { top: 0 } }   # reported"
+severity: off
+category: style
+rule: { kind: AtRule, regex: '^@(?i:if|while|else\s+if)\s*\([^{]*\)\s*\{' }
+---
+id: at-extend-no-missing-placeholder
+message: "extend a placeholder selector (`%name`)"
+description: "An `@extend` of anything but a placeholder selector; a selector with interpolation is left alone."
+example: "a { @extend .b; }   # reported"
+severity: off
+category: style
+rule: { kind: AtRule, regex: '^@(?i:extend)\s+[^%\s]', not: { regex: '#\{[^}]+\}' } }
+---
+id: at-if-no-null
+message: "compare with `not` or the value itself, not with `null`"
+description: "An `@if` that compares with `null` (`== null`, `!= null`): write `not $a` or `$a`."
+example: "@if $a == null { a { top: 0 } }   # reported"
+severity: off
+category: style
+rule: { kind: AtRule, regex: '^@(?i:if)\b[^{\n]*(?: == null\b| != null[ \t]*\)?[ \t]*(?:\{|or\b|\)))' }
+---
+id: load-no-partial-leading-underscore
+message: "write the partial without its leading underscore"
+description: "A `@use`, `@forward` or `@import` of a partial named with a leading underscore (`@use 'a/_b'`); CSS imports are left alone."
+example: "@use 'a/_b';   # reported"
+severity: off
+category: style
+rule: { kind: AtRule, regex: '^@(?i:import|use|forward)\s+["''](?:[^"''/]*/)*_[^"''/]*["'']', not: { regex: '\.css["'']' } }

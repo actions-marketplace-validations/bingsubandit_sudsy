@@ -1,0 +1,7 @@
+on:
+  workflow_call:
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ secrets.passed_by_inherit }}

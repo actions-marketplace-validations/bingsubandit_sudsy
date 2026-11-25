@@ -142,7 +142,10 @@ impl Flow<'_> {
     /// row decides or a line comment ends the line.
     pub fn attach(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
         let rules = self.rules.filter(|r| r.has_attach())?;
-        let (name, word) = rules.attach_word(b)?;
+        let known = rules.attach_word(b, cx.options);
+        if known.is_none() && !rules.attach_unknown(b, a, cx.options) {
+            return None;
+        }
         if comments::trailing_comments(cx.grammar, a)
             .iter()
             .any(|c| c.kind == comments::CommentKind::Line)
@@ -150,7 +153,68 @@ impl Flow<'_> {
         {
             return None;
         }
+        let Some((name, word)) = known else {
+            return Some(true);
+        };
         Some(!cx.options.strings(name).any(|w| w == word))
+    }
+
+    /// Does an empty block with this opening brace keep its braces on two lines: the brace is on
+    /// its own line and the word of its construct is among `split_empty_braces`.
+    pub fn splits_empty(&self, cx: &FormatCtx<'_>, brace: &SyntaxToken) -> bool {
+        let Some(rules) = self.rules.filter(|r| r.has_attach()) else {
+            return false;
+        };
+        let mut a = brace.prev_token();
+        while let Some(t) = a.as_ref().filter(|t| t.text().trim().is_empty()) {
+            a = t.prev_token();
+        }
+        let (Some(a), Some((_, word))) = (a, rules.attach_word(brace, cx.options)) else {
+            return false;
+        };
+        self.attach(cx, &a, brace) == Some(false)
+            && cx
+                .options
+                .strings(core_config::opt::SPLIT_EMPTY_BRACES)
+                .any(|w| w == word)
+    }
+
+    /// The blank between a declarator mark (`*`, `&`) and its neighbour per the language's pointer
+    /// alignment (`derive_pointer_alignment`: the file's), `None` when `a` and `b` are no such pair.
+    fn pointer_blank(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_pointer())?;
+        let side = match cx.options.get(core_config::opt::POINTER_ALIGNMENT) {
+            Some(core_config::OptionValue::String(s)) => s.as_str(),
+            _ => return None,
+        };
+        let derived = || match cx.pointer_net(|| rules.pointer_evidence(a)) {
+            n if n > 0 => "right",
+            n if n < 0 => "left",
+            _ => side,
+        };
+        let side = if cx.options.bool(core_config::opt::DERIVE_POINTER_ALIGNMENT) {
+            derived()
+        } else {
+            side
+        };
+        let (before, after) = match side {
+            "left" => (false, true),
+            "middle" => (true, true),
+            _ => (true, false),
+        };
+        rules.pointer_gap(a, b, before, after)
+    }
+
+    /// The blank inside the braces of a list (`braced_list_padding`), `None` for other pairs.
+    fn pad_blank(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_pad())?;
+        rules.pad_gap(a, b, cx.options.bool(core_config::opt::BRACED_LIST_PADDING))
+    }
+
+    /// The blank after the closing parenthesis of a cast (`space_after_cast`), `None` for other pairs.
+    fn cast_blank(&self, cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let rules = self.rules.filter(|r| r.has_cast())?;
+        rules.cast_gap(a, b, cx.options.bool(core_config::opt::SPACE_AFTER_CAST))
     }
 
     /// What stands between two neighbouring tokens: a line break the source has, else a blank
@@ -192,7 +256,13 @@ impl Flow<'_> {
                 return (space && !glued).then(|| doc::lit(" "));
             }
         }
-        match self.want(a, b) {
+        match self
+            .pointer_blank(cx, a, b)
+            .or_else(|| self.pad_blank(cx, a, b))
+            .or_else(|| self.cast_blank(cx, a, b))
+            .or_else(|| self.rules.and_then(|r| r.operator_gap(a, b)))
+            .or_else(|| self.want(a, b))
+        {
             Some(blank) => blank.then(|| doc::lit(" ")),
             None if broken => Some(doc::lit(" ")),
             None if !gap => self.at_least_one(a, b).then(|| doc::lit(" ")),

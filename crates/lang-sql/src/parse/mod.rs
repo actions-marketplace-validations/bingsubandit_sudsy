@@ -30,6 +30,7 @@ use provider_api::ParseError;
 use tree::{Flat, Leaf, Span};
 
 pub use dialect::Dialect;
+use dialect::list;
 
 /// Parses `src` in `dialect` into the flat form `tree::build` replays.
 pub(crate) fn parse_flat(src: &str, d: Dialect) -> Flat {
@@ -179,6 +180,18 @@ impl<'a> P<'a> {
         words.iter().any(|w| self.is(n, w))
     }
 
+    /// Is the word at the cursor in the word list `name`?
+    pub fn at_list(&self, name: &str) -> bool {
+        self.at_any(dialect::list(name))
+    }
+
+    /// Is `word` in the word list `name` (any case)?
+    pub fn listed(&self, name: &str, word: &str) -> bool {
+        dialect::list(name)
+            .iter()
+            .any(|w| w.eq_ignore_ascii_case(word))
+    }
+
     pub fn at_any(&self, ws: &[&str]) -> bool {
         self.is_t(0, T::Word) && ws.iter().any(|w| self.text(0).eq_ignore_ascii_case(w))
     }
@@ -253,9 +266,14 @@ impl<'a> P<'a> {
         match self.t(0) {
             Some(T::Quoted) => true,
             Some(T::Word) => !self.reserved(0),
-            Some(T::Var) => self.text(0).starts_with('#'),
+            Some(T::Var) => self.text(0).starts_with('#') || self.var_dotted(0),
             _ => false,
         }
+    }
+
+    /// `@x.value(..)`, `@t.col`: a T-SQL variable that starts a dotted name.
+    pub fn var_dotted(&self, n: usize) -> bool {
+        self.d == Dialect::Tsql && self.is_t(n, T::Var) && self.is_t(n + 1, T::Dot)
     }
 
     pub fn reserved(&self, n: usize) -> bool {
@@ -307,7 +325,7 @@ impl<'a> P<'a> {
         let hit = self.at_name();
         if hit {
             if self.is_t(0, T::Var) {
-                self.bump(); // `#temp`
+                self.bump_as(k::WORD); // `#temp`
                 return true;
             }
             let kind = if self.is_t(0, T::Quoted) {

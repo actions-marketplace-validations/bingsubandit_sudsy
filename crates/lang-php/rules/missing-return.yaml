@@ -1,0 +1,14 @@
+id: missing-return
+family: missing-return
+params:
+  message: "The function should return {type} but the end of its body is reachable without a return"
+  skip-types: void never mixed null
+  skip-names: __construct __destruct
+  doc: '@return\s+(.+)'
+description: >-
+  A function or method whose native return type or `@return` tag is not `void` or `never` and whose
+  end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left
+  out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen.
+example: "function f(): int { if ($a) { return 1; } }"
+severity: off
+category: correctness

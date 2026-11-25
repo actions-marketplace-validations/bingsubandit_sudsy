@@ -1,0 +1,113 @@
+tool: "revive"
+version: "1.17.1"
+languages: ["go"]
+sources:
+  - "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md"
+  - "https://github.com/mgechev/revive/blob/v1.17.1/defaults.toml"
+scope: "The 23 rules of revive's default configuration (no config file: `defaults.toml`, confidence 0.8, files with the `Code generated ... DO NOT EDIT.` header skipped); the other rules need a configuration file that turns them on and are `deferred`. revive reads each file of a package with the package's other files (`package-comments`) and, for four rules, go/types (`var-declaration`, `unexported-return`, `context-keys-type`, `time-naming`); Sudsy reads one file at a time."
+entries:
+  add-constant: deferred | not in the default configuration of revive
+  argument-limit: deferred | not in the default configuration of revive
+  atomic: deferred | not in the default configuration of revive
+  banned-characters: deferred | not in the default configuration of revive
+  bare-return: deferred | not in the default configuration of revive
+  blank-imports: planned
+  bool-literal-in-expr: deferred | not in the default configuration of revive
+  call-to-gc: deferred | not in the default configuration of revive
+  cognitive-complexity: deferred | not in the default configuration of revive
+  comment-spacings: deferred | not in the default configuration of revive
+  comments-density: deferred | not in the default configuration of revive
+  confusing-naming: deferred | not in the default configuration of revive
+  confusing-results: deferred | not in the default configuration of revive
+  constant-logical-expr: deferred | not in the default configuration of revive
+  context-as-argument: planned
+  context-keys-type: planned
+  cyclomatic: deferred | not in the default configuration of revive
+  datarace: deferred | not in the default configuration of revive
+  deep-exit: deferred | not in the default configuration of revive
+  defer: deferred | not in the default configuration of revive
+  dot-imports: planned
+  duplicated-imports: deferred | not in the default configuration of revive
+  early-return: deferred | not in the default configuration of revive
+  empty-block: planned
+  empty-lines: deferred | not in the default configuration of revive
+  enforce-map-style: deferred | not in the default configuration of revive
+  enforce-repeated-arg-type-style: deferred | not in the default configuration of revive
+  enforce-slice-style: deferred | not in the default configuration of revive
+  enforce-switch-style: deferred | not in the default configuration of revive
+  epoch-naming: deferred | not in the default configuration of revive
+  error-naming: planned
+  error-return: planned
+  error-strings: planned
+  errorf: planned
+  exported: rule missing-doc-comment, doc-first-word | No stuttering check (a name that starts with the package name), no own-declaration check for `var a, B`; a method that is sortable through methods in another file of the package is reported
+  file-header: deferred | not in the default configuration of revive
+  file-length-limit: deferred | not in the default configuration of revive
+  filename-format: deferred | not in the default configuration of revive
+  flag-parameter: deferred | not in the default configuration of revive
+  forbidden-call-in-wg-go: deferred | not in the default configuration of revive
+  function-length: deferred | not in the default configuration of revive
+  function-result-limit: deferred | not in the default configuration of revive
+  get-return: deferred | not in the default configuration of revive
+  identical-branches: deferred | not in the default configuration of revive
+  identical-ifelseif-branches: deferred | not in the default configuration of revive
+  identical-ifelseif-conditions: deferred | not in the default configuration of revive
+  identical-switch-branches: deferred | not in the default configuration of revive
+  identical-switch-conditions: deferred | not in the default configuration of revive
+  if-return: deferred | not in the default configuration of revive
+  import-alias-naming: deferred | not in the default configuration of revive
+  import-shadowing: deferred | not in the default configuration of revive
+  imports-blocklist: deferred | not in the default configuration of revive
+  increment-decrement: planned
+  indent-error-flow: planned
+  inefficient-map-lookup: deferred | not in the default configuration of revive
+  line-length-limit: deferred | not in the default configuration of revive
+  marshal-receiver: deferred | not in the default configuration of revive
+  max-control-nesting: deferred | not in the default configuration of revive
+  max-public-structs: deferred | not in the default configuration of revive
+  modifies-parameter: deferred | not in the default configuration of revive
+  modifies-value-receiver: deferred | not in the default configuration of revive
+  multiline-if-init: deferred | not in the default configuration of revive
+  nested-structs: deferred | not in the default configuration of revive
+  optimize-operands-order: deferred | not in the default configuration of revive
+  package-comments: rule missing-package-comment, package-comment-form | 52 findings are missed where a generated or build-excluded sibling that revive does not load holds the first file name or the only comment
+  package-directory-mismatch: deferred | not in the default configuration of revive
+  package-naming: deferred | not in the default configuration of revive
+  range: planned
+  range-val-address: deferred | not in the default configuration of revive
+  range-val-in-closure: deferred | not in the default configuration of revive
+  receiver-naming: planned
+  redefines-builtin-id: rule redefines-builtin-id
+  redundant-build-tag: deferred | not in the default configuration of revive
+  redundant-import-alias: deferred | not in the default configuration of revive
+  redundant-test-main-exit: deferred | not in the default configuration of revive
+  string-format: deferred | not in the default configuration of revive
+  string-of-int: deferred | not in the default configuration of revive
+  struct-tag: deferred | not in the default configuration of revive
+  superfluous-else: planned
+  time-date: deferred | not in the default configuration of revive
+  time-equal: deferred | not in the default configuration of revive
+  time-naming: planned
+  unchecked-type-assertion: deferred | not in the default configuration of revive
+  unconditional-recursion: deferred | not in the default configuration of revive
+  unexported-naming: deferred | not in the default configuration of revive
+  unexported-return: planned
+  unhandled-error: deferred | not in the default configuration of revive
+  unnecessary-format: deferred | not in the default configuration of revive
+  unnecessary-if: deferred | not in the default configuration of revive
+  unnecessary-stmt: deferred | not in the default configuration of revive
+  unreachable-code: planned
+  unsecure-url-scheme: deferred | not in the default configuration of revive
+  unused-parameter: rule unused-parameter
+  unused-receiver: deferred | not in the default configuration of revive
+  use-any: deferred | not in the default configuration of revive
+  use-errors-new: deferred | not in the default configuration of revive
+  use-fmt-print: deferred | not in the default configuration of revive
+  use-slices-concat: deferred | not in the default configuration of revive
+  use-slices-sort: deferred | not in the default configuration of revive
+  use-waitgroup-go: deferred | not in the default configuration of revive
+  useless-break: deferred | not in the default configuration of revive
+  useless-fallthrough: deferred | not in the default configuration of revive
+  var-declaration: planned
+  var-naming: planned
+  waitgroup-by-value: deferred | not in the default configuration of revive

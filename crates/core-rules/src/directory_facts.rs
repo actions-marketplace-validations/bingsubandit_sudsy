@@ -5,8 +5,8 @@
 //! (`ProjectContext::complete`): an absence is only a finding when every file was read.
 //!
 //! concept: directory-facts
-//! what: A declaration no file of the directory uses, a need no file provides, a requirement the directory never states.
-//! tools: tflint terraform_unused_declarations, terraform_required_providers, terraform_required_version
+//! what: A declaration no file of the directory uses, a need no file provides, a requirement the directory never states, a directory with no doc comment.
+//! tools: tflint terraform_unused_declarations, terraform_required_providers, terraform_required_version, revive package-comments
 
 use crate::project::{Fact, ProjectContext, ProjectFacts};
 use std::collections::HashSet;
@@ -67,6 +67,27 @@ pub fn missing(facts: &ProjectFacts, ctx: &mut ProjectContext<'_>, message: &str
     let stated = keys(facts, rule, &[NEEDED, PROVIDED]);
     let anchors = of_kind(facts, rule, ANCHOR).filter(|f| !stated.contains(f.key.as_str()));
     for f in last.into_iter().chain(anchors) {
+        ctx.report(&f.file, f.range, message.replace("{name}", &f.key));
+    }
+}
+
+/// Reports one `ANCHOR` fact of the unit (the one in the first file by name) when some fact of
+/// kind `NEEDED` and none of kind `PROVIDED` exists (any key). `message` with `{name}` (the key).
+pub fn first_anchor(facts: &ProjectFacts, ctx: &mut ProjectContext<'_>, message: &str) {
+    if !ctx.complete {
+        return;
+    }
+    let rule = ctx.rule_id();
+    if of_kind(facts, rule, NEEDED).next().is_none()
+        || of_kind(facts, rule, PROVIDED).next().is_some()
+    {
+        return;
+    }
+    let file_name = |f: &Fact| {
+        let name = f.file.file_name().and_then(|n| n.to_str());
+        name.unwrap_or_default().to_string()
+    };
+    if let Some(f) = of_kind(facts, rule, ANCHOR).min_by_key(|f| file_name(f)) {
         ctx.report(&f.file, f.range, message.replace("{name}", &f.key));
     }
 }

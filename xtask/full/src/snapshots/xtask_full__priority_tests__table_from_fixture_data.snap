@@ -1,0 +1,27 @@
+---
+source: xtask/full/src/priority_tests.rs
+expression: "table(&rows, &tools, &catalogs, &[])"
+---
+## Priority
+
+Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Order: primary legs under the bar come before any secondary leg whatever the score says; the score orders inside each group. Points: to the 85% bar. Needs: the findings (lint) or files (format, the groups of the README table) still to win; causes: the largest until the need is met (a rest no cause names is `unclassified`). Difficulty: per cause 1 when its rule exists and is mapped in the catalog, 3 for a new rule, a format gap or an unclassified rest. Score: weight x points / difficulty. A leg at the bar is not listed.
+
+| Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
+|---|---|---|---|---|---|---|---|---|---|
+| Alpha | lint Lint | 4 | 50.0% | 35.0 | 35 findings | `mapped-rule` 30, `unmapped-rule` 15 | 4 | 35.00 | abc123 |
+| Alpha | format Fmt | 4 | 55.9% | 29.1 | 33 files | `big` 30, `small` 5 | 6 | 19.43 | - |
+| (not in support.yaml) | lint unlisted | 0.25 | 10.0% | 75.0 | 75 findings | `y` 90 | 3 | 6.25 | abc123 |
+| Alpha | lint Pop | 1 | 70.0% | 15.0 | 15 findings | `x` 30 | 3 | 5.00 | abc123 |
+
+Blocked on a decision:
+
+| Language | Leg | Now | Points | Reason |
+|---|---|---|---|---|
+| Gamma | format Held | 10.0% | 75.0 | waits on a decision |
+
+Not measured: Beta format OnlyFixtures (no differences.yaml).
+
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: Alpha format Fmt; Alpha lint Lint; Beta format OnlyFixtures.
+
+| Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
+|---|---|---|---|---|---|---|---|

@@ -1,0 +1,25 @@
+id: unused-parameter
+family: scope
+params: { check: unused-parameter }
+message: "parameter '{name}' seems to be unused, consider removing or renaming it as _"
+description: "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use."
+example: "func f(a, b int) int { return a }   // b is reported"
+severity: off
+category: suspicious
+options:
+  - { name: args, type: string, choices: [after-used, all, none], default: all, description: "Which parameters are checked: those after the last one that is read, all of them, or none." }
+  - { name: ignore_pattern, type: regex, default: "^_", description: "A regex for the names that are not checked (revive's `allowRegex`)." }
+---
+id: redefines-builtin-id
+family: scope
+params: { check: redefines-builtin }
+message: "redefinition of the built-in identifier `{name}`"
+description: "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported."
+example: "var len = 1"
+severity: off
+category: suspicious
+options:
+  - { name: allow, type: list, default: [], description: Names that may be declared. }
+  - { name: kinds, type: list, choices: [variable, parameter, function, class, import, type], default: [], description: "The declarations that are checked (empty: all)." }
+  - { name: except_parents, type: list, default: [ReceiverList], description: "Grammar kinds whose direct declarations are left out (a receiver)." }
+  - { name: assigned_by, type: list, default: [AssignmentStatement], description: "Grammar kinds of statements whose left-side names are reported too (`len = 1`, `max += 1`)." }

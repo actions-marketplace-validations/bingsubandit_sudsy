@@ -11,58 +11,61 @@ The catalog of a lint tool lists every rule of the pinned version (`scripts/pari
 | `option <language>.format.<name>` | A formatter option does it. | covered, partial with a gap |
 | `formatter` | Fixed formatter behavior, no option. | covered, partial with a gap |
 | `config <text>` | Configuration outside rules and options (overrides, ignore files, presets, suppression comments). | covered, partial with a gap |
-| `sdk <id>` | A .NET SDK diagnostic (IDE, CA, CS) does it; Sudsy never reimplements these. | sdk |
+| `sdk <id>` | A .NET SDK diagnostic (IDE, CA, CS) does it and Sudsy has no rule for it (StyleCop ids with a rule are `rule`: [../design/stylecop-rules.md](../design/stylecop-rules.md)). | sdk |
 | `planned` | Accepted for implementation. | missing |
 | `deferred` | Wanted eventually, deliberately not scheduled. | deferred |
 | `wontfix <reason>` | Out of scope. | wontfix |
 
+The clang-format run does not compare line wrapping (the `wrap_compare` `note` of its entry in `scripts/parity_tools.json`): its format share counts files whose tokens and non-wrap gaps equal clang-format's, and the byte-identical share is printed beside it.
+
 ## Tools and corpora on a fresh host
-`scripts/parity.sh` installs a tool from its `install` key in `scripts/parity_tools.json` (npm, pip, a release file, a PowerShell module with `psmodule`) and runs the `fetch` scripts of its corpus (`tests/conformance/fetch-<language>-corpus.sh`; the corpora are gitignored, so a new checkout fetches them first: a run on an empty corpus prints `0 of 0 findings`, which is a missing corpus, not a result). Two things come from outside the runner: PowerShell (`pwsh` 7.4 or later on `PATH`; on Linux the tarball `powershell-<version>-linux-<x64|arm64>.tar.gz` of the PowerShell GitHub release, unpacked anywhere) for `invoke-formatter` and `psscriptanalyzer`, and the .NET SDK for the C# tools. PHP is not needed: `php-cs-fixer` and `phpstan` unpack a static PHP of dl.static-php.dev into their prefix. The nightly matrix runs the same commands. Hosts used: registry.npmjs.org, pypi.org, github.com releases, dl.static-php.dev, www.powershellgallery.com, api.nuget.org (StyleCop.Analyzers for the fixtures and the driver).
+`scripts/parity.sh` installs a tool from its `install` key in `scripts/parity_tools.json` (npm, pip, a release file, a PowerShell module with `psmodule`) and runs the `fetch` scripts of its corpus (`tests/conformance/fetch-<language>-corpus.sh`; the corpora are gitignored, so a new checkout fetches them first: a run on an empty corpus prints `0 of 0 findings`, which is a missing corpus, not a result). Two things come from outside the runner: PowerShell (`pwsh` 7.4 or later on `PATH`; on Linux the tarball `powershell-<version>-linux-<x64|arm64>.tar.gz` of the PowerShell GitHub release, unpacked anywhere) for `invoke-formatter` and `psscriptanalyzer`, and the .NET SDK for the C# tools. PHP is not needed: `php-cs-fixer` and `phpstan` unpack a static PHP of dl.static-php.dev into their prefix. The nightly matrix runs the same commands. Hosts used: registry.npmjs.org, pypi.org, github.com releases, dl.static-php.dev, www.powershellgallery.com, api.nuget.org (StyleCop.Analyzers for the fixtures and the driver), repo.packagist.org and api.github.com (the PHP corpus's Composer packages).
 
 ## Counts
 <!-- generated:counts -->
-| Tool | Target | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| actionlint | 85.2% | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
-| angular-eslint | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
-| biome | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
-| buf | 85.8% | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
-| checkmake | 100.0% | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
-| checkstyle | 88.6% | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
-| clang-format | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
-| csharpier | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
-| dotnet-format-editorconfig | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
-| eslint | 100.0% | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |
-| eslint-plugin-jsonc | 0.0% | 44 | 35 | 6 | 1 | 0 | 2 | 0 | 1 |
-| eslint-plugin-svelte | 100.0% | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
-| eslint-plugin-vue | 88.8% | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
-| google-java-format | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
-| graphql-eslint | 53.7% | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
-| hadolint | 86.6% | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
-| html-eslint | 0.2% | 66 | 13 | 12 | 41 | 0 | 0 | 0 | 41 |
-| html-validate | 86.5% | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
-| htmlhint | 5.0% | 44 | 10 | 6 | 28 | 0 | 0 | 0 | 28 |
-| ktlint | 92.3% | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
-| markdownlint | 99.0% | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
-| php-cs-fixer | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| phpstan | 0.0% | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| prettier | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
-| psscriptanalyzer | 87.1% | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
-| roslynator | - | 340 | 23 | 7 | 289 | 18 | 1 | 2 | 289 |
-| rubocop | 96.2% | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
-| ruff | 94.6% | 980 | 133 | 0 | 689 | 0 | 18 | 140 | 689 |
-| shellcheck | 86.6% | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
-| shfmt | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
-| sqlfluff | 85.7% | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
-| stylecop | 24.6% | 197 | 120 | 10 | 1 | 45 | 21 | 0 | 1 |
-| stylelint | 94.7% | 150 | 90 | 9 | 47 | 0 | 0 | 4 | 47 |
-| stylelint-less | 78.0% | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
-| stylelint-scss | 20.6% | 71 | 1 | 2 | 67 | 0 | 0 | 1 | 67 |
-| taplo | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
-| terraform | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
-| tflint | 93.0% | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
-| typescript-eslint | 100.0% | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
-| yamllint | 99.6% | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
+| Tool | Target | Measured on | Entries | Covered | Partial | Missing | SDK | Wontfix | Deferred | Planned |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| actionlint | 87.0% | `cbdd3e85` | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
+| angular-eslint | - | - | 37 | 3 | 2 | 22 | 0 | 0 | 10 | 22 |
+| biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
+| buf | 85.8% | `7514c1f3` | 47 | 20 | 3 | 0 | 0 | 0 | 24 | 0 |
+| checkmake | 100.0% | `7514c1f3` | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
+| checkstyle | 88.6% | `7514c1f3` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
+| clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
+| dotnet-format-editorconfig | - | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
+| eslint | 100.0% | `7514c1f3` | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |
+| eslint-plugin-jsonc | 100.0% | `7514c1f3` | 44 | 35 | 7 | 0 | 0 | 2 | 0 | 0 |
+| eslint-plugin-svelte | 100.0% | `7514c1f3` | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
+| eslint-plugin-vue | 88.8% | `7514c1f3` | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
+| google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
+| graphql-eslint | 88.1% | `7514c1f3` | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
+| hadolint | 91.2% | `7514c1f3` | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
+| html-eslint | 88.1% | `916059a8` | 66 | 15 | 18 | 33 | 0 | 0 | 0 | 33 |
+| html-validate | 92.5% | `0c8a3dcc` | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
+| htmlhint | 91.6% | `0c8a3dcc` | 44 | 10 | 7 | 27 | 0 | 0 | 0 | 27 |
+| ktlint | 92.3% | `7514c1f3` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
+| markdownlint | 99.0% | `7514c1f3` | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
+| php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| phpstan | 36.1% | `362a7f17` | 18 | 0 | 6 | 10 | 0 | 2 | 0 | 10 |
+| prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
+| psscriptanalyzer | 87.1% | `7514c1f3` | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
+| revive | 69.3% | `b11e8bdd` | 105 | 2 | 2 | 19 | 0 | 0 | 82 | 19 |
+| roslynator | 0.4% | `66718389` | 340 | 28 | 7 | 286 | 18 | 1 | 0 | 286 |
+| rubocop | 96.2% | `7514c1f3` | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
+| ruff | 94.6% | `7514c1f3` | 980 | 135 | 0 | 687 | 0 | 18 | 140 | 687 |
+| shellcheck | 86.6% | `7514c1f3` | 520 | 19 | 22 | 0 | 0 | 0 | 479 | 0 |
+| shfmt | - | - | 9 | 1 | 1 | 0 | 0 | 3 | 4 | 0 |
+| sqlfluff | 79.7% | `1456737e` | 97 | 47 | 0 | 31 | 0 | 0 | 19 | 31 |
+| stylecop | 87.3% | `e98263ba` | 197 | 126 | 10 | 1 | 39 | 21 | 0 | 1 |
+| stylelint | 94.8% | `7514c1f3` | 150 | 90 | 11 | 45 | 0 | 0 | 4 | 45 |
+| stylelint-less | 85.4% | `7514c1f3` | 6 | 0 | 0 | 5 | 0 | 0 | 1 | 5 |
+| stylelint-scss | 89.9% | `7514c1f3` | 71 | 16 | 2 | 52 | 0 | 0 | 1 | 52 |
+| taplo | - | - | 23 | 11 | 7 | 0 | 0 | 0 | 5 | 0 |
+| terraform | - | - | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| tflint | 93.0% | `7514c1f3` | 20 | 8 | 4 | 0 | 0 | 0 | 8 | 0 |
+| typescript-eslint | 100.0% | `7514c1f3` | 136 | 10 | 16 | 34 | 0 | 9 | 67 | 34 |
+| yamllint | 98.5% | `dc16e446` | 66 | 61 | 4 | 1 | 0 | 0 | 0 | 1 |
 <!-- /generated -->
 
 ## Lint coverage by function
@@ -91,14 +94,13 @@ The rules with most findings that Sudsy does not report, per reference tool, on 
 | Kotlin | ktlint | `kotlin/ktlint` | `function-signature` 30800, `argument-list-wrapping` 24113, `multiline-expression-wrapping` 15169, `class-signature` 4591, `trailing-comma-on-call-site` 4162 |
 | HCL | tflint | `hcl/tflint-recommended` | `terraform_required_providers` 37, `terraform_required_version` 20, `terraform_unused_declarations` 2 |
 | Java | checkstyle | `java/google` | `MissingJavadocMethod` 18283, `MethodName` 7887, `JavadocParagraph` 5301, `SummaryJavadoc` 1527, `TodoFormat` 1498 |
-| PHP | phpstan | `php/phpstan` | `class.notFound` 7407, `variable.undefined` 591, `classConstant.notFound` 511, `staticMethod.notFound` 401, `function.notFound` 323 |
+| PHP | phpstan | `php/phpstan` | `method.notFound` 384, `class.notFound` 381, `new.static` 317, `function.notFound` 140, `staticMethod.notFound` 90 |
 | SQL | sqlfluff | `sql/sqlfluff` | `PRS` 380, `CP05` 227, `CP02` 187, `RF05` 131, `CV06` 126 |
 
 Not measured:
 
 | Tool | Reason |
 |---|---|
-| Roslynator | the compiler skips analyzers when a compilation has errors and the C# corpus does not compile on its own (118,604 compiler errors); needs an analyzer driver that tolerates errors, as `scripts/stylecop-driver` does for StyleCop |
 | clang-tidy | no catalog, and Sudsy has no C or C++ lint rules; a share would be 0 by construction |
 | detekt, PMD, PHPCS | not catalogued |
 | eslint-plugin-jsonc | the JSON corpus is a parser test suite (JSONTestSuite), no real-world files |

@@ -215,6 +215,80 @@
               "$ref": "#/definitions/rule",
               "description": "An async method returning Task or ValueTask has a name that does not end in `Async`. Overrides, explicit interface implementations and `Main` are left alone (their names are not the method's to choose). Renaming needs the binding layer, so there is no fix."
             },
+            "at-extend-no-missing-placeholder": {
+              "$ref": "#/definitions/rule",
+              "description": "An `@extend` of anything but a placeholder selector; a selector with interpolation is left alone."
+            },
+            "at-function-pattern": {
+              "description": "A `@function` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "default": "",
+                          "description": "The regex a function name must match.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "at-if-no-null": {
+              "$ref": "#/definitions/rule",
+              "description": "An `@if` that compares with `null` (`== null`, `!= null`): write `not $a` or `$a`."
+            },
+            "at-mixin-argumentless-call-parentheses": {
+              "$ref": "#/definitions/rule",
+              "description": "An `@include` of a mixin with empty parentheses (`@include foo()`); a `using (...)` clause after them is left alone."
+            },
+            "at-mixin-pattern": {
+              "description": "A `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "default": "",
+                          "description": "The regex a mixin name must match.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "at-rule-allowed-list": {
               "description": "An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything.",
               "oneOf": [
@@ -248,6 +322,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "at-rule-conditional-no-parentheses": {
+              "$ref": "#/definitions/rule",
+              "description": "The condition of `@if`, `@else if` and `@while` written in parentheses (`@if ($a == 1)`)."
             },
             "at-rule-disallowed-list": {
               "description": "An at-rule (vendor prefix left out) that is in the `list` option.",
@@ -705,6 +783,10 @@
               "$ref": "#/definitions/rule",
               "description": "A fenced code block in which every line starts with `$ ` shows commands without their output, which makes copying them awkward (markdownlint MD014)."
             },
+            "comment-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A `/* */` comment on a line of its own needs a blank line before it, unless it comes first in a block, shares a line with code or is a `stylelint-` directive; a `//` comment is another rule's."
+            },
             "comment-space": {
               "description": "A line comment has text right after its marker. Exempt: nothing but whitespace after the marker, a marker repeated (`////`, `##`), `--` separator lines, and a `#!` shebang on the first line. The fix inserts the space.",
               "oneOf": [
@@ -885,6 +967,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "custom-property-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A custom property needs a blank line before it, unless a comment is right before it or another custom property is; the first declaration of a block and those in a single-line block take none."
             },
             "custom-property-no-missing-var-function": {
               "$ref": "#/definitions/rule",
@@ -1125,6 +1211,10 @@
               "$ref": "#/definitions/rule",
               "description": "A documentation line (`///`) starts with a single space. More spaces are allowed to indent continuation lines, not on the first line of the comment; a tab or no space is always reported."
             },
+            "doc-first-word": {
+              "$ref": "#/definitions/rule",
+              "description": "The first line of the doc comment of an exported function, method, type, constant or variable does not start with its name (revive exported). A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types; a constant or variable in a group whose comment has text is not checked. Lines of directives (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is left to `missing-doc-comment`."
+            },
             "doc-paragraph": {
               "$ref": "#/definitions/rule",
               "description": "The paragraphs of a Javadoc comment: a `<p>` tag stands right before the first word of its paragraph (no space) and after an empty line, an empty line between paragraphs is followed by `<p>`, and the comment does not start with `<p>` (Checkstyle JavadocParagraph). Text inside `<pre>`, `<ul>` and the like, and after the first block tag, is left alone."
@@ -1136,6 +1226,10 @@
             "doc-param-has-text": {
               "$ref": "#/definitions/rule",
               "description": "A `<param>` without text. Skipped when the comment has `<inheritdoc />`. No fix."
+            },
+            "doc-param-missing": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or `<include>` is left out, and so is a declaration without a comment. No fix."
             },
             "doc-partial-required": {
               "$ref": "#/definitions/rule",
@@ -1302,9 +1396,48 @@
               "$ref": "#/definitions/rule",
               "description": "A `variable` block with no `description` argument (tflint terraform_documented_variables)."
             },
+            "dollar-variable-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A `$` variable declaration needs a blank line before it, unless a comment is right before it or another `$` variable is; the first statement of a block and those in a single-line block take none."
+            },
+            "dollar-variable-pattern": {
+              "description": "A `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex). An empty pattern allows everything.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "default": "",
+                          "description": "The regex a variable name, without its `$`, must match.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "double-negation": {
               "$ref": "#/definitions/rule",
               "description": "`not` applied to `not`."
+            },
+            "double-slash-comment-empty-line-before": {
+              "$ref": "#/definitions/rule",
+              "description": "A `//` comment on a line of its own needs a blank line before it, unless a comment is right before it, it comes first in a block, or it is a `stylelint-` directive."
             },
             "duplicate-column-alias": {
               "$ref": "#/definitions/rule",
@@ -1384,7 +1517,7 @@
             },
             "enum-entry-name-case": {
               "$ref": "#/definitions/rule",
-              "description": "An enum entry whose name starts with a lowercase letter or an underscore (ktlint enum-entry-name-case)."
+              "description": "An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint enum-entry-name-case)."
             },
             "enum-first-value-zero": {
               "description": "The first value of an enum is not 0 (buf lint ENUM_FIRST_VALUE_ZERO). Proto3 and editions with open enums require it; proto2 files (also those with no `syntax`) are checked only with the `proto2` option.",
@@ -1484,6 +1617,37 @@
             "field-lower-snake-case": {
               "$ref": "#/definitions/rule",
               "description": "A field name that is not lower_snake_case (buf lint FIELD_LOWER_SNAKE_CASE)."
+            },
+            "field-name-no-underscore": {
+              "description": "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "fields": {
+                          "default": "^[^_]",
+                          "description": "Regular expression the name of a field must match; empty: not checked.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "field-not-required": {
               "$ref": "#/definitions/rule",
@@ -1900,7 +2064,7 @@
             },
             "heading-level": {
               "$ref": "#/definitions/rule",
-              "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`."
+              "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported)."
             },
             "heading-style": {
               "description": "Headings are written in more than one style: `#` in front of the text (atx) or text over `===` or `---` (setext). Style `consistent` takes the first heading's. The fix rewrites a heading of one line, level 1 or 2.",
@@ -2063,13 +2227,44 @@
               "$ref": "#/definitions/rule",
               "description": "An element of a list, tuple or set that is several string literals one after the other, without parentheses."
             },
+            "implicit-nullable-parameter": {
+              "$ref": "#/definitions/rule",
+              "description": "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable)."
+            },
             "import-no-public": {
               "$ref": "#/definitions/rule",
               "description": "`import public` (buf lint IMPORT_NO_PUBLIC)."
             },
             "import-notation": {
-              "$ref": "#/definitions/rule",
-              "description": "An `@import` of `url(...)`: write the string."
+              "description": "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "url": {
+                          "default": false,
+                          "description": "Ask for url() instead of a string.",
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "import-ordering": {
               "$ref": "#/definitions/rule",
@@ -2445,6 +2640,10 @@
             "literal-in-interpolation": {
               "$ref": "#/definitions/rule",
               "description": "A number, symbol, `true`, `false`, `nil` or string literal as the whole content of a `#{...}` (RuboCop Lint/LiteralInInterpolation)."
+            },
+            "load-no-partial-leading-underscore": {
+              "$ref": "#/definitions/rule",
+              "description": "A `@use`, `@forward` or `@import` of a partial named with a leading underscore (`@use 'a/_b'`); CSS imports are left alone."
             },
             "long-title": {
               "$ref": "#/definitions/rule",
@@ -2825,45 +3024,8 @@
               ]
             },
             "missing-doc-comment": {
-              "description": "A public or protected method, constructor or type has no `/** */` comment before it (Checkstyle MissingJavadocMethod and MissingJavadocType). Members of an interface are public. A method of a type that is not public (itself or an enclosing one), a type nested in a type that is not visible, and a declaration inside a method or an anonymous class are left out.",
-              "oneOf": [
-                {
-                  "$ref": "#/definitions/level"
-                },
-                {
-                  "additionalProperties": false,
-                  "properties": {
-                    "level": {
-                      "$ref": "#/definitions/level"
-                    },
-                    "options": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "allowed_annotations": {
-                          "default": [
-                            "Override"
-                          ],
-                          "description": "Names of annotations (`*` matches any run of characters) that excuse a declaration.",
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        },
-                        "property_accessors": {
-                          "default": false,
-                          "description": "Leave out getters and setters: `getX`, `isX` with no parameter and one `return`, `setX` with one parameter and one statement.",
-                          "type": "boolean"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "level"
-                  ],
-                  "type": "object"
-                }
-              ]
+              "$ref": "#/definitions/rule",
+              "description": "A type, member, field or enum item that StyleCop's defaults ask to document (public, protected or internal, in types that are too; members of an interface, explicit interface implementations and enum items are public; partial declarations are left out) has no `///` comment before it. Private members are left alone. No fix."
             },
             "missing-doctype": {
               "$ref": "#/definitions/rule",
@@ -2873,9 +3035,17 @@
               "$ref": "#/definitions/rule",
               "description": "A call of a cmdlet whose mandatory parameters (the ones every parameter set requires) none is given by name or position. A `-name` takes the element after it as its value, so `Write-Verbose -Verbose \"text\"` leaves `-Message` unbound. A command behind a pipe or with a splatted argument is left alone."
             },
+            "missing-package-comment": {
+              "$ref": "#/definitions/rule",
+              "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse."
+            },
             "missing-permissions": {
               "$ref": "#/definitions/rule",
               "description": "A job without `permissions`, in a workflow without top-level `permissions`: it gets the repository's default token permissions, often write access."
+            },
+            "missing-return": {
+              "$ref": "#/definitions/rule",
+              "description": "A function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen."
             },
             "missing-super": {
               "$ref": "#/definitions/rule",
@@ -3160,6 +3330,10 @@
             "no-alt-text": {
               "$ref": "#/definitions/rule",
               "description": "An image with empty alternate text, `![](url)` (markdownlint MD045)."
+            },
+            "no-ambiguous-ampersand": {
+              "$ref": "#/definitions/rule",
+              "description": "An `&` that starts no entity is valid HTML and renders as written; html-validate's `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`."
             },
             "no-anonymous-operations": {
               "$ref": "#/definitions/rule",
@@ -3470,7 +3644,7 @@
             },
             "no-duplicate-id": {
               "$ref": "#/definitions/rule",
-              "description": "An `id` that an earlier element of the document already has. Ids must be unique: scripts, links and labels find the first element only. Empty ids are left alone."
+              "description": "An `id` that an earlier element of the document already has. Ids must be unique: scripts, links and labels find the first element only."
             },
             "no-duplicate-include": {
               "$ref": "#/definitions/rule",
@@ -3596,8 +3770,35 @@
               "description": "A class or interface with `{ }` and nothing in it (ktlint no-empty-class-body)."
             },
             "no-empty-comment": {
-              "$ref": "#/definitions/rule",
-              "description": "A comment has no text. A block comment is reported wherever it is; an empty line comment only when it begins or ends a run of comments, because a bare `//` between two comment lines separates paragraphs."
+              "description": "A comment has no text. A block comment is reported wherever it is; an empty line comment only when it begins or ends a run of comments, because a bare `//` between two comment lines separates paragraphs.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "separators": {
+                          "default": false,
+                          "description": "Also report an empty line comment between two comments.",
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-empty-delegate-parens": {
               "$ref": "#/definitions/rule",
@@ -3799,6 +4000,109 @@
               "$ref": "#/definitions/rule",
               "description": "A function declared by name that is assigned to."
             },
+            "no-global-function-names": {
+              "description": "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "list": {
+                          "default": [
+                            "red=color.red",
+                            "blue=color.blue",
+                            "green=color.green",
+                            "mix=color.mix",
+                            "hue=color.hue",
+                            "saturation=color.saturation",
+                            "lightness=color.lightness",
+                            "complement=color.complement",
+                            "adjust-color=color.adjust",
+                            "scale-color=color.scale",
+                            "change-color=color.change",
+                            "ie-hex-str=color.ie-hex-str",
+                            "map-get=map.get",
+                            "map-merge=map.merge",
+                            "map-remove=map.remove",
+                            "map-keys=map.keys",
+                            "map-values=map.values",
+                            "map-has-key=map.has-key",
+                            "unquote=string.unquote",
+                            "quote=string.quote",
+                            "str-length=string.length",
+                            "str-insert=string.insert",
+                            "str-index=string.index",
+                            "str-slice=string.slice",
+                            "to-upper-case=string.to-upper-case",
+                            "to-lower-case=string.to-lower-case",
+                            "unique-id=string.unique-id",
+                            "percentage=math.percentage",
+                            "ceil=math.ceil",
+                            "floor=math.floor",
+                            "abs=math.abs",
+                            "random=math.random",
+                            "unit=math.unit",
+                            "unitless=math.is-unitless",
+                            "comparable=math.compatible",
+                            "length=list.length",
+                            "nth=list.nth",
+                            "set-nth=list.set-nth",
+                            "join=list.join",
+                            "append=list.append",
+                            "zip=list.zip",
+                            "index=list.index",
+                            "list-separator=list.separator",
+                            "feature-exists=meta.feature-exists",
+                            "variable-exists=meta.variable-exists",
+                            "global-variable-exists=meta.global-variable-exists",
+                            "function-exists=meta.function-exists",
+                            "mixin-exists=meta.mixin-exists",
+                            "inspect=meta.inspect",
+                            "get-function=meta.get-function",
+                            "type-of=meta.type-of",
+                            "call=meta.call",
+                            "content-exists=meta.content-exists",
+                            "keywords=meta.keywords",
+                            "selector-nest=selector.nest",
+                            "selector-append=selector.append",
+                            "selector-replace=selector.replace",
+                            "selector-unify=selector.unify",
+                            "is-superselector=selector.is-superselector",
+                            "simple-selectors=selector.simple-selectors",
+                            "selector-parse=selector.parse",
+                            "selector-extend=selector.extend",
+                            "lighten=color.adjust",
+                            "adjust-hue=color.adjust",
+                            "darken=color.adjust",
+                            "desaturate=color.adjust",
+                            "opacify=color.adjust",
+                            "transparentize=color.adjust"
+                          ],
+                          "description": "`name=replacement` entries: a global function and the module function that replaces it.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "no-global-vars": {
               "$ref": "#/definitions/rule",
               "description": "A variable in the `global:` scope, other than the special variables PSScriptAnalyzer exempts (`$global:LASTEXITCODE`, `$global:ErrorActionPreference`, `$global:PSDefaultParameterValues`, ...)."
@@ -3864,6 +4168,10 @@
             "no-inline-style": {
               "$ref": "#/definitions/rule",
               "description": "A `style` attribute is a sign of unstructured CSS. `display` alone is allowed, because scripts toggle it. A Svelte `style:property` directive is one too."
+            },
+            "no-inner-function": {
+              "$ref": "#/definitions/rule",
+              "description": "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner)."
             },
             "no-interactive-commands": {
               "$ref": "#/definitions/rule",
@@ -3936,6 +4244,10 @@
             "no-multiple-main": {
               "$ref": "#/definitions/rule",
               "description": "A second `<main>` element that is not `hidden`: a page has one main landmark."
+            },
+            "no-name-underscore": {
+              "$ref": "#/definitions/rule",
+              "description": "A name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and every reference to one. A field selected in a query is not checked (`__typename`). Equivalent - graphql-eslint naming-convention without `allowLeadingUnderscore` and `allowTrailingUnderscore`."
             },
             "no-namespace": {
               "$ref": "#/definitions/rule",
@@ -4066,6 +4378,10 @@
             "no-ps-grep": {
               "$ref": "#/definitions/rule",
               "description": "A pipeline from `ps` into `grep`."
+            },
+            "no-raw-gt": {
+              "$ref": "#/definitions/rule",
+              "description": "A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`. A raw `<` is a syntax error."
             },
             "no-raw-special-elements": {
               "$ref": "#/definitions/rule",
@@ -4302,6 +4618,10 @@
               "$ref": "#/definitions/rule",
               "description": "`!a in b` and `!a instanceof B` negate `a`, not the test."
             },
+            "no-unset-hookable-property": {
+              "$ref": "#/definitions/rule",
+              "description": "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty)."
+            },
             "no-unused-anchors": {
               "$ref": "#/definitions/rule",
               "description": "An anchor that no alias refers to. The fix removes the anchor, which changes nothing about the data."
@@ -4464,6 +4784,10 @@
             "outdated-version-block": {
               "$ref": "#/definitions/rule",
               "description": "A test of `sys.version_info` against a version older than the target's, or of `sys.version_info[0]` against a number: the result is always the same."
+            },
+            "package-comment-form": {
+              "$ref": "#/definitions/rule",
+              "description": "The first line of the comment above the `package` clause does not start with `Package` and the name of the package (revive package-comments). A file of package `main` is left alone. A comment of the right form with a blank line before the `package` clause is reported as detached."
             },
             "package-defined": {
               "$ref": "#/definitions/rule",
@@ -4826,6 +5150,10 @@
               "$ref": "#/definitions/rule",
               "description": "A property summary says \"Gets or sets\" while one of the accessors is not reachable from outside the type (`private set`, `internal get` on a public property). The fix replaces the start of the text with the one that matches the visible accessor."
             },
+            "qualify-instance-members": {
+              "$ref": "#/definitions/rule",
+              "description": "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it."
+            },
             "qualify-namespace-usings": {
               "$ref": "#/definitions/rule",
               "description": "A `using` directive inside a namespace whose name is not written fully qualified (it resolves relative to the enclosing namespace). The fix writes the full name, unless it has type arguments."
@@ -4951,6 +5279,76 @@
               "$ref": "#/definitions/rule",
               "description": "A name declared again in the same scope (`var` twice, a `var` and a parameter, two functions). In TypeScript files declaration merging (interfaces, namespaces, a class with an interface) is allowed. Built-in globals are not checked."
             },
+            "redefines-builtin-id": {
+              "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allow": {
+                          "default": [],
+                          "description": "Names that may be declared.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "assigned_by": {
+                          "default": [
+                            "AssignmentStatement"
+                          ],
+                          "description": "Grammar kinds of statements whose left-side names are reported too (`len = 1`, `max += 1`).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "except_parents": {
+                          "default": [
+                            "ReceiverList"
+                          ],
+                          "description": "Grammar kinds whose direct declarations are left out (a receiver).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The declarations that are checked (empty: all).",
+                          "items": {
+                            "enum": [
+                              "variable",
+                              "parameter",
+                              "function",
+                              "class",
+                              "import",
+                              "type"
+                            ],
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "redundant-pattern": {
               "$ref": "#/definitions/rule",
               "description": "A name pattern such as `foo` already matches files and directories called `foo` at every level, so a later `foo/` or `/foo` adds nothing (no `!` pattern in between)."
@@ -4990,6 +5388,10 @@
             "require-for-track": {
               "$ref": "#/definitions/rule",
               "description": "Angular's compiler error for `@for (x of xs) {` without `track`. Only in `.component.html` files."
+            },
+            "require-li-container": {
+              "$ref": "#/definitions/rule",
+              "description": "An `<li>` whose parent is not a list (`ul`, `ol`, `menu`) is not a list item."
             },
             "require-prop-types": {
               "$ref": "#/definitions/rule",
@@ -6285,7 +6687,7 @@
             },
             "text-content": {
               "$ref": "#/definitions/rule",
-              "description": "A `<button>` with no text, no image with an `alt`, no `<svg>` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count."
+              "description": "A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count."
             },
             "timestamp-expanded": {
               "$ref": "#/definitions/rule",
@@ -6680,6 +7082,10 @@
               "$ref": "#/definitions/rule",
               "description": "A named character reference in text (`&name;`) that HTML does not define. Numeric references and references in attribute values are not checked."
             },
+            "unsafe-new-static": {
+              "$ref": "#/definitions/rule",
+              "description": "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is."
+            },
             "unsafe-numbers": {
               "$ref": "#/definitions/rule",
               "description": "A number that a double-precision parser (JavaScript, most JSON libraries) cannot hold: an integer beyond 2^53 - 1, a value that overflows to infinity, underflows to zero or is subnormal."
@@ -6787,7 +7193,7 @@
               "description": "A method parameter that the method never reads (RuboCop Lint/UnusedMethodArgument). Names that start with `_`, empty methods and methods that only raise NotImplementedError are left alone. No fix."
             },
             "unused-parameter": {
-              "description": "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used.",
+              "description": "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
               "oneOf": [
                 {
                   "$ref": "#/definitions/level"
@@ -6802,7 +7208,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "args": {
-                          "default": "after-used",
+                          "default": "all",
                           "description": "Which parameters are checked: those after the last one that is read, all of them, or none.",
                           "enum": [
                             "after-used",
@@ -6812,8 +7218,8 @@
                           "type": "string"
                         },
                         "ignore_pattern": {
-                          "default": "",
-                          "description": "A regex for the names that are not checked (ESLint's `argsIgnorePattern`).",
+                          "default": "^_",
+                          "description": "A regex for the names that are not checked (revive's `allowRegex`).",
                           "type": "string"
                         }
                       },
@@ -6880,6 +7286,37 @@
             "upper-ell": {
               "$ref": "#/definitions/rule",
               "description": "An integer literal that ends in a lower case `l` (Checkstyle UpperEll)."
+            },
+            "use-baseline": {
+              "description": "An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "available": {
+                          "default": "widely",
+                          "description": "How widely a feature must be available: `widely` (in all major browsers for 30 months), `newly` (in all of them), or a year (baseline since that year or before).",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "use-before-define": {
               "description": "A reference that comes before the declaration of what it names in the source (function declarations included), or runs while the variable is being initialized. References in types are left alone.",
@@ -7036,6 +7473,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "using-placement": {
+              "$ref": "#/definitions/rule",
+              "description": "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up."
             },
             "v-bind-style": {
               "$ref": "#/definitions/rule",
@@ -7276,6 +7717,11 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -7298,6 +7744,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
               "type": "boolean"
             },
             "indent_expression_operands": {
@@ -7328,10 +7779,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",
@@ -7434,6 +7906,11 @@
               },
               "type": "array"
             },
+            "braced_list_padding": {
+              "default": false,
+              "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+              "type": "boolean"
+            },
             "break_after_return_type": {
               "default": "none",
               "description": "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`).",
@@ -7475,6 +7952,16 @@
               ],
               "type": "string"
             },
+            "collapse_empty_blocks": {
+              "default": false,
+              "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+              "type": "boolean"
+            },
+            "comment_keep_unicode_blanks": {
+              "default": true,
+              "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+              "type": "boolean"
+            },
             "constructor_initializer_indent": {
               "default": 4,
               "description": "Columns a constructor initializer list is indented more than its constructor.",
@@ -7488,6 +7975,16 @@
               "maximum": 16,
               "minimum": 0,
               "type": "integer"
+            },
+            "derive_pointer_alignment": {
+              "default": false,
+              "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+              "type": "boolean"
+            },
+            "empty_body_own_line": {
+              "default": false,
+              "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
+              "type": "boolean"
             },
             "end_of_line": {
               "default": "auto",
@@ -7503,6 +8000,18 @@
               "default": true,
               "description": "End the file with a newline.",
               "type": "boolean"
+            },
+            "for_each_macros": {
+              "default": [
+                "foreach",
+                "Q_FOREACH",
+                "BOOST_FOREACH"
+              ],
+              "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "indent_braces": {
               "default": false,
@@ -7543,6 +8052,16 @@
                 "tab"
               ],
               "type": "string"
+            },
+            "join_closing_angles": {
+              "default": false,
+              "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+              "type": "boolean"
+            },
+            "keep_blank_lines_at_end_of_blocks": {
+              "default": false,
+              "description": "A blank line before the closing brace of a block stays.",
+              "type": "boolean"
             },
             "keep_leading_blank_lines": {
               "default": true,
@@ -7637,6 +8156,11 @@
               "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
               "type": "boolean"
             },
+            "space_after_cast": {
+              "default": false,
+              "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
+              "type": "boolean"
+            },
             "space_before_parens": {
               "default": "control_statements",
               "description": "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never.",
@@ -7654,10 +8178,92 @@
               "minimum": 0,
               "type": "integer"
             },
+            "split_empty_braces": {
+              "default": [],
+              "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "wrap_lines": {
               "default": true,
               "description": "Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change).",
               "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "lint": {
+          "$ref": "#/definitions/lint"
+        },
+        "semantics": {
+          "additionalProperties": false,
+          "description": "Facts about methods that the flow analyses use.",
+          "properties": {
+            "does_not_return": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "pure": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "cmake": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "additionalProperties": false,
+          "properties": {
+            "end_of_line": {
+              "default": "auto",
+              "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
+              "enum": [
+                "auto",
+                "lf",
+                "crlf"
+              ],
+              "type": "string"
+            },
+            "final_newline": {
+              "default": true,
+              "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_size": {
+              "default": 4,
+              "description": "Columns per indentation level (also the width of a tab).",
+              "maximum": 16,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "indent_style": {
+              "default": "space",
+              "description": "Indent with spaces or tabs.",
+              "enum": [
+                "space",
+                "tab"
+              ],
+              "type": "string"
+            },
+            "line_width": {
+              "default": 80,
+              "description": "Preferred maximum line width in columns.",
+              "maximum": 1000,
+              "minimum": 20,
+              "type": "integer"
             }
           },
           "type": "object"
@@ -7750,6 +8356,11 @@
               },
               "type": "array"
             },
+            "braced_list_padding": {
+              "default": false,
+              "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+              "type": "boolean"
+            },
             "break_after_return_type": {
               "default": "none",
               "description": "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`).",
@@ -7791,6 +8402,16 @@
               ],
               "type": "string"
             },
+            "collapse_empty_blocks": {
+              "default": false,
+              "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+              "type": "boolean"
+            },
+            "comment_keep_unicode_blanks": {
+              "default": true,
+              "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+              "type": "boolean"
+            },
             "constructor_initializer_indent": {
               "default": 4,
               "description": "Columns a constructor initializer list is indented more than its constructor.",
@@ -7804,6 +8425,16 @@
               "maximum": 16,
               "minimum": 0,
               "type": "integer"
+            },
+            "derive_pointer_alignment": {
+              "default": false,
+              "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+              "type": "boolean"
+            },
+            "empty_body_own_line": {
+              "default": false,
+              "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
+              "type": "boolean"
             },
             "end_of_line": {
               "default": "auto",
@@ -7819,6 +8450,18 @@
               "default": true,
               "description": "End the file with a newline.",
               "type": "boolean"
+            },
+            "for_each_macros": {
+              "default": [
+                "foreach",
+                "Q_FOREACH",
+                "BOOST_FOREACH"
+              ],
+              "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "indent_braces": {
               "default": false,
@@ -7859,6 +8502,16 @@
                 "tab"
               ],
               "type": "string"
+            },
+            "join_closing_angles": {
+              "default": false,
+              "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+              "type": "boolean"
+            },
+            "keep_blank_lines_at_end_of_blocks": {
+              "default": false,
+              "description": "A blank line before the closing brace of a block stays.",
+              "type": "boolean"
             },
             "keep_leading_blank_lines": {
               "default": true,
@@ -7953,6 +8606,11 @@
               "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
               "type": "boolean"
             },
+            "space_after_cast": {
+              "default": false,
+              "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
+              "type": "boolean"
+            },
             "space_before_parens": {
               "default": "control_statements",
               "description": "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never.",
@@ -7969,6 +8627,14 @@
               "maximum": 16,
               "minimum": 0,
               "type": "integer"
+            },
+            "split_empty_braces": {
+              "default": [],
+              "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "wrap_lines": {
               "default": true,
@@ -8029,12 +8695,28 @@
               ],
               "type": "string"
             },
+            "assignment_conditional_test_kinds": {
+              "default": [],
+              "description": "Node kinds, besides operator chains, that make a conditional's test count as an operator chain for `assignment_conditional: binary_test` (a parenthesized test).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "assignment_indent": {
               "default": 1,
               "description": "Levels of indentation of a value that moves below the operator of an assignment.",
               "maximum": 4,
               "minimum": 1,
               "type": "integer"
+            },
+            "assignment_inline_test_kinds": {
+              "default": [],
+              "description": "Kinds of operator chain that, as the test of a conditional, do not move the conditional below the operator of an assignment (`x is null ? a : b`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "assignment_layout": {
               "default": "compact",
@@ -8047,6 +8729,42 @@
               ],
               "type": "string"
             },
+            "attached_except_kinds": {
+              "default": [
+                "PropertyDeclaration"
+              ],
+              "description": "Kinds of parent of an assignment (`attached_parent_kinds`) whose value is not attached: a property's initializer moves as a whole.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "attached_parent_kinds": {
+              "default": [
+                "SimpleAssignmentExpression",
+                "EqualsValueClause"
+              ],
+              "description": "Kinds of assignment whose value is attached (`attached_value_kinds`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "attached_value_kinds": {
+              "default": [
+                "ObjectInitializerExpression",
+                "CollectionInitializerExpression",
+                "ArrayInitializerExpression",
+                "ComplexElementInitializerExpression",
+                "WithInitializerExpression",
+                "CollectionExpression"
+              ],
+              "description": "With `wrapped_brace_line: all`: kinds of the value of an assignment whose braces or brackets start on the operator's line when the value breaks.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "base_list_layout": {
               "default": "inline",
               "description": "The base list of a type (`: A, B`): `inline` keeps it on the line of the type name; `hanging` keeps it there when it fits and otherwise starts a line, with one base type per line.",
@@ -8055,6 +8773,16 @@
                 "hanging"
               ],
               "type": "string"
+            },
+            "binary_group_mixed_chains": {
+              "default": true,
+              "description": "A single binary operation (`a.length > 0` in `a.length > 0 || b`) is grouped also when its parent or a side is an operation of another kind; off: it is not when any of them is an operator chain of whatever kind.",
+              "type": "boolean"
+            },
+            "binary_group_single": {
+              "default": false,
+              "description": "A single binary operation (`a(...) == b`) whose parent, left and right side are no operation of its kind breaks before its operator only when the operator and the right side do not fit on the line where the left side ends, however the left side breaks (an operator at the start of a line only; one at the end always does this).",
+              "type": "boolean"
             },
             "binary_hug": {
               "default": "assignment",
@@ -8072,6 +8800,24 @@
               "maximum": 4,
               "minimum": 1,
               "type": "integer"
+            },
+            "binary_inline_right_kinds": {
+              "default": [
+                "RecursivePattern"
+              ],
+              "description": "Node kinds of a right operand that stays on the operator's line, whatever its length (`x is {` ... `}`), unless the operation is an operand of another chain or the test of a conditional: the operand breaks, the operation does not.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "binary_open_kinds": {
+              "default": [],
+              "description": "Node kinds of operator chains that, as an operand of another chain, print their operators in the group of that chain, indented, with no group of their own (`x is A or B`: a break puts every `or` on its own line).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "binary_operator_line": {
               "default": "start",
@@ -8230,12 +8976,33 @@
               "minimum": 1,
               "type": "integer"
             },
+            "conditional_ladder_item_kinds": {
+              "default": [
+                "Argument"
+              ],
+              "description": "With `conditional_layout: ladder`: kinds of an item of a list that indent a ladder when the list has several of them (an argument among others).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "conditional_ladder_parent_kinds": {
+              "default": [
+                "ReturnStatement"
+              ],
+              "description": "With `conditional_layout: ladder`: kinds of parent of a ladder that is indented one level (a returned value).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "conditional_layout": {
               "default": "indented",
-              "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
+              "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one; `ladder` is `indented`, except that a chain of conditionals in the `else` branch puts every `: test ? value` on a line of its own at the level of the first test.",
               "enum": [
                 "indented",
-                "chained"
+                "chained",
+                "ladder"
               ],
               "type": "string"
             },
@@ -8247,6 +9014,24 @@
                 "new_line"
               ],
               "type": "string"
+            },
+            "declarator_own_line_except_kinds": {
+              "default": [
+                "ForStatement"
+              ],
+              "description": "Kinds of parent in which the declarators of `declarator_own_line_kinds` stay on one line (the header of a `for`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "declarator_own_line_kinds": {
+              "default": [],
+              "description": "Kinds of declaration whose declarators after the first (`int a, b;`, also fields) each stand on a line of their own, indented. Empty keeps them on the line of the first.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "derive_symbol_sets": {
               "default": false,
@@ -8307,6 +9092,79 @@
               ],
               "type": "string"
             },
+            "generated_header_markers": {
+              "default": [
+                "<autogenerated",
+                "<auto-generated"
+              ],
+              "description": "Texts (`<auto-generated`) that mark a generated file when they occur, case-insensitively, in the comments at the start of the file. Read when `skip_generated` is on.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "generated_header_skip": {
+              "default": [
+                "#"
+              ],
+              "description": "Line prefixes (`#` for preprocessor lines) that do not end the leading comments when looking for `generated_header_markers`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "generated_names": {
+              "default": [
+                "TemporaryGeneratedFile_*",
+                "*.designer",
+                "*.generated",
+                "*.g",
+                "*.g.i"
+              ],
+              "description": "Patterns of the names of generated files, matched case-insensitively against the file name without its last extension; `*` only at the start or the end (`*.g`, `Temp_*`). Read when `skip_generated` is on.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "hang_operand_kinds": {
+              "default": [],
+              "description": "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "hanging_clause_inline_after": {
+              "default": [
+                "SwitchExpressionArm",
+                "DiscardPattern"
+              ],
+              "description": "Pairs of a parent kind and the kind of its first child: a hanging clause of such a parent stays on the line (`_ when x`).",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "hanging_clause_kinds": {
+              "default": [],
+              "description": "Kinds of clause (`when` of a `catch` filter or a `case` guard) that move to an indented line of their own when the whole does not fit; a condition in parentheses hugs them. Empty keeps them on the line of what precedes them.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "hug_last_argument": {
+              "default": "last",
+              "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `sole_bare` only for a function alone that has no parameters or one without parentheses (`x => ...`, `() => ...`), `never` not at all.",
+              "enum": [
+                "never",
+                "sole",
+                "sole_bare",
+                "last"
+              ],
+              "type": "string"
+            },
             "indent_nested_binary": {
               "default": false,
               "description": "Indent the operands of a binary expression that is itself an operand of a binary expression with an operator of another precedence (`a && b || c`).",
@@ -8351,9 +9209,23 @@
               ],
               "type": "string"
             },
+            "initializer_group": {
+              "default": "own",
+              "description": "The braces of the initializer of a `new` expression: `own` breaks them only when they do not fit; `creation` breaks them together with the whole `new T(...) { ... }`, so that they are expanded once the type and arguments do not fit on the line either.",
+              "enum": [
+                "own",
+                "creation"
+              ],
+              "type": "string"
+            },
             "inline_accessor_bodies": {
               "default": false,
-              "description": "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines.",
+              "description": "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines. Accessors without a body (`{ get; set; }`) then also collapse onto one line when the source has them on several.",
+              "type": "boolean"
+            },
+            "label_blank_line": {
+              "default": false,
+              "description": "A blank line between a label and the statement it labels stays (at most one).",
               "type": "boolean"
             },
             "label_indent": {
@@ -8363,15 +9235,6 @@
                 "no_change",
                 "one_less",
                 "flush_left"
-              ],
-              "type": "string"
-            },
-            "lambda_argument_hug": {
-              "default": "last",
-              "description": "A lambda argument whose body can hang from the call's line: `last` hugs a block lambda that is the last argument; `sole` hugs a lambda (block or expression) only when it is the only argument.",
-              "enum": [
-                "last",
-                "sole"
               ],
               "type": "string"
             },
@@ -8401,12 +9264,34 @@
               ],
               "type": "string"
             },
+            "member_chain_factory_heads": {
+              "default": true,
+              "description": "A capitalized name or `this` at the head of a chain stays on the line of the first call (`Foo.Bar()`; `grouped` style).",
+              "type": "boolean"
+            },
+            "member_chain_hold_comments": {
+              "default": false,
+              "description": "The comments in front of a member chain stay in front of it: their line breaks do not decide whether the chain breaks.",
+              "type": "boolean"
+            },
+            "member_chain_hug_calls": {
+              "default": 0,
+              "description": "A chain with at most this many calls keeps the last call's arguments on the line of the chain when they break (`Foo.Bar(\n args\n)`); a chain with more calls that does not fit on a line is broken at its dots (`grouped` style; 0: the chain's groups decide, as in Prettier).",
+              "maximum": 1000,
+              "minimum": 0,
+              "type": "integer"
+            },
             "member_chain_indent": {
               "default": 1,
               "description": "Levels of indentation of the lines of a broken member chain.",
               "maximum": 4,
               "minimum": 0,
               "type": "integer"
+            },
+            "member_chain_indent_head": {
+              "default": false,
+              "description": "The first group of a chain broken at its dots is indented like the groups after it, so the arguments and blocks in it are one level deeper (`grouped` style).",
+              "type": "boolean"
             },
             "member_chain_keep_accesses": {
               "default": "never",
@@ -8432,6 +9317,17 @@
               "minimum": 0,
               "type": "integer"
             },
+            "member_chain_style": {
+              "default": "fluent",
+              "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+              "enum": [
+                "fluent",
+                "grouped",
+                "wrapped",
+                "soft"
+              ],
+              "type": "string"
+            },
             "parameter_attribute_layout": {
               "default": "inline",
               "description": "A parameter with attribute lists: `inline` keeps them in front of the parameter;              `hanging` keeps them there when the parameter fits and otherwise puts the rest of              the parameter on an indented line below them.",
@@ -8440,6 +9336,20 @@
                 "hanging"
               ],
               "type": "string"
+            },
+            "paren_condition_kinds": {
+              "default": [
+                "IfStatement",
+                "WhileStatement",
+                "DoStatement",
+                "LockStatement",
+                "SwitchStatement"
+              ],
+              "description": "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "preprocessor_symbol_sets": {
               "default": [],
@@ -8480,6 +9390,11 @@
               "description": "With `sort_usings`: one blank line between the System usings and the others (only with `sort_usings_system_first`).",
               "type": "boolean"
             },
+            "skip_generated": {
+              "default": true,
+              "description": "Leave generated files as written when formatting: a file whose name matches `generated_names` or whose leading comments contain one of `generated_header_markers`. A file named on the command line, read from stdin or open in the editor is treated the same. `false` formats them.",
+              "type": "boolean"
+            },
             "sort_usings": {
               "default": false,
               "description": "Sort `using` directives like the `using-order` rule with `compare: culture_ignore_case`, `static_position: after` and `alias_position: after` (System first, then the others, `using static`, aliases), and join the groups: blank lines between directives go, comments above a directive move with it. `global using` directives come first, `using global::X` behind the System ones. `#if` regions stay as they are behind the sorted directives; a list with another preprocessor directive is left alone.",
@@ -8504,6 +9419,14 @@
               "default": false,
               "description": "A space between the two semicolons of a `for` with an empty condition (`for (; ;)`); when false `for (;;)`.",
               "type": "boolean"
+            },
+            "stacked_flush_kinds": {
+              "default": [],
+              "description": "Kinds of statement (`using`, `fixed`) whose body is another statement of the same kind: it goes on the next line at the same level, so that a stack of them reads like a list. Empty indents it like any embedded statement.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "switch_arm_layout": {
               "default": "inline",
@@ -8807,12 +9730,14 @@
           "preset:csharp/csharpier-compat",
           "preset:csharp/dotnet-runtime",
           "preset:csharp/google",
+          "preset:csharp/roslynator",
           "preset:csharp/stylecop",
           "preset:csharp/unity",
           "preset:css/stylelint-recommended",
           "preset:css/stylelint-standard",
           "preset:dockerfile/hadolint",
           "preset:github-actions/actionlint",
+          "preset:go/revive",
           "preset:graphql/graphql-eslint-recommended",
           "preset:hcl/tflint-recommended",
           "preset:html/eslint-plugin-svelte-recommended",
@@ -9112,6 +10037,66 @@
       },
       "type": "object"
     },
+    "go": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "additionalProperties": false,
+          "properties": {
+            "end_of_line": {
+              "default": "auto",
+              "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
+              "enum": [
+                "auto",
+                "lf",
+                "crlf"
+              ],
+              "type": "string"
+            },
+            "final_newline": {
+              "default": true,
+              "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_style": {
+              "default": "space",
+              "description": "Indent with spaces or tabs.",
+              "enum": [
+                "space",
+                "tab"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "lint": {
+          "$ref": "#/definitions/lint"
+        },
+        "semantics": {
+          "additionalProperties": false,
+          "description": "Facts about methods that the flow analyses use.",
+          "properties": {
+            "does_not_return": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "pure": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
     "graphql": {
       "additionalProperties": false,
       "properties": {
@@ -9265,6 +10250,22 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
+            "dialect": {
+              "default": "auto",
+              "description": "`template`: the file is a template whose `{{ }}` actions (Go templates, Hugo) stay as written; a block of actions (`if` ... `end`) must open and close inside one element (a file that does not is not formatted); an action among the attributes is one attribute, kept as written. `template-open`: as `template`, and a block may span elements (the file is laid out by the tree of its markup); no end tag the source lacks is written and none of the source is dropped.",
+              "enum": [
+                "auto",
+                "html",
+                "template",
+                "template-open"
+              ],
+              "type": "string"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -9287,6 +10288,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
               "type": "boolean"
             },
             "indent_expression_operands": {
@@ -9317,10 +10323,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",
@@ -9500,10 +10527,11 @@
             },
             "conditional_layout": {
               "default": "indented",
-              "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
+              "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one; `ladder` is `indented`, except that a chain of conditionals in the `else` branch puts every `: test ? value` on a line of its own at the level of the first test.",
               "enum": [
                 "indented",
-                "chained"
+                "chained",
+                "ladder"
               ],
               "type": "string"
             },
@@ -9529,10 +10557,11 @@
             },
             "hug_last_argument": {
               "default": "sole",
-              "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `never` not at all.",
+              "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `sole_bare` only for a function alone that has no parameters or one without parentheses (`x => ...`, `() => ...`), `never` not at all.",
               "enum": [
                 "never",
                 "sole",
+                "sole_bare",
                 "last"
               ],
               "type": "string"
@@ -9777,10 +10806,11 @@
             },
             "conditional_layout": {
               "default": "chained",
-              "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
+              "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one; `ladder` is `indented`, except that a chain of conditionals in the `else` branch puts every `: test ? value` on a line of its own at the level of the first test.",
               "enum": [
                 "indented",
-                "chained"
+                "chained",
+                "ladder"
               ],
               "type": "string"
             },
@@ -9806,10 +10836,11 @@
             },
             "hug_last_argument": {
               "default": "last",
-              "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `never` not at all.",
+              "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `sole_bare` only for a function alone that has no parameters or one without parentheses (`x => ...`, `() => ...`), `never` not at all.",
               "enum": [
                 "never",
                 "sole",
+                "sole_bare",
                 "last"
               ],
               "type": "string"
@@ -10510,9 +11541,11 @@
           "html",
           "cpp",
           "c",
+          "cmake",
           "dockerfile",
           "editorconfig",
           "gitignore",
+          "go",
           "graphql",
           "hcl",
           "ini",
@@ -10753,9 +11786,10 @@
             "keep_together_kinds": {
               "default": [
                 "LinkDef",
-                "Html"
+                "Html",
+                "Inline>Html"
               ],
-              "description": "Block kinds of which two in a row with no blank line between them in the source stay without one.",
+              "description": "Block kinds of which two in a row with no blank line between them in the source stay without one; `A>B` is a block of kind B right after one of kind A (an HTML block after a paragraph).",
               "items": {
                 "type": "string"
               },
@@ -10811,6 +11845,11 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -10833,6 +11872,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -10863,10 +11907,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -10969,6 +12034,11 @@
                     },
                     "type": "array"
                   },
+                  "braced_list_padding": {
+                    "default": false,
+                    "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+                    "type": "boolean"
+                  },
                   "break_after_return_type": {
                     "default": "none",
                     "description": "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`).",
@@ -11010,6 +12080,16 @@
                     ],
                     "type": "string"
                   },
+                  "collapse_empty_blocks": {
+                    "default": false,
+                    "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+                    "type": "boolean"
+                  },
+                  "comment_keep_unicode_blanks": {
+                    "default": true,
+                    "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+                    "type": "boolean"
+                  },
                   "constructor_initializer_indent": {
                     "default": 4,
                     "description": "Columns a constructor initializer list is indented more than its constructor.",
@@ -11023,6 +12103,16 @@
                     "maximum": 16,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "derive_pointer_alignment": {
+                    "default": false,
+                    "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+                    "type": "boolean"
+                  },
+                  "empty_body_own_line": {
+                    "default": false,
+                    "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
+                    "type": "boolean"
                   },
                   "end_of_line": {
                     "default": "auto",
@@ -11038,6 +12128,18 @@
                     "default": true,
                     "description": "End the file with a newline.",
                     "type": "boolean"
+                  },
+                  "for_each_macros": {
+                    "default": [
+                      "foreach",
+                      "Q_FOREACH",
+                      "BOOST_FOREACH"
+                    ],
+                    "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "indent_braces": {
                     "default": false,
@@ -11078,6 +12180,16 @@
                       "tab"
                     ],
                     "type": "string"
+                  },
+                  "join_closing_angles": {
+                    "default": false,
+                    "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+                    "type": "boolean"
+                  },
+                  "keep_blank_lines_at_end_of_blocks": {
+                    "default": false,
+                    "description": "A blank line before the closing brace of a block stays.",
+                    "type": "boolean"
                   },
                   "keep_leading_blank_lines": {
                     "default": true,
@@ -11172,6 +12284,11 @@
                     "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
                     "type": "boolean"
                   },
+                  "space_after_cast": {
+                    "default": false,
+                    "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
+                    "type": "boolean"
+                  },
                   "space_before_parens": {
                     "default": "control_statements",
                     "description": "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never.",
@@ -11189,10 +12306,92 @@
                     "minimum": 0,
                     "type": "integer"
                   },
+                  "split_empty_braces": {
+                    "default": [],
+                    "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "wrap_lines": {
                     "default": true,
                     "description": "Break lines that are longer than `line_width`. When false, every line keeps the line breaks of the source (only indentation and spacing change).",
                     "type": "boolean"
+                  }
+                },
+                "type": "object"
+              },
+              "lint": {
+                "$ref": "#/definitions/lint"
+              },
+              "semantics": {
+                "additionalProperties": false,
+                "description": "Facts about methods that the flow analyses use.",
+                "properties": {
+                  "does_not_return": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "pure": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "cmake": {
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "additionalProperties": false,
+                "properties": {
+                  "end_of_line": {
+                    "default": "auto",
+                    "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
+                    "enum": [
+                      "auto",
+                      "lf",
+                      "crlf"
+                    ],
+                    "type": "string"
+                  },
+                  "final_newline": {
+                    "default": true,
+                    "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_size": {
+                    "default": 4,
+                    "description": "Columns per indentation level (also the width of a tab).",
+                    "maximum": 16,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "indent_style": {
+                    "default": "space",
+                    "description": "Indent with spaces or tabs.",
+                    "enum": [
+                      "space",
+                      "tab"
+                    ],
+                    "type": "string"
+                  },
+                  "line_width": {
+                    "default": 80,
+                    "description": "Preferred maximum line width in columns.",
+                    "maximum": 1000,
+                    "minimum": 20,
+                    "type": "integer"
                   }
                 },
                 "type": "object"
@@ -11285,6 +12484,11 @@
                     },
                     "type": "array"
                   },
+                  "braced_list_padding": {
+                    "default": false,
+                    "description": "A blank inside the braces of an initializer list (`{ 1, 2 }` against `{1, 2}`); an empty list is `{}`.",
+                    "type": "boolean"
+                  },
                   "break_after_return_type": {
                     "default": "none",
                     "description": "The function name goes on a new line after its return type: never, for declarations and definitions outside classes (`top_level`), for all, or for definitions only (`top_level_definitions`, `all_definitions`).",
@@ -11326,6 +12530,16 @@
                     ],
                     "type": "string"
                   },
+                  "collapse_empty_blocks": {
+                    "default": false,
+                    "description": "An empty body is `{}` when its line fits, except the block of `if`, `for`, `while`, `do`, `try` and `catch` and a block inside a block, which has two lines (`if (x) {\\n}`).",
+                    "type": "boolean"
+                  },
+                  "comment_keep_unicode_blanks": {
+                    "default": true,
+                    "description": "A comment loses only trailing ASCII whitespace; a no-break space at its end stays.",
+                    "type": "boolean"
+                  },
                   "constructor_initializer_indent": {
                     "default": 4,
                     "description": "Columns a constructor initializer list is indented more than its constructor.",
@@ -11339,6 +12553,16 @@
                     "maximum": 16,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "derive_pointer_alignment": {
+                    "default": false,
+                    "description": "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal.",
+                    "type": "boolean"
+                  },
+                  "empty_body_own_line": {
+                    "default": false,
+                    "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
+                    "type": "boolean"
                   },
                   "end_of_line": {
                     "default": "auto",
@@ -11354,6 +12578,18 @@
                     "default": true,
                     "description": "End the file with a newline.",
                     "type": "boolean"
+                  },
+                  "for_each_macros": {
+                    "default": [
+                      "foreach",
+                      "Q_FOREACH",
+                      "BOOST_FOREACH"
+                    ],
+                    "description": "Names of macros that are used as loops: `name(args) {` is a `control` brace. Any other `name(args) {` is a function definition for `brace_wrapping`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "indent_braces": {
                     "default": false,
@@ -11394,6 +12630,16 @@
                       "tab"
                     ],
                     "type": "string"
+                  },
+                  "join_closing_angles": {
+                    "default": false,
+                    "description": "Two closing template brackets are written together (`A<B<C>>` against `A<B<C> >`), as C++11 reads them. Only a `>` that closes a template bracket is joined, a comparison or a shift stays apart.",
+                    "type": "boolean"
+                  },
+                  "keep_blank_lines_at_end_of_blocks": {
+                    "default": false,
+                    "description": "A blank line before the closing brace of a block stays.",
+                    "type": "boolean"
                   },
                   "keep_leading_blank_lines": {
                     "default": true,
@@ -11488,6 +12734,11 @@
                     "description": "A `for`, `while` or range-for with a simple statement is kept on one line when it fits.",
                     "type": "boolean"
                   },
+                  "space_after_cast": {
+                    "default": false,
+                    "description": "A blank after the `)` of a C cast (`(int) x` against `(int)x`).",
+                    "type": "boolean"
+                  },
                   "space_before_parens": {
                     "default": "control_statements",
                     "description": "A blank before the parenthesis of `if`, `for`, `while`, `switch` and `catch` (`control_statements`), before every parenthesis (`always`) or never.",
@@ -11504,6 +12755,14 @@
                     "maximum": 16,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "split_empty_braces": {
+                    "default": [],
+                    "description": "Words of `brace_wrapping` whose empty body keeps `{` and `}` on two lines when the `{` is on its own line (`void f()\\n{\\n}`), as `SplitEmptyFunction`, `SplitEmptyRecord` and `SplitEmptyNamespace`. Other empty bodies are `{}`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "wrap_lines": {
                     "default": true,
@@ -11564,12 +12823,28 @@
                     ],
                     "type": "string"
                   },
+                  "assignment_conditional_test_kinds": {
+                    "default": [],
+                    "description": "Node kinds, besides operator chains, that make a conditional's test count as an operator chain for `assignment_conditional: binary_test` (a parenthesized test).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "assignment_indent": {
                     "default": 1,
                     "description": "Levels of indentation of a value that moves below the operator of an assignment.",
                     "maximum": 4,
                     "minimum": 1,
                     "type": "integer"
+                  },
+                  "assignment_inline_test_kinds": {
+                    "default": [],
+                    "description": "Kinds of operator chain that, as the test of a conditional, do not move the conditional below the operator of an assignment (`x is null ? a : b`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "assignment_layout": {
                     "default": "compact",
@@ -11582,6 +12857,42 @@
                     ],
                     "type": "string"
                   },
+                  "attached_except_kinds": {
+                    "default": [
+                      "PropertyDeclaration"
+                    ],
+                    "description": "Kinds of parent of an assignment (`attached_parent_kinds`) whose value is not attached: a property's initializer moves as a whole.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "attached_parent_kinds": {
+                    "default": [
+                      "SimpleAssignmentExpression",
+                      "EqualsValueClause"
+                    ],
+                    "description": "Kinds of assignment whose value is attached (`attached_value_kinds`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "attached_value_kinds": {
+                    "default": [
+                      "ObjectInitializerExpression",
+                      "CollectionInitializerExpression",
+                      "ArrayInitializerExpression",
+                      "ComplexElementInitializerExpression",
+                      "WithInitializerExpression",
+                      "CollectionExpression"
+                    ],
+                    "description": "With `wrapped_brace_line: all`: kinds of the value of an assignment whose braces or brackets start on the operator's line when the value breaks.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "base_list_layout": {
                     "default": "inline",
                     "description": "The base list of a type (`: A, B`): `inline` keeps it on the line of the type name; `hanging` keeps it there when it fits and otherwise starts a line, with one base type per line.",
@@ -11590,6 +12901,16 @@
                       "hanging"
                     ],
                     "type": "string"
+                  },
+                  "binary_group_mixed_chains": {
+                    "default": true,
+                    "description": "A single binary operation (`a.length > 0` in `a.length > 0 || b`) is grouped also when its parent or a side is an operation of another kind; off: it is not when any of them is an operator chain of whatever kind.",
+                    "type": "boolean"
+                  },
+                  "binary_group_single": {
+                    "default": false,
+                    "description": "A single binary operation (`a(...) == b`) whose parent, left and right side are no operation of its kind breaks before its operator only when the operator and the right side do not fit on the line where the left side ends, however the left side breaks (an operator at the start of a line only; one at the end always does this).",
+                    "type": "boolean"
                   },
                   "binary_hug": {
                     "default": "assignment",
@@ -11607,6 +12928,24 @@
                     "maximum": 4,
                     "minimum": 1,
                     "type": "integer"
+                  },
+                  "binary_inline_right_kinds": {
+                    "default": [
+                      "RecursivePattern"
+                    ],
+                    "description": "Node kinds of a right operand that stays on the operator's line, whatever its length (`x is {` ... `}`), unless the operation is an operand of another chain or the test of a conditional: the operand breaks, the operation does not.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "binary_open_kinds": {
+                    "default": [],
+                    "description": "Node kinds of operator chains that, as an operand of another chain, print their operators in the group of that chain, indented, with no group of their own (`x is A or B`: a break puts every `or` on its own line).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "binary_operator_line": {
                     "default": "start",
@@ -11765,12 +13104,33 @@
                     "minimum": 1,
                     "type": "integer"
                   },
+                  "conditional_ladder_item_kinds": {
+                    "default": [
+                      "Argument"
+                    ],
+                    "description": "With `conditional_layout: ladder`: kinds of an item of a list that indent a ladder when the list has several of them (an argument among others).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "conditional_ladder_parent_kinds": {
+                    "default": [
+                      "ReturnStatement"
+                    ],
+                    "description": "With `conditional_layout: ladder`: kinds of parent of a ladder that is indented one level (a returned value).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "conditional_layout": {
                     "default": "indented",
-                    "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
+                    "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one; `ladder` is `indented`, except that a chain of conditionals in the `else` branch puts every `: test ? value` on a line of its own at the level of the first test.",
                     "enum": [
                       "indented",
-                      "chained"
+                      "chained",
+                      "ladder"
                     ],
                     "type": "string"
                   },
@@ -11782,6 +13142,24 @@
                       "new_line"
                     ],
                     "type": "string"
+                  },
+                  "declarator_own_line_except_kinds": {
+                    "default": [
+                      "ForStatement"
+                    ],
+                    "description": "Kinds of parent in which the declarators of `declarator_own_line_kinds` stay on one line (the header of a `for`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "declarator_own_line_kinds": {
+                    "default": [],
+                    "description": "Kinds of declaration whose declarators after the first (`int a, b;`, also fields) each stand on a line of their own, indented. Empty keeps them on the line of the first.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "derive_symbol_sets": {
                     "default": false,
@@ -11842,6 +13220,79 @@
                     ],
                     "type": "string"
                   },
+                  "generated_header_markers": {
+                    "default": [
+                      "<autogenerated",
+                      "<auto-generated"
+                    ],
+                    "description": "Texts (`<auto-generated`) that mark a generated file when they occur, case-insensitively, in the comments at the start of the file. Read when `skip_generated` is on.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "generated_header_skip": {
+                    "default": [
+                      "#"
+                    ],
+                    "description": "Line prefixes (`#` for preprocessor lines) that do not end the leading comments when looking for `generated_header_markers`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "generated_names": {
+                    "default": [
+                      "TemporaryGeneratedFile_*",
+                      "*.designer",
+                      "*.generated",
+                      "*.g",
+                      "*.g.i"
+                    ],
+                    "description": "Patterns of the names of generated files, matched case-insensitively against the file name without its last extension; `*` only at the start or the end (`*.g`, `Temp_*`). Read when `skip_generated` is on.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "hang_operand_kinds": {
+                    "default": [],
+                    "description": "Kinds of expression with a head and an operand (a cast `(T)x`) whose operand moves to an indented line of its own when the whole does not fit, unless it is a name, a call of a name or a parenthesized expression. Empty keeps the operand on the line of the head.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "hanging_clause_inline_after": {
+                    "default": [
+                      "SwitchExpressionArm",
+                      "DiscardPattern"
+                    ],
+                    "description": "Pairs of a parent kind and the kind of its first child: a hanging clause of such a parent stays on the line (`_ when x`).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "hanging_clause_kinds": {
+                    "default": [],
+                    "description": "Kinds of clause (`when` of a `catch` filter or a `case` guard) that move to an indented line of their own when the whole does not fit; a condition in parentheses hugs them. Empty keeps them on the line of what precedes them.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "hug_last_argument": {
+                    "default": "last",
+                    "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `sole_bare` only for a function alone that has no parameters or one without parentheses (`x => ...`, `() => ...`), `never` not at all.",
+                    "enum": [
+                      "never",
+                      "sole",
+                      "sole_bare",
+                      "last"
+                    ],
+                    "type": "string"
+                  },
                   "indent_nested_binary": {
                     "default": false,
                     "description": "Indent the operands of a binary expression that is itself an operand of a binary expression with an operator of another precedence (`a && b || c`).",
@@ -11886,9 +13337,23 @@
                     ],
                     "type": "string"
                   },
+                  "initializer_group": {
+                    "default": "own",
+                    "description": "The braces of the initializer of a `new` expression: `own` breaks them only when they do not fit; `creation` breaks them together with the whole `new T(...) { ... }`, so that they are expanded once the type and arguments do not fit on the line either.",
+                    "enum": [
+                      "own",
+                      "creation"
+                    ],
+                    "type": "string"
+                  },
                   "inline_accessor_bodies": {
                     "default": false,
-                    "description": "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines.",
+                    "description": "Keep the body of an accessor on its line (`get { return x; }`) when it is one simple statement without comments and fits; otherwise the braces go on their own lines. Accessors without a body (`{ get; set; }`) then also collapse onto one line when the source has them on several.",
+                    "type": "boolean"
+                  },
+                  "label_blank_line": {
+                    "default": false,
+                    "description": "A blank line between a label and the statement it labels stays (at most one).",
                     "type": "boolean"
                   },
                   "label_indent": {
@@ -11898,15 +13363,6 @@
                       "no_change",
                       "one_less",
                       "flush_left"
-                    ],
-                    "type": "string"
-                  },
-                  "lambda_argument_hug": {
-                    "default": "last",
-                    "description": "A lambda argument whose body can hang from the call's line: `last` hugs a block lambda that is the last argument; `sole` hugs a lambda (block or expression) only when it is the only argument.",
-                    "enum": [
-                      "last",
-                      "sole"
                     ],
                     "type": "string"
                   },
@@ -11936,12 +13392,34 @@
                     ],
                     "type": "string"
                   },
+                  "member_chain_factory_heads": {
+                    "default": true,
+                    "description": "A capitalized name or `this` at the head of a chain stays on the line of the first call (`Foo.Bar()`; `grouped` style).",
+                    "type": "boolean"
+                  },
+                  "member_chain_hold_comments": {
+                    "default": false,
+                    "description": "The comments in front of a member chain stay in front of it: their line breaks do not decide whether the chain breaks.",
+                    "type": "boolean"
+                  },
+                  "member_chain_hug_calls": {
+                    "default": 0,
+                    "description": "A chain with at most this many calls keeps the last call's arguments on the line of the chain when they break (`Foo.Bar(\n args\n)`); a chain with more calls that does not fit on a line is broken at its dots (`grouped` style; 0: the chain's groups decide, as in Prettier).",
+                    "maximum": 1000,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
                   "member_chain_indent": {
                     "default": 1,
                     "description": "Levels of indentation of the lines of a broken member chain.",
                     "maximum": 4,
                     "minimum": 0,
                     "type": "integer"
+                  },
+                  "member_chain_indent_head": {
+                    "default": false,
+                    "description": "The first group of a chain broken at its dots is indented like the groups after it, so the arguments and blocks in it are one level deeper (`grouped` style).",
+                    "type": "boolean"
                   },
                   "member_chain_keep_accesses": {
                     "default": "never",
@@ -11967,6 +13445,17 @@
                     "minimum": 0,
                     "type": "integer"
                   },
+                  "member_chain_style": {
+                    "default": "fluent",
+                    "description": "Layout of a chain of member accesses and calls that does not fit: `soft` keeps the accesses in front of the first call with the head and, once there are `member_chain_min_groups` groups after it, puts every access that follows a call or an index on a line of its own, without indentation of its own; `fluent` breaks before every dot once there are `member_chain_min_calls` calls; `grouped` keeps the head, its calls and indexes in the first group and puts a call group per line after it (a chain of up to two groups stays on one line); `wrapped` keeps the accesses in front of the first call with the head and puts every later dot on a line of its own, a call after a block or argument list that ends on a line of its own staying on that line.",
+                    "enum": [
+                      "fluent",
+                      "grouped",
+                      "wrapped",
+                      "soft"
+                    ],
+                    "type": "string"
+                  },
                   "parameter_attribute_layout": {
                     "default": "inline",
                     "description": "A parameter with attribute lists: `inline` keeps them in front of the parameter;              `hanging` keeps them there when the parameter fits and otherwise puts the rest of              the parameter on an indented line below them.",
@@ -11975,6 +13464,20 @@
                       "hanging"
                     ],
                     "type": "string"
+                  },
+                  "paren_condition_kinds": {
+                    "default": [
+                      "IfStatement",
+                      "WhileStatement",
+                      "DoStatement",
+                      "LockStatement",
+                      "SwitchStatement"
+                    ],
+                    "description": "Kinds of statement whose parenthesized head (`if (...)`, `using (...)`) breaks after the `(` and before the `)` when it does not fit. Other kinds keep the head's parentheses against its content.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "preprocessor_symbol_sets": {
                     "default": [],
@@ -12015,6 +13518,11 @@
                     "description": "With `sort_usings`: one blank line between the System usings and the others (only with `sort_usings_system_first`).",
                     "type": "boolean"
                   },
+                  "skip_generated": {
+                    "default": true,
+                    "description": "Leave generated files as written when formatting: a file whose name matches `generated_names` or whose leading comments contain one of `generated_header_markers`. A file named on the command line, read from stdin or open in the editor is treated the same. `false` formats them.",
+                    "type": "boolean"
+                  },
                   "sort_usings": {
                     "default": false,
                     "description": "Sort `using` directives like the `using-order` rule with `compare: culture_ignore_case`, `static_position: after` and `alias_position: after` (System first, then the others, `using static`, aliases), and join the groups: blank lines between directives go, comments above a directive move with it. `global using` directives come first, `using global::X` behind the System ones. `#if` regions stay as they are behind the sorted directives; a list with another preprocessor directive is left alone.",
@@ -12039,6 +13547,14 @@
                     "default": false,
                     "description": "A space between the two semicolons of a `for` with an empty condition (`for (; ;)`); when false `for (;;)`.",
                     "type": "boolean"
+                  },
+                  "stacked_flush_kinds": {
+                    "default": [],
+                    "description": "Kinds of statement (`using`, `fixed`) whose body is another statement of the same kind: it goes on the next line at the same level, so that a stack of them reads like a list. Empty indents it like any embedded statement.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "switch_arm_layout": {
                     "default": "inline",
@@ -12590,6 +14106,66 @@
             },
             "type": "object"
           },
+          "go": {
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "additionalProperties": false,
+                "properties": {
+                  "end_of_line": {
+                    "default": "auto",
+                    "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
+                    "enum": [
+                      "auto",
+                      "lf",
+                      "crlf"
+                    ],
+                    "type": "string"
+                  },
+                  "final_newline": {
+                    "default": true,
+                    "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_style": {
+                    "default": "space",
+                    "description": "Indent with spaces or tabs.",
+                    "enum": [
+                      "space",
+                      "tab"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "lint": {
+                "$ref": "#/definitions/lint"
+              },
+              "semantics": {
+                "additionalProperties": false,
+                "description": "Facts about methods that the flow analyses use.",
+                "properties": {
+                  "does_not_return": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "pure": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
           "graphql": {
             "additionalProperties": false,
             "properties": {
@@ -12743,6 +14319,22 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
+                  "dialect": {
+                    "default": "auto",
+                    "description": "`template`: the file is a template whose `{{ }}` actions (Go templates, Hugo) stay as written; a block of actions (`if` ... `end`) must open and close inside one element (a file that does not is not formatted); an action among the attributes is one attribute, kept as written. `template-open`: as `template`, and a block may span elements (the file is laid out by the tree of its markup); no end tag the source lacks is written and none of the source is dropped.",
+                    "enum": [
+                      "auto",
+                      "html",
+                      "template",
+                      "template-open"
+                    ],
+                    "type": "string"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -12765,6 +14357,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -12795,10 +14392,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -12971,10 +14589,11 @@
                   },
                   "conditional_layout": {
                     "default": "indented",
-                    "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
+                    "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one; `ladder` is `indented`, except that a chain of conditionals in the `else` branch puts every `: test ? value` on a line of its own at the level of the first test.",
                     "enum": [
                       "indented",
-                      "chained"
+                      "chained",
+                      "ladder"
                     ],
                     "type": "string"
                   },
@@ -13000,10 +14619,11 @@
                   },
                   "hug_last_argument": {
                     "default": "sole",
-                    "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `never` not at all.",
+                    "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `sole_bare` only for a function alone that has no parameters or one without parentheses (`x => ...`, `() => ...`), `never` not at all.",
                     "enum": [
                       "never",
                       "sole",
+                      "sole_bare",
                       "last"
                     ],
                     "type": "string"
@@ -13248,10 +14868,11 @@
                   },
                   "conditional_layout": {
                     "default": "chained",
-                    "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one.",
+                    "description": "Layout of a conditional (`a ? b : c`) that does not fit: `indented` puts the branches one level below the test, each conditional a group of its own; `chained` aligns the branches after `? ` and `: ` and breaks a chain of conditionals in the `else` branch as one; `ladder` is `indented`, except that a chain of conditionals in the `else` branch puts every `: test ? value` on a line of its own at the level of the first test.",
                     "enum": [
                       "indented",
-                      "chained"
+                      "chained",
+                      "ladder"
                     ],
                     "type": "string"
                   },
@@ -13277,10 +14898,11 @@
                   },
                   "hug_last_argument": {
                     "default": "last",
-                    "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `never` not at all.",
+                    "description": "A function, object or array that is the last argument stays on the call's line while its body breaks: `last` for the last of any number of arguments, `sole` only for an argument that is alone, `sole_bare` only for a function alone that has no parameters or one without parentheses (`x => ...`, `() => ...`), `never` not at all.",
                     "enum": [
                       "never",
                       "sole",
+                      "sole_bare",
                       "last"
                     ],
                     "type": "string"
@@ -14177,9 +15799,10 @@
                   "keep_together_kinds": {
                     "default": [
                       "LinkDef",
-                      "Html"
+                      "Html",
+                      "Inline>Html"
                     ],
-                    "description": "Block kinds of which two in a row with no blank line between them in the source stay without one.",
+                    "description": "Block kinds of which two in a row with no blank line between them in the source stay without one; `A>B` is a block of kind B right after one of kind A (an HTML block after a paragraph).",
                     "items": {
                       "type": "string"
                     },
@@ -15038,6 +16661,11 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -15060,6 +16688,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -15095,10 +16728,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -15271,6 +16925,11 @@
                     "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
                     "type": "boolean"
                   },
+                  "content_newline_with_elements": {
+                    "default": false,
+                    "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+                    "type": "boolean"
+                  },
                   "embedded_language_formatting": {
                     "default": "auto",
                     "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -15293,6 +16952,11 @@
                   "final_newline": {
                     "default": true,
                     "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_comment_lines": {
+                    "default": false,
+                    "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
                     "type": "boolean"
                   },
                   "indent_expression_operands": {
@@ -15328,10 +16992,31 @@
                     "minimum": 20,
                     "type": "integer"
                   },
+                  "max_attributes_per_line": {
+                    "default": 0,
+                    "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "self_closing_space": {
+                    "default": true,
+                    "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+                    "type": "boolean"
+                  },
                   "single_attribute_per_line": {
                     "default": false,
                     "description": "Put every attribute of a tag that has several on its own line.",
                     "type": "boolean"
+                  },
+                  "void_element_style": {
+                    "default": "selfclose",
+                    "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+                    "enum": [
+                      "selfclose",
+                      "omit"
+                    ],
+                    "type": "string"
                   },
                   "whitespace_sensitivity": {
                     "default": "css",
@@ -16451,6 +18136,11 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16473,6 +18163,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
               "type": "boolean"
             },
             "indent_expression_operands": {
@@ -16508,10 +18203,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",
@@ -16684,6 +18400,11 @@
               "description": "Put the content of an element that has attributes on lines of its own, also when the element fits on a line; inline elements and `pre` keep theirs (`vue/singleline-html-element-content-newline` with its defaults).",
               "type": "boolean"
             },
+            "content_newline_with_elements": {
+              "default": false,
+              "description": "Put the children of an element that has an element child on lines of their own, also when they fit on a line; only where the whitespace between them is not significant (`whitespace_sensitivity: ignore`, `@html-eslint/element-newline`).",
+              "type": "boolean"
+            },
             "embedded_language_formatting": {
               "default": "auto",
               "description": "Format the code of `<script>` and `<style>` and of `style`, `srcset` and event-handler attributes with the formatter of its language (`auto`, Prettier's `embeddedLanguageFormatting`), or keep it as written (`off`). Code that does not parse, or of a language that is not installed, is kept either way.",
@@ -16706,6 +18427,11 @@
             "final_newline": {
               "default": true,
               "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_comment_lines": {
+              "default": false,
+              "description": "Put the lines of a multi-line comment one level deeper than the comment and a closing `-->` on a line of its own at the comment's level, whatever indentation they had (`@html-eslint/indent`); the default keeps them as written.",
               "type": "boolean"
             },
             "indent_expression_operands": {
@@ -16741,10 +18467,31 @@
               "minimum": 20,
               "type": "integer"
             },
+            "max_attributes_per_line": {
+              "default": 0,
+              "description": "Put every attribute of a start tag that has more than this many on its own line (`vue/max-attributes-per-line`, `@html-eslint/attrs-newline`); 0 sets no limit. `single_attribute_per_line` is the limit 1.",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "self_closing_space": {
+              "default": true,
+              "description": "Write a space before the `/>` of a self-closing element (`<use />`, `<br />`); off writes `<use/>` (`@html-eslint/no-extra-spacing-tags`).",
+              "type": "boolean"
+            },
             "single_attribute_per_line": {
               "default": false,
               "description": "Put every attribute of a tag that has several on its own line.",
               "type": "boolean"
+            },
+            "void_element_style": {
+              "default": "selfclose",
+              "description": "How a void element (`br`, `img`, ...) is written: `selfclose` as `<br />`, `omit` as `<br>` (`void-style`).",
+              "enum": [
+                "selfclose",
+                "omit"
+              ],
+              "type": "string"
             },
             "whitespace_sensitivity": {
               "default": "css",

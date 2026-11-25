@@ -35,7 +35,7 @@ entries:
   syntax-check/expression-value: rule workflow-syntax | A value that must be a single expression or a literal.
   syntax-check/number: rule workflow-syntax | A number that must be above zero.
   syntax-check: rule workflow-syntax | The keys, kinds and required keys of the workflow, jobs, steps and the sections around them (rows in `lang-github-actions/src/shape.rs`); not the values that need other files.
-  syntax-check/duplicate-key: rule workflow-syntax | partial
+  syntax-check/duplicate-key: rule workflow-syntax, no-duplicate-keys | partial
   events: rule invalid-event | Event names, activity types and the keys of event sections.
   events/schedule: rule invalid-event | Cron lines (field count, ranges); not time zones or the shortest interval.
   events/filters: rule invalid-event | A filter and its `-ignore` twin together.

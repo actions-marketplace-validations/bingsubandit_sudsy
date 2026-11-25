@@ -1,0 +1,18 @@
+# StyleCop rules that were `sdk`
+
+Sudsy implements the StyleCop rules of [../parity/stylecop.yaml](../parity/stylecop.yaml) that a .NET SDK diagnostic also did, as far as the lint of the `csharp/stylecop` preset needs to report at least 85% of the findings of the 175 default-on ids on the C# corpus (7,659 files), same line. The rules are off by default and on in the preset. The ones below exist; every other `sdk` line stays `sdk` (each under 1,500 findings: SA1121, SA1142, SA1205-SA1207, SA1302, SA1400-SA1408, SA1401, SA1634-SA1641, SX1101, SX1309).
+
+| Sudsy rule | StyleCop ids | Mechanism | C# facts |
+|---|---|---|---|
+| `qualify-instance-members` | SA1101 | family `finding`, check `unqualified_member` of the worker walk (`SymbolFindings.UnqualifiedMember`): a simple name that binds to a non-static field, property, event or ordinary method, not after `.`, not in `nameof`, not the left of an initializer. Fix writes `this.`. Without the worker it reports nothing | none beyond the check |
+| `missing-doc-comment` | SA1600, SA1602 | family `missing-doc-comment` ([core-rules/src/doc_comments.rs](../../../crates/core-rules/src/doc_comments.rs), Java uses it too): rows for declaration tags, params `doc-start: ///`, `report-at: name`, `visible`, `implicit-public-in`, `top-level-visible`, `visible-with`, `skip` | visible = `public protected internal` in visible types (private members are exempt); members of an interface and enum items are public, so are explicit interface implementations (`explicit_interface_specifier` slot); a top-level type without modifier is internal; partial declarations are left to SA1601 |
+| `doc-param-missing` | SA1611 | family `doc-param-missing` ([core-rules/src/doc_params.rs](../../../crates/core-rules/src/doc_params.rs); Java `@param` is the second user): a parameter the doc comment does not name, same visibility params as above, `param` regex for the entry, `skip-doc` regex (`<inheritdoc`, `<include`) | `<param name="x">`, parameter tags added to the grammar |
+| `using-placement` | SA1200 | family `imports`, `report: outside-scope`: an import in the file scope of a file that also has a namespace-tagged declaration; no fix (moving it changes name lookup) | none |
+| `field-name-no-underscore` | SA1309 | family `naming-convention` (`match: regex`), option `fields` default `^[^_]` | field name path `declaration/variables/identifier` |
+
+## Points settled
+
+- **Visibility defaults.** StyleCop's source is not in the repository (the pinned package ships the DLL only). The defaults (`documentExposedElements`, `documentInternalElements` on, `documentPrivateElements`, `documentPrivateFields` off, `documentInterfaces` on) were checked against the corpus: SA1600 and SA1611 are not reported for private members, are for internal ones, for interface members and for explicit interface implementations, and are not for partial types.
+- **SA1101 reach.** The workspace of a run is every file under the opened roots plus the runtime reference assemblies, as the driver's compilation is every file under the corpus folder plus the core library, so base types in other folders resolve or do not on both sides. On the dotnet/runtime part of the corpus (1,679 files) 20,655 of 20,788 SA1101 lines are reported (99.4%); the cost is in [../performance/numbers.md](../performance/numbers.md).
+- **Doc comments.** The doc comment is found by prefix (`doc-start`) among the comment elements before the first code token; Java keeps `/** */` (its output on the corpus is unchanged).
+- **Budget.** The rules are on in the preset only; other presets and the default lint do not run them.

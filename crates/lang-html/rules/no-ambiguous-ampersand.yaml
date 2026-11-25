@@ -1,0 +1,17 @@
+id: no-ambiguous-ampersand
+message: write `&amp;` for a lone `&` and `&lt;` for a `<` in text
+description: >-
+  An `&` that starts no entity is valid HTML and renders as written; html-validate's
+  `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`.
+example: '<p>a & b</p>   <p>a &amp; b</p>'
+severity: off
+category: style
+rule:
+  any:
+    - { kind: Chunk, regex: '(?<C>&)(?:[^A-Za-z#]|$|#(?:[^0-9xX]|$))' }
+    - { kind: Mustache, regex: '^\{\{(?<C><)' }
+  not-inside:
+    any:
+      - { kind: Element, regex: '(?i)^<(script|style|textarea|title)\b' }
+      - kind: Interpolation
+report-on: $C

@@ -60,8 +60,32 @@ pub fn format_file(
     options: &ResolvedOptions,
     directives: &DirectiveTable,
 ) -> Result<String, FileFormatError> {
+    if generated_skipped(provider, file, options) {
+        return Ok(file.text.clone());
+    }
     let parsed = crate::guard::parse(provider, file)?;
     format_parsed(provider, file, &parsed, options, directives)
+}
+
+/// Whether `skip_generated` leaves the file as written (CLI, stdin and the editor all format through here).
+fn generated_skipped(
+    provider: &dyn LanguageProvider,
+    file: &SourceFile,
+    options: &ResolvedOptions,
+) -> bool {
+    if !options.flag(core_config::opt::SKIP_GENERATED, false) {
+        return false;
+    }
+    let spec = core_format::generated::GeneratedSpec {
+        names: options.strings(core_config::opt::GENERATED_NAMES).collect(),
+        markers: options
+            .strings(core_config::opt::GENERATED_HEADER_MARKERS)
+            .collect(),
+        skip: options
+            .strings(core_config::opt::GENERATED_HEADER_SKIP)
+            .collect(),
+    };
+    core_format::generated::is_generated(&file.id, &file.text, provider.grammar(), &spec)
 }
 
 /// [`format_file`] for a tree that is already parsed (the incremental engine memoizes parsing).
@@ -86,6 +110,9 @@ pub fn format_parsed_with(
     directives: &DirectiveTable,
     embedder: Option<&dyn Embedder>,
 ) -> Result<String, FileFormatError> {
+    if generated_skipped(provider, file, options) {
+        return Ok(file.text.clone());
+    }
     if !parsed.errors.is_empty() {
         return Err(syntax_error(&file.text, &parsed.errors));
     }

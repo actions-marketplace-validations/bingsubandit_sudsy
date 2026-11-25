@@ -20,6 +20,11 @@ pub struct Family {
 /// reads and calls [`Params::done`], which rejects every param it did not read.
 pub struct Params(BTreeMap<String, String>);
 
+/// The items of a comma-separated list, as written in a param or a data row.
+pub fn comma_list(text: &str) -> Vec<String> {
+    text.split(',').map(str::to_string).collect()
+}
+
 impl Params {
     pub fn new(map: BTreeMap<String, String>) -> Params {
         Params(map)
@@ -30,6 +35,11 @@ impl Params {
         self.0
             .remove(key)
             .ok_or_else(|| format!("param `{key}` is missing"))
+    }
+
+    /// The items of a comma-separated param `key`; an error when it is missing.
+    pub fn list(&mut self, key: &str) -> Result<Vec<String>, String> {
+        Ok(comma_list(&self.text(key)?))
     }
 
     /// The text of param `key`, if given.

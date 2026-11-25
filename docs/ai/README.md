@@ -9,8 +9,13 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [architecture/csharp-worker.md](architecture/csharp-worker.md) | .NET worker, protocol, workspace, lifecycle |
 | [architecture/adding-a-language.md](architecture/adding-a-language.md) | Adding a tree-sitter language: steps and per-language cost |
 | [design/unification.md](design/unification.md) | Plan: moving the older languages onto the shared core, rule clusters, ordered steps |
+| [design/site-refresh.md](design/site-refresh.md) | Plan: rule pages, rule list and rule descriptions of the public site |
 | [design/discoverability.md](design/discoverability.md) | Plan: how people and agents find Sudsy (site pages, registry metadata, agents, integrations); phase 1 built |
 | [design/hard-cases.md](design/hard-cases.md) | Hard cases left open by unification steps, each with its numbers and missing capability |
+| [development/no-reference-tool.md](development/no-reference-tool.md) | Planning a language or leg that has no reference tool to compare with: corpus, decision table, checklist, numbers |
+| [design/symbol-index.md](design/symbol-index.md) | Plan: names across files and dependencies for lint rules (types, functions, members), phases and checkpoints |
+| [design/go.md](design/go.md) | Plan: Go, parser and revive lint, phases and checkpoints |
+| [design/cmake.md](design/cmake.md) | Plan: CMake, hand-written parser, cmake-lint and gersemi, phases and checkpoints |
 | [architecture/language-packs.md](architecture/language-packs.md) | Languages as installable packs: format, manifest, cache, ABI check, missing language |
 | [architecture/incremental.md](architecture/incremental.md) | Salsa query graph, backdating, parallelism |
 | [formatting/engine.md](formatting/engine.md) | Layout doc, printer, shapes, directives, comments, safety check |
@@ -35,12 +40,13 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [formatting/shell.md](formatting/shell.md) | Shell (sh and Bash) parser (tree-sitter), formatter after shfmt, parser limits, conformance |
 | [formatting/powershell.md](formatting/powershell.md) | PowerShell parser (tree-sitter), formatter after PSScriptAnalyzer's Invoke-Formatter, parity, conformance |
 | [formatting/protobuf.md](formatting/protobuf.md) | Protobuf parser (tree-sitter), formatter after `buf format`, parity, conformance |
+| [formatting/go.md](formatting/go.md) | Go parser (forked tree-sitter-go), no formatter (gofmt), revive lint parity, mapping table, conformance |
 | [formatting/graphql.md](formatting/graphql.md) | GraphQL parser (tree-sitter), formatter after Prettier, grammar gaps, rules, parity |
 | [formatting/markdown.md](formatting/markdown.md) | Markdown parser (two tree-sitter grammars), formatter, safety checks, rules, conformance |
 | [formatting/cpp.md](formatting/cpp.md) | C and C++: lossless lexer, unwrapped-line structure, `#if` groups, formatter, conformance |
 | [formatting/presets.md](formatting/presets.md) | Preset list and notes |
 | [parity/README.md](parity/README.md) | Parity catalog: what yamllint, Prettier, Biome, eslint-plugin-jsonc, StyleCop, CSharpier do and where Sudsy stands |
-| [parity/queue.md](parity/queue.md) | Generated parity queue per tool: unclassified count, gaps by files, lint rules by missed findings, with fix notes |
+| [parity/queue.md](parity/queue.md) | Generated parity queue: priority table with the new-language rows, per tool unclassified count, gaps by files, lint rules by missed findings, with fix notes |
 | [rules/engine.md](rules/engine.md) | Rule trait, scopes, layers and depth, levels, fixes, suppressions |
 | [rules/builtin.md](rules/builtin.md) | Built-in rules |
 | [rules/semantics.md](rules/semantics.md) | Flow graphs, analyses, summaries, compiler agreement |
@@ -53,7 +59,7 @@ Current state only; history is in git. Update the doc of the area you change in 
 | [editor/vscode.md](editor/vscode.md) | VS Code extension, packaging, dogfooding |
 | [performance/numbers.md](performance/numbers.md) | Current numbers per hot path |
 | [performance/tooling.md](performance/tooling.md) | How to measure: bench.sh, perf-bench, speed scripts |
-| [performance/checklist.md](performance/checklist.md) | Six patterns that overran the bench, and the local allocation check |
+| [performance/checklist.md](performance/checklist.md) | The patterns that overran the bench, and the local allocation check |
 | [development/agent-brief.md](development/agent-brief.md) | The standard brief of a build agent: working files, checks, finish, landing, report |
 | [development/dev-loop.md](development/dev-loop.md) | Build, gate, scripts, Windows/Git Bash/WSL notes |
 | [development/parity.md](development/parity.md) | `parity.sh`: differential tests against upstream tools |

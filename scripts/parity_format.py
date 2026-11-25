@@ -28,6 +28,9 @@ from pathlib import Path
 
 import yaml
 
+import parity_landing
+import parity_wrap
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -62,6 +65,23 @@ def catalog_version(name):
 def executable(prefix, name):
     exe = prefix / f"{name}.exe"
     return exe if exe.exists() else prefix / name
+
+
+def ensure_pwsh(version, parity):
+    """`pwsh` from PATH, else the portable PowerShell release of that version (Linux) unpacked below `parity`, put on PATH (the runs call `pwsh`)."""
+    if shutil.which("pwsh"):
+        return
+    if not sys.platform.startswith("linux"):
+        sys.exit("parity: no pwsh on PATH (a portable build is fetched on Linux only)")
+    root = parity / f"pwsh-{version}"
+    if not (root / "pwsh").exists():
+        arch = "arm64" if platform.machine().lower() in ("aarch64", "arm64") else "x64"
+        url = f"https://github.com/PowerShell/PowerShell/releases/download/v{version}/powershell-{version}-linux-{arch}.tar.gz"
+        shutil.rmtree(root, ignore_errors=True)
+        root.mkdir(parents=True)
+        run(["bash", "-c", f"curl -fsSL '{url}' | tar xz -C '{root}'"], ROOT)
+        (root / "pwsh").chmod(0o755)
+    os.environ["PATH"] = f"{root}{os.pathsep}{os.environ['PATH']}"
 
 
 def install(spec, catalog, version, prefix):
@@ -112,12 +132,13 @@ def install(spec, catalog, version, prefix):
     elif "dotnet-project" in spec:  # a .NET project of this repository, built into prefix at the tool's version
         stamp = hashlib.sha256(b"".join(f.read_bytes() for f in sorted((ROOT / spec["dotnet-project"]).glob("*.cs*")))).hexdigest()  # a changed source rebuilds
         if not (prefix / spec["dll"]).exists() or not (prefix / ".source-hash").exists() or (prefix / ".source-hash").read_text() != stamp:
-            run(["dotnet", "build", "-c", "Release", "--nologo", "-v:q", f"-p:StyleCopVersion={version}", "-o", prefix, spec["dotnet-project"]], ROOT)
+            run(["dotnet", "build", "-c", "Release", "--nologo", "-v:q", f"-p:AnalyzerPackage={spec['package']}", f"-p:AnalyzerVersion={version}", "-o", prefix, spec["dotnet-project"]], ROOT)
             (prefix / ".source-hash").write_text(stamp)
     elif "dotnet-tool" in spec:
         if not executable(prefix, spec["exe"]).exists():
             run(["dotnet", "tool", "install", spec["dotnet-tool"], "--version", version, "--tool-path", prefix], ROOT)
     elif "psmodule" in spec:
+        ensure_pwsh(spec["pwsh"], prefix.parent)
         if not (prefix / spec["psmodule"]).is_dir():
             prefix.mkdir(parents=True, exist_ok=True)
             run(["pwsh", "-NoProfile", "-Command", f"Save-Module {spec['psmodule']} -RequiredVersion {version} -Path '{prefix}'"], ROOT)
@@ -162,6 +183,29 @@ def install(spec, catalog, version, prefix):
                 target = prefix / (spec["exe"] + (".exe" if asset.endswith(".exe") else ""))
                 archive.replace(target)
                 target.chmod(0o755)
+        if "composer" in spec:
+            composer_vendors(spec, prefix)
+
+
+def composer_vendors(spec, prefix):
+    """The dependencies of the corpus projects (`composer`: project -> the folder of its composer.json, and its composer.lock
+    when it has one: composer installs from it, else resolves the exact versions the file pins), installed with the pinned
+    composer.phar into prefix/vendor/<project>/vendor (the project's own `vendor/` below a folder of its own, with an empty `composer.json`): outside the corpus, so no vendor file is a corpus file."""
+    php = executable(prefix, spec["exe"])
+    for project, manifest in spec["composer"].items():
+        vendor = prefix / "vendor" / project / "vendor"
+        (vendor.parent / "composer.json").parent.mkdir(parents=True, exist_ok=True)
+        (vendor.parent / "composer.json").write_text("{}\n", encoding="utf-8")  # tools find a project's vendor/ by its composer.json (PHPStan: composerAutoloaderProjectPaths); an empty one declares no php version
+        if (vendor / "autoload.php").exists():
+            continue
+        work = prefix / "deps" / project
+        shutil.rmtree(work, ignore_errors=True)
+        shutil.copytree(ROOT / manifest, work)
+        env = {**os.environ, "COMPOSER_VENDOR_DIR": str(vendor), "COMPOSER_HOME": str(prefix / "composer-home"), "COMPOSER_NO_INTERACTION": "1"}
+        command = "install" if (work / "composer.lock").exists() else "update"
+        run([php, prefix / "composer.phar", command, "--no-scripts", "--no-plugins", "--no-interaction", "--ignore-platform-reqs", "--no-progress", *(["--no-audit"] if command == "update" else [])], work, env=env)
+        for package in spec.get("composer_require", {}).get(project, []):  # what the project's test runner installs on its own (Composer: simple-phpunit installs PHPUnit 9.6 into vendor/bin/.phpunit, where PHPStan never looks), pinned
+            run([php, prefix / "composer.phar", "require", "--dev", package, "--update-with-dependencies", "--no-scripts", "--no-plugins", "--no-interaction", "--ignore-platform-reqs", "--no-progress", "--no-audit"], work, env=env)
 
 
 def fixtures(config, folder, filters):
@@ -203,26 +247,32 @@ def fixtures(config, folder, filters):
 
 
 def generated(spec, path):
-    """A file the tool leaves alone because it documents it as generated code: `names` (regexes on the file name) or
-    `header` (a regex on the comments before the first token, preprocessor lines and blanks skipped)."""
-    if any(re.search(n, path.name, re.I) for n in spec.get("names", [])):
-        return True
-    if "header" not in spec:
-        return False
-    head, rest = [], path.read_text(encoding="utf-8").lstrip("\ufeff")
+    """A file the tool leaves alone because it documents it as generated code. `spec` is `{"lang": <crate dir>}`: the
+    list is the one Sudsy skips by (`generated_names`, `generated_header_markers`, `generated_header_skip` of the
+    language's lang.yaml), so the filter and the formatter share one source."""
+    options = {}
+    for line in (ROOT / "crates" / spec["lang"] / "lang.yaml").read_text(encoding="utf-8").splitlines():
+        m = re.match(r"\s*- (generated_\w+): (.*)$", line)
+        if m:
+            options[m.group(1)] = json.loads(m.group(2))[0]
+    stem = path.name.rsplit(".", 1)[0].lower()
+    for g in map(str.lower, options["generated_names"]):
+        if (g.startswith("*") and stem.endswith(g[1:])) or (g.endswith("*") and stem.startswith(g[:-1])) or stem == g:
+            return True
+    head, rest = "", path.read_text(encoding="utf-8").lstrip("\ufeff")
     while True:
         rest = rest.lstrip()
         if rest.startswith("//"):
             line, _, rest = rest.partition("\n")
-            head.append(line)
+            head += line[2:] + "\n"
         elif rest.startswith("/*"):
             comment, _, rest = rest.partition("*/")
-            head.append(comment)
-        elif rest.startswith("#"):
+            head += comment[2:] + "\n"
+        elif any(rest.startswith(p) for p in options["generated_header_skip"]):
             rest = rest.partition("\n")[2]
         else:
             break
-    return re.search(spec["header"], "\n".join(head)) is not None
+    return any(m.lower() in head.lower() for m in options["generated_header_markers"])
 
 
 def placed(folder, name, source):
@@ -231,7 +281,18 @@ def placed(folder, name, source):
     return folder / (name if source.get("nested") else name.replace("/", "__"))
 
 
-def upstream(config, prefix, version, copy, work, style=None):
+def copy_path(config, source, here, name):
+    """`placed`, with the extension the language is read from: `copy_as` of the source (`.h` of a C++ project is `.cpp`),
+    `copy_suffix` of the tool (Angular: `*.component.html`)."""
+    copy = placed(here, name, source)
+    if "copy_as" in source:
+        copy = copy.with_name(copy.name + source["copy_as"])
+    if "copy_suffix" in config:
+        copy = copy.with_name(copy.name.removesuffix(".html") + config["copy_suffix"])
+    return copy
+
+
+def upstream(config, prefix, version, copy, work, style=None, folder=None):
     """The tool's output for the copy of a fixture, or None when it rejects the file."""
     exe = executable(prefix, config.get("install", {}).get("exe", ""))
     mode = config["input"]
@@ -241,9 +302,10 @@ def upstream(config, prefix, version, copy, work, style=None):
         copy.parent.mkdir(exist_ok=True)
         shutil.copy(work / copy.name, copy)
     group = re.search(config["group"], copy.name) if "group" in config else None  # `{group}`: the first group of the fixture name (sqlfluff: its dialect)
-    command, env = tool_command(config, prefix, exe=exe, file=(copy.name if mode == "in-place" else copy.relative_to(work).as_posix()), group=group.group(1) if group else "", style=style, folder=ROOT / "tests/parity" / config.get("folder", ""))
+    command, env = tool_command(config, prefix, exe=exe, file=(copy.name if mode == "in-place" else copy.relative_to(work).as_posix()), group=group.group(1) if group else "", style=style, folder=folder or ROOT / "tests/parity" / config.get("folder", ""))
     r = run(command, copy.parent if mode == "in-place" else work, text if mode == "stdin" else None, check=False, env=env)
-    if r.returncode != 0:
+    # `reject_output`: a regex over the output; the tool exits non-zero for other reasons too (sqlfluff: unfixable findings left after a fix), and only a match is a rejection
+    if r.returncode != 0 and not ("reject_output" in config and mode == "in-place" and r.returncode == 1 and not re.search(config["reject_output"], (r.stdout + r.stderr).decode("utf-8", "replace"))):
         if config.get("tool_may_reject"):
             return None
         raise SystemExit(f"{' '.join(command)} failed:\n{r.stderr.decode()}{r.stdout.decode()}")
@@ -343,6 +405,7 @@ class Differences:
         self.refused = data.get("refused") or {}  # group -> most files Sudsy's safety check refuses (a lower bound of the second-format count)
         self.intentional = data.get("intentional") or {}
         self.pins = data.get("pins") or {}
+        self.not_comparable = data.get("not-comparable") or {}  # lint coverage: rule -> the evidence that its findings need what the corpus lacks (left out of the target, counted in every run)
         self.flags = data.get("flags") or {}  # reference-tool flag that turns a feature off -> why it is there (a named gap, printed with its count)
         self.refuted = set()  # `invalid-input` files that the reference parser accepts: Sudsy's rejection is a bug
         self.lint = lint
@@ -382,8 +445,9 @@ class Differences:
         groups = ", ".join(f"{k} {self.groups[k]}" for k in (*INTENTIONAL, "REVIEW"))
         print(f"target {percent(self.same, left)} ({self.same} of {left}); intentional: {groups}")
 
-    def finish(self, filtered=False):
-        """Prints the problems of the lists and the report; returns the number of problems."""
+    def finish(self, filtered=False, scope=None):
+        """Prints the problems of the lists and the report; returns the number of problems. `scope`: the files this lint run covered
+        (a tool's fixture run and its coverage run share the file; a key of the other run's files is not stale here)."""
         bad = 0
         used = {n for names in self.files.values() for n in names}
         for n in sorted(used - set(self.defs)):
@@ -405,7 +469,7 @@ class Differences:
                 bad += 1
         if not filtered:
             for key in self.files:
-                if (" " in key) == self.lint and key not in self.differing and key not in NON_UTF8:
+                if (" " in key) == self.lint and key not in self.differing and key not in NON_UTF8 and (scope is None or key.split(" ")[0] in scope):
                     print(f"STALE: {key} is listed but no longer differs")
                     bad += 1
         counts = Counter()
@@ -475,11 +539,16 @@ def editorconfig_cases(version, sudsy, parity):
     return bad
 
 
-def prepare(config, parity):
-    """Builds what the entry needs, fetches its corpora and installs the tool; returns (version, prefix)."""
+def use_worker(config):
+    """Builds the C# worker for an entry that needs it and points Sudsy at it."""
     if "worker" in config.get("needs", []):
         run(["dotnet", "build", "--nologo", "-v:q", "workers/csharp/Sudsy.Worker"], ROOT)
         os.environ.setdefault("SUDSY_CSHARP_WORKER", str(ROOT / "workers/csharp/Sudsy.Worker/bin/Debug/net10.0/Sudsy.Worker.dll"))
+
+
+def prepare(config, parity):
+    """Builds what the entry needs, fetches its corpora and installs the tool; returns (version, prefix)."""
+    use_worker(config)
     for script in config.get("fetch", []):
         run(["bash", script], ROOT)
     if "catalog" not in config:
@@ -519,17 +588,20 @@ def main():
     batch = upstream_batch(config, prefix, found, work) if config["input"] == "batch" else None
 
     flagged = Counter()  # flag -> files the flag changed the result of
+    wrapped = {}  # `wrap_compare`: fixture -> its token-and-gap result (scripts/parity_wrap.py)
+    controlled = bool(os.environ.get("PARITY_CONTROLS"))
+    checker = None
+    if "wrap_compare" in config:
+        checker = parity_wrap.Checker(config["wrap_compare"], ROOT, [os.environ.get("PARITY_DUMP", sudsy), *config["wrap_compare"]["dump"]], work / "dump-tmp")
+        if controlled:
+            parity_wrap.write_variants(config["wrap_compare"], folder, work / "variants", {f[3].get("style") for f in found if f[3].get("style")})
 
     def compare(item):
         name, fixture, _, source = item
         style = source.get("style")
         here = work / f"style-{style}" if style else work  # a style has its own folder and `sudsy.yaml` (`<style>.yaml` of the tool's folder)
-        copy = placed(here, name, source)
+        copy = copy_path(config, source, here, name)
         copy.parent.mkdir(parents=True, exist_ok=True)
-        if "copy_as" in source:  # the language comes from the extension: `.h` of a C++ project is `.cpp`
-            copy = copy.with_name(copy.name + source["copy_as"])
-        if "copy_suffix" in config:  # the file name selects the language (Angular: `*.component.html`)
-            copy = copy.with_name(copy.name.removesuffix(".html") + config["copy_suffix"])
         shutil.copy(fixture, copy)
         theirs = batch[name] if batch is not None else upstream(config, prefix, version, copy, here, style)
         ours, refused = sudsy_format(sudsy, copy, here, config.get("sudsy_command", "format"))
@@ -539,13 +611,18 @@ def main():
         masked = False
         if config.get("ignore_trailing_blanks"):  # the tool keeps the trailing blanks of a line, Sudsy never does
             before = theirs == ours
-            theirs, ours = (re.sub(r"[ 	]+$", "", t, flags=re.M) if t is not None else None for t in (theirs, ours))
+            theirs, ours = (parity_landing.normalize(config, t) if t is not None else None for t in (theirs, ours))
             masked = not before and theirs == ours
         flagged["ignore_trailing_blanks"] += masked
+        if checker and theirs is not None:
+            wrapped[name] = parity_wrap.file_result(checker, config["wrap_compare"], folder, style, theirs, ours, copy, controlled, lambda variant: upstream(config, prefix, version, copy, here, f"{style}~{variant}", work / "variants"))
         return theirs, ours, unstable, refused
 
     with ThreadPoolExecutor(os.cpu_count() if config.get("parallel") else 1) as pool:
         results = list(pool.map(compare, found))
+    if checker:  # a file with equal tokens and gaps counts as equal
+        parity_wrap.report(found, results, wrapped, target, os.environ.get("PARITY_LABEL", "run"), config["wrap_compare"]["note"])
+        results = [(t, t if (w := wrapped.get(f[0])) and w["ok"] else o, u, r) for f, (t, o, u, r) in zip(found, results)]
     bad, groups = 0, {}  # a ratchet group is counted: [identical, different, rejected by the tool]
     unstable = Counter()  # group (or "fixtures") -> files that change on a second format
     refusals = Counter()  # group (or "fixtures") -> files Sudsy's safety check refuses
@@ -607,6 +684,11 @@ def main():
             bad += now > top
     bad += known.finish(only is not None)
     known.summary()
+    if os.environ.get("PARITY_WRITE") and only is None:  # the landing sample (scripts/parity_landing.py): the corpus files that equal the tool's output now
+        if "wrap_compare" in config:
+            print("landing sample: not written (the comparison is not byte equality)")
+        else:
+            parity_landing.write(folder, tool, {path: theirs for (_, path, _, _), (theirs, ours, _, _) in zip(found, results) if theirs is not None and theirs == ours})
     rejected = sum(theirs is None for theirs, *_ in results)
     for flag, why in known.flags.items():  # reference-tool flags that turn a feature off: named gaps, with the files they apply to
         count = filters["skip_with"] if flag == "skip_with" else flagged[flag] if flag in flagged else len(found)

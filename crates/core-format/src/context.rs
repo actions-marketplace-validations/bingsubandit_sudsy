@@ -150,6 +150,17 @@ pub trait NodeFormatter: Send + Sync {
         Ok(())
     }
 
+    /// [`NodeFormatter::extra_check`] for a check that reads an option (HTML's `dialect`); the
+    /// safety check calls this one.
+    fn extra_check_with(
+        &self,
+        before: &SyntaxNode,
+        after: &SyntaxNode,
+        _options: &core_config::ResolvedOptions,
+    ) -> Result<(), String> {
+        self.extra_check(before, after)
+    }
+
     /// What the safety check compares of a `#restyle` token or node of the input and of the
     /// output: the text without what formatting may change (quotes, case, number spelling, blanks).
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
@@ -245,6 +256,8 @@ pub trait NodeFormatter: Send + Sync {
         CommentStyle {
             trim_lines: options.get(core_config::opt::COMMENT_TRIM_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
+            keep_unicode_blanks: options.get(core_config::opt::COMMENT_KEEP_UNICODE_BLANKS)
+                == Some(&core_config::OptionValue::Bool(true)),
             reindent: options.get(core_config::opt::COMMENT_REINDENT_LINES)
                 == Some(&core_config::OptionValue::Bool(true)),
             block_as_line: options.get(core_config::opt::SINGLE_BLOCK_COMMENT_AS_LINE)
@@ -323,6 +336,8 @@ pub struct FormatCtx<'a> {
     cache: std::sync::OnceLock<Box<dyn std::any::Any + Send + Sync>>,
     /// The widths for `align_comments` (see [`crate::align`]), measured when first asked for.
     comment_align: std::sync::OnceLock<crate::align::AlignTable>,
+    /// The pointer evidence of the file (`derive_pointer_alignment`), counted when first asked for.
+    pointer_net: std::sync::OnceLock<i32>,
     /// The shared shapes' policies, built from the options on first use ([`FormatCtx::chain_policy`]).
     policies: Policies,
     /// Documents of nodes formatted for a layout, by node and flags (see [`FormatCtx::layout`]).
@@ -335,6 +350,11 @@ pub struct FormatCtx<'a> {
 }
 
 impl<'a> FormatCtx<'a> {
+    /// The pointer evidence of the file: `count` runs once.
+    pub fn pointer_net(&self, count: impl FnOnce() -> i32) -> i32 {
+        *self.pointer_net.get_or_init(count)
+    }
+
     pub fn new(
         grammar: &'a Grammar,
         options: &'a ResolvedOptions,
@@ -359,6 +379,7 @@ impl<'a> FormatCtx<'a> {
             any_held_leading: std::sync::atomic::AtomicBool::new(false),
             cache: std::sync::OnceLock::new(),
             comment_align: std::sync::OnceLock::new(),
+            pointer_net: std::sync::OnceLock::new(),
             policies: Policies::default(),
             layouts: Mutex::new(HashMap::new()),
             embedder: None,
@@ -900,6 +921,17 @@ pub fn verbatim_text(s: &str) -> Doc {
     }
 }
 
+/// A multi-line comment text with the blanks at the end of each line removed.
+pub fn trimmed_lines_doc(text: &str) -> Doc {
+    verbatim_text(
+        &text
+            .lines()
+            .map(str::trim_end)
+            .collect::<Vec<_>>()
+            .join("\n"),
+    )
+}
+
 /// One own-line comment (or kept-as-written text) as a document, without the break after it.
 pub fn comment_doc(c: &Comment) -> Doc {
     comment_doc_in(c, &CommentStyle::default())
@@ -907,7 +939,7 @@ pub fn comment_doc(c: &Comment) -> Doc {
 
 /// [`comment_doc`] in a comment style.
 pub fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
-    let text = c.text();
+    let text = c.text_in(st);
     match c.kind {
         CommentKind::Lines => lines_doc(&text),
         CommentKind::Directive => doc::concat(vec![doc::line_start(text), doc::break_parent()]),
@@ -916,13 +948,7 @@ pub fn comment_doc_in(c: &Comment, st: &CommentStyle) -> Doc {
             None => verbatim_text(&text),
         },
         CommentKind::Block if st.reindent && text.contains('\n') => reindented_doc(c, &text, st),
-        CommentKind::Block if st.trim_lines && text.contains('\n') => verbatim_text(
-            &text
-                .lines()
-                .map(str::trim_end)
-                .collect::<Vec<_>>()
-                .join("\n"),
-        ),
+        CommentKind::Block if st.trim_lines && text.contains('\n') => trimmed_lines_doc(&text),
         CommentKind::Block => verbatim_text(&st.line_text(c)),
     }
 }
@@ -974,6 +1000,33 @@ fn reindented_doc(c: &Comment, text: &str, st: &CommentStyle) -> Doc {
         } else {
             parts.push(verbatim_text(&line[(line.len() - bare.len()).min(col)..]));
         }
+    }
+    doc::concat(parts)
+}
+
+/// A comment `text` as written, or with `indented` (a multi-line one) every line after the first one level deeper than the
+/// comment and re-indented to it, a line that holds only the closing `closer` at the comment's
+/// own level; blank lines stay empty.
+pub fn comment_text(text: &str, indented: bool, closer: &str) -> Doc {
+    if !indented || !text.contains('\n') {
+        return verbatim_text(text);
+    }
+    let mut lines = text.lines();
+    let first = lines.next().unwrap_or_default();
+    let rest: Vec<&str> = lines.collect();
+    let (body, last) = match rest.split_last() {
+        Some((l, b)) if l.trim() == closer => (b, Some(closer)),
+        _ => (&rest[..], None),
+    };
+    let mut inner = Vec::new();
+    for line in body {
+        inner.push(doc::hardline());
+        inner.push(doc::text(line.trim()));
+    }
+    let mut parts = vec![doc::text(first.trim_end()), doc::indent(doc::concat(inner))];
+    if let Some(l) = last {
+        parts.push(doc::hardline());
+        parts.push(doc::text(l));
     }
     doc::concat(parts)
 }

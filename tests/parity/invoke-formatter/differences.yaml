@@ -1,7 +1,13 @@
 ratchet:
-  fixtures: 195
+  fixtures: 1
+  real-world: 194
 target-files:
-  fixtures: 210
+  fixtures: 1
+  real-world: 209
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
 differences:
   pipeline-indent: gap  the lines after a multi-line pipeline or call are indented as the source has them; Invoke-Formatter derives the indentation from the syntax tree
   backtick-scriptblock: gap  Invoke-Formatter outdents the script block that follows a backtick continuation; Sudsy keeps its indentation
@@ -12,24 +18,10 @@ differences:
   dsc-configuration-brace: gap  the `{` of a DSC `Configuration` block stays on its line in Invoke-Formatter; Sudsy moves it to its own line like a function body
   not-powershell: "choice  the file is C# source: Sudsy rejects it"
 files:
-  corpus/install-scripts/src/dotnet-install.ps1: pipeline-indent
-  corpus/Pester/src/functions/Pester.SessionState.Mock.ps1: pipeline-indent
-  corpus/Pester/src/Pester.RSpec.ps1: backtick-scriptblock
-  corpus/Pester/src/Pester.Runtime.ps1: pipeline-indent
-  corpus/PowerShell/build.psm1: pipeline-indent
-  corpus/PowerShell/test/tools/CodeCoverageAutomation/Start-CodeCoverageRun.ps1: hashtable-first-entry, switch-brace
-  corpus/PowerShell/test/tools/Modules/HttpListener/HttpListener.psm1: switch-brace
-  corpus/PowerShell/test/tools/Modules/PSSysLog/PSSysLog.psm1: enum-alignment
-  corpus/PowerShell/tools/clearlyDefined/src/ClearlyDefined/ClearlyDefined.psm1: pipeline-indent
-  corpus/PowerShell/tools/packaging/packaging.psm1: pipeline-indent, operator-chain-comments
-  corpus/PowerShell/tools/releaseTools.psm1: pipeline-indent
-  corpus/PowerShell/tools/ResxGen/ResxGen.psm1: enum-alignment
-  corpus/PSScriptAnalyzer/build.psm1: pipeline-indent
-  corpus/PSScriptAnalyzer/Tests/Engine/MissingDSCResource.ps1: dsc-configuration-brace
+  real-world: pipeline-indent:8, hashtable-first-entry:2, enum-alignment:2, backtick-scriptblock:1, switch-brace:1, dsc-configuration-brace:1, operator-chain-comments:0
   corpus/PSScriptAnalyzer/Tests/Engine/CSharp.ps1: not-powershell
-  corpus/PSScriptAnalyzer/Tests/Engine/CustomRuleNREAssets/MyCustom.psm1: hashtable-first-entry
+unclassified: 0
 intentional:
   not-powershell: invalid-input
 flags:
   ignore_trailing_blanks: "the trailing blanks of a line are removed from both outputs before comparing: Invoke-Formatter keeps them, Sudsy never does"
-unclassified: 0

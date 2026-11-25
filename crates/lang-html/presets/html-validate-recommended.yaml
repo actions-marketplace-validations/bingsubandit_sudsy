@@ -28,6 +28,7 @@ html:
       no-implicit-input-type: error
       no-inline-style: error
       no-redundant-for: error
+      no-ambiguous-ampersand: error
       no-redundant-role: error
       no-self-closing: error
       no-trailing-whitespace: error

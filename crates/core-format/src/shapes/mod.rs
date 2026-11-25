@@ -20,6 +20,7 @@ pub mod continuation;
 mod declaration;
 pub mod fill;
 pub mod flow;
+mod for_header;
 mod heritage;
 mod inline_list;
 mod key_value;
@@ -36,11 +37,11 @@ pub mod tabular;
 pub use arrow::{ArrowStyle, arrow_body};
 pub use assignment::{
     Assign, AssignHooks, AssignLayout, AssignPolicy, AssignStyle, NoAssignHooks, assignment,
-    complex_type_args, is_assign_op,
+    attached, complex_type_args, is_assign_op,
 };
 pub use binary_chain::{
     BinaryHooks, BinaryPolicy, Hug, NoBinaryHooks, OperatorLine, Place, binary_chain, flattens,
-    unindented_root,
+    hugs_right, unindented_root,
 };
 pub use block::{
     BlockStyle, Continuations, LabelStyle, annotation_line, blank_before, block, block_between,
@@ -65,14 +66,21 @@ pub use declaration::{
     Annotations, Clause, HeaderStyle, Printer, annotated, annotations_above, enum_body,
     has_arguments, has_doc_comment, header, lead_annotations, members, modifiers, type_declaration,
 };
+pub use for_header::{
+    ForTokens, breaks_between as for_header_breaks, full_for_header,
+    header_close as for_header_close,
+};
 pub use heritage::{ClauseBreak, HeritageLayout, clause_break, clause_list, heritage};
 pub use inline_list::{InlineItem, InlineStyle, inline_list};
 pub use key_value::{KeyValueStyle, key_value};
 pub use list::{
-    ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, delimited_list,
-    delimited_list_around, delimited_list_between,
+    Crowded, ListFacts, ListLayout, ListStyle, StyleOf, TrailingComma, creation_group, crowded,
+    delimited_list, delimited_list_around, delimited_list_between, in_creation_group,
 };
-pub use maybe_parenthesize::{between, enclosed, head_test, keyword_argument, maybe_parenthesize};
+pub use maybe_parenthesize::{
+    HangPolicy, between, enclosed, hang_operand, hanging_clause, hangs, head_test,
+    keyword_argument, maybe_parenthesize,
+};
 pub use omit_parens::{OmitHooks, can_omit, head_fits};
 pub use paren_list::paren_list;
 pub use parens::{
@@ -310,7 +318,9 @@ fn place(
 ) -> Result<(), String> {
     match e {
         // (a zero-width node, which some parsers leave in a list, holds nothing to print)
-        SyntaxElement::Node(node) if node.text_range().is_empty() => {}
+        // (a node with a token of its own, empty as it may be, is an item: `A<,>`)
+        SyntaxElement::Node(node)
+            if node.text_range().is_empty() && node.first_child_or_token().is_none() => {}
         // A wrapper of the items (`ListStyle::unwrap`: Protobuf's field options) holds items of the list.
         SyntaxElement::Node(node) if unwrap.contains(&node.kind()) => {
             for c in node

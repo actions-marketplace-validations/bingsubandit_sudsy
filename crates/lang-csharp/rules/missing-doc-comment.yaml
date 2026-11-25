@@ -1,0 +1,27 @@
+id: missing-doc-comment
+family: missing-doc-comment
+params:
+  message: "`{name}` needs a documentation comment"
+  doc-start: "///"
+  report-at: name
+  visible: public protected internal
+  implicit-public-in: interface enum
+  top-level-visible: true
+  visible-with: explicit_interface_specifier
+  skip: partial
+  types: type-declaration
+  outer.types: public protected internal
+  members: method-declaration|constructor-declaration|destructor-declaration|delegate-declaration|property-declaration|event-declaration|operator-declaration=operator_keyword|conversion-operator-declaration=operator_keyword|indexer-declaration=this_keyword
+  outer.members: public protected internal
+  fields: field-declaration=declaration/variables/identifier|event-field-declaration=declaration/variables/identifier
+  outer.fields: public protected internal
+  enum-items: enum-constant
+  outer.enum-items: public protected internal
+description: >-
+  A type, member, field or enum item that StyleCop's defaults ask to document (public, protected
+  or internal, in types that are too; members of an interface, explicit interface implementations
+  and enum items are public; partial declarations are left out) has no
+  `///` comment before it. Private members are left alone. No fix.
+example: "public class C\n{\n    public int Count;   // add a /// <summary>\n}"
+severity: off
+category: style

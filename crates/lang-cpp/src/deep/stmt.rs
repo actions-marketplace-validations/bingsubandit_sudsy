@@ -80,6 +80,7 @@ impl Cx<'_> {
         if t.kind == k::IDENT && crate::structure::macro_name(self.text(a)) {
             // `FOO(x);` and `FOO`: a macro call, which may expand to anything
             let mut e = a + 1;
+            let args = self.open(e, b, k::LPAR) && self.closed(e) && !self.crosses_in(e);
             if self.open(e, b, k::LPAR) {
                 e = self.skip(e);
             }
@@ -87,6 +88,10 @@ impl Cx<'_> {
                 e += 1;
             }
             if e >= b || self.c[e - 1].kind == k::SEMI {
+                // (its arguments are read in a function body)
+                if args && scope == BODY && self.c[e - 1].kind == k::SEMI {
+                    self.args(a + 1, k::ARGUMENTS);
+                }
                 return (e, Some(k::MACRO_STATEMENT));
             }
         }

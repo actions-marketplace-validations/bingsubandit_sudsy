@@ -6,9 +6,11 @@
 //!
 //! concept: recursive-descent-parser
 
-use super::P;
 use super::lexer::T;
+use super::{P, list};
 use crate::generated::kind as k;
+use core_syntax::block_parse::{self, OpenBlocks};
+use core_syntax::parse::is_signed_number;
 
 /// Words after which a name follows.
 const INTRODUCERS: &[&str] = &[
@@ -152,12 +154,6 @@ const CONSTRAINT_STARTS: &[&str] = &[
     "PERIOD",
 ];
 
-/// Words after which an expression follows.
-const EXPR_AFTER: &[&str] = &[
-    "DEFAULT", "WHERE", "WHEN", "THEN", "ELSE", "IF", "WHILE", "RETURN", "RETURNS", "CALL",
-    "UPDATE",
-];
-
 #[derive(Default, Clone, Copy)]
 struct Walk {
     /// The next word is a name.
@@ -172,8 +168,14 @@ struct Walk {
     params: bool,
     /// The names that follow are function names.
     function_name: bool,
+    /// The function names that follow are read as identifiers (the name of a `DROP PROCEDURE`).
+    identifier_name: bool,
+    /// The names that follow keep their case (the function of a T-SQL `DROP FUNCTION`).
+    plain_name: bool,
     /// The statement is a `CREATE TABLE`.
     create_table: bool,
+    /// The statement is a `DROP`, `TRUNCATE` or a cursor statement: only names follow.
+    drop: bool,
     /// An expression may follow.
     expr: bool,
     /// The statement alters or creates a table.
@@ -192,6 +194,16 @@ struct Walk {
     options: bool,
     /// The statement is a `CREATE`.
     create: bool,
+    /// The statement is an `ALTER`.
+    alter: bool,
+    /// The statement is a `SHOW`: its `WHERE` is a clause.
+    show: bool,
+    /// `CASE`s opened and not yet closed by `END`.
+    cases: OpenBlocks,
+    /// A routine, trigger or event header: its one-statement body is indented.
+    body: bool,
+    /// The header is a routine's: the body follows the characteristics, not `DO` or `FOR EACH ROW`.
+    routine: bool,
     /// The statement is a `CREATE` of a procedure: its parameters keep a blank before the bracket.
     procedure: bool,
     /// `ALTER AGGREGATE ..`: the name after `RENAME TO` is a function name.
@@ -208,6 +220,8 @@ struct Walk {
     index: bool,
     /// The statement is a `CREATE INDEX`.
     index_stmt: bool,
+    /// The statement's rest is indented one level (`ON` of `CREATE INDEX`).
+    hung: bool,
     /// The statement is a `CREATE STATISTICS`: expressions follow `ON`.
     statistics: bool,
     /// What `CURRENT_USER` and the like are in a role position of this statement.
@@ -255,24 +269,38 @@ impl P<'_> {
                 "i" => k::IDENTIFIER,
                 _ => k::KEYWORD,
             });
+        let (create, alter) = (self.at("create"), self.at("alter"));
         let grant = self.at_any(&["grant", "revoke", "deny"])
-            || (self.at("alter") && self.is(1, "default") && self.is(2, "privileges"));
-        let create_table = self.at("create") && (1..6).any(|i| self.is(i, "table"));
-        let table_stmt = self.at_any(&["create", "alter"]) && (1..4).any(|i| self.is(i, "table"));
+            || (alter && self.is(1, "default") && self.is(2, "privileges"));
+        let create_table = create && (1..6).any(|i| self.is(i, "table"));
+        let table_stmt = (create || alter) && (1..4).any(|i| self.is(i, "table"));
+        let mysql_routine = self.d == super::Dialect::Mysql && (create || alter);
         self.generic_run(
             self.nesting.depth(),
             Walk {
                 create_table,
+                drop: self.at_any(&["drop", "truncate", "fetch", "open", "close", "deallocate"]),
                 table_stmt,
                 grant,
                 perms: grant && self.d == super::Dialect::Tsql,
-                create: self.at("create"),
-                procedure: self.at("create")
-                    && (1..4).any(|i| self.is(i, "procedure") || self.is(i, "proc")),
+                create,
+                alter,
+                show: self.at("show"),
+                body: mysql_routine
+                    && block_parse::word_ahead(
+                        self,
+                        &["function", "procedure", "trigger", "event"],
+                        7,
+                    ),
+                routine: mysql_routine
+                    && block_parse::word_ahead(self, &["function", "procedure"], 7),
+                procedure: create
+                    && self.d != super::Dialect::Postgres
+                    && (1..8).any(|i| self.is(i, "procedure") || self.is(i, "proc")),
                 role_kind,
-                type_stmt: self.at("create") && self.is(1, "type"),
-                statistics: self.at("create") && self.is(1, "statistics"),
-                index_stmt: self.at("create") && (1..4).any(|i| self.is(i, "index")),
+                type_stmt: create && self.is(1, "type"),
+                statistics: create && self.is(1, "statistics"),
+                index_stmt: create && (1..4).any(|i| self.is(i, "index")),
                 prepare: self.at("prepare"),
                 policy: (1..3).any(|i| self.is(i, "policy")),
                 ..Walk::default()
@@ -290,6 +318,7 @@ impl P<'_> {
     }
 
     fn generic_run(&mut self, depth: usize, mut w: Walk) {
+        let first = self.pos;
         while let Some(t) = self.t(0) {
             if !matches!(t, T::Word | T::Quoted | T::Comma) {
                 w.value = false;
@@ -344,7 +373,59 @@ impl P<'_> {
                     self.dedent();
                     self.eat_t(T::RSquare);
                 }
-                T::Word | T::Quoted => self.generic_word(&mut w, depth),
+                // T-SQL statements need no terminator: an `END` of no `CASE`, or a `GO`, ends the statement.
+                T::Word
+                    if depth == 0
+                        && self.d == super::Dialect::Tsql
+                        && (self.at("go") || w.cases.closes_statement(self.text(0), "END")) =>
+                {
+                    break;
+                }
+                // T-SQL has no terminator: the next statement's first word ends a `DROP` after its names and a
+                // `CREATE TABLE` after its columns (`WITH` may still follow).
+                T::Word
+                    if depth == 0
+                        && self.d == super::Dialect::Tsql
+                        && self.pos > first
+                        && (w.drop || (w.create_table && w.options))
+                        && !self.at_any(&["if", "exists", "with"])
+                        && self.at_statement_start() =>
+                {
+                    break;
+                }
+                // A `BEGIN` after the first word is the block of the next statement.
+                T::Word
+                    if depth == 0
+                        && self.d == super::Dialect::Tsql
+                        && self.pos > first
+                        && self.at("begin")
+                        && !self.prev_text_is("as") =>
+                {
+                    break;
+                }
+                // The first statement of a `BEGIN` body is a statement of its own.
+                T::Word
+                    if depth == 0
+                        && self.d == super::Dialect::Mysql
+                        && self.pos > first
+                        && self.prev_text_is("begin")
+                        && !self.at("end") =>
+                {
+                    break;
+                }
+                T::Word | T::Quoted => {
+                    // The `ON table (columns)` of a `CREATE INDEX` hangs under the statement.
+                    if depth == 0
+                        && w.index_stmt
+                        && self.d == super::Dialect::Tsql
+                        && !w.hung
+                        && self.at("on")
+                    {
+                        self.indent();
+                        w.hung = true;
+                    }
+                    self.generic_word(&mut w, depth);
+                }
                 T::Comma => {
                     w.item_start = w.columns || w.params || w.index;
                     w.expr |= w.statistics;
@@ -399,6 +480,9 @@ impl P<'_> {
                 }
             }
         }
+        if w.hung {
+            self.dedent();
+        }
     }
 
     /// The bracket at the cursor, if any, with generic contents.
@@ -444,6 +528,11 @@ impl P<'_> {
 
     /// A name (dotted): an object reference. The last part is a function name when `function`.
     pub(super) fn generic_name(&mut self, function: bool) {
+        self.generic_name_as(function, false);
+    }
+
+    /// A name; `plain`: its words keep their case.
+    fn generic_name_as(&mut self, function: bool, plain: bool) {
         let m = self.mark();
         let node = if function {
             k::FUNCTION_NAME
@@ -454,6 +543,8 @@ impl P<'_> {
             let more = self.is_t(1, T::Dot) && self.starts_name(2);
             let kind = if self.is_t(0, T::Quoted) {
                 k::QUOTED_IDENTIFIER
+            } else if plain {
+                k::WORD
             } else if function && !more {
                 k::FUNCTION_IDENTIFIER
             } else {
@@ -484,7 +575,12 @@ impl P<'_> {
                 .code
                 .get(self.pos - 1)
                 .is_some_and(|&c| self.lex[c as usize].end != op.start);
-        op.end == num.start && space_before
+        is_signed_number(
+            op.end,
+            num.start,
+            space_before,
+            matches!(self.prev_kind(), Some(T::LParen | T::Comma)),
+        )
     }
 
     fn prev_kind(&self) -> Option<T> {
@@ -532,6 +628,44 @@ impl P<'_> {
         let quoted = self.is_t(0, T::Quoted);
         let dotted = self.is_t(1, T::Dot) || self.prev_is_dot();
         let word = !quoted;
+        if word {
+            if self.d == super::Dialect::Tsql {
+                w.cases.see(&up, "CASE", "END");
+            }
+            match up.as_str() {
+                // `INDEX i (c) WHERE (c = 1)` in a table body, `SHOW .. WHERE`: the filter is a clause.
+                "WHERE"
+                    if (depth > 0 && matches!(self.prev_kind(), Some(T::RParen)))
+                        || (depth == 0
+                            && (w.show || (w.index_stmt && self.d == super::Dialect::Tsql))) =>
+                {
+                    self.where_clause();
+                    return;
+                }
+                // `SET NEW.c = 1` of a trigger: the row alias is a keyword.
+                "NEW" | "OLD" if self.is_t(1, T::Dot) && self.prev_text_is("set") => {
+                    self.bump_as(k::KEYWORD);
+                    return;
+                }
+                _ => {}
+            }
+            // The one statement body of a routine, trigger or event is indented; a block is not one.
+            if w.body {
+                w.body = up != "BEGIN";
+                if w.body
+                    && depth == 0
+                    && !self.is_t(1, T::Colon)
+                    && self.listed("body_starts", &up)
+                    && (w.routine || self.prev_text_is("do") || self.prev_text_is("row"))
+                {
+                    w.body = false;
+                    self.indent();
+                    self.statement_body();
+                    self.dedent();
+                    return;
+                }
+            }
+        }
         // `CONNECTION (a TO b)`: the constraint of a graph edge table.
         if word && up == "CONNECTION" && self.d == super::Dialect::Tsql && self.is_t(1, T::LParen) {
             self.bump_as(k::KEYWORD);
@@ -611,6 +745,7 @@ impl P<'_> {
                 (true, false) => k::IDENTIFIER,
             };
             self.bump_as(kind);
+            w.value &= self.is_t(0, T::Comma);
             return;
         }
         // `ENGINE = InnoDB` after the columns of a table.
@@ -659,7 +794,8 @@ impl P<'_> {
                 w.item_start = true;
                 return;
             }
-            self.generic_name(false);
+            // sqlfluff leaves the name of a parameter or variable as written.
+            self.generic_name_as(false, w.params);
             w.after_name = true;
             w.type_slot = w.columns && !w.params;
             return;
@@ -699,7 +835,7 @@ impl P<'_> {
             && !w.columns
             && !w.params
             && super::types::is_type_word(&up)
-            && self.is(1, "as")
+            && (self.is(1, "as") || self.is_t(1, T::LSquare) && self.is_t(2, T::RSquare))
         {
             self.type_name();
             return;
@@ -736,9 +872,7 @@ impl P<'_> {
                     "CURRENT_USER" | "SESSION_USER" | "CURRENT_ROLE" | "USER" | "CURRENT_SCHEMA"
                 )
                 && (matches!(self.prev_kind(), Some(T::Comma))
-                    || ["to", "by", "for", "schema"]
-                        .iter()
-                        .any(|x| self.prev_text_is(x)));
+                    || list("role_after").iter().any(|x| self.prev_text_is(x)));
             let kind = match (role, up.as_str()) {
                 (false, _) => k::FUNCTION_IDENTIFIER,
                 (true, "CURRENT_USER") if w.policy => k::IDENTIFIER,
@@ -759,6 +893,13 @@ impl P<'_> {
                 table_stmt: w.table_stmt,
                 grant: w.grant,
                 perms: w.perms,
+                create: w.create,
+                alter: w.alter,
+                procedure: w.procedure,
+                body: w.body,
+                routine: w.routine,
+                role_kind: w.role_kind,
+                cases: w.cases,
                 ..Walk::default()
             };
             return;
@@ -788,7 +929,12 @@ impl P<'_> {
                 && !in_row
                 && !self.reserved(0)
                 && !MODIFIERS.contains(&up.as_str())
-                && !INTRODUCERS.contains(&up.as_str())
+                && (!INTRODUCERS.contains(&up.as_str())
+                    || matches!(
+                        self.prev_word().as_deref(),
+                        Some("EXISTS" | "TABLE" | "VIEW" | "REFERENCES")
+                    )
+                    || w.index_stmt && self.prev_text_is("on"))
                 && !NEVER_NAMES.contains(&up.as_str());
         let calls = (w.expr
             || (depth > 0 && !w.columns && !w.params && !(w.index && w.after_name)))
@@ -819,6 +965,7 @@ impl P<'_> {
         if (word || quoted)
             && calls
             && !keyword_bracket
+            && !in_row
             && (self.is_t(1, T::LParen) || (w.expr && self.name_then_paren()))
             && !matches!(up.as_str(), "CHECK" | "ROW" | "THAN" | "COLUMNS")
         {
@@ -836,6 +983,32 @@ impl P<'_> {
             self.bump_as(k::KEYWORD);
             return;
         }
+        // `USING cast(x AS t)` is a call, `CREATE CAST (a AS b)` introduces an object.
+        if word
+            && !dotted
+            && up == "CAST"
+            && self.is_t(1, T::LParen)
+            && !matches!(self.prev_word().as_deref(), Some("CREATE" | "DROP" | "ON"))
+        {
+            self.chain(false);
+            w.expr = false;
+            w.after_name = false;
+            return;
+        }
+        // The character set, the engine and the language of a routine are plain values: their case is the user's.
+        if word
+            && !dotted
+            && (self.d == super::Dialect::Postgres && self.prev_text_is("language")
+                || self.d == super::Dialect::Mysql && self.prev_text_is("charset")
+                || self.d == super::Dialect::Mysql && self.prev_text_is("engine")
+                || (self.prev_text_is("set") && self.text_back_is(2, "character")))
+            && !self.reserved(0)
+        {
+            self.bump_as(k::WORD);
+            w.expect_name = false;
+            w.after_name = true;
+            return;
+        }
         if name_here && !dotted && w.type_stmt && self.d == super::Dialect::Postgres {
             self.bump_as(k::TYPE_IDENTIFIER);
             w.expect_name = false;
@@ -843,8 +1016,8 @@ impl P<'_> {
             return;
         }
         if quoted || dotted || name_here {
-            let function = w.function_name;
-            self.generic_name(function);
+            let function = w.function_name && !w.identifier_name;
+            self.generic_name_as(function, w.plain_name && self.is_t(1, T::Dot));
             w.name_list = true;
             w.expect_name = false;
             w.after_name = true;
@@ -859,6 +1032,15 @@ impl P<'_> {
             return;
         }
         let kind = match self.row {
+            // A non-reserved keyword that an arrow operator takes as its operand is a column.
+            _ if word
+                && self.is_t(1, T::Op)
+                && matches!(self.text(1), "->" | "->>" | "#>" | "#>>")
+                && self.keyword_like(0)
+                && !self.reserved(0) =>
+            {
+                k::IDENTIFIER
+            }
             Some(row) if word => {
                 if up.starts_with(|c: char| c.is_ascii_digit()) {
                     k::WORD
@@ -919,9 +1101,26 @@ impl P<'_> {
                 up.as_str(),
                 "FUNCTION" | "PROCEDURE" | "PROC" | "AGGREGATE" | "ROUTINE" | "METHOD"
             ) {
+                // What sqlfluff reads the name after `DROP <up>` as: `None` a function name, an
+                // identifier, or (`Some(true)`) a word of any case.
+                let dropped = if self.text_back_is(2, "drop") {
+                    use super::Dialect::{Ansi, Mysql, Postgres, Tsql};
+                    match (self.d, up.as_str()) {
+                        (Tsql, "PROCEDURE" | "PROC")
+                        | (Mysql, "PROCEDURE")
+                        | (Postgres, "FUNCTION") => Some(false),
+                        (Tsql, "FUNCTION") | (Ansi, "PROCEDURE") => Some(true),
+                        _ => None,
+                    }
+                } else {
+                    None
+                };
                 w.function_name = true;
+                w.identifier_name = dropped == Some(false);
+                w.plain_name = dropped == Some(true);
+                w.value = false;
                 if up == "AGGREGATE" && self.d == super::Dialect::Postgres && self.starts_name(0) {
-                    self.aggregate_signature(w.create);
+                    self.aggregate_signature(w.create, w.alter);
                     w.expect_name = false;
                     w.after_name = false;
                     w.aggregate = true;
@@ -929,6 +1128,7 @@ impl P<'_> {
                 }
             } else if !MODIFIERS.contains(&up.as_str()) && !INTRODUCERS.contains(&up.as_str()) {
                 w.function_name = false;
+                w.identifier_name = false;
             }
             w.attribute = up == "ATTRIBUTE";
             let exec_call = (up == "EXECUTE" && !first) || (up == "ON" && w.statistics);
@@ -948,8 +1148,11 @@ impl P<'_> {
                 w.expect_name = false;
             }
             w.expr = exec_call
-                || EXPR_AFTER.contains(&up.as_str())
+                || self.listed("expr_after", &up)
                 || (up == "AS" && w.columns && !self.is(2, "columns"));
+            if up == "RETURNS" && self.d == super::Dialect::Postgres && self.at("setof") {
+                self.bump_as(k::KEYWORD);
+            }
             let pg_returns = up == "RETURNS"
                 && self.d == super::Dialect::Postgres
                 && self.is_t(0, T::Word)
@@ -969,6 +1172,7 @@ impl P<'_> {
                 && self.expr_ahead()
             {
                 self.chain(false);
+                w.expr = false;
             }
         } else {
             w.expect_name = false;
@@ -983,9 +1187,14 @@ impl P<'_> {
         (l.kind == T::Word).then(|| self.src[l.start as usize..l.end as usize].to_ascii_uppercase())
     }
 
-    fn prev_text_is(&self, word: &str) -> bool {
+    pub(super) fn prev_text_is(&self, word: &str) -> bool {
+        self.text_back_is(1, word)
+    }
+
+    /// The token `back` before the cursor is `word`.
+    fn text_back_is(&self, back: usize, word: &str) -> bool {
         self.pos
-            .checked_sub(1)
+            .checked_sub(back)
             .and_then(|i| self.code.get(i))
             .is_some_and(|&c| {
                 self.src[self.lex[c as usize].start as usize..self.lex[c as usize].end as usize]

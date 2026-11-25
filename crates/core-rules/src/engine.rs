@@ -117,6 +117,38 @@ pub fn run_file_rules<'a>(
     diagnostics
 }
 
+/// The rules subscribed to one node kind, in rule order: the first few inline, so a kind with
+/// few rules costs no allocation per file.
+#[derive(Default)]
+struct Subscribed {
+    len: usize,
+    inline: [usize; 4],
+    more: Vec<usize>,
+}
+
+impl Subscribed {
+    fn push(&mut self, rule: usize) {
+        let last = match self.len {
+            0 => None,
+            n if n > self.inline.len() => self.more.last(),
+            n => self.inline.get(n - 1),
+        };
+        if last == Some(&rule) {
+            return;
+        }
+        match self.inline.get_mut(self.len) {
+            Some(slot) => *slot = rule,
+            None => self.more.push(rule),
+        }
+        self.len += 1;
+    }
+
+    fn iter(&self) -> impl Iterator<Item = usize> + '_ {
+        let inline = self.len.min(self.inline.len());
+        self.inline[..inline].iter().chain(&self.more).copied()
+    }
+}
+
 /// The traversal behind [`run_rules`] and [`crate::layout::run_layout`]; `layout` is where the
 /// rules' `attach` calls go (they are ignored without it).
 pub(crate) fn traverse(
@@ -128,7 +160,7 @@ pub(crate) fn traverse(
 ) -> FileReport {
     let mut diagnostics = Vec::new();
     // Sorted by kind: a handful of kinds, looked up once per node, so a binary search beats hashing.
-    let mut by_kind: Vec<(SyntaxKind, Vec<usize>)> = Vec::new();
+    let mut by_kind: Vec<(SyntaxKind, Subscribed)> = Vec::new();
     for (i, a) in active.iter().enumerate() {
         // A tag resolves through the file's grammar to the node kinds carrying it.
         let tagged = a
@@ -138,9 +170,12 @@ pub(crate) fn traverse(
             .flat_map(|t| file.grammar.nodes_with_tag(t));
         for &kind in a.rule.kinds().iter().chain(tagged) {
             match by_kind.binary_search_by_key(&kind, |e| e.0) {
-                Ok(at) if by_kind[at].1.last() != Some(&i) => by_kind[at].1.push(i),
-                Ok(_) => {}
-                Err(at) => by_kind.insert(at, (kind, vec![i])),
+                Ok(at) => by_kind[at].1.push(i),
+                Err(at) => {
+                    let mut rules = Subscribed::default();
+                    rules.push(i);
+                    by_kind.insert(at, (kind, rules));
+                }
             }
         }
     }
@@ -161,7 +196,7 @@ pub(crate) fn traverse(
     };
     for node in file.root.descendants() {
         if let Ok(at) = by_kind.binary_search_by_key(&node.kind(), |e| e.0) {
-            for &i in &by_kind[at].1 {
+            for i in by_kind[at].1.iter() {
                 run(i, &mut |rule, ctx| rule.check(&node, ctx));
             }
         }

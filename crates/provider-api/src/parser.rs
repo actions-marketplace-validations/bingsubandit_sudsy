@@ -98,6 +98,17 @@ impl ParserProvider {
         self
     }
 
+    /// The matchers of the spec's extensions and file names leave out the files whose name matches
+    /// one of `names` (`*.h.cmake`: templates of other languages).
+    pub fn without(mut self, names: &[&str]) -> Self {
+        for m in &mut self.matchers {
+            let pattern = Box::new(m.pattern.clone());
+            let except = names.iter().map(|n| n.to_string()).collect();
+            m.pattern = FilePattern::Except { pattern, except };
+        }
+        self
+    }
+
     /// Replaces the file matchers of the spec's extensions and file names (matchers that select
     /// a dialect, or a directory).
     pub fn with_matchers(mut self, matchers: Vec<FileMatcher>) -> Self {

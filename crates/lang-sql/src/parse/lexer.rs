@@ -4,6 +4,7 @@
 
 use super::dialect::Dialect;
 use crate::generated::kind as k;
+use core_syntax::parse::only_block_comment_before;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum T {
@@ -80,7 +81,7 @@ fn is_word_char(c: char, d: Dialect) -> bool {
 /// at the end of the file (strings, quoted names, comments).
 pub fn lex(src: &str, d: Dialect) -> (Vec<Lex>, Vec<u32>) {
     let b = src.as_bytes();
-    let mut out = Vec::with_capacity(src.len() / 4 + 8);
+    let mut out: Vec<Lex> = Vec::with_capacity(src.len() / 4 + 8);
     let mut open = Vec::new();
     let mut i = 0;
     // mysql `DELIMITER ~`: the delimiter token ends statements, `DELIMITER ;` restores `;`.
@@ -104,8 +105,9 @@ pub fn lex(src: &str, d: Dialect) -> (Vec<Lex>, Vec<u32>) {
         };
         if d == Dialect::Mysql
             && kind == T::Word
-            && stmt_start == out.len()
             && src[i..end].eq_ignore_ascii_case("delimiter")
+            && (out[stmt_start..].iter().all(|t| t.kind.is_trivia())
+                || only_block_comment_before(src, i, "/*", "*/"))
         {
             let rest = &src[end..end + rest_line_end(&src[end..])];
             let skip = rest.len() - rest.trim_start_matches([' ', '\t']).len();
@@ -166,6 +168,7 @@ fn is_copy_stdin(src: &str, toks: &[Lex]) -> bool {
 }
 
 /// The data rows from the line after `from`: start and end, the end before the `\\.` line's newline.
+/// Rows without a `\\.` line are no data.
 fn copy_data(src: &str, from: usize) -> (usize, usize) {
     let Some(nl) = src[from..].find('\n') else {
         return (usize::MAX, 0);
@@ -179,7 +182,7 @@ fn copy_data(src: &str, from: usize) -> (usize, usize) {
         }
         pos = end + 1;
     }
-    (start, src.len())
+    (usize::MAX, 0)
 }
 
 /// A psql meta-command runs to the end of its line, or past it while a `(` is open.
@@ -302,6 +305,18 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         b':' if d == Dialect::Postgres && matches!(next, Some(b'\'' | b'"')) => {
             return (T::Var, quoted(src, i + 1, false, open));
         }
+        // `FROM :name`: a psql variable, unless it follows a name, a closing bracket or a slice bound.
+        b':' if d == Dialect::Postgres
+            && next.is_some_and(|n| n.is_ascii_alphabetic() || n == b'_')
+            && i > 0
+            && !(b[i - 1].is_ascii_alphanumeric() || b"_)]\"':[".contains(&b[i - 1])) =>
+        {
+            let mut j = i + 1;
+            while j < b.len() && (b[j].is_ascii_alphanumeric() || b[j] == b'_') {
+                j += 1;
+            }
+            return (T::Var, j);
+        }
         b'U' | b'u'
             if d == Dialect::Postgres
                 && next == Some(b'&')
@@ -364,6 +379,11 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
         }
     }
     let ch = src[i..].chars().next().unwrap_or(' ');
+    if ch.is_whitespace() {
+        // Other blanks (a no-break space) are whitespace too.
+        let run = src[i..].find(|c: char| !c.is_whitespace() || c == '\n' || c == '\r');
+        return (T::Ws, run.map_or(src.len(), |n| i + n));
+    }
     if is_word_start(ch) || (ch.is_ascii_digit()) {
         return word(src, i, ch, d, open);
     }
@@ -397,6 +417,10 @@ fn token(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {
 
 /// Operators only some dialects have; the other ones lex as their single characters.
 fn op_allowed(op: &str, d: Dialect) -> bool {
+    // `@` and `#` start a variable or a comment there, so `x<@y` is `<` and `@y`.
+    if d == Dialect::Mysql && (op.starts_with('#') || op[1..].contains(['@', '#'])) {
+        return false;
+    }
     match op {
         "&&" | "||" | "!!" | "->" | "->>" | "#>" | "#>>" | "@>" | "<@" | "?|" | "?&" | "<->"
         | "<#>" | "<=>" | "@@" | "~=" | "#-" | "&&&" | "|>>" | "<<|" | "&<|" | "|&>" | "!~~"
@@ -450,13 +474,12 @@ fn dollar_string(src: &str, i: usize, d: Dialect, open: &mut bool) -> Option<usi
         return None;
     }
     let tag = &src[i..=j];
-    Some(src[j + 1..].find(tag).map_or_else(
-        || {
+    Some(
+        core_syntax::parse::raw_end(b, j + 1, tag.as_bytes()).unwrap_or_else(|| {
             *open = true;
             b.len()
-        },
-        |p| j + 1 + p + tag.len(),
-    ))
+        }),
+    )
 }
 
 fn number(src: &str, i: usize, d: Dialect, open: &mut bool) -> (T, usize) {

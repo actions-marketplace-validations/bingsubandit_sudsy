@@ -1005,6 +1005,9 @@ fn resolve(
         embeds: Vec::new(),
         containers: Vec::new(),
         token_flags: super::hot_flags(&tokens),
+        trivia_mask: (tokens.iter().enumerate())
+            .filter(|(i, d)| *i < 64 && d.has_tag("trivia"))
+            .fold(0, |m, (i, _)| m | 1u64 << i),
         trivia_nodes: nodes.iter().any(|d| d.has_tag("trivia")),
         node_flags: super::hot_flags(&nodes),
         nodes,

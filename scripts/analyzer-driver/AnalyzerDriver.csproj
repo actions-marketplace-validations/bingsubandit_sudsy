@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Runs the analyzers of a NuGet package over a folder of C# files as a driver, not through the compiler: the compiler skips
+       analyzers when the compilation has errors, and a corpus of unrelated files has many (docs/ai/development/parity.md).
+       AnalyzerPackage and AnalyzerVersion come from the command line (`install` of the tool in scripts/parity_tools.json,
+       the version of its catalog); the package's analyzer DLLs (its `Analyzer` items) are copied to the `analyzer` folder of the output. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalyzerPackage Condition="'$(AnalyzerPackage)' == ''">StyleCop.Analyzers.Unstable</AnalyzerPackage>
+    <AnalyzerVersion Condition="'$(AnalyzerVersion)' == ''">1.2.0-beta.556</AnalyzerVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.12.0" />
+    <PackageReference Include="$(AnalyzerPackage)" Version="$(AnalyzerVersion)" PrivateAssets="all" ExcludeAssets="compile;runtime" />
+  </ItemGroup>
+  <Target Name="CopyAnalyzerPackage" AfterTargets="Build">
+    <Copy SourceFiles="@(Analyzer)" Condition="'%(Analyzer.NuGetPackageId)' == '$(AnalyzerPackage)'" DestinationFolder="$(OutDir)analyzer" />
+  </Target>
+</Project>

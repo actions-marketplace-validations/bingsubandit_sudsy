@@ -29,7 +29,6 @@ not migrated: settings.documentationRules.companyName (the documentation rules (
 not migrated: settings.layoutRules.allowConsecutiveUsings (no Sudsy option for this setting)
 not migrated: settings.namingRules.allowCommonHungarianPrefixes (no Sudsy option for this setting)
 not migrated: settings.orderingRules.usingDirectivesPlacement (no Sudsy option for this setting)
-not migrated: dotnet_diagnostic.SA1600.severity (sdk: CS1591)
 not migrated: dotnet_diagnostic.SA1633.severity (sdk: IDE0073)
 not migrated: dotnet_diagnostic.SA9999.severity (not a StyleCop.Analyzers rule)
 
@@ -68,6 +67,7 @@ dotnet_diagnostic.SA1026.severity = none
 dotnet_diagnostic.SA1027.severity = none
 dotnet_diagnostic.SA1028.severity = none
 dotnet_diagnostic.SA1100.severity = none
+dotnet_diagnostic.SA1101.severity = none
 dotnet_diagnostic.SA1102.severity = none
 dotnet_diagnostic.SA1103.severity = none
 dotnet_diagnostic.SA1104.severity = none
@@ -100,6 +100,7 @@ dotnet_diagnostic.SA1136.severity = none
 dotnet_diagnostic.SA1137.severity = none
 dotnet_diagnostic.SA1139.severity = none
 dotnet_diagnostic.SA1141.severity = none
+dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1201.severity = none
 dotnet_diagnostic.SA1202.severity = none
 dotnet_diagnostic.SA1203.severity = none
@@ -113,6 +114,7 @@ dotnet_diagnostic.SA1213.severity = none
 dotnet_diagnostic.SA1214.severity = none
 dotnet_diagnostic.SA1216.severity = none
 dotnet_diagnostic.SA1217.severity = none
+dotnet_diagnostic.SA1309.severity = none
 dotnet_diagnostic.SA1402.severity = none
 dotnet_diagnostic.SA1403.severity = none
 dotnet_diagnostic.SA1404.severity = none
@@ -139,10 +141,13 @@ dotnet_diagnostic.SA1514.severity = none
 dotnet_diagnostic.SA1516.severity = none
 dotnet_diagnostic.SA1517.severity = none
 dotnet_diagnostic.SA1518.severity = none
+dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1602.severity = none
 dotnet_diagnostic.SA1604.severity = none
 dotnet_diagnostic.SA1606.severity = none
 dotnet_diagnostic.SA1608.severity = none
 dotnet_diagnostic.SA1610.severity = none
+dotnet_diagnostic.SA1611.severity = none
 dotnet_diagnostic.SA1613.severity = none
 dotnet_diagnostic.SA1614.severity = none
 dotnet_diagnostic.SA1615.severity = none

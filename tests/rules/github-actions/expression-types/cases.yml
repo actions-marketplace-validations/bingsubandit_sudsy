@@ -24,3 +24,11 @@ jobs:
 #                     ^ expression-types
       - run: echo ${{ inputs.nothing }}
 #                     ^ expression-types
+      - run: echo ${{ matrix.v }}
+  caller:
+    uses: owner/repo/.github/workflows/w.yml@v1
+  after:
+    needs: caller
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ needs.caller.outputs.anything }}

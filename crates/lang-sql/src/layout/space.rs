@@ -25,12 +25,11 @@ pub fn gaps(pairs: &[(Option<bool>, bool)]) -> Vec<Gap> {
         .collect()
 }
 
-/// Would the text of the two blocks fuse into other tokens with nothing between them?
-fn fuses(prev: &str, next: &str, prev_is_sign: bool) -> bool {
-    let (a, b) = (prev.chars().next_back(), next.chars().next());
-    (a == Some('-') && b == Some('-'))
-        || (prev_is_sign && b.is_some_and(|c| "+-*/<>=~!@#%^&|`?".contains(c)))
-}
+const FUSION: core_format::spacing::Fusion = core_format::spacing::Fusion {
+    operators: "+-*/<>=~!@#%^&|`?",
+    sigils: "@#",
+    line_comment: ['-', '-'],
+};
 
 /// Sets the gap of every point that sits inside a line; returns whether anything changed.
 pub fn respace(seq: &mut Seq) -> bool {
@@ -50,10 +49,11 @@ pub fn respace_point(seq: &mut Seq, i: usize, strip: bool) -> bool {
     let touch = want == Some(false);
     let any = want.is_none();
     let fuse = (touch || any)
-        && fuses(
+        && core_format::spacing::fuses(
             &seq.blocks[i - 1].text,
             &seq.blocks[i].text,
             seq.blocks[i - 1].kind == k::SIGN,
+            &FUSION,
         );
     let strip = (strip || join) && !comment && !fuse;
     // The characters of one operator (`+=`, `||`) the parser lexed apart stay together.

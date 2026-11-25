@@ -1,0 +1,9 @@
+# The Sudsy side of the comparison with `sqlfluff fix --rules layout,capitalisation`: Sudsy's own
+# defaults, and the dialect a fixture's name starts with.
+overrides:
+  - files: ["postgres__*"]
+    sql: { format: { dialect: postgres } }
+  - files: ["mysql__*"]
+    sql: { format: { dialect: mysql, alter_table_indent: true, block_indent: true } }
+  - files: ["tsql__*"]
+    sql: { format: { dialect: tsql } }

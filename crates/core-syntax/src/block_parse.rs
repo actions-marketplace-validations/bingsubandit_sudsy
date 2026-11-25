@@ -113,6 +113,27 @@ impl Nesting {
     }
 }
 
+/// The blocks of one kind a statement has open (`CASE` .. `END`): an opener opens one, a closer
+/// closes the innermost; a closer with none open ends the statement it stands in.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct OpenBlocks(u32);
+
+impl OpenBlocks {
+    /// Counts `word`: `opener` opens a block, `closer` closes the innermost one (none: unchanged).
+    pub fn see(&mut self, word: &str, opener: &str, closer: &str) {
+        if word.eq_ignore_ascii_case(opener) {
+            self.0 += 1;
+        } else if word.eq_ignore_ascii_case(closer) {
+            self.0 = self.0.saturating_sub(1);
+        }
+    }
+
+    /// Does `word`, a closer, find no block open (so it ends the statement)?
+    pub fn closes_statement(self, word: &str, closer: &str) -> bool {
+        self.0 == 0 && word.eq_ignore_ascii_case(closer)
+    }
+}
+
 /// The parser of a language as the shared block parse needs it.
 pub trait Cursor {
     /// The text of the token `n` ahead (empty at the end).
@@ -131,6 +152,10 @@ pub trait Cursor {
     /// Takes the token at the cursor, whatever it is.
     fn bump_any(&mut self);
     fn expression(&mut self);
+    /// The condition of an opener or an arm; a language may indent it when it is too long.
+    fn condition(&mut self) {
+        self.expression();
+    }
     /// One statement, as a node of its own.
     fn statement(&mut self);
     /// The nesting [`statement_list`] keeps.
@@ -143,10 +168,15 @@ fn at<C: Cursor + ?Sized>(c: &C, n: usize, word: &str) -> bool {
     c.text_at(n).eq_ignore_ascii_case(word)
 }
 
+/// Is one of `words` among the `distance` tokens after the cursor?
+pub fn word_ahead<C: Cursor + ?Sized>(c: &C, words: &[&str], distance: usize) -> bool {
+    (1..=distance).any(|n| words.iter().any(|w| at(c, n, w)))
+}
+
 /// A condition when the arm or opener has one, and the word that starts the body.
 fn condition<C: Cursor + ?Sized>(c: &mut C, body_after: Option<&str>) {
     if let Some(word) = body_after {
-        c.expression();
+        c.condition();
         if at(c, 0, word) {
             c.bump_keyword();
         }
@@ -248,4 +278,24 @@ pub fn statement<C: Cursor + ?Sized>(c: &mut C, blocks: &Blocks) -> bool {
     };
     arm_block(c, f, blocks.end);
     true
+}
+
+#[cfg(test)]
+mod open_block_tests {
+    use super::OpenBlocks;
+
+    #[test]
+    fn a_closer_ends_the_statement_only_when_no_block_is_open() {
+        let mut b = OpenBlocks::default();
+        assert!(b.closes_statement("end", "END"));
+        b.see("case", "CASE", "END");
+        b.see("CASE", "CASE", "END");
+        assert!(!b.closes_statement("END", "END"));
+        b.see("end", "CASE", "END");
+        b.see("END", "CASE", "END");
+        assert!(b.closes_statement("End", "END"));
+        b.see("end", "CASE", "END");
+        assert!(b.closes_statement("end", "END"));
+        assert!(!b.closes_statement("else", "END"));
+    }
 }

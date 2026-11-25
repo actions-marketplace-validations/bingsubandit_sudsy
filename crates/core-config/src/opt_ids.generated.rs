@@ -12,178 +12,220 @@ pub const ANNOTATION_SOURCE_KINDS: OptId = OptId(9);
 pub const ARRAY_BRACKET_SPACING: OptId = OptId(10);
 pub const ARROW_PARENS: OptId = OptId(11);
 pub const ASSIGNMENT_CONDITIONAL: OptId = OptId(12);
-pub const ASSIGNMENT_DESTRUCTURE_KINDS: OptId = OptId(13);
-pub const ASSIGNMENT_GENERIC_CLOSURE_KINDS: OptId = OptId(14);
-pub const ASSIGNMENT_HUG_EXCEPT_KINDS: OptId = OptId(15);
-pub const ASSIGNMENT_HUG_KINDS: OptId = OptId(16);
-pub const ASSIGNMENT_INDENT: OptId = OptId(17);
-pub const ASSIGNMENT_KEEP_BREAK_KINDS: OptId = OptId(18);
-pub const ASSIGNMENT_LAYOUT: OptId = OptId(19);
-pub const ASSIGNMENT_LEFT_MIN_PARAMETERS: OptId = OptId(20);
-pub const ASSIGNMENT_LEFT_UNLESS_KINDS: OptId = OptId(21);
-pub const ASSIGNMENT_OP_TOKEN_SKIP_KINDS: OptId = OptId(22);
-pub const BASE_LIST_LAYOUT: OptId = OptId(23);
-pub const BIN_PACK_ARGUMENTS: OptId = OptId(24);
-pub const BIN_PACK_PARAMETERS: OptId = OptId(25);
-pub const BINARY_HUG: OptId = OptId(26);
-pub const BINARY_INDENT: OptId = OptId(27);
-pub const BINARY_OPERATOR_LINE: OptId = OptId(28);
-pub const BLANK_AFTER_BLOCK_KINDS: OptId = OptId(29);
-pub const BLANK_COMPACT_KINDS: OptId = OptId(30);
-pub const BLANK_DIRECTIVES_ATTACH: OptId = OptId(31);
-pub const BLANK_DIRECTIVES_SKIP: OptId = OptId(32);
-pub const BLANK_LINE_AFTER_COMMENT: OptId = OptId(33);
-pub const BLANK_LINE_BEFORE_COMMENT: OptId = OptId(34);
-pub const BLANK_LINES_AFTER_BLOCK: OptId = OptId(35);
-pub const BLANK_LINES_AFTER_KEY: OptId = OptId(36);
-pub const BLANK_LINES_BETWEEN_MEMBERS: OptId = OptId(37);
-pub const BLOCK_COMMENT_KEEP_TIGHT: OptId = OptId(38);
-pub const BLOCK_INDENT: OptId = OptId(39);
-pub const BRACE_NEWLINE: OptId = OptId(40);
-pub const BRACE_SAME_LINE: OptId = OptId(41);
-pub const BRACE_WRAPPING: OptId = OptId(42);
-pub const BRACKET_SAME_LINE: OptId = OptId(43);
-pub const BRACKET_SPACING: OptId = OptId(44);
-pub const BREAK_AFTER_RETURN_TYPE: OptId = OptId(45);
-pub const BREAK_BEFORE_BINARY_OPERATORS: OptId = OptId(46);
-pub const BREAK_CONSTRUCTOR_INITIALIZERS: OptId = OptId(47);
-pub const BREAK_TEMPLATE_DECLARATIONS: OptId = OptId(48);
-pub const CASE_LAST_TERMINATOR: OptId = OptId(49);
-pub const CATCH_LINE: OptId = OptId(50);
-pub const CLASS_SIGNATURE_WRAP_MIN_PARAMETERS: OptId = OptId(51);
-pub const CLASS_SIGNATURE_WRAP_MIN_SUPERTYPES: OptId = OptId(52);
-pub const CLAUSE_KEYWORD_LINE: OptId = OptId(53);
-pub const CLOSING_PAREN_LINE: OptId = OptId(54);
-pub const COLLAPSE: OptId = OptId(55);
-pub const COLLECTION_BLANK_LINES: OptId = OptId(56);
-pub const COMMA_POSITION: OptId = OptId(57);
-pub const COMMENT_COLUMN: OptId = OptId(58);
-pub const COMMENT_INDENT: OptId = OptId(59);
-pub const COMMENT_REINDENT_LINES: OptId = OptId(60);
-pub const COMMENT_SPACE_EXEMPT: OptId = OptId(61);
-pub const COMMENT_SPACING: OptId = OptId(62);
-pub const COMMENT_TRIM_LINES: OptId = OptId(63);
-pub const CONDITIONAL_INDENT: OptId = OptId(64);
-pub const CONDITIONAL_LAYOUT: OptId = OptId(65);
-pub const CONSTRUCTOR_INITIALIZER_INDENT: OptId = OptId(66);
-pub const CONSTRUCTOR_INITIALIZER_LINE: OptId = OptId(67);
-pub const CONTENT_NEWLINE_WITH_ATTRIBUTES: OptId = OptId(68);
-pub const CONTINUATION_INDENT: OptId = OptId(69);
-pub const CTOR_OWN_LINE_KINDS: OptId = OptId(70);
-pub const CURLY_STYLE: OptId = OptId(71);
-pub const DECLARATION_BRACE: OptId = OptId(72);
-pub const DERIVE_SYMBOL_SETS: OptId = OptId(73);
-pub const DIALECT: OptId = OptId(74);
-pub const DO_WHILE_LINE: OptId = OptId(75);
-pub const DOCUMENT_END: OptId = OptId(76);
-pub const DOCUMENT_START: OptId = OptId(77);
-pub const ELSE_LINE: OptId = OptId(78);
-pub const EMBED_MODE: OptId = OptId(79);
-pub const EMBEDDED_LANGUAGE_FORMATTING: OptId = OptId(80);
-pub const EMPTY_BRACES: OptId = OptId(81);
-pub const END_OF_LINE: OptId = OptId(82);
-pub const FINAL_NEWLINE: OptId = OptId(83);
-pub const FINALLY_LINE: OptId = OptId(84);
-pub const FORMAT_RULES: OptId = OptId(85);
-pub const FUNCTION_CASE: OptId = OptId(86);
-pub const FUNCTION_SIGNATURE_WRAP_MIN_PARAMETERS: OptId = OptId(87);
-pub const HEREDOC_INDENT: OptId = OptId(88);
-pub const HUG_FIRST_ARGUMENT: OptId = OptId(89);
-pub const HUG_LAST_ARGUMENT: OptId = OptId(90);
-pub const IDENTIFIER_CASE: OptId = OptId(91);
-pub const INDENT_BRACES: OptId = OptId(92);
-pub const INDENT_CASE_LABELS: OptId = OptId(93);
-pub const INDENT_EXPRESSION_OPERANDS: OptId = OptId(94);
-pub const INDENT_GOTO_LABELS: OptId = OptId(95);
-pub const INDENT_NESTED_BINARY: OptId = OptId(96);
-pub const INDENT_PP_DIRECTIVES: OptId = OptId(97);
-pub const INDENT_SCRIPT_AND_STYLE: OptId = OptId(98);
-pub const INDENT_SIZE: OptId = OptId(99);
-pub const INDENT_STYLE: OptId = OptId(100);
-pub const INDENT_SWITCH_SECTION_BLOCK: OptId = OptId(101);
-pub const INITIALIZER_COLLAPSE: OptId = OptId(102);
-pub const INITIALIZER_EXPAND: OptId = OptId(103);
-pub const INITIALIZER_FILL_WIDTH: OptId = OptId(104);
-pub const INLINE_ACCESSOR_BODIES: OptId = OptId(105);
-pub const JSX_SINGLE_QUOTE: OptId = OptId(106);
-pub const KEEP_LEADING_BLANK_LINES: OptId = OptId(107);
-pub const KEEP_TOGETHER_KINDS: OptId = OptId(108);
-pub const KEYWORD_CASE: OptId = OptId(109);
-pub const LABEL_INDENT: OptId = OptId(110);
-pub const LAMBDA_ARGUMENT_HUG: OptId = OptId(111);
-pub const LINE_WIDTH: OptId = OptId(112);
-pub const LITERAL_CASE: OptId = OptId(113);
-pub const MAGIC_TRAILING_COMMA: OptId = OptId(114);
-pub const MAX_BLANK_LINES: OptId = OptId(115);
-pub const MEMBER_ATTRIBUTE_LINE: OptId = OptId(116);
-pub const MEMBER_CHAIN_BREAK_ON_BLOCK: OptId = OptId(117);
-pub const MEMBER_CHAIN_FORCE_LINKS: OptId = OptId(118);
-pub const MEMBER_CHAIN_HEAD_CALLS: OptId = OptId(119);
-pub const MEMBER_CHAIN_INDENT: OptId = OptId(120);
-pub const MEMBER_CHAIN_KEEP_ACCESSES: OptId = OptId(121);
-pub const MEMBER_CHAIN_MIN_CALLS: OptId = OptId(122);
-pub const MEMBER_CHAIN_MIN_GROUPS: OptId = OptId(123);
-pub const MEMBER_CHAIN_SHORT_HEAD: OptId = OptId(124);
-pub const MEMBER_CHAIN_STYLE: OptId = OptId(125);
-pub const NAMESPACE_INDENTATION: OptId = OptId(126);
-pub const OPEN_COMMENT_INSIDE_PARENTS: OptId = OptId(127);
-pub const PARAMETER_ATTRIBUTE_LAYOUT: OptId = OptId(128);
-pub const PAREN_LINE_END_PARENTS: OptId = OptId(129);
-pub const PENALTY_RETURN_TYPE: OptId = OptId(130);
-pub const POINTER_ALIGNMENT: OptId = OptId(131);
-pub const PREPROCESSOR_SYMBOL_SETS: OptId = OptId(132);
-pub const PREPROCESSOR_SYMBOLS: OptId = OptId(133);
-pub const PRESERVE_QUERY_BREAKS: OptId = OptId(134);
-pub const PRESERVE_SINGLE_LINE_BLOCKS: OptId = OptId(135);
-pub const PRESERVE_SINGLE_LINE_STATEMENTS: OptId = OptId(136);
-pub const QUOTE_PROPS: OptId = OptId(137);
-pub const QUOTE_STYLE: OptId = OptId(138);
-pub const RAW_STRING_CALLS: OptId = OptId(139);
-pub const REDUNDANT_RETURN_TYPES: OptId = OptId(140);
-pub const REDUNDANT_TEMPLATE_BRACES: OptId = OptId(141);
-pub const REWRITE_PARENTHESIZE_PAIRS: OptId = OptId(142);
-pub const SEMI: OptId = OptId(143);
-pub const SEMICOLON_KEEP_PARENTS: OptId = OptId(144);
-pub const SEPARATE_USING_GROUPS: OptId = OptId(145);
-pub const SEQUENCE_INDENT: OptId = OptId(146);
-pub const SETTLE_KEYWORDS: OptId = OptId(147);
-pub const SHORT_CASE_LABELS: OptId = OptId(148);
-pub const SHORT_ENUMS: OptId = OptId(149);
-pub const SHORT_FUNCTIONS: OptId = OptId(150);
-pub const SHORT_IFS: OptId = OptId(151);
-pub const SHORT_LAMBDAS: OptId = OptId(152);
-pub const SHORT_LOOPS: OptId = OptId(153);
-pub const SIGNATURE_WRAP_ANNOTATED: OptId = OptId(154);
-pub const SINGLE_ATTRIBUTE_PER_LINE: OptId = OptId(155);
-pub const SINGLE_BLOCK_COMMENT_AS_LINE: OptId = OptId(156);
-pub const SINGLE_LINE_BODY_KINDS: OptId = OptId(157);
-pub const SINGLE_QUOTE: OptId = OptId(158);
-pub const SORT_USINGS: OptId = OptId(159);
-pub const SORT_USINGS_SYSTEM_FIRST: OptId = OptId(160);
-pub const SPACE_AFTER_DELEGATE: OptId = OptId(161);
-pub const SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE: OptId = OptId(162);
-pub const SPACE_AROUND_ASSIGNMENT: OptId = OptId(163);
-pub const SPACE_AROUND_EQUALS: OptId = OptId(164);
-pub const SPACE_BEFORE_COLON: OptId = OptId(165);
-pub const SPACE_BEFORE_PARENS: OptId = OptId(166);
-pub const SPACE_BETWEEN_EMPTY_FOR_CLAUSES: OptId = OptId(167);
-pub const SPACES_BEFORE_TRAILING_COMMENTS: OptId = OptId(168);
-pub const SWITCH_ARM_LAYOUT: OptId = OptId(169);
-pub const TARGET_VERSION: OptId = OptId(170);
-pub const TRAILING_COMMA_BEFORE: OptId = OptId(171);
-pub const TRAILING_COMMA_LAST_ENTRY: OptId = OptId(172);
-pub const TRAILING_COMMAS: OptId = OptId(173);
-pub const TYPE_ARGUMENT_COMPLEX_KINDS: OptId = OptId(174);
-pub const TYPE_CASE: OptId = OptId(175);
-pub const TYPE_USE_ANNOTATIONS: OptId = OptId(176);
-pub const UNBREAKABLE_SINGLE_ITEM_LISTS: OptId = OptId(177);
-pub const WHITESPACE_SENSITIVITY: OptId = OptId(178);
-pub const WRAP_LINES: OptId = OptId(179);
-pub const WRAPPED_BODY_INDENT_WORDS: OptId = OptId(180);
-pub const WRAPPED_BRACE_LINE: OptId = OptId(181);
+pub const ASSIGNMENT_CONDITIONAL_TEST_KINDS: OptId = OptId(13);
+pub const ASSIGNMENT_DESTRUCTURE_KINDS: OptId = OptId(14);
+pub const ASSIGNMENT_GENERIC_CLOSURE_KINDS: OptId = OptId(15);
+pub const ASSIGNMENT_HUG_EXCEPT_KINDS: OptId = OptId(16);
+pub const ASSIGNMENT_HUG_KINDS: OptId = OptId(17);
+pub const ASSIGNMENT_INDENT: OptId = OptId(18);
+pub const ASSIGNMENT_INLINE_TEST_KINDS: OptId = OptId(19);
+pub const ASSIGNMENT_KEEP_BREAK_KINDS: OptId = OptId(20);
+pub const ASSIGNMENT_LAYOUT: OptId = OptId(21);
+pub const ASSIGNMENT_LEFT_MIN_PARAMETERS: OptId = OptId(22);
+pub const ASSIGNMENT_LEFT_UNLESS_KINDS: OptId = OptId(23);
+pub const ASSIGNMENT_OP_TOKEN_SKIP_KINDS: OptId = OptId(24);
+pub const ATTACHED_EXCEPT_KINDS: OptId = OptId(25);
+pub const ATTACHED_PARENT_KINDS: OptId = OptId(26);
+pub const ATTACHED_VALUE_KINDS: OptId = OptId(27);
+pub const BASE_LIST_LAYOUT: OptId = OptId(28);
+pub const BIN_PACK_ARGUMENTS: OptId = OptId(29);
+pub const BIN_PACK_PARAMETERS: OptId = OptId(30);
+pub const BINARY_GROUP_MIXED_CHAINS: OptId = OptId(31);
+pub const BINARY_GROUP_SINGLE: OptId = OptId(32);
+pub const BINARY_HUG: OptId = OptId(33);
+pub const BINARY_INDENT: OptId = OptId(34);
+pub const BINARY_INLINE_RIGHT_KINDS: OptId = OptId(35);
+pub const BINARY_OPEN_KINDS: OptId = OptId(36);
+pub const BINARY_OPERATOR_LINE: OptId = OptId(37);
+pub const BLANK_AFTER_BLOCK_KINDS: OptId = OptId(38);
+pub const BLANK_COMPACT_KINDS: OptId = OptId(39);
+pub const BLANK_DIRECTIVES_ATTACH: OptId = OptId(40);
+pub const BLANK_DIRECTIVES_SKIP: OptId = OptId(41);
+pub const BLANK_LINE_AFTER_COMMENT: OptId = OptId(42);
+pub const BLANK_LINE_BEFORE_COMMENT: OptId = OptId(43);
+pub const BLANK_LINES_AFTER_BLOCK: OptId = OptId(44);
+pub const BLANK_LINES_AFTER_KEY: OptId = OptId(45);
+pub const BLANK_LINES_BETWEEN_MEMBERS: OptId = OptId(46);
+pub const BLOCK_COMMENT_KEEP_TIGHT: OptId = OptId(47);
+pub const BLOCK_INDENT: OptId = OptId(48);
+pub const BRACE_NEWLINE: OptId = OptId(49);
+pub const BRACE_SAME_LINE: OptId = OptId(50);
+pub const BRACE_WRAPPING: OptId = OptId(51);
+pub const BRACED_LIST_PADDING: OptId = OptId(52);
+pub const BRACKET_SAME_LINE: OptId = OptId(53);
+pub const BRACKET_SPACING: OptId = OptId(54);
+pub const BREAK_AFTER_RETURN_TYPE: OptId = OptId(55);
+pub const BREAK_BEFORE_BINARY_OPERATORS: OptId = OptId(56);
+pub const BREAK_CONSTRUCTOR_INITIALIZERS: OptId = OptId(57);
+pub const BREAK_TEMPLATE_DECLARATIONS: OptId = OptId(58);
+pub const CASE_LAST_TERMINATOR: OptId = OptId(59);
+pub const CATCH_LINE: OptId = OptId(60);
+pub const CLASS_SIGNATURE_WRAP_MIN_PARAMETERS: OptId = OptId(61);
+pub const CLASS_SIGNATURE_WRAP_MIN_SUPERTYPES: OptId = OptId(62);
+pub const CLAUSE_KEYWORD_LINE: OptId = OptId(63);
+pub const CLOSING_PAREN_LINE: OptId = OptId(64);
+pub const COLLAPSE: OptId = OptId(65);
+pub const COLLAPSE_EMPTY_BLOCKS: OptId = OptId(66);
+pub const COLLECTION_BLANK_LINES: OptId = OptId(67);
+pub const COMMA_POSITION: OptId = OptId(68);
+pub const COMMENT_COLUMN: OptId = OptId(69);
+pub const COMMENT_INDENT: OptId = OptId(70);
+pub const COMMENT_KEEP_UNICODE_BLANKS: OptId = OptId(71);
+pub const COMMENT_REINDENT_LINES: OptId = OptId(72);
+pub const COMMENT_SPACE_EXEMPT: OptId = OptId(73);
+pub const COMMENT_SPACING: OptId = OptId(74);
+pub const COMMENT_TRIM_LINES: OptId = OptId(75);
+pub const CONDITIONAL_INDENT: OptId = OptId(76);
+pub const CONDITIONAL_LADDER_ITEM_KINDS: OptId = OptId(77);
+pub const CONDITIONAL_LADDER_PARENT_KINDS: OptId = OptId(78);
+pub const CONDITIONAL_LAYOUT: OptId = OptId(79);
+pub const CONSTRUCTOR_INITIALIZER_INDENT: OptId = OptId(80);
+pub const CONSTRUCTOR_INITIALIZER_LINE: OptId = OptId(81);
+pub const CONTENT_NEWLINE_WITH_ATTRIBUTES: OptId = OptId(82);
+pub const CONTENT_NEWLINE_WITH_ELEMENTS: OptId = OptId(83);
+pub const CONTINUATION_INDENT: OptId = OptId(84);
+pub const CTOR_OWN_LINE_KINDS: OptId = OptId(85);
+pub const CURLY_STYLE: OptId = OptId(86);
+pub const DECLARATION_BRACE: OptId = OptId(87);
+pub const DECLARATOR_OWN_LINE_EXCEPT_KINDS: OptId = OptId(88);
+pub const DECLARATOR_OWN_LINE_KINDS: OptId = OptId(89);
+pub const DERIVE_POINTER_ALIGNMENT: OptId = OptId(90);
+pub const DERIVE_SYMBOL_SETS: OptId = OptId(91);
+pub const DIALECT: OptId = OptId(92);
+pub const DO_WHILE_LINE: OptId = OptId(93);
+pub const DOCUMENT_END: OptId = OptId(94);
+pub const DOCUMENT_START: OptId = OptId(95);
+pub const ELSE_LINE: OptId = OptId(96);
+pub const EMBED_MODE: OptId = OptId(97);
+pub const EMBEDDED_LANGUAGE_FORMATTING: OptId = OptId(98);
+pub const EMPTY_BODY_OWN_LINE: OptId = OptId(99);
+pub const EMPTY_BRACES: OptId = OptId(100);
+pub const END_OF_LINE: OptId = OptId(101);
+pub const FINAL_NEWLINE: OptId = OptId(102);
+pub const FINALLY_LINE: OptId = OptId(103);
+pub const FOR_EACH_MACROS: OptId = OptId(104);
+pub const FORMAT_RULES: OptId = OptId(105);
+pub const FUNCTION_CASE: OptId = OptId(106);
+pub const FUNCTION_SIGNATURE_WRAP_MIN_PARAMETERS: OptId = OptId(107);
+pub const GENERATED_HEADER_MARKERS: OptId = OptId(108);
+pub const GENERATED_HEADER_SKIP: OptId = OptId(109);
+pub const GENERATED_NAMES: OptId = OptId(110);
+pub const HANG_OPERAND_KINDS: OptId = OptId(111);
+pub const HANGING_CLAUSE_INLINE_AFTER: OptId = OptId(112);
+pub const HANGING_CLAUSE_KINDS: OptId = OptId(113);
+pub const HEREDOC_INDENT: OptId = OptId(114);
+pub const HUG_FIRST_ARGUMENT: OptId = OptId(115);
+pub const HUG_LAST_ARGUMENT: OptId = OptId(116);
+pub const IDENTIFIER_CASE: OptId = OptId(117);
+pub const INDENT_BRACES: OptId = OptId(118);
+pub const INDENT_CASE_LABELS: OptId = OptId(119);
+pub const INDENT_COMMENT_LINES: OptId = OptId(120);
+pub const INDENT_EXPRESSION_OPERANDS: OptId = OptId(121);
+pub const INDENT_GOTO_LABELS: OptId = OptId(122);
+pub const INDENT_NESTED_BINARY: OptId = OptId(123);
+pub const INDENT_PP_DIRECTIVES: OptId = OptId(124);
+pub const INDENT_SCRIPT_AND_STYLE: OptId = OptId(125);
+pub const INDENT_SIZE: OptId = OptId(126);
+pub const INDENT_STYLE: OptId = OptId(127);
+pub const INDENT_SWITCH_SECTION_BLOCK: OptId = OptId(128);
+pub const INITIALIZER_COLLAPSE: OptId = OptId(129);
+pub const INITIALIZER_EXPAND: OptId = OptId(130);
+pub const INITIALIZER_FILL_WIDTH: OptId = OptId(131);
+pub const INITIALIZER_GROUP: OptId = OptId(132);
+pub const INLINE_ACCESSOR_BODIES: OptId = OptId(133);
+pub const JOIN_CLOSING_ANGLES: OptId = OptId(134);
+pub const JSX_SINGLE_QUOTE: OptId = OptId(135);
+pub const KEEP_BLANK_LINES_AT_END_OF_BLOCKS: OptId = OptId(136);
+pub const KEEP_LEADING_BLANK_LINES: OptId = OptId(137);
+pub const KEEP_TOGETHER_KINDS: OptId = OptId(138);
+pub const KEYWORD_CASE: OptId = OptId(139);
+pub const LABEL_BLANK_LINE: OptId = OptId(140);
+pub const LABEL_INDENT: OptId = OptId(141);
+pub const LINE_WIDTH: OptId = OptId(142);
+pub const LITERAL_CASE: OptId = OptId(143);
+pub const MAGIC_TRAILING_COMMA: OptId = OptId(144);
+pub const MAX_ATTRIBUTES_PER_LINE: OptId = OptId(145);
+pub const MAX_BLANK_LINES: OptId = OptId(146);
+pub const MEMBER_ATTRIBUTE_LINE: OptId = OptId(147);
+pub const MEMBER_CHAIN_BREAK_ON_BLOCK: OptId = OptId(148);
+pub const MEMBER_CHAIN_FACTORY_HEADS: OptId = OptId(149);
+pub const MEMBER_CHAIN_FORCE_LINKS: OptId = OptId(150);
+pub const MEMBER_CHAIN_HEAD_CALLS: OptId = OptId(151);
+pub const MEMBER_CHAIN_HOLD_COMMENTS: OptId = OptId(152);
+pub const MEMBER_CHAIN_HUG_CALLS: OptId = OptId(153);
+pub const MEMBER_CHAIN_INDENT: OptId = OptId(154);
+pub const MEMBER_CHAIN_INDENT_HEAD: OptId = OptId(155);
+pub const MEMBER_CHAIN_KEEP_ACCESSES: OptId = OptId(156);
+pub const MEMBER_CHAIN_MIN_CALLS: OptId = OptId(157);
+pub const MEMBER_CHAIN_MIN_GROUPS: OptId = OptId(158);
+pub const MEMBER_CHAIN_SHORT_HEAD: OptId = OptId(159);
+pub const MEMBER_CHAIN_STYLE: OptId = OptId(160);
+pub const NAMESPACE_INDENTATION: OptId = OptId(161);
+pub const OPEN_COMMENT_INSIDE_PARENTS: OptId = OptId(162);
+pub const PARAMETER_ATTRIBUTE_LAYOUT: OptId = OptId(163);
+pub const PAREN_CONDITION_KINDS: OptId = OptId(164);
+pub const PAREN_LINE_END_PARENTS: OptId = OptId(165);
+pub const PENALTY_RETURN_TYPE: OptId = OptId(166);
+pub const POINTER_ALIGNMENT: OptId = OptId(167);
+pub const PREPROCESSOR_SYMBOL_SETS: OptId = OptId(168);
+pub const PREPROCESSOR_SYMBOLS: OptId = OptId(169);
+pub const PRESERVE_QUERY_BREAKS: OptId = OptId(170);
+pub const PRESERVE_SINGLE_LINE_BLOCKS: OptId = OptId(171);
+pub const PRESERVE_SINGLE_LINE_STATEMENTS: OptId = OptId(172);
+pub const QUOTE_PROPS: OptId = OptId(173);
+pub const QUOTE_STYLE: OptId = OptId(174);
+pub const RAW_STRING_CALLS: OptId = OptId(175);
+pub const REDUNDANT_RETURN_TYPES: OptId = OptId(176);
+pub const REDUNDANT_TEMPLATE_BRACES: OptId = OptId(177);
+pub const REWRITE_PARENTHESIZE_PAIRS: OptId = OptId(178);
+pub const SELF_CLOSING_SPACE: OptId = OptId(179);
+pub const SEMI: OptId = OptId(180);
+pub const SEMICOLON_KEEP_PARENTS: OptId = OptId(181);
+pub const SEPARATE_USING_GROUPS: OptId = OptId(182);
+pub const SEQUENCE_INDENT: OptId = OptId(183);
+pub const SETTLE_KEYWORDS: OptId = OptId(184);
+pub const SHORT_CASE_LABELS: OptId = OptId(185);
+pub const SHORT_ENUMS: OptId = OptId(186);
+pub const SHORT_FUNCTIONS: OptId = OptId(187);
+pub const SHORT_IFS: OptId = OptId(188);
+pub const SHORT_LAMBDAS: OptId = OptId(189);
+pub const SHORT_LOOPS: OptId = OptId(190);
+pub const SIGNATURE_WRAP_ANNOTATED: OptId = OptId(191);
+pub const SINGLE_ATTRIBUTE_PER_LINE: OptId = OptId(192);
+pub const SINGLE_BLOCK_COMMENT_AS_LINE: OptId = OptId(193);
+pub const SINGLE_LINE_BODY_KINDS: OptId = OptId(194);
+pub const SINGLE_QUOTE: OptId = OptId(195);
+pub const SKIP_GENERATED: OptId = OptId(196);
+pub const SORT_USINGS: OptId = OptId(197);
+pub const SORT_USINGS_SYSTEM_FIRST: OptId = OptId(198);
+pub const SPACE_AFTER_CAST: OptId = OptId(199);
+pub const SPACE_AFTER_DELEGATE: OptId = OptId(200);
+pub const SPACE_AFTER_EMPTY_LAST_FOR_CLAUSE: OptId = OptId(201);
+pub const SPACE_AROUND_ASSIGNMENT: OptId = OptId(202);
+pub const SPACE_AROUND_EQUALS: OptId = OptId(203);
+pub const SPACE_BEFORE_COLON: OptId = OptId(204);
+pub const SPACE_BEFORE_PARENS: OptId = OptId(205);
+pub const SPACE_BETWEEN_EMPTY_FOR_CLAUSES: OptId = OptId(206);
+pub const SPACES_BEFORE_TRAILING_COMMENTS: OptId = OptId(207);
+pub const SPLIT_EMPTY_BRACES: OptId = OptId(208);
+pub const STACKED_FLUSH_KINDS: OptId = OptId(209);
+pub const SWITCH_ARM_LAYOUT: OptId = OptId(210);
+pub const TARGET_VERSION: OptId = OptId(211);
+pub const TRAILING_COMMA_BEFORE: OptId = OptId(212);
+pub const TRAILING_COMMA_LAST_ENTRY: OptId = OptId(213);
+pub const TRAILING_COMMAS: OptId = OptId(214);
+pub const TYPE_ARGUMENT_COMPLEX_KINDS: OptId = OptId(215);
+pub const TYPE_CASE: OptId = OptId(216);
+pub const TYPE_USE_ANNOTATIONS: OptId = OptId(217);
+pub const UNBREAKABLE_SINGLE_ITEM_LISTS: OptId = OptId(218);
+pub const VOID_ELEMENT_STYLE: OptId = OptId(219);
+pub const WHITESPACE_SENSITIVITY: OptId = OptId(220);
+pub const WRAP_LINES: OptId = OptId(221);
+pub const WRAPPED_BODY_INDENT_WORDS: OptId = OptId(222);
+pub const WRAPPED_BRACE_LINE: OptId = OptId(223);
 
 /// Option names sorted; an id is the index.
-pub static NAMES: [&str; 182] = [
+pub static NAMES: [&str; 224] = [
     "access_modifier_outdent",
     "accessor_blank_lines",
     "align_after_open_bracket",
@@ -197,21 +239,30 @@ pub static NAMES: [&str; 182] = [
     "array_bracket_spacing",
     "arrow_parens",
     "assignment_conditional",
+    "assignment_conditional_test_kinds",
     "assignment_destructure_kinds",
     "assignment_generic_closure_kinds",
     "assignment_hug_except_kinds",
     "assignment_hug_kinds",
     "assignment_indent",
+    "assignment_inline_test_kinds",
     "assignment_keep_break_kinds",
     "assignment_layout",
     "assignment_left_min_parameters",
     "assignment_left_unless_kinds",
     "assignment_op_token_skip_kinds",
+    "attached_except_kinds",
+    "attached_parent_kinds",
+    "attached_value_kinds",
     "base_list_layout",
     "bin_pack_arguments",
     "bin_pack_parameters",
+    "binary_group_mixed_chains",
+    "binary_group_single",
     "binary_hug",
     "binary_indent",
+    "binary_inline_right_kinds",
+    "binary_open_kinds",
     "binary_operator_line",
     "blank_after_block_kinds",
     "blank_compact_kinds",
@@ -227,6 +278,7 @@ pub static NAMES: [&str; 182] = [
     "brace_newline",
     "brace_same_line",
     "brace_wrapping",
+    "braced_list_padding",
     "bracket_same_line",
     "bracket_spacing",
     "break_after_return_type",
@@ -240,23 +292,31 @@ pub static NAMES: [&str; 182] = [
     "clause_keyword_line",
     "closing_paren_line",
     "collapse",
+    "collapse_empty_blocks",
     "collection_blank_lines",
     "comma_position",
     "comment_column",
     "comment_indent",
+    "comment_keep_unicode_blanks",
     "comment_reindent_lines",
     "comment_space_exempt",
     "comment_spacing",
     "comment_trim_lines",
     "conditional_indent",
+    "conditional_ladder_item_kinds",
+    "conditional_ladder_parent_kinds",
     "conditional_layout",
     "constructor_initializer_indent",
     "constructor_initializer_line",
     "content_newline_with_attributes",
+    "content_newline_with_elements",
     "continuation_indent",
     "ctor_own_line_kinds",
     "curly_style",
     "declaration_brace",
+    "declarator_own_line_except_kinds",
+    "declarator_own_line_kinds",
+    "derive_pointer_alignment",
     "derive_symbol_sets",
     "dialect",
     "do_while_line",
@@ -265,19 +325,28 @@ pub static NAMES: [&str; 182] = [
     "else_line",
     "embed_mode",
     "embedded_language_formatting",
+    "empty_body_own_line",
     "empty_braces",
     "end_of_line",
     "final_newline",
     "finally_line",
+    "for_each_macros",
     "format_rules",
     "function_case",
     "function_signature_wrap_min_parameters",
+    "generated_header_markers",
+    "generated_header_skip",
+    "generated_names",
+    "hang_operand_kinds",
+    "hanging_clause_inline_after",
+    "hanging_clause_kinds",
     "heredoc_indent",
     "hug_first_argument",
     "hug_last_argument",
     "identifier_case",
     "indent_braces",
     "indent_case_labels",
+    "indent_comment_lines",
     "indent_expression_operands",
     "indent_goto_labels",
     "indent_nested_binary",
@@ -289,22 +358,30 @@ pub static NAMES: [&str; 182] = [
     "initializer_collapse",
     "initializer_expand",
     "initializer_fill_width",
+    "initializer_group",
     "inline_accessor_bodies",
+    "join_closing_angles",
     "jsx_single_quote",
+    "keep_blank_lines_at_end_of_blocks",
     "keep_leading_blank_lines",
     "keep_together_kinds",
     "keyword_case",
+    "label_blank_line",
     "label_indent",
-    "lambda_argument_hug",
     "line_width",
     "literal_case",
     "magic_trailing_comma",
+    "max_attributes_per_line",
     "max_blank_lines",
     "member_attribute_line",
     "member_chain_break_on_block",
+    "member_chain_factory_heads",
     "member_chain_force_links",
     "member_chain_head_calls",
+    "member_chain_hold_comments",
+    "member_chain_hug_calls",
     "member_chain_indent",
+    "member_chain_indent_head",
     "member_chain_keep_accesses",
     "member_chain_min_calls",
     "member_chain_min_groups",
@@ -313,6 +390,7 @@ pub static NAMES: [&str; 182] = [
     "namespace_indentation",
     "open_comment_inside_parents",
     "parameter_attribute_layout",
+    "paren_condition_kinds",
     "paren_line_end_parents",
     "penalty_return_type",
     "pointer_alignment",
@@ -327,6 +405,7 @@ pub static NAMES: [&str; 182] = [
     "redundant_return_types",
     "redundant_template_braces",
     "rewrite_parenthesize_pairs",
+    "self_closing_space",
     "semi",
     "semicolon_keep_parents",
     "separate_using_groups",
@@ -343,8 +422,10 @@ pub static NAMES: [&str; 182] = [
     "single_block_comment_as_line",
     "single_line_body_kinds",
     "single_quote",
+    "skip_generated",
     "sort_usings",
     "sort_usings_system_first",
+    "space_after_cast",
     "space_after_delegate",
     "space_after_empty_last_for_clause",
     "space_around_assignment",
@@ -353,6 +434,8 @@ pub static NAMES: [&str; 182] = [
     "space_before_parens",
     "space_between_empty_for_clauses",
     "spaces_before_trailing_comments",
+    "split_empty_braces",
+    "stacked_flush_kinds",
     "switch_arm_layout",
     "target_version",
     "trailing_comma_before",
@@ -362,6 +445,7 @@ pub static NAMES: [&str; 182] = [
     "type_case",
     "type_use_annotations",
     "unbreakable_single_item_lists",
+    "void_element_style",
     "whitespace_sensitivity",
     "wrap_lines",
     "wrapped_body_indent_words",

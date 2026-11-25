@@ -3,3 +3,4 @@
 mod directory;
 mod embedded;
 mod engine;
+mod package_comment;

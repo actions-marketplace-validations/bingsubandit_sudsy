@@ -1,0 +1,16 @@
+# Roslynator.Analyzers' default set: the Sudsy rules that match the analyzers Roslynator turns on by default
+# (RCS1020, RCS1048, RCS1075, RCS1098, RCS1138, RCS1139, RCS1179, RCS1202, RCS1212, RCS1213).
+# `unused-private-member` needs `analysis: deep`, which a preset cannot set.
+# Checked against Roslynator by `scripts/parity.sh coverage roslynator`.
+csharp:
+  lint:
+    rules:
+      constant-on-right: warn
+      doc-summary-required: warn
+      doc-summary-text: warn
+      no-empty-catch: warn
+      nullable-shorthand: warn
+      possible-null-dereference: warn
+      unused-assignment: warn
+      unused-private-member: warn
+      use-lambda: warn

@@ -15,5 +15,6 @@ html:
       no-implicit-button-type: warn
       no-implicit-close: warn
       no-inline-style: warn
+      no-raw-gt: warn
       no-style-tag: warn
       void-style: warn

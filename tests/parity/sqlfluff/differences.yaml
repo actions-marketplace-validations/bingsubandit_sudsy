@@ -2,95 +2,105 @@ differences:
   parse-gap: gap  "our parser does not parse what sqlfluff's does (a statement it lacks, `DELIMITER`, template tags), so the file is refused"
   layout-gap: gap  "the layout of our own does not yet cover every construct (expressions, joins, CASE, CTEs, comments), those parts stay as written"
   non-utf8-input: gap  "sqlfluff reads a file in another encoding (postgres collate.windows.win1252.sql, Windows-1252); sudsy reads UTF-8 only, so the file stays unformatted and its layout findings count"
+  if-condition-wrap: gap  "a tsql `IF` / `ELSE` body or a mysql `IF` condition is laid out differently from sqlfluff (a condition kept on its line, `SET @v` / `DECLARE` values broken before `=`, a statement after a comment in a body)"
+  identifier-case: gap  "the case of a word sqlfluff reads as a keyword, a column or a data type differs (`name`, `state`, `value`, `array`, `SYSNAME`, `DATETIME`, `default null` as literal or keyword)"
+  tsql-block-indent: gap  "the indentation of `BEGIN` / `END` blocks and statements in T-SQL bodies differs"
+  fix-loop-limit: gap  "sqlfluff `fix` is not at its own fixed point on the file, a second run changes it (`LT05` wraps one more nesting level per run; 5 files of the real-world corpus), so the reference output is one pass of it"
 files:
   sqlfluff-ansi: parse-gap, layout-gap
   sqlfluff-mysql: parse-gap, layout-gap
   sqlfluff-postgres: parse-gap, layout-gap
   sqlfluff-tsql: parse-gap, layout-gap
   postgres-regress: parse-gap, layout-gap
+  real-world: if-condition-wrap:44, fix-loop-limit:5, layout-gap:24, identifier-case:103, tsql-block-indent:3
   sql/postgres/src/test/regress/sql/collate.windows.win1252.sql: non-utf8-input
 ratchet:
-  sqlfluff-ansi: 204
-  sqlfluff-mysql: 216
-  sqlfluff-postgres: 122
-  sqlfluff-tsql: 108
-  postgres-regress: 38
+  sqlfluff-ansi: 205
+  sqlfluff-mysql: 235
+  sqlfluff-postgres: 143
+  sqlfluff-tsql: 153
+  postgres-regress: 51
+  real-world: 646
 target-files:
-  postgres-regress: 115
-  sqlfluff-ansi: 210
-  sqlfluff-mysql: 248
-  sqlfluff-postgres: 142
-  sqlfluff-tsql: 152
-target: 85.7
+  postgres-regress: 79
+  sqlfluff-ansi: 212
+  sqlfluff-mysql: 254
+  sqlfluff-postgres: 162
+  sqlfluff-tsql: 190
+  real-world: 825
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
+unclassified: 110
+target: 79.7
 
 fixes:  # gap name or lint rule -> one line: where and what to change
   PRS: sqlfluff's own parse error on files it cannot read (162 files); Sudsy parses them, nothing to report
-  CP05: bit strings (b'..'), ::regclass and tsql int column types in files Sudsy cannot parse; remaining parse errors (JSON_TABLE PATH .. ON EMPTY options of postgres and mysql, tsql BIT VARYING parameters, RETURNING WITH (OLD AS o), COPY (query INTO), psql variables)
-  CP02: misses are in files with a parse error (the constructs listed under CP05)
-  CP01: misses are in files with a parse error (the constructs listed under CP05)
+  LT02: indentation findings left after `sudsy format` on real-world code (in the formatted files, 15 of 87 hold 80%, almost all T-SQL; `sp_RestoreGene` 2,190, `CASE` / `WHEN` / `END` inside string concatenations and `ELSE` bodies); the rest of the 13,017 sits in the files Sudsy refuses (8) or cannot read (18, not UTF-8) and keeps as written
+  LT01: spacing findings left after `sudsy format` (6,332); not yet split by construct
+  CP02: capitalisation findings of identifiers left after `sudsy format` (3,270); not yet split by file
+  CP01: "3,033 keyword-case findings left after format; 2,791 are in two T-SQL files our parser refuses (tigertoolbox setup.sql, `CROSS apply ::fn_trace_geteventinfo(t .id)` after a long `case` select list; sqlserver-kit Recover_Deleted_Data_Proc.sql 693:22, `STUFF((select ... for xml path('')), 1, 1, '')` after a `case` with `0x,` hex literals), so the file keeps its case; parse fixes first"
+  LT05: line-length findings (1,538); not yet split by file
   RF05: unquoted names with `$`, `#`, `@`, and quoted names of statements the generic parse leaves as plain tokens (no ObjectReference)
   RF06: quoted names in files with a parse error, and tsql and mysql quoting; per-dialect naked identifier templates
   RF03: references of selects over table functions and nested queries
-measured: {covered: 17297, total: 20182, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 95303, total: 119582, main: '1456737e'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  LT02: 528
-  PRS: 380
-  LT01: 285
-  LT09: 149
-  CP02: 122
-  RF03: 105
-  LT14: 103
-  LXR: 102
-  CP01: 79
-  ST06: 75
-  AL03: 72
-  RF02: 67
-  RF06: 61
-  RF05: 59
-  RF01: 53
-  AM09: 52
-  AM04: 50
-  CV10: 49
-  LT06: 44
-  AM06: 39
-  CP05: 33
-  LT05: 31
-  ST11: 25
-  AL02: 24
-  AL09: 24
-  CP03: 24
-  ST09: 21
-  ST12: 21
-  ST05: 17
-  CV11: 15
-  AL01: 13
-  CP04: 13
-  ST10: 13
-  AL08: 12
-  ST07: 12
-  AM08: 11
-  LT11: 11
-  RF04: 11
-  AL04: 10
-  AL10: 8
-  AM03: 7
-  CV01: 7
-  CV08: 5
-  LT03: 5
-  CV06: 4
-  CV07: 4
-  TQ02: 4
-  TQ03: 4
+  LT02: 11125
+  CP01: 3033
+  CP02: 1455
+  CV06: 1452
+  LT01: 1208
+  CP04: 1122
+  RF02: 594
+  LT05: 501
+  CV11: 320
+  PRS: 263
+  LT04: 216
+  LT03: 211
+  RF01: 206
+  LT15: 204
+  LT06: 180
+  ST06: 179
+  CV10: 174
+  CP03: 166
+  AL09: 165
+  RF03: 156
+  AL08: 135
+  AL01: 106
+  LT08: 106
+  ST12: 100
+  CP05: 94
+  ST09: 94
+  LT09: 88
+  AL03: 73
+  TQ02: 54
+  TQ03: 51
+  AM03: 50
+  RF06: 45
+  ST05: 42
+  TQ01: 42
+  RF05: 36
+  AL02: 35
+  AL04: 27
+  ST01: 25
+  RF04: 23
+  AM05: 22
+  LT14: 17
+  LT11: 16
+  LXR: 15
+  ST10: 15
+  AM04: 6
+  AM01: 5
+  ST08: 5
+  AM02: 4
+  JJ01: 4
+  ST04: 4
   AL05: 3
-  AM05: 3
-  CV05: 3
-  ST02: 3
-  ST03: 2
-  CV03: 1
-  CV12: 1
+  CV01: 2
   LT07: 1
-  LT08: 1
-  ST01: 1
-  ST08: 1
+  LT12: 1
+  ST02: 1
+  ST11: 1
   TMP: 1
-  TQ01: 1

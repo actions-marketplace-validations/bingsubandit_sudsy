@@ -135,3 +135,155 @@ fn tsql_indents_if_else_and_while_bodies() {
         "IF @a = 1\n    SELECT 1\nELSE\n    SELECT 2;\nWHILE @a < 3\n    SET @a = @a + 1;\n"
     );
 }
+
+fn formats_as(dialect: &str, input: &str) -> String {
+    let mut subject = Formatting::new(lang_sql::provider(), "a.sql");
+    subject
+        .options
+        .push(("dialect", core_config::OptionValue::String(dialect.into())));
+    assert_formats(&subject, input)
+}
+
+#[test]
+fn tsql_end_closes_a_block_but_not_a_case() {
+    let input = "BEGIN\nSELECT CASE WHEN @a = 1 THEN 1 ELSE 2 END AS x\nBEGIN\nSELECT 3\nEND\nSELECT 4\nEND\nSELECT 5\n";
+    assert_eq!(
+        formats_as("tsql", input),
+        "BEGIN\n    SELECT CASE WHEN @a = 1 THEN 1 ELSE 2 END AS x\n    BEGIN\n        SELECT 3\n    END\n    SELECT 4\nEND\nSELECT 5\n"
+    );
+}
+
+#[test]
+fn join_hint_words_stay_names_when_no_join_follows() {
+    for dialect in ["tsql", "postgres", "mysql"] {
+        assert_eq!(
+            formats_as(dialect, "select * from t hash where hash.a = 1;\n"),
+            "select * from t hash\nwhere hash.a = 1;\n",
+            "{dialect}"
+        );
+        assert_eq!(
+            formats_as(dialect, "select * from t as loop join u on loop.a = u.a;\n"),
+            "select * from t as loop join u on loop.a = u.a;\n",
+            "{dialect}"
+        );
+    }
+}
+
+#[test]
+fn copy_rows_without_a_terminator_are_not_data() {
+    let input = "copy t from stdin;\nselect 1;\n";
+    assert_eq!(formats_as("postgres", input), input);
+}
+
+#[test]
+fn mysql_delimiter_may_be_a_word() {
+    let input = "DELIMITER d//\nSELECT 1 d//\nDELIMITER ;\n";
+    assert_eq!(formats_as("mysql", input), input);
+    // The rest of the `DELIMITER` line is ignored by the client and kept apart from the delimiter.
+    let ignored = "SELECT 30;\nDELIMITER // ;\nSELECT 31 //\n";
+    assert_eq!(
+        formats_as("mysql", ignored),
+        "SELECT 30;\nDELIMITER // ;\nSELECT 31//\n"
+    );
+}
+
+#[test]
+fn tsql_else_if_chains_stay_at_the_level_of_the_first_if() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "IF @a = 1\nSELECT 1\nELSE IF @a = 2\nBEGIN\nSELECT 2\nEND\nELSE\nIF @a = 3\nSELECT 3\n"
+        ),
+        "IF @a = 1\n    SELECT 1\nELSE IF @a = 2\n    BEGIN\n        SELECT 2\n    END\nELSE\nIF @a = 3\n    SELECT 3\n"
+    );
+}
+
+#[test]
+fn tsql_drop_and_create_table_end_at_the_next_statement() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "IF 1 = 1\nDROP TABLE #E\nCREATE TABLE t (a int) WITH (x = 1)\nWHILE 1 = 1\nBEGIN\nSELECT 1\nEND\n"
+        ),
+        "IF 1 = 1\n    DROP TABLE #E\nCREATE TABLE t (a int) WITH (x = 1)\nWHILE 1 = 1\n    BEGIN\n        SELECT 1\n    END\n"
+    );
+}
+
+#[test]
+fn tsql_declare_breaks_before_the_equals_of_a_long_value() {
+    assert_eq!(
+        formats_as(
+            "tsql",
+            "DECLARE @EditionOfTheServer NVARCHAR(MAX) = CAST(SERVERPROPERTY('Edition') AS NVARCHAR(128)), @e int;\n"
+        ),
+        "DECLARE\n    @EditionOfTheServer NVARCHAR(MAX)\n    = CAST(SERVERPROPERTY('Edition') AS NVARCHAR(128)),\n    @e INT;\n"
+    );
+}
+
+#[test]
+fn tsql_go_ends_a_set_option_and_end_semicolon_may_precede_else() {
+    assert_eq!(
+        formats_as("tsql", "SET ANSI_NULLS ON\nGO\nBEGIN\nSELECT 1\nEND\n"),
+        "SET ANSI_NULLS ON\nGO\nBEGIN\n    SELECT 1\nEND\n"
+    );
+    let input = "IF 1 = 1 BEGIN SELECT 1 END; ELSE BEGIN SELECT 2 END\n";
+    assert_eq!(formats_as("tsql", input), input);
+}
+
+#[test]
+fn a_lifted_comment_leaves_a_blank_between_its_neighbours() {
+    let input = "select\n    aaaaaaaaaaaaaaaaaaaaaaaaaaaaa + 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' + -- c\n    case when x then 1 end;\n";
+    assert!(formats(input).contains("\n    + case when x then 1 end;"));
+}
+
+#[test]
+fn an_operator_never_fuses_with_a_sigil_after_it() {
+    // Postgres has `<@`; elsewhere `@y` is a variable (T-SQL, MySQL) or an operator and a name.
+    for dialect in ["ansi", "postgres", "mysql", "tsql"] {
+        assert_eq!(
+            formats_as(dialect, "select a from t where x < @y;\n"),
+            "select a from t\nwhere x < @y;\n",
+            "{dialect}"
+        );
+    }
+    assert_eq!(
+        formats_as("mysql", "select a from t where x<@y;\n"),
+        "select a from t\nwhere x < @y;\n"
+    );
+}
+
+#[test]
+fn mysql_first_body_statement_is_a_statement_of_its_own() {
+    let input = "create procedure p() begin\nif aaaaaaaaaaaaaaaaaaaaaa = 1 and bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb = 2 and ccccccccccccccccccccc = 3 then select 1; end if; end;\n";
+    assert!(formats_as("mysql", input).contains(
+        "\nif\n    aaaaaaaaaaaaaaaaaaaaaa = 1\n    and bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb = 2\n"
+    ));
+}
+
+#[test]
+fn a_keyword_word_before_an_arrow_is_a_column_and_types_are_names_after_references() {
+    let input = "CREATE TABLE t (a INT GENERATED ALWAYS AS (value ->> 'x') STORED, b INT REFERENCES types (id));\n";
+    for dialect in ["postgres", "mysql"] {
+        let out = formats_as(dialect, input);
+        assert!(out.contains("(value ->> 'x')"), "{dialect}: {out}");
+        assert!(out.contains("REFERENCES types (id)"), "{dialect}: {out}");
+    }
+}
+
+#[test]
+fn tsql_calls_a_procedure_without_exec() {
+    let input = "sp_configure 'show advanced options', 1\nRECONFIGURE WITH OVERRIDE\nGO\n";
+    assert_eq!(formats_as("tsql", input), input);
+}
+
+#[test]
+fn drop_function_keeps_its_signature_and_a_reserved_charset_is_a_keyword() {
+    assert_eq!(
+        formats_as("postgres", "DROP FUNCTION sqrt (integer);\n"),
+        "DROP FUNCTION sqrt(integer);\n"
+    );
+    assert_eq!(
+        formats_as("mysql", "CREATE DATABASE d CHARACTER SET binary;\n"),
+        "CREATE DATABASE d CHARACTER SET BINARY;\n"
+    );
+}

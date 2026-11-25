@@ -25,14 +25,14 @@ entries:
   color-named: planned
   color-no-hex: rule color-no-hex
   color-no-invalid-hex: rule color-no-invalid-hex
-  comment-empty-line-before: planned | Needs the `except` and `ignore` secondary options (`first-nested`, `after-comment`, ...), which the rule options do not express yet.
+  comment-empty-line-before: rule comment-empty-line-before | `//` comments are left to double-slash-comment-empty-line-before, as stylelint ignores them
   comment-no-empty: rule no-empty-comment
   comment-pattern: planned
   comment-whitespace-inside: rule comment-space
   comment-word-disallowed-list: planned
   container-name-pattern: rule container-name-pattern
   custom-media-pattern: rule custom-media-pattern
-  custom-property-empty-line-before: planned | Needs the `except` and `ignore` secondary options (`first-nested`, `after-comment`, ...), which the rule options do not express yet.
+  custom-property-empty-line-before: rule custom-property-empty-line-before
   custom-property-no-missing-var-function: rule custom-property-no-missing-var-function
   custom-property-pattern: rule custom-property-pattern
   declaration-block-no-duplicate-custom-properties: rule declaration-block-no-duplicate-custom-properties
@@ -95,7 +95,7 @@ entries:
   no-unknown-animations: planned
   no-unknown-custom-media: planned
   no-unknown-custom-properties: planned
-  number-max-precision: rule number-max-precision
+  number-max-precision: rule number-max-precision | numbers in a Less variable declaration (an at-rule prelude) are not checked, named gap
   property-allowed-list: rule property-allowed-list
   property-disallowed-list: rule property-disallowed-list
   property-layout-mappings: planned | The option maps a property to its values or units, and rule options are not maps.

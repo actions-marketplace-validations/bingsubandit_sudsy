@@ -804,3 +804,17 @@ description: A character class in the constant string given to `re.compile` and 
 example: "import re\nre.compile('[a\\u0301]')   # reported"
 severity: off
 category: suspicious
+---
+id: redefines-builtin-id
+family: scope
+params: { check: redefines-builtin }
+message: "`{name}` shadows a Python builtin"
+description: "A variable, function, class, parameter or import named like a Python builtin (`list`, `id`, `type`, ...; ruff A001 and A002)."
+example: "list = [1]\ndef f(id): pass"
+severity: off
+category: suspicious
+options:
+  - { name: allow, type: list, default: [], description: Names that may be declared. }
+  - { name: kinds, type: list, choices: [variable, parameter, function, class, import, type], default: [], description: "The declarations that are checked (empty: all)." }
+  - { name: except_parents, type: list, default: [], description: "Grammar kinds whose direct declarations are left out." }
+  - { name: assigned_by, type: list, default: [], description: "Grammar kinds of statements whose left-side names are reported too." }

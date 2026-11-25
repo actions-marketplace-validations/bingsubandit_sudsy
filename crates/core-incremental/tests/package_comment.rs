@@ -1,0 +1,73 @@
+//! The Go package comment is a fact of the directory: one report for the first file by name,
+//! caused by a file that needs a comment, never by a test file or a file with a detached
+//! comment, and answered by the comment of any file of the directory.
+
+use core_config::{ConfigChain, EditorConfig};
+use core_incremental::{Database, File, Siblings, directory_scope, module_diagnostics};
+use provider_api::LanguageProvider;
+use std::path::Path;
+
+fn write(dir: &Path, name: &str, text: &str) {
+    std::fs::write(dir.join(name), text).unwrap();
+}
+
+/// The names of the files that have a finding of the unit of `dir`.
+fn reported(dir: &Path) -> Vec<String> {
+    let providers: Vec<Box<dyn LanguageProvider>> = vec![Box::new(lang_go::provider())];
+    let mut db = Database::new(providers);
+    db.set_config(ConfigChain::parse(
+        "lint:\n  rules:\n    missing-package-comment: warn\n",
+    ));
+    let file = File::new(
+        &db,
+        dir.join("a.go"),
+        1,
+        String::new(),
+        false,
+        EditorConfig::default(),
+    );
+    let scope = directory_scope(&db, file).expect("the rule is on");
+    let unit = Siblings::default().unit(&db, dir, &scope, &[]);
+    let mut found: Vec<String> = module_diagnostics(&db, unit)
+        .as_ref()
+        .unwrap()
+        .iter()
+        .map(|(p, _)| p.file_name().unwrap().to_string_lossy().into_owned())
+        .collect();
+    found.sort();
+    found
+}
+
+#[test]
+fn the_first_file_by_name_takes_the_report_and_any_comment_answers_it() {
+    let t = tempfile::tempdir().unwrap();
+    write(t.path(), "b.go", "package a\n");
+    write(t.path(), "c.go", "package a\n");
+    assert_eq!(reported(t.path()), ["b.go"]);
+    // A test file is the first by name: it takes the report.
+    write(t.path(), "a_test.go", "package a\n");
+    assert_eq!(reported(t.path()), ["a_test.go"]);
+    // A comment in any file, a test file too, answers it.
+    write(t.path(), "c.go", "// Package a does things.\npackage a\n");
+    assert_eq!(reported(t.path()), Vec::<String>::new());
+}
+
+#[test]
+fn a_test_file_or_a_detached_comment_never_causes_the_report() {
+    let t = tempfile::tempdir().unwrap();
+    write(t.path(), "a_test.go", "package a\n");
+    assert_eq!(reported(t.path()), Vec::<String>::new());
+    write(t.path(), "b.go", "// Package a does things.\n\npackage a\n");
+    assert_eq!(reported(t.path()), Vec::<String>::new());
+    write(t.path(), "c.go", "package a\n");
+    assert_eq!(reported(t.path()), ["a_test.go"]);
+}
+
+#[test]
+fn a_file_that_does_not_parse_silences_the_report() {
+    let t = tempfile::tempdir().unwrap();
+    write(t.path(), "a.go", "package a\n");
+    assert_eq!(reported(t.path()), ["a.go"]);
+    write(t.path(), "b.go", "package a\nfunc {{{\n");
+    assert_eq!(reported(t.path()), Vec::<String>::new());
+}

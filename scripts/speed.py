@@ -61,9 +61,9 @@ def grouped_commands(spec, command, values, paths, base):
     for p in paths:
         m = re.search(spec["group"], p)
         groups.setdefault(m.group(1) if m else "", []).append(p)
-    fill = lambda a: str(a).format(**values)  # noqa: E731
     out = []
     for group, names in groups.items():
+        fill = lambda a: str(a).format(**values, group=group)  # noqa: E731
         folder = group if spec.get("cwd") == "group" else ""
         size = spec.get("chunk", CHUNK)
         for i in range(0, len(names), size) if "{files}" in command else [0]:

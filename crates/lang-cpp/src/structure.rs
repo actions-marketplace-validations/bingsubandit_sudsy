@@ -558,6 +558,8 @@ impl Builder<'_> {
             count == 2
                 && open == first + 1
                 && self.toks[first].kind == k::IDENT
+                // (`foo(a)` and a statement on the next line are one statement, as clang-format reads them)
+                && macro_name(self.text(first))
                 && self.broken(i, n)
                 && !continues(self.toks[n].kind, self.text(n))
         };

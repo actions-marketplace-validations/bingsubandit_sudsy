@@ -4,6 +4,7 @@
 //! what: Keyword tables and syntax switches of the dialects of one parser.
 //! tools: sqlfluff dialects
 
+use core_syntax::words::{self, WordLists};
 use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
@@ -140,36 +141,34 @@ struct Sets {
     /// Keywords by dialect: the letters `a`, `p`, `m`, `t` of the dialects that have the word.
     all: HashMap<&'static str, &'static str>,
     units: HashSet<&'static str>,
+    /// `data/lists.txt`: the parser's word lists by name.
+    lists: WordLists,
     /// `dialect|FIRST SECOND` (or `dialect|FIRST`) -> the keywords of that statement.
     rows: HashMap<&'static str, HashSet<&'static str>>,
-}
-
-fn words(text: &'static str) -> HashSet<&'static str> {
-    text.lines().filter(|l| !l.is_empty()).collect()
 }
 
 fn sets() -> &'static Sets {
     static SETS: OnceLock<Sets> = OnceLock::new();
     SETS.get_or_init(|| Sets {
         reserved: [
-            words(include_str!("data/ansi.reserved.txt")),
-            words(include_str!("data/postgres.reserved.txt")),
-            words(include_str!("data/mysql.reserved.txt")),
-            words(include_str!("data/tsql.reserved.txt")),
+            words::lines(include_str!("data/ansi.reserved.txt")),
+            words::lines(include_str!("data/postgres.reserved.txt")),
+            words::lines(include_str!("data/mysql.reserved.txt")),
+            words::lines(include_str!("data/tsql.reserved.txt")),
         ],
         all: include_str!("data/keywords.txt")
             .lines()
             .filter_map(|l| l.split_once(' '))
             .collect(),
-        units: words(include_str!("data/units.txt")),
-        rows: include_str!("data/statements.txt")
-            .lines()
-            .filter_map(|l| {
-                let (key, list) = l.rsplit_once('|')?;
-                Some((key, list.split(' ').collect()))
-            })
-            .collect(),
+        units: words::lines(include_str!("data/units.txt")),
+        lists: WordLists::parse(include_str!("data/lists.txt")),
+        rows: words::sets(include_str!("data/statements.txt")).collect(),
     })
+}
+
+/// The word list `name` of `data/lists.txt` (uppercase words).
+pub(super) fn list(name: &str) -> &'static [&'static str] {
+    sets().lists.get(name)
 }
 
 /// Uppercases `word` into `buf` (words longer than the buffer are no keyword).

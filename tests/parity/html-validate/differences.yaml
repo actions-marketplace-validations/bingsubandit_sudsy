@@ -6,28 +6,36 @@ files:
   syntax-error/script-self-closed html-validate:require-sri 3: script-self-closed
   accessibility/elements sudsy:input-missing-label 14: aria-hidden
   accessibility/elements sudsy:input-missing-label 15: aria-hidden
-target: 86.5
-measured: {covered: 848, total: 980, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+target: 92.5
+measured: {covered: 2245, total: 2428, main: '0c8a3dcc'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
-  no-implicit-close: 19
+  no-implicit-close: 30
+  no-raw-characters: 17
   no-inline-style: 15
   attr-spacing: 14
   no-dup-attr: 14
+  form-dup-name: 13
   wcag/h30: 11
   input-attributes: 10
   valid-autocomplete: 8
   unique-landmark: 7
-  text-content: 6
+  valid-id: 4
+  void-style: 4
   wcag/h63: 4
   attr-case: 3
   autocomplete-password: 3
   no-dup-class: 3
-  no-raw-characters: 3
+  no-utf8-bom: 3
   prefer-native-element: 3
-  valid-id: 3
+  aria-label-misuse: 2
+  attribute-allowed-values: 2
+  no-autoplay: 2
+  no-implicit-button-type: 2
+  text-content: 2
+  attribute-misuse: 1
   close-order: 1
   doctype-style: 1
   element-name: 1
   element-permitted-content: 1
-  no-implicit-button-type: 1
   wcag/h32: 1
+  wcag/h71: 1

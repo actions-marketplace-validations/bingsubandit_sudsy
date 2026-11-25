@@ -226,6 +226,8 @@ fn lift_comment(seq: &mut Seq, s: usize, c: usize) {
     }
     let comment = seq.blocks.remove(c);
     seq.blocks.insert(s, comment);
+    let token = seq.tokens.remove(c);
+    seq.tokens.insert(s, token);
     let first = std::mem::take(&mut seq.points[s]);
     seq.points.insert(s, first.clone());
     let p = &mut seq.points[s + 1];
@@ -246,6 +248,17 @@ fn lift_comment(seq: &mut Seq, s: usize, c: usize) {
         if let Some(g) = seq.gaps.get_mut(i) {
             *g = Default::default();
         }
+    }
+    // The two blocks that now meet where the comment was get the gap of the rows.
+    if let (Some(a), Some(b)) = (seq.tokens.get(c), seq.tokens.get(c + 1))
+        && !seq.is_comment(c)
+        && !seq.is_comment(c + 1)
+    {
+        let pair = seq.rules.gaps(&[a.clone(), b.clone()])[1];
+        seq.gaps[c + 1] = super::space::Gap {
+            want: pair.0,
+            join: pair.1,
+        };
     }
 }
 

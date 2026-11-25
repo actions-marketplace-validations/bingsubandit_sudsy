@@ -14,6 +14,7 @@ use super::model::{self, Complex, Part, Piece, split_dimension};
 use crate::data;
 use crate::generated::kind as k;
 use core_rules::listed::selects;
+use core_rules::tree::lower_ascii as lower;
 use core_rules::{Family, Params, Rule, RuleContext, RuleMeta};
 use core_syntax::{SyntaxKind, SyntaxNode, SyntaxNodeExt, TextRange};
 
@@ -290,13 +291,11 @@ impl Table {
             })
         };
         for (i, p) in pieces.iter().enumerate() {
-            let name = p.name.to_ascii_lowercase();
+            let name = lower(&p.name);
             let keep = match (self.target, p.part) {
                 (Target::PseudoClass, Part::PseudoClass) => {
-                    let legacy = matches!(
-                        name.as_str(),
-                        "before" | "after" | "first-line" | "first-letter"
-                    );
+                    let legacy =
+                        matches!(&*name, "before" | "after" | "first-line" | "first-letter");
                     !name.starts_with('-')
                         && !legacy
                         && !(scrollbar && data::has("scrollbar-pseudo-class", &name))
@@ -318,7 +317,7 @@ impl Table {
             let shown = match (self.target, p.part) {
                 (Target::Selector, Part::PseudoClass) => format!(":{name}"),
                 (Target::Selector, Part::PseudoElement) => format!("::{name}"),
-                _ => name,
+                _ => p.name.to_string(),
             };
             out.push((shown, p.range));
         }
@@ -362,7 +361,8 @@ impl Rule for Table {
 
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let ignore = ctx.options.list("ignore");
-        for (name, range) in self.collect(node, ctx) {
+        for (written, range) in self.collect(node, ctx) {
+            let name = lower(&written);
             let hit = match self.mode {
                 Mode::Unknown => !self.known(&name, ctx),
                 Mode::Listed => data::has(&self.data, &name),
@@ -373,7 +373,7 @@ impl Rule for Table {
                 }
             };
             if hit && !ignore.iter().any(|e| selects(e, &name, true)) {
-                ctx.report(range, self.message.replace("{name}", &name));
+                ctx.report(range, self.message.replace("{name}", &written));
             }
         }
     }

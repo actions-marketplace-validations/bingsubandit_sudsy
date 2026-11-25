@@ -72,11 +72,7 @@ fn fix_file(
     }
     let changed = text != before;
     if changed {
-        let mut bytes = Vec::with_capacity(text.len() + 3);
-        if had_bom {
-            bytes.extend_from_slice("\u{feff}".as_bytes());
-        }
-        bytes.extend_from_slice(text.as_bytes());
+        let bytes = crate::atomic::encode_like_file(path, &text, had_bom).map_err(Failed::File)?;
         crate::atomic::write(path, &bytes)
             .context("writing the file")
             .map_err(Failed::File)?;

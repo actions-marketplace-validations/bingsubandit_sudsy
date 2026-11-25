@@ -1,0 +1,7 @@
+id: using-placement
+family: imports
+params: { report: outside-scope, message: "using directives should appear within the namespace declaration" }
+description: "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up."
+example: "using System;   // move inside the namespace\nnamespace N { }"
+severity: off
+category: style

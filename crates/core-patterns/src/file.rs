@@ -29,7 +29,7 @@
 
 use crate::expr::{Ctx, Expr, STEP_BUDGET, Spec};
 use crate::matcher::{Capture, Captures, SnippetParser};
-use crate::metavar::{Meta, names, template, transform};
+use crate::metavar::{Meta, captured, names, template, transform};
 use core_config::Level;
 use core_format::Directive;
 use core_rules::tree::{TraversalCache, significant_range};
@@ -173,15 +173,6 @@ struct TokenMatch {
 enum Rx {
     Fixed(Re),
     Template(String, RegexCache),
-}
-
-/// What a metavariable of a template stands for in `text`: the capture, transformed.
-fn captured(meta: &Meta, captures: &Captures, text: &str) -> String {
-    let text = captures.get(&meta.name).map_or("", |c| c.text(text));
-    match meta.transform.as_deref() {
-        Some(t) => transform(t, text).unwrap_or_else(|| text.to_string()),
-        None => text.to_string(),
-    }
 }
 
 impl Rx {
@@ -415,6 +406,8 @@ struct Body {
     expr: Expr,
     /// Can matching cost more than linear (see [`STEP_BUDGET`])? Only then is it metered.
     metered: bool,
+    /// Does a `regex` read `${NAME}`? Only then do the atoms of an `all` record what they captured.
+    templated: bool,
     constraints: BTreeMap<String, CompiledConstraint>,
     fix: Option<FixTemplate>,
     layout: Vec<LayoutEntry>,
@@ -634,6 +627,7 @@ fn compile_body(
     Ok(Body {
         kinds,
         metered: expr.superlinear(),
+        templated: expr.templated(),
         expr,
         constraints,
         fix,
@@ -824,6 +818,23 @@ pub fn load_lazy(
     let mut lights = lights.into_iter().enumerate().peekable();
     while let Some((i, light)) = lights.next() {
         if let Some(light) = light {
+            if let Some(name) = &light.family {
+                if !families.iter().any(|f| f.name == &**name) {
+                    return Err(PatternError(format!(
+                        "rule `{}`: unknown family `{name}`",
+                        light.id
+                    )));
+                }
+                rules.push(Box::new(LazyFamily {
+                    meta: light.meta(),
+                    doc: docs[i],
+                    language: language.into(),
+                    parser: parser.clone(),
+                    families: families.to_vec(),
+                    built: OnceLock::new(),
+                }));
+                continue;
+            }
             rules.push(Box::new(PatternRule {
                 meta: light.meta(),
                 message: Some(light.message),
@@ -906,6 +917,8 @@ struct Light {
     description: Option<Cow<'static, str>>,
     example: Cow<'static, str>,
     category: Category,
+    /// The Rust family that builds the rule (a `family` document, which has no `rule`).
+    family: Option<Cow<'static, str>>,
 }
 
 impl Light {
@@ -938,6 +951,7 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
     }
     let (mut id, mut message, mut description, mut example) = (None, None, None, None);
     let (mut has_rule, mut inside, mut off) = (false, false, false);
+    let mut family = None;
     let mut category = Category::Style;
     for line in doc.lines() {
         if line.trim().is_empty() || line.starts_with('#') {
@@ -955,6 +969,8 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
         match key {
             "rule" => (has_rule, inside) = (true, true),
             "token" => inside = true,
+            "family" => family = Some(scalar(value)?),
+            "params" => inside = true,
             "id" => id = Some(scalar(value)?),
             "message" => message = Some(scalar(value)?),
             "description" => description = Some(scalar(value)?),
@@ -974,7 +990,7 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
         }
     }
     let id = id?;
-    if !has_rule || !off || grammar.rule_row(&id).is_some() {
+    if has_rule == family.is_some() || !off || grammar.rule_row(&id).is_some() {
         return None;
     }
     Some(Light {
@@ -983,7 +999,89 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
         description,
         example: example?,
         category,
+        family,
     })
+}
+
+/// A default-off rule of a family, listed from the scalars of its document: the family builds it
+/// (and the document is read in full) when the rule first runs.
+struct LazyFamily {
+    meta: &'static RuleMeta,
+    doc: &'static str,
+    language: String,
+    parser: Arc<dyn SnippetParser + Send + Sync>,
+    families: Vec<Family>,
+    built: OnceLock<Box<dyn Rule>>,
+}
+
+impl LazyFamily {
+    fn rule(&self) -> &dyn Rule {
+        &**self.built.get_or_init(|| {
+            load_full(self.doc, &self.language, &self.parser, &self.families)
+                .unwrap_or_else(|e| panic!("built-in pattern file: {e}"))
+                .remove(0)
+        })
+    }
+}
+
+impl Rule for LazyFamily {
+    fn meta(&self) -> &'static RuleMeta {
+        self.meta
+    }
+    fn layout_role(&self) -> LayoutRole {
+        self.rule().layout_role()
+    }
+    fn formats(&self) -> bool {
+        self.rule().formats()
+    }
+    fn format_kinds(&self, grammar: &Grammar) -> Vec<SyntaxKind> {
+        self.rule().format_kinds(grammar)
+    }
+    fn format_applies(
+        &self,
+        grammar: &Grammar,
+        text: &str,
+        own: &RuleOptions,
+        format: &core_config::ResolvedOptions,
+    ) -> bool {
+        self.rule().format_applies(grammar, text, own, format)
+    }
+    fn kinds(&self) -> &[SyntaxKind] {
+        self.rule().kinds()
+    }
+    fn tags(&self) -> &[&'static str] {
+        self.rule().tags()
+    }
+    fn unavailable(&self) -> Option<String> {
+        self.rule().unavailable()
+    }
+    fn reads_embedded(&self) -> bool {
+        self.rule().reads_embedded()
+    }
+    fn reads_formatted(&self) -> bool {
+        self.rule().reads_formatted()
+    }
+    fn bodies(&self) -> bool {
+        self.rule().bodies()
+    }
+    fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
+        self.rule().check(node, ctx);
+    }
+    fn check_file(&self, file: &core_rules::FileContext<'_>, ctx: &mut RuleContext<'_>) {
+        self.rule().check_file(file, ctx);
+    }
+    fn check_body(&self, body: &core_rules::BodyContext<'_>, ctx: &mut RuleContext<'_>) {
+        self.rule().check_body(body, ctx);
+    }
+    fn scope(&self) -> core_rules::Scope {
+        self.rule().scope()
+    }
+    fn collect(&self, file: &core_rules::FileContext<'_>, facts: &mut core_rules::ProjectFacts) {
+        self.rule().collect(file, facts);
+    }
+    fn finish(&self, facts: &core_rules::ProjectFacts, ctx: &mut core_rules::ProjectContext<'_>) {
+        self.rule().finish(facts, ctx);
+    }
 }
 
 fn load_full(
@@ -1280,6 +1378,7 @@ impl Rule for PatternRule {
             options: ctx.options,
             budget: Cell::new(STEP_BUDGET),
             ranges,
+            env: body.templated.then(Default::default),
         };
         let found = body.expr.matches(node, &cx);
         if body.metered && cx.budget.get() == 0 {

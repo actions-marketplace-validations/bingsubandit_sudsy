@@ -1,13 +1,28 @@
-# @html-eslint's recommended rules that Sudsy has, at warn.
+# @html-eslint's recommended rules that Sudsy has, at warn, and the layout of its `indent`, `attrs-newline` (more than 2 attributes, each on a line) and `no-extra-spacing-tags` and `require-closing-tags` (`<br>`, `<use/>`).
+# `dialect: template` keeps `{{ }}` actions (Hugo, Go templates) as written; text without them formats as before.
+# `whitespace_sensitivity: ignore` lays out inline elements as blocks (`element-newline`, no `>Home</a` hugging), which can change the spaces a browser renders between them; the default stays `css`.
 html:
+  format:
+    whitespace_sensitivity: ignore
+    content_newline_with_elements: true
+    indent_comment_lines: true
+    dialect: template-open
+    indent_size: 4
+    max_attributes_per_line: 2
+    void_element_style: omit
+    self_closing_space: false
   lint:
     rules:
       attr-quotes: warn
       deprecated: warn
       element-required-attributes: warn
+      element-required-content: warn
       heading-level: warn
+      img-alt: warn
       missing-doctype: warn
       no-deprecated-attr: warn
       no-duplicate-id: warn
       no-duplicate-keys: warn
       no-implicit-close: warn
+      require-li-container: warn
+      use-baseline: warn

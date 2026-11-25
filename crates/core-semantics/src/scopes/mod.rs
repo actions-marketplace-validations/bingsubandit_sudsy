@@ -151,6 +151,8 @@ pub struct Decl {
     pub binding_range: TextRange,
     pub binding_kind: SyntaxKind,
     pub flags: Flags,
+    /// The declaration takes effect after its node: a read inside the node does not see it.
+    pub late: bool,
     /// The scope the declaration is written in (not the symbol's, when `global` sent it elsewhere).
     pub from: ScopeId,
 }
@@ -313,6 +315,12 @@ impl Model {
         self.scope(scope).redirects.as_ref()?.get(name).copied()
     }
 
+    /// Every declaration of the symbol is late and ends after the reference starts: the reference
+    /// is written before it takes effect (`x := x + 1`).
+    fn not_yet_declared(&self, id: SymbolId, r: &Reference) -> bool {
+        (self.symbol(id).decls.iter()).all(|d| d.late && r.range.start() < d.node_range.end())
+    }
+
     /// The symbol the reference finds: as [`Model::lookup`], except that a reference in a
     /// parameter list does not see what the body of that function declares.
     pub fn find(&self, r: &Reference) -> Option<SymbolId> {
@@ -326,7 +334,10 @@ impl Model {
                 let id = self.own(self.redirect(s, &r.name).unwrap_or(s), &r.name);
                 if let Some(id) = id {
                     let f = self.symbol(id).flags;
-                    if f.intersects(want) && (!r.in_params.contains(&s) || f.intersects(params)) {
+                    if f.intersects(want)
+                        && (!r.in_params.contains(&s) || f.intersects(params))
+                        && !self.not_yet_declared(id, r)
+                    {
                         return Some(id);
                     }
                 }

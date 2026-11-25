@@ -139,5 +139,6 @@ rule:
     - { pattern: '$F.apply(null, $A)' }
     - { pattern: '$F.apply(undefined, $A)' }
     - { pattern: '$O.$M.apply($O, $A)' }
+    - { pattern: '$O[$M].apply($O, $A)' }
 constraints:
   A: { not-regex: '^(\[|\.\.\.)' }

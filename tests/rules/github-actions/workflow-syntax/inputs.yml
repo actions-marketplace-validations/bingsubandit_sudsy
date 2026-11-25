@@ -1,0 +1,16 @@
+on:
+  workflow_call:
+    inputs:
+      foo:
+        type: string
+      FOO:
+#     ^^^ workflow-syntax
+        type: number
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    steps:
+      - &step
+        run: echo
+      - <<: *step
+        run: echo

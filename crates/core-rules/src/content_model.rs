@@ -21,6 +21,7 @@
 //! what: Elements of a markup file that break the content model of their parent or ancestors (permitted content, order, occurrences, required content).
 //! tools: html-validate element-permitted-content, element-permitted-order, element-permitted-occurrences, element-required-content
 
+use crate::family::comma_list as list;
 use crate::markup::{Element, Markup};
 use crate::rule::{FileContext, Rule, RuleContext, RuleMeta};
 use core_syntax::TextRange;
@@ -49,10 +50,6 @@ pub struct Model {
     open: HashMap<String, Vec<(String, String)>>,
     closed: HashMap<String, Vec<String>>,
     transparent: HashSet<String>,
-}
-
-fn list(s: &str) -> Vec<String> {
-    s.split(',').map(str::to_string).collect()
 }
 
 impl Model {

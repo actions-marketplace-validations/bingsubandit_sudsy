@@ -9,6 +9,12 @@ mod differences;
 mod discover;
 mod docs;
 pub mod manifests;
+mod newlang;
+#[cfg(test)]
+mod newlang_tests;
+mod priority;
+#[cfg(test)]
+mod priority_tests;
 mod queue;
 mod rules;
 mod speed;

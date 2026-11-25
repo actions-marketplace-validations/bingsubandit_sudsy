@@ -125,32 +125,32 @@
         "spans": [
           {
             "column": 5,
-            "length": 1,
+            "length": 2,
             "line": 3
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 2,
             "line": 4
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 3,
             "line": 14
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 3,
             "line": 15
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 5,
             "line": 16
           },
           {
             "column": 5,
-            "length": 1,
+            "length": 2,
             "line": 17
           }
         ]
@@ -527,6 +527,11 @@
       ],
       "upstream": [
         {
+          "id": "syntax-check/duplicate-key",
+          "partial": true,
+          "tool": "actionlint"
+        },
+        {
           "id": "suspicious/noDuplicateObjectKeys",
           "partial": false,
           "tool": "Biome"
@@ -646,9 +651,17 @@
       "languages": [
         "all"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": false,
+          "description": "Also report an empty line comment between two comments.",
+          "name": "separators",
+          "type": "bool"
+        }
+      ],
       "presets": [
         "css/stylelint-recommended",
+        "css/stylelint-standard",
         "csharp/stylecop"
       ],
       "upstream": [
@@ -661,6 +674,11 @@
           "id": "comment-no-empty",
           "partial": false,
           "tool": "stylelint"
+        },
+        {
+          "id": "scss/comment-no-empty",
+          "partial": false,
+          "tool": "stylelint-scss"
         }
       ]
     },
@@ -1203,6 +1221,200 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "An `@extend` of anything but a placeholder selector; a selector with interpolation is left alone.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 3,
+            "length": 11,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "at-extend-no-missing-placeholder",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/at-extend-no-missing-placeholder",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `@function` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 11,
+            "length": 4,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "at-function-pattern",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [
+        {
+          "default": "",
+          "description": "The regex a function name must match.",
+          "name": "pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/at-function-pattern",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `@if` that compares with `null` (`== null`, `!= null`): write `not $a` or `$a`.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 3,
+            "length": 26,
+            "line": 15
+          }
+        ]
+      },
+      "fix": null,
+      "id": "at-if-no-null",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/at-if-no-null",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `@include` of a mixin with empty parentheses (`@include foo()`); a `using (...)` clause after them is left alone.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 3,
+            "length": 15,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "at-mixin-argumentless-call-parentheses",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/at-mixin-argumentless-call-parentheses",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `@mixin` whose name does not match the `pattern` option (a regex). An empty pattern allows everything.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 8,
+            "length": 6,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "at-mixin-pattern",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [
+        {
+          "default": "",
+          "description": "The regex a mixin name must match.",
+          "name": "pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/at-mixin-pattern",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "An at-rule (vendor prefix left out) that is not in the `list` option. An empty list allows everything.",
       "example": {
         "config": "property-allowed-list: { level: warn, options: { list: [color, \"/^wid/\"] } }\nunit-allowed-list: { level: warn, options: { list: [px, em] } }\nfunction-allowed-list: { level: warn, options: { list: [var] } }\nat-rule-allowed-list: { level: warn, options: { list: [media] } }\nmedia-feature-name-allowed-list: { level: warn, options: { list: [max-width] } }\nselector-pseudo-class-allowed-list: { level: warn, options: { list: [focus] } }\nselector-pseudo-element-allowed-list: { level: warn, options: { list: [after] } }\nselector-combinator-allowed-list: { level: warn, options: { list: [\" \"] } }\nselector-attribute-operator-allowed-list: { level: warn, options: { list: [\"=\"] } }\n",
@@ -1238,6 +1450,42 @@
           "id": "at-rule-allowed-list",
           "partial": false,
           "tool": "stylelint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The condition of `@if`, `@else if` and `@while` written in parentheses (`@if ($a == 1)`).",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 3,
+            "length": 1,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "at-rule-conditional-no-parentheses",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/at-rule-conditional-no-parentheses",
+          "partial": false,
+          "tool": "stylelint-scss"
         }
       ]
     },
@@ -1772,6 +2020,47 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A `/* */` comment on a line of its own needs a blank line before it, unless it comes first in a block, shares a line with code or is a `stylelint-` directive; a `//` comment is another rule's.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "/* first */\na { color: red; }\n/* needs a line */\n\n/* has one */\nb {\n  /* first in the block */\n  color: red;\n  /* needs a line */\n\n  /* has one */\n  top: 0; /* same line */\n}\n/* stylelint-disable */\nc { top: 0; }\n",
+        "language": "css",
+        "spans": [
+          {
+            "column": 1,
+            "length": 18,
+            "line": 3
+          },
+          {
+            "column": 3,
+            "length": 18,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "comment-empty-line-before",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "comment-empty-line-before",
+          "partial": true,
+          "tool": "stylelint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A `@container` name that does not match the `pattern` option (a regex). An empty pattern allows everything.",
       "example": {
         "config": null,
@@ -1850,6 +2139,42 @@
       "upstream": [
         {
           "id": "custom-media-pattern",
+          "partial": false,
+          "tool": "stylelint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A custom property needs a blank line before it, unless a comment is right before it or another custom property is; the first declaration of a block and those in a single-line block take none.",
+      "example": {
+        "config": "dollar-variable-empty-line-before: warn\ncustom-property-empty-line-before: warn\ndouble-slash-comment-empty-line-before: warn\nno-empty-comment: { level: warn, options: { separators: true } }\n",
+        "fixed": null,
+        "input": "$a: 1;\n$b: 2;\n// note\n$c: 3;\n.x {\n  $d: 4;\n  color: red;\n  $e: 5;\n  --f: 6;\n  --g: 7;\n  // one\n\n  // two\n  top: 0; // inline\n  // stylelint-disable\n  //\n  // text\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 3,
+            "length": 3,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "custom-property-empty-line-before",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "custom-property-empty-line-before",
           "partial": false,
           "tool": "stylelint"
         }
@@ -2189,6 +2514,126 @@
           "id": "declaration-no-important",
           "partial": false,
           "tool": "stylelint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `$` variable declaration needs a blank line before it, unless a comment is right before it or another `$` variable is; the first statement of a block and those in a single-line block take none.",
+      "example": {
+        "config": "dollar-variable-empty-line-before: warn\ncustom-property-empty-line-before: warn\ndouble-slash-comment-empty-line-before: warn\nno-empty-comment: { level: warn, options: { separators: true } }\n",
+        "fixed": null,
+        "input": "$a: 1;\n$b: 2;\n// note\n$c: 3;\n.x {\n  $d: 4;\n  color: red;\n  $e: 5;\n  --f: 6;\n  --g: 7;\n  // one\n\n  // two\n  top: 0; // inline\n  // stylelint-disable\n  //\n  // text\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 3,
+            "length": 2,
+            "line": 8
+          }
+        ]
+      },
+      "fix": null,
+      "id": "dollar-variable-empty-line-before",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/dollar-variable-empty-line-before",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `$name` declaration whose name, without the `$`, does not match the `pattern` option (a regex). An empty pattern allows everything.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 1,
+            "length": 7,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "dollar-variable-pattern",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [
+        {
+          "default": "",
+          "description": "The regex a variable name, without its `$`, must match.",
+          "name": "pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/dollar-variable-pattern",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `//` comment on a line of its own needs a blank line before it, unless a comment is right before it, it comes first in a block, or it is a `stylelint-` directive.",
+      "example": {
+        "config": "dollar-variable-empty-line-before: warn\ncustom-property-empty-line-before: warn\ndouble-slash-comment-empty-line-before: warn\nno-empty-comment: { level: warn, options: { separators: true } }\n",
+        "fixed": null,
+        "input": "$a: 1;\n$b: 2;\n// note\n$c: 3;\n.x {\n  $d: 4;\n  color: red;\n  $e: 5;\n  --f: 6;\n  --g: 7;\n  // one\n\n  // two\n  top: 0; // inline\n  // stylelint-disable\n  //\n  // text\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 1,
+            "length": 7,
+            "line": 3
+          },
+          {
+            "column": 3,
+            "length": 6,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "double-slash-comment-empty-line-before",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/double-slash-comment-empty-line-before",
+          "partial": false,
+          "tool": "stylelint-scss"
         }
       ]
     },
@@ -2646,17 +3091,22 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An `@import` of `url(...)`: write the string.",
+      "description": "An `@import` written in the notation the `url` option does not ask for: a string by default (`url(...)` is reported), `url(...)` with `url: true` (a string is reported).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "@import url(\"a.css\");\n@import \"b.css\";\na {\n  margin: 0px 0.0em 0;\n  transition: 0s;\n  width: calc(0px + 1px);\n  --x: 0px;\n  background: url(a.png), url(\"b.png\");\n  color: #aabbcc;\n  color: #abc;\n  border-color: #ab #abcde #abcdef;\n  padding: 1px 1px;\n  padding: 1px 2px 1px 2px;\n  padding: 1px 2px 3px 2px;\n  font-family: \"Arial\", 'Lucida Grande', \"Font 2\", sans-serif;\n}\n",
+        "input": "@import url(\"a.css\");\n@import \"b.css\";\n@import 'c.css' screen;\n",
         "language": "css",
         "spans": [
           {
             "column": 1,
-            "length": 21,
-            "line": 1
+            "length": 16,
+            "line": 2
+          },
+          {
+            "column": 1,
+            "length": 23,
+            "line": 3
           }
         ]
       },
@@ -2667,7 +3117,14 @@
         "less",
         "scss"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": false,
+          "description": "Ask for url() instead of a string.",
+          "name": "url",
+          "type": "bool"
+        }
+      ],
       "presets": [
         "css/stylelint-standard"
       ],
@@ -2921,6 +3378,42 @@
           "id": "length-zero-no-unit",
           "partial": false,
           "tool": "stylelint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `@use`, `@forward` or `@import` of a partial named with a leading underscore (`@use 'a/_b'`); CSS imports are left alone.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 1,
+            "length": 12,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "load-no-partial-leading-underscore",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/load-no-partial-leading-underscore",
+          "partial": false,
+          "tool": "stylelint-scss"
         }
       ]
     },
@@ -3399,6 +3892,123 @@
       ]
     },
     {
+      "category": "style",
+      "default_level": "off",
+      "description": "A call of a Sass global function that a module of the standard library replaces (`map-get` is `map.get`, `mix` is `color.mix`); calls written with their module are left alone.",
+      "example": {
+        "config": "no-global-function-names: warn\nat-mixin-argumentless-call-parentheses: warn\nat-rule-conditional-no-parentheses: warn\nat-extend-no-missing-placeholder: warn\nat-if-no-null: warn\nload-no-partial-leading-underscore: warn\ndollar-variable-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-mixin-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\nat-function-pattern: { level: warn, options: { pattern: \"^[a-z-]+$\" } }\n",
+        "fixed": null,
+        "input": "@use \"a/_b\";\n@use \"c.css\";\n$fooBar: map-get($m, a) + list.length($x);\n@mixin fooBar { top: 0; }\n@function myFn($x) { @return mix($x, red); }\na {\n  @include foo();\n  @include foo() using ($x) { top: 0; }\n  @extend .b;\n  @extend %b;\n  @extend .c-#{$x};\n  @if ($a == 1) { top: 0; }\n  @else if $a != null { top: 1; }\n  @else if $a != null and $b { top: 2; }\n  @if $a == null { top: 3; }\n}\n",
+        "language": "scss",
+        "spans": [
+          {
+            "column": 10,
+            "length": 7,
+            "line": 3
+          },
+          {
+            "column": 30,
+            "length": 3,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-global-function-names",
+      "languages": [
+        "css",
+        "less",
+        "scss"
+      ],
+      "options": [
+        {
+          "default": [
+            "red=color.red",
+            "blue=color.blue",
+            "green=color.green",
+            "mix=color.mix",
+            "hue=color.hue",
+            "saturation=color.saturation",
+            "lightness=color.lightness",
+            "complement=color.complement",
+            "adjust-color=color.adjust",
+            "scale-color=color.scale",
+            "change-color=color.change",
+            "ie-hex-str=color.ie-hex-str",
+            "map-get=map.get",
+            "map-merge=map.merge",
+            "map-remove=map.remove",
+            "map-keys=map.keys",
+            "map-values=map.values",
+            "map-has-key=map.has-key",
+            "unquote=string.unquote",
+            "quote=string.quote",
+            "str-length=string.length",
+            "str-insert=string.insert",
+            "str-index=string.index",
+            "str-slice=string.slice",
+            "to-upper-case=string.to-upper-case",
+            "to-lower-case=string.to-lower-case",
+            "unique-id=string.unique-id",
+            "percentage=math.percentage",
+            "ceil=math.ceil",
+            "floor=math.floor",
+            "abs=math.abs",
+            "random=math.random",
+            "unit=math.unit",
+            "unitless=math.is-unitless",
+            "comparable=math.compatible",
+            "length=list.length",
+            "nth=list.nth",
+            "set-nth=list.set-nth",
+            "join=list.join",
+            "append=list.append",
+            "zip=list.zip",
+            "index=list.index",
+            "list-separator=list.separator",
+            "feature-exists=meta.feature-exists",
+            "variable-exists=meta.variable-exists",
+            "global-variable-exists=meta.global-variable-exists",
+            "function-exists=meta.function-exists",
+            "mixin-exists=meta.mixin-exists",
+            "inspect=meta.inspect",
+            "get-function=meta.get-function",
+            "type-of=meta.type-of",
+            "call=meta.call",
+            "content-exists=meta.content-exists",
+            "keywords=meta.keywords",
+            "selector-nest=selector.nest",
+            "selector-append=selector.append",
+            "selector-replace=selector.replace",
+            "selector-unify=selector.unify",
+            "is-superselector=selector.is-superselector",
+            "simple-selectors=selector.simple-selectors",
+            "selector-parse=selector.parse",
+            "selector-extend=selector.extend",
+            "lighten=color.adjust",
+            "adjust-hue=color.adjust",
+            "darken=color.adjust",
+            "desaturate=color.adjust",
+            "opacify=color.adjust",
+            "transparentize=color.adjust"
+          ],
+          "description": "`name=replacement` entries: a global function and the module function that replaces it.",
+          "name": "list",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "css/stylelint-standard"
+      ],
+      "upstream": [
+        {
+          "id": "scss/no-global-function-names",
+          "partial": false,
+          "tool": "stylelint-scss"
+        }
+      ]
+    },
+    {
       "category": "correctness",
       "default_level": "warn",
       "description": "A rule or declaration that starts with `//`: CSS has no line comments, so the text swallows the statement.",
@@ -3441,13 +4051,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "@charset \"utf-8\";\n@import \"a.css\";\n@import url(a.css);\n@import \"a.css\" screen;\n@layer base;\n@import \"b.css\";\na { color: red }\n@import \"c.css\";\n",
+        "input": ".a { color: red }\n@import \"a\";\n",
         "language": "css",
         "spans": [
           {
             "column": 1,
-            "length": 16,
-            "line": 8
+            "length": 12,
+            "line": 2
           }
         ]
       },
@@ -3554,7 +4164,7 @@
       "upstream": [
         {
           "id": "number-max-precision",
-          "partial": false,
+          "partial": true,
           "tool": "stylelint"
         }
       ]
@@ -5694,11 +6304,6 @@
           "id": "no-empty",
           "partial": true,
           "tool": "eslint"
-        },
-        {
-          "id": "RCS1075",
-          "partial": false,
-          "tool": "Roslynator"
         }
       ]
     },
@@ -5757,7 +6362,8 @@
         "js/eslint-recommended",
         "powershell/psscriptanalyzer",
         "python/ruff",
-        "ruby/rubocop"
+        "ruby/rubocop",
+        "csharp/roslynator"
       ],
       "upstream": [
         {
@@ -5774,6 +6380,11 @@
           "id": "PSAvoidUsingEmptyCatchBlock",
           "partial": false,
           "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "RCS1075",
+          "partial": false,
+          "tool": "Roslynator"
         },
         {
           "id": "Lint/SuppressedException",
@@ -5798,48 +6409,48 @@
         "language": "js",
         "spans": [
           {
-            "column": 1,
-            "length": 5,
+            "column": 5,
+            "length": 1,
             "line": 1
           },
           {
-            "column": 8,
+            "column": 14,
+            "length": 3,
+            "line": 1
+          },
+          {
+            "column": 40,
+            "length": 4,
+            "line": 1
+          },
+          {
+            "column": 55,
+            "length": 6,
+            "line": 1
+          },
+          {
+            "column": 87,
+            "length": 1,
+            "line": 1
+          },
+          {
+            "column": 10,
+            "length": 6,
+            "line": 2
+          },
+          {
+            "column": 30,
             "length": 9,
-            "line": 1
-          },
-          {
-            "column": 33,
-            "length": 11,
-            "line": 1
-          },
-          {
-            "column": 46,
-            "length": 15,
-            "line": 1
-          },
-          {
-            "column": 81,
-            "length": 7,
-            "line": 1
-          },
-          {
-            "column": 1,
-            "length": 15,
             "line": 2
           },
           {
-            "column": 18,
-            "length": 21,
+            "column": 67,
+            "length": 5,
             "line": 2
           },
           {
-            "column": 59,
-            "length": 13,
-            "line": 2
-          },
-          {
-            "column": 76,
-            "length": 19,
+            "column": 87,
+            "length": 8,
             "line": 2
           }
         ]
@@ -8174,6 +8785,339 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "The first line of the doc comment of an exported function, method, type, constant or variable does not start with its name (revive exported). A type may start with `A`, `An`, `The` or `This` before the name. The comment of a group in parentheses is the comment of its types; a constant or variable in a group whose comment has text is not checked. Lines of directives (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is left to `missing-doc-comment`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\n// Run does it.\nfunc Run() {}\n\n// does it.\nfunc Wrong() {}\n\n// wrong lowercase.\nfunc lower() {}\n\n//go:noinline\n// Pragma is fine.\nfunc Pragma() {}\n\n// A T is fine, with an article.\ntype T struct{}\n\n// The U is fine.\ntype U int\n\n// Other\ntype V int\n\n// X is the comment of the group.\ntype (\n    // W is fine.\n    W int\n    X int\n)\n\n// Constants.\nconst (\n    // other, not checked: the group has a comment.\n    C = 1\n    D = 2\n)\n\n// Wrong names a variable.\nvar E = 1\n\n// Method does it.\nfunc (T) Method() {}\n\n// does it.\nfunc (T) Other() {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 11,
+            "line": 6
+          },
+          {
+            "column": 1,
+            "length": 8,
+            "line": 22
+          },
+          {
+            "column": 1,
+            "length": 26,
+            "line": 39
+          },
+          {
+            "column": 1,
+            "length": 11,
+            "line": 45
+          }
+        ]
+      },
+      "fix": null,
+      "id": "doc-first-word",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "exported",
+          "partial": true,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc F() {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 7,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-package-comment",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "package-comments",
+          "partial": true,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The first line of the comment above the `package` clause does not start with `Package` and the name of the package (revive package-comments). A file of package `main` is left alone. A comment of the right form with a blank line before the `package` clause is reported as detached.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "// Does things.\npackage a\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 15,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "package-comment-form",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "package-comments",
+          "partial": true,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A variable, constant, function, parameter, named result or type parameter named like a predeclared identifier (`len`, `new`, `string`, `nil`, `max`, ...; revive redefines-builtin-id). A name on the left of an assignment counts too. A method and a receiver are not reported.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nvar len = 1\n\nconst iota = 2\n\nfunc new() {}\n\nfunc f(copy int, s string) (error int) {\n\tmax := 1\n\tmin = 2\n\t_, print := 1, 2\n\treturn\n}\n\nfunc (string T) method() {}\n\nfunc g[any int]() {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 5,
+            "length": 3,
+            "line": 3
+          },
+          {
+            "column": 7,
+            "length": 4,
+            "line": 5
+          },
+          {
+            "column": 6,
+            "length": 3,
+            "line": 7
+          },
+          {
+            "column": 8,
+            "length": 4,
+            "line": 9
+          },
+          {
+            "column": 29,
+            "length": 5,
+            "line": 9
+          },
+          {
+            "column": 2,
+            "length": 3,
+            "line": 10
+          },
+          {
+            "column": 2,
+            "length": 3,
+            "line": 11
+          },
+          {
+            "column": 5,
+            "length": 5,
+            "line": 12
+          },
+          {
+            "column": 8,
+            "length": 3,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "redefines-builtin-id",
+      "languages": [
+        "go",
+        "python"
+      ],
+      "options": [
+        {
+          "default": [],
+          "description": "Names that may be declared.",
+          "name": "allow",
+          "type": "list"
+        },
+        {
+          "choices": [
+            "variable",
+            "parameter",
+            "function",
+            "class",
+            "import",
+            "type"
+          ],
+          "default": [],
+          "description": "The declarations that are checked (empty: all).",
+          "name": "kinds",
+          "type": "list"
+        },
+        {
+          "default": [
+            "ReceiverList"
+          ],
+          "description": "Grammar kinds whose direct declarations are left out (a receiver).",
+          "name": "except_parents",
+          "type": "list"
+        },
+        {
+          "default": [
+            "AssignmentStatement"
+          ],
+          "description": "Grammar kinds of statements whose left-side names are reported too (`len = 1`, `max += 1`).",
+          "name": "assigned_by",
+          "type": "list"
+        }
+      ],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "redefines-builtin-id",
+          "partial": false,
+          "tool": "revive"
+        },
+        {
+          "id": "A001",
+          "partial": false,
+          "tool": "ruff"
+        },
+        {
+          "id": "A002",
+          "partial": false,
+          "tool": "ruff"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A parameter of a function with a body (a declaration or a literal) that its body never mentions (revive unused-parameter). A name that matches `ignore_pattern` and the blank identifier are not checked; the receiver and the named results are not parameters; an assignment to a parameter counts as a use.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc used(a, b int) int { return a + b }\n\nfunc unused(a, b int) int {\n\treturn a\n}\n\nfunc assigned(a int) { a = 1 }\nfunc blank(_ int, _x string) {}\n\nfunc lit() func(int) int {\n\treturn func(n int) int { return 1 }\n}\n\nfunc (r *T) method(x int) (n int, err error) {\n\treturn\n}\n\nfunc shadowed(a int) {\n\tif true {\n\t\ta := 1\n\t\t_ = a\n\t}\n}\n\ntype F func(a int)\nfunc noBody(a int)\n\nfunc initReads(ctx int) {\n\tctx, c := wrap(ctx)\n\t_, _ = ctx, c\n\tif true {\n\t\tctx := ctx + 1\n\t\t_ = ctx\n\t}\n}\n\nfunc readBefore(err error) {\n\tif err != nil {\n\t\treturn\n\t}\n\tx, err := wrap(2)\n\t_, _ = x, err\n}\n\nfunc redeclared(ml int) {\n\tml, err := wrap(1)\n\t_, _ = ml, err\n}\n\nfunc newBool(pos int, true bool) bool {\n\treturn true\n}\n\nfunc deferred() {\n\tdefer func(iota int) { sink = iota }(1)\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 16,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 14,
+            "length": 1,
+            "line": 13
+          },
+          {
+            "column": 20,
+            "length": 1,
+            "line": 16
+          },
+          {
+            "column": 15,
+            "length": 1,
+            "line": 20
+          },
+          {
+            "column": 14,
+            "length": 3,
+            "line": 52
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unused-parameter",
+      "languages": [
+        "go",
+        "js",
+        "powershell"
+      ],
+      "options": [
+        {
+          "choices": [
+            "after-used",
+            "all",
+            "none"
+          ],
+          "default": "all",
+          "description": "Which parameters are checked: those after the last one that is read, all of them, or none.",
+          "name": "args",
+          "type": "string"
+        },
+        {
+          "default": "^_",
+          "description": "A regex for the names that are not checked (revive's `allowRegex`).",
+          "name": "ignore_pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "go/revive",
+        "js/eslint-recommended",
+        "js/typescript-eslint-recommended",
+        "js/biome-recommended",
+        "js/oxlint",
+        "powershell/psscriptanalyzer"
+      ],
+      "upstream": [
+        {
+          "id": "no-unused-vars",
+          "partial": true,
+          "tool": "eslint"
+        },
+        {
+          "id": "PSReviewUnusedParameter",
+          "partial": true,
+          "tool": "psscriptanalyzer"
+        },
+        {
+          "id": "unused-parameter",
+          "partial": false,
+          "tool": "revive"
+        },
+        {
+          "id": "no-unused-vars",
+          "partial": true,
+          "tool": "typescript-eslint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A name does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it. Equivalent: graphql-eslint naming-convention (styles only, no prefix or suffix lists).",
       "example": {
         "config": null,
@@ -8443,6 +9387,60 @@
         {
           "id": "no-anonymous-operations",
           "partial": false,
+          "tool": "graphql-eslint"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A name that starts or ends with an underscore: a type, field, argument, enum value, directive, operation, fragment or alias, and every reference to one. A field selected in a query is not checked (`__typename`). Equivalent - graphql-eslint naming-convention without `allowLeadingUnderscore` and `allowTrailingUnderscore`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "scalar Good\nscalar _Any\ntype Query {\n  items(first_: Int): [_Any!]!\n  _entities: Good\n}\nquery Q { items(first_: 1) { __typename } }\n",
+        "language": "graphql",
+        "spans": [
+          {
+            "column": 8,
+            "length": 4,
+            "line": 2
+          },
+          {
+            "column": 9,
+            "length": 6,
+            "line": 4
+          },
+          {
+            "column": 24,
+            "length": 4,
+            "line": 4
+          },
+          {
+            "column": 3,
+            "length": 9,
+            "line": 5
+          },
+          {
+            "column": 17,
+            "length": 6,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-name-underscore",
+      "languages": [
+        "graphql"
+      ],
+      "options": [],
+      "presets": [
+        "graphql/graphql-eslint-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "naming-convention",
+          "partial": true,
           "tool": "graphql-eslint"
         }
       ]
@@ -9518,105 +10516,6 @@
       "upstream": [
         {
           "id": "IllegalTokenText",
-          "partial": true,
-          "tool": "checkstyle"
-        }
-      ]
-    },
-    {
-      "category": "style",
-      "default_level": "off",
-      "description": "A public or protected method, constructor or type has no `/** */` comment before it (Checkstyle MissingJavadocMethod and MissingJavadocType). Members of an interface are public. A method of a type that is not public (itself or an enclosing one), a type nested in a type that is not visible, and a declaration inside a method or an anonymous class are left out.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "/** Documented. */\npublic class Api {\n  private int x;\n  public Api() {}\n\n  /** Documented. */\n  public void ok() {}\n\n  public void f() {}\n\n  @Deprecated\n  protected void g() {}\n\n  @Override\n  public String toString() { return \"\"; }\n\n  @Test\n  public void t() {}\n\n  public int getX() { return x; }\n  public void setX(int x) { this.x = x; }\n  public int getY(int y) { return y; }\n\n  void packagePrivate() {}\n  private void hidden() {}\n  /** Nested. */\n  public interface Inner {\n    void member();\n  }\n\n  public static class NoDoc {\n    public void inNested() {}\n  }\n\n  public enum Kind {\n    A;\n\n    public void inEnum() {}\n  }\n\n  protected static class Prot {\n    public void inProt() {}\n  }\n\n  void run() {\n    Object o = new Object() {\n      public void anon() {}\n    };\n    class Local {\n      public void local() {}\n    }\n  }\n}\n\nclass PackagePrivate {\n  public void notPublicType() {}\n}\n",
-        "language": "java",
-        "spans": [
-          {
-            "column": 3,
-            "length": 6,
-            "line": 4
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 9
-          },
-          {
-            "column": 3,
-            "length": 1,
-            "line": 11
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 22
-          },
-          {
-            "column": 5,
-            "length": 4,
-            "line": 28
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 31
-          },
-          {
-            "column": 5,
-            "length": 6,
-            "line": 32
-          },
-          {
-            "column": 3,
-            "length": 6,
-            "line": 35
-          },
-          {
-            "column": 5,
-            "length": 6,
-            "line": 38
-          },
-          {
-            "column": 3,
-            "length": 9,
-            "line": 41
-          }
-        ]
-      },
-      "fix": null,
-      "id": "missing-doc-comment",
-      "languages": [
-        "java"
-      ],
-      "options": [
-        {
-          "default": [
-            "Override"
-          ],
-          "description": "Names of annotations (`*` matches any run of characters) that excuse a declaration.",
-          "name": "allowed_annotations",
-          "type": "list"
-        },
-        {
-          "default": false,
-          "description": "Leave out getters and setters: `getX`, `isX` with no parameter and one `return`, `setX` with one parameter and one statement.",
-          "name": "property_accessors",
-          "type": "bool"
-        }
-      ],
-      "presets": [
-        "java/google"
-      ],
-      "upstream": [
-        {
-          "id": "MissingJavadocMethod",
-          "partial": true,
-          "tool": "checkstyle"
-        },
-        {
-          "id": "MissingJavadocType",
           "partial": true,
           "tool": "checkstyle"
         }
@@ -11801,13 +12700,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "const a = b\n(c || d).e();\n",
+        "input": "const a = b\n  (c || d).e();\n",
         "language": "js",
         "spans": [
           {
-            "column": 12,
+            "column": 3,
             "length": 1,
-            "line": 1
+            "line": 2
           }
         ]
       },
@@ -12077,23 +12976,35 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = /a  b/, b = /a {2}b/, c = /[  ]/, d = /a  +/, e = /a   +/, f = new RegExp(\"a  b\"), g = RegExp(\"a b\"), h = /a\\  b/;\nvar i = 017, j = 08, k = 0, l = 0.5, m = 0o17;\nvar p = 9007199254740993, q = 0.1, r = 5123000000000000000000000000001, s = 0x20000000000001, t = 0x1fffffffffffff;\nvar u = 12345678901234567890, v = 0.30000000000000004, w = 1_000, x = 0.1000000000000000055511151231257827, y = 1e3;\n",
-        "language": "js",
+        "input": "{\n  \"a\": \"x\\ny\\\"z\\\\wA\",\n  \"b\": \"p\\/q\",\n  \"c\\/d\": [\"\\/\"]\n}\n",
+        "language": "json",
         "spans": [
           {
-            "column": 117,
+            "column": 10,
             "length": 2,
-            "line": 1
+            "line": 3
+          },
+          {
+            "column": 5,
+            "length": 2,
+            "line": 4
+          },
+          {
+            "column": 13,
+            "length": 2,
+            "line": 4
           }
         ]
       },
       "fix": null,
       "id": "no-useless-escape",
       "languages": [
-        "js"
+        "js",
+        "json"
       ],
       "options": [],
       "presets": [
+        "json/eslint-plugin-jsonc-recommended",
         "js/eslint-recommended",
         "js/biome-recommended",
         "js/oxlint"
@@ -12103,6 +13014,11 @@
           "id": "no-useless-escape",
           "partial": true,
           "tool": "eslint"
+        },
+        {
+          "id": "jsonc/no-useless-escape",
+          "partial": true,
+          "tool": "eslint-plugin-jsonc"
         }
       ]
     },
@@ -12166,7 +13082,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
@@ -12327,7 +13243,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
@@ -12338,7 +13254,7 @@
           {
             "column": 3,
             "length": 1,
-            "line": 12
+            "line": 13
           }
         ]
       },
@@ -12367,7 +13283,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
@@ -12402,13 +13318,18 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
+        "input": "var a = 1;\nlet b = 2;\nlet c = 3;\nc = 4;\nfunction f() {\n  return arguments;\n}\nf.apply(undefined, b);\nf.apply(null, [1]);\no[m].apply(o, b);\nfunction g() {\n  let d;\n  d = 1;\n  return d;\n}\n",
         "language": "js",
         "spans": [
           {
             "column": 1,
             "length": 21,
             "line": 8
+          },
+          {
+            "column": 1,
+            "length": 16,
+            "line": 10
           }
         ]
       },
@@ -12750,73 +13671,6 @@
           "id": "F821",
           "partial": false,
           "tool": "ruff"
-        }
-      ]
-    },
-    {
-      "category": "suspicious",
-      "default_level": "off",
-      "description": "A parameter that is never read. By default only the parameters after the last one that is read are reported; the parameters of setters and signatures and the properties a constructor declares are used.",
-      "example": {
-        "config": null,
-        "fixed": null,
-        "input": "function F {\n    param([Parameter(Mandatory = $true)]$Unused, $Used)\n    $Used\n}\nfunction G {\n    param($a, $b)\n    $a | ForEach-Object { $b }\n    { $a }\n}\n",
-        "language": "powershell",
-        "spans": [
-          {
-            "column": 41,
-            "length": 7,
-            "line": 2
-          }
-        ]
-      },
-      "fix": null,
-      "id": "unused-parameter",
-      "languages": [
-        "js",
-        "powershell"
-      ],
-      "options": [
-        {
-          "choices": [
-            "after-used",
-            "all",
-            "none"
-          ],
-          "default": "after-used",
-          "description": "Which parameters are checked: those after the last one that is read, all of them, or none.",
-          "name": "args",
-          "type": "string"
-        },
-        {
-          "default": "",
-          "description": "A regex for the names that are not checked (ESLint's `argsIgnorePattern`).",
-          "name": "ignore_pattern",
-          "type": "string"
-        }
-      ],
-      "presets": [
-        "js/eslint-recommended",
-        "js/typescript-eslint-recommended",
-        "js/biome-recommended",
-        "js/oxlint",
-        "powershell/psscriptanalyzer"
-      ],
-      "upstream": [
-        {
-          "id": "no-unused-vars",
-          "partial": true,
-          "tool": "eslint"
-        },
-        {
-          "id": "PSReviewUnusedParameter",
-          "partial": true,
-          "tool": "psscriptanalyzer"
-        },
-        {
-          "id": "no-unused-vars",
-          "partial": true,
-          "tool": "typescript-eslint"
         }
       ]
     },
@@ -13229,11 +14083,11 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An enum entry whose name starts with a lowercase letter or an underscore (ktlint enum-entry-name-case).",
+      "description": "An enum entry whose name is neither PascalCase nor UPPER_SNAKE_CASE (ktlint enum-entry-name-case).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "enum class E { a, B, C_D, _e, FooBar }\n",
+        "input": "enum class E { a, B, C_D, _e, FooBar }\nenum class F { `1x flows`, G_1, _2BIG }\n",
         "language": "kotlin",
         "spans": [
           {
@@ -13245,6 +14099,16 @@
             "column": 27,
             "length": 2,
             "line": 1
+          },
+          {
+            "column": 16,
+            "length": 10,
+            "line": 2
+          },
+          {
+            "column": 33,
+            "length": 5,
+            "line": 2
           }
         ]
       },
@@ -14896,6 +15760,194 @@
           "id": "MD025",
           "partial": true,
           "tool": "markdownlint"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A parameter with a type that does not allow `null` and a `null` default (PHPStan parameter.implicitlyNullable).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nfunction a(int $a = null, ?int $b = null, int|null $c = null, $d = null, mixed $e = null) {}\nclass P { function __construct(public $x = null, public string $y = null) {} }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 12,
+            "length": 13,
+            "line": 2
+          },
+          {
+            "column": 50,
+            "length": 23,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "implicit-nullable-parameter",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "parameter.implicitlyNullable",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "A function or method whose native return type or `@return` tag is not `void` or `never` and whose end can be reached without a `return` or `throw` (PHPStan return.missing). A generator is left out. A call that never returns (`exit`, `die`, a `@return never` function) is not seen.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nfunction a($x): int { if ($x) { return 1; } }\nfunction b($x): int { if ($x) { return 1; } elseif ($x > 1) { return 2; } else { return 3; } }\nfunction c($x): int { if ($x): return 1; else: throw new E(); endif; }\nfunction d($x): int { if ($x) { return 1; } exit; }\nfunction d2($x): int { if ($x) { return 1; } die(1); }\nfunction e($x): void { if ($x) { return; } }\nfunction f($x): iterable { if ($x) { yield 1; } }\n/** @return int */\nfunction g($x) { if ($x) { return 1; } }\n/** @return int|null */\nfunction h($x) { if ($x) { return 1; } }\nclass K { function __construct() { } }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 23,
+            "length": 21,
+            "line": 2
+          },
+          {
+            "column": 18,
+            "length": 21,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-return",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [],
+      "upstream": [
+        {
+          "id": "return.missing",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "A `function name() {}` statement in the body of a function, method or closure (PHPStan function.inner).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nfunction a() { function b() {} }\nfunction c() { $f = function () {}; }\nclass D { function m() { function n() {} } }\nfunction e() {}\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 16,
+            "length": 8,
+            "line": 2
+          },
+          {
+            "column": 26,
+            "length": 8,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-inner-function",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "function.inner",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "`unset($this->name)` of a property that the class declares and that a subclass could override with a property hook (PHP 8.4): the class is not final and the property is neither private, final, static nor readonly (PHPStan unset.possiblyHookedProperty).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nclass A { public $a; private $b; public readonly int $c;\n    function f() { unset($this->a); unset($this->b); unset($this->c); unset($this->z); }\n}\nfinal class B { public $a; function f() { unset($this->a); } }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 26,
+            "length": 8,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-unset-hookable-property",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "unset.possiblyHookedProperty",
+          "partial": true,
+          "tool": "phpstan"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "`new static` in a class that is not final and has no final or abstract constructor of its own (PHPStan new.static). A constructor or final parent in another file cannot be seen; the `@phpstan-consistent-constructor` tag of the class itself is.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<?php\nclass A { function make() { return new static(); } }\nfinal class B { function make() { return new static(); } }\nclass C { final public function __construct() {} function make() { return new static(); } }\ntrait T { function make() { return new static; } }\nclass D { function make() { return new self(); } }\n/** @phpstan-consistent-constructor */\nclass E { function make() { return new static(); } }\n",
+        "language": "php",
+        "spans": [
+          {
+            "column": 36,
+            "length": 3,
+            "line": 2
+          },
+          {
+            "column": 36,
+            "length": 3,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "unsafe-new-static",
+      "languages": [
+        "php"
+      ],
+      "options": [],
+      "presets": [
+        "php/phpstan"
+      ],
+      "upstream": [
+        {
+          "id": "new.static",
+          "partial": true,
+          "tool": "phpstan"
         }
       ]
     },
@@ -24315,7 +25367,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n      - run: echo ${{ inputs.nothing }}\n",
+        "input": "on:\n  workflow_call:\n    secrets:\n      token: {}\nrun-name: ${{ github.events }}\njobs:\n  a:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b]\n        v: \"${{ fromJSON('[1]') }}\"\n    steps:\n      - run: echo ${{ github.sha }} ${{ contains('a') }} ${{ format('{0} {1}', 1) }}\n      - run: echo ${{ fromJSON('[1') }} ${{ secrets.token }} ${{ secrets.other }}\n      - run: echo ${{ matrix.os }} ${{ matrix.arch }}\n      - run: echo ${{ github.event.*[github.sha] }}\n      - run: echo ${{ inputs.nothing }}\n      - run: echo ${{ matrix.v }}\n  caller:\n    uses: owner/repo/.github/workflows/w.yml@v1\n  after:\n    needs: caller\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ needs.caller.outputs.anything }}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -24499,6 +25551,11 @@
         "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  pull_request_review:\n    types: submitted\n    tags: v1\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n    - cron: '*/4 * * * *'\n    - cron: '0 1 * * *'\n      timezone: Europe/Berlin\n    - cron: '0 1 * * *'\n      timezone: UTC\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
         "language": "github-actions",
         "spans": [
+          {
+            "column": 3,
+            "length": 5,
+            "line": 2
+          },
           {
             "column": 5,
             "length": 15,
@@ -24760,6 +25817,11 @@
         "input": "on: push\npermissions:\n  content: read\n  id-token: read\n  contents: write\njobs:\n  a:\n    runs-on: ubuntu-latest\n    permissions: read\n    steps:\n      - run: echo\n",
         "language": "github-actions",
         "spans": [
+          {
+            "column": 3,
+            "length": 7,
+            "line": 3
+          },
           {
             "column": 13,
             "length": 4,
@@ -25485,9 +26547,9 @@
         "language": "github-actions",
         "spans": [
           {
-            "column": 26,
-            "length": 4,
-            "line": 8
+            "column": 3,
+            "length": 6,
+            "line": 7
           }
         ]
       },
@@ -25659,7 +26721,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -25743,7 +26805,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -26741,9 +27803,15 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-standard"
+        "html/html-validate-standard",
+        "html/html-eslint-recommended"
       ],
       "upstream": [
+        {
+          "id": "require-title",
+          "partial": true,
+          "tool": "html-eslint"
+        },
         {
           "id": "element-required-content",
           "partial": true,
@@ -26957,7 +28025,7 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has a second `<h1>`.",
+      "description": "Headings do not follow the document outline: the first heading is not an `<h1>`, a level is skipped going down the outline (`<h1>` then `<h3>`), or the page has more than one `<h1>` (each one is reported).",
       "example": {
         "config": null,
         "fixed": null,
@@ -26968,6 +28036,11 @@
             "column": 2,
             "length": 2,
             "line": 9
+          },
+          {
+            "column": 2,
+            "length": 2,
+            "line": 10
           },
           {
             "column": 2,
@@ -27179,9 +28252,15 @@
       ],
       "options": [],
       "presets": [
-        "html/html-validate-recommended"
+        "html/html-validate-recommended",
+        "html/html-eslint-recommended"
       ],
       "upstream": [
+        {
+          "id": "require-img-alt",
+          "partial": false,
+          "tool": "html-eslint"
+        },
         {
           "id": "wcag/h37",
           "partial": true,
@@ -27196,7 +28275,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -27317,7 +28396,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -27439,7 +28518,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -27549,6 +28628,43 @@
         {
           "id": "no-abstract-role",
           "partial": false,
+          "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `&` that starts no entity is valid HTML and renders as written; html-validate's `no-raw-characters` asks for `&amp;`. A raw `<` in text is a syntax error, except in `{{<` (the Hugo shortcode), which is this rule; a `>` is `no-raw-gt`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!doctype html>\n<title>t</title>\n<p><strong>></strong></p>\n<p>a &gt; b &amp; &#38;</p>\n<p>Ham & Shroom</p>\n<p>one\ntwo > three</p>\n<script>if (a > b) {}</script>\n<style>a > b {}</style>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 8,
+            "length": 1,
+            "line": 5
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-ambiguous-ampersand",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-validate-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "no-raw-characters",
+          "partial": true,
           "tool": "html-validate"
         }
       ]
@@ -28431,17 +29547,22 @@
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "An `id` that an earlier element of the document already has. Ids must be unique: scripts, links and labels find the first element only. Empty ids are left alone.",
+      "description": "An `id` that an earlier element of the document already has. Ids must be unique: scripts, links and labels find the first element only.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n",
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n<p id=\"\"></p>\n<p id=\"\"></p>\n<ul><li>a</li></ul>\n<div><li>b</li></div>\n",
         "language": "html",
         "spans": [
           {
             "column": 8,
             "length": 1,
             "line": 9
+          },
+          {
+            "column": 8,
+            "length": 1,
+            "line": 12
           }
         ]
       },
@@ -28572,11 +29693,6 @@
         "html/html-eslint-recommended"
       ],
       "upstream": [
-        {
-          "id": "require-closing-tags",
-          "partial": true,
-          "tool": "html-eslint"
-        },
         {
           "id": "no-implicit-close",
           "partial": false,
@@ -28770,7 +29886,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n",
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n<p id=\"\"></p>\n<p id=\"\"></p>\n<ul><li>a</li></ul>\n<div><li>b</li></div>\n",
         "language": "html",
         "spans": [
           {
@@ -28919,6 +30035,48 @@
           "id": "no-object-in-text-mustaches",
           "partial": true,
           "tool": "eslint-plugin-svelte"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `>` in text is valid HTML and renders as written; HTMLHint's `spec-char-escape` asks for `&gt;`. A raw `<` is a syntax error.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!doctype html>\n<title>t</title>\n<p><strong>></strong></p>\n<p>a &gt; b &amp; &#38;</p>\n<p>Ham & Shroom</p>\n<p>one\ntwo > three</p>\n<script>if (a > b) {}</script>\n<style>a > b {}</style>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 12,
+            "length": 1,
+            "line": 3
+          },
+          {
+            "column": 5,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": null,
+      "id": "no-raw-gt",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/htmlhint"
+      ],
+      "upstream": [
+        {
+          "id": "spec-char-escape",
+          "partial": true,
+          "tool": "htmlhint"
         }
       ]
     },
@@ -29679,7 +30837,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -29731,7 +30889,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n",
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n<p id=\"\"></p>\n<p id=\"\"></p>\n<ul><li>a</li></ul>\n<div><li>b</li></div>\n",
         "language": "html",
         "spans": [
           {
@@ -29952,6 +31110,43 @@
       "options": [],
       "presets": [],
       "upstream": []
+    },
+    {
+      "category": "correctness",
+      "default_level": "off",
+      "description": "An `<li>` whose parent is not a list (`ul`, `ol`, `menu`) is not a list item.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<!DOCTYPE html>\n<title>x</title>\n<table><tr><td>a</td></tr></table>\n<table><tbody><tr><td>a</td></tr></tbody></table>\n<main></main>\n<main hidden></main>\n<main></main>\n<p id=\"a\"></p>\n<p id=\"a\"></p>\n<p id=\"b\" class=\"x y x\"></p>\n<p id=\"\"></p>\n<p id=\"\"></p>\n<ul><li>a</li></ul>\n<div><li>b</li></div>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 6,
+            "length": 1,
+            "line": 14
+          }
+        ]
+      },
+      "fix": null,
+      "id": "require-li-container",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [],
+      "presets": [
+        "html/html-eslint-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "require-li-container",
+          "partial": false,
+          "tool": "html-eslint"
+        }
+      ]
     },
     {
       "category": "suspicious",
@@ -30214,7 +31409,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -30245,17 +31440,27 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A `<button>` with no text, no image with an `alt`, no `<svg>` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count.",
+      "description": "A `<button>` with no text (an `<svg>` counts by the text inside it, such as its `<title>`), no image with a non-empty `alt` and no `aria-label` or `aria-labelledby` has no name; a `title` does not count.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
             "column": 1,
             "length": 1,
             "line": 25
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 29
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 30
           }
         ]
       },
@@ -30286,7 +31491,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
+        "input": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>x</title></head>\n<body>\n<input type=\"text\" name=\"a\">\n<label>L <input type=\"text\" name=\"b\"></label>\n<label for=\"c\">C</label><input type=\"text\" id=\"c\">\n<input type=\"text\" aria-label=\"d\">\n<input type=\"hidden\" name=\"e\">\n<label>a <input id=\"x\"> <input id=\"y\"></label>\n<map name=\"m\"><area href=\"x\"><area href=\"y\" alt=\"ok\"><area alt=\"z\"></map>\n<map name=\"m\"></map>\n<svg><path d=\"\"></path></svg>\n<svg focusable=\"false\"></svg>\n<nav aria-label=\"a\"></nav><nav aria-label=\"a\"></nav>\n<nav></nav><aside></aside>\n<div aria-label=\"x\">y</div>\n<span role=\"button\" aria-label=\"x\">y</span>\n<a aria-label=\"x\">y</a>\n<a href=\"x\" aria-label=\"x\">y</a>\n<div role=\"main\"></div>\n<span role=\"button\"></span>\n<main role=\"main\"></main>\n<a href=\"#\" role=\"button\">x</a>\n<button></button>\n<button aria-label=\"x\"></button>\n<button><img src=\"a\" alt=\"x\"></button>\n<button><svg focusable=\"false\"><title>x</title></svg></button>\n<button><svg focusable=\"false\"><use href=\"#a\"/></svg></button>\n<button><img src=\"a\" alt=\"\"></button>\n<button><span>x</span></button>\n</body>\n</html>\n",
         "language": "html",
         "spans": [
           {
@@ -30375,6 +31580,75 @@
           "id": "unrecognized-char-ref",
           "partial": true,
           "tool": "html-validate"
+        }
+      ]
+    },
+    {
+      "category": "suspicious",
+      "default_level": "off",
+      "description": "An element, attribute or attribute value that not all major browsers support (`<geolocation>`, `popover=\"hint\"`, `rel=\"manifest\"` on `<link>`), by the baseline data of web-features. A name the data does not list is not reported; custom elements are skipped, and so are `is` and `slot` in Vue, Svelte and Angular templates, where the framework owns them.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "<a href=\"x\" download>x</a>\n<button interestfor=\"x\">x</button>\n<link rel=\"manifest\" href=\"m\">\n<link rel=\"stylesheet\" href=\"s\">\n<geolocation></geolocation>\n<p foo=\"bar\" popover=\"hint\">x</p>\n<my-element interestfor=\"x\"></my-element>\n<datalist id=\"l\"></datalist>\n<p autocorrect=\"on\">x</p>\n",
+        "language": "html",
+        "spans": [
+          {
+            "column": 9,
+            "length": 11,
+            "line": 2
+          },
+          {
+            "column": 12,
+            "length": 8,
+            "line": 3
+          },
+          {
+            "column": 2,
+            "length": 11,
+            "line": 5
+          },
+          {
+            "column": 23,
+            "length": 4,
+            "line": 6
+          },
+          {
+            "column": 2,
+            "length": 8,
+            "line": 8
+          },
+          {
+            "column": 4,
+            "length": 11,
+            "line": 9
+          }
+        ]
+      },
+      "fix": null,
+      "id": "use-baseline",
+      "languages": [
+        "angular",
+        "html",
+        "svelte",
+        "vue"
+      ],
+      "options": [
+        {
+          "default": "widely",
+          "description": "How widely a feature must be available: `widely` (in all major browsers for 30 months), `newly` (in all of them), or a year (baseline since that year or before).",
+          "name": "available",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "html/html-eslint-recommended"
+      ],
+      "upstream": [
+        {
+          "id": "use-baseline",
+          "partial": true,
+          "tool": "html-eslint"
         }
       ]
     },
@@ -31390,9 +32664,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1098",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1131",
           "partial": false,
@@ -31757,6 +33037,41 @@
       "upstream": [
         {
           "id": "SA1614",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no `<param name=\"...\">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or `<include>` is left out, and so is a declaration without a comment. No fix.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "public class Api {\n  /**\n   * Adds.\n   * @param a first\n   */\n  public int add(int a, int b) { return a + b; }\n\n  /** Inherits. {@inheritDoc} */\n  public int sub(int a) { return a; }\n\n  private int hidden(int a) { return a; }\n}\n",
+        "language": "java",
+        "spans": [
+          {
+            "column": 29,
+            "length": 1,
+            "line": 6
+          }
+        ]
+      },
+      "fix": null,
+      "id": "doc-param-missing",
+      "languages": [
+        "csharp",
+        "java"
+      ],
+      "options": [],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1611",
           "partial": false,
           "tool": "StyleCop"
         }
@@ -32150,9 +33465,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1139",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1604",
           "partial": false,
@@ -32209,9 +33530,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1138",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1606",
           "partial": false,
@@ -32482,6 +33809,47 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A field whose name begins with an underscore (StyleCop SA1309); the option `fields` is the expression a field name must match.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "class C\n{\n    private int _count;\n    private int count;\n}\n",
+        "language": "csharp",
+        "spans": [
+          {
+            "column": 17,
+            "length": 6,
+            "line": 3
+          }
+        ]
+      },
+      "fix": null,
+      "id": "field-name-no-underscore",
+      "languages": [
+        "csharp"
+      ],
+      "options": [
+        {
+          "default": "^[^_]",
+          "description": "Regular expression the name of a field must match; empty: not checked.",
+          "name": "fields",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1309",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "The file name, up to its first dot and ignoring case, is the name of the first type in the file; a generic type may also be written `Name{T,U}`. Not checked when that type is partial. No fix.",
       "example": {
         "config": null,
@@ -32636,6 +34004,109 @@
         },
         {
           "id": "SA1214",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A type, member, field or enum item that StyleCop's defaults ask to document (public, protected or internal, in types that are too; members of an interface, explicit interface implementations and enum items are public; partial declarations are left out) has no `///` comment before it. Private members are left alone. No fix.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "// Package a is the test package.\npackage a\n\nfunc Run() {}\n\n// Detached comment.\n\nfunc Detached() {}\n\n//go:noinline\nfunc Pragma() {}\n\n// Deprecated: use Run.\nfunc Old() {}\n\ntype T struct{}\n\nfunc (T) Method() {}\n\nfunc (T) String() string { return \"\" }\n\ntype hidden struct{}\n\nfunc (hidden) Method() {}\n\nfunc unexported() {}\n\nconst A, b = 1, 2\n\nconst (\n    C = 1\n    D = 2\n)\n\n// Doc of the group.\nvar (\n    V = 1\n    W = 2\n)\n\nvar (\n    X = 1\n    // Y has a comment.\n    Y = 2\n    Z = 3\n)\n\ntype S []int\n\nfunc (s S) Len() int { return 0 }\nfunc (s S) Less(i, j int) bool { return false }\nfunc (s S) Swap(i, j int) {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 6,
+            "length": 3,
+            "line": 4
+          },
+          {
+            "column": 6,
+            "length": 8,
+            "line": 8
+          },
+          {
+            "column": 6,
+            "length": 6,
+            "line": 11
+          },
+          {
+            "column": 6,
+            "length": 3,
+            "line": 14
+          },
+          {
+            "column": 6,
+            "length": 1,
+            "line": 16
+          },
+          {
+            "column": 10,
+            "length": 6,
+            "line": 18
+          },
+          {
+            "column": 7,
+            "length": 1,
+            "line": 28
+          },
+          {
+            "column": 5,
+            "length": 1,
+            "line": 31
+          },
+          {
+            "column": 5,
+            "length": 1,
+            "line": 42
+          },
+          {
+            "column": 6,
+            "length": 1,
+            "line": 48
+          }
+        ]
+      },
+      "fix": null,
+      "id": "missing-doc-comment",
+      "languages": [
+        "csharp",
+        "go",
+        "java"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive",
+        "java/google",
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "MissingJavadocMethod",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "MissingJavadocType",
+          "partial": true,
+          "tool": "checkstyle"
+        },
+        {
+          "id": "exported",
+          "partial": true,
+          "tool": "revive"
+        },
+        {
+          "id": "SA1600",
+          "partial": false,
+          "tool": "StyleCop"
+        },
+        {
+          "id": "SA1602",
           "partial": false,
           "tool": "StyleCop"
         }
@@ -33405,9 +34876,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1020",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1125",
           "partial": false,
@@ -33425,7 +34902,9 @@
         "csharp"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "csharp/roslynator"
+      ],
       "upstream": [
         {
           "id": "RCS1202",
@@ -33512,6 +34991,45 @@
       "upstream": [
         {
           "id": "SA1624",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A field, property, method or event of the containing type used by its simple name. The fix writes `this.` before it.",
+      "example": {
+        "config": null,
+        "fixed": "class Qualify\n{\n    int x;\n    static int s;\n    int M() => this.x + s;\n    int N() => this.x;\n    void P(int x) { x = 1; this.M(); }\n}\n",
+        "input": "class Qualify\n{\n    int x;\n    static int s;\n    int M() => x + s;\n    int N() => this.x;\n    void P(int x) { x = 1; M(); }\n}\n",
+        "language": "csharp",
+        "spans": [
+          {
+            "column": 16,
+            "length": 1,
+            "line": 5
+          },
+          {
+            "column": 28,
+            "length": 1,
+            "line": 7
+          }
+        ]
+      },
+      "fix": "safe",
+      "id": "qualify-instance-members",
+      "languages": [
+        "csharp"
+      ],
+      "options": [],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1101",
           "partial": false,
           "tool": "StyleCop"
         }
@@ -33831,7 +35349,9 @@
         "csharp"
       ],
       "options": [],
-      "presets": [],
+      "presets": [
+        "csharp/roslynator"
+      ],
       "upstream": [
         {
           "id": "RCS1179",
@@ -33869,6 +35389,7 @@
         }
       ],
       "presets": [
+        "csharp/roslynator",
         "csharp/unity"
       ],
       "upstream": [
@@ -33972,9 +35493,15 @@
       ],
       "options": [],
       "presets": [
-        "csharp/stylecop"
+        "csharp/stylecop",
+        "csharp/roslynator"
       ],
       "upstream": [
+        {
+          "id": "RCS1048",
+          "partial": false,
+          "tool": "Roslynator"
+        },
         {
           "id": "SA1130",
           "partial": false,
@@ -34216,6 +35743,40 @@
         },
         {
           "id": "SA1217",
+          "partial": false,
+          "tool": "StyleCop"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "A `using` directive outside the namespace declaration in a file that has one (StyleCop SA1200). No fix: moving a directive changes how names are looked up.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "using System;\nnamespace N\n{\n    using System.IO;\n}\n",
+        "language": "csharp",
+        "spans": [
+          {
+            "column": 1,
+            "length": 13,
+            "line": 1
+          }
+        ]
+      },
+      "fix": null,
+      "id": "using-placement",
+      "languages": [
+        "csharp"
+      ],
+      "options": [],
+      "presets": [
+        "csharp/stylecop"
+      ],
+      "upstream": [
+        {
+          "id": "SA1200",
           "partial": false,
           "tool": "StyleCop"
         }

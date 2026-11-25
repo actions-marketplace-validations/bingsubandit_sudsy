@@ -1,0 +1,9 @@
+no-global-function-names: warn
+at-mixin-argumentless-call-parentheses: warn
+at-rule-conditional-no-parentheses: warn
+at-extend-no-missing-placeholder: warn
+at-if-no-null: warn
+load-no-partial-leading-underscore: warn
+dollar-variable-pattern: { level: warn, options: { pattern: "^[a-z-]+$" } }
+at-mixin-pattern: { level: warn, options: { pattern: "^[a-z-]+$" } }
+at-function-pattern: { level: warn, options: { pattern: "^[a-z-]+$" } }

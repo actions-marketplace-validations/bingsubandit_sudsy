@@ -1,0 +1,106 @@
+id: missing-doc-comment
+family: missing-doc-comment
+params:
+  message: "exported {name} should have comment or be unexported"
+  top-level-visible: "true"
+  visible-by-case: "true"
+  skip-namespaces: main
+  report-at: name
+  doc-lines: "//"
+  doc-skip: "^(line |extern |export |[a-z0-9]+:[a-z0-9])"
+  group-comment: ConstDeclaration VarDeclaration TypeDeclaration
+  function: function
+  method: function&+receiver
+  const: const-spec
+  var: var-spec
+  type: type-spec
+  receiver.method: receiver
+  receiver-token.method: TypeIdent
+  skip-names.method: Error Read ServeHTTP String Write Unwrap
+  sortable.method: Len Less Swap
+  once.const: "true"
+  once.var: "true"
+description: >-
+  An exported function, method, type, constant or variable has no doc comment: no run of comments
+  right above it (a blank line ends the run) and, for a type, constant or variable in a
+  declaration group, none above the group either (revive exported). A name is exported when it
+  starts with an uppercase letter. A method of a type that is not exported, `Error`, `Read`,
+  `ServeHTTP`, `String`, `Write` and `Unwrap`, and `Len`, `Less` and `Swap` of a type that has
+  all three in the file are left out. Only the first constant and the first variable of a group
+  without a comment is reported. A file of package `main` is left alone.
+example: "func Run() {}"
+severity: off
+category: style
+---
+id: doc-first-word
+family: doc-comment
+params:
+  check: first-word
+  message: 'comment on exported {name} should be of the form "{expected} ..."'
+  top-level-visible: "true"
+  visible-by-case: "true"
+  skip-namespaces: main
+  doc-lines: "//"
+  doc-skip: "^(line |extern |export |[a-z0-9]+:[a-z0-9])"
+  group-comment: ConstDeclaration VarDeclaration TypeDeclaration
+  group-open: "("
+  function: function
+  method: function&+receiver
+  const: const-spec
+  var: var-spec
+  type: type-spec
+  receiver.method: receiver
+  receiver-token.method: TypeIdent
+  skip-names.method: Error Read ServeHTTP String Write Unwrap
+  sortable.method: Len Less Swap
+  articles.type: A An The This
+  form-in-group.type: "true"
+description: >-
+  The first line of the doc comment of an exported function, method, type, constant or variable
+  does not start with its name (revive exported). A type may start with `A`, `An`, `The` or
+  `This` before the name. The comment of a group in parentheses is the comment of its types; a
+  constant or variable in a group whose comment has text is not checked. Lines of directives
+  (`//go:generate`) and a first line `Deprecated: ` are no text. A declaration with no comment is
+  left to `missing-doc-comment`.
+example: "// Does things.\nfunc Run() {}"
+severity: off
+category: style
+---
+id: package-comment-form
+family: doc-comment
+params:
+  check: first-word
+  message: 'package comment should be of the form "{expected} ..."'
+  top-level-visible: "true"
+  skip-namespaces: main
+  doc-lines: "//"
+  doc-skip: "^(line |extern |export |[a-z0-9]+:[a-z0-9])"
+  namespace: namespace
+  prefix.namespace: "Package "
+  detached.namespace: "true"
+  detached-message: "package comment is detached; there should be no blank lines between it and the package statement"
+description: >-
+  The first line of the comment above the `package` clause does not start with `Package` and the
+  name of the package (revive package-comments). A file of package `main` is left alone. A comment
+  of the right form with a blank line before the `package` clause is reported as detached.
+example: "// Does things.\npackage a"
+severity: off
+category: style
+---
+id: missing-package-comment
+family: unit-doc-comment
+params:
+  message: should have a package comment
+  members: .go
+  trigger-except: _test.go
+  detached-prefix: "Package "
+  doc-lines: "//"
+description: >-
+  No file of a directory has a comment right above its `package` clause (revive package-comments).
+  Reported once per directory, at the `package` keyword of the first file by name (a test file
+  too); a test file or a file with a detached comment counts for the comment where it has one,
+  and never causes the report. The files of the directory are read even when only some are linted; the
+  rule is silent when one of them does not parse.
+example: "package a"
+severity: off
+category: style

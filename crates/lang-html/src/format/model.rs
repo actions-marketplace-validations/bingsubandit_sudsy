@@ -75,6 +75,8 @@ pub struct N<'s> {
     /// Text: the source text; comment: between `<!--` and `-->`; doctype: the body.
     pub value: Cow<'s, str>,
     pub self_closing: bool,
+    /// A void element of HTML (not in SVG): `<br>`.
+    pub void: bool,
     pub display: &'static str,
     pub lead_sp: bool,
     pub trail_sp: bool,
@@ -104,6 +106,7 @@ impl N<'_> {
             next: None,
             value: Cow::Borrowed(""),
             self_closing: false,
+            void: false,
             display: "inline",
             lead_sp: false,
             trail_sp: false,
@@ -371,7 +374,8 @@ impl<'s> Builder<'_, 's> {
         {
             n.name = Cow::Owned(lower);
         }
-        n.self_closing = self_closing || (!n.svg && is_void(&n.name));
+        n.void = !n.svg && is_void(&n.name);
+        n.self_closing = self_closing || n.void;
         n.parent = parent;
         let id = self.push(n);
         self.display(id, prev_comment);

@@ -3,11 +3,26 @@
 //! the document selector in `src/selector.generated.ts`.
 
 use anyhow::{Context, Result, bail};
-use provider_api::{FilePattern, LanguageProvider};
+use provider_api::LanguageProvider;
 use std::path::PathBuf;
 
 /// Marketplace limit on `keywords`.
 const MAX_KEYWORDS: usize = 30;
+/// Configuration and markup formats, in the order their keywords are dropped when the languages
+/// do not fit next to the two generic words: a programming language is never dropped.
+const CONFIG_FORMATS: [&str; 9] = [
+    "EditorConfig",
+    "Gitignore",
+    "INI",
+    "Makefile",
+    "Dockerfile",
+    "TOML",
+    "XML",
+    "YAML",
+    "JSON",
+];
+/// Always among the keywords: what people search for.
+const GENERIC_KEYWORDS: [&str; 2] = ["formatter", "linter"];
 /// The languages the description names, in order; the rest follow as "and more".
 const MAIN_LANGUAGES: [&str; 6] = [
     "C#",
@@ -50,7 +65,7 @@ fn language_ids(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> 
     Ok(ids)
 }
 
-/// Display names of the languages, `C/C++` as `C` and `C++`.
+/// Display names of the languages, `C/C++` as `C` and `C++`; the first 28.
 fn keywords(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
     let mut words: Vec<String> = Vec::new();
     for p in own_language(providers) {
@@ -60,7 +75,15 @@ fn keywords(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<String>> {
             }
         }
     }
-    words.extend(["formatter".to_string(), "linter".to_string()]);
+    // The generic words keep their places; configuration formats leave first.
+    let room = MAX_KEYWORDS - GENERIC_KEYWORDS.len();
+    for format in CONFIG_FORMATS {
+        if words.len() <= room {
+            break;
+        }
+        words.retain(|w| w != format);
+    }
+    words.extend(GENERIC_KEYWORDS.map(String::from));
     if words.len() > MAX_KEYWORDS {
         bail!(
             "{} keywords, VS Code allows {MAX_KEYWORDS}: {words:?}",
@@ -104,10 +127,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     let mut extensions: Vec<&str> = providers
         .iter()
         .flat_map(|p| p.file_matchers())
-        .filter_map(|m| match &m.pattern {
-            FilePattern::Extension(e) => Some(e.as_str()),
-            _ => None,
-        })
+        .filter_map(|m| m.pattern.extension())
         .collect();
     extensions.dedup();
     let selector: String = ids
@@ -162,5 +182,24 @@ mod tests {
         let ids = language_ids(&languages::providers()).unwrap();
         let unknown: Vec<&String> = ids.iter().filter(|i| !real.contains(&i.as_str())).collect();
         assert!(unknown.is_empty(), "not VS Code language ids: {unknown:?}");
+    }
+
+    /// `formatter` and `linter` always stay; only configuration formats leave when the limit is hit.
+    #[test]
+    fn generic_keywords_stay_and_only_config_formats_leave() {
+        let providers = languages::providers();
+        let words = keywords(&providers).unwrap();
+        assert!(words.len() <= MAX_KEYWORDS);
+        for g in GENERIC_KEYWORDS {
+            assert!(words.iter().any(|w| w == g), "{g} missing");
+        }
+        for p in own_language(&providers) {
+            for part in p.grammar().title.split('/') {
+                assert!(
+                    words.iter().any(|w| w == part) || CONFIG_FORMATS.contains(&part),
+                    "programming language {part} dropped from the keywords"
+                );
+            }
+        }
     }
 }

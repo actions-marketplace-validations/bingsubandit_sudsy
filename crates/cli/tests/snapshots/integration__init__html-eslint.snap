@@ -8,12 +8,11 @@ html:
     rules:
       id-pattern: warn
       no-duplicate-id: error
-      no-implicit-close: error
       no-inline-style: "off"
 ---
 migrated .eslintrc.json
 not migrated: @html-eslint/id-naming-convention options (Sudsy's rule has no option for them; set them by hand)
-not migrated: indent (planned)
+not migrated: indent (the formatter owns layout; the `>` that starts the text of an inline element (`>Home</a`) is Prettier's whitespace-sensitive layout and stays)
 not migrated: not-a-rule (not a rule Sudsy knows)
-not migrated: @html-eslint/require-closing-tags options (Sudsy's rule has no option for them; set them by hand)
+not migrated: require-closing-tags (the formatter writes the end tags that were implied and void elements as `void_element_style` says (the preset writes `<br>`))
 note: `extends` is not followed; the rules of a shared config are not migrated

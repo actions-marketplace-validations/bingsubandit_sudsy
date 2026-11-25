@@ -24,7 +24,7 @@ fn break_before(c: &Check, open: &SyntaxToken, ctx: &mut RuleContext<'_>, what: 
     };
     let gap = TextRange::new(prev.text_range().end(), open.text_range().start());
     if ctx.file.text[gap].contains('\n') {
-        c.hit(ctx, gap, what);
+        c.hit(ctx, open.text_range(), what);
     }
 }
 

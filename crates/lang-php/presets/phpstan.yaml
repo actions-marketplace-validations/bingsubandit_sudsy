@@ -3,3 +3,7 @@ php:
   lint:
     rules:
       undefined-variable: warn
+      unsafe-new-static: warn
+      no-unset-hookable-property: warn
+      no-inner-function: warn
+      implicit-nullable-parameter: warn

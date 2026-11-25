@@ -14,7 +14,7 @@ fetch_tarballs() {
     [ -d "$out" ] && continue
     rm -rf "$out.tmp"; mkdir -p "$out.tmp"
     args=()
-    for p in $patterns; do args+=(--wildcards "$p"); done
+    for p in $patterns; do case "$p" in "!"*) args+=("--exclude=${p#!}") ;; *) args+=(--wildcards "$p") ;; esac; done
     curl -sSfL "https://codeload.github.com/$repo/tar.gz/$sha" | tar -xz -C "$out.tmp" --strip-components=1 "${args[@]}"
     mv "$out.tmp" "$out"
   done

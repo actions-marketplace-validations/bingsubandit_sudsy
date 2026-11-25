@@ -47,6 +47,12 @@ impl Cursor for P<'_> {
         P::expression(self);
     }
 
+    fn condition(&mut self) {
+        self.indented(true, |p| {
+            p.expression();
+        });
+    }
+
     fn statement(&mut self) {
         let m = self.mark();
         if self.at_query_start() {

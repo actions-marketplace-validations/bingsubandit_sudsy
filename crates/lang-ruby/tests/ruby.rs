@@ -125,6 +125,7 @@ fn data_after_end_is_kept() {
     for s in [
         "puts 1\n__END__\nraw # data\n\n",
         "puts 1\n__END__",
+        "puts 1\n__END__\n",
         "puts 1\n__END__\n\n\n",
     ] {
         assert_eq!(fmt(s), s);
@@ -139,6 +140,19 @@ fn syntax_errors_stay_lossless() {
         "class A\n  def f(\nend end\n",
     );
     assert!(!parsed.errors.is_empty());
+}
+
+/// The root is the only `Program`: a check registered on `Program` runs once.
+#[test]
+fn the_tree_has_one_program_node() {
+    let parsed = lang_ruby::parse("a = 1\nputs a\n");
+    let g = core_syntax::grammars::RUBY.get();
+    let programs = parsed
+        .tree
+        .descendants()
+        .filter(|n| g.name(n.kind()) == "Program")
+        .count();
+    assert_eq!(programs, 1);
 }
 
 /// Parse speed over each repository of the corpus, whole files from memory, best of 3.

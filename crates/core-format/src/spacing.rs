@@ -19,7 +19,7 @@
 //! tools: google-java-format spacing, ktlint spacing rules, PHP-CS-Fixer spacing, sqlfluff LT01
 //! reads: rules:space, rules:joined, rules:at_least_one
 
-use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxToken};
+use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 /// A condition on a token: the token's value is (or, with `not`, is not) one of `any`.
 struct Cond {
@@ -538,9 +538,83 @@ pub struct SpaceRules {
     unhang: Vec<Pattern>,
     /// The `attach` kind sets of the options: the constructs whose `{` follows the option's words.
     attach: Vec<crate::rules::Binding>,
+    /// The `attach_call` and `loop_call` kind sets: a block right after a node of such a kind (a call
+    /// head, `list_for_each(x) {`) belongs to the construct of the `attach_call` word, or to the
+    /// word of the `loop_call` set when the head's name is among the words of that option.
+    attach_call: (Vec<crate::rules::Binding>, Vec<crate::rules::Binding>),
+    /// The `attach_after` kinds: a `{` of no known construct behind such a token is on its line.
+    attach_after: Vec<SyntaxKind>,
+    /// The `attach_in` kinds: the nodes that are blocks of statements.
+    attach_in: Vec<SyntaxKind>,
+    /// The `attach_apart` kinds: a token inside such a node (a directive) ends its line.
+    attach_apart: Vec<SyntaxKind>,
     /// The `tight_after` and `tight_behind` kind sets: no blank after a token of the first when the
     /// token before it is of the second (`Args &&...rest`).
     tight: (Vec<SyntaxKind>, Vec<SyntaxKind>),
+    /// The declarator marks (`*`, `&`) of the `pointer_alignment` kind sets.
+    pointer: Pointer,
+    /// The braces of the `braced_list_padding` kind sets.
+    pad: Pad,
+    /// The `cast_node`, `cast_group`, `cast_close`, `cast_keep` and `cast_tight` kind sets: a cast node, its type group, the token
+    /// that closes it, the tokens that may be an operator behind it (the blank stays) and those that touch the `)` (`(a)*b`).
+    cast: [Vec<SyntaxKind>; 5],
+    /// The `binary_node`, `binary_clear` and `binary_cast` kind sets: the nodes of binary operations, the parents
+    /// that prove a name `*` name (`T *x`, `a * b`) is a product, and the tokens that may close a cast type
+    /// (`(T)*p`, `(T)&x`: a mark between it and a name stays as written).
+    binary: (Vec<SyntaxKind>, Vec<SyntaxKind>, Vec<SyntaxKind>),
+}
+
+/// The kind sets of padded braces: `pad_list` (the nodes whose braces are padded), `pad_open` and
+/// `pad_close` (their brace tokens), `pad_except` (a token that makes the list a block the parse took
+/// for a list: its braces stay as written).
+#[derive(Default)]
+struct Pad {
+    except: Vec<SyntaxKind>,
+    lists: Vec<SyntaxKind>,
+    open: Vec<SyntaxKind>,
+    close: Vec<SyntaxKind>,
+}
+
+/// The kind sets of the declarator marks: `pointer` (the marks), `pointer_in` (their parents) and
+/// `pointer_in_under` (the grandparents of marks in a parenthesized type), `pointer_in_loose` (grandparents of marks that need no `pointer_end` behind them: the declaration of a range `for` or a `catch`), `pointer_ref` (marks no other mark follows), `pointer_type` (what
+/// stands before the first mark: a type), `pointer_name` (what a name behind the last mark is),
+/// `pointer_bare` (parents that hold types only, and what `pointer_in_under` names, where a mark needs a `pointer_end` token behind it
+/// to be no multiplication).
+#[derive(Default)]
+struct Pointer {
+    marks: Vec<SyntaxKind>,
+    within: Vec<SyntaxKind>,
+    under: Vec<SyntaxKind>,
+    loose: Vec<SyntaxKind>,
+    refs: Vec<SyntaxKind>,
+    types: Vec<SyntaxKind>,
+    names: Vec<SyntaxKind>,
+    bare: Vec<SyntaxKind>,
+    end: Vec<SyntaxKind>,
+}
+
+/// The previous token that is no blank.
+fn prev_code(t: &SyntaxToken) -> Option<SyntaxToken> {
+    let mut p = t.prev_token();
+    while let Some(x) = &p {
+        if !x.text().trim().is_empty() {
+            break;
+        }
+        p = x.prev_token();
+    }
+    p
+}
+
+/// The next token that is no blank.
+fn next_code(t: &SyntaxToken) -> Option<SyntaxToken> {
+    let mut p = t.next_token();
+    while let Some(x) = &p {
+        if !x.text().trim().is_empty() {
+            break;
+        }
+        p = x.next_token();
+    }
+    p
 }
 
 fn row(grammar: &Grammar, line: &str) -> Row {
@@ -614,6 +688,13 @@ impl SpaceRules {
             .filter(|b| b.role == "attach")
             .cloned()
             .collect();
+        let calls = |role: &str| -> Vec<crate::rules::Binding> {
+            (bindings.iter())
+                .filter(|b| b.role == role)
+                .cloned()
+                .collect()
+        };
+        let attach_call = (calls("attach_call"), calls("loop_call"));
         let set = |role: &str| -> Vec<SyntaxKind> {
             (bindings.iter())
                 .filter(|b| b.role == role)
@@ -622,7 +703,37 @@ impl SpaceRules {
         };
         SpaceRules {
             attach,
+            attach_call,
+            attach_after: set("attach_after"),
+            attach_in: set("attach_in"),
+            attach_apart: set("attach_apart"),
             tight: (set("tight_after"), set("tight_behind")),
+            pointer: Pointer {
+                marks: set("pointer"),
+                within: set("pointer_in"),
+                under: set("pointer_in_under"),
+                loose: set("pointer_in_loose"),
+                refs: set("pointer_ref"),
+                types: set("pointer_type"),
+                names: set("pointer_name"),
+                bare: set("pointer_bare"),
+                end: set("pointer_end"),
+            },
+            binary: (set("binary_node"), set("binary_clear"), set("binary_cast")),
+            cast: [
+                "cast_node",
+                "cast_group",
+                "cast_close",
+                "cast_keep",
+                "cast_tight",
+            ]
+            .map(set),
+            pad: Pad {
+                except: set("pad_except"),
+                lists: set("pad_list"),
+                open: set("pad_open"),
+                close: set("pad_close"),
+            },
             index: Index::build(&space),
             space,
             joined: rows("joined"),
@@ -676,6 +787,221 @@ impl SpaceRules {
         prev.is_some_and(|p| self.tight.1.contains(&p.kind()))
     }
 
+    /// Does the language have declarator marks (`pointer` kind set)?
+    pub fn has_pointer(&self) -> bool {
+        !self.pointer.marks.is_empty()
+    }
+
+    /// Is `t` the `*` or `&` of a declarator (`T *x`, `T&`, `(char *)`, `vector<int *>`)? One whose
+    /// parent is no declaration part, that follows no type or mark, or that a multiplication or a
+    /// bitwise and can be (`N * 2` in template arguments, `operator*`) is none: its blanks stay.
+    pub fn is_mark(&self, t: &SyntaxToken) -> bool {
+        let p = &self.pointer;
+        if !p.marks.contains(&t.kind()) {
+            return false;
+        }
+        let Some(parent) = t.parent() else {
+            return false;
+        };
+        // (in a parent that is no declaration part the end of a type behind the mark proves it)
+        let known = p.within.contains(&parent.kind())
+            || parent
+                .parent()
+                .is_some_and(|g| p.under.contains(&g.kind()) || p.loose.contains(&g.kind()));
+        let ends_type = || {
+            let mut next = next_code(t);
+            while let Some(x) = next.as_ref().filter(|x| p.marks.contains(&x.kind())) {
+                next = next_code(x);
+            }
+            next.is_some_and(|x| p.end.contains(&x.kind()))
+        };
+        if !known && !ends_type() {
+            return false;
+        }
+        let mut prev = prev_code(t);
+        while let Some(x) = prev.as_ref().filter(|x| p.marks.contains(&x.kind())) {
+            prev = prev_code(x);
+        }
+        if !prev.is_some_and(|x| p.types.contains(&x.kind()) && x.text() != "operator") {
+            return false;
+        }
+        if p.refs.contains(&t.kind()) && next_code(t).is_some_and(|x| p.marks.contains(&x.kind())) {
+            return false; // `it && *it`: no pointer or reference follows a reference
+        }
+        if p.bare.contains(&parent.kind())
+            || parent.parent().is_some_and(|g| p.under.contains(&g.kind()))
+        {
+            return ends_type();
+        }
+        true
+    }
+
+    /// The blank between `a` and `b` when one of them is a declarator mark: `before` stands for the
+    /// blank in front of the first mark, `after` for the one behind the last, where a name follows.
+    pub fn pointer_gap(
+        &self,
+        a: &SyntaxToken,
+        b: &SyntaxToken,
+        before: bool,
+        after: bool,
+    ) -> Option<bool> {
+        if !self.has_pointer() {
+            return None;
+        }
+        if self.is_mark(b) {
+            return Some(if self.is_mark(a) { false } else { before });
+        }
+        (self.pointer.names.contains(&b.kind()) && self.is_mark(a)).then_some(after)
+    }
+
+    /// The blank around a `*`, `&` or `&&` of a binary operation: one, unless the operation may be a
+    /// declaration the parse took for one (a type or mark before, a name, mark or end of a type behind, in a parent that does not
+    /// prove an expression): then `None`, the source stays. `None` for other pairs.
+    pub fn operator_gap(&self, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
+        let p = &self.pointer;
+        let binary = |t: &SyntaxToken| {
+            p.marks.contains(&t.kind())
+                && t.parent()
+                    .is_some_and(|n| self.binary.0.contains(&n.kind()))
+        };
+        let mark = match (binary(a), binary(b)) {
+            (true, false) => a,
+            (false, true) => b,
+            _ => return None,
+        };
+        let (left, right) = (prev_code(mark)?, next_code(mark)?);
+        let clear = mark
+            .parent()
+            .and_then(|n| n.parent())
+            .is_some_and(|n| self.binary.1.contains(&n.kind()));
+        let (l, r) = (left.kind(), right.kind());
+        // (the `)` of a group of only a type's tokens before a name ends a cast and the operator
+        // touches it; the `)` of any other group, a call or `sizeof(T)`, ends an operand)
+        if self.binary.2.contains(&l) && p.names.contains(&r) {
+            return Some(!left.parent().is_some_and(|g| self.cast_like(&g)));
+        }
+        let declaration = (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
+            && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));
+        (clear || !declaration).then_some(true)
+    }
+
+    /// Is the group a cast's type: of a kind of `cast_group`, only the tokens of a type (a mark only at
+    /// its end) and no name or call in front of it (`sizeof(T)`, `f(T)`)?
+    fn cast_like(&self, group: &SyntaxNode) -> bool {
+        let p = &self.pointer;
+        if !self.cast[1].contains(&group.kind()) {
+            return false;
+        }
+        let inner: Vec<_> = (group.children_with_tokens())
+            .filter(|e| e.as_token().is_none_or(|t| !t.text().trim().is_empty()))
+            .skip(1)
+            .collect();
+        let typed = inner.iter().enumerate().all(|(i, e)| match e.as_token() {
+            Some(t) if p.marks.contains(&t.kind()) => inner.get(i + 1).is_none_or(|n| {
+                n.as_token().is_some_and(|n| {
+                    p.marks.contains(&n.kind()) || self.cast[2].contains(&n.kind())
+                })
+            }),
+            Some(t) => self.cast[2].contains(&t.kind()) || p.types.contains(&t.kind()),
+            None => false,
+        });
+        // (a group that starts its node, `return (T)&x`, is no argument of a name in front of it)
+        let leads = group.parent().is_none_or(|n| {
+            (n.children_with_tokens())
+                .find(|e| e.as_token().is_none_or(|t| !t.text().trim().is_empty()))
+                .and_then(|e| e.into_node())
+                .is_some_and(|f| f == *group)
+        });
+        typed
+            && (leads
+                || (group.first_token())
+                    .and_then(|t| prev_code(&t))
+                    .is_none_or(|t| !p.types.contains(&t.kind())))
+    }
+
+    /// Does the language have casts (`cast_node` kind set)?
+    pub fn has_cast(&self) -> bool {
+        !self.cast[0].is_empty()
+    }
+
+    /// The blank between the closing token of a cast's type group and its operand: `spaced` stands for
+    /// one (`(int) x`). `None` for other pairs.
+    pub fn cast_gap(&self, a: &SyntaxToken, b: &SyntaxToken, spaced: bool) -> Option<bool> {
+        if !self.cast[2].contains(&a.kind()) || self.cast[3].contains(&b.kind()) {
+            return None;
+        }
+        let group = a.parent().filter(|g| self.cast[1].contains(&g.kind()))?;
+        let node = group
+            .parent()
+            .filter(|n| self.cast[0].contains(&n.kind()))?;
+        // (a group that is no type, `(a & MASK) * b`, is an operand: the operator has its blanks)
+        let tight = self.cast[4].contains(&b.kind());
+        let blank = if tight {
+            !self.cast_like(&group)
+        } else {
+            spaced
+        };
+        node.text_range()
+            .contains_range(b.text_range())
+            .then_some(blank)
+    }
+
+    /// Does the language pad braces (`pad_list` kind set)?
+    pub fn has_pad(&self) -> bool {
+        !self.pad.lists.is_empty()
+    }
+
+    /// The blank inside the braces of a padded list: `padded` stands for the blank behind the opening
+    /// and before the closing brace; the braces of an empty list touch. `None` for other pairs.
+    pub fn pad_gap(&self, a: &SyntaxToken, b: &SyntaxToken, padded: bool) -> Option<bool> {
+        let brace = |t: &SyntaxToken, set: &[SyntaxKind]| {
+            set.contains(&t.kind())
+                && t.parent()
+                    .is_some_and(|p| self.pad.lists.contains(&p.kind()))
+        };
+        let list = if brace(a, &self.pad.open) {
+            a.parent()
+        } else {
+            b.parent()
+        };
+        let block = |n: SyntaxNode| {
+            n.descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .any(|t| self.pad.except.contains(&t.kind()))
+        };
+        if (brace(a, &self.pad.open) || brace(b, &self.pad.close)) && list.is_some_and(block) {
+            return None;
+        }
+        let closes = brace(b, &self.pad.close);
+        if brace(a, &self.pad.open) {
+            return Some(padded && !closes);
+        }
+        closes.then_some(padded)
+    }
+
+    /// Right-aligned marks (a blank before, none behind) minus left-aligned ones (none before, a
+    /// blank behind) of the tree `t` is in (the evidence of `derive_pointer_alignment`).
+    pub fn pointer_evidence(&self, t: &SyntaxToken) -> i32 {
+        let Some(root) = t.parent().and_then(|p| p.ancestors().last()) else {
+            return 0;
+        };
+        let blank = |x: Option<SyntaxToken>| {
+            x.is_some_and(|x| x.text().trim().is_empty() && !x.text().contains('\n'))
+        };
+        let mut net = 0;
+        for m in root
+            .descendants_with_tokens()
+            .filter_map(|e| e.into_token())
+            .filter(|m| self.pointer.marks.contains(&m.kind()))
+        {
+            let (before, after) = (blank(m.prev_token()), blank(m.next_token()));
+            if before != after && self.is_mark(&m) {
+                net += if before { 1 } else { -1 };
+            }
+        }
+        net
+    }
+
     /// `Flow::want`: a blank between the tokens (`None`: as the source has it).
     pub fn want(&self, a: &SyntaxToken, b: &SyntaxToken) -> Option<bool> {
         if self.tight_gap(a) {
@@ -717,24 +1043,44 @@ impl SpaceRules {
 
     /// Does a language option place braces (an `attach` kind set)?
     pub fn has_attach(&self) -> bool {
-        !self.attach.is_empty()
+        !self.attach.is_empty() || !self.attach_call.0.is_empty()
     }
 
     /// The option and the word of the construct an opening brace `{` belongs to: the `{` that
     /// starts the block (child of a construct of an `attach` kind set); of several words for one
     /// kind (`class`, `struct`) the one the construct's own keyword spells.
-    pub fn attach_word(&self, brace: &SyntaxToken) -> Option<(core_config::OptId, &str)> {
-        if self.attach.is_empty() || brace.text() != "{" {
+    pub fn attach_word(
+        &self,
+        brace: &SyntaxToken,
+        options: &core_config::ResolvedOptions,
+    ) -> Option<(core_config::OptId, &str)> {
+        if (self.attach.is_empty() && self.attach_call.0.is_empty()) || brace.text() != "{" {
             return None;
         }
         let block = brace.parent()?;
-        let construct = block.parent()?;
         let mut tokens = block
             .descendants_with_tokens()
             .filter_map(|e| e.into_token());
         if tokens.find(|t| !t.text().trim().is_empty()).as_ref() != Some(brace) {
             return None;
         }
+        if let Some(head) = block.prev_sibling()
+            && let Some(chosen) =
+                (self.attach_call.0.iter()).find(|b| b.kinds.contains(&head.kind()))
+        {
+            let name = (head.descendants_with_tokens())
+                .filter_map(|e| e.into_token())
+                .find(|t| !t.text().trim().is_empty())
+                .map(|t| t.text().to_string());
+            let loops = self.attach_call.1.iter().find(|l| {
+                l.kinds.contains(&head.kind())
+                    && options
+                        .strings(l.option)
+                        .any(|w| Some(w) == name.as_deref())
+            });
+            return Some((chosen.option, loops.unwrap_or(chosen).word.as_str()));
+        }
+        let construct = block.parent()?;
         let mut of = self
             .attach
             .iter()
@@ -750,6 +1096,34 @@ impl SpaceRules {
             .find(|b| spelled(b))
             .unwrap_or(first);
         Some((chosen.option, chosen.word.as_str()))
+    }
+
+    /// Does a `{` that belongs to no known construct (`attach_word` is none) follow a token of the
+    /// `attach_after` kinds, with no construct wrapping its brace: the block of a declaration the
+    /// parse did not recognise, a lambda; it stays on its line.
+    pub fn attach_unknown(
+        &self,
+        brace: &SyntaxToken,
+        a: &SyntaxToken,
+        options: &core_config::ResolvedOptions,
+    ) -> bool {
+        // (where no construct wraps its brace, every brace is on its line)
+        if !self.attach_after.contains(&a.kind())
+            || brace.text() != "{"
+            || (self.attach.iter()).any(|b| options.strings(b.option).next().is_some())
+            || a.parent_ancestors()
+                .any(|n| self.attach_apart.contains(&n.kind()))
+        {
+            return false;
+        }
+        let Some(block) = brace
+            .parent()
+            .filter(|b| self.attach_in.contains(&b.kind()))
+        else {
+            return false;
+        };
+        let mut tokens = (block.descendants_with_tokens()).filter_map(|e| e.into_token());
+        tokens.find(|t| !t.text().trim().is_empty()).as_ref() == Some(brace)
     }
 
     /// `Flow::joined`.
@@ -779,5 +1153,49 @@ impl SpaceRules {
     /// `Flow::op_first`.
     pub fn op_first(&self, t: &SyntaxToken) -> bool {
         self.op_first.iter().any(|p| p.matches(t))
+    }
+}
+
+/// The characters a language's tokens can fuse through (see [`fuses`]).
+pub struct Fusion {
+    /// Characters of operators.
+    pub operators: &'static str,
+    /// Characters that start a variable or a name after an operator (`@`, `#`).
+    pub sigils: &'static str,
+    /// The opener of a line comment: two characters (`--`).
+    pub line_comment: [char; 2],
+}
+
+/// Would the text of two neighbouring tokens read as other tokens with nothing between them: a
+/// line comment opener, two words, an operator that follows a prefix operator (`prev_is_prefix`)
+/// or a sigil that follows an operator?
+pub fn fuses(prev: &str, next: &str, prev_is_prefix: bool, f: &Fusion) -> bool {
+    let (a, b) = (prev.chars().next_back(), next.chars().next());
+    let word = |c: Option<char>| c.is_some_and(|c| c.is_alphanumeric() || c == '_');
+    let operator = |c: Option<char>| c.is_some_and(|c| f.operators.contains(c));
+    (a == Some(f.line_comment[0]) && b == Some(f.line_comment[1]))
+        || (word(a) && word(b))
+        || (prev_is_prefix && operator(b))
+        || (operator(a) && b.is_some_and(|c| f.sigils.contains(c)))
+}
+
+#[cfg(test)]
+mod fusion_tests {
+    use super::*;
+
+    const F: Fusion = Fusion {
+        operators: "+-<>=",
+        sigils: "@#",
+        line_comment: ['-', '-'],
+    };
+
+    #[test]
+    fn tokens_that_would_read_as_others_fuse() {
+        assert!(fuses("-", "-", false, &F));
+        assert!(fuses("a", "b", false, &F));
+        assert!(fuses("-", "+", true, &F));
+        assert!(fuses("<", "@y", false, &F));
+        assert!(!fuses("<", "y", false, &F));
+        assert!(!fuses(",", "@y", false, &F));
     }
 }

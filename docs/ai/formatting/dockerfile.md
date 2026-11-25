@@ -5,7 +5,7 @@ tree-sitter-containerfile 0.9.2 (MIT, WharfLab's maintained fork of tree-sitter-
 
 Files: `Dockerfile`, `Containerfile`, `Dockerfile.*`, `Containerfile.*` (`Dockerfile.dev`) and `*.dockerfile`. A `file_names` entry ending in `*` matches by prefix.
 
-Known gaps: the grammar reads `#` after a variable expansion as a comment, so `ARG X=${V#pattern}` (moby `Dockerfile`) and `ADD ${A}#${B} /` (buildx's `jaeger-ui-rest`) give the tree-sitter tree an `ERROR` node. These are the 2 files of the pinned corpus where the tree has one; Sudsy still formats and lints them, with the text after the `#` read as a comment.
+A `#` is a comment at the start of a line or after a blank, not after other text (`ADD ${A}#${B} /`), and `${V#pattern}` is an expansion (`#`, `##`, `%`, `%%`); both are changes of the vendored grammar ([FORK.md](../../../grammars/tree-sitter-containerfile/FORK.md)). No file of the pinned corpus has an `ERROR` node in its tree.
 
 ## Formatting
 - The instruction name and `AS` are upper case (`from x as y` is `FROM x AS y`).
@@ -45,3 +45,13 @@ Shared: suppression comments (`# sudsy-disable-next-line <rule>`), `no-empty-com
 
 ## Conformance
 `tests/conformance/fetch-dockerfile-corpus.sh` fetches the Dockerfiles of dotnet/dotnet-docker (samples and the 10.0 runtime, aspnet and sdk images), docker-library (golang, python, nginx, postgres), moby and buildx at pinned commits; `cargo test --profile corpus -p lang-dockerfile --test integration -- --ignored --nocapture conformance` checks that each file parses (but for the gap above), round-trips, keeps its instructions and arguments (the safety check, with comments compared as well) and formats idempotently.
+
+Where Sudsy differs from hadolint by design:
+
+<!-- generated:differences:hadolint -->
+
+- `rm-fr`: `rm -fr /var/lib/apt/lists` counts as the cleanup (hadolint accepts only the flag order `-rf`)
+- `windows-run-busybox`: the base image is `mcr.microsoft.com/windows/servercore` and the RUN line is `RUN powershell ...`: hadolint parses it as sh
+- `windows-run-escape`: the file has `# escape=` followed by a backtick, a Windows base image and no `SHELL`: its RUN lines run under cmd.exe, hadolint parses them as sh
+- `windows-run-powershell`: the file has a `SHELL` line that starts powershell on a Windows base image: its RUN lines run under PowerShell, hadolint parses them as sh
+<!-- /generated -->

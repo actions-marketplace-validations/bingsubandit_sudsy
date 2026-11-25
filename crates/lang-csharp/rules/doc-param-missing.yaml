@@ -1,0 +1,20 @@
+id: doc-param-missing
+family: doc-param-missing
+params:
+  message: "the documentation for parameter `{name}` is missing"
+  doc-start: "///"
+  declarations: method-declaration|constructor-declaration|delegate-declaration|operator-declaration|conversion-operator-declaration|indexer-declaration
+  name: identifier
+  param: '<param\s+name\s*=\s*"([^"]*)"'
+  skip-doc: "<inheritdoc|<include"
+  visible: public protected internal
+  implicit-public-in: interface
+  top-level-visible: true
+  visible-with: explicit_interface_specifier
+description: >-
+  A parameter of a documented, non-private method, constructor, delegate, operator or indexer that has no
+  `<param name="...">` in its `///` comment (StyleCop SA1611). A comment with `<inheritdoc />` or
+  `<include>` is left out, and so is a declaration without a comment. No fix.
+example: "/// <summary>Adds.</summary>\npublic int Add(int a) => a;   // add <param name=\"a\">"
+severity: off
+category: style

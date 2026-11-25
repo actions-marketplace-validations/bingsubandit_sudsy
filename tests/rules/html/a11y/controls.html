@@ -43,6 +43,11 @@
 ^ text-content
 <button aria-label="x"></button>
 <button><img src="a" alt="x"></button>
+<button><svg focusable="false"><title>x</title></svg></button>
+<button><svg focusable="false"><use href="#a"/></svg></button>
+^ text-content
+<button><img src="a" alt=""></button>
+^ text-content
 <button><span>x</span></button>
 </body>
 </html>

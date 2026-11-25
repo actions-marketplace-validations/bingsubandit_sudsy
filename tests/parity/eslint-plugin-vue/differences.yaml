@@ -1,7 +1,7 @@
 differences: {}
 files: {}
 target: 88.8
-measured: {covered: 1392, total: 1567, main: 'f4e9edb2'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 1392, total: 1567, main: '7514c1f3'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   vue/html-indent: 144
   vue/html-self-closing: 24

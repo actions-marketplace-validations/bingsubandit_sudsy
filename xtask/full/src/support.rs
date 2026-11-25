@@ -5,7 +5,7 @@
 //! language Sudsy formats with no reference formatter has `stability` groups instead: the share of its
 //! corpus files that `scripts/parity.sh stability <group>` finds stable, in `tests/parity/stability`.
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -50,17 +50,35 @@ pub(crate) struct Row {
 
 /// A reference tool: its `tests/parity` folder, its name in the table and, for a folder that serves
 /// several languages, the ratchet groups of this language.
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub(crate) struct Tool {
     pub tool: String,
     pub name: String,
     #[serde(default)]
-    groups: Vec<String>,
+    pub groups: Vec<String>,
+    /// The tool that decides `Ready` and is listed first; without one, the first of the list.
+    #[serde(default)]
+    pub primary: bool,
+    /// A widely used secondary tool: weight 1 in the priority table (docs/ai/parity/queue.md).
+    #[serde(default)]
+    pub popular: bool,
+    /// Why the leg waits on a user decision; the priority table lists it apart.
+    #[serde(default)]
+    pub blocked: Option<String>,
+    /// A short caveat of the number, printed under the table (what the comparison leaves out).
+    #[serde(default)]
+    pub note: Option<String>,
 }
 
 /// The rows of `support.yaml`.
 pub(crate) fn rows(support_yaml: &str) -> Result<Vec<Row>> {
-    serde_saphyr::from_str(support_yaml).context("parsing support.yaml")
+    let mut rows: Vec<Row> =
+        serde_saphyr::from_str(support_yaml).context("parsing support.yaml")?;
+    for row in &mut rows {
+        row.format.sort_by_key(|t| !t.primary); // stable: the primary first, the others as listed
+        row.lint.sort_by_key(|t| !t.primary);
+    }
+    Ok(rows)
 }
 
 /// The keys of a `differences.yaml` the table reads.
@@ -115,6 +133,21 @@ pub fn render(
         .map(|(_, language, _)| *language)
         .collect();
     out += &measured.iter().map(|m| m.2.as_str()).collect::<String>();
+    let notes: Vec<String> = rows
+        .iter()
+        .flat_map(|r| r.format.iter().chain(&r.lint).map(move |t| (r, t)))
+        .filter_map(|(r, t)| {
+            Some(format!(
+                "{} ({}): {}.",
+                t.name,
+                r.language,
+                t.note.as_ref()?
+            ))
+        })
+        .collect();
+    if !notes.is_empty() {
+        out += &format!("\nNotes: {}\n", notes.join(" "));
+    }
     out += "\nHow to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).\n";
     let (n, rest) = (ready.len(), rows.len() - ready.len());
     let headline = match n {
@@ -136,6 +169,39 @@ pub fn render(
         headline,
         ready,
     })
+}
+
+/// Every leg of `support.yaml` that is not `blocked` must have a number: a `target:` (lint) or a
+/// `ratchet:` of its groups (format) in its `differences.yaml`; a leg that lost it fails with the tool's name.
+pub fn check_measured(root: &Path, support_yaml: &str) -> Result<()> {
+    for row in rows(support_yaml)? {
+        for t in row.lint.iter().filter(|t| t.blocked.is_none()) {
+            if ratchets(root, &t.tool)?.target.is_none() {
+                bail!(
+                    "support.yaml: lint tool `{}` ({}) has no `target:` in tests/parity/{}/differences.yaml (measure it, or mark it `blocked`)",
+                    t.name,
+                    row.language,
+                    t.tool
+                );
+            }
+        }
+        for t in row.format.iter().filter(|t| t.blocked.is_none()) {
+            let r = ratchets(root, &t.tool)?;
+            if !r
+                .ratchet
+                .keys()
+                .any(|g| t.groups.is_empty() || t.groups.contains(g))
+            {
+                bail!(
+                    "support.yaml: format tool `{}` ({}) has no `ratchet:` in tests/parity/{}/differences.yaml (measure it, or mark it `blocked`)",
+                    t.name,
+                    row.language,
+                    t.tool
+                );
+            }
+        }
+    }
+    Ok(())
 }
 
 /// A row with its measured shares: format and lint per tool, and the status.
@@ -160,6 +226,7 @@ pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'
                     tool: STABILITY.into(),
                     name: String::new(),
                     groups: row.stability.clone(),
+                    ..Tool::default()
                 };
                 format.push(format_share(root, &stability)?);
             }
@@ -191,10 +258,15 @@ fn ratchets(root: &Path, tool: &str) -> Result<Ratchets> {
     serde_saphyr::from_str(&text).map_err(|e| anyhow::anyhow!("{}: {e}", path.display()))
 }
 
-/// Identical over target files across the groups of the tool; `None` until `target-files` exists.
+/// The ratchet group of the local fixture files of a tool folder: a few files, never the README number.
+const FIXTURES: &str = "fixtures";
+
+/// Identical over target files across the groups of the tool, never the local `fixtures` group; `None`
+/// (`not measured`) until another group has `target-files`.
 fn format_share(root: &Path, tool: &Tool) -> Result<Option<f64>> {
     let r = ratchets(root, &tool.tool)?;
-    let wanted = |g: &&String| tool.groups.is_empty() || tool.groups.contains(g);
+    let wanted =
+        |g: &&String| g.as_str() != FIXTURES && (tool.groups.is_empty() || tool.groups.contains(g));
     let files: u64 = r
         .target_files
         .keys()
@@ -242,7 +314,7 @@ fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
     )
 }
 
-/// `Ready` when the primary (first listed) format and lint tool are both at the bar; further tools
+/// `Ready` when the primary (`primary: true`, else the first listed) format and lint tool are both at the bar; further tools
 /// are shown but do not decide the status.
 fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &'static str {
     let all: Vec<Option<f64>> = format.iter().chain(lint).copied().collect();

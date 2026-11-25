@@ -510,8 +510,7 @@ export default grammar({
     // Shell-style parameter expansion modifier inside ${...}: a default/
     // alternate/error operator (:- - :+ + :? ?) followed by a word that may
     // itself contain nested expansions. The word runs to the matching brace.
-    // The pattern-manipulation operators (# ## % %% / //) are omitted: they
-    // are pre-release in BuildKit and `#` collides with comment lexing.
+    // The pattern-removal operators are # ## % %%.
     expansion_modifier: $ =>
       seq(
         $.expansion_operator,
@@ -534,7 +533,7 @@ export default grammar({
     // A real (non-alias) rule so the node is a public `sym_` symbol that older
     // tree-sitter query compilers (e.g. go-tree-sitter) accept in queries; an
     // alias of an inline token compiles to an unqueryable `aux_sym`.
-    expansion_operator: () => token.immediate(/:?[-+?]/),
+    expansion_operator: () => token.immediate(/:?[-+?]|##?|%%?/),
 
     variable: () => token.immediate(/[a-zA-Z_][a-zA-Z0-9_]*/),
 

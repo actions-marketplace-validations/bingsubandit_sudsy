@@ -1,0 +1,2 @@
+no-ambiguous-ampersand: warn
+no-raw-gt: warn

@@ -19,6 +19,8 @@ pub enum Target {
     Property,
     CustomProperty,
     Function,
+    Variable,
+    Definition(&'static str),
     Unit,
     AtRule,
     MediaFeature,
@@ -39,6 +41,9 @@ impl Targets for Css {
         ("property", Target::Property),
         ("custom-property", Target::CustomProperty),
         ("function", Target::Function),
+        ("variable", Target::Variable),
+        ("mixin", Target::Definition("mixin")),
+        ("function-definition", Target::Definition("function")),
         ("unit", Target::Unit),
         ("at-rule", Target::AtRule),
         ("media-feature", Target::MediaFeature),
@@ -61,13 +66,12 @@ impl Targets for Css {
     fn kinds(target: Target) -> &'static [SyntaxKind] {
         use Target::*;
         match target {
-            Property | FontFamily => &[k::DECLARATION],
+            Property | FontFamily | Variable => &[k::DECLARATION],
             CustomProperty => &[k::DECLARATION, k::AT_RULE],
             Function => &[k::FUNCTION],
             Unit => &[k::VALUE, k::PRELUDE],
-            AtRule | MediaFeature | KeyframesName | CustomMedia | Layer | Container => {
-                &[k::AT_RULE]
-            }
+            AtRule | Definition(_) | MediaFeature | KeyframesName | CustomMedia | Layer
+            | Container => &[k::AT_RULE],
             Combinator | Selector | AttributeOperator | Part(_) => &[k::RULE],
         }
     }
@@ -80,6 +84,8 @@ impl Targets for Css {
                 | Target::Selector
                 | Target::FontFamily
                 | Target::Function
+                | Target::Variable
+                | Target::Definition(_)
         )
     }
 
@@ -145,8 +151,33 @@ fn collect(
                     }
                 }
             }
+            // `$name` of a declaration, and the name a `@mixin` or `@function` defines, as written.
+            Target::Variable => {
+                if let Some(t) = node
+                    .child(k::PROPERTY)
+                    .and_then(|p| model::tokens(&p).next())
+                    && t.kind() == k::VARIABLE
+                {
+                    out.push((t.text().trim_start_matches('$').to_string(), t.text_range()));
+                }
+            }
+            Target::Definition(at) => {
+                if model::at_name(node) == at
+                    && let Some(t) = node
+                        .child(k::PRELUDE)
+                        .and_then(|p| model::tokens(&p).next())
+                    && t.kind() == k::IDENT
+                {
+                    out.push((t.text().to_string(), t.text_range()));
+                }
+            }
             Target::Function => {
-                if let (false, Some(t)) = (after_colon(node), model::function_name(node)) {
+                // (a pseudo-class, or a call of a Sass module: `map.get(...)`)
+                let qualified =
+                    prev_token(node).is_some_and(|t| t.kind() == k::DELIM && t.text() == ".");
+                if let (false, false, Some(t)) =
+                    (after_colon(node), qualified, model::function_name(node))
+                {
                     out.push((t.text().to_string(), t.text_range()));
                 }
             }

@@ -16,7 +16,7 @@ files:
   corpus/Pester/src/functions/Describe.ps1 sudsy:no-automatic-variable-assignment 101: parameter-report-line
 target: 87.1
 
-measured: {covered: 933, total: 1071, main: '3d6ef290'}  # of the target; `main`: the origin/main commit the measured tree is based on
+measured: {covered: 933, total: 1071, main: '7514c1f3'}  # of the target; `main`: the origin/main commit the measured tree is based on
 missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
   PSUseOutputTypeCorrectly: 59
   PSUseDeclaredVarsMoreThanAssignments: 17

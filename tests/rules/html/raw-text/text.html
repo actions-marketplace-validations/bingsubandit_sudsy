@@ -1,0 +1,12 @@
+<!doctype html>
+<title>t</title>
+<p><strong>></strong></p>
+           ^ no-raw-gt
+<p>a &gt; b &amp; &#38;</p>
+<p>Ham & Shroom</p>
+       ^ no-ambiguous-ampersand
+<p>one
+two > three</p>
+    ^ no-raw-gt
+<script>if (a > b) {}</script>
+<style>a > b {}</style>

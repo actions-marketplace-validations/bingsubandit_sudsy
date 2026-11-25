@@ -102,23 +102,14 @@ impl Lexer<'_> {
     }
 
     fn next(&mut self) {
+        if self.blank(k::WHITESPACE, k::NEWLINE, |c| {
+            matches!(c, b' ' | b'\t' | 0x0c)
+        }) {
+            return;
+        }
         let start = self.pos;
         let c = self.at(0);
         let kind = match c {
-            b' ' | b'\t' | 0x0c => {
-                while matches!(self.at(0), b' ' | b'\t' | 0x0c) {
-                    self.pos += 1;
-                }
-                k::WHITESPACE
-            }
-            b'\n' | b'\r' => {
-                self.pos += if self.at(0) == b'\r' && self.at(1) == b'\n' {
-                    2
-                } else {
-                    1
-                };
-                k::NEWLINE
-            }
             b'/' if self.at(1) == b'*' => match self.src[start + 2..].find("*/") {
                 Some(i) => {
                     self.pos = start + 2 + i + 2;
@@ -131,9 +122,7 @@ impl Lexer<'_> {
                 }
             },
             b'/' if self.at(1) == b'/' && self.dialect != Dialect::Css => {
-                while self.pos < self.src.len() && !matches!(self.at(0), b'\n' | b'\r') {
-                    self.pos += 1;
-                }
+                self.eat_line();
                 k::LINE_COMMENT
             }
             b'"' | b'\'' => self.string(),

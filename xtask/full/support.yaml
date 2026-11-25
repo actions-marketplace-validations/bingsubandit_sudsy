@@ -1,28 +1,29 @@
 # Rows of the README "Language support" table (xtask/full/src/support.rs): the reference tools per
-# language; the first tool of each list is the primary one that decides `Ready`. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
+# language; the primary tool of each list (`primary: true`, else the first) decides `Ready` and is listed first. `tool` is a folder of tests/parity; `groups` limits a folder shared by several languages
 # to the ratchet groups of this one. No `format` list: Sudsy does not format the language, or no reference formatter exists and `stability` names
 # the groups of tests/parity/stability that stand for the format leg (`scripts/parity.sh stability <group>`). `ids` are the
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
 # language names of its rows in bench/speed.json.
+# `popular: true` (a widely used secondary tool, weight 1) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
   ids: [js]
   speed: [JS/TS]
-  format: [{tool: prettier-js, name: Prettier}]
+  format: [{tool: prettier-js, name: Prettier, groups: [real-world]}]
   lint: [{tool: eslint, name: ESLint}, {tool: typescript-eslint, name: typescript-eslint}]
 - language: Python
   ids: [python]
   speed: [Python]
-  format: [{tool: ruff, name: ruff format}]
+  format: [{tool: ruff, name: ruff format, groups: [real-world]}]
   lint: [{tool: ruff, name: ruff}]
 - language: Protobuf
   ids: [protobuf]
   speed: [Protobuf]
-  format: [{tool: buf, name: buf format}]
+  format: [{tool: buf, name: buf format, groups: [real-world]}]
   lint: [{tool: buf, name: buf}]
 - language: Terraform (HCL)
   ids: [hcl]
   speed: [HCL]
-  format: [{tool: terraform, name: terraform fmt}]
+  format: [{tool: terraform, name: terraform fmt, groups: [real-world]}]
   lint: [{tool: tflint, name: tflint}]
 - language: GraphQL
   ids: [graphql]
@@ -30,25 +31,25 @@
 - language: TOML
   ids: [toml]
   speed: [TOML]
-  format: [{tool: taplo, name: taplo}]
+  format: [{tool: taplo, name: taplo, groups: [real-world]}]
 - language: HTML
   ids: [html]
   speed: [HTML]
-  format: [{tool: prettier-html, name: Prettier, groups: [prettier-html, real-world]}]
-  lint: [{tool: html-eslint, name: html-eslint}, {tool: html-validate, name: html-validate}, {tool: htmlhint, name: htmlhint}]
+  format: [{tool: prettier-html, name: Prettier, groups: [real-world]}]
+  lint: [{tool: html-eslint, name: html-eslint, popular: true}, {tool: html-validate, name: html-validate, primary: true}, {tool: htmlhint, name: htmlhint}]
 - language: Vue / Svelte
   ids: [vue, svelte]
   speed: [Vue, Svelte]
-  format: [{tool: prettier-html, name: Prettier, groups: [prettier-vue, prettier-vue-html, real-world-vue, prettier-svelte, real-world-svelte]}]
+  format: [{tool: prettier-html, name: Prettier, groups: [real-world-vue, real-world-svelte]}]
   lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
 - language: Angular templates
   ids: [angular]
   speed: [Angular]
-  format: [{tool: prettier-angular, name: Prettier}]
+  format: [{tool: prettier-angular, name: Prettier, groups: [components, angular, realworld-app]}]
 - language: CSS / SCSS / Less
   ids: [css, scss, less]
   speed: [CSS, SCSS, Less]
-  format: [{tool: prettier-css, name: Prettier}]
+  format: [{tool: prettier-css, name: Prettier, groups: [real-world]}]
   lint: [{tool: stylelint, name: stylelint}, {tool: stylelint-scss, name: stylelint-scss}, {tool: stylelint-less, name: stylelint-less}]
 - language: Markdown
   ids: [markdown]
@@ -58,23 +59,23 @@
 - language: YAML
   ids: [yaml]
   speed: [YAML]
-  format: [{tool: prettier, name: Prettier, groups: [yaml]}]
+  format: [{tool: prettier, name: Prettier, groups: [yaml, real-world-yaml]}]
   lint: [{tool: yamllint, name: yamllint}]
 - language: JSON / JSONC
   ids: [json]
   speed: [JSON]
-  format: [{tool: prettier, name: Prettier, groups: [json]}, {tool: biome, name: Biome}]
+  format: [{tool: prettier, name: Prettier, groups: [json, real-world-json]}, {tool: biome, name: Biome, groups: [real-world]}]
   lint: [{tool: eslint-jsonc, name: eslint-plugin-jsonc}]
 - language: PowerShell
   ids: [powershell]
   speed: [PowerShell]
-  format: [{tool: invoke-formatter, name: Invoke-Formatter}]
+  format: [{tool: invoke-formatter, name: Invoke-Formatter, groups: [real-world]}]
   lint: [{tool: psscriptanalyzer, name: PSScriptAnalyzer}]
 - language: PHP
   ids: [php]
   speed: [PHP]
   format: [{tool: php-cs-fixer, name: PHP-CS-Fixer}]
-  lint: [{tool: phpstan, name: PHPStan}]
+  lint: [{tool: phpstan, name: PHPStan, blocked: "needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision)"}]
 - language: Java
   ids: [java]
   speed: [Java]
@@ -88,30 +89,36 @@
 - language: Shell
   ids: [shell]
   speed: [Shell]
-  format: [{tool: shfmt, name: shfmt}]
+  format: [{tool: shfmt, name: shfmt, groups: [real-world]}]
   lint: [{tool: shellcheck, name: ShellCheck}]
 - language: SQL
   ids: [sql]
   speed: [SQL]
-  format: [{tool: sqlfluff, name: sqlfluff}]
+  format: [{tool: sqlfluff, name: sqlfluff, groups: [real-world]}]
   lint: [{tool: sqlfluff, name: sqlfluff}]
 - language: C#
   ids: [csharp]
   speed: [C#, C# (.editorconfig)]
-  format: [{tool: csharpier, name: CSharpier}]
+  format: [{tool: csharpier, name: CSharpier, groups: [real-world]}]
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]
 - language: XML
   ids: [xml]
   speed: [XML]
-  format: [{tool: csharpier-xml, name: CSharpier XML}]
+  format: [{tool: csharpier-xml, name: CSharpier XML, groups: [real-world]}]
 - language: C / C++
   ids: [c, cpp]
-  format: [{tool: clang-format, name: clang-format}]
-  lint: [{tool: clang-tidy, name: clang-tidy}]
+  format: [{tool: clang-format, name: clang-format, note: "line wrapping is not compared"}]
+  lint: [{tool: clang-tidy, name: clang-tidy, blocked: "no clang-tidy catalog and no measured target yet"}]
 - language: Ruby
   ids: [ruby]
   speed: [Ruby]
   lint: [{tool: rubocop, name: RuboCop}]
+- language: CMake
+  ids: [cmake]
+  lint: [{tool: cmake-lint, name: cmake-lint, blocked: "parser only, no rules and no catalog yet"}]
+- language: Go
+  ids: [go]
+  lint: [{tool: revive, name: revive}]
 - language: Dockerfile
   ids: [dockerfile]
   speed: [Dockerfile]

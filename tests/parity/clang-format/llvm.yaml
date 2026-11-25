@@ -1,2 +1,5 @@
 cpp:
-  format: {}
+  format:
+    join_closing_angles: true
+    empty_body_own_line: true
+    collapse_empty_blocks: true

@@ -245,13 +245,20 @@ fn limits(v: &Value) -> String {
 
 fn adapter_provider(name: &str, v: &Value) -> String {
     let hooks = text(v, "hooks", "core_rules::DEFAULT_HOOKS");
+    // `exclude-names`: file names (patterns) that the extensions and names do not claim.
+    let excluded = list(v, "exclude-names");
+    let without = if excluded.is_empty() {
+        String::new()
+    } else {
+        format!(".without(&{excluded:?})")
+    };
     let strings = |key| {
         format!("{:?}", list(v, key))
             .replace('[', "")
             .replace(']', "")
     };
     format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {})\n}}\n",
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {}){without}\n}}\n",
         name.to_uppercase(),
         strings("extensions"),
         strings("file-names"),

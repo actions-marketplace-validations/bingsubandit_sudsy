@@ -21,6 +21,8 @@ pub struct BlockStyle {
     pub force_blank: Option<BlankRule>,
     /// An empty block puts the closing delimiter on a line of its own instead of `empty`.
     pub expand_empty: bool,
+    /// An empty block is `empty` when its line fits, else the closing delimiter goes on a line of its own.
+    pub empty_fits: bool,
     /// Items that share a source line (no comment between) stay on one line, separated by a space.
     pub keep_same_line: bool,
     /// A blank line after the opening delimiter stays.
@@ -41,6 +43,7 @@ impl BlockStyle {
         empty: "",
         force_blank: None,
         expand_empty: false,
+        empty_fits: false,
         keep_same_line: false,
         keep_leading_blank: false,
         keep_trailing_blank: false,
@@ -112,6 +115,8 @@ pub struct LabelStyle {
     pub body_on_next_line: bool,
     /// Levels the label moves out of the statement's indentation.
     pub outdent: usize,
+    /// A blank line after the label in the source stays.
+    pub keep_blank: bool,
 }
 
 /// A labeled statement: the `head` (`label:`), then the `body`. A `bare` body (an empty
@@ -147,7 +152,23 @@ pub fn labeled_statement(
     let bare = els[2]
         .as_node()
         .is_some_and(|b| cx.grammar.has_tag(b.kind(), "empty-statement"));
-    Ok(labeled(print(&els[..2])?, print(&els[2..])?, style, bare))
+    let body = print(&els[2..])?;
+    let blank = style.keep_blank
+        && !bare
+        && style.body_on_next_line
+        && cx
+            .first_token(node)
+            .and_then(|_| match &els[2] {
+                SyntaxElement::Node(n) => cx.first_token(n),
+                SyntaxElement::Token(t) => Some(t.clone()),
+            })
+            .is_some_and(|t| comments::blank_lines_before(cx.grammar, &t) > 0);
+    let body = if blank {
+        doc::concat(vec![doc::hardline(), body])
+    } else {
+        body
+    };
+    Ok(labeled(print(&els[..2])?, body, style, bare))
 }
 
 /// `open`, the items one per line and indented, `close`. An empty block is `open close`. Separator
@@ -340,12 +361,15 @@ fn block_of(
         && comments::leading_comments(g, &c.close).is_empty()
     {
         let Ends { opening, closing } = ends;
-        return Ok(doc::group(doc::concat(vec![
-            opening,
-            doc::indent(doc::concat(vec![doc::line(), items])),
-            doc::line(),
-            closing,
-        ])));
+        return Ok(doc::label(
+            doc::SHORT_BODY,
+            doc::group(doc::concat(vec![
+                opening,
+                doc::indent(doc::concat(vec![doc::line(), items])),
+                doc::line(),
+                closing,
+            ])),
+        ));
     }
     Ok(braces_of(
         cx,
@@ -407,15 +431,22 @@ fn braces_of(
     let dangling = comments::leading_comments(g, close);
     let Ends { opening, closing } = ends;
     if body.is_none() && dangling.is_empty() && moved.is_empty() {
-        return doc::concat(vec![
+        let d = doc::concat(vec![
             opening,
             if style.expand_empty {
                 doc::hardline()
+            } else if style.empty_fits && style.empty.is_empty() {
+                doc::softline()
             } else {
                 doc::lit(style.empty)
             },
             closing,
         ]);
+        return if style.empty_fits && !style.expand_empty {
+            doc::group(d)
+        } else {
+            d
+        };
     }
     let blank_before_close = body.is_some()
         && (!dangling.is_empty()

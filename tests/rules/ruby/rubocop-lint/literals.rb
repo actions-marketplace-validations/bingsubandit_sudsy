@@ -10,9 +10,9 @@ z = 'a #{b}'
 ^^^^^^^^^^^^ mixed-regexp-capture-types
 /(?<a>x)(?:y)/
 a = a
-^^^^^ no-self-assign
+#   ^ no-self-assign
 @b ||= @b
-^^^^^^^^^ no-self-assign
+#      ^^ no-self-assign
 c = d
 ^ unused-local-variable
 f == 0.1

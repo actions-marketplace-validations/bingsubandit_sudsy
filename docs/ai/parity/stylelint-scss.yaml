@@ -11,42 +11,42 @@ entries:
   scss/at-else-closing-brace-space-after: planned
   scss/at-else-empty-line-before: planned
   scss/at-else-if-parentheses-space-before: planned
-  scss/at-extend-no-missing-placeholder: planned
+  scss/at-extend-no-missing-placeholder: rule at-extend-no-missing-placeholder
   scss/at-function-named-arguments: planned
   scss/at-function-parentheses-space-before: planned
-  scss/at-function-pattern: planned
-  scss/at-if-closing-brace-newline-after: planned
-  scss/at-if-closing-brace-space-after: planned
-  scss/at-if-no-null: planned
+  scss/at-function-pattern: rule at-function-pattern
+  scss/at-if-closing-brace-newline-after: formatter
+  scss/at-if-closing-brace-space-after: formatter
+  scss/at-if-no-null: rule at-if-no-null
   scss/at-import-partial-extension-allowed-list: planned
   scss/at-import-partial-extension-disallowed-list: planned
-  scss/at-mixin-argumentless-call-parentheses: planned
+  scss/at-mixin-argumentless-call-parentheses: rule at-mixin-argumentless-call-parentheses
   scss/at-mixin-named-arguments: planned
   scss/at-mixin-no-risky-nesting-selector: planned
   scss/at-mixin-parentheses-space-before: planned
-  scss/at-mixin-pattern: planned
+  scss/at-mixin-pattern: rule at-mixin-pattern
   scss/at-root-no-redundant: planned
-  scss/at-rule-conditional-no-parentheses: planned
+  scss/at-rule-conditional-no-parentheses: rule at-rule-conditional-no-parentheses
   scss/at-rule-no-unknown: rule at-rule-no-unknown | Less at-rules are not told apart (detached ruleset calls look like at-rules), so none is reported in Less.
   scss/at-use-no-redundant-alias: planned
   scss/at-use-no-unnamespaced: planned
   scss/block-no-redundant-nesting: planned
-  scss/comment-no-empty: planned
+  scss/comment-no-empty: rule no-empty-comment
   scss/comment-no-loud: planned
   scss/declaration-nested-properties: planned
   scss/declaration-nested-properties-no-divided-groups: planned
   scss/dimension-no-non-numeric-values: planned
   scss/dollar-variable-colon-newline-after: planned
-  scss/dollar-variable-colon-space-after: planned
+  scss/dollar-variable-colon-space-after: formatter
   scss/dollar-variable-colon-space-before: planned
   scss/dollar-variable-default: planned
   scss/dollar-variable-empty-line-after: planned
-  scss/dollar-variable-empty-line-before: planned
+  scss/dollar-variable-empty-line-before: rule dollar-variable-empty-line-before
   scss/dollar-variable-first-in-block: planned
   scss/dollar-variable-no-missing-interpolation: planned
   scss/dollar-variable-no-namespaced-assignment: planned
-  scss/dollar-variable-pattern: planned
-  scss/double-slash-comment-empty-line-before: planned
+  scss/dollar-variable-pattern: rule dollar-variable-pattern
+  scss/double-slash-comment-empty-line-before: rule double-slash-comment-empty-line-before
   scss/double-slash-comment-inline: planned
   scss/double-slash-comment-whitespace-inside: planned
   scss/function-calculation-no-interpolation: planned
@@ -56,7 +56,7 @@ entries:
   scss/function-no-unknown: rule function-no-unknown | SCSS and Less built-in functions are not in the table, so none is reported there.
   scss/function-quote-no-quoted-strings-inside: planned
   scss/function-unquote-no-unquoted-strings-inside: planned
-  scss/load-no-partial-leading-underscore: planned
+  scss/load-no-partial-leading-underscore: rule load-no-partial-leading-underscore
   scss/load-partial-extension: planned
   scss/map-keys-quotes: planned
   scss/media-feature-value-dollar-variable: planned
@@ -64,7 +64,7 @@ entries:
   scss/no-duplicate-dollar-variables: planned
   scss/no-duplicate-load-rules: planned
   scss/no-duplicate-mixins: planned
-  scss/no-global-function-names: planned
+  scss/no-global-function-names: rule no-global-function-names
   scss/no-unused-private-members: planned
   scss/operator-no-newline-after: planned
   scss/operator-no-newline-before: planned

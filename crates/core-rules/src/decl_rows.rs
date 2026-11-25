@@ -87,13 +87,22 @@ impl Row {
 
 /// Whether `node` has a `modifiers` child with the keyword `word`.
 pub fn has_modifier(g: &Grammar, node: &SyntaxNode, word: &str) -> bool {
-    node.children()
+    let mut grouped = node
+        .children()
         .filter(|c| g.has_tag(c.kind(), "modifiers"))
-        .any(|m| {
-            m.children_with_tokens()
-                .filter_map(|e| e.into_token())
-                .any(|t| t.text() == word)
-        })
+        .peekable();
+    if grouped.peek().is_none() {
+        // The modifiers are tokens of the declaration itself.
+        return node
+            .children_with_tokens()
+            .filter_map(|e| e.into_token())
+            .any(|t| t.text() == word);
+    }
+    grouped.any(|m| {
+        m.children_with_tokens()
+            .filter_map(|e| e.into_token())
+            .any(|t| t.text() == word)
+    })
 }
 
 /// The names of the annotations of `node`'s `modifiers` (`Test` for `@Test`, `org.junit.Test`

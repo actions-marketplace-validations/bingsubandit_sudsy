@@ -262,6 +262,37 @@ impl RuleFormatter {
         self.rewrite.apply(g, tree, text)
     }
 
+    /// The source with the option-driven joins of closing tokens applied (`join` and `join_in`
+    /// kind sets of a bool option that is on), merged with the `[rewrite]` rows.
+    pub fn rewrite_with_options(
+        &self,
+        g: &Grammar,
+        tree: &SyntaxNode,
+        text: &str,
+        o: &ResolvedOptions,
+    ) -> Option<String> {
+        let joins = self.layout.on_kinds(o, "close_join");
+        if joins.is_empty() {
+            return self.rewrite_source(g, tree, text);
+        }
+        let rows = if self.rewrite.is_empty() {
+            Vec::new()
+        } else {
+            self.rewrite.edits(g, tree)
+        };
+        let mut edits: Vec<(usize, usize, String)> = (rows.into_iter())
+            .map(|(a, b, s)| (a, b, s.to_string()))
+            .collect();
+        crate::join::closers(
+            tree,
+            text,
+            &joins,
+            &self.layout.on_kinds(o, "close_join_in"),
+            &mut edits,
+        );
+        (!edits.is_empty()).then(|| crate::rewrite::apply_edits(text, edits))
+    }
+
     /// The `[rewrite]` rows, when there are any.
     pub fn rewrite_rules(&self) -> Option<&RewriteRules> {
         (!self.rewrite.is_empty()).then_some(&self.rewrite)
@@ -369,9 +400,9 @@ impl NodeFormatter for LazyRules {
         tree: &SyntaxNode,
         text: &str,
         grammar: &Grammar,
-        _: &ResolvedOptions,
+        o: &ResolvedOptions,
     ) -> Option<String> {
-        self.get().rewrite_source(grammar, tree, text)
+        self.get().rewrite_with_options(grammar, tree, text, o)
     }
 
     fn rewrite_rows(&self) -> Option<&RewriteRules> {
@@ -383,12 +414,14 @@ impl NodeFormatter for LazyRules {
         tree: &SyntaxNode,
         text: &str,
         grammar: &Grammar,
-        _: &ResolvedOptions,
+        o: &ResolvedOptions,
         scan: Option<RewriteScan<'_>>,
     ) -> Option<String> {
         match scan {
-            Some(s) => s.apply(grammar, tree, text),
-            None => self.get().rewrite_source(grammar, tree, text),
+            Some(s) if self.get().layout.on_kinds(o, "close_join").is_empty() => {
+                s.apply(grammar, tree, text)
+            }
+            _ => self.get().rewrite_with_options(grammar, tree, text, o),
         }
     }
 
@@ -397,6 +430,7 @@ impl NodeFormatter for LazyRules {
     /// consecutive lines start in one column when the second is true.
     fn comment_style(&self, o: &ResolvedOptions) -> CommentStyle {
         let mut style = self.get().comment_style();
+        style.keep_unicode_blanks = o.flag(core_config::opt::COMMENT_KEEP_UNICODE_BLANKS, false);
         if o.get(core_config::opt::SPACES_BEFORE_TRAILING_COMMENTS)
             .is_some()
         {

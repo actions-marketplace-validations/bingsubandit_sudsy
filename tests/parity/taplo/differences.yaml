@@ -1,14 +1,27 @@
 ratchet:
   fixtures: 203
+  real-world: 1282
 target-files:
   fixtures: 207
+  real-world: 1307
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
+unclassified: 0
 differences:
   comment-dropped: choice  taplo drops the comment after an array item that is followed by a comma on the next line; Sudsy keeps it
   multiline-string-array: gap  taplo keeps an array with a multi-line string on one line; Sudsy expands it
   inline-table-array: gap  taplo expands an array inside a long inline table even when it fits after the break; Sudsy breaks only what does not fit
   empty-file: gap  taplo writes a newline for an empty file; Sudsy keeps it empty
+  array-comment-align: gap  taplo aligns the trailing comments of the items of a multi-line array into a column; Sudsy leaves one space before each
+  comment-trailing-space: choice  taplo keeps the trailing blanks of a comment; Sudsy trims them
+  trailing-comment-width: gap  taplo counts a trailing comment in the width of the line and breaks the array or inline table before it; Sudsy measures the code only
+  header-blank-line: gap  taplo keeps a blank line after a table header; Sudsy removes it
+  blank-lines-collapsed: gap  taplo keeps two blank lines between comments; Sudsy keeps one
   crlf-in-string: gap  taplo keeps CRLF inside a multi-line string and converts the rest; Sudsy writes LF everywhere
 files:
+  real-world: array-comment-align:15, trailing-comment-width:5, comment-trailing-space:2, inline-table-array:1, header-blank-line:1, blank-lines-collapsed:1
   valid/comment/tricky.toml: comment-dropped
   valid/array/string-with-comma-2.toml: multiline-string-array
   valid/inline-table/spaces.toml: inline-table-array
