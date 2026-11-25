@@ -104,12 +104,12 @@ Lint: target 89.7% (2119 of 2362, 243 missed, measured on 2a570ae8); rules by mi
 
 ## checkstyle
 
-Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by missed findings:
-1. `Indentation` (4338 missed)
+Lint: target 88.6% (53144 of 59979, 6835 missed, measured on f29ba2f0); rules by missed findings:
+1. `Indentation` (4344 missed)
 2. `EmptyLineSeparator` (658 missed)
 3. `VariableDeclarationUsageDistance` (632 missed) Fix: cause: no rule. Scope family: statements between a local's declaration and its first use
 4. `SingleSpaceSeparator` (239 missed) Fix: cause: no rule. Token pattern rule: one space between tokens on a line
-5. `LineLength` (186 missed)
+5. `LineLength` (189 missed)
 6. `AtclauseOrder` (85 missed)
 7. `OverloadMethodsDeclarationOrder` (72 missed)
 8. `OperatorWrapNL` (71 missed)
@@ -121,7 +121,7 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 14. `LocalVariableName` (28 missed)
 15. `PatternVariableName` (28 missed)
 
-39 more rules: 302 missed.
+39 more rules: 304 missed.
 
 ## clang-format
 
@@ -348,9 +348,9 @@ Format: unclassified 0 of 15 differing files (0%).
 36. `kt-array-hug` (1 files): an annotation argument array stays on the `=` line in ktlint (`foo = [`); fix: a shared option: keep `name = [` on the `=` line in annotation arguments
 37. `kt-ctor-annot-header` (1 files): the annotated constructor header differs; fix: classify further
 38. `kt-template-braces` (1 files): `${name}` is written as `$name` by ktlint; fix: a shared rule: `${name}` to `$name` when no identifier char follows
-Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 7514c1f3); rules by missed findings:
-1. `function-signature` (1660 missed)
-2. `multiline-expression-wrapping` (904 missed)
+Lint: target 92.3% (109638 of 118837, 9199 missed, measured on bede0bee); rules by missed findings:
+1. `function-signature` (1665 missed)
+2. `multiline-expression-wrapping` (933 missed)
 3. `blank-line-between-when-conditions` (726 missed)
 4. `string-template-indent` (534 missed)
 5. `indent` (509 missed)
@@ -365,7 +365,7 @@ Lint: target 92.3% (109702 of 118836, 9134 missed, measured on 7514c1f3); rules 
 14. `no-unit-return` (188 missed)
 15. `function-naming` (160 missed)
 
-48 more rules: 1773 missed.
+50 more rules: 1804 missed.
 
 ## markdownlint
 

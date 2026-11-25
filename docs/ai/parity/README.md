@@ -32,7 +32,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
 | buf | 89.7% | `2a570ae8` | 47 | 22 | 3 | 0 | 0 | 0 | 22 | 0 |
 | checkmake | 100.0% | `7514c1f3` | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
-| checkstyle | 88.6% | `7514c1f3` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
+| checkstyle | 88.6% | `f29ba2f0` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
 | clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
 | cmake-lint | 97.2% | `92bc171a` | 35 | 8 | 0 | 24 | 0 | 0 | 3 | 24 |
 | csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
@@ -48,7 +48,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | html-eslint | 88.1% | `916059a8` | 66 | 15 | 18 | 33 | 0 | 0 | 0 | 33 |
 | html-validate | 92.5% | `2607e39a` | 97 | 34 | 40 | 20 | 0 | 1 | 2 | 20 |
 | htmlhint | 91.6% | `0c8a3dcc` | 44 | 10 | 7 | 27 | 0 | 0 | 0 | 27 |
-| ktlint | 92.3% | `7514c1f3` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
+| ktlint | 92.3% | `bede0bee` | 100 | 53 | 11 | 36 | 0 | 0 | 0 | 36 |
 | markdownlint | 99.0% | `7514c1f3` | 53 | 23 | 19 | 0 | 0 | 0 | 11 | 0 |
 | php-cs-fixer | - | - | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | phpstan | 36.3% | `062a8f18` | 19 | 0 | 7 | 10 | 0 | 2 | 0 | 10 |

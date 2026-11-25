@@ -1,7 +1,7 @@
 ratchet:
   graphql: 123
   json: 4
-  markdown: 96
+  markdown: 106
   real-world-json: 3184
   real-world-yaml: 803
   yaml: 5
@@ -23,7 +23,7 @@ refused:
 target-files:
   graphql: 124
   json: 4
-  markdown: 104
+  markdown: 114
   real-world-json: 3212
   real-world-yaml: 849
   yaml: 5

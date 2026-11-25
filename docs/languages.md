@@ -115,7 +115,7 @@ The status and the numbers of every language are in the generated table "Languag
 
 <!-- generated:measured-markdown -->
 - **Measured:** Ready.
-  - Format, Prettier: 92% of the files identical (96 of 104 files).
+  - Format, Prettier: 92% of the files identical (106 of 114 files).
   - Lint, markdownlint: 99% of its findings also reported (1,965 of 1,985 findings).
 <!-- /generated -->
 
@@ -224,7 +224,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-java -->
 - **Measured:** Ready.
   - Format, google-java-format: 91% of the files identical (4,898 of 5,337 files).
-  - Lint, Checkstyle: 88% of its findings also reported (53,149 of 59,973 findings).
+  - Lint, Checkstyle: 88% of its findings also reported (53,144 of 59,979 findings).
 <!-- /generated -->
 
 - **Formatter:** google-java-format 2.0.0, run with `--skip-javadoc-formatting --skip-removing-unused-imports --skip-reflowing-long-strings`. Corpus: Guava, Gson, Error Prone, Commons Lang.
@@ -359,7 +359,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-kotlin -->
 - **Measured:** Ready.
   - Format, ktlint: 85% of the files identical (4,924 of 5,776 files).
-  - Lint, ktlint: 92% of its findings also reported (109,702 of 118,836 findings).
+  - Lint, ktlint: 92% of its findings also reported (109,638 of 118,837 findings).
 <!-- /generated -->
 
 - **Formatter:** ktlint 1.8.0 (`ktlint_official`). Corpus: coroutines, ktor, nowinandroid, ktlint.

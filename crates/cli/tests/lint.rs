@@ -168,6 +168,25 @@ fn an_invalid_rule_option_is_a_config_error() {
 }
 
 #[test]
+fn an_invalid_regex_option_is_a_config_error_in_every_command() {
+    let t = project();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "lint:\n  rules:\n    sorted-keys:\n      level: warn\n      options:\n        ignored_keys: [\"(\"]\n",
+    );
+    for command in ["lint", "fix"] {
+        let o = sudsy(t.path(), &[command, "a.json"]);
+        assert_eq!(o.status.code(), Some(2), "{command}: {}", err(&o));
+        assert!(
+            err(&o).contains("invalid regular expression `(`") && !err(&o).contains("panicked"),
+            "{command}: {}",
+            err(&o)
+        );
+    }
+}
+
+#[test]
 fn analysis_flag_overrides_the_config() {
     let t = project();
     write(t.path(), "sudsy.yaml", "analysis: deep\n");

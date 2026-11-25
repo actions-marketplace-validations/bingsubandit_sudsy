@@ -226,6 +226,29 @@ fn an_invalid_config_is_reported_once_and_lifts_when_fixed() {
 }
 
 #[test]
+fn an_invalid_regex_option_is_a_config_message_not_a_crash() {
+    let t = tempfile::tempdir().unwrap();
+    write(
+        t.path(),
+        "sudsy.yaml",
+        "lint:\n  rules:\n    sorted-keys:\n      level: warn\n      options:\n        ignored_keys: [\"(\"]\n",
+    );
+    let mut client = Client::start(t.path(), providers());
+    // The options are checked when a file's rules are built: the first file reports the reason.
+    let uri = client.open("a.json", "json", "{\"b\": 1, \"a\": 2}\n");
+    assert!(client.diagnostics(&uri).is_empty());
+    let message = client.wait_for("window/showMessage");
+    assert!(
+        message["message"]
+            .as_str()
+            .unwrap()
+            .contains("invalid regular expression"),
+        "{message}"
+    );
+    client.shutdown();
+}
+
+#[test]
 fn editorconfig_changes_reach_open_documents() {
     let t = tempfile::tempdir().unwrap();
     write(
