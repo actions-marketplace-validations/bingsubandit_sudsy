@@ -1,6 +1,6 @@
 # Design: the symbol index
 
-Status: plan. The user decided on 2026-11-24 to build it. Phases below; the lead reviews at each checkpoint.
+Status: phase 2 built (`core_semantics::symbols`: rows, extraction, resolver; query `core_incremental::symbols`; `symbols.rows` in lang-php and lang-protobuf; numbers in [performance/numbers.md](../performance/numbers.md)). The user decided on 2026-11-24 to build it. Phases below; the lead reviews at each checkpoint.
 
 ## What it answers
 Which types, functions, constants and members exist, in which file, with which parents and parameter counts. It answers by name: "is there a class `App\Foo`", "does `Foo` or an ancestor have a method `bar`, static or not, with how many parameters".

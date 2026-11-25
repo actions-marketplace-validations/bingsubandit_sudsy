@@ -10,6 +10,7 @@ publish.workspace = true
 [dependencies]
 anyhow.workspace = true
 core-format.workspace = true
+core-semantics.workspace = true
 core-syntax.workspace = true
 serde-saphyr.workspace = true
 serde_json.workspace = true

@@ -70,6 +70,12 @@ pub trait LanguageProvider: Send + Sync {
         &DEFAULT_HOOKS
     }
 
+    /// The rows the symbol index reads this language's declarations by; `None`: the language has
+    /// no symbols.
+    fn symbols(&self) -> Option<&'static core_semantics::symbols::SymbolLang> {
+        None
+    }
+
     /// The code of other languages in the file (a Dockerfile's `RUN`, a Markdown fence).
     fn embedded(&self, _root: &SyntaxNode, _text: &str) -> Vec<Embedded> {
         Vec::new()

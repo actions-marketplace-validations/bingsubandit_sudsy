@@ -8,6 +8,7 @@ mod facts;
 mod layer;
 pub mod scopes;
 mod summaries;
+pub mod symbols;
 
 pub use facts::{
     Accessibility, Answers, CompilerDiagnostic, Declaration, DeclarationFlags, DeclarationKind,

@@ -145,6 +145,9 @@ Markdown instruction counts (`scripts/bench.sh`, the six committed docs, 59.6 KB
 
 Markdown (tree-sitter-md block and inline grammars through `core-treesitter` as a composite, `lang-markdown`): `sudsy.exe` 30,638,592 bytes without, 31,531,008 with (+0.89 MB, +2.9%), release, same machine. The injection costs one parser pool and one mapping table per injected grammar and one extra parse per `inline` or table cell node (the grammar is built once per process); the text fill adds one token per line of prose.
 
+## Symbol index (`symbol-bench DIR LANG [PASSES]`, release)
+Method: the PHP corpus (`tests/conformance/fetch-php-corpus.sh`), every file parsed once, then `core_semantics::symbols::extract` over the trees, best of 3 passes; Graviton arm64, 8 cores, one thread. 10,389 files, 98.4 MB: extraction 273 ms (361 MB/s of source); 7,246 types, 64,923 members, 5,158 functions; the symbols of all files are 10.5 MB payload, 24.2 MB resident growth. Types left `incomplete`: 5. With no index rule active no query runs (`scripts/bench.sh` shows no change).
+
 ## Editor (`lsp-latency`, 300 corpus files as workspace, 20 KB file open, six semantic rules)
 | | Number |
 |---|---|

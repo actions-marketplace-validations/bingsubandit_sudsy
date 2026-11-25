@@ -15,6 +15,7 @@
 mod db;
 mod embedded;
 mod failure;
+mod file_symbols;
 mod fixing;
 mod inputs;
 mod module;
@@ -23,6 +24,7 @@ mod rules;
 
 pub use db::{Database, Db, EventHook, Providers};
 pub use failure::{Failure, Stage};
+pub use file_symbols::symbols;
 pub use fixing::{fix_text, transient};
 pub use inputs::{ConfigFile, ExtensionSet, File, WorkspaceRevision};
 pub use module::{Siblings, Unit, directory_scope, module_diagnostics, module_facts};

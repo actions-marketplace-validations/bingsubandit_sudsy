@@ -49,6 +49,7 @@ pub struct ParserProvider {
     /// The name and config base of a dialect that has a provider of its own.
     dialect: Option<(&'static str, &'static str)>,
     format_parse: bool,
+    symbols: Option<&'static core_semantics::symbols::SymbolLang>,
 }
 
 impl ParserProvider {
@@ -90,6 +91,7 @@ impl ParserProvider {
             },
             dialect: None,
             format_parse: false,
+            symbols: None,
         }
     }
 
@@ -103,6 +105,12 @@ impl ParserProvider {
     /// (`core_patterns::SnippetParser::contexts`).
     pub fn with_snippet_contexts(self, contexts: &'static [(&'static str, &'static str)]) -> Self {
         self.parse.set_contexts(contexts);
+        self
+    }
+
+    /// The language's `symbols.rows`: what the symbol index reads of its files.
+    pub fn with_symbols(mut self, symbols: &'static core_semantics::symbols::SymbolLang) -> Self {
+        self.symbols = Some(symbols);
         self
     }
 
@@ -207,5 +215,9 @@ impl LanguageProvider for ParserProvider {
 
     fn rule_hooks(&self) -> &dyn RuleHooks {
         self.hooks
+    }
+
+    fn symbols(&self) -> Option<&'static core_semantics::symbols::SymbolLang> {
+        self.symbols
     }
 }

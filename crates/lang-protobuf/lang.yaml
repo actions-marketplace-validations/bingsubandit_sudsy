@@ -5,6 +5,7 @@ extensions: [proto]
 formatter: ProtoFormatter
 families: "&[core_rules::file_name::FAMILY]"
 dev-deps: [insta]
+symbols: true
 options:
   - indent_size: 2
   - indent_style

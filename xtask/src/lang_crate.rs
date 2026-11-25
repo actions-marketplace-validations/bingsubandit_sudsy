@@ -158,6 +158,18 @@ fn cargo_toml(krate: &str, v: &Value) -> String {
     )
 }
 
+/// The static of a language with `symbols: true` (its `symbols.rows`) and the call that hands it
+/// to the provider.
+fn symbols(v: &Value) -> (&'static str, &'static str) {
+    match v.get("symbols").and_then(Value::as_bool) {
+        Some(true) => (
+            "static SYMBOLS: provider_api::SymbolLang = provider_api::SymbolLang::new(include_str!(\"../symbols.rows\"));\n\n",
+            ".with_symbols(&SYMBOLS)",
+        ),
+        _ => ("", ""),
+    }
+}
+
 fn provider(name: &str, v: &Value) -> String {
     let grammar = text(v, "grammar-crate", "").replace('-', "_");
     let language = text(v, "language-const", "LANGUAGE");
@@ -225,8 +237,9 @@ fn provider(name: &str, v: &Value) -> String {
     } else {
         format!("{body}.with_snippet_contexts(&[{}])", contexts.join(", "))
     };
+    let (statics, with) = symbols(v);
     format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}\n}}\n"
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n{statics}#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}{with}\n}}\n"
     )
 }
 
@@ -274,8 +287,9 @@ fn adapter_provider(name: &str, v: &Value) -> String {
             .replace('[', "")
             .replace(']', "")
     };
+    let (statics, with) = symbols(v);
     format!(
-        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {}){without}\n}}\n",
+        "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n{statics}#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {}){without}{with}\n}}\n",
         name.to_uppercase(),
         strings("extensions"),
         strings("file-names"),

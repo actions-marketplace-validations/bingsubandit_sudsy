@@ -1,0 +1,27 @@
+// What Protobuf says to the symbol index: the package is the namespace of the whole file, a
+// message, enum or service is a type, a name is looked up in every enclosing scope up to the
+// package and the root, and an import names a file. Format: core_semantics::symbols::rows.
+separator .
+absolute .
+lexical
+
+Package namespace file name=FullIdent
+Import file-import names=String modifiers=Keyword
+Message type message name=MessageName
+Enum type enum name=EnumName
+Service type service name=ServiceName
+MessageBody transparent
+EnumBody transparent
+Oneof transparent
+Field property name=Ident
+OneofField property name=Ident
+MapField property name=Ident
+EnumField case name=Ident
+Rpc method name=RpcName refs=MessageType
+Syntax ignore
+Edition ignore
+OptionDecl ignore
+Reserved ignore
+Extensions ignore
+EmptyStatement ignore
+Extend ignore
