@@ -88,6 +88,7 @@ pub mod unicode_escape;
 pub mod unique;
 pub mod unit_doc;
 pub mod unknown_reference;
+pub mod word_case;
 pub mod word_names;
 pub mod word_table;
 
@@ -96,8 +97,8 @@ pub use diagnostic::{
     Category, Diagnostic, Edit, FORMAT, Fix, FixKind, Related, SYNTAX_ERROR, Severity,
 };
 pub use engine::{
-    ActiveRule, FileReport, collect_directory, directory_rules, layers_needed, run_directory,
-    run_file, run_file_rules, run_project, run_rules, silence,
+    ActiveRule, FileReport, collect_directory, collect_nothing, directory_rules, layers_needed,
+    run_directory, run_file, run_file_rules, run_project, run_rules, silence,
 };
 pub use extension::{ALL_LANGUAGES, ExtensionRule, Extensions};
 pub use family::{Checked, Family, Params};

@@ -2,10 +2,13 @@
 //! option sets. Each param but `message` and `match` is `<option>: <rows>`: the rows are
 //! `|`-separated declaration rows ([`crate::decl_rows`]: a grammar tag, `<parent-tag`, `&modifier`,
 //! `&@annotation`, `=path`; the node's `name` slot, or its `key` slot, by default). The
-//! option's value is a convention (`PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE`) or
-//! `off`; leading `$` and `_` are ignored. With `match: regex` the value is a regular expression
+//! option's value is a convention (`PascalCase`, `camelCase`, `snake_case`, `UPPER_CASE`, `words`:
+//! [`crate::word_case`], with the words of the option `initialisms` in capitals) or `off`;
+//! leading `$` and `_` are ignored (not by `words`). A path ending in `:each` names every
+//! part it finds (`a, b int`); when a node matches several rows of one option, all of them are
+//! read. A name that matches the option `ignore_pattern` (when the rule has one) is left out. With `match: regex` the value is a regular expression
 //! the name must match instead (empty: not checked). The message has `{name}` and
-//! `{convention}` (the value); a param `message.<option>` is the message of that option.
+//! `{convention}` (the value) and, for `words`, `{suggestion}` (the name spelled right); a param `message.<option>` is the message of that option.
 //!
 //! concept: naming-convention
 //! what: The name of a kind of declaration follows the convention an option sets.
@@ -14,8 +17,9 @@
 
 use crate::decl_rows::Row;
 use crate::slot_path::SlotPath;
+use crate::word_case;
 use crate::{Family, Params, RegexCache, Rule, RuleContext, RuleMeta};
-use core_syntax::SyntaxNode;
+use core_syntax::{SyntaxNode, TextRange};
 
 pub const FAMILY: Family = Family {
     name: "naming-convention",
@@ -42,6 +46,8 @@ struct Naming {
     /// `message.<option>` params: the message of one option.
     messages: Vec<(String, String)>,
     regex: Option<RegexCache>,
+    /// The compiled `ignore_pattern`s.
+    ignored: RegexCache,
     /// Rows with the most conditions first.
     rows: Vec<Row>,
     tags: Vec<&'static str>,
@@ -73,6 +79,7 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         message,
         messages,
         regex: regex.then(RegexCache::default),
+        ignored: RegexCache::default(),
         rows,
         tags,
     }))
@@ -95,33 +102,57 @@ impl Rule for Naming {
         let g = ctx.file.grammar;
         // a more specific row whose option is empty (regex mode: not checked) leaves the node to the next row
         let regex = self.regex.is_some();
-        let Some(row) = (self.rows.iter())
+        let Some(first) = (self.rows.iter())
             .find(|r| r.matches(g, node) && !(regex && ctx.options.string(&r.option).is_empty()))
         else {
             return;
         };
+        let convention = ctx.options.string(&first.option);
+        let ignore = ctx.options.string("ignore_pattern");
+        let initialisms = if convention == "words" {
+            ctx.options.list("initialisms")
+        } else {
+            Vec::new()
+        };
         let default = SlotPath::parse("name|key").unwrap_or_else(|_| unreachable!());
-        let path = row.path.as_ref().unwrap_or(&default);
-        let Some(found) = path.find(g, node, ctx.file.text) else {
-            return;
-        };
-        let convention = ctx.options.string(&row.option);
-        let (text, follows) = match &self.regex {
-            Some(cache) => (
-                &*found.text,
-                convention.is_empty() || cache.is_match(convention, &found.text),
-            ),
-            None => {
-                let text = found.text.trim_start_matches('$');
-                (text, follows(convention, text))
+        let mut seen: Vec<TextRange> = Vec::new();
+        for row in &self.rows {
+            if row.option != first.option || !row.matches(g, node) {
+                continue;
             }
-        };
-        if !follows {
-            let template = (self.messages.iter())
-                .find(|(o, _)| *o == row.option)
-                .map_or(&self.message, |(_, m)| m);
-            let message = template.replace("{name}", text);
-            ctx.report(found.range, message.replace("{convention}", convention));
+            let path = row.path.as_ref().unwrap_or(&default);
+            for found in path.find_each(g, node, ctx.file.text) {
+                if seen.contains(&found.range) {
+                    continue;
+                }
+                seen.push(found.range);
+                if !ignore.is_empty() && self.ignored.is_match(ignore, &found.text) {
+                    continue;
+                }
+                let (text, suggestion) = match &self.regex {
+                    Some(cache) => (
+                        &*found.text,
+                        (!convention.is_empty() && !cache.is_match(convention, &found.text))
+                            .then(String::new),
+                    ),
+                    None if convention == "words" => {
+                        (&*found.text, word_case::suggest(&found.text, &initialisms))
+                    }
+                    None => {
+                        let text = found.text.trim_start_matches('$');
+                        (text, (!follows(convention, text)).then(String::new))
+                    }
+                };
+                if let Some(suggestion) = suggestion {
+                    let template = (self.messages.iter())
+                        .find(|(o, _)| *o == row.option)
+                        .map_or(&self.message, |(_, m)| m);
+                    let message = template
+                        .replace("{name}", text)
+                        .replace("{suggestion}", &suggestion);
+                    ctx.report(found.range, message.replace("{convention}", convention));
+                }
+            }
         }
     }
 }

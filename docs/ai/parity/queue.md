@@ -8,7 +8,6 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| Go | lint revive | 4 | 69.3% | 15.7 | 7471 findings | `var-naming` 10923 | 3 | 20.93 | b11e8bdd |
 | SQL | format sqlfluff | 4 | 78.3% | 6.7 | 56 files | `identifier-case` 103 | 3 | 8.93 | - |
 | SQL | lint sqlfluff | 4 | 79.7% | 5.3 | 6342 findings | `LT02` 11125 | 3 | 7.07 | 1456737e |
 | C / C++ | format clang-format | 4 | 61.7% | 23.3 | 1548 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +2 more | 18 | 5.18 | - |
@@ -23,7 +22,7 @@ Blocked on a decision:
 
 Not measured: C / C++ lint clang-tidy (no target, blocked); CMake lint cmake-lint (no target, blocked).
 
-New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format; Go lint revive.
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain x Reach) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); every alternative of a leg competes and the best wins; a leg of reach under 0.85 is scored too. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: SQL format sqlfluff; SQL lint sqlfluff; C / C++ format clang-format.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
@@ -471,24 +470,24 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 
 ## revive
 
-Lint: target 69.3% (32892 of 47485, 14593 missed, measured on b11e8bdd); rules by missed findings:
-1. `var-naming` (10923 missed)
-2. `receiver-naming` (899 missed)
-3. `indent-error-flow` (472 missed)
-4. `empty-block` (320 missed)
-5. `dot-imports` (297 missed)
-6. `exported` (282 missed)
-7. `var-declaration` (254 missed)
-8. `context-as-argument` (237 missed)
-9. `increment-decrement` (189 missed)
-10. `error-strings` (183 missed)
-11. `unexported-return` (141 missed)
-12. `blank-imports` (82 missed)
-13. `error-naming` (79 missed)
-14. `superfluous-else` (75 missed)
-15. `package-comments` (52 missed)
+Lint: target 92.4% (43845 of 47476, 3631 missed, measured on a31131a9); rules by missed findings:
+1. `receiver-naming` (899 missed)
+2. `indent-error-flow` (472 missed)
+3. `empty-block` (320 missed)
+4. `dot-imports` (297 missed)
+5. `exported` (282 missed)
+6. `var-declaration` (251 missed)
+7. `context-as-argument` (237 missed)
+8. `increment-decrement` (189 missed)
+9. `error-strings` (183 missed)
+10. `unexported-return` (138 missed)
+11. `blank-imports` (82 missed)
+12. `error-naming` (79 missed)
+13. `superfluous-else` (75 missed)
+14. `redefines-builtin-id` (34 missed)
+15. `unreachable-code` (22 missed)
 
-8 more rules: 108 missed.
+8 more rules: 71 missed.
 
 ## roslynator
 

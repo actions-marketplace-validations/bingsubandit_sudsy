@@ -9118,6 +9118,178 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A name is not spelled in Go style: it has an underscore, is a constant in ALL_CAPS, or writes a common initialism (`Id`, `Http`, `Url`) in mixed case (revive var-naming, golint's rules). Checked are functions and methods with their parameters and results, the methods of interfaces (their parameters and results, not their names), constants, variables, types, the names of `:=` and the fields of structs. Receivers, function literals and function types are not.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nconst MAX_VALUE = 1\nconst ok_, maxA = 1, 2\n\nvar userId, other_name int\n\ntype Cpu struct {\n\tId, name_x int\n\t_, fine    int\n}\n\nfunc get_value(url_s, userID string, rest_ ...int) (out_x int) {\n\tx_y := 1\n\tf := func(lit_a int) {}\n\tz := MAX_VALUE\n\treturn x_y\n}\n\nfunc (r_x *T) Method(a_b int) {}\n\ntype I interface {\n\tDo_it(arg_a int) (res_a int)\n}\n\nvar LastInsertId, startHttpServer, v1_2 int\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 7,
+            "length": 9,
+            "line": 3
+          },
+          {
+            "column": 7,
+            "length": 3,
+            "line": 4
+          },
+          {
+            "column": 5,
+            "length": 6,
+            "line": 6
+          },
+          {
+            "column": 13,
+            "length": 10,
+            "line": 6
+          },
+          {
+            "column": 6,
+            "length": 3,
+            "line": 8
+          },
+          {
+            "column": 2,
+            "length": 2,
+            "line": 9
+          },
+          {
+            "column": 6,
+            "length": 6,
+            "line": 9
+          },
+          {
+            "column": 6,
+            "length": 9,
+            "line": 13
+          },
+          {
+            "column": 16,
+            "length": 5,
+            "line": 13
+          },
+          {
+            "column": 38,
+            "length": 5,
+            "line": 13
+          },
+          {
+            "column": 53,
+            "length": 5,
+            "line": 13
+          },
+          {
+            "column": 2,
+            "length": 3,
+            "line": 14
+          },
+          {
+            "column": 22,
+            "length": 3,
+            "line": 20
+          },
+          {
+            "column": 8,
+            "length": 5,
+            "line": 23
+          },
+          {
+            "column": 20,
+            "length": 5,
+            "line": 23
+          },
+          {
+            "column": 19,
+            "length": 15,
+            "line": 26
+          }
+        ]
+      },
+      "fix": null,
+      "id": "var-naming",
+      "languages": [
+        "go"
+      ],
+      "options": [
+        {
+          "choices": [
+            "words",
+            "off"
+          ],
+          "default": "words",
+          "description": "The convention of the names: `words` or `off`.",
+          "name": "names",
+          "type": "string"
+        },
+        {
+          "default": [
+            "ACL",
+            "API",
+            "ASCII",
+            "CPU",
+            "CSS",
+            "DNS",
+            "EOF",
+            "GUID",
+            "HTML",
+            "HTTP",
+            "HTTPS",
+            "ID",
+            "IDS",
+            "IP",
+            "JSON",
+            "LHS",
+            "QPS",
+            "RAM",
+            "RHS",
+            "RPC",
+            "SLA",
+            "SMTP",
+            "SQL",
+            "SSH",
+            "TCP",
+            "TLS",
+            "TTL",
+            "UDP",
+            "UI",
+            "UID",
+            "UUID",
+            "URI",
+            "URL",
+            "UTF8",
+            "VM",
+            "XML",
+            "XMPP",
+            "XSRF",
+            "XSS"
+          ],
+          "description": "The words (in capitals) that are written in capitals inside a name.",
+          "name": "initialisms",
+          "type": "list"
+        },
+        {
+          "default": "^(LastInsertId|kWh)$",
+          "description": "A regex for the names that are not checked.",
+          "name": "ignore_pattern",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "var-naming",
+          "partial": false,
+          "tool": "revive"
+        }
+      ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "A name does not follow the style set for what it names: operations, fragments, variables, fields, arguments, types, enum values and directives. `PascalCase` and `camelCase` allow letters and digits only, `snake_case` and `UPPER_CASE` forbid the other case; leading underscores are ignored. No fix: renaming changes the schema or the queries that use it. Equivalent: graphql-eslint naming-convention (styles only, no prefix or suffix lists).",
       "example": {
         "config": null,

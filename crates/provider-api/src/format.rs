@@ -73,9 +73,18 @@ fn generated_skipped(
     file: &SourceFile,
     options: &ResolvedOptions,
 ) -> bool {
-    if !options.flag(core_config::opt::SKIP_GENERATED, false) {
-        return false;
-    }
+    options.flag(core_config::opt::SKIP_GENERATED, false)
+        && is_generated(provider, &file.id, &file.text, options)
+}
+
+/// Whether the file is generated code by the options `generated_names`, `generated_header_markers`
+/// and `generated_header_skip` (formatting and lint read the same lists).
+pub fn is_generated(
+    provider: &dyn LanguageProvider,
+    id: &str,
+    text: &str,
+    options: &ResolvedOptions,
+) -> bool {
     let spec = core_format::generated::GeneratedSpec {
         names: options.strings(core_config::opt::GENERATED_NAMES).collect(),
         markers: options
@@ -85,7 +94,7 @@ fn generated_skipped(
             .strings(core_config::opt::GENERATED_HEADER_SKIP)
             .collect(),
     };
-    core_format::generated::is_generated(&file.id, &file.text, provider.grammar(), &spec)
+    core_format::generated::is_generated(id, text, provider.grammar(), &spec)
 }
 
 /// [`format_file`] for a tree that is already parsed (the incremental engine memoizes parsing).

@@ -19,7 +19,7 @@ pub mod snippets;
 pub mod testing;
 
 pub use format::{
-    FileFormatError, format_file, format_parsed, format_parsed_with, resolve_dialect,
+    FileFormatError, format_file, format_parsed, format_parsed_with, is_generated, resolve_dialect,
     select_provider, select_provider_index,
 };
 pub use out_of_process::OutOfProcessProvider;
