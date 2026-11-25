@@ -100,6 +100,19 @@
         {"dir": "tests/conformance/corpus/json-real", "suffixes": [".json"], "prefix": "corpus/", "ratchet": "real-world", "recursive": true, "nested": true}
       ]
     },
+    "gersemi": {"catalog": "gersemi",
+      "install": {"pip": "gersemi"},
+      "fetch": ["tests/conformance/fetch-cmake-corpus.sh"],
+      "command": ["{python}", "-m", "gersemi", "--no-cache", "--no-warn-about-unknown-commands", "{file}"],
+      "env": {"PYTHONPATH": "{prefix}"},
+      "input": "arg",
+      "tool_may_reject": true,
+      "parallel": true,
+      "quiet": true,
+      "fixtures": [
+        {"dir": "tests/conformance/corpus/cmake", "suffixes": ["CMakeLists.txt", ".cmake"], "prefix": "corpus/", "ratchet": "real-world", "recursive": true, "nested": true}
+      ]
+    },
     "taplo": {"speed": {"language": "TOML", "label": "taplo", "corpus": {"group": "fixtures", "text": "the toml-test valid files and the TOML fixtures of the repository"}, "format": ["{exe}", "fmt", "--check", "--no-auto-config", "{files}"]}, 
       "catalog": "taplo",
       "install": {

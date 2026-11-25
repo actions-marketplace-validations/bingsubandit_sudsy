@@ -27,20 +27,20 @@ entries:
   datarace: deferred | not in the default configuration of revive
   deep-exit: deferred | not in the default configuration of revive
   defer: deferred | not in the default configuration of revive
-  dot-imports: planned
+  dot-imports: rule no-wildcard-imports
   duplicated-imports: deferred | not in the default configuration of revive
   early-return: deferred | not in the default configuration of revive
-  empty-block: planned
+  empty-block: rule no-empty-block | a bare `{}` block statement and an empty `switch` body are not read
   empty-lines: deferred | not in the default configuration of revive
   enforce-map-style: deferred | not in the default configuration of revive
   enforce-repeated-arg-type-style: deferred | not in the default configuration of revive
   enforce-slice-style: deferred | not in the default configuration of revive
   enforce-switch-style: deferred | not in the default configuration of revive
   epoch-naming: deferred | not in the default configuration of revive
-  error-naming: planned
+  error-naming: rule error-naming
   error-return: planned
-  error-strings: planned
-  errorf: planned
+  error-strings: rule error-strings
+  errorf: rule errorf
   exported: rule missing-doc-comment, doc-first-word | No stuttering check (a name that starts with the package name), no own-declaration check for `var a, B`; a method that is sortable through methods in another file of the package is reported
   file-header: deferred | not in the default configuration of revive
   file-length-limit: deferred | not in the default configuration of revive
@@ -59,8 +59,8 @@ entries:
   import-alias-naming: deferred | not in the default configuration of revive
   import-shadowing: deferred | not in the default configuration of revive
   imports-blocklist: deferred | not in the default configuration of revive
-  increment-decrement: planned
-  indent-error-flow: planned
+  increment-decrement: rule increment-decrement
+  indent-error-flow: rule indent-error-flow
   inefficient-map-lookup: deferred | not in the default configuration of revive
   line-length-limit: deferred | not in the default configuration of revive
   marshal-receiver: deferred | not in the default configuration of revive
@@ -74,10 +74,10 @@ entries:
   package-comments: rule missing-package-comment, package-comment-form | 52 findings are missed where a generated or build-excluded sibling that revive does not load holds the first file name or the only comment
   package-directory-mismatch: deferred | not in the default configuration of revive
   package-naming: deferred | not in the default configuration of revive
-  range: planned
+  range: rule range
   range-val-address: deferred | not in the default configuration of revive
   range-val-in-closure: deferred | not in the default configuration of revive
-  receiver-naming: planned
+  receiver-naming: rule receiver-naming, receiver-name-consistent
   redefines-builtin-id: rule redefines-builtin-id
   redundant-build-tag: deferred | not in the default configuration of revive
   redundant-import-alias: deferred | not in the default configuration of revive
@@ -85,7 +85,7 @@ entries:
   string-format: deferred | not in the default configuration of revive
   string-of-int: deferred | not in the default configuration of revive
   struct-tag: deferred | not in the default configuration of revive
-  superfluous-else: planned
+  superfluous-else: rule superfluous-else
   time-date: deferred | not in the default configuration of revive
   time-equal: deferred | not in the default configuration of revive
   time-naming: planned
@@ -97,7 +97,7 @@ entries:
   unnecessary-format: deferred | not in the default configuration of revive
   unnecessary-if: deferred | not in the default configuration of revive
   unnecessary-stmt: deferred | not in the default configuration of revive
-  unreachable-code: planned
+  unreachable-code: rule unreachable-code | the code after `panic`, `os.Exit`, `log.Fatal*` and `t.Fatal*` is not read as unreachable
   unsecure-url-scheme: deferred | not in the default configuration of revive
   unused-parameter: rule unused-parameter
   unused-receiver: deferred | not in the default configuration of revive

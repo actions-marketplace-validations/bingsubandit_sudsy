@@ -1,7 +1,7 @@
 use core_syntax::{SyntaxElement, SyntaxNode};
 use provider_api::LanguageProvider;
 use provider_api::format_testing::{
-    assert_file_names, assert_formats, assert_lossless, check_corpus, check_corpus_shapes,
+    assert_file_names, assert_lossless, check_corpus, check_corpus_shapes,
 };
 use std::path::Path;
 
@@ -365,13 +365,6 @@ fn a_deleted_line_damages_one_command() {
             "without line {i}: {s}"
         );
         assert!(s.matches("Command[").count() >= 6, "without line {i}: {s}");
-    }
-}
-
-#[test]
-fn formats_as_written() {
-    for text in ["set(a   b)\n", "foo(a\n  b)\n", "#[[c]] f( x ) # c\n"] {
-        assert_eq!(assert_formats(provider(), "a.cmake", text), text);
     }
 }
 

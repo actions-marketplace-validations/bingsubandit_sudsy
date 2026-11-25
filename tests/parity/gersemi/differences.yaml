@@ -1,0 +1,18 @@
+ratchet:
+  real-world: 5634
+target-files:
+  real-world: 9038
+second-format:
+  real-world: 0
+refused:
+  real-world: 0
+unclassified: 0
+differences:
+  keyword-sections: gap  gersemi lays the arguments of a known command out in keyword sections (a keyword and its values on one line, the values of `COMMAND`, `PROPERTIES` and the like one level in); Sudsy puts every argument on its own line
+  set-layout: gap  gersemi keeps the name on the line of `set(`, `list(` and the like and breaks a list of more than a few values; Sudsy breaks only what does not fit and never keeps the first argument on the command line
+  condition-layout: gap  gersemi lays the condition of `if`, `elseif` and `while` out by its operators (`AND`, `OR`, `NOT`, groups); Sudsy treats it as a list of arguments
+  section-indent: gap  gersemi indents the values of a section one level further than the keyword; Sudsy has no sections
+files:
+  real-world: keyword-sections:1475, set-layout:1483, condition-layout:340, section-indent:106
+intentional: {}
+pins: {}

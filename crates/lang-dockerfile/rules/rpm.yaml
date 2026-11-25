@@ -3,7 +3,10 @@ family: run-command
 params: { program: 'yum', args: 'install groupinstall localinstall', needs: '-y --assumeyes' }
 message: 'use yum install -y to avoid a prompt'
 description: >-
-  yum install without -y.
+  Reports a `yum install`, `yum groupinstall` or `yum localinstall` without `-y` or `--assumeyes`.
+why: >-
+  Before it installs, yum asks `Is this ok [y/N]`. A build has no terminal to answer, so yum reads
+  the missing answer as no, exits with an error, and the `RUN` fails.
 example: 'RUN yum install curl'
 severity: warn
 category: correctness
@@ -13,7 +16,14 @@ family: run-command
 params: { program: 'yum', args: 'install', cleaned-by: 'yum clean all | rm -rf /var/cache/yum/*' }
 message: 'run yum clean all after yum install'
 description: >-
-  yum install with no yum clean all after it.
+  Reports a `RUN` that installs with yum and does not clean the cache. It runs `yum install` and has
+  no `yum clean all` after it in the same `RUN`. An `rm -rf /var/cache/yum/*` written exactly so is
+  accepted as well.
+why: >-
+  `yum install` stores the metadata and packages it downloaded under `/var/cache/yum`. That cache is
+  written into the layer and stays in the image, adding size that nothing uses at run time.
+
+  Clean it in the same `RUN`: a later `RUN` cannot shrink a layer that was already written.
 example: 'RUN yum install -y curl'
 severity: off
 category: performance
@@ -23,7 +33,11 @@ family: run-command
 params: { program: 'dnf|microdnf', args: 'install groupinstall localinstall', needs: '-y --assumeyes' }
 message: 'use dnf install -y to avoid a prompt'
 description: >-
-  dnf install without -y.
+  Reports a `dnf install`, `dnf groupinstall` or `dnf localinstall` (also with `microdnf`) without
+  `-y` or `--assumeyes`.
+why: >-
+  Before it installs, dnf asks `Is this ok [y/N]`. A build has no terminal to answer, so dnf aborts
+  with `Operation aborted` and the `RUN` fails.
 example: 'RUN dnf install curl'
 severity: warn
 category: correctness
@@ -33,7 +47,15 @@ family: run-command
 params: { program: 'dnf|microdnf', args: 'install in upgrade up upgrade-minimal up-min reinstall rei', cleaned-by: 'dnf clean all | microdnf clean all | rm -rf /var/cache/libdnf5*' }
 message: 'run dnf clean all after dnf install'
 description: >-
-  dnf install with no dnf clean all after it.
+  Reports a `RUN` that installs with dnf and does not clean the cache. It runs `dnf install`,
+  `upgrade` or `reinstall` (also `microdnf`, and the short forms `in`, `up`, `rei`) and has no `dnf
+  clean all` or `microdnf clean all` after it in the same `RUN`. An `rm -rf /var/cache/libdnf5*`
+  written exactly so is accepted as well.
+why: >-
+  `dnf` stores the metadata and packages it downloaded under `/var/cache`. That cache is written
+  into the layer and stays in the image, adding size that nothing uses at run time.
+
+  Clean it in the same `RUN`: a later `RUN` cannot shrink a layer that was already written.
 example: 'RUN dnf install -y curl'
 severity: off
 category: performance
@@ -43,7 +65,16 @@ family: run-command
 params: { program: 'yum|dnf|microdnf', args: 'install', pinned: '^[^-]+-.*[0-9]|^[^-]+-.*\.rpm$|\$', unless: 'module group' }
 message: 'pin the versions in yum and dnf install: pkg-version'
 description: >-
-  A yum or dnf install package without a version.
+  Reports a `yum install`, `dnf install` or `microdnf install` of a package without a version. A
+  package is pinned when it is written `name-version` (`curl-7.88.1`: a digit after a dash), is a
+  `.rpm` file or contains a variable. Commands with `module` or `group` are not checked.
+why: >-
+  An unpinned install takes the newest version in the enabled repositories on the day of the build.
+  Two builds of one Dockerfile can then differ, and a new release can break the image without any
+  change in your code.
+
+  Pinned versions make the build repeatable. Repositories drop old versions, so a pin needs updating
+  from time to time.
 example: 'RUN yum install -y curl'
 severity: off
 category: suspicious
@@ -53,7 +84,14 @@ family: run-command
 params: { program: 'zypper', args: 'install in remove rm source-install si patch', needs: '-n --non-interactive --no-confirm -y' }
 message: 'use zypper install -y to avoid a prompt'
 description: >-
-  zypper install without -y.
+  Reports a `zypper` command that asks for confirmation. That is `install` (`in`), `remove` (`rm`),
+  `source-install` (`si`) or `patch` without `-n`, `--non-interactive`, `--no-confirm` or `-y`.
+why: >-
+  zypper asks for confirmation before it changes packages and, when there is a conflict, which
+  solution to take. A build has no terminal to answer, so the command cannot continue and the `RUN`
+  fails.
+
+  `--non-interactive` makes zypper take the default answer to every question.
 example: 'RUN zypper install curl'
 severity: warn
 category: correctness
@@ -63,7 +101,13 @@ family: run-command
 params: { program: 'zypper', args: 'dist-upgrade dup' }
 message: 'do not use zypper dist-upgrade'
 description: >-
-  A zypper dist-upgrade.
+  Reports a `zypper dist-upgrade` (or `dup`).
+why: >-
+  A distribution upgrade moves every package to the newest version of the enabled repositories,
+  possibly into a new distribution release. The image is then no longer the release that the base
+  image's tag names, and two builds can end in different states.
+
+  Use `zypper update` to apply fixes within the release, or move to a newer base image.
 example: 'RUN zypper dist-upgrade'
 severity: off
 category: suspicious
@@ -73,7 +117,14 @@ family: run-command
 params: { program: 'zypper', args: 'install in', cleaned-by: 'zypper clean | zypper cc', cache-dir: '/var/cache/zypp' }
 message: 'run zypper clean after zypper install'
 description: >-
-  zypper install with no zypper clean after it.
+  Reports a `RUN` that installs with zypper and does not clean the cache. It runs `zypper install`
+  (`in`) and has no `zypper clean` or `zypper cc` after it in the same `RUN`. A `RUN` with a
+  `--mount` of type `cache` or `tmpfs` on `/var/cache/zypp` is not reported.
+why: >-
+  `zypper install` stores the metadata and packages it downloaded under `/var/cache/zypp`. That
+  cache is written into the layer and stays in the image, adding size that nothing uses at run time.
+
+  Clean it in the same `RUN`: a later `RUN` cannot shrink a layer that was already written.
 example: 'RUN zypper install -y curl'
 severity: off
 category: performance
@@ -83,7 +134,15 @@ family: run-command
 params: { program: 'zypper', args: 'install in', pinned: '[=<>]|\.rpm$' }
 message: 'pin the versions in zypper install: pkg=version'
 description: >-
-  A zypper install package without a version.
+  Reports a `zypper install` (`in`) of a package without a version. A package is pinned when its
+  name has `=`, `<` or `>` (`curl=7.88.1`) or when it is a `.rpm` file.
+why: >-
+  An unpinned install takes the newest version in the enabled repositories on the day of the build.
+  Two builds of one Dockerfile can then differ, and a new release can break the image without any
+  change in your code.
+
+  Pinned versions make the build repeatable. Repositories drop old versions, so a pin needs updating
+  from time to time.
 example: 'RUN zypper install -y curl'
 severity: off
 category: suspicious

@@ -186,3 +186,198 @@ fn init_without_agents_flag_writes_no_instruction_file() {
     assert!(t.path().join("sudsy.yaml").exists());
     assert!(!t.path().join("AGENTS.md").exists() && !t.path().join("CLAUDE.md").exists());
 }
+
+/// A small repository with several languages, tool configs and a `.vscode` folder.
+fn mixed() -> tempfile::TempDir {
+    let t = tempfile::tempdir().unwrap();
+    for (name, text) in [
+        ("src/a.py", "print('x')\n"),
+        ("src/b.py", "print('y')\n"),
+        ("src/c.js", "let a = 1;\n"),
+        ("data.json", "{\"a\": 1}\n"),
+        ("cfg.yaml", "a: 1\n"),
+        (".github/workflows/ci.yml", "name: ci\non: push\njobs: {}\n"),
+        ("README.md", "# hi\n"),
+        (".prettierrc", "{ \"printWidth\": 100, \"tabWidth\": 4 }\n"),
+        (".yamllint", "extends: default\n"),
+        (".vscode/settings.json", "{}\n"),
+    ] {
+        let path = t.path().join(name);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, text).unwrap();
+    }
+    t
+}
+
+/// Every answer combination the tests cover leaves a config that loads and a `check` that runs
+/// (exit 0 or 1: findings are fine, a config error or a failed file is exit 2).
+#[test]
+fn every_tested_combination_leaves_a_config_that_checks() {
+    let cases: [&[&str]; 8] = [
+        &["--yes"],
+        &["--yes", "--languages", "python,json"],
+        &["--yes", "--languages", "yaml"],
+        &["--yes", "--preset", "json/biome", "--preset", "python/ruff"],
+        &[
+            "--yes",
+            "--from",
+            "prettier",
+            "--preset",
+            "yaml/prettier-compat",
+        ],
+        &["--yes", "--from", "yamllint", "--from", "prettier"],
+        &["--yes", "--vscode", "--ci", "--agents"],
+        &["--yes", "--languages", "markdown", "--vscode", "--ci"],
+    ];
+    for case in cases {
+        let t = mixed();
+        let mut args = vec!["init"];
+        args.extend(case);
+        let out = sudsy(t.path(), &args);
+        assert_eq!(
+            out.status.code(),
+            Some(0),
+            "{case:?}: {}",
+            text(&out.stderr)
+        );
+        let printed = sudsy(t.path(), &["config", "print"]);
+        assert_eq!(
+            printed.status.code(),
+            Some(0),
+            "{case:?}: {}",
+            text(&printed.stderr)
+        );
+        let checked = sudsy(t.path(), &["check"]);
+        let code = checked.status.code();
+        assert!(
+            code == Some(0) || code == Some(1),
+            "{case:?}: {}",
+            text(&checked.stderr)
+        );
+        let report = text(&checked.stdout);
+        assert!(
+            !report
+                .lines()
+                .any(|l| l.contains("workflows/sudsy.yml") && l.contains(": error[")),
+            "{case:?}: {report}"
+        );
+    }
+}
+
+#[test]
+fn deselected_languages_are_excluded_and_a_workflow_is_not_caught_with_yaml() {
+    let t = mixed();
+    assert!(
+        sudsy(t.path(), &["init", "--yes", "--languages", "yaml"])
+            .status
+            .success()
+    );
+    let yaml = fs::read_to_string(t.path().join("sudsy.yaml")).unwrap();
+    assert!(
+        yaml.contains("**/*.py") && yaml.contains("**/*.json"),
+        "{yaml}"
+    );
+    assert!(!yaml.contains("**/*.yml"), "{yaml}");
+    let out = text(&sudsy(t.path(), &["check"]).stdout);
+    assert!(!out.contains("a.py") && !out.contains("data.json"), "{out}");
+}
+
+#[test]
+fn init_never_overwrites_a_file_and_a_refused_run_writes_nothing() {
+    let t = mixed();
+    let dir = t.path();
+    fs::create_dir_all(dir.join(".github/workflows")).unwrap();
+    fs::write(dir.join(".github/workflows/sudsy.yml"), "mine: 1\n").unwrap();
+    fs::write(
+        dir.join(".vscode/extensions.json"),
+        "// mine\n{ \"recommendations\": [] }\n",
+    )
+    .unwrap();
+    fs::write(dir.join("AGENTS.md"), "# Mine\n").unwrap();
+    let out = sudsy(dir, &["init", "--yes", "--vscode", "--ci", "--agents"]);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let read = |p: &str| fs::read_to_string(dir.join(p)).unwrap();
+    assert_eq!(read(".github/workflows/sudsy.yml"), "mine: 1\n");
+    assert_eq!(
+        read(".vscode/extensions.json"),
+        "// mine\n{ \"recommendations\": [] }\n"
+    );
+    assert!(read("AGENTS.md").starts_with("# Mine\n\n<!-- sudsy:start -->"));
+    // The settings file was plain JSON: merged, with the extension as formatter per language.
+    assert!(read(".vscode/settings.json").contains("sudsy.sudsy"));
+    // An existing config stops the run before anything else is written.
+    let t = mixed();
+    fs::write(t.path().join("sudsy.yaml"), "analysis: fast\n").unwrap();
+    let out = sudsy(t.path(), &["init", "--yes", "--vscode", "--ci", "--agents"]);
+    assert_eq!(out.status.code(), Some(2));
+    assert_eq!(
+        fs::read_to_string(t.path().join("sudsy.yaml")).unwrap(),
+        "analysis: fast\n"
+    );
+    assert!(
+        !t.path().join(".github/workflows/sudsy.yml").exists()
+            && !t.path().join("AGENTS.md").exists()
+    );
+}
+
+#[test]
+fn without_a_terminal_init_writes_the_starter_only() {
+    let t = mixed();
+    assert!(sudsy(t.path(), &["init"]).status.success());
+    assert_eq!(
+        fs::read_to_string(t.path().join("sudsy.yaml")).unwrap(),
+        "# https://github.com/bingsubandit/sudsy\nextends: []   # e.g. preset:python/ruff\n"
+    );
+    assert!(
+        !t.path().join("AGENTS.md").exists()
+            && !t.path().join(".github/workflows/sudsy.yml").exists()
+    );
+}
+
+/// The files `init` writes pass Sudsy's formatter with the config it just wrote, and an edited
+/// JSON file keeps the user's key order and indentation.
+#[test]
+fn written_files_are_formatted_and_user_json_keeps_its_order() {
+    let t = mixed();
+    let user = "{\n\t\"z.last\": 1,\n\t\"a.first\": [\n\t\t\"x\"\n\t]\n}\n";
+    fs::write(t.path().join(".vscode/settings.json"), user).unwrap();
+    fs::write(
+        t.path().join(".vscode/extensions.json"),
+        "{\n\t\"recommendations\": [\n\t\t\"b.b\"\n\t]\n}\n",
+    )
+    .unwrap();
+    let out = sudsy(
+        t.path(),
+        &[
+            "init", "--yes", "--from", "yamllint", "--from", "prettier", "--vscode", "--ci",
+            "--agents",
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let settings = fs::read_to_string(t.path().join(".vscode/settings.json")).unwrap();
+    assert!(
+        settings.starts_with("{\n\t\"z.last\": 1,\n\t\"a.first\": [\n\t\t\"x\"\n\t],\n\t\"["),
+        "{settings}"
+    );
+    let ext = fs::read_to_string(t.path().join(".vscode/extensions.json")).unwrap();
+    assert_eq!(
+        ext,
+        "{\n\t\"recommendations\": [\n\t\t\"b.b\",\n\t\t\"sudsy.sudsy\"\n\t]\n}\n"
+    );
+    for file in [
+        "sudsy.yaml",
+        "CLAUDE.md",
+        "AGENTS.md",
+        ".github/workflows/sudsy.yml",
+    ] {
+        if t.path().join(file).exists() {
+            let checked = sudsy(t.path(), &["format", "--check", file]);
+            assert_eq!(
+                checked.status.code(),
+                Some(0),
+                "{file}: {}",
+                text(&checked.stdout)
+            );
+        }
+    }
+}

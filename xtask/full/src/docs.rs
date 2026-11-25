@@ -26,6 +26,12 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             crate::rules::json(&rule_docs),
         ),
     ];
+    let baseline =
+        std::fs::read_to_string(xtask::repo_root().join("docs/ai/rules/undescribed.txt"));
+    out.push((
+        "docs/ai/rules/undescribed.txt".into(),
+        crate::rules::undescribed(&rule_docs, baseline.ok().as_deref())?,
+    ));
     for p in providers {
         let rel = format!("docs/ai/formatting/{}.md", p.language());
         // A dialect without a doc of its own (scss, less) is documented with its config base.
@@ -45,14 +51,25 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         "docs/ai/architecture/syntax-tree.md",
         &[("roles", roles_table()), ("operators", operators_table())],
     )?);
-    let mut titles: Vec<(&str, &str)> = providers
+    let root = xtask::repo_root();
+    let support_rows = crate::support::rows(include_str!("../support.yaml"))?;
+    let in_order = crate::support::ordered(&root, &support_rows)?;
+    // The language lists name the languages in the order of the support table.
+    let rank = |id: &str| {
+        in_order
+            .iter()
+            .position(|m| m.row.ids.iter().any(|i| i == id))
+            .unwrap_or(usize::MAX)
+    };
+    let mut titles: Vec<(usize, &str, &str)> = providers
         .iter()
-        .map(|p| (p.grammar().title.as_str(), p.language()))
+        .map(|p| (rank(p.language()), p.grammar().title.as_str(), p.language()))
         .collect();
     titles.sort();
     // A dialect with its own provider (GitHub Actions) shares its grammar, and so its title, with its base.
-    let mut shown: Vec<&str> = titles.iter().map(|t| t.0).collect();
-    shown.dedup();
+    let mut shown: Vec<&str> = titles.iter().map(|t| t.1).collect();
+    let mut seen_title = std::collections::BTreeSet::new();
+    shown.retain(|t| seen_title.insert(*t));
     let (last, rest) = shown.split_last().expect("a language");
     let names = format!("{} and {last}", rest.join(", "));
     // A crate with several languages (lang-css) is listed once.
@@ -81,7 +98,15 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
             d.presets.iter().any(|p| p == preset) && d.languages.iter().any(|l| ids.contains(l))
         })
     };
-    crate::support::check_measured(&xtask::repo_root(), include_str!("../support.yaml"))?;
+    crate::support::check_measured(&root, include_str!("../support.yaml"))?;
+    // The language names of bench/speed.json in the order of the language lists.
+    let speed_order: Vec<String> = in_order.iter().flat_map(|m| m.row.speed.clone()).collect();
+    crate::numbers::check(&root, &crate::numbers::tool_names(&root, &support_rows)?)?;
+    out.push(crate::languages_doc::generate(
+        &std::fs::read_to_string(root.join("docs/languages.md"))?,
+        &in_order,
+        &rule_count,
+    )?);
     let support = crate::support::render(
         &xtask::repo_root(),
         include_str!("../support.yaml"),
@@ -99,7 +124,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
         "README.md",
         &[
             ("languages", names.clone()),
-            ("speed", crate::speed::table()?),
+            ("speed", crate::speed::table(&speed_order)?),
             ("support", support.table),
             ("support-headline", support.headline),
             ("support-ready", support.ready),
@@ -115,7 +140,7 @@ pub fn generate(providers: &[Box<dyn LanguageProvider>]) -> Result<Vec<(PathBuf,
     )?);
     out.push(splice(
         "docs/performance.md",
-        &[("speed-method", crate::speed::method()?)],
+        &[("speed-method", crate::speed::method(&speed_order)?)],
     )?);
     for rel in ["editors/vscode/README.md", "docs/ai/editor/vscode.md"] {
         out.push(splice(rel, &[("languages", names.clone())])?);

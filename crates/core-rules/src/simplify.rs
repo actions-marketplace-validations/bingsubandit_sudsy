@@ -20,8 +20,9 @@
 //!   call is a constant, `owners` and `members` the `owner.member` constants), `assert-false`
 //!   (an `#assert` of `false`), `nested-with` (a `#with` whose only statement is a `#with` of
 //!   the same kind), `lonely-if` (an `if` that is the only statement of an `else`),
-//!   `superfluous-else` (a final `else` after branches that all end in the `jump` statement
-//!   `return`, `throw`, `break` or `continue`; an `if` with an `else` that does counts).
+//!   `superfluous-else` (a final `else` after branches that all end in one of the `jump`
+//!   statements `return`, `throw`, `break`, `continue` or `goto`, as words; an `if` with an `else` that does counts, unless `flat: true`: only a jump
+//!   statement itself does).
 //! - the message has `{name}` where the check passes a name.
 //!
 //! concept: simplify
@@ -68,7 +69,10 @@ enum Check {
     AssertFalse,
     NestedWith,
     LonelyIf,
-    SuperfluousElse(&'static str),
+    SuperfluousElse {
+        jump: Vec<&'static str>,
+        flat: bool,
+    },
 }
 
 /// What makes an expression a constant besides a literal.
@@ -169,14 +173,18 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         "nested-with" => (Check::NestedWith, vec!["with"]),
         "lonely-if" => (Check::LonelyIf, vec!["conditional"]),
         "superfluous-else" => {
-            let jump = p.text("jump")?;
-            let Some(jump) = ["return", "throw", "break", "continue"]
-                .into_iter()
-                .find(|j| *j == jump)
-            else {
-                return Err(format!("param `jump`: unknown jump `{jump}`"));
-            };
-            (Check::SuperfluousElse(jump), vec!["conditional"])
+            let mut jump = Vec::new();
+            for w in words(&mut p, "jump") {
+                match ["return", "throw", "break", "continue", "goto"]
+                    .iter()
+                    .find(|j| **j == w)
+                {
+                    Some(j) => jump.push(*j),
+                    None => return Err(format!("param `jump`: unknown jump `{w}`")),
+                }
+            }
+            let flat = p.flag("flat")?;
+            (Check::SuperfluousElse { jump, flat }, vec!["conditional"])
         }
         other => return Err(format!("param `check`: unknown check `{other}`")),
     };
@@ -261,8 +269,8 @@ impl Rule for Simplify {
                 }
                 return;
             }
-            Check::SuperfluousElse(jump) => {
-                if let Some(e) = superfluous_else(g, node, jump) {
+            Check::SuperfluousElse { jump, flat } => {
+                if let Some(e) = superfluous_else(g, node, jump, *flat) {
                     self.report(ctx, significant_range(&e, g), "", None);
                 }
                 return;
@@ -454,31 +462,34 @@ fn lonely_if(g: &Grammar, n: &SyntaxNode) -> Option<SyntaxNode> {
 
 /// Does a statement of `b` always end in a statement tagged `jump`: it is one, or an `if` with
 /// an `else` all of whose branches do?
-fn always_jumps(g: &Grammar, b: &[SyntaxNode], jump: &str) -> bool {
-    b.iter()
-        .any(|s| g.has_tag(s.kind(), jump) || exhaustive_if(g, s, jump))
+fn always_jumps(g: &Grammar, b: &[SyntaxNode], jump: &[&str], flat: bool) -> bool {
+    b.iter().any(|s| {
+        jump.iter().any(|j| g.has_tag(s.kind(), j)) || (!flat && exhaustive_if(g, s, jump))
+    })
 }
 
-fn exhaustive_if(g: &Grammar, s: &SyntaxNode, jump: &str) -> bool {
+fn exhaustive_if(g: &Grammar, s: &SyntaxNode, jump: &[&str]) -> bool {
     if !is_statement_conditional(g, s) || !has_condition(g, s) {
         return false;
     }
     let rest = following(g, s);
     matches!(rest.last(), Some((_, false, _)))
-        && always_jumps(g, &body(g, s), jump)
-        && rest.iter().all(|(_, _, b)| always_jumps(g, b, jump))
+        && always_jumps(g, &body(g, s), jump, false)
+        && rest.iter().all(|(_, _, b)| always_jumps(g, b, jump, false))
 }
 
 /// The last `else` of `n` when every branch before it always ends in a statement tagged `jump`.
-fn superfluous_else(g: &Grammar, n: &SyntaxNode, jump: &str) -> Option<SyntaxNode> {
+fn superfluous_else(g: &Grammar, n: &SyntaxNode, jump: &[&str], flat: bool) -> Option<SyntaxNode> {
     if !is_statement_conditional(g, n) || !has_condition(g, n) || is_elif(g, n) {
         return None;
     }
     let rest = following(g, n);
     let ((last, tested, _), before) = rest.split_last()?;
     (!tested
-        && always_jumps(g, &body(g, n), jump)
-        && before.iter().all(|(_, _, b)| always_jumps(g, b, jump)))
+        && always_jumps(g, &body(g, n), jump, flat)
+        && before
+            .iter()
+            .all(|(_, _, b)| always_jumps(g, b, jump, flat)))
     .then(|| last.clone())
 }
 
@@ -492,7 +503,7 @@ fn node(g: &Grammar, n: &SyntaxNode, label: &str) -> Option<SyntaxNode> {
 
 /// The statements of a body: those of a single block, or the statements as they are.
 fn unblock(g: &Grammar, mut stmts: Vec<SyntaxNode>) -> Vec<SyntaxNode> {
-    if let [only] = &stmts[..]
+    while let [only] = &stmts[..]
         && (g.has_tag(only.kind(), "block") || g.has_tag(only.kind(), "statements"))
     {
         stmts = nodes(g, only, "items");

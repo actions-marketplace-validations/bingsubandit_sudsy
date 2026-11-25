@@ -18,6 +18,11 @@ use std::collections::BTreeMap;
 /// Parses snippets of one language. `Ok(None)` means the text has syntax errors.
 pub trait SnippetParser {
     fn grammar(&self) -> &Grammar;
+    /// Contexts (text before, text after) tried before the common ones, for a language whose bare
+    /// snippet parses as something else (a Go `f(x)` outside a function is a conversion).
+    fn contexts(&self) -> &[(&'static str, &'static str)] {
+        &[]
+    }
     fn parse(&self, text: &str) -> Result<Option<SyntaxNode>, String>;
 }
 
@@ -52,7 +57,7 @@ pub struct Pattern {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Capture {
     pub range: TextRange,
-    /// The node kind when exactly one node was captured.
+    /// The kind when exactly one node or token was captured.
     pub kind: Option<SyntaxKind>,
     /// The significant tokens joined by a space: what repeated metavariables are compared by
     /// (only computed for those).
@@ -130,7 +135,7 @@ impl Pattern {
         let trimmed = text.trim();
         for style in [Style::Identifier, Style::String] {
             let encoded = metavar::encode(trimmed, style);
-            for (before, after) in CONTEXTS {
+            for &(before, after) in parser.contexts().iter().chain(&CONTEXTS) {
                 let Some(tree) = parser.parse(&format!("{before}{encoded}{after}"))? else {
                     continue;
                 };
@@ -257,7 +262,7 @@ impl<'p> Cx<'p> {
                 .join(" ")
         });
         let kind = match run {
-            [SyntaxElement::Node(n)] => Some(n.kind()),
+            [e] => Some(e.kind()),
             _ => None,
         };
         Capture {

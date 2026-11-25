@@ -1,0 +1,12 @@
+# Command names are written in lower case (CMake compares them without case).
+[case]
+Name : lower
+
+# Words that touch (`-DFOO="bar"`, `$<$<X:Y>:(a b)>`) stay glued; a group has no blank inside its parentheses.
+[space]
+kind=LParen / * : no
+* / kind=RParen : no
+* / * : keep
+
+[layout]
+File : commands

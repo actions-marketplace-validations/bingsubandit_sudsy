@@ -24,6 +24,7 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
+| Angular templates | 0.31~ | 0 (paid) | 3.16~ | - | - | lint: lint angular-eslint template rules | estimate: pick only to measure it |
 | Ruby | 0.27 | 0 (paid) | - | 2.89~ | - | format: format rufo | estimate: pick only to measure it |
 | CMake | 0.35 | 0 (paid) | - | 2.57~ | - | format: format gersemi | estimate: pick only to measure it |
 | Batchfile | 0.51~ | ~1.2 | 1.74~ | 1.74~ | 2.29~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
@@ -41,7 +42,6 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | Procfile | 0.26~ | ~1.5 | 0.79~ | 0.79~ | 1.08~ | both: lint none found + format none found | cannot reach the bar: lint none found reach ~0.5; cannot reach the bar: format none found reach ~0.5; estimate: pick only to measure it |
 | Perl | 0.19 | ~1.2 | 0.88~ | 0.68~ | 1.04~ | both: lint perlcritic + format perltidy | cannot reach the bar: format perltidy reach ~0.75; Perl parses only at runtime in full: the grammar is partial; estimate: pick only to measure it |
 | GraphQL | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint graphql-eslint | estimate: pick only to measure it |
-| Angular templates | 0.10~ | 0 (paid) | 1.01~ | - | - | lint: lint angular-eslint template rules | estimate: pick only to measure it |
 | Handlebars | 0.18~ | ~1.5 | 0.75~ | 0.67~ | 0.98~ | both: lint ember-template-lint + format prettier glimmer | Handlebars, Mustache; estimate: pick only to measure it |
 | Tekton pipelines | 0.10~ | ~0.2 | 0.97~ | - | - | lint: lint tekton-lint | estimate: pick only to measure it |
 | Lua | 0.28 | ~1 | 0.68~ | 0.79~ | 0.97~ | both: lint selene + format StyLua | cannot reach the bar: lint selene reach ~0.7; estimate: pick only to measure it |
@@ -209,6 +209,14 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by mi
 4. `vue/no-v-html` (2 missed)
 5. `vue/multi-word-component-names` (1 missed)
 6. `vue/return-in-computed-property` (1 missed)
+
+## gersemi
+
+Format: unclassified 0 of 3404 differing files (0%).
+1. `set-layout` (1483 files): gersemi keeps the name on the line of `set(`, `list(` and the like and breaks a list of more than a few values; Sudsy breaks only what does not fit and never keeps the first argument on the command line
+2. `keyword-sections` (1475 files): gersemi lays the arguments of a known command out in keyword sections (a keyword and its values on one line, the values of `COMMAND`, `PROPERTIES` and the like one level in); Sudsy puts every argument on its own line
+3. `condition-layout` (340 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators (`AND`, `OR`, `NOT`, groups); Sudsy treats it as a list of arguments
+4. `section-indent` (106 files): gersemi indents the values of a section one level further than the keyword; Sudsy has no sections
 
 ## google-java-format
 
@@ -489,24 +497,24 @@ Lint: target 87.1% (933 of 1071, 138 missed, measured on 7514c1f3); rules by mis
 
 ## revive
 
-Lint: target 92.4% (43845 of 47476, 3631 missed, measured on a31131a9); rules by missed findings:
-1. `receiver-naming` (899 missed)
-2. `indent-error-flow` (472 missed)
-3. `empty-block` (320 missed)
-4. `dot-imports` (297 missed)
-5. `exported` (282 missed)
-6. `var-declaration` (251 missed)
-7. `context-as-argument` (237 missed)
-8. `increment-decrement` (189 missed)
-9. `error-strings` (183 missed)
-10. `unexported-return` (138 missed)
-11. `blank-imports` (82 missed)
-12. `error-naming` (79 missed)
-13. `superfluous-else` (75 missed)
-14. `redefines-builtin-id` (34 missed)
-15. `unreachable-code` (22 missed)
+Lint: target 97.5% (46327 of 47483, 1156 missed, measured on 1d6de91f); rules by missed findings:
+1. `exported` (282 missed)
+2. `var-declaration` (252 missed)
+3. `context-as-argument` (237 missed)
+4. `unexported-return` (142 missed)
+5. `blank-imports` (82 missed)
+6. `redefines-builtin-id` (34 missed)
+7. `unreachable-code` (22 missed)
+8. `receiver-naming` (20 missed)
+9. `error-return` (18 missed)
+10. `superfluous-else` (17 missed)
+11. `context-keys-type` (12 missed)
+12. `package-comments` (11 missed)
+13. `var-naming` (11 missed)
+14. `unused-parameter` (6 missed)
+15. `time-naming` (5 missed)
 
-8 more rules: 71 missed.
+2 more rules: 5 missed.
 
 ## roslynator
 

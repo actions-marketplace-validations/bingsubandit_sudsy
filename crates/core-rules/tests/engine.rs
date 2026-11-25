@@ -24,6 +24,7 @@ struct Probe {
 static PROBE: RuleMeta = RuleMeta {
     id: "probe",
     category: Category::Style,
+    why: "",
     description: "",
     example: "",
     default_level: Level::Warn,
@@ -232,6 +233,7 @@ fn a_rule_whose_layer_is_missing_is_skipped_not_failed() {
         ..RuleMeta {
             id: "needs-binding",
             category: Category::Correctness,
+            why: "",
             description: "",
             example: "",
             default_level: Level::Error,

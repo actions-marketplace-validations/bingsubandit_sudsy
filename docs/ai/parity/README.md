@@ -39,6 +39,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | eslint-plugin-jsonc | 100.0% | `7514c1f3` | 44 | 35 | 7 | 0 | 0 | 2 | 0 | 0 |
 | eslint-plugin-svelte | 100.0% | `7514c1f3` | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
 | eslint-plugin-vue | 88.8% | `7514c1f3` | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
+| gersemi | - | - | 6 | 2 | 0 | 0 | 0 | 0 | 4 | 0 |
 | google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | 88.1% | `7514c1f3` | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | 91.2% | `7514c1f3` | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |
@@ -51,7 +52,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | phpstan | 36.1% | `362a7f17` | 18 | 0 | 6 | 10 | 0 | 2 | 0 | 10 |
 | prettier | - | - | 59 | 38 | 9 | 2 | 0 | 3 | 7 | 2 |
 | psscriptanalyzer | 87.1% | `7514c1f3` | 75 | 12 | 14 | 1 | 0 | 0 | 48 | 1 |
-| revive | 92.4% | `a31131a9` | 105 | 3 | 2 | 18 | 0 | 0 | 82 | 18 |
+| revive | 97.5% | `1d6de91f` | 105 | 12 | 4 | 7 | 0 | 0 | 82 | 7 |
 | roslynator | 0.4% | `66718389` | 340 | 28 | 7 | 286 | 18 | 1 | 0 | 286 |
 | rubocop | 96.2% | `7514c1f3` | 160 | 27 | 5 | 69 | 0 | 0 | 59 | 69 |
 | ruff | 94.6% | `7514c1f3` | 980 | 135 | 0 | 687 | 0 | 18 | 140 | 687 |

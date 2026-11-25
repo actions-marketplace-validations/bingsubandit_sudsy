@@ -18,6 +18,10 @@ impl SnippetParser for ProviderSnippets<'_> {
         self.0.grammar()
     }
 
+    fn contexts(&self) -> &[(&'static str, &'static str)] {
+        self.0.snippet_contexts()
+    }
+
     fn parse(&self, text: &str) -> Result<Option<SyntaxNode>, String> {
         let parsed = self
             .0
@@ -31,6 +35,7 @@ impl SnippetParser for ProviderSnippets<'_> {
 pub struct FnSnippets(
     LazyGrammar,
     Box<dyn Fn(&SourceFile) -> ParseResult + Send + Sync>,
+    OnceLock<&'static [(&'static str, &'static str)]>,
 );
 
 impl FnSnippets {
@@ -46,7 +51,16 @@ impl FnSnippets {
         grammar: LazyGrammar,
         parse: impl Fn(&SourceFile) -> ParseResult + Send + Sync + 'static,
     ) -> Arc<Self> {
-        Arc::new(FnSnippets(grammar, Box::new(parse)))
+        Arc::new(FnSnippets(grammar, Box::new(parse), OnceLock::new()))
+    }
+
+    /// The contexts the language's snippets are tried in first (set once, before the rules compile).
+    pub fn set_contexts(&self, contexts: &'static [(&'static str, &'static str)]) {
+        let _ = self.2.set(contexts);
+    }
+
+    pub fn snippet_contexts(&self) -> &'static [(&'static str, &'static str)] {
+        self.2.get().copied().unwrap_or(&[])
     }
 
     pub fn parse_file(&self, file: &SourceFile) -> ParseResult {
@@ -57,6 +71,10 @@ impl FnSnippets {
 impl SnippetParser for FnSnippets {
     fn grammar(&self) -> &Grammar {
         self.0.get()
+    }
+
+    fn contexts(&self) -> &[(&'static str, &'static str)] {
+        self.snippet_contexts()
     }
 
     fn parse(&self, text: &str) -> Result<Option<SyntaxNode>, String> {

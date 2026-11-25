@@ -263,6 +263,17 @@ fn rules_lists_and_explains() {
     let one = sudsy(t.path(), &["rules", "sorted-keys"]);
     assert_eq!(one.status.code(), Some(0));
     insta::assert_snapshot!(out(&one));
+    // A rule with a `why` shows both texts, paragraph by paragraph; the list keeps the first sentence.
+    let why = out(&sudsy(t.path(), &["rules", "pipefail-shell"]));
+    let (what, why) = why.split_once("\nWhy it matters\n").expect("both headings");
+    assert!(what.contains("\nWhat it does\n  Reports a `RUN` with a pipe"));
+    assert!(why.starts_with("  The exit status of a pipe"));
+    assert!(why.contains("\n\n  To fix, set the option"), "{why}");
+    let list_line = list
+        .lines()
+        .find(|l| l.starts_with("pipefail-shell"))
+        .unwrap();
+    assert!(!list_line.contains("does not count"), "{list_line}");
     let unknown = sudsy(t.path(), &["rules", "sorted-kyes"]);
     assert_eq!(unknown.status.code(), Some(2));
     assert!(err(&unknown).contains("did you mean `sorted-keys`"));

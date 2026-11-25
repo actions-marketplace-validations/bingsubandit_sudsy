@@ -53,6 +53,11 @@ pub trait LanguageProvider: Send + Sync {
         &[]
     }
 
+    /// Contexts a pattern snippet is tried in before the common ones (`core_patterns::SnippetParser`).
+    fn snippet_contexts(&self) -> &[(&'static str, &'static str)] {
+        &[]
+    }
+
     /// [`rules`](Self::rules) without the built-in pattern files, which cannot lay out: what
     /// `format` consults, so that formatting reads no rule file.
     fn rust_rules(&self) -> &'static [&'static dyn Rule] {

@@ -1,11 +1,16 @@
 id: no-wildcard-imports
-message: 'import the names you use, not `*`'
+message: 'import the names you use, not every name'
 description: >-
-  An import of every name of a package or module, `import a.b.*;` or `from a import *`
-  (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403).
+  An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's
+  `import . "fmt"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports,
+  ruff F403, revive dot-imports).
 example: 'import a.b.*'
 severity: off
 category: style
+options:
+  - { name: wildcard_aliases, type: list, default: ['.'], description: The aliases that bring in every name of the imported package }
 rule:
   role: import
-  regex: '(?:\.\*|\bimport\s+\*)\s*;?$'
+  any:
+    - regex: '(?:\.\*|\bimport\s+\*)\s*;?$'
+    - fields: { alias: { in-option: wildcard_aliases } }

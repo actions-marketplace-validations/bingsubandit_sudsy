@@ -17,6 +17,7 @@ pub struct NoDebugFlag;
 static NO_DEBUG_FLAG: RuleMeta = RuleMeta {
     id: "no-debug-flag",
     category: Category::Suspicious,
+    why: "",
     description: "A boolean flag that must not be switched on.",
     example: "{ \"debug\": true }   // reported; fixed to false",
     default_level: Level::Warn,
@@ -79,6 +80,7 @@ pub struct BranchyBody;
 static BRANCHY_BODY: RuleMeta = RuleMeta {
     id: "branchy-body",
     category: Category::Performance,
+    why: "",
     description: "A body whose flow graph has more branching blocks than the limit.",
     example: "void F(int a) { if (a > 1) { } if (a > 2) { } }   // with max_branches: 1",
     default_level: Level::Warn,
@@ -125,6 +127,7 @@ pub struct DuplicateName;
 static DUPLICATE_NAME: RuleMeta = RuleMeta {
     id: "duplicate-name",
     category: Category::Correctness,
+    why: "",
     description: "Two objects in the project have the same \"name\".",
     example: "a.json: { \"name\": \"x\" }   b.json: { \"name\": \"x\" }   // reported in b.json",
     default_level: Level::Warn,
@@ -176,6 +179,7 @@ pub struct TodoMarker;
 static TODO_MARKER: RuleMeta = RuleMeta {
     id: "todo-marker",
     category: Category::Style,
+    why: "",
     description: "A TODO left in the file.",
     example: "// TODO: remove",
     default_level: Level::Off,
@@ -208,6 +212,7 @@ pub struct BreakArrays;
 static BREAK_ARRAYS: RuleMeta = RuleMeta {
     id: "break-arrays",
     category: Category::Style,
+    why: "",
     description: "Arrays with many items are laid out one item per line.",
     example: "[1, 2, 3]   // formatted one item per line when min_items is 2",
     default_level: Level::Warn,
@@ -249,6 +254,7 @@ pub struct Misbehave;
 static MISBEHAVE: RuleMeta = RuleMeta {
     id: "misbehave",
     category: Category::Correctness,
+    why: "",
     description: "Test fixture: traps, spins, sleeps or reports a span outside the file, as `mode` says.",
     example: "mode: trap | spin | sleep | span",
     default_level: Level::Off,

@@ -1,0 +1,2 @@
+receiver-naming: warn
+receiver-name-consistent: warn

@@ -108,7 +108,7 @@ Pattern rules show up in `sudsy rules`, take levels under `lint.rules`, honor su
 | `fix`, `fix-kind`, `fix-title` | Replacement text, its safety, its menu title. `fix: ""` deletes. |
 | `report-on` | Where the diagnostic points: `$NAME`, `first-token`, `start`. Default: the matched node. |
 | `options` | Typed user options: `bool`, `int`, `string`, `list`, `regex`. Set under `lint.rules`. |
-| `description`, `example` | Shown by `sudsy rules <id>`. |
+| `description`, `why`, `example` | Shown by `sudsy rules <id>`: what the rule reports, why it matters, an example. |
 
 Unknown keys are errors.
 

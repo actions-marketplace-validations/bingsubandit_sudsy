@@ -72,7 +72,7 @@ fn main() -> ExitCode {
         Command::Config(c) => config_cmd::run(c).map(|()| ExitCode::SUCCESS),
         #[cfg(feature = "pack-mode")]
         Command::Languages(c) => languages_cmd::run(c),
-        Command::Init(args) => init::run(args).map(|()| ExitCode::SUCCESS),
+        Command::Init(args) => init::run(args),
         Command::Lsp => lsp::run_stdio().map(|()| ExitCode::SUCCESS),
     };
     match result {

@@ -77,6 +77,10 @@ pub struct Spec {
     /// The node has one of these roles (tags of `core_syntax::roles`); a rule written on roles runs
     /// on every grammar that has them.
     pub role: Option<Names>,
+    /// Only at the top of a built-in rule: the language has a node with each of these role tags,
+    /// or the rule is left out of it (the rule is about a form only some languages have).
+    #[serde(rename = "needs-role")]
+    pub needs_role: Option<Names>,
     /// The `operator` field of the node is an operator of one of these kinds
     /// (`Grammar::operator_kind`: `equality`, `comparison`, ...).
     pub operator: Option<Names>,
@@ -172,6 +176,17 @@ pub enum Expr {
 pub(crate) fn unwrap(node: &SyntaxNode, g: &Grammar) -> SyntaxNode {
     let mut n = node.clone();
     loop {
+        // Only a node with exactly one child node can be a wrapper: count them on the green
+        // tree, without a red node per child.
+        let green = n.green();
+        let nodes = green
+            .children()
+            .filter(|c| matches!(c, rowan::NodeOrToken::Node(_)))
+            .take(2)
+            .count();
+        if nodes != 1 {
+            return n;
+        }
         let mut kids = n.children();
         let (Some(only), None) = (kids.next(), kids.next()) else {
             return n;
@@ -190,7 +205,12 @@ pub(crate) fn unwrap(node: &SyntaxNode, g: &Grammar) -> SyntaxNode {
 /// No node and no token between the first and the last (the brackets): a block with no statement,
 /// comments aside.
 fn is_bare(node: &SyntaxNode, g: &Grammar) -> bool {
-    if node.children().any(|c| !g.has_tag(c.kind(), "trivia")) {
+    // on the green tree: no red node for the children of a block that holds statements
+    let green = node.green();
+    if green.children().any(|c| match c {
+        rowan::NodeOrToken::Node(n) => !g.has_tag(SyntaxKind(n.kind().0), "trivia"),
+        rowan::NodeOrToken::Token(_) => false,
+    }) {
         return false;
     }
     node.children_with_tokens()
@@ -415,7 +435,14 @@ impl Expr {
                     .into(),
             ),
             1 => Ok(all.remove(0)),
-            _ => Ok(Expr::All(all)),
+            _ => {
+                // A conjunction: the kind and role tests, which most nodes fail, go first (the
+                // other tests keep their order: a reorder by guessed cost slowed other rules).
+                if !all.iter().any(Expr::templated) {
+                    all.sort_by_key(|e| !matches!(e, Expr::Kind(_) | Expr::Role(..)));
+                }
+                Ok(Expr::All(all))
+            }
         }
     }
 

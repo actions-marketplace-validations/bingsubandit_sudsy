@@ -99,6 +99,13 @@ impl ParserProvider {
         self
     }
 
+    /// Contexts (text before, text after) a pattern snippet is tried in before the common ones
+    /// (`core_patterns::SnippetParser::contexts`).
+    pub fn with_snippet_contexts(self, contexts: &'static [(&'static str, &'static str)]) -> Self {
+        self.parse.set_contexts(contexts);
+        self
+    }
+
     /// Makes this the provider of a dialect `name` of the language (Vue of HTML, SCSS of CSS):
     /// it takes `base`'s config section first and shares its rules.
     pub fn with_dialect(mut self, name: &'static str, base: &'static str) -> Self {
@@ -126,6 +133,10 @@ impl ParserProvider {
 }
 
 impl LanguageProvider for ParserProvider {
+    fn snippet_contexts(&self) -> &[(&'static str, &'static str)] {
+        self.parse.snippet_contexts()
+    }
+
     fn id(&self) -> LanguageId {
         self.grammar.id
     }

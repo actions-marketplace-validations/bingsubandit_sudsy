@@ -1,0 +1,14 @@
+id: indent-error-flow
+family: simplify
+params: { check: superfluous-else, jump: return, flat: true }
+message: "if block ends with a return statement, so drop this else and outdent its block"
+description: >-
+  An `else` block after an `if` block that ends in `return`: the code
+  of the `else` can follow the `if`. An `else if` is left alone.
+why: >-
+  When the `if` block ends in `return`, the `else` only adds a level of indentation to the code that follows. Without it the normal path stays at the left edge and the early return reads as a guard, which is the Go way of handling errors first. Removing the `else` does not change what the function does.
+
+  To fix, delete `else` and move its block after the `if`.
+example: "func f(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\treturn 2\n\t}\n}"
+severity: off
+category: style

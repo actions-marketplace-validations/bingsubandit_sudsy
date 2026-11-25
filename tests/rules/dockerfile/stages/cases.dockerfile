@@ -6,7 +6,12 @@ FROM scratch
 FROM alpine:3 AS build
 ^^^^^^^^^^^^^^^^^^^^^^ duplicate-stage-name
 FROM $BASE
+FROM alpine:3 AS Build
+^^^^^^^^^^^^^^^^^^^^^^ duplicate-stage-name
+FROM BUILD
 FROM localhost:5000/img
+^^^^^^^^^^^^^^^^^^^^^^^ untagged-base-image
+FROM localhost:5000/img:1
 FROM alpine@sha256:abc
 USER root
 USER app
@@ -15,9 +20,10 @@ USER 0:0
 COPY --from=build /a /b
 COPY --from=nope /a /b
 ^^^^^^^^^^^^^^^^^^^^^^ copy-from-unknown-stage
+COPY --from=BUILD /a /b
 COPY --from=0 /a /b
-COPY --from=9 /a /b
-^^^^^^^^^^^^^^^^^^^ copy-from-unknown-stage
+COPY --from=99 /a /b
+^^^^^^^^^^^^^^^^^^^^ copy-from-unknown-stage
 COPY --from=alpine:3 /a /b
 CMD ["a"]
 CMD ["b"]
@@ -31,7 +37,7 @@ HEALTHCHECK CMD b
 ^^^^^^^^^^^^^^^^^ single-healthcheck
 #           ^^^^^ json-cmd-entrypoint
 FROM alpine:3 AS last
-COPY --from=last /a /b
+COPY --from=LAST /a /b
 ^^^^^^^^^^^^^^^^^^^^^^ copy-from-own-stage
 USER app
 CMD ["a"]

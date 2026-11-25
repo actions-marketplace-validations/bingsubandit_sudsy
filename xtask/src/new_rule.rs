@@ -68,7 +68,8 @@ fn yaml_rule(id: &str, starter: &Starter) -> String {
     let regex = regex(&starter.reported).replace('\'', "''");
     format!(
         "id: {id}\nmessage: TODO what the diagnostic says\n\
-         description: TODO what the rule reports, and what it leaves alone.\n\
+         description: TODO what the rule reports (first sentence on its own), what it leaves alone, the options that change it.\n\
+         why: TODO the concrete harm or the convention, one to four sentences (docs/ai/development/rule-texts.md).\n\
          example: 'TODO code that triggers the rule   // write: what it should be'\n\
          severity: off\ncategory: style\nrule:\n  kind: {kind}\n  regex: '{regex}'\n"
     )
@@ -81,6 +82,7 @@ fn rust_rule(id: &str, starter: &Starter) -> String {
         "use crate::generated::kind;\nuse core_rules::{{RuleContext, rule}};\nuse core_syntax::SyntaxNode;\n\n\
          rule! {{\n    pub {name} {{\n        id: \"{id}\",\n        category: Style,\n        \
          default: Off,\n        description: \"TODO what the rule reports, and what it leaves alone.\",\n        \
+         why: \"TODO the concrete harm or the convention.\",\n        \
          example: \"TODO code that triggers the rule   // write: what it should be\",\n        \
          kinds: &[kind::{constant}],\n    }}\n\n    \
          fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {{\n        \

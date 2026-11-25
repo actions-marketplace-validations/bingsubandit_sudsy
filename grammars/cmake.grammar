@@ -13,6 +13,8 @@ suppress disable-file "sudsy-disable-file"
 suppress ignore "sudsy-ignore"
 suppress ignore-start "sudsy-ignore-start"
 suppress ignore-end "sudsy-ignore-end"
+suppress ignore-start "gersemi: off"
+suppress ignore-end "gersemi: on"
 
 // Trivia. Newline tokens end a line for the trivia attachment rule.
 token Whitespace #trivia #whitespace
@@ -24,8 +26,10 @@ token BracketComment #trivia #comment
 token LParen "(" #punctuation
 token RParen ")" #punctuation
 
-// A word: a command name or an unquoted argument (`\` escapes the next character).
+// A word: an unquoted argument (`\` escapes the next character). The parse enters the first word of a command as `Name`.
 token Unquoted #argument-part
+// The name of a command; names are case-insensitive, so a formatter may change the case.
+token Name #restyle
 token Quoted #argument-part #literal #string
 string Quoted quote "\"" escape "\\" continuation unknown keep map "n" 10 "r" 13 "t" 9
 // `[==[ ... ]==]`, any number of `=`.
@@ -36,7 +40,7 @@ token Eof
 token Unknown #error
 
 node File = items:Command* Eof
-node Command = name:Unquoted LParen arguments:ArgumentList RParen
+node Command = name:Name LParen arguments:ArgumentList RParen
 node ArgumentList = items:#argument-item*
 node Argument #argument-item = parts:#argument-part*
 node ParenGroup #argument-item = LParen ArgumentList RParen

@@ -110,9 +110,18 @@ fn list(out: &mut String, rules: &Rules) {
             m.category.as_str(),
             m.default_level.as_str(),
             fix_text(m),
-            m.description.split(". ").next().unwrap_or(m.description),
+            m.first_sentence(),
         );
     }
+}
+
+/// A text of paragraphs (one per line of the metadata), indented, with a blank line between.
+fn indented(text: &str) -> String {
+    text.lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(|l| format!("  {l}"))
+        .collect::<Vec<_>>()
+        .join("\n\n")
 }
 
 fn explain(out: &mut String, rules: &Rules, id: &str, presets: &[String]) {
@@ -141,7 +150,12 @@ fn explain(out: &mut String, rules: &Rules, id: &str, presets: &[String]) {
             equivalent.join("\n                 ")
         );
     }
-    let _ = writeln!(out, "\n{}", m.description);
+    if m.why.is_empty() {
+        let _ = writeln!(out, "\n{}", m.description);
+    } else {
+        let _ = writeln!(out, "\nWhat it does\n{}", indented(m.description));
+        let _ = writeln!(out, "\nWhy it matters\n{}", indented(m.why));
+    }
     if !m.options.is_empty() {
         let _ = writeln!(out, "\nOptions:");
         for o in m.options {

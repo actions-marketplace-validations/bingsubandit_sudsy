@@ -137,11 +137,11 @@
             },
             "apk-no-cache": {
               "$ref": "#/definitions/rule",
-              "description": "apk add without --no-cache."
+              "description": "Reports an `apk add` without the `--no-cache` flag."
             },
             "apk-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "An apk add package without a version."
+              "description": "Reports an `apk add` that names a package without a version."
             },
             "approved-verbs": {
               "$ref": "#/definitions/rule",
@@ -149,15 +149,15 @@
             },
             "apt-get-no-recommends": {
               "$ref": "#/definitions/rule",
-              "description": "apt-get install that installs recommended packages."
+              "description": "Reports an `apt-get install` that also installs recommended packages."
             },
             "apt-get-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "An apt-get install package without a version."
+              "description": "Reports an `apt-get install` of a package without a version."
             },
             "apt-get-yes": {
               "$ref": "#/definitions/rule",
-              "description": "apt-get install without -y."
+              "description": "Reports an `apt-get install` that does not answer apt's prompts."
             },
             "area-alt": {
               "$ref": "#/definitions/rule",
@@ -884,19 +884,19 @@
             },
             "copy-from-own-stage": {
               "$ref": "#/definitions/rule",
-              "description": "A `COPY --from` that names the stage it is in."
+              "description": "Reports a `COPY --from` that names its own stage."
             },
             "copy-from-unknown-stage": {
               "$ref": "#/definitions/rule",
-              "description": "A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`)."
+              "description": "Reports a `COPY --from=name` that names no stage defined earlier."
             },
             "copy-instead-of-add": {
               "$ref": "#/definitions/rule",
-              "description": "An ADD with no URL and no archive (`.tar`, `.gz`, `.tgz`, `.xz` and the like) among its arguments, which ADD would extract or download."
+              "description": "Reports an `ADD` that only copies."
             },
             "copy-many-needs-directory": {
               "$ref": "#/definitions/rule",
-              "description": "A COPY with more than one source whose last argument does not end with `/`."
+              "description": "Reports a `COPY` with several sources whose destination does not end with `/` (`COPY a b /app`)."
             },
             "count-star": {
               "$ref": "#/definitions/rule",
@@ -1192,7 +1192,7 @@
             },
             "delete-apt-lists": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that runs apt-get update (or apt update) and does not remove /var/lib/apt/lists, which stays in the image layer. A cache mount on that directory is fine."
+              "description": "Reports a `RUN` that updates the apt package lists and does not delete them."
             },
             "deprecated": {
               "$ref": "#/definitions/rule",
@@ -1270,11 +1270,11 @@
             },
             "dnf-clean": {
               "$ref": "#/definitions/rule",
-              "description": "dnf install with no dnf clean all after it."
+              "description": "Reports a `RUN` that installs with dnf and does not clean the cache."
             },
             "dnf-yes": {
               "$ref": "#/definitions/rule",
-              "description": "dnf install without -y."
+              "description": "Reports a `dnf install`, `dnf groupinstall` or `dnf localinstall` (also with `microdnf`) without `-y` or `--assumeyes`."
             },
             "doc-asterisk": {
               "$ref": "#/definitions/rule",
@@ -1564,7 +1564,7 @@
             },
             "duplicate-stage-name": {
               "$ref": "#/definitions/rule",
-              "description": "Two FROM instructions name their stage alike."
+              "description": "Reports a stage name that an earlier stage already uses, as in `FROM a AS app` followed by `FROM b AS app`."
             },
             "duplicate-table-alias": {
               "$ref": "#/definitions/rule",
@@ -1693,6 +1693,18 @@
               "$ref": "#/definitions/rule",
               "description": "A class body that declares `boolean equals(Object)` and no `hashCode()`: equal objects get different hash codes (Checkstyle EqualsHashCode)."
             },
+            "error-naming": {
+              "$ref": "#/definitions/rule",
+              "description": "A package-level `var` of one name made by `errors.New` or `fmt.Errorf` starts with `err`, or `Err` when exported."
+            },
+            "error-strings": {
+              "$ref": "#/definitions/rule",
+              "description": "The text of an error made with `fmt.Errorf`, `errors.New`, `errors.Errorf`, `errors.Wrap` and the like ends in `.`, `:`, `!` or a newline (a capital first letter is not reported)."
+            },
+            "errorf": {
+              "$ref": "#/definitions/rule",
+              "description": "`errors.New(fmt.Sprintf(...))` is `fmt.Errorf(...)` (the `t.Error(fmt.Sprintf(...))` form on a `*testing.T` needs types and is not read)."
+            },
             "eval-array": {
               "$ref": "#/definitions/rule",
               "description": "An `eval` whose argument expands an array with `[@]`."
@@ -1703,7 +1715,7 @@
             },
             "expose-port-range": {
               "$ref": "#/definitions/rule",
-              "description": "An EXPOSE with a port above 65535."
+              "description": "Reports an `EXPOSE` with a port number above 65535."
             },
             "expression-alias": {
               "$ref": "#/definitions/rule",
@@ -1910,7 +1922,7 @@
             },
             "from-first": {
               "$ref": "#/definitions/rule",
-              "description": "An instruction other than ARG before the first FROM."
+              "description": "Reports an instruction other than `ARG` before the first `FROM`."
             },
             "function-allowed-list": {
               "description": "A function that is not in the `list` option. An empty list allows everything.",
@@ -2131,7 +2143,7 @@
             },
             "gem-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A gem install gem without a version."
+              "description": "Reports a `gem install` (or `gem i`) of a gem without a version: `rails` instead of `rails:7.1.3`."
             },
             "generic-class": {
               "$ref": "#/definitions/rule",
@@ -2151,7 +2163,7 @@
             },
             "go-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A go install or get package without a version (or at latest)."
+              "description": "Reports a `go install` or `go get` of a package without a version, or at `latest` or `none` (`example.com/tool@latest`)."
             },
             "grep-count": {
               "$ref": "#/definitions/rule",
@@ -2393,6 +2405,14 @@
               "$ref": "#/definitions/rule",
               "description": "In a select over one table, some column references are qualified (`t.a`) and others are not (sqlfluff RF03)."
             },
+            "increment-decrement": {
+              "$ref": "#/definitions/rule",
+              "description": "`x += 1` and `x -= 1`, where `x++` and `x--` say the same."
+            },
+            "indent-error-flow": {
+              "$ref": "#/definitions/rule",
+              "description": "An `else` block after an `if` block that ends in `return`: the code of the `else` can follow the `if`."
+            },
             "ineffective-access-modifier": {
               "$ref": "#/definitions/rule",
               "description": "`private` or `protected` before `def self.name`, which it does not affect (RuboCop Lint/IneffectiveAccessModifier); `private_class_method :name` in the class makes the method private on purpose."
@@ -2527,7 +2547,7 @@
             },
             "json-cmd-entrypoint": {
               "$ref": "#/definitions/rule",
-              "description": "A CMD, ENTRYPOINT or HEALTHCHECK CMD in shell form, which runs under `sh -c` and does not get signals."
+              "description": "Reports a `CMD`, `ENTRYPOINT` or `HEALTHCHECK CMD` in shell form."
             },
             "key-name-casing": {
               "description": "A key does not follow one of the allowed naming conventions. The checks are those of eslint-plugin-jsonc: a key with punctuation or whitespace never matches, `camelCase` also rejects `_` and `-`, `snake_case` and `kebab-case` reject capitals. No fix: renaming a key changes the data.",
@@ -2670,7 +2690,7 @@
             },
             "last-user-not-root": {
               "$ref": "#/definitions/rule",
-              "description": "A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`)."
+              "description": "Reports a stage whose last `USER` is root, on that `USER`."
             },
             "late-future-import": {
               "$ref": "#/definitions/rule",
@@ -3090,7 +3110,7 @@
             },
             "merge-consecutive-run": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that is a single command, directly after another single-command RUN with the same flags (a comment in between does not count)."
+              "description": "Reports a `RUN` that could be merged into the `RUN` before it."
             },
             "message-pascal-case": {
               "$ref": "#/definitions/rule",
@@ -3456,7 +3476,7 @@
             },
             "no-apt": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls apt."
+              "description": "Reports a `RUN` that calls `apt`; use `apt-get` or `apt-cache` instead."
             },
             "no-assignment-in-condition": {
               "$ref": "#/definitions/rule",
@@ -3588,7 +3608,7 @@
             },
             "no-copy-whole-stage": {
               "$ref": "#/definitions/rule",
-              "description": "A `COPY --from` with `/` as a source and as the target."
+              "description": "Reports a `COPY --from=stage / /`, which copies the whole file system of a stage to `/`."
             },
             "no-debugger": {
               "description": "A debugger statement, a call of one of the `calls` that start a debugger or an import matching `imports` (ESLint no-debugger, ruff T100); a language lists its calls in its grammar's `rule` row.",
@@ -3829,8 +3849,45 @@
               "description": "An attribute with empty parentheses: `[Foo()]` is `[Foo]`. Parentheses with a comment in them are left alone."
             },
             "no-empty-block": {
-              "$ref": "#/definitions/rule",
-              "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement)."
+              "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement). With `comment_handles` off a comment does not count (revive empty-block). With `waiting_loops` an empty loop whose condition is a call is a wait and is left alone, and so is a loop whose head matches `ignored_loop_heads`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "comment_handles": {
+                          "default": true,
+                          "description": "A comment in the block counts as content",
+                          "type": "boolean"
+                        },
+                        "ignored_loop_heads": {
+                          "default": "\\b\\B",
+                          "description": "A regular expression for the condition or head of a loop whose empty body is left alone",
+                          "type": "string"
+                        },
+                        "waiting_loops": {
+                          "default": false,
+                          "description": "Leave alone an empty loop whose condition is a call",
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-empty-catch": {
               "description": "A `catch`, `except` or `rescue` clause whose body has no statement (a lone `pass` counts as none) and no comment, so the error is silently ignored (ESLint no-empty, Checkstyle EmptyCatchBlock, ruff S110, RuboCop Lint/SuppressedException). With `comment_handles` off a comment does not count (PSScriptAnalyzer). With `broad_only` only a clause that catches everything or one of the `types` is reported.",
@@ -4109,7 +4166,7 @@
             },
             "no-from-platform": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM with a fixed `--platform`; a variable such as `$BUILDPLATFORM` is fine."
+              "description": "Reports a `FROM` with a fixed `--platform`, such as `--platform=linux/amd64`."
             },
             "no-func-assign": {
               "$ref": "#/definitions/rule",
@@ -4295,7 +4352,7 @@
             },
             "no-interactive-commands": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls ssh, vim, shutdown, service, ps, free, top, kill or mount."
+              "description": "Reports a `RUN` that calls `ssh`, `vim`, `shutdown`, `service`, `ps`, `free`, `top`, `kill` or `mount`."
             },
             "no-invalid-double-slash-comments": {
               "$ref": "#/definitions/rule",
@@ -4315,7 +4372,7 @@
             },
             "no-latest-tag": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM image tagged `latest` (without a digest)."
+              "description": "Reports a `FROM` whose image has the tag `latest` (`alpine:latest`)."
             },
             "no-lone-template": {
               "$ref": "#/definitions/rule",
@@ -4335,7 +4392,7 @@
             },
             "no-maintainer": {
               "$ref": "#/definitions/rule",
-              "description": "A MAINTAINER instruction."
+              "description": "Reports a `MAINTAINER` instruction."
             },
             "no-merge-keys": {
               "$ref": "#/definitions/rule",
@@ -4379,7 +4436,7 @@
             },
             "no-nested-onbuild": {
               "$ref": "#/definitions/rule",
-              "description": "An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER."
+              "description": "Reports an `ONBUILD` whose instruction is `ONBUILD`, `FROM` or `MAINTAINER`."
             },
             "no-nested-style-tag": {
               "$ref": "#/definitions/rule",
@@ -4521,7 +4578,7 @@
             },
             "no-redundant-target-platform": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM with `--platform=$TARGETPLATFORM`, which is what it does without the option."
+              "description": "Reports a `FROM` with `--platform=$TARGETPLATFORM` (or `${TARGETPLATFORM}`), which is what `FROM` does without the option."
             },
             "no-regex-spaces": {
               "$ref": "#/definitions/rule",
@@ -4541,7 +4598,7 @@
             },
             "no-reserved-stage-name": {
               "$ref": "#/definitions/rule",
-              "description": "A stage named `scratch` or `context`."
+              "description": "Reports a stage named `scratch` or `context` (`FROM alpine AS scratch`), compared without regard to case."
             },
             "no-returns-on-void": {
               "$ref": "#/definitions/rule",
@@ -4553,7 +4610,7 @@
             },
             "no-secret-in-env": {
               "$ref": "#/definitions/rule",
-              "description": "An ARG or ENV whose name contains `api_key`, `client_key`, `password`, `private`, `secret`, `token` or `username`, or is a well-known credential variable. Build secrets belong in `--mount=type=secret`."
+              "description": "Reports an `ARG` or `ENV` whose name suggests a secret."
             },
             "no-self-assign": {
               "description": "A plain or logical assignment whose two sides are the same tokens, `a = a`, `a.b = a.b` or `@a ||= @a` (ESLint no-self-assign, RuboCop Lint/SelfAssignment).",
@@ -4608,7 +4665,7 @@
             },
             "no-shell-symlink": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that links /bin/sh."
+              "description": "Reports a `RUN` that replaces `/bin/sh`."
             },
             "no-single-line-block-comment": {
               "$ref": "#/definitions/rule",
@@ -4632,7 +4689,7 @@
             },
             "no-sudo": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls sudo."
+              "description": "Reports a `RUN` that calls `sudo`."
             },
             "no-target-blank": {
               "$ref": "#/definitions/rule",
@@ -4803,8 +4860,40 @@
               "description": "A call of `which`."
             },
             "no-wildcard-imports": {
-              "$ref": "#/definitions/rule",
-              "description": "An import of every name of a package or module, `import a.b.*;` or `from a import *` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403)."
+              "description": "An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's `import . \"fmt\"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403, revive dot-imports).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "wildcard_aliases": {
+                          "default": [
+                            "."
+                          ],
+                          "description": "The aliases that bring in every name of the imported package",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "no-with": {
               "$ref": "#/definitions/rule",
@@ -4832,7 +4921,7 @@
             },
             "npm-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "An npm install package without a version."
+              "description": "Reports an `npm install` (also `npm i` and `npm add`) of a package without a version: `express` instead of `express@4.18.2`, `@scope/name` instead of `@scope/name@1.2.0`."
             },
             "null-comparison": {
               "$ref": "#/definitions/rule",
@@ -4879,7 +4968,7 @@
             },
             "numeric-user-id": {
               "$ref": "#/definitions/rule",
-              "description": "A USER that is a name rather than a numeric id (a variable is accepted)."
+              "description": "Reports a `USER` whose user is a name instead of a number (`USER app`, `USER app:1000`)."
             },
             "oneof-lower-snake-case": {
               "$ref": "#/definitions/rule",
@@ -4979,11 +5068,11 @@
             },
             "pip-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A pip install package without a version."
+              "description": "Reports a `pip install` (also `pip3`, `pip3.12`) of a package without a version."
             },
             "pipefail-shell": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN with a pipe in a stage whose SHELL instruction does not set pipefail."
+              "description": "Reports a `RUN` with a pipe (`a | b`) in a stage whose `SHELL` does not set `pipefail`."
             },
             "possible-null-dereference": {
               "$ref": "#/definitions/rule",
@@ -5391,9 +5480,48 @@
               "$ref": "#/definitions/rule",
               "description": "A `raise` of an exception inside an `except` clause (nested `if`, loops, `with` and `match` included; `try`, functions and classes not) without `from`, unless it raises the name the clause bound."
             },
+            "range": {
+              "$ref": "#/definitions/rule",
+              "description": "`for k, _ := range x`: the second value is the blank identifier, so `for k := range x` says the same."
+            },
             "read-without-raw": {
               "$ref": "#/definitions/rule",
               "description": "A `read` without the `-r` flag."
+            },
+            "receiver-name-consistent": {
+              "$ref": "#/definitions/rule",
+              "description": "The methods of a type declared in one file name their receiver the same."
+            },
+            "receiver-naming": {
+              "description": "The name of a method's receiver is `_`, `this` or `self`: a receiver is named by a short form of its type, and left out when the method does not use it.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "receivers": {
+                          "default": "!^(?:_|this|self)$",
+                          "description": "A regular expression the receiver name must match; one that starts with `!` is one it must not match. Empty: not checked.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "redeclared-variable": {
               "$ref": "#/definitions/rule",
@@ -5563,7 +5691,7 @@
             },
             "rpm-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A yum or dnf install package without a version."
+              "description": "Reports a `yum install`, `dnf install` or `microdnf install` of a package without a version."
             },
             "rule-empty-line-before": {
               "$ref": "#/definitions/rule",
@@ -6540,15 +6668,15 @@
             },
             "single-cmd": {
               "$ref": "#/definitions/rule",
-              "description": "A second CMD in one stage."
+              "description": "Reports each `CMD` after the first one in the same stage."
             },
             "single-entrypoint": {
               "$ref": "#/definitions/rule",
-              "description": "A second ENTRYPOINT in one stage."
+              "description": "Reports each `ENTRYPOINT` after the first one in the same stage."
             },
             "single-healthcheck": {
               "$ref": "#/definitions/rule",
-              "description": "A second HEALTHCHECK in one stage."
+              "description": "Reports each `HEALTHCHECK` after the first one in the same stage, `HEALTHCHECK NONE` included."
             },
             "single-namespace-per-file": {
               "$ref": "#/definitions/rule",
@@ -6839,6 +6967,10 @@
             "subprocess-run-without-check": {
               "$ref": "#/definitions/rule",
               "description": "A call of `subprocess.run` with no `check` keyword (and no `**kwargs`)."
+            },
+            "superfluous-else": {
+              "$ref": "#/definitions/rule",
+              "description": "An `else` block after an `if` block that ends in `break`, `continue` or `goto`: the code of the `else` can follow the `if`."
             },
             "supports-should-process": {
               "$ref": "#/definitions/rule",
@@ -7341,7 +7473,7 @@
             },
             "untagged-base-image": {
               "$ref": "#/definitions/rule",
-              "description": "A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. `scratch`, a variable and an earlier stage's name are fine."
+              "description": "Reports a `FROM` image with neither a tag nor a digest (`FROM alpine`)."
             },
             "unused-alias": {
               "$ref": "#/definitions/rule",
@@ -7568,7 +7700,7 @@
             },
             "use-workdir-not-cd": {
               "$ref": "#/definitions/rule",
-              "description": "A RUN that calls cd."
+              "description": "Reports a `RUN` that calls `cd`, anywhere in its script (also in a subshell such as `(cd sub && make)`)."
             },
             "useless-access-modifier": {
               "$ref": "#/definitions/rule",
@@ -7889,7 +8021,7 @@
             },
             "wget-progress": {
               "$ref": "#/definitions/rule",
-              "description": "A wget call with no progress, quiet or log-file flag."
+              "description": "Reports a `wget` call that does not limit its progress output."
             },
             "when-entry-bracing": {
               "$ref": "#/definitions/rule",
@@ -7897,7 +8029,7 @@
             },
             "workdir-absolute": {
               "$ref": "#/definitions/rule",
-              "description": "A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable)."
+              "description": "Reports a `WORKDIR` with a relative path."
             },
             "workflow-syntax": {
               "$ref": "#/definitions/rule",
@@ -7909,11 +8041,11 @@
             },
             "yum-clean": {
               "$ref": "#/definitions/rule",
-              "description": "yum install with no yum clean all after it."
+              "description": "Reports a `RUN` that installs with yum and does not clean the cache."
             },
             "yum-yes": {
               "$ref": "#/definitions/rule",
-              "description": "yum install without -y."
+              "description": "Reports a `yum install`, `yum groupinstall` or `yum localinstall` without `-y` or `--assumeyes`."
             },
             "zip-without-explicit-strict": {
               "$ref": "#/definitions/rule",
@@ -7921,19 +8053,19 @@
             },
             "zypper-clean": {
               "$ref": "#/definitions/rule",
-              "description": "zypper install with no zypper clean after it."
+              "description": "Reports a `RUN` that installs with zypper and does not clean the cache."
             },
             "zypper-no-dist-upgrade": {
               "$ref": "#/definitions/rule",
-              "description": "A zypper dist-upgrade."
+              "description": "Reports a `zypper dist-upgrade` (or `dup`)."
             },
             "zypper-pin-versions": {
               "$ref": "#/definitions/rule",
-              "description": "A zypper install package without a version."
+              "description": "Reports a `zypper install` (`in`) of a package without a version."
             },
             "zypper-yes": {
               "$ref": "#/definitions/rule",
-              "description": "zypper install without -y."
+              "description": "Reports a `zypper` command that asks for confirmation."
             }
           },
           "type": "object"
@@ -8544,11 +8676,362 @@
               ],
               "type": "string"
             },
+            "known_commands": {
+              "default": [
+                "add_compile_definitions",
+                "add_compile_options",
+                "add_compiler_export_flags",
+                "add_custom_command",
+                "add_custom_target",
+                "add_definitions",
+                "add_dependencies",
+                "add_executable",
+                "add_feature_info",
+                "add_file_dependencies",
+                "add_flex_bison_dependency",
+                "add_jar",
+                "add_library",
+                "add_link_options",
+                "add_subdirectory",
+                "add_test",
+                "android_add_test_data",
+                "aux_source_directory",
+                "bison_target",
+                "block",
+                "break",
+                "build_command",
+                "build_name",
+                "check_c_compiler_flag",
+                "check_c_source_compiles",
+                "check_c_source_runs",
+                "check_compiler_flag",
+                "check_cxx_compiler_flag",
+                "check_cxx_source_compiles",
+                "check_cxx_source_runs",
+                "check_cxx_symbol_exists",
+                "check_fortran_compiler_flag",
+                "check_fortran_function_exists",
+                "check_fortran_source_compiles",
+                "check_fortran_source_runs",
+                "check_function_exists",
+                "check_include_file",
+                "check_include_file_cxx",
+                "check_include_files",
+                "check_ipo_supported",
+                "check_language",
+                "check_library_exists",
+                "check_linker_flag",
+                "check_objc_compiler_flag",
+                "check_objc_source_compiles",
+                "check_objc_source_runs",
+                "check_objcxx_compiler_flag",
+                "check_objcxx_source_compiles",
+                "check_objcxx_source_runs",
+                "check_pie_supported",
+                "check_prototype_definition",
+                "check_required_components",
+                "check_source_compiles",
+                "check_source_runs",
+                "check_struct_has_member",
+                "check_symbol_exists",
+                "check_type_size",
+                "check_variable_exists",
+                "clear_bundle_keys",
+                "cmake_add_fortran_subdirectory",
+                "cmake_dependent_option",
+                "cmake_file_api",
+                "cmake_find_frameworks",
+                "cmake_host_system_information",
+                "cmake_instrumentation",
+                "cmake_language",
+                "cmake_minimum_required",
+                "cmake_parse_arguments",
+                "cmake_path",
+                "cmake_pkg_config",
+                "cmake_policy",
+                "cmake_pop_check_state",
+                "cmake_print_properties",
+                "cmake_print_variables",
+                "cmake_push_check_state",
+                "cmake_reset_check_state",
+                "configure_file",
+                "configure_package_config_file",
+                "continue",
+                "copy_and_fixup_bundle",
+                "copy_resolved_framework_into_bundle",
+                "copy_resolved_item_into_bundle",
+                "cpack_add_component",
+                "cpack_add_component_group",
+                "cpack_add_install_type",
+                "cpack_configure_downloads",
+                "cpack_ifw_add_package_resources",
+                "cpack_ifw_add_repository",
+                "cpack_ifw_configure_component",
+                "cpack_ifw_configure_component_group",
+                "cpack_ifw_configure_file",
+                "cpack_ifw_update_repository",
+                "create_javadoc",
+                "create_javah",
+                "create_test_sourcelist",
+                "csharp_get_dependentupon_name",
+                "csharp_get_filename_key_base",
+                "csharp_get_filename_keys",
+                "csharp_set_designer_cs_properties",
+                "csharp_set_windows_forms_properties",
+                "csharp_set_xaml_cs_properties",
+                "ctest_build",
+                "ctest_configure",
+                "ctest_coverage",
+                "ctest_coverage_collect_gcov",
+                "ctest_empty_binary_directory",
+                "ctest_memcheck",
+                "ctest_read_custom_files",
+                "ctest_run_script",
+                "ctest_sleep",
+                "ctest_start",
+                "ctest_submit",
+                "ctest_test",
+                "ctest_update",
+                "ctest_upload",
+                "cxxtest_add_test",
+                "define_property",
+                "doxygen_add_docs",
+                "ecos_add_executable",
+                "ecos_add_include_directories",
+                "ecos_adjust_directory",
+                "ecos_use_arm_elf_tools",
+                "ecos_use_i386_elf_tools",
+                "ecos_use_ppc_eabi_tools",
+                "else",
+                "elseif",
+                "enable_language",
+                "enable_testing",
+                "endblock",
+                "endforeach",
+                "endfunction",
+                "endif",
+                "endmacro",
+                "endwhile",
+                "env_module",
+                "env_module_avail",
+                "env_module_list",
+                "env_module_swap",
+                "exec_program",
+                "execute_process",
+                "export",
+                "export_jars",
+                "ExternalData_Add_Target",
+                "ExternalData_Add_Test",
+                "ExternalData_Expand_Arguments",
+                "ExternalProject_Add",
+                "ExternalProject_Add_Step",
+                "ExternalProject_Add_StepDependencies",
+                "ExternalProject_Add_StepTargets",
+                "ExternalProject_Get_Property",
+                "feature_summary",
+                "FetchContent_Declare",
+                "FetchContent_GetProperties",
+                "FetchContent_MakeAvailable",
+                "FetchContent_Populate",
+                "FetchContent_SetPopulated",
+                "file",
+                "find_dependency",
+                "find_file",
+                "find_jar",
+                "find_library",
+                "find_package",
+                "find_package_check_version",
+                "find_package_handle_standard_args",
+                "find_package_message",
+                "find_path",
+                "find_program",
+                "fixup_bundle",
+                "fixup_bundle_item",
+                "fixup_qt4_executable",
+                "flex_target",
+                "fltk_wrap_ui",
+                "foreach",
+                "FortranCInterface_HEADER",
+                "FortranCInterface_VERIFY",
+                "function",
+                "generate_apple_architecture_selection_file",
+                "generate_apple_platform_selection_file",
+                "generate_export_header",
+                "get_bundle_all_executables",
+                "get_bundle_and_executable",
+                "get_bundle_keys",
+                "get_bundle_main_executable",
+                "get_cmake_property",
+                "get_directory_property",
+                "get_dotapp_dir",
+                "get_filename_component",
+                "get_item_key",
+                "get_item_rpaths",
+                "get_prerequisites",
+                "get_property",
+                "get_source_file_property",
+                "get_target_property",
+                "get_test_property",
+                "gettext_create_translations",
+                "gettext_process_po_files",
+                "gettext_process_pot_file",
+                "GNUInstallDirs_get_absolute_install_dir",
+                "gp_append_unique",
+                "gp_file_type",
+                "gp_item_default_embedded_path",
+                "gp_resolve_item",
+                "gp_resolved_file_type",
+                "gtest_add_tests",
+                "gtest_discover_tests",
+                "Hg_WC_INFO",
+                "if",
+                "include",
+                "include_directories",
+                "include_external_msproject",
+                "include_guard",
+                "include_regular_expression",
+                "install",
+                "install_files",
+                "install_jar",
+                "install_jar_exports",
+                "install_jni_symlink",
+                "install_programs",
+                "install_qt4_executable",
+                "install_qt4_plugin",
+                "install_qt4_plugin_path",
+                "install_targets",
+                "is_file_executable",
+                "kde3_add_dcop_skels",
+                "kde3_add_dcop_stubs",
+                "kde3_add_executable",
+                "kde3_add_kcfg_files",
+                "kde3_add_kdeinit_executable",
+                "kde3_add_kpart",
+                "kde3_add_moc_files",
+                "kde3_add_ui_files",
+                "kde3_automoc",
+                "kde3_install_libtool_file",
+                "link_directories",
+                "link_libraries",
+                "list",
+                "list_prerequisites",
+                "list_prerequisites_by_glob",
+                "load_cache",
+                "load_command",
+                "macro",
+                "mark_as_advanced",
+                "math",
+                "matlab_add_mex",
+                "matlab_add_unit_test",
+                "matlab_extract_all_installed_versions_from_registry",
+                "matlab_get_all_valid_matlab_roots_from_registry",
+                "matlab_get_mex_suffix",
+                "matlab_get_release_name_from_version",
+                "matlab_get_version_from_matlab_run",
+                "matlab_get_version_from_release_name",
+                "message",
+                "option",
+                "output_required_files",
+                "pkg_check_modules",
+                "pkg_get_variable",
+                "pkg_search_module",
+                "print_disabled_features",
+                "print_enabled_features",
+                "ProcessorCount",
+                "project",
+                "protobuf_generate",
+                "protobuf_generate_cpp",
+                "protobuf_generate_python",
+                "Python2_add_library",
+                "Python3_add_library",
+                "Python_add_library",
+                "qt4_add_dbus_adaptor",
+                "qt4_add_dbus_interface",
+                "qt4_add_dbus_interfaces",
+                "qt4_add_resources",
+                "qt4_add_translation",
+                "qt4_automoc",
+                "qt4_create_translation",
+                "qt4_generate_dbus_interface",
+                "qt4_generate_moc",
+                "qt4_use_modules",
+                "qt4_wrap_cpp",
+                "qt4_wrap_ui",
+                "qt_wrap_cpp",
+                "qt_wrap_ui",
+                "remove",
+                "remove_definitions",
+                "resolve_qt4_paths",
+                "return",
+                "select_library_configurations",
+                "separate_arguments",
+                "set",
+                "set_and_check",
+                "set_bundle_key_values",
+                "set_directory_properties",
+                "set_feature_info",
+                "set_package_info",
+                "set_package_properties",
+                "set_property",
+                "set_source_files_properties",
+                "set_target_properties",
+                "set_tests_properties",
+                "site_name",
+                "source_group",
+                "squish_add_test",
+                "string",
+                "subdir_depends",
+                "subdirs",
+                "Subversion_WC_INFO",
+                "Subversion_WC_LOG",
+                "swig_add_library",
+                "swig_link_libraries",
+                "target_compile_definitions",
+                "target_compile_features",
+                "target_compile_options",
+                "target_include_directories",
+                "target_link_directories",
+                "target_link_libraries",
+                "target_link_options",
+                "target_precompile_headers",
+                "target_sources",
+                "test_big_endian",
+                "try_compile",
+                "try_run",
+                "unset",
+                "use_mangled_mesa",
+                "utility_source",
+                "variable_requires",
+                "variable_watch",
+                "verify_app",
+                "verify_bundle_prerequisites",
+                "verify_bundle_symlinks",
+                "while",
+                "write_basic_package_version_file",
+                "write_compiler_detection_header",
+                "write_file",
+                "write_qt4_conf",
+                "xctest_add_bundle",
+                "xctest_add_test"
+              ],
+              "description": "Names of the commands whose arguments are laid out: on the line of the command when they fit, else one per line with the closing parenthesis alone. Any other command is kept as written (its lines move with its indent). Names are compared without case and written as listed. CMake's own commands and the commands of its modules.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "line_width": {
               "default": 80,
               "description": "Preferred maximum line width in columns.",
               "maximum": 1000,
               "minimum": 20,
+              "type": "integer"
+            },
+            "max_blank_lines": {
+              "default": 1,
+              "description": "Largest number of blank lines kept between commands and comments.",
+              "maximum": 10,
+              "minimum": 0,
               "type": "integer"
             }
           },
@@ -12710,11 +13193,362 @@
                     ],
                     "type": "string"
                   },
+                  "known_commands": {
+                    "default": [
+                      "add_compile_definitions",
+                      "add_compile_options",
+                      "add_compiler_export_flags",
+                      "add_custom_command",
+                      "add_custom_target",
+                      "add_definitions",
+                      "add_dependencies",
+                      "add_executable",
+                      "add_feature_info",
+                      "add_file_dependencies",
+                      "add_flex_bison_dependency",
+                      "add_jar",
+                      "add_library",
+                      "add_link_options",
+                      "add_subdirectory",
+                      "add_test",
+                      "android_add_test_data",
+                      "aux_source_directory",
+                      "bison_target",
+                      "block",
+                      "break",
+                      "build_command",
+                      "build_name",
+                      "check_c_compiler_flag",
+                      "check_c_source_compiles",
+                      "check_c_source_runs",
+                      "check_compiler_flag",
+                      "check_cxx_compiler_flag",
+                      "check_cxx_source_compiles",
+                      "check_cxx_source_runs",
+                      "check_cxx_symbol_exists",
+                      "check_fortran_compiler_flag",
+                      "check_fortran_function_exists",
+                      "check_fortran_source_compiles",
+                      "check_fortran_source_runs",
+                      "check_function_exists",
+                      "check_include_file",
+                      "check_include_file_cxx",
+                      "check_include_files",
+                      "check_ipo_supported",
+                      "check_language",
+                      "check_library_exists",
+                      "check_linker_flag",
+                      "check_objc_compiler_flag",
+                      "check_objc_source_compiles",
+                      "check_objc_source_runs",
+                      "check_objcxx_compiler_flag",
+                      "check_objcxx_source_compiles",
+                      "check_objcxx_source_runs",
+                      "check_pie_supported",
+                      "check_prototype_definition",
+                      "check_required_components",
+                      "check_source_compiles",
+                      "check_source_runs",
+                      "check_struct_has_member",
+                      "check_symbol_exists",
+                      "check_type_size",
+                      "check_variable_exists",
+                      "clear_bundle_keys",
+                      "cmake_add_fortran_subdirectory",
+                      "cmake_dependent_option",
+                      "cmake_file_api",
+                      "cmake_find_frameworks",
+                      "cmake_host_system_information",
+                      "cmake_instrumentation",
+                      "cmake_language",
+                      "cmake_minimum_required",
+                      "cmake_parse_arguments",
+                      "cmake_path",
+                      "cmake_pkg_config",
+                      "cmake_policy",
+                      "cmake_pop_check_state",
+                      "cmake_print_properties",
+                      "cmake_print_variables",
+                      "cmake_push_check_state",
+                      "cmake_reset_check_state",
+                      "configure_file",
+                      "configure_package_config_file",
+                      "continue",
+                      "copy_and_fixup_bundle",
+                      "copy_resolved_framework_into_bundle",
+                      "copy_resolved_item_into_bundle",
+                      "cpack_add_component",
+                      "cpack_add_component_group",
+                      "cpack_add_install_type",
+                      "cpack_configure_downloads",
+                      "cpack_ifw_add_package_resources",
+                      "cpack_ifw_add_repository",
+                      "cpack_ifw_configure_component",
+                      "cpack_ifw_configure_component_group",
+                      "cpack_ifw_configure_file",
+                      "cpack_ifw_update_repository",
+                      "create_javadoc",
+                      "create_javah",
+                      "create_test_sourcelist",
+                      "csharp_get_dependentupon_name",
+                      "csharp_get_filename_key_base",
+                      "csharp_get_filename_keys",
+                      "csharp_set_designer_cs_properties",
+                      "csharp_set_windows_forms_properties",
+                      "csharp_set_xaml_cs_properties",
+                      "ctest_build",
+                      "ctest_configure",
+                      "ctest_coverage",
+                      "ctest_coverage_collect_gcov",
+                      "ctest_empty_binary_directory",
+                      "ctest_memcheck",
+                      "ctest_read_custom_files",
+                      "ctest_run_script",
+                      "ctest_sleep",
+                      "ctest_start",
+                      "ctest_submit",
+                      "ctest_test",
+                      "ctest_update",
+                      "ctest_upload",
+                      "cxxtest_add_test",
+                      "define_property",
+                      "doxygen_add_docs",
+                      "ecos_add_executable",
+                      "ecos_add_include_directories",
+                      "ecos_adjust_directory",
+                      "ecos_use_arm_elf_tools",
+                      "ecos_use_i386_elf_tools",
+                      "ecos_use_ppc_eabi_tools",
+                      "else",
+                      "elseif",
+                      "enable_language",
+                      "enable_testing",
+                      "endblock",
+                      "endforeach",
+                      "endfunction",
+                      "endif",
+                      "endmacro",
+                      "endwhile",
+                      "env_module",
+                      "env_module_avail",
+                      "env_module_list",
+                      "env_module_swap",
+                      "exec_program",
+                      "execute_process",
+                      "export",
+                      "export_jars",
+                      "ExternalData_Add_Target",
+                      "ExternalData_Add_Test",
+                      "ExternalData_Expand_Arguments",
+                      "ExternalProject_Add",
+                      "ExternalProject_Add_Step",
+                      "ExternalProject_Add_StepDependencies",
+                      "ExternalProject_Add_StepTargets",
+                      "ExternalProject_Get_Property",
+                      "feature_summary",
+                      "FetchContent_Declare",
+                      "FetchContent_GetProperties",
+                      "FetchContent_MakeAvailable",
+                      "FetchContent_Populate",
+                      "FetchContent_SetPopulated",
+                      "file",
+                      "find_dependency",
+                      "find_file",
+                      "find_jar",
+                      "find_library",
+                      "find_package",
+                      "find_package_check_version",
+                      "find_package_handle_standard_args",
+                      "find_package_message",
+                      "find_path",
+                      "find_program",
+                      "fixup_bundle",
+                      "fixup_bundle_item",
+                      "fixup_qt4_executable",
+                      "flex_target",
+                      "fltk_wrap_ui",
+                      "foreach",
+                      "FortranCInterface_HEADER",
+                      "FortranCInterface_VERIFY",
+                      "function",
+                      "generate_apple_architecture_selection_file",
+                      "generate_apple_platform_selection_file",
+                      "generate_export_header",
+                      "get_bundle_all_executables",
+                      "get_bundle_and_executable",
+                      "get_bundle_keys",
+                      "get_bundle_main_executable",
+                      "get_cmake_property",
+                      "get_directory_property",
+                      "get_dotapp_dir",
+                      "get_filename_component",
+                      "get_item_key",
+                      "get_item_rpaths",
+                      "get_prerequisites",
+                      "get_property",
+                      "get_source_file_property",
+                      "get_target_property",
+                      "get_test_property",
+                      "gettext_create_translations",
+                      "gettext_process_po_files",
+                      "gettext_process_pot_file",
+                      "GNUInstallDirs_get_absolute_install_dir",
+                      "gp_append_unique",
+                      "gp_file_type",
+                      "gp_item_default_embedded_path",
+                      "gp_resolve_item",
+                      "gp_resolved_file_type",
+                      "gtest_add_tests",
+                      "gtest_discover_tests",
+                      "Hg_WC_INFO",
+                      "if",
+                      "include",
+                      "include_directories",
+                      "include_external_msproject",
+                      "include_guard",
+                      "include_regular_expression",
+                      "install",
+                      "install_files",
+                      "install_jar",
+                      "install_jar_exports",
+                      "install_jni_symlink",
+                      "install_programs",
+                      "install_qt4_executable",
+                      "install_qt4_plugin",
+                      "install_qt4_plugin_path",
+                      "install_targets",
+                      "is_file_executable",
+                      "kde3_add_dcop_skels",
+                      "kde3_add_dcop_stubs",
+                      "kde3_add_executable",
+                      "kde3_add_kcfg_files",
+                      "kde3_add_kdeinit_executable",
+                      "kde3_add_kpart",
+                      "kde3_add_moc_files",
+                      "kde3_add_ui_files",
+                      "kde3_automoc",
+                      "kde3_install_libtool_file",
+                      "link_directories",
+                      "link_libraries",
+                      "list",
+                      "list_prerequisites",
+                      "list_prerequisites_by_glob",
+                      "load_cache",
+                      "load_command",
+                      "macro",
+                      "mark_as_advanced",
+                      "math",
+                      "matlab_add_mex",
+                      "matlab_add_unit_test",
+                      "matlab_extract_all_installed_versions_from_registry",
+                      "matlab_get_all_valid_matlab_roots_from_registry",
+                      "matlab_get_mex_suffix",
+                      "matlab_get_release_name_from_version",
+                      "matlab_get_version_from_matlab_run",
+                      "matlab_get_version_from_release_name",
+                      "message",
+                      "option",
+                      "output_required_files",
+                      "pkg_check_modules",
+                      "pkg_get_variable",
+                      "pkg_search_module",
+                      "print_disabled_features",
+                      "print_enabled_features",
+                      "ProcessorCount",
+                      "project",
+                      "protobuf_generate",
+                      "protobuf_generate_cpp",
+                      "protobuf_generate_python",
+                      "Python2_add_library",
+                      "Python3_add_library",
+                      "Python_add_library",
+                      "qt4_add_dbus_adaptor",
+                      "qt4_add_dbus_interface",
+                      "qt4_add_dbus_interfaces",
+                      "qt4_add_resources",
+                      "qt4_add_translation",
+                      "qt4_automoc",
+                      "qt4_create_translation",
+                      "qt4_generate_dbus_interface",
+                      "qt4_generate_moc",
+                      "qt4_use_modules",
+                      "qt4_wrap_cpp",
+                      "qt4_wrap_ui",
+                      "qt_wrap_cpp",
+                      "qt_wrap_ui",
+                      "remove",
+                      "remove_definitions",
+                      "resolve_qt4_paths",
+                      "return",
+                      "select_library_configurations",
+                      "separate_arguments",
+                      "set",
+                      "set_and_check",
+                      "set_bundle_key_values",
+                      "set_directory_properties",
+                      "set_feature_info",
+                      "set_package_info",
+                      "set_package_properties",
+                      "set_property",
+                      "set_source_files_properties",
+                      "set_target_properties",
+                      "set_tests_properties",
+                      "site_name",
+                      "source_group",
+                      "squish_add_test",
+                      "string",
+                      "subdir_depends",
+                      "subdirs",
+                      "Subversion_WC_INFO",
+                      "Subversion_WC_LOG",
+                      "swig_add_library",
+                      "swig_link_libraries",
+                      "target_compile_definitions",
+                      "target_compile_features",
+                      "target_compile_options",
+                      "target_include_directories",
+                      "target_link_directories",
+                      "target_link_libraries",
+                      "target_link_options",
+                      "target_precompile_headers",
+                      "target_sources",
+                      "test_big_endian",
+                      "try_compile",
+                      "try_run",
+                      "unset",
+                      "use_mangled_mesa",
+                      "utility_source",
+                      "variable_requires",
+                      "variable_watch",
+                      "verify_app",
+                      "verify_bundle_prerequisites",
+                      "verify_bundle_symlinks",
+                      "while",
+                      "write_basic_package_version_file",
+                      "write_compiler_detection_header",
+                      "write_file",
+                      "write_qt4_conf",
+                      "xctest_add_bundle",
+                      "xctest_add_test"
+                    ],
+                    "description": "Names of the commands whose arguments are laid out: on the line of the command when they fit, else one per line with the closing parenthesis alone. Any other command is kept as written (its lines move with its indent). Names are compared without case and written as listed. CMake's own commands and the commands of its modules.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "line_width": {
                     "default": 80,
                     "description": "Preferred maximum line width in columns.",
                     "maximum": 1000,
                     "minimum": 20,
+                    "type": "integer"
+                  },
+                  "max_blank_lines": {
+                    "default": 1,
+                    "description": "Largest number of blank lines kept between commands and comments.",
+                    "maximum": 10,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },

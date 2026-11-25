@@ -177,6 +177,12 @@ fn role(g: &Grammar, n: &SyntaxNode) -> Role {
         .unwrap_or(Role::Other)
 }
 
+/// Does the graph read no statement below `n`: a function (its own unit), a node that can fail or
+/// a kind with no flow role? A jump below such a node never reaches a graph.
+pub fn is_leaf(g: &Grammar, n: &SyntaxNode) -> bool {
+    matches!(role(g, n), Role::Function | Role::Fallible | Role::Other)
+}
+
 /// Where a jump goes: a frame (by depth), out of the function, or to the nearest handler.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Target {
@@ -230,9 +236,14 @@ fn endless_test(text: &str, negated: bool) -> bool {
 /// Does the loop look endless: its test is a constant that keeps it going, or it has none where
 /// the grammar has a place for one? (A `break` inside can still end it.)
 pub fn endless_loop(g: &Grammar, text: &str, n: &SyntaxNode) -> bool {
-    match g.slot(n, "condition").and_then(SyntaxElement::into_node) {
+    match g.slot(n, "condition") {
         Some(c) => {
-            let t = code_span(&c, g).map_or("", |r| &text[r]);
+            // a bare name or literal is a token
+            let range = match &c {
+                SyntaxElement::Node(c) => code_span(c, g),
+                SyntaxElement::Token(t) => Some(t.text_range()),
+            };
+            let t = range.map_or("", |r| &text[r]);
             endless_test(t, g.has_tag(n.kind(), "negated"))
         }
         None => {
@@ -496,11 +507,12 @@ impl<'a> Builder<'a> {
     fn conditional(&mut self, n: &SyntaxNode, rest: &[SyntaxNode]) {
         let (then, mut other) = self.branches(n);
         // an `else` clause has no condition: its body runs
-        let Some(cond) = self.node(n, "condition") else {
+        let Some(cond) = self.g.slot(n, "condition") else {
             self.stmts(&then);
             return;
         };
-        self.parts(&[Some(cond)]);
+        // a bare name or literal is a token: nothing to read in it, but the test is there
+        self.parts(&[cond.into_node()]);
         let (head, then_b, else_b) = (self.cur, self.new_block(), self.new_block());
         self.edge(head, then_b, 1);
         self.edge(head, else_b, 2);

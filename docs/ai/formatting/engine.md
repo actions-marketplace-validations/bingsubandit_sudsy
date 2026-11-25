@@ -95,7 +95,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `keep_leading_blank_lines` | bool | cpp `true`, c `true` |
 | `line_width` | int 20-1000 | json `80`, css `80`, scss `80`, less `80`, html `80`, cpp `80`, c `80`, cmake `80`, graphql `80`, java `100`, js `80`, kotlin `140`, php `120`, python `88`, ruby `120`, sql `80`, toml `80`, xml `100`, yaml `80`, github-actions `80`, angular `80`, vue `80`, svelte `80`, csharp `120` |
 | `max_attributes_per_line` | int 0-100 | html `0`, angular `0`, vue `0`, svelte `0` |
-| `max_blank_lines` | int 0-10 | css `1`, scss `1`, less `1`, cpp `1`, c `1`, dockerfile `1`, editorconfig `1`, gitignore `1`, ini `1`, makefile `2`, powershell `10`, shell `1`, toml `1`, xml `1`, yaml `1`, github-actions `1` |
+| `max_blank_lines` | int 0-10 | css `1`, scss `1`, less `1`, cpp `1`, c `1`, cmake `1`, dockerfile `1`, editorconfig `1`, gitignore `1`, ini `1`, makefile `2`, powershell `10`, shell `1`, toml `1`, xml `1`, yaml `1`, github-actions `1` |
 | `member_chain_break_on_block` | `never`, `inner`, `any` | java `any`, csharp `never` |
 | `member_chain_indent` | int 0-4 | java `2`, js `1`, kotlin `1`, python `0`, csharp `1` |
 | `member_chain_keep_accesses` | `never`, `head`, `always` | java `head`, python `always`, csharp `never` |

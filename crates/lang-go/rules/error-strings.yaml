@@ -1,0 +1,26 @@
+id: error-strings
+message: error strings should not be capitalized or end with punctuation or a newline
+description: >-
+  The text of an error made with `fmt.Errorf`, `errors.New`, `errors.Errorf`, `errors.Wrap` and
+  the like ends in `.`, `:`, `!` or a newline (a
+  capital first letter is not reported). The text is the first argument, or the second of the
+  functions that wrap an error (`errors.Wrap(err, "failed.")`).
+why: >-
+  Error strings are joined into longer messages (`failed to open: ` plus the cause), so a full stop, colon, exclamation mark or newline at the end leaves a doubled or dangling mark in the result and in logs. The Go code review comments ask for messages without end punctuation.
+example: 'errors.New("failed.")'
+severity: off
+category: style
+rule:
+  any:
+    - pattern: errors.New($S)
+    - pattern: errors.Errorf($S)
+    - pattern: fmt.Errorf($S)
+    - pattern: errors.Errorf($S, $$$A)
+    - pattern: fmt.Errorf($S, $$$A)
+    - pattern: errors.Wrap($E, $S)
+    - pattern: errors.Wrapf($E, $S, $$$A)
+    - pattern: errors.WithMessage($E, $S)
+    - pattern: errors.WithMessagef($E, $S, $$$A)
+constraints:
+  S: { kind: String, regex: '(?:[.:!]|[^\\]\\n)"$|[.:!\n]`$' }
+report-on: $S

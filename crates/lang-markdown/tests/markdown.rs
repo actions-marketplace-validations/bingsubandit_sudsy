@@ -233,3 +233,26 @@ fn the_meaning_check_sees_a_dropped_escape() {
     assert!(check("a\\*b\n", "a*b\n").is_err());
     assert!(check("a\\_b\n", "a\\_b\n").is_ok());
 }
+
+/// A task marker is paragraph text: later blocks of the item indent to the list marker only,
+/// also an unclosed fence (kept as written).
+#[test]
+fn blocks_after_a_task_item_paragraph_keep_their_indent() {
+    let s = subject();
+    for md in [
+        "- [ ] a\n\n  para\n",
+        "- [ ] a\n  ```\n  x\n  ```\n",
+        "  - [ ] .\n    ````\n",
+        "- [x] a\n  ````\n  x\n",
+        "1. [ ] a\n   ````\n",
+        "- a\n  ````\n  x\n",
+        "- a\n\n  ```\n  x\n\n- b\n",
+        "- a\n  - [ ] b\n    ```\n    x\n",
+        "> - [ ] a\n>   ```\n>   x\n",
+        "1. a\n   ~~~js\n   x = 1\n",
+        "-   a\n    ````\n",
+        "- a\n  - [ ] b\n",
+    ] {
+        assert_eq!(problem(&s, md), None, "{md:?}");
+    }
+}

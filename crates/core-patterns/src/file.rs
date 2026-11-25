@@ -228,6 +228,7 @@ struct FileSpec {
     severity: Option<Level>,
     category: Option<CategorySpec>,
     description: Option<String>,
+    why: Option<String>,
     example: Option<String>,
     rule: Option<Spec>,
     token: Option<TokenSpec>,
@@ -704,6 +705,7 @@ fn meta_of(spec: &FileSpec) -> Result<&'static RuleMeta, String> {
             CategorySpec::Performance => Category::Performance,
         },
         description: leak(description),
+        why: leak(spec.why.clone().unwrap_or_default()),
         example: leak(example),
         default_level: spec.severity.unwrap_or(Level::Warn),
         fix: if spec.family.is_some() {
@@ -909,12 +911,47 @@ fn scalar(text: &'static str) -> Option<Cow<'static, str>> {
     plain.then_some(Cow::Borrowed(t))
 }
 
+/// A text key's value: a one-line scalar, or a `>-` block (folded, one indent) read from the lines
+/// that follow it: a line break is a space, a blank line a line break (the paragraphs of a text).
+fn text(
+    value: &'static str,
+    lines: &mut std::iter::Peekable<std::str::Lines<'static>>,
+) -> Option<Cow<'static, str>> {
+    if value.trim_end() != ">-" {
+        return scalar(value);
+    }
+    let (mut indent, mut blanks, mut out) = (None, 0, String::new());
+    while let Some(line) = lines.peek() {
+        if line.trim().is_empty() {
+            blanks += 1;
+        } else if line.starts_with(' ') {
+            let width = line.len() - line.trim_start().len();
+            if *indent.get_or_insert(width) != width {
+                return None;
+            }
+            match (out.is_empty(), blanks) {
+                (true, _) => {}
+                (false, 0) => out.push(' '),
+                (false, 1) => out.push('\n'),
+                _ => return None,
+            }
+            out.push_str(line[width..].trim_end());
+            blanks = 0;
+        } else {
+            break;
+        }
+        lines.next();
+    }
+    (!out.is_empty()).then_some(Cow::Owned(out))
+}
+
 /// What the scalars of a default-off rule give: the metadata and the message, borrowed from the
 /// rule file.
 struct Light {
     id: Cow<'static, str>,
     message: Cow<'static, str>,
     description: Option<Cow<'static, str>>,
+    why: Option<Cow<'static, str>>,
     example: Cow<'static, str>,
     category: Category,
     /// The Rust family that builds the rule (a `family` document, which has no `rule`).
@@ -933,6 +970,7 @@ impl Light {
             id: leak(&self.id),
             category: self.category,
             description: leak(self.description.as_ref().unwrap_or(&self.message)),
+            why: self.why.as_ref().map_or("", leak),
             example: leak(&self.example),
             default_level: Level::Off,
             fix: None,
@@ -949,11 +987,13 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
     if doc.contains("role") {
         return None;
     }
-    let (mut id, mut message, mut description, mut example) = (None, None, None, None);
+    let (mut id, mut message, mut description, mut why, mut example) =
+        (None, None, None, None, None);
     let (mut has_rule, mut inside, mut off) = (false, false, false);
     let mut family = None;
     let mut category = Category::Style;
-    for line in doc.lines() {
+    let mut lines = doc.lines().peekable();
+    while let Some(line) = lines.next() {
         if line.trim().is_empty() || line.starts_with('#') {
             continue;
         }
@@ -973,7 +1013,8 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
             "params" => inside = true,
             "id" => id = Some(scalar(value)?),
             "message" => message = Some(scalar(value)?),
-            "description" => description = Some(scalar(value)?),
+            "description" => description = Some(text(value, &mut lines)?),
+            "why" => why = Some(text(value, &mut lines)?),
             "example" => example = Some(scalar(value)?),
             "severity" => off = &*scalar(value)? == "off",
             "category" => {
@@ -997,6 +1038,7 @@ fn light(doc: &'static str, grammar: &core_syntax::Grammar) -> Option<Light> {
         id,
         message: message?,
         description,
+        why,
         example: example?,
         category,
         family,
@@ -1094,13 +1136,14 @@ fn load_full(
         .into_iter()
         // A rule written on roles that no node of the language has is not part of the language.
         .filter(|spec| {
-            let roles = spec.rule.as_ref().and_then(|r| r.role.as_ref());
-            roles.is_none_or(|r| {
-                let grammar = parser.grammar();
-                r.list()
-                    .iter()
-                    .any(|n| !grammar.nodes_with_tag(n).is_empty())
-            })
+            let rule = spec.rule.as_ref();
+            let grammar = parser.grammar();
+            let has = |n: &String| !grammar.nodes_with_tag(n).is_empty();
+            rule.and_then(|r| r.role.as_ref())
+                .is_none_or(|r| r.list().iter().any(has))
+                && rule
+                    .and_then(|r| r.needs_role.as_ref())
+                    .is_none_or(|r| r.list().iter().all(has))
         })
         .filter(|spec| !spec.per_language || parser.grammar().rule_row(&spec.id).is_some())
         .map(|mut spec| {
@@ -1506,5 +1549,39 @@ impl PatternRule {
                 diagnostic.fix(Fix::new(fix.title.clone(), fix.kind, vec![edit]));
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::text;
+
+    fn read(block: &'static str) -> Option<String> {
+        let mut lines = block.lines().peekable();
+        let value = lines.next().expect("the key's value");
+        let out = text(value, &mut lines).map(|c| c.into_owned());
+        assert!(
+            out.is_none() || lines.peek().is_none_or(|l| !l.starts_with(' ')),
+            "the block is read to its end"
+        );
+        out
+    }
+
+    #[test]
+    fn a_folded_block_is_one_line_per_paragraph() {
+        let out = read(">-\n  one two\n  three\n\n  four\nid: x");
+        assert_eq!(out.as_deref(), Some("one two three\nfour"));
+    }
+
+    #[test]
+    fn a_block_that_folds_in_a_way_not_read_is_left_to_the_full_parse() {
+        assert_eq!(read(">-\n  one\n    more indented\n"), None);
+        assert_eq!(read(">-\n  one\n\n\n  two\n"), None);
+        assert_eq!(read("|-\n  one\n"), None);
+    }
+
+    #[test]
+    fn a_plain_scalar_stays_a_scalar() {
+        assert_eq!(read("'a b'").as_deref(), Some("a b"));
     }
 }

@@ -1,0 +1,15 @@
+id: range
+message: should omit 2nd value from range; this loop is equivalent to `for $K := range ...`
+description: >-
+  `for k, _ := range x`: the second value is the blank identifier, so `for k := range x` says the
+  same.
+why: >-
+  `for k, _ := range x` and `for k := range x` do the same; the blank identifier is noise that suggests the second value matters. The short form is what `gofmt -s` produces, so code that uses it needs no later cleanup.
+example: "for i, _ := range xs {}"
+severity: off
+category: style
+rule:
+  any:
+    - pattern: for $K, _ := range $X { $$$B }
+    - pattern: for $K, _ = range $X { $$$B }
+report-on: $K

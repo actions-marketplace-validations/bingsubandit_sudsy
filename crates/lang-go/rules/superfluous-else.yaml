@@ -1,0 +1,13 @@
+id: superfluous-else
+family: simplify
+params: { check: superfluous-else, jump: break continue goto, flat: true }
+message: "if block ends with a break, continue or goto statement, so drop this else and outdent its block"
+description: >-
+  An `else` block after an `if` block that ends in `break`, `continue` or `goto`: the code of the `else` can follow the `if`. An `else if` is left alone.
+why: >-
+  When the `if` block ends in `break`, `continue` or `goto`, control never reaches the `else`, so the `else` only indents the code that follows. Without it the code reads as a guard followed by the main path. Removing the `else` does not change what the loop does.
+
+  To fix, delete `else` and move its block after the `if`.
+example: "func f(a bool) {\n\tfor {\n\t\tif a {\n\t\t\tbreak\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t}\n}"
+severity: off
+category: style

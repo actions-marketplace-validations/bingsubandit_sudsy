@@ -5,137 +5,183 @@
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
 # language names of its rows in bench/speed.json.
 # `requires` is one sentence the site shows on the language page.
+# `popularity` orders every language list (README tables, docs/languages.md, the site; ready rows first, then the others,
+# each by popularity): one member per language of the row with the raw values of the two sources of languages.yaml (the
+# demand formula, xtask/full/src/newlang.rs `demand`); the row takes its most popular member. A source that does not list a
+# language has no value and the demand is an estimate (by the other source x 2.27; neither source: 0.1).
+#     gh = GitHub Innovation Graph languages.csv (github/innovationgraph, data/languages.csv), pushers of 2026 Q2 summed over
+#          economies, top HTML 8,329,335; several linguist names of one family are summed (SQL: SQL + PLpgSQL + TSQL + PLSQL +
+#          SQLPL + HiveQL).
+#     so = Stack Overflow Developer Survey 2026 (survey.stackoverflow.co/2026/technology/data), % of the 13,924 respondents who
+#          answered "languages worked with" (count of the page / 13,924), top JavaScript 62.8; HTML and CSS are one answer
+#          (HTML/CSS), Shell is "Bash/Shell (all shells)"; the tool lists of the survey ("cloud platforms and tools"): Docker /
+#          Docker Compose, Terraform, Make, CMake; web frameworks: Vue.js, Angular, Svelte.
+# `estimate: {value, basis}` of a member replaces the demand where no source lists the format (data formats): set by hand, always
+#     marked an estimate. Only rows of support.yaml use it; the new-language scores of languages.yaml keep the formula.
+# `section` is the heading of the section of docs/languages.md of rows that share one (default: the row's `language`).
 # `popular: true` (a widely used secondary tool, weight 1) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
+  popularity: [{name: JavaScript, gh: 6987508, so: 62.8}, {name: TypeScript, gh: 3455867, so: 44.3}]
   ids: [js]
   speed: [JS/TS]
   format: [{tool: prettier-js, name: Prettier, groups: [real-world]}]
   lint: [{tool: eslint, name: ESLint}, {tool: typescript-eslint, name: typescript-eslint}]
 - language: Python
+  popularity: [{name: Python, gh: 5176028, so: 58.8}]
   ids: [python]
   speed: [Python]
   format: [{tool: ruff, name: ruff format, groups: [real-world]}]
   lint: [{tool: ruff, name: ruff}]
 - language: Protobuf
+  popularity: [{name: Protobuf, estimate: {value: 0.2, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
   ids: [protobuf]
   speed: [Protobuf]
   format: [{tool: buf, name: buf format, groups: [real-world]}]
   lint: [{tool: buf, name: buf}]
 - language: Terraform (HCL)
+  popularity: [{name: HCL, gh: 183867, so: 14.3}]
   ids: [hcl]
   speed: [HCL]
   format: [{tool: terraform, name: terraform fmt, groups: [real-world]}]
   lint: [{tool: tflint, name: tflint}]
 - language: GraphQL
+  popularity: [{name: GraphQL, estimate: {value: 0.2, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
   ids: [graphql]
   format: [{tool: prettier, name: Prettier, groups: [graphql]}]
 - language: TOML
+  popularity: [{name: TOML, estimate: {value: 0.4, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}, gh: 199}]
   ids: [toml]
   speed: [TOML]
   format: [{tool: taplo, name: taplo, groups: [real-world]}]
 - language: HTML
+  popularity: [{name: HTML, gh: 8329335, so: 59.0}]
+  section: HTML, Vue, Svelte, Angular
   ids: [html]
   speed: [HTML]
   format: [{tool: prettier-html, name: Prettier, groups: [real-world]}]
   lint: [{tool: html-eslint, name: html-eslint, popular: true}, {tool: html-validate, name: html-validate, primary: true}, {tool: htmlhint, name: htmlhint}]
 - language: Vue / Svelte
+  popularity: [{name: Vue, gh: 304416, so: 12.7}, {name: Svelte, gh: 85652, so: 5.8}]
+  section: HTML, Vue, Svelte, Angular
   ids: [vue, svelte]
   speed: [Vue, Svelte]
   format: [{tool: prettier-html, name: Prettier, groups: [real-world-vue, real-world-svelte]}]
   lint: [{tool: eslint-plugin-vue, name: eslint-plugin-vue}, {tool: eslint-plugin-svelte, name: eslint-plugin-svelte}]
 - language: Angular templates
+  popularity: [{name: Angular, so: 11.8}]
+  section: HTML, Vue, Svelte, Angular
   ids: [angular]
   speed: [Angular]
   format: [{tool: prettier-angular, name: Prettier, groups: [components, angular, realworld-app]}]
 - language: CSS / SCSS / Less
+  popularity: [{name: CSS, gh: 6577861, so: 59.0}, {name: SCSS, gh: 570377}, {name: Less, gh: 65081}]
   ids: [css, scss, less]
   speed: [CSS, SCSS, Less]
   format: [{tool: prettier-css, name: Prettier, groups: [real-world]}]
   lint: [{tool: stylelint, name: stylelint}, {tool: stylelint-scss, name: stylelint-scss}, {tool: stylelint-less, name: stylelint-less}]
 - language: Markdown
+  popularity: [{name: Markdown, estimate: {value: 0.9, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}, gh: 7163}]
   ids: [markdown]
   speed: [Markdown]
   format: [{tool: prettier, name: Prettier, groups: [markdown]}]
   lint: [{tool: markdownlint, name: markdownlint}]
 - language: YAML
+  popularity: [{name: YAML, estimate: {value: 0.8, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}, gh: 4408}]
   ids: [yaml]
   speed: [YAML]
   format: [{tool: prettier, name: Prettier, groups: [yaml, real-world-yaml]}]
   lint: [{tool: yamllint, name: yamllint}]
 - language: JSON / JSONC
+  popularity: [{name: JSON, estimate: {value: 0.9, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}, gh: 3499}, {name: JSONC}]
   ids: [json]
   speed: [JSON]
   format: [{tool: prettier, name: Prettier, groups: [json, real-world-json]}, {tool: biome, name: Biome, groups: [real-world]}]
   lint: [{tool: eslint-jsonc, name: eslint-plugin-jsonc}]
 - language: PowerShell
+  popularity: [{name: PowerShell, gh: 768342, so: 24.9}]
   ids: [powershell]
   speed: [PowerShell]
   format: [{tool: invoke-formatter, name: Invoke-Formatter, groups: [real-world]}]
   lint: [{tool: psscriptanalyzer, name: PSScriptAnalyzer}]
 - language: PHP
+  popularity: [{name: PHP, gh: 641934, so: 17.9}]
   ids: [php]
   speed: [PHP]
   format: [{tool: php-cs-fixer, name: PHP-CS-Fixer, note: "measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains)"}]
   lint: [{tool: phpstan, name: PHPStan, blocked: "needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision)"}]
 - language: Java
+  popularity: [{name: Java, gh: 1217096, so: 27.9}]
   ids: [java]
   speed: [Java]
   format: [{tool: google-java-format, name: google-java-format}]
   lint: [{tool: checkstyle, name: Checkstyle}]
 - language: Kotlin
+  popularity: [{name: Kotlin, gh: 527756, so: 10.9}]
   ids: [kotlin]
   speed: [Kotlin]
   format: [{tool: ktlint, name: ktlint}]
   lint: [{tool: ktlint, name: ktlint}]
 - language: Shell
+  popularity: [{name: Shell, gh: 2803590, so: 51.9}]
   ids: [shell]
   speed: [Shell]
   format: [{tool: shfmt, name: shfmt, groups: [real-world]}]
   lint: [{tool: shellcheck, name: ShellCheck}]
 - language: SQL
+  popularity: [{name: SQL, gh: 564880, so: 59.2}]
   ids: [sql]
   speed: [SQL]
   format: [{tool: sqlfluff, name: sqlfluff, groups: [real-world]}]
   lint: [{tool: sqlfluff, name: sqlfluff}]
 - language: C#
+  popularity: [{name: C#, gh: 633224, so: 27.5}]
   ids: [csharp]
   requires: Needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0); every other language works without it.
   speed: [C#, C# (.editorconfig)]
   format: [{tool: csharpier, name: CSharpier, groups: [real-world]}]
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]
 - language: XML
+  popularity: [{name: XML, estimate: {value: 0.4, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}, gh: 217}]
   ids: [xml]
   speed: [XML]
   format: [{tool: csharpier-xml, name: CSharpier XML, groups: [real-world]}]
 - language: C / C++
+  popularity: [{name: C, gh: 1030891, so: 22.0}, {name: C++, gh: 1088120, so: 24.6}]
   ids: [c, cpp]
   format: [{tool: clang-format, name: clang-format, note: "line wrapping is not compared"}]
   lint: [{tool: clang-tidy, name: clang-tidy, blocked: "no clang-tidy catalog and no measured target yet"}]
 - language: Ruby
+  popularity: [{name: Ruby, gh: 449257, so: 5.9}]
   ids: [ruby]
   speed: [Ruby]
   lint: [{tool: rubocop, name: RuboCop}]
 - language: CMake
+  popularity: [{name: CMake, gh: 608541, so: 11.7}]
   ids: [cmake]
   lint: [{tool: cmake-lint, name: cmake-lint}]
 - language: Go
+  popularity: [{name: Go, gh: 440791, so: 16.7}]
   ids: [go]
   lint: [{tool: revive, name: revive}]
 - language: Dockerfile
+  popularity: [{name: Dockerfile, gh: 2143139, so: 46.3}]
   ids: [dockerfile]
   speed: [Dockerfile]
   stability: [dockerfile]
   lint: [{tool: hadolint, name: hadolint}]
 - language: Makefile
+  popularity: [{name: Makefile, gh: 966194, so: 17.8}]
   ids: [makefile]
   speed: [Makefile]
   stability: [makefile]
   lint: [{tool: checkmake, name: checkmake}]
 - language: GitHub Actions
+  popularity: [{name: GitHub Actions, estimate: {value: 0.5, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
   ids: [github-actions]
   speed: [GitHub Actions]
   stability: [github-actions]
   lint: [{tool: actionlint, name: actionlint}]
 - language: INI / EditorConfig / .gitignore
+  popularity: [{name: INI, estimate: {value: 0.3, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}, {name: EditorConfig}, {name: .gitignore}]
   ids: [ini, editorconfig, gitignore]
   stability: [ini, editorconfig, gitignore]

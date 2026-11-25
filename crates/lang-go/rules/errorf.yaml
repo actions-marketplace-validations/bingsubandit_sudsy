@@ -1,0 +1,14 @@
+id: errorf
+message: should replace errors.New(fmt.Sprintf(...)) with fmt.Errorf(...)
+description: >-
+  `errors.New(fmt.Sprintf(...))` is `fmt.Errorf(...)` (the `t.Error(fmt.Sprintf(...))`
+  form on a `*testing.T` needs types and is not read).
+why: >-
+  `fmt.Errorf` formats and wraps (`%w`) in one call, and `go vet` knows its format string. `errors.New(fmt.Sprintf(...))` formats a string first and then wraps it in an error, which is longer and cannot wrap another error with `%w`.
+
+  To fix, call `fmt.Errorf` with the same format and arguments.
+example: 'errors.New(fmt.Sprintf("x %d", 1))'
+severity: off
+category: style
+rule:
+  pattern: errors.New(fmt.Sprintf($$$A))

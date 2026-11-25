@@ -451,6 +451,7 @@ macro_rules! meta {
         static META: RuleMeta = RuleMeta {
             id: $id,
             category: Category::$category,
+            why: "",
             description: $description,
             example: $example,
             default_level: Level::$level,

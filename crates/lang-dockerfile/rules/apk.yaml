@@ -3,7 +3,19 @@ family: run-command
 params: { program: 'apk', args: 'add', pinned: '[=~<>]|\.apk$', skip-flag-args: 't virtual repository X' }
 message: 'pin the versions in apk add: pkg=version'
 description: >-
-  An apk add package without a version.
+  Reports an `apk add` that names a package without a version. A package is pinned when its name has
+  `=`, `~`, `<` or `>` (`curl=8.5.0-r0`, `curl~8.5`) or when it is a local `.apk` file; a variable
+  such as `$PKGS` counts as unpinned, because its content is unknown.
+
+  The values of options that take one (`--virtual NAME`, `-t NAME`, `--repository URL`, `-X URL`)
+  are not taken for packages, and an `apk add` with no package is fine.
+why: >-
+  Without a version, `apk add` installs whatever the Alpine repository holds on the day of the
+  build. Rebuilding the same Dockerfile later can give an image with other package versions, and a
+  new release that breaks your program arrives without any change on your side.
+
+  A pinned build is repeatable. The price is upkeep: when the repository replaces a version with a
+  newer one, the build fails until you update the pin.
 example: 'RUN apk add curl'
 severity: off
 category: suspicious
@@ -13,7 +25,15 @@ family: run-command
 params: { program: 'apk', args: 'add', needs: '--no-cache', cache-dir: '/var/cache/apk' }
 message: 'use apk add --no-cache'
 description: >-
-  apk add without --no-cache.
+  Reports an `apk add` without the `--no-cache` flag. A `RUN` with a `--mount` of type `cache` or
+  `tmpfs` on `/var/cache/apk` is not reported, since nothing is stored in the image there.
+why: >-
+  Without `--no-cache`, `apk add` keeps the downloaded package index in `/var/cache/apk`. That copy
+  is written into the layer and stays in the image, making it larger for data nobody reads at run
+  time.
+
+  `--no-cache` fetches the index for this one command and stores nothing; it replaces the older pair
+  `apk update` and `rm -rf /var/cache/apk/*`.
 example: 'RUN apk add curl=1'
 severity: off
 category: performance

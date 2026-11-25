@@ -73,8 +73,12 @@ pub const FAMILY: Family = Family {
 /// of the name. `reset`: a name that starts with it and one that does not undo each other (a
 /// later `!x` after `x` is no repeat of an earlier `!x`). `report: item` reports the item's code,
 /// not its name; `lead` is a token kind that, found in the item before its code on the same line, starts the
-/// report. `related`: the text of the first occurrence's note. `message` has `{name}` and
-/// `{group}`.
+/// report. `related`: the text of the first occurrence's note. `message` has `{name}`,
+/// `{group}` and `{previous}`. `consistent: true` turns the check round: the items of a group
+/// (`group` is required) must all have the name of the group's first item (the receiver of the
+/// methods of a type); a later one with another name is reported with `{previous}`, the first
+/// name. `ignore` is a regular expression of names that are left out (neither compared nor
+/// remembered).
 struct UniqueNames {
     meta: &'static RuleMeta,
     message: String,
@@ -93,6 +97,9 @@ struct UniqueNames {
     report_item: bool,
     lead: Option<String>,
     related: Option<String>,
+    consistent: bool,
+    ignore: Option<String>,
+    ignored: crate::RegexCache,
 }
 
 fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String> {
@@ -117,7 +124,13 @@ fn build(meta: &'static RuleMeta, mut p: Params) -> Result<Box<dyn Rule>, String
         report_item: p.choice("report", false, &[("name", false), ("item", true)])?,
         lead: p.optional("lead"),
         related: p.optional("related"),
+        consistent: p.flag("consistent")?,
+        ignore: p.optional("ignore"),
+        ignored: crate::RegexCache::default(),
     };
+    if rule.consistent && rule.group.is_none() {
+        return Err("`consistent` needs a `group`".into());
+    }
     p.done()?;
     Ok(Box::new(rule))
 }
@@ -172,7 +185,7 @@ impl Rule for UniqueNames {
     }
 }
 
-type Seen<'t> = HashMap<(Cow<'t, str>, Cow<'t, str>), (TextRange, bool)>;
+type Seen<'t> = HashMap<(Cow<'t, str>, Cow<'t, str>), (TextRange, bool, Cow<'t, str>)>;
 
 impl UniqueNames {
     /// [`Rule::check`] for the rules that read names from the green tree where the paths allow
@@ -298,16 +311,32 @@ impl UniqueNames {
                 range = TextRange::new(t.text_range().start(), range.end());
             }
         }
+        if (self.ignore.as_deref()).is_some_and(|re| self.ignored.is_match(re, &name)) {
+            return;
+        }
+        if self.consistent {
+            match seen.entry((group, Cow::Borrowed(""))) {
+                Entry::Occupied(e) if e.get().2 != name => {
+                    let message = fill(&self.message, &name, &e.key().0, &e.get().2);
+                    ctx.report(range, message);
+                }
+                Entry::Occupied(_) => {}
+                Entry::Vacant(e) => {
+                    e.insert((range, false, name));
+                }
+            }
+            return;
+        }
         let negated = self
             .reset
             .as_ref()
             .is_some_and(|r| name.starts_with(r.as_str()));
         if self.reset.is_some() {
-            seen.retain(|_, (_, n)| *n == negated);
+            seen.retain(|_, (_, n, _)| *n == negated);
         }
         match seen.entry((group, key)) {
             Entry::Occupied(e) => {
-                let message = fill(&self.message, &name, &e.key().0);
+                let message = fill(&self.message, &name, &e.key().0, "");
                 let first = e.get().0;
                 let d = ctx.report(range, message);
                 if let Some(related) = &self.related {
@@ -315,14 +344,14 @@ impl UniqueNames {
                 }
             }
             Entry::Vacant(e) => {
-                e.insert((range, negated));
+                e.insert((range, negated, Cow::Borrowed("")));
             }
         }
     }
 }
 
-/// `template` with `{name}` and `{group}` filled in: one allocation.
-fn fill(template: &str, name: &str, group: &str) -> String {
+/// `template` with `{name}`, `{group}` and `{previous}` filled in: one allocation.
+fn fill(template: &str, name: &str, group: &str, previous: &str) -> String {
     let mut out = String::with_capacity(template.len() + name.len() + group.len());
     let mut rest = template;
     while let Some(at) = rest.find('{') {
@@ -333,6 +362,9 @@ fn fill(template: &str, name: &str, group: &str) -> String {
             rest = r;
         } else if let Some(r) = rest.strip_prefix("{group}") {
             out.push_str(group);
+            rest = r;
+        } else if let Some(r) = rest.strip_prefix("{previous}") {
+            out.push_str(previous);
             rest = r;
         } else {
             out.push('{');

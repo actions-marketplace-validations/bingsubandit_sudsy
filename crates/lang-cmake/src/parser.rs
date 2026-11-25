@@ -63,7 +63,7 @@ fn stray(p: &mut parse::Parser<'_>) {
 fn command(p: &mut parse::Parser<'_>, closers: &[u32], pairing: &mut Pairing) {
     p.start(k::COMMAND);
     pairing.word(p.text_at(p.pos), p.pos as u32);
-    p.bump(); // name
+    p.bump_as(k::NAME);
     let open = p.pos;
     let limit = limit(p, closers, open);
     p.bump(); // (

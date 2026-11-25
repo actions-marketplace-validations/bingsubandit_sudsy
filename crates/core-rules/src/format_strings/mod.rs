@@ -65,6 +65,7 @@ macro_rules! rules {
             meta: &RuleMeta {
                 id: $id,
                 category: Category::$category,
+                why: "",
                 description: $description,
                 example: $example,
                 default_level: Level::$level,

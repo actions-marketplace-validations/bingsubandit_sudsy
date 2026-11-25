@@ -6567,6 +6567,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -6676,6 +6677,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -6753,37 +6755,47 @@
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement).",
+      "description": "A block with no statement and no comment, as the body of an `if`, `else`, loop, `try` or `finally` (also when the language wraps the block in a node of its own; an empty `catch` is `no-empty-catch`) (ESLint no-empty, Checkstyle EmptyBlock, PHPCS Generic.CodeAnalysis.EmptyStatement). With `comment_handles` off a comment does not count (revive empty-block). With `waiting_loops` an empty loop whose condition is a call is a wait and is left alone, and so is a loop whose head matches `ignored_loop_heads`.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "class A { void F() {\n try { } catch (Exception) { }\n try { } catch { /* ignored on purpose */ }\n try { } catch { Log(); }\n try { } catch { try { } catch { Log(); } }\n} }\n",
-        "language": "csharp",
+        "input": "package a\n\nfunc f(ok bool, ch chan int, g func() bool) {\n\tif ok {\n\t}\n\tif ok {\n\t\t// nothing\n\t} else {\n\t}\n\tfor ok {\n\t}\n\tfor i := 0; i < 3; i++ {\n\t}\n\tfor i := range ch {\n\t}\n\tfor g() {\n\t}\n\tfor range ch {\n\t}\n\t{\n\t}\n\tgo func() {}()\n\tselect {\n\t}\n}\n\nfunc empty() {}\n\nfunc forever() {\n\tfor {\n\t}\n}\n",
+        "language": "go",
         "spans": [
           {
-            "column": 6,
-            "length": 3,
-            "line": 2
-          },
-          {
-            "column": 6,
-            "length": 3,
-            "line": 3
-          },
-          {
-            "column": 6,
-            "length": 3,
+            "column": 8,
+            "length": 1,
             "line": 4
           },
           {
-            "column": 6,
-            "length": 3,
-            "line": 5
+            "column": 8,
+            "length": 1,
+            "line": 6
           },
           {
-            "column": 22,
-            "length": 3,
-            "line": 5
+            "column": 9,
+            "length": 1,
+            "line": 8
+          },
+          {
+            "column": 9,
+            "length": 1,
+            "line": 10
+          },
+          {
+            "column": 25,
+            "length": 1,
+            "line": 12
+          },
+          {
+            "column": 20,
+            "length": 1,
+            "line": 14
+          },
+          {
+            "column": 6,
+            "length": 1,
+            "line": 30
           }
         ]
       },
@@ -6793,6 +6805,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -6800,8 +6813,28 @@
         "python",
         "ruby"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": true,
+          "description": "A comment in the block counts as content",
+          "name": "comment_handles",
+          "type": "bool"
+        },
+        {
+          "default": false,
+          "description": "Leave alone an empty loop whose condition is a call",
+          "name": "waiting_loops",
+          "type": "bool"
+        },
+        {
+          "default": "\\b\\B",
+          "description": "A regular expression for the condition or head of a loop whose empty body is left alone",
+          "name": "ignored_loop_heads",
+          "type": "string"
+        }
+      ],
       "presets": [
+        "go/revive",
         "js/eslint-recommended"
       ],
       "upstream": [
@@ -6811,6 +6844,13 @@
           "partial": true,
           "tool": "eslint",
           "url": "https://eslint.org/docs/latest/rules/no-empty"
+        },
+        {
+          "id": "empty-block",
+          "note": "a bare `{}` block statement and an empty `switch` body are not read",
+          "partial": true,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#empty-block"
         }
       ]
     },
@@ -6975,6 +7015,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "php",
@@ -7067,23 +7108,18 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "class A { int F() { return 1; G(); G(); }\n int H(int x) { if (false) { G(); } throw null; x++; } int G() => 1; }\n",
-        "language": "csharp",
+        "input": "package a\n\nfunc f(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\tg()\n\t}\n\tg()\n\treturn 0\n}\n\nfunc h(a bool) int {\n\treturn 1\n\tg()\n}\n\nfunc k(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\treturn 2\n\t}\n\tg()\n}\n\nfunc m(a bool) int {\n\tif a {\n\t\tgoto done\n\t}\n\treturn 1\ndone:\n\tg()\n\treturn 2\n}\n\nfunc p(ok bool) {\n\tfor ok {\n\t\tg()\n\t}\n\tg()\n}\n",
+        "language": "go",
         "spans": [
           {
-            "column": 31,
-            "length": 4,
-            "line": 1
+            "column": 2,
+            "length": 3,
+            "line": 15
           },
           {
-            "column": 30,
-            "length": 4,
-            "line": 2
-          },
-          {
-            "column": 49,
-            "length": 4,
-            "line": 2
+            "column": 2,
+            "length": 3,
+            "line": 24
           }
         ]
       },
@@ -7093,6 +7129,7 @@
         "c",
         "cpp",
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
@@ -7109,6 +7146,7 @@
         }
       ],
       "presets": [
+        "go/revive",
         "js/eslint-recommended",
         "js/biome-recommended",
         "js/oxlint"
@@ -7121,6 +7159,13 @@
           "url": "https://eslint.org/docs/latest/rules/no-unreachable"
         },
         {
+          "id": "unreachable-code",
+          "note": "the code after `panic`, `os.Exit`, `log.Fatal*` and `t.Fatal*` is not read as unreachable",
+          "partial": true,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#unreachable-code"
+        },
+        {
           "id": "RCS1148",
           "partial": false,
           "tool": "Roslynator",
@@ -7131,7 +7176,7 @@
     {
       "category": "performance",
       "default_level": "off",
-      "description": "apk add without --no-cache.",
+      "description": "Reports an `apk add` without the `--no-cache` flag. A `RUN` with a `--mount` of type `cache` or `tmpfs` on `/var/cache/apk` is not reported, since nothing is stored in the image there.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7161,12 +7206,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3019"
         }
-      ]
+      ],
+      "why": "Without `--no-cache`, `apk add` keeps the downloaded package index in `/var/cache/apk`. That copy is written into the layer and stays in the image, making it larger for data nobody reads at run time.\n\n`--no-cache` fetches the index for this one command and stores nothing; it replaces the older pair `apk update` and `rm -rf /var/cache/apk/*`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An apk add package without a version.",
+      "description": "Reports an `apk add` that names a package without a version. A package is pinned when its name has `=`, `~`, `<` or `>` (`curl=8.5.0-r0`, `curl~8.5`) or when it is a local `.apk` file; a variable such as `$PKGS` counts as unpinned, because its content is unknown.\n\nThe values of options that take one (`--virtual NAME`, `-t NAME`, `--repository URL`, `-X URL`) are not taken for packages, and an `apk add` with no package is fine.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7196,12 +7242,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3018"
         }
-      ]
+      ],
+      "why": "Without a version, `apk add` installs whatever the Alpine repository holds on the day of the build. Rebuilding the same Dockerfile later can give an image with other package versions, and a new release that breaks your program arrives without any change on your side.\n\nA pinned build is repeatable. The price is upkeep: when the repository replaces a version with a newer one, the build fails until you update the pin."
     },
     {
       "category": "performance",
       "default_level": "off",
-      "description": "apt-get install that installs recommended packages.",
+      "description": "Reports an `apt-get install` that also installs recommended packages. `--no-install-recommends` (or `-o APT::Install-Recommends=false`) stops that. Other `apt-get` commands are not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7261,12 +7308,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3015"
         }
-      ]
+      ],
+      "why": "By default `apt-get` also installs the packages that a package only recommends, which it does not need to run. In an image they add size and build time, and more software to patch and to be attacked through.\n\nWith the flag only the real dependencies are installed; name anything else you need yourself."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An apt-get install package without a version.",
+      "description": "Reports an `apt-get install` of a package without a version. A package is pinned when its name has `=` (`curl=7.88.1-10`) or `/` (`curl/stable`, a release), or when it is a `.deb` file. The value of `-t` or `--target-release` is not taken for a package. A variable such as `$PKGS` counts as unpinned.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7306,12 +7354,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3008"
         }
-      ]
+      ],
+      "why": "An unpinned install takes the newest version the distribution offers on the day of the build. Two builds of one Dockerfile can then differ, and a new release can break the image without any change in your code.\n\nPinned versions make the build repeatable. Debian and Ubuntu remove old versions from their repositories, so a pin stops resolving after a while and needs updating."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "apt-get install without -y.",
+      "description": "Reports an `apt-get install` that does not answer apt's prompts. The flags that do are `-y`, `--yes`, `--assume-yes` and `-qq` (also `-q=2` and `--quiet` twice), which implies yes; they may stand anywhere in the command (`apt-get -y install` is fine). Other `apt-get` commands are not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7341,22 +7390,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3014"
         }
-      ]
+      ],
+      "why": "A build has no terminal to answer questions. When `apt-get` needs a confirmation, for example because the install pulls in additional packages, it prints `Do you want to continue? [Y/n] Abort.` and exits with an error, which fails the `RUN` and the build."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "A `COPY --from` that names the stage it is in.",
+      "description": "Reports a `COPY --from` that names its own stage. That is `COPY --from=build` in the stage that `FROM alpine AS build` starts. Names are compared without regard to case.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 22,
-            "line": 24
+            "line": 28
           }
         ]
       },
@@ -7376,27 +7426,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3023"
         }
-      ]
+      ],
+      "why": "A stage cannot copy from itself: its content does not exist yet while it is built, and BuildKit stops with a circular dependency error. The source is usually an earlier stage, or the build context (then drop `--from`)."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A `COPY --from` that names no earlier stage: not a stage name, not the index of an earlier stage, and not an image (no `:`).",
+      "description": "Reports a `COPY --from=name` that names no stage defined earlier. Not reported: the number of an earlier stage (`--from=0`) and an image reference with a `:` (`--from=nginx:1`). A stage defined further down does not count. Names are compared without regard to case.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 22,
-            "line": 13
+            "line": 16
           },
           {
             "column": 1,
-            "length": 19,
-            "line": 15
+            "length": 20,
+            "line": 19
           }
         ]
       },
@@ -7416,22 +7467,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3022"
         }
-      ]
+      ],
+      "why": "Docker does not fail on an unknown name: it takes it for an image and pulls it from the registry. A typo in a stage name (`buidler`) or a reference to a stage defined further down copies files from whatever image has that name, or fails only when the pull fails."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An ADD with no URL and no archive (`.tar`, `.gz`, `.tgz`, `.xz` and the like) among its arguments, which ADD would extract or download.",
+      "description": "Reports an `ADD` that only copies. That is an `ADD` with no URL (`http://`, `https://`) and no archive (a name ending in `.tar`, `.gz`, `.tgz`, `.xz`, `.bz2` and the like) among its arguments.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 16,
-            "line": 21
+            "line": 22
           }
         ]
       },
@@ -7452,22 +7504,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3020"
         }
-      ]
+      ],
+      "why": "`ADD` does more than copy: it unpacks local tar archives and downloads URLs. For a plain file or folder that is a surprise, since an archive you meant to copy is extracted and a value that turns out to be a URL starts a download. `COPY` only copies, so the instruction says what happens.\n\nKeep `ADD` for unpacking an archive into the image."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "A COPY with more than one source whose last argument does not end with `/`.",
+      "description": "Reports a `COPY` with several sources whose destination does not end with `/` (`COPY a b /app`). The JSON form, a single source and a heredoc (`<<`) are not checked.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 14,
-            "line": 18
+            "line": 19
           }
         ]
       },
@@ -7488,12 +7541,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3021"
         }
-      ]
+      ],
+      "why": "With several sources the destination must be a directory, and Docker takes a destination without a trailing slash for a file name. The build stops with an error that the destination of a copy of several sources must end with `/`."
     },
     {
       "category": "performance",
       "default_level": "off",
-      "description": "A RUN that runs apt-get update (or apt update) and does not remove /var/lib/apt/lists, which stays in the image layer. A cache mount on that directory is fine.",
+      "description": "Reports a `RUN` that updates the apt package lists and does not delete them. It runs `apt-get update` or `apt update` and has no `rm` of `/var/lib/apt/lists` after it in the same `RUN`. `apt-get clean` does not count, it empties another directory. A `RUN` with a `--mount` of type `cache` or `tmpfs` on `/var/lib/apt/lists` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7534,12 +7588,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3009"
         }
-      ]
+      ],
+      "why": "`apt-get update` downloads the package index files into `/var/lib/apt/lists`, often tens of megabytes that no program needs at run time. They are written into the layer of that `RUN`, and deleting them in a later `RUN` hides them but does not make the image smaller, because the earlier layer still holds the files.\n\nTo fix, remove them in the same `RUN`: `apt-get update && apt-get install -y ... && rm -rf /var/lib/apt/lists/*`."
     },
     {
       "category": "performance",
       "default_level": "off",
-      "description": "dnf install with no dnf clean all after it.",
+      "description": "Reports a `RUN` that installs with dnf and does not clean the cache. It runs `dnf install`, `upgrade` or `reinstall` (also `microdnf`, and the short forms `in`, `up`, `rei`) and has no `dnf clean all` or `microdnf clean all` after it in the same `RUN`. An `rm -rf /var/cache/libdnf5*` written exactly so is accepted as well.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7579,12 +7634,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3040"
         }
-      ]
+      ],
+      "why": "`dnf` stores the metadata and packages it downloaded under `/var/cache`. That cache is written into the layer and stays in the image, adding size that nothing uses at run time.\n\nClean it in the same `RUN`: a later `RUN` cannot shrink a layer that was already written."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "dnf install without -y.",
+      "description": "Reports a `dnf install`, `dnf groupinstall` or `dnf localinstall` (also with `microdnf`) without `-y` or `--assumeyes`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7614,22 +7670,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3038"
         }
-      ]
+      ],
+      "why": "Before it installs, dnf asks `Is this ok [y/N]`. A build has no terminal to answer, so dnf aborts with `Operation aborted` and the `RUN` fails."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "Two FROM instructions name their stage alike.",
+      "description": "Reports a stage name that an earlier stage already uses, as in `FROM a AS app` followed by `FROM b AS app`. Names are compared without regard to case, as Docker does.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 22,
             "line": 5
+          },
+          {
+            "column": 1,
+            "length": 22,
+            "line": 7
           }
         ]
       },
@@ -7649,16 +7711,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3024"
         }
-      ]
+      ],
+      "why": "`FROM name` and `COPY --from=name` refer to a stage by its name. With two stages of one name the builder cannot tell which one is meant, so Docker rejects the file."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "An EXPOSE with a port above 65535.",
+      "description": "Reports an `EXPOSE` with a port number above 65535. Several ports, `/tcp` and `/udp` suffixes and ranges (`8000-70000`) are all checked; a variable is not.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -7684,12 +7747,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3011"
         }
-      ]
+      ],
+      "why": "TCP and UDP ports are 16-bit numbers from 0 to 65535. A larger number is a typo (a digit too many), and Docker rejects it as an invalid port, so the build fails."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "An instruction other than ARG before the first FROM.",
+      "description": "Reports an instruction other than `ARG` before the first `FROM`. Comments, parser directives and blank lines are allowed there.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7719,22 +7783,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3061"
         }
-      ]
+      ],
+      "why": "Every instruction works on a build stage, and a stage starts with `FROM`. Only `ARG` may come first, because its value can be used in the `FROM` line (`ARG VERSION=3` then `FROM alpine:${VERSION}`). Any other instruction first makes the Dockerfile invalid, and Docker rejects it."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A gem install gem without a version.",
+      "description": "Reports a `gem install` (or `gem i`) of a gem without a version: `rails` instead of `rails:7.1.3`. `-v` or `--version` pins as well. The values of options that take one (`--source URL`, `-i DIR`, `--platform NAME`) are not taken for gems.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN gem install rails\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
+        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN npm i express\nRUN npm add express@4\nRUN gem install rails\nRUN gem install --no-document rails\nRUN gem install --source https://rubygems.org rails:7.0\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 21,
-            "line": 14
+            "line": 16
+          },
+          {
+            "column": 1,
+            "length": 35,
+            "line": 17
           }
         ]
       },
@@ -7755,27 +7825,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3028"
         }
-      ]
+      ],
+      "why": "Without a version `gem install` takes the newest release on the day of the build, and so a major release of a gem can break the image, and two builds of one Dockerfile give different results."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A go install or get package without a version (or at latest).",
+      "description": "Reports a `go install` or `go get` of a package without a version, or at `latest` or `none` (`example.com/tool@latest`). `example.com/tool@v1.4.0` is pinned. A path that starts with `.` or `/` (a package of the current module) is not reported.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN gem install rails\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
+        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN npm i express\nRUN npm add express@4\nRUN gem install rails\nRUN gem install --no-document rails\nRUN gem install --source https://rubygems.org rails:7.0\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 28,
-            "line": 17
+            "line": 21
           },
           {
             "column": 1,
             "length": 35,
-            "line": 19
+            "line": 23
           }
         ]
       },
@@ -7796,16 +7867,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3062"
         }
-      ]
+      ],
+      "why": "`@latest` builds whatever release is newest on the day of the build, so the tool in the image changes between builds and a new release can fail or behave differently. Without any version, `go install` uses the version in the `go.mod` of the working directory (and fails when there is none), and `go get` moves it to the latest release. In both cases the Dockerfile does not say which version ends up in the image.\n\nWrite the version: `go install example.com/tool@v1.4.0`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A CMD, ENTRYPOINT or HEALTHCHECK CMD in shell form, which runs under `sh -c` and does not get signals.",
+      "description": "Reports a `CMD`, `ENTRYPOINT` or `HEALTHCHECK CMD` in shell form. That is `CMD node server.js` instead of the JSON array form `CMD [\"node\", \"server.js\"]`. The same instruction after `ONBUILD` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -7836,27 +7908,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3025"
         }
-      ]
+      ],
+      "why": "The shell form runs the command as `/bin/sh -c \"...\"`, so the shell, not your program, is the main process of the container. `docker stop` sends SIGTERM to that shell, which usually does not pass it on; after the timeout (10 seconds by default) Docker kills the container with SIGKILL, and the program gets no chance to shut down cleanly. With an `ENTRYPOINT` in shell form, the arguments of `CMD` and of `docker run` are ignored as well.\n\nThe JSON form starts the program directly. If you need a shell, write `[\"sh\", \"-c\", \"exec node server.js\"]`."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "A stage whose last USER is root (`root`, `0`, `root:group`, `0:group`).",
+      "description": "Reports a stage whose last `USER` is root, on that `USER`. That is `root` or `0`, also `root:group` and `0:group`. Every stage is checked, build stages too. A stage with no `USER` instruction is not reported.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 8,
-            "line": 11
+            "line": 14
           },
           {
             "column": 1,
             "length": 9,
-            "line": 27
+            "line": 31
           }
         ]
       },
@@ -7876,12 +7949,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3002"
         }
-      ]
+      ],
+      "why": "The container's main process runs as the last user. If the application is compromised, the attacker is root inside the container, which makes it easier to damage mounted volumes or to break out of the container, and files the process writes to a volume are owned by root.\n\nEnd the stage with an unprivileged `USER` (a numeric one, see `numeric-user-id`)."
     },
     {
       "category": "performance",
       "default_level": "off",
-      "description": "A RUN that is a single command, directly after another single-command RUN with the same flags (a comment in between does not count).",
+      "description": "Reports a `RUN` that could be merged into the `RUN` before it. Both are one simple command, with the same leading options (`--mount=...`). A comment between the two does not break the pair; any other instruction does. A `RUN` with `&&`, `;` or a pipe is neither reported nor part of a pair.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7932,12 +8006,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3059"
         }
-      ]
+      ],
+      "why": "Every `RUN` creates an image layer. Files that one `RUN` writes and the next one deletes (a download, a package cache) still sit in the earlier layer and count toward the image size; joined with `&&` in one `RUN`, the cleanup really removes them.\n\nThe price is a coarser build cache: when any part of the joined `RUN` changes, all of it runs again."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A RUN that calls apt.",
+      "description": "Reports a `RUN` that calls `apt`; use `apt-get` or `apt-cache` instead.",
       "example": {
         "config": null,
         "fixed": null,
@@ -7967,22 +8042,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3027"
         }
-      ]
+      ],
+      "why": "`apt` is made for people at a terminal: its output and options may change between versions, and it prints a warning that it has no stable command line interface and should be used with caution in scripts. `apt-get` and `apt-cache` keep an interface that scripts can rely on."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A `COPY --from` with `/` as a source and as the target.",
+      "description": "Reports a `COPY --from=stage / /`, which copies the whole file system of a stage to `/`. A copy of `/` into a folder (`/app/`) or of a folder is not reported.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 17,
-            "line": 17
+            "line": 18
           }
         ]
       },
@@ -8002,16 +8078,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3067"
         }
-      ]
+      ],
+      "why": "It copies everything of the build stage: compilers, package caches, sources, and the stage's own `/etc` and `/usr` over the ones of the final image. The image becomes as large as the build stage, which defeats the purpose of a multi-stage build, and files of the base image are overwritten.\n\nCopy only what the final image needs: `COPY --from=build /out/app /usr/local/bin/`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A FROM with a fixed `--platform`; a variable such as `$BUILDPLATFORM` is fine.",
+      "description": "Reports a `FROM` with a fixed `--platform`, such as `--platform=linux/amd64`. A value that contains `$BUILDPLATFORM` or `$TARGETPLATFORM` is not reported; other variables such as `$TARGETARCH` are.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8037,12 +8114,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3029"
         }
-      ]
+      ],
+      "why": "A fixed platform ties the build to one CPU architecture. On an arm64 machine the base image is pulled for amd64 and runs under emulation, which is slow and sometimes breaks, and a multi-platform build produces the same amd64 content for every target.\n\nWithout the option the base follows the platform of the build; a stage that must run on the build machine uses `--platform=$BUILDPLATFORM`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A RUN that calls ssh, vim, shutdown, service, ps, free, top, kill or mount.",
+      "description": "Reports a `RUN` that calls `ssh`, `vim`, `shutdown`, `service`, `ps`, `free`, `top`, `kill` or `mount`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8072,16 +8150,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3001"
         }
-      ]
+      ],
+      "why": "A build runs without a terminal and without an init system, and each `RUN` ends when its command returns. `ssh`, `vim` and `top` need a terminal. `service` and `shutdown` talk to an init system that the container does not have; a daemon started by `service` stops when that `RUN` ends, so it is not running in containers of the image. `ps`, `free`, `kill` and `mount` report on or change the temporary build sandbox, and nothing of it lasts."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A FROM image tagged `latest` (without a digest).",
+      "description": "Reports a `FROM` whose image has the tag `latest` (`alpine:latest`). A `latest` image with a digest (`alpine:latest@sha256:...`) is not reported; an image with no tag at all is the business of `untagged-base-image`.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8107,22 +8186,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3007"
         }
-      ]
+      ],
+      "why": "`latest` is only a name that the image's owner moves to each new release. The base of your image then changes without any edit in the Dockerfile: a rebuild can pull a new major version of the operating system or runtime, and a build that worked yesterday fails or behaves differently today.\n\nA release tag (`alpine:3.20`) or a digest keeps the base fixed."
     },
     {
       "category": "cleanup",
       "default_level": "warn",
-      "description": "A MAINTAINER instruction.",
+      "description": "Reports a `MAINTAINER` instruction.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 16,
-            "line": 16
+            "line": 17
           }
         ]
       },
@@ -8142,22 +8222,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL4000"
         }
-      ]
+      ],
+      "why": "`MAINTAINER` has been deprecated since Docker 1.13 and may be removed. Its replacement, a label such as `LABEL org.opencontainers.image.authors=\"Name <name@example.com>\"`, carries the same information under a standard key that registries and tools read."
     },
     {
       "category": "correctness",
       "default_level": "error",
-      "description": "An ONBUILD whose instruction is ONBUILD, FROM or MAINTAINER.",
+      "description": "Reports an `ONBUILD` whose instruction is `ONBUILD`, `FROM` or `MAINTAINER`.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 21,
             "line": 15
+          },
+          {
+            "column": 1,
+            "length": 20,
+            "line": 16
           }
         ]
       },
@@ -8177,16 +8263,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3043"
         }
-      ]
+      ],
+      "why": "Docker does not allow these as triggers: `ONBUILD ONBUILD`, `ONBUILD FROM` and `ONBUILD MAINTAINER` are rejected with an error when the file is built, so the Dockerfile cannot be used."
     },
     {
       "category": "cleanup",
       "default_level": "off",
-      "description": "A FROM with `--platform=$TARGETPLATFORM`, which is what it does without the option.",
+      "description": "Reports a `FROM` with `--platform=$TARGETPLATFORM` (or `${TARGETPLATFORM}`), which is what `FROM` does without the option.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8212,16 +8299,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3065"
         }
-      ]
+      ],
+      "why": "The target platform is already the default platform of a `FROM`, so the option changes nothing and only makes a reader look for what it does. Drop it."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A stage named `scratch` or `context`.",
+      "description": "Reports a stage named `scratch` or `context` (`FROM alpine AS scratch`), compared without regard to case.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8247,37 +8335,38 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3063"
         }
-      ]
+      ],
+      "why": "BuildKit reserves both names: `scratch` is the empty base image and `context` is the name of the build context. A stage that takes one of them collides with that meaning, so `FROM scratch` or a reference to `context` no longer clearly says what it uses."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "An ARG or ENV whose name contains `api_key`, `client_key`, `password`, `private`, `secret`, `token` or `username`, or is a well-known credential variable. Build secrets belong in `--mount=type=secret`.",
+      "description": "Reports an `ARG` or `ENV` whose name suggests a secret. The name contains `api_key`, `client_key`, `password`, `private`, `secret`, `token` or `username` (any case), or is one of a list of well-known credential variables such as `AWS_ACCESS_KEY_ID`. Only the name is read, so `PASSWORD_FILE` and `PRIVATE_NET` are reported too, and the value is not looked at.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 17,
-            "line": 27
-          },
-          {
-            "column": 1,
-            "length": 19,
             "line": 28
           },
           {
             "column": 1,
-            "length": 16,
+            "length": 19,
             "line": 29
           },
           {
             "column": 1,
+            "length": 16,
+            "line": 30
+          },
+          {
+            "column": 1,
             "length": 23,
-            "line": 31
+            "line": 32
           }
         ]
       },
@@ -8298,12 +8387,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3064"
         }
-      ]
+      ],
+      "why": "The value of an `ENV` is stored in the image configuration, and the value of an `ARG` shows up in `docker history`. Anyone who can pull the image can read them (`docker inspect`, `docker history`), even when a later instruction unsets them.\n\nA secret needed only during the build belongs in a build secret (`RUN --mount=type=secret,id=name ...`); a runtime secret belongs in the environment of the running container or a secrets store."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A RUN that links /bin/sh.",
+      "description": "Reports a `RUN` that replaces `/bin/sh`. That is an `ln` command with `/bin/sh` among its arguments (`ln -sf /bin/bash /bin/sh`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -8333,12 +8423,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL4005"
         }
-      ]
+      ],
+      "why": "Replacing `/bin/sh` changes the shell that every script of the image, and of the packages you install, expects to be a POSIX `sh`. Scripts that start with `#!/bin/sh` then run under another shell than the one they were written for, and package scripts can fail in odd ways.\n\nTo use another shell for the build, the `SHELL` instruction (`SHELL [\"/bin/bash\", \"-c\"]`) changes only the shell of the later `RUN` instructions."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A RUN that calls sudo.",
+      "description": "Reports a `RUN` that calls `sudo`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8388,22 +8479,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3004"
         }
-      ]
+      ],
+      "why": "A `RUN` already runs as the user of the last `USER` instruction, root by default, so `sudo` adds nothing. Most images do not have it installed, and where it exists it may ask for a password or reset the environment (`HOME`, `PATH`), so the command sees something else than the rest of the build.\n\nFor a step that needs root, put `USER root` before it and switch back after it; to drop privileges at start, use a tool such as `gosu` in the entrypoint."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An npm install package without a version.",
+      "description": "Reports an `npm install` (also `npm i` and `npm add`) of a package without a version: `express` instead of `express@4.18.2`, `@scope/name` instead of `@scope/name@1.2.0`. A path, a tarball (`.tgz`, `.tar.gz`) or a git URL with a `#ref` counts as pinned. The value of `--loglevel` or `--registry` is not taken for a package, and an `npm install` with no package (it reads `package.json`) is not reported.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN gem install rails\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
+        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN npm i express\nRUN npm add express@4\nRUN gem install rails\nRUN gem install --no-document rails\nRUN gem install --source https://rubygems.org rails:7.0\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 23,
             "line": 10
+          },
+          {
+            "column": 1,
+            "length": 17,
+            "line": 14
           }
         ]
       },
@@ -8424,22 +8521,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3016"
         }
-      ]
+      ],
+      "why": "Without a version npm installs the latest release on the day of the build, so a new major version of the package can break the image and two builds of one Dockerfile differ.\n\nPin the version in the command, or keep it in `package.json` with a lock file and use `npm ci`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A USER that is a name rather than a numeric id (a variable is accepted).",
+      "description": "Reports a `USER` whose user is a name instead of a number (`USER app`, `USER app:1000`). `USER 1000`, `USER 1000:app` and a variable are not reported: only the user part is checked, the group may be a name.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 8,
-            "line": 24
+            "line": 25
           }
         ]
       },
@@ -8460,16 +8558,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3066"
         }
-      ]
+      ],
+      "why": "A name is looked up in the `/etc/passwd` of the image at run time, which tools outside the image cannot do. Kubernetes with `runAsNonRoot: true` refuses to start a container whose image user is a name (it cannot verify that the user is not root), and file permissions on mounted volumes use the number, not the name.\n\nCreate the user with a fixed id (`useradd -u 1000 app`) and write `USER 1000`."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A pip install package without a version.",
+      "description": "Reports a `pip install` (also `pip3`, `pip3.12`) of a package without a version. A package is pinned when it has a specifier (`==`, `>=`, `<`, `!=`, `~=`) or is a wheel, a source archive or a path (`.whl`, `.tar.gz`, anything with a `/`). A VCS requirement such as `git+https://example.com/x.git` must name a revision after `@`.\n\nNot reported: `pip install -r requirements.txt` and `-c constraints.txt` (the versions are in the file), `pip install .`, and the values of options such as `-i`, `-e` or `-t`. `python -m pip install` and `pipenv` are not checked.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN gem install rails\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
+        "input": "FROM node:20\nRUN pip install flask\nRUN pip install flask==2.0 \"requests>=2\"\nRUN pip3 install -r requirements.txt\nRUN pip install --no-cache-dir -i https://x/simple flask==1\nRUN pip install .\nRUN pip install git+https://github.com/a/b\nRUN pip install git+https://github.com/a/b@v1\nRUN npm install\nRUN npm install express\nRUN npm install express@4 @scope/pkg@1\nRUN npm install --loglevel verbose express@4\nRUN npm install ./local\nRUN npm i express\nRUN npm add express@4\nRUN gem install rails\nRUN gem install --no-document rails\nRUN gem install --source https://rubygems.org rails:7.0\nRUN gem install rails:7.0\nRUN gem install rails -v 7.0\nRUN go install example.com/x\nRUN go install example.com/x@v1\nRUN go install example.com/x@latest\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8501,12 +8600,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3013"
         }
-      ]
+      ],
+      "why": "An unpinned `pip install` takes the latest release of the package, and of the libraries it depends on, on the day of the build. A new major version can break the application, and two builds of one Dockerfile give different images.\n\nPin the packages, ideally in a `requirements.txt` made by a lock tool, and install it with `-r`."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A RUN with a pipe in a stage whose SHELL instruction does not set pipefail.",
+      "description": "Reports a `RUN` with a pipe (`a | b`) in a stage whose `SHELL` does not set `pipefail`. No earlier `SHELL` instruction of the stage has a word that contains `pipefail` (`SHELL [\"/bin/bash\", \"-o\", \"pipefail\", \"-c\"]`). A `set -o pipefail` inside the `RUN` itself does not count. A new `FROM` starts the check again.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8542,12 +8642,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL4006"
         }
-      ]
+      ],
+      "why": "The exit status of a pipe is the one of its last command. `curl -f https://example.com/x | tar xz` succeeds even when curl fails and tar gets nothing, so the build goes on with a missing or broken file and the error shows up much later. With `pipefail` any failing command of the pipe fails the `RUN`.\n\nTo fix, set the option for the stage with `SHELL [\"/bin/bash\", \"-o\", \"pipefail\", \"-c\"]`; the default `/bin/sh` of some images (Debian's dash) does not have the option."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A yum or dnf install package without a version.",
+      "description": "Reports a `yum install`, `dnf install` or `microdnf install` of a package without a version. A package is pinned when it is written `name-version` (`curl-7.88.1`: a digit after a dash), is a `.rpm` file or contains a variable. Commands with `module` or `group` are not checked.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8595,16 +8696,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3041"
         }
-      ]
+      ],
+      "why": "An unpinned install takes the newest version in the enabled repositories on the day of the build. Two builds of one Dockerfile can then differ, and a new release can break the image without any change in your code.\n\nPinned versions make the build repeatable. Repositories drop old versions, so a pin needs updating from time to time."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A second CMD in one stage.",
+      "description": "Reports each `CMD` after the first one in the same stage. A `CMD` after `ONBUILD` is not counted, and a new `FROM` starts the count again.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8630,22 +8732,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL4003"
         }
-      ]
+      ],
+      "why": "A container has one default command. When a stage lists several `CMD` instructions only the last one takes effect, and the earlier ones do nothing. They look like configuration that runs, so a reader edits the wrong line or believes a command runs that never does.\n\nDelete all but the one you mean."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A second ENTRYPOINT in one stage.",
+      "description": "Reports each `ENTRYPOINT` after the first one in the same stage. An `ENTRYPOINT` after `ONBUILD` is not counted, and a new `FROM` starts the count again.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 16,
-            "line": 20
+            "line": 24
           }
         ]
       },
@@ -8665,22 +8768,23 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL4004"
         }
-      ]
+      ],
+      "why": "A container has one entrypoint. When a stage lists several `ENTRYPOINT` instructions only the last one takes effect, and the earlier ones are ignored without a warning, so a change to an earlier line does nothing.\n\nDelete all but the one you mean."
     },
     {
       "category": "suspicious",
       "default_level": "warn",
-      "description": "A second HEALTHCHECK in one stage.",
+      "description": "Reports each `HEALTHCHECK` after the first one in the same stage, `HEALTHCHECK NONE` included. A new `FROM` starts the count again.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 17,
-            "line": 22
+            "line": 26
           }
         ]
       },
@@ -8700,22 +8804,28 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3012"
         }
-      ]
+      ],
+      "why": "A container has one health check. When a stage lists several only the last one takes effect, so an earlier one (an interval or a command you tuned) is ignored and the container is judged by another check than the file suggests."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A FROM image with neither a tag nor a digest, which builds on whatever `latest` is. `scratch`, a variable and an earlier stage's name are fine.",
+      "description": "Reports a `FROM` image with neither a tag nor a digest (`FROM alpine`). Docker reads it as `:latest`. Not reported: `scratch`, a variable (`$BASE`) and the name of an earlier stage (compared without case). A `:` in the registry host (`localhost:5000/app`) is a port, not a tag.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM localhost:5000/img\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=0 /a /b\nCOPY --from=9 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=last /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
+        "input": "FROM alpine\nFROM alpine:3 AS build\nFROM build\nFROM scratch\nFROM alpine:3 AS build\nFROM $BASE\nFROM alpine:3 AS Build\nFROM BUILD\nFROM localhost:5000/img\nFROM localhost:5000/img:1\nFROM alpine@sha256:abc\nUSER root\nUSER app\nUSER 0:0\nCOPY --from=build /a /b\nCOPY --from=nope /a /b\nCOPY --from=BUILD /a /b\nCOPY --from=0 /a /b\nCOPY --from=99 /a /b\nCOPY --from=alpine:3 /a /b\nCMD [\"a\"]\nCMD [\"b\"]\nENTRYPOINT [\"a\"]\nENTRYPOINT [\"b\"]\nHEALTHCHECK CMD a\nHEALTHCHECK CMD b\nFROM alpine:3 AS last\nCOPY --from=LAST /a /b\nUSER app\nCMD [\"a\"]\nUSER root\n",
         "language": "dockerfile",
         "spans": [
           {
             "column": 1,
             "length": 11,
             "line": 1
+          },
+          {
+            "column": 1,
+            "length": 23,
+            "line": 9
           }
         ]
       },
@@ -8735,12 +8845,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3006"
         }
-      ]
+      ],
+      "why": "An image without a tag is pulled as `latest`, so the Dockerfile does not even say which version it builds on. The base changes with each upstream release, and a rebuild can fail or behave differently with no change in the file.\n\nName a release (`alpine:3.20`) or a digest."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A RUN that calls cd.",
+      "description": "Reports a `RUN` that calls `cd`, anywhere in its script (also in a subshell such as `(cd sub && make)`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -8770,12 +8881,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3003"
         }
-      ]
+      ],
+      "why": "`cd` changes the directory for that one `RUN`; the next instruction starts again in the `WORKDIR`, so it is easy to believe you are in a directory you are not in.\n\n`WORKDIR` states the directory once, creates it when it is missing, and applies to every later `RUN`, `CMD`, `ENTRYPOINT`, `COPY` and `ADD`."
     },
     {
       "category": "style",
       "default_level": "off",
-      "description": "A wget call with no progress, quiet or log-file flag.",
+      "description": "Reports a `wget` call that does not limit its progress output. It has none of `--progress`, `-q` or `--quiet`, `-nv` or `--no-verbose`, `-o` or `--output-file`, `-a` or `--append-output`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8810,16 +8922,17 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3047"
         }
-      ]
+      ],
+      "why": "By default wget draws a progress bar. A build is not a terminal, so each update is logged as a line of its own, and a large download adds thousands of lines to the build log. The log gets hard to read and CI logs reach their size limits.\n\n`--progress=dot:giga`, `-nv` or `-q` keep the output short."
     },
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A WORKDIR whose path is not absolute (a leading `/`, a drive letter or a variable).",
+      "description": "Reports a `WORKDIR` with a relative path. A path is absolute when it starts with `/`, a drive letter (`C:`) or a variable (`$HOME`, `${DIR}/x`). Quotes around the path make no difference, and a relative path is reported also after an absolute `WORKDIR`.",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
+        "input": "FROM alpine:latest\nFROM --platform=linux/amd64 alpine:3\nFROM --platform=$TARGETPLATFORM alpine:3\nFROM --platform=$BUILDPLATFORM alpine:3 AS scratch\nFROM alpine:3@sha256:abc\nWORKDIR app\nWORKDIR /app\nWORKDIR $HOME\nEXPOSE 8080 70000\nEXPOSE 80/tcp 443\nCMD node server.js\nCMD [\"node\", \"server.js\"]\nENTRYPOINT /run.sh\nONBUILD CMD echo hi\nONBUILD ONBUILD RUN x\nONBUILD MAINTAINER x\nMAINTAINER a@b.c\nCOPY --from=0 / /\nCOPY a b /dest\nCOPY a b /dest/\nCOPY a /dest\nADD app.js /app/\nADD app.tar.gz /app/\nADD https://example.com/f /app/\nUSER app\nUSER 1000:1000\nUSER $UID\nENV DB_PASSWORD=x\nENV A=1 NPM_TOKEN=y\nARG GITHUB_TOKEN\nARG VERSION=1\nENV AWS_ACCESS_KEY_ID=x\n",
         "language": "dockerfile",
         "spans": [
           {
@@ -8845,12 +8958,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3000"
         }
-      ]
+      ],
+      "why": "A relative `WORKDIR` is resolved against the previous `WORKDIR`, or against the one of the base image, which you may not control. Adding an instruction or changing the base image then moves the directory without any sign in this line. An absolute path always means the same place."
     },
     {
       "category": "performance",
       "default_level": "off",
-      "description": "yum install with no yum clean all after it.",
+      "description": "Reports a `RUN` that installs with yum and does not clean the cache. It runs `yum install` and has no `yum clean all` after it in the same `RUN`. An `rm -rf /var/cache/yum/*` written exactly so is accepted as well.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8880,12 +8994,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3032"
         }
-      ]
+      ],
+      "why": "`yum install` stores the metadata and packages it downloaded under `/var/cache/yum`. That cache is written into the layer and stays in the image, adding size that nothing uses at run time.\n\nClean it in the same `RUN`: a later `RUN` cannot shrink a layer that was already written."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "yum install without -y.",
+      "description": "Reports a `yum install`, `yum groupinstall` or `yum localinstall` without `-y` or `--assumeyes`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8915,12 +9030,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3030"
         }
-      ]
+      ],
+      "why": "Before it installs, yum asks `Is this ok [y/N]`. A build has no terminal to answer, so yum reads the missing answer as no, exits with an error, and the `RUN` fails."
     },
     {
       "category": "performance",
       "default_level": "off",
-      "description": "zypper install with no zypper clean after it.",
+      "description": "Reports a `RUN` that installs with zypper and does not clean the cache. It runs `zypper install` (`in`) and has no `zypper clean` or `zypper cc` after it in the same `RUN`. A `RUN` with a `--mount` of type `cache` or `tmpfs` on `/var/cache/zypp` is not reported.",
       "example": {
         "config": null,
         "fixed": null,
@@ -8955,12 +9071,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3036"
         }
-      ]
+      ],
+      "why": "`zypper install` stores the metadata and packages it downloaded under `/var/cache/zypp`. That cache is written into the layer and stays in the image, adding size that nothing uses at run time.\n\nClean it in the same `RUN`: a later `RUN` cannot shrink a layer that was already written."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A zypper dist-upgrade.",
+      "description": "Reports a `zypper dist-upgrade` (or `dup`).",
       "example": {
         "config": null,
         "fixed": null,
@@ -8990,12 +9107,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3035"
         }
-      ]
+      ],
+      "why": "A distribution upgrade moves every package to the newest version of the enabled repositories, possibly into a new distribution release. The image is then no longer the release that the base image's tag names, and two builds can end in different states.\n\nUse `zypper update` to apply fixes within the release, or move to a newer base image."
     },
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "A zypper install package without a version.",
+      "description": "Reports a `zypper install` (`in`) of a package without a version. A package is pinned when its name has `=`, `<` or `>` (`curl=7.88.1`) or when it is a `.rpm` file.",
       "example": {
         "config": null,
         "fixed": null,
@@ -9030,12 +9148,13 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3037"
         }
-      ]
+      ],
+      "why": "An unpinned install takes the newest version in the enabled repositories on the day of the build. Two builds of one Dockerfile can then differ, and a new release can break the image without any change in your code.\n\nPinned versions make the build repeatable. Repositories drop old versions, so a pin needs updating from time to time."
     },
     {
       "category": "correctness",
       "default_level": "warn",
-      "description": "zypper install without -y.",
+      "description": "Reports a `zypper` command that asks for confirmation. That is `install` (`in`), `remove` (`rm`), `source-install` (`si`) or `patch` without `-n`, `--non-interactive`, `--no-confirm` or `-y`.",
       "example": {
         "config": null,
         "fixed": null,
@@ -9065,7 +9184,8 @@
           "tool": "hadolint",
           "url": "https://github.com/hadolint/hadolint/wiki/DL3034"
         }
-      ]
+      ],
+      "why": "zypper asks for confirmation before it changes packages and, when there is a conflict, which solution to take. A build has no terminal to answer, so the command cannot continue and the `RUN` fails.\n\n`--non-interactive` makes zypper take the default answer to every question."
     },
     {
       "category": "correctness",
@@ -9421,6 +9541,252 @@
     {
       "category": "style",
       "default_level": "off",
+      "description": "A package-level `var` of one name made by `errors.New` or `fmt.Errorf` starts with `err`, or `Err` when exported.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nimport \"errors\"\n\nvar failed = errors.New(\"x\")\nvar Bad = errors.New(\"x\")\nvar errOK = errors.New(\"x\")\nvar ErrOK = fmt.Errorf(\"x\")\nvar _ = errors.New(\"x\")\nvar (\n\toops error = errors.New(\"x\")\n\tone, two     = errors.New(\"x\"), errors.New(\"y\")\n\tother        = other()\n)\n\nfunc f() {\n\tvar local = errors.New(\"x\")\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 5,
+            "length": 24,
+            "line": 5
+          },
+          {
+            "column": 5,
+            "length": 21,
+            "line": 6
+          },
+          {
+            "column": 2,
+            "length": 28,
+            "line": 11
+          }
+        ]
+      },
+      "fix": null,
+      "id": "error-naming",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "error-naming",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#error-naming"
+        }
+      ],
+      "why": "A package-level error variable is a sentinel that callers compare against with `errors.Is`, and it is read from other packages. The `err` and `Err` prefixes make such variables recognizable at the use site and keep the exported ones apart from other exported names. It is a Go convention; nothing breaks without it."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The text of an error made with `fmt.Errorf`, `errors.New`, `errors.Errorf`, `errors.Wrap` and the like ends in `.`, `:`, `!` or a newline (a capital first letter is not reported). The text is the first argument, or the second of the functions that wrap an error (`errors.Wrap(err, \"failed.\")`).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nvar a = errors.New(\"failed.\")\nvar b = fmt.Errorf(\"failed: %w\", err)\nvar c = fmt.Errorf(\"failed:\")\nvar d = errors.Wrap(err, \"could not read!\")\nvar e = errors.New(\"line\\n\")\nvar f = errors.New(\"Capitalized\")\nvar g = errors.New(\"quoted \\\\n\")\nvar h = errors.New(`raw.`)\nvar i = errors.New(msg + \".\")\nvar j = log.Printf(\"failed.\")\nvar k = errors.New(\"\")\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 20,
+            "length": 9,
+            "line": 8
+          },
+          {
+            "column": 20,
+            "length": 9,
+            "line": 10
+          },
+          {
+            "column": 26,
+            "length": 17,
+            "line": 11
+          },
+          {
+            "column": 20,
+            "length": 8,
+            "line": 12
+          },
+          {
+            "column": 20,
+            "length": 6,
+            "line": 15
+          }
+        ]
+      },
+      "fix": null,
+      "id": "error-strings",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "error-strings",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#error-strings"
+        }
+      ],
+      "why": "Error strings are joined into longer messages (`failed to open: ` plus the cause), so a full stop, colon, exclamation mark or newline at the end leaves a doubled or dangling mark in the result and in logs. The Go code review comments ask for messages without end punctuation."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`errors.New(fmt.Sprintf(...))` is `fmt.Errorf(...)` (the `t.Error(fmt.Sprintf(...))` form on a `*testing.T` needs types and is not read).",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f() {\n\t_ = errors.New(fmt.Sprintf(\"x %d\", 1))\n\t_ = errors.New(fmt.Sprint(\"x\"), 1)\n\t_ = errors.New(\"x\")\n\t_ = fmt.Errorf(\"x %d\", 1)\n\t_ = errors.New(fmt.Sprintf(\"x\") + \"y\")\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 6,
+            "length": 34,
+            "line": 4
+          }
+        ]
+      },
+      "fix": null,
+      "id": "errorf",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "errorf",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#errorf"
+        }
+      ],
+      "why": "`fmt.Errorf` formats and wraps (`%w`) in one call, and `go vet` knows its format string. `errors.New(fmt.Sprintf(...))` formats a string first and then wraps it in an error, which is longer and cannot wrap another error with `%w`.\n\nTo fix, call `fmt.Errorf` with the same format and arguments."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`x += 1` and `x -= 1`, where `x++` and `x--` say the same. Only the literal `1` counts. Left out of a language that has no `++`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(x int, xs []int, m *map[string]int) {\n\tx += 1\n\tx -= 1\n\txs[0] += 1\n\t(*m)[\"k\"] += 1\n\tx += 2\n\tx += 01\n\tx *= 1\n\tfor i := 0; i < 3; i += 1 {\n\t}\n}\n\ntype U map[string]int\n\nfunc (s *U) M() error {\n\t(*s)[\"called\"] += 1\n\treturn nil\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 2,
+            "length": 6,
+            "line": 4
+          },
+          {
+            "column": 2,
+            "length": 6,
+            "line": 5
+          },
+          {
+            "column": 2,
+            "length": 10,
+            "line": 6
+          },
+          {
+            "column": 2,
+            "length": 14,
+            "line": 7
+          },
+          {
+            "column": 21,
+            "length": 6,
+            "line": 11
+          },
+          {
+            "column": 2,
+            "length": 19,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "increment-decrement",
+      "languages": [
+        "go",
+        "js"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "increment-decrement",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#increment-decrement"
+        }
+      ],
+      "why": "`x++` and `x--` are the short forms of `x += 1` and `x -= 1` and are what readers look for in a loop or a counter. Using one form everywhere makes counters easy to find. The rule is off by default because the long form is a valid style in some codebases."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `else` block after an `if` block that ends in `return`: the code of the `else` can follow the `if`. An `else if` is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(a bool) int {\n\tif a {\n\t\treturn 1\n\t} else {\n\t\treturn 2\n\t}\n}\n\nfunc h(a, b bool) int {\n\tif a {\n\t\treturn 1\n\t} else if b {\n\t\treturn 2\n\t}\n\tif x := g(); x {\n\t\treturn 1\n\t} else {\n\t\tg()\n\t}\n\tif a {\n\t\tg()\n\t} else {\n\t\treturn 3\n\t}\n\treturn 0\n}\n\nfunc n(a, b bool) int {\n\tif a {\n\t\tif b {\n\t\t\treturn 1\n\t\t} else {\n\t\t\treturn 2\n\t\t}\n\t} else {\n\t\tg()\n\t}\n\treturn 0\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 9,
+            "length": 1,
+            "line": 6
+          },
+          {
+            "column": 9,
+            "length": 1,
+            "line": 19
+          },
+          {
+            "column": 10,
+            "length": 1,
+            "line": 34
+          }
+        ]
+      },
+      "fix": null,
+      "id": "indent-error-flow",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "indent-error-flow",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#indent-error-flow"
+        }
+      ],
+      "why": "When the `if` block ends in `return`, the `else` only adds a level of indentation to the code that follows. Without it the normal path stays at the left edge and the early return reads as a guard, which is the Go way of handling errors first. Removing the `else` does not change what the function does.\n\nTo fix, delete `else` and move its block after the `if`."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
       "description": "No file of a directory has a comment right above its `package` clause (revive package-comments). Reported once per directory, at the `package` keyword of the first file by name (a test file too); a test file or a file with a detached comment counts for the comment where it has one, and never causes the report. The files of the directory are read even when only some are linted; the rule is silent when one of them does not parse.",
       "example": {
         "config": null,
@@ -9489,6 +9855,146 @@
           "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#package-comments"
         }
       ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "`for k, _ := range x`: the second value is the blank identifier, so `for k := range x` says the same.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(xs []int) {\n\tfor i, _ := range xs {\n\t}\n\tfor i, v := range xs {\n\t}\n\tfor i := range xs {\n\t}\n\tfor _, _ = range xs {\n\t}\n\tfor _, v := range xs {\n\t}\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 6,
+            "length": 1,
+            "line": 4
+          },
+          {
+            "column": 6,
+            "length": 1,
+            "line": 10
+          }
+        ]
+      },
+      "fix": null,
+      "id": "range",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "range",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#range"
+        }
+      ],
+      "why": "`for k, _ := range x` and `for k := range x` do the same; the blank identifier is noise that suggests the second value matters. The short form is what `gofmt -s` produces, so code that uses it needs no later cleanup."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The methods of a type declared in one file name their receiver the same. The first method sets the name; `_`, `this` and `self` are left to `receiver-naming`.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\ntype T struct{}\ntype S[K any] struct{}\n\nfunc (t T) A()   {}\nfunc (u *T) B()  {}\nfunc (t *T) C()  {}\nfunc (self T) D() {}\nfunc (_ T) E()   {}\nfunc (T) F()     {}\nfunc (this *T) G() {}\n\nfunc (s *S[K]) H() {}\nfunc (x *S[K]) I() {}\nfunc (s S[K]) J()  {}\n\ntype U struct{}\n\nfunc (u U) A()  {}\nfunc (U) B()    {}\nfunc (v *U) C() {}\nfunc f(t T)     {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 1,
+            "length": 19,
+            "line": 7
+          },
+          {
+            "column": 1,
+            "length": 21,
+            "line": 15
+          },
+          {
+            "column": 1,
+            "length": 18,
+            "line": 22
+          }
+        ]
+      },
+      "fix": null,
+      "id": "receiver-name-consistent",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "receiver-naming",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#receiver-naming"
+        }
+      ],
+      "why": "A method set reads as one unit. When one method calls its receiver `s` and the next `srv`, a reader has to check each body to know that both mean the same value, and a copied body keeps the wrong name. The Go code review comments ask for one receiver name per type."
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "The name of a method's receiver is `_`, `this` or `self`: a receiver is named by a short form of its type, and left out when the method does not use it.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\ntype T struct{}\ntype S[K any] struct{}\n\nfunc (t T) A()   {}\nfunc (u *T) B()  {}\nfunc (t *T) C()  {}\nfunc (self T) D() {}\nfunc (_ T) E()   {}\nfunc (T) F()     {}\nfunc (this *T) G() {}\n\nfunc (s *S[K]) H() {}\nfunc (x *S[K]) I() {}\nfunc (s S[K]) J()  {}\n\ntype U struct{}\n\nfunc (u U) A()  {}\nfunc (U) B()    {}\nfunc (v *U) C() {}\nfunc f(t T)     {}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 7,
+            "length": 4,
+            "line": 9
+          },
+          {
+            "column": 7,
+            "length": 1,
+            "line": 10
+          },
+          {
+            "column": 7,
+            "length": 4,
+            "line": 12
+          }
+        ]
+      },
+      "fix": null,
+      "id": "receiver-naming",
+      "languages": [
+        "go"
+      ],
+      "options": [
+        {
+          "default": "!^(?:_|this|self)$",
+          "description": "A regular expression the receiver name must match; one that starts with `!` is one it must not match. Empty: not checked.",
+          "name": "receivers",
+          "type": "string"
+        }
+      ],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "receiver-naming",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#receiver-naming"
+        }
+      ],
+      "why": "`this` and `self` carry the habits of other languages into Go, where a receiver is an ordinary parameter named after its type (`s` for `Server`). A `_` receiver is the same as no name, so leaving the name out says the method does not use the value. The Go code review comments ask for short names taken from the type."
     },
     {
       "category": "suspicious",
@@ -9614,6 +10120,47 @@
           "url": "https://docs.astral.sh/ruff/rules/A002/"
         }
       ]
+    },
+    {
+      "category": "style",
+      "default_level": "off",
+      "description": "An `else` block after an `if` block that ends in `break`, `continue` or `goto`: the code of the `else` can follow the `if`. An `else if` is left alone.",
+      "example": {
+        "config": null,
+        "fixed": null,
+        "input": "package a\n\nfunc f(a, b bool) {\n\tfor {\n\t\tif a {\n\t\t\tcontinue\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t\tif a {\n\t\t\tbreak\n\t\t} else if b {\n\t\t\tg()\n\t\t}\n\t\tif a {\n\t\t\tg()\n\t\t\tgoto end\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t\tif a {\n\t\t\treturn\n\t\t} else {\n\t\t\tg()\n\t\t}\n\t}\nend:\n}\n",
+        "language": "go",
+        "spans": [
+          {
+            "column": 10,
+            "length": 1,
+            "line": 7
+          },
+          {
+            "column": 10,
+            "length": 1,
+            "line": 18
+          }
+        ]
+      },
+      "fix": null,
+      "id": "superfluous-else",
+      "languages": [
+        "go"
+      ],
+      "options": [],
+      "presets": [
+        "go/revive"
+      ],
+      "upstream": [
+        {
+          "id": "superfluous-else",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#superfluous-else"
+        }
+      ],
+      "why": "When the `if` block ends in `break`, `continue` or `goto`, control never reaches the `else`, so the `else` only indents the code that follows. Without it the code reads as a guard followed by the main path. Removing the `else` does not change what the loop does.\n\nTo fix, delete `else` and move its block after the `if`."
     },
     {
       "category": "suspicious",
@@ -36524,22 +37071,22 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "An import of every name of a package or module, `import a.b.*;` or `from a import *` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403).",
+      "description": "An import of every name of a package or module, `import a.b.*;`, `from a import *` or Go's `import . \"fmt\"`, whose alias is `.` (Checkstyle AvoidStarImport, ktlint no-wildcard-imports, ruff F403, revive dot-imports).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "import java.util.*;\nimport static java.lang.Math.*;\n\nclass A {}\n",
-        "language": "java",
+        "input": "package a\n\nimport (\n\t. \"fmt\"\n\t\"os\"\n\t_ \"embed\"\n\tm \"math\"\n)\n\nimport . \"strings\"\n",
+        "language": "go",
         "spans": [
           {
-            "column": 1,
-            "length": 19,
-            "line": 1
+            "column": 2,
+            "length": 7,
+            "line": 4
           },
           {
-            "column": 1,
-            "length": 31,
-            "line": 2
+            "column": 8,
+            "length": 11,
+            "line": 10
           }
         ]
       },
@@ -36547,13 +37094,24 @@
       "id": "no-wildcard-imports",
       "languages": [
         "csharp",
+        "go",
         "java",
         "js",
         "kotlin",
         "python"
       ],
-      "options": [],
+      "options": [
+        {
+          "default": [
+            "."
+          ],
+          "description": "The aliases that bring in every name of the imported package",
+          "name": "wildcard_aliases",
+          "type": "list"
+        }
+      ],
       "presets": [
+        "go/revive",
         "java/google",
         "kotlin/ktlint"
       ],
@@ -36570,6 +37128,12 @@
           "partial": false,
           "tool": "ktlint",
           "url": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-wildcard-imports"
+        },
+        {
+          "id": "dot-imports",
+          "partial": false,
+          "tool": "revive",
+          "url": "https://github.com/mgechev/revive/blob/v1.17.1/RULES_DESCRIPTIONS.md#dot-imports"
         },
         {
           "id": "F403",

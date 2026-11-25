@@ -1,0 +1,28 @@
+lang-json json jsonc
+lang-css css scss less
+lang-html html vue svelte
+lang-cpp c cpp
+lang-cmake cmake
+lang-dockerfile dockerfile
+lang-editorconfig editorconfig
+lang-gitignore ignore
+lang-go go
+lang-graphql graphql
+lang-hcl terraform hcl
+lang-ini ini
+lang-java java
+lang-js javascript typescript javascriptreact typescriptreact
+lang-kotlin kotlin
+lang-makefile makefile
+lang-markdown markdown
+lang-php php
+lang-powershell powershell
+lang-protobuf proto3 proto
+lang-python python
+lang-ruby ruby
+lang-shell shellscript
+lang-sql sql
+lang-toml toml
+lang-xml xml
+lang-yaml yaml
+lang-csharp csharp

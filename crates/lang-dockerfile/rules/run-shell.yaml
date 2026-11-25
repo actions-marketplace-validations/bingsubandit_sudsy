@@ -3,7 +3,15 @@ family: run-command
 params: { program: 'sudo' }
 message: 'do not use sudo; run as root during the build or use a tool like gosu'
 description: >-
-  A RUN that calls sudo.
+  Reports a `RUN` that calls `sudo`.
+why: >-
+  A `RUN` already runs as the user of the last `USER` instruction, root by default, so `sudo` adds
+  nothing. Most images do not have it installed, and where it exists it may ask for a password or
+  reset the environment (`HOME`, `PATH`), so the command sees something else than the rest of the
+  build.
+
+  For a step that needs root, put `USER root` before it and switch back after it; to drop privileges
+  at start, use a tool such as `gosu` in the entrypoint.
 example: 'RUN sudo make install'
 severity: off
 category: correctness
@@ -13,7 +21,14 @@ family: run-command
 params: { program: 'cd' }
 message: 'use WORKDIR to switch to a directory, not cd in RUN'
 description: >-
-  A RUN that calls cd.
+  Reports a `RUN` that calls `cd`, anywhere in its script (also in a subshell such as `(cd sub &&
+  make)`).
+why: >-
+  `cd` changes the directory for that one `RUN`; the next instruction starts again in the `WORKDIR`,
+  so it is easy to believe you are in a directory you are not in.
+
+  `WORKDIR` states the directory once, creates it when it is missing, and applies to every later
+  `RUN`, `CMD`, `ENTRYPOINT`, `COPY` and `ADD`.
 example: 'RUN cd /app && make'
 severity: off
 category: style
@@ -23,7 +38,14 @@ family: run-command
 params: { program: 'free|kill|mount|ps|service|shutdown|ssh|top|vim' }
 message: 'this command makes no sense in a build'
 description: >-
-  A RUN that calls ssh, vim, shutdown, service, ps, free, top, kill or mount.
+  Reports a `RUN` that calls `ssh`, `vim`, `shutdown`, `service`, `ps`, `free`, `top`, `kill` or
+  `mount`.
+why: >-
+  A build runs without a terminal and without an init system, and each `RUN` ends when its command
+  returns. `ssh`, `vim` and `top` need a terminal. `service` and `shutdown` talk to an init system
+  that the container does not have; a daemon started by `service` stops when that `RUN` ends, so it
+  is not running in containers of the image. `ps`, `free`, `kill` and `mount` report on or change
+  the temporary build sandbox, and nothing of it lasts.
 example: 'RUN service nginx start'
 severity: off
 category: suspicious
@@ -33,7 +55,11 @@ family: run-command
 params: { program: 'apt' }
 message: 'apt is an end-user tool; use apt-get or apt-cache'
 description: >-
-  A RUN that calls apt.
+  Reports a `RUN` that calls `apt`; use `apt-get` or `apt-cache` instead.
+why: >-
+  `apt` is made for people at a terminal: its output and options may change between versions, and it
+  prints a warning that it has no stable command line interface and should be used with caution in
+  scripts. `apt-get` and `apt-cache` keep an interface that scripts can rely on.
 example: 'RUN apt install curl'
 severity: off
 category: suspicious
@@ -43,7 +69,15 @@ family: run-command
 params: { program: 'ln', args: '/bin/sh' }
 message: 'use SHELL to change the default shell, not a symlink to /bin/sh'
 description: >-
-  A RUN that links /bin/sh.
+  Reports a `RUN` that replaces `/bin/sh`. That is an `ln` command with `/bin/sh` among its
+  arguments (`ln -sf /bin/bash /bin/sh`).
+why: >-
+  Replacing `/bin/sh` changes the shell that every script of the image, and of the packages you
+  install, expects to be a POSIX `sh`. Scripts that start with `#!/bin/sh` then run under another
+  shell than the one they were written for, and package scripts can fail in odd ways.
+
+  To use another shell for the build, the `SHELL` instruction (`SHELL ["/bin/bash", "-c"]`) changes
+  only the shell of the later `RUN` instructions.
 example: 'RUN ln -sf /bin/bash /bin/sh'
 severity: off
 category: suspicious
@@ -53,7 +87,14 @@ family: run-command
 params: { program: 'wget', needs: '--progress -q --quiet -o --output-file -a --append-output --no-verbose -nv' }
 message: 'wget without --progress (or -q, -nv, -o, -a) bloats the build log'
 description: >-
-  A wget call with no progress, quiet or log-file flag.
+  Reports a `wget` call that does not limit its progress output. It has none of `--progress`, `-q`
+  or `--quiet`, `-nv` or `--no-verbose`, `-o` or `--output-file`, `-a` or `--append-output`.
+why: >-
+  By default wget draws a progress bar. A build is not a terminal, so each update is logged as a
+  line of its own, and a large download adds thousands of lines to the build log. The log gets hard
+  to read and CI logs reach their size limits.
+
+  `--progress=dot:giga`, `-nv` or `-q` keep the output short.
 example: 'RUN wget https://example.com/f'
 severity: off
 category: style

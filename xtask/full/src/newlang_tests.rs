@@ -70,11 +70,9 @@ fn best_alternative_wins() {
 /// A supported language with a missing leg has a paid parser (term 0); a deferred leg has no plan.
 #[test]
 fn paid_parser_and_deferred_leg() {
-    let support = "- language: Ruby\n  lint: [{tool: rubocop, name: RuboCop}]\n";
+    let support = "- language: Ruby\n  popularity: [{name: Ruby, gh: 2082333.75, so: 15.7}]\n  lint: [{tool: rubocop, name: RuboCop}]\n";
     let yaml = r"
 - language: Ruby
-  gh: 2082333.75
-  so: 15.7
   format: [{tool: rubyfmt, gain: 0.4, reach: 0.9, cost: 1.0, why: w}]
 ";
     let list = one(yaml, support).unwrap();
@@ -107,6 +105,12 @@ fn bad_values_are_rejected() {
     assert!(err(&GO.replace("  parser: ~1.0\n", ""), half).contains("already has a lint leg"));
     assert!(err(GO, half).contains("parser is paid"));
     assert!(err(&format!("{GO}{GO}"), "").contains("twice"));
+    // A supported language keeps `gh` and `so` in support.yaml.
+    let format_only = GO.replace("  parser: ~1.0\n", "").replace(
+        "  lint: [{tool: lint, gain: 0.4, reach: 0.85, cost: 1.0, why: w}]\n",
+        "",
+    );
+    assert!(err(&format_only, half).contains("`popularity` of its row"));
 }
 
 #[test]

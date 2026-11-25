@@ -1,6 +1,6 @@
 # C and C++
 
-Two languages, `c` and `cpp`, one crate (`lang-cpp`) with one hand-written lexer, one structural layer and a deep layer of lookahead. There is no parser for the full grammar: C and C++ cannot be parsed without the preprocessor and the types the headers declare, and the tree-sitter grammars and `cpp_parser` fail on 5-67% of real files (unknown macros). The tree is a token-level structure in the manner of clang-format's unwrapped lines, and it never fails.
+Two languages, `c` and `cpp`, one crate (`lang-cpp`) with one hand-written lexer, one structural layer and a deep layer of lookahead. There is no parser for the full grammar: C and C++ cannot be parsed without the preprocessor and the types the headers declare, and the tree-sitter grammars and `cpp_parser` fail on many real files (unknown macros). The tree is a token-level structure in the manner of clang-format's unwrapped lines, and it never fails.
 
 Files: `.c` and `.h` are `c`; `.cc .cpp .cxx .hpp .hh .hxx .ipp` are `cpp`. A `.h` is C because the extension does not say, and the lexer differs only in keywords (C++ keywords are identifiers in C); C++ projects that use `.h` select `cpp` with a `files` override.
 
@@ -23,7 +23,7 @@ A second pass reads each `Line` and bracket group by lookahead on the tokens (no
 - `Directive` is `#directive`: the flow graph skips it among statements, and a `switch` with a directive in its body may have arms the tree does not show (`#if`/`#include` around `case`).
 - Roles, tags and fields are in `grammars/cpp.grammar`; `#part` marks what a body may hold loosely (`#part*`), so a shape check passes on tokens the parse does not place.
 
-`#if` branches are not each parsed as clang-format does: at `#else`/`#elif` the groups opened in the branch are closed back to the depth at `#if`, and at `#endif` the state of the last branch continues (single-pass bracket reset). 0.2-6.5% of corpus files have branch-asymmetric groups.
+`#if` branches are not each parsed as clang-format does: at `#else`/`#elif` the groups opened in the branch are closed back to the depth at `#if`, and at `#endif` the state of the last branch continues (single-pass bracket reset). Some corpus files have branch-asymmetric groups.
 
 ## Formatter
 `format.rules` over the shared rules formatter (`format.rs` holds only the facts: the flow keeps what no row decides, a block's `{` ends a hang, comment gaps stay). The sections:

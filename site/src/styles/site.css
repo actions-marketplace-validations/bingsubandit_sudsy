@@ -147,6 +147,7 @@ a.bar-tool:hover { text-decoration: underline; }
 .lang-row { display: grid; gap: 0.6rem; padding: 0.7rem 0.9rem; border: 1px solid var(--sl-color-hairline); border-radius: 0.5rem; }
 .lang-head { grid-column: 1 / -1; display: flex; align-items: center; gap: 0.6rem; font-weight: 600; }
 .lang-head a { text-decoration: none; }
+.lang-how { font-size: var(--sl-text-sm); color: var(--sl-color-gray-3); }
 @media (max-width: 50rem) {
   .bar, .bar:not(:has(.bar-tool)) { grid-template-columns: minmax(0, 1fr) 5.5rem; }
   .bar .bar-tool { grid-column: 1 / -1; }

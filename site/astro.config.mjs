@@ -28,6 +28,7 @@ export default defineConfig({
         { label: 'Command line', link: '/cli/' },
         { label: 'Rules', link: '/rules/' },
         { label: 'Languages', link: '/languages/' },
+        { label: 'How languages are measured', link: '/measured/' },
         { label: 'Compared tools', link: '/compare/' },
         {
           label: 'Reference',

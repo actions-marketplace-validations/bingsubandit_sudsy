@@ -14,6 +14,7 @@ mod block;
 mod call_arguments;
 mod call_chain;
 mod chain;
+mod commands;
 mod compound;
 mod conditional;
 pub mod continuation;
@@ -58,6 +59,7 @@ pub use call_chain::{
     member_chain as call_chain, soft_group_count as chain_soft_groups,
 };
 pub use chain::{MemberChain, ends_in_line_comment, gap_after_operator, member_chain};
+pub use commands::{Commands, command_list};
 pub use compound::{Join, body as compound_body, continuation as compound_continuation};
 pub use conditional::{
     Around, ConditionalHooks, ConditionalPolicy, NoConditionalHooks, conditional, marked_branch,
