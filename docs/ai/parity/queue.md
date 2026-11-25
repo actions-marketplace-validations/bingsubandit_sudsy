@@ -28,8 +28,8 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 | Makefile | 0.44 | 0 (paid) | - | 6.75~ | - | format: format none found | retrofit to no-reference-tool.md; estimate: pick only to measure it |
 | Batchfile | 0.51~ | ~1.2 | 3.48~ | 3.48~ | 4.58~ | both: lint none found + format none found | estimate: pick only to measure it |
 | Gradle | 0.31~ | ~0.2 | 3.51~ | 2.46~ | 3.20~ | lint: lint none found | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; estimate: pick only to measure it |
+| Ruby | 0.27 | 0 (paid) | - | 2.91~ | - | format: format RuboCop layout cops | estimate: pick only to measure it |
 | Jupyter Notebook | 0.57~ | ~1 | 1.94~ | 1.94~ | 2.59~ | both: lint ruff check on cells + format ruff format on cells | JSON file with Python cells: the Python leg does the work; estimate: pick only to measure it |
-| Ruby | 0.27 | 0 (paid) | - | 2.47~ | - | format: format RuboCop layout cops | estimate: pick only to measure it |
 | Ansible | 0.28~ | ~0.2 | 2.37~ | - | - | lint: lint ansible-lint | YAML with playbook semantics; estimate: pick only to measure it |
 | Kubernetes manifests | 0.41~ | ~0.2 | 2.33~ | - | - | lint: lint kubeconform | estimate: pick only to measure it |
 | Procfile | 0.26~ | ~1.5 | 1.59~ | 1.59~ | 2.17~ | both: lint none found + format none found | estimate: pick only to measure it |
@@ -547,6 +547,7 @@ Lint: target 0.4% (40 of 11111, 11071 missed, measured on 66718389); rules by mi
 
 ## rubocop
 
+Format: unclassified 5561 of 5561 differing files (100%).
 Lint: target 96.2% (7717 of 8022, 305 missed, measured on 7514c1f3); rules by missed findings:
 1. `Lint/UselessAssignment` (168 missed)
 2. `Lint/AssignmentInCondition` (14 missed)

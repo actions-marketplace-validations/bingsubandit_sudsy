@@ -8,11 +8,11 @@
 
 use crate::generated::kind as k;
 use core_config::shared;
-use core_format::comments::{self, Comment, CommentStyle};
-use core_format::frames::Frames;
+use core_format::comments::CommentStyle;
 use core_format::rules::LazyRules;
-use core_format::{Doc, FormatCtx, FormatError, NodeFormatter, columns, doc};
-use core_syntax::{Grammar, SyntaxKind, SyntaxNode, SyntaxToken, grammars};
+use core_format::stream::{self, Tk, multiline};
+use core_format::{Doc, FormatCtx, FormatError, NodeFormatter, columns};
+use core_syntax::{SyntaxKind, SyntaxNode, grammars};
 use std::collections::HashMap;
 
 include!("schema.generated.rs");
@@ -44,39 +44,12 @@ impl NodeFormatter for PowerShellFormatter {
     }
 }
 
-/// A token with what the source has around it.
-struct Tk {
-    tok: SyntaxToken,
-    kind: SyntaxKind,
-    /// Source lines of the token's first and last character.
-    first_line: usize,
-    last_line: usize,
-    /// Line breaks between the previous token and this one.
-    breaks: usize,
-    /// A backtick and a line break come before the token.
-    cont: bool,
-    /// The blanks before the token on its line (a comment between counts as one blank).
-    gap: String,
-    /// The blanks in front of the backtick.
-    cont_gap: String,
-    /// The token starts an output line.
-    newline: bool,
-    /// The comments on lines of their own in front of the token.
-    leading: Vec<Comment>,
-    /// A comment follows the token on its line.
-    trailing: bool,
-    /// The matching bracket of an opener or closer.
-    pair: Option<usize>,
+/// Is it one of these keywords (PowerShell ignores their case)?
+trait Keyword {
+    fn keyword(&self, words: &[&str]) -> bool;
 }
 
-impl Tk {
-    fn text(&self) -> &str {
-        self.tok.text()
-    }
-    fn is(&self, kinds: &[SyntaxKind]) -> bool {
-        kinds.contains(&self.kind)
-    }
-    /// Is it one of these keywords (PowerShell ignores their case)?
+impl Keyword for Tk {
     fn keyword(&self, words: &[&str]) -> bool {
         self.kind == k::KEYWORD && words.iter().any(|w| self.text().eq_ignore_ascii_case(w))
     }
@@ -84,98 +57,6 @@ impl Tk {
 
 fn is_open(kind: SyntaxKind) -> bool {
     ROWS.get().brackets().is_open(kind)
-}
-
-fn is_close(kind: SyntaxKind) -> bool {
-    ROWS.get().brackets().is_close(kind)
-}
-
-fn collect(g: &Grammar, root: &SyntaxNode) -> Vec<Tk> {
-    let mut line = 0;
-    let mut out: Vec<Tk> = Vec::new();
-    for t in root
-        .descendants_with_tokens()
-        .filter_map(|e| e.into_token())
-    {
-        let n = comments::count_breaks(t.text());
-        if !g.is_trivia(t.kind()) {
-            let mut tk = Tk {
-                kind: t.kind(),
-                first_line: line,
-                last_line: line + n,
-                breaks: 0,
-                cont: false,
-                gap: String::new(),
-                cont_gap: String::new(),
-                newline: false,
-                leading: comments::leading_comments(g, &t),
-                trailing: comments::has_trailing_comment(g, &t),
-                pair: None,
-                tok: t.clone(),
-            };
-            gap(g, &t, &mut tk);
-            out.push(tk);
-        }
-        line += n;
-    }
-    out
-}
-
-/// Fills in what the trivia between the previous token and `t` say.
-fn gap(g: &Grammar, t: &SyntaxToken, tk: &mut Tk) {
-    let mut trivia = Vec::new();
-    let mut cur = t.prev_token();
-    while let Some(p) = cur.filter(|p| g.is_trivia(p.kind())) {
-        cur = p.prev_token();
-        trivia.push(p);
-    }
-    let (mut commented, mut blanks) = (false, false);
-    for p in trivia.iter().rev() {
-        match p.kind() {
-            k::NEWLINE => {
-                tk.breaks += comments::count_breaks(p.text());
-                tk.gap.clear();
-            }
-            k::WHITESPACE if p.text().contains('`') => {
-                tk.cont = true;
-                tk.cont_gap = std::mem::take(&mut tk.gap);
-            }
-            k::WHITESPACE => {
-                tk.gap.push_str(p.text());
-                blanks = true;
-            }
-            _ => {
-                commented = true;
-                tk.gap.clear();
-            }
-        }
-    }
-    if commented && tk.breaks == 0 {
-        tk.gap = if blanks { " " } else { "" }.into();
-    }
-}
-
-/// Pairs each opener with its closer (a mismatch is a parse error and cannot get here).
-fn pair_brackets(tks: &mut [Tk]) {
-    let mut stack: Vec<usize> = Vec::new();
-    for i in 0..tks.len() {
-        if is_open(tks[i].kind) {
-            stack.push(i);
-        } else if is_close(tks[i].kind)
-            && let Some(o) = stack.pop()
-        {
-            tks[o].pair = Some(i);
-            tks[i].pair = Some(o);
-        }
-    }
-}
-
-/// Is the bracket pair of token `i` spread over several source lines?
-fn multiline(tks: &[Tk], i: usize) -> bool {
-    tks[i].pair.is_some_and(|p| {
-        let (a, b) = (i.min(p), i.max(p));
-        tks[a].last_line != tks[b].first_line
-    })
 }
 
 /// Is token `i` directly inside the body of a `class` or `switch` (`which`)?
@@ -380,107 +261,12 @@ fn blank(tks: &[Tk], i: usize, pads: &HashMap<usize, usize>) -> Option<bool> {
 }
 
 fn program(cx: &FormatCtx<'_>, root: &SyntaxNode) -> Doc {
-    let g = cx.grammar;
-    let max_blank = cx.options.int(shared::MAX_BLANK_LINES) as usize;
-    let mut tks = collect(g, root);
-    pair_brackets(&mut tks);
+    let rules = ROWS.get().stream();
+    let mut tks = stream::collect(cx.grammar, root, rules);
+    stream::pair_brackets(&mut tks, &rules.brackets);
     place_breaks(&mut tks);
     let pads = align_hashtables(cx, root, &tks);
-
-    let mut lines: Vec<Doc> = Vec::new();
-    // The current line's parts, its indentation level and whether it starts with a line break.
-    let mut cur: Vec<Doc> = Vec::new();
-    let mut level = 0;
-    let mut frames = Frames::default();
-    let flush = |lines: &mut Vec<Doc>, cur: &mut Vec<Doc>, level: usize| {
-        if cur.is_empty() {
-            return;
-        }
-        let mut d = doc::concat(std::mem::take(cur));
-        for _ in 0..level {
-            d = doc::indent(d);
-        }
-        lines.push(d);
-    };
-    let blank_lines = |n: usize| (0..n.min(max_blank)).map(|_| doc::hardline());
-
-    for i in 0..tks.len() {
-        let is_eof = tks[i].kind == k::EOF;
-        if is_eof && tks[i].leading.is_empty() {
-            continue;
-        }
-        let starts = i > 0 && (tks[i].newline || is_eof);
-        if starts {
-            if tks[i].cont {
-                cur.push(doc::text(format!("{}`", tks[i].cont_gap)));
-            }
-            flush(&mut lines, &mut cur, level);
-            // A pipeline or backtick line continues on the next line.
-            let (pipe, tick) = (tks[i - 1].kind == k::PIPE, tks[i].cont);
-            frames.continue_line(pipe, tick);
-            // Comments stand where the code in front of the closing bracket stands.
-            let mut blank = if tks[i].breaks > 0 {
-                comments::blank_lines_before(g, &tks[i].tok)
-            } else {
-                0
-            };
-            let leading = std::mem::take(&mut tks[i].leading);
-            let mut inline: Vec<Doc> = Vec::new();
-            for c in &leading {
-                if c.kind == comments::CommentKind::Block && c.breaks_after == 0 {
-                    inline.push(core_format::context::comment_doc_in(c, &cx.comment_style));
-                    inline.push(doc::lit(" "));
-                    continue;
-                }
-                let mut parts: Vec<Doc> = blank_lines(blank).collect();
-                parts.extend([
-                    doc::hardline(),
-                    core_format::context::comment_doc_in(c, &cx.comment_style),
-                ]);
-                lines.push(indented(frames.depth(), doc::concat(parts)));
-                blank = c.breaks_after.saturating_sub(1);
-            }
-            if is_close(tks[i].kind) {
-                frames.close(1);
-            }
-            level = frames.depth();
-            cur.extend(blank_lines(blank));
-            cur.push(doc::hardline());
-            cur.extend(inline);
-        } else if i > 0 {
-            let gap = spacing(&tks, i, &pads);
-            if !gap.is_empty() {
-                cur.push(doc::text(gap));
-            }
-            if is_close(tks[i].kind) {
-                frames.close(1);
-            }
-        } else {
-            // The first token: its comments stand on lines of their own.
-            let leading = std::mem::take(&mut tks[i].leading);
-            for c in &leading {
-                cur.push(core_format::context::comment_doc_in(c, &cx.comment_style));
-                cur.push(doc::hardline());
-                cur.extend(blank_lines(c.breaks_after.saturating_sub(1)));
-            }
-        }
-        if !is_eof {
-            cur.push(cx.token_text(&tks[i].tok));
-            cur.push(cx.trailing_comments_doc(&tks[i].tok));
-        }
-        if is_open(tks[i].kind) {
-            frames.open(1);
-        }
-    }
-    flush(&mut lines, &mut cur, level);
-    doc::concat(lines)
-}
-
-fn indented(levels: usize, mut d: Doc) -> Doc {
-    for _ in 0..levels {
-        d = doc::indent(d);
-    }
-    d
+    stream::emit(cx, rules, tks, &[k::PIPE], |tks, i| spacing(tks, i, &pads))
 }
 
 /// The blanks between token `i - 1` and `i` on one line.

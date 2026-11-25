@@ -77,7 +77,7 @@
 - language: XML
   lint: {tool: "xmllint", gain: ~0.1, cost: {est: true}, why: "only tool found; official libxml2, native; DTD and schema checks; some rules need semantics"}
 - language: Ruby
-  format: {tool: "RuboCop layout cops", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "user decision: RuboCop is Ruby's reference tool, its Layout cops are the format; rubyfmt and rufo are left out; Ruby runtime; the lint tool is the reference; width-based, many options"}
+  format: {tool: "RuboCop layout cops", gain: ~0.7, cost: {layout: whitespace, parts: 4}, why: "user decision: RuboCop is Ruby's reference tool, its Layout cops are the format; rubyfmt and rufo are left out; Ruby runtime; the lint tool is the reference; measured: it keeps every line break, so whitespace only; 4 parts: anchor alignment of continuation lines, keyword-node frames, heredoc reindent, guard-clause and magic-comment blank rows"}
 - language: INI
   support: INI / EditorConfig / .gitignore
   retrofit: true

@@ -16854,6 +16854,13 @@
                     "maximum": 1000,
                     "minimum": 20,
                     "type": "integer"
+                  },
+                  "max_blank_lines": {
+                    "default": 1,
+                    "description": "Largest number of blank lines kept between lines (RuboCop Layout/EmptyLines).",
+                    "maximum": 10,
+                    "minimum": 0,
+                    "type": "integer"
                   }
                 },
                 "type": "object"
@@ -18328,6 +18335,13 @@
               "description": "Preferred maximum line width in columns.",
               "maximum": 1000,
               "minimum": 20,
+              "type": "integer"
+            },
+            "max_blank_lines": {
+              "default": 1,
+              "description": "Largest number of blank lines kept between lines (RuboCop Layout/EmptyLines).",
+              "maximum": 10,
+              "minimum": 0,
               "type": "integer"
             }
           },

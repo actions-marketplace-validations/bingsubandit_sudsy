@@ -170,6 +170,26 @@ fn symbols(v: &Value) -> (&'static str, &'static str) {
     }
 }
 
+/// `format-rows` (`source-indent`, `exact-end`, `keep-comment-gap`): the static `FORMAT` of a language
+/// that is written by the rows of its `format.rules` alone.
+fn format_rows(name: &str, v: &Value) -> String {
+    let Some(f) = v.get("format-rows") else {
+        return String::new();
+    };
+    let flag = |key: &str| f.get(key).and_then(Value::as_bool).unwrap_or(false);
+    format!(
+        "static FORMAT: core_format::rules::LazyRules = core_format::rules::LazyRules::new(|| grammars::{}.get(), include_str!(\"../format.rules\")){}.facts(core_format::rules::RuleFacts {{ exact_end: &{:?}, keep_comment_gap: {}, ..core_format::rules::RuleFacts::DEFAULT }});\n\n",
+        name.to_uppercase(),
+        if flag("source-indent") {
+            ".source_indent()"
+        } else {
+            ""
+        },
+        list(f, "exact-end"),
+        flag("keep-comment-gap"),
+    )
+}
+
 fn provider(name: &str, v: &Value) -> String {
     let grammar = text(v, "grammar-crate", "").replace('-', "_");
     let language = text(v, "language-const", "LANGUAGE");
@@ -288,6 +308,7 @@ fn adapter_provider(name: &str, v: &Value) -> String {
             .replace(']', "")
     };
     let (statics, with) = symbols(v);
+    let statics = format!("{statics}{}", format_rows(name, v));
     format!(
         "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse provider_api::{{ParserProvider, ParserSpec}};\n\ncore_syntax::include_generated!();\n\n{statics}#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    ParserProvider::new(ParserSpec {{ crate_name: env!(\"CARGO_PKG_NAME\"), grammar: grammars::{}, extensions: &[{}], file_names: &[{}], schema: option_schema(), formatter: &{}, hooks: &{hooks}, rules: {}, pattern_files: provider_api::pattern_files!(), families: {} }}, {}){without}{with}\n}}\n",
         name.to_uppercase(),

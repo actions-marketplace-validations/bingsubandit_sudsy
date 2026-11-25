@@ -37,3 +37,12 @@ missed:  # rule -> findings that count as missing, layout left after `sudsy form
   Lint/RedundantWithIndex: 1
   Lint/SendWithMixinArgument: 1
   Lint/Void: 1
+ratchet:
+  real-world: 13397
+target-files:
+  real-world: 18958
+second-format:
+  real-world: 0
+regressions:
+  real-world: 3
+unclassified: 5561

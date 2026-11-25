@@ -1,0 +1,2 @@
+# The Sudsy side of the comparison with RuboCop's Layout cops: its defaults are the formatter defaults.
+ruby: {}

@@ -3,6 +3,7 @@
 [lines]
 open = OpenBrace|HashOpen|OpenParen
 close = CloseBrace|CloseParen
+continuation = `
 
 # A blank is added next to a pipe, not made exactly one.
 [at_least_one]

@@ -23,6 +23,7 @@ use crate::rewrite::{RewriteRules, RewriteScan};
 use crate::seq::kids;
 use crate::shapes::flow::Flow;
 use crate::spacing::SpaceRules;
+use crate::stream::StreamRules;
 use core_config::ResolvedOptions;
 use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
 use std::borrow::Cow;
@@ -99,7 +100,7 @@ impl Default for RuleFacts {
 
 pub struct RuleFormatter {
     space: SpaceRules,
-    brackets: Brackets,
+    stream: StreamRules,
     cases: Cases,
     /// The `[call]` text, parsed when a call asks for it.
     call_text: &'static str,
@@ -156,7 +157,7 @@ impl RuleFormatter {
         let layout: Vec<&str> = section(text, "layout").collect();
         RuleFormatter {
             space: SpaceRules::parse(g, text, facts, &bindings),
-            brackets: Brackets::parse(g, text),
+            stream: StreamRules::parse(g, text),
             cases: Cases::parse(g, section(text, "case")),
             call_text: text,
             calls: OnceLock::new(),
@@ -192,7 +193,12 @@ impl RuleFormatter {
 
     /// The `[lines]` kinds that open and close a frame.
     pub fn brackets(&self) -> &Brackets {
-        &self.brackets
+        &self.stream.brackets
+    }
+
+    /// The `[lines]` settings.
+    pub fn stream(&self) -> &StreamRules {
+        &self.stream
     }
 
     /// The token spacing rows.
@@ -222,6 +228,9 @@ impl RuleFormatter {
         node: &SyntaxNode,
         cx: &FormatCtx<'_>,
     ) -> Result<Option<Doc>, FormatError> {
+        if self.stream.source_indent && node.kind() == cx.grammar.root() {
+            return Ok(Some(crate::stream::format(cx, self, node)));
+        }
         let (flow, level) = (self.flow(self.source_hang), self.flow(false));
         match self
             .layout
@@ -331,6 +340,7 @@ pub struct LazyRules {
     blocks: &'static [core_syntax::block_pair::Block],
     signatures: &'static [core_syntax::signature::Signature],
     option_kinds: OptionKinds,
+    source_indent: bool,
     cell: OnceLock<RuleFormatter>,
 }
 
@@ -362,6 +372,7 @@ impl LazyRules {
             blocks: &[],
             signatures: &[],
             option_kinds: &[],
+            source_indent: false,
             cell: OnceLock::new(),
         }
     }
@@ -387,6 +398,12 @@ impl LazyRules {
         self
     }
 
+    /// The file is written by its rows alone and each line keeps its indentation ([`crate::stream`]).
+    pub const fn source_indent(mut self) -> LazyRules {
+        self.source_indent = true;
+        self
+    }
+
     /// The language's [`RuleFacts`].
     pub const fn facts(mut self, facts: RuleFacts) -> LazyRules {
         self.facts = facts;
@@ -401,6 +418,7 @@ impl LazyRules {
                 &self.facts,
                 self.option_kinds,
             );
+            rules.stream = std::mem::take(&mut rules.stream).source_indent(self.source_indent);
             rules.file.blocks = self.blocks;
             rules.file.signatures = self.signatures;
             rules

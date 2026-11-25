@@ -44,6 +44,7 @@ pub mod safety;
 pub mod seq;
 pub mod shapes;
 pub mod spacing;
+pub mod stream;
 pub mod tabs;
 pub mod tag_layout;
 pub mod testing;

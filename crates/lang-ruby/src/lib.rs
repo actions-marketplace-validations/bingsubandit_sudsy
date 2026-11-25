@@ -1,4 +1,4 @@
-//! Ruby: Prism parses behind `adapter`, which builds the lossless tree; the file is kept as written.
+//! Ruby: Prism parses behind `adapter`, which builds the lossless tree; `format` lays the file out by rows.
 //!
 //! concept: none (glue: provider entry)
 

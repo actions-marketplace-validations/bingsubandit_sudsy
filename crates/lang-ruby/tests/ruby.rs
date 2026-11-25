@@ -204,3 +204,34 @@ fn speed() {
         );
     }
 }
+
+/// Indentation and line breaks stay as written; blank lines collapse to one and the blanks inside
+/// brackets, around commas and in front of a `=` follow RuboCop's Layout cops.
+#[test]
+fn layout_rows() {
+    assert_eq!(
+        fmt("a=1\n\n\n\nb = [ 1,2 , 3 ]\n"),
+        "a = 1\n\nb = [1, 2, 3]\n"
+    );
+    assert_eq!(
+        fmt("x = { a: 1 }\ny = {a: 1}\nz = { }\n"),
+        "x = { a: 1 }\ny = { a: 1 }\nz = {}\n"
+    );
+    assert_eq!(fmt("f( a, b )\n  g { |x|x }\n"), "f(a, b)\n  g { |x|x }\n");
+    // Blanks that line up with a neighbouring line stay.
+    let aligned = "a    = 1\nbbbb = 2\nfoo :a,    1 # c\n";
+    assert_eq!(fmt(aligned), aligned);
+}
+
+/// A comment after a heredoc keeps its indentation, and a token that spans lines is not touched.
+#[test]
+fn heredoc_bodies_and_comments_stay() {
+    let s = "def f\n  x = <<~P\n    a  \n\n\n    b\n  P\n  # c\n  g(x)\nend\n";
+    assert_eq!(fmt(s), s);
+}
+
+/// Blank lines at the start of the file stay.
+#[test]
+fn leading_blank_lines_stay() {
+    assert_eq!(fmt("\n\n# c\nx\n"), "\n\n# c\nx\n");
+}
