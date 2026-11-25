@@ -1,44 +1,21 @@
-"""Evidence run of the Dockerfile format (docs/ai/design/dockerfile.md): split, decision table, agreement, tool comparison.
-
-Usage: dockerfile_evidence.py <sudsy-binary> <dockerfmt-binary> <work-dir>
-
-Reads the corpus of fetch-dockerfile-corpus.sh and fetch-dockerfile-evidence-corpus.sh (23 projects), splits the projects
-at random (SEED) into deciding and held-out halves, counts the variants of every layout choice per project on the
-deciding half (one vote per project), measures how many occurrences of the held-out half already have the form Sudsy
-writes, and compares `sudsy format` with `dockerfmt` (equal files, causes of difference, the share that is only shell
-code of RUN). The files are only read; the tools get copies in <work-dir>.
-"""
-import random
+"""Facts of the Dockerfile format evidence (docs/ai/design/dockerfile.md) for scripts/evidence.py: corpus, the rows of the decision table, the causes of difference to dockerfmt."""
 import re
-import subprocess
-import sys
-from collections import Counter, defaultdict
-from concurrent.futures import ThreadPoolExecutor
-from difflib import SequenceMatcher, unified_diff
-from pathlib import Path
+from collections import defaultdict
+from difflib import SequenceMatcher
 
-ROOT = Path(__file__).resolve().parent.parent
-CORPUS = ROOT / "tests/conformance/corpus"
 SEED = 20261125
+NAMES = re.compile(r"^(Dockerfile(\..*)?|.*\.[Dd]ockerfile)$")
+DIRS = [("dockerfile", NAMES), ("dockerfile-evidence", NAMES)]
+TOOL = []  # dockerfmt reads the file on stdin
+KLASSES = {"shell": "shell code of RUN/CMD/ENTRYPOINT/HEALTHCHECK", "rewrite": "legacy ENV, COPY JSON, MAINTAINER rewrites"}
+
 # Project of a repository directory when it is not the directory name: the docker-library images and Docker's own
 # repositories are one project each, so a project is never on both halves.
 PROJECT = {"golang": "docker-library", "python": "docker-library", "nginx": "docker-library", "postgres": "docker-library",
            "buildx": "moby", "docker": "nextcloud", "core": "home-assistant", "docker-node": "nodejs", "dotnet-docker": "dotnet"}
-NAMES = re.compile(r"^(Dockerfile(\..*)?|.*\.[Dd]ockerfile)$")
 SHELL_KW = {"RUN", "CMD", "ENTRYPOINT"}
 # Causes that rewrite syntax instead of laying it out (Sudsy changes only case and blanks)
 REWRITES = ("ENV: legacy", "COPY: JSON", "ADD: JSON", "instruction replaced")
-
-
-def files():
-    out = []
-    for d in ("dockerfile", "dockerfile-evidence"):
-        for f in sorted((CORPUS / d).rglob("*")):
-            if f.is_file() and NAMES.match(f.name):
-                rel = f.relative_to(CORPUS / d)
-                out.append((PROJECT.get(rel.parts[0], rel.parts[0]), f"{d}/{rel}", f))
-    return out
-
 
 def parse(text):
     """Items of a Dockerfile: ('blank', n), ('comment', line), ('ins', record). Independent of the formatter."""
@@ -146,89 +123,11 @@ def variants(path_text):
     return rows
 
 
-def vote(counter):
-    return counter.most_common(1)[0][0]
-
-
 SUDSY = {"keyword case": "upper", "AS": "upper", "blanks between arguments": "single", "JSON array": "one blank after comma",
          "blanks before backslash": "one", "continuation indent": "4 spaces", "comment in continuation": "indented",
          "blank lines": "one", "final newline": "yes", "heredoc": "as written", "`&&`, `||` at line end or start": None}
 
 
-def decision_table(corpus):
-    split = sorted({p for p, _, _ in corpus})
-    random.Random(SEED).shuffle(split)
-    deciding, held = set(split[: len(split) // 2 + len(split) % 2]), set(split[len(split) // 2 + len(split) % 2:])
-    per = {"deciding": defaultdict(lambda: defaultdict(Counter)), "held": defaultdict(lambda: defaultdict(Counter))}
-    for proj, name, f in corpus:
-        half = "deciding" if proj in deciding else "held"
-        try:
-            rows = variants(f.read_text(encoding="utf-8"))
-        except (UnicodeDecodeError, ValueError):
-            continue
-        for row, vs in rows.items():
-            per[half][row][proj].update(vs)
-    return deciding, held, per
-
-
-def report_table(deciding, held, per):
-    print(f"seed {SEED}; deciding ({len(deciding)}): {', '.join(sorted(deciding))}")
-    print(f"held out ({len(held)}): {', '.join(sorted(held))}\n")
-    print("| row | projects | votes (deciding) | rule | Sudsy writes | agrees | held-out occurrences | held-out with Sudsy form |")
-    print("|---|---|---|---|---|---|---|---|")
-    tot = [0, 0]
-    for row in SUDSY:
-        votes = Counter(vote(c) for c in per["deciding"][row].values() if c)
-        n = sum(votes.values())
-        top, topn = votes.most_common(1)[0] if votes else ("-", 0)
-        share = topn / n if n else 0
-        rule = "default (>=80%)" if share >= 0.8 else "default + option (60-80%)" if share >= 0.6 else "as written (<60%)"
-        occ = Counter()
-        for c in per["held"][row].values():
-            occ.update(c)
-        total, mine = sum(occ.values()), occ[SUDSY[row]]
-        if SUDSY[row] is not None:
-            tot[0] += mine
-            tot[1] += total
-        vs = ", ".join(f"{v} {k}" for k, v in votes.most_common(4))
-        print(f"| {row} | {n} | {vs} | {rule} | {SUDSY[row] or 'as written'} | {'-' if SUDSY[row] is None else 'yes' if top == SUDSY[row] and share >= 0.6 else 'no'} | {total} | {mine} ({100 * mine / max(total, 1):.1f}%) |")
-    print(f"\nagreement (held out, pooled over the rows above): {tot[0]}/{tot[1]} = {100 * tot[0] / max(tot[1], 1):.1f}%")
-    print("\nvariant counts per project, deciding half:")
-    for row in SUDSY:
-        print(f"- {row}:")
-        for p, c in sorted(per["deciding"][row].items()):
-            print(f"    {p}: {dict(c)}")
-    print("\nvariant counts, held-out half (occurrences):")
-    for row in SUDSY:
-        occ = Counter()
-        for c in per["held"][row].values():
-            occ.update(c)
-        print(f"- {row}: {dict(occ)}")
-
-
-def run_sudsy(sudsy, work, corpus):
-    def one(arg):
-        i, (_, name, f) = arg
-        d = work / "sudsy" / str(i)
-        d.mkdir(parents=True, exist_ok=True)
-        (d / f.name).write_bytes(f.read_bytes())
-        r = subprocess.run([sudsy, "format", f.name], cwd=d, capture_output=True, text=True, encoding="utf-8", check=False)
-        return None if r.returncode else (d / f.name).read_text(encoding="utf-8")
-    with ThreadPoolExecutor(8) as ex:
-        return list(ex.map(one, enumerate(corpus)))
-
-
-def run_dockerfmt(dockerfmt, work, corpus):
-    (work / "df").mkdir(parents=True, exist_ok=True)
-    def one(arg):
-        _, (_, name, f) = arg
-        try:
-            r = subprocess.run([dockerfmt], cwd=work / "df", input=f.read_bytes(), capture_output=True, check=False)
-        except OSError:
-            return None
-        return None if r.returncode else r.stdout.decode("utf-8", "replace")
-    with ThreadPoolExecutor(8) as ex:
-        return list(ex.map(one, enumerate(corpus)))
 
 
 def norm(s):
@@ -251,7 +150,7 @@ def item_text(it):
     return it[1] if it[0] == "comment" else ""
 
 
-def causes(a, b):
+def raw_causes(a, b):
     """[(cause, is_shell)] of the differences between two outputs a (Sudsy) and b (dockerfmt); items aligned by content."""
     ia, ib = [x for x in parse(a) if x[0] != "blank"], [x for x in parse(b) if x[0] != "blank"]
     out = []
@@ -273,6 +172,12 @@ def causes(a, b):
         for x, y in pairs:
             out.append(classify(x, y))
     return out
+
+
+
+def causes(a, b):
+    """[(cause, class)]: shell code and the rewrites of syntax are classes of their own."""
+    return [(c, "shell" if shell else "rewrite" if c.startswith(REWRITES) else "") for c, shell in raw_causes(a, b)]
 
 
 EXAMPLES = {}
@@ -316,71 +221,3 @@ def classify1(x, y):
     return (f"{kw}: argument text rewritten", False)
 
 
-def compare(corpus, held, sud, df):
-    equal, unchanged = 0, 0
-    nfiles = 0
-    causes_all, files_by_cause = Counter(), defaultdict(set)
-    shell_only, diff_files, rewrite_only = 0, 0, 0
-    harm = []
-    for (proj, name, f), s, d in zip(corpus, sud, df):
-        if s is None or d is None:
-            continue
-        nfiles += 1
-        if s == d:
-            equal += 1
-            continue
-        diff_files += 1
-        cs = causes(s, d)
-        fine = [c for c in cs if not c[1]]
-        if not fine:
-            shell_only += 1
-        elif all(c[0].startswith(REWRITES) for c in fine):
-            rewrite_only += 1
-        for c, sh in cs:
-            causes_all[(c, sh)] += 1
-            files_by_cause[(c, sh)].add(name)
-        harm.append(name)
-    return nfiles, equal, diff_files, shell_only, causes_all, files_by_cause, rewrite_only
-
-
-def main():
-    sudsy, dockerfmt, work = sys.argv[1], sys.argv[2], Path(sys.argv[3])
-    corpus = files()
-    projects = {p for p, _, _ in corpus}
-    print(f"{len(corpus)} files, {len({n.split('/')[1] for _, n, _ in corpus})} repositories, {len(projects)} projects\n")
-    deciding, held, per = decision_table(corpus)
-    report_table(deciding, held, per)
-    sud, df = run_sudsy(sudsy, work, corpus), run_dockerfmt(dockerfmt, work, corpus)
-    print(f"\nSudsy failed on {sum(s is None for s in sud)} files, dockerfmt on {sum(d is None for d in df)}")
-    for (p, n, _), s, d in zip(corpus, sud, df):
-        if s is None or d is None:
-            print(f"  failed: {n} ({'Sudsy' if s is None else 'dockerfmt'})")
-    ok = [(c, s, d) for c, s, d in zip(corpus, sud, df) if s is not None and d is not None]
-    for label, who in (("held out", lambda p: p in held), ("all", lambda p: True)):
-        sub = [(c, s, d) for c, s, d in ok if who(c[0])]
-        su = sum(s == c[2].read_text(encoding="utf-8") for c, s, _ in sub)
-        du = sum(d == c[2].read_text(encoding="utf-8") for c, _, d in sub)
-        print(f"[{label}] files left byte-equal by Sudsy: {su}/{len(sub)} ({100 * su / max(len(sub), 1):.1f}%), by dockerfmt: {du}/{len(sub)} ({100 * du / max(len(sub), 1):.1f}%)")
-    changed = [(c, s) for c, s, _ in ok if s != c[2].read_text(encoding="utf-8")]
-    sample = random.Random(SEED + 1).sample(changed, min(30, len(changed)))
-    print(f"\nsample of {len(sample)} of {len(changed)} files Sudsy changes (diff, first 10 lines each):")
-    for (p, n, f), s in sample:
-        diff = list(unified_diff(f.read_text(encoding="utf-8").splitlines(), s.splitlines(), "source", "sudsy", lineterm="", n=0))
-        print(f"=== {n}: {len(diff)} diff lines")
-        print("\n".join(l[:150] for l in diff[2:12]))
-    for label, sel in (("all", lambda p: True), ("held out", lambda p: p in held), ("deciding", lambda p: p in deciding)):
-        sub = [(c, s, d) for c, s, d in zip(corpus, sud, df) if sel(c[0])]
-        n, eq, dif, sh, ca, fb, rw = compare([c for c, _, _ in sub], held, [s for _, s, _ in sub], [d for _, _, d in sub])
-        print(f"\n[{label}] both succeed: {n}; equal: {eq} ({100 * eq / max(n, 1):.1f}%); differ only in shell code of RUN/CMD/ENTRYPOINT: {sh} ({100 * sh / max(n, 1):.1f}%); "
-              f"equal if shell left out: {eq + sh} ({100 * (eq + sh) / max(n, 1):.1f}%); "
-              f"also left out the rewrites (legacy ENV, COPY JSON, MAINTAINER): {eq + sh + rw} ({100 * (eq + sh + rw) / max(n, 1):.1f}%)")
-        if label == "all":
-            if len(sys.argv) > 4:
-                for e in EXAMPLES.get(sys.argv[4], [])[:int(sys.argv[5]) if len(sys.argv) > 5 else 3]:
-                    print("--- sudsy\n" + e[0] + "\n--- dockerfmt\n" + e[1])
-            for (c, shell), k in ca.most_common(15):
-                print(f"  {k:6d} {len(fb[(c, shell)]):4d} files  {'[shell] ' if shell else ''}{c}")
-
-
-if __name__ == "__main__":
-    main()

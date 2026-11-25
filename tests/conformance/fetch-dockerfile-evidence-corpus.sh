@@ -15,7 +15,6 @@ apache/airflow ec2bd5eafe17052d752ca72c0cfdc4ed534f8ac5 $P
 home-assistant/core e2a4d8d9022f09fbcf8d3c549f11c71d73f0f541 $P
 kubernetes-sigs/kind b89bd211632684f3dc60187e01ca80c8e3bd2fc3 $P
 vercel/next.js ea5a73353a7b8509555d885823971a21b6f4a489 $P
-envoyproxy/envoy d7aa52f545ce00e04ceca34e2093324ddfd63624 $P
 cockroachdb/cockroach d30c905fff79ef825adc96bcc647f1872a90f2ff $P
 mastodon/mastodon 6c29cb4b9c1f8b3f9a1be23f0efb9c5ac64155a3 $P
 traefik/traefik 8fcaa7cda47c139b76e02ab3d115c168d093ac04 $P

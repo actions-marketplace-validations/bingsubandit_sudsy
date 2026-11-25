@@ -35,5 +35,8 @@ Sources found, corpus and split, decision table, checklist, the oracle or its ab
 ## 6. Ready numbers
 A new language's leg with no reference tool is `Ready` in the README table at: format `stable` 100% and `agreement` 80%; lint `checklist` 85% and `precision` 90% (the numbers of sections 3 and 4). The row of `xtask/full/support.yaml` names `evidence: <folder>`, a folder of `tests/parity` whose `differences.yaml` holds `agreement`, and `checklist` with `precision` (both or none), in percent; `cargo xtask codegen --check` fails a non-exempt format leg with no reference tool that lacks `agreement`. The six legs that predate this page are `exempt: true` by name and keep the `stable` bar of 85%: INI, EditorConfig and .gitignore format (one row), Dockerfile, Makefile and GitHub Actions format. They are scored as `retrofit` rows of the priority table (`xtask/full/languages.yaml`: parser paid, the cost of what this page still asks of them), compete with the new-language rows and never rank ahead of a primary leg under the bar.
 
+## Tooling
+`scripts/evidence.py <language> ...` is the shared harness of sections 2 to 5: file list, seeded project split, one vote per project, agreement, comparison with a partial tool. A language adds `scripts/evidence_<language>.py` with its facts only (corpus folders, seed, row variants, causes of difference); examples: `evidence_dockerfile.py`, `evidence_makefile.py`.
+
 ## 7. When a tool appears
 A maintained reference tool that turns up later becomes the primary tool of the leg. Its result is compared as for any other language, and the tables here keep the options.

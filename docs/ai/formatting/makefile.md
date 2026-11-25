@@ -5,7 +5,7 @@ tree-sitter-make 1.1.1 (GNU make, forked in `grammars/tree-sitter-make`) linked 
 
 Files: `Makefile`, `GNUmakefile`, `makefile`, `*.mk` and `*.mak`.
 
-The grammar is a fork ([../../../grammars/tree-sitter-make/FORK.md](../../../grammars/tree-sitter-make/FORK.md)); all 59 files of the corpus below parse. Known gap: `A+=b`, `A?=b` and `A!=b` written with no blank before the operator read as the name `A+` and `=`, so the formatter leaves such an assignment as written. `.RECIPEPREFIX` is parsed but recipes must still start with a tab.
+The grammar is a fork ([../../../grammars/tree-sitter-make/FORK.md](../../../grammars/tree-sitter-make/FORK.md)); all 59 files of the corpus below parse, but 225 of the 1,021 files of the evidence corpus ([../design/makefile.md](../design/makefile.md)) do not (`stable` 78%): 188 have a variable name with a reference (`OBJS-$(CONFIG_X) += a.o`), 10 are NMake. Known gap: `A+=b`, `A?=b` and `A!=b` written with no blank before the operator read as the name `A+` and `=`, so the formatter leaves such an assignment as written. `.RECIPEPREFIX` is parsed but recipes must still start with a tab.
 
 ## Formatting
 - One statement per line group, blank lines kept up to `max_blank_lines` (2), trailing blanks removed.
