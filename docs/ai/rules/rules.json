@@ -34500,7 +34500,7 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "Element names are case-insensitive in HTML; lowercase is the convention. Everything inside `<svg>` and `<math>` keeps its case. Reported on the name of a start or end tag.",
+      "description": "Element names are case-insensitive in HTML; lowercase is the convention (not in `.vue`, `.svelte` and `*.component.html` files, where component names are capitalised). Everything inside `<svg>` and `<math>` keeps its case. Reported on the name of a start or end tag.",
       "example": {
         "config": null,
         "fixed": null,
@@ -34564,7 +34564,7 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone.",
+      "description": "A custom element name is lowercase letters, digits, `-`, `.` and `_`, and has a `-`, so that it never clashes with an element HTML adds later. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.",
       "example": {
         "config": null,
         "fixed": null,
@@ -35731,7 +35731,7 @@
     {
       "category": "correctness",
       "default_level": "off",
-      "description": "A document without a doctype is rendered in quirks mode.",
+      "description": "A document without a doctype is rendered in quirks mode. Not in `.vue`, `.svelte` and `*.component.html` files, which are fragments of a page.",
       "example": {
         "config": null,
         "fixed": null,
@@ -38067,7 +38067,7 @@
     {
       "category": "suspicious",
       "default_level": "off",
-      "description": "An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone.",
+      "description": "An element name that HTML does not define, custom elements (`<my-element>`) included. Everything inside `<svg>` and `<math>` is left alone, and so are `.vue`, `.svelte` and `*.component.html` files, where component names are normal.",
       "example": {
         "config": null,
         "fixed": null,
