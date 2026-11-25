@@ -39,6 +39,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | eslint-plugin-jsonc | 100.0% | `7514c1f3` | 44 | 35 | 7 | 0 | 0 | 2 | 0 | 0 |
 | eslint-plugin-svelte | 100.0% | `7514c1f3` | 85 | 19 | 9 | 54 | 0 | 3 | 0 | 54 |
 | eslint-plugin-vue | 88.8% | `7514c1f3` | 256 | 45 | 58 | 149 | 0 | 4 | 0 | 149 |
+| gersemi | - | - | 6 | 2 | 0 | 0 | 0 | 0 | 4 | 0 |
 | google-java-format | - | - | 14 | 2 | 5 | 1 | 0 | 6 | 0 | 1 |
 | graphql-eslint | 88.1% | `7514c1f3` | 65 | 4 | 6 | 30 | 0 | 0 | 25 | 30 |
 | hadolint | 91.2% | `7514c1f3` | 71 | 38 | 13 | 0 | 0 | 1 | 19 | 0 |

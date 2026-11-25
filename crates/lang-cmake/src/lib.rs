@@ -1,9 +1,10 @@
 //! CMake (`CMakeLists.txt`, `*.cmake`): a hand-written lossless lexer and parser; the formatter
-//! prints the file as written.
+//! is the rows of `format.rules`.
 //!
 //! concept: none (glue: provider entry)
 
 mod blocks;
+mod format;
 mod lexer;
 mod parser;
 

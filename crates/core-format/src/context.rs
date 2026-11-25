@@ -164,24 +164,7 @@ pub trait NodeFormatter: Send + Sync {
     /// What the safety check compares of a `#restyle` token or node of the input and of the
     /// output: the text without what formatting may change (quotes, case, number spelling, blanks).
     fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
-        match item {
-            SyntaxElement::Token(t) => Cow::Borrowed(t.text()),
-            // (the code of a node: formatting moves the comments around it)
-            SyntaxElement::Node(n) => {
-                let toks: Vec<_> = n
-                    .descendants_with_tokens()
-                    .filter_map(|e| e.into_token())
-                    .collect();
-                let code = |t: &&core_syntax::SyntaxToken| {
-                    let s = t.text();
-                    !s.trim().is_empty() && !s.starts_with("//") && !s.starts_with("/*")
-                };
-                let from = toks.iter().position(|t| code(&t)).unwrap_or(0);
-                let to = toks.iter().rposition(|t| code(&t)).map_or(0, |i| i + 1);
-                let text: String = toks[from..to].iter().map(|t| t.text()).collect();
-                Cow::Owned(text)
-            }
-        }
+        default_value(item)
     }
 
     /// Source text to format instead of the input, for an option that reorders code (C# sorts
@@ -915,6 +898,28 @@ impl<'a> FormatCtx<'a> {
             verbatim_text(&raw),
             self.trailing_comments_doc(last),
         ])
+    }
+}
+
+/// [`NodeFormatter::value`] as it is unless a formatter says otherwise.
+pub fn default_value(item: &SyntaxElement) -> Cow<'_, str> {
+    match item {
+        SyntaxElement::Token(t) => Cow::Borrowed(t.text()),
+        // (the code of a node: formatting moves the comments around it)
+        SyntaxElement::Node(n) => {
+            let toks: Vec<_> = n
+                .descendants_with_tokens()
+                .filter_map(|e| e.into_token())
+                .collect();
+            let code = |t: &&core_syntax::SyntaxToken| {
+                let s = t.text();
+                !s.trim().is_empty() && !s.starts_with("//") && !s.starts_with("/*")
+            };
+            let from = toks.iter().position(|t| code(&t)).unwrap_or(0);
+            let to = toks.iter().rposition(|t| code(&t)).map_or(0, |i| i + 1);
+            let text: String = toks[from..to].iter().map(|t| t.text()).collect();
+            Cow::Owned(text)
+        }
     }
 }
 

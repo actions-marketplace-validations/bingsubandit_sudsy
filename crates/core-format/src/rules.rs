@@ -24,7 +24,8 @@ use crate::seq::kids;
 use crate::shapes::flow::Flow;
 use crate::spacing::SpaceRules;
 use core_config::ResolvedOptions;
-use core_syntax::{Grammar, SyntaxKind, SyntaxNode};
+use core_syntax::{Grammar, SyntaxElement, SyntaxKind, SyntaxNode};
+use std::borrow::Cow;
 use std::sync::OnceLock;
 
 /// The lines of a section: trimmed, without blank lines and `#` comments.
@@ -163,6 +164,7 @@ impl RuleFormatter {
             layout: Layout::parse(g, &layout, bindings),
             blank: Blank::parse(g, section(text, "blank")),
             file: File {
+                blocks: &[],
                 one_line: facts.one_line_verbatim,
                 any: kinds(facts.verbatim_if),
             },
@@ -220,7 +222,10 @@ impl RuleFormatter {
         cx: &FormatCtx<'_>,
     ) -> Result<Option<Doc>, FormatError> {
         let (flow, level) = (self.flow(self.source_hang), self.flow(false));
-        match self.layout.format(cx, node, (&flow, &level), &self.file) {
+        match self
+            .layout
+            .format(cx, node, (&flow, &level), &self.file, &self.cases)
+        {
             Some(r) => r.map(Some),
             None => flow.seq(cx, &kids(cx, node)).map(Some),
         }
@@ -234,7 +239,8 @@ impl RuleFormatter {
         cx: &FormatCtx<'_>,
         flow: &Flow<'_>,
     ) -> Option<Result<Doc, FormatError>> {
-        self.layout.format(cx, node, (flow, flow), &self.file)
+        self.layout
+            .format(cx, node, (flow, flow), &self.file, &self.cases)
     }
 
     pub fn blank_between(&self, cx: &FormatCtx<'_>, prev: &SyntaxNode, next: &SyntaxNode) -> bool {
@@ -321,6 +327,7 @@ pub struct LazyRules {
     grammar: fn() -> &'static Grammar,
     text: &'static str,
     facts: RuleFacts,
+    blocks: &'static [core_syntax::block_pair::Block],
     option_kinds: OptionKinds,
     cell: OnceLock<RuleFormatter>,
 }
@@ -350,6 +357,7 @@ impl LazyRules {
             grammar,
             text,
             facts: RuleFacts::DEFAULT,
+            blocks: &[],
             option_kinds: &[],
             cell: OnceLock::new(),
         }
@@ -361,6 +369,12 @@ impl LazyRules {
         self
     }
 
+    /// The block words of the language's commands (the `commands` layout).
+    pub const fn blocks(mut self, blocks: &'static [core_syntax::block_pair::Block]) -> LazyRules {
+        self.blocks = blocks;
+        self
+    }
+
     /// The language's [`RuleFacts`].
     pub const fn facts(mut self, facts: RuleFacts) -> LazyRules {
         self.facts = facts;
@@ -369,7 +383,14 @@ impl LazyRules {
 
     pub fn get(&self) -> &RuleFormatter {
         self.cell.get_or_init(|| {
-            RuleFormatter::parse_with((self.grammar)(), self.text, &self.facts, self.option_kinds)
+            let mut rules = RuleFormatter::parse_with(
+                (self.grammar)(),
+                self.text,
+                &self.facts,
+                self.option_kinds,
+            );
+            rules.file.blocks = self.blocks;
+            rules
         })
     }
 }
@@ -393,6 +414,17 @@ impl NodeFormatter for LazyRules {
 
     fn rows(&self) -> &'static str {
         self.text
+    }
+
+    /// What the safety check compares of a `#restyle` token: the text, in lower case when a
+    /// `[case]` row covers its kind (the case is the formatter's to change).
+    fn value<'a>(&self, item: &'a SyntaxElement) -> Cow<'a, str> {
+        match item {
+            SyntaxElement::Token(t) if self.get().cases.covers(t.kind()) => {
+                Cow::Owned(t.text().to_lowercase())
+            }
+            _ => crate::context::default_value(item),
+        }
     }
 
     fn rewrite_source(

@@ -1142,6 +1142,14 @@
 ["valid-model-definition","wontfix","wontfix: deprecated upstream","","https://eslint.vuejs.org/rules/valid-model-definition.html"],
 ["valid-next-tick","missing","planned","needs script analysis (the JS semantic layer)","https://eslint.vuejs.org/rules/valid-next-tick.html"]
 ]},
+{"languages":["cmake"],"rule_url":false,"target":null,"tool":"gersemi","version":"0.29.2","entries":[
+["indent","covered","option: cmake.format.indent_size","",""],
+["line_length","covered","option: cmake.format.line_width","",""],
+["list_expansion","deferred","deferred","Phase 5 (keyword sections).",""],
+["definitions","deferred","deferred","User command definitions.",""],
+["unsafe","deferred","deferred","No unsafe mode.",""],
+["warn_about_unknown_commands","deferred","deferred","A warning of the tool, not a layout.",""]
+]},
 {"languages":["java"],"rule_url":false,"target":null,"tool":"google-java-format","version":"2.0.0 (GitHub release latest; the native binary `scripts/parity.sh format google-java-format` downloads, no JVM needed)","entries":[
 ["indent","covered","option: java.format.indent_size","",""],
 ["max-width","covered","option: java.format.line_width","",""],

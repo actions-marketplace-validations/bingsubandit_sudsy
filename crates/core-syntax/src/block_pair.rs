@@ -12,6 +12,7 @@
 //! reads: path:block_pair::Block
 
 /// The words of one kind of block.
+#[derive(Debug)]
 pub struct Block {
     pub open: &'static str,
     /// Words that continue the block (`elseif`, `else`), each only inside it.

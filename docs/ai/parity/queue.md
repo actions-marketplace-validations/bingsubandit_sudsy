@@ -210,6 +210,14 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by mi
 5. `vue/multi-word-component-names` (1 missed)
 6. `vue/return-in-computed-property` (1 missed)
 
+## gersemi
+
+Format: unclassified 0 of 3404 differing files (0%).
+1. `set-layout` (1483 files): gersemi keeps the name on the line of `set(`, `list(` and the like and breaks a list of more than a few values; Sudsy breaks only what does not fit and never keeps the first argument on the command line
+2. `keyword-sections` (1475 files): gersemi lays the arguments of a known command out in keyword sections (a keyword and its values on one line, the values of `COMMAND`, `PROPERTIES` and the like one level in); Sudsy puts every argument on its own line
+3. `condition-layout` (340 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators (`AND`, `OR`, `NOT`, groups); Sudsy treats it as a list of arguments
+4. `section-indent` (106 files): gersemi indents the values of a section one level further than the keyword; Sudsy has no sections
+
 ## google-java-format
 
 1. `layout-gaps` (- files): about 8% of the real-world files differ in a detail (a method chain whose head is a field access or that sits in a lambda or ternary, `@A()` keeps its parentheses, a text block's closing quotes are re-indented, a long trailing comment is not wrapped, and comments in unusual places (inside arguments, between modifiers) stay where the source has them)

@@ -173,6 +173,8 @@ impl Row {
 
 /// File-level facts: when the whole file stays as written.
 pub(crate) struct File {
+    /// The block words of the language's commands ([`core_syntax::block_pair`]).
+    pub(crate) blocks: &'static [core_syntax::block_pair::Block],
     /// A file of one line.
     pub(crate) one_line: bool,
     /// A file with a token of one of these kinds (text outside the language's tags).
@@ -390,6 +392,7 @@ impl Layout {
         node: &SyntaxNode,
         flows: (&Flow<'_>, &Flow<'_>),
         file: &File,
+        case_rows: &crate::case::Cases,
     ) -> Option<R> {
         let row = self
             .by_kind
@@ -459,6 +462,15 @@ impl Layout {
                     n => doc::concat((0..n).map(|_| doc::hardline()).chain([d]).collect()),
                 }
             }),
+            "commands" => shapes::command_list(
+                cx,
+                node,
+                &shapes::Commands {
+                    blocks: file.blocks,
+                    cases: case_rows,
+                    max_blank: max_blank(cx),
+                },
+            ),
             "key_value" => shapes::key_value(
                 cx,
                 node,

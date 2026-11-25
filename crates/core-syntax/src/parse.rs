@@ -299,6 +299,14 @@ impl<'a> Parser<'a> {
         self.builder.token(t.kind, &self.src[t.start..t.end]);
     }
 
+    /// [`Parser::bump`] with the token entered in the tree as `kind`: a token that only the
+    /// parse can tell (a command name from an argument of the same spelling).
+    pub fn bump_as(&mut self, kind: SyntaxKind) {
+        let at = self.real[self.pos];
+        self.tokens[at].kind = kind;
+        self.bump();
+    }
+
     /// Consumes the current token with its leading and trailing trivia.
     #[inline]
     pub fn bump(&mut self) {
