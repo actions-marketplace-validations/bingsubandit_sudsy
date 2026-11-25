@@ -439,7 +439,7 @@ Twenty-four rules read the `///` and `/** */` comment of a declaration (StyleCop
 | `function-call-in-default` | python | suspicious | warn | none | A call in the default of a parameter (not in a lambda, not a call of an immutable builtin such as `tuple`). Equivalent: ruff B008. |
 | `future-feature-not-defined` | python | correctness | warn | none | A name imported from `__future__` that the module does not have. Equivalent: ruff F407. |
 | `generic-class` | python | style | off | none | A class with `Generic[...]` among its bases, for a target version with type parameters (3.12). Equivalent: ruff UP046. |
-| `generic-function` | python | style | off | none | A function outside a class whose signature uses a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12). Equivalent: ruff UP047. |
+| `generic-function` | python | style | off | none | A function outside a class whose parameters use a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12). Equivalent: ruff UP047. |
 | `get-attr-with-constant` | python | style | off | none | `getattr(x, "name")` with a literal name that is an identifier (two arguments). Equivalent: ruff B009. |
 | `hasattr-call` | python | suspicious | warn | none | A call of `hasattr` or `getattr` that asks for `"__call__"`. Equivalent: ruff B004. |
 | `if-expr-with-false-true` | python | style | off | none | A conditional expression with `False` and `True` arms. Equivalent: ruff SIM211. |

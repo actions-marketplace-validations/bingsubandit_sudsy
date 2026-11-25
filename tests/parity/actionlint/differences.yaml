@@ -3,7 +3,6 @@ differences:
   self-hosted-labels: "gap  a job with `self-hosted` is not checked for custom runner labels; actionlint wants them in its config and reports the others as unknown"
   undefined-alias-aborts: "gap  an undefined alias makes actionlint stop at \"could not parse as YAML\" (line 0) and report nothing else; Sudsy reports the alias and the unused anchor each at their line"
   duplicate-entry-dropped: "gap  actionlint drops a duplicated key or job before checking it; Sudsy still checks the second entry (steps missing, an unknown output property)"
-  false-report: "gap  Sudsy reports what actionlint does not: `container: null` as an empty string, `options` on an input without `type` (docs/ai/bugs.md)"
   glob-check: "gap  a filter glob with a leading or trailing space in a `|` scalar and an unterminated `[` in a version are not checked"
   expression-checker: "gap  the expression checker lacks: contexts of the workflow `name`, expressions in env var names and credentials, `if: true` literals, matrix values of an `include`-only matrix, the outputs of known actions"
   event-checks: "gap  more than 25 workflow_dispatch inputs, and an activity type given through a YAML anchor (`types: &created [created]`) are not checked"
@@ -22,7 +21,6 @@ files:
   script-injection/cases sudsy:script-injection 7: script-line
   corpus/actionlint/testdata/err/assign_expression.yaml actionlint:workflow-syntax 11: expression-valued-keys
   corpus/actionlint/testdata/err/empty.yaml actionlint:workflow-syntax 1: empty-document
-  corpus/actionlint/testdata/err/empty_sequence_or_string.yaml sudsy:invalid-event 5: false-report
   corpus/actionlint/testdata/err/errors_in_anchor.yaml actionlint:invalid-event 4: event-checks
   corpus/actionlint/testdata/err/errors_in_anchor.yaml actionlint:workflow-syntax 28: section-values
   corpus/actionlint/testdata/err/expr_check_in_credentials.yaml actionlint:expression-types 22: expression-checker
@@ -58,7 +56,6 @@ files:
   corpus/actionlint/testdata/examples/not_persistent_matrix_values.yaml actionlint:expression-types 22: expression-checker
   corpus/actionlint/testdata/examples/popular_action_outputs.yaml actionlint:expression-types 18: expression-checker
   corpus/actionlint/testdata/examples/yaml_anchor_usage.yaml actionlint:workflow-syntax 18: expression-valued-keys
-  corpus/actionlint/testdata/ok/container_syntax.yaml sudsy:workflow-syntax 11: false-report
   corpus/starter-workflows/code-scanning/codeql.yml actionlint:workflow-syntax 45: expression-valued-keys
   corpus/starter-workflows/deployments/google-cloudrun-docker.yml actionlint:expression-types 93: script-line
   corpus/starter-workflows/deployments/google-cloudrun-docker.yml sudsy:expression-types 95: script-line

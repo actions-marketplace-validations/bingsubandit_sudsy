@@ -2151,7 +2151,7 @@
             },
             "generic-function": {
               "$ref": "#/definitions/rule",
-              "description": "A function outside a class whose signature uses a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12)."
+              "description": "A function outside a class whose parameters use a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12)."
             },
             "get-attr-with-constant": {
               "$ref": "#/definitions/rule",

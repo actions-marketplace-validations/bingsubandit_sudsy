@@ -11,3 +11,10 @@ try:
     pass
 except (A, B):
     pass
+try:
+    pass
+except exit.Exception:
+    B = 2
+except (A, Exception):
+^ no-broad-catch
+    B = 2

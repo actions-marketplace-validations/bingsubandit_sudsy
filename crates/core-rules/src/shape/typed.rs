@@ -65,7 +65,7 @@ impl Walk<'_> {
                 );
                 self.report(row, *key, message);
             }
-            if find(typed.options_key).is_some() && !has_choice {
+            if !options.is_empty() && !has_choice {
                 let message = format!(
                     "\"{}\" can not be set to \"{name}\" input because its input type is not \"{}\"",
                     typed.options_key, typed.choice

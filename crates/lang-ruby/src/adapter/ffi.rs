@@ -111,6 +111,14 @@ unsafe extern "C" fn on_node(node: *const sys::pm_node_t, data: *mut c_void) -> 
             }
         }
     }
+    if node.type_ == sys::pm_node_type::PM_RESCUE_NODE as u16 {
+        // SAFETY: the type says the node is a `pm_rescue_node_t`; `subsequent` is null or a node.
+        let rescue = unsafe { &*std::ptr::from_ref(node).cast::<sys::pm_rescue_node_t>() };
+        // Prism spans a clause over the clauses after it; they are siblings.
+        if let Some(next) = unsafe { rescue.subsequent.cast::<sys::pm_node_t>().as_ref() } {
+            end = next.location.start;
+        }
+    }
     nodes.push(Node {
         kind: node.type_,
         start,

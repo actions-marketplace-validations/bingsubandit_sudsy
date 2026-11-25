@@ -19173,13 +19173,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
             "column": 29,
             "length": 3,
-            "line": 46
+            "line": 49
           }
         ]
       },
@@ -19456,13 +19456,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
             "column": 17,
             "length": 1,
-            "line": 41
+            "line": 44
           }
         ]
       },
@@ -19491,13 +19491,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
             "column": 5,
             "length": 21,
-            "line": 30
+            "line": 33
           }
         ]
       },
@@ -19526,7 +19526,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "A = B = 1\ntry:\n    pass\nexcept:\n    pass\nexcept A:\n    pass\ntry:\n    pass\nexcept (A, B):\n    pass\n",
+        "input": "A = B = 1\ntry:\n    pass\nexcept:\n    pass\nexcept A:\n    pass\ntry:\n    pass\nexcept (A, B):\n    pass\ntry:\n    pass\nexcept exit.Exception:\n    B = 2\nexcept (A, Exception):\n    B = 2\n",
         "language": "python",
         "spans": [
           {
@@ -19561,7 +19561,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -19596,7 +19596,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -19612,7 +19612,7 @@
           {
             "column": 1,
             "length": 34,
-            "line": 32
+            "line": 35
           }
         ]
       },
@@ -19641,7 +19641,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -19939,7 +19939,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -19970,11 +19970,11 @@
     {
       "category": "style",
       "default_level": "off",
-      "description": "A function outside a class whose signature uses a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12).",
+      "description": "A function outside a class whose parameters use a module-level `TypeVar`, `ParamSpec` or `TypeVarTuple`, for a target version with type parameters (3.12).",
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -21063,13 +21063,18 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "A = B = 1\ntry:\n    pass\nexcept:\n    pass\nexcept A:\n    pass\ntry:\n    pass\nexcept (A, B):\n    pass\n",
+        "input": "A = B = 1\ntry:\n    pass\nexcept:\n    pass\nexcept A:\n    pass\ntry:\n    pass\nexcept (A, B):\n    pass\ntry:\n    pass\nexcept exit.Exception:\n    B = 2\nexcept (A, Exception):\n    B = 2\n",
         "language": "python",
         "spans": [
           {
             "column": 1,
             "length": 1,
             "line": 4
+          },
+          {
+            "column": 1,
+            "length": 1,
+            "line": 16
           }
         ]
       },
@@ -21329,7 +21334,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -21419,13 +21424,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
             "column": 4,
             "length": 26,
-            "line": 35
+            "line": 38
           }
         ]
       },
@@ -21819,7 +21824,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -22352,7 +22357,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -22465,13 +22470,13 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
             "column": 1,
             "length": 1,
-            "line": 50
+            "line": 53
           }
         ]
       },
@@ -22653,7 +22658,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
+        "input": "from typing import Union\nx: Union[int, str]\n\nfrom typing import Optional\nx: Optional[int]\n\nfrom typing import List\nx: List[int]\n\nfrom typing import Generator\nx: Generator[int, None, None]\n\ndef f(x: \"int\"):\n    pass\n\nfrom typing import TypeAlias\nX: TypeAlias = int\n\nfrom typing import Generic, TypeVar\nT = TypeVar(\"T\")\nclass A(Generic[T]):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\ndef f(x: T) -> T:\n    return x\n\ndef g() -> T:\n    pass\n\nimport datetime\nx = datetime.timezone.utc\n\nfrom typing_extensions import Self\n\nimport sys\nif sys.version_info >= (3, 8):\n    pass\n\nfrom typing import TypeVar\nT = TypeVar(\"T\")\nclass A:\n    def f(self: T) -> T:\n        return self\n\nfrom typing import Any\nclass A:\n    def __eq__(self, other: Any) -> bool:\n        return True\n\nfrom typing import TypeVar\nT = TypeVar(\"T\", covariant=True)\n",
         "language": "python",
         "spans": [
           {
@@ -27423,7 +27428,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  pull_request_review:\n    types: submitted\n    tags: v1\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n    - cron: '*/4 * * * *'\n    - cron: '0 1 * * *'\n      timezone: Europe/Berlin\n    - cron: '0 1 * * *'\n      timezone: UTC\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
+        "input": "on:\n  pushh: {}\n  push:\n    branches: [main]\n    branches-ignore: [dev]\n  pull_request:\n    types: [opened, created]\n  pull_request_review:\n    types: submitted\n    tags: v1\n  schedule:\n    - cron: '0 0 * *'\n    - cron: '0 0 * * 9'\n    - cron: '*/15 0-5 * * mon'\n    - cron: '*/4 * * * *'\n    - cron: '0 1 * * *'\n      timezone: Europe/Berlin\n    - cron: '0 1 * * *'\n      timezone: UTC\n  workflow_dispatch:\n    inputs:\n      kind:\n        type: choice\n      flag:\n        type: boolean\n        default: yes\n      ok:\n        type: choice\n        options: [a, b]\n        default: a\n      empty:\n        options: []\n  workflow_call:\n    inputs:\n      n:\n        type: number\n        default: x\n      r:\n        required: true\n        default: 1\njobs: {}\n",
         "language": "github-actions",
         "spans": [
           {
@@ -27479,12 +27484,12 @@
           {
             "column": 9,
             "length": 7,
-            "line": 35
+            "line": 37
           },
           {
             "column": 9,
             "length": 7,
-            "line": 38
+            "line": 40
           }
         ]
       },
@@ -28498,7 +28503,7 @@
       "example": {
         "config": null,
         "fixed": null,
-        "input": "on: push\nenv:\n  A: 1\n  a: 2\njobs:\n  build:\n    runs-on: ubuntu-latest\n    stepz: []\n    steps:\n      - run: echo hi\n        uses: actions/checkout@v4\n      - name: nothing\n      - uses: actions/checkout@v4\n        timeout-minutes: 0\n    container:\n      image: ''\n  empty:\n    steps:\n      -\n  matrix:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b, a]\n        exclude:\n          - os: c\n          - arch: x\n    steps:\n      - run: echo\n",
+        "input": "on: push\nenv:\n  A: 1\n  a: 2\njobs:\n  build:\n    runs-on: ubuntu-latest\n    stepz: []\n    steps:\n      - run: echo hi\n        uses: actions/checkout@v4\n      - name: nothing\n      - uses: actions/checkout@v4\n        timeout-minutes: 0\n    container:\n      image: ''\n  none:\n    runs-on: ubuntu-latest\n    container: null\n    steps:\n      - run: echo\n  empty:\n    steps:\n      -\n  matrix:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        os: [a, b, a]\n        exclude:\n          - os: c\n          - arch: x\n    steps:\n      - run: echo\n",
         "language": "github-actions",
         "spans": [
           {
@@ -28534,32 +28539,32 @@
           {
             "column": 3,
             "length": 5,
-            "line": 17
+            "line": 22
           },
           {
             "column": 7,
-            "length": 1,
-            "line": 19
-          },
-          {
-            "column": 7,
-            "length": 1,
-            "line": 19
-          },
-          {
-            "column": 20,
             "length": 1,
             "line": 24
           },
           {
+            "column": 7,
+            "length": 1,
+            "line": 24
+          },
+          {
+            "column": 20,
+            "length": 1,
+            "line": 29
+          },
+          {
             "column": 17,
             "length": 1,
-            "line": 26
+            "line": 31
           },
           {
             "column": 13,
             "length": 4,
-            "line": 27
+            "line": 32
           }
         ]
       },
