@@ -20,6 +20,12 @@ const STABILITY: &str = "stability";
 /// The ending of a cell with no reference tool.
 const NO_TOOL: &str = "no reference tool";
 
+/// `Ready` bars of a new language's leg with no reference tool (docs/ai/development/no-reference-tool.md), percent:
+/// format stable and agreement, lint checklist (the usability bar) and precision.
+const STABLE_BAR: f64 = 100.0;
+const AGREEMENT_BAR: f64 = 80.0;
+const PRECISION_BAR: f64 = 90.0;
+
 #[derive(Deserialize)]
 pub(crate) struct Row {
     pub language: String,
@@ -38,6 +44,14 @@ pub(crate) struct Row {
     /// `tests/parity/stability` (the corpus files that are stable) that stand for the format leg.
     #[serde(default)]
     pub stability: Vec<String>,
+    /// The leg with no reference tool predates docs/ai/development/no-reference-tool.md: it needs no agreement,
+    /// checklist or precision number (the six legs INI, EditorConfig, .gitignore, Dockerfile, Makefile and GitHub
+    /// Actions format; set by name here, never for a new language).
+    #[serde(default)]
+    pub exempt: bool,
+    /// A new language's leg with no reference tool: the folder of `tests/parity` whose `differences.yaml` holds
+    /// `agreement` (format, needed beside `stability`) and `checklist` with `precision` (lint, both or none) in percent.
+    pub evidence: Option<String>,
     /// What a user needs before the language works, in one sentence (shown on the site's language page).
     pub requires: Option<String>,
     /// The raw popularity values of the languages of the row (the sources and the formula of `languages.yaml`);
@@ -150,6 +164,12 @@ struct Ratchets {
     #[serde(default, rename = "target-files")]
     target_files: BTreeMap<String, u64>,
     target: Option<f64>,
+    /// No reference tool, format: the share of decided constructs that already have the chosen form on held-out code.
+    agreement: Option<f64>,
+    /// No reference tool, lint: the share of checklist entries a rule reports on the bad example and not the good one.
+    checklist: Option<f64>,
+    /// No reference tool, lint: the share of judged findings that are true.
+    precision: Option<f64>,
     /// The findings of the lint corpus.
     measured: Option<Findings>,
 }
@@ -184,11 +204,22 @@ pub fn render(
             "| {} | {} | {} | {status} |\n",
             row.language,
             cell(&row.format, &m.format).unwrap_or_else(|| match m.format.first() {
-                Some(p) if !row.stability.is_empty() =>
-                    format!("{} · {NO_TOOL}", share(*p, "stable")),
+                Some(p) if !row.stability.is_empty() => match m.no_tool.0 {
+                    Some(a) => format!(
+                        "{} · {} · {NO_TOOL}",
+                        share(*p, "stable"),
+                        share(Some(a), "agreement")
+                    ),
+                    None => format!("{} · {NO_TOOL}", share(*p, "stable")),
+                },
                 _ => "none".into(),
             }),
             cell(&row.lint, &m.lint).unwrap_or_else(|| match rule_count(&row.ids) {
+                n if n > 0 && m.no_tool.1.is_some() => format!(
+                    "{n} rules · {} · {} · {NO_TOOL}",
+                    share(m.no_tool.1, "checklist"),
+                    share(m.no_tool.2, "precision")
+                ),
                 n if n > 0 => format!("{n} rules · {NO_TOOL}"),
                 _ => "none".into(),
             }),
@@ -250,6 +281,28 @@ pub fn check_measured(root: &Path, support_yaml: &str) -> Result<()> {
                 row.language
             );
         }
+        let no_format_tool = row.format.is_empty() && !row.stability.is_empty();
+        if no_format_tool && !row.exempt {
+            let agreement = match &row.evidence {
+                Some(f) => ratchets(root, f)?.agreement,
+                None => None,
+            };
+            if agreement.is_none() {
+                bail!(
+                    "support.yaml: format of `{}` has no reference tool: it needs `evidence:` (a folder of tests/parity) with an `agreement:` number (docs/ai/development/no-reference-tool.md), or `exempt: true` for the six legs that predate it",
+                    row.language
+                );
+            }
+        }
+        if let Some(f) = &row.evidence {
+            let r = ratchets(root, f)?;
+            if r.checklist.is_some() != r.precision.is_some() {
+                bail!(
+                    "support.yaml: tests/parity/{f}/differences.yaml ({}) needs `checklist:` and `precision:` together",
+                    row.language
+                );
+            }
+        }
         for t in row.lint.iter().filter(|t| t.blocked.is_none()) {
             if ratchets(root, &t.tool)?.target.is_none() {
                 bail!(
@@ -289,6 +342,8 @@ pub(crate) struct Measured<'a> {
     pub lint_n: Vec<Option<(u64, u64)>>,
     pub status: &'static str,
     pub popularity: V,
+    /// The numbers of a leg with no reference tool (`evidence`): agreement, checklist, precision.
+    pub no_tool: (Option<f64>, Option<f64>, Option<f64>),
 }
 
 impl Measured<'_> {
@@ -334,7 +389,15 @@ pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'
                 .collect();
             let format: Vec<Option<f64>> = format_n.iter().map(|n| percent(*n)).collect();
             let no_formatter = row.format.is_empty() && row.stability.is_empty();
-            let status = status(no_formatter, &format, &lint);
+            let no_tool = match &row.evidence {
+                Some(f) => {
+                    let r = ratchets(root, f)?;
+                    (r.agreement, r.checklist, r.precision)
+                }
+                None => (None, None, None),
+            };
+            let ok = no_tool_ready(row, &format, no_tool);
+            let status = status(no_formatter, &format, &lint, ok);
             Ok(Measured {
                 row,
                 format,
@@ -343,6 +406,7 @@ pub(crate) fn measure<'a>(root: &Path, rows: &'a [Row]) -> Result<Vec<Measured<'
                 lint_n,
                 status,
                 popularity: row.popularity(),
+                no_tool,
             })
         })
         .collect()
@@ -428,12 +492,34 @@ fn cell(tools: &[Tool], shares: &[Option<f64>]) -> Option<String> {
     )
 }
 
+/// A new language's leg with no reference tool passes its own bars: format `stable` 100% and agreement 80%; lint
+/// (when the evidence has a checklist) checklist 85% and precision 90%. The exempt legs and the legs with a tool pass.
+fn no_tool_ready(
+    row: &Row,
+    format: &[Option<f64>],
+    (agreement, checklist, precision): (Option<f64>, Option<f64>, Option<f64>),
+) -> bool {
+    let at = |v: Option<f64>, bar: f64| v.is_some_and(|v| v >= bar);
+    let format_ok = row.exempt
+        || !row.format.is_empty()
+        || row.stability.is_empty()
+        || (at(format.last().copied().flatten(), STABLE_BAR) && at(agreement, AGREEMENT_BAR));
+    let lint_ok = (checklist.is_none() && precision.is_none())
+        || (at(checklist, BAR) && at(precision, PRECISION_BAR));
+    format_ok && lint_ok
+}
+
 /// `Ready` when the primary (`primary: true`, else the first listed) format and lint tool are both at the bar; further tools
 /// are shown but do not decide the status.
-fn status(no_formatter: bool, format: &[Option<f64>], lint: &[Option<f64>]) -> &'static str {
+fn status(
+    no_formatter: bool,
+    format: &[Option<f64>],
+    lint: &[Option<f64>],
+    no_tool_ok: bool,
+) -> &'static str {
     let all: Vec<Option<f64>> = format.iter().chain(lint).copied().collect();
     let primary = format.first().into_iter().chain(lint.first());
-    let ready = primary.copied().all(|s| s.is_some_and(|p| p >= BAR));
+    let ready = no_tool_ok && primary.copied().all(|s| s.is_some_and(|p| p >= BAR));
     match (all.iter().all(Option::is_none), no_formatter, ready) {
         (true, ..) => "not measured",
         (_, true, true) => "Lint only: Ready",

@@ -18,10 +18,12 @@ fn table_from_fixture_ratchets() {
   lint: [{tool: lint-a, name: LintA}]
 - language: Delta
 - language: Epsilon
+  exempt: true
   stability: [one, two]
   lint: [{tool: lint-a, name: LintA}]
 - language: Zeta
   popularity: [{name: Z, gh: 2082333.75, so: 15.7}]
+  exempt: true
   stability: [one]
   lint: [{tool: absent, name: Absent}]
 "#;
@@ -146,4 +148,67 @@ fn a_leg_without_a_number_fails_unless_blocked() {
     assert!(
         check("\n- language: A\n  lint: [{tool: absent, name: Absent, blocked: waits}]\n").is_ok()
     );
+}
+
+/// A new language's leg with no reference tool is Ready at stable 100% and agreement 80% (format) and checklist 85% with
+/// precision 90% (lint); one number under its bar, or no evidence, keeps it In progress. An `exempt` leg needs none.
+#[test]
+fn a_leg_with_no_reference_tool_needs_its_numbers() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support");
+    let support = r#"
+- language: Mu
+  popularity: [{name: M, gh: 2082333.75, so: 15.7}]
+  stability: [full]
+  evidence: evidence-ok
+- language: Nu
+  stability: [full]
+  evidence: evidence-low
+- language: Xi
+  stability: [one]
+  evidence: evidence-ok
+- language: Omicron
+  exempt: true
+  stability: [full]
+- language: Pi
+  format: [{tool: fmt-a, name: FmtA, groups: [real-world]}]
+  evidence: evidence-ok
+- language: Rho
+  format: [{tool: fmt-a, name: FmtA, groups: [real-world]}]
+  evidence: evidence-low
+"#;
+    let table = xtask_full::support::render(&root, support, &|_| 5)
+        .unwrap()
+        .table;
+    let row = |name: &str| {
+        table
+            .lines()
+            .find(|l| l.starts_with(&format!("| {name} |")))
+            .unwrap()
+            .to_string()
+    };
+    assert_eq!(
+        row("Mu"),
+        "| Mu | ██████████ 100% stable · ████████░░ 80% agreement · no reference tool | 5 rules · ████████░░ 85% checklist · █████████░ 90% precision · no reference tool | Ready |"
+    );
+    // Agreement 79%, stable under 100%, a lint precision of 89%: each alone keeps the row In progress.
+    for name in ["Nu", "Xi", "Rho"] {
+        assert!(row(name).ends_with("| In progress |"), "{}", row(name));
+    }
+    assert!(row("Pi").ends_with("| Ready |"), "{}", row("Pi"));
+    assert!(row("Omicron").ends_with("| Ready |"), "{}", row("Omicron"));
+    // No evidence for a non-exempt leg with no tool fails the check; the exempt one passes.
+    let missing = xtask_full::support::check_measured(
+        &root,
+        "- language: Q\n  popularity: [{name: Q}]\n  stability: [full]\n",
+    )
+    .unwrap_err();
+    assert!(
+        missing.to_string().contains("needs `evidence:`"),
+        "{missing}"
+    );
+    xtask_full::support::check_measured(
+        &root,
+        "- language: Q\n  popularity: [{name: Q}]\n  exempt: true\n  stability: [full]\n",
+    )
+    .unwrap();
 }
