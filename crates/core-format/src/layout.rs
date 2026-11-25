@@ -24,9 +24,7 @@
 //!
 //! The kind sets of the language's options (`kinds:` of an option in `lang.yaml`, [`Binding`]) say
 //! which constructs an option governs; the shapes decide: `fit` (a block of that parent stays on
-//! one line when it fits: a bool option that is on, or `all`/`inline`), `no_fit_under` and
-//! `no_fit_with` (a body over several lines stays so under such a grandparent, or beside such a
-//! child), `flat` (the items of the block are not indented when the option is `none`), `join` and
+//! one line when it fits: a bool option that is on, or `all`/`inline`), `flat` (the items of the block are not indented when the option is `none`), `join` and
 //! `head` (`compound`), `outdent` (columns of an int option), `outdent_unless` (one indent unless
 //! the bool option is on), `flush_unless` (column 0, one indent when it is on), `tight` (no blanks after the
 //! `#` of a directive when the option is `none`) and `attach` (words of a `words` option: the `{`
@@ -209,6 +207,21 @@ pub(crate) struct Layout {
 }
 
 /// Is there a line break between the first and the last code token of these elements?
+/// The width of the tokens written on one line: a blank where the source has white space.
+fn flat_width<'a>(tokens: impl Iterator<Item = &'a core_syntax::SyntaxToken>) -> usize {
+    let mut width = 0;
+    let mut gap = false;
+    for t in tokens {
+        if t.text().trim().is_empty() {
+            gap = width > 0;
+        } else {
+            width += usize::from(gap) + t.text().chars().count();
+            gap = false;
+        }
+    }
+    width
+}
+
 fn line_break_inside(els: impl Iterator<Item = SyntaxElement>) -> bool {
     let (mut code, mut pending) = (false, false);
     for t in els.filter_map(SyntaxElement::into_token) {
@@ -386,14 +399,17 @@ impl Layout {
             .find(|r| r.matches(node))?;
         let (flow, level) = flows;
         let generic = || flow.seq(cx, &kids(cx, node));
-        // The comments in front of an outdented node go with it, unless a blank line separates
-        // them: then they stay at the indentation of its neighbours.
+        // The comments in front of a node that `outdent_unless` moves (a `case`) go with it, unless
+        // a blank line separates them; those in front of any other outdented node (an access
+        // specifier, a label) stay at the indentation of its neighbours.
         let outdent = self.outdent(cx, node);
         let lead = if outdent.is_some() {
+            let with = self.bound("outdent_unless", node.kind()).is_some();
             cx.first_token(node).filter(|t| {
-                comments::leading_comments(cx.grammar, t)
-                    .last()
-                    .is_some_and(|c| c.breaks_after > 1)
+                !with
+                    || comments::leading_comments(cx.grammar, t)
+                        .last()
+                        .is_some_and(|c| c.breaks_after > 1)
             })
         } else {
             None
@@ -465,6 +481,18 @@ impl Layout {
                 let parent = node.parent().map(|p| p.kind());
                 style.flat = parent.is_some_and(|p| self.is_none(cx, "flat", p));
                 style.fit_single = parent.is_some_and(|p| self.fits(cx, p));
+                // (`blank_before`: a blank line before the items of these kinds, by the option's value)
+                if let Some(b) = self.bindings.iter().find(|b| b.role == "blank_before") {
+                    let mode = cx.options.str(b.option);
+                    if mode != "leave" && node.children().any(|c| b.kinds.contains(&c.kind())) {
+                        style.blank_before = b.kinds.clone();
+                        style.blank_mode = match mode {
+                            "never" => "never",
+                            "always" => "always",
+                            _ => "logical_block",
+                        };
+                    }
+                }
                 // (`keep_end`: a bool option that is off removes the blank line before the `}`,
                 // except of a block in a `keep_end_under` parent or before a `keep_end_before` sibling)
                 style.keep_trailing_blank = self.bound("keep_end", node.kind()).is_none_or(|b| {
@@ -511,33 +539,33 @@ impl Layout {
                 if style.fit_single || as_written {
                     let multiline = line_break_inside(node.descendants_with_tokens());
                     if style.fit_single && multiline {
-                        // A body over several lines stays so after a signature over several lines,
-                        // a template header or a constructor's initializers.
-                        let option = (node.parent())
-                            .and_then(|p| self.bound("fit", p.kind()))
-                            .map(|b| b.option);
-                        let kinds =
-                            |role| option.map_or_else(Vec::new, |o| self.bound_kinds(o, role));
-                        let with = kinds("no_fit_with");
-                        let under = kinds("no_fit_under");
-                        let keeps = node.parent().is_some_and(|p| {
+                        // A body over several lines stays so after a signature over several lines
+                        // that has a comment; without one, the body joins the signature when
+                        // both fit one line.
+                        if let Some(p) = node.parent() {
                             let start = node.text_range().start();
                             // (comments before the signature are not part of it)
-                            let mut code = false;
-                            let header = p
-                                .descendants_with_tokens()
-                                .take_while(|e| e.text_range().start() < start)
-                                .filter(|e| {
-                                    let lead =
-                                        e.as_token().is_some() && cx.grammar.is_trivia(e.kind());
-                                    code |= e.as_token().is_some() && !lead;
-                                    code || !lead
-                                });
-                            line_break_inside(header)
-                                || p.children().any(|c| with.contains(&c.kind()))
-                                || (p.parent()).is_some_and(|g| under.contains(&g.kind()))
-                        });
-                        style.fit_single &= !keeps;
+                            let header = || {
+                                let mut code = false;
+                                p.descendants_with_tokens()
+                                    .take_while(|e| e.text_range().start() < start)
+                                    .filter(move |e| {
+                                        let lead = e.as_token().is_some()
+                                            && cx.grammar.is_trivia(e.kind());
+                                        code |= e.as_token().is_some() && !lead;
+                                        code || !lead
+                                    })
+                            };
+                            if line_break_inside(header()) {
+                                let tokens: Vec<_> =
+                                    header().filter_map(|e| e.into_token()).collect();
+                                let commented = tokens
+                                    .iter()
+                                    .any(|t| cx.grammar.has_tag(t.kind(), "comment"));
+                                style.fit_single &= !commented;
+                                style.fit_prefix = flat_width(tokens.iter());
+                            }
+                        }
                     }
                     style.expand_empty |= multiline && as_written;
                 }

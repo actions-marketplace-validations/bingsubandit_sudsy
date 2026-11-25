@@ -8261,6 +8261,17 @@
               "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
               "type": "boolean"
             },
+            "empty_line_before_access_modifier": {
+              "default": "logical_block",
+              "description": "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added.",
+              "enum": [
+                "never",
+                "leave",
+                "logical_block",
+                "always"
+              ],
+              "type": "string"
+            },
             "end_of_line": {
               "default": "auto",
               "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -8710,6 +8721,17 @@
               "default": false,
               "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
               "type": "boolean"
+            },
+            "empty_line_before_access_modifier": {
+              "default": "logical_block",
+              "description": "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added.",
+              "enum": [
+                "never",
+                "leave",
+                "logical_block",
+                "always"
+              ],
+              "type": "string"
             },
             "end_of_line": {
               "default": "auto",
@@ -12405,6 +12427,17 @@
                     "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
                     "type": "boolean"
                   },
+                  "empty_line_before_access_modifier": {
+                    "default": "logical_block",
+                    "description": "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added.",
+                    "enum": [
+                      "never",
+                      "leave",
+                      "logical_block",
+                      "always"
+                    ],
+                    "type": "string"
+                  },
                   "end_of_line": {
                     "default": "auto",
                     "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
@@ -12854,6 +12887,17 @@
                     "default": false,
                     "description": "The `;` that is the whole body of an `if`, `for` or `while` goes on its own line below the head, indented (`while (x)\\n  ;`).",
                     "type": "boolean"
+                  },
+                  "empty_line_before_access_modifier": {
+                    "default": "logical_block",
+                    "description": "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added.",
+                    "enum": [
+                      "never",
+                      "leave",
+                      "logical_block",
+                      "always"
+                    ],
+                    "type": "string"
                   },
                   "end_of_line": {
                     "default": "auto",

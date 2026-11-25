@@ -38,7 +38,7 @@ exact=return|co_return|co_yield|co_await|throw|case|else|do|new|delete / kind=Lp
 exact=return|co_return|throw|case|else|do|new|delete / kind=ColonColon : yes
 exact=decltype|sizeof|alignof|typeof|noexcept|static_assert / kind=Lpar : no
 kind=Keyword / kind=Lpar&parent=DeclaratorGroup : yes
-kind=Ident / kind=Lpar&parent=DeclaratorGroup : yes
+kind=Ident / kind=Lpar&parent=DeclaratorGroup : keep
 kind=Keyword|Ident / kind=Lpar : no
 * / kind=Lpar&parent=Arguments : no
 # Templates.
@@ -70,6 +70,10 @@ kind=ColonColon|Dot|Arrow|DotStar|ArrowStar / * : no
 * / kind=Colon&parent=CaseClause|AccessSpecifier|LabelStatement : no
 kind=Colon&parent=CaseClause|AccessSpecifier|LabelStatement / * : yes
 * / * : keep
+
+[joined]
+# The `}` of an initializer list stays with its last value.
+kind!=Comma|Semi / kind=Rbrace&parent=InitList
 
 [at_least_one]
 * / kind=Question|Colon&parent=Ternary

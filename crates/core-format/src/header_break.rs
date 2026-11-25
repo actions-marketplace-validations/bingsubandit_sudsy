@@ -67,8 +67,16 @@ pub fn header_break(
         return Ok(header_doc);
     };
     let rest_doc = render(rest)?;
+    // (the body of a declaration under a header of its own line is not kept on one line)
+    let apart = |d: Doc| d.expanded_short_body().unwrap_or(d);
     match mode {
-        "yes" => return Ok(doc::concat(vec![header_doc, doc::hardline(), rest_doc])),
+        "yes" => {
+            return Ok(doc::concat(vec![
+                header_doc,
+                doc::hardline(),
+                apart(rest_doc),
+            ]));
+        }
         "no" => return Ok(doc::concat(vec![header_doc, doc::lit(" "), rest_doc])),
         _ => {}
     }
@@ -87,14 +95,16 @@ pub fn header_break(
     } else {
         header_doc.tail_width() + 1 + rest_doc.width_to_hardline()
     };
+    let apart = rest_doc.expanded_short_body();
     let rest = doc::shared(rest_doc);
+    let apart = apart.map_or_else(|| rest.clone(), doc::shared);
     Ok(doc::concat(vec![
         header_doc,
         doc::fits_below(
             0,
             width,
-            doc::concat(vec![doc::lit(" "), rest.clone()]),
-            doc::concat(vec![doc::hardline(), rest]),
+            doc::concat(vec![doc::lit(" "), rest]),
+            doc::concat(vec![doc::hardline(), apart]),
         ),
     ]))
 }

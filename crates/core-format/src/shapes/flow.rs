@@ -234,7 +234,8 @@ impl Flow<'_> {
         if !broken && self.op_first(b) && comments::break_after(cx.grammar, b) {
             return Some(self.line_break(cx, b));
         }
-        if broken && !self.joined(a, b) {
+        // (a comment between the tokens keeps its line break)
+        if broken && !(self.joined(a, b) && !comment_between(cx, a, b) && !in_directive(cx, a)) {
             return Some(self.line_break(cx, b));
         }
         let gap = a.text_range().end() != b.text_range().start();
@@ -444,4 +445,17 @@ fn blanks(cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> Doc {
         cur = t.next_token();
     }
     doc::text(text)
+}
+
+/// Is `t` part of a preprocessor directive (a line break after it ends the directive)?
+fn in_directive(cx: &FormatCtx<'_>, t: &SyntaxToken) -> bool {
+    t.parent_ancestors()
+        .any(|n| cx.grammar.has_tag(n.kind(), "directive"))
+}
+
+/// Is there a comment between the tokens `a` and `b`?
+fn comment_between(cx: &FormatCtx<'_>, a: &SyntaxToken, b: &SyntaxToken) -> bool {
+    std::iter::successors(a.next_token(), SyntaxToken::next_token)
+        .take_while(|t| t != b)
+        .any(|t| cx.grammar.has_tag(t.kind(), "comment"))
 }

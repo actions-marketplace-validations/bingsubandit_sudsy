@@ -1,6 +1,7 @@
 cpp:
   format:
     empty_body_own_line: true
+    collapse_empty_blocks: true
     indent_style: tab
     indent_size: 8
     align_with_tabs: true

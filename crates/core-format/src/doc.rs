@@ -275,6 +275,55 @@ impl Doc {
         w
     }
 
+    /// The document with the first short body (a [`SHORT_BODY`] label) before its first forced
+    /// line break printed over several lines, or `None` when there is none.
+    pub fn expanded_short_body(&self) -> Option<Doc> {
+        fn walk(d: &Doc, done: &mut bool) -> Option<Doc> {
+            Some(match d {
+                Doc::HardLine | Doc::LineStart(_) => {
+                    *done = true;
+                    return None;
+                }
+                Doc::Label(SHORT_BODY, inner) => {
+                    *done = true;
+                    let Doc::Group(g) = &**inner else { return None };
+                    let g = Group {
+                        broken: true,
+                        ..(**g).clone()
+                    };
+                    Doc::Label(SHORT_BODY, Box::new(Doc::Group(Box::new(g))))
+                }
+                Doc::Concat(ps) => {
+                    for (i, p) in ps.iter().enumerate() {
+                        if let Some(r) = walk(p, done) {
+                            let mut out = ps.clone();
+                            out[i] = r;
+                            return Some(Doc::Concat(out));
+                        }
+                        if *done {
+                            return None;
+                        }
+                    }
+                    return None;
+                }
+                Doc::Group(g) => Doc::Group(Box::new(Group {
+                    contents: walk(&g.contents, done)?,
+                    ..(**g).clone()
+                })),
+                Doc::Indent(x) => Doc::Indent(Box::new(walk(x, done)?)),
+                Doc::Align(n, x) => Doc::Align(*n, Box::new(walk(x, done)?)),
+                Doc::Label(l, x) => Doc::Label(l, Box::new(walk(x, done)?)),
+                Doc::Shared(s) => walk(&s.doc, done)?,
+                Doc::FitsBelow(f) => {
+                    *done = true;
+                    f.otherwise.clone()
+                }
+                _ => return None,
+            })
+        }
+        walk(self, &mut false)
+    }
+
     /// The width of the document's last line printed on one line: what follows its last forced
     /// line break (comments above a header).
     pub fn tail_width(&self) -> usize {

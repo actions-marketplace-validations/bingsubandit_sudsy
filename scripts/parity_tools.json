@@ -295,7 +295,7 @@
         {"dir": "tests/conformance/corpus/cpp/fmt", "suffixes": [".cc", ".h", ".cpp"], "style": "fmt", "ratchet": "fmt", "prefix": "fmt/", "recursive": true, "copy_as": ".cpp"},
         {"dir": "tests/conformance/corpus/cpp/range-v3", "suffixes": [".hpp", ".cpp"], "style": "range-v3", "ratchet": "range-v3", "prefix": "range-v3/", "recursive": true, "copy_as": ".cpp"},
         {"dir": "tests/conformance/corpus/cpp/folly", "suffixes": [".cpp", ".h"], "style": "llvm", "ratchet": "folly", "prefix": "folly/", "recursive": true, "copy_as": ".cpp"},
-        {"dir": "tests/conformance/corpus/cpp/linux", "suffixes": [".c", ".h"], "style": "linux", "ratchet": "linux", "prefix": "linux/", "recursive": true, "copy_as": ".c"},
+        {"dir": "tests/conformance/corpus/cpp/linux", "suffixes": [".c", ".h"], "style": "linux", "style_list": {"file": ".clang-format", "key": "ForEachMacros", "option": "for_each_macros"}, "ratchet": "linux", "prefix": "linux/", "recursive": true, "copy_as": ".c"},
         {"dir": "tests/conformance/corpus/cpp/sqlite", "suffixes": [".c", ".h"], "style": "llvm", "ratchet": "sqlite", "prefix": "sqlite/", "recursive": true, "copy_as": ".c"},
         {"dir": "bench/inputs/cpp", "suffixes": [".cpp", ".hpp"], "style": "google", "ratchet": "google", "prefix": "google/cpp/"},
         {"dir": "bench/inputs/c", "suffixes": [".c"], "style": "google", "ratchet": "google", "prefix": "google/c/"},

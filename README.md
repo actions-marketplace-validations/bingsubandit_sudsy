@@ -96,7 +96,7 @@ Each number is measured on real-world code against the reference tool with its d
 | CMake | none | █████████░ 97% cmake-lint | Lint only: Ready |
 | Go | none | █████████░ 92% revive | Lint only: Ready |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
-| C / C++ | ██████░░░░ 64% clang-format | not measured clang-tidy | In progress |
+| C / C++ | ██████░░░░ 67% clang-format | not measured clang-tidy | In progress |
 
 Notes: PHP-CS-Fixer (PHP): measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains). clang-format (C / C++): line wrapping is not compared.
 
@@ -134,7 +134,7 @@ All languages: <!-- generated:languages -->C#, C/C++, CMake, CSS, Dockerfile, Ed
 | SQL | 14 | sqlfluff | [68](https://docs.sqlfluff.com/en/stable/configuration/default_configuration.html) |
 | C# | 93 | CSharpier | [4](https://csharpier.com/docs/Configuration) |
 | XML | 6 | CSharpier XML | [5](https://csharpier.com/docs/Configuration) |
-| C / C++ | 47 | clang-format | [257](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) |
+| C / C++ | 48 | clang-format | [257](https://clang.llvm.org/docs/ClangFormatStyleOptions.html) |
 <!-- /generated -->
 
 - **Your own rules:** [YAML patterns](docs/rules.md#pattern-rules) with fixes, and sandboxed [Wasm plugins](docs/rules.md#wasm-plugins).

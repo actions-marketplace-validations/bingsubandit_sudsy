@@ -77,6 +77,12 @@ options:
         cast_close: [Rpar]
         cast_keep: [AmpAmp, Plus]
         cast_tight: [Star, Amp, Minus]
+  - empty_line_before_access_modifier:
+      values: ["never", "leave", "logical_block", "always"]
+      default: "logical_block"
+      doc: "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added."
+      kinds:
+        blank_before: [AccessSpecifier]
   - keep_blank_lines_at_end_of_blocks:
       default: false
       doc: "A blank line before the closing brace of a block stays."
@@ -148,8 +154,6 @@ options:
       doc: "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."
       kinds:
         fit: [FunctionDeclaration]
-        no_fit_under: [TemplateDeclaration]
-        no_fit_with: [ConstructorInitializers]
   - short_ifs:
       values: ["never", "without_else", "all"]
       default: "never"

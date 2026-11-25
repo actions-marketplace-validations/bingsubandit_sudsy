@@ -563,6 +563,46 @@ def prepare(config, parity):
     return version, prefix
 
 
+def corpus_list(path, key):
+    """The `- item` lines under `key:` of a YAML file of the corpus, quotes stripped."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    start = next((i for i, line in enumerate(lines) if line.startswith(f"{key}:")), None)
+    if start is None:
+        raise SystemExit(f"{path} has no `{key}:` list")
+    items = []
+    for line in lines[start + 1 :]:
+        m = re.match(r"\s+-\s+(.*?)\s*$", line)
+        if not m:
+            break
+        items.append(m.group(1).strip("'\""))
+    return items
+
+
+def style_files(config, folder, work):
+    """A copy of the style files of `folder` in `work`, where a fixture source with `style_list`
+    (`file`, `key`, `option`) adds a list from a file of its corpus to the tool's style `<style>.clang-format`
+    (as `key:`) and to Sudsy's `<style>.yaml` (as `option`, under the first `format:` section). A missing
+    corpus file stops the run."""
+    out = work / "styles"
+    shutil.copytree(folder, out)
+    for source in config["fixtures"]:
+        add = source.get("style_list")
+        if not add or "style" not in source:
+            continue
+        path = ROOT / source["dir"] / add["file"]
+        if not path.is_file():
+            raise SystemExit(f"{path} is missing: run {' '.join(config.get('fetch', []))} (its `{add['key']}` goes into the {source['style']} style)")
+        items = corpus_list(path, add["key"])
+        tool = out / f"{source['style']}.clang-format"
+        tool.write_text(tool.read_text(encoding="utf-8") + f"{add['key']}:\n" + "".join(f"  - '{i}'\n" for i in items), encoding="utf-8")
+        ours = out / f"{source['style']}.yaml"
+        lines = ours.read_text(encoding="utf-8").splitlines(keepends=True)
+        at = next(i for i, line in enumerate(lines) if line.strip() == "format:") + 1
+        lines[at:at] = [f"    {add['option']}:\n", *(f"      - {i}\n" for i in items)]
+        ours.write_text("".join(lines), encoding="utf-8")
+    return out
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     tool, sudsy, target = sys.argv[1:4]
@@ -578,6 +618,7 @@ def main():
     shutil.copy(folder / "sudsy.yaml", work / "sudsy.yaml")
     config["folder"] = tool
     known = Differences(folder)
+    styles = style_files(config, folder, work)
     only = os.environ.get("PARITY_FILTER")  # a name substring: those fixtures only, with their diffs, no ratchet
     filters = Counter()
     found = [f for f in fixtures(config, folder, filters) if only is None or only in f[0]]
@@ -585,7 +626,7 @@ def main():
 
     for style in {f[3].get("style") for f in found if f[3].get("style")}:  # set up before the threads read it
         (work / f"style-{style}").mkdir()
-        shutil.copy(folder / f"{style}.yaml", work / f"style-{style}" / "sudsy.yaml")
+        shutil.copy(styles / f"{style}.yaml", work / f"style-{style}" / "sudsy.yaml")
 
     batch = upstream_batch(config, prefix, found, work) if config["input"] == "batch" else None
 
@@ -596,7 +637,7 @@ def main():
     if "wrap_compare" in config:
         checker = parity_wrap.Checker(config["wrap_compare"], ROOT, [os.environ.get("PARITY_DUMP", sudsy), *config["wrap_compare"]["dump"]], work / "dump-tmp")
         if controlled:
-            parity_wrap.write_variants(config["wrap_compare"], folder, work / "variants", {f[3].get("style") for f in found if f[3].get("style")})
+            parity_wrap.write_variants(config["wrap_compare"], styles, work / "variants", {f[3].get("style") for f in found if f[3].get("style")})
 
     def compare(item):
         name, fixture, _, source = item
@@ -605,7 +646,7 @@ def main():
         copy = copy_path(config, source, here, name)
         copy.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(fixture, copy)
-        theirs = batch[name] if batch is not None else upstream(config, prefix, version, copy, here, style)
+        theirs = batch[name] if batch is not None else upstream(config, prefix, version, copy, here, style, styles)
         ours, refused = sudsy_format(sudsy, copy, here, config.get("sudsy_command", "format"))
         # Sudsy's own output must be a fixed point; the files that change on a second format are counted.
         again = None if ours is None else sudsy_format(sudsy, copy, here, config.get("sudsy_command", "format"))[0]
@@ -617,7 +658,7 @@ def main():
             masked = not before and theirs == ours
         flagged["ignore_trailing_blanks"] += masked
         if checker and theirs is not None:
-            wrapped[name] = parity_wrap.file_result(checker, config["wrap_compare"], folder, style, theirs, ours, copy, controlled, lambda variant: upstream(config, prefix, version, copy, here, f"{style}~{variant}", work / "variants"))
+            wrapped[name] = parity_wrap.file_result(checker, config["wrap_compare"], styles, style, theirs, ours, copy, controlled, lambda variant: upstream(config, prefix, version, copy, here, f"{style}~{variant}", work / "variants"))
         return theirs, ours, unstable, refused
 
     with ThreadPoolExecutor(os.cpu_count() if config.get("parallel") else 1) as pool:
