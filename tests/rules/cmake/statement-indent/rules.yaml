@@ -1,0 +1,4 @@
+statement-indent:
+  level: warn
+  options:
+    size: 2

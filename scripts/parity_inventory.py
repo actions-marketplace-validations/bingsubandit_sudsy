@@ -50,6 +50,7 @@ SOURCES = {
     "rubocop": {"raw": "https://raw.githubusercontent.com/rubocop/rubocop/v{version}/config/default.yml", "re": r"(?m)^(Lint/\w+):"},
     "ruff": {"wheel": "ruff", "ruff": True},
     "yamllint": {"wheel": "yamllint", "files": r"^yamllint/rules/([a-z][a-z_]*)\.py$"},
+    "cmake-lint": {"wheel": "cmakelang", "files": r"^cmakelang/lint/lintdb\.py$", "content": r'(?m)^"([CEWR]\d{4})",'},
     "sqlfluff": {"wheel": "sqlfluff", "files": r"^sqlfluff/rules/.*\.py$", "content": r"class Rule_([A-Z]{2}\d{2})\b"},
 }
 

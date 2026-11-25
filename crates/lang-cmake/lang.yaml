@@ -6,6 +6,8 @@ exclude-names: ["*.h.cmake", "*.hpp.cmake", "*.c.cmake", "*.cpp.cmake", "*.in.cm
 formatter: 'core_format::VerbatimFormatter { exact_end: &[] }'
 parse: parser::parse_file
 rules: "&[]"
+hooks: 'core_rules::BlockHooks(&blocks::BLOCKS)'
+presets: [cmake-lint]
 options:
   - indent_size: 4
   - line_width: 80

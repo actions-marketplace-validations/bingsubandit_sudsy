@@ -1,0 +1,60 @@
+# The rules of cmake-lint's defaults that Sudsy has, at warn (the rest are in docs/ai/parity/cmake-lint.yaml).
+cmake:
+  lint:
+    rules:
+      max-line-length:
+        level: warn
+        options:
+          max: 80
+          allow_non_breakable_words: false
+      no-trailing-whitespace: warn
+      statement-indent:
+        level: warn
+        options:
+          allow_unindented: true
+      no-hard-tabs:
+        level: warn
+        options:
+          indentation_only: true
+      declared-name-pattern:
+        level: warn
+        options:
+          names:
+            - "set:0:variable"
+            - "list GET:-1:variable"
+            - "list LENGTH:2:variable"
+            - "list JOIN:-1:variable"
+            - "function:0:function"
+            - "function:1+:argument"
+            - "macro:0:macro"
+            - "macro:1+:argument"
+            - "foreach:0:argument"
+          markers:
+            - "PARENT_SCOPE:parent_scope"
+            - "CACHE:cache"
+            - "CACHE INTERNAL:internal"
+          scopes:
+            - ":directory"
+            - "function:local"
+            - "macro:parent_scope"
+          patterns:
+            - "directory:[A-Z][0-9A-Z_]+|_[0-9a-z_]+"
+            - "local:[a-z][a-z0-9_]+"
+            - "internal:_[A-Z][0-9A-Z_]+"
+            - "cache:[A-Z][0-9A-Z_]+"
+            - "parent_scope:[A-Z][0-9A-Z_]+|_[0-9a-z_]+|[a-z][a-z0-9_]+"
+            - "argument:[a-z][a-z0-9_]+"
+            - "function:[0-9a-z_]+"
+            - "macro:[0-9A-Z_]+"
+          ignore_pattern: "^ENV\\{"
+          reference_start: "${"
+          reference_end: "}"
+      statement-blank-lines:
+        level: warn
+        options:
+          max: 1
+      documented-command:
+        level: warn
+        options:
+          commands: [function, macro]
+          doc_kinds: [LineComment]

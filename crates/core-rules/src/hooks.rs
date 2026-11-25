@@ -108,6 +108,12 @@ pub trait RuleHooks: Send + Sync {
         false
     }
 
+    /// The commands that open, continue and close blocks of the language, for the rules that
+    /// need a command's block depth. The default has none.
+    fn blocks(&self) -> &'static [core_syntax::block_pair::Block] {
+        &[]
+    }
+
     /// The dialect or language version the file is read in (`dialect` for SQL), when it has one.
     fn language_version(&self) -> Option<&str> {
         None
@@ -195,6 +201,10 @@ impl RuleHooks for WithRows {
     fn suppressed_ranges(&self, file: &FileContext<'_>) -> Vec<(String, TextRange)> {
         self.inner.suppressed_ranges(file)
     }
+
+    fn blocks(&self) -> &'static [core_syntax::block_pair::Block] {
+        self.inner.blocks()
+    }
 }
 
 /// `inner` for one file read in the dialect or version `version`.
@@ -255,6 +265,20 @@ impl RuleHooks for WithVersion<'_> {
     fn suppressed_ranges(&self, file: &FileContext<'_>) -> Vec<(String, TextRange)> {
         self.inner.suppressed_ranges(file)
     }
+
+    fn blocks(&self) -> &'static [core_syntax::block_pair::Block] {
+        self.inner.blocks()
+    }
+}
+
+/// The hooks of a language whose only fact is its block commands (`lang.yaml`:
+/// `hooks: 'core_rules::BlockHooks(&blocks::BLOCKS)'`).
+pub struct BlockHooks(pub &'static [core_syntax::block_pair::Block]);
+
+impl RuleHooks for BlockHooks {
+    fn blocks(&self) -> &'static [core_syntax::block_pair::Block] {
+        self.0
+    }
 }
 
 /// The hooks of a language that has none of its own.
@@ -263,3 +287,37 @@ pub struct DefaultHooks;
 impl RuleHooks for DefaultHooks {}
 
 pub static DEFAULT_HOOKS: DefaultHooks = DefaultHooks;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core_syntax::block_pair::Block;
+
+    static BLOCKS: [Block; 1] = [Block::plain("if", "endif")];
+
+    struct Own;
+
+    impl RuleHooks for Own {
+        fn blocks(&self) -> &'static [Block] {
+            &BLOCKS
+        }
+    }
+
+    static OWN: Own = Own;
+
+    /// The wrappers hand every fact of the inner hooks on (a rule that reads `blocks` was silent
+    /// behind them).
+    #[test]
+    fn wrappers_forward_blocks() {
+        let rows = WithRows {
+            inner: &OWN,
+            rows: "",
+        };
+        assert_eq!(rows.blocks().len(), 1);
+        let version = WithVersion {
+            inner: &rows,
+            version: None,
+        };
+        assert_eq!(version.blocks().len(), 1);
+    }
+}

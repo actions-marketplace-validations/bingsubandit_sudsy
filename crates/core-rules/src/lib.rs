@@ -23,6 +23,7 @@ pub mod content_model;
 pub mod curly;
 pub mod decl_rows;
 mod declare;
+pub mod declared_name;
 pub mod detached_token;
 pub mod diagnostic;
 pub mod directory_facts;
@@ -32,6 +33,7 @@ pub mod doc_lines;
 pub mod doc_params;
 pub mod doc_run;
 pub mod doc_style;
+pub mod documented_command;
 pub mod embed_keys;
 pub mod engine;
 pub mod escapes;
@@ -80,6 +82,8 @@ pub mod simplify;
 pub mod slot_path;
 pub mod sorted;
 pub mod sorting;
+pub mod statement_blank_lines;
+pub mod statement_indent;
 pub mod suppress;
 pub mod todo_comment;
 pub mod token_case;
@@ -104,7 +108,7 @@ pub use extension::{ALL_LANGUAGES, ExtensionRule, Extensions};
 pub use family::{Checked, Family, Params};
 pub use fixes::{Analysis, FixOutcome, fix_loop};
 pub use hooks::{
-    Accessor, DEFAULT_HOOKS, DefaultHooks, Fold, RuleHooks, Scalar, WithVersion, Word,
+    Accessor, BlockHooks, DEFAULT_HOOKS, DefaultHooks, Fold, RuleHooks, Scalar, WithVersion, Word,
 };
 pub use layout::{Attach, LayoutRole, attached, run_layout};
 pub use lines::LineIndex;

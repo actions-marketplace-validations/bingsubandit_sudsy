@@ -32,6 +32,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | checkmake | 100.0% | `7514c1f3` | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
 | checkstyle | 88.6% | `7514c1f3` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |
 | clang-format | - | - | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| cmake-lint | 97.2% | `92bc171a` | 35 | 8 | 0 | 24 | 0 | 0 | 3 | 24 |
 | csharpier | - | - | 16 | 11 | 5 | 0 | 0 | 0 | 0 | 0 |
 | dotnet-format-editorconfig | - | - | 56 | 50 | 3 | 0 | 1 | 1 | 1 | 0 |
 | eslint | 100.0% | `7514c1f3` | 292 | 95 | 22 | 135 | 0 | 19 | 21 | 135 |

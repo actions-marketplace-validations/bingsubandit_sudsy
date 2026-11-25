@@ -4,7 +4,7 @@
 
 use core_syntax::block_pair::Block;
 
-pub static BLOCKS: [Block; 6] = [
+pub const BLOCKS: [Block; 6] = [
     Block {
         open: "if",
         arms: &["elseif", "else"],

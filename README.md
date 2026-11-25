@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 26 languages, early support for 3 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 27 languages, early support for 2 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -18,7 +18,7 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, HTML, Vue / Svelte, Angular templates, CSS / SCSS / Less, Markdown, YAML, JSON / JSONC, PowerShell, Java, Kotlin, Shell, SQL, C#, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore, Ruby and Go. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
+> **Early release (v0.0.x).** <!-- generated:support-ready -->Ready: JavaScript / TypeScript, Python, Protobuf, Terraform (HCL), GraphQL, TOML, HTML, Vue / Svelte, Angular templates, CSS / SCSS / Less, Markdown, YAML, JSON / JSONC, PowerShell, Java, Kotlin, Shell, SQL, C#, XML, Dockerfile, Makefile, GitHub Actions, INI / EditorConfig / .gitignore, Ruby, CMake and Go. The rest are in progress.<!-- /generated --> See the [status table](#language-support). Config may change in minor versions before 1.0.
 
 ## Install
 
@@ -72,11 +72,11 @@ Each number is measured on real-world code against the reference tool with its d
 | Python | █████████░ 97% ruff format | █████████░ 94% ruff | Ready |
 | Protobuf | █████████░ 99% buf format | ████████░░ 85% buf | Ready |
 | Terraform (HCL) | █████████░ 99% terraform fmt | █████████░ 93% tflint | Ready |
-| GraphQL | █████████░ 99% Prettier | 25 rules · no reference tool | Ready |
-| TOML | █████████░ 98% taplo | 18 rules · no reference tool | Ready |
+| GraphQL | █████████░ 99% Prettier | 29 rules · no reference tool | Ready |
+| TOML | █████████░ 98% taplo | 22 rules · no reference tool | Ready |
 | HTML | █████████░ 95% Prettier | █████████░ 92% html-validate<br>████████░░ 88% html-eslint<br>█████████░ 91% htmlhint | Ready |
 | Vue / Svelte | █████████░ 91% Prettier | ████████░░ 88% eslint-plugin-vue<br>██████████ 100% eslint-plugin-svelte | Ready |
-| Angular templates | █████████░ 99% Prettier | 159 rules · no reference tool | Ready |
+| Angular templates | █████████░ 99% Prettier | 163 rules · no reference tool | Ready |
 | CSS / SCSS / Less | █████████░ 92% Prettier | █████████░ 94% stylelint<br>████████░░ 89% stylelint-scss<br>████████░░ 85% stylelint-less | Ready |
 | Markdown | █████████░ 92% Prettier | █████████░ 99% markdownlint | Ready |
 | YAML | █████████░ 94% Prettier | █████████░ 98% yamllint | Ready |
@@ -87,16 +87,16 @@ Each number is measured on real-world code against the reference tool with its d
 | Shell | ████████░░ 86% shfmt | ████████░░ 86% ShellCheck | Ready |
 | SQL | ████████░░ 85% sqlfluff | ████████░░ 88% sqlfluff | Ready |
 | C# | ████████░░ 85% CSharpier | ████████░░ 87% StyleCop<br>░░░░░░░░░░ 0% Roslynator | Ready |
-| XML | ██████████ 100% CSharpier XML | 20 rules · no reference tool | Ready |
+| XML | ██████████ 100% CSharpier XML | 24 rules · no reference tool | Ready |
 | Dockerfile | ██████████ 100% stable · no reference tool | █████████░ 91% hadolint | Ready |
 | Makefile | ██████████ 100% stable · no reference tool | ██████████ 100% checkmake | Ready |
 | GitHub Actions | █████████░ 99% stable · no reference tool | ████████░░ 87% actionlint | Ready |
-| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 27 rules · no reference tool | Ready |
+| INI / EditorConfig / .gitignore | ██████████ 100% stable · no reference tool | 31 rules · no reference tool | Ready |
 | Ruby | none | █████████░ 96% RuboCop | Lint only: Ready |
+| CMake | none | █████████░ 97% cmake-lint | Lint only: Ready |
 | Go | none | █████████░ 92% revive | Lint only: Ready |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 | C / C++ | ██████░░░░ 64% clang-format | not measured clang-tidy | In progress |
-| CMake | none | not measured cmake-lint | not measured |
 
 Notes: clang-format (C / C++): line wrapping is not compared.
 

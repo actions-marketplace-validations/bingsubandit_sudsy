@@ -1,0 +1,44 @@
+tool: "cmake-lint"
+version: "0.6.13"
+languages: ["cmake"]
+sources:
+  - "https://pypi.org/project/cmakelang/0.6.13/"
+  - "https://cmake-format.readthedocs.io/en/latest/lint-summary.html"
+  - "https://cmake-format.readthedocs.io/en/latest/lint-usage.html"
+scope: "The 35 codes of cmake-lint of cmakelang (the package is GPL-3.0: only its output is compared, never its code or tables) with its default configuration (no config file). Three codes never fire at the defaults (probed on small inputs: C0102 has no blacklist pattern, R0914 and W0104 report nothing) and are `deferred`. The signature codes (E11xx, C0113) need a table of command signatures written from CMake's own documentation."
+entries:
+  C0102: deferred | never fires at the defaults (no blacklist pattern is set)
+  C0103: rule declared-name-pattern
+  C0111: rule documented-command
+  C0112: rule documented-command
+  C0113: planned
+  C0114: planned
+  C0201: planned
+  C0202: planned
+  C0301: rule max-line-length
+  C0303: rule no-trailing-whitespace
+  C0304: planned
+  C0305: rule statement-blank-lines
+  C0306: rule no-hard-tabs
+  C0307: rule statement-indent
+  C0321: planned
+  C0327: planned
+  E0011: planned
+  E0012: planned
+  E0103: planned
+  E0108: planned
+  E0109: planned
+  E1120: planned
+  E1121: planned
+  E1122: planned
+  E1125: planned
+  E1126: planned
+  R0911: planned
+  R0912: planned
+  R0913: planned
+  R0914: deferred | never fires at the defaults (17 local variables in one function report nothing)
+  R0915: planned
+  W0101: planned
+  W0104: deferred | never fires at the defaults (the deprecated commands of CMake report nothing)
+  W0105: planned
+  W0106: planned
