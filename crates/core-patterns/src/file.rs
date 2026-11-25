@@ -515,9 +515,10 @@ fn compile_body(
     spec: &FileSpec,
     parser: &dyn SnippetParser,
     options: &[OptionDecl],
+    builtin: bool,
 ) -> Result<Body, String> {
     let rule = spec.rule.as_ref().ok_or("the rule has no `rule:`")?;
-    let expr = Expr::compile(rule, parser, options)?;
+    let expr = Expr::compile(rule, parser, options, builtin)?;
     let mut captured = Vec::new();
     expr.metas(&mut captured);
     let known = |name: &str| captured.iter().any(|m| m.name == name);
@@ -789,7 +790,7 @@ pub fn load<'p>(
 
 fn compile_eager(spec: FileSpec, parser: &dyn SnippetParser) -> Result<PatternRule, String> {
     let meta = meta_of(&spec)?;
-    let body = compile_body(&spec, parser, meta.options)?;
+    let body = compile_body(&spec, parser, meta.options, false)?;
     Ok(PatternRule {
         meta,
         message: spec.message.map(Cow::Owned),
@@ -1240,7 +1241,7 @@ impl PatternRule {
                 }
             }
         };
-        let compiled = compile_body(spec, &*p.parser, self.meta.options);
+        let compiled = compile_body(spec, &*p.parser, self.meta.options, true);
         *self.failure.lock().unwrap() = compiled.as_ref().err().cloned();
         compiled.map(|body| self.body.get_or_init(|| body))
     }

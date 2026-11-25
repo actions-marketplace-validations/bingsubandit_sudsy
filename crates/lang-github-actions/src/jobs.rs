@@ -11,7 +11,7 @@
 use crate::view::{Entry, entries, get, items, root_mapping, scalar, scalar_list};
 use core_rules::rule;
 use core_rules::unknown_reference::{self, Item, Scope};
-use core_rules::{Check, FileContext, Meta, Opt, OptionDecl, Re, RuleContext, meta_regex};
+use core_rules::{Check, FileContext, Meta, Opt, OptionDecl, RegexCache, RuleContext, meta_regex};
 use core_syntax::{SyntaxNode, TextRange};
 use std::collections::HashMap;
 use std::sync::LazyLock;
@@ -256,12 +256,7 @@ rule! {
     }
 
     fn check_file(&self, file: &FileContext<'_>, ctx: &mut RuleContext<'_>) {
-        let known: Vec<_> = ctx
-            .options
-            .list("labels")
-            .iter()
-            .filter_map(|p| Re::lazy(&format!("^(?i:(?:{p}))$")).ok())
-            .collect();
+        static BUILT: LazyLock<RegexCache> = LazyLock::new(RegexCache::default);
         for job in jobs(file) {
             let Some(job_node) = job.value else { continue };
             let Some(runs_on) = get(&job_node, file.text, "runs-on") else {
@@ -288,7 +283,7 @@ rule! {
                 continue;
             }
             for (label, range) in labels {
-                if !label.contains("${{") && !known.iter().any(|k| k.is_match(&label)) {
+                if !label.contains("${{") && !ctx.options.list("labels").iter().any(|p| BUILT.is_whole_match(p, &label, true)) {
                     ctx.report(range, core_rules::expr::unknown_name(&ctx.options.list("labels"), "label", &label));
                 }
             }

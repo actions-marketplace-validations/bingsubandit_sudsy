@@ -81,6 +81,12 @@ C# cost structure: on CoreLib Roslyn parse ~0.94 s and the mapping walk ~0.83 s 
 
 `standard` is 10-15x `fast` (Roslyn binding and flow of every body); `deep` adds 2-15%. 500 runtime files: `fast` 2.2 s (median 1.1 ms), `standard` 30.6 s (median 25.7 ms, p95 178 ms; first-file workspace build is included in the tree rows).
 
+## Shared lint allocations (`perf-bench fixed <lang> lint|lint-query`, release with `--features count`, x86-64 Linux agent host, `bench/inputs`)
+| Change | Allocations before -> after |
+|---|---|
+| Built-in pattern regexes are built on first match (no syntax check in release; debug builds check them in the tests), the `\b\B` default of a regex option is never built, `same_words` without a boxed iterator, flow blocks reused across the units of a file, format-string rules run once per node (`Rule::cluster`), `runs-on` label regexes built once per process | kt.lint 1404 -> 1162, c.lint 715 -> 639, rb.lint 687 -> 415, cpp.lint 1125 -> 858, java.lint 2322 -> 1793, go.lint 1332 -> 971, py.lint 22880 -> 21392, html.lint 22029 -> 21348, vue.lint 5473 -> 4648, sh.lint 3593 -> 3138, github-actions.lint-query 58546 -> 33635 |
+| Registration of the shared pattern files (`core_patterns::file`: `read_specs`, `meta_of`, `load_full`) in github-actions.lint-query, three embedded languages | 2.6% of its allocations; family documents of off-by-default rules are already listed from their scalars (`LazyFamily`), so neither is worth a cache |
+
 ## Extensions
 | Path | Number |
 |---|---|

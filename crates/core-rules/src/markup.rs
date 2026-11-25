@@ -45,16 +45,44 @@ pub struct Spellings {
 }
 
 impl Spellings {
+    /// The spelling rows of a text that also holds other rows (the content model), which it skips.
     pub fn parse(text: &str) -> Spellings {
+        Self::read(text, false).unwrap_or_default()
+    }
+
+    /// The rows of a file that holds spelling rows only and ships with the program: a row that
+    /// is not one panics with its line.
+    pub fn shipped(text: &str) -> Spellings {
+        Self::read(text, true).unwrap_or_else(|e| panic!("spelling rows: {e}"))
+    }
+
+    /// [`Spellings::shipped`] as a value, for a test of the error.
+    pub fn parse_strict(text: &str) -> Result<Spellings, String> {
+        Self::read(text, true)
+    }
+
+    fn read(text: &str, strict: bool) -> Result<Spellings, String> {
         let mut rows = Vec::new();
-        for line in text.lines().filter(|l| !l.starts_with('#')) {
+        for (n, line) in text.lines().enumerate() {
+            if line.starts_with('#') || line.trim().is_empty() {
+                continue;
+            }
             let mut words = line.split_whitespace();
             let (Some(dialect), Some(kind)) = (words.next(), words.next()) else {
+                if strict {
+                    return Err(format!(
+                        "line {}: a spelling row needs a dialect and a kind",
+                        n + 1
+                    ));
+                }
                 continue;
             };
             let bind = match kind {
                 "prop" => Bind::Prop,
                 "event" => Bind::Event,
+                _ if strict => {
+                    return Err(format!("line {}: unknown spelling kind `{kind}`", n + 1));
+                }
                 _ => continue, // a row of the content model
             };
             let mut strip = String::new();
@@ -64,6 +92,8 @@ impl Spellings {
                     strip = chars.to_string();
                 } else if let Some((a, b)) = w.split_once('%') {
                     forms.push((a.to_string(), b.to_string()));
+                } else if strict {
+                    return Err(format!("line {}: unknown word `{w}`", n + 1));
                 }
             }
             rows.push(Row {
@@ -73,7 +103,7 @@ impl Spellings {
                 forms,
             });
         }
-        Spellings { rows }
+        Ok(Spellings { rows })
     }
 
     /// The rows of the dialect of `path`: those of the longest suffix that ends the file name
@@ -365,4 +395,23 @@ fn attribute(node: &SyntaxNode, r: &Reading<'_>) -> Option<Attr> {
         key,
         value_range: value.map(|v| v.1),
     })
+}
+
+#[cfg(test)]
+mod spelling_tests {
+    use super::Spellings;
+
+    #[test]
+    fn strict_parse_rejects_a_mistyped_row() {
+        assert!(Spellings::parse_strict("vue prop :%").is_ok());
+        assert!(Spellings::parse_strict("vue porp :%").is_err());
+        assert!(Spellings::parse_strict("vue prop :% typo").is_err());
+        assert!(Spellings::parse_strict("vue").is_err());
+        assert!(
+            Spellings::parse("vue porp :%")
+                .of(std::path::Path::new("a.vue"))
+                .0
+                .is_empty()
+        );
+    }
 }

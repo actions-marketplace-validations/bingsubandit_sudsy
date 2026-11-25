@@ -8,6 +8,9 @@ use regex_syntax::ParserBuilder;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
+/// The regex that matches nothing: the default of a `regex` option that is off.
+const NEVER: &str = r"\b\B";
+
 /// The longest text checked for ASCII (and so matched by the ASCII form).
 const ASCII_LIMIT: usize = 1024;
 
@@ -53,6 +56,12 @@ impl Re {
             build(source, true)?;
         }
         Ok(re)
+    }
+
+    /// Neither checked nor built: the automata are built on the first [`Re::is_match`], and a
+    /// pattern that does not parse matches nothing. For the regexes of files a test reads.
+    pub fn unchecked(source: &str) -> Re {
+        Self::unbuilt(source)
     }
 
     fn unbuilt(source: &str) -> Re {
@@ -240,6 +249,15 @@ mod tests {
         assert!(Re::new("(").is_err() && Re::lazy("(").is_err());
     }
 
+    #[test]
+    fn a_cache_matches_whole_text_with_or_without_case() {
+        let cache = RegexCache::default();
+        assert!(cache.is_whole_match("ubuntu-.*", "UBUNTU-latest", true));
+        assert!(!cache.is_whole_match("ubuntu", "ubuntu-latest", true));
+        assert!(!RegexCache::default().is_whole_match("ubuntu", "UBUNTU", false));
+        assert!(!cache.is_match(r"\b\B", "x"));
+    }
+
     /// A pattern whose Unicode form is over the size limit is an error from `new`, not a panic
     /// on non-ASCII text.
     #[test]
@@ -261,17 +279,32 @@ impl std::fmt::Debug for RegexCache {
 
 impl RegexCache {
     pub fn is_match(&self, source: &str, text: &str) -> bool {
-        let re = {
-            let mut cache = self.0.lock().unwrap();
-            match cache.get(source) {
-                Some(re) => re.clone(),
-                None => {
-                    let re = Re::new(source).ok().map(Arc::new);
-                    cache.insert(source.to_string(), re.clone());
-                    re
-                }
+        if source == NEVER {
+            return false; // the default of an option that is off: nothing to build
+        }
+        self.get(source, || source.to_string())
+            .is_some_and(|re| re.is_match(text))
+    }
+
+    /// Does `pattern` match all of `text` (ignoring case when `ignore_case`)? One cache serves one
+    /// kind of question: the regex of a pattern is built once, on the first question.
+    pub fn is_whole_match(&self, pattern: &str, text: &str, ignore_case: bool) -> bool {
+        self.get(pattern, || match ignore_case {
+            true => format!("^(?i:(?:{pattern}))$"),
+            false => format!("^(?:{pattern})$"),
+        })
+        .is_some_and(|re| re.is_match(text))
+    }
+
+    fn get(&self, key: &str, source: impl FnOnce() -> String) -> Option<Arc<Re>> {
+        let mut cache = self.0.lock().unwrap();
+        match cache.get(key) {
+            Some(re) => re.clone(),
+            None => {
+                let re = Re::new(&source()).ok().map(Arc::new);
+                cache.insert(key.to_string(), re.clone());
+                re
             }
-        };
-        re.is_some_and(|re| re.is_match(text))
+        }
     }
 }

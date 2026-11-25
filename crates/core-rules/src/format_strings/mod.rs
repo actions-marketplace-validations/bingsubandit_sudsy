@@ -20,7 +20,6 @@ use core_syntax::roles::code_text;
 use core_syntax::{FormatRow, FormatVia, Grammar, SyntaxNode};
 use flavor::{Failure, Flavor, Spec};
 use shape::{Reader, Rhs};
-use std::cell::RefCell;
 use std::collections::BTreeSet;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -228,40 +227,28 @@ impl Rule for FormatRule {
         &["binary", "call"]
     }
 
+    fn cluster(&self) -> Option<&'static str> {
+        Some("format-strings")
+    }
+
+    /// Runs for the first active rule of the family and reports for each member.
     fn check(&self, node: &SyntaxNode, ctx: &mut RuleContext<'_>) {
         let g = ctx.file.grammar;
-        let names = MEMO.with(|m| m.names(node, self.kind, || findings(&Reader { g }, node)));
-        if names.is_empty() {
+        let found = findings(&Reader { g }, node);
+        if found.is_empty() {
             return;
         }
         let range = significant_range(node, g);
-        for name in names {
-            ctx.report(range, self.message.replace("{name}", &name));
+        for (kind, name) in found {
+            let Some(rule) = RULES.iter().find(|r| r.kind == kind) else {
+                continue;
+            };
+            let member = ctx.members().iter().find(|m| std::ptr::eq(m.0, rule.meta));
+            if let Some(&member) = member {
+                ctx.report_as(member, range, rule.message.replace("{name}", &name));
+            }
         }
     }
-}
-
-/// The findings of the node the rules ran on last: each rule asks for them, the first one works
-/// them out.
-struct Memo(RefCell<Option<(SyntaxNode, Vec<Finding>)>>);
-
-impl Memo {
-    /// What the findings of `kind` name.
-    fn names(&self, n: &SyntaxNode, kind: Kind, f: impl FnOnce() -> Vec<Finding>) -> Vec<String> {
-        let mut slot = self.0.borrow_mut();
-        if slot.as_ref().is_none_or(|(node, _)| node != n) {
-            *slot = Some((n.clone(), f()));
-        }
-        let found = slot.iter().flat_map(|(_, found)| found);
-        found
-            .filter(|(k, _)| *k == kind)
-            .map(|(_, name)| name.clone())
-            .collect()
-    }
-}
-
-thread_local! {
-    static MEMO: Memo = const { Memo(RefCell::new(None)) };
 }
 
 fn join<T: ToString>(items: impl IntoIterator<Item = T>) -> String {

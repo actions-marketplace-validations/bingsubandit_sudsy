@@ -24,6 +24,42 @@ pub struct Flow {
     pub case_ends: Vec<(u32, usize)>,
 }
 
+/// The blocks of graphs that were dropped, with the capacity of their operation and edge lists:
+/// the units of a file are built one after the other, so each takes the buffers of the last.
+#[derive(Default)]
+struct Spare {
+    blocks: Vec<Block>,
+    /// The vector that held the blocks.
+    list: Vec<Block>,
+}
+
+/// More spare blocks than this are not kept.
+const SPARE_LIMIT: usize = 4096;
+
+thread_local! {
+    static SPARE: std::cell::RefCell<Spare> = std::cell::RefCell::default();
+}
+
+impl Drop for Flow {
+    fn drop(&mut self) {
+        let mut blocks = std::mem::take(&mut self.graph.blocks);
+        // `try_with`: not during the exit of a thread, when the pool is gone
+        let _ = SPARE.try_with(|spare| {
+            let mut spare = spare.borrow_mut();
+            for mut b in blocks.drain(..) {
+                if spare.blocks.len() >= SPARE_LIMIT {
+                    break;
+                }
+                b.ops.clear();
+                b.succ.clear();
+                b.branch_const = None;
+                spare.blocks.push(b);
+            }
+            spare.list = blocks;
+        });
+    }
+}
+
 /// What the graph says can run.
 pub struct Reached {
     /// Per block.
@@ -99,7 +135,9 @@ pub fn build(grammar: &Grammar, text: &str, root: &SyntaxNode) -> Option<Flow> {
     let mut b = Builder {
         g: grammar,
         text,
-        blocks: vec![Block::default()],
+        blocks: SPARE
+            .try_with(|s| std::mem::take(&mut s.borrow_mut().list))
+            .unwrap_or_default(),
         cur: 0,
         frames: Vec::new(),
         guards: 0,
@@ -111,6 +149,7 @@ pub fn build(grammar: &Grammar, text: &str, root: &SyntaxNode) -> Option<Flow> {
                 .any(|&k| grammar.has_tag(k, "expression"))
         }),
     };
+    b.new_block();
     if role(grammar, root) == Role::Function {
         let body = b.nodes(root, "body");
         if body.is_empty() {
@@ -257,7 +296,12 @@ pub fn endless_loop(g: &Grammar, text: &str, n: &SyntaxNode) -> bool {
 
 impl<'a> Builder<'a> {
     fn new_block(&mut self) -> usize {
-        self.blocks.push(Block::default());
+        let block = SPARE
+            .try_with(|s| s.borrow_mut().blocks.pop())
+            .ok()
+            .flatten()
+            .unwrap_or_default();
+        self.blocks.push(block);
         self.blocks.len() - 1
     }
 

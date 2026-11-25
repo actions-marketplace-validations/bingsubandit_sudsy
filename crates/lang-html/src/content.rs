@@ -23,7 +23,7 @@ pub(crate) fn model() -> &'static Model {
 /// that a rule that only reads attributes does not load the model.
 pub(crate) fn spellings() -> &'static Spellings {
     static SPELLINGS: LazyLock<Spellings> =
-        LazyLock::new(|| Spellings::parse(include_str!("../data/spelling.txt")));
+        LazyLock::new(|| Spellings::shipped(include_str!("../data/spelling.txt")));
     &SPELLINGS
 }
 

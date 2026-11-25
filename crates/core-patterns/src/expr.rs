@@ -244,11 +244,13 @@ fn words<'a>(
     e: &SyntaxElement,
     g: &'a Grammar,
 ) -> impl Iterator<Item = core_syntax::SyntaxToken> + use<'a> {
-    let all: Box<dyn Iterator<Item = SyntaxElement>> = match e {
-        SyntaxElement::Token(t) => Box::new(std::iter::once(SyntaxElement::Token(t.clone()))),
-        SyntaxElement::Node(n) => Box::new(n.descendants_with_tokens()),
+    let (token, nodes) = match e {
+        SyntaxElement::Token(t) => (Some(t.clone()), None),
+        SyntaxElement::Node(n) => (None, Some(n.descendants_with_tokens())),
     };
-    all.filter_map(|e| e.into_token())
+    token
+        .into_iter()
+        .chain(nodes.into_iter().flatten().filter_map(|e| e.into_token()))
         .filter(|t| !g.is_trivia(t.kind()) && !t.text().is_empty())
 }
 
@@ -270,9 +272,19 @@ impl Expr {
         spec: &Spec,
         parser: &dyn SnippetParser,
         options: &[OptionDecl],
+        builtin: bool,
     ) -> Result<Expr, String> {
         let mut all = Vec::new();
-        let sub = |s: &Spec| Expr::compile(s, parser, options);
+        let sub = |s: &Spec| Expr::compile(s, parser, options, builtin);
+        // A built-in file is tested, so its regexes need no syntax check: they are built when
+        // first matched, and many rules never reach one.
+        let regex = |text: &str| {
+            if builtin {
+                Ok(Re::unchecked(text))
+            } else {
+                Re::new(text)
+            }
+        };
         if let Some(text) = &spec.pattern {
             all.push(Expr::Pattern(Pattern::compile(text, parser)?));
         }
@@ -292,18 +304,18 @@ impl Expr {
             Re::new(&template(text, |_| "x".into())).map_err(|e| format!("regex `{text}`: {e}"))?;
             all.push(Expr::RegexTemplate(text.clone(), RegexCache::default()));
         } else if let Some(text) = &spec.regex {
-            let re = Re::new(text).map_err(|e| format!("regex `{text}`: {e}"))?;
+            let re = regex(text).map_err(|e| format!("regex `{text}`: {e}"))?;
             let groups = re.groups();
             all.push(Expr::Regex(re, groups));
         }
         if let Some(text) = &spec.doc {
             all.push(Expr::Doc(
-                Re::new(text).map_err(|e| format!("doc regex `{text}`: {e}"))?,
+                regex(text).map_err(|e| format!("doc regex `{text}`: {e}"))?,
             ));
         }
         if let Some(text) = &spec.path {
             all.push(Expr::Path(
-                Re::new(text).map_err(|e| format!("path regex `{text}`: {e}"))?,
+                regex(text).map_err(|e| format!("path regex `{text}`: {e}"))?,
             ));
         }
         if let Some(n) = spec.nth {
