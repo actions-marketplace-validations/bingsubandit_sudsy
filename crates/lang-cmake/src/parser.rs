@@ -1,5 +1,6 @@
 //! A lossless parser of CMake files with error recovery: a flat list of commands, each with its
-//! arguments. Blocks (`if` ... `endif`) are not nodes: a pair of commands is as good as no pair.
+//! arguments. Blocks (`if` ... `endif`) are not nodes: the shared pairing of `core_syntax::block_pair`
+//! reads the command names in order and reports an unpaired block on its own command.
 //!
 //! Recovery: tokens that are no command are one `ERROR` node up to the next `name(`. A command
 //! whose `(` is never closed ends before the next line that starts a command at column 0 (or at
@@ -7,9 +8,11 @@
 //!
 //! concept: none (the productions of CMake on the parser kit of core_syntax::parse)
 
+use crate::blocks::BLOCKS;
 use crate::generated::kind as k;
 use crate::lexer::lex;
 use core_syntax::SyntaxKind;
+use core_syntax::block_pair::Pairing;
 use core_syntax::parse::{self, MAX_DEPTH, Parsed};
 use provider_api::{ParseResult, SourceFile};
 
@@ -24,16 +27,20 @@ pub fn parse_file(file: &SourceFile) -> ParseResult {
 pub fn parse(src: &str) -> Parsed {
     let mut p = parse::Parser::new(src, lex(src), k::TRIVIA_MASK, k::EOF);
     let closers = p.pairs(k::L_PAREN, k::R_PAREN);
+    let mut pairing = Pairing::new(&BLOCKS);
     p.start(k::FILE);
     while !p.at_eof() {
         if starts_command(&p) {
-            command(&mut p, &closers);
+            command(&mut p, &closers, &mut pairing);
         } else {
             stray(&mut p);
         }
     }
     p.bump(); // Eof
     p.finish();
+    for f in pairing.finish() {
+        p.error_at(f.at as usize, f.fault.code(), f.fault.message());
+    }
     p.done()
 }
 
@@ -53,8 +60,9 @@ fn stray(p: &mut parse::Parser<'_>) {
     p.finish();
 }
 
-fn command(p: &mut parse::Parser<'_>, closers: &[u32]) {
+fn command(p: &mut parse::Parser<'_>, closers: &[u32], pairing: &mut Pairing) {
     p.start(k::COMMAND);
+    pairing.word(p.text_at(p.pos), p.pos as u32);
     p.bump(); // name
     let open = p.pos;
     let limit = limit(p, closers, open);

@@ -18,6 +18,7 @@
 
 pub mod access;
 pub mod ast;
+pub mod block_pair;
 pub mod block_parse;
 pub mod codegen;
 pub mod containers;

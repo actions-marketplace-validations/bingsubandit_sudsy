@@ -3,11 +3,13 @@
 //!
 //! concept: none (glue: provider entry)
 
+mod blocks;
 mod lexer;
 mod parser;
 
 use core_config::shared;
 
+pub use blocks::BLOCKS;
 pub use parser::parse;
 
 include!("schema.generated.rs");

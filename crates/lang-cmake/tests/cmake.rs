@@ -87,7 +87,41 @@ fn commands_and_arguments() {
     );
     // Blocks are not nodes: the closers are commands, paired or not.
     assert_eq!(ok("if(x)else()endif()"), ok("if(x)\nelse()\nendif()"));
-    assert!(parse("endif()\nif(A)\n").1.is_empty());
+}
+
+#[test]
+fn unpaired_blocks_are_diagnostics_on_their_command_and_change_no_tree() {
+    let text = "set(a)\nendif()\nIf(A)\nelse()\nelseif()\nendforeach()\n";
+    let r = lang_cmake::parse(text);
+    let found: Vec<_> = (r.errors.iter())
+        .map(|e| {
+            (
+                e.code.as_str(),
+                &text[e.start as usize..(e.start + e.len) as usize],
+            )
+        })
+        .collect();
+    assert_eq!(
+        found,
+        [
+            ("unpaired-closer", "endif"),
+            ("unclosed-block", "If"),
+            ("arm-after-last", "elseif"),
+            ("unpaired-closer", "endforeach"),
+        ]
+    );
+    // The tree is the flat list of the paired text.
+    let (shape, _) = parse(text);
+    let (paired, errors) = parse("set(a)\nendif()\nIf(A)\nelse()\nelseif()\nendif()\n");
+    assert_eq!(errors, ["unpaired-closer", "arm-after-last"]);
+    assert_eq!(shape.matches("Command[").count(), 6);
+    assert_eq!(paired.matches("Command[").count(), 6);
+}
+
+#[test]
+fn paired_blocks_have_no_diagnostic() {
+    let text = "function(f)\n  IF(A)\n    foreach(x y)\n    ENDFOREACH()\n  ElseIf(B)\n  else()\n  EndIf()\nendfunction()\n";
+    assert!(parse(text).1.is_empty());
 }
 
 #[test]
@@ -432,9 +466,8 @@ fn intact_commands(text: &str) -> (Vec<String>, bool) {
             .collect();
         let from = usize::from(code[0].text_range().start());
         let to = usize::from(code[code.len() - 1].text_range().end());
-        let error_inside = parsed
-            .errors
-            .iter()
+        let error_inside = (parsed.errors.iter())
+            .filter(|e| !PAIRING.contains(&e.code.as_str()))
             .any(|e| (from..to).contains(&(e.start as usize)));
         let error_node = n
             .descendants()
@@ -443,7 +476,10 @@ fn intact_commands(text: &str) -> (Vec<String>, bool) {
             found.push(text[from..to].to_string());
         }
     }
-    (found, parsed.errors.is_empty())
+    (
+        found,
+        (parsed.errors.iter()).all(|e| PAIRING.contains(&e.code.as_str())),
+    )
 }
 
 /// The line-deletion test of the plan: in each of N sampled files (at least 15 lines, no parse
@@ -504,6 +540,117 @@ fn recovery() {
         "trials={trials} lost<=2: {within_2} lost<=5: {within_5} mean lost {:.2}",
         lost_sum as f64 / trials as f64
     );
+}
+
+/// The codes of the pairing diagnostics: they say a block is unpaired, no command is damaged.
+const PAIRING: [&str; 4] = [
+    "unclosed-block",
+    "unpaired-closer",
+    "arm-after-last",
+    "unpaired-arm",
+];
+
+/// The commands of `text`: lower-case name and byte range from the name to the `)`.
+fn commands(text: &str) -> Vec<(String, usize, usize)> {
+    let parsed = lang_cmake::parse(text);
+    let g = core_syntax::grammars::CMAKE.get();
+    let mut found = Vec::new();
+    for n in (parsed.tree.descendants()).filter(|n| g.name(n.kind()) == "Command") {
+        let code: Vec<_> = (n.descendants_with_tokens())
+            .filter_map(|e| e.into_token())
+            .filter(|t| !g.is_trivia(t.kind()))
+            .collect();
+        let from = usize::from(code[0].text_range().start());
+        let to = usize::from(code[code.len() - 1].text_range().end());
+        found.push((code[0].text().to_ascii_lowercase(), from, to));
+    }
+    found
+}
+
+/// The nesting depth of each command, and how many pairing diagnostics the parse reports.
+fn depths(text: &str) -> (Vec<u32>, usize) {
+    let mut pairing = core_syntax::block_pair::Pairing::new(&lang_cmake::BLOCKS);
+    let d = (commands(text).iter().enumerate())
+        .map(|(i, c)| pairing.word(&c.0, i as u32).depth)
+        .collect();
+    let n = lang_cmake::parse(text)
+        .errors
+        .iter()
+        .filter(|e| PAIRING.contains(&e.code.as_str()))
+        .count();
+    (d, n)
+}
+
+/// Block pairing over the corpus: how many files pair fully; of 600 trials per kind, one opener
+/// (`if`) or one closer (`endif`) of a fully paired file deleted, how many of the other commands
+/// get another depth, and how many diagnostics there are.
+///
+/// `cargo test --release -p lang-cmake --test integration -- --ignored --nocapture pairing`
+#[test]
+#[ignore = "a measurement"]
+fn pairing() {
+    let files = corpus();
+    let mut paired = 0;
+    let mut faulty = Vec::new();
+    for (name, text) in &files {
+        let (_, n) = depths(text);
+        if n == 0 {
+            paired += 1;
+        } else {
+            faulty.push(name.clone());
+        }
+    }
+    println!(
+        "files {} paired {paired} with pairing faults {} {:?}",
+        files.len(),
+        faulty.len(),
+        &faulty[..faulty.len().min(8)]
+    );
+    for word in ["endif", "if"] {
+        let mut seed: u64 = 0x9E3779B97F4A7C15;
+        let mut next = move || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        let (mut trials, mut tries) = (0, 0);
+        let (mut damage, mut diags) = (Vec::new(), Vec::new());
+        while trials < 600 && tries < 60000 {
+            tries += 1;
+            let text = &files[next() as usize % files.len()].1;
+            let (base, n) = depths(text);
+            let cmds = commands(text);
+            let targets: Vec<usize> = (0..cmds.len()).filter(|&i| cmds[i].0 == word).collect();
+            if n != 0 || targets.is_empty() || !lang_cmake::parse(text).errors.is_empty() {
+                continue;
+            }
+            let t = targets[next() as usize % targets.len()];
+            let (_, from, to) = &cmds[t];
+            let cut = format!("{}{}", &text[..*from], &text[*to..]);
+            let (after, n) = depths(&cut);
+            assert_eq!(after.len(), base.len() - 1);
+            let wrong = (0..base.len())
+                .filter(|&i| i != t)
+                .filter(|&i| base[i] != after[i - usize::from(i > t)])
+                .count();
+            trials += 1;
+            damage.push(wrong);
+            diags.push(n);
+        }
+        damage.sort();
+        let at = |q: usize| damage[damage.len() * q / 100];
+        println!(
+            "delete {word}: trials {trials} diagnostics mean {:.2}; commands at another depth: zero {} mean {:.1} median {} p90 {} p99 {} max {}",
+            diags.iter().sum::<usize>() as f64 / trials as f64,
+            damage.iter().filter(|&&d| d == 0).count(),
+            damage.iter().sum::<usize>() as f64 / trials as f64,
+            at(50),
+            at(90),
+            at(99),
+            damage[damage.len() - 1]
+        );
+    }
 }
 
 /// A file with a BOM reaches the parser without it: the provider's file decoding strips it.
