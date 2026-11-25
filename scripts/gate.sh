@@ -67,6 +67,7 @@ gate "cargo fmt" cargo fmt --all -- --check
 has codegen && gate "cargo xtask codegen --check" cargo xtask codegen --check
 has codegen && gate "cargo xtask dupes --check" cargo xtask dupes --check
 has codegen && gate "parity runner tests" bash scripts/parity.sh --test
+has codegen && gate "clean-slots test" bash scripts/test-clean-slots.sh
 if [ ${#ws[@]} -gt 0 ]; then
   gate "cargo clippy" cargo clippy "${ws[@]}" --all-targets -- -D warnings
   # nextest runs the tests of all binaries in parallel (cargo test runs one binary after another);

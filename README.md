@@ -187,6 +187,8 @@ All languages: <!-- generated:languages -->HTML, JavaScript/TypeScript, CSS, JSO
 | Makefile | Lint | checkmake | 3.7× slower | 0.059 s / 0.016 s | 70 / 28 MB |
 | TOML | Format | taplo | 1.6× faster | 0.012 s / 0.019 s | 45 / 40 MB |
 | XML | Format | CSharpier | 4.0× faster | 0.11 s / 0.44 s | 104 / 97 MB |
+| Go | Lint | revive | 1.2× slower | 18.07 s / 14.47 s | 2643 / 4115 MB |
+| CMake | Lint | cmake-lint | 46× faster | 1.46 s / 67.73 s | 755 / 42 MB |
 | Kotlin | Format | ktlint | 30× faster | 1.61 s / 48.42 s | 501 / 715 MB |
 |  | Lint | ktlint | 42× faster | 1.14 s / 48.01 s | 485 / 683 MB |
 | Vue | Lint | eslint-plugin-vue | 73× faster | 0.11 s / 8.27 s | 154 / 634 MB |
