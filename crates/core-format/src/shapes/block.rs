@@ -358,7 +358,14 @@ fn block_of(
             .is_some_and(|t| comments::blank_lines_before(g, &t) > 0)
     };
     let ends = ends_of(cx, &c.open, &c.close, &moved);
-    let single = c.slots.len() == 1 && moved.is_empty();
+    // (a body that holds a block of its own, `SCOPE_EXIT { a(); };`, is no short body; a lambda's is)
+    let nested = |n: &SyntaxNode| {
+        n.descendants().any(|d| {
+            g.has_tag(d.kind(), "block")
+                && d.parent().is_some_and(|p| !g.has_tag(p.kind(), "function"))
+        })
+    };
+    let single = c.slots.len() == 1 && moved.is_empty() && !nested(&first.node);
     let mut rendered = render_slots(cx, &c.slots, true)?;
     for i in 1..rendered.len() {
         if style.blank_before.contains(&rendered[i].first.kind()) {

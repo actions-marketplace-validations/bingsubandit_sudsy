@@ -63,6 +63,9 @@ kind=Question&parent=Ternary / kind=Colon : no
 * / kind=Question|Colon&parent=Ternary : keep
 kind=Question|Colon&parent=Ternary / * : keep
 * / kind=PlusPlus|MinusMinus&parent=Postfix : no
+# An arithmetic index.
+kind=Ident|Number / kind=Plus|Minus&parent=BracketGroup : yes
+kind=Plus|Minus&parent=BracketGroup / kind=Ident|Number&parent=BracketGroup : yes
 # Token pasting.
 kind=HashHash / * : no
 * / kind=HashHash : no

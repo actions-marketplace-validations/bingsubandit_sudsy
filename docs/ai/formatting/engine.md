@@ -105,6 +105,7 @@ Options declared by more than one language, generated from the option schemas; p
 | `namespace_indentation` | `none`, `inner`, `all` | cpp `none`, c `none` |
 | `penalty_return_type` | int 0-1000 | cpp `60`, c `60` |
 | `pointer_alignment` | `right`, `left`, `middle` | cpp `right`, c `right` |
+| `pointer_qualifier_words` | list of words | cpp `[noexcept, override, final, requires]`, c `[noexcept, override, final, requires]` |
 | `quote_style` | js: `double`, `single`; python: `double`, `single`, `preserve`; yaml: `preserve`, `single`, `double`, `prefer_double`; github-actions: `preserve`, `single`, `double`, `prefer_double` | js `double`, python `double`, yaml `preserve`, github-actions `preserve` |
 | `self_closing_space` | bool | html `true`, angular `true`, vue `true`, svelte `true` |
 | `sequence_indent` | `preserve`, `indented`, `flush` | yaml `preserve`, github-actions `preserve` |

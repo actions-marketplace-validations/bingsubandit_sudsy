@@ -1083,6 +1083,35 @@ impl SpaceRules {
         !self.attach.is_empty() || !self.attach_call.0.is_empty()
     }
 
+    /// The `loop_call` binding of a call head whose name is a loop macro (`list_for_each(x)`).
+    fn loop_call(
+        &self,
+        head: &SyntaxNode,
+        options: &core_config::ResolvedOptions,
+    ) -> Option<&crate::rules::Binding> {
+        let name = (head.descendants_with_tokens())
+            .filter_map(|e| e.into_token())
+            .find(|t| !t.text().trim().is_empty() && !self.comments.contains(&t.kind()))
+            .map(|t| t.text().to_string());
+        self.attach_call.1.iter().find(|l| {
+            l.kinds.contains(&head.kind())
+                && options
+                    .strings(l.option)
+                    .any(|w| Some(w) == name.as_deref())
+        })
+    }
+
+    /// Is `block` the body of a loop macro (`list_for_each(x) { ... }`)?
+    pub fn is_loop_block(
+        &self,
+        block: &SyntaxNode,
+        options: &core_config::ResolvedOptions,
+    ) -> bool {
+        block
+            .prev_sibling()
+            .is_some_and(|head| self.loop_call(&head, options).is_some())
+    }
+
     /// The option and the word of the construct an opening brace `{` belongs to: the `{` that
     /// starts the block (child of a construct of an `attach` kind set); of several words for one
     /// kind (`class`, `struct`) the one the construct's own keyword spells.
@@ -1105,16 +1134,7 @@ impl SpaceRules {
             && let Some(chosen) =
                 (self.attach_call.0.iter()).find(|b| b.kinds.contains(&head.kind()))
         {
-            let name = (head.descendants_with_tokens())
-                .filter_map(|e| e.into_token())
-                .find(|t| !t.text().trim().is_empty() && !self.comments.contains(&t.kind()))
-                .map(|t| t.text().to_string());
-            let loops = self.attach_call.1.iter().find(|l| {
-                l.kinds.contains(&head.kind())
-                    && options
-                        .strings(l.option)
-                        .any(|w| Some(w) == name.as_deref())
-            });
+            let loops = self.loop_call(&head, options);
             return Some((chosen.option, loops.unwrap_or(chosen).word.as_str()));
         }
         let construct = block.parent()?;

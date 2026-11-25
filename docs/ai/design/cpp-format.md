@@ -1,83 +1,79 @@
-# C/C++ format: path to 85% by mechanism
+# C/C++ format: where the files are
 
-Current plan. Reference: clang-format 20.1.8, 6,639 files, 85% = 5,644 equal. All counts are upper bounds.
+Reference: clang-format 20.1.8, 6,639 files. Equal now: 4,668 (70.3%). The bar of 85% is 5,644 (976 more).
+The plan does not show a path to 85%: see the verdict at the end.
 
-Data: wrap-r8.json (4,597 equal, 2,042 differing, 1,047 needed). Every gap of a differing file is mapped to one mechanism
-(by gap name and parent kinds; lambda = a Lambda kind in parent, grandparent or the tokens). A file counts as fixed only
-when ALL its mechanisms are fixed (solo + pair + triple cover, greedy by files completed). Numbers are upper bounds: a
-mechanism that is built imperfectly leaves files behind, and files also hide gaps behind a first one (the comparator lists
-every gap, so this is already counted).
+## Ranking
 
-## Cumulative, best order (equal files after each mechanism)
+Data: the gaps of the 1,971 differing files, each mapped to one mechanism by cause, token kinds and parent kinds. A file
+counts as fixed only when ALL its mechanisms are fixed. "Bound" is the greedy completion count (files that become equal
+when this mechanism and the ones above it are fixed). Files hold 1 mechanism (about 990), 2 (470), 3 (250) or more
+(about 260), so bounds are not additive. "Measured" is what a prototype of the mechanism delivered on the corpus.
 
-| # | Mechanism | Files touched | Files completed (cumulative) | Equal |
-|---|-----------|--------------:|-----------------------------:|------:|
-| 0 | now | | | 4,597 |
-| 1 | comments outside lists (comment-other: own-line comment indent/join in blocks, directives, declarations) | 509 | 113 | 4,710 |
-| 2 | comments inside lists (parameters, arguments, init lists, template args) | 451 | 228 | 4,825 |
-| 3 | trailing comment column alignment | 356 | 354 | 4,951 |
-| 4 | pointer / reference alignment (parens, directives, unary, conditions) | 427 | 495 | 5,092 |
-| 5 | brace placement `brace-own-line-in-source` (non-lambda) | 423 | 584 | 5,181 |
-| 6 | short lambda bodies (brace, continuation indent, empty body) | 257 | 721 | 5,318 |
-| 7 | continuation indent of non-wrap lines | 318 | 855 | 5,452 |
-| 8 | braced list padding | 171 | 936 | 5,533 |
-| 9 | column layout of initializer tables | 160 | 1,019 | 5,616 |
-| 10 | binary operator spacing | 209 | 1,099 | 5,696 |
+| # | Mechanism | Files touched | Sole | Bound | Cumulative bound | Measured |
+|---|-----------|--------------:|-----:|------:|-----------------:|----------|
+| 1 | short bodies: a one-line body that clang joins or splits | 599 | 180 | 216 | 216 | option cases +61 (landed, below); lambda joins wait for a ruling |
+| 2 | pointer and reference alignment | 372 | 106 | 146 | 362 | `Line`, directive and function-pointer parents +15 of 146 (10%) |
+| 3 | comments outside lists | 400 | 93 | 107 | 469 | first batch +9 |
+| 4 | comments in lists (hug list) | 503 | 84 | 142 | 611 | +34 net of 142 (24%), 16 files lost: branch `cpp-hug-list` |
+| 5 | trailing comment alignment | 408 | 56 | 142 | 742 | not built |
+| 6 | spacing rest (`->` names, directives, strings) | 359 | 87 | 134 | 876 | not built |
+| 7 | `) {` and `{` placement | 277 | 34 | 134 | 1,010 | not built |
+| 8 | space before paren (gnu, webkit) | 209 | 45 | 103 | 1,113 | not built |
+| 9 | comma space (mostly column-aligned tables) | 155 | 51 | 95 | 1,208 | not built |
+| 10 | binary operator and bracket spacing | 157 | 38 | 99 | 1,307 | `[a-1]` rows: a few files |
+| 11 | continuation indent | 269 | 42 | 105 | 1,412 | not built |
+| 12 | other brace shapes (enum bodies, empty bodies after wrapped initializers, `) {` after wrapped signatures) | 223 | 20 | 137 | 1,549 | not built |
+| 13 | statement join and split | 150 | 41 | 119 | 1,668 | not built |
+| 14 | `> >` and template angles | 104 | 16 | 87 | 1,755 | not built |
+| 15 | comment runs | 104 | 0 | 84 | 1,839 | not built |
+| 16 | the rest (blank lines, braced padding, bitfield colon, cast space, tables) | about 150 | about 40 | about 150 | about 2,000 | not built |
 
-5,644 is reached between steps 9 and 10: the first nine mechanisms give 5,616, the tenth (or the sum of the next three
-spacing families) passes it. Long tail begins at step 10: after it each mechanism adds under 85 files and the next ones
-(spacing-rare 81, escaped-newline align 76, cast-space 78, brace-own-line-in-reference 67, space-before-paren 70) are
-each under 3.5 percent of the gap. The first nine are all large (80-140 files each) and sum to 1,019 of the 1,047 needed.
-Step 9 alone needs 3 steps of the same family to finish, so the real minimum is all nine plus one tail family.
+Joint sets: the comment mechanisms alone complete at most 345 files, the brace mechanisms alone 342, short bodies and
+pointer together 362.
 
-Order matters little: files hold 1-3 mechanisms, so the cover is not additive; the numbers above are greedy completion
-counts. Doing the mechanisms out of order gives the same total after step 9 but a lower curve before it.
+## What the measured yields show
 
-## Mechanisms, kit concept, second language, size
+- A change that is an option or a kind set in a place the tree already shows converts nearly all of its bound: the
+  ref-qualifier and `SCOPE_EXIT` cases gave +49 where the bound of those causes is about 60.
+- A change that needs the tree to decide (pointer in `ParenGroup` and `Line`, comments in lists) converts 10 to 25
+  percent, and loses files where the same tokens are an expression (`a && b` against `T&& x`).
+- Removing the other causes of a file did not raise the yield of the hug list (+34 alone, +37 on top of the other
+  changes): the files it loses and the files it does not convert are different from the files the others fix.
 
-1. Comments outside lists: extends the shared comment layer (`comments.rs`, kit row "comments: own-line and trailing") with
-   rules for a comment between declaration parts and after a directive. Second language: any with a blocky comment
-   (C#, Java, Go, Rust all hit the same joins). Size: 150-250 lines shared, 0 in lang-cpp (rows or options).
-2. Comments inside lists: extends the list shapes (`items`, `calls.rs` argument lists, init lists) so a comment between
-   elements keeps its line and its column neighbours. Second language: C# and TypeScript argument lists, Rust struct
-   literals. Size: 200-300 lines shared.
-3. Trailing comment column alignment: extends `align_trailing_comment` / `align_lines` (context.rs, comments.rs
-   `gap_before`) from "one run, one column" to clang's rules (alignment across blank-free groups, a comment that no longer
-   fits, `AlignTrailingComments` with consecutive-line limits). Second language: Go (gofmt aligns trailing comments in
-   blocks), C#. Size: 100-200 lines shared, mostly options in lang.yaml.
-4. Pointer and reference alignment: extends `spacing.rs` `pointer_gap` and the `pointer_in` kind sets to more parents
-   (ParenGroup, Directive, Unary, Condition). Experience: adding parents blindly lost 550 files, so it needs a real
-   declarator-versus-expression decision: the deep parse of C++ must tag declarations in parameters, conditions and
-   macro arguments. Second language: Go and Rust types (`&`/`*` spacing), D. Size: 150-250 lines, part in lang-cpp deep
-   parse (grammar lookahead, allowed by the lead ruling), part shared.
-5. Brace placement `brace-own-line-in-source`: extends the `brace_wrapping` option (layout.rs, lang.yaml `attach` kind
-   sets). The gap is constructs the deep parse does not tag (macro-block, class vs function in headers, braces after
-   macros). Second language: C# (Allman/K&R), Java, PHP. Size: mostly deep-parse work in lang-cpp (grammar facts, about
-   100-200 lines) plus 50 shared.
-6. Short lambda bodies: extends `compound`/`block` shapes with a "short body fits, else expand" decision for lambdas as
-   call arguments; clang breaks before the lambda argument rather than inside its body. Second language: C# lambdas,
-   Rust closures, TypeScript arrows (all want "short body stays inline in an argument list"). Size: 250-400 lines shared
-   (printer-level: a break priority between argument and body, so it touches doc/printer fits logic).
-7. Continuation indent of non-wrap lines: extends the indentation of continued statements (layout `items`, `chain`);
-   second language: C#, Java (all continuation indent options). Size: 100-150 lines shared.
-8. Braced list padding: extends `pad_gap` (spacing.rs, kit "padded braces"): the `Cpp11BracedListStyle` rule that
-   `{a}` vs `{ a }` depends on the list's use. Second language: JS/TS object padding (`{ a }`), Rust, Swift. Size:
-   about 60 lines shared plus kind sets.
-9. Column layout of initializer tables: new shared shape (`table`/columns) that pads the cells of a braced list of rows
-   to a common width (clang CommaSeparatedList). Second language: YAML/JSON flow tables, Rust arrays and Go composite
-   literals (gofmt aligns key: value columns). Size: 200-300 lines shared in a new module with a kit row, 0 in lang-cpp.
-10. Binary operator spacing and the other spacing families (the rest): small causes in wrapped or macro contexts, each
-    3 to 80 files; long tail.
+## Short bodies: wrapping or option
 
-## Honest read
+`Lbrace|Keyword` in `ReturnStatement` (about 200 files) and `Semi|Rbrace` in `Block` (about 350 files, 218 in a lambda)
+show clang joining a body onto one line where Sudsy keeps the lines of the source, and the reverse in about 85 files.
+Part of it is an option (`short_functions`, `short_lambdas`: `SCOPE_EXIT { g(); };`, a conversion operator with a
+ref-qualifier), landed. The rest follows a width choice: clang joins the lambda body of `auto rng1 =` `v |
+views::chunk_by([](P a, P b) { return a.first == b.first; });` only because it first broke after `=`, where the source
+has `auto rng1 = v | views::chunk_by([](P a, P b) {` and the body on the next lines. In the final prototype state 192
+differing files differ only by such joins and the indent gaps they cause (175 with no other gap), 135 of them in lambda
+places. The comparison counts the body brace as exact; a ruling on it is open.
 
-- Total shared work for steps 1-9 is roughly 1,200-1,800 lines of shared Rust and 200-300 of lang-cpp. That is 6-9
-  steps of the size of the current batch, not one.
-- The first reachable block with the best ratio is 1-3 (all comment mechanisms): 354 files for about 500 shared lines.
-- Steps 5 and 6 are the risky ones (parse and printer level); step 4 is risky for regressions (see the 550-file loss).
-- 85% is reachable only with all nine; skipping any one of 5, 6, 7 leaves the target out of reach (the long tail
-  after step 10 cannot make up more than about 400 files in total).
+## Verdict
+
+The plan does not show a path to 85%.
+- At the measured yields the remaining bounds add up to about 300 to 500 files, so 75 to 77 percent.
+- The one step that could close part of the gap, the lambda and short-body joins, is about 190 files (73% if all of them
+  were fixed) and depends on how clang chooses where to wrap, which is the wrapping the comparison is meant to ignore.
+- Everything else is a long tail of causes under 150 files each, most of them parse questions (declaration against
+  expression, template against less-than) that need the deep parse to decide, not rows.
+- Order of work if it goes on: option and kind-set items first (they convert), enum bodies as a delimited list with a
+  trailing-comma rule (about 55 files, needs an `EnumBody` node of enumerators in the deep parse), the hug list with
+  its 16 losses fixed, then pointer parents that the tree decides.
 
 ## Measured so far
 
-- Mechanism 1 (comments outside lists), first batch: a region under `clang-format off` keeps the comments after the marker and the indentation of its first line (`FormatCtx::verbatim_region`); a comment at column 0 right above a directive stays at column 0 (`leading_comments_doc_before_directive`). Result 4,597 -> 4,606 (+9 of the 113 files the mechanism could complete). The rest of the "comment-other" files are comment lines inside statements that clang wraps differently (continuation indent, `template(...)(requires ...)` macro heads, trailing `//` forcing a break): they depend on wrapping, not on the comment layer. Steps 2 and 3 have the same dependence: parameter lists with comments are laid out by clang one parameter per line with aligned trailing comments.
+- Comments outside lists, first batch: a region under `clang-format off` keeps the comments after the marker and the
+  indentation of its first line (`FormatCtx::verbatim_region`); a comment at column 0 right above a directive stays at
+  column 0 (`leading_comments_doc_before_directive`). 4,597 to 4,606.
+- Option cases and kind sets (this step, 4,607 to 4,668, 62 files won, 1 lost): a conversion operator with a
+  ref-qualifier is a function (`operator T &() & noexcept { }`), `noexcept`, `override`, `final` and `requires` behind a
+  `&` are no names (`pointer_qualifier_words`), a `name(args) { }` macro block joins like a function body unless it is a
+  loop macro, a body that holds a block of its own or has a directive in its signature stays expanded, `Line`,
+  directives and function-pointer groups hold declarator marks, `a[i-1]` gets blanks.
+- List hug (comments in lists): a list with a comment at a line break puts its first item on the bracket line and aligns
+  the rest under it when every line fits, else hangs. 4,607 to 4,641 (50 won, 16 lost: `Dot|InitList` indent in the
+  kgdb files, `Call` indent after comments, the `Binary` comment gap). Not landed, branch `cpp-hug-list`.

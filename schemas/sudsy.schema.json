@@ -8643,6 +8643,19 @@
               ],
               "type": "string"
             },
+            "pointer_qualifier_words": {
+              "default": [
+                "noexcept",
+                "override",
+                "final",
+                "requires"
+              ],
+              "description": "Words that are no name when they follow a `*`, `&` or `&&` of a declarator (`T &noexcept`): a blank stands before them.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "short_case_labels": {
               "default": false,
               "description": "A `case` label and its simple statement are kept on one line when they fit.",
@@ -9120,6 +9133,19 @@
                 "middle"
               ],
               "type": "string"
+            },
+            "pointer_qualifier_words": {
+              "default": [
+                "noexcept",
+                "override",
+                "final",
+                "requires"
+              ],
+              "description": "Words that are no name when they follow a `*`, `&` or `&&` of a declarator (`T &noexcept`): a blank stands before them.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             },
             "short_case_labels": {
               "default": false,
@@ -12827,6 +12853,19 @@
                     ],
                     "type": "string"
                   },
+                  "pointer_qualifier_words": {
+                    "default": [
+                      "noexcept",
+                      "override",
+                      "final",
+                      "requires"
+                    ],
+                    "description": "Words that are no name when they follow a `*`, `&` or `&&` of a declarator (`T &noexcept`): a blank stands before them.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "short_case_labels": {
                     "default": false,
                     "description": "A `case` label and its simple statement are kept on one line when they fit.",
@@ -13304,6 +13343,19 @@
                       "middle"
                     ],
                     "type": "string"
+                  },
+                  "pointer_qualifier_words": {
+                    "default": [
+                      "noexcept",
+                      "override",
+                      "final",
+                      "requires"
+                    ],
+                    "description": "Words that are no name when they follow a `*`, `&` or `&&` of a declarator (`T &noexcept`): a blank stands before them.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
                   },
                   "short_case_labels": {
                     "default": false,

@@ -53,7 +53,7 @@ options:
         tight_after: [Ellipsis]
         tight_behind: [Star, Amp, AmpAmp]
         pointer: [Star, Amp, AmpAmp]
-        pointer_in: [Parameter, FunctionDeclaration, SimpleDeclaration, TemplateArguments]
+        pointer_in: [Parameter, FunctionDeclaration, SimpleDeclaration, TemplateArguments, Line, Directive, DeclaratorGroup]
         pointer_in_under: [Cast]
         pointer_in_loose: [ForStatement, CatchClause, Parameter]
         pointer_ref: [Amp, AmpAmp]
@@ -67,6 +67,10 @@ options:
         binary_cast: [Rpar]
         binary_spaced: [Amp]
         binary_operand: [MemberAccess]
+  - pointer_qualifier_words:
+      kind: "words"
+      default: [noexcept, override, final, requires]
+      doc: "Words that are no name when they follow a `*`, `&` or `&&` of a declarator (`T &noexcept`): a blank stands before them."
   - derive_pointer_alignment:
       default: false
       doc: "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."
@@ -155,7 +159,7 @@ options:
       default: "all"
       doc: "Function bodies kept on the line of the signature when they fit: `none`, `empty` (`{}` only), `inline` (functions defined in a class, and empty ones) or `all`."
       kinds:
-        fit: [FunctionDeclaration]
+        fit: [FunctionDeclaration, Line]
   - short_ifs:
       values: ["never", "without_else", "all"]
       default: "never"

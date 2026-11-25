@@ -20,6 +20,8 @@ pub const NAMESPACE_INDENTATION: core_config::OptId = core_config::opt::NAMESPAC
 #[allow(dead_code)]
 pub const POINTER_ALIGNMENT: core_config::OptId = core_config::opt::POINTER_ALIGNMENT;
 #[allow(dead_code)]
+pub const POINTER_QUALIFIER_WORDS: core_config::OptId = core_config::opt::POINTER_QUALIFIER_WORDS;
+#[allow(dead_code)]
 pub const DERIVE_POINTER_ALIGNMENT: core_config::OptId = core_config::opt::DERIVE_POINTER_ALIGNMENT;
 #[allow(dead_code)]
 pub const SPACE_AFTER_CAST: core_config::OptId = core_config::opt::SPACE_AFTER_CAST;
@@ -97,7 +99,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("pointer_alignment", "pointer", "", &["Star", "Amp", "AmpAmp"]),
     ("pointer_alignment", "pointer_bare", "", &["TemplateArguments"]),
     ("pointer_alignment", "pointer_end", "", &["Greater", "GreaterGreater", "Comma", "Rpar", "Ellipsis", "Lsqb"]),
-    ("pointer_alignment", "pointer_in", "", &["Parameter", "FunctionDeclaration", "SimpleDeclaration", "TemplateArguments"]),
+    ("pointer_alignment", "pointer_in", "", &["Parameter", "FunctionDeclaration", "SimpleDeclaration", "TemplateArguments", "Line", "Directive", "DeclaratorGroup"]),
     ("pointer_alignment", "pointer_in_loose", "", &["ForStatement", "CatchClause", "Parameter"]),
     ("pointer_alignment", "pointer_in_under", "", &["Cast"]),
     ("pointer_alignment", "pointer_name", "", &["Ident", "Keyword", "Lsqb"]),
@@ -135,7 +137,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("brace_wrapping", "attach_call", "function", &["Call"]),
     ("brace_wrapping", "attach_in", "", &["Block"]),
     ("for_each_macros", "loop_call", "control", &["Call"]),
-    ("short_functions", "fit", "", &["FunctionDeclaration"]),
+    ("short_functions", "fit", "", &["FunctionDeclaration", "Line"]),
     ("short_ifs", "head", "", &["Condition"]),
     ("short_ifs", "join", "", &["IfStatement"]),
     ("short_loops", "head", "", &["Condition"]),
@@ -421,6 +423,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::OptionDef::choice(core_config::opt::INDENT_PP_DIRECTIVES, &["none", "keep"], "none", "A preprocessor directive starts with `#` directly followed by its keyword (`none`) or keeps the blanks written after the `#` (`keep`)."),
         core_config::OptionDef::choice(core_config::opt::NAMESPACE_INDENTATION, &["none", "inner", "all"], "none", "Indent the contents of namespaces: `none`, only namespaces nested in another (`inner`), or `all`."),
         core_config::OptionDef::choice(core_config::opt::POINTER_ALIGNMENT, &["right", "left", "middle"], "right", "Where the `*` and `&` of a pointer or reference declarator go: next to the name (`right`), next to the type (`left`) or between them (`middle`)."),
+        core_config::OptionDef::words(core_config::opt::POINTER_QUALIFIER_WORDS, &["noexcept", "override", "final", "requires"], "Words that are no name when they follow a `*`, `&` or `&&` of a declarator (`T &noexcept`): a blank stands before them."),
         core_config::OptionDef::boolean(core_config::opt::DERIVE_POINTER_ALIGNMENT, false, "Take `pointer_alignment` from the file: the side that most of its declarators of pointers and references use (a `*` or `&` with a blank before and none after against none before and a blank after); `pointer_alignment` stays where both sides are equal."),
         core_config::OptionDef::boolean(core_config::opt::SPACE_AFTER_CAST, false, "A blank after the `)` of a C cast (`(int) x` against `(int)x`)."),
         core_config::OptionDef::choice(core_config::opt::EMPTY_LINE_BEFORE_ACCESS_MODIFIER, &["never", "leave", "logical_block", "always"], "logical_block", "A blank line before `public:`, `private:` and `protected:` (not the first item of a class): removed (`never`), as written (`leave`), added unless a comment stands in front (`logical_block`) or always added."),

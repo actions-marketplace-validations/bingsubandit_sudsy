@@ -433,7 +433,12 @@ impl Cx<'_> {
             return None;
         }
         let mut q = self.skip(e);
-        while self.word(q, b, "noexcept") || self.word(q, b, "const") || self.word(q, b, "override")
+        while self.word(q, b, "noexcept")
+            || self.word(q, b, "const")
+            || self.word(q, b, "override")
+            || self.word(q, b, "final")
+            || self.is(q, b, k::AMP)
+            || self.is(q, b, k::AMP_AMP)
         {
             q += 1;
             if self.open(q, b, k::LPAR) {
