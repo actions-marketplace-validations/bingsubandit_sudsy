@@ -33,6 +33,7 @@ pub mod join;
 mod layout;
 mod lines;
 pub mod literals;
+mod payload;
 mod placement;
 pub mod printer;
 mod relay;

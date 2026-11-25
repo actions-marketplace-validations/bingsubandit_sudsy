@@ -7,6 +7,24 @@
 //! what: A directive's blanks collapse and its trailing backslashes align in a column.
 //! tools: clang-format AlignEscapedNewlines
 
+/// Where the backslashes of the lines of a text stand: the kind of alignment, the column of
+/// `Align::Right`, and the columns of a tab in the lines.
+#[derive(Clone, Copy, Debug)]
+pub struct Place {
+    pub align: Align,
+    pub width: usize,
+    pub tab: usize,
+}
+
+impl Place {
+    /// One blank before each backslash.
+    pub const NONE: Place = Place {
+        align: Align::None,
+        width: 0,
+        tab: 8,
+    };
+}
+
 /// Where the backslashes of the lines of a text stand.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Align {
@@ -92,7 +110,7 @@ pub struct CommentGap {
 }
 
 /// `text` with every line collapsed (its indentation kept) and its trailing backslashes aligned.
-pub fn relay(text: &str, align: Align, width: usize, comment: Option<CommentGap>) -> String {
+pub fn relay(text: &str, place: Place, comment: Option<CommentGap>) -> String {
     // A line with no run of blanks, tab, comment, backslash or quote has nothing to collapse.
     if !text.contains(['\t', '\\', '/', '"', '\'', '\n']) && !text.contains("  ") {
         return text.to_string();
@@ -144,10 +162,16 @@ pub fn relay(text: &str, align: Align, width: usize, comment: Option<CommentGap>
         }
         lines.push((format!("{indent}{text}"), escaped));
     }
+    align_escapes(&lines, place)
+}
+
+/// The lines joined, the backslash of each line that has one in its column.
+fn align_escapes(lines: &[(String, bool)], place: Place) -> String {
+    let Place { align, width, tab } = place;
     let widest = lines
         .iter()
         .filter(|l| l.1)
-        .map(|l| l.0.chars().count())
+        .map(|l| columns(&l.0, tab))
         .max()
         .unwrap_or(0);
     let column = match align {
@@ -155,14 +179,14 @@ pub fn relay(text: &str, align: Align, width: usize, comment: Option<CommentGap>
         Align::Left => widest + 2,
         Align::None => 0,
     };
-    let mut out = String::with_capacity(text.len());
+    let mut out = String::with_capacity(lines.iter().map(|l| l.0.len() + 4).sum());
     for (i, (line, escaped)) in lines.iter().enumerate() {
         if i > 0 {
             out.push('\n');
         }
         out.push_str(line);
         if *escaped {
-            let len = line.chars().count();
+            let len = columns(line, tab);
             let pad = if len + 2 <= column {
                 column - 1 - len
             } else {
@@ -175,25 +199,64 @@ pub fn relay(text: &str, align: Align, width: usize, comment: Option<CommentGap>
     out
 }
 
+/// The lines of a text that is laid out already (a macro body printed by the formatter): every line
+/// but the last gets a backslash, in the column `align` says.
+pub fn escape_lines(text: &str, place: Place) -> String {
+    let count = text.split('\n').count();
+    let lines: Vec<(String, bool)> = (text.split('\n'))
+        .enumerate()
+        .map(|(i, l)| (l.trim_end().to_string(), i + 1 < count))
+        .collect();
+    align_escapes(&lines, place)
+}
+
+/// The columns a line takes: a tab goes to the next multiple of `tab`.
+fn columns(line: &str, tab: usize) -> usize {
+    line.chars().fold(0, |col, c| match c {
+        '\t' => (col / tab.max(1) + 1) * tab.max(1),
+        _ => col + 1,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn place(align: Align, width: usize) -> Place {
+        Place {
+            align,
+            width,
+            tab: 8,
+        }
+    }
 
     #[test]
     fn collapses_blanks_and_aligns_backslashes() {
         let text = "#define  A(x)\t\\\n    foo(x,   \"a  b\")   \\\n  bar";
         assert_eq!(
-            relay(text, Align::Left, 80, None),
+            relay(text, place(Align::Left, 80), None),
             "#define A(x)       \\\n    foo(x, \"a  b\") \\\n  bar"
         );
         assert_eq!(
-            relay("#define A  1 // c  d", Align::Right, 80, None),
+            relay("#define A  1 // c  d", place(Align::Right, 80), None),
             "#define A 1 // c  d"
         );
-        let right = relay(text, Align::Right, 20, None);
+        let right = relay(text, place(Align::Right, 20), None);
         assert!(
             right.lines().take(2).all(|l| l.chars().count() == 20),
             "{right}"
+        );
+    }
+
+    #[test]
+    fn a_tab_in_a_line_takes_the_columns_up_to_the_next_stop() {
+        let lines = "\tfoo(x)\n\tbar\nbaz";
+        let aligned = escape_lines(lines, place(Align::Right, 24));
+        let columns_of = |l: &str| columns(l.trim_end_matches('\\').trim_end(), 8);
+        assert_eq!(columns_of(aligned.lines().next().unwrap()), 14);
+        assert!(
+            aligned.lines().take(2).all(|l| columns(l, 8) == 24),
+            "{aligned}"
         );
     }
 }

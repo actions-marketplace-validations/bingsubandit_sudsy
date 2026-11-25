@@ -10,12 +10,14 @@ core_syntax::include_generated!();
 mod deep;
 mod format;
 mod lexer;
+mod payload;
 mod structure;
 
 pub use format::{CppFormatter, option_schema};
 
 use core_syntax::grammars;
 use provider_api::adapter::{Tok, replay_with};
+use provider_api::directive_payload::merge_nodes;
 use provider_api::{ParseError, ParseResult, ParserProvider, ParserSpec, SourceFile};
 
 /// The keywords a file is lexed with: C++ words such as `class`, `new` and `this` are names in C.
@@ -46,7 +48,8 @@ pub fn provider(dialect: Dialect) -> ParserProvider {
         pattern_files: provider_api::pattern_files!(),
         families: &[],
     };
-    let provider = ParserProvider::new(spec, move |file| parse_file(file, dialect));
+    let provider =
+        ParserProvider::new(spec, move |file| parse_file(file, dialect)).with_format_parse();
     match dialect {
         Dialect::Cpp => provider,
         Dialect::C | Dialect::CFile => provider.with_dialect("c", "cpp"),
@@ -55,12 +58,21 @@ pub fn provider(dialect: Dialect) -> ParserProvider {
 
 fn parse_file(file: &SourceFile, dialect: Dialect) -> ParseResult {
     let certain = dialect == Dialect::C && file.id.ends_with(".c");
-    parse(&file.text, if certain { Dialect::CFile } else { dialect })
+    let dialect = if certain { Dialect::CFile } else { dialect };
+    parse_with(&file.text, dialect, file.for_format)
 }
 
 pub fn parse(src: &str, dialect: Dialect) -> ParseResult {
+    parse_with(src, dialect, false)
+}
+
+/// The tree of `src`; for formatting, the code of the directives is read as well.
+fn parse_with(src: &str, dialect: Dialect, for_format: bool) -> ParseResult {
     let lexed = lexer::lex(src, dialect);
-    let nodes = deep::build(src, &lexed.toks, structure::build(src, &lexed.toks));
+    let mut nodes = deep::build(src, &lexed.toks, structure::build(src, &lexed.toks));
+    if for_format {
+        nodes = merge_nodes(nodes, payload::nodes(src, &lexed.toks));
+    }
     let tokens: Vec<Tok> = (lexed.toks.iter())
         .map(|t| Tok {
             kind: t.kind,

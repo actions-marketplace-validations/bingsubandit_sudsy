@@ -63,6 +63,17 @@ pub fn format_file(
     if generated_skipped(provider, file, options) {
         return Ok(file.text.clone());
     }
+    // (the tree for formatting carries what only the layout reads)
+    let owned;
+    let file = if provider.parses_for_format() && !file.for_format {
+        owned = SourceFile {
+            for_format: true,
+            ..file.clone()
+        };
+        &owned
+    } else {
+        file
+    };
     let parsed = crate::guard::parse(provider, file)?;
     format_parsed(provider, file, &parsed, options, directives)
 }
@@ -234,6 +245,7 @@ pub(crate) fn rewrite_loop(
             had_bom: file.had_bom,
             language_version: file.language_version.clone(),
             preprocessor_symbols: file.preprocessor_symbols.clone(),
+            for_format: file.for_format,
         };
         let reparsed = provider.parse(&again)?;
         if let Some(e) = reparsed.errors.first() {
@@ -346,6 +358,7 @@ fn format_checked(
                 had_bom: file.had_bom,
                 language_version: file.language_version.clone(),
                 preprocessor_symbols: symbols.to_vec(),
+                for_format: file.for_format,
             };
             let result = provider.parse(&again).map_err(|e| e.to_string())?;
             match result.errors.first() {
@@ -408,6 +421,7 @@ impl Variants for Reparses<'_> {
             had_bom: self.file.had_bom,
             language_version: self.file.language_version.clone(),
             preprocessor_symbols: symbols.to_vec(),
+            for_format: self.file.for_format,
         };
         let tree = self
             .provider

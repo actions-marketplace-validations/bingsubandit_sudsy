@@ -412,7 +412,7 @@ fn trailing_comments_directives_and_template_headers() {
         "int a;   // x\nint bbb; // y\n         // z\nint c;\n\nint d; // w\n"
     );
     // a directive's blanks collapse and its backslashes stand at the line width
-    let define = fmt("#define  A(x)   \\\n  foo(x)\n");
+    let define = fmt("#define  A(x)   \\\n  foo(x);   \\\n  bar(x);\n");
     assert!(define.starts_with("#define A(x)"), "{define}");
     assert!(define.lines().next().unwrap().ends_with('\\'), "{define}");
     // a template header joins its declaration when that fits
@@ -757,4 +757,98 @@ fn clang_format_off_and_on_keep_a_region_as_written() {
     let src = "int  a;\n// clang-format off\nint   b  =  1;\n// clang-format on\nint   c;\n";
     let want = "int a;\n// clang-format off\nint   b  =  1;\n// clang-format on\nint c;\n";
     assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+}
+
+#[test]
+fn blank_lines_before_a_closing_brace_go_except_in_a_namespace_and_before_a_keyword() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let src = "void g() {\n  if (a) {\n    b;\n\n  } else {\n    c;\n\n  }\n  try {\n    b;\n\n  } catch (E) {\n    c;\n  }\n}\nnamespace n {\nint a;\n\n}\n";
+    let want = "void g() {\n  if (a) {\n    b;\n\n  } else {\n    c;\n  }\n  try {\n    b;\n\n  } catch (E) {\n    c;\n  }\n}\nnamespace n {\nint a;\n\n}\n";
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+}
+
+#[test]
+fn empty_bodies_have_one_line_or_two_by_their_construct_and_a_semicolon_body_its_own_line() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = vec![
+        ("collapse_empty_blocks", V::Bool(true)),
+        ("empty_body_own_line", V::Bool(true)),
+    ];
+    let src = "void g() {\n  for (;;) {}\n  while (x) {}\n  do {} while (x);\n  try {} catch (E) {}\n  { }\n  for (;;);\n  while (x);\n  auto f = [] {};\n  auto l = [x]\n  { return 1; };\n  auto m = [] noexcept\n  { return 1; };\n  std::vector<std::vector<int*>> v;\n  const auto&[k, v] = f();\n  for (auto&& [_, i] : f()) g(i);\n}\nstruct S {};\nT (*fp)(int);\nT(*fq)(int);\nvoid h(std::vector<std::vector<int>>*, int*[3]);\n";
+    let want = "void g() {\n  for (;;) {\n  }\n  while (x) {\n  }\n  do {\n  } while (x);\n  try {\n  } catch (E) {\n  }\n  {\n  }\n  for (;;)\n    ;\n  while (x)\n    ;\n  auto f = [] {};\n  auto l = [x] { return 1; };\n  auto m = [] noexcept {\n    return 1;\n  };\n  std::vector<std::vector<int *>> v;\n  const auto &[k, v] = f();\n  for (auto &&[_, i] : f())\n    g(i);\n}\nstruct S {};\nT (*fp)(int);\nT (*fq)(int);\nvoid h(std::vector<std::vector<int>> *, int *[3]);\n";
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+}
+
+#[test]
+fn a_macro_body_and_a_condition_are_laid_out_as_the_code_they_are() {
+    use core_config::OptionValue as V;
+    use provider_api::format_testing::Formatting;
+    let mut formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    formatting.options = vec![
+        ("collapse_empty_blocks", V::Bool(true)),
+        ("empty_body_own_line", V::Bool(true)),
+    ];
+    let src = "#define A(x) do { f(x); g(x); } while (0)\n#define B(a) ({ f(a); g(a); })\n#define C(r) {.name = #r, .offset = off(r)}\n#define D(a) case V::a: return x(a);\n#define E(a) FOO_BAR(&a,b)\n#define F 1 // comment\n#define G(I) (((I) & M1)==S1||((I) & M2)==S2)\n#define H(a) do {\\\n} while (0)\n#define W(C) DenseSet<C *, C##Info> x;\n#define T template<typename...>\n#define U bool N,\n#define V 1 + 0 /* a\n b */\n#if defined(A)&&B>=3\n#elif __has_include(<compare>)\n#endif\nvoid f() {\n  FOO_BAR(&a,b)\n  EXPECT_THROW({ a(); b(); }, E);\n}\n";
+    let pad = |s: &str| format!("{s:<79}\\\n");
+    let want = [
+        pad("#define A(x)"),
+        pad("  do {"),
+        pad("    f(x);"),
+        pad("    g(x);"),
+        "  } while (0)\n".to_string(),
+        pad("#define B(a)"),
+        pad("  ({"),
+        pad("    f(a);"),
+        pad("    g(a);"),
+        "  })\n".to_string(),
+        "#define C(r) {.name = #r, .offset = off(r)}\n".to_string(),
+        pad("#define D(a)"),
+        pad("  case V::a:"),
+        "    return x(a);\n".to_string(),
+        "#define E(a) FOO_BAR(&a, b)\n#define F 1 // comment\n".to_string(),
+        "#define G(I) (((I) & M1) == S1 || ((I) & M2) == S2)\n".to_string(),
+        pad("#define H(a)"),
+        pad("  do {"),
+        "  } while (0)\n".to_string(),
+        "#define W(C) DenseSet<C *, C##Info> x;\n#define T template <typename...>\n#define U bool N,\n#define V 1 + 0 /* a\n b */\n#if defined(A) && B >= 3\n#elif __has_include(<compare>)\n#endif\n".to_string(),
+        "void f() {\n  FOO_BAR(&a, b)\n  EXPECT_THROW({ a(); b(); }, E);\n}\n".to_string(),
+    ]
+    .concat();
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+}
+
+#[test]
+fn a_macro_body_that_fits_one_line_stays_on_the_line_of_its_name_up_to_the_width() {
+    use provider_api::format_testing::Formatting;
+    let formatting = Formatting::new(provider(Dialect::Cpp), "a.cc");
+    let fits = "#define FOLLY_PRAGMA_UNROLL_N(N) _Pragma(FOLLY_PRAGMA_DETAIL_STR(GCC unroll(N)))\n";
+    assert_eq!(
+        core_format::testing::assert_formats(&formatting, fits),
+        fits
+    );
+    // (a comment behind the body takes no room; a condition stays on the line of its `#if`)
+    let long = "#define FOLLY_HAS_EXCEPTIONS 1 + 0 // default assumption for unknown platforms\n#if defined(AAAAAAAAAAAAAAAAAAAAAAAA) && defined(BBBBBBBBBBBBBBBBBBBBBBBBBB) && defined(CCCCCCCCCCCCCCC)\n#endif\n";
+    assert_eq!(
+        core_format::testing::assert_formats(&formatting, long),
+        long
+    );
+    let src = "#define FOLLY_PRAGMA_UNROLL_NN(N) _Pragma(FOLLY_PRAGMA_DETAIL_STR(GCC unroll(N)))\n";
+    let want = format!(
+        "{:<79}\\\n  _Pragma(FOLLY_PRAGMA_DETAIL_STR(GCC unroll(N)))\n",
+        "#define FOLLY_PRAGMA_UNROLL_NN(N)"
+    );
+    assert_eq!(core_format::testing::assert_formats(&formatting, src), want);
+}
+
+#[test]
+fn only_the_tree_for_formatting_reads_the_code_of_directives() {
+    let p = provider(Dialect::Cpp);
+    let mut file = SourceFile::new("a.cpp", 1, "#define F(a) a + 1\n#if A && B\n#endif\n");
+    let count = |file: &SourceFile| p.parse(file).unwrap().tree.descendants().count();
+    let plain = count(&file);
+    file.for_format = true;
+    assert!(count(&file) > plain);
 }

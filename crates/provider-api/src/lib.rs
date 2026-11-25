@@ -4,6 +4,7 @@
 //! concept: none (glue: crate root)
 
 pub mod adapter;
+pub mod directive_payload;
 pub mod embedded;
 pub mod encoding;
 pub mod fixtures;

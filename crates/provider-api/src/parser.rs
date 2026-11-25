@@ -48,6 +48,7 @@ pub struct ParserProvider {
     rules: LazyRules,
     /// The name and config base of a dialect that has a provider of its own.
     dialect: Option<(&'static str, &'static str)>,
+    format_parse: bool,
 }
 
 impl ParserProvider {
@@ -88,7 +89,14 @@ impl ParserProvider {
                 })),
             },
             dialect: None,
+            format_parse: false,
         }
+    }
+
+    /// The parse of a file for formatting ([`SourceFile::for_format`]) differs from the plain one.
+    pub fn with_format_parse(mut self) -> Self {
+        self.format_parse = true;
+        self
     }
 
     /// Makes this the provider of a dialect `name` of the language (Vue of HTML, SCSS of CSS):
@@ -152,6 +160,10 @@ impl LanguageProvider for ParserProvider {
             return Vec::new();
         }
         core_syntax::embed_rows::find(grammar, self.dialect.map(|d| d.0), root, text)
+    }
+
+    fn parses_for_format(&self) -> bool {
+        self.format_parse
     }
 
     fn formatter(&self) -> &dyn NodeFormatter {

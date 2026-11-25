@@ -558,10 +558,16 @@ pub struct SpaceRules {
     /// The `cast_node`, `cast_group`, `cast_close`, `cast_keep` and `cast_tight` kind sets: a cast node, its type group, the token
     /// that closes it, the tokens that may be an operator behind it (the blank stays) and those that touch the `)` (`(a)*b`).
     cast: [Vec<SyntaxKind>; 5],
-    /// The `binary_node`, `binary_clear` and `binary_cast` kind sets: the nodes of binary operations, the parents
-    /// that prove a name `*` name (`T *x`, `a * b`) is a product, and the tokens that may close a cast type
-    /// (`(T)*p`, `(T)&x`: a mark between it and a name stays as written).
-    binary: (Vec<SyntaxKind>, Vec<SyntaxKind>, Vec<SyntaxKind>),
+    /// The `binary_node`, `binary_clear`, `binary_cast` and `binary_spaced` kind sets: the nodes of binary
+    /// operations, the parents that prove a name `*` name (`T *x`, `a * b`) is a product, the tokens that may close
+    /// a cast type (`(T)*p`, `(T)&x`: a mark between it and a name stays as written) and the marks that are an
+    /// operator, not a cast's, when the source has a blank behind them (`(a) & b`).
+    binary: (
+        Vec<SyntaxKind>,
+        Vec<SyntaxKind>,
+        Vec<SyntaxKind>,
+        Vec<SyntaxKind>,
+    ),
 }
 
 /// The kind sets of padded braces: `pad_list` (the nodes whose braces are padded), `pad_open` and
@@ -719,7 +725,12 @@ impl SpaceRules {
                 bare: set("pointer_bare"),
                 end: set("pointer_end"),
             },
-            binary: (set("binary_node"), set("binary_clear"), set("binary_cast")),
+            binary: (
+                set("binary_node"),
+                set("binary_clear"),
+                set("binary_cast"),
+                set("binary_spaced"),
+            ),
             cast: [
                 "cast_node",
                 "cast_group",
@@ -878,7 +889,12 @@ impl SpaceRules {
         // (the `)` of a group of only a type's tokens before a name ends a cast and the operator
         // touches it; the `)` of any other group, a call or `sizeof(T)`, ends an operand)
         if self.binary.2.contains(&l) && p.names.contains(&r) {
-            return Some(!left.parent().is_some_and(|g| self.cast_like(&g)));
+            // (a blank behind the mark as written makes it an operator)
+            let spaced = self.binary.3.contains(&mark.kind())
+                && mark
+                    .next_token()
+                    .is_some_and(|x| x.text().trim().is_empty());
+            return Some(spaced || !left.parent().is_some_and(|g| self.cast_like(&g)));
         }
         let declaration = (p.types.contains(&l) || p.end.contains(&l) || p.marks.contains(&l))
             && (p.names.contains(&r) || p.end.contains(&r) || p.marks.contains(&r));

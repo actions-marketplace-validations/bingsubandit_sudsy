@@ -8,7 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| C / C++ | format clang-format | 4 | 61.7% | 23.3 | 1548 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +2 more | 18 | 5.18 | - |
+| C / C++ | format clang-format | 4 | 64.1% | 20.9 | 1389 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 +1 more | 15 | 5.58 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -119,7 +119,7 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 
 ## clang-format
 
-Format: unclassified 0 of 2543 differing files (0%).
+Format: unclassified 0 of 2384 differing files (0%).
 1. `brace-own-line-in-source` (361 files): a `{` on its own line in the source that clang-format attaches (a member function body, `extern "C"`, a lambda): the construct is not one of the `brace_wrapping` words Fix: check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque
 2. `pointer-align` (328 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 3. `reference-align` (300 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`
@@ -127,7 +127,7 @@ Format: unclassified 0 of 2543 differing files (0%).
 5. `continuation-indent-of-non-wrap-line` (177 files): indent of a line that is not a wrap point: a label (`put:`) clang-format indents with its block, the body after a loop macro, the items of a macro argument list Fix: ForEachMacros and StatementMacros as lang.yaml word lists read by the shared role pass; labels by the indent_goto_labels rows
 6. `binary-op-space` (172 files): blanks around a binary operator (`a*b`, `x+1`, `0 ... N-1`, in a `#if` condition too): clang-format writes one blank on each side, Sudsy keeps the source Fix: [space] rows for the operators of Binary nodes; directive conditions need the expression parse of `#if` lines
 7. `angle-space` (152 files): blanks next to `<` and `>`: template brackets (`F<int>`, `template <typename...>`) and comparisons in `#if` conditions Fix: [space] rows by node (TemplateArguments, TemplateParameters, Binary); directive conditions as in binary-op-space
-8. `escaped-newline-align` (144 files): the `\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy pads at line_width and keeps the lines Fix: align_escaped_newlines per style (Linux: Left) and the macro body wrap of the shared macro layout
+8. `escaped-newline-align` (144 files): the `\` of a multi-line macro: the column it is padded to and the lines of the body clang-format re-wraps (AlignEscapedNewlines, ReflowComments off); Sudsy lays a body out as code but keeps the line breaks the author wrote inside a statement Fix: a payload mode of the shared directive layout that drops the source breaks inside a statement (a statement of the body is one flow, then wrapped)
 9. `comma-space` (132 files): blanks around `,` in macro parameter lists and in lists inside directives Fix: [space] Comma rows inside Directive nodes
 10. `statement-joined-by-reference` (106 files): the body after a loop-macro head (`for_each_vma(vmi, vma) stmt;`): clang-format keeps it on the line, Sudsy breaks it Fix: treat a MacroStatement from the ForEachMacros list as a loop head
 11. `statement-split-by-reference` (106 files): a statement or declarator part that clang-format puts on its own line (`) ;` after a macro call, attribute macros after `)`), Sudsy joins it Fix: StatementMacros and attribute macros as word lists; no rule needed for the others

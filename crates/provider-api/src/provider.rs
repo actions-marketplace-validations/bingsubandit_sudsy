@@ -35,6 +35,11 @@ pub trait LanguageProvider: Send + Sync {
     /// provider may be unavailable.
     fn parse(&self, file: &SourceFile) -> Result<ParseResult, ProviderError>;
 
+    /// Does the tree of a file with [`SourceFile::for_format`] differ from the plain one?
+    fn parses_for_format(&self) -> bool {
+        false
+    }
+
     /// Per-node formatting code and hooks; tags cover the rest.
     fn formatter(&self) -> &dyn NodeFormatter;
 
@@ -238,6 +243,9 @@ pub struct SourceFile {
     pub language_version: Option<String>,
     /// Conditional compilation symbols (C#); empty for none.
     pub preprocessor_symbols: Vec<String>,
+    /// The tree is for formatting: a language may add what only the layout reads (the code a
+    /// directive carries). Lint and every other reader parse without it.
+    pub for_format: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -255,6 +263,7 @@ impl SourceFile {
             had_bom: false,
             language_version: None,
             preprocessor_symbols: Vec::new(),
+            for_format: false,
         }
     }
 
@@ -284,6 +293,7 @@ impl SourceFile {
             had_bom,
             language_version: None,
             preprocessor_symbols: Vec::new(),
+            for_format: false,
         })
     }
 }
