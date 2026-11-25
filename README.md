@@ -98,7 +98,7 @@ Each number is measured on real-world code against the reference tool with its d
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
 | C / C++ | ██████░░░░ 64% clang-format | not measured clang-tidy | In progress |
 
-Notes: clang-format (C / C++): line wrapping is not compared.
+Notes: PHP-CS-Fixer (PHP): measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains). clang-format (C / C++): line wrapping is not compared.
 
 How to read the numbers, what they leave out and how to reproduce one: [docs/languages.md](docs/languages.md#how-to-read-the-numbers). Presets: [configuration](docs/configuration.md#presets).
 <!-- /generated -->

@@ -121,7 +121,7 @@ The status and the headline numbers of every language are in the generated table
 
 - Config section: `php`.
 - **Formatter:** PHP-CS-Fixer 3.95.31 with `@PER-CS`. Corpus: Laravel, Symfony, WordPress, Composer.
-- **Linter:** PHPStan mapping covers 21% of level 0 (`new.static`, `function.inner`, `parameter.implicitlyNullable`, `unset.possiblyHookedProperty`, `variable.undefined`). Sudsy does no type analysis; the rules are on in `php/phpstan` except `missing-return`, which is off (more extras than findings).
+- **Linter:** PHPStan mapping covers 36% of level 0 (`new.static`, `function.inner`, `parameter.implicitlyNullable`, `unset.possiblyHookedProperty`, `variable.undefined`). Sudsy does no type analysis; the rules are on in `php/phpstan` except `missing-return`, which is off (more extras than findings).
 - **Presets:** `php/phpstan`.
 - **Options:** `trailing_commas`, `declaration_brace`. Default `line_width` is 120.
 - **Differences:**
