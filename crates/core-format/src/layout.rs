@@ -607,6 +607,35 @@ impl Layout {
                     None,
                 )))
             }
+            // (a preprocessor branch that never compiles, `#if 0`, stays as written)
+            "items" if dead_branch(cx, node) => {
+                let full = node.text().to_string();
+                let first = cx.first_token(node);
+                let from = first.as_ref().map_or(0, |f| {
+                    usize::from(f.text_range().start() - node.text_range().start())
+                });
+                let text = full[from..].trim();
+                let (head, rest) = text.split_once('\n').unwrap_or((text, ""));
+                let rest = if rest.is_empty() {
+                    Doc::Nil
+                } else {
+                    doc::verbatim(format!("\n{rest}"))
+                };
+                // the directive words are re-spaced, a trailing comment keeps its text
+                let head = head.trim();
+                let (words, comment) = head
+                    .find("/*")
+                    .or_else(|| head.find("//"))
+                    .map_or((head, ""), |i| head.split_at(i));
+                let words = words.split_whitespace().collect::<Vec<_>>().join(" ");
+                let head = if comment.is_empty() {
+                    words
+                } else {
+                    format!("{words} {comment}")
+                };
+                let lead = first.map_or(Doc::Nil, |f| cx.leading_comments_doc(&f));
+                Ok(doc::concat(vec![lead, doc::line_start(&head), rest]))
+            }
             "items" => statements(cx, &node.children().collect::<Vec<_>>()),
             "line_start" => {
                 let relay = self
@@ -639,6 +668,25 @@ impl Layout {
             None => doc,
         })
     }
+}
+
+/// Does the branch start with a directive `#if 0` or `#elif 0` (a condition that is the number 0)?
+fn dead_branch(cx: &FormatCtx<'_>, node: &SyntaxNode) -> bool {
+    let Some(head) = node
+        .children()
+        .next()
+        .filter(|n| cx.grammar.has_tag(n.kind(), "directive"))
+    else {
+        return false;
+    };
+    let words: Vec<String> = head
+        .descendants_with_tokens()
+        .filter_map(|e| e.into_token())
+        .filter(|t| !cx.grammar.has_tag(t.kind(), "comment"))
+        .map(|t| t.text().trim().to_string())
+        .filter(|t| !t.is_empty())
+        .collect();
+    matches!(words.as_slice(), [h, kw, zero] if h == "#" && (kw == "if" || kw == "elif") && zero == "0")
 }
 
 /// The node's text from its first token on, at column 0, after its leading comments (a

@@ -430,7 +430,7 @@ fn trailing_comments_directives_and_template_headers() {
 #[test]
 fn extern_c_function_body_is_indented_and_a_no_break_space_ends_a_comment() {
     // a linkage specification in front of a function does not make its body a scope
-    let src = "extern \"C\" int f(int a) {\n  return 1;\n}\n";
+    let src = "extern \"C\" int f(int a) {\n  g();\n  return 1;\n}\n";
     assert_eq!(fmt(src), src);
     // a no-break space is text, not trailing whitespace
     let src = "int a; // x\u{a0}\n";
@@ -948,4 +948,62 @@ fn a_template_header_that_breaks_expands_the_short_body_and_one_that_fits_joins_
         ),
         "template <class T>\nint fn(T first_argument, T second_argument, T third_arg_xxxxx) {\n  return 1;\n}\ntemplate <class T> int g(T t) { return 1; }\n"
     );
+}
+
+#[test]
+fn a_dead_preprocessor_branch_stays_as_written() {
+    // (`#if 0` is not formatted, its `#else` is; a comment before it stays a comment)
+    assert_eq!(
+        fmt("void f() {\n  /* c */\n#if  0   /* x */\n  g( a );\n#else\n  h( a );\n#endif\n}\n"),
+        "void f() {\n  /* c */\n#if 0 /* x */\n  g( a );\n#else\n  h(a);\n#endif\n}\n"
+    );
+}
+
+#[test]
+fn clang_spellings_of_operators_casts_and_declarations() {
+    // `##` has no blanks, `co_await` has none before its call, `>>` closes two template lists
+    assert_eq!(fmt("#define C(a, b) a ## b\n"), "#define C(a, b) a##b\n");
+    assert_eq!(
+        fmt("struct S { auto operator co_await () const; };\n"),
+        "struct S {\n  auto operator co_await() const;\n};\n"
+    );
+    assert_eq!(fmt("A<B<C...>> x;\n"), "A<B<C...>> x;\n");
+    // a member operand of `&` is a binary operand, `new T<int>[n]` an array
+    assert_eq!(
+        fmt("void f() { x = p->flags & MASK; y = new T<int>[n]; }\n"),
+        "void f() {\n  x = p->flags & MASK;\n  y = new T<int>[n];\n}\n"
+    );
+    // a structured binding needs `auto`, `extern \"C\"` prefixes a declaration
+    assert_eq!(
+        fmt("void f() { auto [a, b] = g(); x[1] = 2; }\n"),
+        "void f() {\n  auto [a, b] = g();\n  x[1] = 2;\n}\n"
+    );
+    assert_eq!(
+        fmt("extern \"C\" int  f(void);\n"),
+        "extern \"C\" int f(void);\n"
+    );
+    assert_eq!(
+        fmt("void f() { return LLVM_EXTENSION reinterpret_cast<X>(y); }\n"),
+        "void f() { return LLVM_EXTENSION reinterpret_cast<X>(y); }\n"
+    );
+}
+
+#[test]
+fn delete_brackets_sign_casts_attribute_parameters_and_comments_after_brackets() {
+    assert_eq!(
+        fmt("void f() { delete [] b; }\n"),
+        "void f() { delete[] b; }\n"
+    );
+    // `(uintptr_t)-1` is a cast, `(i)+1` a sum
+    assert_eq!(
+        fmt("void f() { x = (uintptr_t)-1; y = (i)+1; }\n"),
+        "void f() {\n  x = (uintptr_t)-1;\n  y = (i) + 1;\n}\n"
+    );
+    // an attribute starts a parameter, so `*` belongs to its declarator
+    assert_eq!(
+        fmt("int g(const char * a, [[maybe_unused]] const char * b);\n"),
+        "int g(const char *a, [[maybe_unused]] const char *b);\n"
+    );
+    // a block comment written against `(` stays there at a line end
+    assert!(fmt("void f() { if (/*c*/\n a) {} }\n").contains("if (/*c*/\n"));
 }

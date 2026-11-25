@@ -271,6 +271,17 @@ impl Cx<'_> {
             self.new_expression();
             return;
         }
+        // (`LLVM_EXTENSION reinterpret_cast<T>(x)`: an annotation macro before a cast)
+        if t.kind == k::IDENT
+            && crate::structure::macro_name(self.text(at))
+            && at + 1 < self.lim
+            && self.c[at + 1].kind == k::KEYWORD
+            && self.text(at + 1).ends_with("_cast")
+        {
+            self.pos += 1;
+            self.unary();
+            return;
+        }
         if t.kind == k::LPAR && self.groups.is_open(at) && self.cast(at) {
             self.pos = self.skip(at);
             self.unary();
@@ -335,7 +346,21 @@ impl Cx<'_> {
         // A prefix operator after a lone name is a binary operator: `(a) - b`.
         let chained =
             self.is(after, self.lim, k::LPAR) && self.groups.is_open(after) && self.cast(after);
-        builtin || decorated || chained || (name && !prefix && self.c[after].kind != k::LPAR)
+        // (`(uintptr_t)-1`: a sign written against both the group and a number is a cast of a
+        // name that ends in `_t`; `(i)+1` is a sum)
+        let signed = hi == lo + 1
+            && self.text(lo).ends_with("_t")
+            && matches!(self.c[after].kind, k::PLUS | k::MINUS)
+            && self.c[after].start == self.c[after - 1].end
+            && self
+                .c
+                .get(after + 1)
+                .is_some_and(|n| n.kind == k::NUMBER && n.start == self.c[after].end);
+        builtin
+            || decorated
+            || chained
+            || signed
+            || (name && !prefix && self.c[after].kind != k::LPAR)
     }
 
     /// Whether the token at `i` starts an operand (not an operator that could be binary).
@@ -554,6 +579,7 @@ impl Cx<'_> {
             | k::COMMA
             | k::SEMI
             | k::RSQB
+            | k::LSQB
             | k::QUESTION
             | k::PIPE_PIPE
             | k::AMP_AMP

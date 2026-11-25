@@ -8,7 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| C / C++ | format clang-format | 4 | 67.5% | 17.5 | 1162 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 | 12 | 5.83 | - |
+| C / C++ | format clang-format | 4 | 69.2% | 15.8 | 1047 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 | 12 | 5.25 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -119,7 +119,7 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 
 ## clang-format
 
-Format: unclassified 0 of 2157 differing files (0%).
+Format: unclassified 0 of 2042 differing files (0%).
 1. `brace-own-line-in-source` (361 files): a `{` on its own line in the source that clang-format attaches (a member function body, `extern "C"`, a lambda): the construct is not one of the `brace_wrapping` words Fix: check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque
 2. `pointer-align` (328 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 3. `reference-align` (300 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`

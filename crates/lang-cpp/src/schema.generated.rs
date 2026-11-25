@@ -92,6 +92,7 @@ pub const OPTION_KINDS: core_format::rules::OptionKinds = &[
     ("pointer_alignment", "binary_cast", "", &["Rpar"]),
     ("pointer_alignment", "binary_clear", "", &["Assignment", "ReturnStatement", "Binary", "Ternary", "Index", "Unary", "Arguments"]),
     ("pointer_alignment", "binary_node", "", &["Binary"]),
+    ("pointer_alignment", "binary_operand", "", &["MemberAccess"]),
     ("pointer_alignment", "binary_spaced", "", &["Amp"]),
     ("pointer_alignment", "pointer", "", &["Star", "Amp", "AmpAmp"]),
     ("pointer_alignment", "pointer_bare", "", &["TemplateArguments"]),

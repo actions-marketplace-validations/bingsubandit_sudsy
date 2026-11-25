@@ -110,9 +110,12 @@ impl Cx<'_> {
                     let w = self.text(p);
                     if t.kind == k::KEYWORD
                         && SPECIFIERS.contains(&w)
-                        && !(w == "extern" && self.is(p + 1, b, k::STRING))
+                        && !(w == "extern"
+                            && self.is(p + 1, b, k::STRING)
+                            && self.is(p + 2, b, k::LBRACE))
                     {
-                        p += 1;
+                        // (`extern "C" void f()`: the linkage string goes with `extern`)
+                        p += 1 + usize::from(w == "extern" && self.is(p + 1, b, k::STRING));
                     } else if (ATTRIBUTES.contains(&w)
                         || w == "template" // (`template(typename T)(requires C<T>)`: a macro)
                         || (t.kind == k::IDENT && w.starts_with("__")))
@@ -156,6 +159,10 @@ impl Cx<'_> {
 
     fn probe_declarators(&mut self, a: usize, b: usize) -> Option<(usize, usize)> {
         let q = self.type_end(a, b)?;
+        // (`auto [a, b]`: only `auto` takes a structured binding; `r[i] = x` is an expression)
+        if self.open(q, b, k::LSQB) && !(a..q).any(|i| self.word(i, b, "auto")) {
+            return None;
+        }
         let id = self.declarator_id(q, b)?;
         let follows = id >= b
             || matches!(
@@ -164,7 +171,9 @@ impl Cx<'_> {
             )
             || self.word(id, b, "const")
             || self.word(id, b, "override")
-            || self.word(id, b, "final");
+            || self.word(id, b, "final")
+            // (`void (*f)(void) __initdata = x;`: an attribute macro behind the declarator)
+            || (self.open(q, b, k::LPAR) && self.is(id, b, k::IDENT) && self.text(id).starts_with("__"));
         follows.then_some((q, id))
     }
 
@@ -216,7 +225,8 @@ impl Cx<'_> {
             } else if self.is(q, b, k::IDENT)
                 && self.text(q).starts_with("__")
                 && ((q + 1 < b && matches!(self.c[q + 1].kind, k::IDENT | k::STAR | k::AMP))
-                    || self.word(q + 1, b, "operator"))
+                    || self.word(q + 1, b, "operator")
+                    || (self.open(q + 1, b, k::LPAR) && self.is(self.inner(q + 1).0, b, k::STAR)))
             {
                 // (`void __init name(`, `void __iomem *name(`, `void *__init name(`: an attribute macro behind the type)
                 q += 1;
@@ -447,10 +457,16 @@ impl Cx<'_> {
         let (lo, hi) = self.inner(lp);
         let mut p = lo;
         while p < hi {
-            if !matches!(
-                self.c[p].kind,
-                k::IDENT | k::KEYWORD | k::COLON_COLON | k::ELLIPSIS
-            ) {
+            // (`[[maybe_unused]] int a`: an attribute starts a parameter)
+            while self.open(p, hi, k::LSQB) && self.is(p + 1, hi, k::LSQB) {
+                p = self.skip(p);
+            }
+            if p >= hi
+                || !matches!(
+                    self.c[p].kind,
+                    k::IDENT | k::KEYWORD | k::COLON_COLON | k::ELLIPSIS
+                )
+            {
                 return false;
             }
             while p < hi && self.c[p].kind != k::COMMA && self.c[p].kind != k::EQUAL {
