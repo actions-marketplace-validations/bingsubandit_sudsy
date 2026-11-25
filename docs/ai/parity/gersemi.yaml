@@ -10,7 +10,7 @@ scope: "The formatter of gersemi at its defaults (MPL-2.0: only its output is co
 entries:
   indent: option cmake.format.indent_size
   line_length: option cmake.format.line_width
-  list_expansion: deferred | Phase 5 (keyword sections).
+  list_expansion: deferred | Not in the help of CMake, so a call with more than four plain values after its positional ones breaks (shapes::keyword_call) and gersemi's per-command exceptions are in queue.md.
   definitions: deferred | User command definitions.
   unsafe: deferred | No unsafe mode.
   warn_about_unknown_commands: deferred | A warning of the tool, not a layout.

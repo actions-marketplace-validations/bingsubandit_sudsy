@@ -2,9 +2,12 @@
 //!
 //! concept: none (glue: the formatter's rows and facts)
 
+use crate::SIGNATURES;
 use crate::blocks::BLOCKS;
 use core_format::rules::LazyRules;
 use core_syntax::grammars;
 
 pub static ROWS: LazyRules =
-    LazyRules::new(|| grammars::CMAKE.get(), include_str!("../format.rules")).blocks(&BLOCKS);
+    LazyRules::new(|| grammars::CMAKE.get(), include_str!("../format.rules"))
+        .blocks(&BLOCKS)
+        .signatures(SIGNATURES);

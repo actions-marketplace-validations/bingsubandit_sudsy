@@ -1145,7 +1145,7 @@
 {"languages":["cmake"],"rule_url":false,"target":null,"tool":"gersemi","version":"0.29.2","entries":[
 ["indent","covered","option: cmake.format.indent_size","",""],
 ["line_length","covered","option: cmake.format.line_width","",""],
-["list_expansion","deferred","deferred","Phase 5 (keyword sections).",""],
+["list_expansion","deferred","deferred","Not in the help of CMake, so a call with more than four plain values after its positional ones breaks (shapes::keyword_call) and gersemi's per-command exceptions are in queue.md.",""],
 ["definitions","deferred","deferred","User command definitions.",""],
 ["unsafe","deferred","deferred","No unsafe mode.",""],
 ["warn_about_unknown_commands","deferred","deferred","A warning of the tool, not a layout.",""]

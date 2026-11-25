@@ -165,6 +165,7 @@ impl RuleFormatter {
             blank: Blank::parse(g, section(text, "blank")),
             file: File {
                 blocks: &[],
+                signatures: &[],
                 one_line: facts.one_line_verbatim,
                 any: kinds(facts.verbatim_if),
             },
@@ -328,6 +329,7 @@ pub struct LazyRules {
     text: &'static str,
     facts: RuleFacts,
     blocks: &'static [core_syntax::block_pair::Block],
+    signatures: &'static [core_syntax::signature::Signature],
     option_kinds: OptionKinds,
     cell: OnceLock<RuleFormatter>,
 }
@@ -358,6 +360,7 @@ impl LazyRules {
             text,
             facts: RuleFacts::DEFAULT,
             blocks: &[],
+            signatures: &[],
             option_kinds: &[],
             cell: OnceLock::new(),
         }
@@ -372,6 +375,15 @@ impl LazyRules {
     /// The block words of the language's commands (the `commands` layout).
     pub const fn blocks(mut self, blocks: &'static [core_syntax::block_pair::Block]) -> LazyRules {
         self.blocks = blocks;
+        self
+    }
+
+    /// The command signatures of the language (the `commands` layout), sorted by lower-case name.
+    pub const fn signatures(
+        mut self,
+        rows: &'static [core_syntax::signature::Signature],
+    ) -> LazyRules {
+        self.signatures = rows;
         self
     }
 
@@ -390,6 +402,7 @@ impl LazyRules {
                 self.option_kinds,
             );
             rules.file.blocks = self.blocks;
+            rules.file.signatures = self.signatures;
             rules
         })
     }

@@ -212,11 +212,11 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by mi
 
 ## gersemi
 
-Format: unclassified 0 of 3404 differing files (0%).
-1. `set-layout` (1483 files): gersemi keeps the name on the line of `set(`, `list(` and the like and breaks a list of more than a few values; Sudsy breaks only what does not fit and never keeps the first argument on the command line
-2. `keyword-sections` (1475 files): gersemi lays the arguments of a known command out in keyword sections (a keyword and its values on one line, the values of `COMMAND`, `PROPERTIES` and the like one level in); Sudsy puts every argument on its own line
-3. `condition-layout` (340 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators (`AND`, `OR`, `NOT`, groups); Sudsy treats it as a list of arguments
-4. `section-indent` (106 files): gersemi indents the values of a section one level further than the keyword; Sudsy has no sections
+Format: unclassified 0 of 859 differing files (0%).
+1. `keyword-sections` (630 files): gersemi's definitions of a known command hold what CMake's help only says in prose or not at all (a keyword of a form such as `FILE_SET`, `IN ITEMS` or `HINTS ENV x`, which form words keep their first argument on the line since `list(APPEND NAME` does and `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not, commands that keep more than four plain values on one line); the table generated from the help has none of it, so the layout chooses by its generic rules
+2. `condition-layout` (169 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
+3. `blank-before-closer-comment` (30 files): gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
+4. `unknown-command-layout` (30 files): a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
 
 ## google-java-format
 

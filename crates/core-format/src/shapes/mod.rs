@@ -25,6 +25,7 @@ mod for_header;
 mod heritage;
 mod inline_list;
 mod key_value;
+mod keyword_sections;
 mod list;
 mod maybe_parenthesize;
 mod omit_parens;

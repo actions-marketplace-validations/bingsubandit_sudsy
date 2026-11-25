@@ -39,7 +39,7 @@ Per language against the bar in [CLAUDE.md](../../CLAUDE.md) (format 85-90% iden
 Not ranked: INI, EditorConfig and `.gitignore` have no reference tool. Measured by a re-run on this host: JS, CSS, HTML, Vue, Svelte, Java, Python, Shell, Protobuf, Terraform, TOML, SQL, Kotlin, PHP, JSON, YAML, XML, PowerShell, Markdown and the lint shares of JSON, YAML, GraphQL, StyleCop, PSScriptAnalyzer, SCSS and Less; recorded and not re-run: the C# format share (the corpus differential needs the CSharpier baseline) and the other lint shares.
 
 ## Small tasks
-- CMake format phase 5 (keyword sections, `set` first-argument layout, `if` conditions): waits for the C3 checkpoint, see [design/cmake.md](design/cmake.md) and the causes in [formatting/cmake.md](formatting/cmake.md).
+- CMake format: the causes left (prose-only keywords, form words that keep their first argument, nested condition groups, blank lines before a comment ahead of a closer) are in [formatting/cmake.md](formatting/cmake.md) and [parity/queue.md](parity/queue.md).
 - Lint allocations of kt, c, rb, cpp and java rose together (kt.lint instr +3.1%, c.lint allocs +4.7%) with the larger shared no-empty-block and no-wildcard-imports rules: profile with valgrind in CI, cause not known.
 - `unreachable-code` of Go costs 810 allocations on the bench input (`go.lint`): 5 flow graphs of large functions (`crates/core-flow/src/build.rs`). Reuse the buffers (blocks, edges, frames) across units of a file.
 - SQL parity leftovers: sqlfluff identifier-case consistency per file, `LT05` on `+` chains in strings, mysql `delimiter` bodies (blank lines inside a flat `BEGIN..END`), the comment indent after a statement in a T-SQL `IF` / `BEGIN` block, `CV06` (a `;` after a comment, 1,452 findings).

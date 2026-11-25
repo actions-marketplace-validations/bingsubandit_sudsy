@@ -175,6 +175,8 @@ impl Row {
 pub(crate) struct File {
     /// The block words of the language's commands ([`core_syntax::block_pair`]).
     pub(crate) blocks: &'static [core_syntax::block_pair::Block],
+    /// The command signatures of the language, sorted by lower-case name.
+    pub(crate) signatures: &'static [core_syntax::signature::Signature],
     /// A file of one line.
     pub(crate) one_line: bool,
     /// A file with a token of one of these kinds (text outside the language's tags).
@@ -467,6 +469,7 @@ impl Layout {
                 node,
                 &shapes::Commands {
                     blocks: file.blocks,
+                    signatures: file.signatures,
                     cases: case_rows,
                     max_blank: max_blank(cx),
                 },

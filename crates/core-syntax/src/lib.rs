@@ -32,6 +32,7 @@ pub mod regex;
 pub mod roles;
 pub mod scan;
 pub mod shape;
+pub mod signature;
 pub mod spans;
 pub mod strings;
 pub mod template_actions;
