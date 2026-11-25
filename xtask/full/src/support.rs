@@ -46,6 +46,8 @@ pub(crate) struct Row {
     /// `tests/parity/stability` (the corpus files that are stable) that stand for the format leg.
     #[serde(default)]
     pub stability: Vec<String>,
+    /// What a user needs before the language works, in one sentence (shown on the site's language page).
+    pub requires: Option<String>,
 }
 
 /// A reference tool: its `tests/parity` folder, its name in the table and, for a folder that serves

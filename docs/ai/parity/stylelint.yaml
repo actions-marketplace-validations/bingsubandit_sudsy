@@ -1,6 +1,9 @@
 tool: "stylelint"
 version: "17.16.0"
 languages: ["css", "scss", "less"]
+rule-url: "https://stylelint.io/user-guide/rules/{id}"
+rule-urls:
+  "declaration-block-single-line-max-declarations": "https://stylelint.io/user-guide/rules/"
 sources:
   - "https://github.com/stylelint/stylelint/tree/17.16.0/lib/rules"
   - "https://stylelint.io/user-guide/rules/"

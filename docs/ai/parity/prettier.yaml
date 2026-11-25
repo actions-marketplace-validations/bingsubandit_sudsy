@@ -1,6 +1,7 @@
 tool: "prettier"
 version: "3.9.10 (npm latest; the options page does not print the version)"
 languages: ["yaml", "json", "markdown", "graphql", "js", "css", "html", "vue", "svelte"]
+rule-url: none
 sources:
   - "https://registry.npmjs.org/prettier/latest"
   - "https://prettier.io/docs/options"

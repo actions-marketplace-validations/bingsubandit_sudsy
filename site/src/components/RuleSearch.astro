@@ -1,81 +1,246 @@
-<div id="rule-search">
-  <input type="search" placeholder="Search rules" aria-label="Search rules" />
-  <div class="filters"></div>
-  <p class="count" role="status"></p>
-  <ul class="results"></ul>
+<div id="rule-search" class="rs">
+  <div class="rs-bar">
+    <input type="search" class="rs-q" placeholder="Search rules or upstream ids" aria-label="Search rules" />
+    <button type="button" class="rs-toggle" aria-expanded="false" aria-controls="rs-filters">Filters <span class="rs-badge" hidden></span></button>
+  </div>
+  <div class="rs-chips" role="group" aria-label="Selected filters"></div>
+  <div id="rs-filters" class="rs-filters" role="group" aria-label="Filters"></div>
+  <p class="count" role="status" aria-live="polite">Loading rules</p>
+  <table class="rs-table">
+    <colgroup><col class="w-rule" /><col class="w-lang" /><col class="w-cat" /><col class="w-fix" /><col class="w-up" /><col class="w-desc" /></colgroup>
+    <thead><tr><th scope="col">Rule</th><th scope="col">Languages</th><th scope="col">Category</th><th scope="col">Fix</th><th scope="col">Upstream</th><th scope="col">Description</th></tr></thead>
+    <tbody class="results"></tbody>
+  </table>
 </div>
 
+<style is:global>
+  :root { --sl-content-width: 72rem; }
+</style>
+
 <script>
-  // Pagefind's JS API directly: the default UI shows nothing without a search term, and these
-  // filters (the data-pagefind-filter chips of the generated rule pages) must work without one.
+  // The rule list: /rules-index.json (written by site/scripts/generate.mjs from rules.json) is read once,
+  // rendered here and filtered in the browser. No request per rule, no search index needed.
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   const root = document.querySelector('#rule-search')!;
-  const input = root.querySelector('input')!;
-  const filterBox = root.querySelector('.filters')!;
+  const input = root.querySelector('.rs-q') as HTMLInputElement;
+  const filterBox = root.querySelector('.rs-filters')!;
+  const chipBox = root.querySelector('.rs-chips')!;
   const count = root.querySelector('.count')!;
-  const list = root.querySelector('.results')!;
-  const LIMIT = 50;
-  const names = ['language', 'category', 'fix', 'preset', 'upstream'];
+  const tbody = root.querySelector('.results')!;
+  const toggle = root.querySelector('.rs-toggle') as HTMLButtonElement;
+  const toggleBadge = root.querySelector('.rs-badge') as HTMLElement;
+
+  const FILTERS = [
+    ['language', 'Language'],
+    ['category', 'Category'],
+    ['fix', 'Fix'],
+    ['preset', 'Preset'],
+    ['upstream', 'Upstream tool'],
+  ] as const;
+  type Rule = { i: string; l: string[]; c: string; f: string; p: string[]; u: string[][]; d: string; hay: string; tools: string[] };
+
+  const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const code = (t: string) => esc(t).replace(/`([^`]+)`/g, '<code>$1</code>');
 
   const params = new URLSearchParams(location.search);
   input.value = params.get('q') ?? '';
-  const selected: Record<string, Set<string>> = Object.fromEntries(names.map((n) => [n, new Set(params.getAll(n))]));
-  const counts: Record<string, Record<string, HTMLElement>> = {};
+  const selected: Record<string, Set<string>> = Object.fromEntries(FILTERS.map(([n]) => [n, new Set(params.getAll(n))]));
 
   try {
-    const pf = await import(/* @vite-ignore */ `${import.meta.env.BASE_URL.replace(/\/$/, '')}/pagefind/pagefind.js`);
-    const all = await pf.filters();
-    // Only rule pages carry a category, so defaulting to every category leaves out the other pages.
-    const rulePages = Object.keys(all.category);
+    const data = await (await fetch(`${base}/rules-index.json`)).json();
+    const langs: Record<string, [string, string]> = data.languages;
+    const rules: Rule[] = data.rules.map((r: Rule) => ({
+      ...r,
+      tools: [...new Set(r.u.map((u) => u[0]))],
+      hay: `${r.i} ${r.d} ${r.u.map((u) => u[1]).join(' ')}`.toLowerCase(),
+    }));
+    const allLanguages = Object.keys(langs);
+    const label = (name: string, v: string) => (name === 'language' ? (langs[v]?.[0] ?? v) : v);
 
-    for (const name of names) {
-      const details = document.createElement('details');
-      details.open = selected[name].size > 0 || name === 'language';
-      details.append(Object.assign(document.createElement('summary'), { textContent: name }));
-      counts[name] = {};
-      for (const value of Object.keys(all[name] ?? {}).sort()) {
-        const label = document.createElement('label');
-        const box = Object.assign(document.createElement('input'), { type: 'checkbox', checked: selected[name].has(value) });
+    // The values a rule has for a filter; a rule for all languages has every language.
+    const values = (r: Rule, name: string): string[] =>
+      name === 'language' ? (r.l.includes('all') ? allLanguages : r.l) : name === 'category' ? [r.c] : name === 'fix' ? [r.f] : name === 'preset' ? r.p : r.tools;
+    const terms = () => input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const matches = (r: Rule, skip: string, t: string[]) =>
+      t.every((x) => r.hay.includes(x)) && FILTERS.every(([n]) => n === skip || !selected[n].size || values(r, n).some((v) => selected[n].has(v)));
+
+    // Menus: one per filter, the value list with counts, a find field inside for the long ones.
+    const counts: Record<string, Map<string, HTMLElement>> = {};
+    const menus: HTMLElement[] = [];
+    const closeAll = (except?: HTMLElement) => {
+      for (const m of menus) {
+        if (m === except) continue;
+        m.querySelector('button')!.setAttribute('aria-expanded', 'false');
+        (m.querySelector('.rs-panel') as HTMLElement).hidden = true;
+      }
+    };
+    for (const [name, title] of FILTERS) {
+      const all = new Set<string>();
+      for (const r of rules) for (const v of values(r, name)) all.add(v);
+      const sorted = [...all].sort((a, b) => label(name, a).localeCompare(label(name, b)));
+      const menu = document.createElement('div');
+      menu.className = 'rs-menu';
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-haspopup', 'true');
+      button.innerHTML = `${title} <span class="rs-n" hidden></span>`;
+      const panel = document.createElement('div');
+      panel.className = 'rs-panel';
+      panel.hidden = true;
+      panel.setAttribute('role', 'group');
+      panel.setAttribute('aria-label', `${title} filter`);
+      let find: HTMLInputElement | null = null;
+      if (sorted.length > 8) {
+        find = Object.assign(document.createElement('input'), { type: 'search', placeholder: `Find ${title.toLowerCase()}` });
+        find.setAttribute('aria-label', `Find in ${title.toLowerCase()} values`);
+        panel.append(find);
+      }
+      const list = document.createElement('ul');
+      counts[name] = new Map();
+      for (const v of sorted) {
+        const li = document.createElement('li');
+        const lab = document.createElement('label');
+        const box = Object.assign(document.createElement('input'), { type: 'checkbox', value: v, checked: selected[name].has(v) });
+        box.dataset.filter = name;
         box.addEventListener('change', () => {
-          selected[name][box.checked ? 'add' : 'delete'](value);
+          selected[name][box.checked ? 'add' : 'delete'](v);
           run();
         });
-        counts[name][value] = document.createElement('span');
-        label.append(box, ` ${value} `, counts[name][value]);
-        details.append(label);
+        const n = document.createElement('span');
+        n.className = 'rs-count';
+        counts[name].set(v, n);
+        lab.append(box, ` ${label(name, v)} `, n);
+        li.append(lab);
+        li.dataset.text = label(name, v).toLowerCase();
+        list.append(li);
       }
-      filterBox.append(details);
+      find?.addEventListener('input', () => {
+        const q = find!.value.toLowerCase();
+        for (const li of list.children as unknown as HTMLElement[]) li.hidden = !!q && !li.dataset.text!.includes(q);
+      });
+      panel.append(list);
+      button.addEventListener('click', () => {
+        const open = button.getAttribute('aria-expanded') !== 'true';
+        closeAll(menu);
+        button.setAttribute('aria-expanded', String(open));
+        panel.hidden = !open;
+        if (open) (find ?? (panel.querySelector('input') as HTMLElement))?.focus();
+      });
+      menu.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !panel.hidden) {
+          closeAll();
+          button.focus();
+        }
+      });
+      menu.dataset.name = name;
+      menu.append(button, panel);
+      menus.push(menu);
+      filterBox.append(menu);
     }
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.rs-menu')) closeAll();
+    });
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(open));
+      filterBox.toggleAttribute('data-open', open);
+    });
 
-    async function run() {
-      const filters: Record<string, { any: string[] }> = { category: { any: rulePages } };
-      for (const n of names) if (selected[n].size) filters[n] = { any: [...selected[n]] };
-      const term = input.value.trim() || null;
-      const res = await pf.search(term, { filters, ...(term ? {} : { sort: { id: 'asc' } }) });
-      for (const n of names) {
-        for (const [value, el] of Object.entries(counts[n])) el.textContent = `(${res.filters[n]?.[value] ?? 0})`;
+    const chip = (name: string, v: string) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'rs-chip';
+      b.setAttribute('aria-label', `Remove filter ${name} ${label(name, v)}`);
+      b.innerHTML = `${esc(FILTERS.find((f) => f[0] === name)![1])}: ${esc(label(name, v))} <span aria-hidden="true">&times;</span>`;
+      b.addEventListener('click', () => {
+        selected[name].delete(v);
+        for (const box of root.querySelectorAll<HTMLInputElement>(`input[data-filter="${name}"]`)) if (box.value === v) box.checked = false;
+        run();
+      });
+      return b;
+    };
+
+    const langBadges = (r: Rule) => {
+      const shown = r.l.slice(0, 3).map((l) => (l === 'all' ? '<span class="badge lang">all</span>' : `<a class="badge lang" href="${base}/languages/${langs[l]?.[1] ?? l}/">${esc(langs[l]?.[0] ?? l)}</a>`));
+      const more = r.l.length - 3;
+      return shown.join(' ') + (more > 0 ? ` <span class="badge more" title="${esc(r.l.map((l) => langs[l]?.[0] ?? l).join(', '))}">+${more}</span>` : '');
+    };
+    const upstream = (r: Rule) => {
+      const byTool = new Map<string, string[][]>();
+      for (const u of r.u) byTool.set(u[0], [...(byTool.get(u[0]) ?? []), u]);
+      let left = 4;
+      const out: string[] = [];
+      for (const [tool, ids] of byTool) {
+        if (left <= 0) break;
+        const shown = ids.slice(0, left);
+        left -= shown.length;
+        out.push(`<div><span class="tool">${esc(tool)}</span> ${shown.map((u) => (u[2] ? `<a class="up" href="${esc(u[2])}">${esc(u[1])}</a>` : `<span class="up">${esc(u[1])}</span>`)).join(' ')}</div>`);
       }
-      const shown = await Promise.all(res.results.slice(0, LIMIT).map((r: any) => r.data()));
-      count.textContent = `${res.results.length} rules` + (res.results.length > LIMIT ? `, showing the first ${LIMIT}: narrow with the filters` : '');
-      list.replaceChildren(
-        ...shown.map((d: any) => {
-          const li = document.createElement('li');
-          const a = Object.assign(document.createElement('a'), { href: d.url, textContent: d.meta.title });
-          const tags = ['language', 'category'].map((n) => d.filters[n]).flat().join(' · ');
-          const info = Object.assign(document.createElement('small'), { textContent: ` ${tags}` });
-          li.append(a, info);
-          if (term) li.insertAdjacentHTML('beforeend', `<p>${d.excerpt}</p>`); // Pagefind escapes the excerpt
-          return li;
-        }),
-      );
+      const more = r.u.length - (4 - left);
+      return out.join('') + (more > 0 ? `<span class="badge more" title="${esc(r.u.slice(4 - left).map((u) => `${u[0]} ${u[1]}`).join(', '))}">+${more} more</span>` : '');
+    };
+    const row = (r: Rule) =>
+      `<tr><th scope="row" class="c-rule"><a href="${base}/rules/${r.i}/">${esc(r.i)}</a></th>` +
+      `<td class="c-lang" data-label="Languages">${langBadges(r)}</td>` +
+      `<td class="c-cat" data-label="Category"><span class="badge category">${esc(r.c)}</span></td>` +
+      `<td class="c-fix" data-label="Fix">${r.f === 'none' ? '<span class="rs-none" aria-label="no fix">-</span>' : `<span class="badge fix ${r.f}">${r.f}</span>`}</td>` +
+      `<td class="c-up" data-label="Upstream">${upstream(r)}</td>` +
+      `<td class="c-desc">${code(r.d)}</td></tr>`;
+
+    let token = 0;
+    function run() {
+      const t = terms();
+      const hits = rules.filter((r) => matches(r, '', t));
+      // Counts per value: the rules that match everything but this filter.
+      for (const [name] of FILTERS) {
+        const tally = new Map<string, number>();
+        for (const r of rules) if (matches(r, name, t)) for (const v of values(r, name)) tally.set(v, (tally.get(v) ?? 0) + 1);
+        for (const [v, el] of counts[name]) el.textContent = `(${tally.get(v) ?? 0})`;
+        const n = menus.find((m) => m.dataset.name === name)!.querySelector('.rs-n') as HTMLElement;
+        n.hidden = !selected[name].size;
+        n.textContent = String(selected[name].size);
+      }
+      chipBox.replaceChildren(...FILTERS.flatMap(([n]) => [...selected[n]].map((v) => chip(n, v))));
+      const active = FILTERS.reduce((s, [n]) => s + selected[n].size, 0);
+      if (active || input.value) {
+        const clear = Object.assign(document.createElement('button'), { type: 'button', className: 'rs-clear', textContent: 'Clear' });
+        clear.addEventListener('click', () => {
+          for (const [n] of FILTERS) selected[n].clear();
+          input.value = '';
+          for (const box of root.querySelectorAll<HTMLInputElement>('input[data-filter]')) box.checked = false;
+          run();
+        });
+        chipBox.append(clear);
+      }
+      toggleBadge.hidden = !active;
+      toggleBadge.textContent = String(active);
+      const next = new URLSearchParams();
+      if (input.value) next.set('q', input.value);
+      for (const [n] of FILTERS) for (const v of selected[n]) next.append(n, v);
+      history.replaceState(null, '', next.size ? `?${next}` : location.pathname);
+
+      count.textContent = `${hits.length} of ${rules.length} rules`;
+      // All rows are rendered, in chunks so the page stays responsive on a very long list.
+      const mine = ++token;
+      tbody.replaceChildren();
+      const CHUNK = 400;
+      const step = (from: number) => {
+        if (mine !== token) return;
+        tbody.insertAdjacentHTML('beforeend', hits.slice(from, from + CHUNK).map(row).join(''));
+        if (from + CHUNK < hits.length) setTimeout(() => step(from + CHUNK), 0);
+        else root.dataset.rendered = String(hits.length);
+      };
+      step(0);
     }
     let timer: number;
     input.addEventListener('input', () => {
       clearTimeout(timer);
-      timer = setTimeout(run, 150);
+      timer = setTimeout(run, 120);
     });
     run();
   } catch (e) {
-    count.textContent = 'Search is only available in the built site (scripts/site.sh build).';
+    count.textContent = 'The rule list could not be loaded.';
     console.error(e);
   }
 </script>

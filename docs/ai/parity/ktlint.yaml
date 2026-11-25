@@ -1,6 +1,20 @@
 tool: "ktlint"
 version: "1.8.0 (released 2025-11-14)"
 languages: ["kotlin"]
+rule-url: "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#{id}"
+rule-urls:
+  "annotation": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#annotation-formatting"
+  "enum-entry-name-case": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#enum-entry"
+  "filename": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#file-name"
+  "no-blank-line-in-list": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-blank-lines-in-list"
+  "no-empty-class-body": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-empty-class-bodies"
+  "no-semi": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-semicolons"
+  "no-unit-return": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#no-unit-as-return-type"
+  "spacing-between-declarations-with-annotations": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#blank-line-between-declarations-with-annotations"
+  "spacing-between-declarations-with-comments": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/#blank-line-between-declaration-with-comments"
+  "expression-operand-wrapping": "https://ktlint.github.io/ktlint/1.8.0/rules/experimental/#expression-operand-wrapping"
+  "condition-wrapping": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/"
+  "discouraged-comment-location": "https://ktlint.github.io/ktlint/1.8.0/rules/standard/"
 sources:
   - "https://pinterest.github.io/ktlint/1.8.0/rules/standard/"
   - "https://pinterest.github.io/ktlint/1.8.0/rules/code-styles/"

@@ -1,6 +1,11 @@
 tool: "ruff"
 version: "0.17.4 (released 2026-11)"
 languages: ["python"]
+rule-url: "https://docs.astral.sh/ruff/rules/{id}/"
+rule-urls:
+  "docstring-code-format": "https://docs.astral.sh/ruff/settings/#format_docstring-code-format"
+  "docstring-code-line-length": "https://docs.astral.sh/ruff/settings/#format_docstring-code-line-length"
+  "preview": "https://docs.astral.sh/ruff/preview/"
 sources:
   - "https://pypi.org/project/ruff/"
   - "https://docs.astral.sh/ruff/formatter/"

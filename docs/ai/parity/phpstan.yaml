@@ -1,6 +1,7 @@
 tool: "phpstan"
 version: "level 0 (no inventory yet: only the identifiers Sudsy reproduces are listed)"
 languages: ["php"]
+rule-url: "https://phpstan.org/error-identifiers"
 sources:
   - "https://phpstan.org/user-guide/rule-levels"
   - "https://phpstan.org/error-identifiers"

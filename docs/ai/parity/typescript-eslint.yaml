@@ -1,6 +1,7 @@
 tool: "typescript-eslint"
 version: "8.72.2"
 languages: ["js"]
+rule-url: "https://typescript-eslint.io/rules/{id}"
 sources:
   - "https://github.com/typescript-eslint/typescript-eslint/tree/v8.72.2/packages/eslint-plugin/src/rules"
   - "https://typescript-eslint.io/rules/"

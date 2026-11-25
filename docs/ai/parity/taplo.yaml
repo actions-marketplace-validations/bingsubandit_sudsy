@@ -1,6 +1,7 @@
 tool: "taplo"
 version: "0.10.0 (GitHub release latest; the version `scripts/parity.sh format taplo` downloads)"
 languages: ["toml"]
+rule-url: none
 sources:
   - "https://taplo.tamasfe.dev/configuration/formatter-options.html"
   - "https://taplo.tamasfe.dev/configuration/file.html"

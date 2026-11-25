@@ -1,0 +1,203 @@
+---
+title: Getting started
+description: Install Sudsy, check a project without changing it, fix it, configure it, and run it in your editor and in CI.
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## 1. Install
+
+<Tabs>
+
+<TabItem label="npm">
+
+```sh
+npm i -D @sudsylint/sudsy
+```
+
+Run it with `npx sudsy`.
+
+</TabItem>
+<TabItem label="PyPI">
+
+```sh
+pip install sudsy
+```
+
+Or run it without installing: `uvx sudsy`.
+
+</TabItem>
+<TabItem label="Homebrew">
+
+```sh
+brew install bingsubandit/sudsy/sudsy
+```
+
+</TabItem>
+<TabItem label="Scoop">
+
+```sh
+scoop bucket add sudsy https://github.com/bingsubandit/scoop-sudsy; scoop install sudsy
+```
+
+</TabItem>
+<TabItem label="Binary">
+
+Download the archive for your platform (Linux, macOS or Windows, x64 or arm64) from the [GitHub releases](https://github.com/bingsubandit/sudsy/releases) and put `sudsy` on your `PATH`.
+
+</TabItem>
+
+</Tabs>
+
+To try it first without installing anything: `npx @sudsylint/sudsy check src/` or `uvx sudsy check src/`.
+
+## 2. Check without changing anything
+
+The examples use two small files in `src/`:
+
+```python
+# src/a.py
+import sys
+import os
+x = os.getcwd()
+if x == None:
+    print( "hi", sys.argv )
+```
+
+```js
+// src/b.js
+function add(a, b) {
+    debugger;
+    return a+b
+}
+```
+
+```sh
+sudsy check src/
+```
+
+```text
+src/a.py:1:1: error[format]: the file is not formatted; run `sudsy format`
+src/a.py:4:4: warning[none-comparison]: compare to None with `is` or `is not`, not `==` or `!=`
+src/b.js:1:1: error[format]: the file is not formatted; run `sudsy format`
+src/b.js:2:5: warning[no-debugger]: a call that stops in a debugger was left in the code
+2 file(s) checked, 2 error(s), 2 warning(s)
+```
+
+A line reads `file:line:column: level[rule]: message`. An `error[format]` means the file is not formatted; a `warning` is a likely bug. `check` changes no files and exits 1 while there is an error.
+
+## 3. Fix it
+
+`sudsy format` rewrites the files in the project's style and changes nothing else. `sudsy fix` applies the safe fixes of the rules first, then formats. Findings whose fix could change behavior are reported and left alone.
+
+```sh
+sudsy format src/
+```
+
+```text
+2 file(s) checked, 2 reformatted, 0 unchanged
+```
+
+```python
+# src/a.py
+import sys
+import os
+
+x = os.getcwd()
+if x == None:
+    print("hi", sys.argv)
+```
+
+```js
+// src/b.js
+function add(a, b) {
+  debugger;
+  return a + b;
+}
+```
+
+The two warnings stay, because removing a `debugger` or rewriting `== None` is not a safe fix. With the files above, `sudsy fix src/` therefore writes the same result and prints the remaining warnings.
+
+## 4. Configure
+
+Without a config file Sudsy formats with its defaults and lint reports likely bugs only, never style. To write a starter file:
+
+```sh
+sudsy init
+```
+
+```yaml
+# sudsy.yaml
+extends: []   # e.g. preset:python/ruff
+```
+
+To keep the style of a tool you use today, extend its preset. For Python code formatted and linted with ruff:
+
+```sh
+sudsy init --preset python/ruff
+```
+
+```yaml
+# sudsy.yaml
+extends:
+  - preset:python/ruff
+```
+
+A rule is set to `off`, `warn` or `error` in the short form, and can sit beside the preset:
+
+```yaml
+extends:
+  - preset:python/ruff
+lint:
+  rules:
+    no-debugger: error
+```
+
+See all [rules](/sudsy/rules/), the [presets](/sudsy/reference/presets/) and the [format options](/sudsy/reference/format-options/).
+
+## 5. Editor
+
+The VS Code extension gives diagnostics, quick fixes, fix all and formatting. Install `sudsy.sudsy` from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=sudsy.sudsy), or from [Open VSX](https://open-vsx.org/extension/sudsy/sudsy) for Cursor, Windsurf and VSCodium:
+
+```sh
+code --install-extension sudsy.sudsy
+```
+
+The `.vsix` for your platform from the [GitHub releases](https://github.com/bingsubandit/sudsy/releases) is the fallback.
+
+Turn on format on save per language in `.vscode/settings.json`:
+
+```json
+{
+  "[python]": { "editor.defaultFormatter": "sudsy.sudsy" },
+  "[javascript]": { "editor.defaultFormatter": "sudsy.sudsy" },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.sudsy": "explicit" }
+}
+```
+
+`sudsy lsp` is a language server over stdio, so any editor with an LSP client can use it. See [editors and CI](https://github.com/bingsubandit/sudsy/blob/main/docs/editors-and-ci.md).
+
+## 6. CI
+
+`sudsy check` runs the format check and the linter together and exits 1 on an unformatted file or a rule error. With `--format github` the findings appear as annotations on the pull request.
+
+```yaml
+# .github/workflows/sudsy.yml
+name: sudsy
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npx @sudsylint/sudsy check --format github
+```
+
+## 7. Next
+
+- [Command line](/sudsy/cli/): every command and the JSON output
+- [Rules](/sudsy/rules/): search and filter every rule
+- [Languages](/sudsy/languages/): what each language supports and how it compares
+- [Compared tools](/sudsy/compare/): rule by rule against ESLint, ruff, hadolint and the others

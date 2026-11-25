@@ -1,6 +1,7 @@
 tool: "eslint-plugin-vue"
 version: "10.12.1"
 languages: ["vue"]
+rule-url: "https://eslint.vuejs.org/rules/{id}.html"
 sources:
   - "https://eslint.vuejs.org/rules/"
 scope: "eslint-plugin-vue's template rules (the `vue/` rules that read the `<template>` tree); with the script rules on the shared JS scope layer (`require-default-prop`, `require-prop-types`, `no-dupe-keys`); the other `<script>` rules are `planned`"

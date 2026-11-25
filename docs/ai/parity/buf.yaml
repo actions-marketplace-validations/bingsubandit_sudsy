@@ -1,6 +1,18 @@
 tool: "buf"
 version: "1.75.0 (GitHub release; the version `scripts/parity.sh format buf` downloads)"
 languages: ["protobuf"]
+rule-url: "https://buf.build/docs/lint/rules/#{id-lower}"
+rule-urls:
+  "RPC_REQUEST_STANDARD_NAME": "https://buf.build/docs/lint/rules/#rpc_request_response"
+  "RPC_RESPONSE_STANDARD_NAME": "https://buf.build/docs/lint/rules/#rpc_request_response"
+  "PACKAGE_SAME_CSHARP_NAMESPACE": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "PACKAGE_SAME_GO_PACKAGE": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "PACKAGE_SAME_JAVA_MULTIPLE_FILES": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "PACKAGE_SAME_JAVA_PACKAGE": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "PACKAGE_SAME_PHP_NAMESPACE": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "PACKAGE_SAME_RUBY_PACKAGE": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "PACKAGE_SAME_SWIFT_PREFIX": "https://buf.build/docs/lint/rules/#package_same_file_option"
+  "RPC_REQUEST_RESPONSE_UNIQUE": "https://buf.build/docs/lint/rules/#rpc_request_response"
 sources:
   - "https://buf.build/docs/reference/cli/buf/format/"
   - "tests/parity/buf (differential numbers, docs/ai/development/parity.md)"

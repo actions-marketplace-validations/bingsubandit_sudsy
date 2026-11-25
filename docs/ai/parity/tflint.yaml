@@ -1,6 +1,7 @@
 tool: "tflint"
 version: "0.17.0 (tflint-ruleset-terraform)"
 languages: ["hcl"]
+rule-url: "https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/{id}.md"
 sources:
   - "https://github.com/terraform-linters/tflint-ruleset-terraform/tree/v0.17.0/docs/rules"
 scope: "The rules of tflint-ruleset-terraform, which need no provider schema (the provider rulesets, such as tflint-ruleset-aws, check resource arguments against the provider and are out of scope). Sudsy sees one file at a time, so a rule that compares the declarations of a module's files is listed as deferred and the others check the file they run on."

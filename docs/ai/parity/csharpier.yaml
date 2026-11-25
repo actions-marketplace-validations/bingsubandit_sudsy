@@ -1,6 +1,7 @@
 tool: "csharpier"
 version: "1.3.0 (NuGet latest; also the version pinned by the repo's dotnet-tools.json and used for the differential test)"
 languages: ["csharp", "xml"]
+rule-url: none
 sources:
   - "https://api.nuget.org/v3-flatcontainer/csharpier/index.json"
   - "https://csharpier.com/docs/Configuration"

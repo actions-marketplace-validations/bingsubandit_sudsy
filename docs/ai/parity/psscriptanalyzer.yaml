@@ -1,6 +1,8 @@
 tool: "psscriptanalyzer"
 version: "1.25.0 (PowerShell Gallery; the version `scripts/parity.sh format invoke-formatter` saves)"
 languages: ["powershell"]
+rule-url: "https://learn.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/{id-lower}"
+rule-url-strip: "PS"
 sources:
   - "https://learn.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/readme"
   - "https://github.com/PowerShell/PSScriptAnalyzer/blob/main/Engine/Settings/CodeFormatting.psd1"

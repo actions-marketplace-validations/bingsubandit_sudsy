@@ -1,6 +1,7 @@
 tool: "google-java-format"
 version: "2.0.0 (GitHub release latest; the native binary `scripts/parity.sh format google-java-format` downloads, no JVM needed)"
 languages: ["java"]
+rule-url: none
 sources:
   - "https://github.com/google/google-java-format"
   - "https://google.github.io/styleguide/javaguide.html"

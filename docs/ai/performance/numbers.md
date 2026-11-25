@@ -182,6 +182,8 @@ Slot size: 240-266 GB before pruning the outputs of earlier worktrees, 56-70 GB 
 ## Documentation site (`scripts/site.sh scale-test`, [development/site.md](../development/site.md))
 Astro 7.4.7 + Starlight 0.42.9, same machine, Node 24, one run, 10 000 synthetic rules (copies of the 101 real ones with unique ids): 14 891 pages (10 000 rule pages at a median 27 KB, 4 887 upstream-id redirect stubs of about 0.3 KB, fixed pages), full build 310 s, output 336 MB apparent size (about 33 KB per rule including its stubs and search index; GitHub Pages allows 1 GB, the workflow guard is 800 MB), Pagefind index 35 MB. Upstream-id stubs are plain files in `public/` (as Starlight pages they were 19 KB each: 21 986 pages, 690 MB). The real 101 rules: 9.5 MB, 9 s with `npm ci` cached.
 
+Rule list (`scripts/site.sh list-bench`, headless Chromium, same machine, one run, `astro preview` without compression): the real 833 rules: `/rules/` and its assets 489 KB decoded (`rules-index.json` 281 KB, 51 KB gzipped), all rows rendered in 0.65 s, first filter 73-99 ms, search term 53 ms. 10 000 synthetic rules (`scale-test`: build 187 s, 22 109 pages, 408 MB, Pagefind index 11.8 MB): 3.6 MB decoded, all rows in 4.7 s, first filter 0.4-2.4 s, search term 1.0 s.
+
 ## Not measured repeatably
 - LSP completion/hover/format request latency in `bench.sh`.
 - Config load and discovery on a large repository.

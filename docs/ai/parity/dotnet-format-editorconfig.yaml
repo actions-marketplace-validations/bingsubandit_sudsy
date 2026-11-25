@@ -1,6 +1,11 @@
 tool: "dotnet-format-editorconfig"
 version: ".NET SDK 10 docs (formatting options pages; IDE index page updated 2026-07)"
 languages: ["csharp"]
+rule-url: "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/{id-lower}"
+rule-urls:
+  "charset": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/formatting-rules"
+  "dotnet_sort_system_directives_first": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/dotnet-formatting-options"
+  "csharp_space_* non-default values": "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/csharp-formatting-options"
 sources:
   - "https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/csharp-formatting-options"
   - "https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0055"

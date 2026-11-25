@@ -2,13 +2,13 @@
 
 ## VS Code
 
-The extension is not on the VS Code Marketplace. Install the `.vsix` for your platform from the [GitHub release](https://github.com/bingsubandit/sudsy/releases):
+Install `sudsy.sudsy` from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=sudsy.sudsy), or from [Open VSX](https://open-vsx.org/extension/sudsy/sudsy) for Cursor, Windsurf and VSCodium:
 
 ```sh
-code --install-extension sudsy-<platform>-<version>.vsix
+code --install-extension sudsy.sudsy
 ```
 
-Platforms: `linux-x64`, `linux-arm64`, `darwin-x64`, `darwin-arm64`, `win32-x64`, `win32-arm64`. The package bundles `sudsy` and the C# worker. It starts `sudsy lsp` and adds nothing else. It covers all supported languages.
+The fallback is the `.vsix` for your platform from the [GitHub release](https://github.com/bingsubandit/sudsy/releases) (`code --install-extension sudsy-<platform>-<version>.vsix`). Platforms: `linux-x64`, `linux-arm64`, `darwin-x64`, `darwin-arm64`, `win32-x64`, `win32-arm64`. The package bundles `sudsy` and the C# worker. It starts `sudsy lsp` and adds nothing else. It covers all supported languages.
 
 Enable format on save per language, and fix on save:
 

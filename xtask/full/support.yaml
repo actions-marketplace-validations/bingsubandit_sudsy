@@ -4,6 +4,7 @@
 # the groups of tests/parity/stability that stand for the format leg (`scripts/parity.sh stability <group>`). `ids` are the
 # language ids of the row (the first is its page slug, every language must be in one row), `speed` the
 # language names of its rows in bench/speed.json.
+# `requires` is one sentence the site shows on the language page.
 # `popular: true` (a widely used secondary tool, weight 1) and `blocked: <reason>` (the leg waits on a user decision) feed the priority table of docs/ai/parity/queue.md.
 - language: JavaScript / TypeScript
   ids: [js]
@@ -74,7 +75,7 @@
 - language: PHP
   ids: [php]
   speed: [PHP]
-  format: [{tool: php-cs-fixer, name: PHP-CS-Fixer}]
+  format: [{tool: php-cs-fixer, name: PHP-CS-Fixer, note: "measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains)"}]
   lint: [{tool: phpstan, name: PHPStan, blocked: "needs the symbol index (docs/ai/design/symbol-index.md); it is built as normal work and does not hold new languages (user decision)"}]
 - language: Java
   ids: [java]
@@ -98,6 +99,7 @@
   lint: [{tool: sqlfluff, name: sqlfluff}]
 - language: C#
   ids: [csharp]
+  requires: Needs the [.NET 10 runtime](https://dotnet.microsoft.com/download/dotnet/10.0); every other language works without it.
   speed: [C#, C# (.editorconfig)]
   format: [{tool: csharpier, name: CSharpier, groups: [real-world]}]
   lint: [{tool: stylecop, name: StyleCop}, {tool: roslynator, name: Roslynator}]

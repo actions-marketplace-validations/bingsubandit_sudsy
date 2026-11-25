@@ -103,11 +103,45 @@ fn every_rule_and_option_a_status_names_exists() {
 
 #[test]
 fn an_entry_may_name_several_rules() {
-    let text = "tool: t\nlanguages: [js]\nentries:\n  a: rule x, y\n  b: rule z\n  c: planned\n";
+    let text = "tool: t\nlanguages: [js]\nrule-url: none\nentries:\n  a: rule x, y\n  b: rule z\n  c: planned\n";
     let c = catalog::parse(text).unwrap();
     let ids = |i: usize| c.entries[i].rules().collect::<Vec<_>>();
     assert_eq!(
         (ids(0), ids(1), ids(2)),
         (vec!["x", "y"], vec!["z"], vec![])
+    );
+}
+
+#[test]
+fn rule_pages_come_from_the_template_and_the_overrides() {
+    let head = "tool: t\nlanguages: [js]\n";
+    let body =
+        "entries:\n  Lint/Syntax: rule x\n  opt: option js.format.line_width\n  b: planned\n";
+    let url = |urls: &str| {
+        let c = catalog::parse(&format!("{head}{urls}{body}")).unwrap();
+        c.entries.iter().map(|e| e.url.clone()).collect::<Vec<_>>()
+    };
+    let t = "rule-url: \"https://x/{group}/{id-flat}/{name}/{id-lower}\"\n";
+    assert_eq!(
+        url(t),
+        [
+            "https://x/lint/lintsyntax/Syntax/lint/syntax",
+            "",
+            "https://x//b/b/b"
+        ]
+    );
+    let o = "rule-urls:\n  b: https://y/b\n";
+    assert_eq!(url(&format!("{t}{o}"))[2], "https://y/b");
+    assert!(url("rule-url: none\n").iter().all(String::is_empty));
+    assert!(catalog::parse(&format!("{head}rule-url: \"{{nope}}\"\n{body}")).is_err());
+    assert!(
+        catalog::parse(&format!(
+            "{head}rule-url: none\nrule-urls:\n  zz: u\n{body}"
+        ))
+        .is_err()
+    );
+    assert!(
+        catalog::parse(&format!("{head}{body}")).is_err(),
+        "a catalog names its rule-url"
     );
 }

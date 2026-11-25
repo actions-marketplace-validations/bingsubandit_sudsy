@@ -50,6 +50,7 @@ pub(crate) fn generate(
             "status": m.status,
             "format": tool(&row.format, &m.format),
             "lint": tool(&row.lint, &m.lint),
+            "requires": row.requires,
             "rules": rule_count(&row.ids),
             "presets": presets.iter().filter(|p| row.ids.iter().any(|i| p.starts_with(&format!("{i}/"))) || preset_in(p, &row.ids)).collect::<Vec<_>>(),
             "speed": crate::speed::rows_of(&row.speed)?,
@@ -61,13 +62,13 @@ pub(crate) fn generate(
         let target = shares.get(&c.tool).copied();
         let head = json!({
             "tool": c.tool, "version": catalog_version(&c.tool)?, "languages": c.languages,
-            "target": target,
+            "target": target, "rule_url": c.rule_url != "none",
         })
         .to_string();
         let entries: Vec<String> = c
             .entries
             .iter()
-            .map(|e| json!([e.id, e.coverage, e.sudsy, e.gap]).to_string())
+            .map(|e| json!([e.id, e.coverage, e.sudsy, e.gap, e.url]).to_string())
             .collect();
         tools.push(format!(
             "{},\"entries\":[\n{}\n]}}",

@@ -1,6 +1,7 @@
 tool: "stylelint-scss"
 version: "7.4.0"
 languages: ["scss"]
+rule-url: "https://github.com/stylelint-scss/stylelint-scss/blob/v7.4.0/src/rules/{name}/README.md"
 sources:
   - "https://github.com/stylelint-scss/stylelint-scss/tree/v7.4.0/src/rules"
   - "https://github.com/stylelint-scss/stylelint-scss#list-of-rules"
