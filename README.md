@@ -11,6 +11,10 @@ Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
 <a href="https://www.npmjs.com/package/@sudsylint/sudsy"><img alt="npm" src="https://img.shields.io/npm/v/@sudsylint/sudsy"></a>
 <a href="https://pypi.org/project/sudsy/"><img alt="PyPI" src="https://img.shields.io/pypi/v/sudsy"></a>
+<a href="https://github.com/bingsubandit/homebrew-sudsy"><img alt="Homebrew" src="https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbingsubandit%2Fhomebrew-sudsy%2FHEAD%2FFormula%2Fsudsy.rb&amp;search=version%20%22(%5B%5E%22%5D%2B)%22&amp;replace=v%241&amp;label=homebrew"></a>
+<a href="https://github.com/bingsubandit/scoop-sudsy"><img alt="Scoop" src="https://img.shields.io/scoop/v/sudsy?bucket=https://github.com/bingsubandit/scoop-sudsy"></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=sudsy.sudsy"><img alt="VS Code Marketplace" src="https://vsmarketplacebadges.dev/version-short/sudsy.sudsy.svg"></a>
+<a href="https://open-vsx.org/extension/sudsy/sudsy"><img alt="Open VSX" src="https://img.shields.io/open-vsx/v/sudsy/sudsy"></a>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
