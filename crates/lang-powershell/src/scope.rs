@@ -22,8 +22,6 @@ static LANG: ScopeLang = ScopeLang::new(include_str!("../scope.rows"))
     ])
     .expansion_escape("`");
 
-pub(crate) use missing_arguments::Command;
-
 pub static FAMILIES: &[Family] = &[
     Family {
         name: "scope",

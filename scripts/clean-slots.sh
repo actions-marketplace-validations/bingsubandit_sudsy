@@ -17,7 +17,11 @@ for t in "${slots[@]}"; do
   [ -d "$t" ] || continue
   # Nested target dirs too: the sample plugin's (sample-host/) and bench's (bench/<side>/).
   name=$([ $mode = all ] && echo debug || echo incremental)
-  for d in $(find "$t" -maxdepth 4 -type d -name "$name"); do echo "removing $d"; rm -rf "$d"; done
+  # Only Cargo profile directories (they hold `.fingerprint`), not another `debug` (the npm package of a parity install).
+  for d in $(find "$t" -maxdepth 4 -type d -name "$name"); do
+    [ -d "$d/.fingerprint" ] || [ -d "$(dirname "$d")/.fingerprint" ] || continue
+    echo "removing $d"; rm -rf "$d"
+  done
 done
 df -h "${slots[0]}" | tail -1
 

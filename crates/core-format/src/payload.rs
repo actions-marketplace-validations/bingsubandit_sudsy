@@ -102,7 +102,7 @@ pub(crate) fn layout(
         if printed.contains('\n') {
             printed = print_at(cx, whole, place.width.saturating_sub(2));
         }
-        let lead = cx.leading_comments_doc(&start);
+        let lead = cx.leading_comments_doc_before_directive(&start);
         Ok(doc::concat(vec![
             lead,
             doc::line_start(relay::escape_lines(&printed, place)),

@@ -8,7 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
-| C / C++ | format clang-format | 4 | 69.2% | 15.8 | 1047 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 | 12 | 5.25 | - |
+| C / C++ | format clang-format | 4 | 69.4% | 15.6 | 1038 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300, `comment-line-indent-or-join` 299 | 12 | 5.21 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
 
@@ -119,7 +119,7 @@ Lint: target 88.6% (53149 of 59973, 6824 missed, measured on 7514c1f3); rules by
 
 ## clang-format
 
-Format: unclassified 0 of 2042 differing files (0%).
+Format: unclassified 0 of 2033 differing files (0%).
 1. `brace-own-line-in-source` (361 files): a `{` on its own line in the source that clang-format attaches (a member function body, `extern "C"`, a lambda): the construct is not one of the `brace_wrapping` words Fix: check the `attach` kind sets for the member function in a class, the linkage specification and lines the deep parse leaves opaque
 2. `pointer-align` (328 files): `*` of a pointer declarator the tree does not show as one (a class head, a function type `void (*f)(int *)`, the arguments of `sizeof(void *)`, a declarator after a comma): clang-format puts it next to the name or the type (PointerAlignment), Sudsy keeps the source spacing Fix: pointer_alignment as [space] rows by parent kind (Declarator, Parameter, Cast); `a * b` stays an operator
 3. `reference-align` (300 files): `&` and `&&` of a reference declarator, the same as pointer-align Fix: the same rows as pointer-align for `&` and `&&`
@@ -212,11 +212,11 @@ Lint: target 88.8% (1392 of 1567, 175 missed, measured on 7514c1f3); rules by mi
 
 ## gersemi
 
-Format: unclassified 0 of 3404 differing files (0%).
-1. `set-layout` (1483 files): gersemi keeps the name on the line of `set(`, `list(` and the like and breaks a list of more than a few values; Sudsy breaks only what does not fit and never keeps the first argument on the command line
-2. `keyword-sections` (1475 files): gersemi lays the arguments of a known command out in keyword sections (a keyword and its values on one line, the values of `COMMAND`, `PROPERTIES` and the like one level in); Sudsy puts every argument on its own line
-3. `condition-layout` (340 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators (`AND`, `OR`, `NOT`, groups); Sudsy treats it as a list of arguments
-4. `section-indent` (106 files): gersemi indents the values of a section one level further than the keyword; Sudsy has no sections
+Format: unclassified 0 of 859 differing files (0%).
+1. `keyword-sections` (630 files): gersemi's definitions of a known command hold what CMake's help only says in prose or not at all (a keyword of a form such as `FILE_SET`, `IN ITEMS` or `HINTS ENV x`, which form words keep their first argument on the line since `list(APPEND NAME` does and `file(TO_CMAKE_PATH`, `file(RELATIVE_PATH` and `math(EXPR` do not, commands that keep more than four plain values on one line); the table generated from the help has none of it, so the layout chooses by its generic rules
+2. `condition-layout` (169 files): gersemi lays the condition of `if`, `elseif` and `while` out by its operators and nested groups (a group that does not fit breaks inside its parentheses, `NOT` and `DEFINED` pairs stay together); Sudsy breaks before `AND` and `OR` only and keeps a nested group as one unit
+3. `blank-before-closer-comment` (30 files): gersemi keeps a blank line in front of the comment that precedes a closer (`endif()`); Sudsy puts the blank line between the comment and the closer
+4. `unknown-command-layout` (30 files): a command the table does not know (a user function or macro) is kept as written and moved with its indent; gersemi re-lays its arguments in a few shapes (comment on the last line, continuation indent)
 
 ## google-java-format
 

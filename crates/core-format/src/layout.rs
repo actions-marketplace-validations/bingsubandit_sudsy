@@ -175,6 +175,8 @@ impl Row {
 pub(crate) struct File {
     /// The block words of the language's commands ([`core_syntax::block_pair`]).
     pub(crate) blocks: &'static [core_syntax::block_pair::Block],
+    /// The command signatures of the language, sorted by lower-case name.
+    pub(crate) signatures: &'static [core_syntax::signature::Signature],
     /// A file of one line.
     pub(crate) one_line: bool,
     /// A file with a token of one of these kinds (text outside the language's tags).
@@ -467,6 +469,7 @@ impl Layout {
                 node,
                 &shapes::Commands {
                     blocks: file.blocks,
+                    signatures: file.signatures,
                     cases: case_rows,
                     max_blank: max_blank(cx),
                 },
@@ -633,7 +636,7 @@ impl Layout {
                 } else {
                     format!("{words} {comment}")
                 };
-                let lead = first.map_or(Doc::Nil, |f| cx.leading_comments_doc(&f));
+                let lead = first.map_or(Doc::Nil, |f| cx.leading_comments_doc_before_directive(&f));
                 Ok(doc::concat(vec![lead, doc::line_start(&head), rest]))
             }
             "items" => statements(cx, &node.children().collect::<Vec<_>>()),
@@ -720,7 +723,7 @@ fn line_start(
     };
     let from = usize::from(first.text_range().start() - node.text_range().start());
     doc::concat(vec![
-        cx.leading_comments_doc(&first),
+        cx.leading_comments_doc_before_directive(&first),
         doc::line_start(tight(text[from..].trim())),
     ])
 }

@@ -4,14 +4,15 @@
 //! one per line with the closing parenthesis alone; any other command is kept as written: its
 //! lines move with the command's indent (never left), the parenthesis stands alone when the
 //! arguments span lines. A blank line stays up to the option's limit, but none stands right
-//! after a block opener or arm or before an arm or closer; comments in front of an arm or
+//! after a block opener or before a closer; comments in front of an arm or
 //! closer stay at the depth of the block body.
 //!
 //! concept: flat-command-list
 //! what: A flat list of name(arguments) commands at their block depth: known commands fit on a line or break one argument per line, the others stay as written.
 //! tools: gersemi indent, gersemi unknown commands
-//! reads: rules:layout, path:block_pair::Block, option:known_commands
+//! reads: rules:layout, path:block_pair::Block, path:signature::Signature
 
+use super::keyword_sections::keyword_call;
 use super::{
     ListLayout, ListStyle, Rendered, TrailingComma, delimited_list_around, gap, leading_info,
 };
@@ -22,15 +23,16 @@ use crate::doc::{self, Doc, Outdent};
 use crate::error::FormatError;
 use crate::ignore::{self, IgnoreMark};
 use core_syntax::block_pair::{Block, Pairing, Role, Step};
+use core_syntax::signature::{Signature, lookup};
 use core_syntax::{SyntaxElement, SyntaxNode, SyntaxToken};
-use std::collections::HashMap;
 
 type R = Result<Doc, FormatError>;
 
-/// What the language says: the kind of a command node, the option with the names of the commands
-/// it knows, its block words and its case rows.
+/// What the language says: the signatures of the commands it knows, its block words and its case
+/// rows.
 pub struct Commands<'a> {
     pub blocks: &'static [Block],
+    pub signatures: &'static [Signature],
     pub cases: &'a Cases,
     /// Blank lines kept between two commands.
     pub max_blank: usize,
@@ -48,13 +50,10 @@ fn significant(cx: &FormatCtx<'_>, node: &SyntaxNode) -> Vec<SyntaxToken> {
         .collect()
 }
 
-/// The known commands by lower-case name, with their spelling.
-type Known<'a> = HashMap<String, &'a str>;
-
-/// The name as written: a known command in its spelling, any other by the case rows.
-fn written(spec: &Commands<'_>, known: &Known<'_>, name: &SyntaxToken) -> String {
-    match known.get(&name.text().to_ascii_lowercase()) {
-        Some(spelling) => (*spelling).to_string(),
+/// The name as written: a known command in the spelling of its row, any other by the case rows.
+fn written(spec: &Commands<'_>, sig: Option<&Signature>, name: &SyntaxToken) -> String {
+    match sig {
+        Some(row) => row.name.to_string(),
         None => {
             (spec.cases.fixed(name.kind(), name.text())).unwrap_or_else(|| name.text().to_string())
         }
@@ -95,13 +94,26 @@ fn known_style() -> ListStyle {
 }
 
 /// A command whose arguments the language lays out.
-fn laid_out(cx: &FormatCtx<'_>, name: String, node: &SyntaxNode, p: &Parts) -> R {
-    let list = delimited_list_around(cx, node, &p.args, &p.open, &p.close, &known_style())?;
+fn laid_out(
+    cx: &FormatCtx<'_>,
+    name: String,
+    node: &SyntaxNode,
+    p: &Parts,
+    sig: &'static Signature,
+) -> R {
+    let (list, trailing) = match keyword_call(cx, &p.args, &p.open, &p.close, sig)? {
+        Some(list) => (list, cx.trailing_comments_doc(&p.close)),
+        None => (
+            delimited_list_around(cx, node, &p.args, &p.open, &p.close, &known_style())?,
+            doc::nil(),
+        ),
+    };
     Ok(doc::concat(vec![
         cx.leading_comments_doc(&p.name),
         doc::text(name),
         cx.trailing_comments_doc(&p.name),
         list,
+        trailing,
     ]))
 }
 
@@ -204,12 +216,6 @@ pub fn command_list(cx: &FormatCtx<'_>, node: &SyntaxNode, spec: &Commands<'_>) 
     let after: Vec<u32> = std::iter::once(0)
         .chain(steps.iter().map(|s| s.after()))
         .collect();
-    let known: Known<'_> = {
-        cx.options
-            .strings(core_config::opt::KNOWN_COMMANDS)
-            .map(|s| (s.to_ascii_lowercase(), s))
-            .collect()
-    };
     let mut parts_out: Vec<Doc> = Vec::new();
     let mut prev: Option<(Rendered, Step)> = None;
     let mut i = 0;
@@ -223,7 +229,7 @@ pub fn command_list(cx: &FormatCtx<'_>, node: &SyntaxNode, spec: &Commands<'_>) 
                 Ok::<_, FormatError>(leading_info(cx, &items[n])?.1)
             })? - 1;
             let last = cx.last_token(&items[j]).ok_or_else(no_tokens)?;
-            (j, cx.verbatim_range(&start, &last), true, step.depth)
+            (j, cx.verbatim_region(&start, &last), true, step.depth)
         } else if mark == Some(IgnoreMark::Ignore) {
             (i, cx.verbatim_node(&items[i]), true, step.depth)
         } else {
@@ -234,9 +240,10 @@ pub fn command_list(cx: &FormatCtx<'_>, node: &SyntaxNode, spec: &Commands<'_>) 
             }
             let body = match parts(cx, &items[i]) {
                 Some(p) => {
-                    let name = written(spec, &known, &p.name);
-                    if known.contains_key(&p.name.text().to_ascii_lowercase()) {
-                        laid_out(cx, name, &items[i], &p)?
+                    let sig = lookup(spec.signatures, p.name.text());
+                    let name = written(spec, sig, &p.name);
+                    if let Some(sig) = sig {
+                        laid_out(cx, name, &items[i], &p, sig)?
                     } else {
                         kept(cx, name, &items[i], &p, step.column(size))
                     }
@@ -254,10 +261,8 @@ pub fn command_list(cx: &FormatCtx<'_>, node: &SyntaxNode, spec: &Commands<'_>) 
             };
             (i, doc, false, if held { comment_depth } else { step.depth })
         };
-        let edge = prev
-            .as_ref()
-            .is_some_and(|(_, p)| matches!(p.role, Role::Open | Role::Arm))
-            || matches!(step.role, Role::Arm | Role::Close);
+        let edge =
+            prev.as_ref().is_some_and(|(_, p)| p.role == Role::Open) || step.role == Role::Close;
         let item = Rendered {
             first: items[i].clone(),
             last: items[j].clone(),

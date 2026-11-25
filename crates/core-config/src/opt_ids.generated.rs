@@ -140,9 +140,9 @@ pub const KEEP_BLANK_LINES_AT_END_OF_BLOCKS: OptId = OptId(137);
 pub const KEEP_LEADING_BLANK_LINES: OptId = OptId(138);
 pub const KEEP_TOGETHER_KINDS: OptId = OptId(139);
 pub const KEYWORD_CASE: OptId = OptId(140);
-pub const KNOWN_COMMANDS: OptId = OptId(141);
-pub const LABEL_BLANK_LINE: OptId = OptId(142);
-pub const LABEL_INDENT: OptId = OptId(143);
+pub const LABEL_BLANK_LINE: OptId = OptId(141);
+pub const LABEL_INDENT: OptId = OptId(142);
+pub const LEADING_ARGUMENT_COMMANDS: OptId = OptId(143);
 pub const LINE_WIDTH: OptId = OptId(144);
 pub const LITERAL_CASE: OptId = OptId(145);
 pub const MAGIC_TRAILING_COMMA: OptId = OptId(146);
@@ -370,9 +370,9 @@ pub static NAMES: [&str; 227] = [
     "keep_leading_blank_lines",
     "keep_together_kinds",
     "keyword_case",
-    "known_commands",
     "label_blank_line",
     "label_indent",
+    "leading_argument_commands",
     "line_width",
     "literal_case",
     "magic_trailing_comma",

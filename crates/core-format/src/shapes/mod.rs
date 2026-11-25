@@ -25,6 +25,7 @@ mod for_header;
 mod heritage;
 mod inline_list;
 mod key_value;
+mod keyword_sections;
 mod list;
 mod maybe_parenthesize;
 mod omit_parens;
@@ -530,7 +531,7 @@ pub(crate) fn render_slots(
                 first: slots[i].node.clone(),
                 last: slots[j].node.clone(),
                 blank_before,
-                doc: cx.verbatim_range(&tok, &last),
+                doc: cx.verbatim_region(&tok, &last),
                 verbatim: true,
                 sep: slots[j].sep.clone(),
                 hole: false,

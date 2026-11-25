@@ -1007,3 +1007,20 @@ fn delete_brackets_sign_casts_attribute_parameters_and_comments_after_brackets()
     // a block comment written against `(` stays there at a line end
     assert!(fmt("void f() { if (/*c*/\n a) {} }\n").contains("if (/*c*/\n"));
 }
+
+#[test]
+fn a_region_under_clang_format_off_keeps_the_comments_and_indent_after_the_marker() {
+    let src = "// clang-format off\n    /// doc\n    template<typename T>\n    int  x;\n// clang-format on\nint y;\n";
+    assert_eq!(fmt(src), src);
+}
+
+#[test]
+fn a_comment_at_column_zero_above_a_directive_stays_there() {
+    let src = "void f() {\n  g();\n// a\n#if X\n  h();\n#endif\n  // b\n#if Y\n#endif\n}\n";
+    assert_eq!(fmt(src), src);
+    // the same above a directive with spaces after the `#`
+    assert_eq!(
+        fmt("void f() {\n// a\n#  if X\n  h();\n#endif\n}\n"),
+        "void f() {\n// a\n#if X\n  h();\n#endif\n}\n"
+    );
+}

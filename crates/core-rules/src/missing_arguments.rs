@@ -1,5 +1,5 @@
 //! The `missing-arguments` family: a call of a known command that leaves every one of its
-//! mandatory parameters unbound. The language passes its table of [`Command`]s to [`build`] (a
+//! mandatory parameters unbound. The language passes its table of [`Signature`]s to [`build`] (a
 //! command's positional parameters in order and its mandatory ones). Params of the rule: `name-token` (the kind of the `-name` token of an argument),
 //! `pipe` (the kind of the token that puts a command behind another) and `splat` (the prefix of a
 //! splatted argument). The message has `{name}`.
@@ -11,20 +11,12 @@
 //! concept: missing-arguments
 //! what: A call of a known command that binds none of its mandatory parameters, from a table of command signatures.
 //! tools: PSScriptAnalyzer PSUseCmdletCorrectly
-//! reads: path:missing_arguments::Command
+//! reads: path:signature::Signature
 
 use crate::tree::is_code;
 use crate::{Params, Rule, RuleContext, RuleMeta};
+use core_syntax::signature::Signature;
 use core_syntax::{SyntaxElement, SyntaxNode};
-
-/// A command and the parameters a call binds by name or position.
-pub struct Command {
-    pub name: &'static str,
-    /// Its positional parameters, in order.
-    pub positional: &'static [&'static str],
-    /// The parameters it requires.
-    pub mandatory: &'static [&'static str],
-}
 
 struct Missing {
     meta: &'static RuleMeta,
@@ -32,12 +24,12 @@ struct Missing {
     name_token: String,
     pipe: String,
     splat: String,
-    commands: &'static [Command],
+    commands: &'static [Signature],
 }
 
 /// The rule for the commands of the table; the family's params are the message and the tokens.
 pub fn build(
-    table: &'static [Command],
+    table: &'static [Signature],
     meta: &'static RuleMeta,
     mut p: Params,
 ) -> Result<Box<dyn Rule>, String> {

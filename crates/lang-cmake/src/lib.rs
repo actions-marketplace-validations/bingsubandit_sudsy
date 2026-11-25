@@ -14,4 +14,5 @@ pub use blocks::BLOCKS;
 pub use parser::parse;
 
 include!("schema.generated.rs");
+include!("signatures.generated.rs");
 include!("provider.generated.rs");

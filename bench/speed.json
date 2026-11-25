@@ -1,7 +1,7 @@
 {
  "runner": "Linux aarch64, 8 cores",
  "runs": 5,
- "commit": "45fb74ef",
+ "commit": "5c8c9fa7",
  "rows": [
   {
    "id": "prettier/JSON/format",
@@ -487,6 +487,42 @@
    "other": {
     "s": 264.551,
     "mb": 377
+   }
+  },
+  {
+   "id": "revive/Go/lint",
+   "language": "Go",
+   "task": "Lint",
+   "tool": "revive",
+   "version": "1.17.1",
+   "corpus": "the Go corpus (Go, Kubernetes, Hugo, Prometheus)",
+   "files": 21480,
+   "bytes": 241264089,
+   "sudsy": {
+    "s": 18.071,
+    "mb": 2643
+   },
+   "other": {
+    "s": 14.469,
+    "mb": 4115
+   }
+  },
+  {
+   "id": "cmake-lint/CMake/lint",
+   "language": "CMake",
+   "task": "Lint",
+   "tool": "cmake-lint",
+   "version": "0.6.13",
+   "corpus": "the CMake corpus (LLVM, CMake, Qt, VTK, OpenCV and others)",
+   "files": 9066,
+   "bytes": 22756981,
+   "sudsy": {
+    "s": 1.46,
+    "mb": 755
+   },
+   "other": {
+    "s": 67.731,
+    "mb": 42
    }
   },
   {

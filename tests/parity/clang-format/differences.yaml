@@ -99,10 +99,10 @@ sets:
   - "spacing Star|Ident in Binary (e.g. `* Token`): +9 files, 491 equal after it"
 unclassified: 0
 ratchet:
-  llvm: 334
-  fmt: 45
+  llvm: 336
+  fmt: 46
   range-v3: 333
-  folly: 1679
+  folly: 1685
   linux: 2150
   sqlite: 52
   google: 2
