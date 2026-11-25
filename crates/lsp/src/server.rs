@@ -187,6 +187,7 @@ impl Server {
             return Ok(());
         }
         self.edited_at = None;
+        self.workspace.refresh_index();
         self.workspace.bump_revision();
         if self.support.diagnostic_refresh {
             self.call::<WorkspaceDiagnosticRefresh>(())?;
@@ -237,6 +238,10 @@ impl Server {
             DocumentDiagnosticRequest::METHOD => {
                 if self.workspace.is_deep() {
                     self.workspace.load_project();
+                }
+                // Sets inputs: only while no request holds the database.
+                if !self.analysis.is_busy() {
+                    self.workspace.refresh_index();
                 }
                 return self.queue(
                     req,
@@ -371,6 +376,13 @@ impl Server {
                 if config_changed {
                     self.reload_config()?;
                 }
+                let mut manifests = false;
+                for path in p.changes.iter().filter_map(|c| path_of(&c.uri)) {
+                    manifests |= self.workspace.manifest_changed(&path);
+                }
+                if manifests {
+                    self.edited_at = Some(Instant::now());
+                }
             }
             CancelRequest::METHOD => {
                 let p: CancelParams = serde_json::from_value(note.params)?;
@@ -405,9 +417,15 @@ impl Server {
             kind: Some(WatchKind::all()),
         };
         let options = DidChangeWatchedFilesRegistrationOptions {
-            watchers: ["**/*.yaml", "**/*.yml", "**/.editorconfig", "**/*.wasm"]
-                .map(watcher)
-                .into(),
+            watchers: [
+                "**/*.yaml",
+                "**/*.yml",
+                "**/.editorconfig",
+                "**/*.wasm",
+                "**/composer.json",
+            ]
+            .map(watcher)
+            .into(),
         };
         self.call::<RegisterCapability>(RegistrationParams {
             registrations: vec![Registration {

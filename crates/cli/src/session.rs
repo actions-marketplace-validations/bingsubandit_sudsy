@@ -13,6 +13,8 @@ pub struct Session {
     pub db: Database,
     /// Absolute paths, in the order they are reported.
     pub paths: Vec<PathBuf>,
+    /// The folders and files named on the command line (the working directory when none), absolute.
+    roots: Vec<PathBuf>,
 }
 
 impl Session {
@@ -43,7 +45,16 @@ impl Session {
             .collect();
         #[cfg(feature = "pack-mode")]
         let paths = crate::missing::skip(&db, &project, paths);
-        Ok(Session { project, db, paths })
+        let roots = roots
+            .iter()
+            .map(|r| std::path::absolute(r).unwrap_or_else(|_| r.clone()))
+            .collect();
+        Ok(Session {
+            project,
+            db,
+            paths,
+            roots,
+        })
     }
 
     /// Reads every file into the database and runs `warm` on it, in parallel; the results of the
@@ -71,7 +82,7 @@ impl Session {
             .iter()
             .filter_map(|f| f.as_ref().ok().copied())
             .collect();
-        open_projects(&mut self.db, &files);
+        open_projects(&mut self.db, &files, &self.roots);
         par_map(&self.db, &files, |db, file| warm(db, *file));
         loaded
     }

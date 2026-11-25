@@ -3,6 +3,7 @@
 mod common;
 mod csharp;
 mod directory;
+mod index_rules;
 #[cfg(feature = "pack-mode")]
 mod languages;
 mod responsiveness;

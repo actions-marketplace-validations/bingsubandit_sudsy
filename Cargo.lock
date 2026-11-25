@@ -2293,6 +2293,7 @@ dependencies = [
  "crossbeam-channel",
  "lang-csharp",
  "lang-json",
+ "lang-protobuf",
  "lang-yaml",
  "languages",
  "lsp-server",

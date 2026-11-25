@@ -4,7 +4,9 @@
 
 use crate::position::apply_change;
 use core_config::{ConfigError, EditorConfig};
-use core_incremental::{Database, Db, File, Siblings};
+use core_incremental::{
+    Database, Db, File, Siblings, is_manifest, manifest_changed, open_projects, reads_index,
+};
 use languages::{Project, installed::Checker};
 use lsp_types::TextDocumentContentChangeEvent;
 use provider_api::LanguageProvider;
@@ -36,6 +38,11 @@ pub struct Workspace {
     /// The files of a directory rule's unit that are not open, read from disk and kept while
     /// their modification time and size stay the same.
     pub(crate) siblings: Arc<Siblings>,
+    /// Set once an active rule reads the symbol index: the projects are opened and follow the
+    /// files (`refresh_index`). Until then the workspace opens no project.
+    index_open: bool,
+    /// The files that make up the projects changed since the last `refresh_index`.
+    index_dirty: bool,
 }
 
 impl Workspace {
@@ -52,6 +59,8 @@ impl Workspace {
             docs: HashMap::new(),
             background: None,
             siblings: Arc::default(),
+            index_open: false,
+            index_dirty: false,
         };
         workspace.db.prestart();
         let error = workspace.reload_config();
@@ -90,6 +99,7 @@ impl Workspace {
             }
         };
         self.background = None;
+        self.index_dirty = true;
         for (path, doc) in &self.docs {
             self.db
                 .set_file_editorconfig(doc.file, EditorConfig::for_file(path));
@@ -173,6 +183,7 @@ impl Workspace {
             Arc::make_mut(background).remove(&path);
         }
         self.docs.insert(path, Doc { file, skipped });
+        self.index_dirty = true;
         !skipped
     }
 
@@ -205,12 +216,14 @@ impl Workspace {
             );
             self.docs
                 .insert(path.to_path_buf(), Doc { file: new, skipped });
+            self.index_dirty = true;
         } else {
             self.db.set_file_text(file, version as u64, text);
         }
     }
 
     pub fn close(&mut self, path: &Path) {
+        self.index_dirty = true;
         if self.docs.remove(path).is_some_and(|d| !d.skipped)
             && let Some(file) = self.background.is_some().then(|| self.read(path)).flatten()
             && let Some(background) = &mut self.background
@@ -223,6 +236,54 @@ impl Workspace {
     /// queries of other handles: call it while none runs.
     pub fn bump_revision(&mut self) {
         self.db.bump_workspace_revision();
+    }
+
+    /// Opens the projects the index rules read, or keeps them in step with the documents. Opens
+    /// none while no active rule of an open document reads the index. Sets inputs: call it while
+    /// no request runs.
+    pub fn refresh_index(&mut self) {
+        if !self.index_dirty {
+            return;
+        }
+        if !self.index_open {
+            let wanted = self
+                .docs
+                .values()
+                .filter(|d| !d.skipped)
+                .any(|d| reads_index(&self.db, d.file));
+            if !wanted {
+                return;
+            }
+            self.index_open = true;
+        }
+        self.index_dirty = false;
+        self.load_project();
+        let mut files: Vec<File> = (self.docs.values())
+            .filter(|d| !d.skipped)
+            .map(|d| d.file)
+            .collect();
+        if let Some(background) = &self.background {
+            files.extend(background.values().copied());
+        }
+        open_projects(&mut self.db, &files, std::slice::from_ref(&self.root));
+    }
+
+    /// Whether the workspace opened its projects for the index rules.
+    pub fn index_open(&self) -> bool {
+        self.index_open
+    }
+
+    /// A watched file changed: when it is a package manifest, the projects find their packages
+    /// again. True when it was one.
+    pub fn manifest_changed(&mut self, path: &Path) -> bool {
+        if !is_manifest(&self.db, path) {
+            return false;
+        }
+        if self.index_open {
+            manifest_changed(&mut self.db);
+            self.index_dirty = true;
+        }
+        true
     }
 
     /// Does the config ask for `analysis: deep`?

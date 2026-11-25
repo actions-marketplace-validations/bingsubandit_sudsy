@@ -4,10 +4,14 @@
 //! the index must answer `Unknown` for, and the memory the symbols of all files keep (a count of
 //! their payload and the resident set before and after).
 //!
+//! `symbol-bench rules DIR LANG RULE[,RULE...]`: the rules that read the index, on every file of DIR (a
+//! project: its manifest in DIR): the first lint of all files and the lint after an edit.
+//!
 //! `symbol-bench index DIR LANG [FILES]`: the index of a project of FILES files of DIR (default
 //! 6,000, spread over the whole set): the first answer, then the time from an edit to the answer
 //! after a body edit and after a signature edit, with the memory of the whole index.
 mod index;
+mod rules;
 
 #[cfg(feature = "mimalloc")]
 #[global_allocator]
@@ -165,6 +169,13 @@ pub(crate) fn walk(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
 fn main() -> Result<()> {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
     let indexed = args.first().is_some_and(|a| a == "index");
+    if args.first().is_some_and(|a| a == "rules") {
+        args.remove(0);
+        let [dir, lang, rules] = args.as_slice() else {
+            return Err(anyhow!("symbol-bench rules DIR LANG RULE[,RULE...]"));
+        };
+        return rules::run(Path::new(dir), lang, rules);
+    }
     if indexed {
         args.remove(0);
     }

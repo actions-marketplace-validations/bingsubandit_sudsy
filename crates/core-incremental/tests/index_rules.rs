@@ -80,7 +80,8 @@ impl World {
 }
 
 fn open(w: &mut World, files: &[File]) {
-    open_projects(&mut w.db, files);
+    let roots = [w.dir.path().to_path_buf()];
+    open_projects(&mut w.db, files, &roots);
 }
 
 const HEAD: &str = "syntax = \"proto3\";\npackage p;\n";
