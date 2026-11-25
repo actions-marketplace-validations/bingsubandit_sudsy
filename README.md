@@ -110,15 +110,15 @@ All languages: <!-- generated:languages -->C#, C/C++, CMake, CSS, Dockerfile, Ed
 |---|---:|---|---:|
 | JavaScript / TypeScript | 33 | Prettier | [17](https://prettier.io/docs/options) |
 | CSS / SCSS / Less | 7 | Prettier | [5](https://prettier.io/docs/options) |
-| HTML | 17 | Prettier | [9](https://prettier.io/docs/options) |
-| YAML | 14 | Prettier | [7](https://prettier.io/docs/options) |
+| HTML | 17 | Prettier | [8](https://prettier.io/docs/options) |
+| YAML | 14 | Prettier | [6](https://prettier.io/docs/options) |
 | GraphQL | 6 | Prettier | [5](https://prettier.io/docs/options) |
-| Python | 13 | ruff format | [9](https://docs.astral.sh/ruff/settings/#format) |
-| Shell | 8 | shfmt | [6](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd) |
-| Java | 23 | google-java-format | [1](https://github.com/google/google-java-format#using-the-formatter) |
+| Python | 13 | ruff format | [10](https://docs.astral.sh/ruff/settings/#format) |
+| Shell | 8 | shfmt | [7](https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd) |
+| Java | 23 | google-java-format | [8](https://github.com/google/google-java-format#from-the-command-line) |
 | Protobuf | 4 | buf format | [0](https://buf.build/docs/format/style) |
 | Terraform (HCL) | 3 | terraform fmt | [0](https://developer.hashicorp.com/terraform/cli/commands/fmt) |
-| C# | 93 | CSharpier | [5](https://csharpier.com/docs/Options) |
+| C# | 93 | CSharpier | [4](https://csharpier.com/docs/Configuration) |
 <!-- /generated -->
 
 - **Your own rules:** [YAML patterns](docs/rules.md#pattern-rules) with fixes, and sandboxed [Wasm plugins](docs/rules.md#wasm-plugins).

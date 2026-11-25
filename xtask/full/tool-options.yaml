@@ -1,14 +1,16 @@
 # Style options of the reference formatters, for the README "Highly configurable" table (xtask/full/src/beyond.rs).
-# `language` is the Sudsy language id; `options` counts every documented style option of the tool for that
-# language, the shared ones (line width, indent) included, as the Sudsy count does. `source` is where to check it.
+# `language` is the Sudsy language id; `options` counts every documented setting or flag of the tool that changes
+# how that language's code is written, the shared ones (line width, indent, line ending) and experimental or preview
+# ones included, as the Sudsy count does. Not counted: modes (dry run, check, range, imports only), file selection,
+# deprecated settings, pragmas, and settings without effect on the language. `source` is where to check it.
 - {language: js, name: JavaScript / TypeScript, tool: Prettier, options: 17, source: "https://prettier.io/docs/options"}
 - {language: css, name: CSS / SCSS / Less, tool: Prettier, options: 5, source: "https://prettier.io/docs/options"}
-- {language: html, name: HTML, tool: Prettier, options: 9, source: "https://prettier.io/docs/options"}
-- {language: yaml, name: YAML, tool: Prettier, options: 7, source: "https://prettier.io/docs/options"}
+- {language: html, name: HTML, tool: Prettier, options: 8, source: "https://prettier.io/docs/options"}
+- {language: yaml, name: YAML, tool: Prettier, options: 6, source: "https://prettier.io/docs/options"}
 - {language: graphql, name: GraphQL, tool: Prettier, options: 5, source: "https://prettier.io/docs/options"}
-- {language: python, name: Python, tool: ruff format, options: 9, source: "https://docs.astral.sh/ruff/settings/#format"}
-- {language: shell, name: Shell, tool: shfmt, options: 6, source: "https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd"}
-- {language: java, name: Java, tool: google-java-format, options: 1, source: "https://github.com/google/google-java-format#using-the-formatter"}
+- {language: python, name: Python, tool: ruff format, options: 10, source: "https://docs.astral.sh/ruff/settings/#format"}
+- {language: shell, name: Shell, tool: shfmt, options: 7, source: "https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd"}
+- {language: java, name: Java, tool: google-java-format, options: 8, source: "https://github.com/google/google-java-format#from-the-command-line"}
 - {language: protobuf, name: Protobuf, tool: buf format, options: 0, source: "https://buf.build/docs/format/style"}
 - {language: hcl, name: Terraform (HCL), tool: terraform fmt, options: 0, source: "https://developer.hashicorp.com/terraform/cli/commands/fmt"}
-- {language: csharp, name: C#, tool: CSharpier, options: 5, source: "https://csharpier.com/docs/Options"}
+- {language: csharp, name: C#, tool: CSharpier, options: 4, source: "https://csharpier.com/docs/Configuration"}
