@@ -27,7 +27,7 @@ New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x
 |---|---|---|---|---|---|---|---|
 | Batchfile | 0.51~ | 0 (paid) | 6.09~ | - | - | lint: lint Blinter | estimate: pick only to measure it |
 | Jupyter Notebook | 0.57~ | 0 (paid) | 2.78~ | - | - | lint: lint ruff check on cells | JSON file with Python cells: the Python leg does the work; evidence in docs/ai/design/jupyter.md; estimate: pick only to measure it |
-| Gradle | 0.31~ | ~1.2 | 2.10~ | 1.47~ | 2.35~ | both: lint none found + format npm-groovy-lint | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; estimate: pick only to measure it |
+| Gradle | 0.31~ | 1.2 | 2.10~ | 1.47~ | 2.35~ | both: lint none found + format Spotless (greclipse) | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; evidence in docs/ai/design/gradle.md; estimate: pick only to measure it |
 | Kubernetes manifests | 0.41~ | ~0.2 | 2.33~ | - | - | lint: lint kubeconform | estimate: pick only to measure it |
 | Procfile | 0.26~ | ~1.5 | 1.59~ | 1.59~ | 2.17~ | both: lint none found + format none found | estimate: pick only to measure it |
 | Ansible | 0.28~ | ~0.2 | 2.07~ | 0.36~ | 1.40~ | lint: lint ansible-lint | YAML dialect (playbooks, roles, tasks, collections); evidence in docs/ai/design/ansible.md; estimate: pick only to measure it |
