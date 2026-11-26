@@ -265,6 +265,20 @@ The status and the numbers of every language are in the generated table "Languag
   - `@A()` keeps its parentheses.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format google-java-format`, `scripts/parity.sh coverage checkstyle`.
 
+## Batchfile
+
+<!-- generated:measured-batchfile -->
+- **Measured:** Ready.
+  - Format, stable: 100% of the files format stably, by the rules of the formatter (719 of 719 files).
+  - Lint, Blinter: 85% of its findings also reported (15,595 of 18,324 findings).
+<!-- /generated -->
+
+- Files: `*.bat` and `*.cmd`.
+- The formatter changes blanks, line ends and the case of commands and keywords. No reference formatter exists: the format column is the stable share and the agreement on a held-out half of the corpus ([ai/design/batchfile.md](ai/design/batchfile.md)).
+- **Lint:** 33 rules, all off by default; `preset:batch/blinter` turns them on with the settings that match Blinter (coverage in the measured block above, [ai/design/batchfile.md](ai/design/batchfile.md)).
+- **Options:** `indent_conversion`, `continued_indent`, `space_after_colons`, `indent_size`, `max_blank_lines`.
+- **Differences:** blanks that are part of a value (`set x=y `, `echo x `) stay.
+
 ## GitHub Actions
 
 <!-- generated:measured-github-actions -->
@@ -490,20 +504,6 @@ The status and the numbers of every language are in the generated table "Languag
 - **Differences:** Sudsy keeps empty statements (`;`). buf drops them.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format buf`, `scripts/parity.sh coverage buf`.
 
-## Batchfile
-
-<!-- generated:measured-batchfile -->
-- **Measured:** In progress.
-  - Format, stable: 0% of the files format stably, by the rules of the formatter (0 of 547 files).
-  - Lint, Blinter: 85% of its findings also reported (15,595 of 18,324 findings).
-<!-- /generated -->
-
-- Files: `*.bat` and `*.cmd`.
-- The formatter changes blanks, line ends and the case of commands and keywords. No reference formatter exists: the format column is the stable share and the agreement on a held-out half of the corpus ([ai/design/batchfile.md](ai/design/batchfile.md)).
-- **Lint:** 33 rules, all off by default; `preset:batch/blinter` turns them on with the settings that match Blinter (coverage in the measured block above, [ai/design/batchfile.md](ai/design/batchfile.md)).
-- **Options:** `indent_conversion`, `continued_indent`, `space_after_colons`, `indent_size`, `max_blank_lines`.
-- **Differences:** blanks that are part of a value (`set x=y `, `echo x `) stay.
-
 ## C / C++
 
 <!-- generated:measured-c-c -->
@@ -541,7 +541,7 @@ The status and the numbers of every language are in the generated table "Languag
 
 <!-- generated:measured-gradle -->
 - **Measured:** In progress.
-  - Format, stable: 0% of the files format stably, by the rules of the formatter (39 of 6,481 files).
+  - Format, stable: 99% of the files format stably, by the rules of the formatter (6,442 of 6,481 files).
   - Lint: 30 rules, no reference tool to compare with.
 <!-- /generated -->
 

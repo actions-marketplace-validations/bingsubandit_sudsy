@@ -537,6 +537,21 @@ mod tests {
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/support")
     }
 
+    /// The stability ratchet counts the stable files, so a group of the repository holds a positive count
+    /// no larger than its `target-files` (a count of the changing files, or a stale total, reads as 0%).
+    #[test]
+    fn stability_ratchet_counts_stable_files() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let r = ratchets(&root, STABILITY).unwrap();
+        for (g, total) in &r.target_files {
+            let stable = r.ratchet.get(g).copied().unwrap_or(0);
+            assert!(
+                0 < stable && stable <= *total,
+                "{g}: {stable} stable of {total}"
+            );
+        }
+    }
+
     fn row(popularity: &str) -> Row {
         let text = format!("- language: X\n  popularity: {popularity}\n");
         rows(&text).unwrap().remove(0)

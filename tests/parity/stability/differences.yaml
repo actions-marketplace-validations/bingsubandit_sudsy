@@ -1,6 +1,6 @@
 ratchet:
-  batchfile: 0
-  gradle: 39
+  batchfile: 719
+  gradle: 6442
   dockerfile: 554
   makefile: 1008
   github-actions: 393
@@ -8,7 +8,7 @@ ratchet:
   editorconfig: 3
   gitignore: 118
 target-files:
-  batchfile: 547
+  batchfile: 719
   gradle: 6481
   dockerfile: 563
   makefile: 1021
