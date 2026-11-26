@@ -33,6 +33,7 @@ comment_space_exempt
 comment_trim_lines
 conditional_indent
 conditional_layout
+continued_block_words
 ctor_own_line_kinds
 curly_style
 embed_mode
