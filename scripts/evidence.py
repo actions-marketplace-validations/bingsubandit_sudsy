@@ -8,6 +8,7 @@ Usage: evidence.py <language> <sudsy-binary> <work-dir> [<tool-binary> [<cause> 
   DIRS      [(corpus folder below tests/conformance/corpus, regex of file names)]
   PROJECT   {repository folder: project} for repositories that are one project; the folder name otherwise
   SKIP      optional: regex of corpus paths that are not the language (left out)
+  KEEP      optional: function of the path below the corpus folder, false for a file that is not the language (left out)
   CAP       optional: at most this many files per project (the first by path), so that no project outweighs the others
   SEED      seed of the split (random.Random over the sorted project names; the first half decides, the other is held out)
   KLASSES   {class: text} of causes of difference that a comparison may leave out, in the order they are left out (cumulative)
@@ -38,7 +39,7 @@ def files(mod):
     out, taken = [], Counter()
     for d, names in mod.DIRS:
         for f in sorted((CORPUS / d).rglob("*")):
-            if f.is_file() and names.match(f.name) and not (hasattr(mod, "SKIP") and mod.SKIP.search(str(f))):
+            if f.is_file() and names.match(f.name) and not (hasattr(mod, "SKIP") and mod.SKIP.search(str(f))) and (not hasattr(mod, "KEEP") or mod.KEEP(f.relative_to(CORPUS / d))):
                 rel = f.relative_to(CORPUS / d)
                 project = mod.PROJECT.get(rel.parts[0], rel.parts[0])
                 taken[project] += 1

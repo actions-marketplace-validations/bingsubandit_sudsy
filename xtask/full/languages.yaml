@@ -100,9 +100,10 @@
   lint: {tool: "gnatcheck", gain: ~0.4, cost: {index: true, est: true}, why: "only tool found; native; semantic rules; some rules need semantics"}
 - language: Ansible
   so: 9.4
-  parser: ~0.2 # reuse: YAML parser (semantic layer only)
-  note: "YAML with playbook semantics"
-  lint: {tool: "ansible-lint", gain: ~0.7, cost: {index: true, est: true}, why: "only tool found; Python runtime; rules read module metadata; some rules need semantics"}
+  parser: ~0.2 # reuse: YAML parser, a dialect chosen by path kind; docs/ai/design/ansible.md
+  note: "YAML dialect (playbooks, roles, tasks, collections); evidence in docs/ai/design/ansible.md"
+  format: {tool: "Prettier (YAML)", gain: ~0.1, cost: {parts: 1, est: true}, why: "Prettier 89.9% equal on the corpus with yaml/prettier-compat (held out 94.4%); ansible-lint --fix is the second reference (73% with options); needs an ansible-lint preset and the dialect"}
+  lint: {tool: "ansible-lint", gain: ~0.7, cost: {parts: 4, est: true}, why: "default rule set; yamllint-family rules 17% of the target (9.7% covered today); the rest is pattern rules over module tables and path kinds; fqcn of collections, args and syntax-check need installed collections and stay out"}
 - language: ANTLR
   gh: 24939
   parser: ~1.5 # hand-written: only grammars found have 1 star

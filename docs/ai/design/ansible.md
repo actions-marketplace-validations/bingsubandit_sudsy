@@ -1,0 +1,83 @@
+# Design: Ansible evidence
+
+Measurements before any Ansible product code (method: [../development/no-reference-tool.md](../development/no-reference-tool.md), [../architecture/adding-a-language.md](../architecture/adding-a-language.md)). Scripts: `scripts/evidence_ansible*.py` (facts for `scripts/evidence.py` and `scripts/evidence_lint.py`, rule verdicts, format and lint baselines, environment and test-tree comparisons). ansible-lint 26.11.1 (ansible-core 2.21.6, yamllint 1.38.0, ruamel.yaml 0.19.1) in two venvs under the slot: `ansible-min` (no collections) and `ansible-full` (the `ansible` 14.6.0 package: 48 collection namespaces, 8,996 module files, 124 MB of source); Prettier 3.10.1; Sudsy release build. Looked up 2026-11-26.
+
+## Corpus
+57 projects (collections, roles, playbook repositories) pinned by commit in `tests/conformance/fetch-ansible-corpus.sh`, chosen before any result (the known ones: community and Red Hat collections, geerlingguy and other role authors, kubespray, awx, ansible, workshops, debops, kolla-ansible, ceph-ansible, openstack-ansible, algo, CIS hardening roles). Every `*.yml` and `*.yaml` (19,624 files, 168 MB); `.github`, `changelogs`, `node_modules`, `vendor` are left out. The 4 repository names that two owners share needed the folder `<owner>__<repo>` (`TARBALL_OWNER=1` in `tarball-corpus.sh`).
+
+Recognition is ansible-lint's own: a list of path globs, first match wins (`DEFAULT_KINDS` in `ansiblelint/config.py`, copied into `evidence_ansible.py`): `tasks/**` tasks, `handlers/*`, `{vars,defaults,group_vars,host_vars}/**` vars, `playbooks/*` and `*playbook*` and `molecule/*/*` playbook, `meta/main`, `meta/runtime`, `meta/argument_specs`, `galaxy.yml`, `requirements`, `inventory/**`, the rest plain `yaml` (only yamllint rules run). Of 19,611 files (after leaving the vendored trees out): tasks 6,540, plain yaml 5,114, reno release notes 2,801, vars 2,104, playbook 703, test-meta 691, meta 564, handlers 427, inventory 228, templates 124, argument specs 121, other 194.
+- Ambiguity by content (a YAML load: list of plays, list of tasks, mapping): of the 11,195 files with an Ansible kind, 503 (4.5%) load as another shape (empty 186, a plain list 134, invalid YAML 32, a playbook where `tasks/` or `handlers/` stands 64, a mapping where a playbook is expected 48, others 39). 2,738 plain-`yaml` files (14% of the corpus) are playbooks or task lists by content (ansible 539, freeipa 512, debops 441, cisco.ios 416 files): ansible-lint runs no Ansible rule on them either. Recognition by path kind is therefore the same as the tool's, and a content check would find 14% more files than the reference lints.
+- Corpus used for the lint and format legs: the files of Ansible kinds (playbook, tasks, handlers, vars, meta, test-meta, argument specs, runtime), at most 60 per project (first by path): 2,631 files (22 MB) of 57 projects. Split by project with seed 20261203: 29 deciding, 28 held out projects. 45% of the files and 57% of the findings are in test trees (collection `tests/integration/targets`, `molecule`); projects that run ansible-lint often exclude them, ansible-lint does not by default. `evidence_ansible_tests.py` prints the split per rule (for example name[missing]: 404 outside, 1,769 in tests).
+
+## Tools
+| Tool | Evidence | Verdict |
+|---|---|---|
+| ansible-lint 26.11.1 (GPL-3.0-or-later, Python) | 5.3M PyPI downloads a month, 3,940 stars, pushed 2026-11-25; 2,420 `.pre-commit-config.yaml` files and 8,112 workflow files mention it, 12,496 `.ansible-lint` files (GitHub code search); Red Hat project, VS Code extension `ansible/vscode-ansible` 494 stars (MIT) | primary for lint (default rule set); its `yaml[*]` rules are yamllint |
+| yamllint 1.38.0 (GPL-3.0) | 28.4M downloads, 3,496 stars; runs inside ansible-lint with `ansiblelint/data/.yamllint` (width 160, braces max 1 space, truthy allowed `true`/`false`, octal forbidden, comments indentation off) | already a reference of the YAML leg; the Ansible config is a preset |
+| Prettier (MIT) | 24,704 `.pre-commit-config.yaml` files mention it; the yamllint file of ansible-lint is written to agree with it (comments, braces) | primary for format |
+| `ansible-lint --fix` (the `yaml` write set) | ruamel.yaml rewrite: double quotes, `---` first, indented sequences, one space before a comment, width 160, `yes`/`no` to `true`/`false`; keeps the quotes of a flow sequence; `--fix` with no list also runs the rule transforms (fqcn, jinja spacing, name casing ...), not measured | second format reference (`--fix=yaml`) |
+| ansible-compat 26.11.1 (MIT), ansible-core (GPL-3.0-or-later), `ansible` package (GPL-3.0-or-later) | 6.1M, 18.5M, 8.9M downloads | the runtime of ansible-lint; the collections are its data |
+| molecule, ansible-navigator, ansible-language-server | molecule 4.2k stars; language server last push 2024-10 | not references |
+
+Offline: `--offline` skips installing requirements and the collection and role downloads, and the run worked with no network in both venvs (57 projects, no failure). Without collections the rules that read module data find nothing (see Target); `ansible-playbook --syntax-check` runs for every playbook (`syntax-check[*]`); a one-file run takes 2.6 s.
+
+## Target
+ansible-lint, no profile and no config (the default rule set; `jinja[spacing]` is on the tool's default warn list and is reported), over the 2,631 files with the files' project as working directory (roles and includes resolve), offline, in the full venv: 13,962 findings of 54 rule codes in 1,358 files, no tool failure. Without the collections: 12,882 findings. 3 to 4 findings per frequent rule were read over distinct projects (the 34 most frequent codes, 99.4% of the findings, about 120 findings); the rest by name and message (`*` in `evidence_ansible_rules.py`).
+
+| Class | Rules | Findings | Share | Weighted by project | Held-out findings |
+|---|---|---|---|---|---|
+| keep: right, decidable from the file and small data | 39 | 9,314 | 66.7% | 63.3% | 2,995 |
+| taste: true as stated, a convention (name[casing], var-naming[no-role-prefix], jinja[spacing], key-order, ignore-errors, name[template]) | 6 | 3,440 | 24.6% | 19.7% | 765 |
+| bug: the tool's own failure (`internal-error`: the syntax check exits 1) | 1 | 60 | 0.4% | 2.1% | 60 |
+| env: needs collections or the runtime | 8 | 1,148 | 8.2% | 14.8% | 382 |
+
+Env rules: `fqcn[action]` (645, the FQCN of a module of an installed collection), `args[module]` (348, argument specs: required, choices, types), `syntax-check[specific]` (133, roles and keywords through `ansible-playbook`; the finding quotes the absolute search path of the roles, so it differs per machine) and `[unknown-module]` (75 without collections, 1 with), `fqcn[canonical]`, `deprecated-module`, `meta-runtime[unsupported-version]` and `warning[outdated-tag]` (dates and renames). What the installed collections change: 1,250 of the findings differ between the two runs (9.0%; `fqcn[action]` +645, `args[module]` +343, `fqcn[action-core]` +78, `syntax-check[unknown-module]` -71, `no-free-form` +26): the collection-dependent part is 8% of the findings and 15% weighted by project. Facts found in the reading: 4 findings flag `ansible.builtin.yum` (a redirect that the tool treats as short); a test fixture of ansible-navigator is in the corpus (`name[play]`); `syntax-check[specific]` and `internal-error` are the only rules that run `ansible-playbook`.
+
+The target is keep and taste: 12,754 findings of 45 rules in 1,136 files (needs the line 7,935, the file 4,193, other files 626). Keep alone: 9,314 of 39 rules. Taste is the user's decision: dropping it removes name[casing] and var-naming[no-role-prefix], the 2nd and 4th rules.
+
+Module data (small): the `ansible.builtin` names with their redirects (71 modules), the free-form and command families, `risky-file-permissions` modules, `command-instead-of-module` pairs, reserved variable names: a few hundred names from ansible-core (GPL-3.0-or-later facts, to be generated and checked). Large and outside the target: argument specs of the 8,996 module files of the community package (about 124 MB of source, DOCUMENTATION blocks GPL-3.0-or-later or Apache/MIT per collection; names and types are facts, the licence of a generated table is unchecked) and the FQCN table of 94 collections. The ansible-lint schemas (`ansiblelint/schemas`, 364 KB JSON, licence not checked) cover `schema[meta]`, `schema[tasks]` (48 findings).
+
+## Baseline (measured with the release build; the rules are not written)
+Lint: Sudsy YAML lint with the rules that mirror ansible-lint's yamllint configuration (`max-line-length` 160, `ambiguous-booleans`, `no-octal-values`, `no-trailing-whitespace`, `comment-space`) over the same files, a finding covered when the mapped rule reports the same file and line. Covered: 1,243 of the target's 12,754 findings (9.7%; held out 12.7%): truthy 99.0%, line-length 99.4%, octal 100%, trailing spaces 100%, comments 100%. Sudsy reports more lines in these rules than ansible-lint (650 against 614 for truthy, 560 against 477 for line length); the cause was not examined. No Sudsy rule exists for yamllint's `indentation` (592), `brackets` spacing (243), `colons` (72), `empty-lines` (12) and `new-line-at-end-of-file` (31), nor for any other ansible-lint rule. Sudsy lints the 2,631 files in 0.42 s; ansible-lint takes 168 s wall (6 jobs of 8 cores, 465 s CPU).
+
+Format (`yaml/prettier-compat`, Sudsy default and an option set `sudsya` of width 160, indented sequences, double quotes, `---` always, comment spacing 1, bracket spacing; byte-equal files, deciding, held out):
+
+| Pair | Files | Deciding | Held out |
+|---|---|---|---|
+| Sudsy prettier-compat = Prettier | 2,365 of 2,631 (89.9%) | 1,162 | 1,203 |
+| Sudsy default = Prettier | 67.2% | | |
+| Sudsy `sudsya` = `ansible-lint --fix=yaml` | 1,921 (73.0%) | 68.1% | 78.3% |
+| Prettier = `ansible-lint --fix=yaml` | 62.9% | | |
+| files `--fix` changes | 36.5% | | |
+
+Second format: 0 files change in all three Sudsy variants. Prettier agreement is above the bar already (held out 94.4%); the remaining 10% are blank-line and comment placement cases of the YAML leg (96.3% once blank lines are set aside). The two references disagree on style (`---`, quotes, sequence indent, width), so the Ansible format is a preset choice, not a gap. Against `--fix`, setting aside in turn quotes, comment spacing, `---`, blank lines and indent raises the cover from 73.0% to 83.2% (held out 84.1%); those are ruamel quirks (flow sequence quotes kept, `#-` comment spacing, trailing space kept in one case), and the `yes`/`no` rewrite is the unsafe fix of `ambiguous-booleans`, not a layout.
+
+## Plan to 85% (lint; the full table is `scripts/evidence_lint.py ansible <work-dir>`)
+Rules in order of findings, cumulative share of the target (raw / weighted by project / held out): 1 fqcn[action-core] 27.3 / 28.4 / 31.7; 2 name[casing] 45.0 / 38.3 / 39.5; 3 name[missing] 62.1 / 51.4 / 63.0; 4 var-naming[no-role-prefix] 67.0 / 59.9 / 71.9; 5 yaml[truthy] (covered) 71.8 / 62.5 / 74.9; 6 yaml[indentation] 76.4 / 64.2 / 75.6; 7 no-changed-when 80.3 / 67.0 / 77.4; 8 yaml[line-length] (covered) 84.0 / 78.4 / 84.9; 9 no-free-form 86.7 / 80.9 / 88.7; 10 yaml[brackets] 88.6 / 82.5 / 88.7; 11 risky-file-permissions 90.5 / 83.7 / 91.1; 12 jinja[spacing] 92.4 / 85.0 / 93.7. The 85% is reached with 9 rules, 7 of them new (raw 86.7%, held out 88.7%; weighted by project it needs rule 12). Of the target: yamllint family 17.3% (9.7% covered today, 7.6% needs the new indentation, brackets, colons, empty-lines and end-of-file rules); module-table and path-kind rules (fqcn[action-core], name[missing], name[casing], var-naming, no-changed-when, no-free-form, risky-file-permissions, key-order, role-name, ...) about 74%; Jinja (`jinja[spacing]`, `name[template]`, `jinja[invalid]`) 3.2%; schemas 0.4%. Estimated, not built: each rule is assumed to equal the tool on the lines it reports. Format needs only the preset and the dialect.
+
+## Parts
+Exist: the YAML grammar, parser and formatter with the options above; the yamllint-mirroring rules and the `yaml/yamllint` preset; dialects of YAML (`config_base`, GitHub Actions: path selection, base rules, own rules, 995 hand-written lines); pattern rules (kind, regex, `has`, `inside`, constraints with `in-option`), families and `token:`; embedded code rows (`embed`: shell in a Dockerfile `RUN`, the Jupyter plan for regions); `template-actions` (delimited actions in markup, used by HTML, JSON and SQL); the shell provider for `risky-shell-pipe` and `command-instead-of-shell`.
+
+Missing (shared crates; the language holds only tables and options):
+- A1: a dialect chosen by path kind (the `DEFAULT_KINDS` list as `lang.yaml` rows with a second user: GitHub Actions path selection) and the kind visible to rules.
+- A2: tasks as a rule context: the module key of a task (the first key not in the play and task keyword set), `block`/`rescue`/`always` nesting, plays against tasks. Decision stays in shared Rust, the keyword set is a table.
+- A3: constraint tables: a captured name `in` a table file (builtin modules, free-form modules, command pairs); the table format has to serve a second language (`word-table` exists).
+- A4: yamllint rules `indentation`, `brackets`/`braces` spacing, `colons`, `empty-lines`, `new-line-at-end-of-file`, as shared YAML lint rules (the formatter knows the layout).
+- A5: role name from the path for `var-naming[no-role-prefix]` and `role-name[path]` (a path fact; one more option of a dialect).
+- A6 (optional, 3.2%): a Jinja token scanner over `{{ }}` and `{% %}` inside scalars for `jinja[spacing]` and `name[template]` (position of the first action is a regex); `template-actions` is the base. A JSON schema check for `schema[*]` (0.4%) waits.
+- A7: ansible-lint preset (`yaml/ansible-lint`: width 160, the yamllint config above) and a format preset for `--fix`.
+
+## Options for Jinja2 (the user decides; no parser is needed for 85%)
+- A (recommended now): no Jinja parser. `name[template]` is a regex; `jinja[spacing]` waits behind `template-actions` and a scanner (A6), so the first landing reaches 85% raw and held out without it.
+- B: the existing `template-actions` plus a hand-written Jinja lexer in a shared crate when `jinja[spacing]` is wanted (the weighted 85%). Hand-written mechanism in a shared crate, as the HARD RULE asks.
+- C: tree-sitter `dbt-labs/tree-sitter-jinja2` (34 stars, pushed 2026-11; the Jinja row of `languages.yaml`) for a later Jinja language leg; Ansible expressions are single-line and a parse of them adds nothing to this target. Not measured here (speed, error recovery, binary size).
+Rejected: calling `jinja2` or ansible-lint (Python runtime, the very cost the native rules avoid).
+
+## Performance
+Sudsy YAML lint 0.42 s and `format --check` 0.42 s over the 2,631 files (22 MB), one process. ansible-lint 168 s wall for the same files and 465 s CPU. A pattern-rule family with tables adds work per task node only (the module key lookup); not measured, no code exists. Memory not measured.
+
+## Cost
+`languages.yaml`: parser 0.2 (YAML exists, a dialect on it), format 1 missing part (preset and dialect), lint 4 missing parts (A1+A5, A2, A3, A4); no `index` (nothing needs a semantic index). Estimates kept (`est: true`).
+
+## Not verified
+Rule behaviour beyond the findings read; whether each rule can equal ansible-lint on its lines (the tool's fixes, `# noqa` and `skip_list` comments, per-file skips); an ansible-lint run with `--profile` levels (the default set only); the licence of module-data tables and ansible-lint's schemas; the corpus effect of excluding test trees (shares given, target not recomputed); `ansible-lint` formatter use inside the VS Code extension; Windows paths; the speed of the real rules.

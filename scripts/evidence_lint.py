@@ -5,6 +5,7 @@ Usage: evidence_lint.py <language> <work-dir> [<n-sample> [<rule>|top:<n>:<k>]]
 
 `<language>` names a module `scripts/evidence_<language>.py` (the same one scripts/evidence.py reads) with the facts of the tool:
   LINT      argv of the linter that takes a file and prints the findings (JSON) on stdout
+  run_all(work, corpus)   optional: [{"file", "project", "findings"[, "failed"]}] of the whole corpus, instead of one LINT run per file
   findings(stdout, path)   [{"line", "code", "name", "severity", "message", "context"}] of one run
   RULE      {code: (needs, verdict, note)}; verdict keep (the target), taste, bug, env, artifact; FAMILY {code: Sudsy family} (optional)
 Runs are cached in <work-dir>/lint.json. Prints the verdicts with their findings, the rule table, the plan (kept rules in order of
@@ -29,6 +30,10 @@ def run(mod, work, corpus):
     if cache.exists():
         return json.loads(cache.read_text())
     work.mkdir(parents=True, exist_ok=True)
+    if hasattr(mod, "run_all"):  # a linter that needs the project around the file runs the corpus itself
+        res = mod.run_all(work, corpus)
+        cache.write_text(json.dumps(res))
+        return res
 
     def one(entry):
         proj, name, f = entry
