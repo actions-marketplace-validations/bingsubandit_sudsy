@@ -8,6 +8,7 @@ Weight: the primary tool of a leg 4, a popular secondary 1, any other 0.25. Orde
 
 | Language | Leg | Weight | Now | Points | Needs | Causes | Difficulty | Score | Measured on |
 |---|---|---|---|---|---|---|---|---|---|
+| Batchfile | format stable | 4 | 0.0% | 85.0 | 465 files | `unclassified` 465 | 3 | 113.33 | - |
 | C / C++ | format clang-format | 4 | 72.7% | 12.3 | 818 files | `brace-own-line-in-source` 361, `pointer-align` 328, `reference-align` 300 | 9 | 5.47 | - |
 | (not in support.yaml) | lint sqlfluff-fixtures | 0.25 | 59.6% | 25.4 | 11453 findings | `CP01` 4211, `LT01` 2805, `LT02` 2639, `PRS` 967 +1 more | 15 | 0.42 | 3cdf2fac |
 | C# | lint Roslynator | 0.25 | 0.4% | 84.6 | 9405 findings | `RCS1157` 1714, `RCS1118` 1422, `RCS1123` 827, `RCS1085` 760 +23 more | 75 | 0.28 | 66718389 |
@@ -20,11 +21,11 @@ Blocked on a decision:
 
 Not measured: C / C++ lint clang-tidy (no target, blocked).
 
-New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); one primary tool per leg (the one most users run), every plan is assumed to reach the bar and its cost holds everything it takes: 1 + 0.3 type worker + 0.2 index + 0.1 per missing shared part + layout (whitespace only -0.3, width +0.2, penalty +0.5); a leg with no reference tool competes like any other. `retrofit` rows are the existing legs with no reference tool (parser paid): they rank by the same formula but never ahead of a primary leg under the bar. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format.
+New languages (`xtask/full/languages.yaml`). Score of a plan = 4 x 85 x Demand x sum(Gain) / (20 x (Parser + sum Cost)), summed over the legs of the plan (lint, format, both); one primary tool per leg (the one most users run), every plan is assumed to reach the bar and its cost holds everything it takes: 1 + 0.3 type worker + 0.2 index + 0.1 per missing shared part + layout (whitespace only -0.3, width +0.2, penalty +0.5); a leg with no reference tool competes like any other. `retrofit` rows are the existing legs with no reference tool (parser paid): they rank by the same formula but never ahead of a primary leg under the bar. `~` marks an estimate, and a score with one is `~`: a row with an estimate may only be picked to measure it (its values), not to build it. Rule for a free slot: a primary leg under the bar that an agent works on counts as handled; the slot goes to a primary leg under the bar without an agent first, else to the best new-language row, before any secondary-tool work. This table cannot see who works on what. Primary legs under the bar now: C / C++ format clang-format; Batchfile format stable.
 
 | Language | Demand | Parser | Lint | Format | Both | Suggestion | Notes |
 |---|---|---|---|---|---|---|---|
-| Batchfile | 0.51~ | ~1.2 | 2.77~ | 4.35~ | 4.93~ | both: lint Blinter + format none found | estimate: pick only to measure it |
+| Batchfile | 0.51~ | 0 (paid) | 6.09~ | - | - | lint: lint Blinter | estimate: pick only to measure it |
 | Jupyter Notebook | 0.57~ | 0.2 | 2.43~ | 2.59~ | 2.68~ | both: lint ruff check on cells + format ruff format on cells | JSON file with Python cells: the Python leg does the work; evidence in docs/ai/design/jupyter.md; estimate: pick only to measure it |
 | Ansible | 0.28~ | ~0.2 | 2.37~ | - | - | lint: lint ansible-lint | YAML with playbook semantics; estimate: pick only to measure it |
 | Gradle | 0.31~ | ~1.2 | 2.10~ | 1.47~ | 2.35~ | both: lint none found + format npm-groovy-lint | build.gradle (Groovy DSL); build.gradle.kts is Kotlin; estimate: pick only to measure it |
