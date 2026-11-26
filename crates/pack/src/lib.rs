@@ -23,6 +23,7 @@ exports! {
     "editorconfig", sudsy_language, konomanoasa_tree_sitter_editorconfig::LANGUAGE;
     "gitignore", sudsy_language, konomanoasa_tree_sitter_gitignore::LANGUAGE;
     "go", sudsy_language, tree_sitter_go::LANGUAGE;
+    "gradle", sudsy_language, tree_sitter_groovy::LANGUAGE;
     "graphql", sudsy_language, tree_sitter_graphql::LANGUAGE;
     "hcl", sudsy_language, tree_sitter_hcl::LANGUAGE;
     "ini", sudsy_language, tree_sitter_ini::LANGUAGE;

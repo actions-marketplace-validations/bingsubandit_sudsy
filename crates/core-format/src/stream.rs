@@ -64,6 +64,8 @@ pub struct LineFacts {
     pub align_closers: bool,
     /// Between a token of the first kind and one of the second a blank stands when the boolean option is on.
     pub option_blanks: &'static [(&'static str, &'static str, &'static str)],
+    /// No blank line stands after an opening bracket that ends a line or before a closing bracket that starts one.
+    pub trim_bracket_edges: bool,
 }
 
 impl LineFacts {
@@ -71,6 +73,7 @@ impl LineFacts {
         flush: &[],
         align_closers: false,
         option_blanks: &[],
+        trim_bracket_edges: false,
     };
 }
 
@@ -82,6 +85,11 @@ pub struct StreamRules {
     /// Each line keeps the indentation it has, and the language is written by its rows alone
     /// ([`format`]): the fact `source_indent` of the language's rules.
     pub(crate) source_indent: bool,
+    /// Every line is indented by the brackets open in front of it ([`crate::frames`]), written by the
+    /// rows alone: the fact `frame_indent` of the language's rules.
+    pub(crate) frame_indent: bool,
+    /// No blank line after an opening bracket or before a closing one (`LineFacts::trim_bracket_edges`).
+    pub(crate) trim_edges: bool,
     pub(crate) blanks: crate::stream_blank::Blanks,
     pub(crate) indents: crate::stream_indent::Indents,
     /// Kinds that start at column 0 (`RuleFacts::flush`).
@@ -98,6 +106,11 @@ impl StreamRules {
         self
     }
 
+    pub(crate) fn frame_indent(mut self, on: bool) -> StreamRules {
+        self.frame_indent = on;
+        self
+    }
+
     pub fn parse(g: &Grammar, text: &str) -> StreamRules {
         let settings = crate::rules::settings(text, "lines");
         let value = |key: &str| settings.iter().find(|(k, _)| *k == key).map(|(_, v)| *v);
@@ -105,6 +118,8 @@ impl StreamRules {
             brackets: Brackets::parse(g, text),
             continuation: value("continuation").and_then(|v| v.chars().next()),
             source_indent: false,
+            frame_indent: false,
+            trim_edges: false,
             blanks: Default::default(),
             indents: Default::default(),
             flush: Vec::new(),
@@ -350,7 +365,11 @@ pub fn emit(
             } else {
                 (None, false)
             };
-            if closes && tks[i].leading.is_empty() {
+            // No blank line after an opener or in front of a closer (`trim_bracket_edges`).
+            let closes = closes || (rules.trim_edges && brackets.is_close(tks[i].kind));
+            if closes && tks[i].leading.is_empty()
+                || rules.trim_edges && brackets.is_open(tks[i - 1].kind)
+            {
                 blank = 0;
             }
             // Directives of a tool right after the code in front stay with it.

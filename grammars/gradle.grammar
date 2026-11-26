@@ -1,0 +1,68 @@
+// Gradle build scripts (Groovy DSL, `*.gradle`), parsed by tree-sitter (the fork grammars/tree-sitter-groovy of dekobon-tree-sitter-groovy) and mapped by the mapping of crates/lang-gradle/lang.yaml.
+// Format: see crates/core-syntax/src/grammar/mod.rs.
+// A string is one token however many `${}` it holds; the nodes are the ones the layout rows read.
+
+language gradle 30 "Gradle"
+comments line "//" block "/*" "*/"
+suppress disable-next-line "sudsy-disable-next-line"
+suppress disable-line "sudsy-disable-line"
+suppress disable "sudsy-disable"
+suppress enable "sudsy-enable"
+suppress disable-file "sudsy-disable-file"
+suppress ignore "sudsy-ignore"
+
+token Whitespace #trivia #whitespace
+token Newline #trivia #newline
+// `//`, `/* */`, `/** */` and a `#!` first line.
+token Comment #trivia #comment
+
+// A name: a variable, a method, a property, a type.
+token Ident
+// Reserved words (`def`, `if`, `class`, `in`, `instanceof`, `as`, ...), and `true`, `false`, `null`.
+token Keyword
+token Number #literal
+// A string of any kind (quoted, triple, slashy, dollar-slashy), delimiters and interpolations included.
+token String #literal #string
+// The operators of expressions: `+ - * / % ** ! ~ == != < > <= >= <=> && || & | ^ << >> ++ -- =~ ==~ ?: ..` and the others.
+token Op
+// `=` and the compound assignments.
+token Assign
+token Comma ","
+token Semi ";"
+token Colon ":"
+// `.`, `?.`, `*.`, `.&`, `.@`, `::`.
+token Dot
+token Arrow "->"
+// `?` of a ternary.
+token Quest "?"
+// `( [ {` and `?[`, and their closers.
+token Open #punctuation
+token Close #punctuation
+// Text the grammar has no token for.
+token Text
+
+token Eof
+token Unknown #error
+
+node Document
+node Closure
+node ClosureParameters
+node Block
+node ClassBody
+node EnumBody
+node SwitchBlock
+node ArgumentList
+node ListLiteral
+node MapLiteral
+node MapEntry
+node NamedArgument
+node CommandChain
+node ParenthesizedExpression
+node FormalParameters
+node BinaryExpression
+node UnaryExpression
+node TernaryExpression
+node ElvisExpression
+node RangeExpression
+node SpreadArguments
+node SwitchCase

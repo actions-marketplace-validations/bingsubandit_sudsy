@@ -1,6 +1,6 @@
 # Design: Gradle evidence
 
-Measurements before any Gradle product code (method: [../development/no-reference-tool.md](../development/no-reference-tool.md), [../architecture/adding-a-language.md](../architecture/adding-a-language.md)). Scope: `*.gradle` (Groovy DSL: build, settings, init, script plugins); `*.gradle.kts` is Kotlin and covered. Scripts: `scripts/evidence_gradle*.py|sh`, `scripts/evidence_gradle_parsers/` (Rust harness). Looked up 2026-11-26. Machine: AWS Neoverse-V2 aarch64, 8 cores, rustc 1.99.0. Tools under the slot (`gradle-eval`, `scripts/evidence_gradle_tools.sh`): Temurin JDK 21.0.13, npm-groovy-lint 19.0.1, Gradle 9.9.2, Spotless plugin 8.12.0 (greclipse).
+Measurements before any Gradle product code (method: [../development/no-reference-tool.md](../development/no-reference-tool.md), [../architecture/adding-a-language.md](../architecture/adding-a-language.md)). Scope: `*.gradle` (Groovy DSL: build, settings, init, script plugins); `*.gradle.kts` is Kotlin and covered. Scripts: `scripts/evidence_gradle*.py|sh`. Looked up 2026-11-26. Machine: AWS Neoverse-V2 aarch64, 8 cores, rustc 1.99.0. Tools under the slot (`gradle-eval`, `scripts/evidence_gradle_tools.sh`): Temurin JDK 21.0.13, npm-groovy-lint 19.0.1, Gradle 9.9.2, Spotless plugin 8.12.0 (greclipse).
 
 ## Corpus
 43 projects pinned by commit in `tests/conformance/fetch-gradle-corpus.sh`, listed before any result (known JVM, Android, plugin, Spring, Apache, Netflix, Elastic projects); a project joined if its tree has at least 4 `.gradle` files (of 86 looked up, 43 qualified). 6,481 `.gradle` files (54 MB); `scripts/evidence_gradle.py` caps a project at 60 files (first by path): 1,538 files (3.48 MB). Split by project, seed 20261204: 22 deciding, 21 held out (lists printed by `scripts/evidence.py gradle table`). Groovy's own parser (inside npm-groovy-lint) rejects 2 files (a `$.platforms` GString, a file starting `dependencies {`): the valid set is 1,536.
@@ -53,26 +53,8 @@ Checklist candidates from the Gradle upgrade guides and the Android plugin API, 
 
 Recommendation: lint leg with no reference tool: the checklist above plus the 8 CodeNarc rules that read the file; Android lint and Nebula named as partial sources, left out for needing a build.
 
-## Parser candidates
-Whole files from memory, warm, best of 5, `scripts/evidence_gradle_parsers.sh`, 1,538 files (3.48 MB), tree-sitter 0.27.2, parser.c at -O2; 70 probes of Gradle and Groovy forms (`probes.groovy`). Binary size is the stripped harness over the lexer-only harness.
-| | dekobon 0.6.0 | murtaza64 (2a6ddd5) | loganprice (b217b73) | amaanq 0.1.2 | hand-written (lexer prototype) |
-|---|---|---|---|---|---|
-| Kind | C, generated, untyped, external scanner | C, generated, untyped | C, generated | C, generated | Rust, 143-line lexer on `core_syntax` style tokens; parser not written |
-| Files without error node | 1,374 (89.3%) | 1,240 (80.6%) | 1,106 (71.9%) | 710 (46.2%) | lexer: 1,538 tile, 0 unknown tokens, all brackets balanced |
-| Probes failing (of 70) | 4 | 5 | 6 | 23 | not parsed |
-| Speed | 18.7 MB/s | 7.0 MB/s | 15.6 MB/s | 8.8 MB/s | lexer 218.8 MB/s |
-| Binary added | 1,536 KB | 960 KB | 640 KB | 1,099 KB | 0 |
-| Error-free files whose leaves plus blanks do not tile | 41 (slashy-string slashes, `\` continuation) | 481 (block comments) | 0 | 145 of all | 0 |
-| Mutants: one deleted bracket, error share median / p75 / p90 (250 files) | 0.1 / 52.3 / 100% (21 no error) | 0.3 / 95.9 / 100% (28) | 0.3 / 41.6 / 100% (34) | 0.1 / 20.3 / 100% (52) | n/a |
-| Deep nesting 100,000 `foo(` and `foo {` | no error, 100 ms | no error, 240 / 400 ms | no error, 110 ms | no error, 110 / 160 ms | n/a |
-| Upstream | Apache-2.0 OR MIT; created 2026-05; 8 releases in 6 months; 5 contributors, 100 commits in the year; 4 stars; crates.io 140k downloads; rust-version 1.90 | MIT; 26 stars, 11 contributors, pushed 2026-09; no crate | MIT; created 2026-10, 0 stars, 2 contributors | no license field; one contributor, last push 2024-11 | ours |
-| Maintainers and funding | one active maintainer (fork of the grammar), unpaid as far as visible | spare time, 35 commits in the year | one person, new | none | us |
-Decodetalkers ships no generated `parser.c` (not built); `arborium-groovy` is a bundle of a grammar above (not measured). Not measured: memory, an adapter, the time to build parser.c (6 to 8 MB of C each).
-
-dekobon, first error of the 164 files with an error node: `,` 67 and `:` 33 (a command expression with several arguments or named arguments after a dotted name: `inputs.property "k", v`, `dependsOn a, b`, `proguardFiles f, 'x'`, `attributes 'k': v`), `->` 6, the rest single causes (not root-caused one by one). Failing probes: a multi-argument command call after `release {` or `attributes`, `foo.bar baz, qux: 1`, `[*a, *: m]`. These command expressions are the core Gradle idiom, so an own fork of the grammar must fix them; the fix is not measured.
-Hand-written: lexer prototype 143 lines (strings with nested `${}`, triple quotes, slashy and dollar-slashy by the previous token); tiling, balance and speed are measured, the parser is not: estimate 1,000 to 1,400 lines for statements, command expressions by juxtaposition, closures, GString re-parse, newline rules (Batchfile: 1,216 lines in all), plus the formatter on shared mechanisms, against the 3,000-line budget.
-
-Recommendation: the dekobon grammar, copied into `grammars/tree-sitter-groovy` and fixed for the command-expression causes (89.3% clean now, 18.7 MB/s, Apache-2.0 OR MIT, the only candidate with active upstream and a scanner for GStrings and slashy strings; the adapter must add the slashy delimiters and `\` that are not leaves in 41 files). Alternative if the user wants no C parser and no maintainer risk: hand-written (+0.3 in the cost: parser 1.5 against 1.2), with a lexer already shown. The choice is the user's.
+## Parser
+Decided and measured in [../formatting/gradle.md](../formatting/gradle.md#parser).
 
 ## Not verified
 Whether the corpus is typical of Kotlin-era repositories that moved to `.kts` (only Groovy files count); greclipse with a project `.eclipse-groovy` properties file (default only); npm-groovy-lint `format` with a custom `.groovylintrc`; slashy-string tokens of the lexer on code with `/` after an identifier in a command expression (135 found, all brackets balanced, not read); first-error causes beyond the top ones; harm sample, stability, meaning oracle, checklist review and precision.

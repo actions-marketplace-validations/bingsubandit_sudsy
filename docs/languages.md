@@ -531,6 +531,19 @@ The status and the numbers of every language are in the generated table "Languag
   - `else if` to `elseif`, modifier order and import order are not rewritten.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format php-cs-fixer`, `scripts/parity.sh coverage phpstan`.
 
+## Gradle
+
+<!-- generated:measured-gradle -->
+- **Measured:** In progress.
+  - Format, stable: 0% of the files format stably, by the rules of the formatter (39 of 6,481 files).
+  - Lint: 30 rules, no reference tool to compare with.
+<!-- /generated -->
+
+- Files: `*.gradle` (Groovy DSL).
+- The formatter changes indentation (4 spaces by default), blanks around commas, braces and assignments, and blank lines. No reference formatter is compared: the format column is the stable share and the agreement with Spotless greclipse on held-out projects ([ai/design/gradle.md](ai/design/gradle.md)).
+- **Options:** `indent_size`, `indent_style`, `max_blank_lines`.
+- **Differences:** quotes, dependency parentheses and operator spacing stay as written.
+
 ## Reproduce (needs a source checkout)
 
 Each comparison runs from a clone of the repository. `scripts/parity.sh format <tool>` compares formatting. `scripts/parity.sh coverage <tool>` measures lint findings. Each run downloads the tool and the corpus. The complete list of differences per tool is in `tests/parity/<tool>/differences.yaml` and in the generated sections of the language pages under [ai/formatting/](ai/formatting/js.md). Method: [ai/development/parity.md](ai/development/parity.md).

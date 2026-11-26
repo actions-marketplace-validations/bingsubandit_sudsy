@@ -4,7 +4,7 @@ use provider_api::{ParserProvider, ParserSpec};
 
 core_syntax::include_generated!();
 
-static FORMAT: core_format::rules::LazyRules = core_format::rules::LazyRules::new(|| grammars::BATCH.get(), include_str!("../format.rules")).source_indent().facts(core_format::rules::RuleFacts { exact_end: &[], keep_comment_gap: false, ..core_format::rules::RuleFacts::DEFAULT }).lines(core_format::stream::LineFacts { flush: &["Label"], align_closers: true, option_blanks: &[("ColonColon", "CommentText", "space_after_colons"), ] });
+static FORMAT: core_format::rules::LazyRules = core_format::rules::LazyRules::new(|| grammars::BATCH.get(), include_str!("../format.rules")).source_indent().facts(core_format::rules::RuleFacts { exact_end: &[], keep_comment_gap: false, ..core_format::rules::RuleFacts::DEFAULT }).lines(core_format::stream::LineFacts { flush: &["Label"], align_closers: true, option_blanks: &[("ColonColon", "CommentText", "space_after_colons"), ], trim_bracket_edges: false });
 
 #[rustfmt::skip]
 pub fn provider() -> ParserProvider {

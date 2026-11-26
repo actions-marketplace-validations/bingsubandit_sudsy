@@ -182,6 +182,8 @@ fn format_rows(name: &str, v: &Value) -> String {
         name.to_uppercase(),
         if flag("source-indent") {
             ".source_indent()"
+        } else if flag("frame-indent") {
+            ".frame_indent()"
         } else {
             ""
         },
@@ -195,9 +197,14 @@ fn format_rows(name: &str, v: &Value) -> String {
 
 /// `flush`, `align-closers` and `option-blanks` of `format-rows`: the `.lines(..)` builder, or nothing.
 fn lines(f: &Value) -> String {
-    if ["flush", "align-closers", "option-blanks"]
-        .iter()
-        .all(|k| f.get(k).is_none())
+    if [
+        "flush",
+        "align-closers",
+        "option-blanks",
+        "trim-bracket-edges",
+    ]
+    .iter()
+    .all(|k| f.get(k).is_none())
     {
         return String::new();
     }
@@ -205,8 +212,9 @@ fn lines(f: &Value) -> String {
         .get("align-closers")
         .and_then(Value::as_bool)
         .unwrap_or(false);
+    let trim = (f.get("trim-bracket-edges").and_then(Value::as_bool)).unwrap_or(false);
     format!(
-        ".lines(core_format::stream::LineFacts {{ flush: &{:?}, align_closers: {closers}, option_blanks: &[{}] }})",
+        ".lines(core_format::stream::LineFacts {{ flush: &{:?}, align_closers: {closers}, option_blanks: &[{}], trim_bracket_edges: {trim} }})",
         list(f, "flush"),
         option_blanks(f),
     )
@@ -341,6 +349,7 @@ fn provider(name: &str, v: &Value) -> String {
         format!("{body}.with_snippet_contexts(&[{}])", contexts.join(", "))
     };
     let (statics, with) = symbols(v);
+    let statics = format!("{statics}{}", format_rows(name, v));
     format!(
         "// Generated from lang.yaml by `cargo xtask codegen`.\nuse core_syntax::grammars;\nuse core_treesitter::{{{imports}}};\nuse provider_api::ParserProvider;\n\ncore_syntax::include_generated!();\n\n{statics}#[rustfmt::skip]\npub fn provider() -> ParserProvider {{\n    {body}{with}\n}}\n"
     )

@@ -8,6 +8,7 @@ lang-dockerfile dockerfile
 lang-editorconfig editorconfig
 lang-gitignore ignore
 lang-go go
+lang-gradle groovy
 lang-graphql graphql
 lang-hcl terraform hcl
 lang-ini ini

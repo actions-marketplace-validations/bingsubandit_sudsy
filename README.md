@@ -5,7 +5,7 @@
 <p align="center"><b>A true polyglot formatter and linter for every repo.</b><br>
 One binary and one config file in place of Prettier, ESLint, ruff, buf, terraform fmt and the rest.<br>
 Extensible: add your own rules as YAML patterns or Wasm plugins.<br>
-<b><!-- generated:support-headline -->Ready for 28 languages, early support for 3 more.<!-- /generated --></b></p>
+<b><!-- generated:support-headline -->Ready for 28 languages, early support for 4 more.<!-- /generated --></b></p>
 
 <p align="center">
 <a href="https://github.com/bingsubandit/sudsy/releases"><img alt="release" src="https://img.shields.io/github/v/release/bingsubandit/sudsy"></a>
@@ -99,6 +99,7 @@ Each number is measured on real-world code against the default rule set of the r
 | Batchfile | ░░░░░░░░░░ 0% stable · █████████░ 96% agreement · no reference tool | ████████░░ 85% Blinter | In progress |
 | C / C++ | ███████░░░ 72% clang-format | not measured clang-tidy | In progress |
 | PHP | ████████░░ 88% PHP-CS-Fixer | ███░░░░░░░ 36% PHPStan | In progress |
+| Gradle | ░░░░░░░░░░ 0% stable · ████████░░ 87% agreement · no reference tool | 30 rules · no reference tool | In progress |
 
 Notes: clang-format (C / C++): line wrapping is not compared. PHP-CS-Fixer (PHP): measured with the `@PER-CS` rule set (the default of PHP-CS-Fixer 3 is `@PSR12`, which `@PER-CS` contains).
 
