@@ -1,0 +1,15 @@
+id: blank-line-before-label
+family: blank-line-before
+params: { tag: item, kind: LabelLine, block: block, always: "true", ignore: after-comment }
+message: "{blank} before the label"
+description: >-
+  Reports a label that has no blank line before it, unless a comment stands on the line right
+  before.
+why: >-
+  A label starts a routine or a jump target. A blank line before it shows where the previous code
+  ends, so the routines of a long file can be told apart.
+
+  To fix, add a blank line before the label.
+example: "echo a\n:next   # reported: no blank line before"
+severity: off
+category: style

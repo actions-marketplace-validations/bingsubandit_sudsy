@@ -50,6 +50,7 @@ pub fn providers() -> Vec<Box<dyn LanguageProvider>> {
         Box::new(lang_editorconfig::provider()),
         Box::new(lang_gitignore::provider()),
         Box::new(lang_go::provider()),
+        Box::new(lang_gradle::provider()),
         Box::new(lang_graphql::provider()),
         Box::new(lang_hcl::provider()),
         Box::new(lang_ini::provider()),

@@ -1,0 +1,22 @@
+id: no-magic-numbers
+message: "the number `${N}` has no name; set it in a variable and use that"
+description: >-
+  Reports a number of three or more digits written in a command, which is not one of the common
+  values (powers of two, ports, a thousand, a day in seconds) the rule lists.
+why: >-
+  A bare `9600` or `19041` says nothing about what it is, and the same value written in several
+  places must be changed in each.
+
+  To fix, give the value a name with `set` once and write `%name%` where it is used.
+example: "if %build% EQU 19041 echo new"
+severity: off
+category: style
+rule:
+  kind: Argument
+  not: { parent: { kind: Simple, regex: '(?i)^set\b' } }
+token:
+  kind: [Text]
+  deep: true
+  needs: "0123456789"
+  regex: '(?:^|[^\w/\\%-])(?<N>\d{3,}|00|98)(?:$|[^\w/\\%-])'
+  not-regex: '^(?:\d\d?|9[0-79]|10[0-7]|127|255|256|260|365|443|512|1000|1024|3389|3600|4096|8080|3276[78]|65536|86400|1000000)$'

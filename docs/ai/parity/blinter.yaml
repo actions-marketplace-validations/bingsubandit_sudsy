@@ -1,0 +1,152 @@
+tool: "blinter"
+version: "1.1.74"
+languages: ["batch"]
+rule-url: none
+sources:
+  - "https://pypi.org/project/blinter/1.1.74/"
+  - "https://github.com/BatchLang/Blinter"
+entries:
+  E001: wontfix the sampled findings are wrong or benign - valid parentheses and embedded PowerShell flagged
+  E002: planned | long tail of class keep - GOTO to a label that is not there
+  E003: planned | long tail of class keep - 
+  E005: planned | long tail of class keep - 
+  E006: wontfix needs the run's environment or cmd.exe - variable may come from the environment or the caller
+  E007: rule quote-if-operands-both
+  E008: planned | long tail of class keep - code after EXIT or GOTO
+  E009: planned | long tail of class keep - 
+  E010: planned | long tail of class keep - FOR without DO
+  E011: planned | long tail of class keep - 
+  E012: wontfix the sampled findings are wrong or benign - list of words after ^ read as a label call
+  E015: planned | long tail of class keep - 
+  E017: planned | long tail of class keep - 
+  E018: wontfix the corpus makes it fire (tarballs lose git's line-ending conversion) - tarballs lose the end-of-line conversion of git
+  E021: planned | long tail of class keep - 
+  E023: planned | long tail of class keep - 
+  E024: planned | long tail of class keep - 
+  E028: planned | long tail of class keep - 
+  E029: planned | long tail of class keep - 
+  E030: planned | long tail of class keep - 
+  E036: planned | long tail of class keep - IF EXISTS typo
+  E037: planned | long tail of class keep - 
+  E038: planned | long tail of class keep - 
+  E042: wontfix the sampled findings are wrong or benign - text in strings and polyglot lines flagged
+  E043: wontfix needs the run's environment or cmd.exe - harm depends on the block and cmd.exe
+  E044: planned | long tail of class keep - ELSE on its own line
+  E045: planned | long tail of class keep - 
+  E047: planned | long tail of class keep - 
+  P001: planned | long tail of class taste - 
+  P003: planned | long tail of class taste - 
+  P004: rule unused-opener
+  P006: planned | long tail of class taste - 
+  P007: planned | long tail of class taste - 
+  P008: rule feature-not-enabled | Blinter reads `!x!` after an enable that is chained with `^&` as not enabled
+  P009: planned | long tail of class taste - 
+  P010: planned | long tail of class taste - 
+  P012: wontfix the sampled findings are wrong or benign - ordinary substring expansions flagged
+  P013: planned | long tail of class taste - 
+  P014: planned | long tail of class taste - 
+  P016: wontfix the sampled findings are wrong or benign - flags set x=!x:...=! as concatenation
+  P017: planned | long tail of class taste - 
+  P019: rule delayed-expansion-in-loop
+  P020: rule repeated-command
+  P022: wontfix the sampled findings are wrong or benign - redirection outside loops flagged
+  P023: planned | long tail of class taste - 
+  P024: rule repeated-command
+  P025: planned | long tail of class taste - 
+  P026: planned | long tail of class taste - 
+  P027: planned | long tail of class taste - 
+  S001: wontfix the sampled findings are wrong or benign - fires after a comment header or @if ... @echo off
+  S003: rule command-case
+  S004: rule no-trailing-whitespace
+  S007: rule cmd-extension
+  S008: rule commented-block | Blinter also reports blocks with a body that is not indented, and long runs of lines that are not a block
+  S009: planned | long tail of class taste - 
+  S010: planned | long tail of class keep - label no GOTO or CALL names; dynamic labels are a risk
+  S011: rule max-line-length
+  S012: planned | long tail of class keep - inconsistent indentation
+  S013: planned | long tail of class taste - no header comment
+  S014: wontfix the sampled findings are wrong or benign - counts redirections and quoted words as parameters
+  S015: rule argument-prefix
+  S016: planned | long tail of class taste - 
+  S018: rule documented-subroutine
+  S019: rule no-magic-numbers
+  S020: rule max-line-length
+  S022: planned | long tail of class taste - variable naming style
+  S023: planned | long tail of class taste - 
+  S024: rule no-long-one-liner
+  S026: planned | long tail of class keep - 
+  S027: rule blank-line-before-label
+  S028: rule no-redundant-parens
+  S029: rule no-late-at-sign
+  S030: planned | long tail of class keep - 
+  SEC001: planned | long tail of class taste - 
+  SEC002: wontfix the sampled findings are wrong or benign - unquoted SET flagged without a metacharacter
+  SEC003: rule no-unconfirmed-delete-tree
+  SEC004: rule no-forced-registry-delete
+  SEC005: wontfix needs the run's environment or cmd.exe - needs the run's privilege; sc query needs none
+  SEC006: planned | long tail of class taste - 
+  SEC008: planned | long tail of class taste - 
+  SEC009: rule no-execution-policy-bypass
+  SEC010: planned | long tail of class taste - 
+  SEC011: wontfix the sampled findings are wrong or benign - every cd .. flagged
+  SEC012: planned | long tail of class taste - 
+  SEC013: wontfix the sampled findings are wrong or benign - any %VAR% next to an operator or switch
+  SEC014: wontfix the sampled findings are wrong or benign - every %1 or %VAR% flagged
+  SEC015: planned | long tail of class taste - 
+  SEC016: planned | long tail of class taste - 
+  SEC017: planned | long tail of class taste - 
+  SEC019: planned | long tail of class taste - 
+  SEC020: wontfix needs the run's environment or cmd.exe - 
+  SEC025: rule quote-cd-variable
+  W001: rule missing-terminator
+  W002: rule unchecked-command
+  W003: rule unchecked-command
+  W004: wontfix the sampled findings are wrong or benign - menu and argument loops flagged
+  W005: rule quote-if-operand
+  W007: wontfix needs the run's environment or cmd.exe - file in use is a run-time fact
+  W009: wontfix needs the run's environment or cmd.exe - Windows versions
+  W010: wontfix needs the run's environment or cmd.exe - 
+  W011: wontfix the sampled findings are wrong or benign - every ECHO flagged
+  W012: rule no-non-ascii
+  W013: rule no-duplicate-label
+  W014: planned | long tail of class taste - 
+  W017: rule no-if-not-errorlevel-zero
+  W018: wontfix the corpus makes it fire (tarballs lose git's line-ending conversion) - needs LF endings
+  W019: wontfix the corpus makes it fire (tarballs lose git's line-ending conversion) - needs LF endings
+  W020: rule for-f-options
+  W021: rule quote-if-operands-both
+  W022: planned | long tail of class keep - 
+  W023: rule nested-for | Blinter also reports a FOR after an unbalanced parenthesis, which it counts as still inside the outer loop
+  W024: planned | long tail of class keep - 
+  W025: rule unchecked-command
+  W027: wontfix needs the run's environment or cmd.exe - 
+  W028: wontfix the sampled findings are wrong or benign - every SET flagged
+  W029: wontfix needs the run's environment or cmd.exe - 
+  W030: planned | long tail of class taste - 
+  W032: planned | long tail of class taste - 
+  W033: wontfix the sampled findings are wrong or benign - every CALL without extension
+  W034: planned | long tail of class keep - 
+  W035: wontfix the sampled findings are wrong or benign - FOR /F tokens without delims is the default
+  W036: planned | long tail of class taste - 
+  W037: planned | long tail of class keep - 
+  W038: planned | long tail of class keep - 
+  W039: rule nested-for | Blinter also reports a FOR after an unbalanced parenthesis, which it counts as still inside the outer loop
+  W040: planned | Blinter's loop tracking reports the reuse of a loop variable letter after the outer loop has closed; the nesting rule does not
+  W042: planned | long tail of class taste - 
+  W043: planned | long tail of class taste - 
+  W047: planned | long tail of class keep - 
+  W048: planned | long tail of class taste - 
+  W051: wontfix the sampled findings are wrong or benign - %f%648 read as %648
+  W052: rule no-shift-in-block
+  W053: wontfix the sampled findings are wrong or benign - every bare SHIFT, hazard only if %0 is read after
+  W054: planned | long tail of class keep - 
+  W057: wontfix the sampled findings are wrong or benign - tail calls flagged; hazard only if code follows
+  W061: planned | long tail of class keep - PUSHD without POPD
+  W063: planned | long tail of class keep - 
+  W065: rule if-compare-wildcard
+  W066: rule stderr-redirect-last
+  W067: wontfix the sampled findings are wrong or benign - setting PATH is normal
+  W068: planned | Blinter reads the block from an unbalanced parenthesis to the end of the file, so the variable is reported on lines outside any block
+  W069: planned | long tail of class keep - 
+  W070: planned | long tail of class keep - 
+  W071: rule parse-time-variable-in-block | Blinter also reports `%errorlevel%` after a command on a line that is not in a block

@@ -2,7 +2,7 @@
 //! `Sequence` of statements joined by operators, a block holds lines. `IF` and `ELSE` take the rest
 //! of their line, or a block, as a `Sequence`; `FOR` the same after `DO`.
 //!
-//! Recovery: a `)` with no block is one `ERROR` token; a block with no `)` ends at the end of the
+//! Recovery: a `)` with no block is one `ERROR` token (no error: polyglot files hold text of other languages, and the rest of the file is still read); a block with no `)` ends at the end of the
 //! file (a label at column 0 inside a block is valid, so it does not end one). Nesting deeper than `LEVELS` is one `ERROR` node (a balanced group).
 //!
 //! concept: none (the productions of Batchfile on the parser kit of core_syntax::parse)
@@ -117,18 +117,20 @@ impl Cx<'_> {
 
     fn simple(&mut self) {
         self.p.start(k::SIMPLE);
-        if self.cur() == k::REDIRECT {
+        let redirected = self.cur() == k::REDIRECT;
+        if redirected {
             self.redirection();
         }
         while self.here() && self.cur() == k::REDIRECT {
             self.redirection();
         }
-        if self.here() && self.cur() == k::L_PAREN {
+        let word = !redirected || self.here();
+        if word && self.cur() == k::L_PAREN {
             // Redirections in front of a block belong to it.
             self.block();
-        } else if matches!(self.cur(), k::NAME | k::PROGRAM) {
+        } else if word && matches!(self.cur(), k::NAME | k::PROGRAM) {
             self.p.bump();
-        } else if is_part(self.cur()) {
+        } else if word && is_part(self.cur()) {
             self.argument();
         }
         while self.here() {

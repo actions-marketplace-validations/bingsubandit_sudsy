@@ -1,0 +1,112 @@
+target: 85.1
+differences:
+  run-offset-zero: "gap  the runner counts a report that starts at the first character also as a line-0 report, so each `cmd-extension` report shows once more as an extra (332 of 664)"
+  extra-magic-numbers: "gap  numbers in PowerShell and `mode` lines of polyglot files, and values Blinter leaves out (192 of 1447, about 80% sampled true)"
+  extra-late-at-sign: "gap  `@` before a PowerShell here-string `@\"` in polyglot files, and `@set` Blinter does not report (72 of 465)"
+  extra-unchecked-command: "gap  commands Blinter counts as checked by a later line, not classified further (93 of 997)"
+  extra-missing-terminator: "gap  files that end in a label or a `set` line which Blinter does not report (68 of 489)"
+  extra-nested-for: "gap  a `for` on the closing line of a block (`) do for ...`), which Blinter reads as a loop of its own (60 of 216)"
+  extra-redundant-parens: "gap  blocks of one command Blinter leaves out, not classified further (58 of 299)"
+  extra-long-one-liner: "gap  lines Blinter counts by another length, not classified further (53 of 432)"
+  extra-small: "gap  the other mapped rules report 1 to 35 lines each that Blinter leaves out (feature-not-enabled 35, quote-if-operand 34, parse-time-variable-in-block 25, no-trailing-whitespace 24, argument-prefix 24, commented-block 23, documented-subroutine 16, for-f-options 11, command-case 11, no-shift-in-block 9, no-duplicate-label 9, no-execution-policy-bypass 8, if-compare-wildcard 4, stderr-redirect-last 1)"
+measured: {covered: 15595, total: 18324, main: '032e2f36'}  # of the target; `main`: the origin/main commit the measured tree is based on
+missed:  # rule -> findings that count as missing, layout left after `sudsy format` included; covered + these = total (COVERAGE_WRITE=1 scripts/parity.sh coverage <tool> writes both)
+  W068: 266
+  W023: 207
+  W039: 207
+  W040: 126
+  S008: 100
+  S010: 98
+  S013: 91
+  S022: 75
+  E008: 73
+  P014: 61
+  P019: 57
+  S016: 55
+  E028: 54
+  E047: 50
+  P006: 50
+  W001: 49
+  W047: 48
+  P023: 45
+  S012: 44
+  E011: 42
+  P008: 39
+  SEC012: 39
+  E045: 37
+  P003: 36
+  S009: 32
+  SEC001: 30
+  SEC006: 30
+  W061: 29
+  S003: 28
+  S019: 26
+  W021: 24
+  W042: 23
+  SEC010: 22
+  W063: 22
+  P002: 21
+  W043: 21
+  W066: 21
+  SEC008: 20
+  E021: 19
+  E044: 19
+  E030: 18
+  W036: 18
+  SEC015: 17
+  E038: 16
+  S028: 16
+  W071: 16
+  S026: 15
+  W030: 15
+  SEC019: 14
+  P001: 13
+  W037: 13
+  P026: 12
+  W048: 12
+  P009: 11
+  S018: 11
+  W005: 11
+  W038: 11
+  W065: 10
+  E009: 9
+  W013: 9
+  W014: 8
+  E005: 7
+  W070: 7
+  E010: 6
+  S023: 6
+  S029: 6
+  W054: 6
+  S024: 5
+  S027: 5
+  W032: 5
+  W069: 5
+  E003: 4
+  E023: 4
+  P010: 4
+  P013: 4
+  P017: 4
+  P025: 4
+  P007: 3
+  SEC009: 3
+  W034: 3
+  E017: 2
+  E024: 2
+  E029: 2
+  E036: 2
+  SEC016: 2
+  W017: 2
+  W022: 2
+  W024: 2
+  E002: 1
+  E007: 1
+  E015: 1
+  E037: 1
+  P020: 1
+  P027: 1
+  S002: 1
+  S015: 1
+  S030: 1
+  SEC017: 1
+  W020: 1

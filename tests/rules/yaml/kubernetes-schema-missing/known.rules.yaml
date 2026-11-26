@@ -1,0 +1,4 @@
+kubernetes-schema-missing:
+  level: warn
+  options:
+    known: [argoproj.io/v1alpha1/Application]

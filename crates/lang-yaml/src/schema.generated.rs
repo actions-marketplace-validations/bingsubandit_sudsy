@@ -106,6 +106,7 @@ pub fn option_schema() -> core_config::OptionSchema {
         core_config::Preset::new("yaml/prettier-compat", include_str!("../presets/prettier-compat.yaml")),
         core_config::Preset::new("yaml/yamllint", include_str!("../presets/yamllint.yaml")),
         core_config::Preset::new("yaml/ansible-lint", include_str!("../presets/ansible-lint.yaml")),
+        core_config::Preset::new("yaml/kubernetes", include_str!("../presets/kubernetes.yaml")),
         ])
     })
 }

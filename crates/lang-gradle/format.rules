@@ -1,0 +1,25 @@
+# Every line of the file keeps its break, is indented by the brackets open in front of it
+# (syntax: crates/core-format/src/frames.rs) and has no blank line after an opener or before a closer.
+[lines]
+open = Open
+close = Close
+continuation = \
+
+# Blanks between two tokens of a line (the decision table of docs/ai/design/gradle.md); no row: the source's.
+[space]
+* / kind=Comma|Semi : no
+kind=Comma|Semi / kind=Close : no
+kind=Comma|Semi / * : yes
+kind=Open&text=(|[|?[ / * : no
+* / kind=Close&text=)|] : no
+kind=Open&text={ / kind=Close&text=} : keep
+kind=Open&text={ / * : yes
+* / kind=Close&text=} : yes
+* / kind=Open&text={ : yes
+kind=Assign / * : yes
+* / kind=Assign : yes
+* / kind=Colon&parent=NamedArgument|MapEntry : no
+kind=Colon&parent=NamedArgument|MapEntry / * : yes
+kind=Quest|Colon&parent=TernaryExpression / * : yes
+* / kind=Quest|Colon&parent=TernaryExpression : yes
+kind=Keyword&text=if|for|while|switch|catch|synchronized / kind=Open&text=( : yes

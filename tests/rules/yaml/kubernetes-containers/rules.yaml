@@ -1,0 +1,5 @@
+kubernetes-no-read-only-root-fs: warn
+kubernetes-run-as-non-root: warn
+kubernetes-unset-memory-requirements: warn
+kubernetes-unset-cpu-requirements: warn
+kubernetes-latest-tag: warn

@@ -9,6 +9,7 @@
 
 use crate::matcher::{Capture, Captures, Pattern, SnippetParser};
 use crate::metavar::{Meta, captured, template};
+use crate::top_level;
 use core_rules::doc_comments::{holder, leading_doc_text};
 use core_rules::paths::key_path;
 use core_rules::tree::TraversalCache;
@@ -48,6 +49,14 @@ pub struct Spec {
     /// The key path of the node (`a.b[0].c`: [`core_rules::paths`]) matches this regex.
     #[serde(rename = "key-path")]
     pub key_path: Option<String>,
+    /// The node is the top-level mapping of a document whose plain scalar entries with these keys
+    /// have values that match these regexes (a named group is captured at the value).
+    #[serde(rename = "top-level")]
+    pub top_level: Option<BTreeMap<String, String>>,
+    /// The node is the top-level mapping of a document, and the values of its entries `keys`,
+    /// joined by `/`, are an item of the `list` option.
+    #[serde(rename = "top-level-in-option")]
+    pub top_level_in_option: Option<top_level::InOption>,
     /// The node is the Nth (from 1) of the children of its parent that have its kind.
     pub nth: Option<usize>,
     pub inside: Option<Box<Spec>>,
@@ -159,6 +168,9 @@ pub enum Expr {
     Path(Re, Vec<String>),
     /// The key path of the node.
     KeyPath(Re),
+    /// The entries of the top-level mapping, with the capture groups of each regex.
+    TopLevel(Vec<(String, Re, Vec<String>)>),
+    TopLevelInOption(top_level::InOption),
     Nth(usize),
     Inside(Box<Expr>),
     Has(Box<Expr>),
@@ -382,6 +394,24 @@ impl Expr {
                 regex(text).map_err(|e| format!("key-path regex `{text}`: {e}"))?,
             ));
         }
+        if let Some(map) = &spec.top_level {
+            let entries = map
+                .iter()
+                .map(|(key, text)| {
+                    let re = regex(text)
+                        .map_err(|e| format!("top-level `{key}` regex `{text}`: {e}"))?;
+                    let groups = re.groups();
+                    Ok((key.clone(), re, groups))
+                })
+                .collect::<Result<_, String>>()?;
+            all.push(Expr::TopLevel(entries));
+        }
+        if let Some(spec) = &spec.top_level_in_option {
+            all.push(Expr::TopLevelInOption(top_level::InOption {
+                keys: spec.keys.clone(),
+                option: spec.option.clone(),
+            }));
+        }
         if let Some(n) = spec.nth {
             if n == 0 {
                 return Err("nth counts from 1".into());
@@ -509,7 +539,7 @@ impl Expr {
         match all.len() {
             0 => Err(
                 "a rule needs at least one of pattern, kind, regex, path, nth, inside, not-inside, \
-                      has, not-has, parent, child, key-path, option, in-option, all, any, not, role, operator, fields, \
+                      has, not-has, parent, child, key-path, top-level, top-level-in-option, option, in-option, all, any, not, role, operator, fields, \
                       items, single, same, empty, bare, commented, inner, regex-option, rethrows"
                     .into(),
             ),
@@ -567,6 +597,8 @@ impl Expr {
             Expr::KeyPath(re) => re
                 .is_match(&key_path(node, cx.grammar, cx.hooks, cx.text))
                 .then(Captures::new),
+            Expr::TopLevel(entries) => top_level::matches(entries, node, cx),
+            Expr::TopLevelInOption(spec) => top_level::in_option(spec, node, cx),
             Expr::Nth(n) => {
                 let mut same = node
                     .parent()?
@@ -753,6 +785,8 @@ impl Expr {
             | Expr::Doc(_)
             | Expr::Path(..)
             | Expr::KeyPath(_)
+            | Expr::TopLevel(_)
+            | Expr::TopLevelInOption(_)
             | Expr::Nth(_)
             | Expr::ChildToken(_)
             | Expr::Option(_)
@@ -793,6 +827,15 @@ impl Expr {
     pub fn metas(&self, out: &mut Vec<Meta>) {
         match self {
             Expr::Pattern(p) => out.extend(p.metas().iter().cloned()),
+            Expr::TopLevel(entries) => {
+                for (_, _, groups) in entries {
+                    out.extend(groups.iter().filter(|n| !n.is_empty()).map(|name| Meta {
+                        multi: false,
+                        name: name.clone(),
+                        transform: None,
+                    }))
+                }
+            }
             Expr::Regex(_, groups) | Expr::Path(_, groups) => {
                 out.extend(groups.iter().filter(|n| !n.is_empty()).map(|name| Meta {
                     multi: false,
@@ -806,6 +849,7 @@ impl Expr {
             | Expr::RegexTemplate(..)
             | Expr::Doc(_)
             | Expr::KeyPath(_)
+            | Expr::TopLevelInOption(_)
             | Expr::Nth(_)
             | Expr::Option(_)
             | Expr::InOption(_)

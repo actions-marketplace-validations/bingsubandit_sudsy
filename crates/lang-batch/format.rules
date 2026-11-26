@@ -7,7 +7,7 @@ continuation = ^
 # Words of cmd are read without case: its commands and the keywords of IF, FOR and ELSE.
 # Switches, comparison words (`EQU`), labels, variables and arguments keep theirs.
 [case]
-Name|IfWord|ForWord|ElseWord|DoWord|InWord|RemWord : lower
+Name|IfWord|ForWord|ElseWord|DoWord|InWord|RemWord : command_case
 
 # One blank in front of the `(` of a block and around `) else (`; every other blank is the source's.
 [space]

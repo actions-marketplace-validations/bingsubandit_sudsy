@@ -217,9 +217,6 @@ impl Lexer<'_> {
             self.want_command = false;
             self.text = false;
         } else {
-            let start = self.pos as u32;
-            self.errors
-                .push(ParseError::new(start, 1, "stray-paren", "unexpected `)`"));
             self.take(k::UNKNOWN, 1);
         }
     }
@@ -271,7 +268,7 @@ impl Lexer<'_> {
     fn colon_line(&mut self) {
         if self.at(1) == b':' {
             self.take(k::COLON_COLON, 2);
-            self.skip_blanks_trivia();
+            self.skip_blanks_unless_end();
             let kind = if self.at(0).is_ascii_alphanumeric() {
                 k::COMMENT_TEXT
             } else {
@@ -285,7 +282,7 @@ impl Lexer<'_> {
             self.pos += 1;
         }
         self.emit(k::LABEL, start);
-        self.skip_blanks_trivia();
+        self.skip_blanks_unless_end();
         if !self.at_end() {
             let start = self.pos;
             self.eat_line_text(false);
@@ -304,12 +301,11 @@ impl Lexer<'_> {
 
     /// Blanks in front of more text: trivia; also at the end of the line.
     fn skip_blanks_unless_end(&mut self) {
-        let mut i = 0;
-        while is_blank(self.at(i)) {
-            i += 1;
-        }
+        let i = (0..).take_while(|&n| is_blank(self.at(n))).count();
         if i > 0 && !is_eol(self.at(i)) && self.pos + i < self.b.len() {
             self.skip_blanks_trivia();
+        } else if i > 0 {
+            self.take(k::WHITESPACE, i);
         }
     }
 

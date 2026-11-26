@@ -1,0 +1,4 @@
+command-case:
+  level: warn
+  options:
+    policy: upper

@@ -1,0 +1,7 @@
+repeated-command:
+  level: warn
+  options:
+    kinds: [Name, Program]
+    commands: [setlocal, "echo off:1"]
+    first-exempt: true
+    nth: 2

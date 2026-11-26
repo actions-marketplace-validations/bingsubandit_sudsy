@@ -1,0 +1,7 @@
+unchecked-command:
+  level: warn
+  options:
+    kinds: [Name, Program]
+    commands: [reg, 'copy:2']
+    window: 3
+    checks: [errorlevel]

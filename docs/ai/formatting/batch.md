@@ -22,5 +22,6 @@ Written line by line from the source (`source-indent`): every line keeps its ind
 | `max_blank_lines` | int 0-10 | `1` | Largest number of blank lines kept between lines. |
 | `indent_conversion` | `as_written`, `spaces`, `tabs` | `as_written` | Indentation of a line: as written, or tabs turned into spaces, or spaces into tabs (a tab is `indent_size` columns). |
 | `continued_indent` | `as_written`, `none` | `as_written` | Indentation of a line that continues the one before it with `^`: as written, or none when a blank stands before the `^` (the blanks then separate arguments and are not content). |
+| `command_case` | `lower`, `upper`, `capitalise`, `consistent` | `lower` | Case of the words cmd reads without case (its commands and the keywords of IF, FOR and ELSE): `lower`, `upper`, `capitalise`, or `consistent` (the first one written sets it). |
 | `space_after_colons` | bool | `true` | At least one blank after `::` before a comment that starts with a letter or digit (more blanks stay as written). |
 <!-- /generated -->

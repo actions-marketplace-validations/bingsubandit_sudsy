@@ -228,7 +228,9 @@ impl RuleFormatter {
         node: &SyntaxNode,
         cx: &FormatCtx<'_>,
     ) -> Result<Option<Doc>, FormatError> {
-        if self.stream.source_indent && node.kind() == cx.grammar.root() {
+        if (self.stream.source_indent || self.stream.frame_indent)
+            && node.kind() == cx.grammar.root()
+        {
             return Ok(Some(crate::stream::format(cx, self, node)));
         }
         let (flow, level) = (self.flow(self.source_hang), self.flow(false));
@@ -341,6 +343,7 @@ pub struct LazyRules {
     signatures: &'static [core_syntax::signature::Signature],
     option_kinds: OptionKinds,
     source_indent: bool,
+    frame_indent: bool,
     blank_facts: crate::stream_blank::BlankFacts,
     line_facts: crate::stream::LineFacts,
     indent_facts: crate::stream_indent::IndentFacts,
@@ -376,6 +379,7 @@ impl LazyRules {
             signatures: &[],
             option_kinds: &[],
             source_indent: false,
+            frame_indent: false,
             blank_facts: crate::stream_blank::BlankFacts::NONE,
             line_facts: crate::stream::LineFacts::NONE,
             indent_facts: crate::stream_indent::IndentFacts::NONE,
@@ -407,6 +411,12 @@ impl LazyRules {
     /// The file is written by its rows alone and each line keeps its indentation ([`crate::stream`]).
     pub const fn source_indent(mut self) -> LazyRules {
         self.source_indent = true;
+        self
+    }
+
+    /// The file is written by its rows alone and each line is indented by the brackets open in front of it ([`crate::stream`]).
+    pub const fn frame_indent(mut self) -> LazyRules {
+        self.frame_indent = true;
         self
     }
 
@@ -442,7 +452,10 @@ impl LazyRules {
                 &self.facts,
                 self.option_kinds,
             );
-            rules.stream = std::mem::take(&mut rules.stream).source_indent(self.source_indent);
+            rules.stream = std::mem::take(&mut rules.stream)
+                .source_indent(self.source_indent)
+                .frame_indent(self.frame_indent);
+            rules.stream.trim_edges = self.line_facts.trim_bracket_edges;
             rules.stream.blanks =
                 crate::stream_blank::Blanks::new((self.grammar)(), self.blank_facts);
             rules.stream.indents =

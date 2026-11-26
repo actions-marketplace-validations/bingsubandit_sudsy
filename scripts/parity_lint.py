@@ -766,6 +766,8 @@ def coverage(tool, sudsy, version, prefix, exe):
     zero = [0, 0, 0]  # findings the tool reports at line 0 (no line): all, those a file-level report covers, those any report in the file has
     filehits = [0]  # the audit: findings with a report of the mapped rule anywhere in the file
     offsets = {}  # upstream rule -> Counter(Sudsy line minus tool line) of the findings reported on another line
+    heldout = (spec or {}).get("heldout")  # project folders (the first folder under the corpus) the rules were not tuned on
+    held = {}  # upstream rule -> [findings, covered] in those projects
 
     def score(ours):
         """`(per, hits, total, tool-wrong findings by rule)`: a finding is covered when the mapped rule reports it on the same line.
@@ -774,6 +776,7 @@ def coverage(tool, sudsy, version, prefix, exe):
         per, wrong = {}, collections.Counter()
         instruction = (spec or {}).get("instruction")  # `{"rule_prefix", "continuation"}`: those codes are covered on any line of the instruction the tool's line starts
         offsets.clear()
+        held.clear()
         uncovered.clear()
         filehits[0] = 0
         zero[:] = [0, 0, 0]
@@ -791,6 +794,10 @@ def coverage(tool, sudsy, version, prefix, exe):
             last = instruction_end(work / file, line, instruction["continuation"]) if instruction and rule.startswith(instruction["rule_prefix"]) and line else line
             on_line = any(line <= l <= last for _, l in reports) if line is not None else False  # a finding at line 0 is a file-level one: only a file-level report of the mapped rule covers it
             row[1] += on_line
+            if heldout and file.split("/")[1] in heldout:
+                held_row = held.setdefault(rule, [0, 0])
+                held_row[0] += 1
+                held_row[1] += on_line
             zero[0] += line == 0
             zero[1] += line == 0 and on_line
             zero[2] += line == 0 and any(l for _, l in reports)
@@ -866,6 +873,9 @@ def coverage(tool, sudsy, version, prefix, exe):
         why = "left after `sudsy format` (formatter or a preset option)" if rule in leftover else f"rule {mapping[rule]} covers {per[rule][1]} of {per[rule][0]}" if rule in mapping else "no Sudsy rule"
         print(f"  {n} {rule}: {why}; e.g. {', '.join(places[rule][:3])}")
     print(target_line(tool, per, hit, total, owned, prefixed, sum(wrong.values())))
+    if heldout:  # the same share over the held-out projects only (no formatter-owned or tool-wrong findings are split out of it)
+        held_hit, held_total = sum(r[1] for r in held.values()), sum(r[0] for r in held.values())
+        print("held-out projects, " + target_line(tool, held, held_hit, held_total, 0, prefixed))
     print(f"{tool} {version}: {len(per)} rules in {len(names) - len(fatal)} files, preset:{preset}")
     target = target_numbers(tool, per, hit, total, owned, prefixed, sum(wrong.values()))
     return ratchet(tool, folder, target[0]) | missed_check(tool, folder, per, hit, target[1], leftover, wrong, prefixed)

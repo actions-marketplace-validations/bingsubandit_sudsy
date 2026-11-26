@@ -161,13 +161,19 @@ The status and the numbers of every language are in the generated table "Languag
 - Config section: `yaml`.
 - **Formatter:** Prettier 3.9.10. Corpus: YAML files of real projects (awesome-compose, the Kubernetes website, GitHub starter workflows, actionlint). The yaml-test-suite valid cases parse, round-trip and keep their data model.
 - **Linter:** yamllint.
-- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`, `yaml/ansible-lint`.
+- **Presets:** `yaml/prettier-compat`, `yaml/yamllint`, `yaml/ansible-lint`, `yaml/kubernetes`.
 - **Options:** `quote_style`, `sequence_indent`, `document_start`, `document_end`, `max_blank_lines`, `comment_spacing`, `bracket_spacing`. Default `line_width` is 80.
 - **Differences:**
   - Long scalars and comments are not re-wrapped.
   - A broken flow sequence has no trailing comma; Prettier writes one.
   - A comment before a dedented item takes the next line's column; Prettier keeps its own.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format prettier`, `scripts/parity.sh coverage yamllint`.
+
+### Kubernetes (YAML)
+
+- Kubernetes manifests are YAML files, recognised by content (`apiVersion` and `kind` at the top). The preset `yaml/kubernetes` formats like Prettier and turns on `kubernetes-schema-missing` (a kind that has no schema in the Kubernetes API, as kubeconform reports; add your custom resources to its `known` option), `kubernetes-no-read-only-root-fs`, `kubernetes-run-as-non-root`, `kubernetes-unset-memory-requirements`, `kubernetes-unset-cpu-requirements` and `kubernetes-latest-tag` (kube-linter's checks).
+- **Linters:** kubeconform and kube-linter with default flags; the preset covers 89% of their pooled findings on real projects. Schema validation of fields and checks that read other objects of the project are not covered.
+- **Reproduce (needs a source checkout):** `scripts/evidence_kubernetes_baseline.py` (see [ai/design/kubernetes.md](ai/design/kubernetes.md)).
 
 ### Ansible (YAML)
 
@@ -231,7 +237,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-jupyter-notebook -->
 - **Measured:** Ready.
   - Format, ruff format: 88% of the files identical (861 of 974 files).
-  - Lint: 22 rules, no reference tool to compare with.
+  - Lint: 30 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - Config section: `jupyter`, on top of `json`.
@@ -258,6 +264,20 @@ The status and the numbers of every language are in the generated table "Languag
   - A method chain inside a ternary is indented differently.
   - `@A()` keeps its parentheses.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format google-java-format`, `scripts/parity.sh coverage checkstyle`.
+
+## Batchfile
+
+<!-- generated:measured-batchfile -->
+- **Measured:** Ready.
+  - Format, stable: 100% of the files format stably, by the rules of the formatter (719 of 719 files).
+  - Lint, Blinter: 85% of its findings also reported (15,595 of 18,324 findings).
+<!-- /generated -->
+
+- Files: `*.bat` and `*.cmd`.
+- The formatter changes blanks, line ends and the case of commands and keywords. No reference formatter exists: the format column is the stable share and the agreement on a held-out half of the corpus ([ai/design/batchfile.md](ai/design/batchfile.md)).
+- **Lint:** 33 rules, all off by default; `preset:batch/blinter` turns them on with the settings that match Blinter (coverage in the measured block above, [ai/design/batchfile.md](ai/design/batchfile.md)).
+- **Options:** `indent_conversion`, `continued_indent`, `space_after_colons`, `indent_size`, `max_blank_lines`.
+- **Differences:** blanks that are part of a value (`set x=y `, `echo x `) stay.
 
 ## GitHub Actions
 
@@ -331,7 +351,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-toml -->
 - **Measured:** Ready.
   - Format, taplo: 98% of the files identical (1,282 of 1,307 files).
-  - Lint: 22 rules, no reference tool to compare with.
+  - Lint: 30 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - **Formatter:** taplo 0.10. Corpus: the .toml files of rust-analyzer, Bevy, Tokio, clap, serde, uv and Cargo (1,310 files); toml-test and the repository fixtures are listed apart.
@@ -349,7 +369,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-xml -->
 - **Measured:** Ready.
   - Format, CSharpier XML: 100% of the files identical (321 of 321 files).
-  - Lint: 24 rules, no reference tool to compare with.
+  - Lint: 32 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - Covers `.csproj`, `.props`, `.config`.
@@ -433,7 +453,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-ini-editorconfig-gitignore -->
 - **Measured:** Ready.
   - Format, stable: 100% of the files format stably, by the rules of the formatter (129 of 129 files).
-  - Lint: 31 rules, no reference tool to compare with.
+  - Lint: 39 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - Small formatters and a few rules. No reference tool, so no comparison: the format column is the stable share.
@@ -459,7 +479,7 @@ The status and the numbers of every language are in the generated table "Languag
 <!-- generated:measured-graphql -->
 - **Measured:** Ready.
   - Format, Prettier: 99% of the files identical (123 of 124 files).
-  - Lint: 29 rules, no reference tool to compare with.
+  - Lint: 37 rules, no reference tool to compare with.
 <!-- /generated -->
 
 - **Presets:** `graphql/graphql-eslint-recommended`.
@@ -483,19 +503,6 @@ The status and the numbers of every language are in the generated table "Languag
 - **Options:** only the shared ones.
 - **Differences:** Sudsy keeps empty statements (`;`). buf drops them.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format buf`, `scripts/parity.sh coverage buf`.
-
-## Batchfile
-
-<!-- generated:measured-batchfile -->
-- **Measured:** In progress.
-  - Format, stable: 0% of the files format stably, by the rules of the formatter (0 of 547 files).
-  - Lint: 22 rules, no reference tool to compare with.
-<!-- /generated -->
-
-- Files: `*.bat` and `*.cmd`.
-- The formatter changes blanks, line ends and the case of commands and keywords. No reference formatter exists: the format column is the stable share and the agreement on a held-out half of the corpus ([ai/design/batchfile.md](ai/design/batchfile.md)).
-- **Options:** `indent_conversion`, `continued_indent`, `space_after_colons`, `indent_size`, `max_blank_lines`.
-- **Differences:** blanks that are part of a value (`set x=y `, `echo x `) stay.
 
 ## C / C++
 
@@ -529,6 +536,19 @@ The status and the numbers of every language are in the generated table "Languag
   - One `use` per trait is not split.
   - `else if` to `elseif`, modifier order and import order are not rewritten.
 - **Reproduce (needs a source checkout):** `scripts/parity.sh format php-cs-fixer`, `scripts/parity.sh coverage phpstan`.
+
+## Gradle
+
+<!-- generated:measured-gradle -->
+- **Measured:** In progress.
+  - Format, stable: 99% of the files format stably, by the rules of the formatter (6,442 of 6,481 files).
+  - Lint: 30 rules, no reference tool to compare with.
+<!-- /generated -->
+
+- Files: `*.gradle` (Groovy DSL).
+- The formatter changes indentation (4 spaces by default), blanks around commas, braces and assignments, and blank lines. No reference formatter is compared: the format column is the stable share and the agreement with Spotless greclipse on held-out projects ([ai/design/gradle.md](ai/design/gradle.md)).
+- **Options:** `indent_size`, `indent_style`, `max_blank_lines`.
+- **Differences:** quotes, dependency parentheses and operator spacing stay as written.
 
 ## Reproduce (needs a source checkout)
 

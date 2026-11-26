@@ -148,8 +148,6 @@
   parser: ~1.2 # tree-sitter: Beaglefoot/tree-sitter-awk (26 stars, pushed 2025-09)
   format: {tool: "gawk --pretty-print", gain: ~0.4, cost: {est: true}, why: "only tool found; GNU, native; drops some comments; canonical, no width"}
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
-- language: Batchfile
-  lint: {tool: "Blinter", gain: ~0.7, cost: {est: true}, why: "only tool found: PyPI Blinter 20,445 downloads a month, BatchLang/Blinter 54 stars, pushed 2026-11-16; Python"}
 - language: Beancount / hledger
   parser: ~1.2 # tree-sitter: polarmutex/tree-sitter-beancount (56 stars, pushed 2026-11)
   format: {tool: "hledger-fmt", gain: ~0.4, cost: {layout: whitespace, parts: 1, est: true}, why: "only tool found; Rust, fast; aligns amounts; whitespace only"}
@@ -359,10 +357,7 @@
   format: {tool: "gn format", gain: ~0.1, cost: {est: true}, why: "only tool found; official, native; ships with GN; canonical, no width"}
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Gradle
-  so: 11.6
-  parser: 1.2 # tree-sitter: dekobon/tree-sitter-groovy 0.6.0 (Apache-2.0 OR MIT, 89.3% of the corpus without an error node, 18.7 MB/s); docs/ai/design/gradle.md
   note: "build.gradle (Groovy DSL); build.gradle.kts is Kotlin; evidence in docs/ai/design/gradle.md"
-  format: {tool: "Spotless (greclipse)", gain: ~0.7, cost: {layout: width, parts: 1, est: true}, why: "Spotless groovyGradle with greclipse (Eclipse Groovy formatter): 1,704 build.gradle files use greclipse against 241 .groovylintrc.json files of npm-groovy-lint; JVM plus Gradle; changes only indent in 72% of the corpus files; the corpus decision table already agrees 87% (held out)"}
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no linter reads Gradle semantics offline: npm-groovy-lint (CodeNarc) gives 353 generic Groovy findings in 1,538 files, 59% of them JavaIoPackageAccess; Android lint and Nebula gradle-lint run inside a build; checklist from the Gradle upgrade guides yields 2,000+ hits"}
 - language: Grain
   parser: ~1.2 # tree-sitter: marceline-cramer/tree-sitter-grain (9 stars, pushed 2023-03)
@@ -465,8 +460,10 @@
   lint: {tool: "none found", gain: ~1.0, cost: {parts: 3, est: true}, why: "no maintained tool found"}
 - language: Kubernetes manifests
   so: 20.4
-  parser: ~0.2 # reuse: YAML parser (semantic layer only)
-  lint: {tool: "kubeconform", gain: ~0.4, cost: {est: true}, why: "Homebrew installs 30 days: kubeconform 32k, kube-linter 1.8k, kube-score 55; Go, fast; schema validation; schema checks"}
+  parser: ~0.2 # reuse: YAML parser, a dialect chosen by content (apiVersion and kind); docs/ai/design/kubernetes.md
+  note: "YAML dialect (manifests, kustomize, CRD instances); evidence in docs/ai/design/kubernetes.md"
+  format: {tool: "Prettier (YAML)", gain: ~0.1, cost: {parts: 1, est: true}, why: "Prettier 86.4% equal on the corpus with yaml/prettier-compat (Sudsy default 50.6%); needs a preset and the dialect"}
+  lint: {tool: "kubeconform", gain: ~0.4, cost: {parts: 3, est: true}, why: "Homebrew 32k installs against kube-linter 1.9k, kube-score 52; its default set is schema validation: 96.6% of 2,816 findings are schema-missing (a kind table), real schema errors about 10; kube-linter is the policy reference (5 rules for 85.7% of its target, pooled 6 rules 90.4%); needs a kind table, a pod-spec context, a content dialect"}
 - language: LaTeX
   gh: 264355
   parser: ~1.2 # tree-sitter: latex-lsp/tree-sitter-latex (174 stars, pushed 2026-08)

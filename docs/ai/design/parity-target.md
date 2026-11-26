@@ -23,7 +23,7 @@ Every parity run reports one number, the **target**: the share of the reference 
 Lint position: a finding is covered only when the mapped rule reports it on the same line (the column is not compared). In the target, a report on another line that is a reviewed `tool-wrong` entry (pinned per finding) leaves the count.
 
 ## What a run prints
-Per run: the target as `target N% (identical of left)` (format) or `target N% (hit of left, same line)` (coverage), then the intentional groups with their counts (`invalid-input`, `tool-wrong`, `REVIEW`, out of scope, formatter findings counted as missing) and every filter count.
+Per run: the target as `target N% (identical of left)` (format) or `target N% (hit of left, same line)` (coverage), then the intentional groups with their counts (`invalid-input`, `tool-wrong`, `REVIEW`, out of scope, formatter findings counted as missing) and every filter count. A tool whose `coverage` entry in `scripts/parity_tools.json` has `heldout` (project folders under the corpus the rules were not tuned on) also prints `held-out projects, target ...`, the same number over those projects only.
 
 ## Where the number is kept
 - **Format:** `ratchet` (least identical files) and `target-files` (the target's files: all minus the intentional ones) per group in `tests/parity/<tool>/differences.yaml`. A run fails below `ratchet` or when `target-files` is stale; the number is `ratchet` over `target-files`. `second-format` (most files that change on a second format) is a separate ratchet, target 0.

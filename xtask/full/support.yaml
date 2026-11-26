@@ -194,6 +194,13 @@
   ids: [batch]
   speed: [Batchfile]
   stability: [batchfile]
+  lint: [{tool: blinter, name: Blinter}]
+- language: Gradle
+  popularity: [{name: Gradle, so: 11.6}]
+  evidence: gradle
+  ids: [gradle]
+  speed: [Gradle]
+  stability: [gradle]
 - language: GitHub Actions
   popularity: [{name: GitHub Actions, estimate: {value: 0.5, basis: "lead's estimate 2026-11-25, how common the file is in repositories; no survey lists data formats"}}]
   exempt: true

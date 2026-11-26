@@ -1,0 +1,34 @@
+id: no-unconfirmed-delete-tree
+message: "this command deletes a tree, formats a disk or shuts the machine down without asking"
+description: >-
+  Reports `rmdir /s /q` (a directory tree deleted without asking), `format` with `/q`, and
+  `shutdown` with a switch.
+why: >-
+  These commands cannot be undone and run without a prompt. With a variable that is empty or wrong
+  (`rmdir /s /q %dir%\`) they remove or stop far more than meant.
+
+  To fix, check the target (`if exist`, a non-empty variable, a prompt with `choice`) before the
+  command, or keep it out of the script.
+example: "rmdir /s /q build"
+severity: off
+category: suspicious
+rule:
+  kind: Simple
+  regex: '(?i)^(?:rmdir\s+/s\s+/q\b|format\b.*\s/q\b|shutdown\s+[/-]\w)'
+---
+id: no-forced-registry-delete
+message: "`reg delete ... /f` removes the registry key without asking"
+description: >-
+  Reports `reg delete` with `/f`, which deletes without a prompt.
+why: >-
+  A deleted key cannot be restored, and a wrong or empty path in a variable removes a different
+  key than meant.
+
+  To fix, check that the key exists first and export it (`reg export`) before the delete, or leave
+  out `/f` so the user is asked.
+example: "reg delete HKCU\\Software\\Demo /f"
+severity: off
+category: suspicious
+rule:
+  kind: Simple
+  regex: '(?i)(?:^|\s)reg\s+delete\b.*\s/f\b'

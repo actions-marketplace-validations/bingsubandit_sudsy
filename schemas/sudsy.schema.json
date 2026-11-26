@@ -628,6 +628,61 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an argument list of a call that the Kotlin formatter would wrap or join differently: the arguments on one line when they fit, one per line when they do not."
             },
+            "argument-prefix": {
+              "description": "Reports the first argument of a command listed in the option `commands` that is written with the option `prefix` when the first such command of the file has none, or the other way round.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands whose first argument is checked (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "except": {
+                          "default": [],
+                          "description": "Arguments, without the prefix, that have one form only (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "prefix": {
+                          "default": "",
+                          "description": "The text an argument may start with.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "aria-hidden-body": {
               "$ref": "#/definitions/rule",
               "description": "Reports `aria-hidden=\"true\"` on `<body>`."
@@ -1031,6 +1086,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a comparison, logical or bitwise operator (`== != === <=> =~ > >= < <= | ^ && ||`) whose two sides are the same code (`x == x`)."
             },
+            "blank-line-before-label": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a label that has no blank line before it, unless a comment stands on the line right before."
+            },
             "blank-line-between-declarations": {
               "$ref": "#/definitions/rule",
               "description": "Reports a declaration (function, property, class, object, typealias) with a blank line before it that the formatter would add or remove."
@@ -1229,6 +1288,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an element with a click handler (`(click)`, `@click`) and no `keydown`, `keyup` or `keypress` handler."
             },
+            "cmd-extension": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a file with the `.bat` extension, at its first token."
+            },
             "collapsible-if": {
               "$ref": "#/definitions/rule",
               "description": "Reports an `if` whose only statement is another `if`, when neither has an `elif` or `else`."
@@ -1284,6 +1347,44 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a hex color that does not have 3, 4, 6 or 8 digits (`#ab`)."
             },
+            "command-case": {
+              "description": "Reports a command or keyword (`cd`, `set`, `if`, `for`, `goto`, ...) written in another case than the file mostly writes the same word in; a tie goes to the first one written.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "policy": {
+                          "default": "majority",
+                          "description": "The case the words must be in: `consistent` follows the first one written; `majority`: the spelling the file uses most for each command.",
+                          "enum": [
+                            "consistent",
+                            "upper",
+                            "lower",
+                            "capitalise",
+                            "majority"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "commands-show-output": {
               "$ref": "#/definitions/rule",
               "description": "Reports a fenced code block in which every non-blank line starts with `$ `, so it shows commands without their output."
@@ -1331,6 +1432,58 @@
             "comment-syntax": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `//` comment where `#` is the convention."
+            },
+            "commented-block": {
+              "description": "Reports an outermost block of the kind named in the option `block` that is the body of a statement of the kinds in `parents`, has at least `lines` lines of code, and has no comment inside it or on the line right above it.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "block": {
+                          "default": [],
+                          "description": "The node kinds of a block.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "indented": {
+                          "default": true,
+                          "description": "Only blocks whose body is indented deeper than the line that opens them.",
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "default": 5,
+                          "description": "The least number of lines of code in the block.",
+                          "type": "integer"
+                        },
+                        "parents": {
+                          "default": [],
+                          "description": "The node kinds of the statements whose block is checked.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "consistent-type-definitions": {
               "$ref": "#/definitions/rule",
@@ -1695,6 +1848,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports `Generator[X, None, None]` and `AsyncGenerator[X, None]` when the `target_version` gives the last arguments a default (3.13 and later)."
             },
+            "delayed-expansion-in-loop": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a line in the body of a `FOR` loop that reads two or more variables with `!name!`."
+            },
             "delete-apt-lists": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `RUN` that updates the apt package lists and does not delete them."
@@ -2012,6 +2169,56 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an `output` block with no `description` argument."
             },
+            "documented-subroutine": {
+              "description": "Reports a label of a kind in the option `labels` that a command in `commands` calls (the first argument of the command is the label) and that has no comment on the line above, two lines above with a blank line between, or on the line below.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands whose first argument names a label (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "labels": {
+                          "default": [],
+                          "description": "The token kinds of a label.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "documented-variables": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `variable` block with no `description` argument."
@@ -2246,6 +2453,61 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an f-string that has no replacement field in any of its parts."
             },
+            "feature-not-enabled": {
+              "description": "Reports a token of the kinds in the option `kinds` that matches the regex of the option `use` while a feature is off.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds that can use the feature.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "off": {
+                          "default": [],
+                          "description": "The words that turn the feature off.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "on": {
+                          "default": [],
+                          "description": "The words that turn the feature on.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "use": {
+                          "default": "",
+                          "description": "A regex the text of a token that uses the feature matches.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "fenced-code-language": {
               "$ref": "#/definitions/rule",
               "description": "Reports a fenced code block that has no info string after the opening fence."
@@ -2420,6 +2682,10 @@
             "font-family-no-missing-generic-family-keyword": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `font-family` (or `font`) list that has no generic family (`serif`, `sans-serif`, `monospace`, ...)."
+            },
+            "for-f-options": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `for /f` whose first argument is not a quoted string with `tokens=`, `delims=`, `skip=` or `eol=`."
             },
             "form-submit": {
               "$ref": "#/definitions/rule",
@@ -2822,6 +3088,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "if-compare-wildcard": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` line with a `==` comparison and a `*` or `?` after or before it."
             },
             "if-condition": {
               "$ref": "#/definitions/rule",
@@ -3237,6 +3507,241 @@
             "keyword-identifier": {
               "$ref": "#/definitions/rule",
               "description": "Reports an unquoted name written like a keyword of the dialect, such as a column called `year` or `name`."
+            },
+            "kubernetes-latest-tag": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or init container whose `image` is `name:latest` or has no tag (an image with a digest, `name@sha256:...`, is not reported)."
+            },
+            "kubernetes-no-read-only-root-fs": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a Kubernetes manifest (Pod, Deployment, DaemonSet, StatefulSet, ReplicaSet, ReplicationController, Job, CronJob) with a container or init container whose `securityContext` does not have `readOnlyRootFilesystem: true`."
+            },
+            "kubernetes-run-as-non-root": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or init container that has neither `runAsNonRoot: true` nor a `runAsUser` of 1 or more in its `securityContext`, when the `securityContext` of the pod has none of them either."
+            },
+            "kubernetes-schema-missing": {
+              "description": "Reports the `kind:` of a Kubernetes manifest (a document with an `apiVersion` of the form `[group/]vN[alpha|beta]N` and a capitalised `kind`) whose `apiVersion` and `kind` joined by `/` are not an item of the `known` option, the pairs of the Kubernetes API that kubeconform finds a schema for by default.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "known": {
+                          "default": [
+                            "admissionregistration.k8s.io/v1/MutatingAdmissionPolicy",
+                            "admissionregistration.k8s.io/v1/MutatingAdmissionPolicyBinding",
+                            "admissionregistration.k8s.io/v1/MutatingAdmissionPolicyBindingList",
+                            "admissionregistration.k8s.io/v1/MutatingAdmissionPolicyList",
+                            "admissionregistration.k8s.io/v1/MutatingWebhookConfiguration",
+                            "admissionregistration.k8s.io/v1/MutatingWebhookConfigurationList",
+                            "admissionregistration.k8s.io/v1/ValidatingAdmissionPolicy",
+                            "admissionregistration.k8s.io/v1/ValidatingAdmissionPolicyBinding",
+                            "admissionregistration.k8s.io/v1/ValidatingAdmissionPolicyBindingList",
+                            "admissionregistration.k8s.io/v1/ValidatingAdmissionPolicyList",
+                            "admissionregistration.k8s.io/v1/ValidatingWebhookConfiguration",
+                            "admissionregistration.k8s.io/v1/ValidatingWebhookConfigurationList",
+                            "admissionregistration.k8s.io/v1alpha1/MutatingAdmissionPolicy",
+                            "admissionregistration.k8s.io/v1alpha1/MutatingAdmissionPolicyBinding",
+                            "admissionregistration.k8s.io/v1alpha1/MutatingAdmissionPolicyBindingList",
+                            "admissionregistration.k8s.io/v1alpha1/MutatingAdmissionPolicyList",
+                            "admissionregistration.k8s.io/v1beta1/MutatingAdmissionPolicy",
+                            "admissionregistration.k8s.io/v1beta1/MutatingAdmissionPolicyBinding",
+                            "admissionregistration.k8s.io/v1beta1/MutatingAdmissionPolicyBindingList",
+                            "admissionregistration.k8s.io/v1beta1/MutatingAdmissionPolicyList",
+                            "apiregistration.k8s.io/v1/APIService",
+                            "apiregistration.k8s.io/v1/APIServiceList",
+                            "apps/v1/ControllerRevision",
+                            "apps/v1/ControllerRevisionList",
+                            "apps/v1/DaemonSet",
+                            "apps/v1/DaemonSetList",
+                            "apps/v1/Deployment",
+                            "apps/v1/DeploymentList",
+                            "apps/v1/ReplicaSet",
+                            "apps/v1/ReplicaSetList",
+                            "apps/v1/StatefulSet",
+                            "apps/v1/StatefulSetList",
+                            "authentication.k8s.io/v1/SelfSubjectReview",
+                            "authentication.k8s.io/v1/TokenRequest",
+                            "authentication.k8s.io/v1/TokenReview",
+                            "authorization.k8s.io/v1/SelfSubjectRulesReview",
+                            "autoscaling/v1/HorizontalPodAutoscaler",
+                            "autoscaling/v1/HorizontalPodAutoscalerList",
+                            "autoscaling/v1/Scale",
+                            "autoscaling/v2/HorizontalPodAutoscaler",
+                            "autoscaling/v2/HorizontalPodAutoscalerList",
+                            "batch/v1/CronJob",
+                            "batch/v1/CronJobList",
+                            "batch/v1/Job",
+                            "batch/v1/JobList",
+                            "certificates.k8s.io/v1/CertificateSigningRequest",
+                            "certificates.k8s.io/v1/CertificateSigningRequestList",
+                            "certificates.k8s.io/v1/ClusterTrustBundle",
+                            "certificates.k8s.io/v1/ClusterTrustBundleList",
+                            "certificates.k8s.io/v1/PodCertificateRequest",
+                            "certificates.k8s.io/v1/PodCertificateRequestList",
+                            "certificates.k8s.io/v1beta1/ClusterTrustBundle",
+                            "certificates.k8s.io/v1beta1/ClusterTrustBundleList",
+                            "certificates.k8s.io/v1beta1/PodCertificateRequest",
+                            "certificates.k8s.io/v1beta1/PodCertificateRequestList",
+                            "coordination.k8s.io/v1/Lease",
+                            "coordination.k8s.io/v1/LeaseList",
+                            "coordination.k8s.io/v1alpha2/LeaseCandidate",
+                            "coordination.k8s.io/v1alpha2/LeaseCandidateList",
+                            "coordination.k8s.io/v1beta1/LeaseCandidate",
+                            "coordination.k8s.io/v1beta1/LeaseCandidateList",
+                            "discovery.k8s.io/v1/EndpointSlice",
+                            "discovery.k8s.io/v1/EndpointSliceList",
+                            "events.k8s.io/v1/Event",
+                            "events.k8s.io/v1/EventList",
+                            "flowcontrol.apiserver.k8s.io/v1/FlowSchema",
+                            "flowcontrol.apiserver.k8s.io/v1/FlowSchemaList",
+                            "flowcontrol.apiserver.k8s.io/v1/PriorityLevelConfiguration",
+                            "flowcontrol.apiserver.k8s.io/v1/PriorityLevelConfigurationList",
+                            "lifecycle.k8s.io/v1alpha1/Eviction",
+                            "lifecycle.k8s.io/v1alpha1/EvictionList",
+                            "lifecycle.k8s.io/v1alpha1/EvictionRequest",
+                            "lifecycle.k8s.io/v1alpha1/EvictionRequestList",
+                            "networking.k8s.io/v1/IPAddress",
+                            "networking.k8s.io/v1/IPAddressList",
+                            "networking.k8s.io/v1/Ingress",
+                            "networking.k8s.io/v1/IngressClass",
+                            "networking.k8s.io/v1/IngressClassList",
+                            "networking.k8s.io/v1/IngressList",
+                            "networking.k8s.io/v1/NetworkPolicy",
+                            "networking.k8s.io/v1/NetworkPolicyList",
+                            "networking.k8s.io/v1/ServiceCIDR",
+                            "networking.k8s.io/v1/ServiceCIDRList",
+                            "node.k8s.io/v1/RuntimeClass",
+                            "node.k8s.io/v1/RuntimeClassList",
+                            "policy/v1/Eviction",
+                            "policy/v1/PodDisruptionBudget",
+                            "policy/v1/PodDisruptionBudgetList",
+                            "rbac.authorization.k8s.io/v1/ClusterRole",
+                            "rbac.authorization.k8s.io/v1/ClusterRoleBinding",
+                            "rbac.authorization.k8s.io/v1/ClusterRoleBindingList",
+                            "rbac.authorization.k8s.io/v1/ClusterRoleList",
+                            "rbac.authorization.k8s.io/v1/Role",
+                            "rbac.authorization.k8s.io/v1/RoleBinding",
+                            "rbac.authorization.k8s.io/v1/RoleBindingList",
+                            "rbac.authorization.k8s.io/v1/RoleList",
+                            "resource.k8s.io/v1/DeviceClass",
+                            "resource.k8s.io/v1/DeviceClassList",
+                            "resource.k8s.io/v1/DeviceTaintRule",
+                            "resource.k8s.io/v1/DeviceTaintRuleList",
+                            "resource.k8s.io/v1/ResourceClaim",
+                            "resource.k8s.io/v1/ResourceClaimList",
+                            "resource.k8s.io/v1/ResourceClaimTemplate",
+                            "resource.k8s.io/v1/ResourceClaimTemplateList",
+                            "resource.k8s.io/v1/ResourceSlice",
+                            "resource.k8s.io/v1/ResourceSliceList",
+                            "resource.k8s.io/v1alpha3/DeviceTaintRule",
+                            "resource.k8s.io/v1alpha3/DeviceTaintRuleList",
+                            "resource.k8s.io/v1alpha3/ResourcePoolStatusRequest",
+                            "resource.k8s.io/v1alpha3/ResourcePoolStatusRequestList",
+                            "resource.k8s.io/v1beta2/DeviceClass",
+                            "resource.k8s.io/v1beta2/DeviceClassList",
+                            "resource.k8s.io/v1beta2/DeviceTaintRule",
+                            "resource.k8s.io/v1beta2/DeviceTaintRuleList",
+                            "resource.k8s.io/v1beta2/ResourceClaim",
+                            "resource.k8s.io/v1beta2/ResourceClaimList",
+                            "resource.k8s.io/v1beta2/ResourceClaimTemplate",
+                            "resource.k8s.io/v1beta2/ResourceClaimTemplateList",
+                            "resource.k8s.io/v1beta2/ResourceSlice",
+                            "resource.k8s.io/v1beta2/ResourceSliceList",
+                            "scheduling.k8s.io/v1/PriorityClass",
+                            "scheduling.k8s.io/v1/PriorityClassList",
+                            "scheduling.k8s.io/v1alpha3/CompositePodGroup",
+                            "scheduling.k8s.io/v1alpha3/CompositePodGroupList",
+                            "scheduling.k8s.io/v1alpha3/PodGroup",
+                            "scheduling.k8s.io/v1alpha3/PodGroupList",
+                            "scheduling.k8s.io/v1beta1/CompositePodGroup",
+                            "scheduling.k8s.io/v1beta1/CompositePodGroupList",
+                            "scheduling.k8s.io/v1beta1/PodGroup",
+                            "scheduling.k8s.io/v1beta1/PodGroupList",
+                            "storage.k8s.io/v1/CSIDriver",
+                            "storage.k8s.io/v1/CSIDriverList",
+                            "storage.k8s.io/v1/CSINode",
+                            "storage.k8s.io/v1/CSINodeList",
+                            "storage.k8s.io/v1/CSIStorageCapacity",
+                            "storage.k8s.io/v1/CSIStorageCapacityList",
+                            "storage.k8s.io/v1/StorageClass",
+                            "storage.k8s.io/v1/StorageClassList",
+                            "storage.k8s.io/v1/VolumeAttachment",
+                            "storage.k8s.io/v1/VolumeAttachmentList",
+                            "storage.k8s.io/v1/VolumeAttributesClass",
+                            "storage.k8s.io/v1/VolumeAttributesClassList",
+                            "storagemigration.k8s.io/v1/StorageVersionMigration",
+                            "storagemigration.k8s.io/v1/StorageVersionMigrationList",
+                            "storagemigration.k8s.io/v1beta1/StorageVersionMigration",
+                            "storagemigration.k8s.io/v1beta1/StorageVersionMigrationList",
+                            "v1/Binding",
+                            "v1/ComponentStatus",
+                            "v1/ComponentStatusList",
+                            "v1/ConfigMap",
+                            "v1/ConfigMapList",
+                            "v1/Endpoints",
+                            "v1/EndpointsList",
+                            "v1/Event",
+                            "v1/EventList",
+                            "v1/LimitRange",
+                            "v1/LimitRangeList",
+                            "v1/List",
+                            "v1/Namespace",
+                            "v1/NamespaceList",
+                            "v1/Node",
+                            "v1/NodeList",
+                            "v1/PersistentVolume",
+                            "v1/PersistentVolumeClaim",
+                            "v1/PersistentVolumeClaimList",
+                            "v1/PersistentVolumeList",
+                            "v1/Pod",
+                            "v1/PodList",
+                            "v1/PodTemplate",
+                            "v1/PodTemplateList",
+                            "v1/ReplicationController",
+                            "v1/ReplicationControllerList",
+                            "v1/ResourceQuota",
+                            "v1/ResourceQuotaList",
+                            "v1/Secret",
+                            "v1/SecretList",
+                            "v1/Service",
+                            "v1/ServiceAccount",
+                            "v1/ServiceAccountList",
+                            "v1/ServiceList"
+                          ],
+                          "description": "The `apiVersion/Kind` pairs that have a schema: `apps/v1/Deployment`, `v1/Pod`.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "kubernetes-unset-cpu-requirements": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or init container that has no `resources.requests.cpu`."
+            },
+            "kubernetes-unset-memory-requirements": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or init container that has no `resources.limits.memory`."
             },
             "label-has-control": {
               "$ref": "#/definitions/rule",
@@ -3748,6 +4253,53 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a `switch` statement that has no `default` label."
             },
+            "missing-terminator": {
+              "description": "Reports a file whose last lines of code (as many as the option `lines`) hold none of the token sequences of the option `terminators`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "lines": {
+                          "default": 5,
+                          "description": "How many of the last lines of code are searched.",
+                          "type": "integer"
+                        },
+                        "skip": {
+                          "default": [],
+                          "description": "Tokens that do not count as code when the report line is chosen; an entry ending in `*` is a prefix.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "terminators": {
+                          "default": [],
+                          "description": "Token sequences that end a script, such as `exit` or `goto :eof` (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
             "mixed-regexp-capture-types": {
               "$ref": "#/definitions/rule",
               "description": "Reports a regexp literal that has both named groups (`(?<name>...)`) and plain groups (`(...)`)."
@@ -4011,6 +4563,10 @@
             "negation-of-excluded-parent": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `!` pattern for a path whose parent directory is excluded by an earlier pattern (`!a/b` after `a/`)."
+            },
+            "nested-for": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `FOR` that is inside the body of another `FOR`."
             },
             "nested-with": {
               "$ref": "#/definitions/rule",
@@ -4386,6 +4942,10 @@
                 }
               ]
             },
+            "no-duplicate-label": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a label that is defined twice in a file (compared without case)."
+            },
             "no-duplicate-pattern": {
               "$ref": "#/definitions/rule",
               "description": "Reports a pattern that appears twice with no opposite pattern (`!x` for `x`) between the two, on the second."
@@ -4648,6 +5208,10 @@
                 }
               ]
             },
+            "no-execution-policy-bypass": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a command that starts PowerShell with `-ExecutionPolicy Bypass`."
+            },
             "no-explicit-any": {
               "$ref": "#/definitions/rule",
               "description": "Reports the `any` type wherever a type is written (`let a: any`, `any[]`, a constraint such as `T extends any`)."
@@ -4729,6 +5293,10 @@
                   "type": "object"
                 }
               ]
+            },
+            "no-forced-registry-delete": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `reg delete` with `/f`, which deletes without a prompt."
             },
             "no-from-platform": {
               "$ref": "#/definitions/rule",
@@ -4884,6 +5452,10 @@
                 }
               ]
             },
+            "no-if-not-errorlevel-zero": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `if not errorlevel 0`."
+            },
             "no-implicit-button-type": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `<button>` with no `type`."
@@ -4936,6 +5508,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports unusual whitespace characters: vertical tab, form feed, no-break space (U+00A0), the spaces and zero-width characters U+2000 to U+200B, line and paragraph separators, narrow no-break space, medium mathematical space, ideographic space, and a byte order mark that is not at the start of the file."
             },
+            "no-late-at-sign": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `@` in front of a command on any line but the first."
+            },
             "no-latest-tag": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `FROM` whose image has the tag `latest` (`alpine:latest`)."
@@ -4948,6 +5524,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an `if` that is the only statement of an `else` block (`else { if (b) { ... } }`), also when that `if` has its own `else`."
             },
+            "no-long-one-liner": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a line of more than 80 characters that joins commands with `&&` or `||` outside quotes."
+            },
             "no-loss-of-precision": {
               "$ref": "#/definitions/rule",
               "description": "Reports a number literal that the 64-bit double it becomes does not hold exactly: `9007199254740993` (above 2^53), `0x20000000000001`, a value that is too large (`1e400`, becomes `Infinity`) or too small (`2e-400`, becomes `0`)."
@@ -4955,6 +5535,10 @@
             "no-ls-grep": {
               "$ref": "#/definitions/rule",
               "description": "Reports a pipeline from `ls` into `grep`."
+            },
+            "no-magic-numbers": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a number of three or more digits written in a command, which is not one of the common values (powers of two, ports, a thousand, a day in seconds) the rule lists."
             },
             "no-maintainer": {
               "$ref": "#/definitions/rule",
@@ -5007,6 +5591,10 @@
             "no-nested-style-tag": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `<style>` that is inside an element."
+            },
+            "no-non-ascii": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a word or a comment with a character that is not ASCII."
             },
             "no-non-null-asserted-optional-chain": {
               "$ref": "#/definitions/rule",
@@ -5138,6 +5726,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports a `<label>` whose `for` names a control that is inside the label."
             },
+            "no-redundant-parens": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` without `ELSE` whose body is one command in parentheses on the same line, as in `if exist x (del x)`."
+            },
             "no-redundant-role": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `role` on an element that already has that role by its name (`<nav role=\"navigation\">`, `<button role=\"button\">`, `<ul role=\"list\">`)."
@@ -5232,6 +5824,10 @@
             "no-shell-symlink": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `RUN` that replaces `/bin/sh`."
+            },
+            "no-shift-in-block": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `shift` inside a block of several lines (`( ... )` after `if`, `for` or alone)."
             },
             "no-single-line-block-comment": {
               "$ref": "#/definitions/rule",
@@ -5351,6 +5947,10 @@
             "no-typename-prefix": {
               "$ref": "#/definitions/rule",
               "description": "Reports a field of an object or interface type that starts with the name of the type (`type User { userId: ID }`); case is ignored."
+            },
+            "no-unconfirmed-delete-tree": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `rmdir /s /q` (a directory tree deleted without asking), `format` with `/q`, and `shutdown` with a switch."
             },
             "no-undefined-alias": {
               "$ref": "#/definitions/rule",
@@ -5626,6 +6226,10 @@
             "parentheses-as-grouped-expression": {
               "$ref": "#/definitions/rule",
               "description": "Reports a space between a method name and a `(` that holds its only argument (`puts (x)`)."
+            },
+            "parse-time-variable-in-block": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a `%errorlevel%`, `%random%`, `%time%` or `%date%` inside a parenthesised block."
             },
             "percent-format-expected-mapping": {
               "$ref": "#/definitions/rule",
@@ -5980,9 +6584,21 @@
               "$ref": "#/definitions/rule",
               "description": "Reports an unquoted `$@` or `${array[@]}` in the arguments of a command."
             },
+            "quote-cd-variable": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports `%CD%` written in an argument without quotes."
+            },
             "quote-command-substitution": {
               "$ref": "#/definitions/rule",
               "description": "Reports an unquoted `$(...)` or backtick substitution in the arguments of a command."
+            },
+            "quote-if-operand": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` that compares a plain `%name%` with `==` and does not put it in quotes (or brackets)."
+            },
+            "quote-if-operands-both": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports an `IF` that compares a plain `%name%` with `==` where the line has blanks around `==`, or the other side is an unquoted word of two or more characters."
             },
             "quote-in-quotes": {
               "$ref": "#/definitions/rule",
@@ -6225,6 +6841,58 @@
             "remove-unused-usings": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `using` directive that nothing in the file needs."
+            },
+            "repeated-command": {
+              "description": "Reports the `nth` use (the option, default 2) and every later one of a command listed in the option `commands`; an entry `word arg` counts only the uses with `arg` after the word; the command words are the tokens of the kinds in `kinds`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "commands": {
+                          "default": [],
+                          "description": "The commands that are counted (ignoring case): `word`, or `word`, `word arg`, with `:N` at the end for its own `nth`.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "first-exempt": {
+                          "default": false,
+                          "description": "A use in the first command of the file is counted but not reported.",
+                          "type": "boolean"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "nth": {
+                          "default": 2,
+                          "description": "The use that is reported.",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "require-component-is": {
               "$ref": "#/definitions/rule",
@@ -7545,6 +8213,10 @@
               "$ref": "#/definitions/rule",
               "description": "Reports `\"sep\".join([a, b])` where the list or tuple is written out in the call."
             },
+            "stderr-redirect-last": {
+              "$ref": "#/definitions/rule",
+              "description": "Reports a command that has more words or redirections after `2>&1` or `>&2`."
+            },
             "string-dot-format-extra-named-arguments": {
               "$ref": "#/definitions/rule",
               "description": "Reports a `.format` call with keyword arguments that no field names."
@@ -7709,6 +8381,61 @@
             "unassigned-variable": {
               "$ref": "#/definitions/rule",
               "description": "Reports a lower case variable that the file reads and never assigns, reads with `read`, `getopts`, `local` or a `for` loop, or guards with a default (`${name:-x}`)."
+            },
+            "unchecked-command": {
+              "description": "Reports a command listed in the option `commands` that starts a line and has no text of the option `checks` (compared ignoring case) on its line or the lines after it, as many as the option `window` says (an entry `word:N` of `commands` says N for that command).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "checks": {
+                          "default": [],
+                          "description": "The texts that count as a check of the result (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "commands": {
+                          "default": [],
+                          "description": "The commands that need a check, `word` or `word:N` (a window of N lines).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "window": {
+                          "default": 3,
+                          "description": "The lines after the command's line that may hold the check.",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "undefined-export": {
               "$ref": "#/definitions/rule",
@@ -8123,6 +8850,69 @@
             "unused-method-argument": {
               "$ref": "#/definitions/rule",
               "description": "Reports a method parameter that the method never reads."
+            },
+            "unused-opener": {
+              "description": "Reports a command of the option `open`, with one of the words of `args` after it when that option is set, in a file where no token of the kinds in `use-kinds` matches the regex of the option `use`.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/level"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "level": {
+                      "$ref": "#/definitions/level"
+                    },
+                    "options": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "args": {
+                          "default": [],
+                          "description": "Words one of which must follow the command to make it count (ignoring case); empty: any.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "kinds": {
+                          "default": [],
+                          "description": "The token kinds of a command word.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "open": {
+                          "default": [],
+                          "description": "The commands that open the feature or scope (ignoring case).",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "use": {
+                          "default": "",
+                          "description": "A regex the text of a token that uses the feature matches.",
+                          "type": "string"
+                        },
+                        "use-kinds": {
+                          "default": [],
+                          "description": "The token kinds that can use the feature.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "level"
+                  ],
+                  "type": "object"
+                }
+              ]
             },
             "unused-parameter": {
               "description": "Reports a parameter of a function with a body (a declaration or a literal) that its body never mentions.",
@@ -8871,6 +9661,17 @@
         "format": {
           "additionalProperties": false,
           "properties": {
+            "command_case": {
+              "default": "lower",
+              "description": "Case of the words cmd reads without case (its commands and the keywords of IF, FOR and ELSE): `lower`, `upper`, `capitalise`, or `consistent` (the first one written sets it).",
+              "enum": [
+                "lower",
+                "upper",
+                "capitalise",
+                "consistent"
+              ],
+              "type": "string"
+            },
             "continued_indent": {
               "default": "as_written",
               "description": "Indentation of a line that continues the one before it with `^`: as written, or none when a blank stands before the `^` (the blanks then separate arguments and are not content).",
@@ -10934,6 +11735,7 @@
       "description": "Presets (`preset:<language>/<name>`) or config files, applied in order.",
       "items": {
         "examples": [
+          "preset:batch/blinter",
           "preset:cmake/cmake-lint",
           "preset:cpp/chromium",
           "preset:cpp/gnu",
@@ -10988,6 +11790,7 @@
           "preset:toml/taplo-compat",
           "preset:xml/csharpier-compat",
           "preset:yaml/ansible-lint",
+          "preset:yaml/kubernetes",
           "preset:yaml/prettier-compat",
           "preset:yaml/yamllint"
         ],
@@ -11299,6 +12102,80 @@
               "default": true,
               "description": "Report nothing in generated files: a file whose name matches `generated_names` or whose leading comments contain one of `generated_header_markers`.",
               "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "lint": {
+          "$ref": "#/definitions/lint"
+        },
+        "semantics": {
+          "additionalProperties": false,
+          "description": "Facts about methods that the flow analyses use.",
+          "properties": {
+            "does_not_return": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "pure": {
+              "description": "Qualified method names without parameter lists; every overload is covered.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "gradle": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "additionalProperties": false,
+          "properties": {
+            "end_of_line": {
+              "default": "auto",
+              "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
+              "enum": [
+                "auto",
+                "lf",
+                "crlf"
+              ],
+              "type": "string"
+            },
+            "final_newline": {
+              "default": true,
+              "description": "End the file with a newline.",
+              "type": "boolean"
+            },
+            "indent_size": {
+              "default": 4,
+              "description": "Columns per indentation level (also the width of a tab).",
+              "maximum": 16,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "indent_style": {
+              "default": "space",
+              "description": "Indent with spaces or tabs.",
+              "enum": [
+                "space",
+                "tab"
+              ],
+              "type": "string"
+            },
+            "max_blank_lines": {
+              "default": 1,
+              "description": "Largest number of blank lines kept between lines.",
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
             }
           },
           "type": "object"
@@ -12903,6 +13780,7 @@
           "editorconfig",
           "gitignore",
           "go",
+          "gradle",
           "graphql",
           "hcl",
           "ini",
@@ -13391,6 +14269,17 @@
               "format": {
                 "additionalProperties": false,
                 "properties": {
+                  "command_case": {
+                    "default": "lower",
+                    "description": "Case of the words cmd reads without case (its commands and the keywords of IF, FOR and ELSE): `lower`, `upper`, `capitalise`, or `consistent` (the first one written sets it).",
+                    "enum": [
+                      "lower",
+                      "upper",
+                      "capitalise",
+                      "consistent"
+                    ],
+                    "type": "string"
+                  },
                   "continued_indent": {
                     "default": "as_written",
                     "description": "Indentation of a line that continues the one before it with `^`: as written, or none when a blank stands before the `^` (the blanks then separate arguments and are not content).",
@@ -15755,6 +16644,80 @@
                     "default": true,
                     "description": "Report nothing in generated files: a file whose name matches `generated_names` or whose leading comments contain one of `generated_header_markers`.",
                     "type": "boolean"
+                  }
+                },
+                "type": "object"
+              },
+              "lint": {
+                "$ref": "#/definitions/lint"
+              },
+              "semantics": {
+                "additionalProperties": false,
+                "description": "Facts about methods that the flow analyses use.",
+                "properties": {
+                  "does_not_return": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "pure": {
+                    "description": "Qualified method names without parameter lists; every overload is covered.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "gradle": {
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "additionalProperties": false,
+                "properties": {
+                  "end_of_line": {
+                    "default": "auto",
+                    "description": "Line break style of the output: `lf`, `crlf`, or `auto` to keep the file's first              line break.",
+                    "enum": [
+                      "auto",
+                      "lf",
+                      "crlf"
+                    ],
+                    "type": "string"
+                  },
+                  "final_newline": {
+                    "default": true,
+                    "description": "End the file with a newline.",
+                    "type": "boolean"
+                  },
+                  "indent_size": {
+                    "default": 4,
+                    "description": "Columns per indentation level (also the width of a tab).",
+                    "maximum": 16,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "indent_style": {
+                    "default": "space",
+                    "description": "Indent with spaces or tabs.",
+                    "enum": [
+                      "space",
+                      "tab"
+                    ],
+                    "type": "string"
+                  },
+                  "max_blank_lines": {
+                    "default": 1,
+                    "description": "Largest number of blank lines kept between lines.",
+                    "maximum": 10,
+                    "minimum": 0,
+                    "type": "integer"
                   }
                 },
                 "type": "object"

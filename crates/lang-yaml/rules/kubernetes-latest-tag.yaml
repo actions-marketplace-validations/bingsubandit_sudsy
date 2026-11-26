@@ -1,0 +1,26 @@
+id: kubernetes-latest-tag
+message: "the image of a container has no tag, or the tag `latest`"
+description: >-
+  Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or
+  init container whose `image` is `name:latest` or has no tag (an image with a digest, `name@sha256:...`,
+  is not reported). The report is on the `kind:` line of the manifest.
+why: >-
+  `latest` is the image the registry has today. Two pods of one deployment can run different code,
+  and a rollback goes to the same tag.
+
+  To fix, name a version tag or a digest.
+example: "image: nginx   # write nginx:1.27 or nginx@sha256:..."
+severity: off
+category: suspicious
+rule:
+  kind: BlockMapping
+  top-level:
+    apiVersion: '^(?:[a-z0-9][a-z0-9.-]*/)?v\d+(?:alpha|beta)?\d*$'
+    kind: '^(?<KIND>Pod|Deployment|DaemonSet|StatefulSet|ReplicaSet|ReplicationController|Job|CronJob)$'
+  has:
+    role: key-value
+    key-path: '^spec(\.template\.spec|\.jobTemplate\.spec\.template\.spec)?\.(containers|initContainers)\[\d+\]$'
+    fields:
+      key: { regex: '^image$' }
+      value: { regex: '^["'']?(?:[^:]*|.*:latest|.*/[^:]+)["'']?$' }
+report-on: $KIND

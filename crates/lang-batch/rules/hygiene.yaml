@@ -1,0 +1,67 @@
+id: quote-cd-variable
+message: "quote the current directory (`\"%CD%\"`): it holds spaces and `&` when the folder has them"
+description: >-
+  Reports `%CD%` written in an argument without quotes.
+why: >-
+  The current directory is any folder name the user made. A space, `&` or `)` in it splits the
+  command or ends the block where the value is used.
+
+  To fix, write `"%CD%"`, or `set "dir=%CD%"` and use `"%dir%"`.
+example: "set here=%CD%"
+severity: off
+category: suspicious
+rule:
+  kind: Argument
+  regex: '(?i)%cd%'
+  not: { regex: '"' }
+---
+id: no-execution-policy-bypass
+message: "`-ExecutionPolicy Bypass` turns off the PowerShell script policy"
+description: >-
+  Reports a command that starts PowerShell with `-ExecutionPolicy Bypass`.
+why: >-
+  The policy is the machine's check on which scripts may run. Bypassing it for a script that is
+  fetched or edited by others lets unchecked code run.
+
+  To fix, sign the script and use `RemoteSigned`, or run it with a policy the machine already allows.
+example: "powershell -ExecutionPolicy Bypass -File run.ps1"
+severity: off
+category: suspicious
+rule:
+  kind: Simple
+  regex: '(?i)-ExecutionPolicy\s+Bypass'
+---
+id: no-if-not-errorlevel-zero
+message: "`if not errorlevel 0` is true only for a negative exit code; test `if errorlevel 1` instead"
+description: >-
+  Reports `if not errorlevel 0`.
+why: >-
+  `errorlevel N` is true when the exit code is N or more, so `not errorlevel 0` can only be true for
+  a negative code. The check never reports the failure it is written for.
+
+  To fix, write `if errorlevel 1 (...)` for a failure.
+example: "if not errorlevel 0 exit /b 1"
+severity: off
+category: correctness
+rule:
+  kind: IfCommand
+  regex: '(?i)^if\s+not\s+errorlevel\s+0\b'
+---
+id: no-non-ascii
+message: "this line has a character outside ASCII; its meaning depends on the code page"
+description: >-
+  Reports a word or a comment with a character that is not ASCII.
+why: >-
+  `cmd` reads a script in the console's code page, so the same bytes mean different text on another
+  machine, and a command with such a character in a name or a path can fail.
+
+  To fix, use ASCII, or `chcp 65001` and a file saved as UTF-8 without a byte order mark.
+example: "echo café"
+severity: off
+category: suspicious
+rule:
+  kind: File
+token:
+  kind: [CommentText, CommentOther, Text, Name, Label]
+  deep: true
+  regex: '[^\x00-\x7F]'

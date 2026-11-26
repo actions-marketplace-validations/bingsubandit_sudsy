@@ -21,6 +21,23 @@ fn a_label_in_a_block_keeps_its_place() {
 }
 
 #[test]
+fn a_label_or_empty_comment_ends_with_its_line() {
+    for text in [
+        ":main\r\n  if a==b (\r\n    echo x\r\n  )\r\n",
+        "::\nif a==b (\n  echo x\n)\n",
+        ":main  \n  if a==b (\n  echo x\n  )\n",
+    ] {
+        let parsed = lossless(text);
+        assert!(parsed.errors.is_empty(), "{text:?}: {:?}", parsed.errors);
+    }
+}
+
+#[test]
+fn blanks_after_a_label_are_trimmed() {
+    assert_eq!(fmt(":main  \r\necho x\r\n"), ":main\r\necho x\r\n");
+}
+
+#[test]
 fn deep_nesting_does_not_overflow() {
     let n = 100_000;
     for text in [
@@ -238,9 +255,10 @@ fn line_ends_are_kept_per_file() {
 }
 
 #[test]
-fn unbalanced_parentheses_are_errors_and_lossless() {
+fn an_unclosed_block_is_an_error_and_a_stray_parenthesis_is_not() {
     assert_eq!(lossless("if a==b (\n  echo x\n").errors.len(), 1);
-    assert_eq!(lossless("echo x\n)\n").errors.len(), 1);
+    // PowerShell or C# text in a polyglot file has parentheses that no block owns: the file still lints.
+    assert!(lossless("echo x\n)\n").errors.is_empty());
 }
 
 #[test]

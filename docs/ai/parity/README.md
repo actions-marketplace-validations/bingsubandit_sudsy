@@ -30,6 +30,7 @@ The clang-format run does not compare line wrapping (the `wrap_compare` `note` o
 | actionlint | 87.0% | `cbdd3e85` | 43 | 5 | 30 | 0 | 0 | 0 | 8 | 0 |
 | angular-eslint | 99.8% | `b314ffb4` | 44 | 10 | 4 | 20 | 0 | 0 | 10 | 20 |
 | biome | - | - | 34 | 13 | 6 | 2 | 0 | 13 | 0 | 2 |
+| blinter | 85.1% | `032e2f36` | 144 | 34 | 5 | 72 | 0 | 33 | 0 | 72 |
 | buf | 89.7% | `2a570ae8` | 47 | 22 | 3 | 0 | 0 | 0 | 22 | 0 |
 | checkmake | 100.0% | `7514c1f3` | 5 | 4 | 1 | 0 | 0 | 0 | 0 | 0 |
 | checkstyle | 88.6% | `f29ba2f0` | 132 | 37 | 24 | 65 | 0 | 6 | 0 | 65 |

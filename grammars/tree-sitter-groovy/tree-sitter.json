@@ -1,0 +1,22 @@
+{
+  "grammars": [
+    {
+      "name": "groovy",
+      "camelcase": "Groovy",
+      "scope": "source.groovy",
+      "path": ".",
+      "file-types": [
+        "groovy",
+        "gradle"
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "0.6.0",
+    "license": "Apache-2.0 OR MIT",
+    "description": "Groovy grammar for tree-sitter",
+    "links": {
+      "repository": "https://github.com/dekobon/tree-sitter-groovy"
+    }
+  }
+}

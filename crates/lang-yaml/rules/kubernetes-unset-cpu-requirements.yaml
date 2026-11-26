@@ -1,0 +1,27 @@
+id: kubernetes-unset-cpu-requirements
+message: "a container of the pod has no cpu request (`resources.requests.cpu`)"
+description: >-
+  Reports a Kubernetes manifest (kinds as in `kubernetes-no-read-only-root-fs`) with a container or
+  init container that has no `resources.requests.cpu`. The report is on the `kind:` line of the
+  manifest.
+why: >-
+  The scheduler places a pod by the cpu it requests. Without a request the container counts as
+  using none and can land on a node that has no cpu left for it.
+
+  To fix, set `resources.requests.cpu` to the cpu the container needs in normal use.
+example: "kind: Deployment   # a container without resources.requests.cpu"
+severity: off
+category: suspicious
+rule:
+  kind: BlockMapping
+  top-level:
+    apiVersion: '^(?:[a-z0-9][a-z0-9.-]*/)?v\d+(?:alpha|beta)?\d*$'
+    kind: '^(?<KIND>Pod|Deployment|DaemonSet|StatefulSet|ReplicaSet|ReplicationController|Job|CronJob)$'
+  has:
+    key-path: '^spec(\.template\.spec|\.jobTemplate\.spec\.template\.spec)?\.(containers|initContainers)\[\d+\]$'
+    not:
+      has:
+        role: key-value
+        key-path: '\.resources\.requests$'
+        fields: { key: { regex: '^cpu$' } }
+report-on: $KIND
